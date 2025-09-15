@@ -96,24 +96,25 @@ Banks face what I call the "legacy lock-in paradox." They've built their entire 
 ```mermaid
 gantt
     title Banking Industry Quantum-Safe Migration Timeline
-    dateFormat YYYY-MM-DD
+    dateFormat  YYYY-MM-DD
+
     section Regulatory Mandates
     NIST PQC Standards Published    :done, nist, 2022-07-01, 2024-01-01
     Fed Reserve PQC Guidelines      :active, fed, 2024-06-01, 2025-12-31
-    PCI-DSS 4.0 PQC Requirements   :pcidss, 2025-01-01, 2026-06-30
-    Basel Committee Quantum Rules  :basel, 2025-06-01, 2027-12-31
-    Mandatory PQC Implementation   :critical, mandatory, 2027-01-01, 2030-12-31
-    
+    PCI-DSS 4.0 PQC Requirements    :pcidss, 2025-01-01, 2026-06-30
+    Basel Committee Quantum Rules   :basel, 2025-06-01, 2027-12-31
+    Mandatory PQC Implementation    :crit, mandatory, 2027-01-01, 2030-12-31
+
     section Industry Reality
-    Legacy System Assessment       :assessment, 2024-01-01, 2025-06-30
-    Vendor Solution Evaluation     :evaluation, 2024-06-01, 2025-12-31
-    Pilot Implementation          :pilot, 2025-01-01, 2026-06-30
-    Full Production Deployment    :deploy, 2025-06-01, 2028-12-31
-    
+    Legacy System Assessment        :assessment, 2024-01-01, 2025-06-30
+    Vendor Solution Evaluation      :evaluation, 2024-06-01, 2025-12-31
+    Pilot Implementation            :pilot, 2025-01-01, 2026-06-30
+    Full Production Deployment      :deploy, 2025-06-01, 2028-12-31
+
     section Quantum Threat
-    Current Quantum Computers     :done, current, 2020-01-01, 2025-12-31
-    Cryptographically Relevant    :critical, relevant, 2028-01-01, 2033-12-31
-    Large Scale Deployment        :largescale, 2033-01-01, 2040-12-31
+    Current Quantum Computers       :done, current, 2020-01-01, 2025-12-31
+    Cryptographically Relevant      :crit, relevant, 2028-01-01, 2033-12-31
+    Large Scale Deployment          :largescale, 2033-01-01, 2040-12-31
 ```
 
 #### How CRONOS AI Addresses Banking Challenges
