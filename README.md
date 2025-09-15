@@ -1445,9 +1445,3 @@ The quantum computing timeline is accelerating, with cryptographically relevant 
 The technology exists today to protect your critical infrastructure against tomorrow's quantum threats. The question isn't whether to implement quantum-safe security - it's how quickly you can get started.
 
 ---
-
-**Document Prepared By**: Enterprise Technical Writing Team  
-**Technical Review**: Chief Technology Office  
-**Security Review**: Information Security Team  
-**Last Updated**: September 2025  
-**Classification**: Confidential - Internal Distribution
