@@ -1,0 +1,158 @@
+# CRONOS AI Protocol Discovery Configuration
+# Production environment configuration
+
+environment: production
+debug: false
+app_name: "CRONOS AI Protocol Discovery"
+app_version: "1.0.0"
+api_host: "0.0.0.0"
+api_port: 8080
+worker_processes: 4
+
+# Database Configuration
+database:
+  host: "db.cronos-ai.internal"
+  port: 5432
+  database: "cronos_ai_prod"
+  username: "cronos_prod_user"
+  password: ""  # REQUIRED: Set via DATABASE_PASSWORD environment variable
+  ssl_mode: "require"
+  connection_pool_size: 20
+  connection_timeout: 30
+
+# Redis Configuration
+redis:
+  host: "redis.cronos-ai.internal"
+  port: 6379
+  database: 0
+  password: ""  # REQUIRED: Set via REDIS_PASSWORD environment variable
+  ssl: true
+  connection_pool_size: 20
+  connection_timeout: 5
+
+# AI Engine Configuration
+ai_engine:
+  model_cache_dir: "/opt/cronos_ai/models"
+  use_gpu: true
+  gpu_memory_limit: 0.9
+  batch_size: 64
+  max_sequence_length: 1024
+  ensemble_size: 7
+  learning_rate: 0.0005
+  training_epochs: 200
+  early_stopping_patience: 15
+  model_save_frequency: 5
+  
+  # Statistical Analysis
+  entropy_window_size: 2000
+  pattern_min_frequency: 5
+  field_boundary_confidence_threshold: 0.8
+  
+  # Grammar Learning
+  pcfg_max_depth: 15
+  pcfg_min_rule_frequency: 3
+  em_max_iterations: 100
+  em_convergence_threshold: 0.0000001
+  
+  # Classification
+  cnn_filter_sizes: [2, 3, 4, 5, 6]
+  cnn_num_filters: 128
+  lstm_hidden_size: 256
+  lstm_num_layers: 3
+  dropout_rate: 0.1
+  
+  # Validation
+  max_validation_rules: 500
+  validation_timeout: 10.0
+
+# Performance Configuration
+performance:
+  # Caching
+  cache_size: 50000
+  cache_ttl: 7200
+  use_redis_cache: true
+  redis_cache_prefix: "cronos_ai_prod:"
+  
+  # Memory Management
+  buffer_size: 16384
+  memory_pool_size: 5000
+  max_memory_usage_mb: 16384
+  gc_threshold: 0.85
+  
+  # Threading
+  max_threads: 0  # Auto-detect
+  io_thread_pool_size: 50
+  cpu_thread_pool_size: 0  # Auto-detect
+  
+  # Batching
+  batch_size: 2000
+  batch_flush_interval: 0.5
+  max_batch_delay: 2.0
+
+# Monitoring Configuration
+monitoring:
+  # Metrics Collection
+  metrics_enabled: true
+  metrics_flush_interval: 15.0
+  max_metric_points: 50000
+  
+  # Prometheus
+  prometheus_enabled: true
+  prometheus_host: "0.0.0.0"
+  prometheus_port: 8000
+  
+  # Health Checking
+  health_check_enabled: true
+  health_check_interval: 30.0
+  health_check_timeout: 5.0
+  
+  # Alerting
+  alerting_enabled: true
+  max_alerts: 5000
+  alert_retention_days: 180
+  
+  # Alert Thresholds (More aggressive for production)
+  cpu_alert_threshold: 80.0
+  memory_alert_threshold: 80.0
+  disk_alert_threshold: 85.0
+  error_rate_alert_threshold: 0.01
+  response_time_alert_threshold: 2.0
+
+# Security Configuration
+security:
+  # API Security - REQUIRED for production
+  api_key_enabled: true
+  api_key_header: "X-API-Key"
+  jwt_enabled: true
+  jwt_secret: ""  # REQUIRED: Set via JWT_SECRET environment variable
+  jwt_algorithm: "HS256"
+  jwt_expiration_hours: 12
+  
+  # TLS/SSL - REQUIRED for production
+  tls_enabled: true
+  tls_cert_file: "/etc/ssl/certs/cronos_ai.crt"
+  tls_key_file: "/etc/ssl/private/cronos_ai.key"
+  tls_ca_file: "/etc/ssl/certs/ca-bundle.crt"
+  tls_verify_client: true
+  
+  # Encryption
+  encryption_key: ""  # REQUIRED: Set via ENCRYPTION_KEY environment variable
+  encryption_algorithm: "AES-256-GCM"
+  
+  # Audit Logging
+  audit_logging_enabled: true
+  audit_log_retention_days: 365
+  sensitive_field_masking: true
+
+# Logging Configuration
+logging:
+  level: "WARN"
+  format: "json"
+  output: "file"
+  file_path: "/var/log/cronos_ai/production.log"
+  max_file_size_mb: 500
+  backup_count: 10
+  structured_logging: true
+  correlation_id_enabled: true
+  performance_logging: true
+  security_logging: true

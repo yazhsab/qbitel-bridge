@@ -1,0 +1,26 @@
+{
+  "$schema": "https://in-toto.io/schemas/in_toto_statement/v0.1",
+  "_note": "Template used for cosign attest --predicate. Values may be augmented by CI during build.",
+  "subject": [],
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://slsa.dev/provenance/v1",
+      "externalParameters": {
+        "workflow": "cronosai-ci",
+        "source": "github.com/OWNER/REPO"
+      },
+      "resolvedDependencies": []
+    },
+    "runDetails": {
+      "builder": {
+        "id": "https://github.com/actions/runner"
+      },
+      "metadata": {
+        "invocationId": "${GITHUB_RUN_ID:-local}",
+        "startedOn": "${BUILD_STARTED:-}"
+      }
+    }
+  }
+}
+

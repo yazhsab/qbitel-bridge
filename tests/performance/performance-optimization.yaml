@@ -1,0 +1,763 @@
+# CronosAI Performance Testing and Optimization Configuration
+# Comprehensive performance testing scenarios and optimization settings
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cronosai-performance-optimization
+  namespace: cronosai-system
+  labels:
+    app: cronosai
+    component: performance
+    testing: optimization
+data:
+  load-test-scenarios.yaml: |
+    # Load Testing Scenarios
+    scenarios:
+      # Basic performance baseline
+      baseline_performance:
+        name: "Baseline Performance Test"
+        description: "Establish performance baseline for CronosAI system"
+        duration: "10m"
+        ramp_up_time: "2m"
+        ramp_down_time: "1m"
+        max_vus: 100
+        target_rps: 1000
+        
+        requests:
+          - name: "health_check"
+            method: "GET"
+            path: "/health"
+            weight: 0.1
+            
+          - name: "device_list"
+            method: "GET"
+            path: "/api/v1/devices"
+            headers:
+              Authorization: "Bearer ${AUTH_TOKEN}"
+            weight: 0.4
+            
+          - name: "device_create"
+            method: "POST"
+            path: "/api/v1/devices"
+            headers:
+              Authorization: "Bearer ${AUTH_TOKEN}"
+              Content-Type: "application/json"
+            body: |
+              {
+                "name": "test-device-${VU_ID}-${ITERATION}",
+                "type": "gateway",
+                "manufacturer": "test-manufacturer",
+                "model": "test-model-v1"
+              }
+            weight: 0.2
+            
+          - name: "device_update"
+            method: "PUT"
+            path: "/api/v1/devices/${DEVICE_ID}"
+            headers:
+              Authorization: "Bearer ${AUTH_TOKEN}"
+              Content-Type: "application/json"
+            body: |
+              {
+                "name": "updated-device-${VU_ID}-${ITERATION}",
+                "status": "active"
+              }
+            weight: 0.2
+            
+          - name: "metrics_query"
+            method: "GET"
+            path: "/api/v1/metrics"
+            headers:
+              Authorization: "Bearer ${AUTH_TOKEN}"
+            weight: 0.1
+            
+        thresholds:
+          max_response_time: "5s"
+          p95_response_time: "2s"
+          p99_response_time: "3s"
+          min_throughput: 800
+          max_error_rate: 1.0
+          max_cpu_usage: 80.0
+          max_memory_usage: 8589934592  # 8GB
+          
+      # High load stress test
+      stress_test:
+        name: "High Load Stress Test"
+        description: "Test system behavior under high load"
+        duration: "15m"
+        ramp_up_time: "5m"
+        ramp_down_time: "2m"
+        max_vus: 500
+        target_rps: 5000
+        
+        requests:
+          - name: "concurrent_device_operations"
+            method: "POST"
+            path: "/api/v1/devices/batch"
+            headers:
+              Authorization: "Bearer ${AUTH_TOKEN}"
+              Content-Type: "application/json"
+            body: |
+              {
+                "devices": [
+                  {
+                    "name": "batch-device-${VU_ID}-${ITERATION}-1",
+                    "type": "endpoint"
+                  },
+                  {
+                    "name": "batch-device-${VU_ID}-${ITERATION}-2",
+                    "type": "sensor"
+                  }
+                ]
+              }
+            weight: 0.6
+            
+          - name: "policy_deployment"
+            method: "POST"
+            path: "/api/v1/policies/deploy"
+            headers:
+              Authorization: "Bearer ${AUTH_TOKEN}"
+              Content-Type: "application/json"
+            body: |
+              {
+                "policy_id": "test-policy-${VU_ID}",
+                "target_devices": ["device-${VU_ID}-1", "device-${VU_ID}-2"]
+              }
+            weight: 0.3
+            
+          - name: "compliance_check"
+            method: "POST"
+            path: "/api/v1/compliance/check"
+            headers:
+              Authorization: "Bearer ${AUTH_TOKEN}"
+            weight: 0.1
+            
+        thresholds:
+          max_response_time: "10s"
+          p95_response_time: "5s"
+          p99_response_time: "8s"
+          min_throughput: 4000
+          max_error_rate: 2.0
+          max_cpu_usage: 90.0
+          max_memory_usage: 17179869184  # 16GB
+          
+      # Endurance test
+      endurance_test:
+        name: "System Endurance Test"
+        description: "Long-running test to identify memory leaks and degradation"
+        duration: "2h"
+        ramp_up_time: "10m"
+        ramp_down_time: "5m"
+        max_vus: 200
+        target_rps: 2000
+        
+        requests:
+          - name: "continuous_monitoring"
+            method: "GET"
+            path: "/api/v1/devices/status"
+            headers:
+              Authorization: "Bearer ${AUTH_TOKEN}"
+            weight: 0.5
+            
+          - name: "periodic_attestation"
+            method: "POST"
+            path: "/api/v1/devices/${DEVICE_ID}/attest"
+            headers:
+              Authorization: "Bearer ${AUTH_TOKEN}"
+              Content-Type: "application/json"
+            body: |
+              {
+                "nonce": "${RANDOM_NONCE}",
+                "timestamp": "${TIMESTAMP}"
+              }
+            weight: 0.3
+            
+          - name: "log_collection"
+            method: "GET"
+            path: "/api/v1/logs"
+            headers:
+              Authorization: "Bearer ${AUTH_TOKEN}"
+            query_params:
+              limit: "100"
+              since: "${LAST_HOUR}"
+            weight: 0.2
+            
+        thresholds:
+          max_response_time: "8s"
+          p95_response_time: "3s"
+          p99_response_time: "6s"
+          min_throughput: 1800
+          max_error_rate: 1.5
+          max_cpu_usage: 85.0
+          max_memory_usage: 12884901888  # 12GB
+          memory_growth_rate: 0.1  # Max 10% growth per hour
+          
+      # Spike test
+      spike_test:
+        name: "Traffic Spike Test"
+        description: "Test system behavior during sudden traffic spikes"
+        duration: "20m"
+        phases:
+          - name: "baseline"
+            duration: "5m"
+            vus: 50
+            rps: 500
+          - name: "spike"
+            duration: "2m"
+            vus: 1000
+            rps: 10000
+          - name: "recovery"
+            duration: "8m"
+            vus: 50
+            rps: 500
+          - name: "second_spike"
+            duration: "2m"
+            vus: 800
+            rps: 8000
+          - name: "final_recovery"
+            duration: "3m"
+            vus: 50
+            rps: 500
+            
+        requests:
+          - name: "device_enrollment"
+            method: "POST"
+            path: "/api/v1/devices/enroll"
+            headers:
+              Authorization: "Bearer ${AUTH_TOKEN}"
+              Content-Type: "application/json"
+            body: |
+              {
+                "device_id": "spike-device-${VU_ID}-${ITERATION}",
+                "attestation_data": "${MOCK_ATTESTATION}"
+              }
+            weight: 1.0
+            
+        thresholds:
+          max_response_time: "15s"
+          p95_response_time: "8s"
+          p99_response_time: "12s"
+          min_throughput: 400  # During baseline
+          max_error_rate: 5.0  # Higher tolerance during spikes
+          recovery_time: "30s"  # Time to recover after spike
+
+  chaos-experiments.yaml: |
+    # Chaos Engineering Experiments
+    experiments:
+      # Network chaos
+      network_latency_experiment:
+        name: "Network Latency Injection"
+        description: "Inject network latency to test system resilience"
+        type: "network_latency"
+        category: "network"
+        severity: "medium"
+        duration: "5m"
+        
+        parameters:
+          latency: "200ms"
+          jitter: "50ms"
+          interface: "eth0"
+          
+        target_services:
+          - "cronosai-controlplane"
+          - "cronosai-mgmtapi"
+          
+        safety_checks:
+          - name: "service_health"
+            type: "http_check"
+            threshold: 0.95
+            operator: ">"
+            
+        success_criteria:
+          - name: "service_availability"
+            metric: "http_success_rate"
+            threshold: 0.9
+            operator: ">"
+            
+      network_partition_experiment:
+        name: "Network Partition Simulation"
+        description: "Simulate network partition between components"
+        type: "network_partition"
+        category: "network"
+        severity: "high"
+        duration: "3m"
+        
+        parameters:
+          target_ips:
+            - "10.0.1.10"  # Control plane
+            - "10.0.1.11"  # Management API
+            
+        safety_checks:
+          - name: "cluster_quorum"
+            type: "cluster_health"
+            threshold: 0.5
+            operator: ">"
+            
+      # Resource chaos
+      cpu_stress_experiment:
+        name: "CPU Stress Test"
+        description: "Stress CPU to test performance degradation"
+        type: "cpu_stress"
+        category: "resource"
+        severity: "medium"
+        duration: "10m"
+        
+        parameters:
+          workers: 4
+          cpu_percent: 80
+          
+        target_services:
+          - "cronosai-dataplane"
+          
+        success_criteria:
+          - name: "response_time_degradation"
+            metric: "p95_response_time"
+            threshold: 5000  # 5 seconds
+            operator: "<"
+            
+      memory_stress_experiment:
+        name: "Memory Pressure Test"
+        description: "Create memory pressure to test memory management"
+        type: "memory_stress"
+        category: "resource"
+        severity: "high"
+        duration: "8m"
+        
+        parameters:
+          memory_size: "4G"
+          workers: 2
+          
+        safety_checks:
+          - name: "oom_protection"
+            type: "memory_usage"
+            threshold: 0.95
+            operator: "<"
+            
+      # Service chaos
+      service_kill_experiment:
+        name: "Service Process Kill"
+        description: "Kill service processes to test restart capabilities"
+        type: "service_kill"
+        category: "service"
+        severity: "high"
+        duration: "2m"
+        
+        parameters:
+          service_name: "cronosai-controlplane"
+          
+        success_criteria:
+          - name: "service_recovery_time"
+            metric: "service_restart_time"
+            threshold: 30  # 30 seconds
+            operator: "<"
+            
+      container_kill_experiment:
+        name: "Container Kill Test"
+        description: "Kill containers to test orchestration recovery"
+        type: "container_kill"
+        category: "infrastructure"
+        severity: "medium"
+        duration: "1m"
+        
+        parameters:
+          container_name: "cronosai-mgmtapi"
+          
+        success_criteria:
+          - name: "container_restart_time"
+            metric: "container_restart_time"
+            threshold: 60  # 60 seconds
+            operator: "<"
+
+  performance-thresholds.yaml: |
+    # Performance Thresholds and SLAs
+    thresholds:
+      # Response time thresholds
+      response_time:
+        api_endpoints:
+          health_check:
+            p50: "50ms"
+            p95: "200ms"
+            p99: "500ms"
+            max: "2s"
+            
+          device_operations:
+            p50: "100ms"
+            p95: "500ms"
+            p99: "1s"
+            max: "5s"
+            
+          policy_operations:
+            p50: "200ms"
+            p95: "1s"
+            p99: "2s"
+            max: "10s"
+            
+          compliance_checks:
+            p50: "500ms"
+            p95: "2s"
+            p99: "5s"
+            max: "30s"
+            
+          attestation_operations:
+            p50: "1s"
+            p95: "5s"
+            p99: "10s"
+            max: "60s"
+            
+      # Throughput thresholds
+      throughput:
+        minimum_rps:
+          device_operations: 1000
+          policy_operations: 500
+          compliance_checks: 100
+          attestation_operations: 50
+          
+        target_rps:
+          device_operations: 5000
+          policy_operations: 2000
+          compliance_checks: 500
+          attestation_operations: 200
+          
+      # Error rate thresholds
+      error_rates:
+        maximum_error_rate: 1.0  # 1%
+        critical_error_rate: 0.1  # 0.1%
+        
+        by_operation:
+          device_operations: 0.5
+          policy_operations: 1.0
+          compliance_checks: 2.0
+          attestation_operations: 1.0
+          
+      # Resource utilization thresholds
+      resources:
+        cpu_usage:
+          warning: 70.0
+          critical: 85.0
+          maximum: 95.0
+          
+        memory_usage:
+          warning: 70.0
+          critical: 85.0
+          maximum: 95.0
+          
+        disk_usage:
+          warning: 80.0
+          critical: 90.0
+          maximum: 95.0
+          
+        network_bandwidth:
+          warning: 70.0
+          critical: 85.0
+          maximum: 95.0
+          
+      # Availability thresholds
+      availability:
+        service_uptime: 99.9  # 99.9%
+        api_availability: 99.95  # 99.95%
+        data_availability: 99.99  # 99.99%
+        
+      # Scalability thresholds
+      scalability:
+        max_concurrent_users: 10000
+        max_devices_managed: 1000000
+        max_policies_active: 10000
+        max_compliance_checks_per_hour: 100000
+
+  optimization-strategies.yaml: |
+    # Performance Optimization Strategies
+    optimization:
+      # Caching strategies
+      caching:
+        redis_cache:
+          enabled: true
+          ttl: "5m"
+          max_memory: "2GB"
+          eviction_policy: "allkeys-lru"
+          
+        application_cache:
+          device_cache:
+            enabled: true
+            size: 10000
+            ttl: "1m"
+            
+          policy_cache:
+            enabled: true
+            size: 1000
+            ttl: "5m"
+            
+          compliance_cache:
+            enabled: true
+            size: 5000
+            ttl: "10m"
+            
+      # Database optimization
+      database:
+        connection_pooling:
+          max_connections: 100
+          min_connections: 10
+          connection_timeout: "30s"
+          idle_timeout: "5m"
+          
+        query_optimization:
+          enable_query_cache: true
+          slow_query_threshold: "1s"
+          explain_analyze: true
+          
+        indexing:
+          auto_create_indexes: true
+          index_maintenance: "weekly"
+          
+      # Network optimization
+      network:
+        connection_pooling:
+          max_idle_connections: 100
+          max_connections_per_host: 10
+          keep_alive_timeout: "30s"
+          
+        compression:
+          enable_gzip: true
+          compression_level: 6
+          min_compress_size: 1024
+          
+        http2:
+          enabled: true
+          max_concurrent_streams: 100
+          
+      # Resource optimization
+      resources:
+        cpu_optimization:
+          enable_cpu_affinity: true
+          worker_threads: "auto"
+          gc_tuning: true
+          
+        memory_optimization:
+          enable_memory_pooling: true
+          gc_target_percentage: 75
+          max_heap_size: "8GB"
+          
+        io_optimization:
+          enable_async_io: true
+          io_buffer_size: "64KB"
+          batch_operations: true
+          
+      # Auto-scaling configuration
+      auto_scaling:
+        horizontal_scaling:
+          enabled: true
+          min_replicas: 3
+          max_replicas: 20
+          target_cpu_utilization: 70
+          target_memory_utilization: 80
+          scale_up_cooldown: "5m"
+          scale_down_cooldown: "10m"
+          
+        vertical_scaling:
+          enabled: true
+          min_cpu: "500m"
+          max_cpu: "4"
+          min_memory: "1Gi"
+          max_memory: "16Gi"
+          
+      # Circuit breaker configuration
+      circuit_breaker:
+        failure_threshold: 5
+        recovery_timeout: "30s"
+        timeout: "10s"
+        max_requests: 100
+
+  monitoring-and-alerting.yaml: |
+    # Performance Monitoring and Alerting
+    monitoring:
+      # Metrics collection
+      metrics:
+        collection_interval: "15s"
+        retention_period: "30d"
+        
+        custom_metrics:
+          - name: "cronosai_device_operations_duration"
+            type: "histogram"
+            labels: ["operation", "device_type"]
+            
+          - name: "cronosai_policy_evaluation_duration"
+            type: "histogram"
+            labels: ["policy_type", "result"]
+            
+          - name: "cronosai_compliance_check_duration"
+            type: "histogram"
+            labels: ["check_type", "status"]
+            
+          - name: "cronosai_attestation_verification_duration"
+            type: "histogram"
+            labels: ["attestation_type", "result"]
+            
+      # Alerting rules
+      alerts:
+        performance_alerts:
+          - name: "HighResponseTime"
+            condition: "cronosai_http_request_duration_seconds{quantile=\"0.95\"} > 2"
+            duration: "5m"
+            severity: "warning"
+            description: "95th percentile response time is above 2 seconds"
+            
+          - name: "LowThroughput"
+            condition: "rate(cronosai_http_requests_total[5m]) < 100"
+            duration: "5m"
+            severity: "warning"
+            description: "Request throughput is below 100 RPS"
+            
+          - name: "HighErrorRate"
+            condition: "rate(cronosai_http_requests_total{status=~\"5..\"}[5m]) / rate(cronosai_http_requests_total[5m]) > 0.01"
+            duration: "2m"
+            severity: "critical"
+            description: "Error rate is above 1%"
+            
+          - name: "HighCPUUsage"
+            condition: "cpu_usage_percent > 85"
+            duration: "10m"
+            severity: "warning"
+            description: "CPU usage is above 85%"
+            
+          - name: "HighMemoryUsage"
+            condition: "memory_usage_percent > 90"
+            duration: "5m"
+            severity: "critical"
+            description: "Memory usage is above 90%"
+            
+        chaos_alerts:
+          - name: "ChaosExperimentFailed"
+            condition: "cronosai_chaos_experiment_success == 0"
+            duration: "0s"
+            severity: "warning"
+            description: "Chaos experiment failed"
+            
+          - name: "SafetyViolation"
+            condition: "increase(cronosai_chaos_safety_violations_total[5m]) > 0"
+            duration: "0s"
+            severity: "critical"
+            description: "Safety violation detected during chaos experiment"
+            
+      # Dashboards
+      dashboards:
+        performance_dashboard:
+          panels:
+            - title: "Request Rate"
+              type: "graph"
+              targets:
+                - expr: "rate(cronosai_http_requests_total[5m])"
+                  legend: "{{method}} {{endpoint}}"
+                  
+            - title: "Response Time"
+              type: "graph"
+              targets:
+                - expr: "cronosai_http_request_duration_seconds{quantile=\"0.50\"}"
+                  legend: "P50"
+                - expr: "cronosai_http_request_duration_seconds{quantile=\"0.95\"}"
+                  legend: "P95"
+                - expr: "cronosai_http_request_duration_seconds{quantile=\"0.99\"}"
+                  legend: "P99"
+                  
+            - title: "Error Rate"
+              type: "stat"
+              targets:
+                - expr: "rate(cronosai_http_requests_total{status=~\"5..\"}[5m]) / rate(cronosai_http_requests_total[5m]) * 100"
+                  legend: "Error Rate %"
+                  
+            - title: "Resource Usage"
+              type: "graph"
+              targets:
+                - expr: "cpu_usage_percent"
+                  legend: "CPU %"
+                - expr: "memory_usage_percent"
+                  legend: "Memory %"
+                  
+        chaos_dashboard:
+          panels:
+            - title: "Experiment Status"
+              type: "stat"
+              targets:
+                - expr: "cronosai_chaos_experiments_total"
+                  legend: "{{status}}"
+                  
+            - title: "Recovery Time"
+              type: "histogram"
+              targets:
+                - expr: "cronosai_chaos_recovery_time_seconds"
+                  legend: "Recovery Time"
+                  
+            - title: "System Resilience Score"
+              type: "gauge"
+              targets:
+                - expr: "cronosai_system_resilience_score"
+                  legend: "{{component}}"
+
+  test-execution-schedule.yaml: |
+    # Performance Test Execution Schedule
+    schedule:
+      # Continuous performance testing
+      continuous:
+        baseline_test:
+          frequency: "hourly"
+          duration: "5m"
+          max_vus: 50
+          enabled: true
+          
+        smoke_test:
+          frequency: "every_commit"
+          duration: "2m"
+          max_vus: 10
+          enabled: true
+          
+      # Daily performance testing
+      daily:
+        regression_test:
+          time: "02:00"
+          duration: "30m"
+          scenarios: ["baseline_performance", "stress_test"]
+          
+        endurance_test:
+          time: "03:00"
+          duration: "2h"
+          scenarios: ["endurance_test"]
+          
+      # Weekly performance testing
+      weekly:
+        comprehensive_test:
+          day: "sunday"
+          time: "01:00"
+          duration: "4h"
+          scenarios: ["baseline_performance", "stress_test", "endurance_test", "spike_test"]
+          
+        chaos_testing:
+          day: "saturday"
+          time: "02:00"
+          duration: "2h"
+          experiments: ["network_latency_experiment", "cpu_stress_experiment", "service_kill_experiment"]
+          
+      # Monthly performance testing
+      monthly:
+        capacity_planning:
+          day: 1
+          time: "00:00"
+          duration: "8h"
+          scenarios: ["all"]
+          generate_report: true
+          
+        disaster_recovery:
+          day: 15
+          time: "00:00"
+          duration: "4h"
+          experiments: ["network_partition_experiment", "container_kill_experiment"]
+          
+      # Release performance testing
+      release:
+        pre_release:
+          scenarios: ["baseline_performance", "stress_test", "spike_test"]
+          duration: "1h"
+          required_success_rate: 100
+          
+        post_release:
+          scenarios: ["endurance_test"]
+          duration: "4h"
+          monitoring_period: "24h"

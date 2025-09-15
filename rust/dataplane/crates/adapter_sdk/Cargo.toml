@@ -1,0 +1,12 @@
+[package]
+name = "adapter_sdk"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[dependencies]
+async-trait = "0.1"
+bytes = "1"
+thiserror = "1"
+tracing = "0.1"
+tokio = { version = "1", features = ["macros", "net"] }

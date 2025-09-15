@@ -1,0 +1,453 @@
+groups:
+  - name: cronosai.critical
+    interval: 30s
+    rules:
+      # Service availability alerts
+      - alert: CronosAIServiceDown
+        expr: up{job=~"cronosai-.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: "{{ $labels.job }}"
+        annotations:
+          summary: "QSLB service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute"
+          runbook_url: "https://runbooks.qslb.io/service-down"
+
+      # High error rate alerts
+      - alert: CronosAIHighErrorRate
+        expr: |
+          (
+            rate(cronosai_requests_total{status=~"5.."}[5m]) /
+            rate(cronosai_requests_total[5m])
+          ) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+          component: "{{ $labels.service }}"
+        annotations:
+          summary: "High error rate detected in {{ $labels.service }}"
+          description: "Error rate is {{ $value | humanizePercentage }} for service {{ $labels.service }}"
+          runbook_url: "https://runbooks.cronosai.io/high-error-rate"
+
+      # High latency alerts
+      - alert: CronosAIHighLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(cronosai_request_duration_seconds_bucket[5m])
+          ) > 0.5
+        for: 3m
+        labels:
+          severity: critical
+          component: "{{ $labels.service }}"
+        annotations:
+          summary: "High latency detected in {{ $labels.service }}"
+          description: "95th percentile latency is {{ $value | humanizeDuration }} for service {{ $labels.service }}"
+          runbook_url: "https://runbooks.cronosai.io/high-latency"
+
+      # Memory usage alerts
+      - alert: CronosAIHighMemoryUsage
+        expr: |
+          (
+            process_resident_memory_bytes{job=~"cronosai-.*"} /
+            node_memory_MemTotal_bytes
+          ) * 100 > 80
+        for: 5m
+        labels:
+          severity: critical
+          component: "{{ $labels.job }}"
+        annotations:
+          summary: "High memory usage in {{ $labels.job }}"
+          description: "Memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+          runbook_url: "https://runbooks.cronosai.io/high-memory"
+
+      # CPU usage alerts
+      - alert: CronosAIHighCPUUsage
+        expr: |
+          rate(process_cpu_seconds_total{job=~"cronosai-.*"}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: critical
+          component: "{{ $labels.job }}"
+        annotations:
+          summary: "High CPU usage in {{ $labels.job }}"
+          description: "CPU usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+          runbook_url: "https://runbooks.cronosai.io/high-cpu"
+
+      # Connection pool exhaustion
+      - alert: CronosAIConnectionPoolExhausted
+        expr: |
+          cronosai_connection_pool_active / cronosai_connection_pool_max > 0.9
+        for: 2m
+        labels:
+          severity: critical
+          component: "connection-pool"
+        annotations:
+          summary: "Connection pool nearly exhausted"
+          description: "Connection pool utilization is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+          runbook_url: "https://runbooks.cronosai.io/connection-pool-exhausted"
+
+  - name: cronosai.warning
+    interval: 60s
+    rules:
+      # Moderate error rate
+      - alert: CronosAIModerateErrorRate
+        expr: |
+          (
+            rate(cronosai_requests_total{status=~"5.."}[5m]) /
+            rate(cronosai_requests_total[5m])
+          ) * 100 > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: "{{ $labels.service }}"
+        annotations:
+          summary: "Moderate error rate in {{ $labels.service }}"
+          description: "Error rate is {{ $value | humanizePercentage }} for service {{ $labels.service }}"
+
+      # Moderate latency
+      - alert: CronosAIModerateLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(cronosai_request_duration_seconds_bucket[5m])
+          ) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+          component: "{{ $labels.service }}"
+        annotations:
+          summary: "Moderate latency in {{ $labels.service }}"
+          description: "95th percentile latency is {{ $value | humanizeDuration }} for service {{ $labels.service }}"
+
+      # Certificate expiration
+      - alert: CronosAICertificateExpiringSoon
+        expr: |
+          (cronosai_certificate_expiry_timestamp - time()) / 86400 < 30
+        for: 1h
+        labels:
+          severity: warning
+          component: "certificates"
+        annotations:
+          summary: "Certificate expiring soon"
+          description: "Certificate {{ $labels.certificate_id }} expires in {{ $value }} days"
+          runbook_url: "https://runbooks.cronosai.io/certificate-expiry"
+
+      # Device health issues
+      - alert: CronosAIDeviceHealthDegraded
+        expr: |
+          cronosai_device_health_status{status!="healthy"} > 0
+        for: 10m
+        labels:
+          severity: warning
+          component: "device-management"
+        annotations:
+          summary: "Device health degraded"
+          description: "Device {{ $labels.device_id }} has health status {{ $labels.status }}"
+
+      # Policy engine issues
+      - alert: CronosAIPolicyEvaluationSlow
+        expr: |
+          histogram_quantile(0.95,
+            rate(cronosai_policy_evaluation_duration_seconds_bucket[5m])
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: warning
+          component: "policy-engine"
+        annotations:
+          summary: "Policy evaluation is slow"
+          description: "95th percentile policy evaluation time is {{ $value | humanizeDuration }}"
+
+  - name: cronosai.security
+    interval: 30s
+    rules:
+      # Failed authentication attempts
+      - alert: CronosAIHighFailedAuthRate
+        expr: |
+          rate(cronosai_auth_failures_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: critical
+          component: "authentication"
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Authentication failure rate is {{ $value }} per second"
+          runbook_url: "https://runbooks.cronosai.io/auth-failures"
+
+      # TPM attestation failures
+      - alert: QSLBTPMAttestationFailures
+        expr: |
+          rate(qslb_tpm_attestation_failures_total[5m]) > 1
+        for: 1m
+        labels:
+          severity: critical
+          component: "tpm-attestation"
+        annotations:
+          summary: "TPM attestation failures detected"
+          description: "TPM attestation failure rate is {{ $value }} per second"
+          runbook_url: "https://runbooks.cronosai.io/tpm-failures"
+
+      # Certificate validation failures
+      - alert: CronosAICertValidationFailures
+        expr: |
+          rate(cronosai_cert_validation_failures_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          component: "certificate-validation"
+        annotations:
+          summary: "Certificate validation failures"
+          description: "Certificate validation failure rate is {{ $value }} per second"
+
+      # Suspicious device behavior
+      - alert: CronosAISuspiciousDeviceBehavior
+        expr: |
+          cronosai_device_compliance_violations_total > 0
+        for: 1m
+        labels:
+          severity: critical
+          component: "device-compliance"
+        annotations:
+          summary: "Device compliance violations detected"
+          description: "Device {{ $labels.device_id }} has compliance violations: {{ $labels.violation_type }}"
+          runbook_url: "https://runbooks.cronosai.io/compliance-violations"
+
+  - name: cronosai.performance
+    interval: 60s
+    rules:
+      # Throughput degradation
+      - alert: CronosAIThroughputDegraded
+        expr: |
+          rate(cronosai_bytes_processed_total[5m]) < 1000000  # Less than 1MB/s
+        for: 5m
+        labels:
+          severity: warning
+          component: "dataplane"
+        annotations:
+          summary: "Throughput degraded"
+          description: "Current throughput is {{ $value | humanizeBytes }}/s"
+
+      # Connection count high
+      - alert: CronosAIHighConnectionCount
+        expr: |
+          cronosai_connections_active > 10000
+        for: 5m
+        labels:
+          severity: warning
+          component: "connection-management"
+        annotations:
+          summary: "High connection count"
+          description: "Active connections: {{ $value }}"
+
+      # Circuit breaker open
+      - alert: CronosAICircuitBreakerOpen
+        expr: |
+          cronosai_circuit_breaker_state{state="open"} > 0
+        for: 1m
+        labels:
+          severity: warning
+          component: "circuit-breaker"
+        annotations:
+          summary: "Circuit breaker is open"
+          description: "Circuit breaker for {{ $labels.target }} is open"
+          runbook_url: "https://runbooks.cronosai.io/circuit-breaker"
+
+      # Backpressure active
+      - alert: CronosAIBackpressureActive
+        expr: |
+          cronosai_backpressure_active > 0
+        for: 2m
+        labels:
+          severity: warning
+          component: "backpressure"
+        annotations:
+          summary: "Backpressure is active"
+          description: "Backpressure is active on {{ $labels.instance }}"
+
+  - name: cronosai.business
+    interval: 300s
+    rules:
+      # SLA breach detection
+      - alert: CronosAISLABreach
+        expr: |
+          (
+            rate(cronosai_requests_total{status=~"2.."}[1h]) /
+            rate(cronosai_requests_total[1h])
+          ) * 100 < 99.9
+        for: 5m
+        labels:
+          severity: critical
+          component: "sla"
+        annotations:
+          summary: "SLA breach detected"
+          description: "Availability is {{ $value | humanizePercentage }} (below 99.9% SLA)"
+          runbook_url: "https://runbooks.cronosai.io/sla-breach"
+
+      # Device enrollment rate anomaly
+      - alert: CronosAIDeviceEnrollmentAnomaly
+        expr: |
+          abs(
+            rate(cronosai_device_enrollments_total[1h]) -
+            rate(cronosai_device_enrollments_total[1h] offset 24h)
+          ) / rate(cronosai_device_enrollments_total[1h] offset 24h) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          component: "device-enrollment"
+        annotations:
+          summary: "Device enrollment rate anomaly"
+          description: "Device enrollment rate has changed significantly compared to 24h ago"
+
+      # Policy update failures
+      - alert: CronosAIPolicyUpdateFailures
+        expr: |
+          rate(cronosai_policy_update_failures_total[1h]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          component: "policy-management"
+        annotations:
+          summary: "Policy update failures"
+          description: "Policy update failure rate is {{ $value }} per second"
+
+  - name: cronosai.capacity
+    interval: 300s
+    rules:
+      # Disk space low
+      - alert: CronosAIDiskSpaceLow
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/"} /
+            node_filesystem_size_bytes{mountpoint="/"}
+          ) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+          component: "storage"
+        annotations:
+          summary: "Disk space low"
+          description: "Available disk space is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+          runbook_url: "https://runbooks.cronosai.io/disk-space-low"
+
+      # Network bandwidth utilization high
+      - alert: CronosAIHighNetworkUtilization
+        expr: |
+          rate(node_network_transmit_bytes_total[5m]) * 8 > 800000000  # 800 Mbps
+        for: 5m
+        labels:
+          severity: warning
+          component: "network"
+        annotations:
+          summary: "High network utilization"
+          description: "Network transmit rate is {{ $value | humanizeBitsPerSec }} on {{ $labels.instance }}"
+
+      # File descriptor usage high
+      - alert: CronosAIHighFileDescriptorUsage
+        expr: |
+          (
+            process_open_fds{job=~"cronosai-.*"} /
+            process_max_fds{job=~"cronosai-.*"}
+          ) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: "file-descriptors"
+        annotations:
+          summary: "High file descriptor usage"
+          description: "File descriptor usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+
+  - name: cronosai.recording
+    interval: 30s
+    rules:
+      # Request rate recording rules
+      - record: cronosai:request_rate_5m
+        expr: rate(cronosai_requests_total[5m])
+
+      - record: cronosai:request_rate_1h
+        expr: rate(cronosai_requests_total[1h])
+
+      # Error rate recording rules
+      - record: cronosai:error_rate_5m
+        expr: |
+          rate(cronosai_requests_total{status=~"5.."}[5m]) /
+          rate(cronosai_requests_total[5m])
+
+      - record: cronosai:error_rate_1h
+        expr: |
+          rate(cronosai_requests_total{status=~"5.."}[1h]) /
+          rate(cronosai_requests_total[1h])
+
+      # Latency recording rules
+      - record: cronosai:latency_p50_5m
+        expr: |
+          histogram_quantile(0.50,
+            rate(cronosai_request_duration_seconds_bucket[5m])
+          )
+
+      - record: cronosai:latency_p95_5m
+        expr: |
+          histogram_quantile(0.95,
+            rate(cronosai_request_duration_seconds_bucket[5m])
+          )
+
+      - record: cronosai:latency_p99_5m
+        expr: |
+          histogram_quantile(0.99,
+            rate(cronosai_request_duration_seconds_bucket[5m])
+          )
+
+      # Throughput recording rules
+      - record: cronosai:throughput_bytes_5m
+        expr: rate(cronosai_bytes_processed_total[5m])
+
+      - record: cronosai:throughput_requests_5m
+        expr: rate(cronosai_requests_total[5m])
+
+      # Availability recording rules
+      - record: cronosai:availability_5m
+        expr: |
+          (
+            rate(cronosai_requests_total{status=~"2.."}[5m]) /
+            rate(cronosai_requests_total[5m])
+          ) * 100
+
+      - record: cronosai:availability_1h
+        expr: |
+          (
+            rate(cronosai_requests_total{status=~"2.."}[1h]) /
+            rate(cronosai_requests_total[1h])
+          ) * 100
+
+      - record: cronosai:availability_24h
+        expr: |
+          (
+            rate(cronosai_requests_total{status=~"2.."}[24h]) /
+            rate(cronosai_requests_total[24h])
+          ) * 100
+
+      # Resource utilization recording rules
+      - record: cronosai:cpu_utilization_5m
+        expr: |
+          rate(process_cpu_seconds_total{job=~"cronosai-.*"}[5m]) * 100
+
+      - record: cronosai:memory_utilization_5m
+        expr: |
+          (
+            process_resident_memory_bytes{job=~"cronosai-.*"} /
+            node_memory_MemTotal_bytes
+          ) * 100
+
+      # Device health recording rules
+      - record: cronosai:device_health_ratio
+        expr: |
+          (
+            count(cronosai_device_health_status{status="healthy"}) /
+            count(cronosai_device_health_status)
+          ) * 100
+
+      # Policy evaluation performance
+      - record: cronosai:policy_evaluation_p95_5m
+        expr: |
+          histogram_quantile(0.95,
+            rate(cronosai_policy_evaluation_duration_seconds_bucket[5m])
+          )

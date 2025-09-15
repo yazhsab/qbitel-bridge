@@ -1,0 +1,16 @@
+[package]
+name = "adapter_iso8583"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[dependencies]
+adapter_sdk = { path = "../../adapter_sdk" }
+async-trait = "0.1"
+bytes = "1"
+thiserror = "1"
+tracing = "0.1"
+hex = "0.4"
+aes = "0.8"
+sha2 = "0.10"
+rand = "0.8"

@@ -1,0 +1,158 @@
+# CRONOS AI Protocol Discovery Configuration
+# Default configuration for development environment
+
+environment: development
+debug: true
+app_name: "CRONOS AI Protocol Discovery"
+app_version: "1.0.0"
+api_host: "0.0.0.0"
+api_port: 8080
+worker_processes: 1
+
+# Database Configuration
+database:
+  host: "localhost"
+  port: 5432
+  database: "cronos_ai"
+  username: "cronos_user"
+  password: ""  # Set via DATABASE_PASSWORD environment variable
+  ssl_mode: "prefer"
+  connection_pool_size: 10
+  connection_timeout: 30
+
+# Redis Configuration
+redis:
+  host: "localhost"
+  port: 6379
+  database: 0
+  password: ""  # Set via REDIS_PASSWORD environment variable
+  ssl: false
+  connection_pool_size: 10
+  connection_timeout: 5
+
+# AI Engine Configuration
+ai_engine:
+  model_cache_dir: "/tmp/cronos_ai_models"
+  use_gpu: true
+  gpu_memory_limit: 0.8
+  batch_size: 32
+  max_sequence_length: 512
+  ensemble_size: 5
+  learning_rate: 0.001
+  training_epochs: 100
+  early_stopping_patience: 10
+  model_save_frequency: 10
+  
+  # Statistical Analysis
+  entropy_window_size: 1000
+  pattern_min_frequency: 3
+  field_boundary_confidence_threshold: 0.7
+  
+  # Grammar Learning
+  pcfg_max_depth: 10
+  pcfg_min_rule_frequency: 2
+  em_max_iterations: 50
+  em_convergence_threshold: 0.000001
+  
+  # Classification
+  cnn_filter_sizes: [3, 4, 5]
+  cnn_num_filters: 100
+  lstm_hidden_size: 128
+  lstm_num_layers: 2
+  dropout_rate: 0.2
+  
+  # Validation
+  max_validation_rules: 100
+  validation_timeout: 5.0
+
+# Performance Configuration
+performance:
+  # Caching
+  cache_size: 10000
+  cache_ttl: 3600
+  use_redis_cache: false
+  redis_cache_prefix: "cronos_ai:"
+  
+  # Memory Management
+  buffer_size: 8192
+  memory_pool_size: 1000
+  max_memory_usage_mb: 4096
+  gc_threshold: 0.8
+  
+  # Threading
+  max_threads: 0  # Auto-detect
+  io_thread_pool_size: 20
+  cpu_thread_pool_size: 0  # Auto-detect
+  
+  # Batching
+  batch_size: 1000
+  batch_flush_interval: 1.0
+  max_batch_delay: 5.0
+
+# Monitoring Configuration
+monitoring:
+  # Metrics Collection
+  metrics_enabled: true
+  metrics_flush_interval: 30.0
+  max_metric_points: 10000
+  
+  # Prometheus
+  prometheus_enabled: true
+  prometheus_host: "0.0.0.0"
+  prometheus_port: 8000
+  
+  # Health Checking
+  health_check_enabled: true
+  health_check_interval: 60.0
+  health_check_timeout: 10.0
+  
+  # Alerting
+  alerting_enabled: true
+  max_alerts: 1000
+  alert_retention_days: 30
+  
+  # Alert Thresholds
+  cpu_alert_threshold: 90.0
+  memory_alert_threshold: 85.0
+  disk_alert_threshold: 90.0
+  error_rate_alert_threshold: 0.05
+  response_time_alert_threshold: 5.0
+
+# Security Configuration
+security:
+  # API Security
+  api_key_enabled: false  # Disabled for development
+  api_key_header: "X-API-Key"
+  jwt_enabled: false
+  jwt_secret: ""  # Auto-generated if JWT enabled
+  jwt_algorithm: "HS256"
+  jwt_expiration_hours: 24
+  
+  # TLS/SSL
+  tls_enabled: false  # Disabled for development
+  tls_cert_file: ""
+  tls_key_file: ""
+  tls_ca_file: ""
+  tls_verify_client: false
+  
+  # Encryption
+  encryption_key: ""  # Auto-generated
+  encryption_algorithm: "AES-256-GCM"
+  
+  # Audit Logging
+  audit_logging_enabled: true
+  audit_log_retention_days: 90
+  sensitive_field_masking: true
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "json"
+  output: "stdout"
+  file_path: "/var/log/cronos_ai/app.log"
+  max_file_size_mb: 100
+  backup_count: 5
+  structured_logging: true
+  correlation_id_enabled: true
+  performance_logging: true
+  security_logging: true

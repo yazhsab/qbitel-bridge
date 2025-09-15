@@ -1,0 +1,599 @@
+# QSLB System Hardening Configuration
+# Based on CIS Benchmarks, NIST Guidelines, and Security Best Practices
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qslb-system-hardening
+  namespace: qslb-system
+  labels:
+    app: qslb
+    component: security
+    hardening: system
+data:
+  kernel-hardening.yaml: |
+    # Kernel Security Hardening
+    kernel:
+      # Kernel parameters for security hardening
+      sysctl_settings:
+        # Network security
+        net.ipv4.ip_forward: 0
+        net.ipv4.conf.all.send_redirects: 0
+        net.ipv4.conf.default.send_redirects: 0
+        net.ipv4.conf.all.accept_source_route: 0
+        net.ipv4.conf.default.accept_source_route: 0
+        net.ipv4.conf.all.accept_redirects: 0
+        net.ipv4.conf.default.accept_redirects: 0
+        net.ipv4.conf.all.secure_redirects: 0
+        net.ipv4.conf.default.secure_redirects: 0
+        net.ipv4.conf.all.log_martians: 1
+        net.ipv4.conf.default.log_martians: 1
+        net.ipv4.icmp_echo_ignore_broadcasts: 1
+        net.ipv4.icmp_ignore_bogus_error_responses: 1
+        net.ipv4.tcp_syncookies: 1
+        net.ipv4.conf.all.rp_filter: 1
+        net.ipv4.conf.default.rp_filter: 1
+        
+        # IPv6 security
+        net.ipv6.conf.all.accept_ra: 0
+        net.ipv6.conf.default.accept_ra: 0
+        net.ipv6.conf.all.accept_redirects: 0
+        net.ipv6.conf.default.accept_redirects: 0
+        
+        # Memory protection
+        kernel.randomize_va_space: 2
+        kernel.exec-shield: 1
+        kernel.dmesg_restrict: 1
+        kernel.kptr_restrict: 2
+        kernel.yama.ptrace_scope: 1
+        
+        # Core dumps
+        fs.suid_dumpable: 0
+        kernel.core_uses_pid: 1
+        
+        # File system security
+        fs.protected_hardlinks: 1
+        fs.protected_symlinks: 1
+        
+      # Kernel modules blacklist
+      module_blacklist:
+        - cramfs
+        - freevxfs
+        - jffs2
+        - hfs
+        - hfsplus
+        - squashfs
+        - udf
+        - dccp
+        - sctp
+        - rds
+        - tipc
+        - bluetooth
+        - usb-storage
+        
+      # Required kernel modules
+      required_modules:
+        - ip_tables
+        - iptable_filter
+        - ip6_tables
+        - ip6table_filter
+        - nf_conntrack
+        - nf_conntrack_ipv4
+        - nf_conntrack_ipv6
+
+  filesystem-hardening.yaml: |
+    # File System Security Hardening
+    filesystem:
+      # Mount options for security
+      mount_options:
+        /tmp:
+          - nodev
+          - nosuid
+          - noexec
+        /var/tmp:
+          - nodev
+          - nosuid
+          - noexec
+        /dev/shm:
+          - nodev
+          - nosuid
+          - noexec
+        /home:
+          - nodev
+          - nosuid
+        /var:
+          - nodev
+          - nosuid
+        /var/log:
+          - nodev
+          - nosuid
+          - noexec
+        /var/log/audit:
+          - nodev
+          - nosuid
+          - noexec
+          
+      # File permissions
+      critical_file_permissions:
+        /etc/passwd: "644"
+        /etc/shadow: "640"
+        /etc/group: "644"
+        /etc/gshadow: "640"
+        /etc/ssh/sshd_config: "600"
+        /etc/sudoers: "440"
+        /etc/crontab: "600"
+        /etc/hosts.allow: "644"
+        /etc/hosts.deny: "644"
+        /boot/grub/grub.cfg: "600"
+        
+      # Directory permissions
+      critical_directory_permissions:
+        /etc/ssh: "755"
+        /etc/ssl/private: "700"
+        /var/log: "755"
+        /var/log/audit: "750"
+        /tmp: "1777"
+        /var/tmp: "1777"
+        
+      # File integrity monitoring
+      fim_paths:
+        - /etc
+        - /bin
+        - /sbin
+        - /usr/bin
+        - /usr/sbin
+        - /usr/local/bin
+        - /usr/local/sbin
+        - /boot
+        - /lib
+        - /lib64
+        - /usr/lib
+        - /usr/lib64
+
+  service-hardening.yaml: |
+    # Service Security Hardening
+    services:
+      # Services to disable
+      disabled_services:
+        - avahi-daemon
+        - cups
+        - dhcpd
+        - slapd
+        - nfs
+        - rpcbind
+        - named
+        - vsftpd
+        - httpd
+        - dovecot
+        - smb
+        - squid
+        - snmpd
+        - rsync
+        - nis
+        - telnet
+        - rsh
+        - rlogin
+        - tftp
+        
+      # Required services
+      required_services:
+        - sshd
+        - rsyslog
+        - auditd
+        - chronyd
+        - firewalld
+        - fail2ban
+        - qslb-controlplane
+        - qslb-dataplane
+        - qslb-mgmtapi
+        
+      # Service configurations
+      service_configs:
+        sshd:
+          Protocol: 2
+          LogLevel: INFO
+          X11Forwarding: "no"
+          MaxAuthTries: 3
+          IgnoreRhosts: "yes"
+          HostbasedAuthentication: "no"
+          PermitRootLogin: "no"
+          PermitEmptyPasswords: "no"
+          PermitUserEnvironment: "no"
+          Ciphers: "chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr"
+          MACs: "hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha2-256,hmac-sha2-512"
+          KexAlgorithms: "curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256"
+          ClientAliveInterval: 300
+          ClientAliveCountMax: 0
+          LoginGraceTime: 60
+          Banner: "/etc/issue.net"
+          
+        rsyslog:
+          FileCreateMode: "0640"
+          DirCreateMode: "0755"
+          Umask: "0022"
+          
+        auditd:
+          log_file: "/var/log/audit/audit.log"
+          log_format: "RAW"
+          log_group: "root"
+          priority_boost: 4
+          flush: "INCREMENTAL_ASYNC"
+          freq: 50
+          num_logs: 5
+          disp_qos: "lossy"
+          dispatcher: "/sbin/audispd"
+          name_format: "HOSTNAME"
+          max_log_file: 50
+          max_log_file_action: "ROTATE"
+          space_left: 75
+          space_left_action: "SYSLOG"
+          admin_space_left: 50
+          admin_space_left_action: "SUSPEND"
+          disk_full_action: "SUSPEND"
+          disk_error_action: "SUSPEND"
+
+  network-hardening.yaml: |
+    # Network Security Hardening
+    network:
+      # Firewall configuration
+      firewall:
+        default_policy: "DROP"
+        
+        # Allowed inbound connections
+        inbound_rules:
+          - port: 22
+            protocol: tcp
+            source: "10.0.1.0/24"
+            comment: "SSH from management network"
+          - port: 443
+            protocol: tcp
+            source: "0.0.0.0/0"
+            comment: "HTTPS for QSLB API"
+          - port: 8443
+            protocol: tcp
+            source: "10.0.0.0/8"
+            comment: "QSLB management interface"
+          - port: 9090
+            protocol: tcp
+            source: "10.0.1.0/24"
+            comment: "Prometheus metrics"
+          - port: 3000
+            protocol: tcp
+            source: "10.0.1.0/24"
+            comment: "Grafana dashboard"
+            
+        # Allowed outbound connections
+        outbound_rules:
+          - port: 53
+            protocol: udp
+            destination: "0.0.0.0/0"
+            comment: "DNS queries"
+          - port: 123
+            protocol: udp
+            destination: "0.0.0.0/0"
+            comment: "NTP synchronization"
+          - port: 443
+            protocol: tcp
+            destination: "0.0.0.0/0"
+            comment: "HTTPS outbound"
+          - port: 80
+            protocol: tcp
+            destination: "0.0.0.0/0"
+            comment: "HTTP outbound (updates)"
+            
+      # Network monitoring
+      monitoring:
+        enable_connection_tracking: true
+        log_dropped_packets: true
+        log_invalid_packets: true
+        enable_syn_flood_protection: true
+        enable_port_scan_detection: true
+        
+      # DDoS protection
+      ddos_protection:
+        enable_rate_limiting: true
+        connection_limit_per_ip: 100
+        request_rate_limit: 1000
+        burst_limit: 50
+        
+      # SSL/TLS configuration
+      tls:
+        min_version: "1.2"
+        preferred_version: "1.3"
+        cipher_suites:
+          - "TLS_AES_256_GCM_SHA384"
+          - "TLS_CHACHA20_POLY1305_SHA256"
+          - "TLS_AES_128_GCM_SHA256"
+          - "ECDHE-RSA-AES256-GCM-SHA384"
+          - "ECDHE-RSA-CHACHA20-POLY1305"
+          - "ECDHE-RSA-AES128-GCM-SHA256"
+        disable_weak_ciphers: true
+        enable_hsts: true
+        hsts_max_age: 31536000
+
+  access-control-hardening.yaml: |
+    # Access Control Hardening
+    access_control:
+      # User account policies
+      user_policies:
+        password_min_length: 14
+        password_complexity: true
+        password_history: 12
+        password_max_age: 90
+        password_min_age: 1
+        password_warn_age: 7
+        account_lockout_threshold: 5
+        account_lockout_duration: 900
+        session_timeout: 900
+        
+      # Sudo configuration
+      sudo:
+        require_tty: true
+        use_pty: true
+        log_input: true
+        log_output: true
+        timestamp_timeout: 5
+        passwd_timeout: 5
+        passwd_tries: 3
+        
+      # PAM configuration
+      pam:
+        enforce_password_complexity: true
+        remember_passwords: 12
+        lock_accounts_after_failures: true
+        failure_count: 5
+        unlock_time: 900
+        
+      # RBAC configuration
+      rbac:
+        enable_rbac: true
+        default_role: "user"
+        admin_roles:
+          - "qslb-admin"
+          - "system-admin"
+        operator_roles:
+          - "qslb-operator"
+          - "network-operator"
+        readonly_roles:
+          - "qslb-viewer"
+          - "auditor"
+
+  audit-hardening.yaml: |
+    # Audit System Hardening
+    audit:
+      # Audit rules
+      rules:
+        # System calls
+        - "-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change"
+        - "-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change"
+        - "-a always,exit -F arch=b64 -S clock_settime -k time-change"
+        - "-a always,exit -F arch=b32 -S clock_settime -k time-change"
+        - "-w /etc/localtime -p wa -k time-change"
+        
+        # User and group changes
+        - "-w /etc/group -p wa -k identity"
+        - "-w /etc/passwd -p wa -k identity"
+        - "-w /etc/gshadow -p wa -k identity"
+        - "-w /etc/shadow -p wa -k identity"
+        - "-w /etc/security/opasswd -p wa -k identity"
+        
+        # Network configuration
+        - "-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale"
+        - "-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale"
+        - "-w /etc/issue -p wa -k system-locale"
+        - "-w /etc/issue.net -p wa -k system-locale"
+        - "-w /etc/hosts -p wa -k system-locale"
+        - "-w /etc/sysconfig/network -p wa -k system-locale"
+        
+        # System administration
+        - "-w /var/log/sudo.log -p wa -k actions"
+        - "-w /etc/sudoers -p wa -k scope"
+        - "-w /etc/sudoers.d/ -p wa -k scope"
+        
+        # Kernel modules
+        - "-w /sbin/insmod -p x -k modules"
+        - "-w /sbin/rmmod -p x -k modules"
+        - "-w /sbin/modprobe -p x -k modules"
+        - "-a always,exit -F arch=b64 -S init_module -S delete_module -k modules"
+        
+        # File system mounts
+        - "-a always,exit -F arch=b64 -S mount -k mounts"
+        - "-a always,exit -F arch=b32 -S mount -k mounts"
+        
+        # File deletions
+        - "-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -k delete"
+        - "-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -k delete"
+        
+        # QSLB specific
+        - "-w /etc/qslb/ -p wa -k qslb-config"
+        - "-w /var/lib/qslb/ -p wa -k qslb-data"
+        - "-w /var/log/qslb/ -p wa -k qslb-logs"
+        
+      # Log retention
+      retention:
+        audit_logs: 365
+        system_logs: 90
+        application_logs: 30
+        security_logs: 730
+        
+      # Log forwarding
+      forwarding:
+        enable_remote_logging: true
+        remote_log_server: "syslog.qslb.local"
+        remote_log_port: 514
+        protocol: "tcp"
+        encryption: true
+
+  container-hardening.yaml: |
+    # Container Security Hardening
+    containers:
+      # Security contexts
+      security_context:
+        run_as_non_root: true
+        run_as_user: 1000
+        run_as_group: 1000
+        fs_group: 1000
+        read_only_root_filesystem: true
+        allow_privilege_escalation: false
+        drop_capabilities:
+          - ALL
+        add_capabilities:
+          - NET_BIND_SERVICE
+          - NET_ADMIN
+        seccomp_profile: "runtime/default"
+        
+      # Pod security policies
+      pod_security:
+        privileged: false
+        allow_privilege_escalation: false
+        required_drop_capabilities:
+          - ALL
+        allowed_capabilities:
+          - NET_BIND_SERVICE
+          - NET_ADMIN
+        volumes:
+          - configMap
+          - emptyDir
+          - projected
+          - secret
+          - downwardAPI
+          - persistentVolumeClaim
+        host_network: false
+        host_ports: false
+        host_pid: false
+        host_ipc: false
+        
+      # Network policies
+      network_policies:
+        default_deny_all: true
+        allow_dns: true
+        allow_same_namespace: true
+        
+      # Resource limits
+      resources:
+        limits:
+          cpu: "2"
+          memory: "4Gi"
+          ephemeral-storage: "10Gi"
+        requests:
+          cpu: "500m"
+          memory: "1Gi"
+          ephemeral-storage: "5Gi"
+
+  compliance-checks.yaml: |
+    # Compliance Verification Checks
+    compliance:
+      # Daily checks
+      daily_checks:
+        - name: "password_policy_compliance"
+          description: "Verify password policies are enforced"
+          command: "pwpolicy -getaccountpolicies"
+          expected_result: "compliant"
+          
+        - name: "failed_login_monitoring"
+          description: "Check for excessive failed login attempts"
+          command: "grep 'authentication failure' /var/log/auth.log | tail -100"
+          threshold: 10
+          
+        - name: "privilege_escalation_monitoring"
+          description: "Monitor for privilege escalation attempts"
+          command: "grep -i 'sudo' /var/log/auth.log | tail -50"
+          alert_on_suspicious: true
+          
+        - name: "file_integrity_check"
+          description: "Verify critical file integrity"
+          command: "aide --check"
+          expected_result: "no_changes"
+          
+      # Weekly checks
+      weekly_checks:
+        - name: "vulnerability_scan"
+          description: "Perform vulnerability scanning"
+          command: "nessus-scan --target localhost"
+          severity_threshold: "medium"
+          
+        - name: "configuration_compliance"
+          description: "Verify configuration compliance"
+          command: "oscap xccdf eval --profile cis /usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml"
+          compliance_threshold: 95
+          
+        - name: "access_review"
+          description: "Review user access and permissions"
+          command: "qslb-cli iam audit --users --roles --permissions"
+          manual_review_required: true
+          
+      # Monthly checks
+      monthly_checks:
+        - name: "penetration_test"
+          description: "Perform internal penetration testing"
+          command: "nmap -sS -O -A localhost"
+          manual_analysis_required: true
+          
+        - name: "security_policy_review"
+          description: "Review and update security policies"
+          manual_task: true
+          responsible_team: "security"
+          
+        - name: "incident_response_test"
+          description: "Test incident response procedures"
+          manual_task: true
+          responsible_team: "operations"
+
+  remediation-actions.yaml: |
+    # Automated Remediation Actions
+    remediation:
+      # Critical security events
+      critical_events:
+        unauthorized_root_access:
+          action: "lock_account"
+          notification: "immediate"
+          escalation: "security_team"
+          
+        malware_detection:
+          action: "quarantine_file"
+          notification: "immediate"
+          escalation: "security_team"
+          
+        privilege_escalation:
+          action: "terminate_session"
+          notification: "immediate"
+          escalation: "security_team"
+          
+        suspicious_network_activity:
+          action: "block_ip"
+          notification: "immediate"
+          escalation: "network_team"
+          
+      # High severity events
+      high_events:
+        repeated_failed_logins:
+          action: "temporary_account_lock"
+          duration: "30m"
+          notification: "alert"
+          
+        configuration_drift:
+          action: "restore_configuration"
+          notification: "alert"
+          backup_before_restore: true
+          
+        unauthorized_file_changes:
+          action: "restore_from_backup"
+          notification: "alert"
+          verify_integrity: true
+          
+      # Medium severity events
+      medium_events:
+        weak_password_detected:
+          action: "force_password_change"
+          notification: "warning"
+          grace_period: "24h"
+          
+        outdated_software:
+          action: "schedule_update"
+          notification: "info"
+          maintenance_window: "next_scheduled"
+          
+        certificate_expiring:
+          action: "renew_certificate"
+          notification: "warning"
+          advance_notice: "30d"

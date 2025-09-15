@@ -1,0 +1,12 @@
+[package]
+name = "adapter_hl7_mllp"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[dependencies]
+adapter_sdk = { path = "../../adapter_sdk" }
+async-trait = "0.1"
+bytes = "1"
+thiserror = "1"
+tracing = "0.1"

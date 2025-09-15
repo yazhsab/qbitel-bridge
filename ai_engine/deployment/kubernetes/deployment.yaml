@@ -1,0 +1,383 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cronos-ai-engine
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai-engine
+    app.kubernetes.io/name: cronos-ai-engine
+    app.kubernetes.io/component: ai-engine
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/part-of: cronos-ai
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: cronos-ai-engine
+  template:
+    metadata:
+      labels:
+        app: cronos-ai-engine
+        app.kubernetes.io/name: cronos-ai-engine
+        app.kubernetes.io/component: ai-engine
+        app.kubernetes.io/version: "1.0.0"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: cronos-ai-engine
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: ai-engine
+        image: cronos-ai/ai-engine:1.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        - name: grpc
+          containerPort: 50051
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        env:
+        - name: AI_ENGINE_CONFIG_PATH
+          value: "/app/config/production.yml"
+        - name: AI_ENGINE_LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: cronos-ai-config
+              key: log_level
+        - name: AI_ENGINE_DATA_PATH
+          value: "/app/data"
+        - name: AI_ENGINE_MODEL_PATH
+          value: "/app/models"
+        - name: MLFLOW_TRACKING_URI
+          valueFrom:
+            configMapKeyRef:
+              name: cronos-ai-config
+              key: mlflow_tracking_uri
+        - name: PROMETHEUS_METRICS_PORT
+          value: "9090"
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        - name: data
+          mountPath: /app/data
+        - name: models
+          mountPath: /app/models
+        - name: logs
+          mountPath: /app/logs
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: config
+        configMap:
+          name: cronos-ai-config
+      - name: data
+        persistentVolumeClaim:
+          claimName: cronos-ai-data
+      - name: models
+        persistentVolumeClaim:
+          claimName: cronos-ai-models
+      - name: logs
+        emptyDir: {}
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+      - key: "ai-workload"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - cronos-ai-engine
+              topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cronos-ai-engine-http
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai-engine
+    app.kubernetes.io/name: cronos-ai-engine
+    app.kubernetes.io/component: ai-engine
+    service-type: http-api
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app: cronos-ai-engine
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cronos-ai-engine-grpc
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai-engine
+    app.kubernetes.io/name: cronos-ai-engine
+    app.kubernetes.io/component: ai-engine
+    service-type: grpc-api
+spec:
+  type: ClusterIP
+  ports:
+  - port: 50051
+    targetPort: grpc
+    protocol: TCP
+    name: grpc
+  selector:
+    app: cronos-ai-engine
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cronos-ai-engine-metrics
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai-engine
+    app.kubernetes.io/name: cronos-ai-engine
+    app.kubernetes.io/component: ai-engine
+    service-type: metrics
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9090
+    targetPort: metrics
+    protocol: TCP
+    name: metrics
+  selector:
+    app: cronos-ai-engine
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cronos-ai-engine
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai-engine
+    app.kubernetes.io/name: cronos-ai-engine
+    app.kubernetes.io/component: ai-engine
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cronos-ai-engine
+  namespace: cronos-ai
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cronos-ai-engine
+  namespace: cronos-ai
+subjects:
+- kind: ServiceAccount
+  name: cronos-ai-engine
+  namespace: cronos-ai
+roleRef:
+  kind: Role
+  name: cronos-ai-engine
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cronos-ai-config
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai-engine
+    app.kubernetes.io/name: cronos-ai-engine
+    app.kubernetes.io/component: ai-engine
+data:
+  log_level: "INFO"
+  mlflow_tracking_uri: "http://mlflow-service.cronos-ai.svc.cluster.local:5000"
+  metrics_collection_interval: "15"
+  health_check_interval: "30"
+  enable_tracing: "true"
+  enable_observability: "true"
+  production.yml: |
+    # CRONOS AI Engine - Production Configuration
+    
+    # Server Configuration
+    rest_host: "0.0.0.0"
+    rest_port: 8000
+    grpc_port: 50051
+    enable_rest_api: true
+    enable_grpc_api: true
+    
+    # Logging Configuration
+    log_level: "INFO"
+    log_format: "structured"
+    enable_console_logging: true
+    enable_file_logging: true
+    log_file: "/app/logs/cronos_ai.log"
+    enable_tracing: true
+    include_system_info: true
+    
+    # Model Configuration
+    model_path: "/app/models"
+    data_path: "/app/data"
+    device: "cpu"
+    batch_size: 32
+    
+    # MLflow Configuration
+    mlflow:
+      tracking_uri: "http://mlflow-service.cronos-ai.svc.cluster.local:5000"
+      experiment_name: "cronos_ai_production"
+      enable_autolog: true
+    
+    # Training Configuration
+    training:
+      max_workers: 4
+      enable_distributed: false
+      save_checkpoints: true
+      checkpoint_interval: 1000
+    
+    # Monitoring Configuration
+    metrics_port: 9090
+    metrics_collection_interval: 15
+    health_check_interval: 30
+    enable_observability: true
+    max_traces_in_memory: 1000
+    tracing_sampling_rate: 1.0
+    
+    # Alert Configuration
+    alert_evaluation_interval: 60
+    max_alert_history: 1000
+    
+    # API Configuration
+    cors_enabled: true
+    cors_origins: ["*"]
+    rate_limit: 100
+    rate_limit_window: 60
+    max_request_size: 10485760  # 10MB
+    
+    # Security Configuration
+    enable_auth: true
+    jwt_secret_key: "change-me-in-production"
+    access_token_expire_minutes: 30
+    
+    # Performance Configuration
+    workers: 3
+    max_connections: 1000
+    keepalive_timeout: 65
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cronos-ai-data
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai-engine
+    app.kubernetes.io/name: cronos-ai-engine
+    app.kubernetes.io/component: ai-engine
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: fast-ssd
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cronos-ai-models
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai-engine
+    app.kubernetes.io/name: cronos-ai-engine
+    app.kubernetes.io/component: ai-engine
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: fast-ssd

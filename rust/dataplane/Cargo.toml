@@ -1,0 +1,12 @@
+[workspace]
+members = [
+  "crates/pqc_tls",
+  "crates/io_engine",
+  "crates/adapter_sdk",
+  "crates/adapters/tn3270e",
+  "crates/adapters/iso8583",
+  "crates/adapters/modbus",
+  "crates/adapters/hl7_mllp",
+  "bin/cronosai-bridge",
+]
+resolver = "2"

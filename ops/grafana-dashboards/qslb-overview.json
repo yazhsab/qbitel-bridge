@@ -1,0 +1,24 @@
+{
+  "title": "QSLB Overview",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Bridge Connections",
+      "targets": [
+        {
+          "expr": "qslb_connections"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Handshake Latency p95",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(qslb_handshake_latency_bucket[5m])) by (le))"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39
+}
