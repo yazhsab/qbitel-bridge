@@ -42,6 +42,8 @@ import {
   AccountCircle as AccountIcon,
   Notifications as NotificationsIcon,
   Badge,
+  Timeline as TimelineIcon,
+  Psychology as AIIcon,
 } from '@mui/icons-material';
 
 // Components
@@ -52,6 +54,10 @@ import ComplianceReporting from './components/ComplianceReporting';
 import SecurityMonitoring from './components/SecurityMonitoring';
 import SystemSettings from './components/SystemSettings';
 import UserProfile from './components/UserProfile';
+import ProtocolVisualization from './components/ProtocolVisualization';
+import AIModelMonitoring from './components/AIModelMonitoring';
+import ThreatIntelligence from './components/ThreatIntelligence';
+import AdvancedAnalytics from './components/AdvancedAnalytics';
 
 // Auth and API
 import { OidcAuthService, defaultAuthConfig } from './auth/oidc';
@@ -110,6 +116,10 @@ const theme = createTheme({
 const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: DashboardIcon, path: '/dashboard' },
   { id: 'devices', label: 'Device Management', icon: DevicesIcon, path: '/devices' },
+  { id: 'protocols', label: 'Protocol Visualization', icon: TimelineIcon, path: '/protocols' },
+  { id: 'ai-models', label: 'AI Model Monitoring', icon: AIIcon, path: '/ai-models' },
+  { id: 'threat-intel', label: 'Threat Intelligence', icon: SecurityIcon, path: '/threat-intelligence' },
+  { id: 'analytics', label: 'Advanced Analytics', icon: AnalyticsIcon, path: '/analytics' },
   { id: 'policies', label: 'Policy Management', icon: PolicyIcon, path: '/policies' },
   { id: 'compliance', label: 'Compliance', icon: SecurityIcon, path: '/compliance' },
   { id: 'security', label: 'Security Monitoring', icon: AnalyticsIcon, path: '/security' },
@@ -459,6 +469,10 @@ function AppContent() {
           <Route path="/callback" element={<div>Processing authentication...</div>} />
           <Route path="/dashboard" element={<Dashboard apiClient={apiClient} />} />
           <Route path="/devices" element={<DeviceManagement apiClient={apiClient} />} />
+          <Route path="/protocols" element={<ProtocolVisualization apiClient={apiClient} />} />
+          <Route path="/ai-models" element={<AIModelMonitoring apiClient={apiClient} />} />
+          <Route path="/threat-intelligence" element={<ThreatIntelligence apiClient={apiClient} />} />
+          <Route path="/analytics" element={<AdvancedAnalytics apiClient={apiClient} />} />
           <Route path="/policies" element={<PolicyManagement apiClient={apiClient} />} />
           <Route path="/compliance" element={<ComplianceReporting apiClient={apiClient} />} />
           <Route path="/security" element={<SecurityMonitoring apiClient={apiClient} />} />

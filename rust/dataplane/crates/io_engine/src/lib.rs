@@ -1,9 +1,11 @@
 pub mod metrics;
 pub mod ha;
 pub mod performance;
+pub mod high_frequency_metrics;
 pub mod tracing;
 
 pub use performance::{PerformanceEngine, PerformanceConfig, PerformanceStats};
+pub use high_frequency_metrics::{HighFrequencyMetrics, HFMetricsConfig, HFMetricsStats};
 pub use tracing::{DistributedTracer, TracingConfig, Span, AttributeValue};
 
 use adapter_sdk::L7Adapter;

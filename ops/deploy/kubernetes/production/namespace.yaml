@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cronos-ai-prod
+  labels:
+    name: cronos-ai-prod
+    environment: production
+    app.kubernetes.io/name: cronos-ai
+    app.kubernetes.io/instance: production
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: helm
+  annotations:
+    kubernetes.io/managed-by: "cronos-ai-operator"
+    description: "CRONOS AI Production Environment"
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: cronos-ai-prod-quota
+  namespace: cronos-ai-prod
+spec:
+  hard:
+    requests.cpu: "50"
+    requests.memory: 100Gi
+    requests.storage: 500Gi
+    limits.cpu: "100"
+    limits.memory: 200Gi
+    persistentvolumeclaims: "10"
+    services: "20"
+    secrets: "50"
+    configmaps: "50"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cronos-ai-prod-limits
+  namespace: cronos-ai-prod
+spec:
+  limits:
+  - default:
+      cpu: "2000m"
+      memory: "4Gi"
+    defaultRequest:
+      cpu: "500m"
+      memory: "1Gi"
+    type: Container
+  - default:
+      storage: "10Gi"
+    type: PersistentVolumeClaim
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cronos-ai-prod-network-policy
+  namespace: cronos-ai-prod
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: cronos-ai-prod
+    - namespaceSelector:
+        matchLabels:
+          name: istio-system
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+  egress:
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: cronos-ai-prod
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: istio-system
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80

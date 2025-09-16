@@ -1,0 +1,208 @@
+# Production Configuration for PQC-TLS
+environment: Production
+
+node:
+  id: "pqc-node-prod-001"
+  role: Primary
+  datacenter: "us-east-1a"
+  region: "us-east-1"
+  metadata:
+    version: "1.0.0"
+    deployment: "production"
+
+security:
+  fips_mode: true
+  min_tls_version: "1.3"
+  allowed_cipher_suites:
+    - "TLS_AES_256_GCM_SHA384"
+    - "TLS_AES_128_GCM_SHA256"
+  certificate_policy:
+    require_pqc: true
+    allow_hybrid: true
+    validation_level: Strict
+    ocsp_required: true
+
+pqc:
+  hardware_acceleration: true
+  threat_level: Low
+  hybrid_mode:
+    enabled: true
+    classical_algorithms:
+      - "x25519"
+    pqc_algorithms:
+      - "kyber768"
+    combination_strategy: "concatenation"
+  algorithm_preferences:
+    kem_algorithms:
+      - "kyber768"
+    signature_algorithms:
+      - "dilithium3"
+    algorithm_params: {}
+  lifecycle:
+    default_policy:
+      max_operations: 1000000
+      max_age: "720h" # 30 days
+      max_data_volume: 1073741824 # 1GB
+      min_rotation_interval: "1h"
+      rotation_grace_period: "1h"
+      deprecation_period: "168h" # 7 days
+      retention_period: "720h" # 30 days
+      require_hsm: true
+      auto_rotation: true
+      backup_policy:
+        enabled: true
+        backup_interval: "24h"
+        max_backups: 7
+        storage_config:
+          Local:
+            path: "/secure/key-backups"
+        encrypt_backups: true
+        compress_backups: true
+    monitor_interval: "60s"
+    max_events_in_memory: 10000
+    event_persistence:
+      File:
+        path: "/var/log/pqc-lifecycle.log"
+    enable_metrics: true
+  rotation:
+    strategy:
+      Scheduled:
+        interval: "86400s" # 24 hours
+        jitter: "3600s" # 1 hour
+    coordination: Independent
+    forward_secrecy:
+      perfect_forward_secrecy: true
+      max_key_lifetime: "86400s" # 24 hours
+      refresh_interval: "3600s" # 1 hour
+      secure_deletion: true
+    emergency:
+      enabled: true
+      max_rotation_time: "300s" # 5 minutes
+      skip_validation: false
+      trigger_levels:
+        - Critical
+        - Imminent
+      pregenerated_keys: true
+    performance:
+      max_cpu_usage: 0.8
+      max_memory_usage: 0.8
+      max_network_bandwidth: 0.5
+      max_concurrent_rotations: 3
+      rotation_timeout: "1800s" # 30 minutes
+    quantum_safety:
+      current_threat_level: Low
+      auto_threat_assessment: true
+      preferred_algorithms:
+        - "kyber768"
+        - "dilithium3"
+        - "x25519_kyber768"
+      hybrid_mode:
+        enabled: true
+        classical_algorithm: "x25519"
+        pqc_algorithm: "kyber768"
+        combination_method: Concatenation
+      migration_settings:
+        migration_phase: Hybrid
+        allow_classical_fallback: true
+        timeline:
+          start_hybrid: null # Already started
+          complete_migration: "31536000s" # 1 year from now
+          deprecate_classical: "63072000s" # 2 years from now
+        compatibility_requirements:
+          - "tls13"
+
+hsm:
+  vendor: "SafeNet"
+  model: "Luna HSM"
+  slots: []
+  session_config:
+    read_write: true
+    serial_session: true
+    auto_login: true
+    session_timeout: "300s" # 5 minutes
+    retry_count: 3
+    retry_delay: "1000ms"
+  ha_config:
+    clustering_enabled: true
+    cluster_nodes: []
+    failover_timeout: "30s"
+    load_balancing: HealthBased
+
+monitoring:
+  metrics_enabled: true
+  metrics_interval: "30s"
+  prometheus:
+    endpoint: "http://prometheus:9090"
+    scrape_interval: "15s"
+    labels:
+      service: "pqc-tls"
+      environment: "production"
+  health_checks:
+    interval: "30s"
+    timeout: "10s"
+    checks:
+      - KeyLifecycle
+      - HsmConnectivity
+      - MemoryUsage
+      - CpuUsage
+  alerting:
+    enabled: true
+    channels:
+      - name: "ops-alerts"
+        channel_type: Slack
+        config:
+          webhook_url: "${SLACK_WEBHOOK_URL}"
+          channel: "#ops-alerts"
+      - name: "critical-alerts"
+        channel_type: Email
+        config:
+          smtp_server: "smtp.company.com"
+          recipients: "ops@company.com,security@company.com"
+    rules:
+      - name: "high_cpu_usage"
+        condition: "cpu_usage > threshold"
+        threshold: 0.9
+        duration: "300s" # 5 minutes
+        severity: Warning
+        channels: ["ops-alerts"]
+      - name: "hsm_connectivity_lost"
+        condition: "hsm_connected == false"
+        threshold: 1.0
+        duration: "30s"
+        severity: Critical
+        channels: ["ops-alerts", "critical-alerts"]
+      - name: "key_rotation_failed"
+        condition: "rotation_failures > threshold"
+        threshold: 3.0
+        duration: "600s" # 10 minutes
+        severity: Critical
+        channels: ["critical-alerts"]
+
+performance:
+  thread_pools:
+    worker_threads: null # Use defaults
+    max_blocking_threads: 512
+    thread_stack_size: null
+  memory:
+    pool_enabled: true
+    pool_sizes:
+      kyber_keys: 1024
+      general: 2048
+      shared_secrets: 512
+      ciphertexts: 1024
+    alignment: 32
+  caching:
+    enabled: true
+    max_entries: 10000
+    max_memory: 1073741824 # 1GB
+    default_ttl: "3600s" # 1 hour
+
+compliance:
+  fips_140_2:
+    enabled: true
+    security_level: 2
+    approved_algorithms_only: true
+  common_criteria:
+    enabled: true
+    eal_level: 4
+    security_target: "PQC-TLS v1.0"

@@ -11,6 +11,7 @@ pub mod hsm;
 pub mod lifecycle;
 pub mod performance;
 pub mod rotation;
+pub mod config;
 
 #[cfg(test)]
 mod tests;
@@ -29,6 +30,7 @@ pub use hsm::{HsmPqcManager, HsmKeyAttributes, HsmKeyType, HsmPool, HsmSlotConfi
 pub use lifecycle::{KeyLifecycleManager, KeyMetadata, KeyLifecycleState, KeyUsagePolicy, LifecycleEvent, LifecycleEventType};
 pub use performance::{MemoryPool, BatchProcessor, SimdOperations, PerformanceMonitor, GlobalPerformanceManager};
 pub use rotation::{QuantumSafeRotationManager, RotationPolicyConfig, RotationStrategy, QuantumThreatLevel, RotationTrigger};
+pub use config::{ProductionConfig, Environment, SecurityConfig, PqcConfig, MonitoringConfig, ComplianceConfig};
 
 /// Production-ready PQC-TLS implementation with complete feature set
 pub struct PqcTlsManager {

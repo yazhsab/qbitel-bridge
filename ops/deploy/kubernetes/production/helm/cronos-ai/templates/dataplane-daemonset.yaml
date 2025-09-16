@@ -1,0 +1,133 @@
+{{- if .Values.dataplane.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "cronos-ai.fullname" . }}-dataplane
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cronos-ai.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dataplane
+spec:
+  selector:
+    matchLabels:
+      {{- include "cronos-ai.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: dataplane
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/dataplane-configmap.yaml") . | sha256sum }}
+        {{- with .Values.dataplane.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "cronos-ai.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: dataplane
+    spec:
+      serviceAccountName: {{ include "cronos-ai.serviceAccountName" . }}-dataplane
+      securityContext:
+        {{- toYaml .Values.dataplane.podSecurityContext | nindent 8 }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- with .Values.dataplane.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dataplane.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dataplane.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: dataplane
+        image: "{{ .Values.global.imageRegistry | default .Values.image.registry }}/{{ .Values.dataplane.image.repository }}:{{ .Values.dataplane.image.tag | default .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.dataplane.image.pullPolicy }}
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - SYS_RESOURCE
+            - NET_ADMIN
+            - NET_RAW
+            - IPC_LOCK
+        env:
+        - name: RUST_LOG
+          value: "info"
+        - name: CONFIG_PATH
+          value: "/etc/config"
+        - name: DPDK_ENABLED
+          value: "{{ .Values.dataplane.dpdk.enabled }}"
+        - name: DPI_ENABLED
+          value: "{{ .Values.dataplane.dpi.enabled }}"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        ports:
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        - name: health
+          containerPort: 8080
+          protocol: TCP
+        livenessProbe:
+          {{- toYaml .Values.dataplane.livenessProbe | nindent 10 }}
+        readinessProbe:
+          {{- toYaml .Values.dataplane.readinessProbe | nindent 10 }}
+        resources:
+          {{- toYaml .Values.dataplane.resources | nindent 10 }}
+        volumeMounts:
+        - name: config
+          mountPath: /etc/config
+          readOnly: true
+        - name: hugepages
+          mountPath: /dev/hugepages
+        - name: tmp
+          mountPath: /tmp
+        {{- if .Values.dataplane.dpdk.enabled }}
+        - name: vfio
+          mountPath: /dev/vfio
+        {{- end }}
+        {{- range .Values.dataplane.networkInterfaces }}
+        - name: {{ .name }}-device
+          mountPath: /sys/bus/pci/devices/{{ .pciAddress }}
+        {{- end }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "cronos-ai.fullname" . }}-dataplane-config
+      - name: hugepages
+        emptyDir:
+          medium: HugePages
+          {{- if .Values.dataplane.dpdk.hugePages }}
+          sizeLimit: {{ .Values.dataplane.dpdk.hugePages }}
+          {{- end }}
+      - name: tmp
+        emptyDir: {}
+      {{- if .Values.dataplane.dpdk.enabled }}
+      - name: vfio
+        hostPath:
+          path: /dev/vfio
+      {{- end }}
+      {{- range .Values.dataplane.networkInterfaces }}
+      - name: {{ .name }}-device
+        hostPath:
+          path: /sys/bus/pci/devices/{{ .pciAddress }}
+      {{- end }}
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0
+{{- end }}

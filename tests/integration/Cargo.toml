@@ -1,0 +1,95 @@
+[package]
+name = "cronos-ai-integration-tests"
+version = "0.1.0"
+edition = "2021"
+description = "Comprehensive integration tests for CRONOS AI"
+
+[dependencies]
+# Test framework
+tokio-test = "0.4"
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+
+# HTTP client for API testing
+reqwest = { version = "0.11", features = ["json"] }
+hyper = { version = "0.14", features = ["full"] }
+
+# Database testing
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "sqlite"] }
+redis = { version = "0.23", features = ["tokio-comp"] }
+
+# Kubernetes testing
+kube = { version = "0.87", features = ["runtime", "derive"] }
+k8s-openapi = { version = "0.20", features = ["v1_28"] }
+
+# gRPC testing
+tonic = "0.10"
+prost = "0.12"
+
+# Metrics and monitoring
+prometheus = { version = "0.13", features = ["process"] }
+
+# Networking and protocols
+socket2 = "0.5"
+pnet = "0.34"
+
+# Machine Learning testing
+candle-core = "0.3"
+candle-nn = "0.3"
+ndarray = "0.15"
+
+# Utilities
+uuid = { version = "1.0", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tempfile = "3.0"
+assert_cmd = "2.0"
+predicates = "3.0"
+
+# Configuration
+config = "0.13"
+
+# Concurrency and async
+futures = "0.3"
+async-trait = "0.1"
+
+# Data structures
+indexmap = "2.0"
+
+# Performance testing
+criterion = { version = "0.5", features = ["html_reports"] }
+
+# Property testing
+quickcheck = "1.0"
+quickcheck_macros = "1.0"
+
+# Test containers for external dependencies
+testcontainers = "0.15"
+testcontainers-modules = { version = "0.3", features = ["postgres", "redis"] }
+
+# File system utilities
+walkdir = "2.0"
+
+# Network simulation
+mockall = "0.11"
+
+# Time utilities for testing
+mockito = "1.2"
+
+[[bin]]
+name = "integration-test-runner"
+path = "src/runner.rs"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "end_to_end_performance"
+harness = false
+
+[[bench]]
+name = "packet_processing_throughput"
+harness = false

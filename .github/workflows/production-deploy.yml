@@ -1,0 +1,386 @@
+name: CRONOS AI Production Deployment
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - staging
+          - production
+      skip_tests:
+        description: 'Skip integration tests'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  REGISTRY: registry.cronos-ai.com
+  HELM_VERSION: '3.12.0'
+  KUBECTL_VERSION: '1.28.0'
+
+jobs:
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Run Semgrep security scan
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/rust
+
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    needs: [security-scan]
+    
+    strategy:
+      matrix:
+        component: [dataplane, controlplane, aiengine, policy-engine, k8s-operator]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/cronos-ai/${{ matrix.component }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/${{ matrix.component }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+      - name: Sign container images with cosign
+        uses: sigstore/cosign-installer@v3
+      
+      - name: Sign the published Docker image
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign --yes {}@${{ steps.meta.outputs.digest }}
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    if: ${{ !github.event.inputs.skip_tests }}
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: cronos_ai_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Run integration tests
+        run: |
+          cd tests/integration
+          cargo test --release --all-features
+        env:
+          DATABASE_URL: postgres://postgres:testpass@localhost/cronos_ai_test
+          REDIS_URL: redis://localhost:6379
+          RUST_LOG: info
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [integration-tests]
+    if: ${{ github.event.inputs.environment == 'staging' || (github.ref == 'refs/heads/main' && github.event_name == 'push') }}
+    environment: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: ${{ env.KUBECTL_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Configure kubectl for EKS
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name cronos-ai-staging
+
+      - name: Deploy to staging
+        run: |
+          chmod +x ./ops/deploy/scripts/deploy-production.sh
+          ./ops/deploy/scripts/deploy-production.sh \
+            --namespace cronos-ai-staging \
+            --release cronos-ai-staging \
+            --values-file ./ops/deploy/kubernetes/staging/values.yaml \
+            --set image.tag=${{ github.sha }} \
+            --timeout 1200
+
+      - name: Run smoke tests
+        run: |
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=cronos-ai -n cronos-ai-staging --timeout=600s
+          kubectl exec -n cronos-ai-staging deployment/cronos-ai-controlplane -- curl -f http://localhost:8080/health
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: ${{ github.event.inputs.environment == 'production' || (startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push') }}
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: ${{ env.KUBECTL_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Configure kubectl for EKS
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name cronos-ai-production
+
+      - name: Pre-deployment validation
+        run: |
+          # Validate cluster state
+          kubectl get nodes
+          kubectl top nodes
+          
+          # Check resource availability
+          kubectl describe quota -n cronos-ai-prod
+
+      - name: Deploy to production
+        run: |
+          chmod +x ./ops/deploy/scripts/deploy-production.sh
+          ./ops/deploy/scripts/deploy-production.sh \
+            --namespace cronos-ai-prod \
+            --release cronos-ai \
+            --values-file ./ops/deploy/kubernetes/production/helm/cronos-ai/values.yaml \
+            --set image.tag=${{ github.ref_name }} \
+            --timeout 1800
+
+      - name: Post-deployment validation
+        run: |
+          # Wait for all pods to be ready
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=cronos-ai -n cronos-ai-prod --timeout=1200s
+          
+          # Run health checks
+          kubectl exec -n cronos-ai-prod deployment/cronos-ai-controlplane -- curl -f http://localhost:8080/health
+          
+          # Check metrics endpoint
+          kubectl exec -n cronos-ai-prod daemonset/cronos-ai-dataplane -- curl -f http://localhost:9090/metrics
+
+      - name: Run production tests
+        run: |
+          # Run a subset of critical tests in production
+          kubectl run cronos-ai-prod-test \
+            --image=${{ env.REGISTRY }}/cronos-ai/integration-tests:${{ github.ref_name }} \
+            --restart=Never \
+            --rm -i \
+            -n cronos-ai-prod \
+            --env="DATAPLANE_ENDPOINT=http://cronos-ai-dataplane:9090" \
+            --env="CONTROLPLANE_ENDPOINT=http://cronos-ai-controlplane:8080" \
+            --env="TEST_NAMESPACE=cronos-ai-prod" \
+            -- /app/integration-test-runner e2e --skip-performance
+
+      - name: Create deployment notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#cronos-ai-deployments'
+          text: |
+            🚀 CRONOS AI Production Deployment ${{ job.status }}
+            Version: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Deployed by: ${{ github.actor }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  rollback:
+    name: Rollback on Failure
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: failure()
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: ${{ env.KUBECTL_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Configure kubectl for EKS
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name cronos-ai-production
+
+      - name: Rollback deployment
+        run: |
+          # Get previous successful revision
+          PREVIOUS_REVISION=$(helm history cronos-ai -n cronos-ai-prod -o json | jq -r '[.[] | select(.status == "deployed")] | sort_by(.revision) | .[-2].revision')
+          
+          if [ "$PREVIOUS_REVISION" != "null" ] && [ "$PREVIOUS_REVISION" != "" ]; then
+            echo "Rolling back to revision $PREVIOUS_REVISION"
+            helm rollback cronos-ai $PREVIOUS_REVISION -n cronos-ai-prod --wait --timeout=600s
+          else
+            echo "No previous successful deployment found for rollback"
+            exit 1
+          fi
+
+      - name: Verify rollback
+        run: |
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=cronos-ai -n cronos-ai-prod --timeout=600s
+          kubectl exec -n cronos-ai-prod deployment/cronos-ai-controlplane -- curl -f http://localhost:8080/health
+
+      - name: Rollback notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              channel: '#cronos-ai-deployments',
+              text: '⚠️ CRONOS AI Production deployment failed and was rolled back',
+              color: 'warning',
+              fields: [
+                {
+                  title: 'Version Attempted',
+                  value: '${{ github.ref_name }}',
+                  short: true
+                },
+                {
+                  title: 'Commit',
+                  value: '${{ github.sha }}',
+                  short: true
+                },
+                {
+                  title: 'Triggered by',
+                  value: '${{ github.actor }}',
+                  short: true
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

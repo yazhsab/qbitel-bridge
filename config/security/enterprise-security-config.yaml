@@ -1,0 +1,508 @@
+# QSLB Enterprise Security Configuration
+# Production-Ready, Enterprise-Grade Security Architecture
+# Implements Zero-Trust, ML-based Threat Detection, SIEM Integration, HSM, Compliance Automation, SOAR, and SSO
+
+# Global Security Settings
+security:
+  enabled: true
+  mode: "enterprise"
+  compliance_mode: "strict"
+  fips_mode: true
+  common_criteria: true
+  security_level: "high"
+  default_deny: true
+
+# Zero-Trust Policy Engine Configuration
+zero_trust:
+  enabled: true
+  default_policy: "deny"
+  policy_cache_timeout: "5m"
+  evaluation_timeout: "30s"
+  
+  # Risk Assessment
+  risk_calculation_interval: "1m"
+  trust_decay_rate: 0.1
+  
+  # Integration
+  siem_enabled: true
+  hsm_enabled: true
+  identity_provider: "enterprise_sso"
+  
+  # Monitoring
+  enable_real_time_monitoring: true
+  monitoring_interval: "10s"
+  alert_threshold: 0.7
+  
+  # Compliance
+  enable_compliance_checks: true
+  required_compliance: ["soc2", "iso27001", "pci_dss"]
+  
+  # Performance
+  max_concurrent_evaluations: 1000
+  cache_enabled: true
+  cache_ttl: "10m"
+
+# ML-Based Threat Detection Configuration
+threat_detection:
+  enabled: true
+  analysis_interval: "30s"
+  min_events_for_analysis: 10
+  baseline_period: "7d"
+  
+  # Anomaly Detection
+  anomaly_threshold: 0.7
+  sensitivity_level: 0.8
+  false_positive_threshold: 0.3
+  
+  # Model Configuration
+  model_update_interval: "24h"
+  auto_retrain: true
+  min_training_samples: 1000
+  
+  # Feature Extraction
+  feature_extraction_window: "1h"
+  max_feature_history: 168  # 7 days of hourly features
+  
+  # Performance
+  max_concurrent_analyses: 50
+  cache_enabled: true
+  cache_ttl: "1h"
+
+# SIEM Integration Framework Configuration
+siem_integration:
+  enabled: true
+  enabled_siems: ["splunk", "elastic", "qradar"]
+  batch_size: 100
+  flush_interval: "30s"
+  retry_attempts: 3
+  retry_delay: "5s"
+  
+  # Splunk Configuration
+  splunk:
+    host: "splunk.enterprise.local"
+    port: 8088
+    token: "${SPLUNK_HEC_TOKEN}"
+    index: "qslb_security"
+    source_type: "qslb:security"
+    source: "qslb"
+    use_https: true
+    verify_ssl: true
+  
+  # Elastic SIEM Configuration
+  elastic:
+    addresses: ["https://elastic.enterprise.local:9200"]
+    username: "${ELASTIC_USERNAME}"
+    password: "${ELASTIC_PASSWORD}"
+    index: "qslb-security"
+    pipeline: "qslb-enrichment"
+    use_https: true
+    verify_ssl: true
+  
+  # IBM QRadar Configuration
+  qradar:
+    host: "qradar.enterprise.local"
+    port: 443
+    api_version: "v1"
+    auth_token: "${QRADAR_API_TOKEN}"
+    use_https: true
+    verify_ssl: true
+  
+  # Correlation Settings
+  enable_correlation: true
+  correlation_window: "5m"
+  
+  # Event Filtering
+  min_severity: "medium"
+  event_filters:
+    - name: "exclude_test_events"
+      field: "source"
+      operator: "ne"
+      value: "test"
+      action: "exclude"
+
+# HSM Key Management Configuration
+hsm_integration:
+  enabled: true
+  
+  # Primary HSM
+  primary_hsm:
+    type: "pkcs11"
+    endpoint: "hsm-primary.enterprise.local"
+    credentials:
+      slot: "0"
+      pin: "${HSM_PRIMARY_PIN}"
+      library: "/usr/lib/softhsm/libsofthsm2.so"
+  
+  # Backup HSM
+  backup_hsm:
+    type: "pkcs11"
+    endpoint: "hsm-backup.enterprise.local"
+    credentials:
+      slot: "1"
+      pin: "${HSM_BACKUP_PIN}"
+      library: "/usr/lib/softhsm/libsofthsm2.so"
+  
+  # Key Management
+  default_key_size: 4096
+  key_rotation_interval: "90d"
+  key_expiration_period: "365d"
+  
+  # Key Escrow
+  enable_key_escrow: true
+  escrow_threshold: 5
+  recovery_threshold: 3
+  escrow_custodians:
+    - "security-officer-1"
+    - "security-officer-2"
+    - "compliance-officer"
+    - "ciso"
+    - "cto"
+  
+  # Compliance
+  fips_mode: true
+  common_criteria: true
+  compliance_frameworks: ["fips-140-2", "common-criteria-eal4+"]
+  
+  # Audit
+  enable_key_audit: true
+  audit_level: "verbose"
+  audit_retention: "7y"
+
+# Compliance Automation Configuration
+compliance_automation:
+  enabled: true
+  enabled_frameworks: ["soc2", "iso27001", "pci_dss", "hipaa", "nist"]
+  
+  # Assessment Settings
+  assessment_interval: "24h"
+  continuous_monitoring: true
+  automated_remediation: true
+  
+  # Reporting
+  reporting_interval: "1w"
+  report_formats: ["pdf", "json", "csv"]
+  report_distribution:
+    - "compliance@enterprise.com"
+    - "security@enterprise.com"
+    - "audit@enterprise.com"
+  
+  # Evidence Collection
+  evidence_retention: "7y"
+  auto_evidence_collection: true
+  evidence_encryption: true
+  
+  # Risk Management
+  risk_tolerance: "low"
+  risk_assessment_interval: "1w"
+  
+  # Performance
+  max_concurrent_assessments: 10
+  cache_enabled: true
+  cache_ttl: "1h"
+
+# SOAR Platform Configuration
+soar_platform:
+  enabled: true
+  auto_response_enabled: true
+  response_timeout: "30m"
+  escalation_timeout: "1h"
+  
+  # Incident Management
+  incident_classification:
+    auto_classify: true
+    ml_assisted: true
+    confidence_threshold: 0.8
+  auto_ticket_creation: true
+  
+  # Playbook Settings
+  playbook_directory: "/etc/qslb/playbooks"
+  default_playbooks:
+    - "malware-response"
+    - "data-breach-response"
+    - "unauthorized-access-response"
+    - "ddos-response"
+  
+  # Integration
+  siem_integration:
+    enabled: true
+    fetch_interval: "30s"
+  ticketing_integration:
+    system: "servicenow"
+    endpoint: "https://enterprise.service-now.com"
+    username: "${SERVICENOW_USER}"
+    password: "${SERVICENOW_PASS}"
+  communication:
+    slack:
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      channels: ["#security-alerts", "#incident-response"]
+    email:
+      smtp_server: "smtp.enterprise.com"
+      from: "security-noreply@enterprise.com"
+      to: ["security-team@enterprise.com"]
+  
+  # Threat Intelligence
+  threat_intel_feeds:
+    - name: "misp"
+      url: "https://misp.enterprise.local"
+      api_key: "${MISP_API_KEY}"
+      enabled: true
+    - name: "otx"
+      url: "https://otx.alienvault.com"
+      api_key: "${OTX_API_KEY}"
+      enabled: true
+  
+  # Automation
+  max_concurrent_playbooks: 20
+  auto_enrichment: true
+  auto_containment: false  # Requires approval for containment actions
+  
+  # Compliance
+  compliance_frameworks: ["nist", "iso27001"]
+  audit_logging: true
+  data_retention: "7y"
+
+# Enterprise Authentication Configuration
+enterprise_authentication:
+  enabled: true
+  service_name: "QSLB Authentication Service"
+  domain: "enterprise.local"
+  base_url: "https://auth.enterprise.local"
+  
+  # Session Management
+  session_timeout: "8h"
+  max_sessions: 5
+  session_cookie_name: "QSLB_SESSION"
+  
+  # Token Settings
+  token_issuer: "qslb-auth"
+  token_audience: ["qslb-api", "qslb-console"]
+  token_expiry: "1h"
+  refresh_token_expiry: "24h"
+  
+  # OIDC Providers
+  oidc_providers:
+    - name: "azure_ad"
+      issuer_url: "https://login.microsoftonline.com/${AZURE_TENANT_ID}/v2.0"
+      client_id: "${AZURE_CLIENT_ID}"
+      client_secret: "${AZURE_CLIENT_SECRET}"
+      redirect_uri: "https://auth.enterprise.local/callback/azure"
+      scopes: ["openid", "profile", "email"]
+      enabled: true
+      priority: 1
+    - name: "okta"
+      issuer_url: "https://enterprise.okta.com"
+      client_id: "${OKTA_CLIENT_ID}"
+      client_secret: "${OKTA_CLIENT_SECRET}"
+      redirect_uri: "https://auth.enterprise.local/callback/okta"
+      scopes: ["openid", "profile", "email", "groups"]
+      enabled: true
+      priority: 2
+  
+  # SAML Providers
+  saml_providers:
+    - name: "adfs"
+      entity_id: "https://adfs.enterprise.local"
+      sso_url: "https://adfs.enterprise.local/adfs/ls/"
+      certificate: "${ADFS_CERTIFICATE}"
+      enabled: true
+      priority: 1
+  
+  # LDAP Providers
+  ldap_providers:
+    - name: "active_directory"
+      host: "ldap.enterprise.local"
+      port: 636
+      use_ssl: true
+      bind_dn: "CN=qslb-service,OU=Service Accounts,DC=enterprise,DC=local"
+      bind_password: "${LDAP_BIND_PASSWORD}"
+      base_dn: "DC=enterprise,DC=local"
+      user_filter: "(&(objectClass=user)(sAMAccountName=%s))"
+      group_filter: "(&(objectClass=group)(member=%s))"
+      enabled: true
+      priority: 3
+  
+  # MFA Settings
+  mfa_required: true
+  mfa_methods: ["totp", "webauthn", "sms"]
+  mfa_grace_period: "7d"
+  
+  # Password Policy
+  password_policy:
+    min_length: 12
+    require_upper: true
+    require_lower: true
+    require_digits: true
+    require_special: true
+    max_age: "90d"
+    history_size: 12
+  
+  # Security Settings
+  login_attempt_limit: 5
+  lockout_duration: "15m"
+  
+  # Compliance
+  compliance_mode: "strict"
+  audit_level: "verbose"
+  data_retention: "7y"
+  
+  # Integration
+  hsm_integration: true
+  vault_integration: true
+  siem_integration: true
+
+# Network Security Controls
+network_security:
+  enabled: true
+  
+  # Micro-segmentation
+  micro_segmentation:
+    enabled: true
+    default_action: "deny"
+    log_all_traffic: true
+    block_unknown_traffic: true
+    
+    # Monitoring
+    traffic_monitoring_interval: "10s"
+    policy_evaluation_interval: "1m"
+    
+    # Thresholds
+    suspicious_traffic_threshold: 10000
+    anomaly_detection_enabled: true
+    
+    # Integration
+    firewall_integration: true
+    sdn_integration: true
+    firewall_type: "iptables"
+  
+  # Network Policies
+  default_policies:
+    - name: "deny-all"
+      action: "deny"
+      priority: 1000
+      enabled: true
+    - name: "allow-management"
+      source: "10.0.1.0/24"
+      action: "allow"
+      priority: 100
+      enabled: true
+
+# Audit and Logging Configuration
+audit_logging:
+  enabled: true
+  audit_level: "verbose"
+  retention_period: "7y"
+  
+  # Log destinations
+  destinations:
+    - type: "file"
+      path: "/var/log/qslb/security-audit.log"
+      format: "json"
+      rotation: "daily"
+      compression: true
+      encryption: true
+    - type: "siem"
+      enabled: true
+      real_time: true
+    - type: "syslog"
+      endpoint: "syslog.enterprise.local:514"
+      protocol: "tls"
+      facility: "local0"
+  
+  # Audit categories
+  categories:
+    authentication: true
+    authorization: true
+    data_access: true
+    configuration_changes: true
+    security_events: true
+    compliance_events: true
+    administrative_actions: true
+
+# Security Monitoring and Alerting
+monitoring:
+  enabled: true
+  
+  # Metrics collection
+  metrics_interval: "30s"
+  retention_period: "365d"
+  
+  # Alerting
+  alerting:
+    enabled: true
+    channels:
+      - type: "email"
+        recipients: ["security-alerts@enterprise.com"]
+        severity_threshold: "medium"
+      - type: "slack"
+        webhook: "${SECURITY_SLACK_WEBHOOK}"
+        channel: "#security-alerts"
+        severity_threshold: "high"
+      - type: "pagerduty"
+        integration_key: "${PAGERDUTY_INTEGRATION_KEY}"
+        severity_threshold: "critical"
+  
+  # Health checks
+  health_checks:
+    interval: "1m"
+    timeout: "30s"
+    endpoints:
+      - "/health"
+      - "/metrics"
+      - "/ready"
+
+# Performance and Resource Limits
+performance:
+  # CPU and Memory limits
+  limits:
+    cpu_cores: 16
+    memory_gb: 32
+    disk_gb: 1000
+  
+  # Concurrency limits
+  concurrency:
+    max_concurrent_requests: 10000
+    max_concurrent_sessions: 50000
+    max_concurrent_analyses: 100
+  
+  # Cache settings
+  cache:
+    enabled: true
+    ttl: "10m"
+    max_size: "1GB"
+    eviction_policy: "lru"
+
+# Development and Testing
+development:
+  # Only enable in non-production environments
+  debug_mode: false
+  test_mode: false
+  mock_integrations: false
+  
+  # Testing endpoints (disabled in production)
+  test_endpoints_enabled: false
+
+# Environment-specific overrides
+environment_overrides:
+  production:
+    debug_mode: false
+    test_mode: false
+    mock_integrations: false
+    test_endpoints_enabled: false
+    audit_level: "verbose"
+    compliance_mode: "strict"
+  
+  staging:
+    debug_mode: true
+    test_mode: false
+    mock_integrations: false
+    test_endpoints_enabled: true
+    audit_level: "standard"
+    compliance_mode: "standard"
+  
+  development:
+    debug_mode: true
+    test_mode: true
+    mock_integrations: true
+    test_endpoints_enabled: true
+    audit_level: "minimal"
+    compliance_mode: "relaxed"

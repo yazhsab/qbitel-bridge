@@ -49,6 +49,13 @@ tokio-util = { version = "0.7", features = ["codec"] }
 criterion = { version = "0.5", optional = true }
 proptest = { version = "1", optional = true }
 
+# Additional dependencies
+uuid = { version = "1.6", features = ["v4", "serde"] }
+serde_yaml = "0.9"
+futures = "0.3"
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+warp = { version = "0.3", optional = true }
+
 [dev-dependencies]
 tempfile = "3"
 criterion = "0.5"
@@ -60,7 +67,12 @@ default = ["hardware-acceleration", "hsm", "benchmarks"]
 hardware-acceleration = ["wide", "rayon"]
 hsm = ["pkcs11", "pkcs11-uri"]
 benchmarks = ["criterion", "proptest"]
+web-service = ["warp"]
 fips = []
+
+[[example]]
+name = "production_example"
+required-features = []
 
 [[bench]]
 name = "kyber_benchmark"
