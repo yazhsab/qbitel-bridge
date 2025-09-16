@@ -1,0 +1,726 @@
+# CRONOS AI - Istio Service Mesh Configuration
+# Production-ready service mesh with security, observability, and traffic management
+
+---
+# Istio Gateway for External Traffic
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: cronos-ai-gateway
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: cronos-ai-tls-cert
+    hosts:
+    - "cronos-ai.example.com"
+    - "api.cronos-ai.example.com"
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "cronos-ai.example.com"
+    - "api.cronos-ai.example.com"
+    tls:
+      httpsRedirect: true
+
+---
+# Virtual Service for Traffic Routing
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: cronos-ai-virtualservice
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-routing
+spec:
+  hosts:
+  - "cronos-ai.example.com"
+  - "api.cronos-ai.example.com"
+  gateways:
+  - cronos-ai-gateway
+  http:
+  # Management Console Routes
+  - match:
+    - uri:
+        prefix: /
+      headers:
+        host:
+          exact: cronos-ai.example.com
+    route:
+    - destination:
+        host: management-console-service
+        port:
+          number: 3000
+    fault:
+      delay:
+        percentage:
+          value: 0.1
+        fixedDelay: 5s
+    retries:
+      attempts: 3
+      perTryTimeout: 30s
+      retryOn: 5xx,reset,connect-failure,refused-stream
+    timeout: 60s
+  # API Routes
+  - match:
+    - uri:
+        prefix: /api/v1
+      headers:
+        host:
+          exact: api.cronos-ai.example.com
+    route:
+    - destination:
+        host: ai-engine-service
+        port:
+          number: 8080
+        subset: stable
+      weight: 90
+    - destination:
+        host: ai-engine-service
+        port:
+          number: 8080
+        subset: canary
+      weight: 10
+    fault:
+      delay:
+        percentage:
+          value: 0.05
+        fixedDelay: 1s
+    retries:
+      attempts: 2
+      perTryTimeout: 15s
+      retryOn: 5xx,reset,connect-failure
+    timeout: 30s
+  # Protocol Processing Routes
+  - match:
+    - uri:
+        prefix: /api/v1/protocol
+    route:
+    - destination:
+        host: protocol-processor-service
+        port:
+          number: 8080
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+    timeout: 30s
+  # Security Analysis Routes
+  - match:
+    - uri:
+        prefix: /api/v1/security
+    route:
+    - destination:
+        host: security-analyzer-service
+        port:
+          number: 8080
+    retries:
+      attempts: 2
+      perTryTimeout: 20s
+    timeout: 45s
+
+---
+# Destination Rules for Traffic Management
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: ai-engine-destination-rule
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-routing
+spec:
+  host: ai-engine-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 30s
+      http:
+        http1MaxPendingRequests: 50
+        maxRequestsPerConnection: 10
+        maxRetries: 3
+        consecutiveGatewayErrors: 5
+        interval: 30s
+        baseEjectionTime: 30s
+    loadBalancer:
+      simple: LEAST_CONN
+    outlierDetection:
+      consecutiveGatewayErrors: 5
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 30
+  subsets:
+  - name: stable
+    labels:
+      version: stable
+    trafficPolicy:
+      connectionPool:
+        tcp:
+          maxConnections: 80
+  - name: canary
+    labels:
+      version: canary
+    trafficPolicy:
+      connectionPool:
+        tcp:
+          maxConnections: 20
+
+---
+# Destination Rule for Protocol Processor
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: protocol-processor-destination-rule
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-routing
+spec:
+  host: protocol-processor-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 200
+        connectTimeout: 10s
+      http:
+        http1MaxPendingRequests: 100
+        maxRequestsPerConnection: 20
+        maxRetries: 2
+    loadBalancer:
+      simple: ROUND_ROBIN
+    outlierDetection:
+      consecutiveGatewayErrors: 3
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 30
+
+---
+# Destination Rule for Security Analyzer
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: security-analyzer-destination-rule
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-routing
+spec:
+  host: security-analyzer-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 150
+        connectTimeout: 15s
+      http:
+        http1MaxPendingRequests: 75
+        maxRequestsPerConnection: 15
+        maxRetries: 2
+    loadBalancer:
+      simple: LEAST_CONN
+    outlierDetection:
+      consecutiveGatewayErrors: 3
+      interval: 60s
+      baseEjectionTime: 60s
+
+---
+# PeerAuthentication for mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: cronos-ai-peer-auth
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-security
+spec:
+  selector:
+    matchLabels:
+      app: cronos-ai
+  mtls:
+    mode: STRICT
+
+---
+# AuthorizationPolicy for Service-to-Service Communication
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: cronos-ai-authz-policy
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-security
+spec:
+  selector:
+    matchLabels:
+      app: cronos-ai
+  rules:
+  # Allow AI Engine to communicate with all services
+  - from:
+    - source:
+        principals: ["cluster.local/ns/cronos-ai/sa/cronos-ai-service-account"]
+        namespaces: ["cronos-ai"]
+    to:
+    - operation:
+        methods: ["GET", "POST", "PUT", "DELETE"]
+  # Allow ingress gateway access
+  - from:
+    - source:
+        principals: ["cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]
+    to:
+    - operation:
+        methods: ["GET", "POST", "PUT", "DELETE"]
+  # Allow Prometheus scraping
+  - from:
+    - source:
+        namespaces: ["istio-system"]
+    to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/metrics", "/stats/prometheus"]
+
+---
+# RequestAuthentication for JWT validation
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: cronos-ai-jwt-auth
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-security
+spec:
+  selector:
+    matchLabels:
+      app: cronos-ai
+      component: ai-engine
+  jwtRules:
+  - issuer: "cronos-ai-auth-service"
+    jwksUri: "http://ai-engine-service:8080/.well-known/jwks.json"
+    audiences:
+    - "cronos-ai-api"
+    fromHeaders:
+    - name: "Authorization"
+      prefix: "Bearer "
+
+---
+# ServiceMonitor for Prometheus Integration
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cronos-ai-service-monitor
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: cronos-ai
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+    honorLabels: true
+  - port: http
+    interval: 30s
+    path: /stats/prometheus
+    honorLabels: true
+  namespaceSelector:
+    matchNames:
+    - cronos-ai
+
+---
+# Telemetry Configuration for Enhanced Observability
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: cronos-ai-telemetry
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-observability
+spec:
+  selector:
+    matchLabels:
+      app: cronos-ai
+  metrics:
+  - providers:
+    - name: prometheus
+  - overrides:
+    - match:
+        metric: ALL_METRICS
+      tagOverrides:
+        request_protocol:
+          operation: UPSERT
+          value: "http"
+        response_code:
+          operation: UPSERT
+          value: "%{RESPONSE_CODE}"
+        method:
+          operation: UPSERT
+          value: "%{REQUEST_METHOD}"
+        url:
+          operation: UPSERT
+          value: "%{REQUEST_URL}"
+  tracing:
+  - providers:
+    - name: jaeger
+  accessLogging:
+  - providers:
+    - name: otel
+
+---
+# WasmPlugin for Custom Security Processing
+apiVersion: extensions.istio.io/v1alpha1
+kind: WasmPlugin
+metadata:
+  name: cronos-ai-security-wasm
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-security
+spec:
+  selector:
+    matchLabels:
+      app: cronos-ai
+  url: oci://ghcr.io/cronos-ai/security-wasm:latest
+  phase: AUTHN
+  pluginConfig:
+    max_request_size: 1048576  # 1MB
+    rate_limit_requests_per_minute: 1000
+    enable_threat_detection: true
+    security_policies:
+      block_suspicious_patterns: true
+      enable_sql_injection_detection: true
+      enable_xss_detection: true
+      max_request_headers: 50
+
+---
+# EnvoyFilter for Custom Request Processing
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: cronos-ai-request-processing
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-envoy
+spec:
+  workloadSelector:
+    labels:
+      app: cronos-ai
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.filters.http.local_ratelimit
+        typed_config:
+          "@type": type.googleapis.com/udpa.type.v1.TypedStruct
+          type_url: type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
+          value:
+            stat_prefix: cronos_ai_rate_limiter
+            token_bucket:
+              max_tokens: 1000
+              tokens_per_fill: 1000
+              fill_interval: 60s
+            filter_enabled:
+              runtime_key: local_rate_limit_enabled
+              default_value:
+                numerator: 100
+                denominator: HUNDRED
+            filter_enforced:
+              runtime_key: local_rate_limit_enforced
+              default_value:
+                numerator: 100
+                denominator: HUNDRED
+
+---
+# Sidecar Configuration for Resource Optimization
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: cronos-ai-sidecar
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-sidecar
+spec:
+  workloadSelector:
+    labels:
+      app: cronos-ai
+  ingress:
+  - port:
+      number: 8080
+      protocol: HTTP
+      name: http
+    defaultEndpoint: 127.0.0.1:8080
+  - port:
+      number: 9090
+      protocol: HTTP
+      name: grpc
+    defaultEndpoint: 127.0.0.1:9090
+  - port:
+      number: 8000
+      protocol: HTTP
+      name: metrics
+    defaultEndpoint: 127.0.0.1:8000
+  egress:
+  - hosts:
+    - "./*"
+    - "istio-system/*"
+    - "kube-system/kube-dns"
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+
+---
+# ProxyConfig for Fine-tuning Envoy
+apiVersion: v1
+kind: EnvoyFilter
+metadata:
+  name: cronos-ai-proxy-config
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-envoy
+spec:
+  workloadSelector:
+    labels:
+      app: cronos-ai
+  configPatches:
+  - applyTo: BOOTSTRAP
+    patch:
+      operation: MERGE
+      value:
+        bootstrap_extensions:
+        - name: envoy.bootstrap.wasm
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.wasm.v3.WasmService
+            singleton: true
+            name: cronos_ai_bootstrap
+            config:
+              name: cronos_ai_bootstrap
+              root_id: cronos_ai_bootstrap
+              vm_config:
+                vm_id: cronos_ai_bootstrap
+                runtime: envoy.wasm.runtime.v8
+                code:
+                  local:
+                    inline_string: |
+                      class CronosAIBootstrap {
+                        constructor(rootContext) {
+                          this.rootContext = rootContext;
+                        }
+                        
+                        onVmStart() {
+                          console.log("CRONOS AI Bootstrap: VM Started");
+                          return true;
+                        }
+                        
+                        onConfigure() {
+                          console.log("CRONOS AI Bootstrap: Configuration loaded");
+                          return true;
+                        }
+                      }
+
+---
+# Traffic Split for Canary Deployments
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: ai-engine-canary
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-canary
+spec:
+  hosts:
+  - ai-engine-service
+  http:
+  - match:
+    - headers:
+        canary:
+          exact: "true"
+    route:
+    - destination:
+        host: ai-engine-service
+        subset: canary
+  - route:
+    - destination:
+        host: ai-engine-service
+        subset: stable
+      weight: 95
+    - destination:
+        host: ai-engine-service
+        subset: canary
+      weight: 5
+
+---
+# Circuit Breaker Configuration
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: cronos-ai-circuit-breaker
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: istio-resilience
+spec:
+  host: "*.cronos-ai.svc.cluster.local"
+  trafficPolicy:
+    outlierDetection:
+      consecutiveGatewayErrors: 3
+      consecutive5xxErrors: 3
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 50
+      splitExternalLocalOriginErrors: true
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 30s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 2
+        maxRetries: 3
+        consecutiveGatewayErrors: 5
+        h2UpgradePolicy: UPGRADE
+
+---
+# Security Scanning with Falco Integration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cronos-ai-falco-rules
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: security-monitoring
+data:
+  cronos_ai_rules.yaml: |
+    - rule: CRONOS AI Suspicious Network Activity
+      desc: Detect suspicious network connections from CRONOS AI pods
+      condition: >
+        k8s_audit and ka.verb in (create, update, patch) and
+        ka.target.namespace = "cronos-ai" and
+        ka.target.kind = "Pod" and
+        outbound and not fd.connected
+      output: >
+        Suspicious outbound connection from CRONOS AI pod
+        (user=%ka.user.name verb=%ka.verb pod=%ka.target.name
+        namespace=%ka.target.namespace connection=%fd.name)
+      priority: WARNING
+      tags: [network, k8s, cronos-ai]
+    
+    - rule: CRONOS AI Unauthorized File Access
+      desc: Detect unauthorized file system access in CRONOS AI containers
+      condition: >
+        spawned_process and container.image.repository startswith "cronos-ai/" and
+        proc.name in (cat, less, tail, head, awk, sed, grep, find) and
+        fd.name startswith "/etc" and not fd.name startswith "/etc/ssl"
+      output: >
+        Unauthorized file access in CRONOS AI container
+        (user=%user.name process=%proc.name file=%fd.name
+        container=%container.name image=%container.image)
+      priority: WARNING
+      tags: [filesystem, security, cronos-ai]
+
+---
+# Service Mesh Configuration Validation
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cronos-ai-mesh-validation
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: validation
+data:
+  validation-script.sh: |
+    #!/bin/bash
+    set -e
+    
+    echo "Validating CRONOS AI Service Mesh Configuration..."
+    
+    # Check if Istio is installed
+    kubectl get namespace istio-system > /dev/null 2>&1 || {
+      echo "Error: Istio system namespace not found"
+      exit 1
+    }
+    
+    # Validate gateway configuration
+    kubectl get gateway cronos-ai-gateway -n cronos-ai > /dev/null 2>&1 || {
+      echo "Error: CRONOS AI gateway not found"
+      exit 1
+    }
+    
+    # Check virtual service
+    kubectl get virtualservice cronos-ai-virtualservice -n cronos-ai > /dev/null 2>&1 || {
+      echo "Error: CRONOS AI virtual service not found"
+      exit 1
+    }
+    
+    # Validate destination rules
+    kubectl get destinationrule ai-engine-destination-rule -n cronos-ai > /dev/null 2>&1 || {
+      echo "Error: AI Engine destination rule not found"
+      exit 1
+    }
+    
+    # Check peer authentication
+    kubectl get peerauthentication cronos-ai-peer-auth -n cronos-ai > /dev/null 2>&1 || {
+      echo "Error: Peer authentication not found"
+      exit 1
+    }
+    
+    # Validate authorization policies
+    kubectl get authorizationpolicy cronos-ai-authz-policy -n cronos-ai > /dev/null 2>&1 || {
+      echo "Error: Authorization policy not found"
+      exit 1
+    }
+    
+    echo "Service mesh validation completed successfully!"
+    
+  health-check.sh: |
+    #!/bin/bash
+    set -e
+    
+    echo "Performing CRONOS AI service mesh health check..."
+    
+    # Check Envoy sidecar status
+    kubectl exec -n cronos-ai deployment/ai-engine -c istio-proxy -- pilot-agent request GET stats/ready
+    kubectl exec -n cronos-ai deployment/protocol-processor -c istio-proxy -- pilot-agent request GET stats/ready
+    kubectl exec -n cronos-ai deployment/security-analyzer -c istio-proxy -- pilot-agent request GET stats/ready
+    
+    # Test mTLS connectivity
+    kubectl exec -n cronos-ai deployment/ai-engine -c ai-engine -- curl -s http://protocol-processor-service:8080/health
+    
+    # Validate certificate rotation
+    kubectl exec -n cronos-ai deployment/ai-engine -c istio-proxy -- pilot-agent request GET certs
+    
+    echo "Service mesh health check completed successfully!"

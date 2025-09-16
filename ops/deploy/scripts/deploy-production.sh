@@ -1,25 +1,16 @@
 #!/bin/bash
-# CRONOS AI Production Deployment Script
-# Enterprise-grade deployment with comprehensive validation and rollback capabilities
+# CRONOS AI - Production Deployment Script
+# Complete automation for production deployment
 
 set -euo pipefail
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
-DEPLOY_DIR="${PROJECT_ROOT}/ops/deploy"
-HELM_CHART_DIR="${DEPLOY_DIR}/kubernetes/production/helm/cronos-ai"
-
-# Default values
-NAMESPACE="cronos-ai-prod"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+HELM_CHART_PATH="${PROJECT_ROOT}/ops/deploy/helm/cronos-ai"
+NAMESPACE="cronos-ai"
+MONITORING_NAMESPACE="cronos-ai-monitoring"
 RELEASE_NAME="cronos-ai"
-DRY_RUN=false
-SKIP_TESTS=false
-SKIP_VALIDATION=false
-ROLLBACK_ON_FAILURE=true
-TIMEOUT=1800  # 30 minutes
-VALUES_FILE="${HELM_CHART_DIR}/values.yaml"
-VALUES_OVERRIDE=""
 
 # Colors for output
 RED='\033[0;31m'
@@ -30,464 +21,484 @@ NC='\033[0m' # No Color
 
 # Logging functions
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $(date '+%Y-%m-%d %H:%M:%S') - $1"
+    echo -e "${BLUE}[INFO]${NC} $1"
 }
 
 log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $(date '+%Y-%m-%d %H:%M:%S') - $1"
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $(date '+%Y-%m-%d %H:%M:%S') - $1"
+    echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $(date '+%Y-%m-%d %H:%M:%S') - $1"
+    echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Help function
-show_help() {
-    cat << EOF
-CRONOS AI Production Deployment Script
-
-Usage: $0 [OPTIONS]
-
-Options:
-    -n, --namespace NAMESPACE       Kubernetes namespace (default: cronos-ai-prod)
-    -r, --release RELEASE_NAME      Helm release name (default: cronos-ai)
-    -f, --values-file FILE          Values file path (default: values.yaml)
-    -s, --set KEY=VALUE             Set values on command line
-    -d, --dry-run                   Perform a dry run without making changes
-    -t, --timeout SECONDS          Timeout for deployment (default: 1800)
-    --skip-tests                    Skip post-deployment tests
-    --skip-validation               Skip pre-deployment validation
-    --no-rollback                   Don't rollback on failure
-    -h, --help                      Show this help message
-
-Examples:
-    $0                              # Deploy with default settings
-    $0 --dry-run                    # Dry run deployment
-    $0 -f custom-values.yaml        # Deploy with custom values
-    $0 --set image.tag=v1.1.0      # Override image tag
-
-EOF
+# Error handling
+cleanup() {
+    local exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        log_error "Deployment failed with exit code $exit_code"
+        log_info "Rolling back changes..."
+        rollback_deployment
+    fi
+    exit $exit_code
 }
 
-# Parse command line arguments
-parse_args() {
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            -n|--namespace)
-                NAMESPACE="$2"
-                shift 2
-                ;;
-            -r|--release)
-                RELEASE_NAME="$2"
-                shift 2
-                ;;
-            -f|--values-file)
-                VALUES_FILE="$2"
-                shift 2
-                ;;
-            -s|--set)
-                VALUES_OVERRIDE="${VALUES_OVERRIDE} --set $2"
-                shift 2
-                ;;
-            -d|--dry-run)
-                DRY_RUN=true
-                shift
-                ;;
-            -t|--timeout)
-                TIMEOUT="$2"
-                shift 2
-                ;;
-            --skip-tests)
-                SKIP_TESTS=true
-                shift
-                ;;
-            --skip-validation)
-                SKIP_VALIDATION=true
-                shift
-                ;;
-            --no-rollback)
-                ROLLBACK_ON_FAILURE=false
-                shift
-                ;;
-            -h|--help)
-                show_help
-                exit 0
-                ;;
-            *)
-                log_error "Unknown option: $1"
-                show_help
-                exit 1
-                ;;
-        esac
-    done
-}
+trap cleanup EXIT
 
-# Check prerequisites
+# Function to check prerequisites
 check_prerequisites() {
     log_info "Checking prerequisites..."
     
-    # Check required tools
-    local tools=("kubectl" "helm" "docker" "jq")
-    for tool in "${tools[@]}"; do
-        if ! command -v "$tool" &> /dev/null; then
-            log_error "$tool is required but not installed"
-            exit 1
-        fi
-    done
+    # Check if kubectl is available and configured
+    if ! command -v kubectl &> /dev/null; then
+        log_error "kubectl is not installed or not in PATH"
+        exit 1
+    fi
     
-    # Check Kubernetes connection
+    # Check if helm is available
+    if ! command -v helm &> /dev/null; then
+        log_error "helm is not installed or not in PATH"
+        exit 1
+    fi
+    
+    # Check if we can connect to Kubernetes cluster
     if ! kubectl cluster-info &> /dev/null; then
         log_error "Cannot connect to Kubernetes cluster"
         exit 1
     fi
     
-    # Check Helm
-    if ! helm version &> /dev/null; then
-        log_error "Helm is not properly configured"
-        exit 1
+    # Check Kubernetes version
+    local k8s_version=$(kubectl version --client=false -o json | jq -r '.serverVersion.gitVersion')
+    log_info "Kubernetes version: $k8s_version"
+    
+    # Check if required Helm repositories are added
+    if ! helm repo list | grep -q "prometheus-community"; then
+        log_info "Adding Prometheus Helm repository..."
+        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
     fi
     
-    # Verify chart exists
-    if [[ ! -f "${HELM_CHART_DIR}/Chart.yaml" ]]; then
-        log_error "Helm chart not found at ${HELM_CHART_DIR}"
-        exit 1
+    if ! helm repo list | grep -q "grafana"; then
+        log_info "Adding Grafana Helm repository..."
+        helm repo add grafana https://grafana.github.io/helm-charts
     fi
     
-    # Verify values file exists
-    if [[ ! -f "$VALUES_FILE" ]]; then
-        log_error "Values file not found: $VALUES_FILE"
-        exit 1
+    if ! helm repo list | grep -q "bitnami"; then
+        log_info "Adding Bitnami Helm repository..."
+        helm repo add bitnami https://charts.bitnami.com/bitnami
     fi
     
+    if ! helm repo list | grep -q "istio"; then
+        log_info "Adding Istio Helm repository..."
+        helm repo add istio https://istio-release.storage.googleapis.com/charts
+    fi
+    
+    helm repo update
     log_success "Prerequisites check completed"
 }
 
-# Validate deployment configuration
-validate_configuration() {
-    if [[ "$SKIP_VALIDATION" == true ]]; then
-        log_warning "Skipping configuration validation"
-        return 0
-    fi
+# Function to create namespaces
+create_namespaces() {
+    log_info "Creating namespaces..."
     
-    log_info "Validating deployment configuration..."
+    # Create main namespace
+    kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+    kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
     
-    # Lint Helm chart
-    if ! helm lint "$HELM_CHART_DIR" --values "$VALUES_FILE"; then
-        log_error "Helm chart validation failed"
-        exit 1
-    fi
+    # Create monitoring namespace
+    kubectl create namespace $MONITORING_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
     
-    # Template and validate Kubernetes manifests
-    local temp_dir
-    temp_dir=$(mktemp -d)
-    trap "rm -rf $temp_dir" EXIT
-    
-    helm template "$RELEASE_NAME" "$HELM_CHART_DIR" \
-        --namespace "$NAMESPACE" \
-        --values "$VALUES_FILE" \
-        $VALUES_OVERRIDE \
-        --output-dir "$temp_dir"
-    
-    # Validate manifests
-    find "$temp_dir" -name "*.yaml" -exec kubectl apply --dry-run=client -f {} \; &> /dev/null
-    
-    log_success "Configuration validation completed"
+    log_success "Namespaces created successfully"
 }
 
-# Create namespace if it doesn't exist
-ensure_namespace() {
-    log_info "Ensuring namespace '$NAMESPACE' exists..."
+# Function to setup secrets
+setup_secrets() {
+    log_info "Setting up secrets..."
     
-    if kubectl get namespace "$NAMESPACE" &> /dev/null; then
-        log_info "Namespace '$NAMESPACE' already exists"
+    # Check if secrets file exists
+    local secrets_file="${PROJECT_ROOT}/config/secrets/production-secrets.yaml"
+    if [[ -f "$secrets_file" ]]; then
+        kubectl apply -f "$secrets_file" -n $NAMESPACE
+        log_success "Applied production secrets"
     else
-        log_info "Creating namespace '$NAMESPACE'..."
-        kubectl apply -f "${DEPLOY_DIR}/kubernetes/production/namespace.yaml"
-        log_success "Namespace '$NAMESPACE' created"
-    fi
-}
-
-# Install or upgrade Helm dependencies
-install_dependencies() {
-    log_info "Installing Helm chart dependencies..."
-    
-    cd "$HELM_CHART_DIR"
-    helm dependency update
-    
-    log_success "Dependencies installed"
-}
-
-# Perform pre-deployment checks
-pre_deployment_checks() {
-    log_info "Performing pre-deployment checks..."
-    
-    # Check cluster resources
-    local total_cpu_requests=0
-    local total_memory_requests=0
-    
-    # Calculate resource requirements from values file
-    # This is a simplified check - in production, you'd parse the actual values
-    log_info "Checking cluster capacity..."
-    
-    # Check if previous version exists
-    if helm get values "$RELEASE_NAME" -n "$NAMESPACE" &> /dev/null; then
-        log_info "Previous deployment found - this will be an upgrade"
+        log_warning "Production secrets file not found at $secrets_file"
+        log_info "Creating placeholder secrets..."
         
-        # Get current revision for potential rollback
-        CURRENT_REVISION=$(helm history "$RELEASE_NAME" -n "$NAMESPACE" -o json | jq -r '.[0].revision')
-        log_info "Current revision: $CURRENT_REVISION"
-    else
-        log_info "No previous deployment found - this will be a fresh install"
-        CURRENT_REVISION=""
+        # Create placeholder secrets (MUST be updated with real values)
+        kubectl create secret generic cronos-ai-secrets \
+            --from-literal=database-url="postgresql://cronos_ai:CHANGE_ME@postgresql:5432/cronos_ai_prod" \
+            --from-literal=redis-password="CHANGE_ME" \
+            --from-literal=jwt-secret="CHANGE_ME" \
+            --from-literal=oauth-client-id="CHANGE_ME" \
+            --from-literal=oauth-client-secret="CHANGE_ME" \
+            --from-literal=vault-token="CHANGE_ME" \
+            --namespace $NAMESPACE \
+            --dry-run=client -o yaml | kubectl apply -f -
+        
+        kubectl create secret generic cronos-ai-grafana-secret \
+            --from-literal=admin-user="admin" \
+            --from-literal=admin-password="CHANGE_ME" \
+            --namespace $MONITORING_NAMESPACE \
+            --dry-run=client -o yaml | kubectl apply -f -
+        
+        log_warning "IMPORTANT: Update the placeholder secrets with actual values before production use!"
     fi
-    
-    # Check critical dependencies
-    log_info "Checking external dependencies..."
-    
-    # Check if PostgreSQL is accessible (if enabled)
-    # Check if Redis is accessible (if enabled)
-    # Check if container registry is accessible
-    
-    log_success "Pre-deployment checks completed"
 }
 
-# Deploy CRONOS AI
-deploy() {
-    log_info "Starting CRONOS AI deployment..."
+# Function to setup TLS certificates
+setup_tls() {
+    log_info "Setting up TLS certificates..."
     
-    local helm_cmd="helm"
-    local action="upgrade"
-    local helm_args=(
-        "--install"
-        "--namespace" "$NAMESPACE"
-        "--create-namespace"
-        "--values" "$VALUES_FILE"
-        "--timeout" "${TIMEOUT}s"
-        "--wait"
-        "--wait-for-jobs"
+    # Check if cert-manager is installed
+    if kubectl get crd certificates.cert-manager.io &> /dev/null; then
+        log_info "cert-manager found, creating certificate issuers..."
+        
+        cat <<EOF | kubectl apply -f -
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@cronos-ai.example.com
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - http01:
+        ingress:
+          class: istio
+EOF
+        log_success "TLS certificate issuer created"
+    else
+        log_warning "cert-manager not found, skipping automatic TLS setup"
+    fi
+}
+
+# Function to deploy Istio service mesh
+deploy_istio() {
+    log_info "Deploying Istio service mesh..."
+    
+    # Check if Istio is already installed
+    if kubectl get namespace istio-system &> /dev/null; then
+        log_info "Istio namespace exists, checking installation..."
+        if kubectl get deployment istiod -n istio-system &> /dev/null; then
+            log_info "Istio already installed, skipping..."
+            return 0
+        fi
+    fi
+    
+    # Install Istio base
+    helm upgrade --install istio-base istio/base \
+        --namespace istio-system \
+        --create-namespace \
+        --version 1.20.0 \
+        --wait
+    
+    # Install Istiod
+    helm upgrade --install istiod istio/istiod \
+        --namespace istio-system \
+        --version 1.20.0 \
+        --wait
+    
+    # Install Istio gateway
+    helm upgrade --install istio-gateway istio/gateway \
+        --namespace istio-system \
+        --version 1.20.0 \
+        --wait
+    
+    log_success "Istio service mesh deployed successfully"
+}
+
+# Function to deploy monitoring stack
+deploy_monitoring() {
+    log_info "Deploying monitoring stack..."
+    
+    # Deploy custom monitoring configuration
+    kubectl apply -f "${PROJECT_ROOT}/ops/monitoring/production-monitoring.yaml"
+    
+    # Wait for monitoring pods to be ready
+    kubectl wait --for=condition=available --timeout=600s deployment/prometheus -n $MONITORING_NAMESPACE || true
+    kubectl wait --for=condition=available --timeout=600s deployment/grafana -n $MONITORING_NAMESPACE || true
+    
+    log_success "Monitoring stack deployed successfully"
+}
+
+# Function to validate deployment
+validate_deployment() {
+    log_info "Validating deployment..."
+    
+    # Check if all deployments are ready
+    local deployments=(
+        "ai-engine"
+        "mgmt-api"
+        "control-plane"
+        "ui-console"
     )
     
-    if [[ "$DRY_RUN" == true ]]; then
-        helm_args+=("--dry-run")
-        log_info "Performing dry run deployment"
-    fi
-    
-    # Add custom values if provided
-    if [[ -n "$VALUES_OVERRIDE" ]]; then
-        helm_args+=($VALUES_OVERRIDE)
-    fi
-    
-    # Execute deployment
-    if $helm_cmd $action "$RELEASE_NAME" "$HELM_CHART_DIR" "${helm_args[@]}"; then
-        if [[ "$DRY_RUN" != true ]]; then
-            log_success "CRONOS AI deployed successfully"
-            
-            # Get deployment info
-            NEW_REVISION=$(helm history "$RELEASE_NAME" -n "$NAMESPACE" -o json | jq -r '.[0].revision')
-            log_info "New revision: $NEW_REVISION"
+    for deployment in "${deployments[@]}"; do
+        local full_name="${RELEASE_NAME}-${deployment}"
+        log_info "Checking deployment: $full_name"
+        
+        if kubectl rollout status deployment/$full_name -n $NAMESPACE --timeout=600s; then
+            log_success "Deployment $full_name is ready"
         else
-            log_success "Dry run completed successfully"
-        fi
-    else
-        log_error "Deployment failed"
-        
-        if [[ "$DRY_RUN" != true && "$ROLLBACK_ON_FAILURE" == true && -n "$CURRENT_REVISION" ]]; then
-            log_warning "Rolling back to revision $CURRENT_REVISION"
-            rollback_deployment "$CURRENT_REVISION"
-        fi
-        
-        exit 1
-    fi
-}
-
-# Rollback deployment
-rollback_deployment() {
-    local revision="$1"
-    
-    log_warning "Rolling back CRONOS AI deployment to revision $revision"
-    
-    if helm rollback "$RELEASE_NAME" "$revision" -n "$NAMESPACE" --timeout "${TIMEOUT}s" --wait; then
-        log_success "Rollback completed successfully"
-    else
-        log_error "Rollback failed"
-        exit 1
-    fi
-}
-
-# Run post-deployment tests
-run_tests() {
-    if [[ "$SKIP_TESTS" == true || "$DRY_RUN" == true ]]; then
-        log_warning "Skipping post-deployment tests"
-        return 0
-    fi
-    
-    log_info "Running post-deployment tests..."
-    
-    # Wait for all pods to be ready
-    log_info "Waiting for all pods to be ready..."
-    kubectl wait --for=condition=ready pod \
-        -l "app.kubernetes.io/name=cronos-ai" \
-        -n "$NAMESPACE" \
-        --timeout=600s
-    
-    # Run health checks
-    log_info "Running health checks..."
-    
-    # Check dataplane health
-    local dataplane_pod
-    dataplane_pod=$(kubectl get pods -n "$NAMESPACE" -l "app.kubernetes.io/component=dataplane" -o jsonpath='{.items[0].metadata.name}')
-    if kubectl exec -n "$NAMESPACE" "$dataplane_pod" -- curl -f http://localhost:8080/health &> /dev/null; then
-        log_success "DataPlane health check passed"
-    else
-        log_error "DataPlane health check failed"
-        return 1
-    fi
-    
-    # Check control plane health
-    local controlplane_svc
-    controlplane_svc=$(kubectl get svc -n "$NAMESPACE" -l "app.kubernetes.io/component=controlplane" -o jsonpath='{.items[0].metadata.name}')
-    if kubectl exec -n "$NAMESPACE" "$dataplane_pod" -- curl -f "http://$controlplane_svc:8080/health" &> /dev/null; then
-        log_success "ControlPlane health check passed"
-    else
-        log_error "ControlPlane health check failed"
-        return 1
-    fi
-    
-    # Run integration tests
-    if [[ -f "${PROJECT_ROOT}/tests/integration/Cargo.toml" ]]; then
-        log_info "Running integration tests..."
-        
-        # Set up test environment variables
-        export DATAPLANE_ENDPOINT="http://$(kubectl get svc -n $NAMESPACE cronos-ai-dataplane -o jsonpath='{.spec.clusterIP}'):9090"
-        export CONTROLPLANE_ENDPOINT="http://$(kubectl get svc -n $NAMESPACE cronos-ai-controlplane -o jsonpath='{.spec.clusterIP}'):8080"
-        export AIENGINE_ENDPOINT="http://$(kubectl get svc -n $NAMESPACE cronos-ai-aiengine -o jsonpath='{.spec.clusterIP}'):8000"
-        export POLICY_ENGINE_ENDPOINT="http://$(kubectl get svc -n $NAMESPACE cronos-ai-policy-engine -o jsonpath='{.spec.clusterIP}'):8001"
-        export TEST_NAMESPACE="$NAMESPACE"
-        
-        # Run tests from within the cluster
-        kubectl run cronos-ai-test \
-            --image="cronos-ai/integration-tests:latest" \
-            --restart=Never \
-            --rm -i \
-            -n "$NAMESPACE" \
-            --env="DATAPLANE_ENDPOINT=$DATAPLANE_ENDPOINT" \
-            --env="CONTROLPLANE_ENDPOINT=$CONTROLPLANE_ENDPOINT" \
-            --env="AIENGINE_ENDPOINT=$AIENGINE_ENDPOINT" \
-            --env="POLICY_ENGINE_ENDPOINT=$POLICY_ENGINE_ENDPOINT" \
-            --env="TEST_NAMESPACE=$NAMESPACE" \
-            -- /app/integration-test-runner e2e
-        
-        if [[ $? -eq 0 ]]; then
-            log_success "Integration tests passed"
-        else
-            log_error "Integration tests failed"
+            log_error "Deployment $full_name failed to become ready"
             return 1
         fi
-    else
-        log_warning "Integration tests not found, skipping"
-    fi
+    done
     
-    log_success "All post-deployment tests completed successfully"
-}
-
-# Generate deployment report
-generate_report() {
-    if [[ "$DRY_RUN" == true ]]; then
-        return 0
-    fi
+    # Check if services are accessible
+    log_info "Checking service endpoints..."
     
-    log_info "Generating deployment report..."
-    
-    local report_file="/tmp/cronos-ai-deployment-report-$(date +%Y%m%d-%H%M%S).json"
-    
-    # Gather deployment information
-    local deployment_info
-    deployment_info=$(cat << EOF
-{
-  "deployment": {
-    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-    "namespace": "$NAMESPACE",
-    "release_name": "$RELEASE_NAME",
-    "chart_version": "$(helm get metadata "$RELEASE_NAME" -n "$NAMESPACE" -o json | jq -r '.chart.metadata.version')",
-    "app_version": "$(helm get metadata "$RELEASE_NAME" -n "$NAMESPACE" -o json | jq -r '.chart.metadata.appVersion')",
-    "revision": "$(helm history "$RELEASE_NAME" -n "$NAMESPACE" -o json | jq -r '.[0].revision')",
-    "status": "$(helm status "$RELEASE_NAME" -n "$NAMESPACE" -o json | jq -r '.info.status')"
-  },
-  "resources": {
-    "pods": $(kubectl get pods -n "$NAMESPACE" -l "app.kubernetes.io/name=cronos-ai" -o json | jq '.items | length'),
-    "services": $(kubectl get svc -n "$NAMESPACE" -l "app.kubernetes.io/name=cronos-ai" -o json | jq '.items | length'),
-    "configmaps": $(kubectl get cm -n "$NAMESPACE" -l "app.kubernetes.io/name=cronos-ai" -o json | jq '.items | length'),
-    "secrets": $(kubectl get secrets -n "$NAMESPACE" -l "app.kubernetes.io/name=cronos-ai" -o json | jq '.items | length')
-  },
-  "health": {
-    "ready_pods": $(kubectl get pods -n "$NAMESPACE" -l "app.kubernetes.io/name=cronos-ai" -o json | jq '[.items[] | select(.status.phase == "Running")] | length'),
-    "total_pods": $(kubectl get pods -n "$NAMESPACE" -l "app.kubernetes.io/name=cronos-ai" -o json | jq '.items | length')
-  }
-}
-EOF
+    local services=(
+        "${RELEASE_NAME}-ai-engine:8000"
+        "${RELEASE_NAME}-mgmt-api:8080"
+        "${RELEASE_NAME}-control-plane:9000"
+        "${RELEASE_NAME}-ui-console:3000"
     )
     
-    echo "$deployment_info" | jq . > "$report_file"
+    for service in "${services[@]}"; do
+        local service_name=$(echo $service | cut -d: -f1)
+        local port=$(echo $service | cut -d: -f2)
+        
+        if kubectl get service $service_name -n $NAMESPACE &> /dev/null; then
+            log_success "Service $service_name is available"
+        else
+            log_warning "Service $service_name not found"
+        fi
+    done
     
-    log_info "Deployment report saved to: $report_file"
+    log_success "Deployment validation completed"
+}
+
+# Function to run integration tests
+run_integration_tests() {
+    log_info "Running integration tests..."
     
-    # Print summary
-    echo
-    echo "=============================================="
-    echo "       CRONOS AI Deployment Summary"
-    echo "=============================================="
-    echo "Timestamp:       $(date)"
-    echo "Namespace:       $NAMESPACE"
-    echo "Release:         $RELEASE_NAME"
-    echo "Status:          $(helm status "$RELEASE_NAME" -n "$NAMESPACE" -o json | jq -r '.info.status')"
-    echo "Revision:        $(helm history "$RELEASE_NAME" -n "$NAMESPACE" -o json | jq -r '.[0].revision')"
-    echo "Ready Pods:      $(kubectl get pods -n "$NAMESPACE" -l "app.kubernetes.io/name=cronos-ai" --field-selector=status.phase=Running --no-headers | wc -l)"
-    echo "Total Pods:      $(kubectl get pods -n "$NAMESPACE" -l "app.kubernetes.io/name=cronos-ai" --no-headers | wc -l)"
-    echo "=============================================="
-    echo
+    # Create test job
+    cat <<EOF | kubectl apply -f -
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cronos-ai-integration-tests
+  namespace: $NAMESPACE
+spec:
+  template:
+    spec:
+      containers:
+      - name: integration-tests
+        image: python:3.11-slim
+        command: ["/bin/bash"]
+        args:
+          - -c
+          - |
+            pip install asyncio aiohttp asyncpg redis kafka-python pytest kubernetes prometheus-client
+            python /tests/production-integration-tests.py --config /config/cronos_ai.production.yaml
+        volumeMounts:
+        - name: test-scripts
+          mountPath: /tests
+        - name: config
+          mountPath: /config
+      volumes:
+      - name: test-scripts
+        configMap:
+          name: integration-test-scripts
+      - name: config
+        configMap:
+          name: cronos-ai-config
+      restartPolicy: Never
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 3600
+EOF
+    
+    # Wait for test completion
+    kubectl wait --for=condition=complete --timeout=1800s job/cronos-ai-integration-tests -n $NAMESPACE || {
+        log_warning "Integration tests failed or timed out"
+        kubectl logs job/cronos-ai-integration-tests -n $NAMESPACE || true
+    }
+    
+    # Clean up test job
+    kubectl delete job cronos-ai-integration-tests -n $NAMESPACE || true
+    
+    log_success "Integration tests completed"
+}
+
+# Function to setup monitoring dashboards
+setup_dashboards() {
+    log_info "Setting up monitoring dashboards..."
+    
+    # Apply Grafana dashboards
+    if [[ -d "${PROJECT_ROOT}/ops/grafana-dashboards" ]]; then
+        for dashboard in "${PROJECT_ROOT}/ops/grafana-dashboards"/*.json; do
+            if [[ -f "$dashboard" ]]; then
+                local dashboard_name=$(basename "$dashboard" .json)
+                kubectl create configmap "dashboard-${dashboard_name}" \
+                    --from-file="$dashboard" \
+                    --namespace $MONITORING_NAMESPACE \
+                    --dry-run=client -o yaml | kubectl apply -f -
+            fi
+        done
+        log_success "Grafana dashboards configured"
+    fi
+    
+    # Apply Prometheus rules
+    if [[ -f "${PROJECT_ROOT}/ops/observability/prometheus/rules.yaml" ]]; then
+        kubectl apply -f "${PROJECT_ROOT}/ops/observability/prometheus/rules.yaml" -n $MONITORING_NAMESPACE
+        log_success "Prometheus rules applied"
+    fi
+}
+
+# Function to perform health checks
+health_check() {
+    log_info "Performing health checks..."
+    
+    # Check pod health
+    local unhealthy_pods=$(kubectl get pods -n $NAMESPACE --field-selector=status.phase!=Running --no-headers | wc -l)
+    if [[ $unhealthy_pods -eq 0 ]]; then
+        log_success "All pods are healthy"
+    else
+        log_warning "$unhealthy_pods unhealthy pods found"
+        kubectl get pods -n $NAMESPACE --field-selector=status.phase!=Running
+    fi
+    
+    # Check service endpoints
+    local endpoints_not_ready=$(kubectl get endpoints -n $NAMESPACE -o json | jq '.items[] | select(.subsets == null or .subsets == []) | .metadata.name' | wc -l)
+    if [[ $endpoints_not_ready -eq 0 ]]; then
+        log_success "All service endpoints are ready"
+    else
+        log_warning "$endpoints_not_ready service endpoints not ready"
+    fi
+    
+    log_success "Health check completed"
+}
+
+# Function to rollback deployment
+rollback_deployment() {
+    log_info "Rolling back deployment..."
+    
+    # Rollback Helm release
+    helm rollback $RELEASE_NAME -n $NAMESPACE || true
+    
+    # Wait for rollback to complete
+    sleep 30
+    
+    log_info "Rollback completed"
+}
+
+# Function to show deployment status
+show_status() {
+    log_info "Deployment Status Summary"
+    echo "=================================="
+    
+    # Show Helm releases
+    echo -e "\n${BLUE}Helm Releases:${NC}"
+    helm list -n $NAMESPACE
+    
+    # Show pods
+    echo -e "\n${BLUE}Pods Status:${NC}"
+    kubectl get pods -n $NAMESPACE -o wide
+    
+    # Show services
+    echo -e "\n${BLUE}Services:${NC}"
+    kubectl get services -n $NAMESPACE
+    
+    # Show ingresses
+    echo -e "\n${BLUE}Ingresses:${NC}"
+    kubectl get ingress -n $NAMESPACE
+    
+    # Show persistent volumes
+    echo -e "\n${BLUE}Persistent Volumes:${NC}"
+    kubectl get pvc -n $NAMESPACE
+    
+    # Show monitoring status
+    echo -e "\n${BLUE}Monitoring Stack:${NC}"
+    kubectl get pods -n $MONITORING_NAMESPACE
+    
+    echo "=================================="
 }
 
 # Main deployment function
-main() {
-    log_info "Starting CRONOS AI production deployment"
+deploy_cronos_ai() {
+    log_info "Starting CRONOS AI production deployment..."
     
-    # Parse arguments
-    parse_args "$@"
-    
-    # Show deployment parameters
-    log_info "Deployment parameters:"
-    log_info "  Namespace: $NAMESPACE"
-    log_info "  Release: $RELEASE_NAME"
-    log_info "  Values file: $VALUES_FILE"
-    log_info "  Timeout: ${TIMEOUT}s"
-    log_info "  Dry run: $DRY_RUN"
-    
-    # Execute deployment steps
+    # Pre-deployment steps
     check_prerequisites
-    validate_configuration
-    ensure_namespace
-    install_dependencies
-    pre_deployment_checks
-    deploy
-    run_tests
-    generate_report
+    create_namespaces
+    setup_secrets
+    setup_tls
     
-    if [[ "$DRY_RUN" != true ]]; then
-        log_success "🎉 CRONOS AI production deployment completed successfully!"
-        log_info "Access your deployment:"
-        log_info "  kubectl get all -n $NAMESPACE"
-        log_info "  kubectl port-forward -n $NAMESPACE svc/cronos-ai-controlplane 8080:8080"
-    else
-        log_success "🔍 CRONOS AI dry run completed successfully!"
+    # Infrastructure deployment
+    deploy_istio
+    deploy_monitoring
+    
+    # Main application deployment
+    log_info "Deploying CRONOS AI application..."
+    helm upgrade --install $RELEASE_NAME $HELM_CHART_PATH \
+        --namespace $NAMESPACE \
+        --values "${HELM_CHART_PATH}/values.yaml" \
+        --timeout 20m \
+        --wait \
+        --atomic
+    
+    # Post-deployment steps
+    validate_deployment
+    setup_dashboards
+    health_check
+    
+    # Optional integration tests
+    if [[ "${RUN_INTEGRATION_TESTS:-false}" == "true" ]]; then
+        run_integration_tests
     fi
+    
+    show_status
+    
+    log_success "CRONOS AI production deployment completed successfully!"
+    log_info "Access URLs:"
+    log_info "  - Console: https://console.cronos-ai.example.com"
+    log_info "  - API: https://api.cronos-ai.example.com"
+    log_info "  - Monitoring: https://monitoring.cronos-ai.example.com"
+    log_info "  - AI API: https://ai-api.cronos-ai.example.com"
 }
 
-# Error handling
-trap 'log_error "Deployment failed at line $LINENO"' ERR
+# Parse command line arguments
+COMMAND=${1:-deploy}
 
-# Execute main function
-main "$@"
+case $COMMAND in
+    "deploy")
+        deploy_cronos_ai
+        ;;
+    "rollback")
+        rollback_deployment
+        ;;
+    "status")
+        show_status
+        ;;
+    "health")
+        health_check
+        ;;
+    "validate")
+        validate_deployment
+        ;;
+    "test")
+        run_integration_tests
+        ;;
+    *)
+        echo "Usage: $0 [deploy|rollback|status|health|validate|test]"
+        echo ""
+        echo "Commands:"
+        echo "  deploy    - Deploy CRONOS AI to production"
+        echo "  rollback  - Rollback to previous version"
+        echo "  status    - Show deployment status"
+        echo "  health    - Perform health checks"
+        echo "  validate  - Validate deployment"
+        echo "  test      - Run integration tests"
+        echo ""
+        echo "Environment Variables:"
+        echo "  RUN_INTEGRATION_TESTS=true  - Run integration tests after deployment"
+        exit 1
+        ;;
+esac

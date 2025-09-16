@@ -1,0 +1,533 @@
+name: CRONOS AI Production CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: cronos-ai
+  KUBECONFIG_FILE: ${{ secrets.KUBECONFIG }}
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+jobs:
+  security-scan:
+    name: Security & Vulnerability Scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+      
+      - name: Run Semgrep security scan
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/owasp-top-ten
+      
+      - name: SAST - CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          languages: python, go, rust, javascript
+          queries: security-and-quality
+
+  code-quality:
+    name: Code Quality & Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        component: [ai-engine, protocol-processor, security-analyzer, integration]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Set up Go 1.21
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+          override: true
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: ui/console/package-lock.json
+      
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+      
+      - name: Cache Rust dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/dataplane/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Cache Go dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio mypy black flake8 safety bandit
+          find . -name requirements.txt -exec pip install -r {} \;
+      
+      - name: Python Code Quality - Black
+        run: black --check --diff .
+      
+      - name: Python Code Quality - Flake8
+        run: flake8 . --max-line-length=100 --exclude=venv,build,dist
+      
+      - name: Python Type Checking - MyPy
+        run: mypy ai_engine/ integration/ --ignore-missing-imports
+      
+      - name: Python Security - Bandit
+        run: bandit -r ai_engine/ integration/ -f json -o bandit-report.json
+        continue-on-error: true
+      
+      - name: Python Security - Safety
+        run: safety check --json --output safety-report.json
+        continue-on-error: true
+      
+      - name: Python Unit Tests
+        run: |
+          cd ai_engine && python -m pytest tests/ --cov=. --cov-report=xml --cov-report=term
+          cd ../integration && python -m pytest --cov=. --cov-report=xml --cov-report=term
+      
+      - name: Rust Code Quality - Format Check
+        run: cd rust/dataplane && cargo fmt --all -- --check
+      
+      - name: Rust Code Quality - Clippy
+        run: cd rust/dataplane && cargo clippy --all-targets --all-features -- -D warnings
+      
+      - name: Rust Unit Tests
+        run: cd rust/dataplane && cargo test --all-features --workspace
+      
+      - name: Rust Security Audit
+        uses: actions-rs/audit@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Go Code Quality - Format Check
+        run: |
+          cd go && gofmt -l . | tee gofmt-output
+          test ! -s gofmt-output
+      
+      - name: Go Code Quality - Vet
+        run: cd go && go vet ./...
+      
+      - name: Go Security - Gosec
+        uses: securecodewarrior/github-action-gosec@master
+        with:
+          args: '-fmt sarif -out gosec-results.sarif ./go/...'
+        continue-on-error: true
+      
+      - name: Go Unit Tests
+        run: cd go && go test -v -race -coverprofile=coverage.out ./...
+      
+      - name: Node.js Code Quality & Tests
+        run: |
+          cd ui/console
+          npm ci
+          npm run lint
+          npm run type-check
+          npm run test:ci
+          npm run build
+      
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./ai_engine/coverage.xml,./integration/coverage.xml,./go/coverage.out
+          flags: unittests
+          name: codecov-umbrella
+
+  build-images:
+    name: Build Container Images
+    runs-on: ubuntu-latest
+    needs: [security-scan, code-quality]
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        component:
+          - name: ai-engine
+            context: .
+            dockerfile: ai_engine/Dockerfile
+          - name: protocol-processor
+            context: rust/dataplane
+            dockerfile: Dockerfile
+          - name: security-analyzer
+            context: .
+            dockerfile: integration/security/Dockerfile
+          - name: management-console
+            context: ui/console
+            dockerfile: Dockerfile
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.component.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=sha-{{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+      
+      - name: Build and push container image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.component.context }}
+          file: ${{ matrix.component.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+            VERSION=${{ github.sha }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+      
+      - name: Run Trivy container scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.component.name }}:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-container-${{ matrix.component.name }}.sarif'
+      
+      - name: Upload container scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-container-${{ matrix.component.name }}.sarif'
+
+  integration-tests:
+    name: Integration Testing
+    runs-on: ubuntu-latest
+    needs: [build-images]
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: timescale/timescaledb:latest-pg15
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_USER: test_user
+          POSTGRES_DB: test_cronos_ai
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+      
+      kafka:
+        image: confluentinc/cp-kafka:latest
+        env:
+          KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+        ports:
+          - 9092:9092
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install test dependencies
+        run: |
+          pip install pytest pytest-asyncio requests aiohttp docker-py
+          pip install -r integration/requirements.txt
+      
+      - name: Set up test environment
+        run: |
+          export DATABASE_URL=postgresql://test_user:test_password@localhost:5432/test_cronos_ai
+          export REDIS_URL=redis://localhost:6379/0
+          export KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+      
+      - name: Run integration tests
+        run: |
+          cd tests/integration
+          python -m pytest test_*.py -v --timeout=300 --maxfail=3
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_cronos_ai
+          REDIS_URL: redis://localhost:6379/0
+          KAFKA_BOOTSTRAP_SERVERS: localhost:9092
+      
+      - name: Run end-to-end tests
+        run: |
+          cd tests/e2e
+          python -m pytest test_*.py -v --timeout=600
+        env:
+          TEST_ENVIRONMENT: ci
+
+  performance-tests:
+    name: Performance & Load Testing
+    runs-on: ubuntu-latest
+    needs: [integration-tests]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+      
+      - name: Run performance tests
+        run: |
+          cd tests/performance
+          k6 run --out json=results.json load-test.js
+          k6 run --out json=stress-results.json stress-test.js
+      
+      - name: Upload performance results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results
+          path: tests/performance/*-results.json
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [integration-tests]
+    if: github.ref == 'refs/heads/develop'
+    timeout-minutes: 20
+    environment:
+      name: staging
+      url: https://staging.cronos-ai.example.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+      
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'v3.12.0'
+      
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBECONFIG_STAGING }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+      
+      - name: Deploy to staging
+        run: |
+          export KUBECONFIG=kubeconfig
+          export IMAGE_TAG=${{ github.sha }}
+          envsubst < ops/kubernetes/staging/values.yaml | helm upgrade --install cronos-ai-staging ./ops/helm/cronos-ai -f - --namespace cronos-ai-staging --create-namespace
+      
+      - name: Verify deployment
+        run: |
+          export KUBECONFIG=kubeconfig
+          kubectl rollout status deployment/ai-engine -n cronos-ai-staging --timeout=600s
+          kubectl rollout status deployment/protocol-processor -n cronos-ai-staging --timeout=600s
+          kubectl rollout status deployment/security-analyzer -n cronos-ai-staging --timeout=600s
+      
+      - name: Run smoke tests
+        run: |
+          cd tests/smoke
+          python -m pytest test_staging.py -v
+        env:
+          STAGING_URL: https://staging.cronos-ai.example.com
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [performance-tests]
+    if: startsWith(github.ref, 'refs/tags/v')
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: https://cronos-ai.example.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+      
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'v3.12.0'
+      
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBECONFIG_PRODUCTION }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+      
+      - name: Pre-deployment backup
+        run: |
+          export KUBECONFIG=kubeconfig
+          kubectl create backup cronos-ai-backup-$(date +%Y%m%d-%H%M%S) --namespace cronos-ai
+      
+      - name: Deploy to production
+        run: |
+          export KUBECONFIG=kubeconfig
+          export IMAGE_TAG=${{ github.ref_name }}
+          envsubst < ops/kubernetes/production/values.yaml | helm upgrade --install cronos-ai ./ops/helm/cronos-ai -f - --namespace cronos-ai --create-namespace --wait --timeout=600s
+      
+      - name: Verify production deployment
+        run: |
+          export KUBECONFIG=kubeconfig
+          kubectl rollout status deployment/ai-engine -n cronos-ai --timeout=900s
+          kubectl rollout status deployment/protocol-processor -n cronos-ai --timeout=900s
+          kubectl rollout status deployment/security-analyzer -n cronos-ai --timeout=900s
+          kubectl rollout status deployment/management-console -n cronos-ai --timeout=300s
+      
+      - name: Run production health checks
+        run: |
+          cd tests/health
+          python -m pytest test_production.py -v --timeout=120
+        env:
+          PRODUCTION_URL: https://cronos-ai.example.com
+      
+      - name: Notify deployment success
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: "🚀 CRONOS AI Production Deployment Successful! Version: ${{ github.ref_name }}"
+          webhook_url: ${{ env.SLACK_WEBHOOK }}
+
+  rollback:
+    name: Rollback Production
+    runs-on: ubuntu-latest
+    if: failure() && startsWith(github.ref, 'refs/tags/v')
+    needs: [deploy-production]
+    timeout-minutes: 10
+    steps:
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBECONFIG_PRODUCTION }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+      
+      - name: Rollback deployment
+        run: |
+          export KUBECONFIG=kubeconfig
+          helm rollback cronos-ai --namespace cronos-ai
+      
+      - name: Notify rollback
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: "⚠️ CRONOS AI Production Deployment Failed - Rollback Initiated"
+          webhook_url: ${{ env.SLACK_WEBHOOK }}
+
+  security-compliance:
+    name: Security Compliance Checks
+    runs-on: ubuntu-latest
+    needs: [build-images]
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run CIS Kubernetes Benchmark
+        run: |
+          docker run --rm -v $PWD:/app aquasec/kube-bench:latest --config-dir /app/ops/security/benchmarks run --targets master,node
+      
+      - name: Run OPA Policy Tests
+        run: |
+          docker run --rm -v $PWD/ops/opa-policies:/policies openpolicyagent/opa test /policies
+      
+      - name: SPDX License Compliance
+        uses: fossa-contrib/fossa-action@v2
+        with:
+          api-key: ${{ secrets.FOSSA_API_KEY }}
+
+  cleanup:
+    name: Cleanup Artifacts
+    runs-on: ubuntu-latest
+    needs: [deploy-production, deploy-staging]
+    if: always()
+    steps:
+      - name: Cleanup old container images
+        run: |
+          echo "Cleaning up container images older than 30 days"
+          # This would be implemented based on your registry's API

@@ -1,0 +1,990 @@
+# CRONOS AI - Production Kubernetes Cluster Configuration
+# Complete production-ready Kubernetes deployment
+
+---
+# Namespace for CRONOS AI
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cronos-ai
+  labels:
+    name: cronos-ai
+    environment: production
+    security-policy: restricted
+  annotations:
+    description: "CRONOS AI Protocol Discovery System - Production Environment"
+
+---
+# Network Policies for Security
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cronos-ai-network-policy
+  namespace: cronos-ai
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: cronos-ai
+    - namespaceSelector:
+        matchLabels:
+          name: istio-system
+    ports:
+    - protocol: TCP
+      port: 8080
+    - protocol: TCP
+      port: 9090
+    - protocol: TCP
+      port: 8000
+  egress:
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 5432  # PostgreSQL/TimescaleDB
+    - protocol: TCP
+      port: 6379  # Redis
+    - protocol: TCP
+      port: 9092  # Kafka
+    - protocol: TCP
+      port: 53   # DNS
+    - protocol: UDP
+      port: 53   # DNS
+
+---
+# Service Account for CRONOS AI
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cronos-ai-service-account
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+  annotations:
+    description: "Service account for CRONOS AI components"
+
+---
+# RBAC - ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cronos-ai-cluster-role
+  labels:
+    app: cronos-ai
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "pods", "services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["metrics.k8s.io"]
+  resources: ["nodes", "pods"]
+  verbs: ["get", "list"]
+
+---
+# RBAC - ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cronos-ai-cluster-role-binding
+  labels:
+    app: cronos-ai
+subjects:
+- kind: ServiceAccount
+  name: cronos-ai-service-account
+  namespace: cronos-ai
+roleRef:
+  kind: ClusterRole
+  name: cronos-ai-cluster-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# ConfigMap for Application Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cronos-ai-config
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: config
+data:
+  cronos_ai.yaml: |
+    environment: production
+    debug: false
+    api_host: "0.0.0.0"
+    api_port: 8080
+    worker_processes: 4
+    
+    database:
+      host: "timescaledb-service"
+      port: 5432
+      database: "cronos_ai_prod"
+      username: "cronos_prod_user"
+      ssl_mode: "require"
+      connection_pool_size: 20
+      connection_timeout: 30
+    
+    redis:
+      host: "redis-service"
+      port: 6379
+      database: 0
+      ssl: false
+      connection_pool_size: 20
+      connection_timeout: 5
+    
+    kafka:
+      bootstrap_servers: ["kafka-service:9092"]
+      security_protocol: "PLAINTEXT"
+      group_id: "cronos-ai"
+      auto_offset_reset: "latest"
+    
+    ai_engine:
+      model_cache_dir: "/opt/cronos_ai/models"
+      use_gpu: true
+      gpu_memory_limit: 0.9
+      batch_size: 64
+      max_sequence_length: 1024
+      ensemble_size: 7
+    
+    security:
+      tls_enabled: true
+      jwt_algorithm: "HS256"
+      jwt_expiration_hours: 12
+      encryption_algorithm: "AES-256-GCM"
+    
+    monitoring:
+      metrics_enabled: true
+      prometheus_enabled: true
+      prometheus_host: "0.0.0.0"
+      prometheus_port: 8000
+      health_check_enabled: true
+      health_check_interval: 30.0
+      alerting_enabled: true
+    
+    logging:
+      level: "INFO"
+      format: "json"
+      output: "stdout"
+      structured_logging: true
+      correlation_id_enabled: true
+
+---
+# Secret for Sensitive Configuration
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cronos-ai-secrets
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: secrets
+type: Opaque
+stringData:
+  database-password: "CHANGE_ME_IN_PRODUCTION"
+  redis-password: "CHANGE_ME_IN_PRODUCTION"
+  jwt-secret: "CHANGE_ME_IN_PRODUCTION"
+  encryption-key: "CHANGE_ME_IN_PRODUCTION"
+  kafka-username: "cronos-ai-user"
+  kafka-password: "CHANGE_ME_IN_PRODUCTION"
+
+---
+# AI Engine Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-engine
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: ai-engine
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: cronos-ai
+      component: ai-engine
+  template:
+    metadata:
+      labels:
+        app: cronos-ai
+        component: ai-engine
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: cronos-ai-service-account
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: ai-engine
+        image: cronos-ai/ai-engine:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 9090
+          name: grpc
+        - containerPort: 8000
+          name: metrics
+        env:
+        - name: CRONOS_ENV
+          value: "production"
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: database-password
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: redis-password
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: jwt-secret
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: encryption-key
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/cronos-ai
+        - name: models-volume
+          mountPath: /opt/cronos_ai/models
+        - name: tmp-volume
+          mountPath: /tmp
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "8Gi"
+            cpu: "4000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+      volumes:
+      - name: config-volume
+        configMap:
+          name: cronos-ai-config
+      - name: models-volume
+        persistentVolumeClaim:
+          claimName: ai-models-pvc
+      - name: tmp-volume
+        emptyDir:
+          sizeLimit: "1Gi"
+      tolerations:
+      - key: "node-type"
+        operator: "Equal"
+        value: "gpu"
+        effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: "accelerator"
+                operator: "In"
+                values: ["nvidia-tesla", "nvidia-a100"]
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: component
+                  operator: In
+                  values: ["ai-engine"]
+              topologyKey: kubernetes.io/hostname
+
+---
+# Protocol Processor Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: protocol-processor
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: protocol-processor
+spec:
+  replicas: 6
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 2
+      maxSurge: 2
+  selector:
+    matchLabels:
+      app: cronos-ai
+      component: protocol-processor
+  template:
+    metadata:
+      labels:
+        app: cronos-ai
+        component: protocol-processor
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+    spec:
+      serviceAccountName: cronos-ai-service-account
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: protocol-processor
+        image: cronos-ai/protocol-processor:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 8000
+          name: metrics
+        env:
+        - name: CRONOS_ENV
+          value: "production"
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: database-password
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: redis-password
+        - name: KAFKA_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: kafka-username
+        - name: KAFKA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: kafka-password
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/cronos-ai
+        - name: tmp-volume
+          mountPath: /tmp
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: config-volume
+        configMap:
+          name: cronos-ai-config
+      - name: tmp-volume
+        emptyDir:
+          sizeLimit: "500Mi"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: component
+                  operator: In
+                  values: ["protocol-processor"]
+              topologyKey: kubernetes.io/hostname
+
+---
+# Security Analyzer Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: security-analyzer
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: security-analyzer
+spec:
+  replicas: 4
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: cronos-ai
+      component: security-analyzer
+  template:
+    metadata:
+      labels:
+        app: cronos-ai
+        component: security-analyzer
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+    spec:
+      serviceAccountName: cronos-ai-service-account
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: security-analyzer
+        image: cronos-ai/security-analyzer:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 8000
+          name: metrics
+        env:
+        - name: CRONOS_ENV
+          value: "production"
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: database-password
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: redis-password
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/cronos-ai
+        - name: security-data-volume
+          mountPath: /opt/security-data
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "3Gi"
+            cpu: "1500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+      volumes:
+      - name: config-volume
+        configMap:
+          name: cronos-ai-config
+      - name: security-data-volume
+        persistentVolumeClaim:
+          claimName: security-data-pvc
+
+---
+# Management Console Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: management-console
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: management-console
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: cronos-ai
+      component: management-console
+  template:
+    metadata:
+      labels:
+        app: cronos-ai
+        component: management-console
+    spec:
+      serviceAccountName: cronos-ai-service-account
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: management-console
+        image: cronos-ai/management-console:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: API_ENDPOINT
+          value: "http://ai-engine-service:8080"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: jwt-secret
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+
+---
+# AI Engine Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-engine-service
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: ai-engine
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+spec:
+  type: ClusterIP
+  selector:
+    app: cronos-ai
+    component: ai-engine
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: grpc
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  - name: metrics
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+
+---
+# Protocol Processor Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: protocol-processor-service
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: protocol-processor
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+spec:
+  type: ClusterIP
+  selector:
+    app: cronos-ai
+    component: protocol-processor
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: metrics
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+
+---
+# Security Analyzer Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: security-analyzer-service
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: security-analyzer
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+spec:
+  type: ClusterIP
+  selector:
+    app: cronos-ai
+    component: security-analyzer
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: metrics
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+
+---
+# Management Console Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: management-console-service
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: management-console
+spec:
+  type: ClusterIP
+  selector:
+    app: cronos-ai
+    component: management-console
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+    protocol: TCP
+
+---
+# Ingress for External Access
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cronos-ai-ingress
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+  annotations:
+    kubernetes.io/ingress.class: "istio"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  tls:
+  - hosts:
+    - cronos-ai.example.com
+    - api.cronos-ai.example.com
+    secretName: cronos-ai-tls-cert
+  rules:
+  - host: cronos-ai.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: management-console-service
+            port:
+              number: 3000
+  - host: api.cronos-ai.example.com
+    http:
+      paths:
+      - path: /api/v1
+        pathType: Prefix
+        backend:
+          service:
+            name: ai-engine-service
+            port:
+              number: 8080
+
+---
+# Horizontal Pod Autoscaler for AI Engine
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ai-engine-hpa
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: ai-engine
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ai-engine
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+
+---
+# Horizontal Pod Autoscaler for Protocol Processor
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: protocol-processor-hpa
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: protocol-processor
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: protocol-processor
+  minReplicas: 6
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 75
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# Persistent Volume Claim for AI Models
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ai-models-pvc
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: storage
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: fast-ssd
+
+---
+# Persistent Volume Claim for Security Data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: security-data-pvc
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: storage
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: standard
+
+---
+# Pod Disruption Budget for AI Engine
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ai-engine-pdb
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: ai-engine
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: cronos-ai
+      component: ai-engine
+
+---
+# Pod Disruption Budget for Protocol Processor
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: protocol-processor-pdb
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: protocol-processor
+spec:
+  minAvailable: 4
+  selector:
+    matchLabels:
+      app: cronos-ai
+      component: protocol-processor
+
+---
+# Pod Security Policy
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: cronos-ai-psp
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1000
+        max: 65535
+  fsGroup:
+    rule: 'RunAsAny'
+  seLinux:
+    rule: 'RunAsAny'
+
+---
+# Resource Quotas
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: cronos-ai-resource-quota
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+spec:
+  hard:
+    requests.cpu: "50"
+    requests.memory: 100Gi
+    limits.cpu: "100"
+    limits.memory: 200Gi
+    persistentvolumeclaims: "10"
+    services: "20"
+    secrets: "10"
+    configmaps: "10"
+
+---
+# Limit Range
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cronos-ai-limit-range
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+spec:
+  limits:
+  - default:
+      cpu: "500m"
+      memory: "1Gi"
+    defaultRequest:
+      cpu: "100m"
+      memory: "256Mi"
+    type: Container
+  - max:
+      cpu: "8"
+      memory: "16Gi"
+    min:
+      cpu: "50m"
+      memory: "64Mi"
+    type: Container

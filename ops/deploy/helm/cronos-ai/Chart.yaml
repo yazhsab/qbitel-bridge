@@ -1,0 +1,69 @@
+apiVersion: v2
+name: cronos-ai
+description: CRONOS AI - Complete Production Stack
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+kubeVersion: ">=1.25.0"
+
+home: https://cronos-ai.example.com
+icon: https://cronos-ai.example.com/icon.png
+
+maintainers:
+  - name: CRONOS AI Team
+    email: devops@cronos-ai.example.com
+
+keywords:
+  - ai
+  - ml
+  - protocol-analysis
+  - security
+  - networking
+
+sources:
+  - https://github.com/cronos-ai/cronos-ai
+
+annotations:
+  category: Infrastructure
+  licenses: Apache-2.0
+
+dependencies:
+  - name: prometheus
+    version: "25.8.0"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    condition: monitoring.prometheus.enabled
+  
+  - name: grafana
+    version: "7.0.19"
+    repository: "https://grafana.github.io/helm-charts"
+    condition: monitoring.grafana.enabled
+  
+  - name: kafka
+    version: "26.4.2"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: kafka.enabled
+  
+  - name: redis
+    version: "18.4.0"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: redis.enabled
+  
+  - name: postgresql
+    version: "13.2.24"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: postgresql.enabled
+  
+  - name: istio-base
+    version: "1.20.0"
+    repository: "https://istio-release.storage.googleapis.com/charts"
+    condition: istio.enabled
+  
+  - name: istiod
+    version: "1.20.0"
+    repository: "https://istio-release.storage.googleapis.com/charts"
+    condition: istio.enabled
+    
+  - name: istio-gateway
+    version: "1.20.0"  
+    repository: "https://istio-release.storage.googleapis.com/charts"
+    condition: istio.gateway.enabled
