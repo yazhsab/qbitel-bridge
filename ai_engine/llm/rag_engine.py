@@ -67,7 +67,11 @@ class RAGEngine:
             'compliance_rules',
             'security_patterns',
             'field_definitions',
-            'threat_intelligence'
+            'threat_intelligence',
+            'protocol_translation_patterns',
+            'api_design_patterns',
+            'code_generation_templates',
+            'translation_best_practices'
         ]
         
         # Query cache
@@ -251,8 +255,8 @@ class RAGEngine:
             )
     
     async def enhance_query_context(
-        self, 
-        query: str, 
+        self,
+        query: str,
         existing_context: Dict[str, Any] = None
     ) -> Dict[str, Any]:
         """
@@ -320,8 +324,8 @@ class RAGEngine:
             'rag_metadata': {
                 'query_processed_at': datetime.now().isoformat(),
                 'total_results': (
-                    protocol_results.total_results + 
-                    compliance_results.total_results + 
+                    protocol_results.total_results +
+                    compliance_results.total_results +
                     security_results.total_results
                 ),
                 'avg_similarity': np.mean([
@@ -337,6 +341,232 @@ class RAGEngine:
         })
         
         return enhanced_context
+
+    async def enhance_translation_context(
+        self,
+        query: str,
+        source_protocol: str = None,
+        target_protocol: str = None,
+        existing_context: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
+        """
+        Enhance query with translation-specific context from knowledge base.
+        
+        Args:
+            query: Translation query
+            source_protocol: Source protocol name
+            target_protocol: Target protocol name
+            existing_context: Existing context to enhance
+            
+        Returns:
+            Enhanced context with translation-specific knowledge
+        """
+        enhanced_context = existing_context or {}
+        
+        # Search for protocol translation patterns
+        translation_query = f"{query} {source_protocol or ''} {target_protocol or ''} protocol translation"
+        translation_results = await self.query_similar(
+            translation_query,
+            collection_name='protocol_translation_patterns',
+            n_results=3,
+            similarity_threshold=0.5
+        )
+        
+        # Search for API design patterns
+        api_query = f"{query} API design patterns {target_protocol or ''}"
+        api_results = await self.query_similar(
+            api_query,
+            collection_name='api_design_patterns',
+            n_results=2,
+            similarity_threshold=0.5
+        )
+        
+        # Search for code generation templates
+        code_query = f"{query} code generation templates"
+        code_results = await self.query_similar(
+            code_query,
+            collection_name='code_generation_templates',
+            n_results=2,
+            similarity_threshold=0.5
+        )
+        
+        # Search for translation best practices
+        practices_query = f"{query} translation best practices"
+        practices_results = await self.query_similar(
+            practices_query,
+            collection_name='translation_best_practices',
+            n_results=2,
+            similarity_threshold=0.5
+        )
+        
+        # Combine translation-specific results
+        enhanced_context.update({
+            'translation_patterns': [
+                {
+                    'content': doc.content,
+                    'metadata': doc.metadata,
+                    'similarity': score
+                }
+                for doc, score in zip(translation_results.documents, translation_results.similarity_scores)
+            ],
+            'api_design_patterns': [
+                {
+                    'content': doc.content,
+                    'metadata': doc.metadata,
+                    'similarity': score
+                }
+                for doc, score in zip(api_results.documents, api_results.similarity_scores)
+            ],
+            'code_generation_templates': [
+                {
+                    'content': doc.content,
+                    'metadata': doc.metadata,
+                    'similarity': score
+                }
+                for doc, score in zip(code_results.documents, code_results.similarity_scores)
+            ],
+            'best_practices': [
+                {
+                    'content': doc.content,
+                    'metadata': doc.metadata,
+                    'similarity': score
+                }
+                for doc, score in zip(practices_results.documents, practices_results.similarity_scores)
+            ],
+            'translation_metadata': {
+                'source_protocol': source_protocol,
+                'target_protocol': target_protocol,
+                'query_processed_at': datetime.now().isoformat(),
+                'total_translation_results': (
+                    translation_results.total_results +
+                    api_results.total_results +
+                    code_results.total_results +
+                    practices_results.total_results
+                )
+            }
+        })
+        
+        return enhanced_context
+
+    async def query_protocol_patterns(
+        self,
+        protocol_name: str,
+        pattern_type: str = 'all',
+        n_results: int = 5
+    ) -> RAGQueryResult:
+        """
+        Query for protocol-specific patterns and knowledge.
+        
+        Args:
+            protocol_name: Name of the protocol
+            pattern_type: Type of patterns (translation, api, security, all)
+            n_results: Number of results to return
+            
+        Returns:
+            RAG query result with protocol patterns
+        """
+        query = f"{protocol_name} protocol patterns {pattern_type}"
+        
+        if pattern_type == 'translation':
+            return await self.query_similar(
+                query, 'protocol_translation_patterns', n_results, 0.5
+            )
+        elif pattern_type == 'api':
+            return await self.query_similar(
+                query, 'api_design_patterns', n_results, 0.5
+            )
+        elif pattern_type == 'security':
+            return await self.query_similar(
+                query, 'security_patterns', n_results, 0.5
+            )
+        else:
+            # Search across all relevant collections
+            collections = [
+                'protocol_knowledge',
+                'protocol_translation_patterns',
+                'api_design_patterns',
+                'security_patterns'
+            ]
+            
+            all_results = []
+            all_scores = []
+            
+            for collection in collections:
+                if collection in self.collections:
+                    result = await self.query_similar(
+                        query, collection, max(1, n_results // len(collections)), 0.5
+                    )
+                    all_results.extend(result.documents)
+                    all_scores.extend(result.similarity_scores)
+            
+            # Sort and limit results
+            if all_results:
+                sorted_pairs = sorted(
+                    zip(all_results, all_scores),
+                    key=lambda x: x[1],
+                    reverse=True
+                )
+                all_results, all_scores = zip(*sorted_pairs)
+                all_results = list(all_results)[:n_results]
+                all_scores = list(all_scores)[:n_results]
+            
+            return RAGQueryResult(
+                documents=all_results,
+                similarity_scores=all_scores,
+                query_embedding=[],
+                processing_time=0.0,
+                total_results=len(all_results)
+            )
+
+    async def get_code_generation_templates(
+        self,
+        language: str,
+        template_type: str = 'client',
+        n_results: int = 3
+    ) -> RAGQueryResult:
+        """
+        Get code generation templates for specific language and type.
+        
+        Args:
+            language: Programming language (python, typescript, etc.)
+            template_type: Type of template (client, models, tests)
+            n_results: Number of results to return
+            
+        Returns:
+            RAG query result with code templates
+        """
+        query = f"{language} {template_type} code generation template"
+        
+        return await self.query_similar(
+            query,
+            collection_name='code_generation_templates',
+            n_results=n_results,
+            similarity_threshold=0.4
+        )
+
+    async def get_translation_best_practices(
+        self,
+        context: str = 'general',
+        n_results: int = 5
+    ) -> RAGQueryResult:
+        """
+        Get translation best practices for specific context.
+        
+        Args:
+            context: Context for best practices (api, protocol, security)
+            n_results: Number of results to return
+            
+        Returns:
+            RAG query result with best practices
+        """
+        query = f"{context} translation best practices"
+        
+        return await self.query_similar(
+            query,
+            collection_name='translation_best_practices',
+            n_results=n_results,
+            similarity_threshold=0.4
+        )
     
     async def _load_initial_knowledge(self) -> None:
         """Load initial knowledge base with protocol information."""
@@ -483,7 +713,278 @@ class RAGEngine:
             
             await self.add_documents('security_patterns', security_docs)
             
-            self.logger.info("Initial knowledge base loaded successfully")
+            # Load protocol translation patterns
+            translation_docs = [
+                RAGDocument(
+                    id="http_to_rest_pattern",
+                    content="""HTTP to REST API Translation Pattern:
+                    
+                    Common mappings:
+                    - HTTP GET requests map to REST GET endpoints
+                    - HTTP POST requests map to REST POST/PUT endpoints
+                    - HTTP headers become API parameters or headers
+                    - Query parameters remain query parameters
+                    - Request/response bodies map to JSON schemas
+                    
+                    Best practices:
+                    - Preserve HTTP semantics in REST design
+                    - Use appropriate HTTP status codes
+                    - Maintain idempotency for safe operations
+                    - Handle authentication consistently
+                    - Implement proper error handling
+                    """,
+                    metadata={
+                        'source_protocol': 'HTTP',
+                        'target_format': 'REST',
+                        'pattern_type': 'protocol_to_api',
+                        'confidence': 'high'
+                    },
+                    created_at=datetime.now()
+                ),
+                RAGDocument(
+                    id="binary_to_json_pattern",
+                    content="""Binary Protocol to JSON API Pattern:
+                    
+                    Translation strategies:
+                    - Binary fields become JSON properties with appropriate types
+                    - Fixed-length fields map to structured JSON objects
+                    - Length-prefixed strings become JSON strings
+                    - Binary data encoded as base64 or hex strings
+                    - Nested structures become nested JSON objects
+                    
+                    Considerations:
+                    - Data type preservation is critical
+                    - Endianness handling for multi-byte values
+                    - Validation of field constraints
+                    - Performance impact of encoding/decoding
+                    - Version compatibility across protocol changes
+                    """,
+                    metadata={
+                        'source_format': 'binary',
+                        'target_format': 'json',
+                        'pattern_type': 'data_transformation',
+                        'complexity': 'medium'
+                    },
+                    created_at=datetime.now()
+                )
+            ]
+            
+            await self.add_documents('protocol_translation_patterns', translation_docs)
+            
+            # Load API design patterns
+            api_design_docs = [
+                RAGDocument(
+                    id="rest_crud_pattern",
+                    content="""RESTful CRUD API Design Pattern:
+                    
+                    Standard endpoints:
+                    - POST /resources - Create new resource
+                    - GET /resources - List resources (with pagination)
+                    - GET /resources/{id} - Retrieve specific resource
+                    - PUT /resources/{id} - Update entire resource
+                    - PATCH /resources/{id} - Partial update
+                    - DELETE /resources/{id} - Remove resource
+                    
+                    Additional patterns:
+                    - GET /resources/{id}/relationships - Access related resources
+                    - POST /resources/{id}/actions - Trigger resource actions
+                    - HEAD /resources/{id} - Check resource existence
+                    - OPTIONS /resources - Get available methods
+                    """,
+                    metadata={
+                        'api_style': 'REST',
+                        'pattern_category': 'CRUD',
+                        'maturity_level': 'standard',
+                        'use_cases': ['data_management', 'resource_access']
+                    },
+                    created_at=datetime.now()
+                ),
+                RAGDocument(
+                    id="async_api_pattern",
+                    content="""Asynchronous API Pattern:
+                    
+                    Implementation approaches:
+                    - POST /jobs - Submit asynchronous job
+                    - GET /jobs/{id} - Check job status
+                    - GET /jobs/{id}/result - Retrieve completed result
+                    - DELETE /jobs/{id} - Cancel pending job
+                    
+                    Webhook notifications:
+                    - POST /webhooks - Register webhook endpoint
+                    - Callback on job completion/failure
+                    - Include job ID and status in callback
+                    
+                    Status states: queued, processing, completed, failed, cancelled
+                    """,
+                    metadata={
+                        'api_style': 'REST',
+                        'pattern_category': 'asynchronous',
+                        'complexity': 'high',
+                        'use_cases': ['long_running_operations', 'batch_processing']
+                    },
+                    created_at=datetime.now()
+                )
+            ]
+            
+            await self.add_documents('api_design_patterns', api_design_docs)
+            
+            # Load code generation templates
+            code_templates = [
+                RAGDocument(
+                    id="python_client_template",
+                    content="""Python SDK Client Template:
+                    
+                    Basic structure:
+                    ```python
+                    import httpx
+                    from typing import Dict, Any, Optional
+                    
+                    class APIClient:
+                        def __init__(self, base_url: str, api_key: str):
+                            self.base_url = base_url
+                            self.client = httpx.AsyncClient(
+                                base_url=base_url,
+                                headers={'Authorization': f'Bearer {api_key}'}
+                            )
+                        
+                        async def request(self, method: str, endpoint: str, **kwargs):
+                            response = await self.client.request(method, endpoint, **kwargs)
+                            response.raise_for_status()
+                            return response.json()
+                    ```
+                    
+                    Key features: async/await, error handling, authentication, type hints
+                    """,
+                    metadata={
+                        'language': 'python',
+                        'template_type': 'client',
+                        'features': ['async', 'authentication', 'error_handling'],
+                        'dependencies': ['httpx']
+                    },
+                    created_at=datetime.now()
+                ),
+                RAGDocument(
+                    id="typescript_interface_template",
+                    content="""TypeScript Interface Template:
+                    
+                    Basic structure:
+                    ```typescript
+                    export interface APIResponse<T> {
+                        data: T;
+                        metadata?: Record<string, any>;
+                        errors?: string[];
+                    }
+                    
+                    export interface APIClient {
+                        request<T>(
+                            method: string,
+                            endpoint: string,
+                            options?: RequestOptions
+                        ): Promise<APIResponse<T>>;
+                    }
+                    
+                    export interface RequestOptions {
+                        params?: Record<string, any>;
+                        data?: any;
+                        headers?: Record<string, string>;
+                    }
+                    ```
+                    
+                    Key features: generic types, strict typing, optional properties
+                    """,
+                    metadata={
+                        'language': 'typescript',
+                        'template_type': 'interfaces',
+                        'features': ['generics', 'strict_typing', 'optional_properties'],
+                        'patterns': ['response_wrapper', 'request_options']
+                    },
+                    created_at=datetime.now()
+                )
+            ]
+            
+            await self.add_documents('code_generation_templates', code_templates)
+            
+            # Load translation best practices
+            best_practices_docs = [
+                RAGDocument(
+                    id="api_translation_practices",
+                    content="""API Translation Best Practices:
+                    
+                    1. Maintain Semantic Consistency:
+                       - Preserve original intent and meaning
+                       - Use consistent naming conventions
+                       - Map similar concepts to similar structures
+                    
+                    2. Handle Data Types Properly:
+                       - Validate type conversions
+                       - Handle precision loss gracefully
+                       - Document type mapping decisions
+                    
+                    3. Error Handling:
+                       - Translate error codes appropriately
+                       - Provide meaningful error messages
+                       - Include context for debugging
+                    
+                    4. Performance Considerations:
+                       - Minimize unnecessary data transformations
+                       - Cache frequently accessed mappings
+                       - Use streaming for large datasets
+                    
+                    5. Security:
+                       - Validate all input data
+                       - Sanitize translated outputs
+                       - Maintain authentication context
+                    """,
+                    metadata={
+                        'category': 'api_translation',
+                        'importance': 'high',
+                        'scope': 'general',
+                        'applies_to': ['REST', 'GraphQL', 'gRPC']
+                    },
+                    created_at=datetime.now()
+                ),
+                RAGDocument(
+                    id="protocol_bridge_practices",
+                    content="""Protocol Bridge Best Practices:
+                    
+                    1. Real-time Translation:
+                       - Minimize latency in translation pipeline
+                       - Use connection pooling for efficiency
+                       - Implement proper backpressure handling
+                    
+                    2. Data Integrity:
+                       - Validate translations bidirectionally
+                       - Handle partial translation failures
+                       - Maintain transaction semantics where applicable
+                    
+                    3. Monitoring and Observability:
+                       - Track translation success rates
+                       - Monitor performance metrics
+                       - Log translation errors with context
+                    
+                    4. Scalability:
+                       - Support horizontal scaling
+                       - Use caching for frequently translated patterns
+                       - Implement circuit breakers for fault tolerance
+                    
+                    5. Configuration Management:
+                       - Allow runtime configuration updates
+                       - Support multiple protocol versions
+                       - Enable feature flags for gradual rollout
+                    """,
+                    metadata={
+                        'category': 'protocol_bridge',
+                        'importance': 'critical',
+                        'scope': 'infrastructure',
+                        'applies_to': ['streaming', 'batch_processing', 'real_time']
+                    },
+                    created_at=datetime.now()
+                )
+            ]
+            
+            await self.add_documents('translation_best_practices', best_practices_docs)
+            
+            self.logger.info("Initial knowledge base with translation extensions loaded successfully")
             
         except Exception as e:
             self.logger.error(f"Failed to load initial knowledge base: {e}")
