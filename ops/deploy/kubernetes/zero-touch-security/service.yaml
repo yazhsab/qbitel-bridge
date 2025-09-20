@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cronos-security-orchestrator
+  namespace: cronos-security
+  labels:
+    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/component: security
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: health
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/component: security
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cronos-security-orchestrator-headless
+  namespace: cronos-security
+  labels:
+    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/component: security
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: health
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/component: security

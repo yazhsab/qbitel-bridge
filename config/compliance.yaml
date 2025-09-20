@@ -1,0 +1,249 @@
+# CRONOS AI - Compliance Reporter Configuration
+# Production-ready configuration for autonomous compliance reporting
+
+compliance:
+  # Service configuration
+  enabled: true
+  service_name: "cronos-ai-compliance-reporter"
+  version: "1.0.0"
+  
+  # Assessment configuration
+  assessment:
+    enabled: true
+    interval_hours: 24  # Run assessments every 24 hours
+    max_concurrent: 3   # Maximum concurrent assessments
+    timeout_seconds: 300
+    retry_attempts: 3
+    cache_ttl_hours: 6
+    
+  # Supported compliance frameworks
+  frameworks:
+    pci_dss:
+      enabled: true
+      version: "4.0"
+      priority: "critical"
+      assessment_frequency_hours: 24
+    basel_iii:
+      enabled: true
+      version: "2022"
+      priority: "high"
+      assessment_frequency_hours: 48
+    hipaa:
+      enabled: true
+      version: "2013"
+      priority: "critical"
+      assessment_frequency_hours: 24
+    nerc_cip:
+      enabled: true
+      version: "014"
+      priority: "critical"
+      assessment_frequency_hours: 12
+    fda_medical:
+      enabled: true
+      version: "2022"
+      priority: "high"
+      assessment_frequency_hours: 72
+      
+  # Reporting configuration
+  reporting:
+    enabled: true
+    formats: ["pdf", "excel", "json", "html"]
+    retention_days: 2555  # 7 years
+    max_report_size_mb: 100
+    template_directory: "/app/templates/compliance"
+    output_directory: "/app/data/reports"
+    
+    # Report types
+    types:
+      executive_summary:
+        enabled: true
+        auto_generate: true
+        formats: ["pdf", "html"]
+      detailed_technical:
+        enabled: true
+        auto_generate: false
+        formats: ["pdf", "excel"]
+      gap_analysis:
+        enabled: true
+        auto_generate: true
+        formats: ["excel", "json"]
+      regulatory_filing:
+        enabled: true
+        auto_generate: false
+        formats: ["pdf"]
+        
+  # Audit trail configuration
+  audit_trail:
+    enabled: true
+    blockchain_enabled: true
+    block_size: 100  # Events per block
+    block_interval_seconds: 300  # 5 minutes
+    encryption_enabled: true
+    signature_algorithm: "RSA-2048"
+    hash_algorithm: "SHA-256"
+    retention_years: 10
+    
+  # Data integration configuration
+  integrations:
+    timescaledb:
+      enabled: true
+      retention_policy: "7 years"
+      compression_enabled: true
+      partition_interval: "1 day"
+      
+    redis:
+      enabled: true
+      cache_prefix: "compliance:"
+      default_ttl_hours: 6
+      max_memory_policy: "allkeys-lru"
+      
+    security:
+      enabled: true
+      encryption_at_rest: true
+      encryption_in_transit: true
+      access_logging: true
+      data_masking: true
+      
+  # LLM integration
+  llm:
+    provider_routing:
+      primary: "anthropic_claude"
+      fallback: ["openai_gpt4", "ollama_local"]
+    temperature: 0.1  # Low temperature for consistent compliance analysis
+    max_tokens: 3000
+    timeout_seconds: 60
+    retry_attempts: 3
+    
+  # Performance and scaling
+  performance:
+    batch_size: 50
+    worker_pool_size: 4
+    queue_size: 1000
+    memory_limit_gb: 8
+    cpu_limit_cores: 4
+    
+  # Monitoring and alerting
+  monitoring:
+    enabled: true
+    metrics_collection: true
+    health_checks: true
+    prometheus_enabled: true
+    
+    # Compliance-specific metrics
+    metrics:
+      compliance_score_threshold: 80.0
+      risk_score_threshold: 30.0
+      assessment_duration_threshold_minutes: 30
+      report_generation_threshold_minutes: 10
+      
+    # Alerting thresholds
+    alerts:
+      critical_compliance_score: 60.0
+      high_risk_score: 70.0
+      assessment_failure_threshold: 5
+      report_failure_threshold: 3
+      audit_integrity_check: true
+      
+  # Security configuration
+  security:
+    authentication_required: true
+    authorization_model: "RBAC"
+    audit_all_access: true
+    data_classification: true
+    encryption_algorithms: ["AES-256-GCM", "ChaCha20-Poly1305"]
+    
+    # Access control
+    roles:
+      compliance_admin:
+        permissions: ["read", "write", "admin", "audit"]
+        frameworks: ["all"]
+      compliance_analyst:
+        permissions: ["read", "write"]
+        frameworks: ["pci_dss", "hipaa"]
+      compliance_auditor:
+        permissions: ["read", "audit"]
+        frameworks: ["all"]
+      executive:
+        permissions: ["read"]
+        frameworks: ["all"]
+        report_types: ["executive_summary"]
+        
+  # Business configuration
+  business:
+    organization:
+      name: "CRONOS AI Enterprise"
+      industry: "Technology"
+      regulatory_environment: "Multi-jurisdictional"
+      risk_appetite: "Low"
+      
+    compliance_officer:
+      name: "Chief Compliance Officer"
+      email: "cco@cronos.ai"
+      phone: "+1-555-0100"
+      
+    regulatory_contacts:
+      pci_dss:
+        authority: "PCI Security Standards Council"
+        contact: "compliance@pcisecuritystandards.org"
+      hipaa:
+        authority: "HHS Office for Civil Rights"
+        contact: "OCRCompliance@hhs.gov"
+      basel_iii:
+        authority: "Basel Committee on Banking Supervision"
+        contact: "basel.secretariat@bis.org"
+        
+  # Operational configuration
+  operations:
+    backup:
+      enabled: true
+      frequency: "daily"
+      retention_days: 90
+      encryption_enabled: true
+      
+    disaster_recovery:
+      enabled: true
+      rto_hours: 4  # Recovery Time Objective
+      rpo_hours: 1  # Recovery Point Objective
+      failover_mode: "automatic"
+      
+    maintenance:
+      window_start: "02:00"
+      window_duration_hours: 2
+      timezone: "UTC"
+      notification_hours_advance: 24
+
+# Environment-specific overrides
+environments:
+  development:
+    compliance:
+      assessment:
+        interval_hours: 1  # More frequent in dev
+        cache_ttl_hours: 1
+      audit_trail:
+        block_interval_seconds: 60  # Faster blocks in dev
+      monitoring:
+        alerts:
+          critical_compliance_score: 50.0  # Lower thresholds in dev
+          
+  staging:
+    compliance:
+      assessment:
+        interval_hours: 6
+        max_concurrent: 2
+      reporting:
+        retention_days: 30  # Shorter retention in staging
+        
+  production:
+    compliance:
+      assessment:
+        interval_hours: 24
+        max_concurrent: 5
+      reporting:
+        retention_days: 2555  # Full 7-year retention in production
+      security:
+        authentication_required: true
+        audit_all_access: true
+      operations:
+        backup:
+          frequency: "every_6_hours"
+          retention_days: 365

@@ -506,3 +506,442 @@ environment_overrides:
     test_endpoints_enabled: true
     audit_level: "minimal"
     compliance_mode: "relaxed"
+
+# Zero-Touch Security Orchestrator Integration Configuration
+zero_touch_integrations:
+  enabled: true
+  
+  # Integration Manager Settings
+  integration_manager:
+    health_check_interval: "5m"
+    connection_retry_interval: "10m"
+    max_failed_attempts: 5
+    auto_disable_threshold: 10
+    
+  # Enhanced SIEM Integration for Zero-Touch Orchestrator
+  enhanced_siem:
+    enabled: true
+    connector_type: "splunk"  # Options: splunk, qradar
+    endpoint: "${SIEM_ENDPOINT}"
+    credentials:
+      username: "${SIEM_USERNAME}"
+      password: "${SIEM_PASSWORD}"
+      hec_token: "${SPLUNK_HEC_TOKEN}"  # For Splunk
+      sec_token: "${QRADAR_SEC_TOKEN}"  # For QRadar
+    timeout_seconds: 30
+    retry_attempts: 3
+    retry_delay_seconds: 5
+    rate_limit_requests_per_minute: 100
+    custom_config:
+      index: "cronos-security"
+      log_source_id: 1001
+      default_assignee: "cronos-ai"
+      auto_create_alerts: true
+      alert_severity_mapping:
+        critical: "critical"
+        high: "high"
+        medium: "medium"
+        low: "low"
+        informational: "informational"
+  
+  # Ticketing System Integration
+  ticketing_system:
+    enabled: true
+    system_type: "servicenow"  # Options: servicenow, jira
+    endpoint: "${TICKETING_ENDPOINT}"
+    credentials:
+      username: "${TICKETING_USERNAME}"
+      password: "${TICKETING_PASSWORD}"
+      api_token: "${TICKETING_API_TOKEN}"  # For Jira
+    timeout_seconds: 30
+    retry_attempts: 3
+    auto_retry: true
+    max_failures_before_disable: 5
+    rate_limit_requests_per_minute: 60
+    custom_config:
+      # ServiceNow specific
+      table_name: "incident"
+      default_caller: "cronos-ai-system"
+      security_group: "CRONOS AI Security Operations"
+      auto_assign: true
+      priority_mapping:
+        critical: "1"  # Critical
+        high: "2"      # High
+        medium: "3"    # Moderate
+        low: "4"       # Low
+        informational: "5"  # Planning
+      
+      # Jira specific
+      project_key: "CROSEC"
+      issue_type: "Security Incident"
+      security_component: "Security Operations"
+      priority_mapping:
+        critical: "Highest"
+        high: "High"
+        medium: "Medium"
+        low: "Low"
+        informational: "Lowest"
+      
+      # Workflow automation
+      auto_create_tickets: true
+      ticket_creation_threshold: "high"  # Only create tickets for high+ severity
+      auto_update_tickets: true
+      auto_close_tickets: false  # Require manual closure
+  
+  # Communication Systems Integration
+  communication_systems:
+    # Slack Integration
+    slack:
+      enabled: true
+      endpoint: "https://slack.com/api"
+      credentials:
+        bot_token: "${SLACK_BOT_TOKEN}"
+        webhook_url: "${SLACK_WEBHOOK_URL}"
+      timeout_seconds: 15
+      retry_attempts: 2
+      rate_limit_requests_per_minute: 1000  # Slack's API limit
+      custom_config:
+        default_channel: "#cronos-security-alerts"
+        threat_analysis_channel: "#cronos-threat-intel"
+        operations_channel: "#cronos-security-ops"
+        executive_channel: "#cronos-executive-alerts"
+        
+        # Channel routing by severity
+        channel_mapping:
+          critical: "#cronos-critical-alerts"
+          high: "#cronos-high-priority"
+          medium: "#cronos-security-alerts"
+          low: "#cronos-security-alerts"
+          informational: "#cronos-security-info"
+          default: "#cronos-security-alerts"
+        
+        # Message formatting
+        use_rich_formatting: true
+        include_thread_replies: true
+        mention_on_critical: true
+        critical_mentions:
+          - "@security-team"
+          - "@incident-response"
+        
+        # Workflow integration
+        enable_interactive_buttons: true
+        enable_workflow_triggers: true
+    
+    # Email Integration
+    email:
+      enabled: true
+      credentials:
+        username: "${SMTP_USERNAME}"
+        password: "${SMTP_PASSWORD}"
+      timeout_seconds: 30
+      retry_attempts: 3
+      custom_config:
+        smtp_server: "${SMTP_SERVER}"
+        smtp_port: 587
+        use_tls: true
+        use_html: true
+        
+        # Default recipients
+        default_recipients:
+          - "cronos-security-team@enterprise.com"
+          - "soc@enterprise.com"
+        
+        # Team-specific distributions
+        security_team_recipients:
+          - "cronos-security-team@enterprise.com"
+          - "threat-intel@enterprise.com"
+          - "malware-analysis@enterprise.com"
+          
+        operations_team_recipients:
+          - "cronos-security-ops@enterprise.com"
+          - "incident-response@enterprise.com"
+          - "forensics@enterprise.com"
+          
+        executive_recipients:
+          - "ciso@enterprise.com"
+          - "cto@enterprise.com"
+          - "security-leadership@enterprise.com"
+        
+        # Severity-based routing
+        recipient_mapping:
+          critical:
+            - "ciso@enterprise.com"
+            - "cronos-security-team@enterprise.com"
+            - "incident-response@enterprise.com"
+            - "security-leadership@enterprise.com"
+          high:
+            - "cronos-security-team@enterprise.com"
+            - "soc@enterprise.com"
+            - "incident-response@enterprise.com"
+          medium:
+            - "soc@enterprise.com"
+            - "cronos-security-ops@enterprise.com"
+          low:
+            - "soc@enterprise.com"
+          informational:
+            - "soc@enterprise.com"
+          default:
+            - "soc@enterprise.com"
+        
+        # Email templates
+        use_templates: true
+        template_directory: "/etc/cronos-ai/templates/email"
+        include_attachments: false  # Security policy
+        max_email_size: "10MB"
+  
+  # Network Security Systems Integration
+  network_security_systems:
+    # Firewall Integration
+    firewall:
+      enabled: true
+      endpoint: "${FIREWALL_ENDPOINT}"
+      credentials:
+        api_key: "${FIREWALL_API_KEY}"
+        username: "${FIREWALL_USERNAME}"
+        password: "${FIREWALL_PASSWORD}"
+      timeout_seconds: 45
+      retry_attempts: 2
+      rate_limit_requests_per_minute: 30  # Conservative for firewall APIs
+      custom_config:
+        firewall_type: "palo_alto"  # Options: palo_alto, checkpoint, fortinet, generic
+        
+        # Automatic blocking settings
+        auto_block_duration: 60     # minutes
+        auto_block_threshold: "high"  # Only auto-block high+ severity threats
+        max_auto_blocks_per_hour: 100
+        
+        # Block list management
+        block_list_name: "CRONOS_AI_BLOCKED"
+        use_dynamic_blocking: true
+        enable_geo_blocking: false
+        
+        # Rule management
+        rule_prefix: "CRONOS_AI_"
+        rule_description_template: "Blocked by CRONOS AI - {reason} - {timestamp}"
+        auto_cleanup_rules: true
+        rule_cleanup_interval: "24h"
+        
+        # Safety constraints
+        never_block_ranges:
+          - "10.0.0.0/8"      # Internal networks
+          - "172.16.0.0/12"   # Internal networks
+          - "192.168.0.0/16"  # Internal networks
+          - "127.0.0.0/8"     # Loopback
+        
+        whitelist_ips:
+          - "${MANAGEMENT_NETWORK}"
+          - "${BACKUP_NETWORK}"
+        
+        # Integration with legacy systems
+        legacy_system_protection: true
+        legacy_quarantine_vlan: "999"
+    
+    # IDS/IPS Integration
+    ids_ips:
+      enabled: false  # Disabled by default, enable per environment
+      endpoint: "${IDS_ENDPOINT}"
+      credentials:
+        api_token: "${IDS_API_TOKEN}"
+        username: "${IDS_USERNAME}"
+        password: "${IDS_PASSWORD}"
+      timeout_seconds: 30
+      retry_attempts: 2
+      custom_config:
+        ids_type: "suricata"  # Options: suricata, snort, generic
+        
+        # Rule management
+        rule_update_interval: "1h"
+        auto_enable_rules: true
+        rule_severity_threshold: "medium"
+        
+        # Signature management
+        signature_feeds:
+          - name: "emerging_threats"
+            url: "https://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz"
+            enabled: true
+          - name: "cronos_custom"
+            url: "${CRONOS_SIGNATURE_FEED}"
+            enabled: true
+        
+        # Event processing
+        event_correlation: true
+        correlation_window: "5m"
+        deduplication_enabled: true
+        
+        # Performance settings
+        max_rules_per_category: 1000
+        rule_performance_monitoring: true
+  
+  # Integration Performance and Reliability
+  performance:
+    # Connection pooling
+    connection_pooling:
+      enabled: true
+      max_connections_per_host: 10
+      connection_timeout: "30s"
+      keep_alive_timeout: "60s"
+    
+    # Circuit breaker settings
+    circuit_breaker:
+      enabled: true
+      failure_threshold: 5
+      recovery_timeout: "60s"
+      half_open_max_calls: 3
+    
+    # Rate limiting
+    rate_limiting:
+      enabled: true
+      global_limit: 1000  # requests per minute
+      per_integration_limit: 200
+      burst_limit: 50
+    
+    # Caching
+    response_caching:
+      enabled: true
+      cache_ttl: "5m"
+      max_cache_size: "100MB"
+      cache_compression: true
+    
+    # Async processing
+    async_processing:
+      enabled: true
+      worker_threads: 10
+      queue_size: 1000
+      batch_processing: true
+      batch_size: 50
+      batch_timeout: "10s"
+  
+  # Security and Compliance
+  security:
+    # Credential management
+    credentials:
+      encryption_enabled: true
+      rotation_interval: "90d"
+      hsm_integration: true
+      vault_integration: true
+    
+    # API security
+    api_security:
+      tls_version: "1.3"
+      certificate_validation: true
+      mutual_tls: false  # Enable per integration as needed
+      api_key_rotation: true
+      
+    # Data protection
+    data_protection:
+      encrypt_in_transit: true
+      encrypt_at_rest: true
+      data_classification: true
+      pii_detection: true
+      data_masking: true
+    
+    # Audit and compliance
+    audit:
+      log_all_requests: true
+      log_response_bodies: false  # Security policy
+      audit_retention: "7y"
+      compliance_frameworks: ["soc2", "iso27001", "pci_dss"]
+  
+  # Monitoring and Alerting
+  monitoring:
+    # Health monitoring
+    health_checks:
+      enabled: true
+      check_interval: "1m"
+      timeout: "30s"
+      failure_threshold: 3
+    
+    # Performance monitoring
+    performance_monitoring:
+      enabled: true
+      metrics_interval: "30s"
+      track_response_times: true
+      track_error_rates: true
+      track_throughput: true
+    
+    # Integration-specific alerts
+    alerts:
+      integration_down:
+        severity: "critical"
+        channels: ["slack", "email", "pagerduty"]
+      high_error_rate:
+        threshold: 0.1  # 10% error rate
+        severity: "high"
+        channels: ["slack", "email"]
+      slow_response:
+        threshold: "30s"
+        severity: "medium"
+        channels: ["slack"]
+      quota_exceeded:
+        threshold: 0.9  # 90% of rate limit
+        severity: "medium"
+        channels: ["slack"]
+
+# Environment-specific Integration Overrides
+integration_environment_overrides:
+  production:
+    zero_touch_integrations:
+      enhanced_siem:
+        retry_attempts: 5
+        rate_limit_requests_per_minute: 200
+      ticketing_system:
+        auto_create_tickets: true
+        ticket_creation_threshold: "medium"
+        max_failures_before_disable: 10
+      communication_systems:
+        slack:
+          enable_interactive_buttons: true
+          mention_on_critical: true
+        email:
+          use_html: true
+          include_attachments: false
+      network_security_systems:
+        firewall:
+          auto_block_threshold: "high"
+          max_auto_blocks_per_hour: 50
+        ids_ips:
+          enabled: true
+          auto_enable_rules: true
+      
+  staging:
+    zero_touch_integrations:
+      enhanced_siem:
+        custom_config:
+          index: "cronos-security-staging"
+      ticketing_system:
+        auto_create_tickets: false
+        custom_config:
+          project_key: "CROSEC-STG"
+      communication_systems:
+        slack:
+          custom_config:
+            default_channel: "#cronos-security-staging"
+        email:
+          custom_config:
+            default_recipients:
+              - "cronos-security-staging@enterprise.com"
+      network_security_systems:
+        firewall:
+          auto_block_threshold: "critical"
+          max_auto_blocks_per_hour: 10
+        ids_ips:
+          enabled: false
+          
+  development:
+    zero_touch_integrations:
+      enhanced_siem:
+        enabled: false
+      ticketing_system:
+        enabled: false
+      communication_systems:
+        slack:
+          enabled: false
+        email:
+          custom_config:
+            default_recipients:
+              - "cronos-dev@enterprise.com"
+      network_security_systems:
+        firewall:
+          enabled: false
+        ids_ips:
+          enabled: false

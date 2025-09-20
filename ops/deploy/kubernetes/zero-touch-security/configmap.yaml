@@ -1,0 +1,442 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cronos-security-config
+  namespace: cronos-security
+  labels:
+    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/component: security
+data:
+  enterprise-security-config.yaml: |
+    # CRONOS AI Engine - Zero-Touch Security Orchestrator Configuration
+    # Production-Ready Kubernetes Configuration
+    
+    security:
+      enabled: true
+      mode: "enterprise"
+      compliance_mode: "strict"
+      fips_mode: true
+      common_criteria: true
+      security_level: "high"
+      default_deny: true
+    
+    # Zero-Touch Security Orchestrator Core Configuration
+    zero_touch_orchestrator:
+      enabled: true
+      autonomous_mode: true
+      confidence_threshold: 0.95
+      escalation_threshold: 0.85
+      max_concurrent_operations: 100
+      response_timeout: "10m"
+      
+      # LLM Configuration
+      llm_config:
+        provider: "openai"
+        model: "gpt-4"
+        temperature: 0.1
+        max_tokens: 2000
+        fallback_providers: ["anthropic", "ollama"]
+        
+      # Decision Engine Settings
+      decision_engine:
+        confidence_decay_rate: 0.05
+        learning_rate: 0.001
+        max_decision_time: "30s"
+        require_human_approval_below: 0.8
+    
+    # Legacy System Configuration
+    legacy_systems:
+      enabled: true
+      protocols:
+        hl7_mllp:
+          enabled: true
+          safety_constraints:
+            max_quarantine_duration: "4h"
+            preserve_patient_data: true
+            require_clinical_approval: true
+        iso8583:
+          enabled: true
+          safety_constraints:
+            max_downtime: "30s"
+            preserve_transaction_integrity: true
+            require_business_approval: true
+        modbus:
+          enabled: true
+          safety_constraints:
+            max_disruption_time: "10s"
+            preserve_operational_safety: true
+            require_operations_approval: true
+        tn3270e:
+          enabled: true
+          safety_constraints:
+            max_session_disruption: "60s"
+            preserve_mainframe_stability: true
+            require_mainframe_approval: true
+    
+    # Zero-Touch Integration Configuration
+    zero_touch_integrations:
+      enabled: true
+      
+      # Enhanced SIEM Integration
+      enhanced_siem:
+        enabled: true
+        connector_type: "splunk"
+        endpoint: "${SIEM_ENDPOINT}"
+        timeout_seconds: 30
+        retry_attempts: 3
+        custom_config:
+          index: "cronos-security"
+          auto_create_alerts: true
+          alert_severity_mapping:
+            critical: "critical"
+            high: "high"
+            medium: "medium"
+            low: "low"
+      
+      # Ticketing System Integration
+      ticketing_system:
+        enabled: true
+        system_type: "servicenow"
+        endpoint: "${SERVICENOW_ENDPOINT}"
+        timeout_seconds: 30
+        retry_attempts: 3
+        custom_config:
+          auto_create_tickets: true
+          ticket_creation_threshold: "high"
+          auto_assign: true
+      
+      # Communication Systems
+      communications:
+        slack:
+          enabled: true
+          endpoint: "https://slack.com/api"
+          timeout_seconds: 15
+          custom_config:
+            default_channel: "#cronos-security-alerts"
+            critical_mentions:
+              - "@security-team"
+              - "@incident-response"
+        
+        email:
+          enabled: true
+          timeout_seconds: 30
+          custom_config:
+            smtp_server: "${SMTP_SERVER}"
+            smtp_port: 587
+            use_tls: true
+            default_recipients:
+              - "security-team@company.com"
+              - "soc@company.com"
+      
+      # Network Security Systems
+      network_security_systems:
+        firewall:
+          enabled: true
+          endpoint: "${FIREWALL_ENDPOINT}"
+          timeout_seconds: 45
+          custom_config:
+            firewall_type: "palo_alto"
+            auto_block_duration: 60
+            max_auto_blocks_per_hour: 50
+    
+    # Resilience Framework Configuration
+    resilience:
+      enabled: true
+      level: "high"
+      
+      # Circuit Breakers
+      circuit_breakers:
+        enabled: true
+        default_failure_threshold: 5
+        default_recovery_timeout: 60
+        default_success_threshold: 3
+      
+      # Retry Policies
+      retry_policies:
+        enabled: true
+        default_max_attempts: 3
+        default_base_delay: 1.0
+        use_exponential_backoff: true
+      
+      # Bulkhead Isolation
+      bulkhead_isolation:
+        enabled: true
+        resource_pools:
+          api_calls: 100
+          database_connections: 50
+          network_requests: 200
+          file_operations: 25
+      
+      # Health Checking
+      health_checking:
+        enabled: true
+        check_interval: 60.0
+        dependency_tracking: true
+      
+      # Timeout Management
+      timeout_management:
+        enabled: true
+        default_timeout: 30.0
+        adaptive_timeouts: true
+      
+      # Error Recovery
+      error_recovery:
+        enabled: true
+        max_recovery_attempts: 3
+        recovery_timeout: 300.0
+    
+    # Logging Configuration
+    logging:
+      level: "INFO"
+      format: "structured_json"
+      destination: "stdout"
+      enable_audit_logging: true
+      mask_sensitive_data: true
+      retention_days: 90
+      
+      # Structured logging fields
+      structured_fields:
+        - "timestamp"
+        - "level"
+        - "service"
+        - "component"
+        - "event_id"
+        - "user_id"
+        - "session_id"
+        - "trace_id"
+        - "message"
+        - "metadata"
+      
+      # Log levels by component
+      component_levels:
+        "ai_engine.security.decision_engine": "INFO"
+        "ai_engine.security.threat_analyzer": "INFO"
+        "ai_engine.security.legacy_response": "INFO"
+        "ai_engine.security.integrations": "INFO"
+        "ai_engine.security.resilience": "WARN"
+    
+    # Monitoring and Metrics
+    monitoring:
+      enabled: true
+      metrics_port: 9090
+      metrics_path: "/metrics"
+      health_check_port: 8000
+      
+      # Prometheus Configuration
+      prometheus:
+        enabled: true
+        namespace: "cronos_security"
+        job_name: "cronos-security-orchestrator"
+        scrape_interval: "15s"
+        
+      # Health Endpoints
+      health_endpoints:
+        liveness: "/health/live"
+        readiness: "/health/ready"
+        startup: "/health/startup"
+        detailed: "/health/detailed"
+      
+      # Alerting Thresholds
+      alert_thresholds:
+        high_error_rate: 0.05  # 5%
+        high_response_time: 2.0  # 2 seconds
+        low_confidence_rate: 0.1  # 10%
+        circuit_breaker_open: 1
+        resource_utilization: 0.85  # 85%
+    
+    # Performance Configuration
+    performance:
+      max_concurrent_requests: 1000
+      request_timeout: 30
+      worker_threads: 10
+      connection_pool_size: 100
+      
+      # Memory Management
+      memory_limits:
+        max_heap_size: "2048m"
+        ml_model_cache_size: "512m"
+        event_history_size: 10000
+      
+      # Caching Configuration
+      caching:
+        enabled: true
+        ttl: 300  # 5 minutes
+        max_size: "256m"
+        
+      # Batch Processing
+      batch_processing:
+        enabled: true
+        batch_size: 50
+        batch_timeout: 10
+    
+    # Database Configuration
+    database:
+      connection_pool_size: 20
+      connection_timeout: 30
+      query_timeout: 10
+      retry_attempts: 3
+      health_check_interval: 60
+    
+    # Redis Configuration
+    redis:
+      connection_pool_size: 10
+      connection_timeout: 5
+      key_ttl: 3600  # 1 hour
+      health_check_interval: 30
+    
+    # Environment-specific overrides
+    environments:
+      production:
+        logging:
+          level: "INFO"
+        monitoring:
+          detailed_metrics: true
+        zero_touch_integrations:
+          enhanced_siem:
+            retry_attempts: 5
+          ticketing_system:
+            auto_create_tickets: true
+          communications:
+            slack:
+              enable_interactive_buttons: true
+          network_security_systems:
+            firewall:
+              auto_block_threshold: "high"
+      
+      staging:
+        logging:
+          level: "DEBUG"
+        zero_touch_integrations:
+          enhanced_siem:
+            custom_config:
+              index: "cronos-security-staging"
+          communications:
+            slack:
+              custom_config:
+                default_channel: "#cronos-security-staging"
+      
+      development:
+        logging:
+          level: "DEBUG"
+        zero_touch_integrations:
+          enhanced_siem:
+            enabled: false
+          ticketing_system:
+            enabled: false
+          communications:
+            slack:
+              enabled: false
+          network_security_systems:
+            firewall:
+              enabled: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cronos-security-scripts
+  namespace: cronos-security
+  labels:
+    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/component: security
+data:
+  entrypoint.sh: |
+    #!/bin/bash
+    set -e
+    
+    echo "Starting CRONOS AI Security Orchestrator..."
+    echo "Pod: ${POD_NAME}"
+    echo "Namespace: ${POD_NAMESPACE}"
+    echo "IP: ${POD_IP}"
+    
+    # Wait for dependencies
+    echo "Waiting for Redis..."
+    until redis-cli -u "${REDIS_URL}" ping > /dev/null 2>&1; do
+      echo "Redis not ready, waiting..."
+      sleep 2
+    done
+    echo "Redis is ready"
+    
+    echo "Waiting for Database..."
+    until python -c "
+    import psycopg2
+    import os
+    try:
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        conn.close()
+        print('Database connection successful')
+    except Exception as e:
+        print(f'Database connection failed: {e}')
+        exit(1)
+    "; do
+      echo "Database not ready, waiting..."
+      sleep 2
+    done
+    echo "Database is ready"
+    
+    # Run database migrations if needed
+    echo "Running database initialization..."
+    python -m ai_engine.security.scripts.init_db
+    
+    # Start the application
+    echo "Starting Security Orchestrator Service..."
+    exec python -m ai_engine.security.security_service
+  
+  healthcheck.py: |
+    #!/usr/bin/env python3
+    """
+    Health check script for CRONOS AI Security Orchestrator
+    """
+    import sys
+    import requests
+    import json
+    from urllib.parse import urljoin
+    
+    def check_health(endpoint="http://localhost:8000"):
+        """Check application health"""
+        try:
+            # Liveness check
+            response = requests.get(
+                urljoin(endpoint, "/health/live"),
+                timeout=5
+            )
+            if response.status_code != 200:
+                print(f"Liveness check failed: {response.status_code}")
+                return False
+            
+            # Readiness check
+            response = requests.get(
+                urljoin(endpoint, "/health/ready"),
+                timeout=5
+            )
+            if response.status_code != 200:
+                print(f"Readiness check failed: {response.status_code}")
+                return False
+            
+            # Check detailed health
+            response = requests.get(
+                urljoin(endpoint, "/health/detailed"),
+                timeout=10
+            )
+            if response.status_code == 200:
+                health_data = response.json()
+                overall_status = health_data.get("overall_status", "unknown")
+                print(f"Overall health status: {overall_status}")
+                
+                if overall_status not in ["healthy", "degraded"]:
+                    print("System is unhealthy")
+                    return False
+            
+            print("All health checks passed")
+            return True
+            
+        except requests.exceptions.RequestException as e:
+            print(f"Health check request failed: {e}")
+            return False
+        except Exception as e:
+            print(f"Health check error: {e}")
+            return False
+    
+    if __name__ == "__main__":
+        endpoint = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8000"
+        success = check_health(endpoint)
+        sys.exit(0 if success else 1)

@@ -211,6 +211,118 @@ data:
               summary: "CRONOS AI Redis memory usage is critical"
               description: "Redis memory usage is above 90%"
 
+      # Compliance Module Alerts
+      - name: cronos_ai_compliance.rules
+        rules:
+          - alert: ComplianceAssessmentFailed
+            expr: increase(cronos_ai_compliance_assessments_failed_total[10m]) > 0
+            for: 1m
+            labels:
+              severity: critical
+              component: "compliance"
+              framework: "{{ $labels.framework }}"
+            annotations:
+              summary: "Compliance assessment failed for {{ $labels.framework }}"
+              description: "Failed compliance assessment detected for framework {{ $labels.framework }}"
+          
+          - alert: ComplianceScoreBelow80
+            expr: cronos_ai_compliance_score < 80
+            for: 5m
+            labels:
+              severity: warning
+              component: "compliance"
+              framework: "{{ $labels.framework }}"
+            annotations:
+              summary: "Compliance score below 80% for {{ $labels.framework }}"
+              description: "Compliance score is {{ $value }}% for framework {{ $labels.framework }}, below the 80% threshold"
+          
+          - alert: ComplianceScoreBelow60
+            expr: cronos_ai_compliance_score < 60
+            for: 2m
+            labels:
+              severity: critical
+              component: "compliance"
+              framework: "{{ $labels.framework }}"
+            annotations:
+              summary: "Critical compliance score below 60% for {{ $labels.framework }}"
+              description: "Compliance score is {{ $value }}% for framework {{ $labels.framework }}, critically below 60% threshold"
+          
+          - alert: ComplianceCriticalGapDetected
+            expr: increase(cronos_ai_compliance_critical_gaps_total[5m]) > 0
+            for: 1m
+            labels:
+              severity: critical
+              component: "compliance"
+              framework: "{{ $labels.framework }}"
+            annotations:
+              summary: "Critical compliance gaps detected for {{ $labels.framework }}"
+              description: "{{ $value }} critical compliance gaps detected for framework {{ $labels.framework }}"
+          
+          - alert: ComplianceReportGenerationFailed
+            expr: increase(cronos_ai_compliance_report_generation_failures_total[5m]) > 0
+            for: 1m
+            labels:
+              severity: warning
+              component: "compliance-reports"
+              report_type: "{{ $labels.report_type }}"
+            annotations:
+              summary: "Compliance report generation failed for {{ $labels.report_type }}"
+              description: "Failed to generate {{ $labels.report_type }} compliance report"
+          
+          - alert: ComplianceAuditTrailIntegrityFailure
+            expr: increase(cronos_ai_compliance_audit_integrity_failures_total[5m]) > 0
+            for: 1m
+            labels:
+              severity: critical
+              component: "compliance-audit"
+            annotations:
+              summary: "Compliance audit trail integrity failure detected"
+              description: "Blockchain integrity verification failed for compliance audit trail"
+          
+          - alert: ComplianceLLMServiceDown
+            expr: cronos_ai_compliance_llm_service_up == 0
+            for: 2m
+            labels:
+              severity: critical
+              component: "compliance-llm"
+              provider: "{{ $labels.provider }}"
+            annotations:
+              summary: "Compliance LLM service {{ $labels.provider }} is down"
+              description: "LLM service {{ $labels.provider }} for compliance module is unavailable"
+          
+          - alert: ComplianceLLMHighLatency
+            expr: histogram_quantile(0.95, rate(cronos_ai_compliance_llm_request_duration_seconds_bucket[5m])) > 30
+            for: 3m
+            labels:
+              severity: warning
+              component: "compliance-llm"
+              provider: "{{ $labels.provider }}"
+            annotations:
+              summary: "High latency for compliance LLM {{ $labels.provider }}"
+              description: "95th percentile latency is {{ $value }}s for LLM provider {{ $labels.provider }}"
+          
+          - alert: ComplianceDataIntegrationFailure
+            expr: increase(cronos_ai_compliance_data_integration_failures_total[10m]) > 0
+            for: 2m
+            labels:
+              severity: warning
+              component: "compliance-data"
+              integration_type: "{{ $labels.integration_type }}"
+            annotations:
+              summary: "Compliance data integration failure for {{ $labels.integration_type }}"
+              description: "Failed to integrate compliance data from {{ $labels.integration_type }}"
+          
+          - alert: ComplianceAssessmentLongRunning
+            expr: (time() - cronos_ai_compliance_assessment_start_time) > 1800  # 30 minutes
+            for: 1m
+            labels:
+              severity: warning
+              component: "compliance"
+              framework: "{{ $labels.framework }}"
+            annotations:
+              summary: "Long-running compliance assessment for {{ $labels.framework }}"
+              description: "Compliance assessment for {{ $labels.framework }} has been running for over 30 minutes"
+
 ---
 # Prometheus Deployment
 apiVersion: apps/v1

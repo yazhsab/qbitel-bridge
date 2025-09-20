@@ -1,0 +1,328 @@
+# CRONOS AI Legacy System Whisperer - Docker Compose Configuration
+# Complete development and testing environment
+
+version: '3.8'
+
+services:
+  # PostgreSQL/TimescaleDB for time-series data
+  postgres:
+    image: timescale/timescaledb:latest-pg14
+    container_name: legacy-whisperer-postgres
+    environment:
+      POSTGRES_DB: cronos_ai
+      POSTGRES_USER: cronos
+      POSTGRES_PASSWORD: cronos123
+      TIMESCALEDB_TELEMETRY: 'off'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cronos -d cronos_ai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - legacy-network
+    restart: unless-stopped
+
+  # Redis for caching and session storage
+  redis:
+    image: redis:7-alpine
+    container_name: legacy-whisperer-redis
+    command: redis-server --appendonly yes --requirepass cronos123
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - legacy-network
+    restart: unless-stopped
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: legacy-whisperer-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - legacy-network
+    restart: unless-stopped
+    depends_on:
+      - legacy-whisperer
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: legacy-whisperer-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3000:3000"
+    networks:
+      - legacy-network
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+  # Jaeger for distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: legacy-whisperer-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: 'true'
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14268:14268"  # Jaeger collector HTTP
+      - "14250:14250"  # Jaeger collector gRPC
+    networks:
+      - legacy-network
+    restart: unless-stopped
+
+  # Ollama for local LLM inference (optional)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: legacy-whisperer-ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    environment:
+      OLLAMA_HOST: 0.0.0.0
+    networks:
+      - legacy-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - local-llm
+
+  # Main Legacy System Whisperer application
+  legacy-whisperer:
+    build:
+      context: ../../../
+      dockerfile: ai_engine/legacy/docker/Dockerfile
+      target: development
+    container_name: legacy-whisperer-app
+    environment:
+      # Database configuration
+      CRONOS_AI_DB_HOST: postgres
+      CRONOS_AI_DB_PORT: 5432
+      CRONOS_AI_DB_NAME: cronos_ai
+      CRONOS_AI_DB_USER: cronos
+      CRONOS_AI_DB_PASSWORD: cronos123
+      
+      # Redis configuration
+      CRONOS_AI_REDIS_HOST: redis
+      CRONOS_AI_REDIS_PORT: 6379
+      CRONOS_AI_REDIS_PASSWORD: cronos123
+      
+      # Service configuration
+      CRONOS_AI_ENVIRONMENT: development
+      CRONOS_AI_DEBUG: 'true'
+      CRONOS_AI_LOG_LEVEL: DEBUG
+      
+      # LLM configuration
+      CRONOS_AI_LEGACY_LLM_PROVIDER: ollama
+      CRONOS_AI_LLM_OLLAMA_BASE_URL: http://ollama:11434
+      
+      # Monitoring configuration
+      CRONOS_AI_MONITORING_ENABLED: 'true'
+      CRONOS_AI_METRICS_PORT: 8080
+      JAEGER_AGENT_HOST: jaeger
+      JAEGER_AGENT_PORT: 6831
+      
+      # Security configuration
+      CRONOS_AI_JWT_SECRET: dev-secret-key-change-in-production
+      CRONOS_AI_ENCRYPT_SENSITIVE_DATA: 'false'  # Disabled for development
+      
+      # Legacy System Whisperer specific
+      CRONOS_AI_LEGACY_ENABLED: 'true'
+      CRONOS_AI_LEGACY_MAX_SYSTEMS: 100
+      CRONOS_AI_LEGACY_ANOMALY_THRESHOLD: 0.85
+      CRONOS_AI_LEGACY_PREDICTION_ENABLED: 'true'
+    volumes:
+      - ../../../:/app
+      - legacy_logs:/app/logs
+      - legacy_data:/app/data
+    ports:
+      - "8000:8000"  # Main API
+      - "8080:8080"  # Metrics
+      - "8888:8888"  # Jupyter (development)
+    networks:
+      - legacy-network
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/legacy-system-whisperer/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Nginx reverse proxy (production-like setup)
+  nginx:
+    image: nginx:alpine
+    container_name: legacy-whisperer-nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - legacy-network
+    restart: unless-stopped
+    depends_on:
+      - legacy-whisperer
+    profiles:
+      - proxy
+
+  # Load testing with k6
+  k6:
+    image: grafana/k6:latest
+    container_name: legacy-whisperer-k6
+    volumes:
+      - ./k6-scripts:/scripts
+    command: run --vus 10 --duration 30s /scripts/load-test.js
+    environment:
+      TARGET_URL: http://legacy-whisperer:8000
+    networks:
+      - legacy-network
+    profiles:
+      - load-test
+    depends_on:
+      - legacy-whisperer
+
+  # Database backup service
+  db-backup:
+    image: postgres:14-alpine
+    container_name: legacy-whisperer-backup
+    environment:
+      PGPASSWORD: cronos123
+    volumes:
+      - ./backups:/backups
+      - ./backup-script.sh:/backup-script.sh
+    command: /backup-script.sh
+    networks:
+      - legacy-network
+    profiles:
+      - backup
+    depends_on:
+      - postgres
+
+# Named volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  ollama_data:
+    driver: local
+  legacy_logs:
+    driver: local
+  legacy_data:
+    driver: local
+
+# Network for service communication
+networks:
+  legacy-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Development compose override
+---
+# docker-compose.override.yml (for local development)
+version: '3.8'
+
+services:
+  legacy-whisperer:
+    build:
+      target: development
+    environment:
+      CRONOS_AI_ENVIRONMENT: development
+      CRONOS_AI_DEBUG: 'true'
+      CRONOS_AI_AUTO_RELOAD: 'true'
+    volumes:
+      - ../../../:/app:cached  # Use cached mount for better performance on macOS
+    stdin_open: true
+    tty: true
+    profiles: []  # Always include in development
+
+  # Development database with sample data
+  postgres:
+    environment:
+      POSTGRES_DB: cronos_ai_dev
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./sample-data.sql:/docker-entrypoint-initdb.d/sample-data.sql
+
+  # Development tools
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: legacy-whisperer-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@cronos-ai.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - legacy-network
+    profiles: []  # Always include in development
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: legacy-whisperer-redis-ui
+    environment:
+      REDIS_HOSTS: local:redis:6379:0:cronos123
+    ports:
+      - "8081:8081"
+    networks:
+      - legacy-network
+    profiles: []  # Always include in development
+
+volumes:
+  postgres_dev_data:
+    driver: local
+  pgadmin_data:
+    driver: local

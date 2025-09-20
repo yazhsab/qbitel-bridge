@@ -110,12 +110,37 @@ aiEngine:
       value: "INFO"
     - name: METRICS_ENABLED
       value: "true"
+    # Compliance Module Configuration
+    - name: COMPLIANCE_ENABLED
+      value: "true"
+    - name: COMPLIANCE_CONFIG_PATH
+      value: "/etc/cronos-ai/compliance.yaml"
+    - name: COMPLIANCE_AUDIT_TRAIL_PATH
+      value: "/app/compliance/audit-trail"
+    - name: COMPLIANCE_REPORTS_PATH
+      value: "/app/compliance/reports"
+    - name: ANTHROPIC_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: cronos-ai-secrets
+          key: anthropic-api-key
+    - name: OPENAI_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: cronos-ai-secrets
+          key: openai-api-key
   
   volumeMounts:
     - name: model-storage
       mountPath: /app/models
     - name: temp-storage
       mountPath: /tmp
+    - name: compliance-storage
+      mountPath: /app/compliance
+    - name: compliance-config
+      mountPath: /etc/cronos-ai/compliance.yaml
+      subPath: compliance.yaml
+      readOnly: true
   
   volumes:
     - name: model-storage
@@ -124,11 +149,22 @@ aiEngine:
     - name: temp-storage
       emptyDir:
         sizeLimit: 10Gi
+    - name: compliance-storage
+      persistentVolumeClaim:
+        claimName: ai-engine-compliance-pvc
+    - name: compliance-config
+      configMap:
+        name: cronos-ai-compliance-config
   
   persistence:
     models:
       enabled: true
       size: 100Gi
+      accessMode: ReadWriteOnce
+      storageClass: fast-ssd
+    compliance:
+      enabled: true
+      size: 50Gi
       accessMode: ReadWriteOnce
       storageClass: fast-ssd
   
@@ -643,6 +679,10 @@ security:
       clientId: "CHANGE_ME_IN_PRODUCTION"
       clientSecret: "CHANGE_ME_IN_PRODUCTION"
       
+    llm:
+      anthropicApiKey: "CHANGE_ME_IN_PRODUCTION"
+      openaiApiKey: "CHANGE_ME_IN_PRODUCTION"
+      
     tls:
       ca: "CHANGE_ME_IN_PRODUCTION"
       cert: "CHANGE_ME_IN_PRODUCTION"
@@ -738,3 +778,122 @@ test:
   enabled: false
   integrationTests: false
   loadTests: false
+
+# Compliance Module Configuration
+compliance:
+  enabled: true
+  
+  # Assessment Configuration
+  assessment:
+    intervalHours: 24
+    maxConcurrentAssessments: 5
+    cacheEnabled: true
+    cacheTtlHours: 12
+  
+  # Supported Frameworks
+  frameworks:
+    - PCI_DSS_4_0
+    - BASEL_III
+    - HIPAA
+    - NERC_CIP
+    - FDA_MEDICAL
+  
+  # Report Generation
+  reports:
+    formats:
+      - PDF
+      - HTML
+      - JSON
+      - EXCEL
+      - WORD
+      - CSV
+    retention:
+      days: 365
+    encryption:
+      enabled: true
+      algorithm: "AES-256-GCM"
+  
+  # Audit Trail
+  auditTrail:
+    enabled: true
+    blockchain:
+      enabled: true
+      network: "private"
+    retention:
+      days: 2557  # 7 years for compliance
+    encryption:
+      enabled: true
+  
+  # LLM Configuration
+  llm:
+    primary:
+      provider: "anthropic"
+      model: "claude-3-sonnet-20240229"
+      maxTokens: 4096
+      temperature: 0.1
+    fallback:
+      provider: "openai"
+      model: "gpt-4"
+      maxTokens: 4096
+      temperature: 0.1
+    
+  # Data Integration
+  dataIntegration:
+    timescaledb:
+      enabled: true
+      retentionPolicy: "7d"
+    redis:
+      enabled: true
+      keyPrefix: "compliance:"
+      ttl: 43200  # 12 hours
+    security:
+      enabled: true
+      eventTypes:
+        - AUTHENTICATION
+        - AUTHORIZATION
+        - DATA_ACCESS
+        - SYSTEM_CHANGE
+  
+  # Monitoring and Alerting
+  monitoring:
+    enabled: true
+    dashboards:
+      enabled: true
+      grafana:
+        folder: "Compliance"
+    alerts:
+      enabled: true
+      criticalGapThreshold: 10
+      complianceScoreThreshold: 80
+    metrics:
+      enabled: true
+      prometheusNamespace: "cronos_ai_compliance"
+  
+  # Security Settings
+  security:
+    encryption:
+      enabled: true
+      algorithm: "AES-256-GCM"
+    accessControl:
+      enabled: true
+      rbac: true
+    dataClassification:
+      enabled: true
+      levels:
+        - PUBLIC
+        - INTERNAL
+        - CONFIDENTIAL
+        - RESTRICTED
+  
+  # Enterprise Features
+  enterprise:
+    multiTenancy:
+      enabled: false
+    customFrameworks:
+      enabled: true
+    apiRateLimit:
+      enabled: true
+      requestsPerMinute: 100
+    sla:
+      assessmentTime: 300  # 5 minutes
+      reportGeneration: 600  # 10 minutes

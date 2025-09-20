@@ -1,0 +1,116 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cronos-security-orchestrator-netpol
+  namespace: cronos-security
+  labels:
+    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/component: security
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cronos-security-orchestrator
+      app.kubernetes.io/component: security
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from monitoring namespace (Prometheus)
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9090
+  # Allow ingress from ingress controller
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 8080
+  # Allow health checks from kubelet
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 8000
+  # Allow inter-pod communication within namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: cronos-security
+    ports:
+    - protocol: TCP
+      port: 8080
+    - protocol: TCP
+      port: 8000
+    - protocol: TCP
+      port: 9090
+  egress:
+  # Allow DNS resolution
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    - podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow access to Redis (assuming in redis namespace)
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+  # Allow access to PostgreSQL (assuming in postgres namespace)
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow HTTPS outbound for external integrations
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow HTTP outbound for external integrations
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 80
+  # Allow SMTP outbound for email notifications
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 587
+    - protocol: TCP
+      port: 465
+    - protocol: TCP
+      port: 25
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cronos-security-deny-all-default
+  namespace: cronos-security
+  labels:
+    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/component: security
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  # This creates a default deny-all policy for the namespace
+  # Specific allow rules are defined in other NetworkPolicy resources

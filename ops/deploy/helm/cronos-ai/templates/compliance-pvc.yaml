@@ -1,0 +1,24 @@
+{{- if and .Values.compliance.enabled .Values.aiEngine.persistence.compliance.enabled }}
+# CRONOS AI - Compliance Storage PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "cronos-ai.fullname" . }}-compliance-pvc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cronos-ai.labels" . | nindent 4 }}
+    app.kubernetes.io/component: compliance-storage
+spec:
+  accessModes:
+    - {{ .Values.aiEngine.persistence.compliance.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.aiEngine.persistence.compliance.size }}
+  {{- if .Values.aiEngine.persistence.compliance.storageClass }}
+  {{- if (eq "-" .Values.aiEngine.persistence.compliance.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ .Values.aiEngine.persistence.compliance.storageClass }}
+  {{- end }}
+  {{- end }}
+{{- end }}

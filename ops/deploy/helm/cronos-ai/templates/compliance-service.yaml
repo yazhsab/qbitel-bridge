@@ -1,0 +1,54 @@
+{{- if .Values.compliance.enabled }}
+# CRONOS AI - Compliance Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cronos-ai.fullname" . }}-compliance-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cronos-ai.labels" . | nindent 4 }}
+    app.kubernetes.io/component: compliance
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8000"
+    prometheus.io/path: "/metrics"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "cronos-ai.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: ai-engine
+  ports:
+  - name: compliance-http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: compliance-grpc
+    port: 9091
+    targetPort: 9091
+    protocol: TCP
+  - name: metrics
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+---
+# Compliance Dashboard Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "cronos-ai.fullname" . }}-compliance-dashboard
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cronos-ai.labels" . | nindent 4 }}
+    app.kubernetes.io/component: compliance-dashboard
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "cronos-ai.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: ai-engine
+  ports:
+  - name: dashboard-http
+    port: 3001
+    targetPort: 3001
+    protocol: TCP
+{{- end }}

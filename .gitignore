@@ -1,0 +1,94 @@
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.env.*
+.venv/
+venv/
+env/
+pythonenv*/
+pip-wheel-metadata/
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+.wheels/
+*.log
+.coverage
+.coverage.*
+.htmlcov/
+.tox/
+.mypy_cache/
+.pytest_cache/
+.cache/
+.ipynb_checkpoints/
+
+# Go
+bin/
+obj/
+*.test
+*.out
+
+# Rust
+/target/
+**/target/
+
+# Node / Frontend
+node_modules/
+.npm/
+.npmrc
+.pnpm-store/
+.pnp.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.next/
+.nuxt/
+.tmp/
+.temp/
+.DS_Store
+
+# Logs & temp
+*.swp
+*.swo
+*.tmp
+*.temp
+*.bak
+*.orig
+*.old
+
+# IDE / tooling
+.vscode/
+.idea/
+*.iml
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+.pyre/
+.pytype/
+
+# Testing & coverage
+coverage/
+coverage.xml
+nosetests.xml
+pytestdebug.log
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+
+# Kubernetes & cloud credentials
+*.kubeconfig
+*.pem
+*.key
+*.crt
+
+# Local overrides
+*.local
+

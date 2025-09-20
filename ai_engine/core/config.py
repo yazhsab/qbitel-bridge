@@ -253,6 +253,18 @@ class Config:
     anomaly_threshold: float = 0.95
     anomaly_window_size: int = 100
     
+    # Compliance Reporter specific
+    compliance_enabled: bool = True
+    compliance_assessment_interval_hours: int = 24
+    compliance_cache_ttl_hours: int = 6
+    compliance_max_concurrent_assessments: int = 3
+    compliance_report_retention_days: int = 365
+    compliance_audit_trail_enabled: bool = True
+    compliance_blockchain_enabled: bool = True
+    compliance_timescaledb_integration: bool = True
+    compliance_redis_integration: bool = True
+    compliance_security_integration: bool = True
+    
     @classmethod
     def load_from_file(cls, config_path: Union[str, Path]) -> "Config":
         """Load configuration from YAML file."""

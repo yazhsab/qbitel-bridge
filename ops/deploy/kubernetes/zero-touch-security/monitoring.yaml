@@ -1,0 +1,172 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cronos-security-orchestrator
+  namespace: cronos-security
+  labels:
+    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/component: security
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cronos-security-orchestrator
+      app.kubernetes.io/component: security
+  endpoints:
+  - port: metrics
+    interval: 15s
+    path: /metrics
+    scrapeTimeout: 10s
+    honorLabels: true
+    metricRelabelings:
+    - sourceLabels: [__name__]
+      regex: 'cronos_security_.*'
+      targetLabel: __tmp_cronos_security
+      replacement: 'true'
+  namespaceSelector:
+    matchNames:
+    - cronos-security
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cronos-security-orchestrator-rules
+  namespace: cronos-security
+  labels:
+    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/component: security
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+  - name: cronos-security-orchestrator.rules
+    rules:
+    - alert: CronosSecurityHighErrorRate
+      expr: |
+        (
+          rate(cronos_security_errors_total[5m]) /
+          rate(cronos_security_requests_total[5m])
+        ) > 0.05
+      for: 2m
+      labels:
+        severity: warning
+        component: security-orchestrator
+      annotations:
+        summary: "High error rate in CRONOS Security Orchestrator"
+        description: "Error rate is {{ $value | humanizePercentage }} for the last 5 minutes"
+
+    - alert: CronosSecurityHighResponseTime
+      expr: |
+        histogram_quantile(0.95, 
+          rate(cronos_security_request_duration_seconds_bucket[5m])
+        ) > 2.0
+      for: 3m
+      labels:
+        severity: warning
+        component: security-orchestrator
+      annotations:
+        summary: "High response time in CRONOS Security Orchestrator"
+        description: "95th percentile response time is {{ $value }}s"
+
+    - alert: CronosSecurityLowConfidenceRate
+      expr: |
+        (
+          rate(cronos_security_low_confidence_decisions_total[10m]) /
+          rate(cronos_security_decisions_total[10m])
+        ) > 0.1
+      for: 5m
+      labels:
+        severity: warning
+        component: security-orchestrator
+      annotations:
+        summary: "High rate of low-confidence decisions"
+        description: "{{ $value | humanizePercentage }} of decisions have low confidence"
+
+    - alert: CronosSecurityCircuitBreakerOpen
+      expr: cronos_security_circuit_breaker_state == 1
+      for: 1m
+      labels:
+        severity: critical
+        component: security-orchestrator
+      annotations:
+        summary: "Circuit breaker is open"
+        description: "Circuit breaker for {{ $labels.service }} is open"
+
+    - alert: CronosSecurityServiceDown
+      expr: up{job="cronos-security-orchestrator"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        component: security-orchestrator
+      annotations:
+        summary: "CRONOS Security Orchestrator is down"
+        description: "Service has been down for more than 1 minute"
+
+    - alert: CronosSecurityHighMemoryUsage
+      expr: |
+        (
+          container_memory_working_set_bytes{
+            container="cronos-security-orchestrator"
+          } /
+          container_spec_memory_limit_bytes{
+            container="cronos-security-orchestrator"
+          }
+        ) > 0.85
+      for: 5m
+      labels:
+        severity: warning
+        component: security-orchestrator
+      annotations:
+        summary: "High memory usage"
+        description: "Memory usage is {{ $value | humanizePercentage }} of limit"
+
+    - alert: CronosSecurityHighCpuUsage
+      expr: |
+        rate(container_cpu_usage_seconds_total{
+          container="cronos-security-orchestrator"
+        }[5m]) > 0.85
+      for: 5m
+      labels:
+        severity: warning
+        component: security-orchestrator
+      annotations:
+        summary: "High CPU usage"
+        description: "CPU usage is {{ $value | humanizePercentage }}"
+
+    - alert: CronosSecurityIntegrationFailure
+      expr: cronos_security_integration_failures_total > 0
+      for: 1m
+      labels:
+        severity: warning
+        component: security-orchestrator
+      annotations:
+        summary: "Integration failure detected"
+        description: "{{ $labels.integration }} integration has failed"
+
+    - alert: CronosSecurityDependencyUnhealthy
+      expr: cronos_security_dependency_health_status == 0
+      for: 2m
+      labels:
+        severity: warning
+        component: security-orchestrator
+      annotations:
+        summary: "Dependency is unhealthy"
+        description: "{{ $labels.dependency }} dependency is unhealthy"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cronos-security-grafana-dashboard
+  namespace: cronos-security
+  labels:
+    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/component: monitoring
+spec:
+  type: ClusterIP
+  ports:
+  - name: grafana
+    port: 3000
+    targetPort: 3000
+  selector:
+    app: grafana

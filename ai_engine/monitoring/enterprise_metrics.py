@@ -533,6 +533,35 @@ class EnterpriseMetrics:
             AlertSeverity.CRITICAL,
             "High number of protocol discovery errors"
         )
+        
+        # Compliance-specific alerts
+        self.alert_manager.register_alert_rule(
+            "compliance_assessment_failures",
+            lambda m: m.get('compliance_assessment_errors_total', 0) > 5,
+            AlertSeverity.CRITICAL,
+            "High number of compliance assessment failures"
+        )
+        
+        self.alert_manager.register_alert_rule(
+            "low_compliance_score",
+            lambda m: m.get('compliance_average_score', 100) < 70,
+            AlertSeverity.WARNING,
+            "Average compliance score below 70%"
+        )
+        
+        self.alert_manager.register_alert_rule(
+            "compliance_report_failures",
+            lambda m: m.get('compliance_report_errors_total', 0) > 3,
+            AlertSeverity.WARNING,
+            "Multiple compliance report generation failures"
+        )
+        
+        self.alert_manager.register_alert_rule(
+            "audit_trail_integrity",
+            lambda m: not m.get('audit_blockchain_integrity', True),
+            AlertSeverity.CRITICAL,
+            "Blockchain audit trail integrity compromised"
+        )
     
     def _setup_default_health_checks(self):
         """Setup default health checks."""

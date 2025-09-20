@@ -158,6 +158,22 @@ data:
       jwt_expiration_hours: 12
       encryption_algorithm: "AES-256-GCM"
     
+    # Compliance Configuration
+    compliance:
+      enabled: true
+      assessment_interval_hours: 24
+      max_concurrent_assessments: 5
+      audit_trail_enabled: true
+      blockchain_enabled: true
+      supported_frameworks:
+        - PCI_DSS_4_0
+        - BASEL_III
+        - HIPAA
+        - NERC_CIP
+        - FDA_MEDICAL
+      llm_primary_provider: "anthropic"
+      llm_fallback_provider: "openai"
+    
     monitoring:
       metrics_enabled: true
       prometheus_enabled: true
@@ -192,6 +208,9 @@ stringData:
   encryption-key: "CHANGE_ME_IN_PRODUCTION"
   kafka-username: "cronos-ai-user"
   kafka-password: "CHANGE_ME_IN_PRODUCTION"
+  anthropic-api-key: "CHANGE_ME_IN_PRODUCTION"
+  openai-api-key: "CHANGE_ME_IN_PRODUCTION"
+  siem-api-token: "CHANGE_ME_IN_PRODUCTION"
 
 ---
 # AI Engine Deployment
@@ -263,6 +282,24 @@ spec:
             secretKeyRef:
               name: cronos-ai-secrets
               key: encryption-key
+        # Compliance Environment Variables
+        - name: COMPLIANCE_ENABLED
+          value: "true"
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: anthropic-api-key
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: openai-api-key
+        - name: SIEM_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: cronos-ai-secrets
+              key: siem-api-token
         volumeMounts:
         - name: config-volume
           mountPath: /etc/cronos-ai
@@ -270,6 +307,12 @@ spec:
           mountPath: /opt/cronos_ai/models
         - name: tmp-volume
           mountPath: /tmp
+        - name: compliance-volume
+          mountPath: /app/compliance
+        - name: compliance-config-volume
+          mountPath: /etc/cronos-ai/compliance.yaml
+          subPath: compliance.yaml
+          readOnly: true
         resources:
           requests:
             memory: "2Gi"
@@ -311,6 +354,12 @@ spec:
       - name: tmp-volume
         emptyDir:
           sizeLimit: "1Gi"
+      - name: compliance-volume
+        persistentVolumeClaim:
+          claimName: compliance-data-pvc
+      - name: compliance-config-volume
+        configMap:
+          name: cronos-ai-compliance-config
       tolerations:
       - key: "node-type"
         operator: "Equal"
@@ -761,6 +810,23 @@ spec:
             name: ai-engine-service
             port:
               number: 8080
+      - path: /api/v1/compliance
+        pathType: Prefix
+        backend:
+          service:
+            name: ai-engine-service
+            port:
+              number: 8080
+  - host: compliance.cronos-ai.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ai-engine-service
+            port:
+              number: 8080
 
 ---
 # Horizontal Pod Autoscaler for AI Engine
@@ -872,6 +938,109 @@ spec:
     requests:
       storage: 50Gi
   storageClassName: standard
+
+---
+# Persistent Volume Claim for Compliance Data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: compliance-data-pvc
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: compliance-storage
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: fast-ssd
+
+---
+# ConfigMap for Compliance Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cronos-ai-compliance-config
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: compliance
+data:
+  compliance.yaml: |
+    # CRONOS AI Compliance Module Configuration - Production
+    environment: production
+    service_name: cronos-ai-compliance
+    version: "1.0.0"
+    
+    compliance:
+      enabled: true
+      assessment_interval_hours: 24
+      max_concurrent_assessments: 5
+      cache_enabled: true
+      cache_ttl_hours: 12
+      supported_frameworks:
+        - PCI_DSS_4_0
+        - BASEL_III
+        - HIPAA
+        - NERC_CIP
+        - FDA_MEDICAL
+    
+    reports:
+      enabled: true
+      output_formats: ["PDF", "HTML", "JSON", "EXCEL"]
+      retention_days: 365
+      encryption:
+        enabled: true
+        algorithm: "AES-256-GCM"
+    
+    audit_trail:
+      enabled: true
+      blockchain:
+        enabled: true
+        network_type: "private"
+      retention_days: 2557
+      encryption:
+        enabled: true
+    
+    llm:
+      primary_provider: "anthropic"
+      primary_model: "claude-3-sonnet-20240229"
+      fallback_provider: "openai"
+      fallback_model: "gpt-4"
+      timeout_seconds: 30
+      max_retries: 3
+    
+    data_integration:
+      timescaledb:
+        enabled: true
+        retention_policy: "7d"
+      redis:
+        enabled: true
+        key_prefix: "compliance:"
+        ttl: 43200
+      security:
+        enabled: true
+    
+    monitoring:
+      enabled: true
+      metrics_enabled: true
+      prometheus_namespace: "cronos_ai_compliance"
+      alerts:
+        enabled: true
+        critical_gap_threshold: 10
+        compliance_score_threshold: 80
+    
+    security:
+      encryption:
+        enabled: true
+        algorithm: "AES-256-GCM"
+      access_control:
+        enabled: true
+        rbac: true
+      data_classification:
+        enabled: true
 
 ---
 # Pod Disruption Budget for AI Engine
