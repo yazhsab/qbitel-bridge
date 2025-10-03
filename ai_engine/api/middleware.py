@@ -21,6 +21,13 @@ from ..core.config import Config
 
 logger = logging.getLogger(__name__)
 
+def _get_config_value(section, attr, default=None):
+    if section is None:
+        return default
+    if isinstance(section, dict):
+        return section.get(attr, default)
+    return getattr(section, attr, default)
+
 # Prometheus metrics
 REQUEST_COUNT = Counter(
     'http_requests_total',
@@ -110,21 +117,51 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         return response
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    """Add security headers to all responses."""
+    """Add comprehensive security headers to all responses."""
+    
+    def __init__(self, app, enable_hsts: bool = True, enable_csp: bool = True):
+        super().__init__(app)
+        self.enable_hsts = enable_hsts
+        self.enable_csp = enable_csp
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         response = await call_next(request)
         
-        # Add security headers
+        # Basic security headers
         response.headers.update({
             "X-Content-Type-Options": "nosniff",
             "X-Frame-Options": "DENY",
             "X-XSS-Protection": "1; mode=block",
-            "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
             "Referrer-Policy": "strict-origin-when-cross-origin",
-            "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'",
-            "Permissions-Policy": "geolocation=(), microphone=(), camera=()"
+            "Permissions-Policy": "geolocation=(), microphone=(), camera=(), payment=(), usb=()",
+            "X-Permitted-Cross-Domain-Policies": "none",
+            "Cross-Origin-Embedder-Policy": "require-corp",
+            "Cross-Origin-Opener-Policy": "same-origin",
+            "Cross-Origin-Resource-Policy": "same-origin"
         })
+        
+        # HSTS (HTTP Strict Transport Security)
+        if self.enable_hsts:
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+        
+        # Content Security Policy
+        if self.enable_csp:
+            csp_directives = [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+                "style-src 'self' 'unsafe-inline'",
+                "img-src 'self' data: https:",
+                "font-src 'self' data:",
+                "connect-src 'self'",
+                "frame-ancestors 'none'",
+                "base-uri 'self'",
+                "form-action 'self'",
+                "upgrade-insecure-requests"
+            ]
+            response.headers["Content-Security-Policy"] = "; ".join(csp_directives)
+        
+        # Remove server header for security
+        response.headers.pop("Server", None)
         
         return response
 
@@ -202,7 +239,7 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
                 headers={"X-Correlation-ID": correlation_id}
             )
 
-def setup_middleware(app: FastAPI, config: Config):
+async def setup_middleware(app: FastAPI, config: Config):
     """Setup all middleware for the FastAPI application."""
     
     # Connection counter (outermost)
@@ -212,24 +249,69 @@ def setup_middleware(app: FastAPI, config: Config):
     app.add_middleware(ErrorHandlingMiddleware)
     
     # Security headers
-    app.add_middleware(SecurityHeadersMiddleware)
+    enable_hsts = _get_config_value(config.security, 'tls_enabled', False)
+    app.add_middleware(
+        SecurityHeadersMiddleware,
+        enable_hsts=enable_hsts,
+        enable_csp=True
+    )
     
-    # Rate limiting (if enabled)
-    if config.security.get('enable_rate_limiting', True):
-        app.add_middleware(
-            RateLimitingMiddleware,
-            requests_per_minute=config.security.get('requests_per_minute', 100)
-        )
+    # Advanced rate limiting (if enabled)
+    rate_limit_config = config.__dict__.get('rate_limiting', {})
+    if rate_limit_config.get('enabled', True):
+        try:
+            from .rate_limiter import get_rate_limiter, AdvancedRateLimitMiddleware, RateLimitConfig
+            
+            # Create rate limit config
+            rl_config = RateLimitConfig(
+                requests_per_minute=rate_limit_config.get('default_limit', 100),
+                requests_per_hour=rate_limit_config.get('per_user_limit', 1000),
+                burst_size=rate_limit_config.get('burst_limit', 200),
+                enable_per_user=True,
+                enable_per_ip=True,
+                enable_per_endpoint=True
+            )
+            
+            # Initialize rate limiter
+            redis_url = f"redis://{_get_config_value(config.redis, 'host', 'localhost')}:{_get_config_value(config.redis, 'port', 6379)}/0"
+            rate_limiter = await get_rate_limiter(redis_url, rl_config)
+            
+            app.add_middleware(
+                AdvancedRateLimitMiddleware,
+                rate_limiter=rate_limiter,
+                config=rl_config
+            )
+            logger.info("Advanced rate limiting enabled")
+        except Exception as e:
+            logger.warning(f"Failed to setup advanced rate limiting: {e}, falling back to simple rate limiting")
+            # Fall back to simple rate limiting
+            app.add_middleware(
+                RateLimitingMiddleware,
+                requests_per_minute=rate_limit_config.get('default_limit', 100)
+            )
     
     # Request logging and metrics
     app.add_middleware(RequestLoggingMiddleware)
     
     # Trusted hosts
-    if config.security.get('trusted_hosts'):
+    if _get_config_value(config.security, 'trusted_hosts'):
         app.add_middleware(
             TrustedHostMiddleware,
             allowed_hosts=config.security.trusted_hosts
         )
+    
+    # CORS (if configured)
+    cors_config = config.__dict__.get('cors', {})
+    if cors_config.get('enabled', False):
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=cors_config.get('allowed_origins', []),
+            allow_credentials=cors_config.get('allow_credentials', True),
+            allow_methods=cors_config.get('allowed_methods', ["*"]),
+            allow_headers=cors_config.get('allowed_headers', ["*"]),
+            max_age=cors_config.get('max_age', 3600)
+        )
+        logger.info("CORS middleware enabled")
     
     # Gzip compression
     app.add_middleware(GZipMiddleware, minimum_size=1000)

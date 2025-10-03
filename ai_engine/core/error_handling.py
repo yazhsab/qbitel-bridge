@@ -19,6 +19,7 @@ from enum import Enum
 import json
 import uuid
 import random
+from collections import Counter
 
 from .exceptions import CronosAIException, ProtocolException, ModelException, InferenceException
 
@@ -208,7 +209,7 @@ class ErrorHandler:
     circuit breakers, and detailed error tracking.
     """
     
-    def __init__(self):
+    def __init__(self, enable_persistent_storage: bool = True, enable_sentry: bool = True):
         self.logger = logging.getLogger(__name__)
         
         # Error tracking
@@ -222,6 +223,12 @@ class ErrorHandler:
         
         # Error classification rules
         self.classification_rules = self._initialize_classification_rules()
+        
+        # External integrations
+        self.enable_persistent_storage = enable_persistent_storage
+        self.enable_sentry = enable_sentry
+        self.persistent_storage = None
+        self.sentry_tracker = None
         
     def _initialize_classification_rules(self) -> Dict[Type[Exception], Tuple[ErrorSeverity, ErrorCategory, RecoveryStrategy]]:
         """Initialize error classification rules."""
@@ -357,6 +364,20 @@ class ErrorHandler:
         
         # Store error record
         self.error_records.append(error_record)
+        
+        # Store in persistent storage
+        if self.enable_persistent_storage and self.persistent_storage:
+            try:
+                await self.persistent_storage.store_error(error_record)
+            except Exception as storage_error:
+                self.logger.error(f"Failed to store error in persistent storage: {storage_error}")
+        
+        # Send to Sentry
+        if self.enable_sentry and self.sentry_tracker:
+            try:
+                self.sentry_tracker.capture_error_record(error_record)
+            except Exception as sentry_error:
+                self.logger.error(f"Failed to send error to Sentry: {sentry_error}")
         
         return recovery_successful, result
     
@@ -526,6 +547,84 @@ class ErrorHandler:
                 Counter([r.exception_type for r in recent_errors]).most_common(5)
             ]
         }
+    
+    async def initialize_integrations(
+        self,
+        redis_url: Optional[str] = None,
+        postgres_url: Optional[str] = None,
+        sentry_dsn: Optional[str] = None,
+        environment: Optional[str] = None
+    ):
+        """Initialize external integrations for error tracking."""
+        try:
+            # Initialize persistent storage
+            if self.enable_persistent_storage:
+                from .error_storage import get_error_storage
+                self.persistent_storage = await get_error_storage(redis_url, postgres_url)
+                self.logger.info("Persistent error storage initialized")
+            
+            # Initialize Sentry
+            if self.enable_sentry:
+                from .sentry_integration import get_sentry_tracker
+                self.sentry_tracker = get_sentry_tracker(sentry_dsn, environment)
+                self.logger.info("Sentry error tracking initialized")
+                
+        except Exception as e:
+            self.logger.error(f"Failed to initialize error tracking integrations: {e}")
+    
+    async def get_aggregated_errors(
+        self,
+        component: Optional[str] = None,
+        time_window_hours: int = 24,
+        limit: int = 100
+    ) -> List[Dict[str, Any]]:
+        """
+        Get aggregated errors from persistent storage.
+        
+        Args:
+            component: Filter by component name
+            time_window_hours: Time window in hours
+            limit: Maximum number of errors to return
+            
+        Returns:
+            List of error records
+        """
+        if not self.persistent_storage:
+            # Fall back to in-memory records
+            cutoff_time = time.time() - (time_window_hours * 3600)
+            errors = [
+                record.to_dict() for record in self.error_records
+                if record.timestamp >= cutoff_time
+            ]
+            if component:
+                errors = [e for e in errors if e['component'] == component]
+            return errors[:limit]
+        
+        try:
+            if component:
+                since = time.time() - (time_window_hours * 3600)
+                return await self.persistent_storage.get_errors_by_component(
+                    component, limit, since
+                )
+            else:
+                # Get statistics and recent errors
+                stats = await self.persistent_storage.get_error_statistics(time_window_hours)
+                return stats
+        except Exception as e:
+            self.logger.error(f"Failed to get aggregated errors: {e}")
+            return []
+    
+    async def cleanup_old_errors(self):
+        """Clean up old error records from persistent storage."""
+        if self.persistent_storage:
+            try:
+                deleted_count = await self.persistent_storage.cleanup_old_errors()
+                self.logger.info(f"Cleaned up {deleted_count} old error records")
+                return deleted_count
+            except Exception as e:
+                self.logger.error(f"Failed to cleanup old errors: {e}")
+                return 0
+        return 0
 
 
 # Global error handler instance

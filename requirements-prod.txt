@@ -1,0 +1,72 @@
+# CRONOS AI - Production-Only Dependencies
+# Additional packages needed specifically for production deployments
+# Install with: pip install -r requirements.txt -r requirements-prod.txt
+
+# Include base requirements
+-r requirements.txt
+
+# ============================================================================
+# Production Monitoring & APM
+# ============================================================================
+# Datadog APM
+ddtrace==2.3.0
+
+# New Relic APM
+newrelic==9.4.0
+
+# Sentry error tracking
+sentry-sdk[fastapi]==1.39.1
+
+# ============================================================================
+# Production Logging
+# ============================================================================
+# JSON logging for production
+python-json-logger==2.0.7
+
+# Log aggregation
+loguru==0.7.2
+
+# ============================================================================
+# Production Security
+# ============================================================================
+# Secrets management
+hvac==2.1.0  # HashiCorp Vault client
+
+# Certificate management
+certifi==2023.11.17
+
+# ============================================================================
+# Production Performance
+# ============================================================================
+# Connection pooling
+aiohttp==3.9.1
+
+# Caching
+aiocache==0.12.2
+
+# ============================================================================
+# Production Database
+# ============================================================================
+# Database connection pooling
+psycopg2-binary==2.9.9
+
+# TimescaleDB support
+timescaledb==0.1.0
+
+# ============================================================================
+# Production Message Queue
+# ============================================================================
+# Kafka support
+aiokafka==0.10.0
+
+# RabbitMQ support
+aio-pika==9.3.1
+
+# ============================================================================
+# Production Metrics Export
+# ============================================================================
+# StatsD client
+statsd==4.0.1
+
+# Graphite client
+graphyte==1.7.1

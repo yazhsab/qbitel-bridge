@@ -20,6 +20,8 @@ dist/
 *.egg
 .wheels/
 *.log
+cronos_ai.log
+cronos_ai_engine.log
 .coverage
 .coverage.*
 .htmlcov/
@@ -38,6 +40,8 @@ obj/
 # Rust
 /target/
 **/target/
+**/*.rs.bk
+Cargo.lock
 
 # Node / Frontend
 node_modules/

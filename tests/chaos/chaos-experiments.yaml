@@ -1,0 +1,389 @@
+# CRONOS AI - Chaos Engineering Experiments
+# Chaos Mesh configurations for testing system resilience
+
+---
+# Pod Failure Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: pod-failure-experiment
+  namespace: cronos-ai
+spec:
+  action: pod-failure
+  mode: one
+  duration: "30s"
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+  scheduler:
+    cron: "@every 1h"
+
+---
+# Pod Kill Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: pod-kill-experiment
+  namespace: cronos-ai
+spec:
+  action: pod-kill
+  mode: fixed
+  value: "1"
+  duration: "60s"
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+      component: api
+  scheduler:
+    cron: "@every 2h"
+
+---
+# Network Delay Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-delay-experiment
+  namespace: cronos-ai
+spec:
+  action: delay
+  mode: one
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+  delay:
+    latency: "100ms"
+    correlation: "25"
+    jitter: "10ms"
+  duration: "5m"
+  direction: to
+  target:
+    mode: all
+    selector:
+      namespaces:
+        - cronos-ai
+
+---
+# Network Partition Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-partition-experiment
+  namespace: cronos-ai
+spec:
+  action: partition
+  mode: one
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+      component: dataplane
+  direction: both
+  duration: "2m"
+  target:
+    mode: one
+    selector:
+      namespaces:
+        - cronos-ai
+      labelSelectors:
+        app: cronos-ai
+        component: controlplane
+
+---
+# Network Bandwidth Limit
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-bandwidth-experiment
+  namespace: cronos-ai
+spec:
+  action: bandwidth
+  mode: all
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+  bandwidth:
+    rate: "1mbps"
+    limit: 20000
+    buffer: 10000
+  duration: "3m"
+  direction: to
+
+---
+# Network Packet Loss
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-loss-experiment
+  namespace: cronos-ai
+spec:
+  action: loss
+  mode: one
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+  loss:
+    loss: "25"
+    correlation: "25"
+  duration: "2m"
+  direction: to
+
+---
+# CPU Stress Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: cpu-stress-experiment
+  namespace: cronos-ai
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+  stressors:
+    cpu:
+      workers: 2
+      load: 80
+  duration: "5m"
+
+---
+# Memory Stress Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: memory-stress-experiment
+  namespace: cronos-ai
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+  stressors:
+    memory:
+      workers: 1
+      size: "512MB"
+  duration: "3m"
+
+---
+# IO Stress Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: IOChaos
+metadata:
+  name: io-stress-experiment
+  namespace: cronos-ai
+spec:
+  action: latency
+  mode: one
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+  volumePath: /data
+  path: /data/**/*
+  delay: "100ms"
+  percent: 50
+  duration: "5m"
+
+---
+# DNS Chaos Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: DNSChaos
+metadata:
+  name: dns-chaos-experiment
+  namespace: cronos-ai
+spec:
+  action: error
+  mode: all
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+  patterns:
+    - "*.cronos-ai.svc.cluster.local"
+  duration: "1m"
+
+---
+# Time Chaos Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: TimeChaos
+metadata:
+  name: time-chaos-experiment
+  namespace: cronos-ai
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+  timeOffset: "-1h"
+  duration: "2m"
+
+---
+# HTTP Abort Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: HTTPChaos
+metadata:
+  name: http-abort-experiment
+  namespace: cronos-ai
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+  target: Request
+  port: 8080
+  path: "/api/v1/*"
+  abort: true
+  duration: "1m"
+
+---
+# HTTP Delay Experiment
+apiVersion: chaos-mesh.org/v1alpha1
+kind: HTTPChaos
+metadata:
+  name: http-delay-experiment
+  namespace: cronos-ai
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+  target: Request
+  port: 8080
+  path: "/api/v1/*"
+  delay: "2s"
+  duration: "3m"
+
+---
+# Kernel Chaos - Container Kill
+apiVersion: chaos-mesh.org/v1alpha1
+kind: KernelChaos
+metadata:
+  name: kernel-chaos-experiment
+  namespace: cronos-ai
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+  failKernRequest:
+    callchain:
+      - funcname: "should_failslab"
+    failtype: 0
+  duration: "1m"
+
+---
+# JVM Chaos - Exception Injection
+apiVersion: chaos-mesh.org/v1alpha1
+kind: JVMChaos
+metadata:
+  name: jvm-exception-experiment
+  namespace: cronos-ai
+spec:
+  action: exception
+  mode: one
+  selector:
+    namespaces:
+      - cronos-ai
+    labelSelectors:
+      app: cronos-ai
+      runtime: jvm
+  class: "com.cronos.ai.Service"
+  method: "processRequest"
+  exception: "java.lang.RuntimeException('Chaos injection')"
+  duration: "2m"
+
+---
+# Workflow - Complex Chaos Scenario
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Workflow
+metadata:
+  name: complex-chaos-workflow
+  namespace: cronos-ai
+spec:
+  entry: entry
+  templates:
+    - name: entry
+      templateType: Serial
+      deadline: 10m
+      children:
+        - network-delay-step
+        - pod-failure-step
+        - recovery-validation-step
+    
+    - name: network-delay-step
+      templateType: NetworkChaos
+      deadline: 3m
+      networkChaos:
+        action: delay
+        mode: one
+        selector:
+          namespaces:
+            - cronos-ai
+          labelSelectors:
+            app: cronos-ai
+        delay:
+          latency: "200ms"
+        duration: "2m"
+    
+    - name: pod-failure-step
+      templateType: PodChaos
+      deadline: 2m
+      podChaos:
+        action: pod-failure
+        mode: one
+        selector:
+          namespaces:
+            - cronos-ai
+          labelSelectors:
+            app: cronos-ai
+        duration: "1m"
+    
+    - name: recovery-validation-step
+      templateType: Suspend
+      deadline: 1m
+
+---
+# Schedule - Automated Chaos Testing
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Schedule
+metadata:
+  name: scheduled-chaos-tests
+  namespace: cronos-ai
+spec:
+  schedule: "0 2 * * *"  # Run daily at 2 AM
+  type: PodChaos
+  podChaos:
+    action: pod-kill
+    mode: one
+    selector:
+      namespaces:
+        - cronos-ai
+      labelSelectors:
+        app: cronos-ai
+    duration: "30s"
+  historyLimit: 5
+  concurrencyPolicy: Forbid

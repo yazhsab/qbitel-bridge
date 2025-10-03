@@ -234,36 +234,114 @@ class RuleEvaluator:
 
 
 class PythonRuleEvaluator(RuleEvaluator):
-    """Python expression rule evaluator."""
+    """
+    Safe Python expression rule evaluator.
+    
+    SECURITY NOTE: This evaluator uses a restricted AST-based approach
+    instead of eval() to prevent code injection attacks. Only safe
+    operations are allowed (comparisons, arithmetic, attribute access).
+    """
     
     def __init__(self, config: Config):
         super().__init__(config)
-        self.safe_globals = {
-            '__builtins__': {
-                'len': len,
-                'str': str,
-                'int': int,
-                'float': float,
-                'bool': bool,
-                'list': list,
-                'dict': dict,
-                'max': max,
-                'min': min,
-                'sum': sum,
-                'any': any,
-                'all': all,
-            },
-            're': re,
-            'datetime': datetime,
-            'timedelta': timedelta,
+        # Allowed node types for safe evaluation
+        self.allowed_nodes = {
+            'Module', 'Expr', 'Load', 'Store',
+            'BinOp', 'UnaryOp', 'Compare', 'BoolOp',
+            'Add', 'Sub', 'Mult', 'Div', 'Mod', 'Pow',
+            'And', 'Or', 'Not',
+            'Eq', 'NotEq', 'Lt', 'LtE', 'Gt', 'GtE', 'In', 'NotIn', 'Is', 'IsNot',
+            'Constant', 'Num', 'Str', 'NameConstant',
+            'Name', 'Attribute', 'Subscript', 'Index', 'Slice',
+            'List', 'Tuple', 'Dict',
+            'IfExp',  # Ternary operator
+        }
+        
+        # Safe built-in functions
+        self.safe_functions = {
+            'len': len,
+            'str': str,
+            'int': int,
+            'float': float,
+            'bool': bool,
+            'max': max,
+            'min': min,
+            'sum': sum,
+            'any': any,
+            'all': all,
+            'abs': abs,
+            'round': round,
         }
     
-    async def evaluate(self, rule: PolicyRule, context: EvaluationContext) -> bool:
-        """Evaluate Python expression."""
+    def _is_safe_ast(self, node: Any) -> bool:
+        """Check if AST node is safe to evaluate."""
+        import ast
+        
+        node_type = type(node).__name__
+        
+        # Check if node type is allowed
+        if node_type not in self.allowed_nodes:
+            self.logger.warning(f"Unsafe AST node type: {node_type}")
+            return False
+        
+        # Recursively check child nodes
+        for child in ast.iter_child_nodes(node):
+            if not self._is_safe_ast(child):
+                return False
+        
+        # Additional checks for specific node types
+        if isinstance(node, ast.Name):
+            # Only allow safe variable names (no dunder methods)
+            if node.id.startswith('__') or node.id.startswith('_'):
+                self.logger.warning(f"Unsafe variable name: {node.id}")
+                return False
+        
+        if isinstance(node, ast.Attribute):
+            # Only allow safe attribute access (no dunder attributes)
+            if node.attr.startswith('__') or node.attr.startswith('_'):
+                self.logger.warning(f"Unsafe attribute access: {node.attr}")
+                return False
+        
+        if isinstance(node, ast.Call):
+            # Function calls are not allowed in safe mode
+            self.logger.warning("Function calls not allowed in safe evaluation")
+            return False
+        
+        return True
+    
+    def _safe_eval(self, expression: str, namespace: Dict[str, Any]) -> Any:
+        """Safely evaluate expression using AST validation."""
+        import ast
+        
         try:
-            # Create evaluation namespace
-            namespace = self.safe_globals.copy()
-            namespace.update({
+            # Parse expression into AST
+            tree = ast.parse(expression, mode='eval')
+            
+            # Validate AST is safe
+            if not self._is_safe_ast(tree):
+                raise ValueError("Expression contains unsafe operations")
+            
+            # Compile and evaluate with restricted namespace
+            code = compile(tree, '<safe_eval>', 'eval')
+            
+            # Create restricted namespace with no __builtins__
+            safe_namespace = {'__builtins__': {}}
+            safe_namespace.update(self.safe_functions)
+            safe_namespace.update(namespace)
+            
+            # Evaluate in restricted environment
+            result = eval(code, safe_namespace, {})
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Safe evaluation failed: {e}")
+            raise
+    
+    async def evaluate(self, rule: PolicyRule, context: EvaluationContext) -> bool:
+        """Evaluate Python expression safely."""
+        try:
+            # Create evaluation namespace with context data
+            namespace = {
                 'context': context,
                 'user_id': context.user_id,
                 'resource': context.resource,
@@ -273,10 +351,13 @@ class PythonRuleEvaluator(RuleEvaluator):
                 'environment': context.environment,
                 'metadata': context.metadata,
                 'now': datetime.utcnow(),
-            })
+                're': re,  # Allow regex module for pattern matching
+                'datetime': datetime,
+                'timedelta': timedelta,
+            }
             
-            # Evaluate expression
-            result = eval(rule.expression, namespace)
+            # Safely evaluate expression
+            result = self._safe_eval(rule.expression, namespace)
             return bool(result)
             
         except Exception as e:
@@ -284,11 +365,23 @@ class PythonRuleEvaluator(RuleEvaluator):
             return False
     
     def validate_expression(self, expression: str) -> bool:
-        """Validate Python expression."""
+        """Validate Python expression for safety."""
+        import ast
+        
         try:
-            compile(expression, '<string>', 'eval')
+            # Parse expression
+            tree = ast.parse(expression, mode='eval')
+            
+            # Check if AST is safe
+            if not self._is_safe_ast(tree):
+                return False
+            
+            # Try to compile
+            compile(tree, '<string>', 'eval')
             return True
-        except SyntaxError:
+            
+        except (SyntaxError, ValueError) as e:
+            self.logger.warning(f"Expression validation failed: {e}")
             return False
 
 

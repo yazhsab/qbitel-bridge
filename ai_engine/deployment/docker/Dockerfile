@@ -30,9 +30,13 @@ RUN python -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Copy requirements first for better caching
-COPY requirements.txt ./
+COPY requirements.txt requirements-prod.txt ./
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-prod.txt
+
+# Verify dependencies
+COPY scripts/check_dependencies.py ./scripts/
+RUN python scripts/check_dependencies.py || echo "Warning: Some optional dependencies missing"
 
 # Copy application code
 COPY --chown=builder:builder . ./app/

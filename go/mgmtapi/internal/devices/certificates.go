@@ -7,8 +7,11 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"math/big"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -18,15 +21,15 @@ import (
 
 // CertificateManager handles device certificate lifecycle
 type CertificateManager struct {
-	logger     *zap.Logger
-	config     *LifecycleConfig
-	rootCA     *x509.Certificate
-	rootKey    *rsa.PrivateKey
-	intermCA   *x509.Certificate
-	intermKey  *rsa.PrivateKey
-	crl        *x509.RevocationList
-	mu         sync.RWMutex
-	serialNum  *big.Int
+	logger    *zap.Logger
+	config    *LifecycleConfig
+	rootCA    *x509.Certificate
+	rootKey   *rsa.PrivateKey
+	intermCA  *x509.Certificate
+	intermKey *rsa.PrivateKey
+	crl       *x509.RevocationList
+	mu        sync.RWMutex
+	serialNum *big.Int
 }
 
 // NewCertificateManager creates a new certificate manager
@@ -133,26 +136,38 @@ func (cm *CertificateManager) IssueCertificate(ctx context.Context, csr *x509.Ce
 }
 
 // RevokeCertificate revokes a device certificate
-func (cm *CertificateManager) RevokeCertificate(ctx context.Context, certID string, reason string) error {
+func (cm *CertificateManager) RevokeCertificate(ctx context.Context, cert *DeviceCertificate, reason string) error {
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
 
-	// In a real implementation, this would look up the certificate from storage
-	// For now, we'll simulate the revocation process
-
-	// Add to CRL
-	revokedCert := pkix.RevokedCertificate{
-		SerialNumber:   big.NewInt(1), // Would be actual serial number
-		RevocationTime: time.Now(),
-		Extensions: []pkix.Extension{
-			{
-				Id:    []int{2, 5, 29, 21}, // CRL Reason Code
-				Value: []byte{1},           // Key compromise
-			},
-		},
+	if cert == nil {
+		return fmt.Errorf("certificate not found")
 	}
 
-	// Update CRL
+	serialNumber, ok := new(big.Int).SetString(cert.SerialNumber, 10)
+	if !ok {
+		return fmt.Errorf("invalid certificate serial number: %s", cert.SerialNumber)
+	}
+
+	// Prevent duplicate entries in the CRL
+	for _, revoked := range cm.crl.RevokedCertificates {
+		if revoked.SerialNumber.Cmp(serialNumber) == 0 {
+			return fmt.Errorf("certificate already revoked")
+		}
+	}
+
+	revocationReason := mapRevocationReason(reason)
+	revocationExtension := pkix.Extension{
+		Id:    []int{2, 5, 29, 21},
+		Value: []byte{byte(revocationReason)},
+	}
+
+	revokedCert := pkix.RevokedCertificate{
+		SerialNumber:   serialNumber,
+		RevocationTime: time.Now(),
+		Extensions:     []pkix.Extension{revocationExtension},
+	}
+
 	cm.crl.RevokedCertificates = append(cm.crl.RevokedCertificates, revokedCert)
 	cm.crl.NextUpdate = time.Now().Add(24 * time.Hour)
 
@@ -166,8 +181,149 @@ func (cm *CertificateManager) RevokeCertificate(ctx context.Context, certID stri
 	_ = crlDER
 
 	cm.logger.Info("certificate revoked",
-		zap.String("certificate_id", certID),
+		zap.String("certificate_id", cert.ID),
 		zap.String("reason", reason))
+
+	return nil
+}
+
+func mapRevocationReason(reason string) int {
+	switch strings.ToLower(strings.TrimSpace(reason)) {
+	case "key_compromise", "key compromise":
+		return 1
+	case "ca_compromise", "ca compromise":
+		return 2
+	case "affiliation_changed", "affiliation changed":
+		return 3
+	case "superseded":
+		return 4
+	case "cessation_of_operation", "cessation of operation":
+		return 5
+	case "certificate_hold", "hold":
+		return 6
+	default:
+		return 0 // unspecified
+	}
+}
+
+func loadCertificateAndKey(path string) (*x509.Certificate, *rsa.PrivateKey, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var cert *x509.Certificate
+	var key interface{}
+	rest := data
+	for {
+		var block *pem.Block
+		block, rest = pem.Decode(rest)
+		if block == nil {
+			break
+		}
+
+		switch block.Type {
+		case "CERTIFICATE":
+			parsed, err := x509.ParseCertificate(block.Bytes)
+			if err != nil {
+				return nil, nil, fmt.Errorf("failed to parse certificate: %w", err)
+			}
+			cert = parsed
+		case "RSA PRIVATE KEY":
+			parsed, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+			if err != nil {
+				return nil, nil, fmt.Errorf("failed to parse RSA private key: %w", err)
+			}
+			key = parsed
+		case "PRIVATE KEY":
+			parsed, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+			if err != nil {
+				return nil, nil, fmt.Errorf("failed to parse private key: %w", err)
+			}
+			key = parsed
+		}
+	}
+
+	if cert == nil {
+		return nil, nil, errors.New("certificate not found in PEM file")
+	}
+
+	if key == nil {
+		return nil, nil, errors.New("private key not found in PEM file")
+	}
+
+	rsaKey, ok := key.(*rsa.PrivateKey)
+	if !ok {
+		return nil, nil, errors.New("private key is not RSA")
+	}
+
+	return cert, rsaKey, nil
+}
+
+func generateCA(commonName string, validity time.Duration, keySize int, parentCert *x509.Certificate, parentKey *rsa.PrivateKey) (*x509.Certificate, *rsa.PrivateKey, error) {
+	template := &x509.Certificate{
+		SerialNumber: big.NewInt(time.Now().UnixNano()),
+		Subject: pkix.Name{
+			CommonName:   commonName,
+			Organization: []string{"QSLB"},
+			Country:      []string{"US"},
+		},
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().Add(validity),
+		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
+		BasicConstraintsValid: true,
+		IsCA:                  true,
+		MaxPathLen:            1,
+	}
+
+	key, err := rsa.GenerateKey(rand.Reader, keySize)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to generate key: %w", err)
+	}
+
+	issuerCert := template
+	issuerKey := key
+	if parentCert != nil && parentKey != nil {
+		issuerCert = parentCert
+		issuerKey = parentKey
+	}
+
+	der, err := x509.CreateCertificate(rand.Reader, template, issuerCert, &key.PublicKey, issuerKey)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create certificate: %w", err)
+	}
+
+	cert, err := x509.ParseCertificate(der)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to parse certificate: %w", err)
+	}
+
+	return cert, key, nil
+}
+
+func writeCertificateAndKey(path string, cert *x509.Certificate, key *rsa.PrivateKey) error {
+	if path == "" {
+		return nil
+	}
+
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("failed to create directory %s: %w", dir, err)
+	}
+
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
+	if err != nil {
+		return fmt.Errorf("failed to open CA file: %w", err)
+	}
+	defer file.Close()
+
+	if err := pem.Encode(file, &pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw}); err != nil {
+		return fmt.Errorf("failed to write certificate: %w", err)
+	}
+
+	if err := pem.Encode(file, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(key)}); err != nil {
+		return fmt.Errorf("failed to write private key: %w", err)
+	}
 
 	return nil
 }
@@ -182,7 +338,7 @@ func (cm *CertificateManager) RenewCertificate(ctx context.Context, certID strin
 
 	// In a real implementation, this would look up the existing certificate from storage
 	// For now, we'll simulate the lookup and validation process
-	
+
 	// Validate the renewal request
 	if err := cm.validateRenewalRequest(certID, csr); err != nil {
 		return nil, fmt.Errorf("renewal validation failed: %w", err)
@@ -336,80 +492,77 @@ func (cm *CertificateManager) ValidateCertificate(certDER []byte) error {
 // Helper methods
 
 func (cm *CertificateManager) initializeCAs() error {
-	// In a real implementation, this would load existing CA certificates
-	// For now, we'll create self-signed CAs for demonstration
-
-	// Create root CA
-	rootTemplate := &x509.Certificate{
-		SerialNumber: big.NewInt(1),
-		Subject: pkix.Name{
-			CommonName:   "QSLB Root CA",
-			Organization: []string{"QSLB"},
-			Country:      []string{"US"},
-		},
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().Add(10 * 365 * 24 * time.Hour), // 10 years
-		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
-		BasicConstraintsValid: true,
-		IsCA:                  true,
-		MaxPathLen:            1,
+	if err := cm.initializeRootCA(); err != nil {
+		return err
 	}
 
-	// Generate root CA key
-	rootKey, err := rsa.GenerateKey(rand.Reader, 4096)
+	if err := cm.initializeIntermediateCA(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (cm *CertificateManager) initializeRootCA() error {
+	if cm.config.RootCAPath != "" {
+		cert, key, err := loadCertificateAndKey(cm.config.RootCAPath)
+		if err == nil {
+			if !cert.IsCA {
+				return errors.New("configured root certificate is not a CA")
+			}
+			cm.rootCA = cert
+			cm.rootKey = key
+			return nil
+		}
+		if !errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("failed to load root CA: %w", err)
+		}
+	}
+
+	rootCert, rootKey, err := generateCA("QSLB Root CA", 10*365*24*time.Hour, 4096, nil, nil)
 	if err != nil {
-		return fmt.Errorf("failed to generate root CA key: %w", err)
+		return err
 	}
-
-	// Create root CA certificate
-	rootCertDER, err := x509.CreateCertificate(rand.Reader, rootTemplate, rootTemplate, &rootKey.PublicKey, rootKey)
-	if err != nil {
-		return fmt.Errorf("failed to create root CA certificate: %w", err)
-	}
-
-	rootCert, err := x509.ParseCertificate(rootCertDER)
-	if err != nil {
-		return fmt.Errorf("failed to parse root CA certificate: %w", err)
-	}
-
 	cm.rootCA = rootCert
 	cm.rootKey = rootKey
 
-	// Create intermediate CA
-	intermTemplate := &x509.Certificate{
-		SerialNumber: big.NewInt(2),
-		Subject: pkix.Name{
-			CommonName:   "QSLB Intermediate CA",
-			Organization: []string{"QSLB"},
-			Country:      []string{"US"},
-		},
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().Add(5 * 365 * 24 * time.Hour), // 5 years
-		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
-		BasicConstraintsValid: true,
-		IsCA:                  true,
-		MaxPathLen:            0,
+	if cm.config.RootCAPath != "" {
+		if err := writeCertificateAndKey(cm.config.RootCAPath, rootCert, rootKey); err != nil {
+			return fmt.Errorf("failed to persist root CA: %w", err)
+		}
 	}
 
-	// Generate intermediate CA key
-	intermKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	return nil
+}
+
+func (cm *CertificateManager) initializeIntermediateCA() error {
+	if cm.config.IntermediateCAPath != "" {
+		cert, key, err := loadCertificateAndKey(cm.config.IntermediateCAPath)
+		if err == nil {
+			if !cert.IsCA {
+				return errors.New("configured intermediate certificate is not a CA")
+			}
+			cm.intermCA = cert
+			cm.intermKey = key
+			return nil
+		}
+		if !errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("failed to load intermediate CA: %w", err)
+		}
+	}
+
+	intermCert, intermKey, err := generateCA("QSLB Intermediate CA", 5*365*24*time.Hour, 2048, cm.rootCA, cm.rootKey)
 	if err != nil {
-		return fmt.Errorf("failed to generate intermediate CA key: %w", err)
+		return err
 	}
-
-	// Create intermediate CA certificate
-	intermCertDER, err := x509.CreateCertificate(rand.Reader, intermTemplate, rootCert, &intermKey.PublicKey, rootKey)
-	if err != nil {
-		return fmt.Errorf("failed to create intermediate CA certificate: %w", err)
-	}
-
-	intermCert, err := x509.ParseCertificate(intermCertDER)
-	if err != nil {
-		return fmt.Errorf("failed to parse intermediate CA certificate: %w", err)
-	}
-
 	cm.intermCA = intermCert
 	cm.intermKey = intermKey
+
+	if cm.config.IntermediateCAPath != "" {
+		if err := writeCertificateAndKey(cm.config.IntermediateCAPath, intermCert, intermKey); err != nil {
+			return fmt.Errorf("failed to persist intermediate CA: %w", err)
+		}
+	}
 
 	return nil
 }
@@ -450,7 +603,7 @@ func (cm *CertificateManager) validateCSR(csr *x509.CertificateRequest) error {
 func (cm *CertificateManager) addDeviceExtensions(template *x509.Certificate, device *Device) {
 	// Add device-specific extensions
 	// This could include device type, capabilities, etc.
-	
+
 	// Example: Add device ID as a custom extension
 	deviceIDExt := pkix.Extension{
 		Id:       []int{1, 3, 6, 1, 4, 1, 12345, 1, 1}, // Custom OID
@@ -483,13 +636,13 @@ func (cm *CertificateManager) GetCertificateStats() map[string]interface{} {
 	defer cm.mu.RUnlock()
 
 	return map[string]interface{}{
-		"root_ca_subject":        cm.rootCA.Subject.String(),
+		"root_ca_subject":         cm.rootCA.Subject.String(),
 		"intermediate_ca_subject": cm.intermCA.Subject.String(),
-		"root_ca_expires":        cm.rootCA.NotAfter,
+		"root_ca_expires":         cm.rootCA.NotAfter,
 		"intermediate_ca_expires": cm.intermCA.NotAfter,
-		"revoked_certificates":   len(cm.crl.RevokedCertificates),
-		"next_serial_number":     cm.serialNum.String(),
-		"crl_next_update":        cm.crl.NextUpdate,
+		"revoked_certificates":    len(cm.crl.RevokedCertificates),
+		"next_serial_number":      cm.serialNum.String(),
+		"crl_next_update":         cm.crl.NextUpdate,
 	}
 }
 
@@ -621,9 +774,9 @@ func (cm *CertificateManager) CheckCertificateExpiry(warningDays int) ([]*Device
 	// In a real implementation, this would query the database for certificates
 	// expiring within the warning period
 	warningTime := time.Now().Add(time.Duration(warningDays) * 24 * time.Hour)
-	
+
 	var expiringCerts []*DeviceCertificate
-	
+
 	// This would be replaced with actual database query
 	cm.logger.Info("checking for expiring certificates",
 		zap.Time("warning_threshold", warningTime),

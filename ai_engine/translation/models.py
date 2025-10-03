@@ -4,6 +4,7 @@ Enterprise-grade data structures for protocol translation, API generation, and c
 """
 
 import asyncio
+import base64
 import json
 import logging
 import time
@@ -47,6 +48,22 @@ class CodeLanguage(str, Enum):
     RUBY = "ruby"
     KOTLIN = "kotlin"
     SWIFT = "swift"
+
+
+class FieldType(str, Enum):
+    """Protocol field data types."""
+    INTEGER = "integer"
+    STRING = "string"
+    BINARY = "binary"
+    BOOLEAN = "boolean"
+    FLOAT = "float"
+    TIMESTAMP = "timestamp"
+    ADDRESS = "address"
+    LENGTH = "length"
+    CHECKSUM = "checksum"
+    DELIMITER = "delimiter"
+    RESERVED = "reserved"
+    UNKNOWN = "unknown"
 
 
 class ProtocolFormat(str, Enum):
@@ -112,6 +129,7 @@ class ProtocolSchema:
     metadata: Dict[str, Any] = field(default_factory=dict)
     security_requirements: List[str] = field(default_factory=list)
     compliance_tags: List[str] = field(default_factory=list)
+    semantic_info: Dict[str, Any] = field(default_factory=dict)
     
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -162,6 +180,7 @@ class APISpecification:
     version: str
     description: Optional[str] = None
     api_style: APIStyle = APIStyle.REST
+    security_level: SecurityLevel = SecurityLevel.PUBLIC
     base_url: Optional[str] = None
     endpoints: List[APIEndpoint] = field(default_factory=list)
     schemas: Dict[str, Dict[str, Any]] = field(default_factory=dict)
@@ -169,6 +188,7 @@ class APISpecification:
     servers: List[Dict[str, Any]] = field(default_factory=list)
     contact: Optional[Dict[str, Any]] = None
     license: Optional[Dict[str, Any]] = None
+    extensions: Dict[str, Any] = field(default_factory=dict)
     
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     spec_id: str = field(default_factory=lambda: str(uuid.uuid4()))
@@ -198,7 +218,7 @@ class APISpecification:
             openapi_spec["info"]["contact"] = self.contact
         if self.license:
             openapi_spec["info"]["license"] = self.license
-        
+
         # Convert endpoints to OpenAPI paths
         for endpoint in self.endpoints:
             if endpoint.path not in openapi_spec["paths"]:
@@ -219,7 +239,10 @@ class APISpecification:
             
             if endpoint.security:
                 openapi_spec["paths"][endpoint.path][endpoint.method.lower()]["security"] = endpoint.security
-        
+
+        if self.extensions:
+            openapi_spec.setdefault("x-cronos-extensions", self.extensions)
+
         return openapi_spec
 
 
@@ -327,39 +350,115 @@ class ProtocolBridgeConfig:
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class TranslationMode(str, Enum):
+    """Protocol translation modes."""
+    DIRECT = "direct"
+    SEMANTIC = "semantic"
+    HYBRID = "hybrid"
+    STREAMING = "streaming"
+    BATCH = "batch"
+
+
+class QualityLevel(str, Enum):
+    """Translation quality levels."""
+    FAST = "fast"
+    BALANCED = "balanced"
+    ACCURATE = "accurate"
+    PERFECT = "perfect"
+
+
+@dataclass
+class TranslationRule:
+    """Rule for protocol field translation."""
+    source_field: str
+    target_field: str
+    transformation: Optional[str] = None
+    validation: Optional[str] = None
+    priority: int = 5
+    conditions: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
 @dataclass
 class TranslationRequest:
     """Request for protocol translation and API generation."""
-    request_id: str
-    protocol_data: bytes
+    request_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     source_protocol: Optional[str] = None
+    target_protocol: Optional[str] = None
+    data: Optional[bytes] = None
+    protocol_data: Optional[bytes] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    translation_mode: TranslationMode = TranslationMode.HYBRID
+    quality_level: QualityLevel = QualityLevel.BALANCED
     target_api_style: APIStyle = APIStyle.REST
     target_languages: List[CodeLanguage] = field(default_factory=lambda: [CodeLanguage.PYTHON])
-    
-    # Generation options
     generate_documentation: bool = True
     generate_tests: bool = True
     generate_examples: bool = True
     include_validation: bool = True
     security_level: SecurityLevel = SecurityLevel.AUTHENTICATED
-    
-    # LLM analysis options
-    enable_semantic_analysis: bool = True
-    enable_security_analysis: bool = True
-    enable_compliance_check: bool = False
-    compliance_frameworks: List[str] = field(default_factory=list)
-    
-    # Context and metadata
+    preserve_metadata: bool = True
+    enable_validation: bool = True
+    custom_rules: List[TranslationRule] = field(default_factory=list)
     user_context: Dict[str, Any] = field(default_factory=dict)
     session_id: Optional[str] = None
-    priority: int = 5  # 1-10, 10 = highest
-    
+    priority: int = 5  # 1-10, 10 highest
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    
-    def __post_init__(self):
-        """Post-initialization processing."""
+
+    def __post_init__(self) -> None:
+        """Normalise payload handling and ensure compatibility with older fields."""
         if not self.request_id:
             self.request_id = str(uuid.uuid4())
+
+        # Allow legacy callers to pass protocol_data instead of data.
+        if self.data is None and self.protocol_data is not None:
+            self.data = self.protocol_data
+        elif self.protocol_data is None and self.data is not None:
+            self.protocol_data = self.data
+
+        if isinstance(self.data, str):
+            self.data = self.data.encode("utf-8")
+        if isinstance(self.protocol_data, str):
+            self.protocol_data = self.protocol_data.encode("utf-8")
+
+        if self.data is None:
+            self.data = b""
+        if self.protocol_data is None:
+            self.protocol_data = self.data
+
+        # Clamp priority within expected bounds.
+        self.priority = max(1, min(10, self.priority))
+
+    def validate(self) -> List[str]:
+        """Validate request contents and return a list of issues."""
+        errors: List[str] = []
+
+        if not self.source_protocol:
+            errors.append("source_protocol is required")
+        if not self.target_protocol:
+            errors.append("target_protocol is required")
+        if not self.data:
+            errors.append("data payload must be provided")
+        if self.data and not isinstance(self.data, (bytes, bytearray)):
+            errors.append("data must be bytes")
+        if not isinstance(self.priority, int) or not (1 <= self.priority <= 10):
+            errors.append("priority must be an integer between 1 and 10")
+
+        return errors
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Create JSON-safe representation of the request."""
+        encoded_data = base64.b64encode(self.data).decode("ascii") if self.data else None
+        return {
+            "request_id": self.request_id,
+            "source_protocol": self.source_protocol,
+            "target_protocol": self.target_protocol,
+            "data": encoded_data,
+            "metadata": self.metadata,
+            "translation_mode": self.translation_mode.value,
+            "quality_level": self.quality_level.value,
+            "priority": self.priority,
+        }
 
 
 @dataclass
@@ -417,6 +516,56 @@ class APIGenerationResult:
         self.status = GenerationStatus.FAILED
         self.errors.append(error_message)
         self.completed_at = datetime.now(timezone.utc)
+
+
+@dataclass
+class TranslationResult:
+    """Result of protocol translation."""
+    translation_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    source_protocol: str = ""
+    target_protocol: str = ""
+    translated_data: bytes = b""
+    confidence: float = 0.0
+    processing_time: float = 0.0
+    translation_mode: TranslationMode = TranslationMode.HYBRID
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    validation_errors: List[str] = field(default_factory=list)
+    warnings: List[str] = field(default_factory=list)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+
+    def validate(self) -> List[str]:
+        """Validate translation output and return issues."""
+        errors: List[str] = []
+
+        if not self.source_protocol:
+            errors.append("source_protocol is required")
+        if not self.target_protocol:
+            errors.append("target_protocol is required")
+        if not isinstance(self.translated_data, (bytes, bytearray)):
+            errors.append("translated_data must be bytes")
+        if not (0.0 <= self.confidence <= 1.0):
+            errors.append("confidence must be between 0.0 and 1.0")
+        if self.processing_time < 0:
+            errors.append("processing_time must be non-negative")
+
+        return errors
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Create JSON-safe representation of the translation result."""
+        encoded_data = base64.b64encode(self.translated_data).decode("ascii") if self.translated_data else None
+        return {
+            "translation_id": self.translation_id,
+            "source_protocol": self.source_protocol,
+            "target_protocol": self.target_protocol,
+            "translated_data": encoded_data,
+            "confidence": self.confidence,
+            "processing_time": self.processing_time,
+            "translation_mode": self.translation_mode.value,
+            "metadata": self.metadata,
+            "validation_errors": self.validation_errors,
+            "warnings": self.warnings,
+            "timestamp": self.timestamp.isoformat(),
+        }
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
@@ -508,6 +657,7 @@ def create_rest_api_spec(
         version=version,
         description=description,
         api_style=APIStyle.REST,
+        security_level=SecurityLevel.AUTHENTICATED,
         security_schemes={
             "bearerAuth": {
                 "type": "http",
@@ -583,7 +733,7 @@ def validate_api_specification(spec: APISpecification) -> List[str]:
     if not spec.version:
         issues.append("API specification must have a version")
     
-    if not spec.endpoints:
+    if spec.api_style != APIStyle.GRPC and not spec.endpoints:
         issues.append("API specification must have at least one endpoint")
     
     # Check for duplicate endpoints
@@ -643,3 +793,140 @@ def merge_protocol_schemas(schemas: List[ProtocolSchema]) -> ProtocolSchema:
     merged.compliance_tags = list(set(merged.compliance_tags))
     
     return merged
+
+
+def create_protocol_schema(
+    name: str,
+    fields: Optional[List[Dict[str, Any]]] = None,
+    *,
+    version: str = "1.0",
+    description: Optional[str] = None,
+    semantic_info: Optional[Dict[str, Any]] = None,
+    metadata: Optional[Dict[str, Any]] = None,
+    protocol_format: ProtocolFormat = ProtocolFormat.BINARY
+) -> ProtocolSchema:
+    """Factory helper for quickly constructing protocol schemas."""
+    schema = ProtocolSchema(
+        name=name,
+        version=version,
+        description=description,
+        format=protocol_format,
+        semantic_info=semantic_info or {},
+        metadata=metadata or {}
+    )
+
+    for index, field_def in enumerate(fields or []):
+        if not validate_field_definition(field_def):
+            continue
+
+        length = field_def.get('size', field_def.get('length', 0)) or 0
+        offset = field_def.get('offset', index * max(1, length))
+        field = ProtocolField(
+            name=field_def['name'],
+            field_type=field_def.get('type', FieldType.STRING.value),
+            offset=offset,
+            length=length,
+            description=field_def.get('description'),
+            optional=field_def.get('optional', False),
+            semantic_type=field_def.get('semantic_type')
+        )
+        schema.add_field(field)
+
+    return schema
+
+
+def create_api_specification(
+    protocol_schema: ProtocolSchema,
+    *,
+    api_style: APIStyle = APIStyle.REST,
+    security_level: SecurityLevel = SecurityLevel.PUBLIC
+) -> APISpecification:
+    """Factory helper for generating simple API specifications."""
+    spec = APISpecification(
+        title=f"{protocol_schema.name} API",
+        version="1.0.0",
+        api_style=api_style,
+        security_level=security_level
+    )
+
+    if api_style == APIStyle.REST:
+        spec.add_endpoint(
+            APIEndpoint(
+                path="/messages",
+                method="POST",
+                summary="Create message",
+                description="Create a new protocol message",
+                request_body={
+                    "required": True,
+                    "content": {
+                        "application/json": {
+                            "schema": {"type": "object"}
+                        }
+                    }
+                },
+                responses={
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            )
+        )
+        spec.add_endpoint(
+            APIEndpoint(
+                path="/messages/{id}",
+                method="GET",
+                summary="Get message",
+                description="Retrieve a protocol message by ID",
+                parameters=[
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": True,
+                        "schema": {"type": "string"}
+                    }
+                ],
+                responses={
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            )
+        )
+    elif api_style == APIStyle.GRAPHQL:
+        spec.add_endpoint(
+            APIEndpoint(
+                path="/graphql",
+                method="POST",
+                summary=f"GraphQL endpoint for {protocol_schema.name}",
+                description="Execute GraphQL operations"
+            )
+        )
+    # gRPC endpoints are represented via extensions and do not expose HTTP paths.
+
+    return spec
+
+
+def validate_field_definition(field_def: Dict[str, Any]) -> bool:
+    """Validate that a field definition contains the minimum required structure."""
+    if not field_def.get('name'):
+        return False
+    field_type = field_def.get('type')
+    if field_type not in {ft.value for ft in FieldType}:
+        return False
+    size = field_def.get('size', field_def.get('length'))
+    if size is not None and size < 0:
+        return False
+    return True
+
+
+def calculate_schema_complexity(schema: ProtocolSchema) -> float:
+    """Rudimentary complexity heuristic for protocol schemas."""
+    if not schema.fields:
+        return 0.0
+
+    total_fields = len(schema.fields)
+    variable_fields = sum(1 for field in schema.fields if field.length == 0 or field.optional)
+    unique_types = len({field.field_type for field in schema.fields})
+
+    complexity = 0.4 * (variable_fields / total_fields) + 0.4 * (unique_types / len(FieldType)) + 0.2 * min(1.0, total_fields / 10)
+    return round(min(1.0, complexity), 3)

@@ -1,0 +1,407 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cronos-translation-studio
+  labels:
+    app: cronos-ai
+    component: translation-studio
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: translation-studio-config
+  namespace: cronos-translation-studio
+data:
+  config.yaml: |
+    service_name: "protocol-translation-studio"
+    version: "1.0.0"
+    environment: "production"
+    log_level: "INFO"
+    
+    # LLM Configuration
+    llm:
+      primary_provider: "openai_gpt4"
+      fallback_providers:
+        - "anthropic_claude"
+        - "ollama_local"
+      temperature: 0.2
+      max_tokens: 4000
+    
+    # Translation Configuration
+    translation:
+      cache_ttl_hours: 24
+      max_message_size: 65536
+      default_encoding: "utf-8"
+      validation_enabled: true
+      
+    # Performance Configuration
+    performance:
+      target_latency_ms: 1.0
+      target_throughput: 100000
+      target_accuracy: 0.99
+      optimization_interval_hours: 6
+    
+    # Metrics Configuration
+    metrics:
+      enabled: true
+      port: 9090
+      path: "/metrics"
+---
+# NOTE: This is a template. Create actual secrets using:
+# kubectl create secret generic translation-studio-secrets \
+#   --from-literal=openai-api-key="$OPENAI_API_KEY" \
+#   --from-literal=anthropic-api-key="$ANTHROPIC_API_KEY" \
+#   --from-literal=database-password="$DATABASE_PASSWORD" \
+#   --from-literal=redis-password="$REDIS_PASSWORD" \
+#   -n cronos-translation-studio
+#
+# Or use External Secrets Operator, Sealed Secrets, or Vault
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: translation-studio-secrets
+  namespace: cronos-translation-studio
+type: Opaque
+# data:
+#   openai-api-key: <base64-encoded-value>
+#   anthropic-api-key: <base64-encoded-value>
+#   database-password: <base64-encoded-value>
+#   redis-password: <base64-encoded-value>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: translation-studio
+  namespace: cronos-translation-studio
+  labels:
+    app: cronos-ai
+    component: translation-studio
+    version: v1
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: cronos-ai
+      component: translation-studio
+  template:
+    metadata:
+      labels:
+        app: cronos-ai
+        component: translation-studio
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: translation-studio
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      
+      initContainers:
+      - name: wait-for-dependencies
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for Redis..."
+          until nc -z redis-service 6379; do
+            echo "Redis not ready, waiting..."
+            sleep 2
+          done
+          echo "Redis is ready!"
+          
+          echo "Waiting for Database..."
+          until nc -z postgres-service 5432; do
+            echo "Database not ready, waiting..."
+            sleep 2
+          done
+          echo "Database is ready!"
+      
+      containers:
+      - name: translation-studio
+        image: cronos-ai/translation-studio:1.0.0
+        imagePullPolicy: IfNotPresent
+        
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        
+        env:
+        - name: CRONOS_AI_ENVIRONMENT
+          value: "production"
+        - name: CRONOS_AI_SERVICE_NAME
+          value: "translation-studio"
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: translation-studio-secrets
+              key: openai-api-key
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: translation-studio-secrets
+              key: anthropic-api-key
+        - name: CRONOS_AI_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: translation-studio-secrets
+              key: database-password
+        - name: CRONOS_AI_REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: translation-studio-secrets
+              key: redis-password
+        - name: CRONOS_AI_DB_HOST
+          value: "postgres-service"
+        - name: CRONOS_AI_REDIS_HOST
+          value: "redis-service"
+        
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        - name: cache
+          mountPath: /app/cache
+        
+        resources:
+          requests:
+            cpu: "1000m"
+            memory: "2Gi"
+          limits:
+            cpu: "2000m"
+            memory: "4Gi"
+        
+        livenessProbe:
+          httpGet:
+            path: /api/v1/translation/health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /api/v1/translation/health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      
+      volumes:
+      - name: config
+        configMap:
+          name: translation-studio-config
+      - name: cache
+        emptyDir:
+          sizeLimit: 1Gi
+      
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: component
+                  operator: In
+                  values:
+                  - translation-studio
+              topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: translation-studio-service
+  namespace: cronos-translation-studio
+  labels:
+    app: cronos-ai
+    component: translation-studio
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8000
+    targetPort: http
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+    protocol: TCP
+  selector:
+    app: cronos-ai
+    component: translation-studio
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: translation-studio
+  namespace: cronos-translation-studio
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: translation-studio-hpa
+  namespace: cronos-translation-studio
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: translation-studio
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  # NOTE: Custom metrics require Prometheus Adapter or similar metrics server
+  # Ensure translation_requests_per_second metric is exposed via /metrics endpoint
+  # and configured in Prometheus Adapter ConfigMap
+  # - type: Pods
+  #   pods:
+  #     metric:
+  #       name: translation_requests_per_second
+  #     target:
+  #       type: AverageValue
+  #       averageValue: "10000"
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+      - type: Pods
+        value: 2
+        periodSeconds: 30
+      selectPolicy: Max
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: translation-studio-pdb
+  namespace: cronos-translation-studio
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: cronos-ai
+      component: translation-studio
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: translation-studio-network-policy
+  namespace: cronos-translation-studio
+spec:
+  podSelector:
+    matchLabels:
+      app: cronos-ai
+      component: translation-studio
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: cronos-ai-gateway
+    ports:
+    - protocol: TCP
+      port: 8000
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: cronos-monitoring
+    ports:
+    - protocol: TCP
+      port: 9090
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: cronos-database
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: cronos-cache
+    ports:
+    - protocol: TCP
+      port: 6379
+  - to:
+    - podSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: translation-studio-metrics
+  namespace: cronos-translation-studio
+  labels:
+    app: cronos-ai
+    component: translation-studio
+spec:
+  selector:
+    matchLabels:
+      app: cronos-ai
+      component: translation-studio
+  endpoints:
+  - port: metrics
+    interval: 15s
+    path: /metrics
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: translation-studio-cache
+  namespace: cronos-translation-studio
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: fast-ssd

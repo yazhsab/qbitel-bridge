@@ -59,6 +59,9 @@ python-pcapng>=2.1.0
 cryptography>=41.0.0
 pycryptodome>=3.18.0
 pyopenssl>=23.2.0
+pyotp>=2.9.0
+qrcode[pil]>=7.4.0
+python-jose[cryptography]>=3.3.0
 
 # Configuration and Environment
 pyyaml>=6.0

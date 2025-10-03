@@ -1,0 +1,211 @@
+---
+# Certificate Issuer for Let's Encrypt (Production)
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  namespace: cert-manager
+spec:
+  acme:
+    # Production Let's Encrypt server
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: ops@cronos-ai.example.com  # CHANGE THIS
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+    - dns01:
+        cloudflare:
+          email: ops@cronos-ai.example.com  # CHANGE THIS
+          apiTokenSecretRef:
+            name: cloudflare-api-token
+            key: api-token
+
+---
+# Certificate Issuer for Let's Encrypt (Staging)
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  namespace: cert-manager
+spec:
+  acme:
+    # Staging Let's Encrypt server (for testing)
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: ops@cronos-ai.example.com  # CHANGE THIS
+    privateKeySecretRef:
+      name: letsencrypt-staging-account-key
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+
+---
+# Self-Signed Issuer (for development/internal)
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-issuer
+  namespace: cert-manager
+spec:
+  selfSigned: {}
+
+---
+# Certificate for API Gateway
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cronos-ai-api-tls
+  namespace: cronos-ai-production
+spec:
+  secretName: cronos-ai-api-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - api.cronos-ai.example.com  # CHANGE THIS
+  - "*.api.cronos-ai.example.com"
+  duration: 2160h  # 90 days
+  renewBefore: 360h  # 15 days before expiry
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 4096
+    rotationPolicy: Always
+  usages:
+  - digital signature
+  - key encipherment
+  - server auth
+
+---
+# Certificate for gRPC Service
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cronos-ai-grpc-tls
+  namespace: cronos-ai-production
+spec:
+  secretName: cronos-ai-grpc-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - grpc.cronos-ai.example.com  # CHANGE THIS
+  duration: 2160h  # 90 days
+  renewBefore: 360h  # 15 days before expiry
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 4096
+    rotationPolicy: Always
+  usages:
+  - digital signature
+  - key encipherment
+  - server auth
+  - client auth
+
+---
+# Certificate for Internal mTLS
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cronos-ai-internal-mtls
+  namespace: cronos-ai-production
+spec:
+  secretName: cronos-ai-internal-mtls
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+  commonName: cronos-ai-internal
+  dnsNames:
+  - "*.cronos-ai-production.svc.cluster.local"
+  - "cronos-ai-api.cronos-ai-production.svc.cluster.local"
+  - "cronos-ai-grpc.cronos-ai-production.svc.cluster.local"
+  duration: 8760h  # 1 year
+  renewBefore: 720h  # 30 days before expiry
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 4096
+    rotationPolicy: Always
+  usages:
+  - digital signature
+  - key encipherment
+  - server auth
+  - client auth
+
+---
+# Certificate Monitoring
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cert-monitor-config
+  namespace: cronos-ai-production
+data:
+  check-interval: "3600"  # Check every hour
+  alert-threshold-days: "15"  # Alert when cert expires in 15 days
+  
+---
+# Certificate Rotation CronJob
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cert-rotation-check
+  namespace: cronos-ai-production
+spec:
+  schedule: "0 */6 * * *"  # Every 6 hours
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: cert-manager
+          containers:
+          - name: cert-checker
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Checking certificate expiry..."
+              kubectl get certificates -n cronos-ai-production -o json | \
+              jq -r '.items[] | select(.status.notAfter != null) | 
+                "\(.metadata.name): expires \(.status.notAfter)"'
+          restartPolicy: OnFailure
+
+---
+# TLS Policy for Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cronos-ai-ingress
+  namespace: cronos-ai-production
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.3"
+    nginx.ingress.kubernetes.io/ssl-ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"
+    nginx.ingress.kubernetes.io/ssl-prefer-server-ciphers: "true"
+    nginx.ingress.kubernetes.io/hsts: "true"
+    nginx.ingress.kubernetes.io/hsts-max-age: "31536000"
+    nginx.ingress.kubernetes.io/hsts-include-subdomains: "true"
+    nginx.ingress.kubernetes.io/hsts-preload: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - api.cronos-ai.example.com
+    secretName: cronos-ai-api-tls
+  rules:
+  - host: api.cronos-ai.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: cronos-ai-api
+            port:
+              number: 8080

@@ -8,6 +8,7 @@ for monitoring AI Engine health, performance, and operational issues.
 import asyncio
 import time
 import logging
+import threading
 from typing import Dict, List, Optional, Any, Callable, Union
 from dataclasses import dataclass, field
 from enum import Enum
@@ -541,8 +542,9 @@ class AlertManager:
         self.config = config
         self.logger = get_logger(__name__)
         
-        # Alert storage
+        # Alert storage with thread safety
         self.active_alerts: Dict[str, Alert] = {}
+        self._alerts_lock = threading.RLock()
         self.alert_rules: Dict[str, AlertRule] = {}
         self.notification_channels: Dict[str, AlertChannel] = {}
         
@@ -624,41 +626,44 @@ class AlertManager:
     
     async def resolve_alert(self, alert_id: str, user: Optional[str] = None) -> bool:
         """Resolve an active alert."""
-        if alert_id in self.active_alerts:
-            alert = self.active_alerts[alert_id]
-            alert.resolve()
+        with self._alerts_lock:
+            if alert_id in self.active_alerts:
+                alert = self.active_alerts[alert_id]
+                alert.resolve()
+                
+                # Move to history
+                self.alert_history.append(alert)
+                del self.active_alerts[alert_id]
+                
+                # Update statistics
+                self.stats["active_alerts"] -= 1
+                
+                self.logger.info(f"Alert resolved: {alert_id}")
+                return True
             
-            # Move to history
-            self.alert_history.append(alert)
-            del self.active_alerts[alert_id]
-            
-            # Update statistics
-            self.stats["active_alerts"] -= 1
-            
-            self.logger.info(f"Alert resolved: {alert_id}")
-            return True
-        
-        return False
+            return False
     
     async def acknowledge_alert(self, alert_id: str, user: str) -> bool:
         """Acknowledge an active alert."""
-        if alert_id in self.active_alerts:
-            alert = self.active_alerts[alert_id]
-            alert.acknowledge(user)
+        with self._alerts_lock:
+            if alert_id in self.active_alerts:
+                alert = self.active_alerts[alert_id]
+                alert.acknowledge(user)
+                
+                self.logger.info(f"Alert acknowledged by {user}: {alert_id}")
+                return True
             
-            self.logger.info(f"Alert acknowledged by {user}: {alert_id}")
-            return True
-        
-        return False
+            return False
     
     def get_active_alerts(self, severity: Optional[AlertSeverity] = None) -> List[Alert]:
         """Get active alerts, optionally filtered by severity."""
-        alerts = list(self.active_alerts.values())
-        
-        if severity:
-            alerts = [a for a in alerts if a.severity == severity]
-        
-        return alerts
+        with self._alerts_lock:
+            alerts = list(self.active_alerts.values())
+            
+            if severity:
+                alerts = [a for a in alerts if a.severity == severity]
+            
+            return alerts
     
     def get_alert_statistics(self) -> Dict[str, Any]:
         """Get alert statistics."""
@@ -819,18 +824,19 @@ class AlertManager:
             source_data=metrics_data.copy()
         )
         
-        # Store alert
-        self.active_alerts[alert_id] = alert
-        self.alert_history.append(alert)
-        
-        # Update statistics
-        self.stats["total_alerts"] += 1
-        self.stats["active_alerts"] += 1
-        self.stats["alerts_by_severity"][rule.severity.value] += 1
-        
-        # Limit history size
-        if len(self.alert_history) > self.max_history_size:
-            self.alert_history = self.alert_history[-self.max_history_size:]
+        # Store alert with thread safety
+        with self._alerts_lock:
+            self.active_alerts[alert_id] = alert
+            self.alert_history.append(alert)
+            
+            # Update statistics
+            self.stats["total_alerts"] += 1
+            self.stats["active_alerts"] += 1
+            self.stats["alerts_by_severity"][rule.severity.value] += 1
+            
+            # Limit history size
+            if len(self.alert_history) > self.max_history_size:
+                self.alert_history = self.alert_history[-self.max_history_size:]
         
         self.logger.warning(f"New alert created: {alert_id} ({rule.severity.value})")
         
@@ -877,6 +883,34 @@ class AlertManager:
         # This would integrate with the metrics collector
         # For now, return empty dict
         return {}
+
+
+# Global alert manager instance
+_alert_manager: Optional[AlertManager] = None
+
+
+def get_alert_manager() -> Optional[AlertManager]:
+    """Get global alert manager instance."""
+    return _alert_manager
+
+
+async def initialize_alert_manager(config: Config) -> AlertManager:
+    """Initialize global alert manager."""
+    global _alert_manager
+    
+    if _alert_manager is None:
+        _alert_manager = AlertManager(config)
+        await _alert_manager.start_evaluation()
+    
+    return _alert_manager
+
+
+async def shutdown_alert_manager():
+    """Shutdown global alert manager."""
+    global _alert_manager
+    if _alert_manager:
+        await _alert_manager.stop_evaluation()
+        _alert_manager = None
 
 
 # Notification provider factory

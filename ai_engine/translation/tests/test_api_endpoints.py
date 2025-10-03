@@ -11,14 +11,14 @@ from unittest.mock import AsyncMock, Mock, patch
 from fastapi.testclient import TestClient
 from fastapi import HTTPException
 
-from ..api_endpoints import router
-from ..models import (
+from ai_engine.translation.api_endpoints import router
+from ai_engine.translation.models import (
     CodeLanguage,
     APIStyle,
     SecurityLevel,
     GenerationStatus
 )
-from ..exceptions import (
+from ai_engine.translation.exceptions import (
     TranslationStudioException,
     ProtocolDiscoveryException,
     APIGenerationException,

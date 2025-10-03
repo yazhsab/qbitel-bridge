@@ -34,6 +34,12 @@ from ..models import (
 from prometheus_client import Counter, Histogram, Gauge
 import uuid
 
+from .schema_utils import (
+    generate_examples,
+    generate_graphql_assets,
+    generate_grpc_assets,
+)
+
 # Metrics for API generation
 API_SPEC_GENERATION_COUNTER = Counter(
     'cronos_api_spec_generation_total',
@@ -176,6 +182,7 @@ class APIGenerator:
                 version=self.default_api_version,
                 description=await self._generate_api_description(context),
                 api_style=context.target_style,
+                security_level=context.security_level,
                 base_url=f"https://api.example.com{context.base_path}"
             )
             
@@ -899,15 +906,17 @@ class APIGenerator:
         context: APIGenerationContext
     ) -> None:
         """Generate GraphQL schema and resolvers."""
-        # TODO: Implement comprehensive GraphQL schema generation
-        self.logger.info("GraphQL schema generation not yet fully implemented")
-        
-        # Create a basic GraphQL endpoint
+        graphql_assets = generate_graphql_assets(
+            context.protocol_schema,
+            base_path=context.base_path,
+            security_level=context.security_level,
+        )
+
         graphql_endpoint = APIEndpoint(
-            path=f"{context.base_path}/graphql",
+            path=graphql_assets["endpoint"],
             method="POST",
-            summary="GraphQL endpoint",
-            description="GraphQL endpoint for protocol operations",
+            summary=f"GraphQL endpoint for {context.protocol_schema.name}",
+            description="Execute GraphQL queries and mutations for protocol operations",
             request_body={
                 "required": True,
                 "content": {
@@ -920,6 +929,15 @@ class APIGenerator:
                                 "operationName": {"type": "string"}
                             },
                             "required": ["query"]
+                        },
+                        "examples": {
+                            "sample": {
+                                "summary": "Sample GraphQL query",
+                                "value": {
+                                    "query": graphql_assets["operations"]["query"],
+                                    "variables": {"id": "example-id"}
+                                }
+                            }
                         }
                     }
                 }
@@ -942,7 +960,19 @@ class APIGenerator:
             },
             tags=["graphql"]
         )
+
+        if graphql_assets.get("headers"):
+            graphql_endpoint.security = [
+                {"bearerAuth": []}
+            ]
+
         api_spec.add_endpoint(graphql_endpoint)
+        api_spec.schemas[f"{context.protocol_schema.name}GraphQLSchema"] = {
+            "type": "string",
+            "description": f"GraphQL SDL for {context.protocol_schema.name}",
+            "example": graphql_assets["sdl"],
+        }
+        api_spec.extensions.setdefault("graphql", graphql_assets)
 
     async def _generate_grpc_service(
         self,
@@ -950,8 +980,13 @@ class APIGenerator:
         context: APIGenerationContext
     ) -> None:
         """Generate gRPC service definition."""
-        # TODO: Implement comprehensive gRPC service generation
-        self.logger.info("gRPC service generation not yet fully implemented")
+        grpc_assets = generate_grpc_assets(context.protocol_schema)
+        api_spec.schemas[f"{context.protocol_schema.name}GrpcDescriptor"] = {
+            "type": "string",
+            "description": f"gRPC service definition for {context.protocol_schema.name}",
+            "example": grpc_assets["proto"],
+        }
+        api_spec.extensions.setdefault("grpc", grpc_assets)
 
     async def _generate_websocket_endpoints(
         self,
@@ -1485,8 +1520,32 @@ class APIGenerator:
         context: APIGenerationContext
     ) -> None:
         """Add comprehensive examples to API specification."""
-        # TODO: Generate realistic examples based on protocol schema
-        pass
+        examples = generate_examples(context.protocol_schema)
+        if not examples:
+            return
+
+        schema_key = f"{context.protocol_schema.name}Data"
+        payload_schema = api_spec.schemas.get(schema_key)
+        if payload_schema is not None:
+            payload_schema["examples"] = [example["structured"] for example in examples]
+
+        for endpoint in api_spec.endpoints:
+            if endpoint.request_body:
+                for media in endpoint.request_body.get("content", {}).values():
+                    media.setdefault("examples", {})
+                    media["examples"]["sample"] = {
+                        "summary": examples[0]["summary"],
+                        "value": examples[0]["structured"],
+                    }
+            for response in endpoint.responses.values():
+                for media in response.get("content", {}).values():
+                    media.setdefault("examples", {})
+                    media["examples"]["sample"] = {
+                        "summary": examples[0]["summary"],
+                        "value": examples[0]["structured"],
+                    }
+
+        api_spec.extensions.setdefault("examples", examples)
 
     async def _validate_openapi_spec(self, api_spec: APISpecification) -> Dict[str, Any]:
         """Validate generated OpenAPI specification."""

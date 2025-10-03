@@ -45,6 +45,11 @@ from .models import (
     create_protocol_field,
     validate_api_specification
 )
+from .api_generation.schema_utils import (
+    generate_examples,
+    generate_graphql_assets,
+    generate_grpc_assets,
+)
 
 from prometheus_client import Counter, Histogram, Gauge
 import hashlib
@@ -632,8 +637,71 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
         request: APIGenerationRequest
     ) -> None:
         """Generate GraphQL schema for protocol operations."""
-        # TODO: Implement GraphQL schema generation
-        self.logger.info("GraphQL schema generation not yet implemented")
+        graphql_assets = generate_graphql_assets(
+            protocol_schema,
+            base_path=request.api_base_path,
+            security_level=request.security_level,
+        )
+
+        graphql_endpoint = APIEndpoint(
+            path=graphql_assets["endpoint"],
+            method="POST",
+            summary=f"GraphQL endpoint for {protocol_schema.name}",
+            description="Execute GraphQL queries and mutations for discovered protocol",
+            request_body={
+                "required": True,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "query": {"type": "string"},
+                                "variables": {"type": "object"},
+                                "operationName": {"type": "string"}
+                            },
+                            "required": ["query"]
+                        },
+                        "examples": {
+                            "sample": {
+                                "summary": "Sample GraphQL query",
+                                "value": {
+                                    "query": graphql_assets["operations"]["query"],
+                                    "variables": {"id": "example-id"}
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            responses={
+                "200": {
+                    "description": "GraphQL response",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "data": {"type": "object"},
+                                    "errors": {"type": "array", "items": {"type": "object"}}
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            tags=["graphql"]
+        )
+
+        if graphql_assets.get("headers"):
+            graphql_endpoint.security = [{"bearerAuth": []}]
+
+        api_spec.add_endpoint(graphql_endpoint)
+        api_spec.schemas[f"{protocol_schema.name}GraphQLSchema"] = {
+            "type": "string",
+            "description": f"GraphQL SDL for {protocol_schema.name}",
+            "example": graphql_assets["sdl"],
+        }
+        api_spec.extensions.setdefault("graphql", graphql_assets)
 
     async def _generate_grpc_service(
         self,
@@ -642,8 +710,13 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
         request: APIGenerationRequest
     ) -> None:
         """Generate gRPC service definition for protocol operations."""
-        # TODO: Implement gRPC service generation
-        self.logger.info("gRPC service generation not yet implemented")
+        grpc_assets = generate_grpc_assets(protocol_schema)
+        api_spec.schemas[f"{protocol_schema.name}GrpcDescriptor"] = {
+            "type": "string",
+            "description": f"gRPC service definition for {protocol_schema.name}",
+            "example": grpc_assets["proto"],
+        }
+        api_spec.extensions.setdefault("grpc", grpc_assets)
 
     def _add_security_schemes(self, api_spec: APISpecification, security_level: SecurityLevel) -> None:
         """Add appropriate security schemes based on security level."""
@@ -785,8 +858,32 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
         sample_messages: List[bytes]
     ) -> None:
         """Add realistic examples to API specification."""
-        # TODO: Generate realistic examples based on sample messages
-        pass
+        examples = generate_examples(protocol_schema, sample_messages)
+        if not examples:
+            return
+
+        schema_key = f"{protocol_schema.name}Data"
+        payload_schema = api_spec.schemas.get(schema_key)
+        if payload_schema is not None:
+            payload_schema["examples"] = [example["structured"] for example in examples]
+
+        for endpoint in api_spec.endpoints:
+            if endpoint.request_body:
+                for media in endpoint.request_body.get("content", {}).values():
+                    media.setdefault("examples", {})
+                    media["examples"]["sample"] = {
+                        "summary": examples[0]["summary"],
+                        "value": examples[0]["structured"],
+                    }
+            for response in endpoint.responses.values():
+                for media in response.get("content", {}).values():
+                    media.setdefault("examples", {})
+                    media["examples"]["sample"] = {
+                        "summary": examples[0]["summary"],
+                        "value": examples[0]["structured"],
+                    }
+
+        api_spec.extensions.setdefault("examples", examples)
 
     async def _perform_semantic_field_analysis(
         self,

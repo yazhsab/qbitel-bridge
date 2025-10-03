@@ -1,0 +1,418 @@
+# CRONOS AI - Comprehensive Alerting Rules
+# Prometheus alerting rules for production monitoring
+
+groups:
+  # Service Level Indicators (SLI) Alerts
+  - name: sli_alerts
+    interval: 30s
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(cronos_ai_http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(cronos_ai_http_requests_total[5m]))
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          category: sli
+          slo: availability
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 1%)"
+          runbook_url: "https://runbooks.cronos-ai.com/high-error-rate"
+          dashboard_url: "https://grafana.cronos-ai.com/d/slo-dashboard"
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(cronos_ai_http_request_duration_seconds_bucket[5m])
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          category: sli
+          slo: latency
+        annotations:
+          summary: "High latency detected"
+          description: "P95 latency is {{ $value }}s (threshold: 0.5s)"
+          runbook_url: "https://runbooks.cronos-ai.com/high-latency"
+
+      - alert: LowThroughput
+        expr: sum(rate(cronos_ai_http_requests_total[5m])) < 100
+        for: 10m
+        labels:
+          severity: warning
+          category: sli
+          slo: throughput
+        annotations:
+          summary: "Low throughput detected"
+          description: "Request rate is {{ $value }} req/s (threshold: 100 req/s)"
+
+  # Error Budget Alerts
+  - name: error_budget_alerts
+    interval: 1m
+    rules:
+      - alert: ErrorBudgetBurnRateCritical
+        expr: |
+          (
+            sum(rate(cronos_ai_http_requests_total{status=~"5.."}[1h]))
+            /
+            sum(rate(cronos_ai_http_requests_total[1h]))
+          ) / (1 - 0.999) > 14.4
+        for: 2m
+        labels:
+          severity: critical
+          category: error_budget
+          burn_rate: fast
+        annotations:
+          summary: "Critical error budget burn rate"
+          description: "Burning error budget 14.4x faster than sustainable rate"
+          runbook_url: "https://runbooks.cronos-ai.com/error-budget-burn"
+
+      - alert: ErrorBudgetBurnRateHigh
+        expr: |
+          (
+            sum(rate(cronos_ai_http_requests_total{status=~"5.."}[6h]))
+            /
+            sum(rate(cronos_ai_http_requests_total[6h]))
+          ) / (1 - 0.999) > 6
+        for: 15m
+        labels:
+          severity: warning
+          category: error_budget
+          burn_rate: medium
+        annotations:
+          summary: "High error budget burn rate"
+          description: "Burning error budget 6x faster than sustainable rate"
+
+      - alert: ErrorBudgetExhausted
+        expr: |
+          1 - (
+            sum(rate(cronos_ai_http_requests_total{status=~"2.."}[30d]))
+            /
+            sum(rate(cronos_ai_http_requests_total[30d]))
+          ) < 0.001
+        for: 5m
+        labels:
+          severity: critical
+          category: error_budget
+        annotations:
+          summary: "Error budget exhausted"
+          description: "30-day error budget has been exhausted"
+          runbook_url: "https://runbooks.cronos-ai.com/error-budget-exhausted"
+
+  # Infrastructure Alerts
+  - name: infrastructure_alerts
+    interval: 30s
+    rules:
+      - alert: PodCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total{namespace="cronos-ai"}[15m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "Pod {{ $labels.pod }} is crash looping"
+          description: "Pod has restarted {{ $value }} times in the last 15 minutes"
+          runbook_url: "https://runbooks.cronos-ai.com/pod-crash-loop"
+
+      - alert: PodNotReady
+        expr: |
+          sum by (namespace, pod) (
+            kube_pod_status_phase{namespace="cronos-ai", phase!~"Running|Succeeded"}
+          ) > 0
+        for: 10m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "Pod {{ $labels.pod }} not ready"
+          description: "Pod has been in {{ $labels.phase }} state for more than 10 minutes"
+
+      - alert: HighCPUUsage
+        expr: |
+          sum(rate(container_cpu_usage_seconds_total{namespace="cronos-ai"}[5m])) by (pod)
+          /
+          sum(kube_pod_container_resource_limits{namespace="cronos-ai", resource="cpu"}) by (pod)
+          > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "High CPU usage on {{ $labels.pod }}"
+          description: "CPU usage is {{ $value | humanizePercentage }}"
+
+      - alert: HighMemoryUsage
+        expr: |
+          sum(container_memory_working_set_bytes{namespace="cronos-ai"}) by (pod)
+          /
+          sum(kube_pod_container_resource_limits{namespace="cronos-ai", resource="memory"}) by (pod)
+          > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "High memory usage on {{ $labels.pod }}"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      - alert: DiskSpaceLow
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/"}
+            /
+            node_filesystem_size_bytes{mountpoint="/"}
+          ) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+          category: infrastructure
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Only {{ $value | humanizePercentage }} disk space remaining"
+          runbook_url: "https://runbooks.cronos-ai.com/disk-space-low"
+
+  # Application Alerts
+  - name: application_alerts
+    interval: 30s
+    rules:
+      - alert: ProtocolDiscoveryFailureRate
+        expr: |
+          sum(rate(cronos_ai_protocol_discovery_failures_total[5m]))
+          /
+          sum(rate(cronos_ai_protocol_discovery_total[5m]))
+          > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          category: application
+          component: protocol_discovery
+        annotations:
+          summary: "High protocol discovery failure rate"
+          description: "Failure rate is {{ $value | humanizePercentage }}"
+
+      - alert: SecurityAnalysisBacklog
+        expr: cronos_ai_security_analysis_queue_size > 1000
+        for: 10m
+        labels:
+          severity: warning
+          category: application
+          component: security
+        annotations:
+          summary: "Security analysis backlog growing"
+          description: "Queue size is {{ $value }} events"
+
+      - alert: MLModelInferenceLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(cronos_ai_ml_inference_duration_seconds_bucket[5m])
+          ) > 1.0
+        for: 10m
+        labels:
+          severity: warning
+          category: application
+          component: ml_inference
+        annotations:
+          summary: "High ML inference latency"
+          description: "P95 inference latency is {{ $value }}s"
+
+      - alert: ComplianceCheckFailures
+        expr: |
+          sum(rate(cronos_ai_compliance_check_failures_total[5m]))
+          /
+          sum(rate(cronos_ai_compliance_check_total[5m]))
+          > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          category: application
+          component: compliance
+        annotations:
+          summary: "High compliance check failure rate"
+          description: "Failure rate is {{ $value | humanizePercentage }}"
+          runbook_url: "https://runbooks.cronos-ai.com/compliance-failures"
+
+  # Database Alerts
+  - name: database_alerts
+    interval: 30s
+    rules:
+      - alert: DatabaseConnectionPoolExhausted
+        expr: cronos_ai_db_connection_pool_active / cronos_ai_db_connection_pool_max > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          category: database
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "{{ $value | humanizePercentage }} of connections in use"
+          runbook_url: "https://runbooks.cronos-ai.com/db-connection-pool"
+
+      - alert: DatabaseQueryLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(cronos_ai_db_query_duration_seconds_bucket[5m])
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "High database query latency"
+          description: "P95 query latency is {{ $value }}s"
+
+      - alert: DatabaseReplicationLag
+        expr: cronos_ai_db_replication_lag_seconds > 30
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "High database replication lag"
+          description: "Replication lag is {{ $value }}s"
+
+  # Security Alerts
+  - name: security_alerts
+    interval: 30s
+    rules:
+      - alert: HighAuthenticationFailureRate
+        expr: |
+          sum(rate(cronos_ai_auth_failures_total[5m]))
+          /
+          sum(rate(cronos_ai_auth_attempts_total[5m]))
+          > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Failure rate is {{ $value | humanizePercentage }}"
+          runbook_url: "https://runbooks.cronos-ai.com/auth-failures"
+
+      - alert: SuspiciousActivityDetected
+        expr: cronos_ai_security_threats_detected_total > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Security threats detected"
+          description: "{{ $value }} threats detected in the last minute"
+          runbook_url: "https://runbooks.cronos-ai.com/security-threats"
+
+      - alert: CertificateExpiringSoon
+        expr: (cronos_ai_tls_cert_expiry_seconds - time()) / 86400 < 30
+        for: 1h
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "TLS certificate expiring soon"
+          description: "Certificate {{ $labels.cert_name }} expires in {{ $value }} days"
+          runbook_url: "https://runbooks.cronos-ai.com/cert-renewal"
+
+  # Backup and DR Alerts
+  - name: backup_dr_alerts
+    interval: 1h
+    rules:
+      - alert: BackupFailed
+        expr: cronos_ai_backup_last_success_timestamp < (time() - 86400)
+        for: 1h
+        labels:
+          severity: critical
+          category: backup
+        annotations:
+          summary: "Backup has not succeeded in 24 hours"
+          description: "Last successful backup was {{ $value | humanizeDuration }} ago"
+          runbook_url: "https://runbooks.cronos-ai.com/backup-failure"
+
+      - alert: BackupVerificationFailed
+        expr: cronos_ai_backup_verification_failures_total > 0
+        for: 5m
+        labels:
+          severity: critical
+          category: backup
+        annotations:
+          summary: "Backup verification failed"
+          description: "{{ $value }} backup verifications have failed"
+          runbook_url: "https://runbooks.cronos-ai.com/backup-verification"
+
+      - alert: DRDrillOverdue
+        expr: (time() - cronos_ai_dr_drill_last_run_timestamp) / 86400 > 90
+        for: 1h
+        labels:
+          severity: warning
+          category: dr
+        annotations:
+          summary: "DR drill overdue"
+          description: "Last DR drill was {{ $value }} days ago"
+          runbook_url: "https://runbooks.cronos-ai.com/dr-drill"
+
+  # Dependency Alerts
+  - name: dependency_alerts
+    interval: 30s
+    rules:
+      - alert: ExternalAPIDown
+        expr: cronos_ai_external_api_up == 0
+        for: 5m
+        labels:
+          severity: warning
+          category: dependency
+        annotations:
+          summary: "External API {{ $labels.api_name }} is down"
+          description: "API has been unreachable for 5 minutes"
+
+      - alert: MessageQueueBacklog
+        expr: cronos_ai_message_queue_depth > 10000
+        for: 10m
+        labels:
+          severity: warning
+          category: dependency
+        annotations:
+          summary: "Message queue backlog growing"
+          description: "Queue depth is {{ $value }} messages"
+
+      - alert: CacheHitRateLow
+        expr: |
+          sum(rate(cronos_ai_cache_hits_total[5m]))
+          /
+          sum(rate(cronos_ai_cache_requests_total[5m]))
+          < 0.8
+        for: 15m
+        labels:
+          severity: warning
+          category: dependency
+        annotations:
+          summary: "Low cache hit rate"
+          description: "Cache hit rate is {{ $value | humanizePercentage }}"
+
+  # Business Metrics Alerts
+  - name: business_alerts
+    interval: 5m
+    rules:
+      - alert: LowUserActivity
+        expr: sum(rate(cronos_ai_user_requests_total[1h])) < 10
+        for: 30m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "Low user activity detected"
+          description: "Only {{ $value }} requests per second"
+
+      - alert: HighAbandonmentRate
+        expr: |
+          sum(rate(cronos_ai_requests_abandoned_total[5m]))
+          /
+          sum(rate(cronos_ai_requests_total[5m]))
+          > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "High request abandonment rate"
+          description: "Abandonment rate is {{ $value | humanizePercentage }}"

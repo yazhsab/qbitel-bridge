@@ -10,11 +10,23 @@ import json
 from typing import Dict, Any, Optional, List, Union, AsyncIterator
 from dataclasses import dataclass, asdict
 from enum import Enum
-import openai
-from anthropic import AsyncAnthropic
-import ollama
 from concurrent.futures import ThreadPoolExecutor
 from prometheus_client import Counter, Histogram, Gauge
+
+try:  # Optional dependency - OpenAI SDK
+    import openai  # type: ignore
+except ImportError:  # pragma: no cover - environment dependent
+    openai = None  # type: ignore[assignment]
+
+try:  # Optional dependency - Anthropic SDK
+    from anthropic import AsyncAnthropic  # type: ignore
+except ImportError:  # pragma: no cover - environment dependent
+    AsyncAnthropic = None  # type: ignore[assignment]
+
+try:  # Optional dependency - Ollama SDK
+    import ollama  # type: ignore
+except ImportError:  # pragma: no cover - environment dependent
+    ollama = None  # type: ignore[assignment]
 
 from ..core.config import Config
 from ..core.exceptions import CronosAIException
@@ -69,10 +81,11 @@ class UnifiedLLMService:
         self.config = config
         self.logger = logging.getLogger(__name__)
         
-        # Initialize providers
-        self.openai_client: Optional[openai.AsyncOpenAI] = None
-        self.anthropic_client: Optional[AsyncAnthropic] = None
-        self.ollama_client = None
+        # Initialize providers (optional dependencies)
+        self.openai_client: Optional[Any] = None
+        self.anthropic_client: Optional[Any] = None
+        self.ollama_client: Optional[Any] = None
+        self._initialized: bool = False
         
         # Provider health tracking
         self.provider_health = {
@@ -80,6 +93,10 @@ class UnifiedLLMService:
             LLMProvider.ANTHROPIC_CLAUDE: True,
             LLMProvider.OLLAMA_LOCAL: True
         }
+        
+        # Background task management
+        self._health_monitor_task: Optional[asyncio.Task] = None
+        self._shutdown_event = asyncio.Event()
         
         # Domain-specific routing configuration
         self.domain_routing = {
@@ -131,41 +148,68 @@ class UnifiedLLMService:
     
     async def initialize(self) -> None:
         """Initialize all LLM providers."""
+        if self._initialized:
+            self.logger.debug("Unified LLM Service already initialized; skipping reinitialization")
+            return
         try:
             self.logger.info("Initializing Unified LLM Service...")
+            # Reset shutdown event before starting background tasks
+            if self._shutdown_event.is_set():
+                self._shutdown_event = asyncio.Event()
             
             # Initialize OpenAI
             openai_key = getattr(self.config, 'openai_api_key', None)
-            if openai_key:
+            if openai_key and openai is not None:
                 self.openai_client = openai.AsyncOpenAI(
                     api_key=openai_key,
                     timeout=30.0
                 )
                 await self._test_provider(LLMProvider.OPENAI_GPT4)
-            
+            else:
+                if openai_key and openai is None:
+                    self.logger.warning(
+                        'OpenAI SDK not installed; disabling GPT-4 provider'
+                    )
+                elif not openai_key:
+                    self.logger.info('OpenAI API key not configured; GPT-4 provider disabled')
+                self.provider_health[LLMProvider.OPENAI_GPT4] = False
+
             # Initialize Anthropic
             anthropic_key = getattr(self.config, 'anthropic_api_key', None)
-            if anthropic_key:
+            if anthropic_key and AsyncAnthropic is not None:
                 self.anthropic_client = AsyncAnthropic(
                     api_key=anthropic_key,
                     timeout=30.0
                 )
                 await self._test_provider(LLMProvider.ANTHROPIC_CLAUDE)
-            
+            else:
+                if anthropic_key and AsyncAnthropic is None:
+                    self.logger.warning(
+                        'Anthropic SDK not installed; disabling Claude provider'
+                    )
+                elif not anthropic_key:
+                    self.logger.info('Anthropic API key not configured; Claude provider disabled')
+                self.provider_health[LLMProvider.ANTHROPIC_CLAUDE] = False
+
             # Initialize Ollama (local)
-            try:
-                self.ollama_client = ollama.AsyncClient(
-                    host=getattr(self.config, 'ollama_host', 'http://localhost:11434')
-                )
-                await self._test_provider(LLMProvider.OLLAMA_LOCAL)
-            except Exception as e:
-                self.logger.warning(f"Ollama initialization failed: {e}")
+            if ollama is not None:
+                try:
+                    self.ollama_client = ollama.AsyncClient(
+                        host=getattr(self.config, 'ollama_host', 'http://localhost:11434')
+                    )
+                    await self._test_provider(LLMProvider.OLLAMA_LOCAL)
+                except Exception as e:
+                    self.logger.warning(f"Ollama initialization failed: {e}")
+                    self.provider_health[LLMProvider.OLLAMA_LOCAL] = False
+            else:
+                self.logger.info('Ollama SDK not installed; local provider disabled')
                 self.provider_health[LLMProvider.OLLAMA_LOCAL] = False
             
-            # Start health monitoring
-            asyncio.create_task(self._health_monitor())
+            # Start health monitoring with lifecycle management
+            self._health_monitor_task = asyncio.create_task(self._health_monitor())
             
             self.logger.info("Unified LLM Service initialized successfully")
+            self._initialized = True
             
         except Exception as e:
             self.logger.error(f"Failed to initialize LLM service: {e}")
@@ -193,13 +237,15 @@ class UnifiedLLMService:
         primary_provider = domain_config['primary']
         providers_to_try = [primary_provider] + domain_config['fallback']
         
-        last_error = None
-        
+        last_error: Optional[Exception] = None
+        attempted_provider = False
+
         for provider in providers_to_try:
             if not self.provider_health[provider]:
                 continue
                 
             try:
+                attempted_provider = True
                 response = await self._execute_request(
                     request, provider, domain_config['system_prompt']
                 )
@@ -230,8 +276,10 @@ class UnifiedLLMService:
                     feature_domain=request.feature_domain,
                     status='error'
                 ).inc()
-        
+
         # All providers failed
+        if not attempted_provider:
+            raise LLMException("No healthy LLM providers are available for this request")
         raise LLMException(f"All LLM providers failed. Last error: {last_error}")
     
     async def _execute_request(
@@ -257,10 +305,16 @@ class UnifiedLLMService:
         
         # Execute based on provider
         if provider == LLMProvider.OPENAI_GPT4:
+            if not self.openai_client:
+                raise LLMException('OpenAI client not initialized or configured')
             return await self._execute_openai(request, messages, start_time)
         elif provider == LLMProvider.ANTHROPIC_CLAUDE:
+            if not self.anthropic_client:
+                raise LLMException('Anthropic client not initialized or configured')
             return await self._execute_anthropic(request, messages, start_time)
         elif provider == LLMProvider.OLLAMA_LOCAL:
+            if not self.ollama_client:
+                raise LLMException('Ollama client not initialized or configured')
             return await self._execute_ollama(request, messages, start_time)
         else:
             raise LLMException(f"Unsupported provider: {provider}")
@@ -402,6 +456,21 @@ class UnifiedLLMService:
     
     async def _test_provider(self, provider: LLMProvider) -> bool:
         """Test provider health."""
+        if provider == LLMProvider.OPENAI_GPT4 and not self.openai_client:
+            self.logger.debug("Skipping OpenAI health check; client unavailable")
+            self.provider_health[provider] = False
+            return False
+
+        if provider == LLMProvider.ANTHROPIC_CLAUDE and not self.anthropic_client:
+            self.logger.debug("Skipping Anthropic health check; client unavailable")
+            self.provider_health[provider] = False
+            return False
+
+        if provider == LLMProvider.OLLAMA_LOCAL and not self.ollama_client:
+            self.logger.debug("Skipping Ollama health check; client unavailable")
+            self.provider_health[provider] = False
+            return False
+
         try:
             test_request = LLMRequest(
                 prompt="Hello, please respond with 'OK' if you're working.",
@@ -425,16 +494,27 @@ class UnifiedLLMService:
     
     async def _health_monitor(self) -> None:
         """Background health monitoring for all providers."""
-        while True:
-            try:
-                await asyncio.sleep(300)  # Check every 5 minutes
+        try:
+            while not self._shutdown_event.is_set():
+                try:
+                    # Use wait_for to allow interruption during sleep
+                    await asyncio.wait_for(
+                        self._shutdown_event.wait(),
+                        timeout=300.0  # Check every 5 minutes
+                    )
+                    break  # Shutdown event was set
+                except asyncio.TimeoutError:
+                    # Timeout is expected, continue with health checks
+                    pass
                 
                 for provider in LLMProvider:
                     if not self.provider_health[provider]:
                         await self._test_provider(provider)
                         
-            except Exception as e:
-                self.logger.error(f"Health monitor error: {e}")
+        except asyncio.CancelledError:
+            self.logger.info("Health monitor task cancelled")
+        except Exception as e:
+            self.logger.error(f"Health monitor error: {e}")
     
     def get_health_status(self) -> Dict[str, Any]:
         """Get health status of all providers."""
@@ -458,25 +538,63 @@ class UnifiedLLMService:
     
     async def shutdown(self) -> None:
         """Shutdown LLM service."""
+        if not self._initialized:
+            self.logger.debug("Unified LLM Service shutdown requested but service is not initialized")
+            return
         self.logger.info("Shutting down Unified LLM Service...")
         
+        # Stop health monitor task
+        if self._health_monitor_task and not self._health_monitor_task.done():
+            self._shutdown_event.set()
+            try:
+                await asyncio.wait_for(self._health_monitor_task, timeout=5.0)
+            except asyncio.TimeoutError:
+                self.logger.warning("Health monitor task did not stop gracefully, cancelling...")
+                self._health_monitor_task.cancel()
+                try:
+                    await self._health_monitor_task
+                except asyncio.CancelledError:
+                    pass
+        self._health_monitor_task = None
+        
+        # Close provider clients
         if self.openai_client:
             await self.openai_client.close()
         
         if self.anthropic_client:
             await self.anthropic_client.close()
         
+        # Shutdown executor
         self.executor.shutdown(wait=True)
         
         self.logger.info("Unified LLM Service shutdown complete")
+        self._initialized = False
 
 # Global LLM service instance
 _llm_service: Optional[UnifiedLLMService] = None
 
-def get_llm_service() -> UnifiedLLMService:
+def get_llm_service() -> Optional[UnifiedLLMService]:
     """Get global LLM service instance."""
-    global _llm_service
-    if _llm_service is None:
-        from ..core.config import get_config
-        _llm_service = UnifiedLLMService(get_config())
     return _llm_service
+
+def set_llm_service(service: UnifiedLLMService) -> None:
+    """Set global LLM service instance."""
+    global _llm_service
+    _llm_service = service
+
+async def initialize_llm_service(config: Config) -> UnifiedLLMService:
+    """Initialize and set global LLM service instance."""
+    global _llm_service
+    if _llm_service is not None:
+        raise RuntimeError("LLM service already initialized")
+    
+    _llm_service = UnifiedLLMService(config)
+    await _llm_service.initialize()
+    return _llm_service
+
+async def shutdown_llm_service() -> None:
+    """Shutdown global LLM service instance."""
+    global _llm_service
+    if _llm_service:
+        await _llm_service.shutdown()
+        _llm_service = None

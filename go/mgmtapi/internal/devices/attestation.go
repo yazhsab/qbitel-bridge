@@ -6,9 +6,15 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
-	"encoding/asn1"
+	"encoding/hex"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -17,42 +23,43 @@ import (
 
 // AttestationVerifier handles TPM attestation verification
 type AttestationVerifier struct {
-	logger          *zap.Logger
-	config          *LifecycleConfig
-	trustedRoots    *x509.CertPool
-	trustedEKCerts  map[string]*x509.Certificate
+	logger           *zap.Logger
+	config           *LifecycleConfig
+	trustedRoots     *x509.CertPool
+	trustedEKCerts   map[string]*x509.Certificate
 	attestationCache map[string]*CachedAttestation
-	mu              sync.RWMutex
+	expectedPCRs     map[int][]byte
+	mu               sync.RWMutex
 }
 
 // CachedAttestation represents a cached attestation result
 type CachedAttestation struct {
-	DeviceID    string    `json:"device_id"`
-	Result      bool      `json:"result"`
-	Timestamp   time.Time `json:"timestamp"`
-	ExpiresAt   time.Time `json:"expires_at"`
-	PCRValues   map[int][]byte `json:"pcr_values"`
-	EventLog    []byte    `json:"event_log"`
-	Errors      []string  `json:"errors,omitempty"`
+	DeviceID  string         `json:"device_id"`
+	Result    bool           `json:"result"`
+	Timestamp time.Time      `json:"timestamp"`
+	ExpiresAt time.Time      `json:"expires_at"`
+	PCRValues map[int][]byte `json:"pcr_values"`
+	EventLog  []byte         `json:"event_log"`
+	Errors    []string       `json:"errors,omitempty"`
 }
 
 // TPMQuote represents a TPM quote structure
 type TPMQuote struct {
-	Magic       uint32            `json:"magic"`
-	Type        uint16            `json:"type"`
-	QualData    []byte            `json:"qual_data"`
-	PCRSelect   TPMPCRSelection   `json:"pcr_select"`
-	PCRDigest   []byte            `json:"pcr_digest"`
-	ClockInfo   TPMClockInfo      `json:"clock_info"`
-	FirmwareVersion uint64        `json:"firmware_version"`
-	Attested    TPMAttestedQuote  `json:"attested"`
+	Magic           uint32           `json:"magic"`
+	Type            uint16           `json:"type"`
+	QualData        []byte           `json:"qual_data"`
+	PCRSelect       TPMPCRSelection  `json:"pcr_select"`
+	PCRDigest       []byte           `json:"pcr_digest"`
+	ClockInfo       TPMClockInfo     `json:"clock_info"`
+	FirmwareVersion uint64           `json:"firmware_version"`
+	Attested        TPMAttestedQuote `json:"attested"`
 }
 
 // TPMPCRSelection represents PCR selection
 type TPMPCRSelection struct {
-	Hash      uint16 `json:"hash"`
-	SizeOfSelect uint8 `json:"size_of_select"`
-	PCRSelect []byte `json:"pcr_select"`
+	Hash         uint16 `json:"hash"`
+	SizeOfSelect uint8  `json:"size_of_select"`
+	PCRSelect    []byte `json:"pcr_select"`
 }
 
 // TPMClockInfo represents TPM clock information
@@ -65,10 +72,10 @@ type TPMClockInfo struct {
 
 // TPMAttestedQuote represents the attested portion of a quote
 type TPMAttestedQuote struct {
-	Magic       uint32 `json:"magic"`
-	Type        uint16 `json:"type"`
-	QualData    []byte `json:"qual_data"`
-	ExtraData   []byte `json:"extra_data"`
+	Magic     uint32 `json:"magic"`
+	Type      uint16 `json:"type"`
+	QualData  []byte `json:"qual_data"`
+	ExtraData []byte `json:"extra_data"`
 }
 
 // EventLogEntry represents a measured boot event
@@ -83,16 +90,16 @@ type EventLogEntry struct {
 
 // AttestationResult represents the result of attestation verification
 type AttestationResult struct {
-	Valid           bool                    `json:"valid"`
-	DeviceID        string                  `json:"device_id"`
-	Timestamp       time.Time               `json:"timestamp"`
-	PCRValues       map[int][]byte          `json:"pcr_values"`
-	ExpectedPCRs    map[int][]byte          `json:"expected_pcrs"`
-	EventLog        []EventLogEntry         `json:"event_log"`
-	Compliance      ComplianceResult        `json:"compliance"`
-	TrustChain      TrustChainResult        `json:"trust_chain"`
-	Errors          []string                `json:"errors,omitempty"`
-	Warnings        []string                `json:"warnings,omitempty"`
+	Valid        bool             `json:"valid"`
+	DeviceID     string           `json:"device_id"`
+	Timestamp    time.Time        `json:"timestamp"`
+	PCRValues    map[int][]byte   `json:"pcr_values"`
+	ExpectedPCRs map[int][]byte   `json:"expected_pcrs"`
+	EventLog     []EventLogEntry  `json:"event_log"`
+	Compliance   ComplianceResult `json:"compliance"`
+	TrustChain   TrustChainResult `json:"trust_chain"`
+	Errors       []string         `json:"errors,omitempty"`
+	Warnings     []string         `json:"warnings,omitempty"`
 }
 
 // ComplianceResult represents compliance check results
@@ -107,11 +114,11 @@ type ComplianceResult struct {
 
 // TrustChainResult represents trust chain verification results
 type TrustChainResult struct {
-	EKValid         bool     `json:"ek_valid"`
-	AKValid         bool     `json:"ak_valid"`
-	CertChainValid  bool     `json:"cert_chain_valid"`
-	ManufacturerTrusted bool `json:"manufacturer_trusted"`
-	Issues          []string `json:"issues,omitempty"`
+	EKValid             bool     `json:"ek_valid"`
+	AKValid             bool     `json:"ak_valid"`
+	CertChainValid      bool     `json:"cert_chain_valid"`
+	ManufacturerTrusted bool     `json:"manufacturer_trusted"`
+	Issues              []string `json:"issues,omitempty"`
 }
 
 // NewAttestationVerifier creates a new attestation verifier
@@ -303,19 +310,30 @@ func (av *AttestationVerifier) verifyTrustChain(attestation *AttestationData) (*
 		return result, nil
 	}
 
-	// Verify EK certificate against trusted roots
-	opts := x509.VerifyOptions{
-		Roots: av.trustedRoots,
-	}
-	_, err = ekCert.Verify(opts)
-	if err != nil {
-		result.Issues = append(result.Issues, fmt.Sprintf("EK certificate verification failed: %v", err))
+	if av.trustedRoots != nil && len(av.trustedRoots.Subjects()) > 0 {
+		opts := x509.VerifyOptions{Roots: av.trustedRoots}
+		if _, err := ekCert.Verify(opts); err != nil {
+			result.Issues = append(result.Issues, fmt.Sprintf("EK certificate verification failed: %v", err))
+		} else {
+			result.EKValid = true
+		}
 	} else {
-		result.EKValid = true
+		result.Issues = append(result.Issues, "no trusted roots configured for EK validation")
 	}
 
-	// Verify AK certificate (simplified - in practice would verify against EK)
-	result.AKValid = true // Placeholder
+	if len(av.trustedEKCerts) > 0 {
+		fingerprint := certificateFingerprint(ekCert)
+		if _, ok := av.trustedEKCerts[fingerprint]; !ok {
+			result.Issues = append(result.Issues, "EK certificate not in trusted list")
+			result.EKValid = false
+		}
+	}
+
+	if err := akCert.CheckSignatureFrom(ekCert); err != nil {
+		result.Issues = append(result.Issues, fmt.Sprintf("AK certificate signature verification failed: %v", err))
+	} else {
+		result.AKValid = true
+	}
 
 	// Check manufacturer trust
 	result.ManufacturerTrusted = av.isManufacturerTrusted(ekCert.Subject.Organization)
@@ -353,10 +371,10 @@ func (av *AttestationVerifier) verifyPCRValues(attestation *AttestationData) err
 // parseEventLog parses the measured boot event log
 func (av *AttestationVerifier) parseEventLog(eventLogData []byte) ([]EventLogEntry, error) {
 	var entries []EventLogEntry
-	
+
 	// This is a simplified parser - real implementation would handle TCG Event Log format
 	// For now, return empty entries
-	
+
 	return entries, nil
 }
 
@@ -404,7 +422,7 @@ func (av *AttestationVerifier) performComplianceChecks(attestation *AttestationD
 func (av *AttestationVerifier) parseTPMQuote(quoteData []byte) (*TPMQuote, error) {
 	// This is a simplified parser - real implementation would handle TPM2B_ATTEST structure
 	quote := &TPMQuote{}
-	
+
 	if len(quoteData) < 8 {
 		return nil, fmt.Errorf("quote data too short")
 	}
@@ -412,9 +430,9 @@ func (av *AttestationVerifier) parseTPMQuote(quoteData []byte) (*TPMQuote, error
 	// Parse basic fields (simplified)
 	quote.Magic = uint32(quoteData[0])<<24 | uint32(quoteData[1])<<16 | uint32(quoteData[2])<<8 | uint32(quoteData[3])
 	quote.Type = uint16(quoteData[4])<<8 | uint16(quoteData[5])
-	
+
 	// In a real implementation, this would properly parse the entire TPMS_ATTEST structure
-	
+
 	return quote, nil
 }
 
@@ -454,14 +472,71 @@ func (av *AttestationVerifier) cacheAttestationResult(attestation *AttestationDa
 }
 
 func (av *AttestationVerifier) loadTrustedRoots() error {
-	// Load trusted root certificates from configuration
-	// This would typically load from files or a certificate store
+	av.trustedRoots = x509.NewCertPool()
+	path := strings.TrimSpace(av.config.TrustedRootCAPath)
+	if path == "" {
+		av.logger.Warn("no trusted root CA path configured; EK certificate validation will be limited")
+		return nil
+	}
+
+	files, err := collectPEMFiles(path)
+	if err != nil {
+		return fmt.Errorf("failed to enumerate trusted roots: %w", err)
+	}
+
+	loaded := 0
+	for _, file := range files {
+		certs, err := loadCertificatesFromFile(file)
+		if err != nil {
+			av.logger.Warn("failed to load root certificate", zap.String("path", file), zap.Error(err))
+			continue
+		}
+		for _, cert := range certs {
+			av.trustedRoots.AddCert(cert)
+			loaded++
+		}
+	}
+
+	if loaded == 0 {
+		return fmt.Errorf("no root certificates loaded from %s", path)
+	}
+
+	av.logger.Info("trusted root certificates loaded", zap.Int("count", loaded))
 	return nil
 }
 
 func (av *AttestationVerifier) loadTrustedEKCerts() error {
-	// Load trusted EK certificates from TPM manufacturers
-	// This would typically load from a database or certificate store
+	av.trustedEKCerts = make(map[string]*x509.Certificate)
+	path := strings.TrimSpace(av.config.TrustedEKCertsPath)
+	if path == "" {
+		av.logger.Warn("no trusted EK certificates path configured; EK pinning disabled")
+		return nil
+	}
+
+	files, err := collectPEMFiles(path)
+	if err != nil {
+		return fmt.Errorf("failed to enumerate trusted EK certificates: %w", err)
+	}
+
+	loaded := 0
+	for _, file := range files {
+		certs, err := loadCertificatesFromFile(file)
+		if err != nil {
+			av.logger.Warn("failed to load EK certificate", zap.String("path", file), zap.Error(err))
+			continue
+		}
+		for _, cert := range certs {
+			fingerprint := certificateFingerprint(cert)
+			av.trustedEKCerts[fingerprint] = cert
+			loaded++
+		}
+	}
+
+	if loaded == 0 {
+		return fmt.Errorf("no EK certificates loaded from %s", path)
+	}
+
+	av.logger.Info("trusted EK certificates loaded", zap.Int("count", loaded))
 	return nil
 }
 
@@ -477,9 +552,54 @@ func (av *AttestationVerifier) isManufacturerTrusted(organizations []string) boo
 }
 
 func (av *AttestationVerifier) getExpectedPCRValues() map[int][]byte {
-	// Return expected PCR values from policy or baseline
-	// This would typically come from a configuration or policy engine
-	return make(map[int][]byte)
+	av.mu.RLock()
+	if av.expectedPCRs != nil {
+		defer av.mu.RUnlock()
+		return av.expectedPCRs
+	}
+	av.mu.RUnlock()
+
+	av.mu.Lock()
+	defer av.mu.Unlock()
+
+	if av.expectedPCRs != nil {
+		return av.expectedPCRs
+	}
+
+	baselinePath := strings.TrimSpace(av.config.PCRBaselinePath)
+	expected := make(map[int][]byte)
+	if baselinePath != "" {
+		data, err := os.ReadFile(baselinePath)
+		if err != nil {
+			av.logger.Warn("failed to read PCR baseline", zap.String("path", baselinePath), zap.Error(err))
+		} else {
+			var raw map[string]string
+			if err := json.Unmarshal(data, &raw); err != nil {
+				av.logger.Warn("failed to parse PCR baseline", zap.String("path", baselinePath), zap.Error(err))
+			} else {
+				for indexStr, value := range raw {
+					idx, err := strconv.Atoi(strings.TrimSpace(indexStr))
+					if err != nil {
+						av.logger.Warn("invalid PCR index in baseline", zap.String("index", indexStr))
+						continue
+					}
+					decoded, err := hex.DecodeString(strings.TrimSpace(value))
+					if err != nil {
+						av.logger.Warn("invalid PCR value in baseline", zap.String("index", indexStr), zap.Error(err))
+						continue
+					}
+					expected[idx] = decoded
+				}
+			}
+		}
+	}
+
+	if len(expected) == 0 {
+		av.logger.Warn("no PCR baseline values configured; PCR verification will be bypassed")
+	}
+
+	av.expectedPCRs = expected
+	return expected
 }
 
 func (av *AttestationVerifier) checkSecureBootPCR(pcrValue []byte) bool {
@@ -520,6 +640,70 @@ func (av *AttestationVerifier) startCacheCleanupTask() {
 	for range ticker.C {
 		av.cleanupExpiredCache()
 	}
+}
+
+func collectPEMFiles(path string) ([]string, error) {
+	info, err := os.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if !info.IsDir() {
+		return []string{path}, nil
+	}
+
+	var files []string
+	err = filepath.WalkDir(path, func(entry string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		files = append(files, entry)
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
+}
+
+func loadCertificatesFromFile(path string) ([]*x509.Certificate, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var certs []*x509.Certificate
+	rest := data
+	for {
+		block, remaining := pem.Decode(rest)
+		if block == nil {
+			break
+		}
+		rest = remaining
+		if block.Type != "CERTIFICATE" {
+			continue
+		}
+		cert, err := x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse certificate in %s: %w", path, err)
+		}
+		certs = append(certs, cert)
+	}
+
+	if len(certs) == 0 {
+		return nil, fmt.Errorf("no certificates found in %s", path)
+	}
+
+	return certs, nil
+}
+
+func certificateFingerprint(cert *x509.Certificate) string {
+	sum := sha256.Sum256(cert.Raw)
+	return hex.EncodeToString(sum[:])
 }
 
 func (av *AttestationVerifier) cleanupExpiredCache() {

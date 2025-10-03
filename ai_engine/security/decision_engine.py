@@ -93,10 +93,12 @@ class ZeroTouchDecisionEngine:
         try:
             self.logger.info("Initializing Zero-Touch Decision Engine...")
             
-            # Initialize LLM service
+            # Get LLM service - must be initialized first
             self.llm_service = get_llm_service()
-            if not hasattr(self.llm_service, '_initialized') or not self.llm_service._initialized:
-                await self.llm_service.initialize()
+            if self.llm_service is None:
+                raise SecurityException(
+                    "LLM service not initialized. Call initialize_llm_service() first."
+                )
             
             # Initialize threat analyzer
             self.threat_analyzer = ThreatAnalyzer(self.config)

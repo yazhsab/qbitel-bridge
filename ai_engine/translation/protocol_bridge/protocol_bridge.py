@@ -18,7 +18,16 @@ import weakref
 
 from ...core.config import Config
 from ...core.exceptions import CronosAIException
-from ...llm.unified_llm_service import UnifiedLLMService, LLMRequest, LLMResponse
+try:  # pragma: no cover - optional dependency during lightweight testing
+    from ...llm.unified_llm_service import UnifiedLLMService, LLMRequest, LLMResponse
+except ModuleNotFoundError:
+    UnifiedLLMService = None  # type: ignore
+
+    class LLMRequest:  # type: ignore
+        pass
+
+    class LLMResponse:  # type: ignore
+        pass
 from ...discovery.protocol_discovery_orchestrator import ProtocolDiscoveryOrchestrator
 
 from ..models import (
@@ -27,7 +36,11 @@ from ..models import (
     ProtocolBridgeConfig,
     ProtocolFormat,
     TranslationException,
-    GenerationStatus
+    GenerationStatus,
+    TranslationMode,
+    QualityLevel,
+    TranslationResult,
+    TranslationRule,
 )
 
 from prometheus_client import Counter, Histogram, Gauge, Summary
@@ -70,35 +83,6 @@ class BridgeException(CronosAIException):
     pass
 
 
-class TranslationMode(str, Enum):
-    """Protocol translation modes."""
-    DIRECT = "direct"          # Direct field mapping
-    SEMANTIC = "semantic"      # LLM-based semantic translation
-    HYBRID = "hybrid"          # Combination of direct and semantic
-    STREAMING = "streaming"    # Real-time streaming translation
-    BATCH = "batch"           # Batch processing
-
-
-class QualityLevel(str, Enum):
-    """Translation quality levels."""
-    FAST = "fast"             # Fast, basic translation
-    BALANCED = "balanced"     # Balanced speed and quality
-    ACCURATE = "accurate"     # High accuracy, slower
-    PERFECT = "perfect"       # Maximum quality, slowest
-
-
-@dataclass
-class TranslationRule:
-    """Rule for protocol field translation."""
-    source_field: str
-    target_field: str
-    transformation: Optional[str] = None  # Python expression or function name
-    validation: Optional[str] = None      # Validation rule
-    priority: int = 5                     # 1-10, higher = more priority
-    conditions: List[str] = field(default_factory=list)  # Conditional rules
-    metadata: Dict[str, Any] = field(default_factory=dict)
-
-
 @dataclass
 class TranslationContext:
     """Context for protocol translation."""
@@ -112,23 +96,6 @@ class TranslationContext:
     custom_rules: List[TranslationRule] = field(default_factory=list)
     session_id: Optional[str] = None
     user_context: Dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass
-class TranslationResult:
-    """Result of protocol translation."""
-    source_protocol: str
-    target_protocol: str
-    translated_data: bytes
-    confidence: float
-    processing_time: float
-    translation_mode: TranslationMode
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    validation_errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
-    
-    translation_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 @dataclass

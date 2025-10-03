@@ -21,7 +21,14 @@ import os
 from pathlib import Path
 
 from ..core.config import Config
-from ..core.exceptions import LoggingException
+
+try:
+    from ..core.exceptions import LoggingException
+except ImportError:  # pragma: no cover - fallback when symbol missing
+    class LoggingException(Exception):
+        """Fallback logging exception used when core definition is unavailable."""
+
+        pass
 
 
 class LogLevel(str, Enum):

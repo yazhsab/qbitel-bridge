@@ -1,191 +1,135 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cronos-security-orchestrator
-  namespace: cronos-security
+  name: zero-touch-security-orchestrator
+  namespace: cronos-ai
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
-    app.kubernetes.io/version: "1.0.0"
-    app.kubernetes.io/component: security
-    app.kubernetes.io/part-of: cronos-ai
+    app: zero-touch-security
+    component: orchestrator
+    tier: security
 spec:
   replicas: 3
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 1
       maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
-      app.kubernetes.io/name: cronos-security-orchestrator
-      app.kubernetes.io/component: security
+      app: zero-touch-security
+      component: orchestrator
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: cronos-security-orchestrator
-        app.kubernetes.io/version: "1.0.0"
-        app.kubernetes.io/component: security
-        app.kubernetes.io/part-of: cronos-ai
+        app: zero-touch-security
+        component: orchestrator
+        tier: security
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "8000"
+        prometheus.io/port: "8080"
         prometheus.io/path: "/metrics"
-        config.linkerd.io/skip-inbound-ports: "9090"
     spec:
-      serviceAccountName: cronos-security-orchestrator
+      serviceAccountName: zero-touch-security
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
-        fsGroup: 2000
+        fsGroup: 1000
+      
       containers:
-      - name: cronos-security-orchestrator
-        image: cronos/security-orchestrator:1.0.0
-        imagePullPolicy: IfNotPresent
+      - name: security-orchestrator
+        image: cronos-ai/zero-touch-security:latest
+        imagePullPolicy: Always
+        
         ports:
         - name: http
-          containerPort: 8000
+          containerPort: 8080
           protocol: TCP
         - name: metrics
           containerPort: 9090
           protocol: TCP
+        
         env:
-        - name: CRONOS_LOG_LEVEL
+        - name: ENVIRONMENT
+          value: "production"
+        - name: LOG_LEVEL
           value: "INFO"
-        - name: CRONOS_CONFIG_PATH
-          value: "/app/config/security/enterprise-security-config.yaml"
-        - name: REDIS_URL
-          valueFrom:
-            secretKeyRef:
-              name: cronos-security-secrets
-              key: redis-url
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: cronos-security-secrets
-              key: database-url
         - name: OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
-              name: cronos-security-secrets
+              name: llm-credentials
               key: openai-api-key
         - name: ANTHROPIC_API_KEY
           valueFrom:
             secretKeyRef:
-              name: cronos-security-secrets
+              name: llm-credentials
               key: anthropic-api-key
-        - name: SPLUNK_HEC_TOKEN
+        - name: REDIS_HOST
+          value: "redis-service.cronos-ai.svc.cluster.local"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: TIMESCALEDB_HOST
+          value: "timescaledb-service.cronos-ai.svc.cluster.local"
+        - name: TIMESCALEDB_PORT
+          value: "5432"
+        - name: TIMESCALEDB_DATABASE
+          value: "cronos_security"
+        - name: TIMESCALEDB_USER
           valueFrom:
             secretKeyRef:
-              name: cronos-security-secrets
-              key: splunk-hec-token
-        - name: SERVICENOW_USERNAME
+              name: timescaledb-credentials
+              key: username
+        - name: TIMESCALEDB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-security-secrets
-              key: servicenow-username
-        - name: SERVICENOW_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: cronos-security-secrets
-              key: servicenow-password
-        - name: SLACK_BOT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: cronos-security-secrets
-              key: slack-bot-token
-        - name: SMTP_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: cronos-security-secrets
-              key: smtp-username
-        - name: SMTP_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: cronos-security-secrets
-              key: smtp-password
-        - name: FIREWALL_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: cronos-security-secrets
-              key: firewall-api-key
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: POD_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
+              name: timescaledb-credentials
+              key: password
+        
         resources:
-          limits:
-            cpu: 2000m
-            memory: 4Gi
-            ephemeral-storage: 2Gi
           requests:
-            cpu: 1000m
-            memory: 2Gi
-            ephemeral-storage: 1Gi
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        
         livenessProbe:
           httpGet:
-            path: /health/live
+            path: /api/v1/security/health
             port: http
-            scheme: HTTP
           initialDelaySeconds: 30
-          periodSeconds: 30
-          timeoutSeconds: 10
-          failureThreshold: 3
-          successThreshold: 1
-        readinessProbe:
-          httpGet:
-            path: /health/ready
-            port: http
-            scheme: HTTP
-          initialDelaySeconds: 15
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
-          successThreshold: 1
-        startupProbe:
+        
+        readinessProbe:
           httpGet:
-            path: /health/startup
+            path: /api/v1/security/health
             port: http
-            scheme: HTTP
           initialDelaySeconds: 10
           periodSeconds: 5
           timeoutSeconds: 3
-          failureThreshold: 30
-          successThreshold: 1
+          failureThreshold: 3
+        
         volumeMounts:
         - name: config
           mountPath: /app/config
           readOnly: true
+        - name: cache
+          mountPath: /app/cache
         - name: logs
           mountPath: /app/logs
-        - name: tmp
-          mountPath: /tmp
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1000
-          capabilities:
-            drop:
-            - ALL
+      
       volumes:
       - name: config
         configMap:
-          name: cronos-security-config
-          defaultMode: 0444
-      - name: logs
+          name: security-orchestrator-config
+      - name: cache
         emptyDir:
           sizeLimit: 1Gi
-      - name: tmp
+      - name: logs
         emptyDir:
-          sizeLimit: 100Mi
+          sizeLimit: 5Gi
+      
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -193,45 +137,32 @@ spec:
             podAffinityTerm:
               labelSelector:
                 matchExpressions:
-                - key: app.kubernetes.io/name
+                - key: app
                   operator: In
                   values:
-                  - cronos-security-orchestrator
+                  - zero-touch-security
               topologyKey: kubernetes.io/hostname
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            preference:
-              matchExpressions:
-              - key: node-type
-                operator: In
-                values:
-                - security
+      
       tolerations:
       - key: "security-workload"
         operator: "Equal"
         value: "true"
         effect: "NoSchedule"
-      restartPolicy: Always
-      terminationGracePeriodSeconds: 60
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cronos-security-orchestrator
-  namespace: cronos-security
+  name: zero-touch-security-service
+  namespace: cronos-ai
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
-    app.kubernetes.io/component: security
-  annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "9090"
-    prometheus.io/path: "/metrics"
+    app: zero-touch-security
+    component: orchestrator
 spec:
   type: ClusterIP
   ports:
   - name: http
-    port: 8000
+    port: 80
     targetPort: http
     protocol: TCP
   - name: metrics
@@ -239,25 +170,215 @@ spec:
     targetPort: metrics
     protocol: TCP
   selector:
-    app.kubernetes.io/name: cronos-security-orchestrator
-    app.kubernetes.io/component: security
+    app: zero-touch-security
+    component: orchestrator
+
 ---
 apiVersion: v1
-kind: Service
+kind: ServiceAccount
 metadata:
-  name: cronos-security-orchestrator-headless
-  namespace: cronos-security
+  name: zero-touch-security
+  namespace: cronos-ai
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
-    app.kubernetes.io/component: security
+    app: zero-touch-security
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: zero-touch-security-role
+  namespace: cronos-ai
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: zero-touch-security-rolebinding
+  namespace: cronos-ai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: zero-touch-security-role
+subjects:
+- kind: ServiceAccount
+  name: zero-touch-security
+  namespace: cronos-ai
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: security-orchestrator-config
+  namespace: cronos-ai
+data:
+  config.yaml: |
+    security_orchestrator:
+      detection_accuracy_threshold: 0.95
+      response_time_target_ms: 60000
+      false_positive_rate_threshold: 0.05
+      max_concurrent_incidents: 100
+      cache_ttl_hours: 1
+      
+    threat_detection:
+      enabled: true
+      confidence_threshold: 0.7
+      risk_score_threshold: 50
+      auto_response_enabled: true
+      
+    policy_generation:
+      enabled: true
+      validation_enabled: true
+      frameworks:
+        - NIST
+        - ISO27001
+        - CIS
+        - PCI-DSS
+        - HIPAA
+      
+    threat_intelligence:
+      enabled: true
+      sources:
+        - threat-feed-alpha
+        - threat-feed-beta
+      correlation_enabled: true
+      
+    incident_response:
+      auto_escalation_enabled: true
+      escalation_threshold: "high"
+      notification_channels:
+        - email
+        - slack
+        - pagerduty
+      
+    integrations:
+      alert_manager: true
+      policy_engine: true
+      monitoring: true
+      audit_trail: true
+    
+    performance:
+      max_workers: 10
+      queue_size: 1000
+      batch_size: 100
+      timeout_seconds: 300
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: zero-touch-security-hpa
+  namespace: cronos-ai
 spec:
-  type: ClusterIP
-  clusterIP: None
-  ports:
-  - name: http
-    port: 8000
-    targetPort: http
-    protocol: TCP
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: zero-touch-security-orchestrator
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  # NOTE: Custom metrics require Prometheus Adapter or similar metrics server
+  # Ensure security_events_per_second metric is exposed via /metrics endpoint
+  # and configured in Prometheus Adapter ConfigMap
+  # - type: Pods
+  #   pods:
+  #     metric:
+  #       name: security_events_per_second
+  #     target:
+  #       type: AverageValue
+  #       averageValue: "100"
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+      - type: Pods
+        value: 2
+        periodSeconds: 30
+      selectPolicy: Max
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: zero-touch-security-pdb
+  namespace: cronos-ai
+spec:
+  minAvailable: 2
   selector:
-    app.kubernetes.io/name: cronos-security-orchestrator
-    app.kubernetes.io/component: security
+    matchLabels:
+      app: zero-touch-security
+      component: orchestrator
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: zero-touch-security-netpol
+  namespace: cronos-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: zero-touch-security
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: cronos-ai
+    - podSelector:
+        matchLabels:
+          app: api-gateway
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: cronos-ai
+    ports:
+    - protocol: TCP
+      port: 6379  # Redis
+    - protocol: TCP
+      port: 5432  # TimescaleDB
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443  # HTTPS for LLM APIs
+    - protocol: TCP
+      port: 53   # DNS
+    - protocol: UDP
+      port: 53   # DNS

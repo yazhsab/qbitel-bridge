@@ -1,22 +1,50 @@
-"""
-CRONOS AI Engine - Model Management Module
+"""Top-level exports for the CRONOS AI model toolkit.
 
-This module provides model registry, versioning, and management capabilities
-for AI models used in protocol discovery, field detection, and anomaly detection.
+This module makes the commonly used model primitives available from
+``ai_engine.models`` so internal and integration code can rely on the
+package without importing private modules. The previous implementation
+referenced non-existent modules (for example ``base_model`` and
+``transformer_models``) which caused an immediate ``ModuleNotFoundError``
+whenever ``ai_engine.models`` was imported.  The exports below map to the
+actual module structure that exists in the repository today.
 """
 
-from .registry import ModelRegistry, ModelMetadata, ModelVersion
-from .base_model import BaseModel
-from .transformer_models import TransformerModel, ProtocolTransformer
-from .ensemble_models import EnsembleModel, VotingEnsemble
+from .base import BaseModel, ModelInput, ModelOutput, ModelState
+from .ensemble import (
+    EnsembleModel,
+    EnsembleMethod,
+    VotingType,
+    EnsembleMember,
+    EnsembleResult,
+)
+from .model_manager import ModelManager
+from .registry import (
+    ModelRegistry,
+    ModelMetadata,
+    ModelVersion,
+    ModelStatus,
+    ModelType,
+)
 
 __all__ = [
-    "ModelRegistry",
-    "ModelMetadata", 
-    "ModelVersion",
+    # Base model primitives
     "BaseModel",
-    "TransformerModel",
-    "ProtocolTransformer",
+    "ModelInput",
+    "ModelOutput",
+    "ModelState",
+
+    # Ensemble tooling
     "EnsembleModel",
-    "VotingEnsemble",
+    "EnsembleMethod",
+    "VotingType",
+    "EnsembleMember",
+    "EnsembleResult",
+
+    # Management interfaces
+    "ModelManager",
+    "ModelRegistry",
+    "ModelMetadata",
+    "ModelVersion",
+    "ModelStatus",
+    "ModelType",
 ]

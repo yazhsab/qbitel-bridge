@@ -1,0 +1,165 @@
+# CRONOS AI - Production Environment Configuration
+# This file contains production-specific overrides
+
+environment: production
+debug: false
+
+# Production API Configuration
+api_host: "0.0.0.0"
+api_port: 8080
+worker_processes: 8  # Adjust based on CPU cores
+
+# Database - Production Settings
+database:
+  host: "${DB_HOST:-db.cronos-ai.internal}"
+  port: 5432
+  database: "${DB_NAME:-cronos_ai_prod}"
+  username: "${DB_USER:-cronos_prod}"
+  password: ""  # MUST be set via DATABASE_PASSWORD env var
+  ssl_mode: "verify-full"  # Strictest SSL mode
+  connection_pool_size: 50
+  connection_timeout: 30
+  max_overflow: 20
+  pool_pre_ping: true
+  pool_recycle: 3600
+
+# Redis - Production Settings
+redis:
+  host: "${REDIS_HOST:-redis.cronos-ai.internal}"
+  port: 6379
+  database: 0
+  password: ""  # MUST be set via REDIS_PASSWORD env var
+  ssl: true
+  ssl_cert_reqs: "required"
+  connection_pool_size: 50
+  socket_timeout: 5
+  socket_connect_timeout: 5
+  retry_on_timeout: true
+  health_check_interval: 30
+
+# Security - Production Settings
+security:
+  # Authentication
+  api_key_enabled: true
+  jwt_enabled: true
+  jwt_secret: ""  # MUST be set via JWT_SECRET env var (min 32 chars)
+  jwt_algorithm: "HS256"
+  jwt_expiration_hours: 8
+  
+  # TLS/SSL
+  tls_enabled: true
+  tls_cert_file: "/etc/cronos-ai/certs/server.crt"
+  tls_key_file: "/etc/cronos-ai/certs/server.key"
+  tls_ca_file: "/etc/cronos-ai/certs/ca.crt"
+  tls_verify_client: true
+  tls_min_version: "TLSv1.3"
+  tls_ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"
+  
+  # Encryption
+  encryption_key: ""  # MUST be set via ENCRYPTION_KEY env var (min 32 chars)
+  encryption_algorithm: "AES-256-GCM"
+  
+  # Audit
+  audit_logging_enabled: true
+  audit_log_retention_days: 365
+  sensitive_field_masking: true
+  
+  # Trusted hosts
+  trusted_hosts:
+    - "api.cronos-ai.example.com"
+    - "*.cronos-ai.example.com"
+
+# Rate Limiting - Production Settings
+rate_limiting:
+  enabled: true
+  default_limit: 100  # requests per minute
+  burst_limit: 200
+  per_user_limit: 1000  # requests per hour
+  per_ip_limit: 500  # requests per hour
+  whitelist_ips: []
+  blacklist_ips: []
+
+# CORS - Production Settings
+cors:
+  enabled: true
+  allowed_origins:
+    - "https://cronos-ai.example.com"
+    - "https://dashboard.cronos-ai.example.com"
+  allowed_methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+  allowed_headers:
+    - "Authorization"
+    - "Content-Type"
+    - "X-API-Key"
+    - "X-Request-ID"
+  allow_credentials: true
+  max_age: 3600
+
+# Monitoring - Production Settings
+monitoring:
+  metrics_enabled: true
+  metrics_flush_interval: 30.0
+  prometheus_enabled: true
+  prometheus_host: "0.0.0.0"
+  prometheus_port: 9090
+  health_check_enabled: true
+  health_check_interval: 30.0
+  alerting_enabled: true
+  
+  # Alert thresholds
+  cpu_alert_threshold: 80.0
+  memory_alert_threshold: 80.0
+  disk_alert_threshold: 85.0
+  error_rate_alert_threshold: 0.01
+  response_time_alert_threshold: 2.0
+
+# Logging - Production Settings
+logging:
+  level: "INFO"
+  format: "json"
+  output: "file"
+  file_path: "/var/log/cronos-ai/app.log"
+  max_file_size_mb: 500
+  backup_count: 10
+  structured_logging: true
+  correlation_id_enabled: true
+  performance_logging: true
+  security_logging: true
+
+# Performance - Production Settings
+performance:
+  cache_size: 100000
+  cache_ttl: 3600
+  use_redis_cache: true
+  max_memory_usage_mb: 16384
+  gc_threshold: 0.8
+  max_threads: 0  # Auto-detect
+  io_thread_pool_size: 100
+
+# Secrets Manager - Production Settings
+secrets_manager:
+  enabled: true
+  backend: "vault"  # Options: vault, aws_secrets_manager, azure_key_vault
+  vault_addr: "${VAULT_ADDR}"
+  vault_token: "${VAULT_TOKEN}"
+  vault_mount_point: "secret"
+  vault_path: "cronos-ai/production"
+
+# Error Tracking - Production Settings
+error_tracking:
+  sentry_enabled: true
+  sentry_dsn: "${SENTRY_DSN}"
+  sentry_environment: "production"
+  sentry_traces_sample_rate: 0.1
+  sentry_profiles_sample_rate: 0.1
+  
+  # Persistent storage
+  persistent_storage_enabled: true
+  error_retention_days: 90
+  
+  # Aggregation
+  error_aggregation_enabled: true
+  aggregation_window_minutes: 5

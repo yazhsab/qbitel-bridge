@@ -12,10 +12,9 @@ from typing import Dict, Any, Optional
 from concurrent import futures
 import grpc
 
-from ..core.engine import AIEngine
+from ..core.engine import CronosAIEngine
 from ..core.config import Config
 from ..core.exceptions import AIEngineException
-from ..models import ModelInput
 
 
 # gRPC service definition (would typically be generated from .proto file)
@@ -33,7 +32,7 @@ class AIEngineGRPCService:
         self.logger = logging.getLogger(__name__)
         
         # Initialize AI Engine
-        self.ai_engine: Optional[AIEngine] = None
+        self.ai_engine: Optional[CronosAIEngine] = None
         
         # gRPC server
         self.server: Optional[grpc.aio.Server] = None
@@ -53,7 +52,7 @@ class AIEngineGRPCService:
         """Initialize the gRPC service."""
         try:
             # Initialize AI Engine
-            self.ai_engine = AIEngine(self.config)
+            self.ai_engine = CronosAIEngine(self.config)
             await self.ai_engine.initialize()
             
             self.logger.info("gRPC service initialized successfully")
@@ -117,38 +116,33 @@ class AIEngineGRPCService:
             # Decode input data
             data_bytes = self._decode_data(request.data, request.data_format)
             
-            # Create model input
-            model_input = ModelInput(
-                data=data_bytes,
-                metadata={
-                    "expected_protocol": getattr(request, 'expected_protocol', None),
-                    "confidence_threshold": getattr(request, 'confidence_threshold', 0.7),
-                    "max_samples": getattr(request, 'max_samples', 1000),
-                    "include_grammar": getattr(request, 'include_grammar', False)
-                }
+            metadata = {
+                "expected_protocol": getattr(request, 'expected_protocol', None),
+                "confidence_threshold": getattr(request, 'confidence_threshold', 0.7),
+                "max_samples": getattr(request, 'max_samples', 1000),
+                "include_grammar": getattr(request, 'include_grammar', False)
+            }
+            # Remove nulls to avoid clutter
+            metadata = {k: v for k, v in metadata.items() if v is not None}
+
+            result = await self.ai_engine.discover_protocol(
+                data_bytes,
+                metadata=metadata if metadata else None
             )
-            
-            # Perform protocol discovery
-            result = await self.ai_engine.discover_protocol(model_input)
             
             # Update statistics
             processing_time = (time.time() - start_time) * 1000
             self.stats["successful_requests"] += 1
             self.stats["total_processing_time_ms"] += processing_time
             
-            # Build response
             response = {
-                "discovered_protocol": result.metadata.get("protocol_type", "unknown"),
-                "confidence_score": result.metadata.get("confidence", 0.0),
-                "protocol_characteristics": result.metadata.get("characteristics", {}),
-                "processing_time_ms": processing_time
+                "discovered_protocol": result.get("protocol_type", "unknown"),
+                "confidence_score": result.get("confidence", 0.0),
+                "structure": result.get("structure", {}),
+                "grammar": result.get("grammar"),
+                "metadata": result.get("metadata", {}),
+                "processing_time_ms": result.get("processing_time", 0.0) * 1000
             }
-            
-            if result.metadata.get("field_structure"):
-                response["field_structure"] = result.metadata["field_structure"]
-            
-            if result.metadata.get("grammar_rules"):
-                response["grammar_rules"] = result.metadata["grammar_rules"]
             
             self.logger.info(f"Protocol discovery completed in {processing_time:.2f}ms")
             return response
@@ -208,20 +202,8 @@ class AIEngineGRPCService:
             # Decode input data
             data_bytes = self._decode_data(request.data, request.data_format)
             
-            # Create model input
-            model_input = ModelInput(
-                data=data_bytes,
-                metadata={
-                    "protocol_hint": getattr(request, 'protocol_hint', None),
-                    "detection_level": getattr(request, 'detection_level', 'medium'),
-                    "include_boundaries": getattr(request, 'include_boundaries', True),
-                    "include_semantics": getattr(request, 'include_semantics', False),
-                    "max_fields": getattr(request, 'max_fields', 100)
-                }
-            )
-            
-            # Perform field detection
-            result = await self.ai_engine.detect_fields(model_input)
+            protocol_hint = getattr(request, 'protocol_hint', None)
+            result = await self.ai_engine.detect_fields(data_bytes, protocol_hint)
             
             # Update statistics
             processing_time = (time.time() - start_time) * 1000
@@ -230,31 +212,24 @@ class AIEngineGRPCService:
             
             # Build response
             detected_fields = []
-            if "detected_fields" in result.metadata:
-                for field in result.metadata["detected_fields"]:
-                    detected_fields.append({
-                        "field_id": field["id"],
-                        "field_name": field.get("name", ""),
-                        "start_offset": field["start_offset"],
-                        "end_offset": field["end_offset"],
-                        "field_type": field["field_type"],
-                        "confidence": field["confidence"],
-                        "semantic_type": field.get("semantic_type", ""),
-                        "encoding": field.get("encoding", ""),
-                        "examples": field.get("examples", [])
-                    })
+            for field in result:
+                detected_fields.append({
+                    "field_id": field.get("id"),
+                    "field_name": field.get("name", ""),
+                    "start_offset": field.get("start"),
+                    "end_offset": field.get("end"),
+                    "field_type": field.get("type", "unknown"),
+                    "confidence": field.get("confidence"),
+                    "semantic_type": field.get("semantic_type", ""),
+                    "encoding": field.get("encoding", ""),
+                    "examples": field.get("examples", [])
+                })
             
             response = {
                 "detected_fields": detected_fields,
                 "total_fields": len(detected_fields),
                 "processing_time_ms": processing_time
             }
-            
-            if result.metadata.get("protocol_structure"):
-                response["protocol_structure"] = result.metadata["protocol_structure"]
-            
-            if result.metadata.get("confidence_summary"):
-                response["confidence_summary"] = result.metadata["confidence_summary"]
             
             self.logger.info(f"Field detection completed in {processing_time:.2f}ms")
             return response
@@ -322,20 +297,19 @@ class AIEngineGRPCService:
                     for baseline in request.baseline_data
                 ]
             
-            # Create model input
-            model_input = ModelInput(
-                data=data_bytes,
-                metadata={
-                    "baseline_data": baseline_bytes,
-                    "protocol_context": getattr(request, 'protocol_context', None),
-                    "sensitivity": getattr(request, 'sensitivity', 'medium'),
-                    "anomaly_threshold": getattr(request, 'anomaly_threshold', 0.5),
-                    "include_explanations": getattr(request, 'include_explanations', True)
-                }
+            context = {
+                "protocol_context": getattr(request, 'protocol_context', None),
+                "sensitivity": getattr(request, 'sensitivity', 'medium'),
+                "baseline_data": baseline_bytes,
+                "anomaly_threshold": getattr(request, 'anomaly_threshold', 0.5),
+                "include_explanations": getattr(request, 'include_explanations', True)
+            }
+            context = {k: v for k, v in context.items() if v is not None}
+
+            result = await self.ai_engine.detect_anomaly(
+                data_bytes,
+                context=context if context else None
             )
-            
-            # Perform anomaly detection
-            result = await self.ai_engine.detect_anomalies(model_input)
             
             # Update statistics
             processing_time = (time.time() - start_time) * 1000
@@ -343,40 +317,28 @@ class AIEngineGRPCService:
             self.stats["total_processing_time_ms"] += processing_time
             
             # Build anomaly score
-            score_data = result.metadata.get("anomaly_score", {})
             anomaly_score = {
-                "overall_score": score_data.get("overall_score", 0.0),
-                "reconstruction_error": score_data.get("reconstruction_error"),
-                "statistical_deviation": score_data.get("statistical_deviation"),
-                "sequence_anomaly": score_data.get("sequence_anomaly"),
-                "field_level_scores": score_data.get("field_level_scores", {})
+                "score": result.get("anomaly_score", 0.0),
+                "confidence": result.get("confidence", 0.0),
+                "threshold": context.get("anomaly_threshold") if context else None
             }
-            
-            # Build explanations
+
             explanations = []
-            if "explanations" in result.metadata:
-                for exp in result.metadata["explanations"]:
-                    explanations.append({
-                        "anomaly_type": exp["type"],
-                        "description": exp["description"],
-                        "affected_regions": exp.get("affected_regions", []),
-                        "severity": exp["severity"],
-                        "confidence": exp["confidence"],
-                        "recommendations": exp.get("recommendations", [])
-                    })
+            explanation_text = result.get("explanation")
+            if explanation_text:
+                explanations.append({
+                    "description": explanation_text,
+                    "confidence": result.get("confidence", 0.0)
+                })
             
             response = {
-                "is_anomalous": result.metadata.get("is_anomalous", False),
+                "is_anomalous": result.get("is_anomaly", False),
                 "anomaly_score": anomaly_score,
+                "detector_scores": result.get("detector_scores", {}),
+                "context": result.get("context", {}),
                 "anomaly_explanations": explanations,
-                "processing_time_ms": processing_time
+                "processing_time_ms": result.get("processing_time", 0.0) * 1000
             }
-            
-            if result.metadata.get("baseline_comparison"):
-                response["baseline_comparison"] = result.metadata["baseline_comparison"]
-            
-            if result.metadata.get("trend_analysis"):
-                response["trend_analysis"] = result.metadata["trend_analysis"]
             
             self.logger.info(f"Anomaly detection completed in {processing_time:.2f}ms")
             return response
@@ -438,7 +400,7 @@ class AIEngineGRPCService:
             # Get AI Engine status
             engine_status = {}
             if self.ai_engine:
-                engine_status = await self.ai_engine.get_status()
+                engine_status = self.ai_engine.get_model_info()
             
             return {
                 "service_name": "CRONOS AI Engine gRPC",
@@ -481,8 +443,7 @@ class AIEngineGRPCService:
             if not self.ai_engine:
                 status = "unhealthy"
             else:
-                engine_status = await self.ai_engine.get_status()
-                if engine_status.get("status") != "ready":
+                if not getattr(self.ai_engine, "_initialized", False):
                     status = "degraded"
             
             return {
@@ -534,51 +495,21 @@ class AIEngineGRPCService:
                     
                     # Process based on operation type
                     if operation == 'discovery':
-                        # Create mock request for protocol discovery
-                        mock_request = type('obj', (object,), {
-                            'data': data_item,
-                            'data_format': 'base64',
-                            'expected_protocol': None,
-                            'confidence_threshold': 0.7,
-                            'max_samples': 1000,
-                            'include_grammar': False
-                        })()
-                        
-                        result = await self.DiscoverProtocol(mock_request, context)
+                        decoded = self._decode_data(data_item, 'base64')
+                        result = await self.ai_engine.discover_protocol(decoded)
                         
                     elif operation == 'detection':
-                        # Create mock request for field detection
-                        mock_request = type('obj', (object,), {
-                            'data': data_item,
-                            'data_format': 'base64',
-                            'protocol_hint': None,
-                            'detection_level': 'medium',
-                            'include_boundaries': True,
-                            'include_semantics': False,
-                            'max_fields': 100
-                        })()
-                        
-                        result = await self.DetectFields(mock_request, context)
+                        decoded = self._decode_data(data_item, 'base64')
+                        result = await self.ai_engine.detect_fields(decoded)
                         
                     elif operation == 'anomaly':
-                        # Create mock request for anomaly detection
-                        mock_request = type('obj', (object,), {
-                            'data': data_item,
-                            'data_format': 'base64',
-                            'baseline_data': None,
-                            'protocol_context': None,
-                            'sensitivity': 'medium',
-                            'anomaly_threshold': 0.5,
-                            'include_explanations': True
-                        })()
-                        
-                        result = await self.DetectAnomalies(mock_request, context)
+                        decoded = self._decode_data(data_item, 'base64')
+                        result = await self.ai_engine.detect_anomaly(decoded)
                     
                     else:
                         raise ValueError(f"Unknown operation: {operation}")
                     
                     processing_time = (time.time() - item_start_time) * 1000
-                    
                     results.append({
                         "item_index": i,
                         "success": True,

@@ -5,6 +5,7 @@ Authentication and authorization for Legacy System Whisperer API endpoints.
 """
 
 import jwt
+from jwt import ExpiredSignatureError, PyJWTError
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 from fastapi import HTTPException, Depends, Security
@@ -291,7 +292,7 @@ class LegacySystemAuth:
             
             return user
             
-        except jwt.ExpiredSignatureError:
+        except ExpiredSignatureError:
             logger.warning("Token expired")
             raise HTTPException(
                 status_code=HTTP_401_UNAUTHORIZED,

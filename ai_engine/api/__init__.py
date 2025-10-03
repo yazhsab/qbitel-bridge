@@ -30,12 +30,14 @@ from .schemas import (
     ModelType
 )
 from .auth import (
-    authenticate_request,
+    get_current_user,
     get_api_key,
     initialize_auth,
-    APIKeyManager,
-    JWTManager,
-    RateLimiter
+    require_permission,
+    require_role,
+    login,
+    refresh_access_token,
+    logout
 )
 from .middleware import (
     RateLimitMiddleware,
@@ -84,12 +86,14 @@ __all__ = [
     "ModelType",
     
     # Authentication
-    "authenticate_request",
+    "get_current_user",
     "get_api_key",
     "initialize_auth",
-    "APIKeyManager",
-    "JWTManager",
-    "RateLimiter",
+    "require_permission",
+    "require_role",
+    "login",
+    "refresh_access_token",
+    "logout",
     
     # Middleware
     "RateLimitMiddleware",

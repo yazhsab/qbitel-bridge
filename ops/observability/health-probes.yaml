@@ -1,0 +1,306 @@
+# CRONOS AI - Health Probe Configurations
+# Kubernetes liveness, readiness, and startup probes
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: health-probe-config
+  namespace: cronos-ai
+data:
+  # Liveness probe configuration
+  liveness-config.yaml: |
+    probes:
+      http:
+        path: /health/live
+        port: 8080
+        initial_delay_seconds: 30
+        period_seconds: 10
+        timeout_seconds: 5
+        success_threshold: 1
+        failure_threshold: 3
+      
+      tcp:
+        port: 8080
+        initial_delay_seconds: 15
+        period_seconds: 10
+        timeout_seconds: 3
+        failure_threshold: 3
+      
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "pgrep -f cronos-ai || exit 1"
+        initial_delay_seconds: 30
+        period_seconds: 10
+        timeout_seconds: 5
+        failure_threshold: 3
+  
+  # Readiness probe configuration
+  readiness-config.yaml: |
+    probes:
+      http:
+        path: /health/ready
+        port: 8080
+        initial_delay_seconds: 10
+        period_seconds: 5
+        timeout_seconds: 3
+        success_threshold: 1
+        failure_threshold: 3
+      
+      checks:
+        - name: database_connection
+          type: database
+          timeout: 2s
+          required: true
+        
+        - name: redis_connection
+          type: cache
+          timeout: 1s
+          required: true
+        
+        - name: external_api
+          type: http
+          url: https://api.external.com/health
+          timeout: 3s
+          required: false
+        
+        - name: message_queue
+          type: queue
+          timeout: 2s
+          required: true
+  
+  # Startup probe configuration
+  startup-config.yaml: |
+    probes:
+      http:
+        path: /health/startup
+        port: 8080
+        initial_delay_seconds: 0
+        period_seconds: 5
+        timeout_seconds: 3
+        success_threshold: 1
+        failure_threshold: 30  # Allow 150 seconds for startup
+      
+      checks:
+        - name: configuration_loaded
+          type: config
+          timeout: 5s
+        
+        - name: ml_models_loaded
+          type: ml_model
+          timeout: 30s
+        
+        - name: database_migrations
+          type: database
+          timeout: 60s
+        
+        - name: cache_warmed
+          type: cache
+          timeout: 10s
+
+---
+# Health Check Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: health-check-service
+  namespace: cronos-ai
+  labels:
+    app: cronos-ai
+    component: health
+spec:
+  type: ClusterIP
+  ports:
+    - name: health
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: cronos-ai
+
+---
+# Health Check Deployment with Probes
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cronos-ai-with-probes
+  namespace: cronos-ai
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cronos-ai
+  template:
+    metadata:
+      labels:
+        app: cronos-ai
+    spec:
+      containers:
+      - name: cronos-ai
+        image: cronos-ai:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        
+        # Startup Probe - Checks if application has started
+        startupProbe:
+          httpGet:
+            path: /health/startup
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 0
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 30  # 150 seconds max startup time
+        
+        # Liveness Probe - Checks if application is alive
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        
+        # Readiness Probe - Checks if application can serve traffic
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+        
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        
+        env:
+        - name: HEALTH_CHECK_ENABLED
+          value: "true"
+        - name: HEALTH_CHECK_PORT
+          value: "8080"
+
+---
+# ServiceMonitor for Prometheus
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cronos-ai-health-monitor
+  namespace: cronos-ai
+spec:
+  selector:
+    matchLabels:
+      app: cronos-ai
+  endpoints:
+  - port: health
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+
+---
+# PrometheusRule for Health Alerts
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cronos-ai-health-alerts
+  namespace: cronos-ai
+spec:
+  groups:
+  - name: health_checks
+    interval: 30s
+    rules:
+    - alert: HealthCheckFailing
+      expr: up{job="cronos-ai"} == 0
+      for: 2m
+      labels:
+        severity: critical
+        component: health
+      annotations:
+        summary: "Health check failing for {{ $labels.instance }}"
+        description: "Health check has been failing for more than 2 minutes"
+    
+    - alert: ReadinessCheckFailing
+      expr: cronos_ai_readiness_check{status="fail"} > 0
+      for: 5m
+      labels:
+        severity: warning
+        component: health
+      annotations:
+        summary: "Readiness check failing for {{ $labels.check_name }}"
+        description: "Readiness check {{ $labels.check_name }} has been failing"
+    
+    - alert: HighHealthCheckLatency
+      expr: cronos_ai_health_check_duration_seconds > 1
+      for: 5m
+      labels:
+        severity: warning
+        component: health
+      annotations:
+        summary: "High health check latency"
+        description: "Health check latency is above 1 second"
+    
+    - alert: FrequentRestarts
+      expr: rate(kube_pod_container_status_restarts_total{namespace="cronos-ai"}[15m]) > 0.1
+      for: 5m
+      labels:
+        severity: warning
+        component: health
+      annotations:
+        summary: "Frequent pod restarts detected"
+        description: "Pod {{ $labels.pod }} is restarting frequently"
+
+---
+# PodDisruptionBudget
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cronos-ai-pdb
+  namespace: cronos-ai
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: cronos-ai
+
+---
+# NetworkPolicy for Health Checks
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-health-checks
+  namespace: cronos-ai
+spec:
+  podSelector:
+    matchLabels:
+      app: cronos-ai
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 8080
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 8080

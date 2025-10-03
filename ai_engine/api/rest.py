@@ -5,6 +5,8 @@ Extended FastAPI implementation with LLM-enhanced protocol analysis capabilities
 
 import asyncio
 import logging
+import time
+import uuid
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
@@ -17,7 +19,10 @@ import uvicorn
 from ..core.config import Config, get_config
 from ..core.engine import CronosAIEngine
 from ..copilot.protocol_copilot import create_protocol_copilot, ProtocolIntelligenceCopilot
+from ..llm.rag_engine import RAGDocument
 from .copilot_endpoints import router as copilot_router
+from .translation_studio_endpoints import router as translation_router
+from .security_orchestrator_endpoints import router as security_router
 from .auth import get_current_user, verify_token
 from .middleware import setup_middleware
 from .schemas import *
@@ -27,6 +32,7 @@ logger = logging.getLogger(__name__)
 # Global instances
 _ai_engine: Optional[CronosAIEngine] = None
 _protocol_copilot: Optional[ProtocolIntelligenceCopilot] = None
+_metrics_collector: Optional['MetricsCollector'] = None
 
 def create_app(config: Config = None) -> FastAPI:
     """Create and configure the FastAPI application with Protocol Intelligence Copilot."""
@@ -42,13 +48,23 @@ def create_app(config: Config = None) -> FastAPI:
         redoc_url="/redoc" if config.debug else None,
     )
     
-    # Setup CORS
+    # Setup CORS with safe defaults that respect configured origins
+    security_cfg = getattr(config, 'security', None)
+    raw_cors = getattr(security_cfg, 'cors_origins', ['*'])
+    if isinstance(raw_cors, (list, tuple, set)):
+        cors_origins = list(raw_cors)
+    elif raw_cors:
+        cors_origins = [str(raw_cors)]
+    else:
+        cors_origins = ['*']
+    allow_credentials = '*' not in cors_origins
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # Configure appropriately for production
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_origins=cors_origins,
+        allow_credentials=allow_credentials,
+        allow_methods=['*'],
+        allow_headers=['*'],
     )
     
     # Setup additional middleware
@@ -56,6 +72,8 @@ def create_app(config: Config = None) -> FastAPI:
     
     # Include routers
     app.include_router(copilot_router)
+    app.include_router(translation_router)
+    app.include_router(security_router)
     
     # Enhanced API endpoints
     @app.get("/")
@@ -134,11 +152,16 @@ def create_app(config: Config = None) -> FastAPI:
             raise HTTPException(status_code=503, detail="AI Engine not initialized")
         
         try:
-            # Traditional protocol discovery
+            start_time = time.time()
+
             result = await _ai_engine.discover_protocol(
                 request.packet_data,
                 request.metadata
             )
+
+            processing_time = result.get("processing_time")
+            if processing_time is None:
+                processing_time = time.time() - start_time
             
             # Enhance with LLM analysis if copilot is available
             enhanced_analysis = None
@@ -167,7 +190,12 @@ def create_app(config: Config = None) -> FastAPI:
             
             # Combine results
             enhanced_result = {
-                **result,
+                "protocol_type": result.get("protocol_type", "unknown"),
+                "confidence": result.get("confidence", 0.0),
+                "structure": result.get("structure", {}),
+                "grammar": result.get("grammar"),
+                "metadata": result.get("metadata", request.metadata or {}),
+                "processing_time": processing_time,
                 "enhanced_analysis": enhanced_analysis,
                 "llm_enabled": _protocol_copilot is not None
             }
@@ -198,11 +226,13 @@ def create_app(config: Config = None) -> FastAPI:
             raise HTTPException(status_code=503, detail="AI Engine not initialized")
         
         try:
-            # Traditional field detection
+            start_time = time.time()
             fields = await _ai_engine.detect_fields(
                 request.message_data,
                 request.protocol_type
             )
+
+            processing_time = time.time() - start_time
             
             # Enhance with LLM interpretation
             llm_interpretation = None
@@ -227,10 +257,23 @@ def create_app(config: Config = None) -> FastAPI:
                 except Exception as e:
                     logger.warning(f"LLM field interpretation failed: {e}")
             
+            normalized_fields: List[Dict[str, Any]] = []
+            for field in fields:
+                normalized_fields.append({
+                    "field_id": field.get("id"),
+                    "field_name": field.get("name", ""),
+                    "start_offset": field.get("start"),
+                    "end_offset": field.get("end"),
+                    "field_type": field.get("type", "unknown"),
+                    "confidence": field.get("confidence"),
+                    "examples": field.get("examples", [])
+                })
+
             return {
-                "fields": fields,
+                "detected_fields": normalized_fields,
+                "total_fields": len(normalized_fields),
                 "llm_interpretation": llm_interpretation,
-                "processing_time": 0.1  # Placeholder
+                "processing_time": processing_time
             }
             
         except Exception as e:
@@ -240,20 +283,40 @@ def create_app(config: Config = None) -> FastAPI:
     # Startup and shutdown events
     @app.on_event("startup")
     async def startup():
-        """Initialize AI Engine and Protocol Copilot."""
-        global _ai_engine, _protocol_copilot
+        """Initialize AI Engine, Protocol Copilot, Translation Studio, and Security Orchestrator."""
+        global _ai_engine, _protocol_copilot, _metrics_collector
         
         try:
-            logger.info("Starting CRONOS AI Engine with Protocol Intelligence Copilot...")
+            logger.info("Starting CRONOS AI Engine with all services...")
             
             # Initialize AI Engine
             _ai_engine = CronosAIEngine(config)
             await _ai_engine.initialize()
             
+            # Initialize LLM Service and set as global singleton
+            from ..llm.unified_llm_service import initialize_llm_service
+            llm_service = await initialize_llm_service(config)
+            
             # Initialize Protocol Copilot
             _protocol_copilot = await create_protocol_copilot()
             
-            logger.info("CRONOS AI Engine with Protocol Copilot started successfully")
+            # Initialize Translation Studio
+            from ..llm.translation_studio import initialize_translation_studio
+            from ..monitoring.metrics import MetricsCollector
+            _metrics_collector = MetricsCollector(config)
+            await _metrics_collector.start()  # Start metrics collection
+            await initialize_translation_studio(config, llm_service, _metrics_collector)
+            
+            # Initialize Security Orchestrator
+            from ..llm.security_orchestrator import initialize_security_orchestrator
+            from ..monitoring.alerts import initialize_alert_manager
+            from ..policy.policy_engine import get_policy_engine
+            
+            alert_manager = await initialize_alert_manager(config)
+            policy_engine = get_policy_engine()
+            await initialize_security_orchestrator(config, llm_service, alert_manager, policy_engine)
+            
+            logger.info("CRONOS AI Engine with all services started successfully")
             
         except Exception as e:
             logger.error(f"Failed to start services: {e}")
@@ -262,14 +325,37 @@ def create_app(config: Config = None) -> FastAPI:
     @app.on_event("shutdown")
     async def shutdown():
         """Shutdown services gracefully."""
-        global _ai_engine, _protocol_copilot
+        global _ai_engine, _protocol_copilot, _metrics_collector
         
         try:
-            logger.info("Shutting down CRONOS AI Engine and Protocol Copilot...")
+            logger.info("Shutting down CRONOS AI Engine and all services...")
             
+            # Shutdown Translation Studio
+            from ..llm.translation_studio import shutdown_translation_studio
+            await shutdown_translation_studio()
+            
+            # Shutdown Security Orchestrator
+            from ..llm.security_orchestrator import shutdown_security_orchestrator
+            await shutdown_security_orchestrator()
+            
+            # Shutdown Alert Manager
+            from ..monitoring.alerts import shutdown_alert_manager
+            await shutdown_alert_manager()
+            
+            # Shutdown Protocol Copilot
             if _protocol_copilot:
                 await _protocol_copilot.shutdown()
             
+            # Shutdown LLM Service using proper lifecycle management
+            from ..llm.unified_llm_service import shutdown_llm_service
+            await shutdown_llm_service()
+            
+            # Shutdown Metrics Collector
+            if _metrics_collector:
+                await _metrics_collector.shutdown()
+                logger.info("Metrics collector shutdown complete")
+            
+            # Shutdown AI Engine
             if _ai_engine:
                 await _ai_engine.shutdown()
                 
@@ -302,19 +388,20 @@ async def update_knowledge_base(result: Dict[str, Any], packet_data: bytes):
         global _protocol_copilot
         
         if _protocol_copilot and result.get('confidence', 0) > 0.8:
-            # Update knowledge base with high-confidence discoveries
+            discovery_doc = RAGDocument(
+                id=f"protocol-{result['protocol_type']}-{uuid.uuid4().hex}",
+                content=f"Discovered {result['protocol_type']} protocol with {result['confidence']} confidence",
+                metadata={
+                    'protocol': result['protocol_type'],
+                    'confidence': result['confidence'],
+                    'discovery_time': datetime.utcnow().isoformat()
+                },
+                created_at=datetime.utcnow()
+            )
+
             await _protocol_copilot.rag_engine.add_documents(
                 'protocol_knowledge',
-                [
-                    {
-                        'content': f"Discovered {result['protocol_type']} protocol with {result['confidence']} confidence",
-                        'metadata': {
-                            'protocol': result['protocol_type'],
-                            'confidence': result['confidence'],
-                            'discovery_time': datetime.now().isoformat()
-                        }
-                    }
-                ]
+                [discovery_doc]
             )
             
     except Exception as e:

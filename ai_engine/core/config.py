@@ -11,8 +11,11 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 from pathlib import Path
 from enum import Enum
+import logging
 
 from .exceptions import ConfigurationException
+
+logger = logging.getLogger(__name__)
 
 
 class Environment(str, Enum):
@@ -34,27 +37,144 @@ class LogLevel(str, Enum):
 
 @dataclass
 class DatabaseConfig:
-    """Database configuration."""
+    """Database configuration with production-ready validation."""
     host: str = "localhost"
     port: int = 5432
     database: str = "cronos_ai"
     username: str = "cronos"
-    password: str = "cronos123"
+    password: str = ""  # MUST be set via environment variable or secrets manager
     pool_size: int = 10
     max_overflow: int = 20
     pool_timeout: int = 30
     pool_recycle: int = 3600
     echo: bool = False
     
+    # Validation constants
+    MIN_PASSWORD_LENGTH: int = 16
+    WEAK_PATTERNS: List[str] = field(default_factory=lambda: [
+        'password', 'admin', 'test', 'demo', '123456', 'qwerty',
+        'letmein', 'welcome', 'monkey', 'dragon'
+    ])
+    
+    def __post_init__(self):
+        """Load password from environment with comprehensive validation."""
+        if not self.password:
+            # Try environment variables in priority order
+            self.password = (
+                os.getenv('CRONOS_AI_DB_PASSWORD') or
+                os.getenv('DATABASE_PASSWORD') or
+                ''
+            )
+            
+            if not self.password:
+                error_msg = (
+                    "Database password not configured!\n"
+                    "REQUIRED: Set one of the following environment variables:\n"
+                    "  - CRONOS_AI_DB_PASSWORD (recommended)\n"
+                    "  - DATABASE_PASSWORD\n\n"
+                    "Security Requirements:\n"
+                    f"  - Minimum length: {self.MIN_PASSWORD_LENGTH} characters\n"
+                    "  - No common weak patterns\n"
+                    "  - Use strong, randomly generated passwords\n\n"
+                    "Generate a secure password:\n"
+                    "  python -c \"import secrets; print(secrets.token_urlsafe(32))\""
+                )
+                
+                # In production, this should be a hard error
+                if self._is_production_mode():
+                    raise ConfigurationException(error_msg)
+                else:
+                    logger.warning(error_msg)
+        
+        # Validate password if set
+        if self.password:
+            self._validate_password()
+    
+    def _is_production_mode(self) -> bool:
+        """Check if running in production mode."""
+        env = os.getenv('CRONOS_AI_ENVIRONMENT', os.getenv('ENVIRONMENT', 'development')).lower()
+        return env in ('production', 'prod')
+    
+    def _validate_password(self) -> None:
+        """Validate password meets security requirements."""
+        errors = []
+        
+        # Check minimum length
+        if len(self.password) < self.MIN_PASSWORD_LENGTH:
+            errors.append(
+                f"Password too short: {len(self.password)} characters "
+                f"(minimum: {self.MIN_PASSWORD_LENGTH})"
+            )
+        
+        # Check for weak patterns
+        password_lower = self.password.lower()
+        found_patterns = [p for p in self.WEAK_PATTERNS if p in password_lower]
+        if found_patterns:
+            errors.append(
+                f"Password contains weak patterns: {', '.join(found_patterns)}"
+            )
+        
+        # Check for sequential characters
+        if self._has_sequential_chars(self.password):
+            errors.append("Password contains sequential characters (e.g., '123', 'abc')")
+        
+        # Check for repeated characters
+        if self._has_repeated_chars(self.password):
+            errors.append("Password contains too many repeated characters")
+        
+        if errors:
+            error_msg = (
+                "Database password validation failed:\n" +
+                "\n".join(f"  - {error}" for error in errors) +
+                "\n\nRemediation:\n"
+                "  1. Generate a strong password:\n"
+                "     python -c \"import secrets; print(secrets.token_urlsafe(32))\"\n"
+                "  2. Set the environment variable:\n"
+                "     export CRONOS_AI_DB_PASSWORD='<generated_password>'\n"
+                "  3. Store securely in your secrets manager"
+            )
+            
+            if self._is_production_mode():
+                raise ConfigurationException(error_msg)
+            else:
+                logger.warning(error_msg)
+    
+    def _has_sequential_chars(self, password: str, min_length: int = 3) -> bool:
+        """Check for sequential characters."""
+        for i in range(len(password) - min_length + 1):
+            substr = password[i:i + min_length]
+            # Check numeric sequences
+            if substr.isdigit():
+                nums = [int(c) for c in substr]
+                if all(nums[j] + 1 == nums[j + 1] for j in range(len(nums) - 1)):
+                    return True
+            # Check alphabetic sequences
+            if substr.isalpha():
+                chars = [ord(c.lower()) for c in substr]
+                if all(chars[j] + 1 == chars[j + 1] for j in range(len(chars) - 1)):
+                    return True
+        return False
+    
+    def _has_repeated_chars(self, password: str, max_repeats: int = 3) -> bool:
+        """Check for repeated characters."""
+        for i in range(len(password) - max_repeats + 1):
+            if len(set(password[i:i + max_repeats])) == 1:
+                return True
+        return False
+    
     @property
     def url(self) -> str:
         """Get database URL."""
+        if not self.password:
+            raise ConfigurationException(
+                "Database password not configured. Set CRONOS_AI_DB_PASSWORD environment variable."
+            )
         return f"postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
 
 @dataclass
 class RedisConfig:
-    """Redis configuration."""
+    """Redis configuration with production-ready validation."""
     host: str = "localhost"
     port: int = 6379
     password: Optional[str] = None
@@ -63,6 +183,90 @@ class RedisConfig:
     socket_timeout: int = 30
     socket_connect_timeout: int = 30
     decode_responses: bool = True
+    
+    # Validation constants
+    MIN_PASSWORD_LENGTH: int = 16
+    WEAK_PATTERNS: List[str] = field(default_factory=lambda: [
+        'password', 'admin', 'test', 'demo', '123456', 'redis',
+        'cache', 'letmein', 'welcome'
+    ])
+    
+    def __post_init__(self):
+        """Load password from environment with comprehensive validation."""
+        if not self.password:
+            # Try environment variables in priority order
+            self.password = (
+                os.getenv('CRONOS_AI_REDIS_PASSWORD') or
+                os.getenv('REDIS_PASSWORD')
+            )
+            
+            # In production, Redis MUST have authentication
+            if not self.password and self._is_production_mode():
+                error_msg = (
+                    "Redis password not configured in PRODUCTION mode!\n"
+                    "REQUIRED: Set one of the following environment variables:\n"
+                    "  - CRONOS_AI_REDIS_PASSWORD (recommended)\n"
+                    "  - REDIS_PASSWORD\n\n"
+                    "Security Requirements:\n"
+                    f"  - Minimum length: {self.MIN_PASSWORD_LENGTH} characters\n"
+                    "  - No common weak patterns\n"
+                    "  - Use strong, randomly generated passwords\n\n"
+                    "Generate a secure password:\n"
+                    "  python -c \"import secrets; print(secrets.token_urlsafe(32))\"\n\n"
+                    "WARNING: Running Redis without authentication in production is a CRITICAL security risk!"
+                )
+                raise ConfigurationException(error_msg)
+            elif not self.password:
+                logger.warning(
+                    "Redis password not set. This is acceptable for development but "
+                    "REQUIRED for production. Set CRONOS_AI_REDIS_PASSWORD environment variable."
+                )
+        
+        # Validate password if set
+        if self.password:
+            self._validate_password()
+    
+    def _is_production_mode(self) -> bool:
+        """Check if running in production mode."""
+        env = os.getenv('CRONOS_AI_ENVIRONMENT', os.getenv('ENVIRONMENT', 'development')).lower()
+        return env in ('production', 'prod')
+    
+    def _validate_password(self) -> None:
+        """Validate password meets security requirements."""
+        errors = []
+        
+        # Check minimum length
+        if len(self.password) < self.MIN_PASSWORD_LENGTH:
+            errors.append(
+                f"Password too short: {len(self.password)} characters "
+                f"(minimum: {self.MIN_PASSWORD_LENGTH})"
+            )
+        
+        # Check for weak patterns
+        password_lower = self.password.lower()
+        found_patterns = [p for p in self.WEAK_PATTERNS if p in password_lower]
+        if found_patterns:
+            errors.append(
+                f"Password contains weak patterns: {', '.join(found_patterns)}"
+            )
+        
+        if errors:
+            error_msg = (
+                "Redis password validation failed:\n" +
+                "\n".join(f"  - {error}" for error in errors) +
+                "\n\nRemediation:\n"
+                "  1. Generate a strong password:\n"
+                "     python -c \"import secrets; print(secrets.token_urlsafe(32))\"\n"
+                "  2. Set the environment variable:\n"
+                "     export CRONOS_AI_REDIS_PASSWORD='<generated_password>'\n"
+                "  3. Update Redis configuration to require authentication:\n"
+                "     requirepass <generated_password>"
+            )
+            
+            if self._is_production_mode():
+                raise ConfigurationException(error_msg)
+            else:
+                logger.warning(error_msg)
     
     @property
     def url(self) -> str:
@@ -195,11 +399,12 @@ class MonitoringConfig:
 
 @dataclass
 class SecurityConfig:
-    """Security configuration."""
+    """Security configuration with production-ready validation."""
     enable_encryption: bool = True
     encryption_key: Optional[str] = None
     jwt_secret: Optional[str] = None
     jwt_expiry_hours: int = 24
+    api_key: Optional[str] = None
     
     # API Security
     enable_rate_limiting: bool = True
@@ -211,6 +416,286 @@ class SecurityConfig:
     sign_models: bool = True
     verify_model_signatures: bool = True
     model_encryption: bool = False
+    
+    # Validation constants
+    MIN_SECRET_LENGTH: int = 32
+    MIN_API_KEY_LENGTH: int = 32
+    WEAK_PATTERNS: List[str] = field(default_factory=lambda: [
+        'secret', 'password', 'admin', 'test', 'demo', '123456',
+        'key', 'token', 'letmein', 'welcome', 'changeme'
+    ])
+    
+    def __post_init__(self):
+        """Load secrets from secrets manager or environment with comprehensive validation."""
+        # Try to load from secrets manager first
+        self._load_from_secrets_manager()
+        
+        # Load JWT secret
+        if not self.jwt_secret:
+            self.jwt_secret = (
+                os.getenv('CRONOS_AI_JWT_SECRET') or
+                os.getenv('JWT_SECRET')
+            )
+            
+            if not self.jwt_secret:
+                error_msg = (
+                    "JWT secret not configured!\n"
+                    "REQUIRED: Configure in secrets manager (Vault/AWS/Azure) or set environment variable:\n"
+                    "  - CRONOS_AI_JWT_SECRET (recommended)\n"
+                    "  - JWT_SECRET\n\n"
+                    "Security Requirements:\n"
+                    f"  - Minimum length: {self.MIN_SECRET_LENGTH} characters\n"
+                    "  - No common weak patterns\n"
+                    "  - Use cryptographically secure random generation\n\n"
+                    "Generate a secure JWT secret:\n"
+                    "  python -c \"import secrets; print(secrets.token_urlsafe(48))\"\n\n"
+                    "WARNING: Without a JWT secret, authentication tokens will not persist across restarts!"
+                )
+                
+                if self._is_production_mode():
+                    raise ConfigurationException(error_msg)
+                else:
+                    logger.warning(error_msg)
+        
+        # Load encryption key
+        if not self.encryption_key:
+            self.encryption_key = (
+                os.getenv('CRONOS_AI_ENCRYPTION_KEY') or
+                os.getenv('ENCRYPTION_KEY')
+            )
+            
+            if not self.encryption_key and self.enable_encryption:
+                error_msg = (
+                    "Encryption key not configured but encryption is enabled!\n"
+                    "REQUIRED: Configure in secrets manager (Vault/AWS/Azure) or set environment variable:\n"
+                    "  - CRONOS_AI_ENCRYPTION_KEY (recommended)\n"
+                    "  - ENCRYPTION_KEY\n\n"
+                    "Security Requirements:\n"
+                    f"  - Minimum length: {self.MIN_SECRET_LENGTH} characters\n"
+                    "  - Must be base64-encoded 256-bit key\n"
+                    "  - Use cryptographically secure random generation\n\n"
+                    "Generate a secure encryption key:\n"
+                    "  python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\"\n\n"
+                    "WARNING: Data encryption will fail without a valid encryption key!"
+                )
+                
+                if self._is_production_mode():
+                    raise ConfigurationException(error_msg)
+                else:
+                    logger.warning(error_msg)
+        
+        # Load API key
+        if not self.api_key:
+            self.api_key = (
+                os.getenv('CRONOS_AI_API_KEY') or
+                os.getenv('API_KEY')
+            )
+            
+            if not self.api_key and self._is_production_mode():
+                logger.warning(
+                    "API key not configured. Set CRONOS_AI_API_KEY environment variable "
+                    "or configure in secrets manager for API authentication."
+                )
+        
+        # Validate all secrets
+        if self.jwt_secret:
+            self._validate_secret('JWT secret', self.jwt_secret)
+        if self.encryption_key:
+            self._validate_secret('Encryption key', self.encryption_key)
+        if self.api_key:
+            self._validate_api_key()
+        
+        # Validate CORS configuration in production
+        if self._is_production_mode() and "*" in self.cors_origins:
+            raise ConfigurationException(
+                "CORS wildcard (*) is FORBIDDEN in production mode!\n"
+                "Security Requirement:\n"
+                "  - Specify explicit allowed origins\n"
+                "  - Example: ['https://app.example.com', 'https://dashboard.example.com']\n\n"
+                "Remediation:\n"
+                "  1. Update cors_origins in your configuration\n"
+                "  2. Remove '*' and add specific domain names\n"
+                "  3. Use HTTPS URLs only in production\n\n"
+                "WARNING: CORS wildcard allows any origin to access your API, "
+                "creating a critical security vulnerability!"
+            )
+    
+    def _load_from_secrets_manager(self):
+        """Load secrets from secrets manager if available."""
+        try:
+            # Avoid circular import
+            from ..security.secrets_manager import get_secrets_manager
+            
+            secrets_mgr = get_secrets_manager()
+            
+            # Try to load JWT secret
+            if not self.jwt_secret:
+                jwt_secret = secrets_mgr.get_secret('jwt_secret')
+                if jwt_secret:
+                    self.jwt_secret = jwt_secret
+                    logger.info("JWT secret loaded from secrets manager")
+            
+            # Try to load encryption key
+            if not self.encryption_key:
+                encryption_key = secrets_mgr.get_secret('encryption_key')
+                if encryption_key:
+                    self.encryption_key = encryption_key
+                    logger.info("Encryption key loaded from secrets manager")
+            
+            # Try to load API key
+            if not self.api_key:
+                api_key = secrets_mgr.get_secret('api_key')
+                if api_key:
+                    self.api_key = api_key
+                    logger.info("API key loaded from secrets manager")
+                    
+        except Exception as e:
+            logger.debug(f"Could not load secrets from secrets manager: {e}")
+    
+    def _is_production_mode(self) -> bool:
+        """Check if running in production mode."""
+        env = os.getenv('CRONOS_AI_ENVIRONMENT', os.getenv('ENVIRONMENT', 'development')).lower()
+        return env in ('production', 'prod')
+    
+    def _validate_secret(self, secret_name: str, secret_value: str) -> None:
+        """Validate secret meets security requirements."""
+        errors = []
+        
+        # Check minimum length
+        if len(secret_value) < self.MIN_SECRET_LENGTH:
+            errors.append(
+                f"{secret_name} too short: {len(secret_value)} characters "
+                f"(minimum: {self.MIN_SECRET_LENGTH})"
+            )
+        
+        # Check for weak patterns
+        secret_lower = secret_value.lower()
+        found_patterns = [p for p in self.WEAK_PATTERNS if p in secret_lower]
+        if found_patterns:
+            errors.append(
+                f"{secret_name} contains weak patterns: {', '.join(found_patterns)}"
+            )
+        
+        # Check entropy (basic check)
+        if len(set(secret_value)) < len(secret_value) * 0.5:
+            errors.append(
+                f"{secret_name} has low entropy (too many repeated characters)"
+            )
+        
+        # Check for sequential characters
+        if self._has_sequential_chars(secret_value):
+            errors.append(f"{secret_name} contains sequential characters")
+        
+        if errors:
+            error_msg = (
+                f"{secret_name} validation failed:\n" +
+                "\n".join(f"  - {error}" for error in errors) +
+                "\n\nRemediation:\n"
+                "  1. Generate a cryptographically secure secret:\n"
+                "     python -c \"import secrets; print(secrets.token_urlsafe(48))\"\n"
+                "  2. Set the appropriate environment variable:\n"
+                f"     export CRONOS_AI_{secret_name.upper().replace(' ', '_')}='<generated_secret>'\n"
+                "  3. Store securely in your secrets manager\n"
+                "  4. Never commit secrets to version control"
+            )
+            
+            if self._is_production_mode():
+                raise ConfigurationException(error_msg)
+            else:
+                logger.warning(error_msg)
+    
+    def _validate_api_key(self) -> None:
+        """Validate API key meets security requirements."""
+        errors = []
+        
+        # Check minimum length
+        if len(self.api_key) < self.MIN_API_KEY_LENGTH:
+            errors.append(
+                f"API key too short: {len(self.api_key)} characters "
+                f"(minimum: {self.MIN_API_KEY_LENGTH})"
+            )
+        
+        # Check format (should be alphanumeric with special chars)
+        if not any(c.isdigit() for c in self.api_key):
+            errors.append("API key should contain digits")
+        if not any(c.isalpha() for c in self.api_key):
+            errors.append("API key should contain letters")
+        
+        # Check for weak patterns
+        api_key_lower = self.api_key.lower()
+        found_patterns = [p for p in self.WEAK_PATTERNS if p in api_key_lower]
+        if found_patterns:
+            errors.append(
+                f"API key contains weak patterns: {', '.join(found_patterns)}"
+            )
+        
+        if errors:
+            error_msg = (
+                "API key validation failed:\n" +
+                "\n".join(f"  - {error}" for error in errors) +
+                "\n\nRemediation:\n"
+                "  1. Generate a secure API key:\n"
+                "     python -c \"import secrets; print('cronos_' + secrets.token_urlsafe(32))\"\n"
+                "  2. Set the environment variable:\n"
+                "     export CRONOS_AI_API_KEY='<generated_key>'\n"
+                "  3. Implement API key rotation policy\n"
+                "  4. Monitor API key usage for anomalies"
+            )
+            
+            if self._is_production_mode():
+                raise ConfigurationException(error_msg)
+            else:
+                logger.warning(error_msg)
+    
+    def _has_sequential_chars(self, value: str, min_length: int = 4) -> bool:
+        """Check for sequential characters."""
+        for i in range(len(value) - min_length + 1):
+            substr = value[i:i + min_length]
+            # Check numeric sequences
+            if substr.isdigit():
+                nums = [int(c) for c in substr]
+                if all(nums[j] + 1 == nums[j + 1] for j in range(len(nums) - 1)):
+                    return True
+            # Check alphabetic sequences
+            if substr.isalpha():
+                chars = [ord(c.lower()) for c in substr]
+                if all(chars[j] + 1 == chars[j + 1] for j in range(len(chars) - 1)):
+                    return True
+        return False
+    
+    def validate(self) -> None:
+        """Validate security configuration."""
+        errors = []
+        
+        # Validate JWT secret strength
+        if self.jwt_secret and len(self.jwt_secret) < self.MIN_SECRET_LENGTH:
+            errors.append(f"JWT secret must be at least {self.MIN_SECRET_LENGTH} characters long")
+        
+        # Validate encryption key
+        if self.encryption_key and len(self.encryption_key) < self.MIN_SECRET_LENGTH:
+            errors.append(f"Encryption key must be at least {self.MIN_SECRET_LENGTH} characters long")
+        
+        # Validate API key
+        if self.api_key and len(self.api_key) < self.MIN_API_KEY_LENGTH:
+            errors.append(f"API key must be at least {self.MIN_API_KEY_LENGTH} characters long")
+        
+        # Production-specific validations
+        if self._is_production_mode():
+            if not self.jwt_secret:
+                errors.append("JWT secret is REQUIRED in production mode")
+            if self.enable_encryption and not self.encryption_key:
+                errors.append("Encryption key is REQUIRED when encryption is enabled in production")
+            if "*" in self.cors_origins:
+                errors.append(
+                    "CORS wildcard (*) is FORBIDDEN in production mode. "
+                    "Specify explicit allowed origins for security."
+                )
+        
+        if errors:
+            raise ConfigurationException(
+                f"Security configuration validation failed:\n" +
+                "\n".join(f"  - {error}" for error in errors)
+            )
 
 
 @dataclass
@@ -247,6 +732,8 @@ class Config:
     field_detection_enabled: bool = True
     field_detection_max_fields: int = 100
     field_detection_confidence_threshold: float = 0.8
+    # Feature flag for ML-based field type classifier (scaffold code)
+    field_detection_ml_classifier_enabled: bool = False
     
     # Anomaly Detection specific
     anomaly_detection_enabled: bool = True
@@ -264,6 +751,16 @@ class Config:
     compliance_timescaledb_integration: bool = True
     compliance_redis_integration: bool = True
     compliance_security_integration: bool = True
+    
+    # Translation Studio specific
+    translation_studio_enabled: bool = True
+    # Feature flag for processing step implementations (scaffold code)
+    translation_studio_processing_steps_enabled: bool = False
+    
+    # Security Orchestrator specific
+    security_orchestrator_enabled: bool = True
+    # Feature flag for action implementations (scaffold code)
+    security_orchestrator_actions_enabled: bool = False
     
     @classmethod
     def load_from_file(cls, config_path: Union[str, Path]) -> "Config":

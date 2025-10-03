@@ -15,19 +15,22 @@ from pathlib import Path
 import uuid
 from datetime import datetime, timezone
 
-from ..models import (
+from ai_engine.translation.models import (
     ProtocolSchema,
     APISpecification,
+    APIEndpoint,
     GeneratedSDK,
     TranslationRequest,
-    TranslationResult,
     CodeLanguage,
     APIStyle,
     SecurityLevel,
-    FieldType
+    FieldType,
+    TranslationMode,
+    QualityLevel,
 )
-from ..exceptions import ErrorContext, create_error_context
-from ..logging import LogContext, LogComponent, LogOperation
+from ai_engine.translation.models import TranslationResult
+from ai_engine.translation.exceptions import ErrorContext, create_error_context
+from ai_engine.translation.logging import LogContext, LogComponent, LogOperation
 
 
 @pytest.fixture
@@ -133,28 +136,61 @@ def sample_protocol_schema():
 def sample_api_specification():
     """Sample API specification for testing."""
     return APISpecification(
-        spec_id=str(uuid.uuid4()),
         title="Test Protocol API",
         version="1.0.0",
         description="API generated from test protocol",
         base_url="https://api.test.com",
-        style=APIStyle.REST,
+        api_style=APIStyle.REST,
         security_level=SecurityLevel.AUTHENTICATED,
         endpoints=[
-            {
-                'path': '/messages',
-                'method': 'POST',
-                'operation_id': 'send_message',
-                'summary': 'Send a new message',
-                'description': 'Send a message using the test protocol'
-            },
-            {
-                'path': '/messages/{id}',
-                'method': 'GET',
-                'operation_id': 'get_message',
-                'summary': 'Get message by ID',
-                'description': 'Retrieve a specific message'
-            }
+            APIEndpoint(
+                path='/messages',
+                method='POST',
+                summary='Send a new message',
+                description='Send a message using the test protocol',
+                request_body={
+                    "required": True,
+                    "content": {
+                        "application/json": {
+                            "schema": {"$ref": '#/components/schemas/Message'}
+                        }
+                    }
+                },
+                responses={
+                    "201": {
+                        "description": "Message created",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": '#/components/schemas/Message'}
+                            }
+                        }
+                    }
+                }
+            ),
+            APIEndpoint(
+                path='/messages/{id}',
+                method='GET',
+                summary='Get message by ID',
+                description='Retrieve a specific message',
+                parameters=[
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": True,
+                        "schema": {"type": "string"}
+                    }
+                ],
+                responses={
+                    "200": {
+                        "description": "Message details",
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": '#/components/schemas/Message'}
+                            }
+                        }
+                    }
+                }
+            )
         ],
         schemas={
             'Message': {
@@ -167,7 +203,8 @@ def sample_api_specification():
                 },
                 'required': ['message_type', 'payload']
             }
-        }
+        },
+        extensions={}
     )
 
 
@@ -477,7 +514,7 @@ def base64_encoded_messages():
 def api_test_client():
     """Test client for API endpoints."""
     from fastapi.testclient import TestClient
-    from ..api_endpoints import router
+    from ai_engine.translation.api_endpoints import router
     
     # Create a test app with the translation router
     from fastapi import FastAPI

@@ -17,11 +17,26 @@ from contextlib import contextmanager
 import prometheus_client
 from prometheus_client import Counter, Histogram, Gauge, Summary, Info
 from prometheus_client.core import CollectorRegistry
-import psutil
-import torch
+
+try:  # Optional dependency for system metrics
+    import psutil  # type: ignore
+except ImportError:  # pragma: no cover - environment dependent
+    psutil = None  # type: ignore[assignment]
+
+try:  # Optional dependency for GPU metrics
+    import torch  # type: ignore
+except ImportError:  # pragma: no cover - environment dependent
+    torch = None  # type: ignore[assignment]
 
 from ..core.config import Config
-from ..core.exceptions import MonitoringException
+
+try:  # Optional custom exception
+    from ..core.exceptions import MonitoringException
+except ImportError:  # pragma: no cover - fallback when symbol missing
+    class MonitoringException(Exception):
+        """Fallback monitoring exception used when core definition is unavailable."""
+
+        pass
 
 
 class MetricType(str, Enum):
@@ -73,6 +88,11 @@ class MetricsCollector:
         self._stop_collection = asyncio.Event()
         
         self.logger.info("MetricsCollector initialized")
+
+    async def initialize(self) -> None:
+        """Maintain compatibility with call sites expecting initialize."""
+        await self.start()
+
     
     def register_metric(self, metric_config: MetricConfig, metric_type: MetricType) -> Any:
         """Register a new metric."""
@@ -181,6 +201,11 @@ class MetricsCollector:
             duration = time.time() - start_time
             self.observe_histogram(metric_name, duration, labels)
     
+    async def start(self) -> None:
+        """Start metrics collector and background collection."""
+        await self.start_collection()
+        self.logger.info("MetricsCollector started")
+    
     async def start_collection(self) -> None:
         """Start background metrics collection."""
         if self._collection_task:
@@ -189,6 +214,11 @@ class MetricsCollector:
         
         self._collection_task = asyncio.create_task(self._collection_loop())
         self.logger.info("Started background metrics collection")
+    
+    async def shutdown(self) -> None:
+        """Shutdown metrics collector."""
+        await self.stop_collection()
+        self.logger.info("MetricsCollector shutdown complete")
     
     async def stop_collection(self) -> None:
         """Stop background metrics collection."""
@@ -200,7 +230,12 @@ class MetricsCollector:
         try:
             await asyncio.wait_for(self._collection_task, timeout=5.0)
         except asyncio.TimeoutError:
+            self.logger.warning("Metrics collection task did not stop gracefully, cancelling...")
             self._collection_task.cancel()
+            try:
+                await self._collection_task
+            except asyncio.CancelledError:
+                pass
         
         self._collection_task = None
         self._stop_collection.clear()
@@ -221,6 +256,10 @@ class MetricsCollector:
     async def _collect_system_metrics(self) -> None:
         """Collect system-level metrics."""
         try:
+            if psutil is None:
+                self.logger.debug("psutil not available; skipping system metrics collection")
+                return
+
             # CPU metrics
             cpu_percent = psutil.cpu_percent(interval=1)
             self.set_gauge("system_cpu_percent", cpu_percent)
@@ -245,6 +284,10 @@ class MetricsCollector:
     async def _collect_gpu_metrics(self) -> None:
         """Collect GPU metrics if available."""
         try:
+            if torch is None:
+                self.logger.debug("PyTorch not available; skipping GPU metrics collection")
+                return
+
             if torch.cuda.is_available():
                 device_count = torch.cuda.device_count()
                 self.set_gauge("gpu_device_count", device_count)

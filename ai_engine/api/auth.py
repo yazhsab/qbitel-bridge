@@ -3,18 +3,27 @@ CRONOS AI Engine - Authentication and Authorization
 Enterprise-grade authentication with JWT tokens and role-based access control.
 """
 
+import json
 import logging
+import os
+import secrets
 from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
 import jwt
+from jwt import ExpiredSignatureError, PyJWTError
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from passlib.context import CryptContext
 import redis.asyncio as redis
 
 from ..core.config import get_config
+from ..security.secrets_manager import get_secrets_manager
+from ..security.audit_logger import get_audit_logger
 
 logger = logging.getLogger(__name__)
+
+# API key must be set via environment variable or secrets manager
+_api_key: Optional[str] = None
 
 # Security configuration
 security = HTTPBearer()
@@ -30,10 +39,59 @@ class AuthenticationService:
     def __init__(self, config=None):
         self.config = config or get_config()
         self.redis_client = None
-        self.secret_key = self.config.security.jwt_secret
+        self.secret_key = self._load_secret_key()
         self.algorithm = "HS256"
         self.access_token_expire_minutes = 30
         self.refresh_token_expire_days = 7
+        self._session_store: Dict[str, Dict[str, Any]] = {}
+        self._session_expiry: Dict[str, datetime] = {}
+        self._token_blacklist: Dict[str, datetime] = {}
+        self.audit_logger = get_audit_logger()
+        self.secrets_manager = get_secrets_manager()
+
+    def _load_secret_key(self) -> str:
+        """
+        Load JWT secret from secrets manager or configuration.
+        
+        Priority order:
+        1. Secrets manager (Vault, AWS Secrets Manager, etc.)
+        2. Environment variable
+        3. Configuration file
+        4. Generate ephemeral (development only)
+        """
+        # Try secrets manager first
+        try:
+            secrets_mgr = get_secrets_manager()
+            secret = secrets_mgr.get_secret('jwt_secret')
+            if secret and len(secret) >= 32:
+                logger.info("JWT secret loaded from secrets manager")
+                return secret
+        except Exception as e:
+            logger.debug(f"Could not load JWT secret from secrets manager: {e}")
+        
+        # Try configuration
+        secret = getattr(self.config.security, 'jwt_secret', None)
+        if secret and len(secret) >= 32:
+            return secret
+
+        # Check if production mode
+        if hasattr(self.config, 'environment') and self.config.environment.value == 'production':
+            raise AuthenticationError(
+                "JWT secret not configured in production mode!\n"
+                "REQUIRED: Configure JWT secret in secrets manager or set CRONOS_AI_JWT_SECRET.\n"
+                "Generate a secure secret: python -c \"import secrets; print(secrets.token_urlsafe(48))\""
+            )
+
+        # Generate ephemeral secret for development
+        generated = secrets.token_urlsafe(48)
+        if hasattr(self.config.security, 'jwt_secret'):
+            self.config.security.jwt_secret = generated
+
+        logger.warning(
+            "JWT secret not configured; generated ephemeral secret for development. "
+            "Configure 'security.jwt_secret' with a strong value for production."
+        )
+        return generated
     
     async def initialize(self):
         """Initialize authentication service."""
@@ -49,8 +107,11 @@ class AuthenticationService:
             logger.info("Authentication service initialized")
             
         except Exception as e:
-            logger.error(f"Failed to initialize authentication service: {e}")
-            raise AuthenticationError(f"Authentication initialization failed: {e}")
+            logger.warning(
+                "Redis unavailable for authentication service (%s); falling back to in-memory session store",
+                e,
+            )
+            self.redis_client = None
     
     def hash_password(self, password: str) -> str:
         """Hash password using bcrypt."""
@@ -88,80 +149,132 @@ class AuthenticationService:
                 blacklisted = await self.redis_client.get(f"blacklist:{token}")
                 if blacklisted:
                     raise AuthenticationError("Token has been revoked")
+            else:
+                self._prune_blacklist()
+                expiry = self._token_blacklist.get(token)
+                if expiry and expiry > datetime.utcnow():
+                    raise AuthenticationError("Token has been revoked")
             
             return payload
             
-        except jwt.ExpiredSignatureError:
+        except ExpiredSignatureError:
             raise AuthenticationError("Token has expired")
-        except jwt.JWTError:
+        except PyJWTError:
             raise AuthenticationError("Invalid token")
     
     async def revoke_token(self, token: str):
         """Add token to blacklist."""
+        try:
+            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm], verify=False)
+            exp_ts = payload.get('exp', 0)
+            expiry = datetime.utcfromtimestamp(exp_ts) if exp_ts else datetime.utcnow()
+        except Exception:
+            expiry = datetime.utcnow() + timedelta(hours=1)
+
         if self.redis_client:
             try:
-                # Decode to get expiration
-                payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm], verify=False)
-                exp = payload.get('exp', 0)
-                
-                # Add to blacklist with TTL
-                ttl = max(0, exp - int(datetime.utcnow().timestamp()))
-                await self.redis_client.setex(f"blacklist:{token}", ttl, "revoked")
-                
+                ttl = max(0, int((expiry - datetime.utcnow()).total_seconds()))
+                await self.redis_client.setex(f"blacklist:{token}", ttl or 1, "revoked")
             except Exception as e:
-                logger.warning(f"Failed to revoke token: {e}")
+                logger.warning(f"Failed to revoke token in redis: {e}")
+        else:
+            self._prune_blacklist()
+            self._token_blacklist[token] = expiry
     
     async def store_session(self, user_id: str, session_data: Dict[str, Any], ttl: int = 3600):
         """Store user session data."""
         if self.redis_client:
             try:
+                payload = json.dumps(session_data or {}, default=str)
                 await self.redis_client.setex(
                     f"session:{user_id}", 
                     ttl, 
-                    str(session_data)
+                    payload
                 )
             except Exception as e:
                 logger.warning(f"Failed to store session: {e}")
+        else:
+            self._prune_sessions()
+            expiry = datetime.utcnow() + timedelta(seconds=ttl)
+            self._session_store[user_id] = session_data or {}
+            self._session_expiry[user_id] = expiry
     
     async def get_session(self, user_id: str) -> Optional[Dict[str, Any]]:
         """Get user session data."""
         if self.redis_client:
             try:
                 session_data = await self.redis_client.get(f"session:{user_id}")
-                return eval(session_data) if session_data else None
+                if session_data:
+                    try:
+                        return json.loads(session_data)
+                    except json.JSONDecodeError:
+                        logger.warning("Failed to decode session JSON; discarding session data")
             except Exception as e:
                 logger.warning(f"Failed to get session: {e}")
+        else:
+            self._prune_sessions()
+            session = self._session_store.get(user_id)
+            if session:
+                return session
         return None
     
     async def authenticate_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
-        """Authenticate user credentials."""
-        # In production, this would query a user database
-        # For now, we'll use a simple demo user
+        """
+        Authenticate user credentials.
+        
+        PRODUCTION NOTE: This is a legacy method for backward compatibility.
+        Use EnterpriseAuthenticationService from auth_enterprise.py for production deployments.
+        
+        This method is DEPRECATED and will be removed in a future version.
+        """
+        # Check if we're in production mode
+        if hasattr(self.config, 'environment') and self.config.environment.value == 'production':
+            logger.error(
+                "Legacy authentication called in production mode! "
+                "Use EnterpriseAuthenticationService from auth_enterprise.py instead."
+            )
+            raise AuthenticationError(
+                "Legacy authentication not available in production. "
+                "Use enterprise authentication with database-backed user management."
+            )
+        
+        # DEVELOPMENT/TESTING ONLY - Demo users
+        logger.warning(
+            "Using legacy demo user authentication - FOR DEVELOPMENT/TESTING ONLY. "
+            "Switch to EnterpriseAuthenticationService for production."
+        )
+        
+        # Only allow demo users in non-production environments
+        import os
         demo_users = {
             "admin": {
                 "user_id": "admin_001",
                 "username": "admin",
-                "password_hash": self.hash_password("admin123"),
+                "password_hash": self.hash_password(
+                    os.getenv('DEMO_ADMIN_PASSWORD', 'DemoOnly_NotForProduction_123!')
+                ),
                 "role": "administrator",
                 "permissions": [
                     "protocol_discovery",
-                    "copilot_access", 
+                    "copilot_access",
                     "system_administration",
                     "analytics_access"
                 ],
-                "full_name": "System Administrator"
+                "full_name": "Demo Administrator (DEV ONLY)"
             },
             "analyst": {
-                "user_id": "analyst_001", 
+                "user_id": "analyst_001",
                 "username": "analyst",
-                "password_hash": self.hash_password("analyst123"),
+                "password_hash": self.hash_password(
+                    os.getenv('DEMO_ANALYST_PASSWORD', 'DemoOnly_NotForProduction_456!')
+                ),
                 "role": "security_analyst",
                 "permissions": [
                     "protocol_discovery",
                     "copilot_access",
                     "analytics_access"
                 ],
-                "full_name": "Security Analyst"
+                "full_name": "Demo Analyst (DEV ONLY)"
             }
         }
         
@@ -175,6 +288,19 @@ class AuthenticationService:
                 "full_name": user["full_name"]
             }
         return None
+
+    def _prune_blacklist(self) -> None:
+        now = datetime.utcnow()
+        expired = [token for token, expiry in self._token_blacklist.items() if expiry <= now]
+        for token in expired:
+            self._token_blacklist.pop(token, None)
+
+    def _prune_sessions(self) -> None:
+        now = datetime.utcnow()
+        expired = [user_id for user_id, expiry in self._session_expiry.items() if expiry <= now]
+        for user_id in expired:
+            self._session_store.pop(user_id, None)
+            self._session_expiry.pop(user_id, None)
 
 # Global authentication service instance
 _auth_service: Optional[AuthenticationService] = None
@@ -190,8 +316,23 @@ async def get_auth_service() -> AuthenticationService:
 async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Dict[str, Any]:
     """Verify JWT token from Authorization header."""
     try:
+        token = credentials.credentials
+
+        # Allow static API key for simple integrations/tests
+        if token == get_api_key():
+            return {
+                "user_id": "api-key-user",
+                "username": "api-key-user",
+                "role": "system",
+                "permissions": [
+                    "protocol_discovery",
+                    "copilot_access",
+                    "analytics_access"
+                ]
+            }
+
         auth_service = await get_auth_service()
-        payload = await auth_service.verify_token(credentials.credentials)
+        payload = await auth_service.verify_token(token)
         return payload
         
     except AuthenticationError as e:
@@ -243,18 +384,25 @@ def require_role(role: str):
     return check_role
 
 # Authentication endpoints
-async def login(username: str, password: str) -> Dict[str, Any]:
+async def login(username: str, password: str, ip_address: Optional[str] = None, user_agent: Optional[str] = None) -> Dict[str, Any]:
     """Authenticate user and return tokens."""
     auth_service = await get_auth_service()
     
     user = await auth_service.authenticate_user(username, password)
     if not user:
+        # Log failed login attempt
+        auth_service.audit_logger.log_login_failed(
+            username=username,
+            reason="Invalid credentials",
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Create tokens
     token_data = {
         "user_id": user["user_id"],
-        "username": user["username"], 
+        "username": user["username"],
         "role": user["role"],
         "permissions": user["permissions"]
     }
@@ -267,9 +415,18 @@ async def login(username: str, password: str) -> Dict[str, Any]:
         user["user_id"],
         {
             "login_time": datetime.utcnow().isoformat(),
-            "user_agent": "api_client",
-            "ip_address": "127.0.0.1"  # Would be actual IP in production
+            "user_agent": user_agent or "api_client",
+            "ip_address": ip_address or "127.0.0.1"
         }
+    )
+    
+    # Log successful login
+    auth_service.audit_logger.log_login_success(
+        user_id=user["user_id"],
+        username=user["username"],
+        ip_address=ip_address,
+        user_agent=user_agent,
+        mfa_used=False
     )
     
     return {
@@ -310,3 +467,87 @@ async def logout(current_user: Dict[str, Any] = Depends(get_current_user)):
     """Logout user and revoke tokens."""
     # In production, would revoke all user tokens
     return {"message": "Logged out successfully"}
+
+def initialize_auth(config: Optional[Any] = None) -> str:
+    """
+    Initialize API key configuration and return the active key.
+    
+    Priority order:
+    1. Secrets manager (Vault, AWS Secrets Manager, etc.)
+    2. CRONOS_AI_API_KEY environment variable
+    3. API_KEY environment variable
+    4. Configuration file
+    
+    NEVER use hardcoded API keys in production.
+    """
+    global _api_key
+
+    cfg = config or get_config()
+    security_cfg = getattr(cfg, "security", None)
+    
+    # Try secrets manager first
+    try:
+        secrets_mgr = get_secrets_manager()
+        candidate = secrets_mgr.get_secret('api_key')
+        if candidate and len(candidate) >= 32:
+            logger.info("API key loaded from secrets manager")
+            _api_key = candidate
+            if security_cfg is not None:
+                security_cfg.api_key = _api_key
+            return _api_key
+    except Exception as e:
+        logger.debug(f"Could not load API key from secrets manager: {e}")
+    
+    # Try to get API key from config
+    candidate = None
+    if security_cfg is not None:
+        candidate = getattr(security_cfg, "api_key", None)
+    
+    # Try environment variables
+    if not candidate:
+        candidate = os.getenv('CRONOS_AI_API_KEY') or os.getenv('API_KEY')
+    
+    # Validate API key strength
+    if candidate:
+        if len(candidate) < 32:
+            logger.warning(
+                f"API key is too short ({len(candidate)} chars). "
+                "Minimum 32 characters recommended for production."
+            )
+        _api_key = candidate
+    else:
+        # In production, this should fail
+        if cfg and hasattr(cfg, 'environment') and cfg.environment.value == 'production':
+            raise AuthenticationError(
+                "API key not configured in production mode!\n"
+                "REQUIRED: Configure API key in secrets manager or set CRONOS_AI_API_KEY.\n"
+                "Generate a secure key: python -c \"import secrets; print('cronos_' + secrets.token_urlsafe(32))\""
+            )
+        
+        # For development, generate a temporary key and warn
+        _api_key = secrets.token_urlsafe(32)
+        logger.warning(
+            "No API key configured. Generated temporary key for development. "
+            "Set CRONOS_AI_API_KEY environment variable for production."
+        )
+    
+    if security_cfg is not None and not getattr(security_cfg, "api_key", None):
+        security_cfg.api_key = _api_key
+
+    return _api_key
+
+
+def get_api_key() -> str:
+    """
+    Return the configured API key for bearer authentication.
+    
+    Raises AuthenticationError if no API key is configured in production.
+    """
+    global _api_key
+    if _api_key is None:
+        initialize_auth()
+    
+    if not _api_key:
+        raise AuthenticationError("API key not configured")
+    
+    return _api_key

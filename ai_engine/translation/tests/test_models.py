@@ -8,25 +8,25 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Any
 
-from ..models import (
+from ai_engine.translation.models import (
     ProtocolSchema,
     APISpecification,
     GeneratedSDK,
     TranslationRequest,
-    TranslationResult,
     CodeLanguage,
     APIStyle,
     SecurityLevel,
-    FieldType,
     GenerationStatus,
     TranslationMode,
     QualityLevel,
+    FieldType,
     create_protocol_schema,
     create_api_specification,
     validate_field_definition,
     calculate_schema_complexity
 )
-from ..exceptions import ValidationException, SchemaValidationException
+from ai_engine.translation.exceptions import ValidationException, SchemaValidationException
+from ai_engine.translation.models import TranslationResult
 
 
 class TestProtocolSchema:
@@ -144,7 +144,7 @@ class TestAPISpecification:
         
         assert spec.title == "Test Protocol API"
         assert spec.version == "1.0.0"
-        assert spec.style == APIStyle.REST
+        assert spec.api_style == APIStyle.REST
         assert spec.security_level == SecurityLevel.AUTHENTICATED
         assert len(spec.endpoints) == 2
     
@@ -189,6 +189,14 @@ class TestAPISpecification:
         assert 'components' in openapi_dict
         assert 'securitySchemes' in openapi_dict['components']
         assert 'bearerAuth' in openapi_dict['components']['securitySchemes']
+
+    def test_api_specification_extensions(self, sample_api_specification):
+        """Ensure custom extensions are surfaced in OpenAPI output."""
+        sample_api_specification.extensions = {'graphql': {'endpoint': '/graphql'}}
+        openapi_dict = sample_api_specification.to_openapi_dict()
+
+        assert 'x-cronos-extensions' in openapi_dict
+        assert 'graphql' in openapi_dict['x-cronos-extensions']
     
     def test_create_api_specification_factory(self, sample_protocol_schema):
         """Test API specification factory function."""
@@ -200,7 +208,7 @@ class TestAPISpecification:
         
         assert isinstance(spec, APISpecification)
         assert spec.title == f"{sample_protocol_schema.name} API"
-        assert spec.style == APIStyle.REST
+        assert spec.api_style == APIStyle.REST
         assert spec.security_level == SecurityLevel.PUBLIC
     
     @pytest.mark.parametrize("api_style,expected_paths", [
@@ -220,7 +228,7 @@ class TestAPISpecification:
             # gRPC specs don't have HTTP endpoints
             assert len(spec.endpoints) == 0
         else:
-            endpoint_paths = [endpoint['path'] for endpoint in spec.endpoints]
+            endpoint_paths = [endpoint.path for endpoint in spec.endpoints]
             for expected_path in expected_paths:
                 assert any(expected_path in path for path in endpoint_paths)
 

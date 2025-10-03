@@ -48,14 +48,17 @@ def main():
     
     args = parser.parse_args()
     
-    # Setup logging
+    # Setup logging - prefer stdout for containerized environments
+    log_handlers = [logging.StreamHandler(sys.stdout)]
+    
+    # Only add file handler in development mode
+    if args.development:
+        log_handlers.append(logging.FileHandler('cronos_ai_engine.log'))
+    
     logging.basicConfig(
         level=getattr(logging, args.log_level.upper()),
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler(sys.stdout),
-            logging.FileHandler('cronos_ai_engine.log')
-        ]
+        handlers=log_handlers
     )
     
     logger = logging.getLogger(__name__)

@@ -39,7 +39,11 @@ class TimescaleComplianceIntegration:
         self.port = getattr(config.database, 'port', 5432)
         self.database = getattr(config.database, 'database', 'cronos_ai')
         self.username = getattr(config.database, 'username', 'cronos')
-        self.password = getattr(config.database, 'password', 'cronos123')
+        self.password = getattr(config.database, 'password', '')
+        
+        if not self.password:
+            import os
+            self.password = os.getenv('CRONOS_AI_DB_PASSWORD') or os.getenv('DATABASE_PASSWORD', '')
         
         # Table names
         self.tables = {

@@ -32,7 +32,7 @@ from ..anomaly.vae_detector import VAEAnomalyDetector
 from ..anomaly.ensemble_detector import EnsembleAnomalyDetector
 from ..features.extractors import FeatureExtractor
 from ..models.registry import ModelRegistry
-from ..monitoring.metrics_collector import MetricsCollector
+from ..monitoring.metrics import MetricsCollector
 
 
 # Prometheus metrics

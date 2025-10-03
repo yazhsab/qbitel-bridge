@@ -1,0 +1,72 @@
+# CRONOS AI - Staging Environment Configuration
+# This file contains staging-specific overrides
+
+environment: staging
+debug: false
+
+# Staging API Configuration
+api_host: "0.0.0.0"
+api_port: 8080
+worker_processes: 4
+
+# Database - Staging Settings
+database:
+  host: "${DB_HOST:-db.staging.cronos-ai.internal}"
+  port: 5432
+  database: "${DB_NAME:-cronos_ai_staging}"
+  username: "${DB_USER:-cronos_staging}"
+  password: ""  # Set via DATABASE_PASSWORD env var
+  ssl_mode: "require"
+  connection_pool_size: 20
+  connection_timeout: 30
+
+# Redis - Staging Settings
+redis:
+  host: "${REDIS_HOST:-redis.staging.cronos-ai.internal}"
+  port: 6379
+  database: 0
+  password: ""  # Set via REDIS_PASSWORD env var
+  ssl: true
+  connection_pool_size: 20
+
+# Security - Staging Settings
+security:
+  api_key_enabled: true
+  jwt_enabled: true
+  jwt_secret: ""  # Set via JWT_SECRET env var
+  jwt_expiration_hours: 12
+  tls_enabled: true
+  tls_cert_file: "/etc/cronos-ai/certs/staging.crt"
+  tls_key_file: "/etc/cronos-ai/certs/staging.key"
+  audit_logging_enabled: true
+  audit_log_retention_days: 90
+
+# Rate Limiting - Staging Settings
+rate_limiting:
+  enabled: true
+  default_limit: 200  # More lenient for testing
+  burst_limit: 400
+  per_user_limit: 2000
+  per_ip_limit: 1000
+
+# Monitoring - Staging Settings
+monitoring:
+  metrics_enabled: true
+  prometheus_enabled: true
+  alerting_enabled: true
+  cpu_alert_threshold: 85.0
+  memory_alert_threshold: 85.0
+
+# Logging - Staging Settings
+logging:
+  level: "INFO"
+  format: "json"
+  output: "file"
+  file_path: "/var/log/cronos-ai/staging.log"
+
+# Error Tracking - Staging Settings
+error_tracking:
+  sentry_enabled: true
+  sentry_dsn: "${SENTRY_DSN}"
+  sentry_environment: "staging"
+  sentry_traces_sample_rate: 0.5  # Higher sampling for testing

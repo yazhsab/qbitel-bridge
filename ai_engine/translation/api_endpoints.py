@@ -32,7 +32,9 @@ from .models import (
     SecurityLevel,
     GenerationStatus,
     ProtocolSchema,
-    APISpecification
+    APISpecification,
+    TranslationMode,
+    QualityLevel,
 )
 from .enhanced_discovery import EnhancedProtocolDiscoveryOrchestrator, APIGenerationRequest
 from .api_generation.api_generator import APIGenerator, APIGenerationContext
@@ -453,8 +455,6 @@ async def translate_protocol(
         protocol_data = base64.b64decode(request.data)
         
         # Create translation context
-        from .protocol_bridge.protocol_bridge import TranslationMode, QualityLevel
-        
         translation_context = TranslationContext(
             source_protocol=request.source_protocol,
             target_protocol=request.target_protocol,
@@ -510,7 +510,6 @@ async def batch_translate_protocols(
             import base64
             protocol_data = base64.b64decode(trans_req.data)
             
-            from .protocol_bridge.protocol_bridge import TranslationMode, QualityLevel
             context = TranslationContext(
                 source_protocol=trans_req.source_protocol,
                 target_protocol=trans_req.target_protocol,

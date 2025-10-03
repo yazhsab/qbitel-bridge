@@ -17,6 +17,12 @@ from ..core.exceptions import CronosAIException
 from ..llm.unified_llm_service import get_llm_service, LLMRequest
 from ..llm.rag_engine import RAGEngine
 from .context_manager import ConversationContextManager
+from .parser_improvement_engine import ParserImprovementEngine, ParserError
+from .protocol_behavior_explainer import (
+    ProtocolBehaviorExplainer,
+    ProtocolBehaviorQuery,
+    BehaviorExplanation
+)
 from ..discovery.protocol_discovery_orchestrator import ProtocolDiscoveryOrchestrator
 
 # Metrics
@@ -63,11 +69,15 @@ class ProtocolIntelligenceCopilot:
         self.config = get_config()
         self.logger = logging.getLogger(__name__)
         
-        # Core components
-        self.llm_service = get_llm_service()
+        # Core components - will be initialized in initialize()
+        self.llm_service = None
         self.rag_engine = RAGEngine()
         self.context_manager = ConversationContextManager()
         self.discovery_orchestrator = discovery_orchestrator
+        
+        # New enhancement components
+        self.parser_improvement_engine = None
+        self.behavior_explainer = None
         
         # Query classification patterns
         self.query_patterns = {
@@ -162,8 +172,14 @@ Security Assessment:
         try:
             self.logger.info("Initializing Protocol Intelligence Copilot...")
             
+            # Get LLM service - it must be initialized first
+            self.llm_service = get_llm_service()
+            if self.llm_service is None:
+                raise CopilotException(
+                    "LLM service not initialized. Call initialize_llm_service() before creating copilot."
+                )
+            
             # Initialize all components
-            await self.llm_service.initialize()
             await self.rag_engine.initialize()
             await self.context_manager.initialize()
             
@@ -171,6 +187,17 @@ Security Assessment:
             if not self.discovery_orchestrator:
                 self.discovery_orchestrator = ProtocolDiscoveryOrchestrator(self.config)
                 await self.discovery_orchestrator.initialize()
+            
+            # Initialize enhancement components
+            self.parser_improvement_engine = ParserImprovementEngine(
+                self.llm_service,
+                self.rag_engine
+            )
+            
+            self.behavior_explainer = ProtocolBehaviorExplainer(
+                self.llm_service,
+                self.rag_engine
+            )
             
             self.logger.info("Protocol Intelligence Copilot initialized successfully")
             
@@ -860,6 +887,108 @@ Security Assessment:
         
         return visualizations
     
+    async def suggest_parser_improvements(
+        self,
+        parser_code: str,
+        errors: List[str],
+        context: Dict[str, Any] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Suggest parser improvements based on errors.
+        
+        Args:
+            parser_code: Parser source code
+            errors: List of error messages
+            context: Additional context
+            
+        Returns:
+            List of improvement suggestions
+        """
+        try:
+            if not self.parser_improvement_engine:
+                raise CopilotException("Parser improvement engine not initialized")
+            
+            improvements = await self.parser_improvement_engine.suggest_parser_improvements(
+                parser_code,
+                errors,
+                context
+            )
+            
+            # Convert to dict format
+            return [
+                {
+                    'type': imp.improvement_type,
+                    'title': imp.title,
+                    'description': imp.description,
+                    'code_example': imp.code_example,
+                    'priority': imp.priority,
+                    'impact': imp.estimated_impact,
+                    'steps': imp.implementation_steps,
+                    'confidence': imp.confidence
+                }
+                for imp in improvements
+            ]
+            
+        except Exception as e:
+            self.logger.error(f"Failed to suggest parser improvements: {e}")
+            return []
+    
+    async def explain_protocol_behavior(
+        self,
+        protocol_type: str,
+        messages: List[bytes],
+        question: str,
+        context: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
+        """
+        Explain protocol behavior based on message analysis.
+        
+        Args:
+            protocol_type: Type of protocol
+            messages: List of protocol messages
+            question: User's question about behavior
+            context: Additional context
+            
+        Returns:
+            Behavior explanation with analysis
+        """
+        try:
+            if not self.behavior_explainer:
+                raise CopilotException("Behavior explainer not initialized")
+            
+            query = ProtocolBehaviorQuery(
+                protocol_type=protocol_type,
+                messages=messages,
+                question=question,
+                context=context or {},
+                include_examples=True,
+                detail_level="standard"
+            )
+            
+            explanation = await self.behavior_explainer.explain_protocol_behavior(query)
+            
+            # Convert to dict format
+            return {
+                'explanation': explanation.explanation,
+                'key_observations': explanation.key_observations,
+                'message_patterns': explanation.message_patterns,
+                'sequence_analysis': explanation.sequence_analysis,
+                'security_implications': explanation.security_implications,
+                'performance_notes': explanation.performance_notes,
+                'examples': explanation.examples,
+                'confidence': explanation.confidence,
+                'sources': explanation.sources,
+                'metadata': explanation.metadata
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to explain protocol behavior: {e}")
+            return {
+                'explanation': f"Unable to explain protocol behavior: {str(e)}",
+                'confidence': 0.0,
+                'error': str(e)
+            }
+    
     def get_health_status(self) -> Dict[str, Any]:
         """Get health status of copilot components."""
         return {
@@ -868,6 +997,8 @@ Security Assessment:
             "rag_engine": self.rag_engine.get_collection_stats(),
             "discovery_orchestrator": "connected" if self.discovery_orchestrator else "not_connected",
             "context_manager": "active",
+            "parser_improvement_engine": "active" if self.parser_improvement_engine else "not_initialized",
+            "behavior_explainer": "active" if self.behavior_explainer else "not_initialized",
             "query_patterns": len(self.query_patterns),
             "response_templates": len(self.response_templates)
         }

@@ -65,10 +65,23 @@ from .compliance_service import (
     ComplianceServiceConfig
 )
 
+from .compliance_reporter import (
+    AutonomousComplianceReporter,
+    ComplianceStandard,
+    ComplianceAlert,
+    AuditRequest,
+    AuditEvidence,
+    MonitoringFrequency,
+    AlertSeverity,
+    ContinuousMonitoringConfig,
+    get_compliance_reporter,
+    shutdown_compliance_reporter
+)
+
 __all__ = [
     'RegulatoryKnowledgeBase',
     'PCIDSSFramework',
-    'BaselIIIFramework', 
+    'BaselIIIFramework',
     'HIPAAFramework',
     'NERCCIPFramework',
     'FDAMedicalFramework',
@@ -92,7 +105,18 @@ __all__ = [
     'RegulatoryUpdate',
     'UpdateSeverity',
     'ComplianceService',
-    'ComplianceServiceConfig'
+    'ComplianceServiceConfig',
+    # Autonomous Compliance Reporter
+    'AutonomousComplianceReporter',
+    'ComplianceStandard',
+    'ComplianceAlert',
+    'AuditRequest',
+    'AuditEvidence',
+    'MonitoringFrequency',
+    'AlertSeverity',
+    'ContinuousMonitoringConfig',
+    'get_compliance_reporter',
+    'shutdown_compliance_reporter'
 ]
 
 __version__ = "1.0.0"
