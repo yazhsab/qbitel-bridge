@@ -1693,7 +1693,10 @@ Format response as JSON with:
         source_protocol: str,
         target_protocol: str
     ) -> Optional[PerformanceData]:
-    
+        """Get performance data for a translation pair."""
+        key = f"{source_protocol}_to_{target_protocol}"
+        return self.performance_tracker.get(key)
+
     async def train_translation_rules_batch(
         self,
         training_batches: List[List[Dict[str, Any]]],

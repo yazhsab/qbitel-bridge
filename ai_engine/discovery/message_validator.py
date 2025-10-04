@@ -12,7 +12,7 @@ import struct
 import zlib
 from collections import defaultdict, Counter
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple, Any, Union, Callable
+from typing import Dict, List, Optional, Set, Tuple, Any, Union, Callable, AsyncIterator
 from enum import Enum
 import re
 import hashlib

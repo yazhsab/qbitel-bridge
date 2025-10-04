@@ -1583,8 +1583,10 @@ class ImpactAssessor:
         
         return {
             "dimension": "operational",
-            "impact_score
-, Any]]:
+            "impact_score": impact_score
+        }
+
+    async def _create_contingency_plans(self, risks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Create contingency plans for identified risks."""
         
         contingencies = []

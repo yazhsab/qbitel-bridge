@@ -10,6 +10,7 @@ import asyncio
 import time
 from typing import List, Dict, Any
 import numpy as np
+from ai_engine.core.exceptions import ProtocolException, ModelException
 
 from ai_engine.discovery.protocol_discovery_orchestrator import (
     ProtocolDiscoveryOrchestrator,

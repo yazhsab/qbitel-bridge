@@ -18,6 +18,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 import weakref
+from aiohttp import web
 
 logger = logging.getLogger(__name__)
 

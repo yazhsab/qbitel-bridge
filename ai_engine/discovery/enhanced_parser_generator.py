@@ -883,7 +883,6 @@ class EnhancedParserGenerator(ParserGenerator):
             error_recovery_rate=error_recovery_rate,
             throughput=throughput,
             metadata={
-                'total_bytes_processe
                 'total_bytes_processed': total_bytes,
                 'iterations': iterations,
                 'test_samples': len(test_data)

@@ -8,6 +8,7 @@ import asyncio
 import logging
 import time
 import json
+from datetime import datetime
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import asdict
 
@@ -16,6 +17,8 @@ from ..core.config import Config
 from ..core.exceptions import CronosAIException
 from ..monitoring.metrics import MetricsCollector
 from .models import (
+    SecurityEventType,
+    SystemCriticality,
     SecurityEvent, ThreatAnalysis, AutomatedResponse, SecurityContext,
     LegacySystem, ResponseAction, ThreatLevel, ConfidenceLevel, ResponseType,
     SecurityException, ThreatAnalysisException, ResponseExecutionException,

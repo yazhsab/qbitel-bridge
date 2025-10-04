@@ -1113,4 +1113,3 @@ class ProductionProtocolDiscovery:
                 if t.is_active
             ])
         }
-                model, model

@@ -82,61 +82,64 @@ class UserRole:
 
 
 # Role-to-permissions mapping
+# Define base permissions for each role
+_VIEWER_PERMS = [
+    LegacyPermissions.SYSTEM_VIEW,
+    LegacyPermissions.ANALYSIS_VIEW,
+    LegacyPermissions.PREDICTION_VIEW,
+    LegacyPermissions.KNOWLEDGE_VIEW,
+    LegacyPermissions.DECISION_VIEW,
+    LegacyPermissions.MAINTENANCE_VIEW,
+    LegacyPermissions.MONITORING_VIEW,
+    LegacyPermissions.ALERT_VIEW,
+    LegacyPermissions.CONFIG_VIEW
+]
+
+_OPERATOR_PERMS = [
+    *_VIEWER_PERMS,
+    LegacyPermissions.SYSTEM_MODIFY,
+    LegacyPermissions.ANALYSIS_REQUEST,
+    LegacyPermissions.PREDICTION_REQUEST,
+    LegacyPermissions.KNOWLEDGE_SEARCH
+]
+
+_ANALYST_PERMS = [
+    *_OPERATOR_PERMS,
+    LegacyPermissions.KNOWLEDGE_CAPTURE,
+    LegacyPermissions.DECISION_REQUEST,
+    LegacyPermissions.MAINTENANCE_SCHEDULE
+]
+
+_MAINTAINER_PERMS = [
+    *_ANALYST_PERMS,
+    LegacyPermissions.KNOWLEDGE_MODIFY,
+    LegacyPermissions.MAINTENANCE_MODIFY,
+    LegacyPermissions.MAINTENANCE_APPROVE
+]
+
+_ADMIN_PERMS = [
+    *_MAINTAINER_PERMS,
+    LegacyPermissions.SYSTEM_REGISTER,
+    LegacyPermissions.SYSTEM_DELETE,
+    LegacyPermissions.DECISION_APPROVE,
+    LegacyPermissions.ALERT_MANAGE,
+    LegacyPermissions.CONFIG_MODIFY,
+    LegacyPermissions.BULK_OPERATIONS
+]
+
+_SUPER_ADMIN_PERMS = [
+    *_ADMIN_PERMS,
+    LegacyPermissions.SYSTEM_ADMIN,
+    LegacyPermissions.SERVICE_ADMIN
+]
+
 ROLE_PERMISSIONS = {
-    UserRole.VIEWER: [
-        LegacyPermissions.SYSTEM_VIEW,
-        LegacyPermissions.ANALYSIS_VIEW,
-        LegacyPermissions.PREDICTION_VIEW,
-        LegacyPermissions.KNOWLEDGE_VIEW,
-        LegacyPermissions.DECISION_VIEW,
-        LegacyPermissions.MAINTENANCE_VIEW,
-        LegacyPermissions.MONITORING_VIEW,
-        LegacyPermissions.ALERT_VIEW,
-        LegacyPermissions.CONFIG_VIEW
-    ],
-    
-    UserRole.OPERATOR: [
-        # Includes all VIEWER permissions
-        *ROLE_PERMISSIONS.get(UserRole.VIEWER, []),
-        LegacyPermissions.SYSTEM_MODIFY,
-        LegacyPermissions.ANALYSIS_REQUEST,
-        LegacyPermissions.PREDICTION_REQUEST,
-        LegacyPermissions.KNOWLEDGE_SEARCH
-    ],
-    
-    UserRole.ANALYST: [
-        # Includes all OPERATOR permissions
-        *ROLE_PERMISSIONS.get(UserRole.OPERATOR, []),
-        LegacyPermissions.KNOWLEDGE_CAPTURE,
-        LegacyPermissions.DECISION_REQUEST,
-        LegacyPermissions.MAINTENANCE_SCHEDULE
-    ],
-    
-    UserRole.MAINTAINER: [
-        # Includes all ANALYST permissions
-        *ROLE_PERMISSIONS.get(UserRole.ANALYST, []),
-        LegacyPermissions.KNOWLEDGE_MODIFY,
-        LegacyPermissions.MAINTENANCE_MODIFY,
-        LegacyPermissions.MAINTENANCE_APPROVE
-    ],
-    
-    UserRole.ADMIN: [
-        # Includes all MAINTAINER permissions
-        *ROLE_PERMISSIONS.get(UserRole.MAINTAINER, []),
-        LegacyPermissions.SYSTEM_REGISTER,
-        LegacyPermissions.SYSTEM_DELETE,
-        LegacyPermissions.DECISION_APPROVE,
-        LegacyPermissions.ALERT_MANAGE,
-        LegacyPermissions.CONFIG_MODIFY,
-        LegacyPermissions.BULK_OPERATIONS
-    ],
-    
-    UserRole.SUPER_ADMIN: [
-        # Includes all ADMIN permissions
-        *ROLE_PERMISSIONS.get(UserRole.ADMIN, []),
-        LegacyPermissions.SYSTEM_ADMIN,
-        LegacyPermissions.SERVICE_ADMIN
-    ]
+    UserRole.VIEWER: _VIEWER_PERMS,
+    UserRole.OPERATOR: _OPERATOR_PERMS,
+    UserRole.ANALYST: _ANALYST_PERMS,
+    UserRole.MAINTAINER: _MAINTAINER_PERMS,
+    UserRole.ADMIN: _ADMIN_PERMS,
+    UserRole.SUPER_ADMIN: _SUPER_ADMIN_PERMS
 }
 
 

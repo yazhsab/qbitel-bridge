@@ -902,6 +902,8 @@ class FieldDetector:
         if precision == 0.0 and recall == 0.0:
             f1_score = 0.0
         else:
+            f1_score = 2 * (precision * recall) / (precision + recall)
+
     def _validate_epoch_comprehensive(self, val_loader) -> Dict[str, float]:
         """
         Validate for one epoch with comprehensive metrics.
