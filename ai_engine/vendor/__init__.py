@@ -7,6 +7,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-__all__ = ['llm_shims', 'ml_shims', 'monitoring_shims']
+__all__ = ["llm_shims", "ml_shims", "monitoring_shims"]
 
 logger.info("CRONOS AI vendor shims package loaded")

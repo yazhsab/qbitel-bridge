@@ -35,12 +35,16 @@ class TestHealthCheckIntegration:
         """Test complete health check cycle."""
         # Perform health check
         health = await health_checker.check_all_components()
-        
+
         assert health is not None
-        assert health.overall_status in [HealthStatus.HEALTHY, HealthStatus.DEGRADED, HealthStatus.UNHEALTHY]
+        assert health.overall_status in [
+            HealthStatus.HEALTHY,
+            HealthStatus.DEGRADED,
+            HealthStatus.UNHEALTHY,
+        ]
         assert len(health.component_health) > 0
         assert health.uptime_seconds >= 0
-        
+
         # Verify system metrics collected
         assert "cpu_percent" in health.system_metrics
         assert "memory_percent" in health.system_metrics
@@ -52,24 +56,28 @@ class TestHealthCheckIntegration:
         # Check individual components
         system_health = await health_checker.check_component("system_resources")
         assert system_health.status in [HealthStatus.HEALTHY, HealthStatus.DEGRADED]
-        
+
         gpu_health = await health_checker.check_component("gpu")
-        assert gpu_health.status in [HealthStatus.HEALTHY, HealthStatus.DEGRADED, HealthStatus.UNHEALTHY]
+        assert gpu_health.status in [
+            HealthStatus.HEALTHY,
+            HealthStatus.DEGRADED,
+            HealthStatus.UNHEALTHY,
+        ]
 
     @pytest.mark.asyncio
     async def test_health_monitoring_background_task(self, test_config):
         """Test background health monitoring."""
         checker = HealthChecker(test_config)
         checker.check_interval = 1  # Fast interval for testing
-        
+
         await checker.start_monitoring()
-        
+
         # Wait for at least 2 checks
         await asyncio.sleep(2.5)
-        
+
         history = checker.get_health_history()
         assert len(history) >= 2
-        
+
         await checker.stop_monitoring()
 
     @pytest.mark.asyncio
@@ -79,9 +87,9 @@ class TestHealthCheckIntegration:
         for _ in range(5):
             await health_checker.check_all_components()
             await asyncio.sleep(0.1)
-        
+
         trends = health_checker.get_health_trends()
-        
+
         assert trends["total_checks"] >= 5
         assert "status_distribution" in trends
         assert "component_availability" in trends
@@ -105,7 +113,7 @@ class TestDatabaseIntegration:
         # Acquire connection
         conn = await mock_db_pool.acquire()
         assert conn is not None
-        
+
         # Release connection
         await mock_db_pool.release(conn)
         mock_db_pool.release.assert_called_once()
@@ -116,11 +124,11 @@ class TestDatabaseIntegration:
         # Mock query result
         mock_database.fetch.return_value = [
             {"id": 1, "name": "test1"},
-            {"id": 2, "name": "test2"}
+            {"id": 2, "name": "test2"},
         ]
-        
+
         result = await mock_database.fetch("SELECT * FROM test")
-        
+
         assert len(result) == 2
         assert result[0]["id"] == 1
         mock_database.fetch.assert_called_once()
@@ -130,10 +138,10 @@ class TestDatabaseIntegration:
         """Test database transaction handling."""
         # Mock transaction
         mock_database.transaction = AsyncMock()
-        
+
         async with mock_database.transaction():
             await mock_database.execute("INSERT INTO test VALUES (1, 'test')")
-        
+
         mock_database.execute.assert_called_once()
 
 
@@ -147,12 +155,12 @@ class TestRedisIntegration:
         # Set value
         await mock_redis.set("test_key", "test_value", ex=60)
         mock_redis.set.assert_called_once()
-        
+
         # Get value
         mock_redis.get.return_value = b"test_value"
         value = await mock_redis.get("test_key")
         assert value == b"test_value"
-        
+
         # Delete value
         await mock_redis.delete("test_key")
         mock_redis.delete.assert_called_once()
@@ -162,12 +170,12 @@ class TestRedisIntegration:
         """Test Redis cache expiration."""
         # Set with expiration
         await mock_redis.set("temp_key", "temp_value", ex=1)
-        
+
         # Check exists
         mock_redis.exists.return_value = 1
         exists = await mock_redis.exists("temp_key")
         assert exists == 1
-        
+
         # Update expiration
         await mock_redis.expire("temp_key", 60)
         mock_redis.expire.assert_called_once()
@@ -188,11 +196,11 @@ class TestRateLimiterIntegration:
     async def test_rate_limit_enforcement(self, rate_limiter, mock_redis):
         """Test rate limit enforcement."""
         client_id = "test_client"
-        
+
         # Mock Redis responses
         mock_redis.get.return_value = None
         mock_redis.incr.return_value = 1
-        
+
         # First request should be allowed
         allowed = await rate_limiter.check_rate_limit(client_id)
         assert allowed is True
@@ -201,10 +209,10 @@ class TestRateLimiterIntegration:
     async def test_rate_limit_exceeded(self, rate_limiter, mock_redis):
         """Test rate limit exceeded scenario."""
         client_id = "test_client"
-        
+
         # Mock Redis to return high count
         mock_redis.get.return_value = b"1000"
-        
+
         allowed = await rate_limiter.check_rate_limit(client_id)
         # Behavior depends on implementation
         assert allowed in [True, False]
@@ -213,7 +221,7 @@ class TestRateLimiterIntegration:
     async def test_rate_limit_reset(self, rate_limiter, mock_redis):
         """Test rate limit reset."""
         client_id = "test_client"
-        
+
         await rate_limiter.reset_rate_limit(client_id)
         mock_redis.delete.assert_called()
 
@@ -234,27 +242,23 @@ class TestErrorHandlingIntegration:
             raise ValueError("Test error")
         except Exception as e:
             error_id = await error_handler.capture_exception(
-                e,
-                context={"test": "data"},
-                severity="error"
+                e, context={"test": "data"}, severity="error"
             )
-            
+
             assert error_id is not None
             assert error_id.startswith("ERR_")
 
     @pytest.mark.asyncio
     async def test_error_notification(self, error_handler):
         """Test error notification system."""
-        with patch.object(error_handler, '_send_notification') as mock_notify:
+        with patch.object(error_handler, "_send_notification") as mock_notify:
             try:
                 raise RuntimeError("Critical error")
             except Exception as e:
                 await error_handler.capture_exception(
-                    e,
-                    severity="critical",
-                    notify=True
+                    e, severity="critical", notify=True
                 )
-            
+
             # Verify notification was attempted
             # Implementation specific
 
@@ -268,7 +272,7 @@ class TestAPIEndpointIntegration:
         """Create test API client."""
         from fastapi.testclient import TestClient
         from ai_engine.api.rest import create_app
-        
+
         app = create_app(test_config)
         app.router.on_startup.clear()
         app.router.on_shutdown.clear()
@@ -277,7 +281,7 @@ class TestAPIEndpointIntegration:
     def test_health_endpoint_integration(self, test_client):
         """Test health endpoint integration."""
         response = test_client.get("/health")
-        
+
         assert response.status_code == 200
         data = response.json()
         assert "status" in data
@@ -286,17 +290,17 @@ class TestAPIEndpointIntegration:
     def test_api_authentication_flow(self, test_client):
         """Test API authentication flow."""
         # Test without auth
-        response = test_client.post("/api/v1/discover", json={
-            "packet_data": base64.b64encode(b"test").decode(),
-            "metadata": {}
-        })
+        response = test_client.post(
+            "/api/v1/discover",
+            json={"packet_data": base64.b64encode(b"test").decode(), "metadata": {}},
+        )
         assert response.status_code == 401
-        
+
         # Test with invalid auth
         response = test_client.post(
             "/api/v1/discover",
             json={"packet_data": base64.b64encode(b"test").decode(), "metadata": {}},
-            headers={"Authorization": "Bearer invalid"}
+            headers={"Authorization": "Bearer invalid"},
         )
         assert response.status_code == 401
 
@@ -309,13 +313,13 @@ class TestMonitoringIntegration:
     async def test_metrics_collection_pipeline(self, test_config):
         """Test metrics collection pipeline."""
         from ai_engine.monitoring.metrics import MetricsCollector
-        
+
         collector = MetricsCollector(test_config)
         await collector.initialize()
-        
+
         # Collect metrics
         metrics = await collector.collect_all_metrics()
-        
+
         assert metrics is not None
         assert "system" in metrics or len(metrics) >= 0
 
@@ -323,17 +327,17 @@ class TestMonitoringIntegration:
     async def test_alert_generation_pipeline(self, test_config):
         """Test alert generation pipeline."""
         from ai_engine.monitoring.alerts import AlertManager
-        
+
         alert_manager = AlertManager(test_config)
-        
+
         # Trigger alert
         alert_id = await alert_manager.create_alert(
             severity="warning",
             title="Test Alert",
             description="Integration test alert",
-            source="test"
+            source="test",
         )
-        
+
         assert alert_id is not None
 
 
@@ -370,14 +374,14 @@ class TestEndToEndWorkflows:
     async def test_health_degradation_recovery(self, test_config):
         """Test health degradation and recovery."""
         checker = HealthChecker(test_config)
-        
+
         # Initial health check
         health1 = await checker.check_all_components()
         assert health1.overall_status in [HealthStatus.HEALTHY, HealthStatus.DEGRADED]
-        
+
         # Simulate degradation (would need actual component failure)
         # Then verify recovery
-        
+
         health2 = await checker.check_all_components()
         assert health2 is not None
 
@@ -392,11 +396,11 @@ class TestPerformanceIntegration:
     async def test_concurrent_health_checks(self, test_config):
         """Test concurrent health check performance."""
         checker = HealthChecker(test_config)
-        
+
         # Run multiple concurrent checks
         tasks = [checker.check_all_components() for _ in range(10)]
         results = await asyncio.gather(*tasks)
-        
+
         assert len(results) == 10
         assert all(r is not None for r in results)
 
@@ -405,14 +409,14 @@ class TestPerformanceIntegration:
         """Test high throughput request handling."""
         # Simulate high load
         request_count = 100
-        
+
         async def mock_request():
             await asyncio.sleep(0.01)
             return {"status": "success"}
-        
+
         tasks = [mock_request() for _ in range(request_count)]
         results = await asyncio.gather(*tasks)
-        
+
         assert len(results) == request_count
 
 

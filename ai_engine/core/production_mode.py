@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class EnvironmentMode(str, Enum):
     """Environment mode enumeration."""
+
     PRODUCTION = "production"
     STAGING = "staging"
     DEVELOPMENT = "development"
@@ -23,108 +24,106 @@ class EnvironmentMode(str, Enum):
 class ProductionModeDetector:
     """
     Centralized production mode detection.
-    
+
     This class provides consistent production mode detection across
     the entire application.
     """
-    
+
     # Production mode aliases
-    PRODUCTION_ALIASES = {'production', 'prod'}
-    
+    PRODUCTION_ALIASES = {"production", "prod"}
+
     @staticmethod
     def is_production_mode() -> bool:
         """
         Check if running in production mode.
-        
+
         Returns:
             bool: True if in production mode, False otherwise
         """
         env = os.getenv(
-            'CRONOS_AI_ENVIRONMENT',
-            os.getenv('ENVIRONMENT', 'development')
+            "CRONOS_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
         ).lower()
         return env in ProductionModeDetector.PRODUCTION_ALIASES
-    
+
     @staticmethod
     def get_environment_mode() -> EnvironmentMode:
         """
         Get the current environment mode.
-        
+
         Returns:
             EnvironmentMode: The current environment mode
         """
         env = os.getenv(
-            'CRONOS_AI_ENVIRONMENT',
-            os.getenv('ENVIRONMENT', 'development')
+            "CRONOS_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
         ).lower()
-        
+
         if env in ProductionModeDetector.PRODUCTION_ALIASES:
             return EnvironmentMode.PRODUCTION
-        elif env == 'staging':
+        elif env == "staging":
             return EnvironmentMode.STAGING
-        elif env == 'testing':
+        elif env == "testing":
             return EnvironmentMode.TESTING
         else:
             return EnvironmentMode.DEVELOPMENT
-    
+
     @staticmethod
     def validate_production_environment() -> Tuple[bool, List[str]]:
         """
         Validate that all production requirements are met.
-        
+
         Returns:
             Tuple[bool, List[str]]: (is_valid, list of error messages)
         """
         if not ProductionModeDetector.is_production_mode():
             return True, []
-        
+
         errors = []
-        
+
         # Check required environment variables
         required_vars = {
-            'CRONOS_AI_DB_PASSWORD': 'Database password',
-            'CRONOS_AI_REDIS_PASSWORD': 'Redis password',
-            'CRONOS_AI_JWT_SECRET': 'JWT secret',
-            'CRONOS_AI_ENCRYPTION_KEY': 'Encryption key'
+            "CRONOS_AI_DB_PASSWORD": "Database password",
+            "CRONOS_AI_REDIS_PASSWORD": "Redis password",
+            "CRONOS_AI_JWT_SECRET": "JWT secret",
+            "CRONOS_AI_ENCRYPTION_KEY": "Encryption key",
         }
-        
+
         for var_name, description in required_vars.items():
             if not os.getenv(var_name):
                 errors.append(
                     f"{description} is REQUIRED in production mode. "
                     f"Set {var_name} environment variable."
                 )
-        
+
         return len(errors) == 0, errors
-    
+
     @staticmethod
     def get_production_checklist() -> Dict[str, bool]:
         """
         Get a checklist of production requirements.
-        
+
         Returns:
             Dict[str, bool]: Dictionary of requirement name to status
         """
         checklist = {
-            'production_mode_enabled': ProductionModeDetector.is_production_mode(),
-            'database_password_set': bool(os.getenv('CRONOS_AI_DB_PASSWORD')),
-            'redis_password_set': bool(os.getenv('CRONOS_AI_REDIS_PASSWORD')),
-            'jwt_secret_set': bool(os.getenv('CRONOS_AI_JWT_SECRET')),
-            'encryption_key_set': bool(os.getenv('CRONOS_AI_ENCRYPTION_KEY')),
-            'api_key_set': bool(os.getenv('CRONOS_AI_API_KEY')),
+            "production_mode_enabled": ProductionModeDetector.is_production_mode(),
+            "database_password_set": bool(os.getenv("CRONOS_AI_DB_PASSWORD")),
+            "redis_password_set": bool(os.getenv("CRONOS_AI_REDIS_PASSWORD")),
+            "jwt_secret_set": bool(os.getenv("CRONOS_AI_JWT_SECRET")),
+            "encryption_key_set": bool(os.getenv("CRONOS_AI_ENCRYPTION_KEY")),
+            "api_key_set": bool(os.getenv("CRONOS_AI_API_KEY")),
         }
-        
+
         return checklist
-    
+
     @staticmethod
     def log_environment_info() -> None:
         """Log current environment information."""
         mode = ProductionModeDetector.get_environment_mode()
         is_prod = ProductionModeDetector.is_production_mode()
-        
+
         logger.info(f"Environment Mode: {mode.value}")
         logger.info(f"Production Mode: {is_prod}")
-        
+
         if is_prod:
             is_valid, errors = ProductionModeDetector.validate_production_environment()
             if is_valid:
@@ -139,115 +138,136 @@ class ProductionValidator:
     """
     Validates production-specific requirements.
     """
-    
+
     MIN_PASSWORD_LENGTH = 16
     MIN_SECRET_LENGTH = 32
     MIN_API_KEY_LENGTH = 32
-    
+
     WEAK_PATTERNS = [
-        'password', 'admin', 'test', 'demo', '123456', 'qwerty',
-        'letmein', 'welcome', 'monkey', 'dragon', 'secret', 'key',
-        'token', 'changeme', 'redis', 'cache'
+        "password",
+        "admin",
+        "test",
+        "demo",
+        "123456",
+        "qwerty",
+        "letmein",
+        "welcome",
+        "monkey",
+        "dragon",
+        "secret",
+        "key",
+        "token",
+        "changeme",
+        "redis",
+        "cache",
     ]
-    
+
     @staticmethod
-    def validate_password_strength(password: str, min_length: int = MIN_PASSWORD_LENGTH) -> Tuple[bool, List[str]]:
+    def validate_password_strength(
+        password: str, min_length: int = MIN_PASSWORD_LENGTH
+    ) -> Tuple[bool, List[str]]:
         """
         Validate password strength.
-        
+
         Args:
             password: Password to validate
             min_length: Minimum required length
-            
+
         Returns:
             Tuple[bool, List[str]]: (is_valid, list of error messages)
         """
         errors = []
-        
+
         # Check minimum length
         if len(password) < min_length:
             errors.append(
                 f"Password too short: {len(password)} characters "
                 f"(minimum: {min_length})"
             )
-        
+
         # Check for weak patterns
         password_lower = password.lower()
-        found_patterns = [p for p in ProductionValidator.WEAK_PATTERNS if p in password_lower]
+        found_patterns = [
+            p for p in ProductionValidator.WEAK_PATTERNS if p in password_lower
+        ]
         if found_patterns:
             errors.append(
                 f"Password contains weak patterns: {', '.join(found_patterns)}"
             )
-        
+
         # Check for sequential characters
         if ProductionValidator._has_sequential_chars(password):
             errors.append("Password contains sequential characters")
-        
+
         # Check for repeated characters
         if ProductionValidator._has_repeated_chars(password):
             errors.append("Password contains too many repeated characters")
-        
+
         return len(errors) == 0, errors
-    
+
     @staticmethod
-    def validate_secret_strength(secret: str, min_length: int = MIN_SECRET_LENGTH) -> Tuple[bool, List[str]]:
+    def validate_secret_strength(
+        secret: str, min_length: int = MIN_SECRET_LENGTH
+    ) -> Tuple[bool, List[str]]:
         """
         Validate secret strength.
-        
+
         Args:
             secret: Secret to validate
             min_length: Minimum required length
-            
+
         Returns:
             Tuple[bool, List[str]]: (is_valid, list of error messages)
         """
         errors = []
-        
+
         # Check minimum length
         if len(secret) < min_length:
             errors.append(
                 f"Secret too short: {len(secret)} characters "
                 f"(minimum: {min_length})"
             )
-        
+
         # Check for weak patterns
         secret_lower = secret.lower()
-        found_patterns = [p for p in ProductionValidator.WEAK_PATTERNS if p in secret_lower]
+        found_patterns = [
+            p for p in ProductionValidator.WEAK_PATTERNS if p in secret_lower
+        ]
         if found_patterns:
-            errors.append(
-                f"Secret contains weak patterns: {', '.join(found_patterns)}"
-            )
-        
+            errors.append(f"Secret contains weak patterns: {', '.join(found_patterns)}")
+
         # Check entropy
         if len(set(secret)) < len(secret) * 0.5:
             errors.append("Secret has low entropy (too many repeated characters)")
-        
+
         # Check for sequential characters
         if ProductionValidator._has_sequential_chars(secret):
             errors.append("Secret contains sequential characters")
-        
+
         return len(errors) == 0, errors
-    
+
     @staticmethod
-    def validate_cors_origins(origins: List[str], allow_wildcard: bool = False) -> Tuple[bool, List[str]]:
+    def validate_cors_origins(
+        origins: List[str], allow_wildcard: bool = False
+    ) -> Tuple[bool, List[str]]:
         """
         Validate CORS origins configuration.
-        
+
         Args:
             origins: List of CORS origins
             allow_wildcard: Whether to allow wildcard (*)
-            
+
         Returns:
             Tuple[bool, List[str]]: (is_valid, list of error messages)
         """
         errors = []
-        
+
         if "*" in origins and not allow_wildcard:
             errors.append(
                 "CORS wildcard (*) is not allowed in production mode. "
                 "Specify explicit allowed origins."
             )
-        
+
         # Validate HTTPS in production
         if ProductionModeDetector.is_production_mode():
             for origin in origins:
@@ -255,14 +275,14 @@ class ProductionValidator:
                     errors.append(
                         f"Origin '{origin}' must use HTTPS in production mode"
                     )
-        
+
         return len(errors) == 0, errors
-    
+
     @staticmethod
     def _has_sequential_chars(value: str, min_length: int = 3) -> bool:
         """Check for sequential characters."""
         for i in range(len(value) - min_length + 1):
-            substr = value[i:i + min_length]
+            substr = value[i : i + min_length]
             # Check numeric sequences
             if substr.isdigit():
                 nums = [int(c) for c in substr]
@@ -274,12 +294,12 @@ class ProductionValidator:
                 if all(chars[j] + 1 == chars[j + 1] for j in range(len(chars) - 1)):
                     return True
         return False
-    
+
     @staticmethod
     def _has_repeated_chars(value: str, max_repeats: int = 3) -> bool:
         """Check for repeated characters."""
         for i in range(len(value) - max_repeats + 1):
-            if len(set(value[i:i + max_repeats])) == 1:
+            if len(set(value[i : i + max_repeats])) == 1:
                 return True
         return False
 
@@ -287,12 +307,13 @@ class ProductionValidator:
 def require_production_mode(func):
     """
     Decorator to require production mode for a function.
-    
+
     Usage:
         @require_production_mode
         def production_only_function():
             pass
     """
+
     def wrapper(*args, **kwargs):
         if not ProductionModeDetector.is_production_mode():
             raise RuntimeError(
@@ -300,25 +321,26 @@ def require_production_mode(func):
                 f"Current mode: {ProductionModeDetector.get_environment_mode().value}"
             )
         return func(*args, **kwargs)
+
     return wrapper
 
 
 def skip_in_production(func):
     """
     Decorator to skip a function in production mode.
-    
+
     Usage:
         @skip_in_production
         def development_only_function():
             pass
     """
+
     def wrapper(*args, **kwargs):
         if ProductionModeDetector.is_production_mode():
-            logger.warning(
-                f"Skipping {func.__name__} in production mode"
-            )
+            logger.warning(f"Skipping {func.__name__} in production mode")
             return None
         return func(*args, **kwargs)
+
     return wrapper
 
 

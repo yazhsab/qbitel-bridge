@@ -105,7 +105,7 @@ def _default_value_for_field(field: ProtocolField) -> Any:
 def generate_graphql_assets(
     protocol_schema: ProtocolSchema,
     base_path: str = "/api/v1",
-    security_level: Optional[SecurityLevel] = None
+    security_level: Optional[SecurityLevel] = None,
 ) -> Dict[str, Any]:
     """Create GraphQL SDL and example operations for a protocol schema."""
     type_name = _to_pascal_case(protocol_schema.name)
@@ -160,10 +160,7 @@ def generate_graphql_assets(
     )
 
     delete_payload_definition = (
-        f"type {delete_payload} {{\n"
-        "  id: ID!\n"
-        "  deleted: Boolean!\n"
-        "}"
+        f"type {delete_payload} {{\n" "  id: ID!\n" "  deleted: Boolean!\n" "}"
     )
 
     schema_root = "schema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}"
@@ -171,19 +168,23 @@ def generate_graphql_assets(
     sdl_parts: List[str] = []
     if scalar_declarations:
         sdl_parts.extend(scalar_declarations.values())
-    sdl_parts.extend([
-        type_definition,
-        input_definition,
-        filter_definition,
-        delete_payload_definition,
-        query_definition,
-        mutation_definition,
-        subscription_definition,
-        schema_root,
-    ])
+    sdl_parts.extend(
+        [
+            type_definition,
+            input_definition,
+            filter_definition,
+            delete_payload_definition,
+            query_definition,
+            mutation_definition,
+            subscription_definition,
+            schema_root,
+        ]
+    )
     sdl = "\n\n".join(sdl_parts)
 
-    field_selection = "\n    ".join(_to_camel_case(field.name) for field in protocol_schema.fields)
+    field_selection = "\n    ".join(
+        _to_camel_case(field.name) for field in protocol_schema.fields
+    )
     sample_query = (
         "query Get{type_name}($id: ID!) {{\n"
         "  get{type_name}(id: $id) {{\n    {fields}\n  }}\n"
@@ -241,10 +242,7 @@ def generate_grpc_assets(protocol_schema: ProtocolSchema) -> Dict[str, Any]:
 
     message_definition = "\n".join([f"message {type_name} {{"] + message_fields + ["}"])
 
-    proto_template = [
-        'syntax = "proto3";',
-        f'package {package_name};'
-    ]
+    proto_template = ['syntax = "proto3";', f"package {package_name};"]
     proto_template.extend(imports)
     proto_template.append("")
     proto_template.append(message_definition)
@@ -305,6 +303,7 @@ def _interpret_field(field: ProtocolField, raw: bytes) -> Any:
             return int.from_bytes(raw, byteorder="big", signed=False)
     if field_type in {"float", "double"} and len(raw) in {4, 8}:
         import struct
+
         fmt = "!f" if len(raw) == 4 else "!d"
         try:
             return struct.unpack(fmt, raw)[0]
@@ -323,7 +322,7 @@ def generate_examples(
     protocol_schema: ProtocolSchema,
     sample_messages: Optional[Sequence[bytes]] = None,
     *,
-    limit: int = 3
+    limit: int = 3,
 ) -> List[Dict[str, Any]]:
     """Generate structured example payloads for a protocol schema."""
     examples: List[Dict[str, Any]] = []
@@ -356,7 +355,9 @@ def generate_examples(
                 "offset": field.offset,
                 "length": field.length,
                 "raw_hex": raw_slice.hex(),
-                "raw_base64": base64.b64encode(raw_slice).decode("ascii") if raw_slice else None,
+                "raw_base64": (
+                    base64.b64encode(raw_slice).decode("ascii") if raw_slice else None
+                ),
                 "interpreted": interpreted,
             }
         examples.append(

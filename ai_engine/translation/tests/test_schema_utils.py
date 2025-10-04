@@ -18,10 +18,29 @@ def _sample_schema() -> ProtocolSchema:
         description="Sample schema",
         format=ProtocolFormat.BINARY,
         fields=[
-            ProtocolField(name="message_type", field_type="integer", offset=0, length=1, description="Type"),
-            ProtocolField(name="timestamp", field_type="timestamp", offset=1, length=8, description="Epoch"),
-            ProtocolField(name="payload", field_type="string", offset=9, length=0, description="Payload", optional=True),
-        ]
+            ProtocolField(
+                name="message_type",
+                field_type="integer",
+                offset=0,
+                length=1,
+                description="Type",
+            ),
+            ProtocolField(
+                name="timestamp",
+                field_type="timestamp",
+                offset=1,
+                length=8,
+                description="Epoch",
+            ),
+            ProtocolField(
+                name="payload",
+                field_type="string",
+                offset=9,
+                length=0,
+                description="Payload",
+                optional=True,
+            ),
+        ],
     )
 
 

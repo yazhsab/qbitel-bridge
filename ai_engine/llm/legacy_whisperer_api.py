@@ -15,7 +15,7 @@ from .legacy_whisperer import (
     AdapterCode,
     Explanation,
     AdapterLanguage,
-    create_legacy_whisperer
+    create_legacy_whisperer,
 )
 from ..core.exceptions import CronosAIException
 
@@ -38,21 +38,21 @@ async def get_whisperer() -> LegacySystemWhisperer:
 
 # Request/Response Models
 
+
 class ReverseEngineerRequest(BaseModel):
     """Request for protocol reverse engineering."""
+
     traffic_samples: List[str] = Field(
-        ...,
-        description="List of protocol message samples (hex-encoded)",
-        min_items=10
+        ..., description="List of protocol message samples (hex-encoded)", min_items=10
     )
     system_context: str = Field(
-        default="",
-        description="Additional context about the system"
+        default="", description="Additional context about the system"
     )
 
 
 class ReverseEngineerResponse(BaseModel):
     """Response from protocol reverse engineering."""
+
     protocol_name: str
     version: str
     description: str
@@ -69,13 +69,17 @@ class ReverseEngineerResponse(BaseModel):
 
 class GenerateAdapterRequest(BaseModel):
     """Request for adapter code generation."""
+
     spec_id: str = Field(..., description="Protocol specification ID")
-    target_protocol: str = Field(..., description="Target protocol (REST, gRPC, GraphQL)")
+    target_protocol: str = Field(
+        ..., description="Target protocol (REST, gRPC, GraphQL)"
+    )
     language: str = Field(default="python", description="Programming language")
 
 
 class GenerateAdapterResponse(BaseModel):
     """Response from adapter code generation."""
+
     adapter_id: str
     source_protocol: str
     target_protocol: str
@@ -92,15 +96,16 @@ class GenerateAdapterResponse(BaseModel):
 
 class ExplainBehaviorRequest(BaseModel):
     """Request for behavior explanation."""
+
     behavior: str = Field(..., description="Description of the legacy behavior")
     context: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional context"
+        default_factory=dict, description="Additional context"
     )
 
 
 class ExplainBehaviorResponse(BaseModel):
     """Response from behavior explanation."""
+
     explanation_id: str
     behavior_description: str
     technical_explanation: str
@@ -118,36 +123,34 @@ class ExplainBehaviorResponse(BaseModel):
 
 # API Endpoints
 
+
 @router.post("/reverse-engineer", response_model=ReverseEngineerResponse)
 async def reverse_engineer_protocol(
     request: ReverseEngineerRequest,
-    whisperer: LegacySystemWhisperer = Depends(get_whisperer)
+    whisperer: LegacySystemWhisperer = Depends(get_whisperer),
 ):
     """
     Reverse engineer a legacy protocol from traffic samples.
-    
+
     This endpoint analyzes protocol message samples to automatically:
     - Identify protocol structure and fields
     - Detect message types and patterns
     - Generate comprehensive documentation
     - Assess protocol complexity
-    
+
     **Success Metrics:**
     - Reverse engineering accuracy: 85%+
     - Documentation completeness: 90%+
     """
     try:
         # Convert hex samples to bytes
-        traffic_samples = [
-            bytes.fromhex(sample) for sample in request.traffic_samples
-        ]
-        
+        traffic_samples = [bytes.fromhex(sample) for sample in request.traffic_samples]
+
         # Perform reverse engineering
         spec = await whisperer.reverse_engineer_protocol(
-            traffic_samples=traffic_samples,
-            system_context=request.system_context
+            traffic_samples=traffic_samples, system_context=request.system_context
         )
-        
+
         # Convert to response
         return ReverseEngineerResponse(
             protocol_name=spec.protocol_name,
@@ -159,29 +162,29 @@ async def reverse_engineer_protocol(
             samples_analyzed=spec.samples_analyzed,
             fields=[
                 {
-                    'name': f.name,
-                    'offset': f.offset,
-                    'length': f.length,
-                    'type': f.field_type,
-                    'description': f.description,
-                    'confidence': f.confidence
+                    "name": f.name,
+                    "offset": f.offset,
+                    "length": f.length,
+                    "type": f.field_type,
+                    "description": f.description,
+                    "confidence": f.confidence,
                 }
                 for f in spec.fields
             ],
             message_types=spec.message_types,
             patterns=[
                 {
-                    'type': p.pattern_type,
-                    'description': p.description,
-                    'frequency': p.frequency,
-                    'confidence': p.confidence
+                    "type": p.pattern_type,
+                    "description": p.description,
+                    "frequency": p.frequency,
+                    "confidence": p.confidence,
                 }
                 for p in spec.patterns
             ],
             documentation=spec.documentation,
-            spec_id=spec.spec_id
+            spec_id=spec.spec_id,
         )
-        
+
     except CronosAIException as e:
         logger.error(f"Reverse engineering failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -194,21 +197,21 @@ async def reverse_engineer_protocol(
 async def generate_adapter_code(
     request: GenerateAdapterRequest,
     background_tasks: BackgroundTasks,
-    whisperer: LegacySystemWhisperer = Depends(get_whisperer)
+    whisperer: LegacySystemWhisperer = Depends(get_whisperer),
 ):
     """
     Generate protocol adapter code.
-    
+
     This endpoint generates production-ready adapter code to bridge
     a legacy protocol to a modern target protocol (REST, gRPC, GraphQL).
-    
+
     **Includes:**
     - Complete adapter implementation
     - Comprehensive test suite
     - Integration documentation
     - Deployment guide
     - Configuration templates
-    
+
     **Code Quality:** Production-ready with >85% test coverage
     """
     try:
@@ -218,29 +221,28 @@ async def generate_adapter_code(
             if cached_spec.spec_id == request.spec_id:
                 spec = cached_spec
                 break
-        
+
         if spec is None:
             raise HTTPException(
                 status_code=404,
-                detail=f"Protocol specification {request.spec_id} not found"
+                detail=f"Protocol specification {request.spec_id} not found",
             )
-        
+
         # Validate language
         try:
             language = AdapterLanguage(request.language.lower())
         except ValueError:
             raise HTTPException(
-                status_code=400,
-                detail=f"Unsupported language: {request.language}"
+                status_code=400, detail=f"Unsupported language: {request.language}"
             )
-        
+
         # Generate adapter code
         adapter = await whisperer.generate_adapter_code(
             legacy_protocol=spec,
             target_protocol=request.target_protocol,
-            language=language
+            language=language,
         )
-        
+
         # Convert to response
         return GenerateAdapterResponse(
             adapter_id=adapter.adapter_id,
@@ -254,9 +256,9 @@ async def generate_adapter_code(
             configuration_template=adapter.configuration_template,
             deployment_guide=adapter.deployment_guide,
             code_quality_score=adapter.code_quality_score,
-            generation_time=adapter.generation_time
+            generation_time=adapter.generation_time,
         )
-        
+
     except HTTPException:
         raise
     except CronosAIException as e:
@@ -270,18 +272,18 @@ async def generate_adapter_code(
 @router.post("/explain-behavior", response_model=ExplainBehaviorResponse)
 async def explain_legacy_behavior(
     request: ExplainBehaviorRequest,
-    whisperer: LegacySystemWhisperer = Depends(get_whisperer)
+    whisperer: LegacySystemWhisperer = Depends(get_whisperer),
 ):
     """
     Explain legacy system behavior with modernization guidance.
-    
+
     This endpoint provides:
     - Technical explanation of legacy behavior
     - Historical context and root causes
     - Multiple modernization approaches
     - Risk assessment
     - Implementation guidance
-    
+
     **Use Cases:**
     - Understanding undocumented legacy systems
     - Planning modernization projects
@@ -291,10 +293,9 @@ async def explain_legacy_behavior(
     try:
         # Explain behavior
         explanation = await whisperer.explain_legacy_behavior(
-            behavior=request.behavior,
-            context=request.context
+            behavior=request.behavior, context=request.context
         )
-        
+
         # Convert to response
         return ExplainBehaviorResponse(
             explanation_id=explanation.explanation_id,
@@ -309,9 +310,9 @@ async def explain_legacy_behavior(
             risk_level=explanation.risk_level.value,
             implementation_steps=explanation.implementation_steps,
             estimated_effort=explanation.estimated_effort,
-            confidence=explanation.confidence
+            confidence=explanation.confidence,
         )
-        
+
     except CronosAIException as e:
         logger.error(f"Behavior explanation failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -321,12 +322,10 @@ async def explain_legacy_behavior(
 
 
 @router.get("/statistics")
-async def get_statistics(
-    whisperer: LegacySystemWhisperer = Depends(get_whisperer)
-):
+async def get_statistics(whisperer: LegacySystemWhisperer = Depends(get_whisperer)):
     """
     Get Legacy System Whisperer statistics.
-    
+
     Returns operational metrics and cache statistics.
     """
     try:
@@ -340,17 +339,18 @@ async def get_statistics(
 async def health_check():
     """
     Health check endpoint.
-    
+
     Returns the health status of the Legacy System Whisperer service.
     """
     return {
         "status": "healthy",
         "service": "legacy-system-whisperer",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
     }
 
 
 # Startup/Shutdown Events
+
 
 async def startup_event():
     """Initialize whisperer on startup."""

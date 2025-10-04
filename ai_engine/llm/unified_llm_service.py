@@ -33,26 +33,44 @@ from ..core.exceptions import CronosAIException
 from ..monitoring.metrics import MetricsCollector
 
 # Prometheus metrics for LLM operations
-LLM_REQUEST_COUNTER = Counter('cronos_llm_requests_total', 'Total LLM requests', ['provider', 'feature_domain', 'status'])
-LLM_REQUEST_DURATION = Histogram('cronos_llm_request_duration_seconds', 'LLM request duration', ['provider', 'feature_domain'])
-LLM_TOKEN_USAGE = Counter('cronos_llm_tokens_total', 'Total tokens used', ['provider', 'type'])
-LLM_ACTIVE_CONNECTIONS = Gauge('cronos_llm_active_connections', 'Active LLM connections', ['provider'])
+LLM_REQUEST_COUNTER = Counter(
+    "cronos_llm_requests_total",
+    "Total LLM requests",
+    ["provider", "feature_domain", "status"],
+)
+LLM_REQUEST_DURATION = Histogram(
+    "cronos_llm_request_duration_seconds",
+    "LLM request duration",
+    ["provider", "feature_domain"],
+)
+LLM_TOKEN_USAGE = Counter(
+    "cronos_llm_tokens_total", "Total tokens used", ["provider", "type"]
+)
+LLM_ACTIVE_CONNECTIONS = Gauge(
+    "cronos_llm_active_connections", "Active LLM connections", ["provider"]
+)
 
 logger = logging.getLogger(__name__)
 
+
 class LLMException(CronosAIException):
     """LLM-specific exception."""
+
     pass
+
 
 class LLMProvider(Enum):
     """LLM provider types."""
+
     OPENAI_GPT4 = "openai_gpt4"
     ANTHROPIC_CLAUDE = "anthropic_claude"
     OLLAMA_LOCAL = "ollama_local"
 
+
 @dataclass
 class LLMRequest:
     """LLM request structure."""
+
     prompt: str
     feature_domain: str
     context: Dict[str, Any] = None
@@ -61,9 +79,11 @@ class LLMRequest:
     system_prompt: Optional[str] = None
     stream: bool = False
 
+
 @dataclass
 class LLMResponse:
     """LLM response structure."""
+
     content: str
     provider: str
     tokens_used: int
@@ -71,259 +91,259 @@ class LLMResponse:
     confidence: float
     metadata: Dict[str, Any] = None
 
+
 class UnifiedLLMService:
     """
     Unified LLM service supporting multiple providers with intelligent fallback.
     Integrates seamlessly with existing CRONOS AI architecture.
     """
-    
+
     def __init__(self, config: Config):
         self.config = config
         self.logger = logging.getLogger(__name__)
-        
+
         # Initialize providers (optional dependencies)
         self.openai_client: Optional[Any] = None
         self.anthropic_client: Optional[Any] = None
         self.ollama_client: Optional[Any] = None
         self._initialized: bool = False
-        
+
         # Provider health tracking
         self.provider_health = {
             LLMProvider.OPENAI_GPT4: True,
             LLMProvider.ANTHROPIC_CLAUDE: True,
-            LLMProvider.OLLAMA_LOCAL: True
+            LLMProvider.OLLAMA_LOCAL: True,
         }
-        
+
         # Background task management
         self._health_monitor_task: Optional[asyncio.Task] = None
         self._shutdown_event = asyncio.Event()
-        
+
         # Domain-specific routing configuration
         self.domain_routing = {
-            'protocol_copilot': {
-                'primary': LLMProvider.OPENAI_GPT4,
-                'fallback': [LLMProvider.ANTHROPIC_CLAUDE, LLMProvider.OLLAMA_LOCAL],
-                'system_prompt': """You are a protocol analysis expert with deep knowledge of networking protocols, 
+            "protocol_copilot": {
+                "primary": LLMProvider.OPENAI_GPT4,
+                "fallback": [LLMProvider.ANTHROPIC_CLAUDE, LLMProvider.OLLAMA_LOCAL],
+                "system_prompt": """You are a protocol analysis expert with deep knowledge of networking protocols, 
                 packet analysis, and cybersecurity. Provide accurate, technical responses about protocol behavior, 
-                structure, and security implications. Always cite your reasoning and provide actionable insights."""
+                structure, and security implications. Always cite your reasoning and provide actionable insights.""",
             },
-            'compliance_reporter': {
-                'primary': LLMProvider.ANTHROPIC_CLAUDE,
-                'fallback': [LLMProvider.OPENAI_GPT4, LLMProvider.OLLAMA_LOCAL],
-                'system_prompt': """You are a compliance and regulatory expert specializing in cybersecurity frameworks 
+            "compliance_reporter": {
+                "primary": LLMProvider.ANTHROPIC_CLAUDE,
+                "fallback": [LLMProvider.OPENAI_GPT4, LLMProvider.OLLAMA_LOCAL],
+                "system_prompt": """You are a compliance and regulatory expert specializing in cybersecurity frameworks 
                 like PCI-DSS, HIPAA, SOX, and Basel III. Provide precise regulatory interpretations and compliance 
-                gap analysis."""
+                gap analysis.""",
             },
-            'legacy_whisperer': {
-                'primary': LLMProvider.OLLAMA_LOCAL,  # Privacy for sensitive legacy systems
-                'fallback': [LLMProvider.OPENAI_GPT4, LLMProvider.ANTHROPIC_CLAUDE],
-                'system_prompt': """You are a legacy systems expert with deep knowledge of mainframes, COBOL, 
+            "legacy_whisperer": {
+                "primary": LLMProvider.OLLAMA_LOCAL,  # Privacy for sensitive legacy systems
+                "fallback": [LLMProvider.OPENAI_GPT4, LLMProvider.ANTHROPIC_CLAUDE],
+                "system_prompt": """You are a legacy systems expert with deep knowledge of mainframes, COBOL, 
                 industrial protocols, and system maintenance. Provide practical advice for maintaining and 
-                troubleshooting legacy infrastructure."""
+                troubleshooting legacy infrastructure.""",
             },
-            'security_orchestrator': {
-                'primary': LLMProvider.ANTHROPIC_CLAUDE,
-                'fallback': [LLMProvider.OPENAI_GPT4, LLMProvider.OLLAMA_LOCAL],
-                'system_prompt': """You are a cybersecurity expert specializing in threat analysis, incident response, 
+            "security_orchestrator": {
+                "primary": LLMProvider.ANTHROPIC_CLAUDE,
+                "fallback": [LLMProvider.OPENAI_GPT4, LLMProvider.OLLAMA_LOCAL],
+                "system_prompt": """You are a cybersecurity expert specializing in threat analysis, incident response, 
                 and automated security orchestration. Provide clear, actionable security recommendations with 
-                risk assessments."""
+                risk assessments.""",
             },
-            'translation_studio': {
-                'primary': LLMProvider.OPENAI_GPT4,  # Best for code generation
-                'fallback': [LLMProvider.ANTHROPIC_CLAUDE, LLMProvider.OLLAMA_LOCAL],
-                'system_prompt': """You are a protocol translation and API generation expert. Generate clean, 
+            "translation_studio": {
+                "primary": LLMProvider.OPENAI_GPT4,  # Best for code generation
+                "fallback": [LLMProvider.ANTHROPIC_CLAUDE, LLMProvider.OLLAMA_LOCAL],
+                "system_prompt": """You are a protocol translation and API generation expert. Generate clean, 
                 production-ready code and comprehensive API documentation. Focus on security, performance, 
-                and maintainability."""
-            }
+                and maintainability.""",
+            },
         }
-        
+
         # Request queue for rate limiting
         self.request_queues = {
-            provider: asyncio.Queue(maxsize=100) 
-            for provider in LLMProvider
+            provider: asyncio.Queue(maxsize=100) for provider in LLMProvider
         }
-        
+
         # Thread pool for synchronous operations
         self.executor = ThreadPoolExecutor(max_workers=4)
-    
+
     async def initialize(self) -> None:
         """Initialize all LLM providers."""
         if self._initialized:
-            self.logger.debug("Unified LLM Service already initialized; skipping reinitialization")
+            self.logger.debug(
+                "Unified LLM Service already initialized; skipping reinitialization"
+            )
             return
         try:
             self.logger.info("Initializing Unified LLM Service...")
             # Reset shutdown event before starting background tasks
             if self._shutdown_event.is_set():
                 self._shutdown_event = asyncio.Event()
-            
+
             # Initialize OpenAI
-            openai_key = getattr(self.config, 'openai_api_key', None)
+            openai_key = getattr(self.config, "openai_api_key", None)
             if openai_key and openai is not None:
                 self.openai_client = openai.AsyncOpenAI(
-                    api_key=openai_key,
-                    timeout=30.0
+                    api_key=openai_key, timeout=30.0
                 )
                 await self._test_provider(LLMProvider.OPENAI_GPT4)
             else:
                 if openai_key and openai is None:
                     self.logger.warning(
-                        'OpenAI SDK not installed; disabling GPT-4 provider'
+                        "OpenAI SDK not installed; disabling GPT-4 provider"
                     )
                 elif not openai_key:
-                    self.logger.info('OpenAI API key not configured; GPT-4 provider disabled')
+                    self.logger.info(
+                        "OpenAI API key not configured; GPT-4 provider disabled"
+                    )
                 self.provider_health[LLMProvider.OPENAI_GPT4] = False
 
             # Initialize Anthropic
-            anthropic_key = getattr(self.config, 'anthropic_api_key', None)
+            anthropic_key = getattr(self.config, "anthropic_api_key", None)
             if anthropic_key and AsyncAnthropic is not None:
                 self.anthropic_client = AsyncAnthropic(
-                    api_key=anthropic_key,
-                    timeout=30.0
+                    api_key=anthropic_key, timeout=30.0
                 )
                 await self._test_provider(LLMProvider.ANTHROPIC_CLAUDE)
             else:
                 if anthropic_key and AsyncAnthropic is None:
                     self.logger.warning(
-                        'Anthropic SDK not installed; disabling Claude provider'
+                        "Anthropic SDK not installed; disabling Claude provider"
                     )
                 elif not anthropic_key:
-                    self.logger.info('Anthropic API key not configured; Claude provider disabled')
+                    self.logger.info(
+                        "Anthropic API key not configured; Claude provider disabled"
+                    )
                 self.provider_health[LLMProvider.ANTHROPIC_CLAUDE] = False
 
             # Initialize Ollama (local)
             if ollama is not None:
                 try:
                     self.ollama_client = ollama.AsyncClient(
-                        host=getattr(self.config, 'ollama_host', 'http://localhost:11434')
+                        host=getattr(
+                            self.config, "ollama_host", "http://localhost:11434"
+                        )
                     )
                     await self._test_provider(LLMProvider.OLLAMA_LOCAL)
                 except Exception as e:
                     self.logger.warning(f"Ollama initialization failed: {e}")
                     self.provider_health[LLMProvider.OLLAMA_LOCAL] = False
             else:
-                self.logger.info('Ollama SDK not installed; local provider disabled')
+                self.logger.info("Ollama SDK not installed; local provider disabled")
                 self.provider_health[LLMProvider.OLLAMA_LOCAL] = False
-            
+
             # Start health monitoring with lifecycle management
             self._health_monitor_task = asyncio.create_task(self._health_monitor())
-            
+
             self.logger.info("Unified LLM Service initialized successfully")
             self._initialized = True
-            
+
         except Exception as e:
             self.logger.error(f"Failed to initialize LLM service: {e}")
             raise LLMException(f"LLM service initialization failed: {e}")
-    
+
     async def process_request(self, request: LLMRequest) -> LLMResponse:
         """
         Process LLM request with intelligent routing and fallback.
-        
+
         Args:
             request: LLM request with prompt and context
-            
+
         Returns:
             LLM response with content and metadata
         """
         start_time = time.time()
-        
+
         # Get domain configuration
         domain_config = self.domain_routing.get(
-            request.feature_domain, 
-            self.domain_routing['protocol_copilot']  # Default
+            request.feature_domain, self.domain_routing["protocol_copilot"]  # Default
         )
-        
+
         # Try primary provider first
-        primary_provider = domain_config['primary']
-        providers_to_try = [primary_provider] + domain_config['fallback']
-        
+        primary_provider = domain_config["primary"]
+        providers_to_try = [primary_provider] + domain_config["fallback"]
+
         last_error: Optional[Exception] = None
         attempted_provider = False
 
         for provider in providers_to_try:
             if not self.provider_health[provider]:
                 continue
-                
+
             try:
                 attempted_provider = True
                 response = await self._execute_request(
-                    request, provider, domain_config['system_prompt']
+                    request, provider, domain_config["system_prompt"]
                 )
-                
+
                 # Update metrics
                 LLM_REQUEST_COUNTER.labels(
                     provider=provider.value,
                     feature_domain=request.feature_domain,
-                    status='success'
+                    status="success",
                 ).inc()
-                
+
                 LLM_REQUEST_DURATION.labels(
-                    provider=provider.value,
-                    feature_domain=request.feature_domain
+                    provider=provider.value, feature_domain=request.feature_domain
                 ).observe(time.time() - start_time)
-                
+
                 return response
-                
+
             except Exception as e:
                 last_error = e
                 self.logger.warning(f"Provider {provider.value} failed: {e}")
-                
+
                 # Mark provider as unhealthy temporarily
                 self.provider_health[provider] = False
-                
+
                 LLM_REQUEST_COUNTER.labels(
                     provider=provider.value,
                     feature_domain=request.feature_domain,
-                    status='error'
+                    status="error",
                 ).inc()
 
         # All providers failed
         if not attempted_provider:
-            raise LLMException("No healthy LLM providers are available for this request")
+            raise LLMException(
+                "No healthy LLM providers are available for this request"
+            )
         raise LLMException(f"All LLM providers failed. Last error: {last_error}")
-    
+
     async def _execute_request(
-        self, 
-        request: LLMRequest, 
-        provider: LLMProvider, 
-        system_prompt: str
+        self, request: LLMRequest, provider: LLMProvider, system_prompt: str
     ) -> LLMResponse:
         """Execute request on specific provider."""
         start_time = time.time()
-        
+
         # Prepare messages
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
-        
+
         # Add context if available
         if request.context:
             context_str = self._format_context(request.context)
             messages.append({"role": "user", "content": f"Context: {context_str}"})
-        
+
         messages.append({"role": "user", "content": request.prompt})
-        
+
         # Execute based on provider
         if provider == LLMProvider.OPENAI_GPT4:
             if not self.openai_client:
-                raise LLMException('OpenAI client not initialized or configured')
+                raise LLMException("OpenAI client not initialized or configured")
             return await self._execute_openai(request, messages, start_time)
         elif provider == LLMProvider.ANTHROPIC_CLAUDE:
             if not self.anthropic_client:
-                raise LLMException('Anthropic client not initialized or configured')
+                raise LLMException("Anthropic client not initialized or configured")
             return await self._execute_anthropic(request, messages, start_time)
         elif provider == LLMProvider.OLLAMA_LOCAL:
             if not self.ollama_client:
-                raise LLMException('Ollama client not initialized or configured')
+                raise LLMException("Ollama client not initialized or configured")
             return await self._execute_ollama(request, messages, start_time)
         else:
             raise LLMException(f"Unsupported provider: {provider}")
-    
+
     async def _execute_openai(
-        self, 
-        request: LLMRequest, 
-        messages: List[Dict], 
-        start_time: float
+        self, request: LLMRequest, messages: List[Dict], start_time: float
     ) -> LLMResponse:
         """Execute request using OpenAI."""
         response = await self.openai_client.chat.completions.create(
@@ -331,14 +351,14 @@ class UnifiedLLMService:
             messages=messages,
             max_tokens=request.max_tokens,
             temperature=request.temperature,
-            stream=request.stream
+            stream=request.stream,
         )
-        
+
         content = response.choices[0].message.content
         tokens_used = response.usage.total_tokens if response.usage else 0
-        
-        LLM_TOKEN_USAGE.labels(provider='openai', type='total').inc(tokens_used)
-        
+
+        LLM_TOKEN_USAGE.labels(provider="openai", type="total").inc(tokens_used)
+
         return LLMResponse(
             content=content,
             provider=LLMProvider.OPENAI_GPT4.value,
@@ -346,41 +366,38 @@ class UnifiedLLMService:
             processing_time=time.time() - start_time,
             confidence=0.9,  # High confidence for GPT-4
             metadata={
-                'model': 'gpt-4-turbo',
-                'finish_reason': response.choices[0].finish_reason
-            }
+                "model": "gpt-4-turbo",
+                "finish_reason": response.choices[0].finish_reason,
+            },
         )
-    
+
     async def _execute_anthropic(
-        self, 
-        request: LLMRequest, 
-        messages: List[Dict], 
-        start_time: float
+        self, request: LLMRequest, messages: List[Dict], start_time: float
     ) -> LLMResponse:
         """Execute request using Anthropic Claude."""
         # Convert messages format for Anthropic
         system_msg = None
         user_messages = []
-        
+
         for msg in messages:
-            if msg['role'] == 'system':
-                system_msg = msg['content']
+            if msg["role"] == "system":
+                system_msg = msg["content"]
             else:
                 user_messages.append(msg)
-        
+
         response = await self.anthropic_client.messages.create(
             model="claude-3-sonnet-20240229",
             messages=user_messages,
             max_tokens=request.max_tokens,
             temperature=request.temperature,
-            system=system_msg
+            system=system_msg,
         )
-        
+
         content = response.content[0].text
         tokens_used = response.usage.input_tokens + response.usage.output_tokens
-        
-        LLM_TOKEN_USAGE.labels(provider='anthropic', type='total').inc(tokens_used)
-        
+
+        LLM_TOKEN_USAGE.labels(provider="anthropic", type="total").inc(tokens_used)
+
         return LLMResponse(
             content=content,
             provider=LLMProvider.ANTHROPIC_CLAUDE.value,
@@ -388,51 +405,45 @@ class UnifiedLLMService:
             processing_time=time.time() - start_time,
             confidence=0.9,  # High confidence for Claude
             metadata={
-                'model': 'claude-3-sonnet-20240229',
-                'stop_reason': response.stop_reason
-            }
+                "model": "claude-3-sonnet-20240229",
+                "stop_reason": response.stop_reason,
+            },
         )
-    
+
     async def _execute_ollama(
-        self, 
-        request: LLMRequest, 
-        messages: List[Dict], 
-        start_time: float
+        self, request: LLMRequest, messages: List[Dict], start_time: float
     ) -> LLMResponse:
         """Execute request using Ollama (local)."""
         # Format messages for Ollama
         prompt = self._format_ollama_prompt(messages)
-        
+
         response = await self.ollama_client.generate(
-            model='llama2',  # Configurable
+            model="llama2",  # Configurable
             prompt=prompt,
             options={
-                'temperature': request.temperature,
-                'num_predict': request.max_tokens
-            }
+                "temperature": request.temperature,
+                "num_predict": request.max_tokens,
+            },
         )
-        
-        content = response['response']
+
+        content = response["response"]
         tokens_used = len(content.split())  # Approximate
-        
-        LLM_TOKEN_USAGE.labels(provider='ollama', type='total').inc(tokens_used)
-        
+
+        LLM_TOKEN_USAGE.labels(provider="ollama", type="total").inc(tokens_used)
+
         return LLMResponse(
             content=content,
             provider=LLMProvider.OLLAMA_LOCAL.value,
             tokens_used=tokens_used,
             processing_time=time.time() - start_time,
             confidence=0.7,  # Lower confidence for local model
-            metadata={
-                'model': 'llama2',
-                'local': True
-            }
+            metadata={"model": "llama2", "local": True},
         )
-    
+
     def _format_context(self, context: Dict[str, Any]) -> str:
         """Format context for LLM consumption."""
         formatted_parts = []
-        
+
         for key, value in context.items():
             if isinstance(value, dict):
                 formatted_parts.append(f"{key}: {json.dumps(value, indent=2)}")
@@ -440,20 +451,20 @@ class UnifiedLLMService:
                 formatted_parts.append(f"{key}: {', '.join(str(v) for v in value)}")
             else:
                 formatted_parts.append(f"{key}: {value}")
-        
+
         return "\n".join(formatted_parts)
-    
+
     def _format_ollama_prompt(self, messages: List[Dict]) -> str:
         """Format messages for Ollama."""
         prompt_parts = []
-        
+
         for msg in messages:
-            role = msg['role'].upper()
-            content = msg['content']
+            role = msg["role"].upper()
+            content = msg["content"]
             prompt_parts.append(f"{role}: {content}")
-        
+
         return "\n\n".join(prompt_parts) + "\n\nASSISTANT:"
-    
+
     async def _test_provider(self, provider: LLMProvider) -> bool:
         """Test provider health."""
         if provider == LLMProvider.OPENAI_GPT4 and not self.openai_client:
@@ -476,22 +487,22 @@ class UnifiedLLMService:
                 prompt="Hello, please respond with 'OK' if you're working.",
                 feature_domain="health_check",
                 max_tokens=10,
-                temperature=0.0
+                temperature=0.0,
             )
-            
+
             response = await self._execute_request(
                 test_request, provider, "You are a helpful assistant."
             )
-            
+
             self.provider_health[provider] = True
             self.logger.info(f"Provider {provider.value} is healthy")
             return True
-            
+
         except Exception as e:
             self.logger.warning(f"Provider {provider.value} health check failed: {e}")
             self.provider_health[provider] = False
             return False
-    
+
     async def _health_monitor(self) -> None:
         """Background health monitoring for all providers."""
         try:
@@ -500,97 +511,110 @@ class UnifiedLLMService:
                     # Use wait_for to allow interruption during sleep
                     await asyncio.wait_for(
                         self._shutdown_event.wait(),
-                        timeout=300.0  # Check every 5 minutes
+                        timeout=300.0,  # Check every 5 minutes
                     )
                     break  # Shutdown event was set
                 except asyncio.TimeoutError:
                     # Timeout is expected, continue with health checks
                     pass
-                
+
                 for provider in LLMProvider:
                     if not self.provider_health[provider]:
                         await self._test_provider(provider)
-                        
+
         except asyncio.CancelledError:
             self.logger.info("Health monitor task cancelled")
         except Exception as e:
             self.logger.error(f"Health monitor error: {e}")
-    
+
     def get_health_status(self) -> Dict[str, Any]:
         """Get health status of all providers."""
         return {
             "providers": {
                 provider.value: {
                     "healthy": self.provider_health[provider],
-                    "queue_size": self.request_queues[provider].qsize()
+                    "queue_size": self.request_queues[provider].qsize(),
                 }
                 for provider in LLMProvider
             },
-            "total_requests": sum([
-                counter._value._value 
-                for counter in LLM_REQUEST_COUNTER._metrics.values()
-            ]),
-            "active_connections": sum([
-                gauge._value._value 
-                for gauge in LLM_ACTIVE_CONNECTIONS._metrics.values()
-            ])
+            "total_requests": sum(
+                [
+                    counter._value._value
+                    for counter in LLM_REQUEST_COUNTER._metrics.values()
+                ]
+            ),
+            "active_connections": sum(
+                [
+                    gauge._value._value
+                    for gauge in LLM_ACTIVE_CONNECTIONS._metrics.values()
+                ]
+            ),
         }
-    
+
     async def shutdown(self) -> None:
         """Shutdown LLM service."""
         if not self._initialized:
-            self.logger.debug("Unified LLM Service shutdown requested but service is not initialized")
+            self.logger.debug(
+                "Unified LLM Service shutdown requested but service is not initialized"
+            )
             return
         self.logger.info("Shutting down Unified LLM Service...")
-        
+
         # Stop health monitor task
         if self._health_monitor_task and not self._health_monitor_task.done():
             self._shutdown_event.set()
             try:
                 await asyncio.wait_for(self._health_monitor_task, timeout=5.0)
             except asyncio.TimeoutError:
-                self.logger.warning("Health monitor task did not stop gracefully, cancelling...")
+                self.logger.warning(
+                    "Health monitor task did not stop gracefully, cancelling..."
+                )
                 self._health_monitor_task.cancel()
                 try:
                     await self._health_monitor_task
                 except asyncio.CancelledError:
                     pass
         self._health_monitor_task = None
-        
+
         # Close provider clients
         if self.openai_client:
             await self.openai_client.close()
-        
+
         if self.anthropic_client:
             await self.anthropic_client.close()
-        
+
         # Shutdown executor
         self.executor.shutdown(wait=True)
-        
+
         self.logger.info("Unified LLM Service shutdown complete")
         self._initialized = False
+
 
 # Global LLM service instance
 _llm_service: Optional[UnifiedLLMService] = None
 
+
 def get_llm_service() -> Optional[UnifiedLLMService]:
     """Get global LLM service instance."""
     return _llm_service
+
 
 def set_llm_service(service: UnifiedLLMService) -> None:
     """Set global LLM service instance."""
     global _llm_service
     _llm_service = service
 
+
 async def initialize_llm_service(config: Config) -> UnifiedLLMService:
     """Initialize and set global LLM service instance."""
     global _llm_service
     if _llm_service is not None:
         raise RuntimeError("LLM service already initialized")
-    
+
     _llm_service = UnifiedLLMService(config)
     await _llm_service.initialize()
     return _llm_service
+
 
 async def shutdown_llm_service() -> None:
     """Shutdown global LLM service instance."""

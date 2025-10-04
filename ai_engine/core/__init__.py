@@ -7,7 +7,9 @@ configuration management, exception handling, and the main engine orchestrator.
 
 try:  # pragma: no cover - optional dependency shim for lightweight contexts
     from .engine import CronosAIEngine  # type: ignore
-except ModuleNotFoundError:  # torch or other heavy deps may be absent in lightweight test runs
+except (
+    ModuleNotFoundError
+):  # torch or other heavy deps may be absent in lightweight test runs
     CronosAIEngine = None  # type: ignore
 
 from .config import Config, ModelConfig, TrainingConfig
@@ -23,7 +25,7 @@ __version__ = "1.0.0"
 __all__ = [
     "CronosAIEngine",
     "Config",
-    "ModelConfig", 
+    "ModelConfig",
     "TrainingConfig",
     "CronosAIException",
     "ModelException",

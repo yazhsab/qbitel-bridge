@@ -39,7 +39,7 @@ db_config = cronos_config.database
 # Override sqlalchemy.url with environment variables
 config.set_main_option(
     "sqlalchemy.url",
-    f"postgresql://{db_config.username}:{db_config.password}@{db_config.host}:{db_config.port}/{db_config.database}"
+    f"postgresql://{db_config.username}:{db_config.password}@{db_config.host}:{db_config.port}/{db_config.database}",
 )
 
 # add your model's MetaData object here
@@ -96,12 +96,12 @@ def do_run_migrations(connection):
 async def run_async_migrations():
     """Run migrations in async mode."""
     from sqlalchemy.ext.asyncio import create_async_engine
-    
+
     # Convert postgresql:// to postgresql+asyncpg://
     url = config.get_main_option("sqlalchemy.url")
     if url.startswith("postgresql://"):
         url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    
+
     connectable = create_async_engine(
         url,
         poolclass=pool.NullPool,
@@ -122,9 +122,10 @@ def run_migrations_online() -> None:
     """
     # Check if we should use async mode
     use_async = os.getenv("ALEMBIC_USE_ASYNC", "false").lower() == "true"
-    
+
     if use_async:
         import asyncio
+
         asyncio.run(run_async_migrations())
     else:
         connectable = engine_from_config(

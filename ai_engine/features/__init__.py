@@ -17,7 +17,7 @@ __all__ = [
     "DataPreprocessor",
     "NormalizationStrategy",
     "FeatureTransformer",
-    "ScalingTransformer", 
+    "ScalingTransformer",
     "EncodingTransformer",
     "DataValidator",
     "FeatureValidator",

@@ -12,7 +12,7 @@ from .schedulers import SchedulerFactory, CustomSchedulers
 
 __all__ = [
     "ModelTrainer",
-    "TrainingJob", 
+    "TrainingJob",
     "TrainingConfig",
     "DatasetManager",
     "ProtocolDataset",

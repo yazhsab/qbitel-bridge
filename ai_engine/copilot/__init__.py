@@ -8,9 +8,9 @@ from .context_manager import ConversationContextManager
 from .protocol_knowledge_base import ProtocolKnowledgeBase
 
 __all__ = [
-    'ProtocolIntelligenceCopilot',
-    'CopilotQuery', 
-    'CopilotResponse',
-    'ConversationContextManager',
-    'ProtocolKnowledgeBase'
+    "ProtocolIntelligenceCopilot",
+    "CopilotQuery",
+    "CopilotResponse",
+    "ConversationContextManager",
+    "ProtocolKnowledgeBase",
 ]

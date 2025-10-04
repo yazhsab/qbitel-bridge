@@ -9,8 +9,4 @@ from .schemas import *
 from .middleware import LegacySystemMiddleware
 from .auth import LegacySystemAuth
 
-__all__ = [
-    "legacy_router",
-    "LegacySystemMiddleware", 
-    "LegacySystemAuth"
-]
+__all__ = ["legacy_router", "LegacySystemMiddleware", "LegacySystemAuth"]

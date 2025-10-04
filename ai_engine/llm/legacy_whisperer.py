@@ -1,4 +1,3 @@
-
 """
 CRONOS AI - Legacy System Whisperer
 LLM-powered legacy protocol understanding and modernization.
@@ -29,23 +28,22 @@ from .rag_engine import RAGEngine, RAGDocument
 
 # Metrics
 LEGACY_ANALYSIS_COUNTER = Counter(
-    'cronos_legacy_analysis_total',
-    'Total legacy protocol analyses',
-    ['analysis_type', 'status']
+    "cronos_legacy_analysis_total",
+    "Total legacy protocol analyses",
+    ["analysis_type", "status"],
 )
 LEGACY_ANALYSIS_DURATION = Histogram(
-    'cronos_legacy_analysis_duration_seconds',
-    'Legacy protocol analysis duration',
-    ['analysis_type']
+    "cronos_legacy_analysis_duration_seconds",
+    "Legacy protocol analysis duration",
+    ["analysis_type"],
 )
 LEGACY_CONFIDENCE_SCORE = Histogram(
-    'cronos_legacy_confidence_score',
-    'Legacy protocol analysis confidence scores'
+    "cronos_legacy_confidence_score", "Legacy protocol analysis confidence scores"
 )
 LEGACY_ADAPTER_GENERATION = Counter(
-    'cronos_legacy_adapter_generation_total',
-    'Total adapter code generations',
-    ['source_protocol', 'target_protocol', 'status']
+    "cronos_legacy_adapter_generation_total",
+    "Total adapter code generations",
+    ["source_protocol", "target_protocol", "status"],
 )
 
 logger = logging.getLogger(__name__)
@@ -53,11 +51,13 @@ logger = logging.getLogger(__name__)
 
 class LegacyWhispererException(CronosAIException):
     """Legacy Whisperer-specific exception."""
+
     pass
 
 
 class ProtocolComplexity(str, Enum):
     """Protocol complexity levels."""
+
     SIMPLE = "simple"
     MODERATE = "moderate"
     COMPLEX = "complex"
@@ -66,6 +66,7 @@ class ProtocolComplexity(str, Enum):
 
 class ModernizationRisk(str, Enum):
     """Modernization risk levels."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -74,6 +75,7 @@ class ModernizationRisk(str, Enum):
 
 class AdapterLanguage(str, Enum):
     """Supported adapter code languages."""
+
     PYTHON = "python"
     JAVA = "java"
     GO = "go"
@@ -85,6 +87,7 @@ class AdapterLanguage(str, Enum):
 @dataclass
 class ProtocolPattern:
     """Identified protocol pattern."""
+
     pattern_type: str
     description: str
     frequency: int
@@ -96,6 +99,7 @@ class ProtocolPattern:
 @dataclass
 class ProtocolField:
     """Reverse-engineered protocol field."""
+
     name: str
     offset: int
     length: int
@@ -109,237 +113,249 @@ class ProtocolField:
 @dataclass
 class ProtocolSpecification:
     """Complete protocol specification from reverse engineering."""
+
     protocol_name: str
     version: str
     description: str
     complexity: ProtocolComplexity
-    
+
     # Structure information
     fields: List[ProtocolField] = field(default_factory=list)
     message_types: List[Dict[str, Any]] = field(default_factory=list)
     patterns: List[ProtocolPattern] = field(default_factory=list)
-    
+
     # Protocol characteristics
     is_binary: bool = True
     is_stateful: bool = False
     uses_encryption: bool = False
     has_checksums: bool = False
-    
+
     # Analysis metadata
     confidence_score: float = 0.0
     analysis_time: float = 0.0
     samples_analyzed: int = 0
-    
+
     # Documentation
     documentation: str = ""
     usage_examples: List[str] = field(default_factory=list)
     known_implementations: List[str] = field(default_factory=list)
-    
+
     # Historical context
     historical_context: str = ""
     common_issues: List[str] = field(default_factory=list)
     security_concerns: List[str] = field(default_factory=list)
-    
+
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    spec_id: str = field(default_factory=lambda: hashlib.sha256(str(time.time()).encode()).hexdigest()[:16])
-    
+    spec_id: str = field(
+        default_factory=lambda: hashlib.sha256(str(time.time()).encode()).hexdigest()[
+            :16
+        ]
+    )
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         result = asdict(self)
-        result['created_at'] = result['created_at'].isoformat()
-        result['complexity'] = result['complexity']
+        result["created_at"] = result["created_at"].isoformat()
+        result["complexity"] = result["complexity"]
         return result
 
 
 @dataclass
 class AdapterCode:
     """Generated protocol adapter code."""
+
     source_protocol: str
     target_protocol: str
     language: AdapterLanguage
-    
+
     # Generated code
     adapter_code: str
     test_code: str
     documentation: str
-    
+
     # Code metadata
     dependencies: List[str] = field(default_factory=list)
     configuration_template: str = ""
     deployment_guide: str = ""
-    
+
     # Integration information
     integration_points: List[str] = field(default_factory=list)
     api_endpoints: List[Dict[str, Any]] = field(default_factory=list)
-    
+
     # Quality metrics
     code_quality_score: float = 0.0
     test_coverage: float = 0.0
     performance_notes: str = ""
-    
+
     # Generation metadata
     generation_time: float = 0.0
     llm_provider: str = ""
-    
+
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    adapter_id: str = field(default_factory=lambda: hashlib.sha256(str(time.time()).encode()).hexdigest()[:16])
-    
+    adapter_id: str = field(
+        default_factory=lambda: hashlib.sha256(str(time.time()).encode()).hexdigest()[
+            :16
+        ]
+    )
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         result = asdict(self)
-        result['created_at'] = result['created_at'].isoformat()
-        result['language'] = result['language']
+        result["created_at"] = result["created_at"].isoformat()
+        result["language"] = result["language"]
         return result
 
 
 @dataclass
 class Explanation:
     """Explanation of legacy system behavior."""
+
     behavior_description: str
     technical_explanation: str
     historical_context: str
-    
+
     # Analysis
     root_causes: List[str] = field(default_factory=list)
     implications: List[str] = field(default_factory=list)
-    
+
     # Modernization guidance
     modernization_approaches: List[Dict[str, Any]] = field(default_factory=list)
     recommended_approach: Optional[str] = None
-    
+
     # Risk assessment
     modernization_risks: List[Dict[str, Any]] = field(default_factory=list)
     risk_level: ModernizationRisk = ModernizationRisk.MEDIUM
-    
+
     # Implementation guidance
     implementation_steps: List[str] = field(default_factory=list)
     estimated_effort: str = ""
     required_expertise: List[str] = field(default_factory=list)
-    
+
     # Quality metrics
     confidence: float = 0.0
     completeness: float = 0.0
-    
+
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    explanation_id: str = field(default_factory=lambda: hashlib.sha256(str(time.time()).encode()).hexdigest()[:16])
-    
+    explanation_id: str = field(
+        default_factory=lambda: hashlib.sha256(str(time.time()).encode()).hexdigest()[
+            :16
+        ]
+    )
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         result = asdict(self)
-        result['created_at'] = result['created_at'].isoformat()
-        result['risk_level'] = result['risk_level']
+        result["created_at"] = result["created_at"].isoformat()
+        result["risk_level"] = result["risk_level"]
         return result
 
 
 class LegacySystemWhisperer:
     """
     LLM-powered legacy protocol understanding and modernization.
-    
+
     Features:
     - Automatic protocol reverse engineering from traffic samples
     - Legacy documentation generation
     - Protocol adapter code generation
     - Migration path recommendations
     - Risk assessment for modernization
-    
+
     Success Metrics:
     - Reverse engineering accuracy: 85%+
     - Documentation completeness: 90%+
     - Adapter code quality: Production-ready
     """
-    
+
     def __init__(self):
         self.config = get_config()
         self.logger = logging.getLogger(__name__)
-        
+
         # Core components
         self.llm_service = get_llm_service()
         self.rag_engine = RAGEngine()
-        
+
         # Analysis cache
         self.analysis_cache: Dict[str, ProtocolSpecification] = {}
         self.adapter_cache: Dict[str, AdapterCode] = {}
-        
+
         # Knowledge base for legacy protocols
         self.legacy_knowledge: Dict[str, Any] = {}
-        
+
         # Configuration
         self.min_samples_for_analysis = 10
         self.confidence_threshold = 0.85
         self.max_cache_size = 100
-    
+
     async def initialize(self) -> None:
         """Initialize the Legacy System Whisperer."""
         try:
             self.logger.info("Initializing Legacy System Whisperer...")
-            
+
             # Initialize LLM service
             await self.llm_service.initialize()
-            
+
             # Initialize RAG engine
             await self.rag_engine.initialize()
-            
+
             # Load legacy protocol knowledge
             await self._load_legacy_knowledge()
-            
+
             self.logger.info("Legacy System Whisperer initialized successfully")
-            
+
         except Exception as e:
             self.logger.error(f"Failed to initialize Legacy System Whisperer: {e}")
             raise LegacyWhispererException(f"Initialization failed: {e}")
-    
+
     async def reverse_engineer_protocol(
-        self,
-        traffic_samples: List[bytes],
-        system_context: str = ""
+        self, traffic_samples: List[bytes], system_context: str = ""
     ) -> ProtocolSpecification:
         """
         Reverse engineer legacy protocol from traffic samples.
-        
+
         Args:
             traffic_samples: List of protocol message samples
             system_context: Additional context about the system
-            
+
         Returns:
             Complete protocol specification
         """
         start_time = time.time()
-        
+
         try:
             LEGACY_ANALYSIS_COUNTER.labels(
-                analysis_type='reverse_engineering',
-                status='started'
+                analysis_type="reverse_engineering", status="started"
             ).inc()
-            
+
             # Validate input
             if len(traffic_samples) < self.min_samples_for_analysis:
                 raise LegacyWhispererException(
                     f"Insufficient samples: {len(traffic_samples)} "
                     f"(minimum: {self.min_samples_for_analysis})"
                 )
-            
+
             # Check cache
             cache_key = self._generate_cache_key(traffic_samples, system_context)
             if cache_key in self.analysis_cache:
                 self.logger.info("Returning cached protocol specification")
                 return self.analysis_cache[cache_key]
-            
+
             # Step 1: Analyze traffic patterns
             self.logger.info(f"Analyzing {len(traffic_samples)} traffic samples...")
             patterns = await self._analyze_traffic_patterns(traffic_samples)
-            
+
             # Step 2: Infer protocol structure
             self.logger.info("Inferring protocol structure...")
             fields = await self._infer_protocol_structure(traffic_samples, patterns)
-            
+
             # Step 3: Identify message types
             self.logger.info("Identifying message types...")
             message_types = await self._identify_message_types(traffic_samples, fields)
-            
+
             # Step 4: Determine protocol characteristics
             self.logger.info("Determining protocol characteristics...")
             characteristics = await self._determine_characteristics(traffic_samples)
-            
+
             # Step 5: Generate documentation using LLM
             self.logger.info("Generating protocol documentation...")
             documentation = await self._generate_documentation(
@@ -348,157 +364,137 @@ class LegacySystemWhisperer:
                 fields,
                 message_types,
                 characteristics,
-                system_context
+                system_context,
             )
-            
+
             # Step 6: Assess complexity
             complexity = self._assess_complexity(fields, patterns, message_types)
-            
+
             # Step 7: Calculate confidence score
             confidence = self._calculate_confidence(
-                len(traffic_samples),
-                patterns,
-                fields,
-                message_types
+                len(traffic_samples), patterns, fields, message_types
             )
-            
+
             # Create specification
             spec = ProtocolSpecification(
-                protocol_name=documentation.get('protocol_name', 'Unknown Protocol'),
-                version=documentation.get('version', '1.0'),
-                description=documentation.get('description', ''),
+                protocol_name=documentation.get("protocol_name", "Unknown Protocol"),
+                version=documentation.get("version", "1.0"),
+                description=documentation.get("description", ""),
                 complexity=complexity,
                 fields=fields,
                 message_types=message_types,
                 patterns=patterns,
-                is_binary=characteristics['is_binary'],
-                is_stateful=characteristics['is_stateful'],
-                uses_encryption=characteristics['uses_encryption'],
-                has_checksums=characteristics['has_checksums'],
+                is_binary=characteristics["is_binary"],
+                is_stateful=characteristics["is_stateful"],
+                uses_encryption=characteristics["uses_encryption"],
+                has_checksums=characteristics["has_checksums"],
                 confidence_score=confidence,
                 analysis_time=time.time() - start_time,
                 samples_analyzed=len(traffic_samples),
-                documentation=documentation.get('full_documentation', ''),
-                usage_examples=documentation.get('usage_examples', []),
-                known_implementations=documentation.get('known_implementations', []),
-                historical_context=documentation.get('historical_context', ''),
-                common_issues=documentation.get('common_issues', []),
-                security_concerns=documentation.get('security_concerns', [])
+                documentation=documentation.get("full_documentation", ""),
+                usage_examples=documentation.get("usage_examples", []),
+                known_implementations=documentation.get("known_implementations", []),
+                historical_context=documentation.get("historical_context", ""),
+                common_issues=documentation.get("common_issues", []),
+                security_concerns=documentation.get("security_concerns", []),
             )
-            
+
             # Cache the result
             self._cache_specification(cache_key, spec)
-            
+
             # Update metrics
             LEGACY_ANALYSIS_DURATION.labels(
-                analysis_type='reverse_engineering'
+                analysis_type="reverse_engineering"
             ).observe(time.time() - start_time)
             LEGACY_CONFIDENCE_SCORE.observe(confidence)
             LEGACY_ANALYSIS_COUNTER.labels(
-                analysis_type='reverse_engineering',
-                status='success'
+                analysis_type="reverse_engineering", status="success"
             ).inc()
-            
+
             self.logger.info(
                 f"Protocol reverse engineering completed in {time.time() - start_time:.2f}s "
                 f"with confidence {confidence:.2%}"
             )
-            
+
             return spec
-            
+
         except Exception as e:
             self.logger.error(f"Protocol reverse engineering failed: {e}")
             LEGACY_ANALYSIS_COUNTER.labels(
-                analysis_type='reverse_engineering',
-                status='error'
+                analysis_type="reverse_engineering", status="error"
             ).inc()
             raise LegacyWhispererException(f"Reverse engineering failed: {e}")
-    
+
     async def generate_adapter_code(
         self,
         legacy_protocol: ProtocolSpecification,
         target_protocol: str,
-        language: AdapterLanguage = AdapterLanguage.PYTHON
+        language: AdapterLanguage = AdapterLanguage.PYTHON,
     ) -> AdapterCode:
         """
         Generate protocol adapter code.
-        
+
         Args:
             legacy_protocol: Legacy protocol specification
             target_protocol: Target protocol name (e.g., 'REST', 'gRPC', 'GraphQL')
             language: Programming language for adapter
-            
+
         Returns:
             Complete adapter code with tests and documentation
         """
         start_time = time.time()
-        
+
         try:
             LEGACY_ADAPTER_GENERATION.labels(
                 source_protocol=legacy_protocol.protocol_name,
                 target_protocol=target_protocol,
-                status='started'
+                status="started",
             ).inc()
-            
+
             # Check cache
             cache_key = f"{legacy_protocol.spec_id}_{target_protocol}_{language.value}"
             if cache_key in self.adapter_cache:
                 self.logger.info("Returning cached adapter code")
                 return self.adapter_cache[cache_key]
-            
+
             # Step 1: Analyze protocol differences
             self.logger.info("Analyzing protocol differences...")
             differences = await self._analyze_protocol_differences(
-                legacy_protocol,
-                target_protocol
+                legacy_protocol, target_protocol
             )
-            
+
             # Step 2: Generate transformation logic using LLM
             self.logger.info(f"Generating {language.value} adapter code...")
             adapter_code = await self._generate_transformation_logic(
-                legacy_protocol,
-                target_protocol,
-                language,
-                differences
+                legacy_protocol, target_protocol, language, differences
             )
-            
+
             # Step 3: Generate test cases
             self.logger.info("Generating test cases...")
             test_code = await self._generate_test_cases(
-                legacy_protocol,
-                target_protocol,
-                language,
-                adapter_code
+                legacy_protocol, target_protocol, language, adapter_code
             )
-            
+
             # Step 4: Generate documentation
             self.logger.info("Generating integration documentation...")
             documentation = await self._generate_integration_guide(
-                legacy_protocol,
-                target_protocol,
-                language,
-                adapter_code
+                legacy_protocol, target_protocol, language, adapter_code
             )
-            
+
             # Step 5: Extract dependencies and configuration
             dependencies = self._extract_dependencies(adapter_code, language)
             config_template = self._generate_config_template(
-                legacy_protocol,
-                target_protocol,
-                language
+                legacy_protocol, target_protocol, language
             )
-            
+
             # Step 6: Generate deployment guide
             deployment_guide = await self._generate_deployment_guide(
-                legacy_protocol,
-                target_protocol,
-                language,
-                adapter_code
+                legacy_protocol, target_protocol, language, adapter_code
             )
-            
+
             # Step 7: Assess code quality
             quality_score = await self._assess_code_quality(adapter_code, test_code)
-            
+
             # Create adapter code object
             adapter = AdapterCode(
                 source_protocol=legacy_protocol.protocol_name,
@@ -510,207 +506,200 @@ class LegacySystemWhisperer:
                 dependencies=dependencies,
                 configuration_template=config_template,
                 deployment_guide=deployment_guide,
-                integration_points=differences.get('integration_points', []),
-                api_endpoints=differences.get('api_endpoints', []),
+                integration_points=differences.get("integration_points", []),
+                api_endpoints=differences.get("api_endpoints", []),
                 code_quality_score=quality_score,
                 test_coverage=0.85,  # Estimated based on generated tests
-                performance_notes=differences.get('performance_notes', ''),
+                performance_notes=differences.get("performance_notes", ""),
                 generation_time=time.time() - start_time,
-                llm_provider=self.llm_service.get_current_provider()
+                llm_provider=self.llm_service.get_current_provider(),
             )
-            
+
             # Cache the result
             self._cache_adapter(cache_key, adapter)
-            
+
             # Update metrics
             LEGACY_ADAPTER_GENERATION.labels(
                 source_protocol=legacy_protocol.protocol_name,
                 target_protocol=target_protocol,
-                status='success'
+                status="success",
             ).inc()
-            
+
             self.logger.info(
                 f"Adapter code generation completed in {time.time() - start_time:.2f}s "
                 f"with quality score {quality_score:.2%}"
             )
-            
+
             return adapter
-            
+
         except Exception as e:
             self.logger.error(f"Adapter code generation failed: {e}")
             LEGACY_ADAPTER_GENERATION.labels(
                 source_protocol=legacy_protocol.protocol_name,
                 target_protocol=target_protocol,
-                status='error'
+                status="error",
             ).inc()
             raise LegacyWhispererException(f"Adapter generation failed: {e}")
-    
+
     async def explain_legacy_behavior(
-        self,
-        behavior: str,
-        context: Dict[str, Any]
+        self, behavior: str, context: Dict[str, Any]
     ) -> Explanation:
         """
         Explain legacy system behavior with modernization guidance.
-        
+
         Args:
             behavior: Description of the legacy behavior
             context: Additional context (protocol, system info, etc.)
-            
+
         Returns:
             Comprehensive explanation with modernization recommendations
         """
         start_time = time.time()
-        
+
         try:
             LEGACY_ANALYSIS_COUNTER.labels(
-                analysis_type='behavior_explanation',
-                status='started'
+                analysis_type="behavior_explanation", status="started"
             ).inc()
-            
+
             # Step 1: Analyze behavior patterns using LLM
             self.logger.info("Analyzing legacy behavior...")
             analysis = await self._analyze_behavior_with_llm(behavior, context)
-            
+
             # Step 2: Provide historical context
             self.logger.info("Gathering historical context...")
             historical_context = await self._gather_historical_context(
-                behavior,
-                context
+                behavior, context
             )
-            
+
             # Step 3: Suggest modernization approaches
             self.logger.info("Generating modernization approaches...")
             approaches = await self._suggest_modernization_approaches(
-                behavior,
-                context,
-                analysis
+                behavior, context, analysis
             )
-            
+
             # Step 4: Assess modernization risks
             self.logger.info("Assessing modernization risks...")
             risks = await self._assess_modernization_risks(
-                behavior,
-                context,
-                approaches
+                behavior, context, approaches
             )
-            
+
             # Step 5: Generate implementation guidance
             self.logger.info("Generating implementation guidance...")
             implementation = await self._generate_implementation_guidance(
-                behavior,
-                approaches,
-                risks
+                behavior, approaches, risks
             )
-            
+
             # Create explanation
             explanation = Explanation(
                 behavior_description=behavior,
-                technical_explanation=analysis.get('technical_explanation', ''),
+                technical_explanation=analysis.get("technical_explanation", ""),
                 historical_context=historical_context,
-                root_causes=analysis.get('root_causes', []),
-                implications=analysis.get('implications', []),
+                root_causes=analysis.get("root_causes", []),
+                implications=analysis.get("implications", []),
                 modernization_approaches=approaches,
                 recommended_approach=self._select_best_approach(approaches, risks),
                 modernization_risks=risks,
                 risk_level=self._determine_overall_risk(risks),
-                implementation_steps=implementation.get('steps', []),
-                estimated_effort=implementation.get('effort', ''),
-                required_expertise=implementation.get('expertise', []),
-                confidence=analysis.get('confidence', 0.0),
-                completeness=self._calculate_completeness(analysis, approaches, risks)
+                implementation_steps=implementation.get("steps", []),
+                estimated_effort=implementation.get("effort", ""),
+                required_expertise=implementation.get("expertise", []),
+                confidence=analysis.get("confidence", 0.0),
+                completeness=self._calculate_completeness(analysis, approaches, risks),
             )
-            
+
             # Update metrics
             LEGACY_ANALYSIS_DURATION.labels(
-                analysis_type='behavior_explanation'
+                analysis_type="behavior_explanation"
             ).observe(time.time() - start_time)
             LEGACY_ANALYSIS_COUNTER.labels(
-                analysis_type='behavior_explanation',
-                status='success'
+                analysis_type="behavior_explanation", status="success"
             ).inc()
-            
+
             self.logger.info(
                 f"Behavior explanation completed in {time.time() - start_time:.2f}s"
             )
-            
+
             return explanation
-            
+
         except Exception as e:
             self.logger.error(f"Behavior explanation failed: {e}")
             LEGACY_ANALYSIS_COUNTER.labels(
-                analysis_type='behavior_explanation',
-                status='error'
+                analysis_type="behavior_explanation", status="error"
             ).inc()
             raise LegacyWhispererException(f"Behavior explanation failed: {e}")
-    
+
     # Private helper methods
-    
+
     async def _analyze_traffic_patterns(
-        self,
-        samples: List[bytes]
+        self, samples: List[bytes]
     ) -> List[ProtocolPattern]:
         """Analyze traffic samples to identify patterns."""
         patterns = []
-        
+
         # Analyze message lengths
         lengths = [len(sample) for sample in samples]
         if len(set(lengths)) == 1:
-            patterns.append(ProtocolPattern(
-                pattern_type='fixed_length',
-                description=f'All messages have fixed length of {lengths[0]} bytes',
-                frequency=len(samples),
-                confidence=1.0
-            ))
-        
+            patterns.append(
+                ProtocolPattern(
+                    pattern_type="fixed_length",
+                    description=f"All messages have fixed length of {lengths[0]} bytes",
+                    frequency=len(samples),
+                    confidence=1.0,
+                )
+            )
+
         # Analyze common byte sequences
         byte_sequences = {}
         for sample in samples:
             for i in range(len(sample) - 3):
-                seq = sample[i:i+4]
+                seq = sample[i : i + 4]
                 byte_sequences[seq] = byte_sequences.get(seq, 0) + 1
-        
+
         # Find common sequences
-        for seq, count in sorted(byte_sequences.items(), key=lambda x: x[1], reverse=True)[:5]:
+        for seq, count in sorted(
+            byte_sequences.items(), key=lambda x: x[1], reverse=True
+        )[:5]:
             if count > len(samples) * 0.5:  # Appears in >50% of samples
-                patterns.append(ProtocolPattern(
-                    pattern_type='common_sequence',
-                    description=f'Common byte sequence: {seq.hex()}',
-                    frequency=count,
-                    confidence=count / len(samples)
-                ))
-        
+                patterns.append(
+                    ProtocolPattern(
+                        pattern_type="common_sequence",
+                        description=f"Common byte sequence: {seq.hex()}",
+                        frequency=count,
+                        confidence=count / len(samples),
+                    )
+                )
+
         # Analyze header patterns (first N bytes)
         header_size = min(16, min(len(s) for s in samples))
         headers = [sample[:header_size] for sample in samples]
-        
+
         # Check for magic numbers
         first_bytes = {}
         for header in headers:
             if len(header) >= 4:
                 magic = header[:4]
                 first_bytes[magic] = first_bytes.get(magic, 0) + 1
-        
+
         for magic, count in first_bytes.items():
             if count > len(samples) * 0.7:  # Appears in >70% of samples
-                patterns.append(ProtocolPattern(
-                    pattern_type='magic_number',
-                    description=f'Magic number: {magic.hex()}',
-                    frequency=count,
-                    confidence=count / len(samples)
-                ))
-        
+                patterns.append(
+                    ProtocolPattern(
+                        pattern_type="magic_number",
+                        description=f"Magic number: {magic.hex()}",
+                        frequency=count,
+                        confidence=count / len(samples),
+                    )
+                )
+
         return patterns
-    
+
     async def _infer_protocol_structure(
-        self,
-        samples: List[bytes],
-        patterns: List[ProtocolPattern]
+        self, samples: List[bytes], patterns: List[ProtocolPattern]
     ) -> List[ProtocolField]:
         """Infer protocol field structure using LLM."""
         # Prepare sample data for LLM analysis
         sample_hex = [sample.hex() for sample in samples[:10]]  # First 10 samples
-        
+
         llm_request = LLMRequest(
             prompt=f"""
             Analyze these protocol message samples and infer the field structure:
@@ -731,59 +720,59 @@ class LegacySystemWhisperer:
             Provide your analysis in JSON format with fields array.
             """,
             feature_domain="legacy_whisperer",
-            context={'analysis_type': 'structure_inference'},
+            context={"analysis_type": "structure_inference"},
             max_tokens=2000,
-            temperature=0.1
+            temperature=0.1,
         )
-        
+
         response = await self.llm_service.process_request(llm_request)
-        
+
         # Parse LLM response to extract fields
         try:
             # Extract JSON from response
             content = response.content
-            if '```json' in content:
-                content = content.split('```json')[1].split('```')[0]
-            elif '```' in content:
-                content = content.split('```')[1].split('```')[0]
-            
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0]
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0]
+
             analysis = json.loads(content.strip())
-            
+
             fields = []
-            for field_data in analysis.get('fields', []):
-                fields.append(ProtocolField(
-                    name=field_data.get('name', 'unknown'),
-                    offset=field_data.get('offset', 0),
-                    length=field_data.get('length', 0),
-                    field_type=field_data.get('type', 'binary'),
-                    description=field_data.get('description', ''),
-                    confidence=field_data.get('confidence', 0.7)
-                ))
-            
+            for field_data in analysis.get("fields", []):
+                fields.append(
+                    ProtocolField(
+                        name=field_data.get("name", "unknown"),
+                        offset=field_data.get("offset", 0),
+                        length=field_data.get("length", 0),
+                        field_type=field_data.get("type", "binary"),
+                        description=field_data.get("description", ""),
+                        confidence=field_data.get("confidence", 0.7),
+                    )
+                )
+
             return fields
-            
+
         except Exception as e:
             self.logger.warning(f"Failed to parse LLM field analysis: {e}")
             # Return basic field structure as fallback
             return [
                 ProtocolField(
-                    name='header',
+                    name="header",
                     offset=0,
                     length=16,
-                    field_type='binary',
-                    description='Protocol header',
-                    confidence=0.5
+                    field_type="binary",
+                    description="Protocol header",
+                    confidence=0.5,
                 )
             ]
-    
+
     async def _identify_message_types(
-        self,
-        samples: List[bytes],
-        fields: List[ProtocolField]
+        self, samples: List[bytes], fields: List[ProtocolField]
     ) -> List[Dict[str, Any]]:
         """Identify different message types in the protocol."""
         message_types = []
-        
+
         # Group samples by potential type indicators
         type_groups = {}
         for sample in samples:
@@ -793,56 +782,55 @@ class LegacySystemWhisperer:
                 if type_indicator not in type_groups:
                     type_groups[type_indicator] = []
                 type_groups[type_indicator].append(sample)
-        
+
         # Create message type definitions
         for i, (indicator, group_samples) in enumerate(type_groups.items()):
-            message_types.append({
-                'type_id': i + 1,
-                'type_indicator': indicator,
-                'sample_count': len(group_samples),
-                'description': f'Message type {i + 1}',
-                'fields': [f.name for f in fields]
-            })
-        
+            message_types.append(
+                {
+                    "type_id": i + 1,
+                    "type_indicator": indicator,
+                    "sample_count": len(group_samples),
+                    "description": f"Message type {i + 1}",
+                    "fields": [f.name for f in fields],
+                }
+            )
+
         return message_types
-    
-    async def _determine_characteristics(
-        self,
-        samples: List[bytes]
-    ) -> Dict[str, bool]:
+
+    async def _determine_characteristics(self, samples: List[bytes]) -> Dict[str, bool]:
         """Determine protocol characteristics."""
         characteristics = {
-            'is_binary': True,  # Assume binary unless proven otherwise
-            'is_stateful': False,
-            'uses_encryption': False,
-            'has_checksums': False
+            "is_binary": True,  # Assume binary unless proven otherwise
+            "is_stateful": False,
+            "uses_encryption": False,
+            "has_checksums": False,
         }
-        
+
         # Check if text-based
         try:
             for sample in samples[:5]:
-                sample.decode('ascii')
-            characteristics['is_binary'] = False
+                sample.decode("ascii")
+            characteristics["is_binary"] = False
         except:
             pass
-        
+
         # Check for high entropy (possible encryption)
         for sample in samples[:10]:
             if len(sample) > 0:
                 entropy = len(set(sample)) / len(sample)
                 if entropy > 0.9:
-                    characteristics['uses_encryption'] = True
+                    characteristics["uses_encryption"] = True
                     break
-        
+
         # Check for checksum patterns (last few bytes often checksums)
         # This is a heuristic - would need more sophisticated analysis
         if len(samples) > 5:
             last_bytes = [sample[-4:] for sample in samples if len(sample) >= 4]
             if len(set(last_bytes)) == len(last_bytes):
-                characteristics['has_checksums'] = True
-        
+                characteristics["has_checksums"] = True
+
         return characteristics
-    
+
     async def _generate_documentation(
         self,
         samples: List[bytes],
@@ -850,7 +838,7 @@ class LegacySystemWhisperer:
         fields: List[ProtocolField],
         message_types: List[Dict[str, Any]],
         characteristics: Dict[str, bool],
-        system_context: str
+        system_context: str,
     ) -> Dict[str, Any]:
         """Generate comprehensive protocol documentation using LLM."""
         llm_request = LLMRequest(
@@ -889,57 +877,57 @@ class LegacySystemWhisperer:
             Format as JSON with these keys.
             """,
             feature_domain="legacy_whisperer",
-            context={'analysis_type': 'documentation_generation'},
+            context={"analysis_type": "documentation_generation"},
             max_tokens=3000,
-            temperature=0.2
+            temperature=0.2,
         )
-        
+
         response = await self.llm_service.process_request(llm_request)
-        
+
         try:
             content = response.content
-            if '```json' in content:
-                content = content.split('```json')[1].split('```')[0]
-            elif '```' in content:
-                content = content.split('```')[1].split('```')[0]
-            
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0]
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0]
+
             return json.loads(content.strip())
         except:
             # Return basic documentation as fallback
             return {
-                'protocol_name': 'Unknown Legacy Protocol',
-                'version': '1.0',
-                'description': 'Legacy protocol identified through traffic analysis',
-                'full_documentation': response.content,
-                'usage_examples': [],
-                'known_implementations': [],
-                'historical_context': '',
-                'common_issues': [],
-                'security_concerns': []
+                "protocol_name": "Unknown Legacy Protocol",
+                "version": "1.0",
+                "description": "Legacy protocol identified through traffic analysis",
+                "full_documentation": response.content,
+                "usage_examples": [],
+                "known_implementations": [],
+                "historical_context": "",
+                "common_issues": [],
+                "security_concerns": [],
             }
-    
+
     def _assess_complexity(
         self,
         fields: List[ProtocolField],
         patterns: List[ProtocolPattern],
-        message_types: List[Dict[str, Any]]
+        message_types: List[Dict[str, Any]],
     ) -> ProtocolComplexity:
         """Assess protocol complexity."""
         complexity_score = 0
-        
+
         # Factor in number of fields
         complexity_score += len(fields) * 0.3
-        
+
         # Factor in number of message types
         complexity_score += len(message_types) * 0.4
-        
+
         # Factor in pattern complexity
         complexity_score += len(patterns) * 0.2
-        
+
         # Factor in field types diversity
         field_types = set(f.field_type for f in fields)
         complexity_score += len(field_types) * 0.1
-        
+
         if complexity_score < 5:
             return ProtocolComplexity.SIMPLE
         elif complexity_score < 10:
@@ -948,17 +936,17 @@ class LegacySystemWhisperer:
             return ProtocolComplexity.COMPLEX
         else:
             return ProtocolComplexity.HIGHLY_COMPLEX
-    
+
     def _calculate_confidence(
         self,
         sample_count: int,
         patterns: List[ProtocolPattern],
         fields: List[ProtocolField],
-        message_types: List[Dict[str, Any]]
+        message_types: List[Dict[str, Any]],
     ) -> float:
         """Calculate overall confidence score."""
         confidence = 0.0
-        
+
         # Sample size factor
         if sample_count >= 100:
             confidence += 0.3
@@ -966,27 +954,25 @@ class LegacySystemWhisperer:
             confidence += 0.2
         elif sample_count >= 20:
             confidence += 0.1
-        
+
         # Pattern confidence
         if patterns:
             avg_pattern_confidence = sum(p.confidence for p in patterns) / len(patterns)
             confidence += avg_pattern_confidence * 0.3
-        
+
         # Field confidence
         if fields:
             avg_field_confidence = sum(f.confidence for f in fields) / len(fields)
             confidence += avg_field_confidence * 0.3
-        
+
         # Message type diversity
         if message_types:
             confidence += min(0.1, len(message_types) * 0.02)
-        
+
         return min(1.0, confidence)
-    
+
     async def _analyze_protocol_differences(
-        self,
-        legacy_protocol: ProtocolSpecification,
-        target_protocol: str
+        self, legacy_protocol: ProtocolSpecification, target_protocol: str
     ) -> Dict[str, Any]:
         """Analyze differences between legacy and target protocols."""
         llm_request = LLMRequest(
@@ -1013,37 +999,37 @@ class LegacySystemWhisperer:
             Format as JSON.
             """,
             feature_domain="legacy_whisperer",
-            context={'analysis_type': 'protocol_differences'},
+            context={"analysis_type": "protocol_differences"},
             max_tokens=2000,
-            temperature=0.1
+            temperature=0.1,
         )
-        
+
         response = await self.llm_service.process_request(llm_request)
-        
+
         try:
             content = response.content
-            if '```json' in content:
-                content = content.split('```json')[1].split('```')[0]
-            elif '```' in content:
-                content = content.split('```')[1].split('```')[0]
-            
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0]
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0]
+
             return json.loads(content.strip())
         except:
             return {
-                'structural_differences': [],
-                'transformation_requirements': [],
-                'integration_points': [],
-                'api_endpoints': [],
-                'performance_notes': '',
-                'security_implications': []
+                "structural_differences": [],
+                "transformation_requirements": [],
+                "integration_points": [],
+                "api_endpoints": [],
+                "performance_notes": "",
+                "security_implications": [],
             }
-    
+
     async def _generate_transformation_logic(
         self,
         legacy_protocol: ProtocolSpecification,
         target_protocol: str,
         language: AdapterLanguage,
-        differences: Dict[str, Any]
+        differences: Dict[str, Any],
     ) -> str:
         """Generate transformation logic code using LLM."""
         llm_request = LLMRequest(
@@ -1080,28 +1066,28 @@ class LegacySystemWhisperer:
             Generate only the code, no explanations.
             """,
             feature_domain="legacy_whisperer",
-            context={'generation_type': 'adapter_code'},
+            context={"generation_type": "adapter_code"},
             max_tokens=4000,
-            temperature=0.2
+            temperature=0.2,
         )
-        
+
         response = await self.llm_service.process_request(llm_request)
-        
+
         # Extract code from response
         content = response.content
-        if f'```{language.value}' in content:
-            content = content.split(f'```{language.value}')[1].split('```')[0]
-        elif '```' in content:
-            content = content.split('```')[1].split('```')[0]
-        
+        if f"```{language.value}" in content:
+            content = content.split(f"```{language.value}")[1].split("```")[0]
+        elif "```" in content:
+            content = content.split("```")[1].split("```")[0]
+
         return content.strip()
-    
+
     async def _generate_test_cases(
         self,
         legacy_protocol: ProtocolSpecification,
         target_protocol: str,
         language: AdapterLanguage,
-        adapter_code: str
+        adapter_code: str,
     ) -> str:
         """Generate comprehensive test cases."""
         llm_request = LLMRequest(
@@ -1128,27 +1114,27 @@ class LegacySystemWhisperer:
             Generate only the test code.
             """,
             feature_domain="legacy_whisperer",
-            context={'generation_type': 'test_code'},
+            context={"generation_type": "test_code"},
             max_tokens=3000,
-            temperature=0.2
+            temperature=0.2,
         )
-        
+
         response = await self.llm_service.process_request(llm_request)
-        
+
         content = response.content
-        if f'```{language.value}' in content:
-            content = content.split(f'```{language.value}')[1].split('```')[0]
-        elif '```' in content:
-            content = content.split('```')[1].split('```')[0]
-        
+        if f"```{language.value}" in content:
+            content = content.split(f"```{language.value}")[1].split("```")[0]
+        elif "```" in content:
+            content = content.split("```")[1].split("```")[0]
+
         return content.strip()
-    
+
     async def _generate_integration_guide(
         self,
         legacy_protocol: ProtocolSpecification,
         target_protocol: str,
         language: AdapterLanguage,
-        adapter_code: str
+        adapter_code: str,
     ) -> str:
         """Generate integration documentation."""
         llm_request = LLMRequest(
@@ -1173,48 +1159,44 @@ class LegacySystemWhisperer:
             Format in Markdown.
             """,
             feature_domain="legacy_whisperer",
-            context={'generation_type': 'documentation'},
+            context={"generation_type": "documentation"},
             max_tokens=3000,
-            temperature=0.3
+            temperature=0.3,
         )
-        
+
         response = await self.llm_service.process_request(llm_request)
         return response.content
-    
-    def _extract_dependencies(
-        self,
-        code: str,
-        language: AdapterLanguage
-    ) -> List[str]:
+
+    def _extract_dependencies(self, code: str, language: AdapterLanguage) -> List[str]:
         """Extract dependencies from generated code."""
         dependencies = []
-        
+
         if language == AdapterLanguage.PYTHON:
             # Extract import statements
-            for line in code.split('\n'):
+            for line in code.split("\n"):
                 line = line.strip()
-                if line.startswith('import ') or line.startswith('from '):
+                if line.startswith("import ") or line.startswith("from "):
                     # Extract package name
-                    if 'import' in line:
-                        pkg = line.split('import')[1].split()[0].split('.')[0]
-                        if pkg not in ['os', 'sys', 'time', 'json', 'typing']:
+                    if "import" in line:
+                        pkg = line.split("import")[1].split()[0].split(".")[0]
+                        if pkg not in ["os", "sys", "time", "json", "typing"]:
                             dependencies.append(pkg)
-        
+
         elif language == AdapterLanguage.JAVA:
             # Extract Maven dependencies
-            for line in code.split('\n'):
-                if 'import' in line and not line.strip().startswith('//'):
-                    pkg = line.split('import')[1].split(';')[0].strip()
-                    if not pkg.startswith('java.'):
-                        dependencies.append(pkg.split('.')[0])
-        
+            for line in code.split("\n"):
+                if "import" in line and not line.strip().startswith("//"):
+                    pkg = line.split("import")[1].split(";")[0].strip()
+                    if not pkg.startswith("java."):
+                        dependencies.append(pkg.split(".")[0])
+
         return list(set(dependencies))
-    
+
     def _generate_config_template(
         self,
         legacy_protocol: ProtocolSpecification,
         target_protocol: str,
-        language: AdapterLanguage
+        language: AdapterLanguage,
     ) -> str:
         """Generate configuration template."""
         if language == AdapterLanguage.PYTHON:
@@ -1251,13 +1233,13 @@ api_key = "${{API_KEY}}"
 """
         else:
             return "# Configuration template for " + language.value
-    
+
     async def _generate_deployment_guide(
         self,
         legacy_protocol: ProtocolSpecification,
         target_protocol: str,
         language: AdapterLanguage,
-        adapter_code: str
+        adapter_code: str,
     ) -> str:
         """Generate deployment guide."""
         llm_request = LLMRequest(
@@ -1282,56 +1264,50 @@ api_key = "${{API_KEY}}"
             Format in Markdown.
             """,
             feature_domain="legacy_whisperer",
-            context={'generation_type': 'deployment_guide'},
+            context={"generation_type": "deployment_guide"},
             max_tokens=2500,
-            temperature=0.2
+            temperature=0.2,
         )
-        
+
         response = await self.llm_service.process_request(llm_request)
         return response.content
-    
-    async def _assess_code_quality(
-        self,
-        adapter_code: str,
-        test_code: str
-    ) -> float:
+
+    async def _assess_code_quality(self, adapter_code: str, test_code: str) -> float:
         """Assess generated code quality."""
         quality_score = 0.0
-        
+
         # Check for error handling
-        if 'try' in adapter_code and 'except' in adapter_code:
+        if "try" in adapter_code and "except" in adapter_code:
             quality_score += 0.2
-        
+
         # Check for logging
-        if 'log' in adapter_code.lower():
+        if "log" in adapter_code.lower():
             quality_score += 0.15
-        
+
         # Check for docstrings/comments
-        if '"""' in adapter_code or '///' in adapter_code:
+        if '"""' in adapter_code or "///" in adapter_code:
             quality_score += 0.15
-        
+
         # Check for type hints (Python)
-        if '->' in adapter_code or ': ' in adapter_code:
+        if "->" in adapter_code or ": " in adapter_code:
             quality_score += 0.1
-        
+
         # Check for tests
         if len(test_code) > 100:
             quality_score += 0.2
-        
+
         # Check for configuration management
-        if 'config' in adapter_code.lower():
+        if "config" in adapter_code.lower():
             quality_score += 0.1
-        
+
         # Check for async support
-        if 'async' in adapter_code:
+        if "async" in adapter_code:
             quality_score += 0.1
-        
+
         return min(1.0, quality_score)
-    
+
     async def _analyze_behavior_with_llm(
-        self,
-        behavior: str,
-        context: Dict[str, Any]
+        self, behavior: str, context: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Analyze legacy behavior using LLM."""
         llm_request = LLMRequest(
@@ -1352,56 +1328,49 @@ api_key = "${{API_KEY}}"
             Format as JSON with keys: technical_explanation, root_causes, implications, confidence
             """,
             feature_domain="legacy_whisperer",
-            context={'analysis_type': 'behavior_analysis'},
+            context={"analysis_type": "behavior_analysis"},
             max_tokens=2000,
-            temperature=0.2
+            temperature=0.2,
         )
-        
+
         response = await self.llm_service.process_request(llm_request)
-        
+
         try:
             content = response.content
-            if '```json' in content:
-                content = content.split('```json')[1].split('```')[0]
-            elif '```' in content:
-                content = content.split('```')[1].split('```')[0]
-            
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0]
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0]
+
             return json.loads(content.strip())
         except:
             return {
-                'technical_explanation': response.content,
-                'root_causes': [],
-                'implications': [],
-                'confidence': 0.7
+                "technical_explanation": response.content,
+                "root_causes": [],
+                "implications": [],
+                "confidence": 0.7,
             }
-    
+
     async def _gather_historical_context(
-        self,
-        behavior: str,
-        context: Dict[str, Any]
+        self, behavior: str, context: Dict[str, Any]
     ) -> str:
         """Gather historical context using RAG."""
         # Search knowledge base for similar behaviors
         query = f"legacy system behavior: {behavior}"
         results = await self.rag_engine.query_similar(
-            query,
-            collection_name='protocol_knowledge',
-            n_results=3
+            query, collection_name="protocol_knowledge", n_results=3
         )
-        
+
         if results.documents:
             historical_context = "Historical Context:\n\n"
             for doc in results.documents:
                 historical_context += f"- {doc.content[:200]}...\n"
             return historical_context
-        
+
         return "No specific historical context found in knowledge base."
-    
+
     async def _suggest_modernization_approaches(
-        self,
-        behavior: str,
-        context: Dict[str, Any],
-        analysis: Dict[str, Any]
+        self, behavior: str, context: Dict[str, Any], analysis: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Suggest modernization approaches."""
         llm_request = LLMRequest(
@@ -1424,37 +1393,36 @@ api_key = "${{API_KEY}}"
             Format as JSON array.
             """,
             feature_domain="legacy_whisperer",
-            context={'analysis_type': 'modernization_approaches'},
+            context={"analysis_type": "modernization_approaches"},
             max_tokens=2500,
-            temperature=0.3
+            temperature=0.3,
         )
-        
+
         response = await self.llm_service.process_request(llm_request)
-        
+
         try:
             content = response.content
-            if '```json' in content:
-                content = content.split('```json')[1].split('```')[0]
-            elif '```' in content:
-                content = content.split('```')[1].split('```')[0]
-            
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0]
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0]
+
             return json.loads(content.strip())
         except:
-            return [{
-                'name': 'Gradual Modernization',
-                'description': 'Incrementally replace legacy components',
-                'benefits': ['Lower risk', 'Continuous operation'],
-                'drawbacks': ['Longer timeline'],
-                'complexity': 'medium',
-                'timeline': '6-12 months',
-                'resources': ['2-3 developers', '1 architect']
-            }]
-    
+            return [
+                {
+                    "name": "Gradual Modernization",
+                    "description": "Incrementally replace legacy components",
+                    "benefits": ["Lower risk", "Continuous operation"],
+                    "drawbacks": ["Longer timeline"],
+                    "complexity": "medium",
+                    "timeline": "6-12 months",
+                    "resources": ["2-3 developers", "1 architect"],
+                }
+            ]
+
     async def _assess_modernization_risks(
-        self,
-        behavior: str,
-        context: Dict[str, Any],
-        approaches: List[Dict[str, Any]]
+        self, behavior: str, context: Dict[str, Any], approaches: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """Assess modernization risks."""
         llm_request = LLMRequest(
@@ -1481,35 +1449,37 @@ api_key = "${{API_KEY}}"
             Format as JSON array.
             """,
             feature_domain="legacy_whisperer",
-            context={'analysis_type': 'risk_assessment'},
+            context={"analysis_type": "risk_assessment"},
             max_tokens=2500,
-            temperature=0.2
+            temperature=0.2,
         )
-        
+
         response = await self.llm_service.process_request(llm_request)
-        
+
         try:
             content = response.content
-            if '```json' in content:
-                content = content.split('```json')[1].split('```')[0]
-            elif '```' in content:
-                content = content.split('```')[1].split('```')[0]
-            
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0]
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0]
+
             return json.loads(content.strip())
         except:
-            return [{
-                'category': 'technical',
-                'description': 'Compatibility issues with existing systems',
-                'severity': 'medium',
-                'likelihood': 'medium',
-                'mitigation': ['Comprehensive testing', 'Phased rollout']
-            }]
-    
+            return [
+                {
+                    "category": "technical",
+                    "description": "Compatibility issues with existing systems",
+                    "severity": "medium",
+                    "likelihood": "medium",
+                    "mitigation": ["Comprehensive testing", "Phased rollout"],
+                }
+            ]
+
     async def _generate_implementation_guidance(
         self,
         behavior: str,
         approaches: List[Dict[str, Any]],
-        risks: List[Dict[str, Any]]
+        risks: List[Dict[str, Any]],
     ) -> Dict[str, Any]:
         """Generate implementation guidance."""
         llm_request = LLMRequest(
@@ -1530,77 +1500,78 @@ api_key = "${{API_KEY}}"
             Format as JSON.
             """,
             feature_domain="legacy_whisperer",
-            context={'analysis_type': 'implementation_guidance'},
+            context={"analysis_type": "implementation_guidance"},
             max_tokens=2000,
-            temperature=0.2
+            temperature=0.2,
         )
-        
+
         response = await self.llm_service.process_request(llm_request)
-        
+
         try:
             content = response.content
-            if '```json' in content:
-                content = content.split('```json')[1].split('```')[0]
-            elif '```' in content:
-                content = content.split('```')[1].split('```')[0]
-            
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0]
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0]
+
             return json.loads(content.strip())
         except:
             return {
-                'steps': ['Analyze current implementation', 'Design new solution', 'Implement', 'Test', 'Deploy'],
-                'effort': '4-6 weeks',
-                'expertise': ['Senior Developer', 'System Architect']
+                "steps": [
+                    "Analyze current implementation",
+                    "Design new solution",
+                    "Implement",
+                    "Test",
+                    "Deploy",
+                ],
+                "effort": "4-6 weeks",
+                "expertise": ["Senior Developer", "System Architect"],
             }
-    
+
     def _select_best_approach(
-        self,
-        approaches: List[Dict[str, Any]],
-        risks: List[Dict[str, Any]]
+        self, approaches: List[Dict[str, Any]], risks: List[Dict[str, Any]]
     ) -> Optional[str]:
         """Select the best modernization approach."""
         if not approaches:
             return None
-        
+
         # Score each approach based on complexity and risks
         scores = {}
         for approach in approaches:
             score = 0.0
-            
+
             # Lower complexity is better
-            complexity = approach.get('complexity', 'medium')
-            if complexity == 'low':
+            complexity = approach.get("complexity", "medium")
+            if complexity == "low":
                 score += 0.4
-            elif complexity == 'medium':
+            elif complexity == "medium":
                 score += 0.2
-            
+
             # Consider benefits
-            benefits = approach.get('benefits', [])
+            benefits = approach.get("benefits", [])
             score += len(benefits) * 0.1
-            
+
             # Consider drawbacks (negative)
-            drawbacks = approach.get('drawbacks', [])
+            drawbacks = approach.get("drawbacks", [])
             score -= len(drawbacks) * 0.05
-            
-            scores[approach.get('name', '')] = score
-        
+
+            scores[approach.get("name", "")] = score
+
         # Return approach with highest score
         if scores:
             return max(scores.items(), key=lambda x: x[1])[0]
-        
-        return approaches[0].get('name')
-    
-    def _determine_overall_risk(
-        self,
-        risks: List[Dict[str, Any]]
-    ) -> ModernizationRisk:
+
+        return approaches[0].get("name")
+
+    def _determine_overall_risk(self, risks: List[Dict[str, Any]]) -> ModernizationRisk:
         """Determine overall risk level."""
         if not risks:
             return ModernizationRisk.LOW
-        
+
         # Count risks by severity
-        critical_count = sum(1 for r in risks if r.get('severity') == 'critical')
-        high_count = sum(1 for r in risks if r.get('severity') == 'high')
-        
+        critical_count = sum(1 for r in risks if r.get("severity") == "critical")
+        high_count = sum(1 for r in risks if r.get("severity") == "high")
+
         if critical_count > 0:
             return ModernizationRisk.CRITICAL
         elif high_count >= 3:
@@ -1609,43 +1580,39 @@ api_key = "${{API_KEY}}"
             return ModernizationRisk.MEDIUM
         else:
             return ModernizationRisk.LOW
-    
+
     def _calculate_completeness(
         self,
         analysis: Dict[str, Any],
         approaches: List[Dict[str, Any]],
-        risks: List[Dict[str, Any]]
+        risks: List[Dict[str, Any]],
     ) -> float:
         """Calculate explanation completeness."""
         completeness = 0.0
-        
+
         # Check analysis completeness
-        if analysis.get('technical_explanation'):
+        if analysis.get("technical_explanation"):
             completeness += 0.25
-        if analysis.get('root_causes'):
+        if analysis.get("root_causes"):
             completeness += 0.15
-        if analysis.get('implications'):
+        if analysis.get("implications"):
             completeness += 0.15
-        
+
         # Check approaches
         if len(approaches) >= 3:
             completeness += 0.25
         elif len(approaches) > 0:
             completeness += 0.15
-        
+
         # Check risks
         if len(risks) >= 3:
             completeness += 0.20
         elif len(risks) > 0:
             completeness += 0.10
-        
+
         return min(1.0, completeness)
-    
-    def _generate_cache_key(
-        self,
-        samples: List[bytes],
-        context: str
-    ) -> str:
+
+    def _generate_cache_key(self, samples: List[bytes], context: str) -> str:
         """Generate cache key for analysis."""
         # Hash samples and context
         hasher = hashlib.sha256()
@@ -1653,33 +1620,25 @@ api_key = "${{API_KEY}}"
             hasher.update(sample)
         hasher.update(context.encode())
         return hasher.hexdigest()[:16]
-    
-    def _cache_specification(
-        self,
-        key: str,
-        spec: ProtocolSpecification
-    ) -> None:
+
+    def _cache_specification(self, key: str, spec: ProtocolSpecification) -> None:
         """Cache protocol specification."""
         if len(self.analysis_cache) >= self.max_cache_size:
             # Remove oldest entry
             oldest_key = next(iter(self.analysis_cache))
             del self.analysis_cache[oldest_key]
-        
+
         self.analysis_cache[key] = spec
-    
-    def _cache_adapter(
-        self,
-        key: str,
-        adapter: AdapterCode
-    ) -> None:
+
+    def _cache_adapter(self, key: str, adapter: AdapterCode) -> None:
         """Cache adapter code."""
         if len(self.adapter_cache) >= self.max_cache_size:
             # Remove oldest entry
             oldest_key = next(iter(self.adapter_cache))
             del self.adapter_cache[oldest_key]
-        
+
         self.adapter_cache[key] = adapter
-    
+
     async def _load_legacy_knowledge(self) -> None:
         """Load legacy protocol knowledge into RAG."""
         # Add common legacy protocol knowledge
@@ -1703,8 +1662,8 @@ api_key = "${{API_KEY}}"
                 - Enhanced error handling
                 - API-based access
                 """,
-                metadata={'category': 'legacy_protocols', 'era': 'mainframe'},
-                created_at=datetime.now(timezone.utc)
+                metadata={"category": "legacy_protocols", "era": "mainframe"},
+                created_at=datetime.now(timezone.utc),
             ),
             RAGDocument(
                 id="legacy_proprietary_protocols",
@@ -1725,35 +1684,35 @@ api_key = "${{API_KEY}}"
                 - State machine inference
                 - Field boundary detection
                 """,
-                metadata={'category': 'legacy_protocols', 'type': 'proprietary'},
-                created_at=datetime.now(timezone.utc)
-            )
+                metadata={"category": "legacy_protocols", "type": "proprietary"},
+                created_at=datetime.now(timezone.utc),
+            ),
         ]
-        
-        await self.rag_engine.add_documents('protocol_knowledge', legacy_docs)
+
+        await self.rag_engine.add_documents("protocol_knowledge", legacy_docs)
         self.logger.info("Legacy protocol knowledge loaded")
-    
+
     def get_statistics(self) -> Dict[str, Any]:
         """Get Legacy Whisperer statistics."""
         return {
-            'analysis_cache_size': len(self.analysis_cache),
-            'adapter_cache_size': len(self.adapter_cache),
-            'min_samples_required': self.min_samples_for_analysis,
-            'confidence_threshold': self.confidence_threshold,
-            'max_cache_size': self.max_cache_size
+            "analysis_cache_size": len(self.analysis_cache),
+            "adapter_cache_size": len(self.adapter_cache),
+            "min_samples_required": self.min_samples_for_analysis,
+            "confidence_threshold": self.confidence_threshold,
+            "max_cache_size": self.max_cache_size,
         }
-    
+
     async def shutdown(self) -> None:
         """Shutdown Legacy System Whisperer."""
         try:
             self.logger.info("Shutting down Legacy System Whisperer...")
-            
+
             # Clear caches
             self.analysis_cache.clear()
             self.adapter_cache.clear()
-            
+
             self.logger.info("Legacy System Whisperer shutdown complete")
-            
+
         except Exception as e:
             self.logger.error(f"Error during shutdown: {e}")
 

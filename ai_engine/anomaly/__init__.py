@@ -14,7 +14,7 @@ from .ensemble_detector import EnsembleAnomalyDetector, AnomalyResult
 __all__ = [
     "VAEAnomalyDetector",
     "VAEModel",
-    "LSTMAnomalyDetector", 
+    "LSTMAnomalyDetector",
     "LSTMModel",
     "IsolationForestDetector",
     "EnsembleAnomalyDetector",

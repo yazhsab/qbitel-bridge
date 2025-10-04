@@ -21,17 +21,21 @@ from .regulatory_kb import (
     ComplianceGap,
     ComplianceRecommendation,
     ComplianceRequirement,
-    RequirementSeverity
+    RequirementSeverity,
 )
 
 logger = logging.getLogger(__name__)
 
+
 class PromptException(CronosAIException):
     """Prompt template specific exception."""
+
     pass
+
 
 class PromptType(Enum):
     """Types of compliance prompts."""
+
     GAP_ANALYSIS = "gap_analysis"
     REQUIREMENT_ASSESSMENT = "requirement_assessment"
     RISK_EVALUATION = "risk_evaluation"
@@ -43,17 +47,21 @@ class PromptType(Enum):
     COMPLIANCE_SCORING = "compliance_scoring"
     FRAMEWORK_MAPPING = "framework_mapping"
 
+
 class PromptCategory(Enum):
     """Categories of prompt usage."""
+
     ASSESSMENT = "assessment"
     REPORTING = "reporting"
     ANALYSIS = "analysis"
     GENERATION = "generation"
     VALIDATION = "validation"
 
+
 @dataclass
 class PromptTemplate:
     """LLM prompt template with metadata."""
+
     id: str
     name: str
     description: str
@@ -70,69 +78,87 @@ class PromptTemplate:
     examples: List[Dict[str, Any]] = field(default_factory=list)
     validation_rules: Dict[str, Any] = field(default_factory=dict)
 
+
 class CompliancePromptManager:
     """Manages compliance-specific LLM prompts and templates."""
-    
+
     def __init__(self, config: Config):
         self.config = config
         self.logger = logging.getLogger(__name__)
-        
+
         # Template storage
         self.templates: Dict[str, PromptTemplate] = {}
-        
+
         # Jinja2 environment for template rendering
         self.jinja_env = jinja2.Environment(
             loader=jinja2.DictLoader({}),
             autoescape=False,
             trim_blocks=True,
-            lstrip_blocks=True
+            lstrip_blocks=True,
         )
-        
+
         # Load built-in templates
         self._load_builtin_templates()
-        
+
         # Framework-specific configurations
         self.framework_configs = {
-            'PCI_DSS_4_0': {
-                'emphasis': 'data protection and cardholder data security',
-                'key_areas': ['network security', 'access controls', 'encryption', 'monitoring'],
-                'regulatory_language': 'formal and technical',
-                'compliance_focus': 'payment card industry standards'
+            "PCI_DSS_4_0": {
+                "emphasis": "data protection and cardholder data security",
+                "key_areas": [
+                    "network security",
+                    "access controls",
+                    "encryption",
+                    "monitoring",
+                ],
+                "regulatory_language": "formal and technical",
+                "compliance_focus": "payment card industry standards",
             },
-            'HIPAA': {
-                'emphasis': 'protected health information (PHI) safeguards',
-                'key_areas': ['administrative', 'physical', 'technical safeguards'],
-                'regulatory_language': 'healthcare-focused and privacy-centric',
-                'compliance_focus': 'healthcare data protection'
+            "HIPAA": {
+                "emphasis": "protected health information (PHI) safeguards",
+                "key_areas": ["administrative", "physical", "technical safeguards"],
+                "regulatory_language": "healthcare-focused and privacy-centric",
+                "compliance_focus": "healthcare data protection",
             },
-            'BASEL_III': {
-                'emphasis': 'capital adequacy and risk management',
-                'key_areas': ['capital ratios', 'liquidity requirements', 'risk assessment'],
-                'regulatory_language': 'financial services terminology',
-                'compliance_focus': 'banking regulation compliance'
+            "BASEL_III": {
+                "emphasis": "capital adequacy and risk management",
+                "key_areas": [
+                    "capital ratios",
+                    "liquidity requirements",
+                    "risk assessment",
+                ],
+                "regulatory_language": "financial services terminology",
+                "compliance_focus": "banking regulation compliance",
             },
-            'NERC_CIP': {
-                'emphasis': 'critical infrastructure protection',
-                'key_areas': ['cyber security', 'physical security', 'personnel training'],
-                'regulatory_language': 'utility and power grid terminology',
-                'compliance_focus': 'electrical grid cybersecurity'
+            "NERC_CIP": {
+                "emphasis": "critical infrastructure protection",
+                "key_areas": [
+                    "cyber security",
+                    "physical security",
+                    "personnel training",
+                ],
+                "regulatory_language": "utility and power grid terminology",
+                "compliance_focus": "electrical grid cybersecurity",
             },
-            'FDA_MEDICAL': {
-                'emphasis': 'medical device safety and quality',
-                'key_areas': ['design controls', 'quality management', 'risk management'],
-                'regulatory_language': 'medical device regulatory terminology',
-                'compliance_focus': 'FDA medical device regulations'
-            }
+            "FDA_MEDICAL": {
+                "emphasis": "medical device safety and quality",
+                "key_areas": [
+                    "design controls",
+                    "quality management",
+                    "risk management",
+                ],
+                "regulatory_language": "medical device regulatory terminology",
+                "compliance_focus": "FDA medical device regulations",
+            },
         }
-    
+
     def _load_builtin_templates(self):
         """Load built-in prompt templates for compliance frameworks."""
-        
+
         # Gap Analysis Template
-        self.templates['gap_analysis_comprehensive'] = PromptTemplate(
-            id='gap_analysis_comprehensive',
-            name='Comprehensive Gap Analysis',
-            description='Detailed compliance gap analysis with root cause identification',
+        self.templates["gap_analysis_comprehensive"] = PromptTemplate(
+            id="gap_analysis_comprehensive",
+            name="Comprehensive Gap Analysis",
+            description="Detailed compliance gap analysis with root cause identification",
             type=PromptType.GAP_ANALYSIS,
             category=PromptCategory.ANALYSIS,
             template="""
@@ -177,15 +203,22 @@ Use professional {{ framework_config.regulatory_language }} appropriate for {{ f
 
 Return structured analysis with clear priorities and actionable insights.
 """,
-            variables=['framework', 'framework_config', 'assessment', 'total_requirements', 'gaps', 'system_evidence'],
-            tags=['gap_analysis', 'comprehensive', 'prioritization']
+            variables=[
+                "framework",
+                "framework_config",
+                "assessment",
+                "total_requirements",
+                "gaps",
+                "system_evidence",
+            ],
+            tags=["gap_analysis", "comprehensive", "prioritization"],
         )
-        
+
         # Requirement Assessment Template
-        self.templates['requirement_assessment_detailed'] = PromptTemplate(
-            id='requirement_assessment_detailed',
-            name='Detailed Requirement Assessment',
-            description='Individual requirement compliance assessment with evidence analysis',
+        self.templates["requirement_assessment_detailed"] = PromptTemplate(
+            id="requirement_assessment_detailed",
+            name="Detailed Requirement Assessment",
+            description="Individual requirement compliance assessment with evidence analysis",
             type=PromptType.REQUIREMENT_ASSESSMENT,
             category=PromptCategory.ASSESSMENT,
             template="""
@@ -231,15 +264,20 @@ Focus on objective, evidence-based assessment using {{ framework_config.regulato
 
 Return response as JSON with the specified structure.
 """,
-            variables=['framework', 'framework_config', 'requirement', 'evidence_items'],
-            tags=['requirement', 'assessment', 'evidence_based']
+            variables=[
+                "framework",
+                "framework_config",
+                "requirement",
+                "evidence_items",
+            ],
+            tags=["requirement", "assessment", "evidence_based"],
         )
-        
+
         # Executive Summary Template
-        self.templates['executive_summary_strategic'] = PromptTemplate(
-            id='executive_summary_strategic',
-            name='Strategic Executive Summary',
-            description='High-level executive summary for C-level stakeholders',
+        self.templates["executive_summary_strategic"] = PromptTemplate(
+            id="executive_summary_strategic",
+            name="Strategic Executive Summary",
+            description="High-level executive summary for C-level stakeholders",
             type=PromptType.EXECUTIVE_SUMMARY,
             category=PromptCategory.REPORTING,
             template="""
@@ -279,15 +317,22 @@ Use business-focused language appropriate for executive audiences. Focus on:
 
 Avoid technical details. Emphasize business value and risk mitigation.
 """,
-            variables=['framework', 'framework_config', 'assessment', 'critical_gap_count', 'critical_gaps', 'business_impact'],
-            tags=['executive', 'strategic', 'business_focused']
+            variables=[
+                "framework",
+                "framework_config",
+                "assessment",
+                "critical_gap_count",
+                "critical_gaps",
+                "business_impact",
+            ],
+            tags=["executive", "strategic", "business_focused"],
         )
-        
-        # Technical Report Template  
-        self.templates['technical_report_comprehensive'] = PromptTemplate(
-            id='technical_report_comprehensive',
-            name='Comprehensive Technical Report',
-            description='Detailed technical compliance report for technical teams',
+
+        # Technical Report Template
+        self.templates["technical_report_comprehensive"] = PromptTemplate(
+            id="technical_report_comprehensive",
+            name="Comprehensive Technical Report",
+            description="Detailed technical compliance report for technical teams",
             type=PromptType.TECHNICAL_REPORT,
             category=PromptCategory.REPORTING,
             template="""
@@ -347,16 +392,25 @@ TASK: Generate a comprehensive technical report with:
 Use precise technical language appropriate for {{ framework_config.compliance_focus }}.
 Focus on implementation details, configuration requirements, and technical controls.
 """,
-            variables=['framework', 'framework_config', 'assessment', 'evidence_source_count', 'system_environment', 
-                      'assessment_scope', 'total_requirements', 'requirement_sections', 'technical_gaps'],
-            tags=['technical', 'comprehensive', 'implementation_focused']
+            variables=[
+                "framework",
+                "framework_config",
+                "assessment",
+                "evidence_source_count",
+                "system_environment",
+                "assessment_scope",
+                "total_requirements",
+                "requirement_sections",
+                "technical_gaps",
+            ],
+            tags=["technical", "comprehensive", "implementation_focused"],
         )
-        
+
         # Risk Evaluation Template
-        self.templates['risk_evaluation_quantitative'] = PromptTemplate(
-            id='risk_evaluation_quantitative',
-            name='Quantitative Risk Evaluation',
-            description='Quantitative risk assessment with business impact analysis',
+        self.templates["risk_evaluation_quantitative"] = PromptTemplate(
+            id="risk_evaluation_quantitative",
+            name="Quantitative Risk Evaluation",
+            description="Quantitative risk assessment with business impact analysis",
             type=PromptType.RISK_EVALUATION,
             category=PromptCategory.ANALYSIS,
             template="""
@@ -422,16 +476,25 @@ TASK: Provide quantitative risk evaluation including:
 
 Use quantitative metrics where possible. Focus on business-relevant risk assessment for {{ framework_config.compliance_focus }}.
 """,
-            variables=['framework', 'framework_config', 'assessment', 'critical_gap_count', 'high_priority_gap_count', 
-                      'gaps', 'industry_context', 'regulatory_environment', 'business_criticality'],
-            tags=['risk', 'quantitative', 'business_impact']
+            variables=[
+                "framework",
+                "framework_config",
+                "assessment",
+                "critical_gap_count",
+                "high_priority_gap_count",
+                "gaps",
+                "industry_context",
+                "regulatory_environment",
+                "business_criticality",
+            ],
+            tags=["risk", "quantitative", "business_impact"],
         )
-        
+
         # Remediation Plan Template
-        self.templates['remediation_plan_actionable'] = PromptTemplate(
-            id='remediation_plan_actionable',
-            name='Actionable Remediation Plan',
-            description='Detailed remediation plan with implementation roadmap',
+        self.templates["remediation_plan_actionable"] = PromptTemplate(
+            id="remediation_plan_actionable",
+            name="Actionable Remediation Plan",
+            description="Detailed remediation plan with implementation roadmap",
             type=PromptType.REMEDIATION_PLAN,
             category=PromptCategory.GENERATION,
             template="""
@@ -503,17 +566,27 @@ TASK: Create a comprehensive remediation plan with:
 Focus on practical, actionable guidance for {{ framework_config.compliance_focus }}.
 Prioritize based on regulatory risk and business impact.
 """,
-            variables=['framework', 'framework_config', 'assessment', 'target_compliance_score', 'target_timeline',
-                      'budget_range', 'prioritized_gaps', 'team_size', 'technical_expertise', 'budget_constraints',
-                      'regulatory_deadline'],
-            tags=['remediation', 'actionable', 'project_management']
+            variables=[
+                "framework",
+                "framework_config",
+                "assessment",
+                "target_compliance_score",
+                "target_timeline",
+                "budget_range",
+                "prioritized_gaps",
+                "team_size",
+                "technical_expertise",
+                "budget_constraints",
+                "regulatory_deadline",
+            ],
+            tags=["remediation", "actionable", "project_management"],
         )
 
         # Regulatory Filing Template
-        self.templates['regulatory_filing_formal'] = PromptTemplate(
-            id='regulatory_filing_formal',
-            name='Formal Regulatory Filing',
-            description='Formal compliance report for regulatory submission',
+        self.templates["regulatory_filing_formal"] = PromptTemplate(
+            id="regulatory_filing_formal",
+            name="Formal Regulatory Filing",
+            description="Formal compliance report for regulatory submission",
             type=PromptType.REGULATORY_FILING,
             category=PromptCategory.REPORTING,
             framework=None,  # Can be used for any framework
@@ -584,220 +657,254 @@ Use formal regulatory language appropriate for {{ framework }} submissions.
 Ensure completeness and accuracy for regulatory review.
 Include all required disclosures and attestations.
 """,
-            variables=['framework', 'regulatory_body', 'filing_type', 'compliance_period', 'submission_deadline',
-                      'required_attestations', 'assessment', 'assessment_period', 'assessor_name', 
-                      'section_compliance', 'material_findings'],
-            tags=['regulatory', 'formal', 'filing', 'attestation']
+            variables=[
+                "framework",
+                "regulatory_body",
+                "filing_type",
+                "compliance_period",
+                "submission_deadline",
+                "required_attestations",
+                "assessment",
+                "assessment_period",
+                "assessor_name",
+                "section_compliance",
+                "material_findings",
+            ],
+            tags=["regulatory", "formal", "filing", "attestation"],
         )
 
         # Update Jinja2 loader with templates
-        template_dict = {template_id: template.template for template_id, template in self.templates.items()}
+        template_dict = {
+            template_id: template.template
+            for template_id, template in self.templates.items()
+        }
         self.jinja_env.loader = jinja2.DictLoader(template_dict)
-    
+
     def get_template(self, template_id: str) -> Optional[PromptTemplate]:
         """Get specific prompt template."""
         return self.templates.get(template_id)
-    
+
     def list_templates(
         self,
         framework: Optional[str] = None,
         prompt_type: Optional[PromptType] = None,
-        category: Optional[PromptCategory] = None
+        category: Optional[PromptCategory] = None,
     ) -> List[PromptTemplate]:
         """List templates with optional filtering."""
         templates = list(self.templates.values())
-        
+
         if framework:
-            templates = [t for t in templates if t.framework is None or t.framework == framework]
-        
+            templates = [
+                t for t in templates if t.framework is None or t.framework == framework
+            ]
+
         if prompt_type:
             templates = [t for t in templates if t.type == prompt_type]
-        
+
         if category:
             templates = [t for t in templates if t.category == category]
-        
+
         return templates
-    
+
     def render_prompt(
         self,
         template_id: str,
         variables: Dict[str, Any],
-        framework: Optional[str] = None
+        framework: Optional[str] = None,
     ) -> str:
         """Render prompt template with provided variables."""
         try:
             template = self.get_template(template_id)
             if not template:
                 raise PromptException(f"Template not found: {template_id}")
-            
+
             # Add framework configuration if available
             if framework and framework in self.framework_configs:
-                variables['framework_config'] = self.framework_configs[framework]
-            
+                variables["framework_config"] = self.framework_configs[framework]
+
             # Validate required variables
             missing_vars = set(template.variables) - set(variables.keys())
             if missing_vars:
-                self.logger.warning(f"Missing variables for template {template_id}: {missing_vars}")
-            
+                self.logger.warning(
+                    f"Missing variables for template {template_id}: {missing_vars}"
+                )
+
             # Render template
             jinja_template = self.jinja_env.get_template(template_id)
             rendered_prompt = jinja_template.render(**variables)
-            
+
             return rendered_prompt.strip()
-            
+
         except jinja2.TemplateError as e:
             self.logger.error(f"Template rendering failed: {e}")
             raise PromptException(f"Template rendering failed: {e}")
         except Exception as e:
             self.logger.error(f"Prompt rendering error: {e}")
             raise PromptException(f"Prompt rendering error: {e}")
-    
+
     def create_gap_analysis_prompt(
         self,
         framework: str,
         assessment: ComplianceAssessment,
-        system_evidence: str = ""
+        system_evidence: str = "",
     ) -> str:
         """Create gap analysis prompt for specific assessment."""
         try:
             total_requirements = (
-                assessment.compliant_requirements + 
-                assessment.non_compliant_requirements + 
-                assessment.partially_compliant_requirements +
-                assessment.not_assessed_requirements
+                assessment.compliant_requirements
+                + assessment.non_compliant_requirements
+                + assessment.partially_compliant_requirements
+                + assessment.not_assessed_requirements
             )
-            
+
             variables = {
-                'framework': framework,
-                'assessment': assessment,
-                'total_requirements': total_requirements,
-                'gaps': assessment.gaps,
-                'system_evidence': system_evidence
+                "framework": framework,
+                "assessment": assessment,
+                "total_requirements": total_requirements,
+                "gaps": assessment.gaps,
+                "system_evidence": system_evidence,
             }
-            
-            return self.render_prompt('gap_analysis_comprehensive', variables, framework)
-            
+
+            return self.render_prompt(
+                "gap_analysis_comprehensive", variables, framework
+            )
+
         except Exception as e:
             self.logger.error(f"Failed to create gap analysis prompt: {e}")
             raise PromptException(f"Gap analysis prompt creation failed: {e}")
-    
+
     def create_requirement_assessment_prompt(
         self,
         framework: str,
         requirement: ComplianceRequirement,
-        evidence_items: List[Any]
+        evidence_items: List[Any],
     ) -> str:
         """Create requirement assessment prompt."""
         try:
             variables = {
-                'framework': framework,
-                'requirement': requirement,
-                'evidence_items': evidence_items
+                "framework": framework,
+                "requirement": requirement,
+                "evidence_items": evidence_items,
             }
-            
-            return self.render_prompt('requirement_assessment_detailed', variables, framework)
-            
+
+            return self.render_prompt(
+                "requirement_assessment_detailed", variables, framework
+            )
+
         except Exception as e:
             self.logger.error(f"Failed to create requirement assessment prompt: {e}")
             raise PromptException(f"Requirement assessment prompt creation failed: {e}")
-    
+
     def create_executive_summary_prompt(
         self,
         framework: str,
         assessment: ComplianceAssessment,
-        business_impact: str = "Regulatory compliance and risk mitigation"
+        business_impact: str = "Regulatory compliance and risk mitigation",
     ) -> str:
         """Create executive summary prompt."""
         try:
-            critical_gaps = [g for g in assessment.gaps if g.severity == RequirementSeverity.CRITICAL]
-            
+            critical_gaps = [
+                g for g in assessment.gaps if g.severity == RequirementSeverity.CRITICAL
+            ]
+
             variables = {
-                'framework': framework,
-                'assessment': assessment,
-                'critical_gap_count': len(critical_gaps),
-                'critical_gaps': critical_gaps,
-                'business_impact': business_impact
+                "framework": framework,
+                "assessment": assessment,
+                "critical_gap_count": len(critical_gaps),
+                "critical_gaps": critical_gaps,
+                "business_impact": business_impact,
             }
-            
-            return self.render_prompt('executive_summary_strategic', variables, framework)
-            
+
+            return self.render_prompt(
+                "executive_summary_strategic", variables, framework
+            )
+
         except Exception as e:
             self.logger.error(f"Failed to create executive summary prompt: {e}")
             raise PromptException(f"Executive summary prompt creation failed: {e}")
-    
+
     def create_technical_report_prompt(
         self,
         framework: str,
         assessment: ComplianceAssessment,
         system_environment: str = "Production",
-        assessment_scope: str = "Full system assessment"
+        assessment_scope: str = "Full system assessment",
     ) -> str:
         """Create technical report prompt."""
         try:
             total_requirements = (
-                assessment.compliant_requirements + 
-                assessment.non_compliant_requirements + 
-                assessment.partially_compliant_requirements +
-                assessment.not_assessed_requirements
+                assessment.compliant_requirements
+                + assessment.non_compliant_requirements
+                + assessment.partially_compliant_requirements
+                + assessment.not_assessed_requirements
             )
-            
+
             # Organize gaps by technical complexity
-            technical_gaps = [g for g in assessment.gaps 
-                            if g.remediation_effort in ['medium', 'high']]
-            
+            technical_gaps = [
+                g for g in assessment.gaps if g.remediation_effort in ["medium", "high"]
+            ]
+
             variables = {
-                'framework': framework,
-                'assessment': assessment,
-                'evidence_source_count': 10,  # Would be dynamically calculated
-                'system_environment': system_environment,
-                'assessment_scope': assessment_scope,
-                'total_requirements': total_requirements,
-                'requirement_sections': [],  # Would be populated from framework
-                'technical_gaps': technical_gaps
+                "framework": framework,
+                "assessment": assessment,
+                "evidence_source_count": 10,  # Would be dynamically calculated
+                "system_environment": system_environment,
+                "assessment_scope": assessment_scope,
+                "total_requirements": total_requirements,
+                "requirement_sections": [],  # Would be populated from framework
+                "technical_gaps": technical_gaps,
             }
-            
-            return self.render_prompt('technical_report_comprehensive', variables, framework)
-            
+
+            return self.render_prompt(
+                "technical_report_comprehensive", variables, framework
+            )
+
         except Exception as e:
             self.logger.error(f"Failed to create technical report prompt: {e}")
             raise PromptException(f"Technical report prompt creation failed: {e}")
-    
+
     def create_risk_evaluation_prompt(
         self,
         framework: str,
         assessment: ComplianceAssessment,
         industry_context: str = "Enterprise",
-        regulatory_environment: str = "Regulated industry"
+        regulatory_environment: str = "Regulated industry",
     ) -> str:
         """Create risk evaluation prompt."""
         try:
-            critical_gaps = [g for g in assessment.gaps if g.severity == RequirementSeverity.CRITICAL]
-            high_priority_gaps = [g for g in assessment.gaps if g.severity == RequirementSeverity.HIGH]
-            
+            critical_gaps = [
+                g for g in assessment.gaps if g.severity == RequirementSeverity.CRITICAL
+            ]
+            high_priority_gaps = [
+                g for g in assessment.gaps if g.severity == RequirementSeverity.HIGH
+            ]
+
             variables = {
-                'framework': framework,
-                'assessment': assessment,
-                'critical_gap_count': len(critical_gaps),
-                'high_priority_gap_count': len(high_priority_gaps),
-                'gaps': assessment.gaps,
-                'industry_context': industry_context,
-                'regulatory_environment': regulatory_environment,
-                'business_criticality': 'High'
+                "framework": framework,
+                "assessment": assessment,
+                "critical_gap_count": len(critical_gaps),
+                "high_priority_gap_count": len(high_priority_gaps),
+                "gaps": assessment.gaps,
+                "industry_context": industry_context,
+                "regulatory_environment": regulatory_environment,
+                "business_criticality": "High",
             }
-            
-            return self.render_prompt('risk_evaluation_quantitative', variables, framework)
-            
+
+            return self.render_prompt(
+                "risk_evaluation_quantitative", variables, framework
+            )
+
         except Exception as e:
             self.logger.error(f"Failed to create risk evaluation prompt: {e}")
             raise PromptException(f"Risk evaluation prompt creation failed: {e}")
-    
+
     def create_remediation_plan_prompt(
         self,
         framework: str,
         assessment: ComplianceAssessment,
         target_compliance_score: int = 95,
         target_timeline: int = 6,
-        budget_range: str = "Enterprise budget"
+        budget_range: str = "Enterprise budget",
     ) -> str:
         """Create remediation plan prompt."""
         try:
@@ -805,153 +912,173 @@ Include all required disclosures and attestations.
             prioritized_gaps = sorted(
                 assessment.gaps,
                 key=lambda g: (
-                    {'critical': 0, 'high': 1, 'medium': 2, 'low': 3}.get(g.severity.value, 4),
-                    {'high': 0, 'medium': 1, 'low': 2}.get(g.remediation_effort, 3)
-                )
+                    {"critical": 0, "high": 1, "medium": 2, "low": 3}.get(
+                        g.severity.value, 4
+                    ),
+                    {"high": 0, "medium": 1, "low": 2}.get(g.remediation_effort, 3),
+                ),
             )
-            
+
             variables = {
-                'framework': framework,
-                'assessment': assessment,
-                'target_compliance_score': target_compliance_score,
-                'target_timeline': target_timeline,
-                'budget_range': budget_range,
-                'prioritized_gaps': prioritized_gaps,
-                'team_size': 'Medium (5-10 people)',
-                'technical_expertise': 'High',
-                'budget_constraints': 'Moderate',
-                'regulatory_deadline': f'{target_timeline} months'
+                "framework": framework,
+                "assessment": assessment,
+                "target_compliance_score": target_compliance_score,
+                "target_timeline": target_timeline,
+                "budget_range": budget_range,
+                "prioritized_gaps": prioritized_gaps,
+                "team_size": "Medium (5-10 people)",
+                "technical_expertise": "High",
+                "budget_constraints": "Moderate",
+                "regulatory_deadline": f"{target_timeline} months",
             }
-            
-            return self.render_prompt('remediation_plan_actionable', variables, framework)
-            
+
+            return self.render_prompt(
+                "remediation_plan_actionable", variables, framework
+            )
+
         except Exception as e:
             self.logger.error(f"Failed to create remediation plan prompt: {e}")
             raise PromptException(f"Remediation plan prompt creation failed: {e}")
-    
+
     def create_regulatory_filing_prompt(
         self,
         framework: str,
         assessment: ComplianceAssessment,
         regulatory_body: str,
-        filing_type: str = "Annual Compliance Report"
+        filing_type: str = "Annual Compliance Report",
     ) -> str:
         """Create regulatory filing prompt."""
         try:
             # Identify material findings (critical and high severity gaps)
             material_findings = []
             for gap in assessment.gaps:
-                if gap.severity in [RequirementSeverity.CRITICAL, RequirementSeverity.HIGH]:
-                    material_findings.append({
-                        'title': gap.requirement_title,
-                        'status': 'Identified',
-                        'regulatory_impact': gap.impact_assessment,
-                        'remediation_status': 'In Progress',
-                        'target_date': 'Within 90 days'
-                    })
-            
+                if gap.severity in [
+                    RequirementSeverity.CRITICAL,
+                    RequirementSeverity.HIGH,
+                ]:
+                    material_findings.append(
+                        {
+                            "title": gap.requirement_title,
+                            "status": "Identified",
+                            "regulatory_impact": gap.impact_assessment,
+                            "remediation_status": "In Progress",
+                            "target_date": "Within 90 days",
+                        }
+                    )
+
             variables = {
-                'framework': framework,
-                'regulatory_body': regulatory_body,
-                'filing_type': filing_type,
-                'compliance_period': 'Annual',
-                'submission_deadline': '30 days from assessment',
-                'required_attestations': ['Management Certification', 'Independent Assessment'],
-                'assessment': assessment,
-                'assessment_period': 'Current year',
-                'assessor_name': 'CRONOS AI Compliance System',
-                'section_compliance': {},  # Would be populated from framework
-                'material_findings': material_findings
+                "framework": framework,
+                "regulatory_body": regulatory_body,
+                "filing_type": filing_type,
+                "compliance_period": "Annual",
+                "submission_deadline": "30 days from assessment",
+                "required_attestations": [
+                    "Management Certification",
+                    "Independent Assessment",
+                ],
+                "assessment": assessment,
+                "assessment_period": "Current year",
+                "assessor_name": "CRONOS AI Compliance System",
+                "section_compliance": {},  # Would be populated from framework
+                "material_findings": material_findings,
             }
-            
-            return self.render_prompt('regulatory_filing_formal', variables, framework)
-            
+
+            return self.render_prompt("regulatory_filing_formal", variables, framework)
+
         except Exception as e:
             self.logger.error(f"Failed to create regulatory filing prompt: {e}")
             raise PromptException(f"Regulatory filing prompt creation failed: {e}")
-    
+
     def add_custom_template(self, template: PromptTemplate) -> None:
         """Add custom prompt template."""
         try:
             # Validate template
             if not template.id or not template.template:
                 raise PromptException("Template ID and template content are required")
-            
+
             # Add to templates
             self.templates[template.id] = template
-            
+
             # Update Jinja2 loader
-            template_dict = {template_id: tmpl.template for template_id, tmpl in self.templates.items()}
+            template_dict = {
+                template_id: tmpl.template
+                for template_id, tmpl in self.templates.items()
+            }
             self.jinja_env.loader = jinja2.DictLoader(template_dict)
-            
+
             self.logger.info(f"Custom template added: {template.id}")
-            
+
         except Exception as e:
             self.logger.error(f"Failed to add custom template: {e}")
             raise PromptException(f"Custom template addition failed: {e}")
-    
-    def validate_prompt_variables(self, template_id: str, variables: Dict[str, Any]) -> Dict[str, Any]:
+
+    def validate_prompt_variables(
+        self, template_id: str, variables: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Validate prompt variables against template requirements."""
         template = self.get_template(template_id)
         if not template:
             raise PromptException(f"Template not found: {template_id}")
-        
+
         validation_result = {
-            'valid': True,
-            'missing_variables': [],
-            'extra_variables': [],
-            'warnings': []
+            "valid": True,
+            "missing_variables": [],
+            "extra_variables": [],
+            "warnings": [],
         }
-        
+
         # Check for missing required variables
         provided_vars = set(variables.keys())
         required_vars = set(template.variables)
-        
+
         missing = required_vars - provided_vars
         if missing:
-            validation_result['valid'] = False
-            validation_result['missing_variables'] = list(missing)
-        
+            validation_result["valid"] = False
+            validation_result["missing_variables"] = list(missing)
+
         # Check for extra variables (not necessarily an error)
         extra = provided_vars - required_vars
         if extra:
-            validation_result['extra_variables'] = list(extra)
-            validation_result['warnings'].append(f"Extra variables provided: {extra}")
-        
+            validation_result["extra_variables"] = list(extra)
+            validation_result["warnings"].append(f"Extra variables provided: {extra}")
+
         return validation_result
-    
+
     def get_framework_config(self, framework: str) -> Dict[str, Any]:
         """Get framework-specific configuration."""
-        return self.framework_configs.get(framework, {
-            'emphasis': 'general compliance',
-            'key_areas': ['security', 'governance', 'risk management'],
-            'regulatory_language': 'professional and formal',
-            'compliance_focus': 'regulatory compliance'
-        })
-    
-    def export_templates(self, format: str = 'json') -> str:
+        return self.framework_configs.get(
+            framework,
+            {
+                "emphasis": "general compliance",
+                "key_areas": ["security", "governance", "risk management"],
+                "regulatory_language": "professional and formal",
+                "compliance_focus": "regulatory compliance",
+            },
+        )
+
+    def export_templates(self, format: str = "json") -> str:
         """Export all templates for backup or sharing."""
         try:
             templates_data = {}
             for template_id, template in self.templates.items():
                 templates_data[template_id] = {
-                    'id': template.id,
-                    'name': template.name,
-                    'description': template.description,
-                    'type': template.type.value,
-                    'category': template.category.value,
-                    'framework': template.framework,
-                    'template': template.template,
-                    'variables': template.variables,
-                    'version': template.version,
-                    'tags': template.tags
+                    "id": template.id,
+                    "name": template.name,
+                    "description": template.description,
+                    "type": template.type.value,
+                    "category": template.category.value,
+                    "framework": template.framework,
+                    "template": template.template,
+                    "variables": template.variables,
+                    "version": template.version,
+                    "tags": template.tags,
                 }
-            
-            if format.lower() == 'json':
+
+            if format.lower() == "json":
                 return json.dumps(templates_data, indent=2)
             else:
                 raise PromptException(f"Unsupported export format: {format}")
-                
+
         except Exception as e:
             self.logger.error(f"Template export failed: {e}")
             raise PromptException(f"Template export failed: {e}")

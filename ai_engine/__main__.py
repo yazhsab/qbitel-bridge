@@ -19,59 +19,67 @@ from .api.server import run_production_server, run_development_server
 def main():
     """Main entry point for CRONOS AI Engine."""
     import argparse
-    
+
     parser = argparse.ArgumentParser(
-        description='CRONOS AI Engine - Enterprise Protocol Discovery, Field Detection, and Anomaly Detection'
+        description="CRONOS AI Engine - Enterprise Protocol Discovery, Field Detection, and Anomaly Detection"
     )
-    
+
     # Server configuration
-    parser.add_argument('--host', type=str, default='0.0.0.0', help='Host to bind to')
-    parser.add_argument('--port', type=int, default=8000, help='REST API port')
-    parser.add_argument('--grpc-port', type=int, default=50051, help='gRPC port')
-    parser.add_argument('--enable-grpc', action='store_true', help='Enable gRPC server')
-    
+    parser.add_argument("--host", type=str, default="0.0.0.0", help="Host to bind to")
+    parser.add_argument("--port", type=int, default=8000, help="REST API port")
+    parser.add_argument("--grpc-port", type=int, default=50051, help="gRPC port")
+    parser.add_argument("--enable-grpc", action="store_true", help="Enable gRPC server")
+
     # Environment
-    parser.add_argument('--development', action='store_true', help='Run in development mode')
-    parser.add_argument('--reload', action='store_true', help='Enable hot reloading (dev only)')
-    
+    parser.add_argument(
+        "--development", action="store_true", help="Run in development mode"
+    )
+    parser.add_argument(
+        "--reload", action="store_true", help="Enable hot reloading (dev only)"
+    )
+
     # Logging
-    parser.add_argument('--log-level', type=str, default='INFO', 
-                       choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                       help='Log level')
-    
+    parser.add_argument(
+        "--log-level",
+        type=str,
+        default="INFO",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="Log level",
+    )
+
     # Configuration
-    parser.add_argument('--config', type=str, help='Configuration file path')
-    
+    parser.add_argument("--config", type=str, help="Configuration file path")
+
     # AI Engine specific
-    parser.add_argument('--model-path', type=str, help='Path to AI models directory')
-    parser.add_argument('--data-path', type=str, help='Path to training data directory')
-    
+    parser.add_argument("--model-path", type=str, help="Path to AI models directory")
+    parser.add_argument("--data-path", type=str, help="Path to training data directory")
+
     args = parser.parse_args()
-    
+
     # Setup logging - prefer stdout for containerized environments
     log_handlers = [logging.StreamHandler(sys.stdout)]
-    
+
     # Only add file handler in development mode
     if args.development:
-        log_handlers.append(logging.FileHandler('cronos_ai_engine.log'))
-    
+        log_handlers.append(logging.FileHandler("cronos_ai_engine.log"))
+
     logging.basicConfig(
         level=getattr(logging, args.log_level.upper()),
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=log_handlers
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=log_handlers,
     )
-    
+
     logger = logging.getLogger(__name__)
-    
+
     try:
         logger.info("Starting CRONOS AI Engine...")
         logger.info(f"Version: 1.0.0")
         logger.info(f"Python: {sys.version}")
         logger.info(f"Mode: {'Development' if args.development else 'Production'}")
-        
+
         # Load configuration
         config = Config()
-        
+
         # Override config with CLI arguments
         if args.host:
             config.rest_host = args.host
@@ -85,7 +93,7 @@ def main():
             config.model_path = args.model_path
         if args.data_path:
             config.data_path = args.data_path
-        
+
         # Run appropriate server
         if args.development:
             logger.info("Running in development mode with hot reloading...")
@@ -95,12 +103,12 @@ def main():
                 port=args.port,
                 enable_grpc=args.enable_grpc,
                 grpc_port=args.grpc_port,
-                reload=args.reload
+                reload=args.reload,
             )
         else:
             logger.info("Running in production mode...")
             run_production_server(config)
-    
+
     except KeyboardInterrupt:
         logger.info("Shutdown requested by user")
         sys.exit(0)

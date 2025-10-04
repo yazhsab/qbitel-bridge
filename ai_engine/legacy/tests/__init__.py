@@ -24,11 +24,11 @@ MOCK_MAINFRAME_CONTEXT = {
     "criticality": "high",
     "compliance_requirements": ["sox", "hipaa"],
     "technical_contacts": ["admin@test.com"],
-    "business_contacts": ["business@test.com"]
+    "business_contacts": ["business@test.com"],
 }
 
 MOCK_SCADA_CONTEXT = {
-    "system_id": "test_scada_001", 
+    "system_id": "test_scada_001",
     "system_name": "Test SCADA System",
     "system_type": "scada",
     "version": "v3.1",
@@ -36,7 +36,7 @@ MOCK_SCADA_CONTEXT = {
     "criticality": "critical",
     "compliance_requirements": ["nerc_cip"],
     "technical_contacts": ["scada@test.com"],
-    "business_contacts": ["ops@test.com"]
+    "business_contacts": ["ops@test.com"],
 }
 
 MOCK_SYSTEM_METRICS = {
@@ -48,15 +48,15 @@ MOCK_SYSTEM_METRICS = {
     "error_rate": 0.02,
     "transaction_rate": 1250.0,
     "availability": 0.9995,
-    "timestamp": "2024-01-15T10:30:00Z"
+    "timestamp": "2024-01-15T10:30:00Z",
 }
 
 # Test environment markers
 pytest_markers = {
     "unit": "Unit tests - fast, isolated",
-    "integration": "Integration tests - slower, requires dependencies", 
+    "integration": "Integration tests - slower, requires dependencies",
     "e2e": "End-to-end tests - full system",
     "performance": "Performance tests - resource intensive",
     "security": "Security tests - authentication/authorization",
-    "slow": "Slow running tests - may take several minutes"
+    "slow": "Slow running tests - may take several minutes",
 }

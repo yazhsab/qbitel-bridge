@@ -36,232 +36,248 @@ from ..monitoring.metrics import MetricsCollector
 
 
 # Prometheus metrics
-INFERENCE_COUNTER = Counter('cronos_ai_inference_total', 'Total inference requests', ['component', 'status'])
-INFERENCE_DURATION = Histogram('cronos_ai_inference_duration_seconds', 'Inference duration', ['component'])
-MODEL_ACCURACY = Gauge('cronos_ai_model_accuracy', 'Model accuracy', ['model_name'])
-ACTIVE_MODELS = Gauge('cronos_ai_active_models', 'Number of active models')
+INFERENCE_COUNTER = Counter(
+    "cronos_ai_inference_total", "Total inference requests", ["component", "status"]
+)
+INFERENCE_DURATION = Histogram(
+    "cronos_ai_inference_duration_seconds", "Inference duration", ["component"]
+)
+MODEL_ACCURACY = Gauge("cronos_ai_model_accuracy", "Model accuracy", ["model_name"])
+ACTIVE_MODELS = Gauge("cronos_ai_active_models", "Number of active models")
 
 
 class CronosAIEngine:
     """
     Main AI Engine that orchestrates all machine learning components.
-    
+
     This class provides a unified interface for protocol discovery, field detection,
     and anomaly detection capabilities.
     """
-    
+
     def __init__(self, config: Optional[Config] = None):
         """
         Initialize the AI Engine.
-        
+
         Args:
             config: Configuration object. If None, loads from environment.
         """
         self.config = config or get_config()
         self.logger = self._setup_logging()
-        
+
         # Component initialization
         self._protocol_classifier: Optional[ProtocolClassifier] = None
         self._pcfg_inference: Optional[PCFGInference] = None
         self._field_detector: Optional[FieldDetector] = None
         self._anomaly_detector: Optional[EnsembleAnomalyDetector] = None
         self._feature_extractor: Optional[FeatureExtractor] = None
-        
+
         # Infrastructure components
         self._model_registry: Optional[ModelRegistry] = None
         self._metrics_collector: Optional[MetricsCollector] = None
         self._executor: Optional[ThreadPoolExecutor] = None
-        
+
         # State management
         self._initialized = False
         self._models_loaded = {}
         self._performance_stats = {}
-        
-        self.logger.info(f"AI Engine initialized with config: {self.config.environment.value}")
-    
+
+        self.logger.info(
+            f"AI Engine initialized with config: {self.config.environment.value}"
+        )
+
     async def initialize(self) -> None:
         """Initialize all AI components and load models."""
         if self._initialized:
             self.logger.warning("AI Engine already initialized")
             return
-        
+
         try:
             self.logger.info("Initializing AI Engine components...")
-            
+
             # Initialize infrastructure
             await self._initialize_infrastructure()
-            
+
             # Initialize AI components
             await self._initialize_ai_components()
-            
+
             # Load models
             await self._load_models()
-            
+
             # Start monitoring
             await self._start_monitoring()
-            
+
             self._initialized = True
             ACTIVE_MODELS.set(len(self._models_loaded))
-            
+
             self.logger.info("AI Engine initialization completed successfully")
-            
+
         except Exception as e:
             self.logger.error(f"Failed to initialize AI Engine: {e}")
             raise CronosAIException(f"Engine initialization failed: {e}")
-    
+
     async def shutdown(self) -> None:
         """Shutdown the AI Engine and cleanup resources."""
         self.logger.info("Shutting down AI Engine...")
-        
+
         try:
             # Stop monitoring
             if self._metrics_collector:
                 await self._metrics_collector.stop()
-            
+
             # Shutdown executor
             if self._executor:
                 self._executor.shutdown(wait=True)
-            
+
             # Cleanup models
             self._models_loaded.clear()
-            
+
             self._initialized = False
             ACTIVE_MODELS.set(0)
-            
+
             self.logger.info("AI Engine shutdown completed")
-            
+
         except Exception as e:
             self.logger.error(f"Error during AI Engine shutdown: {e}")
             raise CronosAIException(f"Engine shutdown failed: {e}")
-    
+
     async def discover_protocol(
-        self,
-        packet_data: bytes,
-        metadata: Optional[Dict[str, Any]] = None
+        self, packet_data: bytes, metadata: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Discover protocol from packet data.
-        
+
         Args:
             packet_data: Raw packet data
             metadata: Optional metadata about the packet
-            
+
         Returns:
             Protocol discovery results including type, confidence, and structure
         """
         if not self._initialized:
             raise CronosAIException("AI Engine not initialized")
-        
+
         start_time = time.time()
-        
+
         try:
             # Extract features from packet data
             features = await self._extract_features(packet_data, "protocol_discovery")
-            
+
             # Classify protocol using ML model
             protocol_result = await self._classify_protocol(features)
-            
+
             # If unknown protocol, infer grammar structure
             if protocol_result.get("confidence", 0) < 0.8:
                 grammar_result = await self._infer_grammar(packet_data)
                 protocol_result["grammar"] = grammar_result
-            
+
             # Update metrics
-            INFERENCE_COUNTER.labels(component="protocol_discovery", status="success").inc()
-            INFERENCE_DURATION.labels(component="protocol_discovery").observe(time.time() - start_time)
-            
+            INFERENCE_COUNTER.labels(
+                component="protocol_discovery", status="success"
+            ).inc()
+            INFERENCE_DURATION.labels(component="protocol_discovery").observe(
+                time.time() - start_time
+            )
+
             return {
                 "protocol_type": protocol_result.get("protocol_type", "unknown"),
                 "confidence": protocol_result.get("confidence", 0.0),
                 "structure": protocol_result.get("structure", {}),
                 "grammar": protocol_result.get("grammar"),
                 "metadata": metadata or {},
-                "processing_time": time.time() - start_time
+                "processing_time": time.time() - start_time,
             }
-            
+
         except Exception as e:
-            INFERENCE_COUNTER.labels(component="protocol_discovery", status="error").inc()
+            INFERENCE_COUNTER.labels(
+                component="protocol_discovery", status="error"
+            ).inc()
             self.logger.error(f"Protocol discovery failed: {e}")
             raise InferenceException(f"Protocol discovery failed: {e}")
-    
+
     async def detect_fields(
-        self,
-        message_data: bytes,
-        protocol_type: Optional[str] = None
+        self, message_data: bytes, protocol_type: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
         Detect fields in a protocol message.
-        
+
         Args:
             message_data: Protocol message data
             protocol_type: Optional protocol type hint
-            
+
         Returns:
             List of detected fields with boundaries and types
         """
         if not self._initialized:
             raise CronosAIException("AI Engine not initialized")
-        
+
         start_time = time.time()
-        
+
         try:
             # Extract features for field detection
             features = await self._extract_features(message_data, "field_detection")
-            
+
             # Detect field boundaries using BiLSTM-CRF
             fields = await self._detect_field_boundaries(features, protocol_type)
-            
+
             # Infer field types
             for field in fields:
                 field["type"] = await self._infer_field_type(
-                    message_data[field["start"]:field["end"]]
+                    message_data[field["start"] : field["end"]]
                 )
-            
+
             # Update metrics
-            INFERENCE_COUNTER.labels(component="field_detection", status="success").inc()
-            INFERENCE_DURATION.labels(component="field_detection").observe(time.time() - start_time)
-            
+            INFERENCE_COUNTER.labels(
+                component="field_detection", status="success"
+            ).inc()
+            INFERENCE_DURATION.labels(component="field_detection").observe(
+                time.time() - start_time
+            )
+
             return fields
-            
+
         except Exception as e:
             INFERENCE_COUNTER.labels(component="field_detection", status="error").inc()
             self.logger.error(f"Field detection failed: {e}")
             raise InferenceException(f"Field detection failed: {e}")
-    
+
     async def detect_anomaly(
         self,
         data: Union[bytes, np.ndarray, Dict[str, Any]],
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Detect anomalies in the provided data.
-        
+
         Args:
             data: Input data for anomaly detection
             context: Optional context information
-            
+
         Returns:
             Anomaly detection results with scores and explanations
         """
         if not self._initialized:
             raise CronosAIException("AI Engine not initialized")
-        
+
         start_time = time.time()
-        
+
         try:
             # Extract features for anomaly detection
             if isinstance(data, bytes):
                 features = await self._extract_features(data, "anomaly_detection")
             else:
                 features = data
-            
+
             # Run ensemble anomaly detection
             anomaly_result = await self._detect_anomaly_ensemble(features, context)
-            
+
             # Update metrics
-            INFERENCE_COUNTER.labels(component="anomaly_detection", status="success").inc()
-            INFERENCE_DURATION.labels(component="anomaly_detection").observe(time.time() - start_time)
-            
+            INFERENCE_COUNTER.labels(
+                component="anomaly_detection", status="success"
+            ).inc()
+            INFERENCE_DURATION.labels(component="anomaly_detection").observe(
+                time.time() - start_time
+            )
+
             return {
                 "is_anomaly": anomaly_result["score"] > self.config.anomaly_threshold,
                 "anomaly_score": anomaly_result["score"],
@@ -269,37 +285,39 @@ class CronosAIEngine:
                 "explanation": anomaly_result.get("explanation", ""),
                 "detector_scores": anomaly_result.get("individual_scores", {}),
                 "context": context or {},
-                "processing_time": time.time() - start_time
+                "processing_time": time.time() - start_time,
             }
-            
+
         except Exception as e:
-            INFERENCE_COUNTER.labels(component="anomaly_detection", status="error").inc()
+            INFERENCE_COUNTER.labels(
+                component="anomaly_detection", status="error"
+            ).inc()
             self.logger.error(f"Anomaly detection failed: {e}")
             raise InferenceException(f"Anomaly detection failed: {e}")
-    
+
     async def batch_process(
-        self,
-        batch_data: List[bytes],
-        operation: str = "discover_protocol"
+        self, batch_data: List[bytes], operation: str = "discover_protocol"
     ) -> List[Dict[str, Any]]:
         """
         Process a batch of data efficiently.
-        
+
         Args:
             batch_data: List of data items to process
             operation: Operation to perform ("discover_protocol", "detect_fields", "detect_anomaly")
-            
+
         Returns:
             List of processing results
         """
         if not self._initialized:
             raise CronosAIException("AI Engine not initialized")
-        
-        self.logger.info(f"Processing batch of {len(batch_data)} items with operation: {operation}")
-        
+
+        self.logger.info(
+            f"Processing batch of {len(batch_data)} items with operation: {operation}"
+        )
+
         # Process in parallel using thread pool
         loop = asyncio.get_event_loop()
-        
+
         if operation == "discover_protocol":
             tasks = [
                 loop.run_in_executor(self._executor, self._sync_discover_protocol, data)
@@ -317,9 +335,9 @@ class CronosAIEngine:
             ]
         else:
             raise InferenceException(f"Unknown operation: {operation}")
-        
+
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
+
         # Handle exceptions in results
         processed_results = []
         for i, result in enumerate(results):
@@ -328,9 +346,9 @@ class CronosAIEngine:
                 processed_results.append({"error": str(result), "index": i})
             else:
                 processed_results.append(result)
-        
+
         return processed_results
-    
+
     def get_model_info(self) -> Dict[str, Any]:
         """Get information about loaded models."""
         return {
@@ -340,22 +358,24 @@ class CronosAIEngine:
                     "version": model.get("version", "unknown"),
                     "type": model.get("type", "unknown"),
                     "device": model.get("device", "unknown"),
-                    "last_updated": model.get("last_updated")
+                    "last_updated": model.get("last_updated"),
                 }
                 for name, model in self._models_loaded.items()
             },
             "performance_stats": self._performance_stats,
-            "config": asdict(self.config)
+            "config": asdict(self.config),
         }
-    
+
     async def update_model(self, model_name: str, model_version: str) -> None:
         """Update a specific model to a new version."""
         self.logger.info(f"Updating model {model_name} to version {model_version}")
-        
+
         try:
             # Load new model version
-            model_info = await self._model_registry.load_model(model_name, model_version)
-            
+            model_info = await self._model_registry.load_model(
+                model_name, model_version
+            )
+
             # Update model in components
             if model_name == "protocol_classifier" and self._protocol_classifier:
                 await self._protocol_classifier.load_model(model_info)
@@ -363,56 +383,58 @@ class CronosAIEngine:
                 await self._field_detector.load_model(model_info)
             elif model_name.startswith("anomaly_") and self._anomaly_detector:
                 await self._anomaly_detector.update_detector(model_name, model_info)
-            
+
             # Update model registry
             self._models_loaded[model_name] = {
                 "version": model_version,
                 "model_info": model_info,
-                "last_updated": time.time()
+                "last_updated": time.time(),
             }
-            
-            self.logger.info(f"Successfully updated model {model_name} to version {model_version}")
-            
+
+            self.logger.info(
+                f"Successfully updated model {model_name} to version {model_version}"
+            )
+
         except Exception as e:
             self.logger.error(f"Failed to update model {model_name}: {e}")
             raise ModelException(f"Model update failed: {e}", model_name, model_version)
-    
+
     # Private methods
-    
+
     async def _initialize_infrastructure(self) -> None:
         """Initialize infrastructure components."""
         # Initialize thread pool executor
         self._executor = ThreadPoolExecutor(
             max_workers=self.config.inference.num_workers,
-            thread_name_prefix="cronos-ai-"
+            thread_name_prefix="cronos-ai-",
         )
-        
+
         # Initialize model registry
         self._model_registry = ModelRegistry(self.config)
         await self._model_registry.initialize()
-        
+
         # Initialize metrics collector
         self._metrics_collector = MetricsCollector(self.config)
         await self._metrics_collector.initialize()
-    
+
     async def _initialize_ai_components(self) -> None:
         """Initialize AI components."""
         # Initialize feature extractor
         self._feature_extractor = FeatureExtractor(self.config)
-        
+
         # Initialize protocol discovery components
         if self.config.discovery_enabled:
             self._protocol_classifier = ProtocolClassifier(self.config)
             self._pcfg_inference = PCFGInference(self.config)
-        
+
         # Initialize field detection
         if self.config.field_detection_enabled:
             self._field_detector = FieldDetector(self.config)
-        
+
         # Initialize anomaly detection
         if self.config.anomaly_detection_enabled:
             self._anomaly_detector = EnsembleAnomalyDetector(self.config)
-    
+
     async def _load_models(self) -> None:
         """Load all configured models."""
         for model_name, model_config in self.config.models.items():
@@ -424,71 +446,75 @@ class CronosAIEngine:
                     "version": model_config.version,
                     "config": model_config,
                     "model_info": model_info,
-                    "last_updated": time.time()
+                    "last_updated": time.time(),
                 }
                 self.logger.info(f"Loaded model: {model_name} v{model_config.version}")
-                
+
             except Exception as e:
                 self.logger.error(f"Failed to load model {model_name}: {e}")
                 if self.config.environment.value == "production":
-                    raise ModelException(f"Critical model loading failed: {e}", model_name)
-    
+                    raise ModelException(
+                        f"Critical model loading failed: {e}", model_name
+                    )
+
     async def _start_monitoring(self) -> None:
         """Start monitoring and metrics collection."""
         if self._metrics_collector:
             await self._metrics_collector.start()
-    
+
     async def _extract_features(self, data: bytes, context: str) -> np.ndarray:
         """Extract features from data."""
         return await self._feature_extractor.extract(data, context)
-    
+
     async def _classify_protocol(self, features: np.ndarray) -> Dict[str, Any]:
         """Classify protocol from features."""
         return await self._protocol_classifier.predict(features)
-    
+
     async def _infer_grammar(self, data: bytes) -> Dict[str, Any]:
         """Infer grammar structure from data."""
         return await self._pcfg_inference.infer(data)
-    
+
     async def _detect_field_boundaries(
         self, features: np.ndarray, protocol_type: Optional[str]
     ) -> List[Dict[str, Any]]:
         """Detect field boundaries."""
         return await self._field_detector.detect_boundaries(features, protocol_type)
-    
+
     async def _infer_field_type(self, field_data: bytes) -> str:
         """Infer the type of a field."""
         return await self._field_detector.infer_type(field_data)
-    
+
     async def _detect_anomaly_ensemble(
-        self, features: Union[np.ndarray, Dict[str, Any]], context: Optional[Dict[str, Any]]
+        self,
+        features: Union[np.ndarray, Dict[str, Any]],
+        context: Optional[Dict[str, Any]],
     ) -> Dict[str, Any]:
         """Run ensemble anomaly detection."""
         return await self._anomaly_detector.detect(features, context)
-    
+
     def _sync_discover_protocol(self, data: bytes) -> Dict[str, Any]:
         """Synchronous wrapper for protocol discovery."""
         return asyncio.run(self.discover_protocol(data))
-    
+
     def _sync_detect_fields(self, data: bytes) -> List[Dict[str, Any]]:
         """Synchronous wrapper for field detection."""
         return asyncio.run(self.detect_fields(data))
-    
+
     def _sync_detect_anomaly(self, data: bytes) -> Dict[str, Any]:
         """Synchronous wrapper for anomaly detection."""
         return asyncio.run(self.detect_anomaly(data))
-    
+
     def _setup_logging(self) -> logging.Logger:
         """Setup structured logging."""
         logger = logging.getLogger("cronos.ai.engine")
         logger.setLevel(getattr(logging, self.config.log_level.value))
-        
+
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
-        
+
         return logger
