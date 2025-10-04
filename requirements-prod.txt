@@ -51,7 +51,7 @@ aiocache==0.12.2
 psycopg2-binary==2.9.9
 
 # TimescaleDB support
-timescaledb==0.1.0
+timescaledb==0.0.4
 
 # ============================================================================
 # Production Message Queue

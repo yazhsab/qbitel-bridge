@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cronos-ai"
+version = "0.1.0"
+description = "CRONOS AI - Protocol Discovery and Analysis Engine"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["ai_engine", "integration"]
