@@ -7,6 +7,7 @@ including frequency analysis, entropy calculation, pattern detection, and field 
 
 import asyncio
 import logging
+import string
 import time
 from collections import defaultdict, Counter
 from dataclasses import dataclass
@@ -40,6 +41,27 @@ class ByteStatistics:
     is_random: bool
     is_text: bool
     is_binary: bool
+
+
+@dataclass
+class ByteFrequency(ByteStatistics):
+    """Backward-compatible alias of ``ByteStatistics`` for legacy imports."""
+
+
+@dataclass
+class FieldStatistics:
+    """Aggregated statistics for a logical protocol field."""
+
+    min_length: int
+    max_length: int
+    avg_length: float
+    length_std_dev: float
+    value_frequency: Dict[str, int]
+    unique_values: int
+    entropy: float
+    is_fixed_length: bool
+    is_printable: bool
+    is_numeric: bool
 
 
 @dataclass
@@ -261,8 +283,105 @@ class StatisticalAnalyzer:
             chi_square_pvalue=chi2_p,
             is_random=is_random,
             is_text=is_text,
-            is_binary=is_binary,
+        is_binary=is_binary,
         )
+
+    def summarize_field_statistics(self, field_values: List[bytes]) -> FieldStatistics:
+        """Summarize discrete protocol field samples into statistical features."""
+        if not field_values:
+            return FieldStatistics(
+                min_length=0,
+                max_length=0,
+                avg_length=0.0,
+                length_std_dev=0.0,
+                value_frequency={},
+                unique_values=0,
+                entropy=0.0,
+                is_fixed_length=True,
+                is_printable=False,
+                is_numeric=False,
+            )
+
+        lengths = np.array([len(value) for value in field_values], dtype=np.float64)
+        min_len = int(lengths.min())
+        max_len = int(lengths.max())
+        avg_len = float(lengths.mean())
+        length_std_dev = float(lengths.std())
+
+        normalized_values = [self._normalize_field_value(value) for value in field_values]
+        frequency = Counter(normalized_values)
+        total = sum(frequency.values())
+
+        distribution = (
+            np.array(list(frequency.values()), dtype=np.float64) / total
+            if total
+            else np.array([])
+        )
+        entropy_value = float(entropy(distribution, base=2)) if distribution.size else 0.0
+
+        is_fixed_length = min_len == max_len
+        is_printable = all(
+            self._is_printable(value) for value in field_values if len(value) > 0
+        )
+        is_numeric = all(
+            self._is_numeric(value) for value in field_values if len(value) > 0
+        )
+
+        return FieldStatistics(
+            min_length=min_len,
+            max_length=max_len,
+            avg_length=avg_len,
+            length_std_dev=length_std_dev,
+            value_frequency=dict(frequency),
+            unique_values=len(frequency),
+            entropy=entropy_value,
+            is_fixed_length=is_fixed_length,
+            is_printable=is_printable,
+            is_numeric=is_numeric,
+        )
+
+    def _normalize_field_value(self, value: bytes) -> str:
+        """Normalize raw field bytes into a readable key for counting."""
+        if not value:
+            return ""
+
+        try:
+            decoded = value.decode("utf-8")
+        except UnicodeDecodeError:
+            decoded = None
+
+        if decoded and decoded.strip() and all(ch in string.printable for ch in decoded):
+            return decoded.strip()
+
+        return value.hex()
+
+    def _is_printable(self, value: bytes) -> bool:
+        """Return True if every character in ``value`` is human-readable."""
+        try:
+            decoded = value.decode("utf-8")
+        except UnicodeDecodeError:
+            return False
+
+        cleaned = decoded.strip()
+        if not cleaned:
+            return False
+
+        return all(ch in string.printable for ch in cleaned)
+
+    def _is_numeric(self, value: bytes) -> bool:
+        """Return True if ``value`` represents an integer string."""
+        try:
+            decoded = value.decode("utf-8").strip()
+        except UnicodeDecodeError:
+            return False
+
+        if not decoded:
+            return False
+
+        if decoded.startswith(("+", "-")):
+            decoded = decoded[1:]
+
+        return decoded.isdigit()
 
     async def _analyze_structure(self, messages: List[bytes]) -> StructuralFeatures:
         """Analyze structural features of messages."""

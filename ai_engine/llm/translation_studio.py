@@ -25,7 +25,7 @@ import os
 import pickle
 from typing import Dict, Any, Optional, List, Union, Tuple, Set
 from dataclasses import dataclass, field, asdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 import uuid
 from collections import defaultdict
@@ -78,6 +78,18 @@ class TranslationException(CronosAIException):
     """Protocol translation specific exception."""
 
     pass
+
+
+def utc_now() -> datetime:
+    """Return the current UTC time as a timezone-aware datetime."""
+    return datetime.now(timezone.utc)
+
+
+def ensure_utc(dt: datetime) -> datetime:
+    """Normalize datetimes to timezone-aware UTC instances."""
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
 
 
 class ProtocolType(str, Enum):
@@ -153,7 +165,7 @@ class ProtocolSpecification:
     max_message_size: int = 65536
     validation_schema: Optional[Dict[str, Any]] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=utc_now)
 
 
 @dataclass
@@ -183,7 +195,7 @@ class TranslationRules:
     postprocessing: List[str] = field(default_factory=list)
     error_handling: Dict[str, str] = field(default_factory=dict)
     performance_hints: Dict[str, Any] = field(default_factory=dict)
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=utc_now)
     accuracy: float = 0.0
     test_cases: List[Dict[str, Any]] = field(default_factory=list)
 
@@ -197,7 +209,7 @@ class OptimizedRules:
     optimizations_applied: List[str]
     performance_improvement: float
     accuracy_improvement: float
-    optimization_timestamp: datetime = field(default_factory=datetime.utcnow)
+    optimization_timestamp: datetime = field(default_factory=utc_now)
     benchmarks: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -234,7 +246,7 @@ class TranslationResult:
     errors: List[str] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=utc_now)
 
 
 class ProtocolTranslationStudio:
@@ -707,7 +719,7 @@ Format response as JSON with:
         if cache_key in self.translation_rules_cache:
             rules = self.translation_rules_cache[cache_key]
             # Check if cache is still valid
-            if datetime.utcnow() - rules.created_at < self.cache_ttl:
+            if utc_now() - ensure_utc(rules.created_at) < self.cache_ttl:
                 return rules
 
         # Generate new rules
@@ -1701,7 +1713,7 @@ Format response as JSON with:
             "cached_rules": len(self.translation_rules_cache),
             "registered_protocols": len(self.protocol_specs),
             "optimization_history_size": len(self.optimization_history),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now().isoformat(),
         }
 
     async def register_protocol(self, spec: ProtocolSpecification) -> None:
@@ -2036,7 +2048,8 @@ Format response as JSON with:
         os.makedirs(rules_dir, exist_ok=True)
 
         # Create filename with timestamp and metrics
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        now = utc_now()
+        timestamp = now.strftime("%Y%m%d_%H%M%S")
         version_str = version or "1.0.0"
         accuracy = rules.accuracy
         rules_name = f"translation_rules_{rules.source_protocol.protocol_id}_to_{rules.target_protocol.protocol_id}_v{version_str}_acc{accuracy:.4f}_{timestamp}.pkl"
