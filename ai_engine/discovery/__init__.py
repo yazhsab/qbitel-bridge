@@ -6,19 +6,19 @@ PCFG grammar inference, statistical analysis, and protocol classification.
 """
 
 from .pcfg_inference import PCFGInference, Grammar, ProductionRule
-from .protocol_classifier import ProtocolClassifier, ProtocolPrediction
+from .protocol_classifier import ProtocolClassifier, ClassificationResult
 from .statistical_analyzer import StatisticalAnalyzer, ByteFrequency, FieldStatistics
 from .pattern_extractor import PatternExtractor, PatternResult
 
 __all__ = [
     "PCFGInference",
-    "Grammar", 
+    "Grammar",
     "ProductionRule",
     "ProtocolClassifier",
-    "ProtocolPrediction",
+    "ClassificationResult",
     "StatisticalAnalyzer",
     "ByteFrequency",
-    "FieldStatistics", 
+    "FieldStatistics",
     "PatternExtractor",
     "PatternResult",
 ]

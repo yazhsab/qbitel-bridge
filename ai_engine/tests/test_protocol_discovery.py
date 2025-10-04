@@ -17,7 +17,7 @@ from typing import Dict, List, Any, Optional
 from ai_engine.discovery.statistical_analyzer import StatisticalAnalyzer, TrafficPattern, FieldBoundary
 from ai_engine.discovery.grammar_learner import GrammarLearner, PCFGRule, Grammar
 from ai_engine.discovery.parser_generator import ParserGenerator, GeneratedParser
-from ai_engine.discovery.protocol_classifier import ProtocolClassifier, ProtocolPrediction
+from ai_engine.discovery.protocol_classifier import ProtocolClassifier, ClassificationResult
 from ai_engine.discovery.message_validator import MessageValidator, ValidationResult, ValidationRule
 from ai_engine.discovery.protocol_discovery_orchestrator import ProtocolDiscoveryOrchestrator, DiscoveryResult
 from ai_engine.core.error_handling import ErrorHandler, CircuitBreaker, RetryManager
@@ -329,7 +329,7 @@ class TestProtocolClassifier:
         http_msg = b"GET /test HTTP/1.1\r\nHost: test.com\r\n\r\n"
         prediction = await classifier.classify_message(http_msg)
         
-        assert isinstance(prediction, ProtocolPrediction)
+        assert isinstance(prediction, ClassificationResult)
         assert prediction.protocol in training_data.keys()
         assert prediction.confidence > 0.0 and prediction.confidence <= 1.0
         assert len(prediction.class_probabilities) == len(training_data)
@@ -372,7 +372,7 @@ class TestProtocolClassifier:
         # Test that loaded classifier works
         test_msg = b"GET /test HTTP/1.1\r\n\r\n"
         prediction = await new_classifier.classify_message(test_msg)
-        assert isinstance(prediction, ProtocolPrediction)
+        assert isinstance(prediction, ClassificationResult)
 
 class TestMessageValidator:
     """Test suite for MessageValidator."""
