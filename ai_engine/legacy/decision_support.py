@@ -1588,18 +1588,19 @@ class ImpactAssessor:
 
     async def _create_contingency_plans(self, risks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Create contingency plans for identified risks."""
-        
+
         contingencies = []
-        
-        for risk in action.risks:
-            if "downtime" in risk.lower():
+
+        for risk in risks:
+            risk_desc = risk.get("description", str(risk))
+            if "downtime" in risk_desc.lower():
                 contingencies.append({
                     "trigger": "extended_system_downtime",
                     "response": "Activate backup systems and notify stakeholders",
                     "owner": "operations_manager",
                     "timeline": "immediate"
                 })
-            elif "cost" in risk.lower():
+            elif "cost" in risk_desc.lower():
                 contingencies.append({
                     "trigger": "cost_overrun_>20%",
                     "response": "Review scope and consider phased implementation",
@@ -1608,7 +1609,7 @@ class ImpactAssessor:
                 })
             else:
                 contingencies.append({
-                    "trigger": f"{risk}_occurs",
+                    "trigger": f"{risk_desc}_occurs",
                     "response": "Implement standard risk response procedures",
                     "owner": "project_manager",
                     "timeline": "as_needed"

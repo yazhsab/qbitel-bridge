@@ -1157,13 +1157,10 @@ class FieldDetector:
             )
             
             return metadata
-            
+
         except Exception as e:
             self.logger.error(f"Failed to load checkpoint: {e}")
             raise ModelException(f"Checkpoint loading failed: {e}")
-            f1_score = (2 * precision * recall) / (precision + recall)
-
-        return avg_loss, f1_score
     
     def _save_model(self, model_path: Optional[str] = None) -> None:
         """Save model checkpoint."""

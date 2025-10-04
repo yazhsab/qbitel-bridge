@@ -366,7 +366,7 @@ class VAEAnomalyDetector:
             self.logger.error(f"Anomaly detection failed: {e}")
             raise AnomalyDetectionException(f"Detection error: {e}")
     
-    def train(
+    async def train(
         self,
         training_data: np.ndarray,
         validation_data: Optional[np.ndarray] = None,
