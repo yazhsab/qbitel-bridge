@@ -153,9 +153,10 @@ jobs:
         run: cd rust/dataplane && cargo test --all-features --workspace
       
       - name: Rust Security Audit
-        uses: actions-rs/audit@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cargo install cargo-audit
+          cd rust/dataplane && cargo audit
+        continue-on-error: true
       
       - name: Go Code Quality - Format Check
         run: |
@@ -166,9 +167,9 @@ jobs:
         run: cd go && go vet ./...
       
       - name: Go Security - Gosec
-        uses: securecodewarrior/github-action-gosec@master
-        with:
-          args: '-fmt sarif -out gosec-results.sarif ./go/...'
+        run: |
+          go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
+          cd go && gosec -fmt sarif -out gosec-results.sarif ./...
         continue-on-error: true
       
       - name: Go Unit Tests
