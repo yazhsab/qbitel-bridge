@@ -221,3 +221,149 @@ class ServingException(CronosAIException):
             context["request_id"] = request_id
 
         super().__init__(message, error_code="SERVING_ERROR", context=context)
+
+
+class AIEngineException(CronosAIException):
+    """High-level exception for AI Engine orchestration failures."""
+
+    def __init__(self, message: str, component: Optional[str] = None):
+        context = {"component": component} if component else {}
+        super().__init__(message, error_code="AI_ENGINE_ERROR", context=context)
+
+    def __str__(self) -> str:  # pragma: no cover - simple override
+        return self.message
+
+
+class ValidationException(AIEngineException):
+    """Exception raised when validation logic fails."""
+
+    def __init__(
+        self,
+        message: str,
+        field: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+    ):
+        context: Dict[str, Any] = {}
+        if field:
+            context["field"] = field
+        if details:
+            context["details"] = details
+
+        super().__init__(message, component="validation")
+        self.context.update(context)
+
+
+class ConfigException(CronosAIException):
+    """Exception raised for configuration service errors."""
+
+    def __init__(self, message: str, key: Optional[str] = None):
+        context = {"config_key": key} if key else {}
+        super().__init__(message, error_code="CONFIG_SERVICE_ERROR", context=context)
+
+
+class PolicyException(CronosAIException):
+    """Exception raised within the policy engine domain."""
+
+    def __init__(self, message: str, policy_id: Optional[str] = None):
+        context = {"policy_id": policy_id} if policy_id else {}
+        super().__init__(message, error_code="POLICY_ERROR", context=context)
+
+
+class ComplianceException(CronosAIException):
+    """Exception raised for compliance assessment operations."""
+
+    def __init__(self, message: str, framework: Optional[str] = None):
+        context = {"framework": framework} if framework else {}
+        super().__init__(message, error_code="COMPLIANCE_ERROR", context=context)
+
+
+class SecurityException(CronosAIException):
+    """Exception raised for security orchestration failures."""
+
+    def __init__(self, message: str, domain: Optional[str] = None):
+        context = {"domain": domain} if domain else {}
+        super().__init__(message, error_code="SECURITY_ERROR", context=context)
+
+
+class LLMException(CronosAIException):
+    """LLM-related exception shared across providers."""
+
+    def __init__(self, message: str, provider: Optional[str] = None):
+        context = {"provider": provider} if provider else {}
+        super().__init__(message, error_code="LLM_ERROR", context=context)
+
+
+class TranslationException(CronosAIException):
+    """Exception raised by translation studio endpoints."""
+
+    def __init__(self, message: str, translation_id: Optional[str] = None):
+        context = {"translation_id": translation_id} if translation_id else {}
+        super().__init__(message, error_code="TRANSLATION_ERROR", context=context)
+
+
+class ObservabilityException(CronosAIException):
+    """Exception raised for observability subsystem failures."""
+
+    def __init__(self, message: str, subsystem: Optional[str] = None):
+        context = {"subsystem": subsystem} if subsystem else {}
+        super().__init__(message, error_code="OBSERVABILITY_ERROR", context=context)
+
+
+class MonitoringException(ObservabilityException):
+    """Exception for monitoring metric collection issues."""
+
+    def __init__(self, message: str, metric: Optional[str] = None):
+        super().__init__(message, subsystem="monitoring")
+        if metric:
+            self.context["metric"] = metric
+
+
+class LoggingException(ObservabilityException):
+    """Exception for logging pipeline failures."""
+
+    def __init__(self, message: str, sink: Optional[str] = None):
+        super().__init__(message, subsystem="logging")
+        if sink:
+            self.context["sink"] = sink
+
+
+class AlertException(ObservabilityException):
+    """Exception raised while managing alerts."""
+
+    def __init__(self, message: str, alert_id: Optional[str] = None):
+        super().__init__(message, subsystem="alerts")
+        if alert_id:
+            self.context["alert_id"] = alert_id
+
+
+class HealthCheckException(ObservabilityException):
+    """Exception raised when health checks fail."""
+
+    def __init__(self, message: str, component: Optional[str] = None):
+        super().__init__(message, subsystem="health")
+        if component:
+            self.context["component"] = component
+
+
+class SLAViolationException(CronosAIException):
+    """Exception raised when service level objectives are violated."""
+
+    def __init__(self, message: str, sla_threshold_ms: Optional[float] = None):
+        context = {"sla_threshold_ms": sla_threshold_ms} if sla_threshold_ms else {}
+        super().__init__(message, error_code="SLA_VIOLATION", context=context)
+
+
+class DeploymentException(CronosAIException):
+    """Exception raised for deployment lifecycle errors."""
+
+    def __init__(self, message: str, deployment_id: Optional[str] = None):
+        context = {"deployment_id": deployment_id} if deployment_id else {}
+        super().__init__(message, error_code="DEPLOYMENT_ERROR", context=context)
+
+
+class EnsembleException(CronosAIException):
+    """Exception raised for ensemble model coordination errors."""
+
+    def __init__(self, message: str, ensemble_id: Optional[str] = None):
+        context = {"ensemble_id": ensemble_id} if ensemble_id else {}
+        super().__init__(message, error_code="ENSEMBLE_ERROR", context=context)

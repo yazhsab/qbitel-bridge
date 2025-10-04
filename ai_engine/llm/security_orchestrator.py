@@ -24,7 +24,7 @@ import uuid
 from prometheus_client import Counter, Histogram, Gauge
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import CronosAIException, SecurityException
 from ..monitoring.metrics import MetricsCollector
 from ..monitoring.alerts import AlertManager, Alert, AlertSeverity, AlertStatus
 from ..policy.policy_engine import PolicyEngine, Policy, PolicyType, PolicySeverity
@@ -51,14 +51,6 @@ ACTIVE_THREATS = Gauge(
 )
 
 logger = logging.getLogger(__name__)
-
-
-class SecurityException(CronosAIException):
-    """Security orchestrator specific exception."""
-
-    pass
-
-
 class ThreatSeverity(str, Enum):
     """Threat severity levels."""
 

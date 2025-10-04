@@ -8,7 +8,7 @@ import abc
 import logging
 import time
 from typing import Any, Dict, List, Optional, Tuple, Union
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 import torch
@@ -35,7 +35,7 @@ class ModelInput:
     """Base class for model inputs."""
 
     data: Union[torch.Tensor, np.ndarray, bytes, str]
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_tensor(self) -> torch.Tensor:
         """Convert input data to tensor."""

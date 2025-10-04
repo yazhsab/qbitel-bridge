@@ -72,6 +72,7 @@ class FieldBoundary:
     confidence: float
     boundary_type: str  # 'delimiter', 'length_field', 'entropy_change', 'pattern_break'
     evidence: Dict[str, Any]
+    separator: Optional[bytes] = None
 
 
 @dataclass
@@ -103,6 +104,19 @@ class StructuralFeatures:
     message_classes: List[str]
 
 
+@dataclass
+class TrafficPattern:
+    """Aggregate metrics describing analyzed traffic."""
+
+    total_messages: int
+    message_lengths: List[int]
+    entropy: float
+    binary_ratio: float
+    detected_patterns: List[PatternInfo]
+    field_boundaries: List[FieldBoundary]
+    processing_time: float
+
+
 class StatisticalAnalyzer:
     """
     Enterprise-grade statistical analyzer for protocol discovery.
@@ -111,9 +125,9 @@ class StatisticalAnalyzer:
     automated protocol structure discovery and field boundary detection.
     """
 
-    def __init__(self, config: Config):
+    def __init__(self, config: Optional[Config] = None):
         """Initialize the statistical analyzer."""
-        self.config = config
+        self.config = config or Config()
         self.logger = logging.getLogger(__name__)
 
         # Analysis parameters
@@ -137,6 +151,47 @@ class StatisticalAnalyzer:
         self._boundary_cache: Dict[str, List[FieldBoundary]] = {}
 
         self.logger.info("Statistical Analyzer initialized")
+
+    async def analyze_traffic(self, messages: List[bytes]) -> TrafficPattern:
+        """Analyze message traffic and return high level metrics."""
+        if not messages:
+            raise ProtocolException("No messages provided for analysis")
+
+        start_time = time.time()
+
+        byte_stats_task = asyncio.create_task(self._compute_byte_statistics(b"".join(messages)))
+        pattern_task = asyncio.create_task(self.detect_patterns(messages))
+        boundary_task = asyncio.create_task(self.detect_field_boundaries(messages))
+
+        byte_stats, patterns, boundaries = await asyncio.gather(
+            byte_stats_task, pattern_task, boundary_task
+        )
+
+        processing_time = time.time() - start_time
+        message_lengths = [len(msg) for msg in messages]
+        entropy_value = await self._calculate_entropy(b"".join(messages))
+        binary_ratio = self._calculate_binary_ratio(messages)
+
+        traffic_pattern = TrafficPattern(
+            total_messages=len(messages),
+            message_lengths=message_lengths,
+            entropy=entropy_value,
+            binary_ratio=binary_ratio,
+            detected_patterns=patterns,
+            field_boundaries=boundaries,
+            processing_time=processing_time,
+        )
+
+        self.logger.debug(
+            "Traffic analysis completed",
+            extra={
+                "total_messages": traffic_pattern.total_messages,
+                "entropy": traffic_pattern.entropy,
+                "binary_ratio": traffic_pattern.binary_ratio,
+                "processing_time": traffic_pattern.processing_time,
+            },
+        )
+        return traffic_pattern
 
     async def analyze_messages(self, messages: List[bytes]) -> Dict[str, Any]:
         """
@@ -283,8 +338,33 @@ class StatisticalAnalyzer:
             chi_square_pvalue=chi2_p,
             is_random=is_random,
             is_text=is_text,
-        is_binary=is_binary,
+            is_binary=is_binary,
         )
+
+    async def _calculate_entropy(self, data: bytes) -> float:
+        """Calculate Shannon entropy for provided data."""
+        if not data:
+            return 0.0
+
+        frequency = Counter(data)
+        total = len(data)
+        probabilities = np.array([count / total for count in frequency.values()])
+        return float(entropy(probabilities, base=2))
+
+    def _calculate_binary_ratio(self, messages: List[bytes]) -> float:
+        """Estimate ratio of binary messages in sample."""
+        if not messages:
+            return 0.0
+
+        binary_count = 0
+        for msg in messages:
+            if not msg:
+                continue
+            printable = sum(1 for b in msg if 32 <= b <= 126)
+            if printable / max(len(msg), 1) < 0.6:
+                binary_count += 1
+
+        return binary_count / len(messages)
 
     def summarize_field_statistics(self, field_values: List[bytes]) -> FieldStatistics:
         """Summarize discrete protocol field samples into statistical features."""
@@ -883,6 +963,7 @@ class StatisticalAnalyzer:
                             "entropy_after": entropies[i],
                             "entropy_diff": entropy_diff,
                         },
+                        separator=None,
                     )
                     boundaries.append(boundary)
 
@@ -928,6 +1009,7 @@ class StatisticalAnalyzer:
                                 "frequency": len(positions),
                                 "relative_position_std": std_dev,
                             },
+                            separator=delimiter,
                         )
                         boundaries.append(boundary)
 
@@ -959,17 +1041,18 @@ class StatisticalAnalyzer:
                     remaining_length = len(msg) - length_size
                     if declared_length == remaining_length:
                         confidence = 0.9  # High confidence for exact match
-                        boundary = FieldBoundary(
-                            position=length_size,
-                            confidence=confidence,
-                            boundary_type="length_field",
-                            evidence={
-                                "length_field_size": length_size,
-                                "declared_length": declared_length,
-                                "actual_length": remaining_length,
-                            },
-                        )
-                        boundaries.append(boundary)
+                    boundary = FieldBoundary(
+                        position=length_size,
+                        confidence=confidence,
+                        boundary_type="length_field",
+                        evidence={
+                            "length_field_size": length_size,
+                            "declared_length": declared_length,
+                            "actual_length": remaining_length,
+                        },
+                        separator=None,
+                    )
+                    boundaries.append(boundary)
 
                 except (struct.error, IndexError):
                     continue
@@ -1013,6 +1096,7 @@ class StatisticalAnalyzer:
                         "byte_before": msg[pos - 1] if pos > 0 else None,
                         "byte_after": msg[pos] if pos < len(msg) else None,
                     },
+                    separator=None,
                 )
                 boundaries.append(boundary)
 
@@ -1041,6 +1125,24 @@ class StatisticalAnalyzer:
 
         merged.append(current_boundary)
         return merged
+
+    async def detect_field_boundaries(self, messages: List[bytes]) -> List[FieldBoundary]:
+        """Public interface for field boundary detection."""
+        boundaries = await self._detect_field_boundaries(messages)
+        # Ensure delimiter boundaries expose separator attribute for consumers
+        for boundary in boundaries:
+            if boundary.separator is None and "delimiter" in boundary.evidence:
+                delimiter_value = boundary.evidence.get("delimiter")
+                if isinstance(delimiter_value, (bytes, bytearray)):
+                    boundary.separator = bytes(delimiter_value)
+        return boundaries
+
+    async def detect_patterns(self, messages: List[bytes]) -> List[PatternInfo]:
+        """Public interface for pattern detection."""
+        if not messages:
+            return []
+        patterns = await self._detect_patterns(messages)
+        return patterns
 
     def _classify_pattern_type(
         self, pattern: bytes, positions: List[int], contexts: List[bytes]

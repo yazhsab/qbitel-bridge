@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 import ipaddress
 import uuid
 
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import SecurityException
 
 
 class SecurityEventType(str, Enum):
@@ -530,13 +530,6 @@ class SecurityMetrics:
     period_start: datetime = field(default_factory=datetime.now)
     period_end: datetime = field(default_factory=datetime.now)
     metadata: Dict[str, Any] = field(default_factory=dict)
-
-
-# Exception classes for security operations
-class SecurityException(CronosAIException):
-    """Base security orchestrator exception."""
-
-    pass
 
 
 class ThreatAnalysisException(SecurityException):

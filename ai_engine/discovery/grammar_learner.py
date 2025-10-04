@@ -65,6 +65,9 @@ class ProductionRule:
         return all(s.is_terminal for s in self.right_hand_side)
 
 
+PCFGRule = ProductionRule
+
+
 @dataclass
 class Grammar:
     """Enhanced grammar representation with semantic annotations."""

@@ -29,7 +29,7 @@ except ImportError:  # pragma: no cover - environment dependent
     ollama = None  # type: ignore[assignment]
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import CronosAIException, LLMException
 from ..monitoring.metrics import MetricsCollector
 
 # Prometheus metrics for LLM operations
@@ -51,14 +51,6 @@ LLM_ACTIVE_CONNECTIONS = Gauge(
 )
 
 logger = logging.getLogger(__name__)
-
-
-class LLMException(CronosAIException):
-    """LLM-specific exception."""
-
-    pass
-
-
 class LLMProvider(Enum):
     """LLM provider types."""
 

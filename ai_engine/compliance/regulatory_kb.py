@@ -114,8 +114,8 @@ class ComplianceRecommendation:
     priority: RequirementSeverity
     implementation_steps: List[str]
     estimated_effort_days: int
-    cost_estimate: Optional[float] = None
     business_impact: str
+    cost_estimate: Optional[float] = None
     technical_requirements: List[str] = field(default_factory=list)
     success_metrics: List[str] = field(default_factory=list)
 

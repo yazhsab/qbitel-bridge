@@ -16,10 +16,10 @@ from ai_engine.core.config import Config
 from ai_engine.core.engine import AIEngine
 from ai_engine.core.exceptions import AIEngineException, ValidationException
 from ai_engine.models import ModelInput, ModelOutput
-from . import TestConfig
+from . import TestConfig as BaseTestConfig
 
 
-class TestConfig:
+class TestConfig(BaseTestConfig):
     """Test configuration for core tests."""
 
     @pytest.fixture

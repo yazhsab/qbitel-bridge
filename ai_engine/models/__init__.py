@@ -10,21 +10,33 @@ actual module structure that exists in the repository today.
 """
 
 from .base import BaseModel, ModelInput, ModelOutput, ModelState
-from .ensemble import (
-    EnsembleModel,
-    EnsembleMethod,
-    VotingType,
-    EnsembleMember,
-    EnsembleResult,
-)
-from .model_manager import ModelManager
-from .registry import (
-    ModelRegistry,
-    ModelMetadata,
-    ModelVersion,
-    ModelStatus,
-    ModelType,
-)
+
+try:  # Optional: ensemble utilities rely on scikit-learn
+    from .ensemble import (
+        EnsembleModel,
+        EnsembleMethod,
+        VotingType,
+        EnsembleMember,
+        EnsembleResult,
+    )
+except Exception:  # pragma: no cover - optional dependency
+    EnsembleModel = EnsembleMethod = VotingType = EnsembleMember = EnsembleResult = None
+
+try:  # Optional: management modules depend on external services
+    from .model_manager import ModelManager
+except Exception:  # pragma: no cover - optional dependency
+    ModelManager = None
+
+try:
+    from .registry import (
+        ModelRegistry,
+        ModelMetadata,
+        ModelVersion,
+        ModelStatus,
+        ModelType,
+    )
+except Exception:  # pragma: no cover - optional dependency
+    ModelRegistry = ModelMetadata = ModelVersion = ModelStatus = ModelType = None
 
 __all__ = [
     # Base model primitives

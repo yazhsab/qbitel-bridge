@@ -759,6 +759,10 @@ class Config:
     log_level: LogLevel = LogLevel.INFO
     service_name: str = "cronos-ai-engine"
     version: str = "1.0.0"
+    device: str = "cpu"
+    batch_size: int = 32
+    model_path: str = "models"
+    data_path: str = "data"
 
     # Component configurations
     database: DatabaseConfig = field(default_factory=DatabaseConfig)
@@ -812,6 +816,8 @@ class Config:
     security_orchestrator_enabled: bool = True
     # Feature flag for action implementations (scaffold code)
     security_orchestrator_actions_enabled: bool = False
+
+    _ALLOWED_DEVICES = {"cpu", "cuda"}
 
     @classmethod
     def load_from_file(cls, config_path: Union[str, Path]) -> "Config":
@@ -882,6 +888,15 @@ class Config:
             )
 
         return config
+
+    def validate_device(self, device: str) -> str:
+        """Validate and normalize device selection."""
+        normalized = device.lower()
+        if normalized not in self._ALLOWED_DEVICES:
+            raise ValueError(
+                f"Unsupported device '{device}'. Allowed values: {sorted(self._ALLOWED_DEVICES)}"
+            )
+        return normalized
 
     @classmethod
     def _from_dict(cls, data: Dict[str, Any]) -> "Config":

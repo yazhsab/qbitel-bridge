@@ -22,6 +22,7 @@ from .exceptions import (
     ModelException,
     InferenceException,
     ConfigurationException,
+    AIEngineException,
 )
 
 # Import AI components (will be implemented)
@@ -31,8 +32,11 @@ from ..detection.field_detector import FieldDetector
 from ..anomaly.vae_detector import VAEAnomalyDetector
 from ..anomaly.ensemble_detector import EnsembleAnomalyDetector
 from ..features.extractors import FeatureExtractor
-from ..models.registry import ModelRegistry
-from ..monitoring.metrics import MetricsCollector
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:  # pragma: no cover - for type checkers only
+    from ..models.registry import ModelRegistry
+    from ..monitoring.metrics import MetricsCollector
 
 
 # Prometheus metrics
@@ -44,6 +48,129 @@ INFERENCE_DURATION = Histogram(
 )
 MODEL_ACCURACY = Gauge("cronos_ai_model_accuracy", "Model accuracy", ["model_name"])
 ACTIVE_MODELS = Gauge("cronos_ai_active_models", "Number of active models")
+
+
+class AIEngine:
+    """Minimal orchestration layer used by tests to exercise core workflows."""
+
+    def __init__(self, config: Config):
+        self.config = config
+        self.state = "initialized"
+        self.protocol_discovery = None
+        self.field_detector = None
+        self.anomaly_detector = None
+        self.model_registry = None
+        self.metrics: Dict[str, Any] = {}
+        self._start_time = time.time()
+
+    async def _initialize_components(self) -> None:
+        """Hook for asynchronous component initialization."""
+        # Sub-classes or tests can override/patch this method.
+        return None
+
+    async def initialize(self) -> None:
+        """Initialize engine components and transition to ready state."""
+        try:
+            await self._initialize_components()
+            self.state = "ready"
+        except Exception as exc:  # pragma: no cover - defensive
+            self.state = "failed"
+            raise AIEngineException("Failed to initialize AI Engine") from exc
+
+    async def shutdown(self) -> None:
+        """Shutdown the engine and release resources."""
+        self.state = "stopped"
+
+    async def discover_protocol(self, model_input: Any) -> Any:
+        """Delegate protocol discovery to the configured component."""
+        self._ensure_ready("protocol discovery")
+        if not self.protocol_discovery or not hasattr(
+            self.protocol_discovery, "discover_protocol"
+        ):
+            raise AIEngineException("Protocol discovery component not configured")
+
+        start_time = time.time()
+        try:
+            result = await self.protocol_discovery.discover_protocol(model_input)
+        except Exception as exc:
+            raise AIEngineException("Protocol discovery failed") from exc
+
+        self._annotate_processing_time(result, start_time)
+        return result
+
+    async def detect_fields(self, model_input: Any) -> Any:
+        """Delegate field detection to the configured component."""
+        self._ensure_ready("field detection")
+        if not self.field_detector or not hasattr(
+            self.field_detector, "detect_fields"
+        ):
+            raise AIEngineException("Field detector component not configured")
+
+        start_time = time.time()
+        try:
+            result = await self.field_detector.detect_fields(model_input)
+        except Exception as exc:
+            raise AIEngineException("Field detection failed") from exc
+
+        self._annotate_processing_time(result, start_time)
+        return result
+
+    async def detect_anomalies(self, model_input: Any) -> Any:
+        """Delegate anomaly detection to the configured component."""
+        self._ensure_ready("anomaly detection")
+        if not self.anomaly_detector:
+            raise AIEngineException("Anomaly detector component not configured")
+
+        detect_fn = None
+        if hasattr(self.anomaly_detector, "detect_anomalies"):
+            detect_fn = self.anomaly_detector.detect_anomalies
+        elif hasattr(self.anomaly_detector, "detect"):
+            detect_fn = self.anomaly_detector.detect
+        else:
+            raise AIEngineException("Anomaly detector does not expose a detect method")
+
+        start_time = time.time()
+        try:
+            result = await detect_fn(model_input)
+        except Exception as exc:
+            raise AIEngineException("Anomaly detection failed") from exc
+
+        self._annotate_processing_time(result, start_time)
+        return result
+
+    async def get_status(self) -> Dict[str, Any]:
+        """Return a lightweight status summary used by health checks."""
+        components = {
+            "protocol_discovery": self.protocol_discovery is not None,
+            "field_detector": self.field_detector is not None,
+            "anomaly_detector": self.anomaly_detector is not None,
+            "model_registry": self.model_registry is not None,
+        }
+
+        return {
+            "status": self.state,
+            "uptime_seconds": time.time() - self._start_time,
+            "components": components,
+            "system_metrics": dict(self.metrics),
+        }
+
+    async def cleanup(self) -> None:
+        """Cleanup resources owned by the engine."""
+        if self.model_registry and hasattr(self.model_registry, "cleanup"):
+            cleanup_fn = self.model_registry.cleanup
+            result = cleanup_fn()
+            if asyncio.iscoroutine(result):
+                await result
+        self.state = "stopped"
+
+    def _ensure_ready(self, operation: str) -> None:
+        if self.state != "ready":
+            raise AIEngineException("AI Engine not ready", component=operation)
+
+    def _annotate_processing_time(self, result: Any, start_time: float) -> None:
+        if hasattr(result, "processing_time_ms"):
+            if getattr(result, "processing_time_ms", None) is None:
+                result.processing_time_ms = (time.time() - start_time) * 1000.0
 
 
 class CronosAIEngine:
@@ -72,8 +199,8 @@ class CronosAIEngine:
         self._feature_extractor: Optional[FeatureExtractor] = None
 
         # Infrastructure components
-        self._model_registry: Optional[ModelRegistry] = None
-        self._metrics_collector: Optional[MetricsCollector] = None
+        self._model_registry: Optional["ModelRegistry"] = None
+        self._metrics_collector: Optional["MetricsCollector"] = None
         self._executor: Optional[ThreadPoolExecutor] = None
 
         # State management
@@ -410,10 +537,14 @@ class CronosAIEngine:
         )
 
         # Initialize model registry
+        from ..models.registry import ModelRegistry
+
         self._model_registry = ModelRegistry(self.config)
         await self._model_registry.initialize()
 
         # Initialize metrics collector
+        from ..monitoring.metrics import MetricsCollector
+
         self._metrics_collector = MetricsCollector(self.config)
         await self._metrics_collector.initialize()
 

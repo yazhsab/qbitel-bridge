@@ -9,8 +9,13 @@ import os
 from pathlib import Path
 
 # Add ai_engine to path for testing
-ai_engine_path = Path(__file__).parent.parent
-sys.path.insert(0, str(ai_engine_path))
+project_root = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+# Ensure the ai_engine package itself is available before relative imports
+ai_engine_path = project_root / "ai_engine"
+if str(ai_engine_path) not in sys.path:
+    sys.path.insert(0, str(ai_engine_path))
 
 # Test configuration
 TEST_DATA_PATH = Path(__file__).parent / "data"
