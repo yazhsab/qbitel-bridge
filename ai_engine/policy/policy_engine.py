@@ -37,7 +37,24 @@ except ModuleNotFoundError:  # pragma: no cover - fallback stub
 
     jsonpath_ng.parse = _missing_jsonpath  # type: ignore[attr-defined]
     sys.modules.setdefault("jsonpath_ng", jsonpath_ng)
-from croniter import croniter
+
+try:  # pragma: no cover - optional dependency
+    from croniter import croniter  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - fallback stub
+    class croniter:  # type: ignore[override]
+        """Minimal croniter fallback that advances in one-minute increments."""
+
+        def __init__(self, expression: str, start_time: Optional[datetime] = None):
+            self.expression = expression
+            self.current = start_time or datetime.utcnow()
+
+        def get_next(self, return_type=datetime):
+            self.current = self.current + timedelta(minutes=1)
+            return self.current
+
+        def get_prev(self, return_type=datetime):
+            self.current = self.current - timedelta(minutes=1)
+            return self.current
 
 from ..core.config import Config
 from ..core.exceptions import PolicyException, ValidationException, ComplianceException
