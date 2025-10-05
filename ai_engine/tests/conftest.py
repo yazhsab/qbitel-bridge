@@ -4,6 +4,9 @@ CRONOS AI - Pytest Configuration and Fixtures
 This module provides shared fixtures and configuration for all tests.
 """
 
+# Import mocks FIRST before any other imports
+from . import conftest_mocks  # noqa: F401
+
 import pytest
 import asyncio
 import tempfile

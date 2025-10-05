@@ -6,9 +6,26 @@ MLflow integration, distributed training, and automated hyperparameter tuning.
 """
 
 from .trainer import ModelTrainer, TrainingJob, TrainingConfig
-from .datasets import DatasetManager, ProtocolDataset, AnomalyDataset
-from .optimizers import OptimizerFactory, CustomOptimizers
-from .schedulers import SchedulerFactory, CustomSchedulers
+
+# Import optional modules only if they exist
+try:
+    from .datasets import DatasetManager, ProtocolDataset, AnomalyDataset
+except ImportError:
+    DatasetManager = None
+    ProtocolDataset = None
+    AnomalyDataset = None
+
+try:
+    from .optimizers import OptimizerFactory, CustomOptimizers
+except ImportError:
+    OptimizerFactory = None
+    CustomOptimizers = None
+
+try:
+    from .schedulers import SchedulerFactory, CustomSchedulers
+except ImportError:
+    SchedulerFactory = None
+    CustomSchedulers = None
 
 __all__ = [
     "ModelTrainer",
