@@ -11,15 +11,25 @@ import shutil
 from pathlib import Path
 from typing import Dict, Any
 from unittest.mock import Mock, AsyncMock
+from prometheus_client import REGISTRY
 
 from ai_engine.core.config import Config
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def event_loop():
-    """Create an instance of the default event loop for the test session."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+    """Create an instance of the default event loop for each test function."""
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
     yield loop
+    # Clean up any remaining tasks
+    try:
+        pending = asyncio.all_tasks(loop)
+        for task in pending:
+            task.cancel()
+        loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+    except Exception:
+        pass
     loop.close()
 
 
@@ -86,6 +96,26 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "performance: marks tests as performance tests")
     config.addinivalue_line("markers", "e2e: marks tests as end-to-end tests")
     config.addinivalue_line("markers", "chaos: marks tests as chaos engineering tests")
+
+
+@pytest.fixture(autouse=True)
+def clear_prometheus_registry():
+    """Clear Prometheus registry before each test to avoid duplicate metrics."""
+    # Get list of collectors to remove
+    collectors = list(REGISTRY._collector_to_names.keys())
+    for collector in collectors:
+        try:
+            REGISTRY.unregister(collector)
+        except Exception:
+            pass
+    yield
+    # Clean up after test
+    collectors = list(REGISTRY._collector_to_names.keys())
+    for collector in collectors:
+        try:
+            REGISTRY.unregister(collector)
+        except Exception:
+            pass
 
 
 # Test data generators

@@ -34,7 +34,7 @@ from ai_engine.discovery.protocol_discovery_orchestrator import (
     ProtocolDiscoveryOrchestrator,
     DiscoveryResult,
 )
-from ai_engine.core.error_handling import ErrorHandler, CircuitBreaker, RetryManager
+from ai_engine.core.error_handling import ErrorHandler, CircuitBreaker, CircuitBreakerConfig, RetryManager
 from ai_engine.core.structured_logging import StructuredLogger
 from ai_engine.core.performance_optimizer import PerformanceOptimizer, ComputationCache
 from ai_engine.monitoring.enterprise_metrics import EnterpriseMetrics, MetricsCollector
@@ -137,8 +137,8 @@ class TestGrammarLearner:
     """Test suite for GrammarLearner."""
 
     @pytest.fixture
-    def learner(self):
-        return GrammarLearner()
+    def learner(self, test_config):
+        return GrammarLearner(test_config)
 
     @pytest.fixture
     def sample_patterns(self):
@@ -220,8 +220,8 @@ class TestParserGenerator:
     """Test suite for ParserGenerator."""
 
     @pytest.fixture
-    def generator(self):
-        return ParserGenerator()
+    def generator(self, test_config):
+        return ParserGenerator(test_config)
 
     @pytest.fixture
     def sample_grammar(self):
@@ -399,8 +399,8 @@ class TestMessageValidator:
     """Test suite for MessageValidator."""
 
     @pytest.fixture
-    def validator(self):
-        return MessageValidator()
+    def validator(self, test_config):
+        return MessageValidator(test_config)
 
     @pytest.fixture
     def sample_rules(self):
@@ -591,7 +591,8 @@ class TestErrorHandling:
 
     @pytest.fixture
     def circuit_breaker(self):
-        return CircuitBreaker(failure_threshold=3, recovery_timeout=1.0)
+        config = CircuitBreakerConfig(failure_threshold=3, recovery_timeout=1.0)
+        return CircuitBreaker(config)
 
     @pytest.mark.asyncio
     async def test_circuit_breaker_states(self, circuit_breaker):
