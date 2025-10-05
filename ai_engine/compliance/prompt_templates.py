@@ -90,9 +90,11 @@ class CompliancePromptManager:
         self.templates: Dict[str, PromptTemplate] = {}
 
         # Jinja2 environment for template rendering
+        # Note: autoescape=False is intentional - these are LLM prompt templates,
+        # not HTML templates. No XSS risk as output goes to LLM, not browsers.
         self.jinja_env = jinja2.Environment(
             loader=jinja2.DictLoader({}),
-            autoescape=False,
+            autoescape=False,  # nosec B701 - LLM prompts, not HTML
             trim_blocks=True,
             lstrip_blocks=True,
         )

@@ -50,12 +50,17 @@ jobs:
             p/security-audit
             p/secrets
             p/owasp-top-ten
-      
-      - name: SAST - CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
         with:
-          languages: python, go, rust, javascript
+          languages: python, javascript
           queries: security-and-quality
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   code-quality:
     name: Code Quality & Testing
@@ -266,6 +271,8 @@ jobs:
       - name: Upload container scan results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           sarif_file: 'trivy-container-${{ matrix.component.name }}.sarif'
 

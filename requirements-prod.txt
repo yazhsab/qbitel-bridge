@@ -38,10 +38,7 @@ certifi==2023.11.17
 # ============================================================================
 # Production Performance
 # ============================================================================
-# Connection pooling
-aiohttp==3.9.1
-
-# Caching
+# Caching (aiohttp moved to base requirements.txt)
 aiocache==0.12.2
 
 # ============================================================================
@@ -50,8 +47,9 @@ aiocache==0.12.2
 # Database connection pooling
 psycopg2-binary==2.9.9
 
-# TimescaleDB support
-timescaledb==0.0.4
+# TimescaleDB support (requires Python 3.11+)
+timescaledb==0.0.4; python_version >= '3.11'
+timescaledb==0.0.2; python_version < '3.11'
 
 # ============================================================================
 # Production Message Queue

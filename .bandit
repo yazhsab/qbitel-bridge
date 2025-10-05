@@ -1,0 +1,53 @@
+# Bandit security scanner configuration for CRONOS AI
+# https://bandit.readthedocs.io/en/latest/config.html
+
+[bandit]
+# Exclude test files and generated code
+exclude_dirs = [
+    '/tests/',
+    '/test/',
+    '/.venv/',
+    '/venv/',
+    '/build/',
+    '/dist/',
+    '/__pycache__/'
+]
+
+# Tests to skip (with justification)
+skips = [
+    # B104: Binding to 0.0.0.0 is intentional for containerized deployments
+    # Security is handled at infrastructure/network layer
+    'B104',
+
+    # B108: /tmp usage is acceptable as these are cache directories
+    # Production deployments use volume mounts with proper permissions
+    'B108'
+]
+
+# Only report high and medium severity issues
+# Low severity issues create too much noise
+severity_level = MEDIUM
+confidence_level = MEDIUM
+
+[bandit.plugins]
+# Configure specific plugins
+
+# Allow MD5 when used for non-security purposes (cache keys, identifiers)
+# For cryptographic purposes, use SHA256 or better
+B324_exclude_patterns = [
+    # Cache key generation (non-security)
+    '*cache_key*',
+    '*snapshot_id*',
+    '*request_hash*',
+    # AB testing traffic split (non-security)
+    '*ab_test*',
+    '*canary*'
+]
+
+# SQL queries using parameterized statements are safe
+# Only flag actual SQL injection risks
+B608_check_sql_injection = true
+
+# Pickle usage in controlled environments (internal caching only)
+# Never unpickle data from untrusted sources
+B301_ignore_internal_cache = true

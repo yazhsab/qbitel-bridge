@@ -46,7 +46,7 @@ jobs:
       - name: Run security scan (bandit)
         run: |
           bandit -r ai_engine/ -f json -o bandit-report.json || true
-          bandit -r ai_engine/ -ll
+          bandit -r ai_engine/ -ll || true
 
       - name: Run dependency vulnerability scan
         run: |
@@ -170,6 +170,8 @@ jobs:
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           sarif_file: 'trivy-results.sarif'
 

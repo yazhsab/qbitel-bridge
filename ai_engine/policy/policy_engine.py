@@ -528,7 +528,8 @@ class Jinja2RuleEvaluator(RuleEvaluator):
 
     def __init__(self, config: Config):
         super().__init__(config)
-        self.env = Environment()
+        # Policy templates are for internal logic, not user-facing HTML
+        self.env = Environment()  # nosec B701 - internal policy templates
 
     async def evaluate(self, rule: PolicyRule, context: EvaluationContext) -> bool:
         """Evaluate Jinja2 template."""
