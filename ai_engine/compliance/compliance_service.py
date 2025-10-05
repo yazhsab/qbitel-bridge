@@ -449,8 +449,12 @@ class ComplianceService:
 
             # Record audit event
             if self.audit_trail:
-                report_id = getattr(report, "report_id", f"report_{uuid.uuid4().hex[:8]}")
-                file_size = getattr(report, "file_size", len(getattr(report, "content", b"")))
+                report_id = getattr(
+                    report, "report_id", f"report_{uuid.uuid4().hex[:8]}"
+                )
+                file_size = getattr(
+                    report, "file_size", len(getattr(report, "content", b""))
+                )
                 await self.audit_trail.record_compliance_event(
                     EventType.REPORT_GENERATED,
                     "system",

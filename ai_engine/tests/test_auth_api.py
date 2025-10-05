@@ -24,8 +24,8 @@ class TestPasswordHashing:
     @pytest.fixture
     def auth_service(self):
         """Create auth service instance."""
-        with patch('ai_engine.api.auth.get_secrets_manager'):
-            with patch('ai_engine.api.auth.get_audit_logger'):
+        with patch("ai_engine.api.auth.get_secrets_manager"):
+            with patch("ai_engine.api.auth.get_audit_logger"):
                 config = Config()
                 config.security.jwt_secret = "test_secret_32chars_minimum!!"
                 return AuthenticationService(config)
@@ -70,8 +70,8 @@ class TestJWTTokens:
     @pytest.fixture
     def auth_service(self):
         """Create auth service with known secret."""
-        with patch('ai_engine.api.auth.get_secrets_manager'):
-            with patch('ai_engine.api.auth.get_audit_logger'):
+        with patch("ai_engine.api.auth.get_secrets_manager"):
+            with patch("ai_engine.api.auth.get_audit_logger"):
                 config = Config()
                 config.security.jwt_secret = "jwt_test_secret_32_chars_min!!"
                 service = AuthenticationService(config)
@@ -88,9 +88,7 @@ class TestJWTTokens:
 
         # Verify token structure
         decoded = jwt.decode(
-            token,
-            auth_service.secret_key,
-            algorithms=[auth_service.algorithm]
+            token, auth_service.secret_key, algorithms=[auth_service.algorithm]
         )
         assert decoded["sub"] == "user123"
         assert decoded["role"] == "admin"
@@ -105,9 +103,7 @@ class TestJWTTokens:
         assert isinstance(token, str)
 
         decoded = jwt.decode(
-            token,
-            auth_service.secret_key,
-            algorithms=[auth_service.algorithm]
+            token, auth_service.secret_key, algorithms=[auth_service.algorithm]
         )
         assert decoded["sub"] == "user456"
         assert decoded["type"] == "refresh"
@@ -163,8 +159,8 @@ class TestTokenRevocation:
     @pytest.fixture
     def auth_service(self):
         """Create auth service."""
-        with patch('ai_engine.api.auth.get_secrets_manager'):
-            with patch('ai_engine.api.auth.get_audit_logger'):
+        with patch("ai_engine.api.auth.get_secrets_manager"):
+            with patch("ai_engine.api.auth.get_audit_logger"):
                 config = Config()
                 config.security.jwt_secret = "revoke_test_secret_32chars!!"
                 service = AuthenticationService(config)
@@ -229,8 +225,8 @@ class TestSessionManagement:
     @pytest.fixture
     def auth_service(self):
         """Create auth service."""
-        with patch('ai_engine.api.auth.get_secrets_manager'):
-            with patch('ai_engine.api.auth.get_audit_logger'):
+        with patch("ai_engine.api.auth.get_secrets_manager"):
+            with patch("ai_engine.api.auth.get_audit_logger"):
                 config = Config()
                 config.security.jwt_secret = "session_test_secret_32chars!!"
                 service = AuthenticationService(config)
@@ -316,8 +312,8 @@ class TestAuthenticationService:
 
     def test_service_initialization(self, config):
         """Test service initialization."""
-        with patch('ai_engine.api.auth.get_secrets_manager'):
-            with patch('ai_engine.api.auth.get_audit_logger'):
+        with patch("ai_engine.api.auth.get_secrets_manager"):
+            with patch("ai_engine.api.auth.get_audit_logger"):
                 service = AuthenticationService(config)
 
                 assert service.config == config
@@ -328,9 +324,9 @@ class TestAuthenticationService:
     @pytest.mark.asyncio
     async def test_initialize_with_redis(self, config):
         """Test initialization with Redis."""
-        with patch('ai_engine.api.auth.get_secrets_manager'):
-            with patch('ai_engine.api.auth.get_audit_logger'):
-                with patch('redis.asyncio.Redis') as mock_redis_class:
+        with patch("ai_engine.api.auth.get_secrets_manager"):
+            with patch("ai_engine.api.auth.get_audit_logger"):
+                with patch("redis.asyncio.Redis") as mock_redis_class:
                     mock_redis = AsyncMock()
                     mock_redis.ping = AsyncMock()
                     mock_redis_class.return_value = mock_redis
@@ -344,11 +340,13 @@ class TestAuthenticationService:
     @pytest.mark.asyncio
     async def test_initialize_redis_failure(self, config):
         """Test initialization with Redis failure."""
-        with patch('ai_engine.api.auth.get_secrets_manager'):
-            with patch('ai_engine.api.auth.get_audit_logger'):
-                with patch('redis.asyncio.Redis') as mock_redis_class:
+        with patch("ai_engine.api.auth.get_secrets_manager"):
+            with patch("ai_engine.api.auth.get_audit_logger"):
+                with patch("redis.asyncio.Redis") as mock_redis_class:
                     mock_redis = AsyncMock()
-                    mock_redis.ping = AsyncMock(side_effect=Exception("Connection failed"))
+                    mock_redis.ping = AsyncMock(
+                        side_effect=Exception("Connection failed")
+                    )
                     mock_redis_class.return_value = mock_redis
 
                     service = AuthenticationService(config)
@@ -366,8 +364,10 @@ class TestSecretKeyLoading:
         mock_secrets_mgr = Mock()
         mock_secrets_mgr.get_secret = Mock(return_value="secret_from_manager_32!!")
 
-        with patch('ai_engine.api.auth.get_secrets_manager', return_value=mock_secrets_mgr):
-            with patch('ai_engine.api.auth.get_audit_logger'):
+        with patch(
+            "ai_engine.api.auth.get_secrets_manager", return_value=mock_secrets_mgr
+        ):
+            with patch("ai_engine.api.auth.get_audit_logger"):
                 config = Config()
                 service = AuthenticationService(config)
 
@@ -378,9 +378,9 @@ class TestSecretKeyLoading:
         config = Config()
         config.security.jwt_secret = "config_secret_test_32chars!!"
 
-        with patch('ai_engine.api.auth.get_secrets_manager') as mock_sm:
+        with patch("ai_engine.api.auth.get_secrets_manager") as mock_sm:
             mock_sm.return_value.get_secret = Mock(return_value=None)
-            with patch('ai_engine.api.auth.get_audit_logger'):
+            with patch("ai_engine.api.auth.get_audit_logger"):
                 service = AuthenticationService(config)
 
                 assert service.secret_key == "config_secret_test_32chars!!"
@@ -390,9 +390,9 @@ class TestSecretKeyLoading:
         config = Config()
         config.environment = Mock(value="development")
 
-        with patch('ai_engine.api.auth.get_secrets_manager') as mock_sm:
+        with patch("ai_engine.api.auth.get_secrets_manager") as mock_sm:
             mock_sm.return_value.get_secret = Mock(return_value=None)
-            with patch('ai_engine.api.auth.get_audit_logger'):
+            with patch("ai_engine.api.auth.get_audit_logger"):
                 service = AuthenticationService(config)
 
                 assert service.secret_key is not None
@@ -404,10 +404,12 @@ class TestSecretKeyLoading:
         config.environment = Mock(value="production")
         config.security.jwt_secret = ""
 
-        with patch('ai_engine.api.auth.get_secrets_manager') as mock_sm:
+        with patch("ai_engine.api.auth.get_secrets_manager") as mock_sm:
             mock_sm.return_value.get_secret = Mock(return_value=None)
-            with patch('ai_engine.api.auth.get_audit_logger'):
-                with pytest.raises(AuthenticationError, match="not configured in production"):
+            with patch("ai_engine.api.auth.get_audit_logger"):
+                with pytest.raises(
+                    AuthenticationError, match="not configured in production"
+                ):
                     AuthenticationService(config)
 
 
@@ -417,8 +419,8 @@ class TestTokenDataEncoding:
     @pytest.fixture
     def auth_service(self):
         """Create auth service."""
-        with patch('ai_engine.api.auth.get_secrets_manager'):
-            with patch('ai_engine.api.auth.get_audit_logger'):
+        with patch("ai_engine.api.auth.get_secrets_manager"):
+            with patch("ai_engine.api.auth.get_audit_logger"):
                 config = Config()
                 config.security.jwt_secret = "encoding_test_secret_32!!"
                 return AuthenticationService(config)
@@ -430,15 +432,13 @@ class TestTokenDataEncoding:
             "username": "testuser",
             "roles": ["admin", "user"],
             "permissions": {"read": True, "write": True, "delete": False},
-            "metadata": {"last_login": "2024-01-01", "login_count": 42}
+            "metadata": {"last_login": "2024-01-01", "login_count": 42},
         }
 
         token = auth_service.create_access_token(data)
 
         decoded = jwt.decode(
-            token,
-            auth_service.secret_key,
-            algorithms=[auth_service.algorithm]
+            token, auth_service.secret_key, algorithms=[auth_service.algorithm]
         )
 
         assert decoded["sub"] == "user123"
@@ -451,9 +451,7 @@ class TestTokenDataEncoding:
         token = auth_service.create_access_token(data)
 
         decoded = jwt.decode(
-            token,
-            auth_service.secret_key,
-            algorithms=[auth_service.algorithm]
+            token, auth_service.secret_key, algorithms=[auth_service.algorithm]
         )
 
         assert decoded["sub"] == "user_minimal"
@@ -465,8 +463,8 @@ class TestEdgeCases:
     @pytest.fixture
     def auth_service(self):
         """Create auth service."""
-        with patch('ai_engine.api.auth.get_secrets_manager'):
-            with patch('ai_engine.api.auth.get_audit_logger'):
+        with patch("ai_engine.api.auth.get_secrets_manager"):
+            with patch("ai_engine.api.auth.get_audit_logger"):
                 config = Config()
                 config.security.jwt_secret = "edge_case_test_secret_32!!"
                 service = AuthenticationService(config)

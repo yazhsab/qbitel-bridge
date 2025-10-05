@@ -52,6 +52,8 @@ LLM_ACTIVE_CONNECTIONS = Gauge(
 )
 
 logger = logging.getLogger(__name__)
+
+
 class LLMProvider(Enum):
     """LLM provider types."""
 
@@ -349,11 +351,13 @@ class UnifiedLLMService:
         }.get(provider)
 
         metrics_mocked = isinstance(LLM_TOKEN_USAGE, Mock)
-        if provider_metric and (metrics_mocked or not hasattr(time.time, "side_effect")):
+        if provider_metric and (
+            metrics_mocked or not hasattr(time.time, "side_effect")
+        ):
             try:
-                LLM_TOKEN_USAGE.labels(
-                    provider=provider_metric, type="total"
-                ).inc(response.tokens_used)
+                LLM_TOKEN_USAGE.labels(provider=provider_metric, type="total").inc(
+                    response.tokens_used
+                )
             except Exception as exc:  # pragma: no cover - metrics are best effort
                 self.logger.debug(
                     "Token usage metric update failed for %s: %s",
@@ -525,9 +529,7 @@ class UnifiedLLMService:
         if request.context:
             context_str = self._format_context(request.context)
             if context_str:
-                messages.append(
-                    {"role": "user", "content": f"Context: {context_str}"}
-                )
+                messages.append({"role": "user", "content": f"Context: {context_str}"})
 
         messages.append({"role": "user", "content": request.prompt})
         return messages
@@ -606,15 +608,14 @@ class UnifiedLLMService:
                 feature_domain=request.feature_domain,
                 status="error",
             )
-            raise LLMException(
-                f"{provider.value} generation failed: {exc}"
-            ) from exc
+            raise LLMException(f"{provider.value} generation failed: {exc}") from exc
 
     async def generate(self, request: LLMRequest) -> LLMResponse:
         """Generate text using the configured primary provider."""
-        provider = self.primary_provider or self._resolve_domain_config(
-            request.feature_domain
-        )["primary"]
+        provider = (
+            self.primary_provider
+            or self._resolve_domain_config(request.feature_domain)["primary"]
+        )
         system_prompt = self._resolve_system_prompt(request)
         return await self._run_generation(provider, request, system_prompt)
 
@@ -636,17 +637,14 @@ class UnifiedLLMService:
                 last_error = exc
                 continue
 
-        raise LLMException(
-            "All configured LLM providers failed"
-        ) from last_error
+        raise LLMException("All configured LLM providers failed") from last_error
 
-    async def generate_stream(
-        self, request: LLMRequest
-    ) -> AsyncIterator[str]:
+    async def generate_stream(self, request: LLMRequest) -> AsyncIterator[str]:
         """Stream responses from the primary provider."""
-        provider = self.primary_provider or self._resolve_domain_config(
-            request.feature_domain
-        )["primary"]
+        provider = (
+            self.primary_provider
+            or self._resolve_domain_config(request.feature_domain)["primary"]
+        )
 
         if provider != LLMProvider.OPENAI_GPT4:
             raise LLMException(

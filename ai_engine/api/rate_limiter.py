@@ -313,9 +313,7 @@ class RateLimiter:
             self._owns_client = True
             await self.redis_client.ping()
         except Exception as exc:  # noqa: BLE001 - fail open intentionally
-            self.logger.warning(
-                "Rate limiter Redis initialization failed: %s", exc
-            )
+            self.logger.warning("Rate limiter Redis initialization failed: %s", exc)
             self.redis_client = None
 
     async def shutdown(self) -> None:
@@ -348,7 +346,9 @@ class RateLimiter:
                 await self.redis_client.expire(key, 60)
             except Exception as exc:  # noqa: BLE001
                 self.logger.warning(
-                    "Rate limiting failed for %s: %s. Allowing request.", identifier, exc
+                    "Rate limiting failed for %s: %s. Allowing request.",
+                    identifier,
+                    exc,
                 )
                 return True
 
@@ -381,6 +381,7 @@ class RateLimiter:
     @staticmethod
     def _build_key(identifier: str) -> str:
         return f"rate_limit:{identifier}"
+
 
 class AdvancedRateLimitMiddleware(BaseHTTPMiddleware):
     """

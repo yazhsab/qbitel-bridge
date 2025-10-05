@@ -37,7 +37,7 @@ class TestComponentHealth:
         health = ComponentHealth(
             name="test_component",
             status=HealthStatus.HEALTHY,
-            message="All systems operational"
+            message="All systems operational",
         )
 
         assert health.name == "test_component"
@@ -46,10 +46,7 @@ class TestComponentHealth:
 
     def test_component_health_defaults(self):
         """Test component health default values."""
-        health = ComponentHealth(
-            name="default_component",
-            status=HealthStatus.HEALTHY
-        )
+        health = ComponentHealth(name="default_component", status=HealthStatus.HEALTHY)
 
         assert health.message == ""
         assert health.check_duration_ms == 0.0
@@ -59,10 +56,7 @@ class TestComponentHealth:
 
     def test_is_healthy(self):
         """Test is_healthy method."""
-        health = ComponentHealth(
-            name="healthy_comp",
-            status=HealthStatus.HEALTHY
-        )
+        health = ComponentHealth(name="healthy_comp", status=HealthStatus.HEALTHY)
 
         assert health.is_healthy() is True
         assert health.is_degraded() is False
@@ -70,10 +64,7 @@ class TestComponentHealth:
 
     def test_is_degraded(self):
         """Test is_degraded method."""
-        health = ComponentHealth(
-            name="degraded_comp",
-            status=HealthStatus.DEGRADED
-        )
+        health = ComponentHealth(name="degraded_comp", status=HealthStatus.DEGRADED)
 
         assert health.is_healthy() is False
         assert health.is_degraded() is True
@@ -81,10 +72,7 @@ class TestComponentHealth:
 
     def test_is_unhealthy(self):
         """Test is_unhealthy method."""
-        health = ComponentHealth(
-            name="unhealthy_comp",
-            status=HealthStatus.UNHEALTHY
-        )
+        health = ComponentHealth(name="unhealthy_comp", status=HealthStatus.UNHEALTHY)
 
         assert health.is_healthy() is False
         assert health.is_degraded() is False
@@ -94,9 +82,7 @@ class TestComponentHealth:
         """Test component health with details."""
         details = {"latency_ms": 50, "error_rate": 0.01}
         health = ComponentHealth(
-            name="detailed_comp",
-            status=HealthStatus.HEALTHY,
-            details=details
+            name="detailed_comp", status=HealthStatus.HEALTHY, details=details
         )
 
         assert health.details == details
@@ -105,9 +91,7 @@ class TestComponentHealth:
         """Test component health with dependencies."""
         deps = ["database", "cache", "message_queue"]
         health = ComponentHealth(
-            name="dependent_comp",
-            status=HealthStatus.HEALTHY,
-            dependencies=deps
+            name="dependent_comp", status=HealthStatus.HEALTHY, dependencies=deps
         )
 
         assert health.dependencies == deps
@@ -118,9 +102,7 @@ class TestSystemHealth:
 
     def test_system_health_creation(self):
         """Test creating system health."""
-        health = SystemHealth(
-            overall_status=HealthStatus.HEALTHY
-        )
+        health = SystemHealth(overall_status=HealthStatus.HEALTHY)
 
         assert health.overall_status == HealthStatus.HEALTHY
         assert health.component_health == {}
@@ -236,11 +218,9 @@ class TestHealthChecker:
 
     def test_register_health_checker(self, checker):
         """Test registering health checker."""
+
         async def custom_checker():
-            return ComponentHealth(
-                name="custom",
-                status=HealthStatus.HEALTHY
-            )
+            return ComponentHealth(name="custom", status=HealthStatus.HEALTHY)
 
         checker.register_health_checker("custom_component", custom_checker)
 
@@ -260,11 +240,10 @@ class TestHealthChecker:
     @pytest.mark.asyncio
     async def test_check_all_components_healthy(self, checker):
         """Test checking all healthy components."""
+
         async def healthy_checker():
             return ComponentHealth(
-                name="healthy",
-                status=HealthStatus.HEALTHY,
-                message="All good"
+                name="healthy", status=HealthStatus.HEALTHY, message="All good"
             )
 
         checker.health_checkers = {"healthy": healthy_checker}
@@ -278,6 +257,7 @@ class TestHealthChecker:
     @pytest.mark.asyncio
     async def test_check_component_timeout(self, checker):
         """Test health check timeout."""
+
         async def slow_checker():
             await asyncio.sleep(20)  # Longer than timeout
             return ComponentHealth("slow", HealthStatus.HEALTHY)
@@ -293,6 +273,7 @@ class TestHealthChecker:
     @pytest.mark.asyncio
     async def test_check_component_exception(self, checker):
         """Test health check with exception."""
+
         async def failing_checker():
             raise Exception("Checker failed")
 
@@ -306,6 +287,7 @@ class TestHealthChecker:
     @pytest.mark.asyncio
     async def test_check_multiple_components(self, checker):
         """Test checking multiple components."""
+
         async def healthy_checker():
             return ComponentHealth("healthy", HealthStatus.HEALTHY)
 
@@ -329,6 +311,7 @@ class TestHealthChecker:
     @pytest.mark.asyncio
     async def test_health_history(self, checker):
         """Test health history tracking."""
+
         async def simple_checker():
             return ComponentHealth("simple", HealthStatus.HEALTHY)
 
@@ -405,14 +388,13 @@ class TestHealthCheckerEdgeCases:
     @pytest.mark.asyncio
     async def test_health_check_performance(self, checker):
         """Test health check performance tracking."""
+
         async def timed_checker():
             start = time.time()
             await asyncio.sleep(0.05)
             duration = (time.time() - start) * 1000
             return ComponentHealth(
-                "timed",
-                HealthStatus.HEALTHY,
-                check_duration_ms=duration
+                "timed", HealthStatus.HEALTHY, check_duration_ms=duration
             )
 
         checker.health_checkers = {"timed": timed_checker}
@@ -444,14 +426,14 @@ class TestComponentHealthDetails:
             "cpu_percent": 45.2,
             "memory_mb": 512,
             "latency_p95_ms": 150,
-            "error_rate": 0.001
+            "error_rate": 0.001,
         }
 
         health = ComponentHealth(
             name="api_server",
             status=HealthStatus.HEALTHY,
             message="Operating normally",
-            details=details
+            details=details,
         )
 
         assert health.details["cpu_percent"] == 45.2
@@ -462,7 +444,7 @@ class TestComponentHealthDetails:
         health = ComponentHealth(
             name="application",
             status=HealthStatus.HEALTHY,
-            dependencies=["database", "redis", "message_queue"]
+            dependencies=["database", "redis", "message_queue"],
         )
 
         assert "database" in health.dependencies
@@ -475,14 +457,14 @@ class TestComponentHealthDetails:
             "reason": "high_latency",
             "threshold_ms": 200,
             "actual_ms": 350,
-            "degraded_since": time.time()
+            "degraded_since": time.time(),
         }
 
         health = ComponentHealth(
             name="slow_service",
             status=HealthStatus.DEGRADED,
             message="Response time above threshold",
-            details=details
+            details=details,
         )
 
         assert health.details["reason"] == "high_latency"

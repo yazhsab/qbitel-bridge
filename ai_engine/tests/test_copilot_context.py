@@ -427,9 +427,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_get_context_redis_error(self, manager):
         """Test get_context handles Redis errors gracefully."""
-        manager.redis_client.hgetall = AsyncMock(
-            side_effect=Exception("Redis error")
-        )
+        manager.redis_client.hgetall = AsyncMock(side_effect=Exception("Redis error"))
 
         context = await manager.get_context("user_123", "sess_456")
 

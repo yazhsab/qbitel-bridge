@@ -23,6 +23,7 @@ class TestEnterpriseAuthenticationService:
     def auth_service(self, mock_config):
         """Create authentication service instance."""
         from ai_engine.api.auth_enterprise import EnterpriseAuthenticationService
+
         return EnterpriseAuthenticationService(mock_config)
 
     def test_service_initialization(self, auth_service):
@@ -35,16 +36,18 @@ class TestEnterpriseAuthenticationService:
     def test_load_secret_key_success(self, mock_config):
         """Test loading JWT secret key."""
         from ai_engine.api.auth_enterprise import EnterpriseAuthenticationService
+
         service = EnterpriseAuthenticationService(mock_config)
         assert len(service.secret_key) >= 32
 
     def test_load_secret_key_failure(self):
         """Test loading JWT secret key failure."""
         from ai_engine.api.auth_enterprise import EnterpriseAuthenticationService
+
         config = Mock()
         config.security = Mock()
         config.security.jwt_secret = "short"
-        
+
         with pytest.raises(ValueError, match="JWT secret not configured"):
             EnterpriseAuthenticationService(config)
 
@@ -52,7 +55,7 @@ class TestEnterpriseAuthenticationService:
         """Test password hashing."""
         password = "TestPassword123!"
         hashed = auth_service.hash_password(password)
-        
+
         assert hashed != password
         assert len(hashed) > 0
 
@@ -60,7 +63,7 @@ class TestEnterpriseAuthenticationService:
         """Test password verification."""
         password = "TestPassword123!"
         hashed = auth_service.hash_password(password)
-        
+
         assert auth_service.verify_password(password, hashed) is True
         assert auth_service.verify_password("WrongPassword", hashed) is False
 
@@ -68,7 +71,7 @@ class TestEnterpriseAuthenticationService:
         """Test password strength validation with valid password."""
         password = "ValidPass123!@#"
         is_valid, error = auth_service.validate_password_strength(password)
-        
+
         assert is_valid is True
         assert error is None
 
@@ -76,7 +79,7 @@ class TestEnterpriseAuthenticationService:
         """Test password strength validation - too short."""
         password = "Short1!"
         is_valid, error = auth_service.validate_password_strength(password)
-        
+
         assert is_valid is False
         assert "at least 12 characters" in error
 
@@ -84,7 +87,7 @@ class TestEnterpriseAuthenticationService:
         """Test password strength validation - no uppercase."""
         password = "lowercase123!"
         is_valid, error = auth_service.validate_password_strength(password)
-        
+
         assert is_valid is False
         assert "uppercase letter" in error
 
@@ -92,7 +95,7 @@ class TestEnterpriseAuthenticationService:
         """Test password strength validation - no lowercase."""
         password = "UPPERCASE123!"
         is_valid, error = auth_service.validate_password_strength(password)
-        
+
         assert is_valid is False
         assert "lowercase letter" in error
 
@@ -100,7 +103,7 @@ class TestEnterpriseAuthenticationService:
         """Test password strength validation - no digit."""
         password = "NoDigitsHere!"
         is_valid, error = auth_service.validate_password_strength(password)
-        
+
         assert is_valid is False
         assert "digit" in error
 
@@ -108,7 +111,7 @@ class TestEnterpriseAuthenticationService:
         """Test password strength validation - no special character."""
         password = "NoSpecial123"
         is_valid, error = auth_service.validate_password_strength(password)
-        
+
         assert is_valid is False
         assert "special character" in error
 
@@ -116,7 +119,7 @@ class TestEnterpriseAuthenticationService:
         """Test password strength validation - common pattern."""
         password = "Password123!"
         is_valid, error = auth_service.validate_password_strength(password)
-        
+
         assert is_valid is False
         assert "common patterns" in error
 
@@ -124,22 +127,22 @@ class TestEnterpriseAuthenticationService:
     async def test_change_password_success(self, auth_service):
         """Test successful password change."""
         from ai_engine.models.database import User
-        
+
         mock_db = AsyncMock()
         user = User(
             id="user123",
             username="testuser",
-            password_hash=auth_service.hash_password("OldPassword123!")
+            password_hash=auth_service.hash_password("OldPassword123!"),
         )
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
+
         result = await auth_service.change_password(
             mock_db, "user123", "OldPassword123!", "NewPassword456!"
         )
-        
+
         assert result is True
         assert user.must_change_password is False
 
@@ -150,7 +153,7 @@ class TestEnterpriseAuthenticationService:
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = None
         mock_db.execute.return_value = mock_result
-        
+
         with pytest.raises(HTTPException, match="User not found"):
             await auth_service.change_password(
                 mock_db, "user123", "OldPassword123!", "NewPassword456!"
@@ -160,18 +163,18 @@ class TestEnterpriseAuthenticationService:
     async def test_change_password_invalid_old_password(self, auth_service):
         """Test password change with invalid old password."""
         from ai_engine.models.database import User
-        
+
         mock_db = AsyncMock()
         user = User(
             id="user123",
             username="testuser",
-            password_hash=auth_service.hash_password("OldPassword123!")
+            password_hash=auth_service.hash_password("OldPassword123!"),
         )
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
+
         with pytest.raises(HTTPException, match="Invalid old password"):
             await auth_service.change_password(
                 mock_db, "user123", "WrongPassword!", "NewPassword456!"
@@ -180,7 +183,7 @@ class TestEnterpriseAuthenticationService:
     def test_generate_totp_secret(self, auth_service):
         """Test TOTP secret generation."""
         secret = auth_service.generate_totp_secret()
-        
+
         assert len(secret) > 0
         assert isinstance(secret, str)
 
@@ -188,25 +191,25 @@ class TestEnterpriseAuthenticationService:
         """Test TOTP QR code generation."""
         secret = auth_service.generate_totp_secret()
         qr_code = auth_service.generate_totp_qr_code("testuser", secret)
-        
+
         assert len(qr_code) > 0
         assert isinstance(qr_code, str)
 
     def test_verify_totp(self, auth_service):
         """Test TOTP verification."""
         import pyotp
-        
+
         secret = auth_service.generate_totp_secret()
         totp = pyotp.TOTP(secret)
         token = totp.now()
-        
+
         assert auth_service.verify_totp(secret, token) is True
         assert auth_service.verify_totp(secret, "000000") is False
 
     def test_generate_backup_codes(self, auth_service):
         """Test backup codes generation."""
         codes = auth_service.generate_backup_codes(count=10)
-        
+
         assert len(codes) == 10
         assert all(isinstance(code, str) for code in codes)
         assert all(len(code) == 8 for code in codes)  # 4 bytes hex = 8 chars
@@ -215,18 +218,16 @@ class TestEnterpriseAuthenticationService:
     async def test_enable_mfa_totp(self, auth_service):
         """Test enabling MFA with TOTP."""
         from ai_engine.models.database import User, MFAMethod
-        
+
         mock_db = AsyncMock()
         user = User(id="user123", username="testuser")
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
-        result = await auth_service.enable_mfa(
-            mock_db, "user123", MFAMethod.TOTP
-        )
-        
+
+        result = await auth_service.enable_mfa(mock_db, "user123", MFAMethod.TOTP)
+
         assert "qr_code" in result
         assert "secret" in result
         assert "backup_codes" in result
@@ -236,12 +237,12 @@ class TestEnterpriseAuthenticationService:
     async def test_enable_mfa_user_not_found(self, auth_service):
         """Test enabling MFA with user not found."""
         from ai_engine.models.database import MFAMethod
-        
+
         mock_db = AsyncMock()
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = None
         mock_db.execute.return_value = mock_result
-        
+
         with pytest.raises(HTTPException, match="User not found"):
             await auth_service.enable_mfa(mock_db, "user123", MFAMethod.TOTP)
 
@@ -250,32 +251,32 @@ class TestEnterpriseAuthenticationService:
         """Test MFA token verification success."""
         from ai_engine.models.database import User, MFAMethod
         import pyotp
-        
+
         secret = auth_service.generate_totp_secret()
         totp = pyotp.TOTP(secret)
         token = totp.now()
-        
+
         mock_db = AsyncMock()
         user = User(
             id="user123",
             username="testuser",
             mfa_enabled=True,
             mfa_method=MFAMethod.TOTP,
-            mfa_secret=secret
+            mfa_secret=secret,
         )
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
+
         result = await auth_service.verify_mfa_token(mock_db, "user123", token)
-        
+
         assert result is True
 
     def test_generate_api_key(self, auth_service):
         """Test API key generation."""
         api_key, key_hash = auth_service.generate_api_key()
-        
+
         assert api_key.startswith("cronos_")
         assert len(key_hash) == 64  # SHA256 hex digest
 
@@ -283,15 +284,15 @@ class TestEnterpriseAuthenticationService:
     async def test_create_api_key(self, auth_service):
         """Test API key creation."""
         mock_db = AsyncMock()
-        
+
         result = await auth_service.create_api_key(
             mock_db,
             user_id="user123",
             name="Test API Key",
             description="Test description",
-            expires_days=30
+            expires_days=30,
         )
-        
+
         assert "api_key" in result
         assert "key_id" in result
         assert "key_prefix" in result
@@ -301,7 +302,7 @@ class TestEnterpriseAuthenticationService:
     async def test_revoke_api_key(self, auth_service):
         """Test API key revocation."""
         from ai_engine.models.database import APIKey, APIKeyStatus
-        
+
         mock_db = AsyncMock()
         api_key = APIKey(
             id="key123",
@@ -309,17 +310,17 @@ class TestEnterpriseAuthenticationService:
             key_prefix="cronos_",
             name="Test Key",
             user_id="user123",
-            status=APIKeyStatus.ACTIVE
+            status=APIKeyStatus.ACTIVE,
         )
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = api_key
         mock_db.execute.return_value = mock_result
-        
+
         result = await auth_service.revoke_api_key(
             mock_db, "key123", "admin", "Security review"
         )
-        
+
         assert result is True
         assert api_key.status == APIKeyStatus.REVOKED
 
@@ -328,32 +329,29 @@ class TestEnterpriseAuthenticationService:
         """Test API key verification success."""
         from ai_engine.models.database import APIKey, User, APIKeyStatus
         import hashlib
-        
+
         api_key = "cronos_test_key"
         key_hash = hashlib.sha256(api_key.encode()).hexdigest()
-        
+
         mock_db = AsyncMock()
         api_key_record = APIKey(
-            id="key123",
-            key_hash=key_hash,
-            status=APIKeyStatus.ACTIVE,
-            usage_count=0
+            id="key123", key_hash=key_hash, status=APIKeyStatus.ACTIVE, usage_count=0
         )
         user = User(id="user123", username="testuser", is_active=True)
-        
+
         mock_result = Mock()
         mock_result.first.return_value = (api_key_record, user)
         mock_db.execute.return_value = mock_result
-        
+
         result = await auth_service.verify_api_key(mock_db, api_key)
-        
+
         assert result == user
 
     def test_create_access_token(self, auth_service):
         """Test access token creation."""
         data = {"user_id": "user123", "username": "testuser"}
         token = auth_service.create_access_token(data)
-        
+
         assert isinstance(token, str)
         assert len(token) > 0
 
@@ -361,7 +359,7 @@ class TestEnterpriseAuthenticationService:
         """Test refresh token creation."""
         data = {"user_id": "user123"}
         token = auth_service.create_refresh_token(data)
-        
+
         assert isinstance(token, str)
         assert len(token) > 0
 
@@ -370,9 +368,9 @@ class TestEnterpriseAuthenticationService:
         """Test token verification success."""
         data = {"user_id": "user123"}
         token = auth_service.create_access_token(data)
-        
+
         payload = await auth_service.verify_token(token)
-        
+
         assert payload["user_id"] == "user123"
         assert "exp" in payload
 
@@ -381,10 +379,12 @@ class TestEnterpriseAuthenticationService:
         """Test token verification with expired token."""
         import jwt
         from datetime import datetime, timedelta
-        
+
         data = {"user_id": "user123", "exp": datetime.utcnow() - timedelta(hours=1)}
-        token = jwt.encode(data, auth_service.secret_key, algorithm=auth_service.algorithm)
-        
+        token = jwt.encode(
+            data, auth_service.secret_key, algorithm=auth_service.algorithm
+        )
+
         with pytest.raises(HTTPException, match="Token has expired"):
             await auth_service.verify_token(token)
 
@@ -392,14 +392,14 @@ class TestEnterpriseAuthenticationService:
     async def test_create_session(self, auth_service):
         """Test session creation."""
         mock_db = AsyncMock()
-        
+
         session = await auth_service.create_session(
             mock_db,
             user_id="user123",
             ip_address="192.168.1.1",
-            user_agent="Mozilla/5.0"
+            user_agent="Mozilla/5.0",
         )
-        
+
         assert session.user_id == "user123"
         assert session.ip_address == "192.168.1.1"
 
@@ -407,19 +407,16 @@ class TestEnterpriseAuthenticationService:
     async def test_revoke_session(self, auth_service):
         """Test session revocation."""
         from ai_engine.models.database import UserSession
-        
+
         mock_db = AsyncMock()
-        session = UserSession(
-            session_token="token123",
-            user_id="user123"
-        )
-        
+        session = UserSession(session_token="token123", user_id="user123")
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = session
         mock_db.execute.return_value = mock_result
-        
+
         result = await auth_service.revoke_session(mock_db, "token123")
-        
+
         assert result is True
         assert session.revoked_at is not None
 
@@ -427,7 +424,7 @@ class TestEnterpriseAuthenticationService:
     async def test_authenticate_user_success(self, auth_service):
         """Test successful user authentication."""
         from ai_engine.models.database import User
-        
+
         password = "TestPassword123!"
         mock_db = AsyncMock()
         user = User(
@@ -436,17 +433,15 @@ class TestEnterpriseAuthenticationService:
             password_hash=auth_service.hash_password(password),
             is_active=True,
             failed_login_attempts=0,
-            mfa_enabled=False
+            mfa_enabled=False,
         )
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
-        result = await auth_service.authenticate_user(
-            mock_db, "testuser", password
-        )
-        
+
+        result = await auth_service.authenticate_user(mock_db, "testuser", password)
+
         assert result == user
         assert user.failed_login_attempts == 0
 
@@ -457,102 +452,99 @@ class TestEnterpriseAuthenticationService:
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = None
         mock_db.execute.return_value = mock_result
-        
+
         result = await auth_service.authenticate_user(
             mock_db, "nonexistent", "password"
         )
-        
+
         assert result is None
 
     @pytest.mark.asyncio
     async def test_authenticate_user_account_locked(self, auth_service):
         """Test authentication with locked account."""
         from ai_engine.models.database import User
-        
+
         mock_db = AsyncMock()
         user = User(
             id="user123",
             username="testuser",
             is_active=True,
-            account_locked_until=datetime.utcnow() + timedelta(hours=1)
+            account_locked_until=datetime.utcnow() + timedelta(hours=1),
         )
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
+
         with pytest.raises(HTTPException, match="Account locked"):
-            await auth_service.authenticate_user(
-                mock_db, "testuser", "password"
-            )
+            await auth_service.authenticate_user(mock_db, "testuser", "password")
 
     @pytest.mark.asyncio
     async def test_authenticate_user_invalid_password(self, auth_service):
         """Test authentication with invalid password."""
         from ai_engine.models.database import User
-        
+
         mock_db = AsyncMock()
         user = User(
             id="user123",
             username="testuser",
             password_hash=auth_service.hash_password("CorrectPassword123!"),
             is_active=True,
-            failed_login_attempts=0
+            failed_login_attempts=0,
         )
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
+
         result = await auth_service.authenticate_user(
             mock_db, "testuser", "WrongPassword"
         )
-        
+
         assert result is None
         assert user.failed_login_attempts == 1
 
     def test_requires_mfa_admin_user(self, auth_service):
         """Test MFA requirement for admin user."""
         from ai_engine.models.database import User, UserRole
-        
+
         user = User(
             id="user123",
             username="admin",
             role=UserRole.ADMINISTRATOR,
-            created_at=datetime.utcnow() - timedelta(days=30)
+            created_at=datetime.utcnow() - timedelta(days=30),
         )
-        
+
         assert auth_service._requires_mfa(user) is True
 
     def test_requires_mfa_grace_period(self, auth_service):
         """Test MFA requirement during grace period."""
         from ai_engine.models.database import User, UserRole
-        
+
         user = User(
             id="user123",
             username="admin",
             role=UserRole.ADMINISTRATOR,
-            created_at=datetime.utcnow() - timedelta(days=3)
+            created_at=datetime.utcnow() - timedelta(days=3),
         )
-        
+
         assert auth_service._requires_mfa(user) is False
 
     def test_is_privileged_user(self, auth_service):
         """Test privileged user check."""
         from ai_engine.models.database import User, UserRole
-        
+
         admin_user = User(id="user1", role=UserRole.ADMINISTRATOR)
         regular_user = User(id="user2", role=UserRole.USER)
-        
+
         assert auth_service._is_privileged_user(admin_user) is True
         assert auth_service._is_privileged_user(regular_user) is False
-
 
     @pytest.mark.asyncio
     async def test_authenticate_user_with_mfa_required(self, auth_service):
         """Test authentication when MFA is required but not provided."""
         from ai_engine.models.database import User, UserRole
-        
+
         password = "TestPassword123!"
         mock_db = AsyncMock()
         user = User(
@@ -563,13 +555,13 @@ class TestEnterpriseAuthenticationService:
             failed_login_attempts=0,
             mfa_enabled=True,
             role=UserRole.ADMINISTRATOR,
-            created_at=datetime.utcnow() - timedelta(days=30)
+            created_at=datetime.utcnow() - timedelta(days=30),
         )
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
+
         with pytest.raises(HTTPException, match="MFA token required"):
             await auth_service.authenticate_user(
                 mock_db, "admin", password, mfa_token=None
@@ -579,10 +571,10 @@ class TestEnterpriseAuthenticationService:
     async def test_authenticate_user_with_invalid_mfa(self, auth_service):
         """Test authentication with invalid MFA token."""
         from ai_engine.models.database import User, UserRole, MFAMethod
-        
+
         password = "TestPassword123!"
         secret = auth_service.generate_totp_secret()
-        
+
         mock_db = AsyncMock()
         user = User(
             id="user123",
@@ -594,42 +586,42 @@ class TestEnterpriseAuthenticationService:
             mfa_method=MFAMethod.TOTP,
             mfa_secret=secret,
             role=UserRole.ADMINISTRATOR,
-            created_at=datetime.utcnow() - timedelta(days=30)
+            created_at=datetime.utcnow() - timedelta(days=30),
         )
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
+
         result = await auth_service.authenticate_user(
             mock_db, "admin", password, mfa_token="000000"
         )
-        
+
         assert result is None
 
     @pytest.mark.asyncio
     async def test_authenticate_user_account_lockout(self, auth_service):
         """Test account lockout after failed attempts."""
         from ai_engine.models.database import User
-        
+
         mock_db = AsyncMock()
         user = User(
             id="user123",
             username="testuser",
             password_hash=auth_service.hash_password("CorrectPassword123!"),
             is_active=True,
-            failed_login_attempts=4
+            failed_login_attempts=4,
         )
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
+
         # This should trigger lockout
         result = await auth_service.authenticate_user(
             mock_db, "testuser", "WrongPassword"
         )
-        
+
         assert result is None
         assert user.failed_login_attempts == 5
         assert user.account_locked_until is not None
@@ -639,25 +631,25 @@ class TestEnterpriseAuthenticationService:
         """Test API key verification with expired key."""
         from ai_engine.models.database import APIKey, User, APIKeyStatus
         import hashlib
-        
+
         api_key = "cronos_test_key"
         key_hash = hashlib.sha256(api_key.encode()).hexdigest()
-        
+
         mock_db = AsyncMock()
         api_key_record = APIKey(
             id="key123",
             key_hash=key_hash,
             status=APIKeyStatus.ACTIVE,
-            expires_at=datetime.utcnow() - timedelta(days=1)
+            expires_at=datetime.utcnow() - timedelta(days=1),
         )
         user = User(id="user123", username="testuser", is_active=True)
-        
+
         mock_result = Mock()
         mock_result.first.return_value = (api_key_record, user)
         mock_db.execute.return_value = mock_result
-        
+
         result = await auth_service.verify_api_key(mock_db, api_key)
-        
+
         assert result is None
         assert api_key_record.status == APIKeyStatus.EXPIRED
 
@@ -668,9 +660,9 @@ class TestEnterpriseAuthenticationService:
         mock_result = Mock()
         mock_result.first.return_value = None
         mock_db.execute.return_value = mock_result
-        
+
         result = await auth_service.verify_api_key(mock_db, "invalid_key")
-        
+
         assert result is None
 
     @pytest.mark.asyncio
@@ -680,7 +672,7 @@ class TestEnterpriseAuthenticationService:
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = None
         mock_db.execute.return_value = mock_result
-        
+
         with pytest.raises(HTTPException, match="API key not found"):
             await auth_service.revoke_api_key(mock_db, "key123", "admin")
 
@@ -691,47 +683,43 @@ class TestEnterpriseAuthenticationService:
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = None
         mock_db.execute.return_value = mock_result
-        
+
         result = await auth_service.revoke_session(mock_db, "invalid_token")
-        
+
         assert result is False
 
     @pytest.mark.asyncio
     async def test_verify_mfa_token_not_enabled(self, auth_service):
         """Test MFA verification when MFA is not enabled."""
         from ai_engine.models.database import User
-        
+
         mock_db = AsyncMock()
-        user = User(
-            id="user123",
-            username="testuser",
-            mfa_enabled=False
-        )
-        
+        user = User(id="user123", username="testuser", mfa_enabled=False)
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
+
         result = await auth_service.verify_mfa_token(mock_db, "user123", "123456")
-        
+
         assert result is False
 
     @pytest.mark.asyncio
     async def test_enable_mfa_unsupported_method(self, auth_service):
         """Test enabling MFA with unsupported method."""
         from ai_engine.models.database import User
-        
+
         mock_db = AsyncMock()
         user = User(id="user123", username="testuser")
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
+
         # Create a mock MFA method that's not TOTP
         mock_method = Mock()
         mock_method.value = "SMS"
-        
+
         with pytest.raises(HTTPException, match="not implemented"):
             await auth_service.enable_mfa(mock_db, "user123", mock_method)
 
@@ -739,18 +727,18 @@ class TestEnterpriseAuthenticationService:
     async def test_change_password_weak_password(self, auth_service):
         """Test password change with weak new password."""
         from ai_engine.models.database import User
-        
+
         mock_db = AsyncMock()
         user = User(
             id="user123",
             username="testuser",
-            password_hash=auth_service.hash_password("OldPassword123!")
+            password_hash=auth_service.hash_password("OldPassword123!"),
         )
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
+
         with pytest.raises(HTTPException):
             await auth_service.change_password(
                 mock_db, "user123", "OldPassword123!", "weak"
@@ -766,48 +754,48 @@ class TestEnterpriseAuthenticationService:
     async def test_create_api_key_with_permissions(self, auth_service):
         """Test API key creation with specific permissions."""
         mock_db = AsyncMock()
-        
+
         result = await auth_service.create_api_key(
             mock_db,
             user_id="user123",
             name="Test API Key",
-            permissions=["read:data", "write:data"]
+            permissions=["read:data", "write:data"],
         )
-        
+
         assert "api_key" in result
         mock_db.add.assert_called_once()
 
     def test_requires_mfa_privileged_user(self, auth_service):
         """Test MFA requirement for privileged user."""
         from ai_engine.models.database import User, UserRole
-        
+
         user = User(
             id="user123",
             username="security_admin",
             role=UserRole.SECURITY_ADMIN,
-            created_at=datetime.utcnow() - timedelta(days=30)
+            created_at=datetime.utcnow() - timedelta(days=30),
         )
-        
+
         assert auth_service._requires_mfa(user) is True
 
     def test_requires_mfa_compliance_officer(self, auth_service):
         """Test MFA requirement for compliance officer."""
         from ai_engine.models.database import User, UserRole
-        
+
         user = User(
             id="user123",
             username="compliance",
             role=UserRole.COMPLIANCE_OFFICER,
-            created_at=datetime.utcnow() - timedelta(days=30)
+            created_at=datetime.utcnow() - timedelta(days=30),
         )
-        
+
         assert auth_service._requires_mfa(user) is True
 
     @pytest.mark.asyncio
     async def test_authenticate_user_mfa_not_enabled_privileged(self, auth_service):
         """Test authentication for privileged user without MFA enabled."""
         from ai_engine.models.database import User, UserRole
-        
+
         password = "TestPassword123!"
         mock_db = AsyncMock()
         user = User(
@@ -818,13 +806,13 @@ class TestEnterpriseAuthenticationService:
             failed_login_attempts=0,
             mfa_enabled=False,
             role=UserRole.ADMINISTRATOR,
-            created_at=datetime.utcnow() - timedelta(days=30)
+            created_at=datetime.utcnow() - timedelta(days=30),
         )
-        
+
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
-        
+
         with pytest.raises(HTTPException, match="MFA is required"):
             await auth_service.authenticate_user(mock_db, "admin", password)
 
@@ -836,8 +824,8 @@ class TestGetAuthService:
     async def test_get_auth_service(self):
         """Test getting auth service instance."""
         from ai_engine.api.auth_enterprise import get_auth_service
-        
-        with patch('ai_engine.api.auth_enterprise.EnterpriseAuthenticationService'):
+
+        with patch("ai_engine.api.auth_enterprise.EnterpriseAuthenticationService"):
             service = await get_auth_service()
             assert service is not None
 
@@ -845,16 +833,18 @@ class TestGetAuthService:
     async def test_get_auth_service_singleton(self):
         """Test that get_auth_service returns singleton instance."""
         from ai_engine.api import auth_enterprise
-        
+
         # Reset global instance
         auth_enterprise._auth_service = None
-        
-        with patch('ai_engine.api.auth_enterprise.get_config') as mock_config:
+
+        with patch("ai_engine.api.auth_enterprise.get_config") as mock_config:
             mock_config.return_value = Mock()
             mock_config.return_value.security = Mock()
-            mock_config.return_value.security.jwt_secret = "test_secret_key_with_at_least_32_characters_long"
-            
+            mock_config.return_value.security.jwt_secret = (
+                "test_secret_key_with_at_least_32_characters_long"
+            )
+
             service1 = await auth_enterprise.get_auth_service()
             service2 = await auth_enterprise.get_auth_service()
-            
+
             assert service1 is service2

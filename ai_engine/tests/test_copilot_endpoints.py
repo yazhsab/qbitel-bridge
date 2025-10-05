@@ -33,7 +33,7 @@ from ai_engine.api.copilot_endpoints import (
 def mock_copilot():
     """Create a mock copilot instance."""
     copilot = AsyncMock()
-    
+
     # Mock process_query
     mock_response = Mock()
     mock_response.response = "This is a test response"
@@ -44,37 +44,43 @@ def mock_copilot():
     mock_response.source_data = [{"source": "test"}]
     mock_response.visualizations = [{"type": "chart"}]
     mock_response.metadata = {"test": "data"}
-    
+
     copilot.process_query = AsyncMock(return_value=mock_response)
-    
+
     # Mock context_manager
     copilot.context_manager = AsyncMock()
-    copilot.context_manager.get_user_sessions = AsyncMock(return_value=[
-        {
+    copilot.context_manager.get_user_sessions = AsyncMock(
+        return_value=[
+            {
+                "session_id": "session1",
+                "user_id": "user1",
+                "created_at": "2024-01-01T00:00:00",
+            }
+        ]
+    )
+    copilot.context_manager.get_session_summary = AsyncMock(
+        return_value={
             "session_id": "session1",
             "user_id": "user1",
-            "created_at": "2024-01-01T00:00:00",
+            "duration": "1h 30m",
+            "total_turns": 10,
+            "query_types": {"protocol_analysis": 5, "security": 5},
+            "average_confidence": 0.85,
+            "top_topics": ["HTTP", "Security"],
+            "last_activity": "2024-01-01T01:30:00",
         }
-    ])
-    copilot.context_manager.get_session_summary = AsyncMock(return_value={
-        "session_id": "session1",
-        "user_id": "user1",
-        "duration": "1h 30m",
-        "total_turns": 10,
-        "query_types": {"protocol_analysis": 5, "security": 5},
-        "average_confidence": 0.85,
-        "top_topics": ["HTTP", "Security"],
-        "last_activity": "2024-01-01T01:30:00",
-    })
+    )
     copilot.context_manager.clear_session = AsyncMock(return_value=True)
-    
+
     # Mock get_health_status
-    copilot.get_health_status = Mock(return_value={
-        "llm": "healthy",
-        "context_manager": "healthy",
-        "knowledge_base": "healthy",
-    })
-    
+    copilot.get_health_status = Mock(
+        return_value={
+            "llm": "healthy",
+            "context_manager": "healthy",
+            "knowledge_base": "healthy",
+        }
+    )
+
     return copilot
 
 
@@ -107,7 +113,7 @@ class TestCopilotQueryRequest:
             session_id="session123",
             context={"source": "test"},
         )
-        
+
         assert request.query == "What protocol is this?"
         assert request.session_id == "session123"
         assert request.context == {"source": "test"}
@@ -119,7 +125,7 @@ class TestCopilotQueryRequest:
             query="Analyze this packet",
             packet_data=packet_data,
         )
-        
+
         assert request.packet_data == packet_data
 
     def test_request_with_invalid_packet_data(self):
@@ -145,21 +151,25 @@ class TestProcessCopilotQuery:
     """Tests for process_copilot_query endpoint."""
 
     @pytest.mark.asyncio
-    async def test_process_query_success(self, mock_copilot, mock_current_user, mock_background_tasks):
+    async def test_process_query_success(
+        self, mock_copilot, mock_current_user, mock_background_tasks
+    ):
         """Test successful query processing."""
         request = CopilotQueryRequest(
             query="What protocol is this?",
             session_id="session123",
         )
-        
-        with patch('ai_engine.api.copilot_endpoints.get_copilot', return_value=mock_copilot):
+
+        with patch(
+            "ai_engine.api.copilot_endpoints.get_copilot", return_value=mock_copilot
+        ):
             response = await process_copilot_query(
                 request=request,
                 background_tasks=mock_background_tasks,
                 current_user=mock_current_user,
                 copilot=mock_copilot,
             )
-        
+
         assert response.response == "This is a test response"
         assert response.confidence == 0.85
         assert response.query_type == "protocol_analysis"
@@ -168,68 +178,76 @@ class TestProcessCopilotQuery:
         mock_background_tasks.add_task.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_process_query_generates_session_id(self, mock_copilot, mock_current_user, mock_background_tasks):
+    async def test_process_query_generates_session_id(
+        self, mock_copilot, mock_current_user, mock_background_tasks
+    ):
         """Test query processing generates session ID if not provided."""
         request = CopilotQueryRequest(query="What protocol is this?")
-        
+
         response = await process_copilot_query(
             request=request,
             background_tasks=mock_background_tasks,
             current_user=mock_current_user,
             copilot=mock_copilot,
         )
-        
+
         assert response.session_id is not None
         assert len(response.session_id) > 0
 
     @pytest.mark.asyncio
-    async def test_process_query_with_packet_data(self, mock_copilot, mock_current_user, mock_background_tasks):
+    async def test_process_query_with_packet_data(
+        self, mock_copilot, mock_current_user, mock_background_tasks
+    ):
         """Test query processing with packet data."""
         packet_data = base64.b64encode(b"test packet").decode()
         request = CopilotQueryRequest(
             query="Analyze this packet",
             packet_data=packet_data,
         )
-        
+
         response = await process_copilot_query(
             request=request,
             background_tasks=mock_background_tasks,
             current_user=mock_current_user,
             copilot=mock_copilot,
         )
-        
+
         assert response.response == "This is a test response"
         # Verify packet data was decoded and passed
         call_args = mock_copilot.process_query.call_args
         assert call_args[0][0].packet_data == b"test packet"
 
     @pytest.mark.asyncio
-    async def test_process_query_with_context(self, mock_copilot, mock_current_user, mock_background_tasks):
+    async def test_process_query_with_context(
+        self, mock_copilot, mock_current_user, mock_background_tasks
+    ):
         """Test query processing with context."""
         request = CopilotQueryRequest(
             query="What protocol is this?",
             context={"source": "network_capture", "protocol_hint": "http"},
         )
-        
+
         response = await process_copilot_query(
             request=request,
             background_tasks=mock_background_tasks,
             current_user=mock_current_user,
             copilot=mock_copilot,
         )
-        
+
         assert response.response == "This is a test response"
         call_args = mock_copilot.process_query.call_args
         assert call_args[0][0].context == request.context
 
     @pytest.mark.asyncio
-    async def test_process_query_cronos_exception(self, mock_copilot, mock_current_user, mock_background_tasks):
+    async def test_process_query_cronos_exception(
+        self, mock_copilot, mock_current_user, mock_background_tasks
+    ):
         """Test query processing with CronosAIException."""
         from ai_engine.core.exceptions import CronosAIException
-        
+
         request = CopilotQueryRequest(query="What protocol is this?")
         mock_copilot.process_query.side_effect = CronosAIException("Processing failed")
-        
+
         with pytest.raises(HTTPException) as exc_info:
             await process_copilot_query(
                 request=request,
@@ -237,16 +255,18 @@ class TestProcessCopilotQuery:
                 current_user=mock_current_user,
                 copilot=mock_copilot,
             )
-        
+
         assert exc_info.value.status_code == 400
         assert "Processing failed" in str(exc_info.value.detail)
 
     @pytest.mark.asyncio
-    async def test_process_query_unexpected_exception(self, mock_copilot, mock_current_user, mock_background_tasks):
+    async def test_process_query_unexpected_exception(
+        self, mock_copilot, mock_current_user, mock_background_tasks
+    ):
         """Test query processing with unexpected exception."""
         request = CopilotQueryRequest(query="What protocol is this?")
         mock_copilot.process_query.side_effect = Exception("Unexpected error")
-        
+
         with pytest.raises(HTTPException) as exc_info:
             await process_copilot_query(
                 request=request,
@@ -254,7 +274,7 @@ class TestProcessCopilotQuery:
                 current_user=mock_current_user,
                 copilot=mock_copilot,
             )
-        
+
         assert exc_info.value.status_code == 500
         assert "Internal server error" in str(exc_info.value.detail)
 
@@ -270,7 +290,7 @@ class TestGetUserSessions:
             current_user=mock_current_user,
             copilot=mock_copilot,
         )
-        
+
         assert len(sessions) == 1
         assert sessions[0]["session_id"] == "session1"
         mock_copilot.context_manager.get_user_sessions.assert_called_once_with(
@@ -285,7 +305,7 @@ class TestGetUserSessions:
             current_user=mock_current_user,
             copilot=mock_copilot,
         )
-        
+
         mock_copilot.context_manager.get_user_sessions.assert_called_once_with(
             "test_user_123", 5
         )
@@ -293,15 +313,17 @@ class TestGetUserSessions:
     @pytest.mark.asyncio
     async def test_get_sessions_exception(self, mock_copilot, mock_current_user):
         """Test session retrieval with exception."""
-        mock_copilot.context_manager.get_user_sessions.side_effect = Exception("DB error")
-        
+        mock_copilot.context_manager.get_user_sessions.side_effect = Exception(
+            "DB error"
+        )
+
         with pytest.raises(HTTPException) as exc_info:
             await get_user_sessions(
                 limit=10,
                 current_user=mock_current_user,
                 copilot=mock_copilot,
             )
-        
+
         assert exc_info.value.status_code == 500
         assert "Failed to retrieve sessions" in str(exc_info.value.detail)
 
@@ -317,7 +339,7 @@ class TestGetSessionSummary:
             current_user=mock_current_user,
             copilot=mock_copilot,
         )
-        
+
         assert summary.session_id == "session1"
         assert summary.user_id == "user1"
         assert summary.total_turns == 10
@@ -327,29 +349,31 @@ class TestGetSessionSummary:
     async def test_get_summary_not_found(self, mock_copilot, mock_current_user):
         """Test session summary not found."""
         mock_copilot.context_manager.get_session_summary.return_value = None
-        
+
         with pytest.raises(HTTPException) as exc_info:
             await get_session_summary(
                 session_id="nonexistent",
                 current_user=mock_current_user,
                 copilot=mock_copilot,
             )
-        
+
         assert exc_info.value.status_code == 404
         assert "Session not found" in str(exc_info.value.detail)
 
     @pytest.mark.asyncio
     async def test_get_summary_exception(self, mock_copilot, mock_current_user):
         """Test session summary with exception."""
-        mock_copilot.context_manager.get_session_summary.side_effect = Exception("DB error")
-        
+        mock_copilot.context_manager.get_session_summary.side_effect = Exception(
+            "DB error"
+        )
+
         with pytest.raises(HTTPException) as exc_info:
             await get_session_summary(
                 session_id="session1",
                 current_user=mock_current_user,
                 copilot=mock_copilot,
             )
-        
+
         assert exc_info.value.status_code == 500
         assert "Failed to retrieve session summary" in str(exc_info.value.detail)
 
@@ -365,7 +389,7 @@ class TestClearSession:
             current_user=mock_current_user,
             copilot=mock_copilot,
         )
-        
+
         assert result["message"] == "Session session1 cleared successfully"
         mock_copilot.context_manager.clear_session.assert_called_once_with(
             "test_user_123", "session1"
@@ -375,14 +399,14 @@ class TestClearSession:
     async def test_clear_session_not_found(self, mock_copilot, mock_current_user):
         """Test clearing non-existent session."""
         mock_copilot.context_manager.clear_session.return_value = False
-        
+
         with pytest.raises(HTTPException) as exc_info:
             await clear_session(
                 session_id="nonexistent",
                 current_user=mock_current_user,
                 copilot=mock_copilot,
             )
-        
+
         assert exc_info.value.status_code == 404
         assert "Session not found" in str(exc_info.value.detail)
 
@@ -390,14 +414,14 @@ class TestClearSession:
     async def test_clear_session_exception(self, mock_copilot, mock_current_user):
         """Test session clearing with exception."""
         mock_copilot.context_manager.clear_session.side_effect = Exception("DB error")
-        
+
         with pytest.raises(HTTPException) as exc_info:
             await clear_session(
                 session_id="session1",
                 current_user=mock_current_user,
                 copilot=mock_copilot,
             )
-        
+
         assert exc_info.value.status_code == 500
         assert "Failed to clear session" in str(exc_info.value.detail)
 
@@ -409,7 +433,7 @@ class TestGetCopilotHealth:
     async def test_health_check_success(self, mock_copilot):
         """Test successful health check."""
         result = await get_copilot_health(copilot=mock_copilot)
-        
+
         assert result["status"] == "healthy"
         assert "components" in result
         assert result["components"]["llm"] == "healthy"
@@ -419,9 +443,9 @@ class TestGetCopilotHealth:
     async def test_health_check_exception(self, mock_copilot):
         """Test health check with exception."""
         mock_copilot.get_health_status.side_effect = Exception("Health check failed")
-        
+
         result = await get_copilot_health(copilot=mock_copilot)
-        
+
         assert result["status"] == "unhealthy"
         assert "error" in result
         assert "Health check failed" in result["error"]
@@ -438,7 +462,7 @@ class TestWebSocketMessage:
             timestamp="2024-01-01T00:00:00",
             correlation_id="corr123",
         )
-        
+
         assert message.type == "query"
         assert message.data == {"query": "test"}
         assert message.correlation_id == "corr123"
@@ -446,7 +470,7 @@ class TestWebSocketMessage:
     def test_message_types(self):
         """Test different message types."""
         types = ["query", "response", "error", "ping", "pong"]
-        
+
         for msg_type in types:
             message = WebSocketMessage(type=msg_type, data={})
             assert message.type == msg_type
@@ -470,7 +494,7 @@ class TestLogQueryAnalytics:
     async def test_log_analytics_exception(self):
         """Test analytics logging with exception (should not propagate)."""
         # Should handle exceptions gracefully
-        with patch('ai_engine.api.copilot_endpoints.logger') as mock_logger:
+        with patch("ai_engine.api.copilot_endpoints.logger") as mock_logger:
             # Force an error by passing invalid data
             await log_query_analytics(
                 user_id=None,  # This might cause an error
@@ -478,7 +502,7 @@ class TestLogQueryAnalytics:
                 query_type="test",
                 confidence=0.5,
             )
-            
+
             # Should not raise exception, just log it
             # The function should complete without error
 
@@ -491,16 +515,19 @@ class TestWebSocketEndpoint:
         """Test WebSocket connection with invalid token."""
         websocket = AsyncMock(spec=WebSocket)
         websocket.close = AsyncMock()
-        
-        with patch('ai_engine.api.copilot_endpoints.verify_token', side_effect=Exception("Invalid token")):
+
+        with patch(
+            "ai_engine.api.copilot_endpoints.verify_token",
+            side_effect=Exception("Invalid token"),
+        ):
             from ai_engine.api.copilot_endpoints import websocket_copilot_chat
-            
+
             await websocket_copilot_chat(
                 websocket=websocket,
                 token="invalid_token",
                 copilot=mock_copilot,
             )
-            
+
             websocket.close.assert_called_once()
 
     @pytest.mark.asyncio
@@ -510,10 +537,13 @@ class TestWebSocketEndpoint:
         websocket.accept = AsyncMock()
         websocket.send_text = AsyncMock()
         websocket.receive_text = AsyncMock(side_effect=Exception("Stop"))
-        
-        with patch('ai_engine.api.copilot_endpoints.verify_token', return_value={"user_id": "user123"}):
+
+        with patch(
+            "ai_engine.api.copilot_endpoints.verify_token",
+            return_value={"user_id": "user123"},
+        ):
             from ai_engine.api.copilot_endpoints import websocket_copilot_chat
-            
+
             try:
                 await websocket_copilot_chat(
                     websocket=websocket,
@@ -522,7 +552,7 @@ class TestWebSocketEndpoint:
                 )
             except:
                 pass
-            
+
             websocket.accept.assert_called_once()
             # Should have sent welcome message
             assert websocket.send_text.call_count >= 1
@@ -536,14 +566,17 @@ class TestGetCopilot:
         """Test get_copilot creates instance if not exists."""
         # Reset global instance
         import ai_engine.api.copilot_endpoints as copilot_module
+
         copilot_module._copilot_instance = None
-        
-        with patch('ai_engine.api.copilot_endpoints.create_protocol_copilot') as mock_create:
+
+        with patch(
+            "ai_engine.api.copilot_endpoints.create_protocol_copilot"
+        ) as mock_create:
             mock_copilot = AsyncMock()
             mock_create.return_value = mock_copilot
-            
+
             result = await get_copilot()
-            
+
             assert result == mock_copilot
             mock_create.assert_called_once()
 
@@ -551,12 +584,12 @@ class TestGetCopilot:
     async def test_get_copilot_reuses_instance(self):
         """Test get_copilot reuses existing instance."""
         import ai_engine.api.copilot_endpoints as copilot_module
-        
+
         mock_copilot = AsyncMock()
         copilot_module._copilot_instance = mock_copilot
-        
+
         result = await get_copilot()
-        
+
         assert result == mock_copilot
 
 
@@ -576,7 +609,7 @@ class TestCopilotQueryResponse:
             visualizations=[{"type": "chart"}],
             metadata={"key": "value"},
         )
-        
+
         assert response.response == "Test response"
         assert response.confidence == 0.85
         assert response.query_type == "protocol_analysis"
@@ -593,7 +626,7 @@ class TestCopilotQueryResponse:
             session_id="session123",
         )
         assert response.confidence == 0.5
-        
+
         # Invalid confidence (should be validated by Pydantic)
         with pytest.raises(ValueError):
             CopilotQueryResponse(
@@ -620,7 +653,7 @@ class TestSessionSummaryResponse:
             top_topics=["HTTP", "Security"],
             last_activity="2024-01-01T01:30:00",
         )
-        
+
         assert summary.session_id == "session123"
         assert summary.total_turns == 10
         assert summary.average_confidence == 0.85

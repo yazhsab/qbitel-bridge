@@ -25,6 +25,7 @@ import weakref
 
 import yaml
 from jinja2 import Template, Environment, meta
+
 try:  # pragma: no cover - optional dependency
     import jsonpath_ng  # type: ignore
 except ModuleNotFoundError:  # pragma: no cover - fallback stub
@@ -41,6 +42,7 @@ except ModuleNotFoundError:  # pragma: no cover - fallback stub
 try:  # pragma: no cover - optional dependency
     from croniter import croniter  # type: ignore
 except ModuleNotFoundError:  # pragma: no cover - fallback stub
+
     class croniter:  # type: ignore[override]
         """Minimal croniter fallback that advances in one-minute increments."""
 
@@ -55,6 +57,7 @@ except ModuleNotFoundError:  # pragma: no cover - fallback stub
         def get_prev(self, return_type=datetime):
             self.current = self.current - timedelta(minutes=1)
             return self.current
+
 
 from ..core.config import Config
 from ..core.exceptions import PolicyException, ValidationException, ComplianceException

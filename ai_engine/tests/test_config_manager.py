@@ -63,7 +63,7 @@ class TestDatabaseConfig:
             host="db.example.com",
             port=5433,
             database="custom_db",
-            password="custom_pass"
+            password="custom_pass",
         )
 
         assert config.host == "db.example.com"
@@ -189,10 +189,7 @@ class TestConfigManager:
             "environment": "testing",
             "debug": True,
             "api_port": 9000,
-            "database": {
-                "host": "testdb.example.com",
-                "port": 5433
-            }
+            "database": {"host": "testdb.example.com", "port": 5433},
         }
 
         manager = ConfigManager()
@@ -209,7 +206,7 @@ class TestConfigManager:
         config_data = {
             "environment": "staging",
             "api_port": 8888,
-            "database": {"host": "staging-db.example.com"}
+            "database": {"host": "staging-db.example.com"},
         }
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -226,10 +223,7 @@ class TestConfigManager:
 
     def test_load_from_json_file(self):
         """Test loading configuration from JSON file."""
-        config_data = {
-            "environment": "production",
-            "api_port": 7777
-        }
+        config_data = {"environment": "production", "api_port": 7777}
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config_file = Path(tmpdir) / "config.json"
@@ -291,14 +285,13 @@ class TestConfigManager:
         """Test production requires authentication."""
         config_dict = {
             "environment": "production",
-            "security": {
-                "api_key_enabled": False,
-                "jwt_enabled": False
-            }
+            "security": {"api_key_enabled": False, "jwt_enabled": False},
         }
         manager = ConfigManager()
 
-        with pytest.raises(ConfigValidationError, match="Authentication must be enabled"):
+        with pytest.raises(
+            ConfigValidationError, match="Authentication must be enabled"
+        ):
             manager.load_config(config_dict=config_dict)
 
     def test_get_config(self):

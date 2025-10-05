@@ -70,7 +70,9 @@ class EnsembleAnomalyDetector:
         context: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Detect anomalies for a batch of feature vectors."""
-        tasks = [self._detect_internal(features, context) for features in batch_features]
+        tasks = [
+            self._detect_internal(features, context) for features in batch_features
+        ]
         results = await asyncio.gather(*tasks)
         return [result.to_dict() for result in results]
 

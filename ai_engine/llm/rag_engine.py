@@ -67,7 +67,9 @@ class _InMemoryChromaCollection:
         ids: Optional[List[str]] = None,
     ) -> None:
         if embeddings is None:
-            raise ValueError("Embeddings are required when using the in-memory Chroma fallback")
+            raise ValueError(
+                "Embeddings are required when using the in-memory Chroma fallback"
+            )
 
         metadatas = metadatas or [{} for _ in documents]
         ids = ids or [str(uuid.uuid4()) for _ in documents]
@@ -121,7 +123,9 @@ class _InMemoryChromaCollection:
         }
 
         if "embeddings" in include:
-            embed_map = {doc_id: emb for doc_id, emb in zip(self._ids, self._embeddings)}
+            embed_map = {
+                doc_id: emb for doc_id, emb in zip(self._ids, self._embeddings)
+            }
             result["embeddings"] = [[embed_map[doc_id] for doc_id in ids]]
 
         return result
@@ -317,7 +321,9 @@ class RAGEngine:
         metadata = {"hnsw:space": "cosine"}
 
         if hasattr(self.client, "get_or_create_collection"):
-            collection = self.client.get_or_create_collection(name=name, metadata=metadata)
+            collection = self.client.get_or_create_collection(
+                name=name, metadata=metadata
+            )
             self.collections[name] = collection
             return collection
 
@@ -348,7 +354,9 @@ class RAGEngine:
                 normalized_docs.append(doc)
             elif isinstance(doc, dict):
                 if "content" not in doc:
-                    raise ValueError("Document dictionaries must include a 'content' field")
+                    raise ValueError(
+                        "Document dictionaries must include a 'content' field"
+                    )
                 normalized_docs.append(
                     RAGDocument(
                         id=str(doc.get("id") or uuid.uuid4()),
@@ -371,7 +379,9 @@ class RAGEngine:
             return False
 
         texts = [doc.content for doc in normalized_docs]
-        embeddings = [list(embedding) for embedding in self.embedding_model.encode(texts)]
+        embeddings = [
+            list(embedding) for embedding in self.embedding_model.encode(texts)
+        ]
 
         for doc, embedding in zip(normalized_docs, embeddings):
             doc.embedding = embedding
@@ -384,7 +394,9 @@ class RAGEngine:
         )
 
         self.logger.info(
-            "Added %s documents to collection '%s'", len(normalized_docs), collection_name
+            "Added %s documents to collection '%s'",
+            len(normalized_docs),
+            collection_name,
         )
         return True
 
@@ -453,25 +465,25 @@ class RAGEngine:
                             results.get("distances", [[]])[0],
                         )
                     ):
-                            # Convert distance to similarity score
-                            similarity = 1.0 - distance
+                        # Convert distance to similarity score
+                        similarity = 1.0 - distance
 
-                            if similarity >= similarity_threshold:
-                                rag_doc = RAGDocument(
-                                    id=(
-                                        results["ids"][0][i]
-                                        if results["ids"]
-                                        else f"{coll_name}_{i}"
-                                    ),
-                                    content=doc,
-                                    metadata={
-                                        **metadata,
-                                        "collection": coll_name,
-                                        "similarity": similarity,
-                                    },
-                                )
-                                all_documents.append(rag_doc)
-                                all_scores.append(similarity)
+                        if similarity >= similarity_threshold:
+                            rag_doc = RAGDocument(
+                                id=(
+                                    results["ids"][0][i]
+                                    if results["ids"]
+                                    else f"{coll_name}_{i}"
+                                ),
+                                content=doc,
+                                metadata={
+                                    **metadata,
+                                    "collection": coll_name,
+                                    "similarity": similarity,
+                                },
+                            )
+                            all_documents.append(rag_doc)
+                            all_scores.append(similarity)
 
             # Sort by similarity score
             if all_documents:

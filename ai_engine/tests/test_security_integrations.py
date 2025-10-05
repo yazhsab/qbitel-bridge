@@ -19,7 +19,9 @@ from ai_engine.security.integrations.base_connector import (
 )
 from ai_engine.security.integrations.siem_connector import SIEMConnector
 from ai_engine.security.integrations.ticketing_connector import TicketingConnector
-from ai_engine.security.integrations.network_security_connector import NetworkSecurityConnector
+from ai_engine.security.integrations.network_security_connector import (
+    NetworkSecurityConnector,
+)
 from ai_engine.core.config import Config
 
 
@@ -177,7 +179,9 @@ class TestSIEMConnector:
             endpoint="https://splunk.test.com",
         )
 
-        with patch("ai_engine.security.integrations.siem_connector.SIEMConnector") as mock_conn:
+        with patch(
+            "ai_engine.security.integrations.siem_connector.SIEMConnector"
+        ) as mock_conn:
             mock_instance = AsyncMock()
             mock_conn.return_value = mock_instance
             return mock_instance
@@ -227,9 +231,7 @@ class TestSIEMConnector:
     @pytest.mark.asyncio
     async def test_check_siem_connection(self, connector):
         """Test checking SIEM connection."""
-        connector.check_connection = AsyncMock(
-            return_value=IntegrationStatus.CONNECTED
-        )
+        connector.check_connection = AsyncMock(return_value=IntegrationStatus.CONNECTED)
 
         status = await connector.check_connection()
 
@@ -238,9 +240,7 @@ class TestSIEMConnector:
     @pytest.mark.asyncio
     async def test_siem_connection_failure(self, connector):
         """Test SIEM connection failure."""
-        connector.check_connection = AsyncMock(
-            return_value=IntegrationStatus.ERROR
-        )
+        connector.check_connection = AsyncMock(return_value=IntegrationStatus.ERROR)
 
         status = await connector.check_connection()
 
@@ -491,7 +491,9 @@ class TestIntegrationConcurrency:
     @pytest.mark.asyncio
     async def test_concurrent_event_forwarding(self):
         """Test forwarding multiple events concurrently."""
-        with patch("ai_engine.security.integrations.siem_connector.SIEMConnector") as mock_conn:
+        with patch(
+            "ai_engine.security.integrations.siem_connector.SIEMConnector"
+        ) as mock_conn:
             mock_instance = AsyncMock()
             mock_instance.forward_event = AsyncMock(
                 side_effect=[
@@ -550,7 +552,9 @@ class TestIntegrationEdgeCases:
     @pytest.mark.asyncio
     async def test_empty_event_data(self):
         """Test handling empty event data."""
-        with patch("ai_engine.security.integrations.siem_connector.SIEMConnector") as mock_conn:
+        with patch(
+            "ai_engine.security.integrations.siem_connector.SIEMConnector"
+        ) as mock_conn:
             mock_instance = AsyncMock()
             mock_instance.forward_event = AsyncMock(
                 return_value=IntegrationResult(

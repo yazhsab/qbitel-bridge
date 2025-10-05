@@ -44,7 +44,9 @@ class PatternExtractor:
             if not message:
                 continue
             total_bytes += len(message)
-            for length in range(self.min_length, min(self.max_length, len(message)) + 1):
+            for length in range(
+                self.min_length, min(self.max_length, len(message)) + 1
+            ):
                 for index in range(len(message) - length + 1):
                     pattern = message[index : index + length]
                     pattern_occurrences[pattern].append(index)

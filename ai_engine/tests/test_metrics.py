@@ -38,7 +38,7 @@ class TestMetricConfig:
             name="test_metric",
             help="Test metric description",
             labels=["label1", "label2"],
-            unit="seconds"
+            unit="seconds",
         )
 
         assert config.name == "test_metric"
@@ -49,10 +49,7 @@ class TestMetricConfig:
 
     def test_metric_config_defaults(self):
         """Test metric config default values."""
-        config = MetricConfig(
-            name="default_metric",
-            help="Default metric"
-        )
+        config = MetricConfig(name="default_metric", help="Default metric")
 
         assert config.labels == []
         assert config.buckets is None
@@ -63,9 +60,7 @@ class TestMetricConfig:
         """Test metric config with histogram buckets."""
         buckets = [0.1, 0.5, 1.0, 5.0, 10.0]
         config = MetricConfig(
-            name="histogram_metric",
-            help="Histogram metric",
-            buckets=buckets
+            name="histogram_metric", help="Histogram metric", buckets=buckets
         )
 
         assert config.buckets == buckets
@@ -110,7 +105,7 @@ class TestMetricsCollector:
         config = MetricConfig(
             name="requests_total",
             help="Total number of requests",
-            labels=["method", "endpoint"]
+            labels=["method", "endpoint"],
         )
 
         metric = collector.register_metric(config, MetricType.COUNTER)
@@ -124,7 +119,7 @@ class TestMetricsCollector:
         config = MetricConfig(
             name="request_duration",
             help="Request duration in seconds",
-            buckets=[0.1, 0.5, 1.0, 5.0]
+            buckets=[0.1, 0.5, 1.0, 5.0],
         )
 
         metric = collector.register_metric(config, MetricType.HISTOGRAM)
@@ -136,8 +131,7 @@ class TestMetricsCollector:
     def test_register_gauge_metric(self, collector):
         """Test registering a gauge metric."""
         config = MetricConfig(
-            name="active_connections",
-            help="Number of active connections"
+            name="active_connections", help="Number of active connections"
         )
 
         metric = collector.register_metric(config, MetricType.GAUGE)
@@ -148,10 +142,7 @@ class TestMetricsCollector:
 
     def test_register_summary_metric(self, collector):
         """Test registering a summary metric."""
-        config = MetricConfig(
-            name="response_size",
-            help="Response size in bytes"
-        )
+        config = MetricConfig(name="response_size", help="Response size in bytes")
 
         metric = collector.register_metric(config, MetricType.SUMMARY)
 
@@ -161,10 +152,7 @@ class TestMetricsCollector:
 
     def test_register_info_metric(self, collector):
         """Test registering an info metric."""
-        config = MetricConfig(
-            name="app_info",
-            help="Application information"
-        )
+        config = MetricConfig(name="app_info", help="Application information")
 
         metric = collector.register_metric(config, MetricType.INFO)
 
@@ -174,10 +162,7 @@ class TestMetricsCollector:
 
     def test_register_duplicate_metric(self, collector):
         """Test registering duplicate metric returns existing."""
-        config = MetricConfig(
-            name="duplicate_metric",
-            help="Duplicate metric"
-        )
+        config = MetricConfig(name="duplicate_metric", help="Duplicate metric")
 
         metric1 = collector.register_metric(config, MetricType.COUNTER)
         metric2 = collector.register_metric(config, MetricType.COUNTER)
@@ -186,10 +171,7 @@ class TestMetricsCollector:
 
     def test_get_metric(self, collector):
         """Test getting registered metric."""
-        config = MetricConfig(
-            name="test_counter",
-            help="Test counter"
-        )
+        config = MetricConfig(name="test_counter", help="Test counter")
 
         registered = collector.register_metric(config, MetricType.COUNTER)
         retrieved = collector.get_metric("test_counter")
@@ -204,22 +186,19 @@ class TestMetricsCollector:
     def test_increment_counter(self, collector):
         """Test incrementing counter metric."""
         config = MetricConfig(
-            name="test_counter",
-            help="Test counter",
-            labels=["status"]
+            name="test_counter", help="Test counter", labels=["status"]
         )
 
         collector.register_metric(config, MetricType.COUNTER)
-        collector.increment_counter("test_counter", labels={"status": "success"}, value=5.0)
+        collector.increment_counter(
+            "test_counter", labels={"status": "success"}, value=5.0
+        )
 
         # Metric should have been incremented (can't easily verify value in Prometheus)
 
     def test_increment_counter_without_labels(self, collector):
         """Test incrementing counter without labels."""
-        config = MetricConfig(
-            name="simple_counter",
-            help="Simple counter"
-        )
+        config = MetricConfig(name="simple_counter", help="Simple counter")
 
         collector.register_metric(config, MetricType.COUNTER)
         collector.increment_counter("simple_counter", value=1.0)
@@ -228,11 +207,7 @@ class TestMetricsCollector:
 
     def test_set_gauge(self, collector):
         """Test setting gauge value."""
-        config = MetricConfig(
-            name="test_gauge",
-            help="Test gauge",
-            labels=["instance"]
-        )
+        config = MetricConfig(name="test_gauge", help="Test gauge", labels=["instance"])
 
         collector.register_metric(config, MetricType.GAUGE)
         collector.set_gauge("test_gauge", 42.0, labels={"instance": "server1"})
@@ -241,10 +216,7 @@ class TestMetricsCollector:
 
     def test_set_gauge_without_labels(self, collector):
         """Test setting gauge without labels."""
-        config = MetricConfig(
-            name="simple_gauge",
-            help="Simple gauge"
-        )
+        config = MetricConfig(name="simple_gauge", help="Simple gauge")
 
         collector.register_metric(config, MetricType.GAUGE)
         collector.set_gauge("simple_gauge", 100.0)
@@ -257,20 +229,19 @@ class TestMetricsCollector:
             name="test_histogram",
             help="Test histogram",
             labels=["operation"],
-            buckets=[0.1, 0.5, 1.0, 5.0]
+            buckets=[0.1, 0.5, 1.0, 5.0],
         )
 
         collector.register_metric(config, MetricType.HISTOGRAM)
-        collector.observe_histogram("test_histogram", 0.75, labels={"operation": "query"})
+        collector.observe_histogram(
+            "test_histogram", 0.75, labels={"operation": "query"}
+        )
 
         # Histogram should have observation
 
     def test_observe_histogram_without_labels(self, collector):
         """Test observing histogram without labels."""
-        config = MetricConfig(
-            name="simple_histogram",
-            help="Simple histogram"
-        )
+        config = MetricConfig(name="simple_histogram", help="Simple histogram")
 
         collector.register_metric(config, MetricType.HISTOGRAM)
         collector.observe_histogram("simple_histogram", 1.5)
@@ -348,7 +319,7 @@ class TestMetricsCollectorEdgeCases:
         config = MetricConfig(
             name="extreme_histogram",
             help="Extreme histogram",
-            buckets=[0.1, 1.0, 10.0, 100.0]
+            buckets=[0.1, 1.0, 10.0, 100.0],
         )
         collector.register_metric(config, MetricType.HISTOGRAM)
 
@@ -359,9 +330,7 @@ class TestMetricsCollectorEdgeCases:
         """Test metric with many labels."""
         labels = [f"label{i}" for i in range(10)]
         config = MetricConfig(
-            name="many_labels",
-            help="Metric with many labels",
-            labels=labels
+            name="many_labels", help="Metric with many labels", labels=labels
         )
 
         metric = collector.register_metric(config, MetricType.COUNTER)
@@ -372,20 +341,20 @@ class TestMetricsCollectorEdgeCases:
         config = MetricConfig(
             name="labeled_counter",
             help="Labeled counter",
-            labels=["method", "status", "endpoint"]
+            labels=["method", "status", "endpoint"],
         )
 
         collector.register_metric(config, MetricType.COUNTER)
         collector.increment_counter(
             "labeled_counter",
-            labels={"method": "GET", "status": "200", "endpoint": "/api/users"}
+            labels={"method": "GET", "status": "200", "endpoint": "/api/users"},
         )
 
     def test_histogram_default_buckets(self, collector):
         """Test histogram with default buckets."""
         config = MetricConfig(
             name="default_buckets",
-            help="Default buckets histogram"
+            help="Default buckets histogram",
             # No buckets specified, should use defaults
         )
 
@@ -397,7 +366,7 @@ class TestMetricsCollectorEdgeCases:
         config = MetricConfig(
             name="custom_metric",
             help="Custom namespace metric",
-            namespace="custom_namespace"
+            namespace="custom_namespace",
         )
 
         metric = collector.register_metric(config, MetricType.COUNTER)
@@ -436,12 +405,13 @@ class TestMetricsCollectorThreadSafety:
 
         def register_metric(i):
             config = MetricConfig(
-                name=f"concurrent_metric_{i}",
-                help=f"Concurrent metric {i}"
+                name=f"concurrent_metric_{i}", help=f"Concurrent metric {i}"
             )
             collector.register_metric(config, MetricType.COUNTER)
 
-        threads = [threading.Thread(target=register_metric, args=(i,)) for i in range(10)]
+        threads = [
+            threading.Thread(target=register_metric, args=(i,)) for i in range(10)
+        ]
 
         for thread in threads:
             thread.start()

@@ -27,6 +27,7 @@ class TestAIEngineServer:
     def server(self, mock_config):
         """Create AIEngineServer instance."""
         from ai_engine.api.server import AIEngineServer
+
         return AIEngineServer(mock_config)
 
     def test_server_initialization(self, server, mock_config):
@@ -40,10 +41,12 @@ class TestAIEngineServer:
         assert server.is_running is False
 
     @pytest.mark.asyncio
-    @patch('ai_engine.api.server.initialize_auth')
-    @patch('ai_engine.api.server.create_app')
-    @patch('ai_engine.api.server.GRPCServer')
-    async def test_server_initialize(self, mock_grpc, mock_create_app, mock_init_auth, server):
+    @patch("ai_engine.api.server.initialize_auth")
+    @patch("ai_engine.api.server.create_app")
+    @patch("ai_engine.api.server.GRPCServer")
+    async def test_server_initialize(
+        self, mock_grpc, mock_create_app, mock_init_auth, server
+    ):
         """Test server initialization."""
         mock_app = Mock()
         mock_create_app.return_value = mock_app
@@ -58,7 +61,7 @@ class TestAIEngineServer:
         assert server.grpc_server == mock_grpc_instance
 
     @pytest.mark.asyncio
-    @patch('ai_engine.api.server.initialize_auth')
+    @patch("ai_engine.api.server.initialize_auth")
     async def test_server_initialize_failure(self, mock_init_auth, server):
         """Test server initialization failure."""
         mock_init_auth.side_effect = Exception("Init failed")
@@ -67,12 +70,12 @@ class TestAIEngineServer:
             await server.initialize()
 
     @pytest.mark.asyncio
-    @patch('ai_engine.api.server.uvicorn.Server')
+    @patch("ai_engine.api.server.uvicorn.Server")
     async def test_server_start_rest_only(self, mock_uvicorn_server, server):
         """Test starting REST server only."""
         server.enable_grpc = False
         server.rest_app = Mock()
-        
+
         mock_server_instance = AsyncMock()
         mock_server_instance.serve = AsyncMock()
         mock_uvicorn_server.return_value = mock_server_instance
@@ -80,9 +83,9 @@ class TestAIEngineServer:
         # Start server in background
         start_task = asyncio.create_task(server.start())
         await asyncio.sleep(0.1)
-        
+
         assert server.is_running is True
-        
+
         # Cancel task
         start_task.cancel()
         try:
@@ -128,7 +131,7 @@ class TestAIEngineServer:
         await server.stop()  # Should return without error
 
     @pytest.mark.asyncio
-    @patch('asyncio.sleep', new_callable=AsyncMock)
+    @patch("asyncio.sleep", new_callable=AsyncMock)
     async def test_server_restart(self, mock_sleep, server):
         """Test restarting server."""
         server.stop = AsyncMock()
@@ -170,6 +173,7 @@ class TestServerManager:
     def manager(self, mock_config):
         """Create ServerManager instance."""
         from ai_engine.api.server import ServerManager
+
         return ServerManager(mock_config)
 
     def test_manager_initialization(self, manager, mock_config):
@@ -179,7 +183,7 @@ class TestServerManager:
         assert manager.shutdown_event is not None
 
     @pytest.mark.asyncio
-    @patch('ai_engine.api.server.AIEngineServer')
+    @patch("ai_engine.api.server.AIEngineServer")
     async def test_manager_run(self, mock_server_class, manager):
         """Test manager run."""
         mock_server = AsyncMock()
@@ -191,11 +195,11 @@ class TestServerManager:
         # Run manager in background
         run_task = asyncio.create_task(manager.run())
         await asyncio.sleep(0.1)
-        
+
         # Trigger shutdown
         manager.shutdown_event.set()
         await asyncio.sleep(0.1)
-        
+
         # Cancel task
         run_task.cancel()
         try:
@@ -206,7 +210,7 @@ class TestServerManager:
         mock_server.initialize.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch('ai_engine.api.server.AIEngineServer')
+    @patch("ai_engine.api.server.AIEngineServer")
     async def test_manager_run_keyboard_interrupt(self, mock_server_class, manager):
         """Test manager handles keyboard interrupt."""
         mock_server = AsyncMock()
@@ -233,12 +237,12 @@ class TestDevelopmentServer:
     """Test suite for development server functions."""
 
     @pytest.mark.asyncio
-    @patch('ai_engine.api.server.uvicorn.run')
-    @patch('ai_engine.api.server.create_app')
+    @patch("ai_engine.api.server.uvicorn.run")
+    @patch("ai_engine.api.server.create_app")
     def test_run_development_server_rest_only(self, mock_create_app, mock_uvicorn_run):
         """Test running development server with REST only."""
         from ai_engine.api.server import run_development_server
-        
+
         mock_app = Mock()
         mock_create_app.return_value = mock_app
         mock_config = Mock(spec=Config)
@@ -248,19 +252,21 @@ class TestDevelopmentServer:
             host="127.0.0.1",
             port=8000,
             enable_grpc=False,
-            reload=True
+            reload=True,
         )
 
         mock_create_app.assert_called_once_with(mock_config)
         mock_uvicorn_run.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch('ai_engine.api.server.AIEngineServer')
-    @patch('asyncio.run')
-    def test_run_development_server_with_grpc(self, mock_asyncio_run, mock_server_class):
+    @patch("ai_engine.api.server.AIEngineServer")
+    @patch("asyncio.run")
+    def test_run_development_server_with_grpc(
+        self, mock_asyncio_run, mock_server_class
+    ):
         """Test running development server with gRPC."""
         from ai_engine.api.server import run_development_server
-        
+
         mock_config = Mock(spec=Config)
 
         run_development_server(
@@ -269,7 +275,7 @@ class TestDevelopmentServer:
             port=8000,
             enable_grpc=True,
             grpc_port=50051,
-            reload=False
+            reload=False,
         )
 
         mock_asyncio_run.assert_called_once()
@@ -277,12 +283,12 @@ class TestDevelopmentServer:
     def test_run_development_server_default_config(self):
         """Test running development server with default config."""
         from ai_engine.api.server import run_development_server
-        
-        with patch('ai_engine.api.server.Config') as mock_config_class:
-            with patch('ai_engine.api.server.create_app'):
-                with patch('ai_engine.api.server.uvicorn.run'):
+
+        with patch("ai_engine.api.server.Config") as mock_config_class:
+            with patch("ai_engine.api.server.create_app"):
+                with patch("ai_engine.api.server.uvicorn.run"):
                     run_development_server()
-                    
+
                     mock_config_class.assert_called_once()
 
 
@@ -290,12 +296,12 @@ class TestProductionServer:
     """Test suite for production server functions."""
 
     @pytest.mark.asyncio
-    @patch('ai_engine.api.server.ServerManager')
-    @patch('asyncio.run')
+    @patch("ai_engine.api.server.ServerManager")
+    @patch("asyncio.run")
     def test_run_production_server(self, mock_asyncio_run, mock_manager_class):
         """Test running production server."""
         from ai_engine.api.server import run_production_server
-        
+
         mock_config = Mock(spec=Config)
         mock_manager = Mock()
         mock_manager_class.return_value = mock_manager
@@ -309,96 +315,103 @@ class TestProductionServer:
 class TestMainCLI:
     """Test suite for main CLI function."""
 
-    @patch('ai_engine.api.server.run_production_server')
-    @patch('ai_engine.api.server.Config')
+    @patch("ai_engine.api.server.run_production_server")
+    @patch("ai_engine.api.server.Config")
     def test_main_production_mode(self, mock_config, mock_run_prod):
         """Test main CLI in production mode."""
         from ai_engine.api.server import main
-        
+
         mock_config_instance = Mock()
         mock_config.return_value = mock_config_instance
-        
-        test_args = ['server', '--host', '0.0.0.0', '--port', '8080']
-        with patch('sys.argv', test_args):
+
+        test_args = ["server", "--host", "0.0.0.0", "--port", "8080"]
+        with patch("sys.argv", test_args):
             try:
                 main()
             except SystemExit:
                 pass
-        
+
         mock_run_prod.assert_called_once()
 
-    @patch('ai_engine.api.server.run_development_server')
-    @patch('ai_engine.api.server.Config')
+    @patch("ai_engine.api.server.run_development_server")
+    @patch("ai_engine.api.server.Config")
     def test_main_development_mode(self, mock_config, mock_run_dev):
         """Test main CLI in development mode."""
         from ai_engine.api.server import main
-        
+
         mock_config_instance = Mock()
         mock_config.return_value = mock_config_instance
-        
-        test_args = ['server', '--development', '--reload']
-        with patch('sys.argv', test_args):
+
+        test_args = ["server", "--development", "--reload"]
+        with patch("sys.argv", test_args):
             try:
                 main()
             except SystemExit:
                 pass
-        
+
         mock_run_dev.assert_called_once()
 
-    @patch('ai_engine.api.server.Config')
+    @patch("ai_engine.api.server.Config")
     def test_main_keyboard_interrupt(self, mock_config):
         """Test main CLI handles keyboard interrupt."""
         from ai_engine.api.server import main
-        
+
         mock_config_instance = Mock()
         mock_config.return_value = mock_config_instance
-        
-        test_args = ['server']
-        with patch('sys.argv', test_args):
-            with patch('ai_engine.api.server.run_production_server', side_effect=KeyboardInterrupt):
+
+        test_args = ["server"]
+        with patch("sys.argv", test_args):
+            with patch(
+                "ai_engine.api.server.run_production_server",
+                side_effect=KeyboardInterrupt,
+            ):
                 with pytest.raises(SystemExit) as exc_info:
                     main()
-                
+
                 assert exc_info.value.code == 0
 
-    @patch('ai_engine.api.server.Config')
+    @patch("ai_engine.api.server.Config")
     def test_main_exception_handling(self, mock_config):
         """Test main CLI handles exceptions."""
         from ai_engine.api.server import main
-        
+
         mock_config.side_effect = Exception("Config error")
-        
-        test_args = ['server']
-        with patch('sys.argv', test_args):
+
+        test_args = ["server"]
+        with patch("sys.argv", test_args):
             with pytest.raises(SystemExit) as exc_info:
                 main()
-            
+
             assert exc_info.value.code == 1
 
-    @patch('ai_engine.api.server.run_production_server')
-    @patch('ai_engine.api.server.Config')
+    @patch("ai_engine.api.server.run_production_server")
+    @patch("ai_engine.api.server.Config")
     def test_main_with_all_options(self, mock_config, mock_run_prod):
         """Test main CLI with all options."""
         from ai_engine.api.server import main
-        
+
         mock_config_instance = Mock()
         mock_config.return_value = mock_config_instance
-        
+
         test_args = [
-            'server',
-            '--host', '192.168.1.1',
-            '--port', '9000',
-            '--grpc-port', '50052',
-            '--enable-grpc',
-            '--log-level', 'DEBUG'
+            "server",
+            "--host",
+            "192.168.1.1",
+            "--port",
+            "9000",
+            "--grpc-port",
+            "50052",
+            "--enable-grpc",
+            "--log-level",
+            "DEBUG",
         ]
-        with patch('sys.argv', test_args):
+        with patch("sys.argv", test_args):
             try:
                 main()
             except SystemExit:
                 pass
-        
-        assert mock_config_instance.rest_host == '192.168.1.1'
+
+        assert mock_config_instance.rest_host == "192.168.1.1"
         assert mock_config_instance.rest_port == 9000
         assert mock_config_instance.grpc_port == 50052
         assert mock_config_instance.enable_grpc_api is True

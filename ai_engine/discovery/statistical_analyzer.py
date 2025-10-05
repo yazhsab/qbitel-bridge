@@ -159,7 +159,9 @@ class StatisticalAnalyzer:
 
         start_time = time.time()
 
-        byte_stats_task = asyncio.create_task(self._compute_byte_statistics(b"".join(messages)))
+        byte_stats_task = asyncio.create_task(
+            self._compute_byte_statistics(b"".join(messages))
+        )
         pattern_task = asyncio.create_task(self.detect_patterns(messages))
         boundary_task = asyncio.create_task(self.detect_field_boundaries(messages))
 
@@ -388,7 +390,9 @@ class StatisticalAnalyzer:
         avg_len = float(lengths.mean())
         length_std_dev = float(lengths.std())
 
-        normalized_values = [self._normalize_field_value(value) for value in field_values]
+        normalized_values = [
+            self._normalize_field_value(value) for value in field_values
+        ]
         frequency = Counter(normalized_values)
         total = sum(frequency.values())
 
@@ -397,7 +401,9 @@ class StatisticalAnalyzer:
             if total
             else np.array([])
         )
-        entropy_value = float(entropy(distribution, base=2)) if distribution.size else 0.0
+        entropy_value = (
+            float(entropy(distribution, base=2)) if distribution.size else 0.0
+        )
 
         is_fixed_length = min_len == max_len
         is_printable = all(
@@ -430,7 +436,11 @@ class StatisticalAnalyzer:
         except UnicodeDecodeError:
             decoded = None
 
-        if decoded and decoded.strip() and all(ch in string.printable for ch in decoded):
+        if (
+            decoded
+            and decoded.strip()
+            and all(ch in string.printable for ch in decoded)
+        ):
             return decoded.strip()
 
         return value.hex()
@@ -1129,7 +1139,9 @@ class StatisticalAnalyzer:
         merged.append(current_boundary)
         return merged
 
-    async def detect_field_boundaries(self, messages: List[bytes]) -> List[FieldBoundary]:
+    async def detect_field_boundaries(
+        self, messages: List[bytes]
+    ) -> List[FieldBoundary]:
         """Public interface for field boundary detection."""
         boundaries = await self._detect_field_boundaries(messages)
         # Ensure delimiter boundaries expose separator attribute for consumers

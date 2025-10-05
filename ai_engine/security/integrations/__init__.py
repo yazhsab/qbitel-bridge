@@ -16,26 +16,35 @@ try:
         IntegrationType,
         IntegrationConfig,
     )
-    __all__.extend([
-        "BaseIntegrationConnector",
-        "HTTPIntegrationConnector",
-        "IntegrationResult",
-        "IntegrationType",
-        "IntegrationConfig",
-    ])
+
+    __all__.extend(
+        [
+            "BaseIntegrationConnector",
+            "HTTPIntegrationConnector",
+            "IntegrationResult",
+            "IntegrationType",
+            "IntegrationConfig",
+        ]
+    )
 except Exception:  # pragma: no cover
     pass
 
 # SIEM Connectors
 try:
     from .siem_connector import SIEMConnector, SplunkConnector, QRadarConnector
+
     __all__.extend(["SIEMConnector", "SplunkConnector", "QRadarConnector"])
 except Exception:  # pragma: no cover
     pass
 
 # Ticketing Connectors
 try:
-    from .ticketing_connector import TicketingConnector, ServiceNowConnector, JiraConnector
+    from .ticketing_connector import (
+        TicketingConnector,
+        ServiceNowConnector,
+        JiraConnector,
+    )
+
     __all__.extend(["TicketingConnector", "ServiceNowConnector", "JiraConnector"])
 except Exception:  # pragma: no cover
     pass
@@ -47,6 +56,7 @@ try:
         SlackConnector,
         EmailConnector,
     )
+
     __all__.extend(["CommunicationConnector", "SlackConnector", "EmailConnector"])
 except Exception:  # pragma: no cover
     pass
@@ -58,6 +68,7 @@ try:
         FirewallConnector,
         IDSConnector,
     )
+
     __all__.extend(["NetworkSecurityConnector", "FirewallConnector", "IDSConnector"])
 except Exception:  # pragma: no cover
     pass
@@ -65,6 +76,7 @@ except Exception:  # pragma: no cover
 # Integration Manager
 try:
     from .integration_manager import IntegrationManager, get_integration_manager
+
     __all__.extend(["IntegrationManager", "get_integration_manager"])
 except Exception:  # pragma: no cover
     pass

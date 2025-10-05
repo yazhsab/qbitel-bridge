@@ -86,7 +86,7 @@ class TestUserModel:
             email="test@example.com",
             full_name="Test User",
             password_hash="hashed_password",
-            role=UserRole.VIEWER
+            role=UserRole.VIEWER,
         )
 
         db_session.add(user)
@@ -104,7 +104,7 @@ class TestUserModel:
         user = User(
             username="defaultuser",
             email="default@example.com",
-            full_name="Default User"
+            full_name="Default User",
         )
 
         db_session.add(user)
@@ -125,7 +125,7 @@ class TestUserModel:
             full_name="MFA User",
             mfa_enabled=True,
             mfa_method=MFAMethod.TOTP,
-            mfa_secret="encrypted_secret"
+            mfa_secret="encrypted_secret",
         )
 
         db_session.add(user)
@@ -143,7 +143,7 @@ class TestUserModel:
             full_name="OAuth User",
             oauth_provider="google",
             oauth_id="google_12345",
-            password_hash=None  # OAuth users don't have passwords
+            password_hash=None,  # OAuth users don't have passwords
         )
 
         db_session.add(user)
@@ -163,7 +163,7 @@ class TestUserModel:
             last_login=now,
             last_login_ip="192.168.1.1",
             failed_login_attempts=2,
-            account_locked_until=now + timedelta(hours=1)
+            account_locked_until=now + timedelta(hours=1),
         )
 
         db_session.add(user)
@@ -180,7 +180,7 @@ class TestUserModel:
             username="deleteduser",
             email="deleted@example.com",
             full_name="Deleted User",
-            deleted_at=datetime.utcnow()
+            deleted_at=datetime.utcnow(),
         )
 
         db_session.add(user)
@@ -194,7 +194,7 @@ class TestUserModel:
             username="repruser",
             email="repr@example.com",
             full_name="Repr User",
-            role=UserRole.ADMINISTRATOR
+            role=UserRole.ADMINISTRATOR,
         )
 
         db_session.add(user)
@@ -222,11 +222,7 @@ class TestAPIKeyModel:
     @pytest.fixture
     def test_user(self, db_session):
         """Create a test user."""
-        user = User(
-            username="keyuser",
-            email="key@example.com",
-            full_name="Key User"
-        )
+        user = User(username="keyuser", email="key@example.com", full_name="Key User")
         db_session.add(user)
         db_session.commit()
         return user
@@ -239,7 +235,7 @@ class TestAPIKeyModel:
             name="Production Key",
             description="Key for production use",
             user_id=test_user.id,
-            status=APIKeyStatus.ACTIVE
+            status=APIKeyStatus.ACTIVE,
         )
 
         db_session.add(api_key)
@@ -255,10 +251,7 @@ class TestAPIKeyModel:
     def test_api_key_defaults(self, db_session, test_user):
         """Test API key default values."""
         api_key = APIKey(
-            key_hash="hash",
-            key_prefix="key_",
-            name="Default Key",
-            user_id=test_user.id
+            key_hash="hash", key_prefix="key_", name="Default Key", user_id=test_user.id
         )
 
         db_session.add(api_key)
@@ -277,7 +270,7 @@ class TestAPIKeyModel:
             key_prefix="exp_",
             name="Expiring Key",
             user_id=test_user.id,
-            expires_at=expires_at
+            expires_at=expires_at,
         )
 
         db_session.add(api_key)
@@ -295,7 +288,7 @@ class TestAPIKeyModel:
             user_id=test_user.id,
             last_used_at=now,
             last_used_ip="10.0.0.1",
-            usage_count=42
+            usage_count=42,
         )
 
         db_session.add(api_key)
@@ -312,7 +305,7 @@ class TestAPIKeyModel:
             key_prefix="rev_",
             name="Revoked Key",
             user_id=test_user.id,
-            status=APIKeyStatus.REVOKED
+            status=APIKeyStatus.REVOKED,
         )
 
         db_session.add(api_key)
@@ -328,7 +321,7 @@ class TestAPIKeyModel:
             key_prefix="perm_",
             name="Permission Key",
             user_id=test_user.id,
-            permissions=permissions
+            permissions=permissions,
         )
 
         db_session.add(api_key)
@@ -343,7 +336,7 @@ class TestAPIKeyModel:
             key_prefix="rate_",
             name="Rate Limited Key",
             user_id=test_user.id,
-            rate_limit_per_minute=500
+            rate_limit_per_minute=500,
         )
 
         db_session.add(api_key)
@@ -370,7 +363,7 @@ class TestUserAPIKeyRelationship:
         user = User(
             username="multikey",
             email="multikey@example.com",
-            full_name="Multi Key User"
+            full_name="Multi Key User",
         )
         db_session.add(user)
         db_session.commit()
@@ -381,7 +374,7 @@ class TestUserAPIKeyRelationship:
                 key_hash=f"hash_{i}",
                 key_prefix=f"key_{i}_",
                 name=f"Key {i}",
-                user_id=user.id
+                user_id=user.id,
             )
             db_session.add(api_key)
 
@@ -396,7 +389,7 @@ class TestUserAPIKeyRelationship:
         user = User(
             username="cascadeuser",
             email="cascade@example.com",
-            full_name="Cascade User"
+            full_name="Cascade User",
         )
         db_session.add(user)
         db_session.commit()
@@ -406,7 +399,7 @@ class TestUserAPIKeyRelationship:
             key_hash="cascade_hash",
             key_prefix="cascade_",
             name="Cascade Key",
-            user_id=user.id
+            user_id=user.id,
         )
         db_session.add(api_key)
         db_session.commit()
@@ -437,9 +430,7 @@ class TestModelConstraints:
     def test_user_unique_username(self, db_session):
         """Test username must be unique."""
         user1 = User(
-            username="uniqueuser",
-            email="user1@example.com",
-            full_name="User 1"
+            username="uniqueuser", email="user1@example.com", full_name="User 1"
         )
         db_session.add(user1)
         db_session.commit()
@@ -447,7 +438,7 @@ class TestModelConstraints:
         user2 = User(
             username="uniqueuser",  # Duplicate
             email="user2@example.com",
-            full_name="User 2"
+            full_name="User 2",
         )
         db_session.add(user2)
 
@@ -456,18 +447,14 @@ class TestModelConstraints:
 
     def test_user_unique_email(self, db_session):
         """Test email must be unique."""
-        user1 = User(
-            username="user1",
-            email="unique@example.com",
-            full_name="User 1"
-        )
+        user1 = User(username="user1", email="unique@example.com", full_name="User 1")
         db_session.add(user1)
         db_session.commit()
 
         user2 = User(
             username="user2",
             email="unique@example.com",  # Duplicate
-            full_name="User 2"
+            full_name="User 2",
         )
         db_session.add(user2)
 

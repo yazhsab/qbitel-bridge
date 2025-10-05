@@ -233,6 +233,7 @@ class RetryManager:
         if last_exc is not None:
             raise last_exc
 
+
 class CircuitBreaker:
     """Circuit breaker implementation for fault tolerance."""
 

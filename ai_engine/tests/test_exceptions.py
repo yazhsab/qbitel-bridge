@@ -88,7 +88,9 @@ class TestModelException:
 
     def test_model_exception_with_details(self):
         """Test model exception with details."""
-        exc = ModelException("Model failed", model_name="cnn_classifier", model_version="v1.2")
+        exc = ModelException(
+            "Model failed", model_name="cnn_classifier", model_version="v1.2"
+        )
         assert exc.context["model_name"] == "cnn_classifier"
         assert exc.context["model_version"] == "v1.2"
 
@@ -103,7 +105,9 @@ class TestModelVersionException:
 
     def test_model_version_exception_with_details(self):
         """Test model version exception with details."""
-        exc = ModelVersionException("Version conflict", version_id="v2.0", model_name="classifier")
+        exc = ModelVersionException(
+            "Version conflict", version_id="v2.0", model_name="classifier"
+        )
         assert exc.context["version_id"] == "v2.0"
         assert exc.context["model_name"] == "classifier"
 
@@ -132,7 +136,9 @@ class TestInferenceException:
 
     def test_inference_exception_with_details(self):
         """Test inference exception with details."""
-        exc = InferenceException("Invalid input", model_name="bert", input_shape=(32, 512))
+        exc = InferenceException(
+            "Invalid input", model_name="bert", input_shape=(32, 512)
+        )
         assert exc.context["model_name"] == "bert"
         assert exc.context["input_shape"] == (32, 512)
 
@@ -147,10 +153,12 @@ class TestTrainingException:
 
     def test_training_exception_with_details(self):
         """Test training exception with training details."""
-        exc = TrainingException("NaN loss", epoch=5, batch_idx=100, loss_value=float('inf'))
+        exc = TrainingException(
+            "NaN loss", epoch=5, batch_idx=100, loss_value=float("inf")
+        )
         assert exc.context["epoch"] == 5
         assert exc.context["batch_idx"] == 100
-        assert exc.context["loss_value"] == float('inf')
+        assert exc.context["loss_value"] == float("inf")
 
 
 class TestDataException:
@@ -163,7 +171,9 @@ class TestDataException:
 
     def test_data_exception_with_details(self):
         """Test data exception with details."""
-        exc = DataException("Invalid records", data_source="file.csv", record_count=1000)
+        exc = DataException(
+            "Invalid records", data_source="file.csv", record_count=1000
+        )
         assert exc.context["data_source"] == "file.csv"
         assert exc.context["record_count"] == 1000
 
@@ -178,7 +188,9 @@ class TestProtocolException:
 
     def test_protocol_exception_with_details(self):
         """Test protocol exception with details."""
-        exc = ProtocolException("Invalid packet", protocol_type="HTTP", packet_length=1024)
+        exc = ProtocolException(
+            "Invalid packet", protocol_type="HTTP", packet_length=1024
+        )
         assert exc.context["protocol_type"] == "HTTP"
         assert exc.context["packet_length"] == 1024
 
@@ -193,7 +205,9 @@ class TestFieldDetectionException:
 
     def test_field_detection_exception_with_details(self):
         """Test field detection exception with details."""
-        exc = FieldDetectionException("Too many fields", message_length=256, detected_fields=50)
+        exc = FieldDetectionException(
+            "Too many fields", message_length=256, detected_fields=50
+        )
         assert exc.context["message_length"] == 256
         assert exc.context["detected_fields"] == 50
 
@@ -208,7 +222,9 @@ class TestAnomalyDetectionException:
 
     def test_anomaly_detection_exception_with_details(self):
         """Test anomaly detection exception with details."""
-        exc = AnomalyDetectionException("High anomaly score", detector_type="VAE", anomaly_score=0.95)
+        exc = AnomalyDetectionException(
+            "High anomaly score", detector_type="VAE", anomaly_score=0.95
+        )
         assert exc.context["detector_type"] == "VAE"
         assert exc.context["anomaly_score"] == 0.95
 
@@ -223,7 +239,9 @@ class TestFeatureExtractionException:
 
     def test_feature_extraction_exception_with_details(self):
         """Test feature extraction exception with details."""
-        exc = FeatureExtractionException("Invalid input", feature_type="spectral", input_size=1024)
+        exc = FeatureExtractionException(
+            "Invalid input", feature_type="spectral", input_size=1024
+        )
         assert exc.context["feature_type"] == "spectral"
         assert exc.context["input_size"] == 1024
 
@@ -238,7 +256,9 @@ class TestModelRegistryException:
 
     def test_model_registry_exception_with_details(self):
         """Test model registry exception with details."""
-        exc = ModelRegistryException("Connection failed", registry_url="http://registry", operation="push")
+        exc = ModelRegistryException(
+            "Connection failed", registry_url="http://registry", operation="push"
+        )
         assert exc.context["registry_url"] == "http://registry"
         assert exc.context["operation"] == "push"
 
@@ -253,7 +273,9 @@ class TestServingException:
 
     def test_serving_exception_with_details(self):
         """Test serving exception with details."""
-        exc = ServingException("Request timeout", endpoint="/predict", request_id="req-456")
+        exc = ServingException(
+            "Request timeout", endpoint="/predict", request_id="req-456"
+        )
         assert exc.context["endpoint"] == "/predict"
         assert exc.context["request_id"] == "req-456"
 

@@ -103,7 +103,9 @@ def test_security_logger_masks_and_logs_events(monkeypatch, stub_config_factory)
     logger.log_security_event_obj(security_event)
     assert logger.log_counts[LogLevel.CRITICAL.value] == 1
 
-    threat_analysis = ThreatAnalysis(threat_level=ThreatLevel.HIGH, confidence_score=0.9)
+    threat_analysis = ThreatAnalysis(
+        threat_level=ThreatLevel.HIGH, confidence_score=0.9
+    )
     logger.log_threat_analysis(threat_analysis)
     assert logger.log_counts[LogLevel.ERROR.value] == 1
 

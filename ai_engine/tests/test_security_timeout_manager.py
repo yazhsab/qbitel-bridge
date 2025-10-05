@@ -21,7 +21,9 @@ class _DummyLogger:
         self.name = name
         self.events = []
 
-    def log_security_event(self, log_type, message, level=None, metadata=None, **kwargs):
+    def log_security_event(
+        self, log_type, message, level=None, metadata=None, **kwargs
+    ):
         entry = {
             "log_type": log_type,
             "message": message,
@@ -196,7 +198,9 @@ async def test_execute_with_timeout_handles_exception():
 
 
 @pytest.mark.asyncio
-async def test_timeout_manager_execute_with_unknown_policy_falls_back(stub_security_logger):
+async def test_timeout_manager_execute_with_unknown_policy_falls_back(
+    stub_security_logger,
+):
     manager = TimeoutManager()
 
     async def quick():
@@ -207,7 +211,10 @@ async def test_timeout_manager_execute_with_unknown_policy_falls_back(stub_secur
 
     assert result.success is True
     manager_logger = stub_security_logger["cronos.security.resilience.timeout_manager"]
-    assert any("Using default timeout policy" in event["message"] for event in manager_logger.events)
+    assert any(
+        "Using default timeout policy" in event["message"]
+        for event in manager_logger.events
+    )
 
 
 @pytest.mark.asyncio
@@ -265,7 +272,8 @@ async def test_timeout_context_logs_timeout_event(stub_security_logger):
 
     context_logger = stub_security_logger["cronos.security.resilience.timeout_context"]
     assert any(
-        event["log_type"] == SecurityLogType.PERFORMANCE_METRIC and "slow-op" in event["message"]
+        event["log_type"] == SecurityLogType.PERFORMANCE_METRIC
+        and "slow-op" in event["message"]
         for event in context_logger.events
     )
 

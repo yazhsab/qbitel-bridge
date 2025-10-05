@@ -51,6 +51,7 @@ def _get_metric(metric_cls, name: str, *args, **kwargs):
     _METRIC_CACHE[name] = metric
     return metric
 
+
 # Prometheus metrics
 SECURITY_EVENTS_COUNTER = _get_metric(
     Counter,
@@ -60,11 +61,12 @@ SECURITY_EVENTS_COUNTER = _get_metric(
 )
 RESPONSE_TIME_HISTOGRAM = _get_metric(
     Histogram,
-    "cronos_security_response_time_seconds", "Security response time", ["response_type"]
+    "cronos_security_response_time_seconds",
+    "Security response time",
+    ["response_type"],
 )
 ACTIVE_INCIDENTS_GAUGE = _get_metric(
-    Gauge,
-    "cronos_security_active_incidents", "Number of active security incidents"
+    Gauge, "cronos_security_active_incidents", "Number of active security incidents"
 )
 AUTONOMOUS_DECISIONS_COUNTER = _get_metric(
     Counter,
@@ -80,7 +82,8 @@ HUMAN_ESCALATIONS_COUNTER = _get_metric(
 )
 SYSTEM_QUARANTINES_GAUGE = _get_metric(
     Gauge,
-    "cronos_security_active_quarantines", "Number of systems currently quarantined"
+    "cronos_security_active_quarantines",
+    "Number of systems currently quarantined",
 )
 MTTR_SUMMARY = _get_metric(
     Summary,

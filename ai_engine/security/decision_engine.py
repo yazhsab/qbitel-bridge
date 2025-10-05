@@ -54,6 +54,7 @@ def _get_metric(metric_cls, name: str, *args, **kwargs):
     _METRIC_CACHE[name] = metric
     return metric
 
+
 # Prometheus metrics
 DECISION_COUNTER = _get_metric(
     Counter,
@@ -62,8 +63,7 @@ DECISION_COUNTER = _get_metric(
     ["decision_type", "confidence_level"],
 )
 DECISION_DURATION = _get_metric(
-    Histogram,
-    "cronos_security_decision_duration_seconds", "Decision making duration"
+    Histogram, "cronos_security_decision_duration_seconds", "Decision making duration"
 )
 RESPONSE_EXECUTION_COUNTER = _get_metric(
     Counter,
@@ -72,12 +72,10 @@ RESPONSE_EXECUTION_COUNTER = _get_metric(
     ["response_type", "status"],
 )
 AUTO_EXECUTE_GAUGE = _get_metric(
-    Gauge,
-    "cronos_security_auto_executions", "Autonomous executions per hour"
+    Gauge, "cronos_security_auto_executions", "Autonomous executions per hour"
 )
 HUMAN_ESCALATIONS_GAUGE = _get_metric(
-    Gauge,
-    "cronos_security_human_escalations", "Human escalations per hour"
+    Gauge, "cronos_security_human_escalations", "Human escalations per hour"
 )
 
 logger = logging.getLogger(__name__)

@@ -51,6 +51,8 @@ ACTIVE_THREATS = Gauge(
 )
 
 logger = logging.getLogger(__name__)
+
+
 class ThreatSeverity(str, Enum):
     """Threat severity levels."""
 

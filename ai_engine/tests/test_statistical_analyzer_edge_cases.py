@@ -75,6 +75,7 @@ class TestStatisticalAnalyzerEdgeCases:
     async def test_max_entropy_random_data(self, analyzer):
         """Test with maximum entropy random data."""
         import os
+
         messages = [os.urandom(1000) for _ in range(10)]
         result = await analyzer.analyze_traffic(messages)
 
@@ -92,11 +93,7 @@ class TestStatisticalAnalyzerEdgeCases:
     @pytest.mark.asyncio
     async def test_detect_field_boundaries_single_char_delimiters(self, analyzer):
         """Test with single character delimiters."""
-        messages = [
-            b"A|B|C|D",
-            b"E|F|G|H",
-            b"I|J|K|L"
-        ]
+        messages = [b"A|B|C|D", b"E|F|G|H", b"I|J|K|L"]
         boundaries = await analyzer.detect_field_boundaries(messages)
 
         assert len(boundaries) > 0
@@ -106,9 +103,9 @@ class TestStatisticalAnalyzerEdgeCases:
     async def test_unicode_in_messages(self, analyzer):
         """Test with Unicode characters (UTF-8 encoded)."""
         messages = [
-            "Hello 世界".encode('utf-8'),
-            "Test テスト".encode('utf-8'),
-            "Data данные".encode('utf-8')
+            "Hello 世界".encode("utf-8"),
+            "Test テスト".encode("utf-8"),
+            "Data данные".encode("utf-8"),
         ]
         result = await analyzer.analyze_traffic(messages)
 
@@ -121,7 +118,7 @@ class TestStatisticalAnalyzerEdgeCases:
             b"HTTP/1.1 200 OK\r\n",
             b"\x01\x02\x03\x04\x05",
             b"GET /api HTTP/1.1\r\n",
-            b"\xff\xfe\xfd\xfc"
+            b"\xff\xfe\xfd\xfc",
         ]
         result = await analyzer.analyze_traffic(messages)
 
@@ -140,10 +137,7 @@ class TestStatisticalAnalyzerEdgeCases:
     @pytest.mark.asyncio
     async def test_alternating_patterns(self, analyzer):
         """Test with alternating patterns."""
-        messages = [
-            b"PATTERN_A" if i % 2 == 0 else b"PATTERN_B"
-            for i in range(100)
-        ]
+        messages = [b"PATTERN_A" if i % 2 == 0 else b"PATTERN_B" for i in range(100)]
         result = await analyzer.analyze_traffic(messages)
 
         assert result.total_messages == 100
@@ -169,7 +163,7 @@ class TestStatisticalAnalyzerEdgeCases:
         messages = [
             b"\x00\x05HelloWorld",  # Length 5, but data is longer
             b"\x00\x04TestData",
-            b"\x00\x06Example"
+            b"\x00\x06Example",
         ]
         boundaries = await analyzer.detect_field_boundaries(messages)
 
@@ -181,7 +175,7 @@ class TestStatisticalAnalyzerEdgeCases:
         """Test with nested delimiter structures."""
         messages = [
             b"field1:sub1,sub2;field2:sub3,sub4",
-            b"field1:sub5,sub6;field2:sub7,sub8"
+            b"field1:sub5,sub6;field2:sub7,sub8",
         ]
         boundaries = await analyzer.detect_field_boundaries(messages)
 
@@ -191,11 +185,7 @@ class TestStatisticalAnalyzerEdgeCases:
     @pytest.mark.asyncio
     async def test_variable_length_fields(self, analyzer):
         """Test with highly variable length fields."""
-        messages = [
-            b"A|BB|CCC|DDDD",
-            b"E|FF|GGG|HHHH",
-            b"I|JJ|KKK|LLLL"
-        ]
+        messages = [b"A|BB|CCC|DDDD", b"E|FF|GGG|HHHH", b"I|JJ|KKK|LLLL"]
         boundaries = await analyzer.detect_field_boundaries(messages)
 
         assert len(boundaries) > 0
@@ -204,11 +194,12 @@ class TestStatisticalAnalyzerEdgeCases:
     async def test_messages_with_checksums(self, analyzer):
         """Test messages that include checksums."""
         import struct
+
         messages = []
         for i in range(10):
             data = f"payload_{i}".encode()
             checksum = sum(data) & 0xFF
-            message = data + struct.pack('B', checksum)
+            message = data + struct.pack("B", checksum)
             messages.append(message)
 
         result = await analyzer.analyze_traffic(messages)
@@ -218,10 +209,11 @@ class TestStatisticalAnalyzerEdgeCases:
     async def test_compressed_data(self, analyzer):
         """Test with compressed/encrypted-looking data."""
         import zlib
+
         messages = [
             zlib.compress(b"data1"),
             zlib.compress(b"data2"),
-            zlib.compress(b"data3")
+            zlib.compress(b"data3"),
         ]
         result = await analyzer.analyze_traffic(messages)
 
@@ -234,7 +226,7 @@ class TestStatisticalAnalyzerEdgeCases:
         messages = [
             b"DATA1" + b"\x00" * 10,
             b"DATA2" + b"\x00" * 10,
-            b"DATA3" + b"\x00" * 10
+            b"DATA3" + b"\x00" * 10,
         ]
         boundaries = await analyzer.detect_field_boundaries(messages)
 
@@ -245,9 +237,7 @@ class TestStatisticalAnalyzerEdgeCases:
     async def test_high_frequency_rare_bytes(self, analyzer):
         """Test with rare bytes appearing frequently."""
         # Message with many rare control characters
-        messages = [
-            b"\x01\x02\x03" + b"normal_text" + b"\x1f\x1e\x1d"
-        ] * 10
+        messages = [b"\x01\x02\x03" + b"normal_text" + b"\x1f\x1e\x1d"] * 10
         result = await analyzer.analyze_traffic(messages)
 
         assert result.total_messages == 10
@@ -258,7 +248,7 @@ class TestStatisticalAnalyzerEdgeCases:
         messages = [
             b"\x89PNG" + b"rest_of_data",
             b"\x89PNG" + b"different_data",
-            b"\x89PNG" + b"more_data"
+            b"\x89PNG" + b"more_data",
         ]
         result = await analyzer.analyze_traffic(messages)
 
@@ -273,7 +263,7 @@ class TestStatisticalAnalyzerEdgeCases:
             b"A",  # 1 byte
             b"B" * 10,  # 10 bytes
             b"C" * 1000,  # 1000 bytes
-            b"D" * 100000  # 100KB
+            b"D" * 100000,  # 100KB
         ]
         result = await analyzer.analyze_traffic(messages)
 
@@ -299,7 +289,7 @@ class TestByteStatistics:
             chi_square_pvalue=0.05,
             is_random=False,
             is_text=True,
-            is_binary=False
+            is_binary=False,
         )
 
         assert stats.total_count == 15
@@ -317,7 +307,7 @@ class TestFieldBoundary:
             confidence=0.9,
             boundary_type="delimiter",
             evidence={"delimiter": "|"},
-            separator=b"|"
+            separator=b"|",
         )
 
         assert boundary.position == 5
@@ -338,7 +328,7 @@ class TestPatternInfo:
             contexts=[b"HTTP/1.1", b"HTTP/2.0"],
             pattern_type="fixed",
             entropy=2.0,
-            significance=0.95
+            significance=0.95,
         )
 
         assert pattern.pattern == b"HTTP"

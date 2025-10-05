@@ -35,7 +35,13 @@ from ai_engine.discovery.protocol_discovery_orchestrator import (
     ProtocolDiscoveryOrchestrator,
     DiscoveryResult,
 )
-from ai_engine.core.error_handling import ErrorHandler, CircuitBreaker, CircuitBreakerConfig, CircuitBreakerState, RetryManager
+from ai_engine.core.error_handling import (
+    ErrorHandler,
+    CircuitBreaker,
+    CircuitBreakerConfig,
+    CircuitBreakerState,
+    RetryManager,
+)
 from ai_engine.core.structured_logging import StructuredLogger
 from ai_engine.core.performance_optimizer import PerformanceOptimizer, ComputationCache
 from ai_engine.monitoring.enterprise_metrics import EnterpriseMetrics, MetricsCollector

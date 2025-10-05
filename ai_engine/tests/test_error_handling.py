@@ -65,7 +65,7 @@ class TestErrorContext:
             component="test_component",
             operation="test_operation",
             request_id="req-123",
-            user_id="user-456"
+            user_id="user-456",
         )
 
         assert context.component == "test_component"
@@ -78,7 +78,7 @@ class TestErrorContext:
         context = ErrorContext(
             component="api",
             operation="get_data",
-            additional_data={"endpoint": "/api/users", "method": "GET"}
+            additional_data={"endpoint": "/api/users", "method": "GET"},
         )
 
         assert context.additional_data["endpoint"] == "/api/users"
@@ -101,7 +101,7 @@ class TestErrorRecord:
             exception_type="ConnectionError",
             exception_message="Connection failed",
             stack_trace="...",
-            context=context
+            context=context,
         )
 
         assert record.error_id == "err-123"
@@ -125,7 +125,7 @@ class TestErrorRecord:
             context=context,
             recovery_attempted=True,
             recovery_successful=True,
-            recovery_strategy=RecoveryStrategy.RETRY
+            recovery_strategy=RecoveryStrategy.RETRY,
         )
 
         result = record.to_dict()
@@ -182,8 +182,7 @@ class TestRetryManager:
     async def test_retry_non_retryable_exception(self):
         """Test non-retryable exception fails immediately."""
         retry_manager = RetryManager(
-            max_retries=3,
-            retryable_exceptions=(ConnectionError,)
+            max_retries=3, retryable_exceptions=(ConnectionError,)
         )
 
         async def raises_value_error():
@@ -196,10 +195,7 @@ class TestRetryManager:
     async def test_retry_exponential_backoff(self):
         """Test exponential backoff delay calculation."""
         retry_manager = RetryManager(
-            max_retries=3,
-            base_delay=1.0,
-            backoff_factor=2.0,
-            jitter=False
+            max_retries=3, base_delay=1.0, backoff_factor=2.0, jitter=False
         )
 
         delay1 = retry_manager._get_delay(1)
@@ -242,8 +238,7 @@ class TestCircuitBreaker:
     async def test_circuit_breaker_opens_after_threshold(self):
         """Test circuit breaker opens after failure threshold."""
         config = CircuitBreakerConfig(
-            failure_threshold=3,
-            expected_exception_types={ConnectionError}
+            failure_threshold=3, expected_exception_types={ConnectionError}
         )
         cb = CircuitBreaker(config)
 
@@ -286,7 +281,7 @@ class TestCircuitBreaker:
         config = CircuitBreakerConfig(
             failure_threshold=1,
             recovery_timeout=0.1,  # Short timeout for testing
-            half_open_max_calls=2
+            half_open_max_calls=2,
         )
         cb = CircuitBreaker(config)
 
@@ -341,10 +336,7 @@ class TestErrorHandler:
 
     def test_error_handler_initialization(self):
         """Test error handler initialization."""
-        handler = ErrorHandler(
-            enable_persistent_storage=False,
-            enable_sentry=False
-        )
+        handler = ErrorHandler(enable_persistent_storage=False, enable_sentry=False)
 
         assert len(handler.error_records) == 0
         assert len(handler.error_stats) == 0
@@ -352,10 +344,7 @@ class TestErrorHandler:
 
     def test_classify_error(self):
         """Test error classification."""
-        handler = ErrorHandler(
-            enable_persistent_storage=False,
-            enable_sentry=False
-        )
+        handler = ErrorHandler(enable_persistent_storage=False, enable_sentry=False)
 
         # Test specific exception types
         severity, category, strategy = handler.classify_error(ConnectionError())
@@ -371,10 +360,7 @@ class TestErrorHandler:
     @pytest.mark.asyncio
     async def test_handle_error_logging(self):
         """Test error handling and logging."""
-        handler = ErrorHandler(
-            enable_persistent_storage=False,
-            enable_sentry=False
-        )
+        handler = ErrorHandler(enable_persistent_storage=False, enable_sentry=False)
 
         context = ErrorContext(component="test", operation="test_op")
         exception = ValueError("Test error")
@@ -391,10 +377,7 @@ class TestErrorHandler:
     @pytest.mark.asyncio
     async def test_handle_error_with_retry_recovery(self):
         """Test error handling with retry recovery."""
-        handler = ErrorHandler(
-            enable_persistent_storage=False,
-            enable_sentry=False
-        )
+        handler = ErrorHandler(enable_persistent_storage=False, enable_sentry=False)
 
         context = ErrorContext(component="test", operation="test_op")
 
@@ -405,9 +388,7 @@ class TestErrorHandler:
         exception = InferenceException("Inference failed")
 
         success, result = await handler.handle_error(
-            exception,
-            context,
-            recovery_func=recovery_func
+            exception, context, recovery_func=recovery_func
         )
 
         assert success is True
@@ -415,10 +396,7 @@ class TestErrorHandler:
 
     def test_get_circuit_breaker(self):
         """Test getting/creating circuit breaker."""
-        handler = ErrorHandler(
-            enable_persistent_storage=False,
-            enable_sentry=False
-        )
+        handler = ErrorHandler(enable_persistent_storage=False, enable_sentry=False)
 
         cb1 = handler.get_circuit_breaker("component1")
         cb2 = handler.get_circuit_breaker("component1")
@@ -429,10 +407,7 @@ class TestErrorHandler:
 
     def test_set_retry_config(self):
         """Test setting retry configuration."""
-        handler = ErrorHandler(
-            enable_persistent_storage=False,
-            enable_sentry=False
-        )
+        handler = ErrorHandler(enable_persistent_storage=False, enable_sentry=False)
 
         config = RetryConfig(max_attempts=5, base_delay=2.0)
         handler.set_retry_config("component1", config)
@@ -443,10 +418,7 @@ class TestErrorHandler:
 
     def test_get_error_statistics(self):
         """Test getting error statistics."""
-        handler = ErrorHandler(
-            enable_persistent_storage=False,
-            enable_sentry=False
-        )
+        handler = ErrorHandler(enable_persistent_storage=False, enable_sentry=False)
 
         # Manually add error stats
         handler.error_stats["high_network"] = 5
@@ -461,10 +433,7 @@ class TestErrorHandler:
     @pytest.mark.asyncio
     async def test_get_component_health(self):
         """Test component health status."""
-        handler = ErrorHandler(
-            enable_persistent_storage=False,
-            enable_sentry=False
-        )
+        handler = ErrorHandler(enable_persistent_storage=False, enable_sentry=False)
 
         # Add some error records
         context = ErrorContext(component="api", operation="request")
@@ -479,7 +448,7 @@ class TestErrorHandler:
                 exception_type="ConnectionError",
                 exception_message="Failed",
                 stack_trace="...",
-                context=context
+                context=context,
             )
             handler.error_records.append(error)
 
@@ -496,6 +465,7 @@ class TestHandleErrorsDecorator:
     @pytest.mark.asyncio
     async def test_decorator_success(self):
         """Test decorator with successful function."""
+
         @handle_errors(component="test")
         async def success_func():
             return "success"
@@ -506,6 +476,7 @@ class TestHandleErrorsDecorator:
     @pytest.mark.asyncio
     async def test_decorator_with_error(self):
         """Test decorator handles errors."""
+
         @handle_errors(component="test", operation="failing_op")
         async def failing_func():
             raise ValueError("Test error")
@@ -537,10 +508,7 @@ class TestHealthMonitor:
 
     def test_health_monitor_initialization(self):
         """Test health monitor initialization."""
-        handler = ErrorHandler(
-            enable_persistent_storage=False,
-            enable_sentry=False
-        )
+        handler = ErrorHandler(enable_persistent_storage=False, enable_sentry=False)
         monitor = HealthMonitor(handler)
 
         assert monitor.error_handler is handler
@@ -549,10 +517,7 @@ class TestHealthMonitor:
     @pytest.mark.asyncio
     async def test_register_health_check(self):
         """Test registering health check."""
-        handler = ErrorHandler(
-            enable_persistent_storage=False,
-            enable_sentry=False
-        )
+        handler = ErrorHandler(enable_persistent_storage=False, enable_sentry=False)
         monitor = HealthMonitor(handler)
 
         async def custom_health_check():
@@ -565,10 +530,7 @@ class TestHealthMonitor:
     @pytest.mark.asyncio
     async def test_check_system_health(self):
         """Test system-wide health check."""
-        handler = ErrorHandler(
-            enable_persistent_storage=False,
-            enable_sentry=False
-        )
+        handler = ErrorHandler(enable_persistent_storage=False, enable_sentry=False)
         monitor = HealthMonitor(handler)
 
         # Register a health check
@@ -601,11 +563,7 @@ class TestRetryConfig:
 
     def test_retry_config_custom(self):
         """Test custom retry configuration."""
-        config = RetryConfig(
-            max_attempts=5,
-            base_delay=2.0,
-            backoff_strategy="linear"
-        )
+        config = RetryConfig(max_attempts=5, base_delay=2.0, backoff_strategy="linear")
 
         assert config.max_attempts == 5
         assert config.base_delay == 2.0
@@ -625,10 +583,7 @@ class TestCircuitBreakerConfig:
 
     def test_circuit_breaker_config_custom(self):
         """Test custom circuit breaker configuration."""
-        config = CircuitBreakerConfig(
-            failure_threshold=10,
-            recovery_timeout=30.0
-        )
+        config = CircuitBreakerConfig(failure_threshold=10, recovery_timeout=30.0)
 
         assert config.failure_threshold == 10
         assert config.recovery_timeout == 30.0

@@ -18,9 +18,11 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 import weakref
+
 try:  # pragma: no cover - optional dependency
     from aiohttp import web  # type: ignore
 except ModuleNotFoundError:  # pragma: no cover - fallback stub
+
     class _AiohttpMissing:
         def __getattr__(self, item):
             raise ModuleNotFoundError(

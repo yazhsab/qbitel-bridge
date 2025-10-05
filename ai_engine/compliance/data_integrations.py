@@ -34,6 +34,7 @@ class IntegrationException(CronosAIException):
 try:  # pragma: no cover - optional dependency
     import asyncpg  # type: ignore
 except ImportError:  # pragma: no cover
+
     async def _missing_create_pool(*args, **kwargs):
         raise ImportError("asyncpg library required for TimescaleDB integration")
 

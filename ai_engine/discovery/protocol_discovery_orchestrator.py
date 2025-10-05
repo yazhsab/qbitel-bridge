@@ -91,12 +91,14 @@ class DiscoveryResult:
     @property
     def discovered_protocols(self) -> List[Dict[str, Any]]:
         """Get list of discovered protocols for backward compatibility."""
-        return [{
-            "protocol_type": self.protocol_type,
-            "confidence": self.confidence,
-            "grammar": self.grammar,
-            "parser": self.parser
-        }]
+        return [
+            {
+                "protocol_type": self.protocol_type,
+                "confidence": self.confidence,
+                "grammar": self.grammar,
+                "parser": self.parser,
+            }
+        ]
 
 
 @dataclass

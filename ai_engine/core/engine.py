@@ -101,9 +101,7 @@ class AIEngine:
     async def detect_fields(self, model_input: Any) -> Any:
         """Delegate field detection to the configured component."""
         self._ensure_ready("field detection")
-        if not self.field_detector or not hasattr(
-            self.field_detector, "detect_fields"
-        ):
+        if not self.field_detector or not hasattr(self.field_detector, "detect_fields"):
             raise AIEngineException("Field detector component not configured")
 
         start_time = time.time()

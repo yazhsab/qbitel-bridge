@@ -83,7 +83,9 @@ class LSTMAnomalyDetector:
             metadata=metadata,
         )
 
-    async def update_threshold(self, calibration_sequences: Iterable[Iterable[float]]) -> None:
+    async def update_threshold(
+        self, calibration_sequences: Iterable[Iterable[float]]
+    ) -> None:
         """Calibrate anomaly threshold using sample sequences."""
         scores = []
         for sequence in calibration_sequences:

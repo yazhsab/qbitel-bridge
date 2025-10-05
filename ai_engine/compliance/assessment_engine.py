@@ -1250,13 +1250,25 @@ class ComplianceDataCollector:
             if isinstance(control_type_value, str):
                 control_type_value = control_type_value.lower()
 
-            if control_type_value == ControlType.TECHNICAL or control_type_value == ControlType.TECHNICAL.value:
+            if (
+                control_type_value == ControlType.TECHNICAL
+                or control_type_value == ControlType.TECHNICAL.value
+            ):
                 control_categories.append("technical_controls")
-            elif control_type_value == ControlType.ADMINISTRATIVE or control_type_value == ControlType.ADMINISTRATIVE.value:
+            elif (
+                control_type_value == ControlType.ADMINISTRATIVE
+                or control_type_value == ControlType.ADMINISTRATIVE.value
+            ):
                 control_categories.append("administrative_controls")
-            elif control_type_value == ControlType.OPERATIONAL or control_type_value == ControlType.OPERATIONAL.value:
+            elif (
+                control_type_value == ControlType.OPERATIONAL
+                or control_type_value == ControlType.OPERATIONAL.value
+            ):
                 control_categories.append("operational_controls")
-            elif control_type_value == ControlType.PHYSICAL or control_type_value == ControlType.PHYSICAL.value:
+            elif (
+                control_type_value == ControlType.PHYSICAL
+                or control_type_value == ControlType.PHYSICAL.value
+            ):
                 control_categories.append("physical_controls")
 
             # Additional categorization based on requirement content

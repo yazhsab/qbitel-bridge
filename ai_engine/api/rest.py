@@ -208,7 +208,10 @@ def create_app(config: Config = None) -> FastAPI:
             health_data["status"] = "degraded"
             health_data["error"] = str(e)
 
-        if any(check["status"] in {"unhealthy", "degraded"} for check in health_data["checks"]):
+        if any(
+            check["status"] in {"unhealthy", "degraded"}
+            for check in health_data["checks"]
+        ):
             health_data["status"] = "degraded"
 
         return health_data
@@ -227,7 +230,9 @@ def create_app(config: Config = None) -> FastAPI:
             packet_data = request.packet_data
             try:
                 if isinstance(packet_data, str):
-                    packet_data = base64.b64decode(packet_data.encode("utf-8"), validate=True)
+                    packet_data = base64.b64decode(
+                        packet_data.encode("utf-8"), validate=True
+                    )
                 else:
                     packet_data = base64.b64decode(packet_data, validate=True)
             except (ValueError, binascii.Error):

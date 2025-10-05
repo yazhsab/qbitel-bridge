@@ -185,7 +185,9 @@ class TestUnifiedLLMServiceInitialization:
 
         service = UnifiedLLMService(config)
 
-        with patch("ai_engine.llm.unified_llm_service.AsyncAnthropic") as mock_anthropic:
+        with patch(
+            "ai_engine.llm.unified_llm_service.AsyncAnthropic"
+        ) as mock_anthropic:
             mock_anthropic.return_value = AsyncMock()
             await service.initialize()
 
@@ -321,9 +323,7 @@ class TestLLMServiceFallback:
         mock_response.content = [Mock(text="Fallback response")]
         mock_response.usage = Mock(input_tokens=50, output_tokens=50)
 
-        service.anthropic_client.messages.create = AsyncMock(
-            return_value=mock_response
-        )
+        service.anthropic_client.messages.create = AsyncMock(return_value=mock_response)
 
         request = LLMRequest(prompt="Test", feature_domain="test")
 

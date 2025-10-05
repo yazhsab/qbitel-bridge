@@ -71,7 +71,7 @@ class TestAuditEvent:
             username="testuser",
             ip_address="192.168.1.1",
             result="success",
-            severity=AuditSeverity.LOW
+            severity=AuditSeverity.LOW,
         )
 
         assert event.event_type == AuditEventType.LOGIN_SUCCESS
@@ -88,7 +88,7 @@ class TestAuditEvent:
             event_type=AuditEventType.LOGIN_SUCCESS,
             timestamp=datetime.utcnow(),
             user_id="user123",
-            details=details
+            details=details,
         )
 
         assert event.details == details
@@ -104,7 +104,7 @@ class TestAuditEvent:
             resource="/api/admin",
             action="read",
             result="failure",
-            severity=AuditSeverity.MEDIUM
+            severity=AuditSeverity.MEDIUM,
         )
 
         result = event.to_dict()
@@ -123,7 +123,7 @@ class TestAuditEvent:
             event_type=AuditEventType.MFA_ENABLED,
             timestamp=datetime.utcnow(),
             user_id="user789",
-            severity=AuditSeverity.LOW
+            severity=AuditSeverity.LOW,
         )
 
         json_str = event.to_json()
@@ -148,11 +148,7 @@ class TestAuditLogger:
 
     def test_audit_logger_custom_config(self):
         """Test audit logger with custom configuration."""
-        config = {
-            "enabled": False,
-            "log_to_file": False,
-            "log_to_syslog": True
-        }
+        config = {"enabled": False, "log_to_file": False, "log_to_syslog": True}
         logger = AuditLogger(config)
 
         assert logger.enabled is False
@@ -165,8 +161,7 @@ class TestAuditLogger:
         logger = AuditLogger(config)
 
         event = AuditEvent(
-            event_type=AuditEventType.LOGIN_SUCCESS,
-            timestamp=datetime.utcnow()
+            event_type=AuditEventType.LOGIN_SUCCESS, timestamp=datetime.utcnow()
         )
 
         # Should not raise error, just not log
@@ -176,17 +171,13 @@ class TestAuditLogger:
         """Test logging event to file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             audit_file = os.path.join(tmpdir, "audit.log")
-            config = {
-                "enabled": True,
-                "log_to_file": True,
-                "audit_file": audit_file
-            }
+            config = {"enabled": True, "log_to_file": True, "audit_file": audit_file}
             logger = AuditLogger(config)
 
             event = AuditEvent(
                 event_type=AuditEventType.LOGIN_SUCCESS,
                 timestamp=datetime.utcnow(),
-                user_id="user123"
+                user_id="user123",
             )
 
             logger.log_event(event)
@@ -203,7 +194,7 @@ class TestAuditLogger:
             user_id="user123",
             username="testuser",
             ip_address="192.168.1.1",
-            mfa_used=True
+            mfa_used=True,
         )
 
         # Should not raise error
@@ -214,9 +205,7 @@ class TestAuditLogger:
         logger = AuditLogger(config)
 
         logger.log_login_failed(
-            username="testuser",
-            reason="Invalid password",
-            ip_address="192.168.1.1"
+            username="testuser", reason="Invalid password", ip_address="192.168.1.1"
         )
 
         # Should not raise error
@@ -226,11 +215,7 @@ class TestAuditLogger:
         config = {"enabled": True, "log_to_file": False}
         logger = AuditLogger(config)
 
-        logger.log_mfa_enabled(
-            user_id="user123",
-            username="testuser",
-            method="totp"
-        )
+        logger.log_mfa_enabled(user_id="user123", username="testuser", method="totp")
 
         # Should not raise error
 
@@ -240,9 +225,7 @@ class TestAuditLogger:
         logger = AuditLogger(config)
 
         logger.log_password_changed(
-            user_id="user123",
-            username="testuser",
-            forced=False
+            user_id="user123", username="testuser", forced=False
         )
 
         # Should not raise error
@@ -253,9 +236,7 @@ class TestAuditLogger:
         logger = AuditLogger(config)
 
         logger.log_api_key_created(
-            user_id="user123",
-            key_name="production-key",
-            key_id="key-abc123"
+            user_id="user123", key_name="production-key", key_id="key-abc123"
         )
 
         # Should not raise error
@@ -265,10 +246,7 @@ class TestAuditLogger:
         config = {"enabled": True, "log_to_file": False}
         logger = AuditLogger(config)
 
-        logger.log_secret_accessed(
-            user_id="user123",
-            secret_key="database_password"
-        )
+        logger.log_secret_accessed(user_id="user123", secret_key="database_password")
 
         # Should not raise error
 
@@ -278,9 +256,7 @@ class TestAuditLogger:
         logger = AuditLogger(config)
 
         logger.log_secret_rotated(
-            user_id="user123",
-            secret_key="api_key",
-            reason="scheduled_rotation"
+            user_id="user123", secret_key="api_key", reason="scheduled_rotation"
         )
 
         # Should not raise error
@@ -294,7 +270,7 @@ class TestAuditLogger:
             user_id="user123",
             resource="/api/admin/users",
             action="delete",
-            reason="insufficient_permissions"
+            reason="insufficient_permissions",
         )
 
         # Should not raise error
@@ -308,7 +284,7 @@ class TestAuditLogger:
             alert_type="brute_force_attempt",
             description="Multiple failed login attempts detected",
             severity=AuditSeverity.HIGH,
-            ip_address="192.168.1.100"
+            ip_address="192.168.1.100",
         )
 
         # Should not raise error
@@ -322,7 +298,7 @@ class TestAuditLogger:
             event_type=AuditEventType.SECURITY_ALERT,
             timestamp=datetime.utcnow(),
             severity=AuditSeverity.CRITICAL,
-            details={"alert": "critical_security_breach"}
+            details={"alert": "critical_security_breach"},
         )
 
         logger.log_event(event)
@@ -346,7 +322,7 @@ class TestGlobalAuditLoggerFunctions:
         event = AuditEvent(
             event_type=AuditEventType.LOGIN_SUCCESS,
             timestamp=datetime.utcnow(),
-            user_id="user123"
+            user_id="user123",
         )
 
         # Should not raise error
@@ -367,7 +343,7 @@ class TestAuditEventScenarios:
             username="alice",
             ip_address="192.168.1.50",
             user_agent="Mozilla/5.0",
-            mfa_used=True
+            mfa_used=True,
         )
 
         # Token is created
@@ -378,7 +354,7 @@ class TestAuditEventScenarios:
             username="alice",
             result="success",
             severity=AuditSeverity.LOW,
-            details={"token_type": "bearer", "expires_in": 3600}
+            details={"token_type": "bearer", "expires_in": 3600},
         )
         logger.log_event(event)
 
@@ -391,7 +367,7 @@ class TestAuditEventScenarios:
             username="alice",
             reason="Invalid credentials",
             ip_address="192.168.1.50",
-            attempt_count=3
+            attempt_count=3,
         )
 
     def test_account_lockout(self):
@@ -405,7 +381,7 @@ class TestAuditEventScenarios:
                 username="alice",
                 reason="Invalid password",
                 ip_address="192.168.1.50",
-                attempt_count=i + 1
+                attempt_count=i + 1,
             )
 
         # Account locked
@@ -416,7 +392,7 @@ class TestAuditEventScenarios:
             username="alice",
             result="success",
             severity=AuditSeverity.HIGH,
-            details={"reason": "too_many_failed_attempts"}
+            details={"reason": "too_many_failed_attempts"},
         )
         logger.log_event(event)
 
@@ -431,14 +407,14 @@ class TestAuditEventScenarios:
             action="update",
             reason="insufficient_role",
             current_role="user",
-            required_role="admin"
+            required_role="admin",
         )
 
         logger.log_security_alert(
             alert_type="privilege_escalation_attempt",
             description="User attempted to access admin endpoint",
             severity=AuditSeverity.HIGH,
-            user_id="user456"
+            user_id="user456",
         )
 
     def test_sensitive_data_access(self):
@@ -457,8 +433,8 @@ class TestAuditEventScenarios:
             details={
                 "data_type": "personal_information",
                 "record_count": 100,
-                "justification": "compliance_audit"
-            }
+                "justification": "compliance_audit",
+            },
         )
         logger.log_event(event)
 
@@ -479,9 +455,9 @@ class TestAuditEventScenarios:
                 "policy": "password_requirements",
                 "changes": {
                     "min_length": {"old": 8, "new": 12},
-                    "require_special_chars": {"old": False, "new": True}
-                }
-            }
+                    "require_special_chars": {"old": False, "new": True},
+                },
+            },
         )
         logger.log_event(event)
 
@@ -495,7 +471,7 @@ class TestAuditEventScenarios:
             user_id="user123",
             key_name="production-api-key",
             key_id="key-abc123",
-            scope="read_write"
+            scope="read_write",
         )
 
         # API key used
@@ -505,11 +481,7 @@ class TestAuditEventScenarios:
             user_id="user123",
             result="success",
             severity=AuditSeverity.LOW,
-            details={
-                "key_id": "key-abc123",
-                "endpoint": "/api/data",
-                "method": "POST"
-            }
+            details={"key_id": "key-abc123", "endpoint": "/api/data", "method": "POST"},
         )
         logger.log_event(event)
 
@@ -520,10 +492,7 @@ class TestAuditEventScenarios:
             user_id="user123",
             result="success",
             severity=AuditSeverity.MEDIUM,
-            details={
-                "key_id": "key-abc123",
-                "reason": "compromised"
-            }
+            details={"key_id": "key-abc123", "reason": "compromised"},
         )
         logger.log_event(event)
 
