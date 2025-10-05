@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 import json
 
-from copilot.context_manager import (
+from ai_engine.copilot.context_manager import (
     ConversationContextManager,
     ConversationSession,
     ConversationTurn,

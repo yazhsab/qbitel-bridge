@@ -308,6 +308,19 @@ class ConversationContextManager:
             "persistent_context": session.persistent_context.copy(),
         }
 
+        # Provide full conversation history for clients that need detailed turns
+        context["turns"] = [
+            {
+                "timestamp": turn.timestamp.isoformat(),
+                "user_query": turn.user_query,
+                "assistant_response": turn.assistant_response,
+                "query_type": turn.query_type,
+                "confidence": turn.confidence,
+                "context_used": turn.context_used or {},
+            }
+            for turn in session.turns
+        ]
+
         # Add recent conversation history (last 5 turns)
         recent_turns = session.turns[-5:] if session.turns else []
         context["recent_conversation"] = [
@@ -498,7 +511,7 @@ class ConversationContextManager:
 
         except Exception as e:
             self.logger.error(f"Error loading session from Redis: {e}")
-            return None
+            raise
 
     async def _save_session_to_redis(self, session: ConversationSession) -> None:
         """Save session to Redis."""

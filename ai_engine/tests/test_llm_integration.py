@@ -10,14 +10,14 @@ from datetime import datetime
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from dataclasses import asdict
 
-from llm.unified_llm_service import (
+from ai_engine.llm.unified_llm_service import (
     UnifiedLLMService,
     LLMProvider,
     LLMRequest,
     LLMResponse,
 )
-from core.config import Config
-from core.exceptions import LLMException
+from ai_engine.core.config import Config
+from ai_engine.core.exceptions import LLMException
 
 
 class TestLLMProvider:
@@ -170,7 +170,7 @@ class TestUnifiedLLMServiceInitialization:
 
         service = UnifiedLLMService(config)
 
-        with patch("llm.unified_llm_service.openai") as mock_openai:
+        with patch("ai_engine.llm.unified_llm_service.openai") as mock_openai:
             mock_openai.AsyncOpenAI = Mock()
             await service.initialize()
 
@@ -185,7 +185,7 @@ class TestUnifiedLLMServiceInitialization:
 
         service = UnifiedLLMService(config)
 
-        with patch("llm.unified_llm_service.AsyncAnthropic") as mock_anthropic:
+        with patch("ai_engine.llm.unified_llm_service.AsyncAnthropic") as mock_anthropic:
             mock_anthropic.return_value = AsyncMock()
             await service.initialize()
 
@@ -200,7 +200,7 @@ class TestUnifiedLLMServiceInitialization:
 
         service = UnifiedLLMService(config)
 
-        with patch("llm.unified_llm_service.ollama") as mock_ollama:
+        with patch("ai_engine.llm.unified_llm_service.ollama") as mock_ollama:
             mock_ollama.AsyncClient = Mock()
             await service.initialize()
 
@@ -405,9 +405,11 @@ class TestLLMServiceMetrics:
         request = LLMRequest(prompt="Test", feature_domain="test")
 
         with patch("time.time", side_effect=[0, 0.5]):
-            with patch("llm.unified_llm_service.LLM_REQUEST_COUNTER") as mock_counter:
+            with patch(
+                "ai_engine.llm.unified_llm_service.LLM_REQUEST_COUNTER"
+            ) as mock_counter:
                 with patch(
-                    "llm.unified_llm_service.LLM_TOKEN_USAGE"
+                    "ai_engine.llm.unified_llm_service.LLM_TOKEN_USAGE"
                 ) as mock_token_counter:
                     await service.generate(request)
 
