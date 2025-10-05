@@ -99,12 +99,42 @@ class ValidationRule:
     """Represents a validation rule."""
 
     name: str
-    description: str
-    validator_func: Callable[[bytes, Dict[str, Any]], List[ValidationIssue]]
+    description: str = ""
+    validator_func: Optional[Callable[[bytes, Dict[str, Any]], List[ValidationIssue]]] = None
     severity: ValidationSeverity = ValidationSeverity.ERROR
     enabled: bool = True
     protocol_specific: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
+
+    # Backward compatibility fields
+    rule_type: Optional[str] = None
+    pattern: Optional[bytes] = None
+    required: bool = False
+    custom_validator: Optional[Callable] = None
+
+    def __post_init__(self):
+        """Initialize validator_func from legacy fields if needed."""
+        if self.validator_func is None:
+            if self.rule_type == "regex" and self.pattern:
+                import re
+                regex = re.compile(self.pattern)
+                self.validator_func = lambda msg, ctx: [] if regex.search(msg) else [
+                    ValidationIssue(
+                        severity=self.severity,
+                        field=self.name,
+                        message=f"Pattern {self.pattern} not found",
+                        suggestion=None
+                    )
+                ]
+            elif self.rule_type == "custom" and self.custom_validator:
+                self.validator_func = lambda msg, ctx: [] if self.custom_validator(msg) else [
+                    ValidationIssue(
+                        severity=self.severity,
+                        field=self.name,
+                        message=f"Custom validation failed for {self.name}",
+                        suggestion=None
+                    )
+                ]
 
 
 class MessageValidator:

@@ -1041,6 +1041,9 @@ class StatisticalAnalyzer:
                     remaining_length = len(msg) - length_size
                     if declared_length == remaining_length:
                         confidence = 0.9  # High confidence for exact match
+                    else:
+                        # Lower confidence if lengths don't match exactly
+                        confidence = 0.5
                     boundary = FieldBoundary(
                         position=length_size,
                         confidence=confidence,

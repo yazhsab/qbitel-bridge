@@ -4,6 +4,7 @@ Comprehensive test suite for security automation functionality.
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 from datetime import datetime
 from unittest.mock import Mock, AsyncMock, patch
@@ -63,7 +64,7 @@ def mock_policy_engine():
     return Mock()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def security_orchestrator(
     mock_config, mock_llm_service, mock_alert_manager, mock_policy_engine
 ):

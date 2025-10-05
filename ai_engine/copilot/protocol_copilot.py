@@ -64,12 +64,26 @@ class CopilotResponse:
 
     response: str
     confidence: float
-    source_data: List[Dict[str, Any]]
-    processing_time: float
-    query_type: str
+    source_data: List[Dict[str, Any]] = None
+    processing_time: float = 0.0
+    query_type: str = "general"
     suggestions: List[str] = None
     metadata: Dict[str, Any] = None
     visualizations: List[Dict[str, Any]] = None
+    sources: List[Dict[str, Any]] = None  # Backward compatibility alias
+
+    def __post_init__(self):
+        """Initialize backward compatibility fields."""
+        # If sources is provided but source_data is not, use sources
+        if self.sources is not None and self.source_data is None:
+            self.source_data = self.sources
+        # If source_data is provided but sources is not, use source_data
+        elif self.source_data is not None and self.sources is None:
+            self.sources = self.source_data
+        # Ensure both are set to same value for backward compatibility
+        elif self.source_data is None and self.sources is None:
+            self.source_data = []
+            self.sources = []
 
 
 class ProtocolIntelligenceCopilot:

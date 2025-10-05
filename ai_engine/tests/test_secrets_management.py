@@ -237,8 +237,8 @@ class TestSecurityConfig:
 
     def test_jwt_secret_from_environment(self):
         """Test loading JWT secret from environment."""
-        # Use a strong secret that won't be auto-replaced
-        strong_jwt = "StrongJWTSecret12345Key98765"
+        # Use a strong value without weak patterns (no 'secret', 'key', 'password', etc.)
+        strong_jwt = "XyZ9mN4pQrS7tUvWaB2cDeF6gHiJ8kLmNoP"
         os.environ["CRONOS_AI_JWT_SECRET"] = strong_jwt
 
         config = SecurityConfig()
@@ -249,12 +249,12 @@ class TestSecurityConfig:
 
     def test_encryption_key_from_environment(self):
         """Test loading encryption key from environment."""
-        # Use a strong key that won't be auto-replaced
-        strong_key = "StrongEncryptKey12345Secure98765"
-        os.environ["CRONOS_AI_ENCRYPTION_KEY"] = strong_key
+        # Use a strong value without weak patterns (no 'secret', 'key', 'password', etc.)
+        strong_enc = "Ab1Cd2Ef3Gh4Ij5Kl6Mn7Op8Qr9St0Uv1Wx2Yz"
+        os.environ["CRONOS_AI_ENCRYPTION_KEY"] = strong_enc
 
         config = SecurityConfig()
-        assert config.encryption_key == strong_key
+        assert config.encryption_key == strong_enc
 
         # Cleanup
         del os.environ["CRONOS_AI_ENCRYPTION_KEY"]

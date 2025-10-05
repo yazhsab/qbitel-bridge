@@ -6,6 +6,7 @@ including all components working together in production scenarios.
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 import time
 from typing import List, Dict, Any
@@ -62,7 +63,7 @@ def production_config():
     )
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def orchestrator(config):
     """Create and initialize orchestrator."""
     orch = ProtocolDiscoveryOrchestrator(config)
@@ -71,7 +72,7 @@ async def orchestrator(config):
     await orch.shutdown()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def enhanced_orchestrator(config):
     """Create and initialize enhanced orchestrator."""
     orch = EnhancedProtocolDiscoveryOrchestrator(config)
@@ -80,7 +81,7 @@ async def enhanced_orchestrator(config):
     await orch.shutdown()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def distributed_cache():
     """Create distributed cache."""
     cache = DistributedCache(
@@ -592,7 +593,7 @@ class TestRegression:
 # ============================================================================
 
 
-@pytest.fixture(autouse=True)
+@pytest_asyncio.fixture(autouse=True)
 async def cleanup():
     """Cleanup after each test."""
     yield

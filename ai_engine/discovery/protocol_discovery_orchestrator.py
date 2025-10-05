@@ -82,6 +82,22 @@ class DiscoveryResult:
     phases_completed: List[DiscoveryPhase] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
+    # Backward compatibility properties
+    @property
+    def success(self) -> bool:
+        """Check if discovery was successful."""
+        return self.confidence >= 0.5 and self.protocol_type != "unknown"
+
+    @property
+    def discovered_protocols(self) -> List[Dict[str, Any]]:
+        """Get list of discovered protocols for backward compatibility."""
+        return [{
+            "protocol_type": self.protocol_type,
+            "confidence": self.confidence,
+            "grammar": self.grammar,
+            "parser": self.parser
+        }]
+
 
 @dataclass
 class ProtocolProfile:

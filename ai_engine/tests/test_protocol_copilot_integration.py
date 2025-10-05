@@ -4,6 +4,7 @@ Comprehensive test suite for LLM-enhanced protocol discovery and analysis.
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 import json
 import time
@@ -32,7 +33,7 @@ from ..api.schemas import QueryType
 class TestProtocolCopilotCore:
     """Test core Protocol Intelligence Copilot functionality."""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def mock_config(self):
         """Create mock configuration for testing."""
         config = Mock(spec=Config)
@@ -52,7 +53,7 @@ class TestProtocolCopilotCore:
         config.security.jwt_secret = "test-secret"
         return config
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def mock_llm_service(self):
         """Create mock LLM service."""
         service = Mock(spec=UnifiedLLMService)
@@ -75,7 +76,7 @@ class TestProtocolCopilotCore:
         )
         return service
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def mock_rag_engine(self):
         """Create mock RAG engine."""
         engine = Mock(spec=RAGEngine)
@@ -92,7 +93,7 @@ class TestProtocolCopilotCore:
         engine.get_health_status = Mock(return_value="healthy")
         return engine
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def protocol_copilot(self, mock_config, mock_llm_service, mock_rag_engine):
         """Create Protocol Intelligence Copilot instance."""
         with patch(
@@ -182,7 +183,7 @@ class TestProtocolCopilotCore:
 class TestEnhancedProtocolDiscovery:
     """Test Enhanced Protocol Discovery Orchestrator."""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def mock_config(self):
         """Create mock configuration."""
         config = Mock(spec=Config)
@@ -190,7 +191,7 @@ class TestEnhancedProtocolDiscovery:
         config.inference.num_workers = 4
         return config
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def mock_copilot(self):
         """Create mock Protocol Intelligence Copilot."""
         copilot = Mock(spec=ProtocolIntelligenceCopilot)
@@ -215,7 +216,7 @@ class TestEnhancedProtocolDiscovery:
         )
         return copilot
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def enhanced_orchestrator(self, mock_config, mock_copilot):
         """Create Enhanced Protocol Discovery Orchestrator."""
         # Mock all the required components
@@ -550,6 +551,10 @@ class TestSecurityIntegration:
     async def test_authentication_service(self):
         """Test authentication service functionality."""
         from ..api.auth import AuthenticationService
+        import os
+
+        # Set a valid JWT secret for testing (avoid auto-generation issues)
+        os.environ["CRONOS_AI_JWT_SECRET"] = "Zx9Cv8Bn7Vm6An5Sd4Qf3Wg2Rt1Yh0Uj"
 
         with patch("redis.asyncio.Redis") as mock_redis:
             mock_redis_instance = AsyncMock()
@@ -573,6 +578,9 @@ class TestSecurityIntegration:
             payload = await auth_service.verify_token(token)
             assert payload["user_id"] == "test_user"
             assert payload["role"] == "admin"
+
+            # Cleanup
+            del os.environ["CRONOS_AI_JWT_SECRET"]
 
 
 class TestPerformanceAndResilience:

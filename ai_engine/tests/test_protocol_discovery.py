@@ -34,7 +34,7 @@ from ai_engine.discovery.protocol_discovery_orchestrator import (
     ProtocolDiscoveryOrchestrator,
     DiscoveryResult,
 )
-from ai_engine.core.error_handling import ErrorHandler, CircuitBreaker, CircuitBreakerConfig, RetryManager
+from ai_engine.core.error_handling import ErrorHandler, CircuitBreaker, CircuitBreakerConfig, CircuitBreakerState, RetryManager
 from ai_engine.core.structured_logging import StructuredLogger
 from ai_engine.core.performance_optimizer import PerformanceOptimizer, ComputationCache
 from ai_engine.monitoring.enterprise_metrics import EnterpriseMetrics, MetricsCollector
@@ -598,7 +598,7 @@ class TestErrorHandling:
     async def test_circuit_breaker_states(self, circuit_breaker):
         """Test circuit breaker state transitions."""
         # Initially closed
-        assert circuit_breaker.state == "closed"
+        assert circuit_breaker.state == CircuitBreakerState.CLOSED
 
         # Simulate failures
         for i in range(3):
@@ -608,18 +608,18 @@ class TestErrorHandling:
                 )  # Will raise ZeroDivisionError
 
         # Should be open now
-        assert circuit_breaker.state == "open"
+        assert circuit_breaker.state == CircuitBreakerState.OPEN
 
         # Wait for recovery timeout
         await asyncio.sleep(1.1)
 
         # Should be half-open
-        assert circuit_breaker.state == "half_open"
+        assert circuit_breaker.state == CircuitBreakerState.HALF_OPEN
 
         # Successful call should close it
         result = await circuit_breaker.call(lambda: "success")
         assert result == "success"
-        assert circuit_breaker.state == "closed"
+        assert circuit_breaker.state == CircuitBreakerState.CLOSED
 
     @pytest.mark.asyncio
     async def test_retry_manager(self):
@@ -715,11 +715,11 @@ class TestPerformanceOptimizer:
 class TestIntegration:
     """Integration tests for the complete system."""
 
-    @pytest.fixture
-    async def full_system(self):
+    @pytest_asyncio.fixture
+    async def full_system(self, test_config):
         """Setup complete protocol discovery system."""
         # Initialize all components
-        orchestrator = ProtocolDiscoveryOrchestrator()
+        orchestrator = ProtocolDiscoveryOrchestrator(test_config)
         optimizer = PerformanceOptimizer()
         metrics = EnterpriseMetrics()
 
@@ -843,7 +843,7 @@ class TestPerformance:
     @pytest.mark.performance
     async def test_throughput_benchmark(self):
         """Benchmark overall system throughput."""
-        orchestrator = ProtocolDiscoveryOrchestrator()
+        orchestrator = ProtocolDiscoveryOrchestrator(Config())
 
         # Generate test data
         test_messages = []
@@ -876,7 +876,7 @@ class TestPerformance:
 
         tracemalloc.start()
 
-        orchestrator = ProtocolDiscoveryOrchestrator()
+        orchestrator = ProtocolDiscoveryOrchestrator(Config())
 
         # Generate large dataset
         large_dataset = [os.urandom(1000) for _ in range(1000)]
