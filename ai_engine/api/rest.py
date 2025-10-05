@@ -4,6 +4,8 @@ Extended FastAPI implementation with LLM-enhanced protocol analysis capabilities
 """
 
 import asyncio
+import base64
+import binascii
 import logging
 import time
 import uuid
@@ -30,6 +32,21 @@ from ..copilot.protocol_copilot import (
     ProtocolIntelligenceCopilot,
 )
 from ..llm.rag_engine import RAGDocument
+from ..llm.unified_llm_service import (
+    initialize_llm_service,
+    shutdown_llm_service,
+)
+from ..llm.translation_studio import (
+    initialize_translation_studio,
+    shutdown_translation_studio,
+)
+from ..monitoring.alerts import initialize_alert_manager, shutdown_alert_manager
+from ..monitoring.metrics import MetricsCollector
+from ..llm.security_orchestrator import (
+    initialize_security_orchestrator,
+    shutdown_security_orchestrator,
+)
+from ..policy.policy_engine import get_policy_engine
 from .copilot_endpoints import router as copilot_router
 from .translation_studio_endpoints import router as translation_router
 from .security_orchestrator_endpoints import router as security_router
@@ -119,6 +136,8 @@ def create_app(config: Config = None) -> FastAPI:
         health_data = {
             "status": "healthy",
             "timestamp": datetime.now().isoformat(),
+            "version": app.version,
+            "checks": [],
             "services": {
                 "ai_engine": "unknown",
                 "protocol_copilot": "unknown",
@@ -131,8 +150,22 @@ def create_app(config: Config = None) -> FastAPI:
             # Check AI Engine
             if _ai_engine:
                 health_data["services"]["ai_engine"] = "healthy"
+                health_data["checks"].append(
+                    {
+                        "component": "ai_engine",
+                        "status": "healthy",
+                        "details": "Engine initialized",
+                    }
+                )
             else:
                 health_data["services"]["ai_engine"] = "not_initialized"
+                health_data["checks"].append(
+                    {
+                        "component": "ai_engine",
+                        "status": "unhealthy",
+                        "details": "Engine not initialized",
+                    }
+                )
 
             # Check Protocol Copilot
             if _protocol_copilot:
@@ -146,10 +179,37 @@ def create_app(config: Config = None) -> FastAPI:
                 )
             else:
                 health_data["services"]["protocol_copilot"] = "not_initialized"
+                health_data["checks"].append(
+                    {
+                        "component": "protocol_copilot",
+                        "status": "degraded",
+                        "details": "Copilot not initialized",
+                    }
+                )
+
+            if _protocol_copilot and _protocol_copilot.get_health_status():
+                health_data["checks"].append(
+                    {
+                        "component": "llm_service",
+                        "status": "healthy",
+                        "details": "LLM service available",
+                    }
+                )
+            else:
+                health_data["checks"].append(
+                    {
+                        "component": "llm_service",
+                        "status": "unknown",
+                        "details": "LLM service not initialized",
+                    }
+                )
 
         except Exception as e:
             health_data["status"] = "degraded"
             health_data["error"] = str(e)
+
+        if any(check["status"] in {"unhealthy", "degraded"} for check in health_data["checks"]):
+            health_data["status"] = "degraded"
 
         return health_data
 
@@ -163,15 +223,24 @@ def create_app(config: Config = None) -> FastAPI:
         """Enhanced protocol discovery with LLM analysis."""
         global _ai_engine, _protocol_copilot
 
-        if not _ai_engine:
-            raise HTTPException(status_code=503, detail="AI Engine not initialized")
-
         try:
+            packet_data = request.packet_data
+            try:
+                if isinstance(packet_data, str):
+                    packet_data = base64.b64decode(packet_data.encode("utf-8"), validate=True)
+                else:
+                    packet_data = base64.b64decode(packet_data, validate=True)
+            except (ValueError, binascii.Error):
+                raise HTTPException(
+                    status_code=422, detail="Invalid base64 packet data"
+                )
+
+            if not _ai_engine:
+                raise HTTPException(status_code=503, detail="AI Engine not initialized")
+
             start_time = time.time()
 
-            result = await _ai_engine.discover_protocol(
-                request.packet_data, request.metadata
-            )
+            result = await _ai_engine.discover_protocol(packet_data, request.metadata)
 
             processing_time = result.get("processing_time")
             if processing_time is None:
@@ -187,7 +256,7 @@ def create_app(config: Config = None) -> FastAPI:
                         query=f"Analyze this {result['protocol_type']} protocol data",
                         user_id=current_user.get("user_id", "system"),
                         session_id=request.session_id or "discovery_session",
-                        packet_data=request.packet_data,
+                        packet_data=packet_data,
                     )
 
                     copilot_response = await _protocol_copilot.process_query(query)
@@ -221,6 +290,8 @@ def create_app(config: Config = None) -> FastAPI:
 
             return enhanced_result
 
+        except HTTPException:
+            raise
         except Exception as e:
             logger.error(f"Enhanced protocol discovery failed: {e}")
             raise HTTPException(status_code=500, detail=str(e))
@@ -307,26 +378,17 @@ def create_app(config: Config = None) -> FastAPI:
             await _ai_engine.initialize()
 
             # Initialize LLM Service and set as global singleton
-            from ..llm.unified_llm_service import initialize_llm_service
-
             llm_service = await initialize_llm_service(config)
 
             # Initialize Protocol Copilot
             _protocol_copilot = await create_protocol_copilot()
 
             # Initialize Translation Studio
-            from ..llm.translation_studio import initialize_translation_studio
-            from ..monitoring.metrics import MetricsCollector
-
             _metrics_collector = MetricsCollector(config)
             await _metrics_collector.start()  # Start metrics collection
             await initialize_translation_studio(config, llm_service, _metrics_collector)
 
             # Initialize Security Orchestrator
-            from ..llm.security_orchestrator import initialize_security_orchestrator
-            from ..monitoring.alerts import initialize_alert_manager
-            from ..policy.policy_engine import get_policy_engine
-
             alert_manager = await initialize_alert_manager(config)
             policy_engine = get_policy_engine()
             await initialize_security_orchestrator(
@@ -348,18 +410,12 @@ def create_app(config: Config = None) -> FastAPI:
             logger.info("Shutting down CRONOS AI Engine and all services...")
 
             # Shutdown Translation Studio
-            from ..llm.translation_studio import shutdown_translation_studio
-
             await shutdown_translation_studio()
 
             # Shutdown Security Orchestrator
-            from ..llm.security_orchestrator import shutdown_security_orchestrator
-
             await shutdown_security_orchestrator()
 
             # Shutdown Alert Manager
-            from ..monitoring.alerts import shutdown_alert_manager
-
             await shutdown_alert_manager()
 
             # Shutdown Protocol Copilot
@@ -367,8 +423,6 @@ def create_app(config: Config = None) -> FastAPI:
                 await _protocol_copilot.shutdown()
 
             # Shutdown LLM Service using proper lifecycle management
-            from ..llm.unified_llm_service import shutdown_llm_service
-
             await shutdown_llm_service()
 
             # Shutdown Metrics Collector

@@ -14,6 +14,8 @@ from dataclasses import asdict
 from datetime import datetime, timedelta
 import hashlib
 import pickle
+import types
+import sys
 
 from ..core.config import Config
 from ..core.exceptions import CronosAIException
@@ -27,6 +29,16 @@ class IntegrationException(CronosAIException):
     """Integration-specific exception."""
 
     pass
+
+
+try:  # pragma: no cover - optional dependency
+    import asyncpg  # type: ignore
+except ImportError:  # pragma: no cover
+    async def _missing_create_pool(*args, **kwargs):
+        raise ImportError("asyncpg library required for TimescaleDB integration")
+
+    asyncpg = types.SimpleNamespace(create_pool=_missing_create_pool)
+    sys.modules.setdefault("asyncpg", asyncpg)
 
 
 class TimescaleComplianceIntegration:
@@ -508,7 +520,41 @@ class RedisComplianceCache:
             key = f"{self.key_prefix}assessment:{framework}"
 
             # Serialize assessment
-            serialized_data = pickle.dumps(asdict(assessment))
+            try:
+                assessment_dict = asdict(assessment)
+            except TypeError:
+                assessment_dict = {
+                    "framework": getattr(assessment, "framework", framework),
+                    "version": getattr(assessment, "version", "unknown"),
+                    "assessment_date": getattr(
+                        assessment,
+                        "assessment_date",
+                        datetime.utcnow(),
+                    ).isoformat(),
+                    "overall_compliance_score": getattr(
+                        assessment, "overall_compliance_score", 0.0
+                    ),
+                    "risk_score": getattr(assessment, "risk_score", 0.0),
+                    "compliant_requirements": getattr(
+                        assessment, "compliant_requirements", 0
+                    ),
+                    "non_compliant_requirements": getattr(
+                        assessment, "non_compliant_requirements", 0
+                    ),
+                    "partially_compliant_requirements": getattr(
+                        assessment, "partially_compliant_requirements", 0
+                    ),
+                    "not_assessed_requirements": getattr(
+                        assessment, "not_assessed_requirements", 0
+                    ),
+                    "next_assessment_due": getattr(
+                        assessment,
+                        "next_assessment_due",
+                        datetime.utcnow() + timedelta(days=90),
+                    ).isoformat(),
+                }
+
+            serialized_data = pickle.dumps(assessment_dict)
 
             # Store with TTL
             await self.redis_client.setex(
@@ -519,9 +565,11 @@ class RedisComplianceCache:
             metadata_key = f"{self.key_prefix}meta:{framework}"
             metadata = {
                 "framework": framework,
-                "score": assessment.overall_compliance_score,
-                "risk": assessment.risk_score,
-                "date": assessment.assessment_date.isoformat(),
+                "score": getattr(assessment, "overall_compliance_score", 0.0),
+                "risk": getattr(assessment, "risk_score", 0.0),
+                "date": getattr(
+                    assessment, "assessment_date", datetime.utcnow()
+                ).isoformat(),
                 "cached_at": datetime.utcnow().isoformat(),
             }
 

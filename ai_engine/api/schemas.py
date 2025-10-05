@@ -36,6 +36,33 @@ class MessageRole(str, Enum):
     SYSTEM = "system"
 
 
+class DataFormat(str, Enum):
+    """Supported payload formats."""
+
+    RAW = "raw"
+    HEX = "hex"
+    BASE64 = "base64"
+    TEXT = "text"
+
+
+class ProtocolType(str, Enum):
+    """Common protocol types."""
+
+    HTTP = "http"
+    HTTPS = "https"
+    MODBUS = "modbus"
+    MQTT = "mqtt"
+    CUSTOM = "custom"
+
+
+class DetectionLevel(str, Enum):
+    """Detection sensitivity levels."""
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
 # Base schemas
 class BaseRequest(BaseModel):
     """Base request model with common fields."""
@@ -223,6 +250,43 @@ class FieldDetectionResponse(BaseResponse):
     processing_time: float = Field(..., ge=0, description="Processing time in seconds")
     confidence_scores: Optional[Dict[str, float]] = Field(
         None, description="Per-field confidence scores"
+    )
+
+
+class AnomalyDetectionRequest(BaseRequest):
+    """Anomaly detection request payload."""
+
+    packet_data: bytes = Field(..., description="Raw packet data for anomaly analysis")
+    protocol_type: Optional[str] = Field(
+        None, description="Optional protocol hint for improved analysis"
+    )
+    sensitivity: float = Field(
+        0.5,
+        ge=0.0,
+        le=1.0,
+        description="Detection sensitivity threshold between 0 and 1",
+    )
+    include_explanations: bool = Field(
+        False, description="Include model explanations for detected anomalies"
+    )
+    session_id: Optional[str] = Field(None, description="Session identifier")
+
+    class Config:
+        json_encoders = {bytes: lambda v: v.hex() if v else None}
+
+
+class AnomalyDetectionResponse(BaseResponse):
+    """Anomaly detection response payload."""
+
+    anomalies: List[Dict[str, Any]] = Field(
+        default_factory=list, description="Detected anomalies and metadata"
+    )
+    overall_score: float = Field(
+        0.0, ge=0.0, le=1.0, description="Overall anomaly score"
+    )
+    severity: Optional[str] = Field(None, description="Overall severity classification")
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict, description="Additional analysis metadata"
     )
 
 

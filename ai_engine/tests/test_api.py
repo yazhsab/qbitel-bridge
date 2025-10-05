@@ -5,6 +5,7 @@ This module contains tests for REST and gRPC API endpoints.
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 from contextlib import ExitStack
 import json
@@ -30,45 +31,51 @@ from ai_engine.core.config import Config
 from . import TestConfig
 
 
+@pytest.fixture
+def config():
+    """Create test configuration."""
+    cfg = Config()
+    cfg.model_path = "test_models"
+    cfg.data_path = "test_data"
+    cfg.device = "cpu"
+    return cfg
+
+
+@pytest.fixture
+def app(config):
+    """Create test FastAPI app."""
+    application = create_app(config)
+    application.router.on_startup.clear()
+    application.router.on_shutdown.clear()
+    return application
+
+
+@pytest.fixture
+def client(app):
+    """Create test client."""
+    return TestClient(app)
+
+
+@pytest.fixture
+def auth_headers():
+    """Create authentication headers."""
+    api_key = get_api_key()
+    return {"Authorization": f"Bearer {api_key}"}
+
+
+@pytest.fixture
+def sample_data():
+    """Create sample request data."""
+    http_data = b"GET /api/v1/users HTTP/1.1\r\nHost: example.com\r\n\r\n"
+    return {
+        "base64_http": base64.b64encode(http_data).decode("utf-8"),
+        "hex_modbus": "0103000000024C0B",
+        "text_data": "Hello World",
+    }
+
+
 class TestRESTAPI:
     """Test cases for REST API endpoints."""
-
-    @pytest.fixture
-    def config(self):
-        """Create test configuration."""
-        config = Config()
-        config.model_path = "test_models"
-        config.data_path = "test_data"
-        config.device = "cpu"
-        return config
-
-    @pytest.fixture
-    def app(self, config):
-        """Create test FastAPI app."""
-        return create_app(config)
-
-    @pytest.fixture
-    def client(self, app):
-        """Create test client."""
-        app.router.on_startup.clear()
-        app.router.on_shutdown.clear()
-        return TestClient(app)
-
-    @pytest.fixture
-    def auth_headers(self):
-        """Create authentication headers."""
-        api_key = get_api_key()
-        return {"Authorization": f"Bearer {api_key}"}
-
-    @pytest.fixture
-    def sample_data(self):
-        """Create sample request data."""
-        http_data = b"GET /api/v1/users HTTP/1.1\r\nHost: example.com\r\n\r\n"
-        return {
-            "base64_http": base64.b64encode(http_data).decode("utf-8"),
-            "hex_modbus": "0103000000024C0B",
-            "text_data": "Hello World",
-        }
 
     def test_health_check(self, client):
         """Test health check endpoint."""
@@ -318,7 +325,7 @@ class TestGRPCAPI:
         config.grpc_port = 50052  # Use different port for testing
         return config
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def grpc_service(self, config):
         """Create gRPC service for testing."""
         service = AIEngineGRPCService(config)

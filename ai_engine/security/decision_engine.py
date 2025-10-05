@@ -38,24 +38,45 @@ from .threat_analyzer import ThreatAnalyzer
 
 from prometheus_client import Counter, Histogram, Gauge
 
+
+_METRIC_CACHE = {}
+
+
+def _get_metric(metric_cls, name: str, *args, **kwargs):
+    """Return cached Prometheus metric or create an unregistered instance."""
+
+    if name in _METRIC_CACHE:
+        return _METRIC_CACHE[name]
+
+    kwargs = dict(kwargs)
+    kwargs.setdefault("registry", None)
+    metric = metric_cls(name, *args, **kwargs)
+    _METRIC_CACHE[name] = metric
+    return metric
+
 # Prometheus metrics
-DECISION_COUNTER = Counter(
+DECISION_COUNTER = _get_metric(
+    Counter,
     "cronos_security_decisions_total",
     "Security decisions made",
     ["decision_type", "confidence_level"],
 )
-DECISION_DURATION = Histogram(
+DECISION_DURATION = _get_metric(
+    Histogram,
     "cronos_security_decision_duration_seconds", "Decision making duration"
 )
-RESPONSE_EXECUTION_COUNTER = Counter(
+RESPONSE_EXECUTION_COUNTER = _get_metric(
+    Counter,
     "cronos_security_responses_total",
     "Security responses executed",
     ["response_type", "status"],
 )
-AUTO_EXECUTE_GAUGE = Gauge(
+AUTO_EXECUTE_GAUGE = _get_metric(
+    Gauge,
     "cronos_security_auto_executions", "Autonomous executions per hour"
 )
-HUMAN_ESCALATIONS_GAUGE = Gauge(
+HUMAN_ESCALATIONS_GAUGE = _get_metric(
+    Gauge,
     "cronos_security_human_escalations", "Human escalations per hour"
 )
 

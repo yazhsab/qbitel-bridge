@@ -3,6 +3,7 @@ CRONOS AI Engine - API Middleware
 Enterprise-grade middleware for security, monitoring, and performance.
 """
 
+import asyncio
 import time
 import logging
 import uuid
@@ -159,7 +160,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             response.headers["Content-Security-Policy"] = "; ".join(csp_directives)
 
         # Remove server header for security
-        response.headers.pop("Server", None)
+        try:
+            del response.headers["server"]
+        except KeyError:
+            pass
 
         return response
 
@@ -241,7 +245,7 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
             )
 
 
-async def setup_middleware(app: FastAPI, config: Config):
+def setup_middleware(app: FastAPI, config: Config):
     """Setup all middleware for the FastAPI application."""
 
     # Connection counter (outermost)
@@ -258,7 +262,7 @@ async def setup_middleware(app: FastAPI, config: Config):
 
     # Advanced rate limiting (if enabled)
     rate_limit_config = config.__dict__.get("rate_limiting", {})
-    if rate_limit_config.get("enabled", True):
+    if rate_limit_config.get("enabled", False):
         try:
             from .rate_limiter import (
                 get_rate_limiter,
@@ -278,7 +282,15 @@ async def setup_middleware(app: FastAPI, config: Config):
 
             # Initialize rate limiter
             redis_url = f"redis://{_get_config_value(config.redis, 'host', 'localhost')}:{_get_config_value(config.redis, 'port', 6379)}/0"
-            rate_limiter = await get_rate_limiter(redis_url, rl_config)
+            loop = asyncio.new_event_loop()
+            try:
+                asyncio.set_event_loop(loop)
+                rate_limiter = loop.run_until_complete(
+                    get_rate_limiter(redis_url, rl_config)
+                )
+            finally:
+                asyncio.set_event_loop(None)
+                loop.close()
 
             app.add_middleware(
                 AdvancedRateLimitMiddleware, rate_limiter=rate_limiter, config=rl_config
@@ -293,6 +305,12 @@ async def setup_middleware(app: FastAPI, config: Config):
                 RateLimitingMiddleware,
                 requests_per_minute=rate_limit_config.get("default_limit", 100),
             )
+
+    else:
+        app.add_middleware(
+            RateLimitingMiddleware,
+            requests_per_minute=rate_limit_config.get("default_limit", 100),
+        )
 
     # Request logging and metrics
     app.add_middleware(RequestLoggingMiddleware)

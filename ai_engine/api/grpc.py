@@ -292,11 +292,14 @@ class AIEngineGRPCService:
 
             # Decode baseline data if provided
             baseline_bytes = None
-            if hasattr(request, "baseline_data") and request.baseline_data:
+            baseline_attr = getattr(request, "baseline_data", None)
+            if isinstance(baseline_attr, (list, tuple)) and baseline_attr:
                 baseline_bytes = [
                     self._decode_data(baseline, request.data_format)
-                    for baseline in request.baseline_data
+                    for baseline in baseline_attr
                 ]
+            elif isinstance(baseline_attr, (str, bytes)) and baseline_attr:
+                baseline_bytes = [self._decode_data(baseline_attr, request.data_format)]
 
             context = {
                 "protocol_context": getattr(request, "protocol_context", None),

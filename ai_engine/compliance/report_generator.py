@@ -753,10 +753,17 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
     
     <div class="footer">
         <p><em>This report was generated automatically by CRONOS AI Compliance Reporter on {{ content.metadata.generation_date }}.</em></p>
-    </div>
+        </div>
 </body>
 </html>
         """
+
+        metadata = content.setdefault("metadata", {})
+        metadata.setdefault("framework", "Unknown Framework")
+        metadata.setdefault("assessment_date", datetime.utcnow().isoformat())
+        metadata.setdefault("generation_date", datetime.utcnow().isoformat())
+        metadata.setdefault("compliance_score", 0.0)
+        metadata.setdefault("risk_score", 0.0)
 
         jinja_template = jinja2.Template(html_template)
         return jinja_template.render(content=content)

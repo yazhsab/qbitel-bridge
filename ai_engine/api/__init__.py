@@ -4,7 +4,7 @@ CRONOS AI Engine - API Module
 This module provides REST and gRPC API interfaces for the AI Engine.
 """
 
-from .rest import app as rest_app, AIEngineAPI, create_app, run_server
+from .rest import AIEngineAPI, create_app, create_ai_engine_api
 from .grpc import AIEngineGRPCService, GRPCServer, AIEngineGRPCClient, run_grpc_server
 from .schemas import (
     ProtocolDiscoveryRequest,
@@ -13,21 +13,9 @@ from .schemas import (
     FieldDetectionResponse,
     AnomalyDetectionRequest,
     AnomalyDetectionResponse,
-    ModelRegistrationRequest,
-    ModelRegistrationResponse,
-    EngineStatusResponse,
-    ErrorResponse,
-    BatchProcessingRequest,
-    BatchProcessingResponse,
-    TrainingRequest,
-    TrainingResponse,
-    HealthCheckResponse,
-    PredictionRequest,
-    PredictionResponse,
     DataFormat,
     ProtocolType,
     DetectionLevel,
-    ModelType,
 )
 from .auth import (
     get_current_user,
@@ -40,21 +28,19 @@ from .auth import (
     logout,
 )
 from .middleware import (
-    RateLimitMiddleware,
-    LoggingMiddleware,
-    SecurityMiddleware,
-    MetricsMiddleware,
-    CorsMiddleware,
-    CompressionMiddleware,
+    RequestLoggingMiddleware,
+    SecurityHeadersMiddleware,
+    RateLimitingMiddleware,
+    ConnectionCounterMiddleware,
+    ErrorHandlingMiddleware,
     setup_middleware,
 )
 
 __all__ = [
     # REST API
-    "rest_app",
     "AIEngineAPI",
     "create_app",
-    "run_server",
+    "create_ai_engine_api",
     # gRPC API
     "AIEngineGRPCService",
     "GRPCServer",
@@ -67,21 +53,9 @@ __all__ = [
     "FieldDetectionResponse",
     "AnomalyDetectionRequest",
     "AnomalyDetectionResponse",
-    "ModelRegistrationRequest",
-    "ModelRegistrationResponse",
-    "EngineStatusResponse",
-    "ErrorResponse",
-    "BatchProcessingRequest",
-    "BatchProcessingResponse",
-    "TrainingRequest",
-    "TrainingResponse",
-    "HealthCheckResponse",
-    "PredictionRequest",
-    "PredictionResponse",
     "DataFormat",
     "ProtocolType",
     "DetectionLevel",
-    "ModelType",
     # Authentication
     "get_current_user",
     "get_api_key",
@@ -92,11 +66,10 @@ __all__ = [
     "refresh_access_token",
     "logout",
     # Middleware
-    "RateLimitMiddleware",
-    "LoggingMiddleware",
-    "SecurityMiddleware",
-    "MetricsMiddleware",
-    "CorsMiddleware",
-    "CompressionMiddleware",
+    "RequestLoggingMiddleware",
+    "SecurityHeadersMiddleware",
+    "RateLimitingMiddleware",
+    "ConnectionCounterMiddleware",
+    "ErrorHandlingMiddleware",
     "setup_middleware",
 ]

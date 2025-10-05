@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 _api_key: Optional[str] = None
 
 # Security configuration
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -338,6 +338,9 @@ async def verify_token(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> Dict[str, Any]:
     """Verify JWT token from Authorization header."""
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
     try:
         token = credentials.credentials
 
@@ -565,7 +568,7 @@ def initialize_auth(config: Optional[Any] = None) -> str:
             )
 
         # For development, generate a temporary key and warn
-        _api_key = secrets.token_urlsafe(32)
+        _api_key = f"cronos_ai_{secrets.token_urlsafe(24)}"
         logger.warning(
             "No API key configured. Generated temporary key for development. "
             "Set CRONOS_AI_API_KEY environment variable for production."

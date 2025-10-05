@@ -278,6 +278,110 @@ class RedisRateLimiter:
             await self.redis_client.close()
 
 
+class RateLimiter:
+    """Simplified rate limiter facade used in integration tests."""
+
+    def __init__(
+        self,
+        config,
+        redis_client: Optional[redis.Redis] = None,
+        rate_config: Optional[RateLimitConfig] = None,
+    ) -> None:
+        self.config = config
+        self.redis_client = redis_client
+        self.rate_config = rate_config or RateLimitConfig()
+        self.logger = logging.getLogger(__name__)
+        self._owns_client = False
+        self._lock = asyncio.Lock()
+
+        security_cfg = getattr(config, "security", None)
+        if security_cfg is not None:
+            rpm = getattr(security_cfg, "rate_limit_per_minute", None)
+            if isinstance(rpm, int) and rpm > 0:
+                self.rate_config.requests_per_minute = rpm
+
+    async def initialize(self) -> None:
+        """Ensure a Redis client is ready for use."""
+
+        if self.redis_client is not None:
+            return
+
+        try:
+            self.redis_client = await redis.from_url(
+                "redis://localhost:6379/0", encoding="utf-8", decode_responses=True
+            )
+            self._owns_client = True
+            await self.redis_client.ping()
+        except Exception as exc:  # noqa: BLE001 - fail open intentionally
+            self.logger.warning(
+                "Rate limiter Redis initialization failed: %s", exc
+            )
+            self.redis_client = None
+
+    async def shutdown(self) -> None:
+        """Shutdown the rate limiter and release resources."""
+
+        if self._owns_client and self.redis_client is not None:
+            try:
+                await self.redis_client.close()
+            except Exception:  # noqa: BLE001 - best effort close
+                pass
+            finally:
+                self.redis_client = None
+                self._owns_client = False
+
+    async def check_rate_limit(self, identifier: str) -> bool:
+        """Apply a simple fixed-window rate limit."""
+
+        if not self.redis_client:
+            return True
+
+        key = self._build_key(identifier)
+
+        async with self._lock:
+            try:
+                current = await self._get_count(key)
+                if current >= self.rate_config.requests_per_minute:
+                    return False
+
+                await self.redis_client.incr(key)
+                await self.redis_client.expire(key, 60)
+            except Exception as exc:  # noqa: BLE001
+                self.logger.warning(
+                    "Rate limiting failed for %s: %s. Allowing request.", identifier, exc
+                )
+                return True
+
+        return True
+
+    async def reset_rate_limit(self, identifier: str) -> None:
+        """Reset rate limit counters for the identifier."""
+
+        if not self.redis_client:
+            return
+
+        try:
+            await self.redis_client.delete(self._build_key(identifier))
+        except Exception as exc:  # noqa: BLE001
+            self.logger.warning(
+                "Failed to reset rate limit for %s: %s", identifier, exc
+            )
+
+    async def _get_count(self, key: str) -> int:
+        value = await self.redis_client.get(key)
+        if value is None:
+            return 0
+        if isinstance(value, bytes):
+            value = value.decode("utf-8")
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return 0
+
+    @staticmethod
+    def _build_key(identifier: str) -> str:
+        return f"rate_limit:{identifier}"
+
 class AdvancedRateLimitMiddleware(BaseHTTPMiddleware):
     """
     Advanced rate limiting middleware with multiple strategies.

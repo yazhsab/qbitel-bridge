@@ -33,6 +33,9 @@ from .assessment_engine import (
     ComplianceGap,
     ComplianceRecommendation,
     RiskLevel,
+    ComplianceStatus,
+    SystemStateAnalyzer,
+    ComplianceDataCollector,
 )
 
 from .report_generator import (
@@ -43,18 +46,6 @@ from .report_generator import (
 )
 
 from .audit_trail import AuditTrailManager, AuditEvent, BlockchainAuditTrail
-
-from .data_collector import (
-    ComplianceDataCollector,
-    SystemStateAnalyzer,
-    ComplianceDataPoint,
-)
-
-from .regulatory_monitor import (
-    RegulatoryUpdateMonitor,
-    RegulatoryUpdate,
-    UpdateSeverity,
-)
 
 from .compliance_service import ComplianceService, ComplianceServiceConfig
 
@@ -84,6 +75,9 @@ __all__ = [
     "ComplianceGap",
     "ComplianceRecommendation",
     "RiskLevel",
+    "ComplianceStatus",
+    "SystemStateAnalyzer",
+    "ComplianceDataCollector",
     "AutomatedReportGenerator",
     "ComplianceReport",
     "ReportFormat",
@@ -91,12 +85,6 @@ __all__ = [
     "AuditTrailManager",
     "AuditEvent",
     "BlockchainAuditTrail",
-    "ComplianceDataCollector",
-    "SystemStateAnalyzer",
-    "ComplianceDataPoint",
-    "RegulatoryUpdateMonitor",
-    "RegulatoryUpdate",
-    "UpdateSeverity",
     "ComplianceService",
     "ComplianceServiceConfig",
     # Autonomous Compliance Reporter

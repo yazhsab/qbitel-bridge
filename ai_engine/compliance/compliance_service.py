@@ -8,6 +8,7 @@ and integrates with existing infrastructure systems.
 import asyncio
 import logging
 import json
+import uuid
 from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -328,6 +329,7 @@ class ComplianceService:
 
                 # Record audit event
                 if self.audit_trail:
+                    score = getattr(assessment, "overall_compliance_score", 0.0)
                     await self.audit_trail.record_compliance_event(
                         EventType.ASSESSMENT_COMPLETED,
                         "system",
@@ -337,7 +339,7 @@ class ComplianceService:
                         {
                             "framework": framework,
                             "assessment_id": assessment_id,
-                            "compliance_score": assessment.overall_compliance_score,
+                            "compliance_score": score,
                             "duration_seconds": (
                                 datetime.utcnow() - assessment_start
                             ).total_seconds(),
@@ -348,12 +350,12 @@ class ComplianceService:
                 # Record metrics
                 self.metrics.record_protocol_discovery_metric(
                     "compliance_assessment_score",
-                    assessment.overall_compliance_score,
+                    score,
                     {"framework": framework},
                 )
 
                 self.logger.info(
-                    f"Assessment completed: {assessment_id} - {assessment.overall_compliance_score:.1f}%"
+                    f"Assessment completed: {assessment_id} - {score:.1f}%"
                 )
                 return assessment
 
@@ -447,18 +449,20 @@ class ComplianceService:
 
             # Record audit event
             if self.audit_trail:
+                report_id = getattr(report, "report_id", f"report_{uuid.uuid4().hex[:8]}")
+                file_size = getattr(report, "file_size", len(getattr(report, "content", b"")))
                 await self.audit_trail.record_compliance_event(
                     EventType.REPORT_GENERATED,
                     "system",
-                    f"report_{report.report_id}",
+                    f"report_{report_id}",
                     "generate_report",
                     "success",
                     {
                         "framework": framework,
                         "report_type": report_type.value,
                         "format": format.value,
-                        "report_id": report.report_id,
-                        "file_size": report.file_size,
+                        "report_id": report_id,
+                        "file_size": file_size,
                     },
                     compliance_framework=framework,
                 )

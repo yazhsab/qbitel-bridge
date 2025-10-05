@@ -116,20 +116,6 @@ class SystemStateAnalyzer:
         self.logger = logging.getLogger(__name__)
         self.metrics = get_enterprise_metrics()
 
-        # Data collectors for different system aspects
-        self.collectors = {
-            "system_info": self._collect_system_info,
-            "network_config": self._collect_network_config,
-            "security_config": self._collect_security_config,
-            "access_controls": self._collect_access_controls,
-            "data_handling": self._collect_data_handling,
-            "monitoring": self._collect_monitoring_config,
-            "policies": self._collect_policies,
-            "training": self._collect_training_records,
-            "incidents": self._collect_incident_logs,
-            "audit": self._collect_audit_logs,
-        }
-
     async def capture_system_state(self) -> SystemStateSnapshot:
         """Capture complete system state snapshot."""
         try:
@@ -142,10 +128,23 @@ class SystemStateAnalyzer:
 
             # Collect data from all sources concurrently
             tasks = []
+            collectors = {
+                "system_info": self._collect_system_info,
+                "network_config": self._collect_network_config,
+                "security_config": self._collect_security_config,
+                "access_controls": self._collect_access_controls,
+                "data_handling": self._collect_data_handling,
+                "monitoring": self._collect_monitoring_config,
+                "policies": self._collect_policies,
+                "training": self._collect_training_records,
+                "incidents": self._collect_incident_logs,
+                "audit": self._collect_audit_logs,
+            }
+
             with ThreadPoolExecutor(max_workers=8) as executor:
                 futures = {
                     executor.submit(collector): name
-                    for name, collector in self.collectors.items()
+                    for name, collector in collectors.items()
                 }
 
                 collected_data = {}
@@ -1246,17 +1245,24 @@ class ComplianceDataCollector:
             control_categories = []
 
             # Categorize based on control type and content
-            if req.control_type == ControlType.TECHNICAL:
+            control_type = getattr(req, "control_type", None)
+            control_type_value = getattr(control_type, "value", control_type)
+            if isinstance(control_type_value, str):
+                control_type_value = control_type_value.lower()
+
+            if control_type_value == ControlType.TECHNICAL or control_type_value == ControlType.TECHNICAL.value:
                 control_categories.append("technical_controls")
-            elif req.control_type == ControlType.ADMINISTRATIVE:
+            elif control_type_value == ControlType.ADMINISTRATIVE or control_type_value == ControlType.ADMINISTRATIVE.value:
                 control_categories.append("administrative_controls")
-            elif req.control_type == ControlType.OPERATIONAL:
+            elif control_type_value == ControlType.OPERATIONAL or control_type_value == ControlType.OPERATIONAL.value:
                 control_categories.append("operational_controls")
-            elif req.control_type == ControlType.PHYSICAL:
+            elif control_type_value == ControlType.PHYSICAL or control_type_value == ControlType.PHYSICAL.value:
                 control_categories.append("physical_controls")
 
             # Additional categorization based on requirement content
-            req_content = (req.title + " " + req.description).lower()
+            title = getattr(req, "title", "") or ""
+            description = getattr(req, "description", "") or ""
+            req_content = (str(title) + " " + str(description)).lower()
 
             if any(
                 term in req_content for term in ["network", "firewall", "encryption"]

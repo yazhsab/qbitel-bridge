@@ -56,6 +56,32 @@ class ModelException(CronosAIException):
         super().__init__(message, error_code="MODEL_ERROR", context=context)
 
 
+class ModelVersionException(CronosAIException):
+    """Exception raised for model version management issues."""
+
+    def __init__(
+        self,
+        message: str,
+        version_id: Optional[str] = None,
+        model_name: Optional[str] = None,
+    ):
+        context = {}
+        if version_id:
+            context["version_id"] = version_id
+        if model_name:
+            context["model_name"] = model_name
+
+        super().__init__(message, error_code="MODEL_VERSION_ERROR", context=context)
+
+
+class DiscoveryException(CronosAIException):
+    """Exception raised during protocol discovery workflows."""
+
+    def __init__(self, message: str, request_id: Optional[str] = None):
+        context = {"request_id": request_id} if request_id else {}
+        super().__init__(message, error_code="DISCOVERY_ERROR", context=context)
+
+
 class InferenceException(CronosAIException):
     """Exception raised during model inference."""
 

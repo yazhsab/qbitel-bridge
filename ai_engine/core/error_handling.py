@@ -164,6 +164,75 @@ class CircuitBreakerState(Enum):
     HALF_OPEN = "half_open"  # Testing if service is recovered
 
 
+class RetryManager:
+    """Simple retry manager with exponential backoff support."""
+
+    def __init__(
+        self,
+        max_retries: int = 3,
+        base_delay: float = 1.0,
+        backoff_factor: float = 2.0,
+        retryable_exceptions: Optional[Tuple[Type[Exception], ...]] = None,
+        jitter: bool = True,
+    ) -> None:
+        self.max_retries = max(1, max_retries)
+        self.base_delay = max(0.0, base_delay)
+        self.backoff_factor = max(1.0, backoff_factor)
+        self.retryable_exceptions = retryable_exceptions or (
+            ConnectionError,
+            TimeoutError,
+            InferenceException,
+        )
+        self.jitter = jitter
+        self.logger = logging.getLogger(f"{__name__}.RetryManager")
+
+    def _get_delay(self, attempt: int) -> float:
+        delay = self.base_delay * (self.backoff_factor ** (attempt - 1))
+        if self.jitter and delay > 0:
+            delay *= random.uniform(0.8, 1.2)
+        return delay
+
+    def _should_retry(self, exc: Exception) -> bool:
+        return isinstance(exc, self.retryable_exceptions)
+
+    async def retry(self, func: Callable, *args, **kwargs):
+        """Retry a callable until success or attempts exhausted."""
+
+        last_exc: Optional[Exception] = None
+
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                if asyncio.iscoroutinefunction(func):
+                    return await func(*args, **kwargs)
+                result = func(*args, **kwargs)
+                if asyncio.iscoroutine(result):
+                    return await result
+                return result
+            except Exception as exc:  # noqa: PERF203 - explicit retries
+                last_exc = exc
+                if attempt >= self.max_retries or not self._should_retry(exc):
+                    self.logger.error(
+                        "Retry attempts exhausted for %s: %s",
+                        getattr(func, "__name__", repr(func)),
+                        exc,
+                    )
+                    raise
+
+                delay = self._get_delay(attempt)
+                self.logger.warning(
+                    "Retry attempt %s/%s failed for %s: %s. Next retry in %.2fs",
+                    attempt,
+                    self.max_retries,
+                    getattr(func, "__name__", repr(func)),
+                    exc,
+                    delay,
+                )
+                if delay > 0:
+                    await asyncio.sleep(delay)
+
+        if last_exc is not None:
+            raise last_exc
+
 class CircuitBreaker:
     """Circuit breaker implementation for fault tolerance."""
 

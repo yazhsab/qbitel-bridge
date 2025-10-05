@@ -35,32 +35,55 @@ from .threat_analyzer import ThreatAnalyzer
 
 from prometheus_client import Counter, Histogram, Gauge, Summary
 
+
+_METRIC_CACHE = {}
+
+
+def _get_metric(metric_cls, name: str, *args, **kwargs):
+    """Return cached Prometheus metric or create an unregistered one."""
+
+    if name in _METRIC_CACHE:
+        return _METRIC_CACHE[name]
+
+    kwargs = dict(kwargs)
+    kwargs.setdefault("registry", None)
+    metric = metric_cls(name, *args, **kwargs)
+    _METRIC_CACHE[name] = metric
+    return metric
+
 # Prometheus metrics
-SECURITY_EVENTS_COUNTER = Counter(
+SECURITY_EVENTS_COUNTER = _get_metric(
+    Counter,
     "cronos_security_events_total",
     "Total security events processed",
     ["event_type", "severity"],
 )
-RESPONSE_TIME_HISTOGRAM = Histogram(
+RESPONSE_TIME_HISTOGRAM = _get_metric(
+    Histogram,
     "cronos_security_response_time_seconds", "Security response time", ["response_type"]
 )
-ACTIVE_INCIDENTS_GAUGE = Gauge(
+ACTIVE_INCIDENTS_GAUGE = _get_metric(
+    Gauge,
     "cronos_security_active_incidents", "Number of active security incidents"
 )
-AUTONOMOUS_DECISIONS_COUNTER = Counter(
+AUTONOMOUS_DECISIONS_COUNTER = _get_metric(
+    Counter,
     "cronos_security_autonomous_decisions_total",
     "Autonomous decisions made",
     ["decision_outcome"],
 )
-HUMAN_ESCALATIONS_COUNTER = Counter(
+HUMAN_ESCALATIONS_COUNTER = _get_metric(
+    Counter,
     "cronos_security_human_escalations_total",
     "Human escalations",
     ["escalation_reason"],
 )
-SYSTEM_QUARANTINES_GAUGE = Gauge(
+SYSTEM_QUARANTINES_GAUGE = _get_metric(
+    Gauge,
     "cronos_security_active_quarantines", "Number of systems currently quarantined"
 )
-MTTR_SUMMARY = Summary(
+MTTR_SUMMARY = _get_metric(
+    Summary,
     "cronos_security_mean_time_to_response_seconds",
     "Mean time to response for security incidents",
 )
