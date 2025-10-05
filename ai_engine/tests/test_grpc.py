@@ -547,6 +547,8 @@ class TestAIEngineGRPCClient:
 
         assert result["status"] == "healthy"
         assert result["service"] == "cronos-ai-grpc"
+        assert isinstance(result, dict)
+        assert "timestamp" in result or "status" in result  # Ensure key fields present
 
     @pytest.mark.asyncio
     async def test_discover_protocol(self):
@@ -557,6 +559,9 @@ class TestAIEngineGRPCClient:
 
         assert "discovered_protocol" in result
         assert "confidence_score" in result
+        assert isinstance(result, dict)
+        assert isinstance(result.get("confidence_score", 0.0), (int, float))
+        assert 0 <= result.get("confidence_score", 0) <= 1
 
     @pytest.mark.asyncio
     async def test_detect_fields(self):
@@ -567,6 +572,10 @@ class TestAIEngineGRPCClient:
 
         assert "detected_fields" in result
         assert "total_fields" in result
+        assert isinstance(result, dict)
+        assert isinstance(result.get("total_fields", 0), int)
+        assert result.get("total_fields", 0) >= 0
+        assert isinstance(result.get("detected_fields", []), list)
 
     @pytest.mark.asyncio
     async def test_detect_anomalies(self):
@@ -577,6 +586,16 @@ class TestAIEngineGRPCClient:
 
         assert "is_anomalous" in result
         assert "anomaly_score" in result
+        assert isinstance(result, dict)
+        assert isinstance(result.get("is_anomalous", False), bool)
+        # anomaly_score can be either a number or a dict with overall_score
+        anomaly_score = result.get("anomaly_score", {})
+        if isinstance(anomaly_score, dict):
+            assert "overall_score" in anomaly_score
+            assert 0 <= anomaly_score["overall_score"] <= 1
+        else:
+            assert isinstance(anomaly_score, (int, float))
+            assert 0 <= anomaly_score <= 1
 
 
 class TestRunGRPCServer:

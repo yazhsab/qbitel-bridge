@@ -42,6 +42,7 @@ from ai_engine.core.error_handling import (
     CircuitBreakerState,
     RetryManager,
 )
+from ai_engine.core.config import Config
 from ai_engine.core.structured_logging import StructuredLogger
 from ai_engine.core.performance_optimizer import PerformanceOptimizer, ComputationCache
 from ai_engine.monitoring.enterprise_metrics import EnterpriseMetrics, MetricsCollector
