@@ -4,6 +4,7 @@ Tests all core components with unit, integration, and performance testing.
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 import numpy as np
 import time
