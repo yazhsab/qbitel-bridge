@@ -18,7 +18,16 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 import weakref
-from aiohttp import web
+try:  # pragma: no cover - optional dependency
+    from aiohttp import web  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - fallback stub
+    class _AiohttpMissing:
+        def __getattr__(self, item):
+            raise ModuleNotFoundError(
+                "aiohttp is required for the metrics web server functionality"
+            )
+
+    web = _AiohttpMissing()  # type: ignore
 
 logger = logging.getLogger(__name__)
 

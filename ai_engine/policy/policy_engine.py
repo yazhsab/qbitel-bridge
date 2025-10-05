@@ -10,7 +10,9 @@ import asyncio
 import json
 import logging
 import re
+import sys
 import time
+import types
 import uuid
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta
@@ -23,7 +25,18 @@ import weakref
 
 import yaml
 from jinja2 import Template, Environment, meta
-import jsonpath_ng
+try:  # pragma: no cover - optional dependency
+    import jsonpath_ng  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - fallback stub
+    jsonpath_ng = types.ModuleType("jsonpath_ng")
+
+    def _missing_jsonpath(*_args, **_kwargs):
+        raise ModuleNotFoundError(
+            "jsonpath_ng is required for JSONPath-based policy rules"
+        )
+
+    jsonpath_ng.parse = _missing_jsonpath  # type: ignore[attr-defined]
+    sys.modules.setdefault("jsonpath_ng", jsonpath_ng)
 from croniter import croniter
 
 from ..core.config import Config

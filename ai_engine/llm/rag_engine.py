@@ -4,16 +4,177 @@ Advanced RAG implementation for protocol intelligence with vector similarity sea
 """
 
 import asyncio
+import hashlib
 import logging
+import sys
 import time
+import types
+import uuid
 import numpy as np
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Optional, Tuple, Union
 from dataclasses import dataclass, asdict
-import chromadb
-from sentence_transformers import SentenceTransformer
 import json
 from datetime import datetime
 from prometheus_client import Counter, Histogram
+
+try:  # pragma: no cover - optional dependency
+    import chromadb as _chromadb  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - handled via in-memory fallback
+    _chromadb = None
+
+try:  # pragma: no cover - optional dependency
+    from sentence_transformers import SentenceTransformer as _SentenceTransformer  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - handled via deterministic fallback
+    _SentenceTransformer = None
+
+
+class _FallbackSentenceTransformer:
+    """Deterministic embedding fallback when sentence-transformers is unavailable."""
+
+    def __init__(self, model_name: str = "sentence-transformer-fallback"):
+        self.model_name = model_name
+
+    def encode(self, texts: List[str]) -> List[List[float]]:
+        return [self._encode_single(text) for text in texts]
+
+    @staticmethod
+    def _encode_single(text: str, vector_size: int = 32) -> List[float]:
+        digest = hashlib.sha256(text.encode("utf-8")).digest()
+        floats = [byte / 255.0 for byte in digest]
+        if len(floats) >= vector_size:
+            return floats[:vector_size]
+        repeats = (vector_size + len(floats) - 1) // len(floats)
+        extended = (floats * repeats)[:vector_size]
+        return extended
+
+
+class _InMemoryChromaCollection:
+    """Minimal in-memory collection used as a chromadb fallback."""
+
+    def __init__(self, name: str, metadata: Optional[Dict[str, Any]] = None):
+        self.name = name
+        self.metadata = metadata or {}
+        self._documents: List[str] = []
+        self._embeddings: List[List[float]] = []
+        self._metadatas: List[Dict[str, Any]] = []
+        self._ids: List[str] = []
+
+    def add(
+        self,
+        documents: List[str],
+        embeddings: Optional[List[List[float]]] = None,
+        metadatas: Optional[List[Dict[str, Any]]] = None,
+        ids: Optional[List[str]] = None,
+    ) -> None:
+        if embeddings is None:
+            raise ValueError("Embeddings are required when using the in-memory Chroma fallback")
+
+        metadatas = metadatas or [{} for _ in documents]
+        ids = ids or [str(uuid.uuid4()) for _ in documents]
+
+        for doc, emb, meta, doc_id in zip(documents, embeddings, metadatas, ids):
+            self._documents.append(doc)
+            self._embeddings.append(list(emb))
+            self._metadatas.append(dict(meta))
+            self._ids.append(doc_id)
+
+    def query(
+        self,
+        query_embeddings: List[List[float]],
+        n_results: int = 5,
+        include: Optional[List[str]] = None,
+    ) -> Dict[str, List[List[Any]]]:
+        include = include or []
+        if not query_embeddings:
+            empty = [[]]
+            result: Dict[str, List[List[Any]]] = {
+                "ids": empty,
+                "documents": empty,
+                "metadatas": empty,
+                "distances": empty,
+            }
+            if "embeddings" in include:
+                result["embeddings"] = empty
+            return result
+
+        query_vector = np.array(query_embeddings[0], dtype=float)
+
+        ranked: List[Tuple[str, str, Dict[str, Any], float]] = []
+        for doc_id, doc, meta, emb in zip(
+            self._ids, self._documents, self._metadatas, self._embeddings
+        ):
+            emb_vector = np.array(emb, dtype=float)
+            similarity = self._cosine_similarity(query_vector, emb_vector)
+            ranked.append((doc_id, doc, meta, similarity))
+
+        ranked.sort(key=lambda item: item[3], reverse=True)
+        top_k = ranked[: max(1, n_results)] if ranked else []
+
+        ids, docs, metas, sims = zip(*top_k) if top_k else ([], [], [], [])
+        distances = [1.0 - sim for sim in sims]
+
+        result: Dict[str, List[List[Any]]] = {
+            "ids": [list(ids)],
+            "documents": [list(docs)],
+            "metadatas": [list(metas)],
+            "distances": [distances],
+        }
+
+        if "embeddings" in include:
+            embed_map = {doc_id: emb for doc_id, emb in zip(self._ids, self._embeddings)}
+            result["embeddings"] = [[embed_map[doc_id] for doc_id in ids]]
+
+        return result
+
+    @staticmethod
+    def _cosine_similarity(vec_a: np.ndarray, vec_b: np.ndarray) -> float:
+        denom = np.linalg.norm(vec_a) * np.linalg.norm(vec_b)
+        if denom == 0:
+            return 0.0
+        return float(np.dot(vec_a, vec_b) / denom)
+
+
+class _InMemoryChromaClient:
+    """Lightweight client that mimics the subset of chromadb API we rely on."""
+
+    def __init__(self, *args, **kwargs):
+        self._collections: Dict[str, _InMemoryChromaCollection] = {}
+
+    def get_collection(self, name: str):
+        if name not in self._collections:
+            raise KeyError(name)
+        return self._collections[name]
+
+    def create_collection(self, name: str, metadata: Optional[Dict[str, Any]] = None):
+        collection = _InMemoryChromaCollection(name, metadata)
+        self._collections[name] = collection
+        return collection
+
+    def get_or_create_collection(
+        self, name: str, metadata: Optional[Dict[str, Any]] = None
+    ):
+        return self._collections.get(name) or self.create_collection(name, metadata)
+
+    def delete_collection(self, name: str) -> None:
+        self._collections.pop(name, None)
+
+
+if _SentenceTransformer is None:  # pragma: no cover - import guard
+    SentenceTransformer = _FallbackSentenceTransformer  # type: ignore
+else:
+    SentenceTransformer = _SentenceTransformer  # type: ignore
+
+
+if _chromadb is None:  # pragma: no cover - import guard
+    chromadb = types.ModuleType("chromadb")
+    chromadb.Client = _InMemoryChromaClient  # type: ignore[attr-defined]
+    chromadb.PersistentClient = _InMemoryChromaClient  # type: ignore[attr-defined]
+    chromadb.Collection = _InMemoryChromaCollection  # type: ignore[attr-defined]
+    sys.modules["chromadb"] = chromadb
+    _HAS_CHROMADB = False
+else:
+    chromadb = _chromadb  # type: ignore
+    _HAS_CHROMADB = True
 
 # Metrics
 RAG_QUERY_COUNTER = Counter(
@@ -59,18 +220,19 @@ class RAGEngine:
         self.config = config or {}
         self.logger = logging.getLogger(__name__)
 
-        # Initialize ChromaDB client
-        self.chroma_client = chromadb.PersistentClient(
-            path=self.config.get("chroma_db_path", "./data/chroma_db")
-        )
+        # Client configuration
+        self.client = None
+        self.is_initialized = False
+        self.use_fallback_store = False
+        self._chroma_path = self.config.get("chroma_db_path", "./data/chroma_db")
 
-        # Initialize embedding model
+        # Initialize embedding model (falls back to deterministic stub when needed)
         self.embedding_model = SentenceTransformer(
             self.config.get("embedding_model", "all-MiniLM-L6-v2")
         )
 
         # Collections for different knowledge types
-        self.collections = {}
+        self.collections: Dict[str, Any] = {}
         self.collection_names = [
             "protocol_knowledge",
             "compliance_rules",
@@ -84,59 +246,147 @@ class RAGEngine:
         ]
 
         # Query cache
-        self.query_cache = {}
-        self.cache_ttl = 3600  # 1 hour
+        self.query_cache: Dict[str, Dict[str, Any]] = {}
+        self.cache_ttl = self.config.get("cache_ttl", 3600)  # seconds
 
     async def initialize(self) -> None:
         """Initialize RAG engine and create collections."""
         try:
             self.logger.info("Initializing RAG Engine...")
 
+            if self.client is None:
+                self.client = self._create_client()
+                self.use_fallback_store = isinstance(self.client, _InMemoryChromaClient)
+
             # Create or get collections
             for collection_name in self.collection_names:
-                try:
-                    collection = self.chroma_client.get_collection(name=collection_name)
-                    self.logger.info(f"Loaded existing collection: {collection_name}")
-                except:
-                    collection = self.chroma_client.create_collection(
-                        name=collection_name, metadata={"hnsw:space": "cosine"}
-                    )
-                    self.logger.info(f"Created new collection: {collection_name}")
-
+                collection = self._get_or_create_collection(collection_name)
                 self.collections[collection_name] = collection
 
             # Load initial knowledge base
             await self._load_initial_knowledge()
 
+            self.is_initialized = True
             self.logger.info("RAG Engine initialized successfully")
 
         except Exception as e:
             self.logger.error(f"Failed to initialize RAG engine: {e}")
             raise
 
+    def _create_client(self):
+        """Create a ChromaDB client, falling back to in-memory storage when unavailable."""
+        if _HAS_CHROMADB:
+            persistent_cls = getattr(chromadb, "PersistentClient", None)
+            if persistent_cls is not None:
+                try:
+                    return persistent_cls(path=self._chroma_path)
+                except Exception as exc:  # pragma: no cover - runtime safety net
+                    self.logger.warning(
+                        "Failed to initialize chromadb.PersistentClient, falling back to Client: %s",
+                        exc,
+                    )
+
+            client_cls = getattr(chromadb, "Client", None)
+            if client_cls is not None:
+                try:
+                    return client_cls()
+                except Exception as exc:  # pragma: no cover - runtime safety net
+                    self.logger.warning(
+                        "Failed to initialize chromadb.Client, using in-memory fallback: %s",
+                        exc,
+                    )
+
+        self.logger.warning(
+            "chromadb dependency not available; using in-memory vector store fallback"
+        )
+        return _InMemoryChromaClient()
+
+    def _get_or_create_collection(self, name: str):
+        if self.client is None:
+            raise RuntimeError("RAGEngine client is not initialized")
+
+        # Attempt standard chromadb API
+        try:
+            if hasattr(self.client, "get_collection"):
+                collection = self.client.get_collection(name=name)
+                self.collections[name] = collection
+                return collection
+        except Exception:
+            pass
+
+        metadata = {"hnsw:space": "cosine"}
+
+        if hasattr(self.client, "get_or_create_collection"):
+            collection = self.client.get_or_create_collection(name=name, metadata=metadata)
+            self.collections[name] = collection
+            return collection
+
+        if hasattr(self.client, "create_collection"):
+            collection = self.client.create_collection(name=name, metadata=metadata)
+            self.collections[name] = collection
+            return collection
+
+        raise AttributeError(
+            "Configured Chroma client does not expose a collection creation API"
+        )
+
     async def add_documents(
-        self, collection_name: str, documents: List[RAGDocument]
-    ) -> None:
+        self, collection_name: str, documents: List[Union[RAGDocument, Dict[str, Any]]]
+    ) -> bool:
         """Add documents to a specific collection."""
-        if collection_name not in self.collections:
-            raise ValueError(f"Collection {collection_name} not found")
+        if self.client is None:
+            raise RuntimeError("RAGEngine must be initialized before adding documents")
 
-        collection = self.collections[collection_name]
+        collection = self.collections.get(collection_name)
+        if collection is None:
+            collection = self._get_or_create_collection(collection_name)
+            self.collections[collection_name] = collection
 
-        # Generate embeddings for documents
-        texts = [doc.content for doc in documents]
-        embeddings = self.embedding_model.encode(texts).tolist()
+        normalized_docs: List[RAGDocument] = []
+        for doc in documents:
+            if isinstance(doc, RAGDocument):
+                normalized_docs.append(doc)
+            elif isinstance(doc, dict):
+                if "content" not in doc:
+                    raise ValueError("Document dictionaries must include a 'content' field")
+                normalized_docs.append(
+                    RAGDocument(
+                        id=str(doc.get("id") or uuid.uuid4()),
+                        content=doc["content"],
+                        metadata=dict(doc.get("metadata", {})),
+                        embedding=doc.get("embedding"),
+                        created_at=doc.get("created_at") or datetime.utcnow(),
+                    )
+                )
+            else:
+                raise TypeError(
+                    "Documents must be RAGDocument instances or dictionary representations"
+                )
 
-        # Prepare data for ChromaDB
-        ids = [doc.id for doc in documents]
-        metadatas = [doc.metadata for doc in documents]
+        if not normalized_docs:
+            self.logger.debug(
+                "No documents provided for collection %s; skipping add operation",
+                collection_name,
+            )
+            return False
 
-        # Store in ChromaDB
+        texts = [doc.content for doc in normalized_docs]
+        embeddings = [list(embedding) for embedding in self.embedding_model.encode(texts)]
+
+        for doc, embedding in zip(normalized_docs, embeddings):
+            doc.embedding = embedding
+
+        ids = [doc.id for doc in normalized_docs]
+        metadatas = [doc.metadata for doc in normalized_docs]
+
         collection.add(
             documents=texts, embeddings=embeddings, metadatas=metadatas, ids=ids
         )
 
-        self.logger.info(f"Added {len(documents)} documents to {collection_name}")
+        self.logger.info(
+            "Added %s documents to collection '%s'", len(normalized_docs), collection_name
+        )
+        return True
 
     async def query_similar(
         self,
@@ -179,25 +429,30 @@ class RAGEngine:
             )
 
             for coll_name in collections_to_search:
-                if coll_name in self.collections:
-                    collection = self.collections[coll_name]
+                collection = self.collections.get(coll_name)
+                if collection is None:
+                    try:
+                        collection = self._get_or_create_collection(coll_name)
+                    except Exception:
+                        continue
 
-                    # Query ChromaDB
-                    results = collection.query(
-                        query_embeddings=[query_embedding],
-                        n_results=n_results,
-                        include=["documents", "metadatas", "distances"],
-                    )
+                if not hasattr(collection, "query"):
+                    continue
 
-                    # Process results
-                    if results["documents"] and results["documents"][0]:
-                        for i, (doc, metadata, distance) in enumerate(
-                            zip(
-                                results["documents"][0],
-                                results["metadatas"][0],
-                                results["distances"][0],
-                            )
-                        ):
+                results = collection.query(
+                    query_embeddings=[query_embedding],
+                    n_results=n_results,
+                    include=["documents", "metadatas", "distances"],
+                )
+
+                if results.get("documents") and results["documents"][0]:
+                    for i, (doc, metadata, distance) in enumerate(
+                        zip(
+                            results["documents"][0],
+                            results.get("metadatas", [[]])[0],
+                            results.get("distances", [[]])[0],
+                        )
+                    ):
                             # Convert distance to similarity score
                             similarity = 1.0 - distance
 
@@ -256,6 +511,35 @@ class RAGEngine:
                 processing_time=time.time() - start_time,
                 total_results=0,
             )
+
+    async def search(
+        self,
+        collection_name: str,
+        query: str,
+        limit: int = 5,
+        similarity_threshold: float = 0.0,
+    ) -> List[Dict[str, Any]]:
+        """Convenience wrapper returning a simplified list of document matches."""
+
+        result = await self.query_similar(
+            query,
+            collection_name=collection_name,
+            n_results=limit,
+            similarity_threshold=similarity_threshold or 0.0,
+        )
+
+        simplified: List[Dict[str, Any]] = []
+        for document, score in zip(result.documents, result.similarity_scores):
+            simplified.append(
+                {
+                    "id": document.id,
+                    "content": document.content,
+                    "metadata": document.metadata,
+                    "similarity": score,
+                }
+            )
+
+        return simplified
 
     async def enhance_query_context(
         self, query: str, existing_context: Dict[str, Any] = None
