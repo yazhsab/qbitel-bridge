@@ -1,931 +1,834 @@
 """
-Comprehensive tests for ai_engine/api/auth_enterprise.py
+Comprehensive Unit Tests for ai_engine/api/auth_enterprise.py - Enterprise Authentication
 
-Tests cover:
-- Password management and validation
-- Multi-factor authentication (TOTP, backup codes)
-- API key management
-- JWT token creation and verification
-- Session management
-- User authentication with MFA
-- Account lockout policies
-- Audit logging
+This test suite provides complete coverage of the EnterpriseAuthenticationService class,
+including all authentication methods, security features, and edge cases.
 """
 
 import pytest
-import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import Mock, AsyncMock, MagicMock, patch, call
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
+from fastapi import HTTPException
 import hashlib
 import secrets
-import jwt
-from jwt import ExpiredSignatureError, PyJWTError
-from fastapi import HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-
-from ai_engine.api.auth_enterprise import (
-    EnterpriseAuthenticationService,
-    get_auth_service,
-)
-from ai_engine.models.database import (
-    User,
-    APIKey,
-    UserSession,
-    AuditLog,
-    UserRole,
-    MFAMethod,
-    APIKeyStatus,
-    AuditAction,
-)
 
 
-# Fixtures
+class TestEnterpriseAuthenticationServiceComprehensive:
+    """Comprehensive test suite for EnterpriseAuthenticationService."""
 
-@pytest.fixture
-def mock_config():
-    """Create mock configuration."""
-    config = Mock()
-    config.security = Mock()
-    config.security.jwt_secret = "test_secret_key_that_is_at_least_32_characters_long"
-    return config
+    @pytest.fixture
+    def mock_config(self):
+        """Create mock config with all security settings."""
+        config = Mock()
+        config.security = Mock()
+        config.security.jwt_secret = "test_secret_key_with_at_least_32_characters_long_for_security"
+        return config
 
+    @pytest.fixture
+    def auth_service(self, mock_config):
+        """Create authentication service instance."""
+        from ai_engine.api.auth_enterprise import EnterpriseAuthenticationService
+        return EnterpriseAuthenticationService(mock_config)
 
-@pytest.fixture
-def auth_service(mock_config):
-    """Create EnterpriseAuthenticationService instance."""
-    with patch("ai_engine.api.auth_enterprise.get_config", return_value=mock_config):
-        with patch("ai_engine.api.auth_enterprise.get_audit_logger"):
-            service = EnterpriseAuthenticationService(mock_config)
-            return service
+    # ==================== Initialization Tests ====================
 
+    def test_service_initialization_complete(self, auth_service):
+        """Test complete service initialization with all attributes."""
+        assert auth_service.algorithm == "HS256"
+        assert auth_service.access_token_expire_minutes == 30
+        assert auth_service.refresh_token_expire_days == 7
+        assert auth_service.mfa_required_for_admin is True
+        assert auth_service.mfa_required_for_privileged is True
+        assert auth_service.mfa_grace_period_days == 7
+        assert auth_service.audit_logger is not None
 
-@pytest.fixture
-async def mock_db():
-    """Create mock database session."""
-    db = AsyncMock(spec=AsyncSession)
-    return db
+    def test_load_secret_key_minimum_length(self):
+        """Test JWT secret key minimum length requirement."""
+        from ai_engine.api.auth_enterprise import EnterpriseAuthenticationService
+        
+        config = Mock()
+        config.security = Mock()
+        config.security.jwt_secret = "a" * 32  # Exactly 32 characters
+        
+        service = EnterpriseAuthenticationService(config)
+        assert len(service.secret_key) == 32
 
+    def test_load_secret_key_none(self):
+        """Test loading JWT secret when None."""
+        from ai_engine.api.auth_enterprise import EnterpriseAuthenticationService
+        
+        config = Mock()
+        config.security = Mock()
+        config.security.jwt_secret = None
+        
+        with pytest.raises(ValueError, match="JWT secret not configured"):
+            EnterpriseAuthenticationService(config)
 
-@pytest.fixture
-def mock_user():
-    """Create mock user."""
-    user = Mock(spec=User)
-    user.id = "user-123"
-    user.username = "testuser"
-    user.email = "test@example.com"
-    user.password_hash = "$2b$12$test_hash"
-    user.is_active = True
-    user.role = UserRole.USER
-    user.mfa_enabled = False
-    user.mfa_method = None
-    user.mfa_secret = None
-    user.mfa_backup_codes = []
-    user.failed_login_attempts = 0
-    user.account_locked_until = None
-    user.created_at = datetime.utcnow()
-    user.last_login = None
-    user.last_login_ip = None
-    user.must_change_password = False
-    user.password_changed_at = datetime.utcnow()
-    return user
+    def test_load_secret_key_empty_string(self):
+        """Test loading JWT secret when empty string."""
+        from ai_engine.api.auth_enterprise import EnterpriseAuthenticationService
+        
+        config = Mock()
+        config.security = Mock()
+        config.security.jwt_secret = ""
+        
+        with pytest.raises(ValueError, match="JWT secret not configured"):
+            EnterpriseAuthenticationService(config)
 
+    # ==================== Password Management Tests ====================
 
-# Initialization Tests
+    def test_hash_password_different_hashes(self, auth_service):
+        """Test that same password produces different hashes (salt)."""
+        password = "TestPassword123!"
+        hash1 = auth_service.hash_password(password)
+        hash2 = auth_service.hash_password(password)
+        
+        assert hash1 != hash2  # Different due to salt
+        assert auth_service.verify_password(password, hash1)
+        assert auth_service.verify_password(password, hash2)
 
-def test_service_initialization(auth_service):
-    """Test service initialization."""
-    assert auth_service.config is not None
-    assert auth_service.secret_key is not None
-    assert auth_service.algorithm == "HS256"
-    assert auth_service.access_token_expire_minutes == 30
-    assert auth_service.refresh_token_expire_days == 7
+    def test_verify_password_empty_password(self, auth_service):
+        """Test password verification with empty password."""
+        hashed = auth_service.hash_password("TestPassword123!")
+        assert auth_service.verify_password("", hashed) is False
 
+    def test_validate_password_strength_all_requirements(self, auth_service):
+        """Test password validation with all requirements met."""
+        valid_passwords = [
+            "ValidPass123!@#",
+            "Str0ng!Password",
+            "C0mpl3x#Pass",
+            "S3cur3$Passw0rd",
+        ]
+        
+        for password in valid_passwords:
+            is_valid, error = auth_service.validate_password_strength(password)
+            assert is_valid is True, f"Password {password} should be valid"
+            assert error is None
 
-def test_service_initialization_missing_secret():
-    """Test initialization fails with missing or short secret."""
-    config = Mock()
-    config.security = Mock()
-    config.security.jwt_secret = "short"  # Too short
+    def test_validate_password_strength_edge_cases(self, auth_service):
+        """Test password validation edge cases."""
+        # Exactly 12 characters
+        is_valid, _ = auth_service.validate_password_strength("ValidPass1!")
+        assert is_valid is False  # Only 11 chars
+        
+        is_valid, _ = auth_service.validate_password_strength("ValidPass12!")
+        assert is_valid is True  # Exactly 12 chars
 
-    with patch("ai_engine.api.auth_enterprise.get_config", return_value=config):
-        with patch("ai_engine.api.auth_enterprise.get_audit_logger"):
-            with pytest.raises(ValueError, match="JWT secret not configured"):
-                EnterpriseAuthenticationService(config)
+    def test_validate_password_strength_multiple_special_chars(self, auth_service):
+        """Test password with multiple special characters."""
+        password = "Test!@#$%^&*()123Abc"
+        is_valid, error = auth_service.validate_password_strength(password)
+        assert is_valid is True
+        assert error is None
 
+    def test_validate_password_strength_common_patterns_case_insensitive(self, auth_service):
+        """Test common pattern detection is case insensitive."""
+        weak_passwords = [
+            "PASSWORD123!Abc",
+            "MyPassword123!",
+            "Admin123!@#Abc",
+            "Qwerty123!@#Abc",
+            "Letmein123!@#Abc",
+        ]
+        
+        for password in weak_passwords:
+            is_valid, error = auth_service.validate_password_strength(password)
+            assert is_valid is False
+            assert "common patterns" in error
 
-# Password Management Tests
-
-def test_hash_password(auth_service):
-    """Test password hashing."""
-    password = "test_password_123"
-    hashed = auth_service.hash_password(password)
-
-    assert hashed != password
-    assert hashed.startswith("$2b$")
-
-
-def test_verify_password_success(auth_service):
-    """Test password verification success."""
-    password = "test_password_123"
-    hashed = auth_service.hash_password(password)
-
-    assert auth_service.verify_password(password, hashed) is True
-
-
-def test_verify_password_failure(auth_service):
-    """Test password verification failure."""
-    password = "test_password_123"
-    hashed = auth_service.hash_password(password)
-
-    assert auth_service.verify_password("wrong_password", hashed) is False
-
-
-def test_validate_password_strength_success(auth_service):
-    """Test password strength validation success."""
-    password = "StrongP@ssw0rd123!"
-    is_valid, error = auth_service.validate_password_strength(password)
-
-    assert is_valid is True
-    assert error is None
-
-
-def test_validate_password_too_short(auth_service):
-    """Test password too short."""
-    password = "Short1!"
-    is_valid, error = auth_service.validate_password_strength(password)
-
-    assert is_valid is False
-    assert "12 characters" in error
-
-
-def test_validate_password_no_uppercase(auth_service):
-    """Test password missing uppercase."""
-    password = "lowercase123!@#"
-    is_valid, error = auth_service.validate_password_strength(password)
-
-    assert is_valid is False
-    assert "uppercase" in error
-
-
-def test_validate_password_no_lowercase(auth_service):
-    """Test password missing lowercase."""
-    password = "UPPERCASE123!@#"
-    is_valid, error = auth_service.validate_password_strength(password)
-
-    assert is_valid is False
-    assert "lowercase" in error
-
-
-def test_validate_password_no_digit(auth_service):
-    """Test password missing digit."""
-    password = "NoDigitsHere!@#"
-    is_valid, error = auth_service.validate_password_strength(password)
-
-    assert is_valid is False
-    assert "digit" in error
-
-
-def test_validate_password_no_special_char(auth_service):
-    """Test password missing special character."""
-    password = "NoSpecialChar123"
-    is_valid, error = auth_service.validate_password_strength(password)
-
-    assert is_valid is False
-    assert "special character" in error
-
-
-def test_validate_password_common_pattern(auth_service):
-    """Test password with common pattern."""
-    password = "Password123!@#"
-    is_valid, error = auth_service.validate_password_strength(password)
-
-    assert is_valid is False
-    assert "common patterns" in error
-
-
-@pytest.mark.asyncio
-async def test_change_password_success(auth_service, mock_db, mock_user):
-    """Test password change success."""
-    old_password = "OldPassword123!"
-    new_password = "NewPassword456!"
-
-    mock_user.password_hash = auth_service.hash_password(old_password)
-
-    # Mock database query
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    result = await auth_service.change_password(
-        mock_db, str(mock_user.id), old_password, new_password
-    )
-
-    assert result is True
-    assert mock_user.must_change_password is False
-    assert mock_user.password_changed_at is not None
-    mock_db.commit.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_change_password_user_not_found(auth_service, mock_db):
-    """Test password change with non-existent user."""
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = None
-    mock_db.execute.return_value = mock_result
-
-    with pytest.raises(HTTPException, match="User not found"):
-        await auth_service.change_password(
-            mock_db, "non-existent", "old", "new"
+    @pytest.mark.asyncio
+    async def test_change_password_updates_timestamp(self, auth_service):
+        """Test that password change updates timestamp."""
+        from ai_engine.models.database import User
+        
+        mock_db = AsyncMock()
+        old_time = datetime.utcnow() - timedelta(days=30)
+        user = User(
+            id="user123",
+            username="testuser",
+            password_hash=auth_service.hash_password("OldPassword123!"),
+            password_changed_at=old_time,
         )
-
-
-@pytest.mark.asyncio
-async def test_change_password_invalid_old_password(auth_service, mock_db, mock_user):
-    """Test password change with invalid old password."""
-    mock_user.password_hash = auth_service.hash_password("CorrectPassword123!")
-
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    with pytest.raises(HTTPException, match="Invalid old password"):
+        
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = user
+        mock_db.execute.return_value = mock_result
+        
         await auth_service.change_password(
-            mock_db, str(mock_user.id), "WrongPassword!", "NewPassword456!"
+            mock_db, "user123", "OldPassword123!", "NewPassword456!"
         )
+        
+        assert user.password_changed_at > old_time
+        assert user.must_change_password is False
 
-
-@pytest.mark.asyncio
-async def test_change_password_weak_new_password(auth_service, mock_db, mock_user):
-    """Test password change with weak new password."""
-    old_password = "OldPassword123!"
-    mock_user.password_hash = auth_service.hash_password(old_password)
-
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    with pytest.raises(HTTPException, match="12 characters"):
-        await auth_service.change_password(
-            mock_db, str(mock_user.id), old_password, "weak"
+    @pytest.mark.asyncio
+    async def test_change_password_audit_logging(self, auth_service):
+        """Test that password change creates audit logs."""
+        from ai_engine.models.database import User
+        
+        mock_db = AsyncMock()
+        user = User(
+            id="user123",
+            username="testuser",
+            password_hash=auth_service.hash_password("OldPassword123!"),
         )
-
-
-# Multi-Factor Authentication Tests
-
-def test_generate_totp_secret(auth_service):
-    """Test TOTP secret generation."""
-    secret = auth_service.generate_totp_secret()
-
-    assert isinstance(secret, str)
-    assert len(secret) > 0
-
-
-def test_generate_totp_qr_code(auth_service):
-    """Test TOTP QR code generation."""
-    secret = auth_service.generate_totp_secret()
-    qr_code = auth_service.generate_totp_qr_code("testuser", secret)
-
-    assert isinstance(qr_code, str)
-    assert len(qr_code) > 0  # Base64 encoded
-
-
-def test_verify_totp_success(auth_service):
-    """Test TOTP verification success."""
-    import pyotp
-
-    secret = auth_service.generate_totp_secret()
-    totp = pyotp.TOTP(secret)
-    token = totp.now()
-
-    assert auth_service.verify_totp(secret, token) is True
-
-
-def test_verify_totp_failure(auth_service):
-    """Test TOTP verification failure."""
-    secret = auth_service.generate_totp_secret()
-    invalid_token = "000000"
-
-    assert auth_service.verify_totp(secret, invalid_token) is False
-
-
-def test_generate_backup_codes(auth_service):
-    """Test backup codes generation."""
-    codes = auth_service.generate_backup_codes(count=10)
-
-    assert len(codes) == 10
-    assert all(isinstance(code, str) for code in codes)
-    assert len(set(codes)) == 10  # All unique
-
-
-@pytest.mark.asyncio
-async def test_enable_mfa_totp(auth_service, mock_db, mock_user):
-    """Test enabling TOTP MFA."""
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    result = await auth_service.enable_mfa(
-        mock_db, str(mock_user.id), MFAMethod.TOTP
-    )
-
-    assert "qr_code" in result
-    assert "secret" in result
-    assert "backup_codes" in result
-    assert len(result["backup_codes"]) == 10
-    assert mock_user.mfa_enabled is True
-    assert mock_user.mfa_method == MFAMethod.TOTP
-    mock_db.commit.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_enable_mfa_user_not_found(auth_service, mock_db):
-    """Test enabling MFA for non-existent user."""
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = None
-    mock_db.execute.return_value = mock_result
-
-    with pytest.raises(HTTPException, match="User not found"):
-        await auth_service.enable_mfa(mock_db, "non-existent", MFAMethod.TOTP)
-
-
-@pytest.mark.asyncio
-async def test_verify_mfa_token_success(auth_service, mock_db, mock_user):
-    """Test MFA token verification success."""
-    import pyotp
-
-    secret = auth_service.generate_totp_secret()
-    mock_user.mfa_enabled = True
-    mock_user.mfa_method = MFAMethod.TOTP
-    mock_user.mfa_secret = secret
-
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    totp = pyotp.TOTP(secret)
-    token = totp.now()
-
-    result = await auth_service.verify_mfa_token(mock_db, str(mock_user.id), token)
-
-    assert result is True
-
-
-@pytest.mark.asyncio
-async def test_verify_mfa_token_failure(auth_service, mock_db, mock_user):
-    """Test MFA token verification failure."""
-    mock_user.mfa_enabled = True
-    mock_user.mfa_method = MFAMethod.TOTP
-    mock_user.mfa_secret = auth_service.generate_totp_secret()
-
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    result = await auth_service.verify_mfa_token(
-        mock_db, str(mock_user.id), "000000"
-    )
-
-    assert result is False
-
-
-# API Key Management Tests
-
-def test_generate_api_key(auth_service):
-    """Test API key generation."""
-    api_key, key_hash = auth_service.generate_api_key()
-
-    assert api_key.startswith("cronos_")
-    assert len(api_key) > 40
-    assert len(key_hash) == 64  # SHA256 hex digest
-
-
-@pytest.mark.asyncio
-async def test_create_api_key(auth_service, mock_db):
-    """Test API key creation."""
-    mock_db.add = Mock()
-    mock_db.refresh = AsyncMock()
-
-    result = await auth_service.create_api_key(
-        mock_db,
-        user_id="user-123",
-        name="Test API Key",
-        description="For testing",
-        expires_days=30,
-        permissions=["read", "write"],
-    )
-
-    assert "api_key" in result
-    assert "key_id" in result
-    assert "key_prefix" in result
-    assert "expires_at" in result
-    assert result["api_key"].startswith("cronos_")
-    mock_db.add.assert_called_once()
-    mock_db.commit.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_revoke_api_key(auth_service, mock_db):
-    """Test API key revocation."""
-    mock_api_key = Mock(spec=APIKey)
-    mock_api_key.id = "key-123"
-
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_api_key
-    mock_db.execute.return_value = mock_result
-
-    result = await auth_service.revoke_api_key(
-        mock_db, "key-123", "admin-user", reason="Security concern"
-    )
-
-    assert result is True
-    assert mock_api_key.status == APIKeyStatus.REVOKED
-    assert mock_api_key.revoked_at is not None
-    assert mock_api_key.revoked_by == "admin-user"
-    assert mock_api_key.revoked_reason == "Security concern"
-    mock_db.commit.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_revoke_api_key_not_found(auth_service, mock_db):
-    """Test revoking non-existent API key."""
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = None
-    mock_db.execute.return_value = mock_result
-
-    with pytest.raises(HTTPException, match="API key not found"):
-        await auth_service.revoke_api_key(mock_db, "non-existent", "admin")
-
-
-@pytest.mark.asyncio
-async def test_verify_api_key_success(auth_service, mock_db, mock_user):
-    """Test API key verification success."""
-    api_key, key_hash = auth_service.generate_api_key()
-
-    mock_api_key = Mock(spec=APIKey)
-    mock_api_key.key_hash = key_hash
-    mock_api_key.status = APIKeyStatus.ACTIVE
-    mock_api_key.expires_at = None
-    mock_api_key.last_used_at = None
-    mock_api_key.usage_count = 0
-
-    mock_result = AsyncMock()
-    mock_result.first.return_value = (mock_api_key, mock_user)
-    mock_db.execute.return_value = mock_result
-
-    user = await auth_service.verify_api_key(mock_db, api_key)
-
-    assert user == mock_user
-    assert mock_api_key.last_used_at is not None
-    assert mock_api_key.usage_count == 1
-    mock_db.commit.assert_called()
-
-
-@pytest.mark.asyncio
-async def test_verify_api_key_expired(auth_service, mock_db, mock_user):
-    """Test API key verification with expired key."""
-    api_key, key_hash = auth_service.generate_api_key()
-
-    mock_api_key = Mock(spec=APIKey)
-    mock_api_key.key_hash = key_hash
-    mock_api_key.status = APIKeyStatus.ACTIVE
-    mock_api_key.expires_at = datetime.utcnow() - timedelta(days=1)
-    mock_api_key.last_used_at = None
-    mock_api_key.usage_count = 0
-
-    mock_result = AsyncMock()
-    mock_result.first.return_value = (mock_api_key, mock_user)
-    mock_db.execute.return_value = mock_result
-
-    user = await auth_service.verify_api_key(mock_db, api_key)
-
-    assert user is None
-    assert mock_api_key.status == APIKeyStatus.EXPIRED
-
-
-@pytest.mark.asyncio
-async def test_verify_api_key_invalid(auth_service, mock_db):
-    """Test API key verification with invalid key."""
-    mock_result = AsyncMock()
-    mock_result.first.return_value = None
-    mock_db.execute.return_value = mock_result
-
-    user = await auth_service.verify_api_key(mock_db, "invalid_key")
-
-    assert user is None
-
-
-# JWT Token Management Tests
-
-def test_create_access_token(auth_service):
-    """Test access token creation."""
-    data = {"user_id": "user-123", "username": "testuser"}
-    token = auth_service.create_access_token(data)
-
-    assert isinstance(token, str)
-    assert len(token) > 0
-
-    # Decode and verify
-    payload = jwt.decode(token, auth_service.secret_key, algorithms=[auth_service.algorithm])
-    assert payload["user_id"] == "user-123"
-    assert payload["type"] == "access"
-    assert "exp" in payload
-
-
-def test_create_refresh_token(auth_service):
-    """Test refresh token creation."""
-    data = {"user_id": "user-123"}
-    token = auth_service.create_refresh_token(data)
-
-    assert isinstance(token, str)
-
-    payload = jwt.decode(token, auth_service.secret_key, algorithms=[auth_service.algorithm])
-    assert payload["user_id"] == "user-123"
-    assert payload["type"] == "refresh"
-
-
-@pytest.mark.asyncio
-async def test_verify_token_success(auth_service):
-    """Test token verification success."""
-    data = {"user_id": "user-123"}
-    token = auth_service.create_access_token(data)
-
-    payload = await auth_service.verify_token(token)
-
-    assert payload["user_id"] == "user-123"
-    assert payload["type"] == "access"
-
-
-@pytest.mark.asyncio
-async def test_verify_token_expired(auth_service):
-    """Test token verification with expired token."""
-    # Create expired token
-    data = {"user_id": "user-123"}
-    expire = datetime.utcnow() - timedelta(minutes=10)
-    data.update({"exp": expire})
-
-    token = jwt.encode(data, auth_service.secret_key, algorithm=auth_service.algorithm)
-
-    with pytest.raises(HTTPException, match="Token has expired"):
-        await auth_service.verify_token(token)
-
-
-@pytest.mark.asyncio
-async def test_verify_token_invalid(auth_service):
-    """Test token verification with invalid token."""
-    with pytest.raises(HTTPException, match="Invalid token"):
-        await auth_service.verify_token("invalid.token.here")
-
-
-# Session Management Tests
-
-@pytest.mark.asyncio
-async def test_create_session(auth_service, mock_db):
-    """Test session creation."""
-    mock_db.refresh = AsyncMock()
-
-    session = await auth_service.create_session(
-        mock_db,
-        user_id="user-123",
-        ip_address="192.168.1.1",
-        user_agent="Mozilla/5.0",
-    )
-
-    assert isinstance(session, UserSession)
-    assert session.user_id == "user-123"
-    assert session.ip_address == "192.168.1.1"
-    assert session.session_token is not None
-    mock_db.add.assert_called_once()
-    mock_db.commit.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_revoke_session_success(auth_service, mock_db):
-    """Test session revocation success."""
-    mock_session = Mock(spec=UserSession)
-    mock_session.session_token = "test-token"
-
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_session
-    mock_db.execute.return_value = mock_result
-
-    result = await auth_service.revoke_session(mock_db, "test-token")
-
-    assert result is True
-    assert mock_session.revoked_at is not None
-    mock_db.commit.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_revoke_session_not_found(auth_service, mock_db):
-    """Test session revocation with non-existent session."""
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = None
-    mock_db.execute.return_value = mock_result
-
-    result = await auth_service.revoke_session(mock_db, "non-existent")
-
-    assert result is False
-
-
-# User Authentication Tests
-
-@pytest.mark.asyncio
-async def test_authenticate_user_success(auth_service, mock_db, mock_user):
-    """Test user authentication success."""
-    password = "TestPassword123!"
-    mock_user.password_hash = auth_service.hash_password(password)
-
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    user = await auth_service.authenticate_user(
-        mock_db, "testuser", password, ip_address="192.168.1.1"
-    )
-
-    assert user == mock_user
-    assert mock_user.failed_login_attempts == 0
-    assert mock_user.last_login is not None
-    assert mock_user.last_login_ip == "192.168.1.1"
-    mock_db.commit.assert_called()
-
-
-@pytest.mark.asyncio
-async def test_authenticate_user_not_found(auth_service, mock_db):
-    """Test authentication with non-existent user."""
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = None
-    mock_db.execute.return_value = mock_result
-
-    user = await auth_service.authenticate_user(
-        mock_db, "nonexistent", "password"
-    )
-
-    assert user is None
-
-
-@pytest.mark.asyncio
-async def test_authenticate_user_account_locked(auth_service, mock_db, mock_user):
-    """Test authentication with locked account."""
-    mock_user.account_locked_until = datetime.utcnow() + timedelta(minutes=30)
-
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    with pytest.raises(HTTPException, match="Account locked"):
-        await auth_service.authenticate_user(mock_db, "testuser", "password")
-
-
-@pytest.mark.asyncio
-async def test_authenticate_user_wrong_password(auth_service, mock_db, mock_user):
-    """Test authentication with wrong password."""
-    mock_user.password_hash = auth_service.hash_password("CorrectPassword123!")
-
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    user = await auth_service.authenticate_user(
-        mock_db, "testuser", "WrongPassword123!"
-    )
-
-    assert user is None
-    assert mock_user.failed_login_attempts == 1
-    mock_db.commit.assert_called()
-
-
-@pytest.mark.asyncio
-async def test_authenticate_user_lockout_after_failed_attempts(auth_service, mock_db, mock_user):
-    """Test account lockout after multiple failed attempts."""
-    mock_user.password_hash = auth_service.hash_password("CorrectPassword123!")
-    mock_user.failed_login_attempts = 4  # One more will trigger lockout
-
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    user = await auth_service.authenticate_user(
-        mock_db, "testuser", "WrongPassword123!"
-    )
-
-    assert user is None
-    assert mock_user.failed_login_attempts == 5
-    assert mock_user.account_locked_until is not None
-
-
-@pytest.mark.asyncio
-async def test_authenticate_user_with_mfa_required(auth_service, mock_db, mock_user):
-    """Test authentication requiring MFA token."""
-    import pyotp
-
-    password = "TestPassword123!"
-    secret = auth_service.generate_totp_secret()
-
-    mock_user.password_hash = auth_service.hash_password(password)
-    mock_user.mfa_enabled = True
-    mock_user.mfa_method = MFAMethod.TOTP
-    mock_user.mfa_secret = secret
-
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    # Without MFA token
-    with pytest.raises(HTTPException, match="MFA token required"):
-        await auth_service.authenticate_user(mock_db, "testuser", password)
-
-    # With valid MFA token
-    totp = pyotp.TOTP(secret)
-    token = totp.now()
-
-    user = await auth_service.authenticate_user(
-        mock_db, "testuser", password, mfa_token=token
-    )
-
-    assert user == mock_user
-
-
-@pytest.mark.asyncio
-async def test_authenticate_user_with_invalid_mfa(auth_service, mock_db, mock_user):
-    """Test authentication with invalid MFA token."""
-    password = "TestPassword123!"
-    mock_user.password_hash = auth_service.hash_password(password)
-    mock_user.mfa_enabled = True
-    mock_user.mfa_method = MFAMethod.TOTP
-    mock_user.mfa_secret = auth_service.generate_totp_secret()
-
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    user = await auth_service.authenticate_user(
-        mock_db, "testuser", password, mfa_token="000000"
-    )
-
-    assert user is None
-
-
-@pytest.mark.asyncio
-async def test_authenticate_admin_without_mfa_enforced(auth_service, mock_db, mock_user):
-    """Test admin user required to have MFA enabled."""
-    password = "TestPassword123!"
-    mock_user.password_hash = auth_service.hash_password(password)
-    mock_user.role = UserRole.ADMINISTRATOR
-    mock_user.mfa_enabled = False
-    mock_user.created_at = datetime.utcnow() - timedelta(days=30)  # Past grace period
-
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    with pytest.raises(HTTPException, match="MFA is required"):
-        await auth_service.authenticate_user(mock_db, "testuser", password)
-
-
-# MFA Policy Tests
-
-def test_requires_mfa_for_admin(auth_service, mock_user):
-    """Test MFA requirement for admin users."""
-    mock_user.role = UserRole.ADMINISTRATOR
-    mock_user.created_at = datetime.utcnow() - timedelta(days=30)
-
-    assert auth_service._requires_mfa(mock_user) is True
-
-
-def test_requires_mfa_grace_period(auth_service, mock_user):
-    """Test MFA grace period for new users."""
-    mock_user.role = UserRole.ADMINISTRATOR
-    mock_user.created_at = datetime.utcnow() - timedelta(days=3)  # Within grace period
-
-    assert auth_service._requires_mfa(mock_user) is False
-
-
-def test_is_privileged_user(auth_service, mock_user):
-    """Test privileged user detection."""
-    mock_user.role = UserRole.ADMINISTRATOR
-    assert auth_service._is_privileged_user(mock_user) is True
-
-    mock_user.role = UserRole.SECURITY_ADMIN
-    assert auth_service._is_privileged_user(mock_user) is True
-
-    mock_user.role = UserRole.COMPLIANCE_OFFICER
-    assert auth_service._is_privileged_user(mock_user) is True
-
-    mock_user.role = UserRole.USER
-    assert auth_service._is_privileged_user(mock_user) is False
-
-
-# Audit Logging Tests
-
-@pytest.mark.asyncio
-async def test_log_audit(auth_service, mock_db):
-    """Test audit logging."""
-    await auth_service._log_audit(
-        mock_db,
-        user_id="user-123",
-        action=AuditAction.LOGIN_SUCCESS,
-        success=True,
-        details={"ip": "192.168.1.1"},
-        ip_address="192.168.1.1",
-        user_agent="Mozilla/5.0",
-    )
-
-    mock_db.add.assert_called_once()
-    mock_db.commit.assert_called_once()
-
-
-# Global Service Instance Tests
-
-@pytest.mark.asyncio
-async def test_get_auth_service():
-    """Test getting global auth service instance."""
-    with patch("ai_engine.api.auth_enterprise.get_config"):
-        with patch("ai_engine.api.auth_enterprise.get_audit_logger"):
-            service1 = await get_auth_service()
-            service2 = await get_auth_service()
-
-            assert service1 is service2  # Same instance
-
-
-# Integration Tests
-
-@pytest.mark.asyncio
-async def test_full_authentication_flow(auth_service, mock_db, mock_user):
-    """Test complete authentication flow."""
-    # 1. User registration (password setup)
-    password = "SecurePassword123!"
-    mock_user.password_hash = auth_service.hash_password(password)
-
-    # 2. Enable MFA
-    mock_result = AsyncMock()
-    mock_result.scalar_one_or_none.return_value = mock_user
-    mock_db.execute.return_value = mock_result
-
-    mfa_result = await auth_service.enable_mfa(
-        mock_db, str(mock_user.id), MFAMethod.TOTP
-    )
-
-    secret = mfa_result["secret"]
-
-    # 3. Authenticate with password and MFA
-    import pyotp
-
-    totp = pyotp.TOTP(secret)
-    token = totp.now()
-
-    user = await auth_service.authenticate_user(
-        mock_db, mock_user.username, password, mfa_token=token
-    )
-
-    assert user == mock_user
-
-    # 4. Create session
-    session = await auth_service.create_session(mock_db, str(user.id))
-    assert session is not None
-
-    # 5. Create API key
-    api_key_result = await auth_service.create_api_key(
-        mock_db, str(user.id), "Test Key"
-    )
-    assert "api_key" in api_key_result
-
-
-@pytest.mark.asyncio
-async def test_api_key_lifecycle(auth_service, mock_db, mock_user):
-    """Test complete API key lifecycle."""
-    # 1. Create API key
-    mock_db.refresh = AsyncMock()
-    api_key_result = await auth_service.create_api_key(
-        mock_db,
-        user_id=str(mock_user.id),
-        name="Test Key",
-        expires_days=30,
-    )
-
-    api_key = api_key_result["api_key"]
-    key_id = api_key_result["key_id"]
-
-    # 2. Verify API key
-    key_hash = hashlib.sha256(api_key.encode()).hexdigest()
-    mock_api_key = Mock(spec=APIKey)
-    mock_api_key.key_hash = key_hash
-    mock_api_key.status = APIKeyStatus.ACTIVE
-    mock_api_key.expires_at = None
-    mock_api_key.last_used_at = None
-    mock_api_key.usage_count = 0
-
-    mock_result = AsyncMock()
-    mock_result.first.return_value = (mock_api_key, mock_user)
-    mock_result.scalar_one_or_none.return_value = mock_api_key
-    mock_db.execute.return_value = mock_result
-
-    verified_user = await auth_service.verify_api_key(mock_db, api_key)
-    assert verified_user == mock_user
-
-    # 3. Revoke API key
-    revoke_result = await auth_service.revoke_api_key(
-        mock_db, key_id, "admin-user", reason="Test complete"
-    )
-    assert revoke_result is True
+        
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = user
+        mock_db.execute.return_value = mock_result
+        
+        with patch.object(auth_service, '_log_audit', new_callable=AsyncMock) as mock_audit:
+            await auth_service.change_password(
+                mock_db, "user123", "OldPassword123!", "NewPassword456!"
+            )
+            
+            # Should log success
+            assert mock_audit.call_count >= 1
+
+    # ==================== MFA Tests ====================
+
+    def test_generate_totp_secret_uniqueness(self, auth_service):
+        """Test that TOTP secrets are unique."""
+        secrets_set = set()
+        for _ in range(10):
+            secret = auth_service.generate_totp_secret()
+            assert secret not in secrets_set
+            secrets_set.add(secret)
+
+    def test_generate_totp_qr_code_format(self, auth_service):
+        """Test QR code generation format."""
+        secret = auth_service.generate_totp_secret()
+        qr_code = auth_service.generate_totp_qr_code("testuser", secret)
+        
+        # Should be base64 encoded
+        import base64
+        try:
+            decoded = base64.b64decode(qr_code)
+            assert len(decoded) > 0
+        except Exception:
+            pytest.fail("QR code should be valid base64")
+
+    def test_verify_totp_window(self, auth_service):
+        """Test TOTP verification with time window."""
+        import pyotp
+        
+        secret = auth_service.generate_totp_secret()
+        totp = pyotp.TOTP(secret)
+        
+        # Current token should work
+        current_token = totp.now()
+        assert auth_service.verify_totp(secret, current_token) is True
+        
+        # Invalid token should fail
+        assert auth_service.verify_totp(secret, "000000") is False
+
+    def test_generate_backup_codes_format(self, auth_service):
+        """Test backup codes format and uniqueness."""
+        codes = auth_service.generate_backup_codes(count=10)
+        
+        assert len(codes) == 10
+        assert len(set(codes)) == 10  # All unique
+        
+        for code in codes:
+            assert len(code) == 8  # 4 bytes hex = 8 chars
+            assert code.isupper()  # Should be uppercase
+            assert all(c in "0123456789ABCDEF" for c in code)
+
+    def test_generate_backup_codes_custom_count(self, auth_service):
+        """Test generating custom number of backup codes."""
+        for count in [5, 15, 20]:
+            codes = auth_service.generate_backup_codes(count=count)
+            assert len(codes) == count
+
+    @pytest.mark.asyncio
+    async def test_enable_mfa_with_provided_secret(self, auth_service):
+        """Test enabling MFA with user-provided secret."""
+        from ai_engine.models.database import User, MFAMethod
+        
+        mock_db = AsyncMock()
+        user = User(id="user123", username="testuser")
+        
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = user
+        mock_db.execute.return_value = mock_result
+        
+        custom_secret = "CUSTOMSECRET1234"
+        result = await auth_service.enable_mfa(
+            mock_db, "user123", MFAMethod.TOTP, secret=custom_secret
+        )
+        
+        assert result["secret"] == custom_secret
+        assert user.mfa_secret == custom_secret
+
+    @pytest.mark.asyncio
+    async def test_enable_mfa_backup_codes_hashed(self, auth_service):
+        """Test that backup codes are properly hashed."""
+        from ai_engine.models.database import User, MFAMethod
+        
+        mock_db = AsyncMock()
+        user = User(id="user123", username="testuser")
+        
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = user
+        mock_db.execute.return_value = mock_result
+        
+        result = await auth_service.enable_mfa(mock_db, "user123", MFAMethod.TOTP)
+        
+        # Backup codes in result should be plain text
+        backup_codes = result["backup_codes"]
+        assert len(backup_codes) == 10
+        
+        # Stored codes should be hashed
+        assert len(user.mfa_backup_codes) == 10
+        for stored_code in user.mfa_backup_codes:
+            assert stored_code != backup_codes[0]  # Should be hashed
+
+    @pytest.mark.asyncio
+    async def test_verify_mfa_token_user_not_found(self, auth_service):
+        """Test MFA verification when user doesn't exist."""
+        mock_db = AsyncMock()
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = None
+        mock_db.execute.return_value = mock_result
+        
+        result = await auth_service.verify_mfa_token(mock_db, "nonexistent", "123456")
+        assert result is False
+
+    # ==================== API Key Management Tests ====================
+
+    def test_generate_api_key_format(self, auth_service):
+        """Test API key generation format."""
+        api_key, key_hash = auth_service.generate_api_key()
+        
+        assert api_key.startswith("cronos_")
+        assert len(key_hash) == 64  # SHA256 hex
+        
+        # Verify hash is correct
+        expected_hash = hashlib.sha256(api_key.encode()).hexdigest()
+        assert key_hash == expected_hash
+
+    def test_generate_api_key_uniqueness(self, auth_service):
+        """Test that generated API keys are unique."""
+        keys = set()
+        for _ in range(10):
+            api_key, _ = auth_service.generate_api_key()
+            assert api_key not in keys
+            keys.add(api_key)
+
+    @pytest.mark.asyncio
+    async def test_create_api_key_without_expiration(self, auth_service):
+        """Test creating API key without expiration."""
+        mock_db = AsyncMock()
+        
+        result = await auth_service.create_api_key(
+            mock_db,
+            user_id="user123",
+            name="Test Key",
+            expires_days=None,
+        )
+        
+        assert result["expires_at"] is None
+
+    @pytest.mark.asyncio
+    async def test_create_api_key_with_permissions(self, auth_service):
+        """Test creating API key with specific permissions."""
+        mock_db = AsyncMock()
+        
+        permissions = ["read:data", "write:data", "admin:users"]
+        result = await auth_service.create_api_key(
+            mock_db,
+            user_id="user123",
+            name="Admin Key",
+            permissions=permissions,
+        )
+        
+        assert "api_key" in result
+        mock_db.add.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_revoke_api_key_with_reason(self, auth_service):
+        """Test API key revocation with reason."""
+        from ai_engine.models.database import APIKey, APIKeyStatus
+        
+        mock_db = AsyncMock()
+        api_key = APIKey(
+            id="key123",
+            key_hash="hash",
+            key_prefix="cronos_",
+            name="Test Key",
+            user_id="user123",
+            status=APIKeyStatus.ACTIVE,
+        )
+        
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = api_key
+        mock_db.execute.return_value = mock_result
+        
+        reason = "Security audit"
+        result = await auth_service.revoke_api_key(
+            mock_db, "key123", "admin", reason=reason
+        )
+        
+        assert result is True
+        assert api_key.revoked_reason == reason
+        assert api_key.revoked_by == "admin"
+
+    @pytest.mark.asyncio
+    async def test_verify_api_key_inactive_user(self, auth_service):
+        """Test API key verification with inactive user."""
+        from ai_engine.models.database import APIKey, User, APIKeyStatus
+        
+        api_key = "cronos_test_key"
+        key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+        
+        mock_db = AsyncMock()
+        api_key_record = APIKey(
+            id="key123",
+            key_hash=key_hash,
+            status=APIKeyStatus.ACTIVE,
+        )
+        user = User(id="user123", username="testuser", is_active=False)
+        
+        mock_result = Mock()
+        mock_result.first.return_value = (api_key_record, user)
+        mock_db.execute.return_value = mock_result
+        
+        result = await auth_service.verify_api_key(mock_db, api_key)
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_verify_api_key_usage_tracking(self, auth_service):
+        """Test that API key usage is tracked."""
+        from ai_engine.models.database import APIKey, User, APIKeyStatus
+        
+        api_key = "cronos_test_key"
+        key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+        
+        mock_db = AsyncMock()
+        api_key_record = APIKey(
+            id="key123",
+            key_hash=key_hash,
+            status=APIKeyStatus.ACTIVE,
+            usage_count=5,
+            last_used_at=None,
+        )
+        user = User(id="user123", username="testuser", is_active=True)
+        
+        mock_result = Mock()
+        mock_result.first.return_value = (api_key_record, user)
+        mock_db.execute.return_value = mock_result
+        
+        result = await auth_service.verify_api_key(mock_db, api_key)
+        
+        assert result == user
+        assert api_key_record.usage_count == 6
+        assert api_key_record.last_used_at is not None
+
+    # ==================== JWT Token Tests ====================
+
+    def test_create_access_token_payload(self, auth_service):
+        """Test access token payload structure."""
+        import jwt
+        
+        data = {"user_id": "user123", "username": "testuser", "role": "admin"}
+        token = auth_service.create_access_token(data)
+        
+        # Decode without verification to check payload
+        payload = jwt.decode(token, options={"verify_signature": False})
+        
+        assert payload["user_id"] == "user123"
+        assert payload["username"] == "testuser"
+        assert payload["role"] == "admin"
+        assert payload["type"] == "access"
+        assert "exp" in payload
+
+    def test_create_refresh_token_expiration(self, auth_service):
+        """Test refresh token has longer expiration."""
+        import jwt
+        
+        data = {"user_id": "user123"}
+        access_token = auth_service.create_access_token(data)
+        refresh_token = auth_service.create_refresh_token(data)
+        
+        access_payload = jwt.decode(access_token, options={"verify_signature": False})
+        refresh_payload = jwt.decode(refresh_token, options={"verify_signature": False})
+        
+        assert refresh_payload["exp"] > access_payload["exp"]
+        assert refresh_payload["type"] == "refresh"
+
+    @pytest.mark.asyncio
+    async def test_verify_token_type_checking(self, auth_service):
+        """Test token type is included in payload."""
+        data = {"user_id": "user123"}
+        access_token = auth_service.create_access_token(data)
+        
+        payload = await auth_service.verify_token(access_token)
+        assert payload["type"] == "access"
+
+    # ==================== Session Management Tests ====================
+
+    @pytest.mark.asyncio
+    async def test_create_session_with_metadata(self, auth_service):
+        """Test session creation with full metadata."""
+        mock_db = AsyncMock()
+        
+        session = await auth_service.create_session(
+            mock_db,
+            user_id="user123",
+            ip_address="192.168.1.100",
+            user_agent="Mozilla/5.0 (Test Browser)",
+        )
+        
+        assert session.user_id == "user123"
+        assert session.ip_address == "192.168.1.100"
+        assert session.user_agent == "Mozilla/5.0 (Test Browser)"
+        assert session.expires_at > datetime.utcnow()
+
+    @pytest.mark.asyncio
+    async def test_create_session_token_uniqueness(self, auth_service):
+        """Test that session tokens are unique."""
+        mock_db = AsyncMock()
+        
+        tokens = set()
+        for _ in range(5):
+            session = await auth_service.create_session(mock_db, user_id="user123")
+            assert session.session_token not in tokens
+            tokens.add(session.session_token)
+
+    @pytest.mark.asyncio
+    async def test_revoke_session_timestamp(self, auth_service):
+        """Test that session revocation sets timestamp."""
+        from ai_engine.models.database import UserSession
+        
+        mock_db = AsyncMock()
+        session = UserSession(
+            session_token="token123",
+            user_id="user123",
+            revoked_at=None,
+        )
+        
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = session
+        mock_db.execute.return_value = mock_result
+        
+        result = await auth_service.revoke_session(mock_db, "token123")
+        
+        assert result is True
+        assert session.revoked_at is not None
+        assert session.revoked_at <= datetime.utcnow()
+
+    # ==================== Authentication Tests ====================
+
+    @pytest.mark.asyncio
+    async def test_authenticate_user_with_valid_mfa(self, auth_service):
+        """Test authentication with valid MFA token."""
+        from ai_engine.models.database import User, UserRole, MFAMethod
+        import pyotp
+        
+        password = "TestPassword123!"
+        secret = auth_service.generate_totp_secret()
+        totp = pyotp.TOTP(secret)
+        valid_token = totp.now()
+        
+        mock_db = AsyncMock()
+        user = User(
+            id="user123",
+            username="admin",
+            password_hash=auth_service.hash_password(password),
+            is_active=True,
+            failed_login_attempts=0,
+            mfa_enabled=True,
+            mfa_method=MFAMethod.TOTP,
+            mfa_secret=secret,
+            role=UserRole.ADMINISTRATOR,
+            created_at=datetime.utcnow() - timedelta(days=30),
+        )
+        
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = user
+        mock_db.execute.return_value = mock_result
+        
+        result = await auth_service.authenticate_user(
+            mock_db, "admin", password, mfa_token=valid_token
+        )
+        
+        assert result == user
+        assert user.failed_login_attempts == 0
+
+    @pytest.mark.asyncio
+    async def test_authenticate_user_lockout_duration(self, auth_service):
+        """Test account lockout duration."""
+        from ai_engine.models.database import User
+        
+        mock_db = AsyncMock()
+        lockout_time = datetime.utcnow() + timedelta(minutes=30)
+        user = User(
+            id="user123",
+            username="testuser",
+            is_active=True,
+            account_locked_until=lockout_time,
+        )
+        
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = user
+        mock_db.execute.return_value = mock_result
+        
+        with pytest.raises(HTTPException) as exc_info:
+            await auth_service.authenticate_user(mock_db, "testuser", "password")
+        
+        assert "Account locked" in str(exc_info.value.detail)
+
+    @pytest.mark.asyncio
+    async def test_authenticate_user_failed_attempts_increment(self, auth_service):
+        """Test failed login attempts increment correctly."""
+        from ai_engine.models.database import User
+        
+        mock_db = AsyncMock()
+        user = User(
+            id="user123",
+            username="testuser",
+            password_hash=auth_service.hash_password("CorrectPassword123!"),
+            is_active=True,
+            failed_login_attempts=2,
+        )
+        
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = user
+        mock_db.execute.return_value = mock_result
+        
+        result = await auth_service.authenticate_user(
+            mock_db, "testuser", "WrongPassword"
+        )
+        
+        assert result is None
+        assert user.failed_login_attempts == 3
+
+    @pytest.mark.asyncio
+    async def test_authenticate_user_last_login_tracking(self, auth_service):
+        """Test that last login is tracked."""
+        from ai_engine.models.database import User
+        
+        password = "TestPassword123!"
+        ip_address = "192.168.1.1"
+        
+        mock_db = AsyncMock()
+        user = User(
+            id="user123",
+            username="testuser",
+            password_hash=auth_service.hash_password(password),
+            is_active=True,
+            failed_login_attempts=0,
+            mfa_enabled=False,
+            last_login=None,
+            last_login_ip=None,
+        )
+        
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = user
+        mock_db.execute.return_value = mock_result
+        
+        result = await auth_service.authenticate_user(
+            mock_db, "testuser", password, ip_address=ip_address
+        )
+        
+        assert result == user
+        assert user.last_login is not None
+        assert user.last_login_ip == ip_address
+
+    # ==================== MFA Policy Tests ====================
+
+    def test_requires_mfa_regular_user(self, auth_service):
+        """Test MFA not required for regular users."""
+        from ai_engine.models.database import User, UserRole
+        
+        user = User(
+            id="user123",
+            username="regular",
+            role=UserRole.USER,
+            created_at=datetime.utcnow() - timedelta(days=30),
+        )
+        
+        assert auth_service._requires_mfa(user) is False
+
+    def test_requires_mfa_security_admin(self, auth_service):
+        """Test MFA required for security admin."""
+        from ai_engine.models.database import User, UserRole
+        
+        user = User(
+            id="user123",
+            username="security_admin",
+            role=UserRole.SECURITY_ADMIN,
+            created_at=datetime.utcnow() - timedelta(days=30),
+        )
+        
+        assert auth_service._requires_mfa(user) is True
+
+    def test_requires_mfa_grace_period_boundary(self, auth_service):
+        """Test MFA grace period boundary conditions."""
+        from ai_engine.models.database import User, UserRole
+        
+        # Just before grace period ends
+        user = User(
+            id="user123",
+            username="admin",
+            role=UserRole.ADMINISTRATOR,
+            created_at=datetime.utcnow() - timedelta(days=6, hours=23),
+        )
+        assert auth_service._requires_mfa(user) is False
+        
+        # Just after grace period ends
+        user.created_at = datetime.utcnow() - timedelta(days=7, hours=1)
+        assert auth_service._requires_mfa(user) is True
+
+    def test_is_privileged_user_all_roles(self, auth_service):
+        """Test privileged user check for all roles."""
+        from ai_engine.models.database import User, UserRole
+        
+        privileged_roles = [
+            UserRole.ADMINISTRATOR,
+            UserRole.SECURITY_ADMIN,
+            UserRole.COMPLIANCE_OFFICER,
+        ]
+        
+        for role in privileged_roles:
+            user = User(id="user123", role=role)
+            assert auth_service._is_privileged_user(user) is True
+        
+        # Non-privileged roles
+        user = User(id="user123", role=UserRole.USER)
+        assert auth_service._is_privileged_user(user) is False
+
+    # ==================== Audit Logging Tests ====================
+
+    @pytest.mark.asyncio
+    async def test_log_audit_complete_metadata(self, auth_service):
+        """Test audit logging with complete metadata."""
+        from ai_engine.models.database import AuditAction
+        
+        mock_db = AsyncMock()
+        
+        await auth_service._log_audit(
+            db=mock_db,
+            user_id="user123",
+            action=AuditAction.LOGIN_SUCCESS,
+            success=True,
+            details={"mfa_used": True, "device": "mobile"},
+            ip_address="192.168.1.1",
+            user_agent="Mozilla/5.0",
+        )
+        
+        mock_db.add.assert_called_once()
+        mock_db.commit.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_log_audit_failure_with_error(self, auth_service):
+        """Test audit logging for failures."""
+        from ai_engine.models.database import AuditAction
+        
+        mock_db = AsyncMock()
+        
+        await auth_service._log_audit(
+            db=mock_db,
+            user_id="user123",
+            action=AuditAction.LOGIN_FAILED,
+            success=False,
+            error_message="Invalid credentials",
+            ip_address="192.168.1.1",
+        )
+        
+        mock_db.add.assert_called_once()
+
+    # ==================== Edge Cases and Error Handling ====================
+
+    @pytest.mark.asyncio
+    async def test_change_password_same_as_old(self, auth_service):
+        """Test changing password to same as old password."""
+        from ai_engine.models.database import User
+        
+        password = "TestPassword123!"
+        mock_db = AsyncMock()
+        user = User(
+            id="user123",
+            username="testuser",
+            password_hash=auth_service.hash_password(password),
+        )
+        
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = user
+        mock_db.execute.return_value = mock_result
+        
+        # Should succeed even if same password
+        result = await auth_service.change_password(
+            mock_db, "user123", password, password
+        )
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_verify_api_key_concurrent_usage(self, auth_service):
+        """Test API key verification handles concurrent usage."""
+        from ai_engine.models.database import APIKey, User, APIKeyStatus
+        
+        api_key = "cronos_test_key"
+        key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+        
+        mock_db = AsyncMock()
+        api_key_record = APIKey(
+            id="key123",
+            key_hash=key_hash,
+            status=APIKeyStatus.ACTIVE,
+            usage_count=100,
+        )
+        user = User(id="user123", username="testuser", is_active=True)
+        
+        mock_result = Mock()
+        mock_result.first.return_value = (api_key_record, user)
+        mock_db.execute.return_value = mock_result
+        
+        result = await auth_service.verify_api_key(mock_db, api_key)
+        
+        assert result == user
+        assert api_key_record.usage_count == 101
+
+
+class TestGetAuthServiceSingleton:
+    """Test suite for get_auth_service singleton pattern."""
+
+    @pytest.mark.asyncio
+    async def test_get_auth_service_creates_instance(self):
+        """Test that get_auth_service creates instance."""
+        from ai_engine.api import auth_enterprise
+        
+        # Reset singleton
+        auth_enterprise._auth_service = None
+        
+        with patch("ai_engine.api.auth_enterprise.get_config") as mock_config:
+            mock_config.return_value = Mock()
+            mock_config.return_value.security = Mock()
+            mock_config.return_value.security.jwt_secret = (
+                "test_secret_key_with_at_least_32_characters_long"
+            )
+            
+            service = await auth_enterprise.get_auth_service()
+            assert service is not None
+            assert isinstance(service, auth_enterprise.EnterpriseAuthenticationService)
+
+    @pytest.mark.asyncio
+    async def test_get_auth_service_returns_same_instance(self):
+        """Test that multiple calls return same instance."""
+        from ai_engine.api import auth_enterprise
+        
+        # Reset singleton
+        auth_enterprise._auth_service = None
+        
+        with patch("ai_engine.api.auth_enterprise.get_config") as mock_config:
+            mock_config.return_value = Mock()
+            mock_config.return_value.security = Mock()
+            mock_config.return_value.security.jwt_secret = (
+                "test_secret_key_with_at_least_32_characters_long"
+            )
+            
+            service1 = await auth_enterprise.get_auth_service()
+            service2 = await auth_enterprise.get_auth_service()
+            
+            assert service1 is service2

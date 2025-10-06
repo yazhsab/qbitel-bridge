@@ -803,3 +803,260 @@ class TestGetApiKey:
         with patch("ai_engine.api.auth.initialize_auth", return_value=None):
             with pytest.raises(AuthenticationError, match="API key not configured"):
                 get_api_key()
+
+
+class TestAuthenticationServiceEdgeCases:
+    """Additional edge case tests for AuthenticationService."""
+
+    @pytest.mark.asyncio
+    async def test_get_session_redis_json_decode_error(self, auth_service, mock_redis):
+        """Test session retrieval with JSON decode error."""
+        auth_service.redis_client = mock_redis
+        mock_redis.get.return_value = "invalid json"
+
+        result = await auth_service.get_session("user123")
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_get_session_redis_exception(self, auth_service, mock_redis):
+        """Test session retrieval with Redis exception."""
+        auth_service.redis_client = mock_redis
+        mock_redis.get.side_effect = Exception("Redis error")
+
+        result = await auth_service.get_session("user123")
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_store_session_redis_exception(self, auth_service, mock_redis):
+        """Test session storage with Redis exception."""
+        auth_service.redis_client = mock_redis
+        mock_redis.setex.side_effect = Exception("Redis error")
+
+        # Should not raise exception
+        await auth_service.store_session("user123", {"data": "test"})
+
+    @pytest.mark.asyncio
+    async def test_revoke_token_redis_exception(self, auth_service, mock_redis):
+        """Test token revocation with Redis exception."""
+        auth_service.redis_client = mock_redis
+        mock_redis.setex.side_effect = Exception("Redis error")
+
+        data = {"user_id": "user123"}
+        token = auth_service.create_access_token(data)
+
+        # Should not raise exception
+        await auth_service.revoke_token(token)
+
+    @pytest.mark.asyncio
+    async def test_revoke_token_invalid_token(self, auth_service):
+        """Test revoking an invalid token."""
+        # Should handle gracefully
+        await auth_service.revoke_token("invalid_token")
+
+    @pytest.mark.asyncio
+    async def test_authenticate_user_analyst(self, auth_service):
+        """Test authentication with analyst user."""
+        user = await auth_service.authenticate_user(
+            "analyst", "DemoOnly_NotForProduction_456!"
+        )
+
+        assert user is not None
+        assert user["username"] == "analyst"
+        assert user["role"] == "security_analyst"
+
+    @pytest.mark.asyncio
+    async def test_authenticate_user_nonexistent(self, auth_service):
+        """Test authentication with nonexistent user."""
+        user = await auth_service.authenticate_user("nonexistent", "password")
+
+        assert user is None
+
+    def test_load_secret_key_short_warning(self, mock_config, caplog):
+        """Test warning for short secret key."""
+        mock_config.security.jwt_secret = "short"
+        mock_config.environment.value = "development"
+
+        with patch("ai_engine.api.auth.get_secrets_manager") as mock_secrets_mgr:
+            mock_mgr = Mock()
+            mock_mgr.get_secret.return_value = None
+            mock_secrets_mgr.return_value = mock_mgr
+
+            service = AuthenticationService(mock_config)
+
+            # Should generate ephemeral key
+            assert len(service.secret_key) >= 32
+
+    @pytest.mark.asyncio
+    async def test_store_session_with_none_data(self, auth_service):
+        """Test storing session with None data."""
+        await auth_service.store_session("user123", None, ttl=3600)
+
+        result = await auth_service.get_session("user123")
+        assert result == {}
+
+    @pytest.mark.asyncio
+    async def test_verify_token_blacklisted_expired_memory(self, auth_service):
+        """Test verifying token with expired blacklist entry."""
+        data = {"user_id": "user123"}
+        token = auth_service.create_access_token(data)
+
+        # Add expired blacklist entry
+        auth_service._token_blacklist[token] = datetime.utcnow() - timedelta(hours=1)
+
+        # Should not raise error (expired blacklist entry is pruned)
+        payload = await auth_service.verify_token(token)
+        assert payload["user_id"] == "user123"
+
+    def test_initialize_auth_short_key_warning(self, caplog):
+        """Test warning for short API key."""
+        config = Mock()
+        config.security = Mock()
+        config.security.api_key = "short_key"
+        config.environment = Mock()
+        config.environment.value = "development"
+
+        with patch("ai_engine.api.auth.get_secrets_manager") as mock_secrets_mgr:
+            mock_mgr = Mock()
+            mock_mgr.get_secret.return_value = None
+            mock_secrets_mgr.return_value = mock_mgr
+
+            with caplog.at_level(logging.WARNING):
+                api_key = initialize_auth(config)
+
+                assert api_key == "short_key"
+                assert any("too short" in record.message for record in caplog.records)
+
+    def test_initialize_auth_from_config(self):
+        """Test API key initialization from config."""
+        config = Mock()
+        config.security = Mock()
+        config.security.api_key = "config_api_key_at_least_32_characters"
+        config.environment = Mock()
+        config.environment.value = "development"
+
+        with patch("ai_engine.api.auth.get_secrets_manager") as mock_secrets_mgr:
+            mock_mgr = Mock()
+            mock_mgr.get_secret.return_value = None
+            mock_secrets_mgr.return_value = mock_mgr
+
+            api_key = initialize_auth(config)
+
+            assert api_key == "config_api_key_at_least_32_characters"
+
+    def test_initialize_auth_fallback_env_variable(self):
+        """Test API key initialization from API_KEY env variable."""
+        with patch("ai_engine.api.auth.get_secrets_manager") as mock_secrets_mgr:
+            mock_mgr = Mock()
+            mock_mgr.get_secret.return_value = None
+            mock_secrets_mgr.return_value = mock_mgr
+
+            with patch.dict(
+                "os.environ",
+                {"API_KEY": "fallback_api_key_at_least_32_chars"},
+                clear=True
+            ):
+                api_key = initialize_auth()
+
+                assert api_key == "fallback_api_key_at_least_32_chars"
+
+    @pytest.mark.asyncio
+    async def test_login_with_ip_and_user_agent(self):
+        """Test login with IP address and user agent."""
+        with patch("ai_engine.api.auth.get_auth_service") as mock_get_service:
+            mock_service = AsyncMock()
+            mock_service.authenticate_user = AsyncMock(
+                return_value={
+                    "user_id": "user123",
+                    "username": "testuser",
+                    "role": "analyst",
+                    "permissions": ["read"],
+                }
+            )
+            mock_service.create_access_token = Mock(return_value="access_token")
+            mock_service.create_refresh_token = Mock(return_value="refresh_token")
+            mock_service.store_session = AsyncMock()
+            mock_service.audit_logger = Mock()
+            mock_service.audit_logger.log_login_success = Mock()
+            mock_get_service.return_value = mock_service
+
+            result = await login(
+                "testuser",
+                "password",
+                ip_address="192.168.1.1",
+                user_agent="TestAgent/1.0"
+            )
+
+            assert result["access_token"] == "access_token"
+            # Verify session was stored with IP and user agent
+            mock_service.store_session.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_verify_token_generic_exception(self):
+        """Test token verification with generic exception."""
+        credentials = HTTPAuthorizationCredentials(
+            scheme="Bearer", credentials="token"
+        )
+
+        with patch("ai_engine.api.auth.get_auth_service") as mock_get_service:
+            mock_service = AsyncMock()
+            mock_service.verify_token = AsyncMock(
+                side_effect=Exception("Unexpected error")
+            )
+            mock_get_service.return_value = mock_service
+
+            with patch("ai_engine.api.auth.get_api_key", return_value="different_key"):
+                with pytest.raises(HTTPException) as exc_info:
+                    await verify_token(credentials)
+
+                assert exc_info.value.status_code == 401
+                assert "Authentication failed" in str(exc_info.value.detail)
+
+    @pytest.mark.asyncio
+    async def test_refresh_token_authentication_error(self):
+        """Test token refresh with authentication error."""
+        with patch("ai_engine.api.auth.get_auth_service") as mock_get_service:
+            mock_service = AsyncMock()
+            mock_service.verify_token = AsyncMock(
+                side_effect=AuthenticationError("Token expired")
+            )
+            mock_get_service.return_value = mock_service
+
+            with pytest.raises(HTTPException) as exc_info:
+                await refresh_access_token("expired_token")
+
+            assert exc_info.value.status_code == 401
+
+    def test_initialize_auth_secrets_manager_exception(self):
+        """Test API key initialization with secrets manager exception."""
+        with patch("ai_engine.api.auth.get_secrets_manager") as mock_secrets_mgr:
+            mock_secrets_mgr.side_effect = Exception("Secrets manager error")
+
+            with patch.dict(
+                "os.environ",
+                {"CRONOS_AI_API_KEY": "env_key_at_least_32_characters"},
+            ):
+                api_key = initialize_auth()
+
+                assert api_key == "env_key_at_least_32_characters"
+
+    @pytest.mark.asyncio
+    async def test_get_current_user_with_no_session(self):
+        """Test get current user when session doesn't exist."""
+        token_payload = {
+            "user_id": "user123",
+            "username": "testuser",
+            "role": "analyst",
+            "permissions": ["read"],
+        }
+
+        with patch("ai_engine.api.auth.get_auth_service") as mock_get_service:
+            mock_service = AsyncMock()
+            mock_service.get_session = AsyncMock(return_value=None)
+            mock_get_service.return_value = mock_service
+
+            result = await get_current_user(token_payload)
+
+            assert result["user_id"] == "user123"
+            assert result["session_data"] is None

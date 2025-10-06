@@ -636,3 +636,322 @@ class TestRunGRPCServer:
                 await run_grpc_server(mock_config)
 
             mock_server.stop.assert_called_once()
+
+
+class TestAIEngineGRPCServiceStreaming:
+    """Tests for streaming endpoints."""
+
+    @pytest.mark.asyncio
+    async def test_discover_protocol_stream(
+        self, mock_config, mock_ai_engine, mock_grpc_context
+    ):
+        """Test streaming protocol discovery."""
+        service = AIEngineGRPCService(mock_config)
+        service.ai_engine = mock_ai_engine
+
+        async def request_generator():
+            for i in range(3):
+                request = Mock()
+                request.data = base64.b64encode(f"data{i}".encode()).decode()
+                request.data_format = "base64"
+                yield request
+
+        responses = []
+        async for response in service.DiscoverProtocolStream(
+            request_generator(), mock_grpc_context
+        ):
+            responses.append(response)
+
+        assert len(responses) == 3
+        assert all(r["discovered_protocol"] == "http" for r in responses)
+
+    @pytest.mark.asyncio
+    async def test_detect_fields_stream(
+        self, mock_config, mock_ai_engine, mock_grpc_context
+    ):
+        """Test streaming field detection."""
+        service = AIEngineGRPCService(mock_config)
+        service.ai_engine = mock_ai_engine
+
+        async def request_generator():
+            for i in range(2):
+                request = Mock()
+                request.data = base64.b64encode(f"data{i}".encode()).decode()
+                request.data_format = "base64"
+                yield request
+
+        responses = []
+        async for response in service.DetectFieldsStream(
+            request_generator(), mock_grpc_context
+        ):
+            responses.append(response)
+
+        assert len(responses) == 2
+
+    @pytest.mark.asyncio
+    async def test_detect_anomalies_stream(
+        self, mock_config, mock_ai_engine, mock_grpc_context
+    ):
+        """Test streaming anomaly detection."""
+        service = AIEngineGRPCService(mock_config)
+        service.ai_engine = mock_ai_engine
+
+        async def request_generator():
+            for i in range(2):
+                request = Mock()
+                request.data = base64.b64encode(f"data{i}".encode()).decode()
+                request.data_format = "base64"
+                yield request
+
+        responses = []
+        async for response in service.DetectAnomaliesStream(
+            request_generator(), mock_grpc_context
+        ):
+            responses.append(response)
+
+        assert len(responses) == 2
+
+
+class TestGRPCServerAdvanced:
+    """Advanced tests for GRPCServer."""
+
+    @pytest.mark.asyncio
+    async def test_server_configuration(self, mock_config):
+        """Test server configuration options."""
+        mock_config.grpc_max_message_length = 20 * 1024 * 1024
+        server = GRPCServer(mock_config)
+
+        assert server.max_message_length == 20 * 1024 * 1024
+
+    @pytest.mark.asyncio
+    async def test_wait_for_termination(self, mock_config):
+        """Test server wait for termination."""
+        server = GRPCServer(mock_config)
+        server.server = AsyncMock()
+        server.server.wait_for_termination = AsyncMock()
+
+        await server.wait_for_termination()
+
+        server.server.wait_for_termination.assert_called_once()
+
+
+class TestDataEncodingEdgeCases:
+    """Test edge cases for data encoding/decoding."""
+
+    def test_decode_data_hex_with_spaces(self, mock_config):
+        """Test hex decoding with spaces."""
+        service = AIEngineGRPCService(mock_config)
+
+        data = "74 65 73 74"  # "test" in hex with spaces
+        decoded = service._decode_data(data, "hex")
+
+        assert decoded == b"test"
+
+    def test_decode_data_unknown_format(self, mock_config):
+        """Test decoding with unknown format."""
+        service = AIEngineGRPCService(mock_config)
+
+        decoded = service._decode_data("test", "unknown")
+
+        assert decoded == b"test"
+
+
+class TestServiceStatusEdgeCases:
+    """Test edge cases for service status."""
+
+    @pytest.mark.asyncio
+    async def test_get_service_status_no_requests(
+        self, mock_config, mock_ai_engine, mock_grpc_context
+    ):
+        """Test service status with no requests."""
+        service = AIEngineGRPCService(mock_config)
+        service.ai_engine = mock_ai_engine
+
+        request = Mock()
+        response = await service.GetServiceStatus(request, mock_grpc_context)
+
+        assert response["statistics"]["total_requests"] == 0
+        assert response["statistics"]["average_processing_time_ms"] == 0.0
+
+    @pytest.mark.asyncio
+    async def test_get_service_status_failure(self, mock_config, mock_grpc_context):
+        """Test service status retrieval failure."""
+        service = AIEngineGRPCService(mock_config)
+        service.ai_engine = None
+
+        with patch.object(service, "stats", side_effect=Exception("Stats error")):
+            request = Mock()
+            response = await service.GetServiceStatus(request, mock_grpc_context)
+
+            assert response == {}
+
+    @pytest.mark.asyncio
+    async def test_health_check_exception(self, mock_config, mock_grpc_context):
+        """Test health check with exception."""
+        service = AIEngineGRPCService(mock_config)
+
+        with patch.object(service, "ai_engine", side_effect=Exception("Health error")):
+            request = Mock()
+            response = await service.HealthCheck(request, mock_grpc_context)
+
+            assert response["status"] == "unhealthy"
+            assert "error" in response
+
+
+class TestBatchProcessingEdgeCases:
+    """Test edge cases for batch processing."""
+
+    @pytest.mark.asyncio
+    async def test_batch_process_no_engine(self, mock_config, mock_grpc_context):
+        """Test batch processing without engine."""
+        service = AIEngineGRPCService(mock_config)
+
+        request = Mock()
+        request.operation = "discovery"
+        request.data_items = []
+
+        response = await service.BatchProcess(request, mock_grpc_context)
+
+        assert response == {}
+
+    @pytest.mark.asyncio
+    async def test_batch_process_empty_items(
+        self, mock_config, mock_ai_engine, mock_grpc_context
+    ):
+        """Test batch processing with empty items."""
+        service = AIEngineGRPCService(mock_config)
+        service.ai_engine = mock_ai_engine
+
+        request = Mock()
+        request.operation = "discovery"
+        request.data_items = []
+
+        response = await service.BatchProcess(request, mock_grpc_context)
+
+        assert response["total_items"] == 0
+        assert response["successful_items"] == 0
+
+    @pytest.mark.asyncio
+    async def test_batch_process_partial_failure(
+        self, mock_config, mock_ai_engine, mock_grpc_context
+    ):
+        """Test batch processing with partial failures."""
+        service = AIEngineGRPCService(mock_config)
+        service.ai_engine = mock_ai_engine
+
+        # Make second call fail
+        call_count = [0]
+
+        async def failing_discover(*args, **kwargs):
+            call_count[0] += 1
+            if call_count[0] == 2:
+                raise Exception("Processing failed")
+            return {
+                "protocol_type": "http",
+                "confidence": 0.85,
+                "structure": {},
+                "metadata": {},
+                "processing_time": 0.1,
+            }
+
+        mock_ai_engine.discover_protocol = failing_discover
+
+        request = Mock()
+        request.operation = "discovery"
+        request.data_items = [
+            base64.b64encode(b"data1").decode(),
+            base64.b64encode(b"data2").decode(),
+            base64.b64encode(b"data3").decode(),
+        ]
+
+        response = await service.BatchProcess(request, mock_grpc_context)
+
+        assert response["total_items"] == 3
+        assert response["successful_items"] == 2
+        assert response["failed_items"] == 1
+
+
+class TestClientEdgeCases:
+    """Test edge cases for gRPC client."""
+
+    @pytest.mark.asyncio
+    async def test_connect_failure(self):
+        """Test client connection failure."""
+        client = AIEngineGRPCClient("localhost:50051")
+
+        with patch(
+            "ai_engine.api.grpc.grpc.aio.insecure_channel",
+            side_effect=Exception("Connection failed"),
+        ):
+            with pytest.raises(Exception, match="Connection failed"):
+                await client.connect()
+
+    @pytest.mark.asyncio
+    async def test_disconnect_without_connection(self):
+        """Test disconnecting without active connection."""
+        client = AIEngineGRPCClient("localhost:50051")
+
+        # Should not raise error
+        await client.disconnect()
+
+
+class TestServiceInitializationEdgeCases:
+    """Test edge cases for service initialization."""
+
+    @pytest.mark.asyncio
+    async def test_start_server_failure(self, mock_config):
+        """Test server start failure."""
+        server = GRPCServer(mock_config)
+
+        with patch(
+            "ai_engine.api.grpc.AIEngineGRPCService",
+            side_effect=Exception("Service init failed"),
+        ):
+            with pytest.raises(Exception, match="Service init failed"):
+                await server.start()
+
+    @pytest.mark.asyncio
+    async def test_stop_server_without_start(self, mock_config):
+        """Test stopping server that was never started."""
+        server = GRPCServer(mock_config)
+
+        # Should not raise error
+        await server.stop()
+
+
+class TestAnomalyDetectionWithBaseline:
+    """Test anomaly detection with various baseline configurations."""
+
+    @pytest.mark.asyncio
+    async def test_detect_anomalies_with_string_baseline(
+        self, mock_config, mock_ai_engine, mock_grpc_context
+    ):
+        """Test anomaly detection with string baseline."""
+        service = AIEngineGRPCService(mock_config)
+        service.ai_engine = mock_ai_engine
+
+        request = Mock()
+        request.data = base64.b64encode(b"test data").decode()
+        request.data_format = "base64"
+        request.baseline_data = base64.b64encode(b"baseline").decode()
+
+        response = await service.DetectAnomalies(request, mock_grpc_context)
+
+        assert "is_anomalous" in response
+
+    @pytest.mark.asyncio
+    async def test_detect_anomalies_with_empty_baseline(
+        self, mock_config, mock_ai_engine, mock_grpc_context
+    ):
+        """Test anomaly detection with empty baseline."""
+        service = AIEngineGRPCService(mock_config)
+        service.ai_engine = mock_ai_engine
+
+        request = Mock()
+        request.data = base64.b64encode(b"test data").decode()
+        request.data_format = "base64"
+        request.baseline_data = []
+
+        response = await service.DetectAnomalies(request, mock_grpc_context)
+
+        assert "is_anomalous" in response

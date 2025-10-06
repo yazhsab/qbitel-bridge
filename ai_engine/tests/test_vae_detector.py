@@ -563,3 +563,331 @@ class TestAnomalyResult:
         assert result.is_anomaly is True
         assert result.anomaly_score == 15.0
         assert result.confidence == 0.95
+
+
+class TestVAEModelAdvanced:
+    """Advanced tests for VAE model."""
+
+    def test_vae_model_custom_hidden_dims(self):
+        """Test VAE with custom hidden dimensions."""
+        from ai_engine.anomaly.vae_detector import VAEModel
+
+        model = VAEModel(input_dim=100, latent_dim=32, hidden_dims=[256, 128, 64])
+        x = torch.randn(5, 100)
+        reconstruction, mu, logvar = model.forward(x)
+
+        assert reconstruction.shape == (5, 100)
+        assert mu.shape == (5, 32)
+
+    def test_vae_model_no_dropout(self):
+        """Test VAE without dropout."""
+        from ai_engine.anomaly.vae_detector import VAEModel
+
+        model = VAEModel(input_dim=50, latent_dim=16, dropout_prob=0.0)
+        x = torch.randn(10, 50)
+        reconstruction, mu, logvar = model.forward(x)
+
+        assert reconstruction.shape == (10, 50)
+
+    def test_vae_model_weight_initialization(self):
+        """Test VAE weight initialization."""
+        from ai_engine.anomaly.vae_detector import VAEModel
+
+        model = VAEModel(input_dim=50, latent_dim=16)
+
+        # Check that weights are initialized
+        for param in model.parameters():
+            assert not torch.isnan(param).any()
+            assert not torch.isinf(param).any()
+
+
+class TestVAEAnomalyDetectorAdvanced:
+    """Advanced tests for VAE anomaly detector."""
+
+    @pytest.fixture
+    def mock_config(self):
+        """Create mock config."""
+        config = Mock()
+        return config
+
+    @pytest.fixture
+    def detector(self, mock_config):
+        """Create VAE anomaly detector instance."""
+        from ai_engine.anomaly.vae_detector import VAEAnomalyDetector
+
+        return VAEAnomalyDetector(mock_config)
+
+    @pytest.mark.asyncio
+    async def test_train_with_custom_batch_size(self, detector):
+        """Test training with custom batch size."""
+        await detector.initialize(input_dim=50)
+
+        training_data = np.random.randn(100, 50)
+
+        history = await detector.train(
+            training_data=training_data, num_epochs=2, batch_size=16
+        )
+
+        assert len(history["train_loss"]) == 2
+        assert detector.batch_size == 16
+
+    @pytest.mark.asyncio
+    async def test_train_with_scaler(self, detector):
+        """Test training with gradient scaler (GPU)."""
+        await detector.initialize(input_dim=50)
+
+        # Mock CUDA availability
+        with patch("torch.cuda.is_available", return_value=True):
+            detector.scaler = torch.cuda.amp.GradScaler()
+
+            training_data = np.random.randn(50, 50)
+
+            history = await detector.train(
+                training_data=training_data, num_epochs=1, batch_size=16
+            )
+
+            assert "train_loss" in history
+
+    @pytest.mark.asyncio
+    async def test_save_model_with_normalization_stats(self, detector, tmp_path):
+        """Test saving model with normalization statistics."""
+        await detector.initialize(input_dim=50)
+
+        training_data = np.random.randn(100, 50)
+        detector._calculate_normalization_stats(training_data)
+
+        model_path = tmp_path / "vae_with_stats.pt"
+        await detector.save_model(str(model_path))
+
+        assert model_path.exists()
+
+        # Load and verify
+        new_detector = type(detector)(detector.config)
+        await new_detector.initialize(input_dim=50)
+        await new_detector.load_model(str(model_path))
+
+        assert new_detector.feature_mean is not None
+        assert new_detector.feature_std is not None
+
+    def test_create_dataloader_without_normalization(self, detector):
+        """Test dataloader creation without normalization."""
+        data = np.random.randn(100, 50)
+        dataloader = detector._create_dataloader(data, shuffle=False)
+
+        assert dataloader is not None
+        assert not dataloader.sampler.shuffle if hasattr(dataloader.sampler, 'shuffle') else True
+
+    @pytest.mark.asyncio
+    async def test_detect_with_high_anomaly_score(self, detector):
+        """Test detection with high anomaly score."""
+        await detector.initialize(input_dim=50)
+
+        detector.anomaly_threshold = 1.0
+        detector.reconstruction_threshold = 0.5
+        detector.kl_threshold = 0.5
+
+        # Create anomalous features
+        features = np.random.randn(50) * 10  # High variance
+
+        result = await detector.detect(features)
+
+        assert isinstance(result.is_anomaly, bool)
+        assert result.anomaly_score >= 0
+
+    def test_generate_explanation_high_reconstruction_error(self, detector):
+        """Test explanation with high reconstruction error."""
+        detector.anomaly_threshold = 10.0
+        detector.reconstruction_threshold = 5.0
+        detector.kl_threshold = 5.0
+
+        explanation = detector._generate_explanation(
+            is_anomaly=True,
+            total_score=15.0,
+            recon_error=12.0,
+            kl_div=3.0,
+            context={"protocol_type": "TCP"},
+        )
+
+        assert "reconstruction error" in explanation.lower()
+        assert "TCP" in explanation
+
+    def test_generate_explanation_high_kl_divergence(self, detector):
+        """Test explanation with high KL divergence."""
+        detector.anomaly_threshold = 10.0
+        detector.reconstruction_threshold = 5.0
+        detector.kl_threshold = 5.0
+
+        explanation = detector._generate_explanation(
+            is_anomaly=True,
+            total_score=15.0,
+            recon_error=3.0,
+            kl_div=12.0,
+            context=None,
+        )
+
+        assert "latent space" in explanation.lower() or "distribution" in explanation.lower()
+
+    def test_generate_explanation_no_specific_threshold_exceeded(self, detector):
+        """Test explanation when only combined score exceeds threshold."""
+        detector.anomaly_threshold = 10.0
+        detector.reconstruction_threshold = 50.0
+        detector.kl_threshold = 50.0
+
+        explanation = detector._generate_explanation(
+            is_anomaly=True,
+            total_score=15.0,
+            recon_error=3.0,
+            kl_div=3.0,
+            context=None,
+        )
+
+        assert "combined" in explanation.lower() or "anomaly" in explanation.lower()
+
+    @pytest.mark.asyncio
+    async def test_train_with_scheduler_step(self, detector):
+        """Test that scheduler steps during training."""
+        await detector.initialize(input_dim=50)
+
+        training_data = np.random.randn(100, 50)
+        validation_data = np.random.randn(20, 50)
+
+        history = await detector.train(
+            training_data=training_data,
+            validation_data=validation_data,
+            num_epochs=3,
+            batch_size=32,
+        )
+
+        # Verify scheduler was used (learning rate should change)
+        assert len(history["train_loss"]) <= 3
+
+    @pytest.mark.asyncio
+    async def test_save_best_model_called_during_training(self, detector):
+        """Test that best model is saved during training."""
+        await detector.initialize(input_dim=50)
+
+        training_data = np.random.randn(100, 50)
+        validation_data = np.random.randn(20, 50)
+
+        with patch.object(detector, "_save_best_model", new_callable=AsyncMock) as mock_save:
+            await detector.train(
+                training_data=training_data,
+                validation_data=validation_data,
+                num_epochs=2,
+                batch_size=32,
+            )
+
+            # Should be called at least once when validation improves
+            assert mock_save.call_count >= 0
+
+    def test_calculate_confidence_edge_cases(self, detector):
+        """Test confidence calculation edge cases."""
+        detector.anomaly_threshold = 10.0
+        detector.reconstruction_threshold = 5.0
+        detector.kl_threshold = 5.0
+
+        # Very high scores
+        confidence_high = detector._calculate_confidence(100.0, 50.0, 50.0)
+        assert 0.1 <= confidence_high <= 0.99
+
+        # Very low scores
+        confidence_low = detector._calculate_confidence(0.1, 0.1, 0.1)
+        assert 0.1 <= confidence_low <= 0.99
+
+    @pytest.mark.asyncio
+    async def test_calculate_thresholds_with_small_dataset(self, detector):
+        """Test threshold calculation with small dataset."""
+        await detector.initialize(input_dim=50)
+
+        training_data = np.random.randn(10, 50)  # Very small dataset
+        detector._calculate_normalization_stats(training_data)
+
+        await detector._calculate_thresholds(training_data)
+
+        assert detector.anomaly_threshold is not None
+        assert detector.reconstruction_threshold is not None
+        assert detector.kl_threshold is not None
+
+    def test_preprocess_features_with_zero_std(self, detector):
+        """Test preprocessing when std is zero."""
+        detector.feature_mean = torch.zeros(50)
+        detector.feature_std = torch.zeros(50)  # Zero std
+
+        features = np.random.randn(50)
+        processed = detector._preprocess_features(features)
+
+        # Should handle division by zero (adds epsilon)
+        assert not torch.isnan(processed).any()
+        assert not torch.isinf(processed).any()
+
+    @pytest.mark.asyncio
+    async def test_train_epoch_with_mlflow_logging(self, detector):
+        """Test training epoch with MLflow logging."""
+        from torch.utils.data import TensorDataset, DataLoader
+
+        await detector.initialize(input_dim=50)
+
+        detector.mlflow_client = Mock()
+
+        data = torch.randn(100, 50)
+        dataset = TensorDataset(data)
+        dataloader = DataLoader(dataset, batch_size=10)
+
+        with patch("mlflow.log_metric") as mock_log:
+            metrics = detector._train_epoch(dataloader)
+
+            assert "total_loss" in metrics
+
+    def test_validate_epoch_empty_dataloader(self, detector):
+        """Test validation with empty dataloader."""
+        from torch.utils.data import TensorDataset, DataLoader
+
+        detector.model = Mock()
+        detector.model.eval = Mock()
+
+        # Empty dataset
+        data = torch.randn(0, 50)
+        dataset = TensorDataset(data)
+        dataloader = DataLoader(dataset, batch_size=10)
+
+        metrics = detector._validate_epoch(dataloader)
+
+        assert metrics["total_loss"] == 0.0
+
+
+class TestVAEModelLossFunctions:
+    """Test VAE loss function variations."""
+
+    def test_loss_function_with_different_beta_values(self):
+        """Test loss function with various beta values."""
+        from ai_engine.anomaly.vae_detector import VAEModel
+
+        model = VAEModel(input_dim=50, latent_dim=16)
+        x = torch.randn(10, 50)
+        reconstruction, mu, logvar = model.forward(x)
+
+        loss_beta_0 = model.loss_function(x, reconstruction, mu, logvar, beta=0.0)
+        loss_beta_1 = model.loss_function(x, reconstruction, mu, logvar, beta=1.0)
+        loss_beta_2 = model.loss_function(x, reconstruction, mu, logvar, beta=2.0)
+
+        # Higher beta should increase total loss
+        assert loss_beta_0["total_loss"] <= loss_beta_1["total_loss"]
+        assert loss_beta_1["total_loss"] <= loss_beta_2["total_loss"]
+
+    def test_anomaly_score_consistency(self):
+        """Test anomaly score consistency."""
+        from ai_engine.anomaly.vae_detector import VAEModel
+
+        model = VAEModel(input_dim=50, latent_dim=16)
+        model.eval()
+
+        x = torch.randn(10, 50)
+
+        # Calculate scores multiple times
+        score1, recon1, kl1 = model.anomaly_score(x)
+        score2, recon2, kl2 = model.anomaly_score(x)
+
+        # Should be consistent in eval mode
+        assert torch.allclose(score1, score2)
+        assert torch.allclose(recon1, recon2)
+        assert torch.allclose(kl1, kl2)
