@@ -29,7 +29,7 @@ from .exceptions import (
 from ..discovery.pcfg_inference import PCFGInference
 from ..discovery.protocol_classifier import ProtocolClassifier
 from ..detection.field_detector import FieldDetector
-from ..anomaly.vae_detector import VAEAnomalyDetector
+from ..anomaly.vae_detector import VAEDetector
 from ..anomaly.ensemble_detector import EnsembleAnomalyDetector
 from ..features.extractors import FeatureExtractor
 from typing import TYPE_CHECKING

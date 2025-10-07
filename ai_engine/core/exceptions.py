@@ -393,3 +393,11 @@ class EnsembleException(CronosAIException):
     def __init__(self, message: str, ensemble_id: Optional[str] = None):
         context = {"ensemble_id": ensemble_id} if ensemble_id else {}
         super().__init__(message, error_code="ENSEMBLE_ERROR", context=context)
+
+
+class ThreatAnalysisException(CronosAIException):
+    """Exception raised for threat analysis operations."""
+
+    def __init__(self, message: str, threat_type: Optional[str] = None):
+        context = {"threat_type": threat_type} if threat_type else {}
+        super().__init__(message, error_code="THREAT_ANALYSIS_ERROR", context=context)

@@ -405,6 +405,24 @@ def require_permission(permission: str):
     return check_permission
 
 
+def require_permissions(permissions: list):
+    """Dependency to require multiple permissions."""
+
+    async def check_permissions(
+        current_user: Dict[str, Any] = Depends(get_current_user),
+    ):
+        user_permissions = current_user.get("permissions", [])
+        missing_permissions = [p for p in permissions if p not in user_permissions]
+        if missing_permissions:
+            raise HTTPException(
+                status_code=403, 
+                detail=f"Missing required permissions: {', '.join(missing_permissions)}"
+            )
+        return current_user
+
+    return check_permissions
+
+
 def require_role(role: str):
     """Dependency to require specific role."""
 

@@ -223,7 +223,7 @@ class VAEModel(nn.Module):
         return total_score, recon_error, kl_div
 
 
-class VAEAnomalyDetector:
+class VAEDetector:
     """
     VAE-based anomaly detection system.
 

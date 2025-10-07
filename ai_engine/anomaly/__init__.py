@@ -6,13 +6,13 @@ VAE, LSTM, and ensemble methods for identifying unusual patterns
 in protocol communications.
 """
 
-from .vae_detector import VAEAnomalyDetector, VAEModel
+from .vae_detector import VAEDetector, VAEModel
 from .lstm_detector import LSTMAnomalyDetector, LSTMModel
 from .isolation_forest import IsolationForestDetector
 from .ensemble_detector import EnsembleAnomalyDetector, AnomalyResult
 
 __all__ = [
-    "VAEAnomalyDetector",
+    "VAEDetector",
     "VAEModel",
     "LSTMAnomalyDetector",
     "LSTMModel",

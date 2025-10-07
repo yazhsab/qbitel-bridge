@@ -1,0 +1,14 @@
+[run]
+include =
+    */ai_engine/security/monitoring.py
+    */ai_engine/security/resilience/timeout_manager.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.
+    if TYPE_CHECKING:
+fail_under = 80
