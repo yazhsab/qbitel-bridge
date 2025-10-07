@@ -1,482 +1,697 @@
 """
-Comprehensive Unit Tests for VAE Anomaly Detector
-Tests for ai_engine/anomaly/vae_detector.py
+CRONOS AI Engine - VAE Detector Comprehensive Tests
+
+Comprehensive test suite for Variational Autoencoder anomaly detection.
 """
 
 import pytest
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-import tempfile
-from pathlib import Path
+from unittest.mock import Mock, patch, MagicMock
+from typing import Dict, List, Any, Optional
 
 from ai_engine.anomaly.vae_detector import (
-    VAEModel,
-    VAEAnomalyDetector,
-    AnomalyResult,
+    VAEDetector,
+    VAEEncoder,
+    VAEDecoder,
+    VAELoss,
+    VAEConfig,
+    VAEAnomalyResult,
+    VAEException,
 )
-from ai_engine.core.config import Config
-from ai_engine.core.exceptions import AnomalyDetectionException, ModelException
 
 
-class TestAnomalyResult:
-    """Test AnomalyResult dataclass."""
-    
+class TestVAEConfig:
+    """Test VAEConfig dataclass."""
+
+    def test_vae_config_creation(self):
+        """Test creating VAEConfig instance."""
+        config = VAEConfig(
+            input_dim=100,
+            hidden_dims=[64, 32],
+            latent_dim=16,
+            learning_rate=0.001,
+            batch_size=32,
+            epochs=100,
+            beta=1.0,
+            reconstruction_loss_weight=1.0,
+            kl_loss_weight=1.0,
+            anomaly_threshold=0.1,
+            device="cpu"
+        )
+        
+        assert config.input_dim == 100
+        assert config.hidden_dims == [64, 32]
+        assert config.latent_dim == 16
+        assert config.learning_rate == 0.001
+        assert config.batch_size == 32
+        assert config.epochs == 100
+        assert config.beta == 1.0
+        assert config.reconstruction_loss_weight == 1.0
+        assert config.kl_loss_weight == 1.0
+        assert config.anomaly_threshold == 0.1
+        assert config.device == "cpu"
+
+    def test_vae_config_defaults(self):
+        """Test VAEConfig with default values."""
+        config = VAEConfig()
+        
+        assert config.input_dim == 784
+        assert config.hidden_dims == [512, 256]
+        assert config.latent_dim == 20
+        assert config.learning_rate == 0.001
+        assert config.batch_size == 128
+        assert config.epochs == 50
+        assert config.beta == 1.0
+        assert config.device == "cpu"
+
+    def test_vae_config_validation(self):
+        """Test VAEConfig validation."""
+        # Valid config
+        config = VAEConfig(
+            input_dim=100,
+            hidden_dims=[64, 32],
+            latent_dim=16,
+            learning_rate=0.001,
+            batch_size=32,
+            epochs=100
+        )
+        assert config.is_valid() is True
+        
+        # Invalid config - negative values
+        invalid_config = VAEConfig(
+            input_dim=-1,
+            hidden_dims=[64, 32],
+            latent_dim=16,
+            learning_rate=-0.001,
+            batch_size=-32,
+            epochs=-100
+        )
+        assert invalid_config.is_valid() is False
+
+    def test_vae_config_device_detection(self):
+        """Test VAEConfig device detection."""
+        config = VAEConfig(device="auto")
+        
+        # Should detect available device
+        assert config.device in ["cpu", "cuda", "mps"]
+
+
+class TestVAEEncoder:
+    """Test VAEEncoder neural network."""
+
+    @pytest.fixture
+    def encoder(self):
+        """Create VAEEncoder instance."""
+        return VAEEncoder(
+            input_dim=100,
+            hidden_dims=[64, 32],
+            latent_dim=16
+        )
+
+    def test_encoder_initialization(self, encoder):
+        """Test VAEEncoder initialization."""
+        assert encoder.input_dim == 100
+        assert encoder.hidden_dims == [64, 32]
+        assert encoder.latent_dim == 16
+        assert len(encoder.encoder_layers) == 2  # 2 hidden layers
+        assert encoder.mu_layer is not None
+        assert encoder.logvar_layer is not None
+
+    def test_encoder_forward(self, encoder):
+        """Test VAEEncoder forward pass."""
+        batch_size = 32
+        input_tensor = torch.randn(batch_size, 100)
+        
+        mu, logvar = encoder(input_tensor)
+        
+        assert mu.shape == (batch_size, 16)
+        assert logvar.shape == (batch_size, 16)
+        assert torch.isfinite(mu).all()
+        assert torch.isfinite(logvar).all()
+
+    def test_encoder_reparameterization(self, encoder):
+        """Test VAEEncoder reparameterization trick."""
+        batch_size = 32
+        mu = torch.randn(batch_size, 16)
+        logvar = torch.randn(batch_size, 16)
+        
+        z = encoder.reparameterize(mu, logvar)
+        
+        assert z.shape == (batch_size, 16)
+        assert torch.isfinite(z).all()
+
+    def test_encoder_different_input_sizes(self, encoder):
+        """Test VAEEncoder with different input sizes."""
+        # Test with different batch sizes
+        for batch_size in [1, 16, 64, 128]:
+            input_tensor = torch.randn(batch_size, 100)
+            mu, logvar = encoder(input_tensor)
+            
+            assert mu.shape == (batch_size, 16)
+            assert logvar.shape == (batch_size, 16)
+
+    def test_encoder_gradient_flow(self, encoder):
+        """Test VAEEncoder gradient flow."""
+        batch_size = 32
+        input_tensor = torch.randn(batch_size, 100, requires_grad=True)
+        
+        mu, logvar = encoder(input_tensor)
+        loss = mu.sum() + logvar.sum()
+        loss.backward()
+        
+        assert input_tensor.grad is not None
+        assert torch.isfinite(input_tensor.grad).all()
+
+
+class TestVAEDecoder:
+    """Test VAEDecoder neural network."""
+
+    @pytest.fixture
+    def decoder(self):
+        """Create VAEDecoder instance."""
+        return VAEDecoder(
+            latent_dim=16,
+            hidden_dims=[32, 64],
+            output_dim=100
+        )
+
+    def test_decoder_initialization(self, decoder):
+        """Test VAEDecoder initialization."""
+        assert decoder.latent_dim == 16
+        assert decoder.hidden_dims == [32, 64]
+        assert decoder.output_dim == 100
+        assert len(decoder.decoder_layers) == 2  # 2 hidden layers
+        assert decoder.output_layer is not None
+
+    def test_decoder_forward(self, decoder):
+        """Test VAEDecoder forward pass."""
+        batch_size = 32
+        latent_tensor = torch.randn(batch_size, 16)
+        
+        output = decoder(latent_tensor)
+        
+        assert output.shape == (batch_size, 100)
+        assert torch.isfinite(output).all()
+
+    def test_decoder_different_batch_sizes(self, decoder):
+        """Test VAEDecoder with different batch sizes."""
+        for batch_size in [1, 16, 64, 128]:
+            latent_tensor = torch.randn(batch_size, 16)
+            output = decoder(latent_tensor)
+            
+            assert output.shape == (batch_size, 100)
+
+    def test_decoder_gradient_flow(self, decoder):
+        """Test VAEDecoder gradient flow."""
+        batch_size = 32
+        latent_tensor = torch.randn(batch_size, 16, requires_grad=True)
+        
+        output = decoder(latent_tensor)
+        loss = output.sum()
+        loss.backward()
+        
+        assert latent_tensor.grad is not None
+        assert torch.isfinite(latent_tensor.grad).all()
+
+
+class TestVAELoss:
+    """Test VAELoss computation."""
+
+    @pytest.fixture
+    def vae_loss(self):
+        """Create VAELoss instance."""
+        return VAELoss(
+            reconstruction_loss_weight=1.0,
+            kl_loss_weight=1.0,
+            beta=1.0
+        )
+
+    def test_vae_loss_initialization(self, vae_loss):
+        """Test VAELoss initialization."""
+        assert vae_loss.reconstruction_loss_weight == 1.0
+        assert vae_loss.kl_loss_weight == 1.0
+        assert vae_loss.beta == 1.0
+
+    def test_reconstruction_loss(self, vae_loss):
+        """Test reconstruction loss computation."""
+        batch_size = 32
+        input_data = torch.randn(batch_size, 100)
+        reconstructed_data = torch.randn(batch_size, 100)
+        
+        recon_loss = vae_loss.reconstruction_loss(input_data, reconstructed_data)
+        
+        assert recon_loss.shape == ()
+        assert torch.isfinite(recon_loss).all()
+        assert recon_loss >= 0
+
+    def test_kl_divergence_loss(self, vae_loss):
+        """Test KL divergence loss computation."""
+        batch_size = 32
+        mu = torch.randn(batch_size, 16)
+        logvar = torch.randn(batch_size, 16)
+        
+        kl_loss = vae_loss.kl_divergence_loss(mu, logvar)
+        
+        assert kl_loss.shape == ()
+        assert torch.isfinite(kl_loss).all()
+        assert kl_loss >= 0
+
+    def test_total_loss(self, vae_loss):
+        """Test total VAE loss computation."""
+        batch_size = 32
+        input_data = torch.randn(batch_size, 100)
+        reconstructed_data = torch.randn(batch_size, 100)
+        mu = torch.randn(batch_size, 16)
+        logvar = torch.randn(batch_size, 16)
+        
+        total_loss = vae_loss(input_data, reconstructed_data, mu, logvar)
+        
+        assert total_loss.shape == ()
+        assert torch.isfinite(total_loss).all()
+        assert total_loss >= 0
+
+    def test_loss_components(self, vae_loss):
+        """Test individual loss components."""
+        batch_size = 32
+        input_data = torch.randn(batch_size, 100)
+        reconstructed_data = torch.randn(batch_size, 100)
+        mu = torch.randn(batch_size, 16)
+        logvar = torch.randn(batch_size, 16)
+        
+        total_loss, recon_loss, kl_loss = vae_loss.compute_losses(
+            input_data, reconstructed_data, mu, logvar
+        )
+        
+        assert total_loss.shape == ()
+        assert recon_loss.shape == ()
+        assert kl_loss.shape == ()
+        assert torch.isfinite(total_loss).all()
+        assert torch.isfinite(recon_loss).all()
+        assert torch.isfinite(kl_loss).all()
+
+    def test_loss_with_different_weights(self):
+        """Test VAE loss with different weight configurations."""
+        # Test with different beta values
+        for beta in [0.1, 0.5, 1.0, 2.0]:
+            vae_loss = VAELoss(beta=beta)
+            
+            batch_size = 32
+            input_data = torch.randn(batch_size, 100)
+            reconstructed_data = torch.randn(batch_size, 100)
+            mu = torch.randn(batch_size, 16)
+            logvar = torch.randn(batch_size, 16)
+            
+            total_loss = vae_loss(input_data, reconstructed_data, mu, logvar)
+            assert torch.isfinite(total_loss).all()
+
+
+class TestVAEAnomalyResult:
+    """Test VAEAnomalyResult dataclass."""
+
     def test_anomaly_result_creation(self):
-        """Test creating anomaly result."""
-        result = AnomalyResult(
+        """Test creating VAEAnomalyResult instance."""
+        result = VAEAnomalyResult(
             is_anomaly=True,
             anomaly_score=0.85,
-            reconstruction_error=0.6,
-            kl_divergence=0.25,
-            confidence=0.9,
-            explanation="High reconstruction error detected",
-            processing_time=0.15
+            reconstruction_error=0.15,
+            kl_divergence=0.05,
+            confidence=0.92,
+            threshold=0.1,
+            metadata={
+                "input_shape": (32, 100),
+                "latent_dim": 16,
+                "model_version": "1.0.0"
+            }
         )
         
         assert result.is_anomaly is True
         assert result.anomaly_score == 0.85
-        assert result.reconstruction_error == 0.6
-        assert result.kl_divergence == 0.25
-        assert result.confidence == 0.9
-        assert "reconstruction error" in result.explanation
-        assert result.processing_time == 0.15
+        assert result.reconstruction_error == 0.15
+        assert result.kl_divergence == 0.05
+        assert result.confidence == 0.92
+        assert result.threshold == 0.1
+        assert result.metadata["input_shape"] == (32, 100)
 
-
-class TestVAEModel:
-    """Test VAEModel class."""
-    
-    @pytest.fixture
-    def vae_model(self):
-        """Create VAE model instance."""
-        return VAEModel(
-            input_dim=100,
-            latent_dim=32,
-            hidden_dims=[128, 64],
-            dropout_prob=0.1,
-            use_batch_norm=True
-        )
-    
-    def test_vae_model_initialization(self, vae_model):
-        """Test VAE model initialization."""
-        assert vae_model.input_dim == 100
-        assert vae_model.latent_dim == 32
-        assert vae_model.use_batch_norm is True
-        assert vae_model.encoder is not None
-        assert vae_model.decoder is not None
-        assert vae_model.fc_mu is not None
-        assert vae_model.fc_logvar is not None
-    
-    def test_vae_model_default_hidden_dims(self):
-        """Test VAE model with default hidden dimensions."""
-        model = VAEModel(input_dim=100, latent_dim=32)
-        
-        assert model.input_dim == 100
-        assert model.latent_dim == 32
-    
-    def test_vae_encode(self, vae_model):
-        """Test VAE encoding."""
-        x = torch.randn(10, 100)
-        
-        mu, logvar = vae_model.encode(x)
-        
-        assert mu.shape == (10, 32)
-        assert logvar.shape == (10, 32)
-    
-    def test_vae_reparameterize_training(self, vae_model):
-        """Test reparameterization during training."""
-        vae_model.train()
-        mu = torch.randn(10, 32)
-        logvar = torch.randn(10, 32)
-        
-        z = vae_model.reparameterize(mu, logvar)
-        
-        assert z.shape == (10, 32)
-    
-    def test_vae_reparameterize_inference(self, vae_model):
-        """Test reparameterization during inference."""
-        vae_model.eval()
-        mu = torch.randn(10, 32)
-        logvar = torch.randn(10, 32)
-        
-        z = vae_model.reparameterize(mu, logvar)
-        
-        # During inference, should return mu
-        assert torch.allclose(z, mu)
-    
-    def test_vae_decode(self, vae_model):
-        """Test VAE decoding."""
-        z = torch.randn(10, 32)
-        
-        reconstruction = vae_model.decode(z)
-        
-        assert reconstruction.shape == (10, 100)
-        # Output should be in [0, 1] due to sigmoid
-        assert torch.all(reconstruction >= 0)
-        assert torch.all(reconstruction <= 1)
-    
-    def test_vae_forward(self, vae_model):
-        """Test VAE forward pass."""
-        x = torch.randn(10, 100)
-        
-        reconstruction, mu, logvar = vae_model.forward(x)
-        
-        assert reconstruction.shape == (10, 100)
-        assert mu.shape == (10, 32)
-        assert logvar.shape == (10, 32)
-    
-    def test_vae_loss_function(self, vae_model):
-        """Test VAE loss calculation."""
-        x = torch.rand(10, 100)  # Use rand for [0,1] range
-        reconstruction, mu, logvar = vae_model.forward(x)
-        
-        losses = vae_model.loss_function(x, reconstruction, mu, logvar, beta=1.0)
-        
-        assert "total_loss" in losses
-        assert "reconstruction_loss" in losses
-        assert "kl_loss" in losses
-        assert losses["total_loss"].item() >= 0
-    
-    def test_vae_loss_function_with_beta(self, vae_model):
-        """Test VAE loss with beta parameter."""
-        x = torch.rand(10, 100)
-        reconstruction, mu, logvar = vae_model.forward(x)
-        
-        losses_beta1 = vae_model.loss_function(x, reconstruction, mu, logvar, beta=1.0)
-        losses_beta2 = vae_model.loss_function(x, reconstruction, mu, logvar, beta=2.0)
-        
-        # Higher beta should increase total loss
-        assert losses_beta2["total_loss"].item() >= losses_beta1["total_loss"].item()
-    
-    def test_vae_anomaly_score(self, vae_model):
-        """Test anomaly score calculation."""
-        vae_model.eval()
-        x = torch.rand(10, 100)
-        
-        total_score, recon_error, kl_div = vae_model.anomaly_score(x)
-        
-        assert total_score.shape == (10,)
-        assert recon_error.shape == (10,)
-        assert kl_div.shape == (10,)
-        assert torch.all(total_score >= 0)
-
-
-class TestVAEAnomalyDetector:
-    """Test VAEAnomalyDetector class."""
-    
-    @pytest.fixture
-    def config(self):
-        """Create test configuration."""
-        return Mock(spec=Config)
-    
-    @pytest.fixture
-    def detector(self, config):
-        """Create VAE anomaly detector instance."""
-        return VAEAnomalyDetector(config)
-    
-    def test_detector_initialization(self, detector):
-        """Test detector initialization."""
-        assert detector.config is not None
-        assert detector.input_dim == 100
-        assert detector.latent_dim == 32
-        assert detector.model is None
-        assert detector.device is not None
-        assert detector.feature_mean is None
-        assert detector.feature_std is None
-    
-    @pytest.mark.asyncio
-    async def test_initialize_detector(self, detector):
-        """Test detector initialization."""
-        await detector.initialize(input_dim=50)
-        
-        assert detector.input_dim == 50
-        assert detector.model is not None
-        assert isinstance(detector.model, VAEModel)
-        assert detector.optimizer is not None
-        assert detector.scheduler is not None
-    
-    @pytest.mark.asyncio
-    async def test_initialize_detector_failure(self, detector):
-        """Test detector initialization failure."""
-        with patch('ai_engine.anomaly.vae_detector.VAEModel', side_effect=Exception("Init failed")):
-            with pytest.raises(ModelException):
-                await detector.initialize(input_dim=50)
-    
-    @pytest.mark.asyncio
-    async def test_detect_anomaly(self, detector):
-        """Test anomaly detection."""
-        await detector.initialize(input_dim=50)
-        
-        # Set thresholds
-        detector.anomaly_threshold = 10.0
-        detector.reconstruction_threshold = 8.0
-        detector.kl_threshold = 2.0
-        
-        features = np.random.randn(50).astype(np.float32)
-        
-        result = await detector.detect(features)
-        
-        assert isinstance(result, AnomalyResult)
-        assert isinstance(result.is_anomaly, bool)
-        assert result.anomaly_score >= 0
-        assert result.reconstruction_error >= 0
-        assert result.kl_divergence >= 0
-        assert 0 <= result.confidence <= 1
-        assert result.processing_time > 0
-    
-    @pytest.mark.asyncio
-    async def test_detect_without_initialization(self, detector):
-        """Test detection without initialization."""
-        features = np.random.randn(50).astype(np.float32)
-        
-        with pytest.raises(AnomalyDetectionException):
-            await detector.detect(features)
-    
-    @pytest.mark.asyncio
-    async def test_detect_with_context(self, detector):
-        """Test detection with context."""
-        await detector.initialize(input_dim=50)
-        detector.anomaly_threshold = 10.0
-        
-        features = np.random.randn(50).astype(np.float32)
-        context = {"protocol_type": "http", "source": "network"}
-        
-        result = await detector.detect(features, context=context)
-        
-        assert isinstance(result, AnomalyResult)
-        assert "http" in result.explanation or "Normal" in result.explanation
-    
-    @pytest.mark.asyncio
-    async def test_train_detector(self, detector):
-        """Test detector training."""
-        await detector.initialize(input_dim=50)
-        
-        # Create training data
-        training_data = np.random.randn(100, 50).astype(np.float32)
-        
-        history = await detector.train(
-            training_data=training_data,
-            num_epochs=2,
-            batch_size=32
-        )
-        
-        assert "train_loss" in history
-        assert "train_recon_loss" in history
-        assert "train_kl_loss" in history
-        assert len(history["train_loss"]) > 0
-        assert detector.anomaly_threshold is not None
-    
-    @pytest.mark.asyncio
-    async def test_train_with_validation(self, detector):
-        """Test training with validation data."""
-        await detector.initialize(input_dim=50)
-        
-        training_data = np.random.randn(100, 50).astype(np.float32)
-        validation_data = np.random.randn(20, 50).astype(np.float32)
-        
-        history = await detector.train(
-            training_data=training_data,
-            validation_data=validation_data,
-            num_epochs=2,
-            batch_size=32,
-            early_stopping_patience=5
-        )
-        
-        assert "val_loss" in history
-        assert len(history["val_loss"]) > 0
-    
-    @pytest.mark.asyncio
-    async def test_train_without_initialization(self, detector):
-        """Test training without initialization."""
-        training_data = np.random.randn(100, 50).astype(np.float32)
-        
-        with pytest.raises(AnomalyDetectionException):
-            await detector.train(training_data=training_data, num_epochs=2)
-    
-    @pytest.mark.asyncio
-    async def test_save_model(self, detector):
-        """Test saving model."""
-        await detector.initialize(input_dim=50)
-        detector.anomaly_threshold = 10.0
-        detector.reconstruction_threshold = 8.0
-        detector.kl_threshold = 2.0
-        
-        with tempfile.NamedTemporaryFile(suffix='.pt', delete=False) as tmp:
-            model_path = tmp.name
-        
-        try:
-            await detector.save_model(model_path)
-            
-            # Verify file exists
-            assert Path(model_path).exists()
-        finally:
-            Path(model_path).unlink(missing_ok=True)
-    
-    @pytest.mark.asyncio
-    async def test_load_model(self, detector):
-        """Test loading model."""
-        await detector.initialize(input_dim=50)
-        detector.anomaly_threshold = 10.0
-        detector.reconstruction_threshold = 8.0
-        detector.kl_threshold = 2.0
-        
-        with tempfile.NamedTemporaryFile(suffix='.pt', delete=False) as tmp:
-            model_path = tmp.name
-        
-        try:
-            # Save model
-            await detector.save_model(model_path)
-            
-            # Create new detector and load
-            new_detector = VAEAnomalyDetector(detector.config)
-            await new_detector.initialize(input_dim=50)
-            await new_detector.load_model(model_path)
-            
-            assert new_detector.anomaly_threshold == 10.0
-            assert new_detector.reconstruction_threshold == 8.0
-            assert new_detector.kl_threshold == 2.0
-        finally:
-            Path(model_path).unlink(missing_ok=True)
-    
-    @pytest.mark.asyncio
-    async def test_load_model_failure(self, detector):
-        """Test loading model failure."""
-        await detector.initialize(input_dim=50)
-        
-        with pytest.raises(ModelException):
-            await detector.load_model("/nonexistent/model.pt")
-    
-    def test_preprocess_features_single(self, detector):
-        """Test preprocessing single feature vector."""
-        features = np.random.randn(50).astype(np.float32)
-        
-        tensor = detector._preprocess_features(features)
-        
-        assert tensor.shape == (1, 50)
-        assert tensor.device == detector.device
-    
-    def test_preprocess_features_batch(self, detector):
-        """Test preprocessing batch of features."""
-        features = np.random.randn(10, 50).astype(np.float32)
-        
-        tensor = detector._preprocess_features(features)
-        
-        assert tensor.shape == (10, 50)
-    
-    def test_preprocess_features_with_normalization(self, detector):
-        """Test preprocessing with normalization."""
-        detector.feature_mean = torch.zeros(50, device=detector.device)
-        detector.feature_std = torch.ones(50, device=detector.device)
-        
-        features = np.random.randn(50).astype(np.float32)
-        
-        tensor = detector._preprocess_features(features)
-        
-        assert tensor.shape == (1, 50)
-    
-    def test_calculate_normalization_stats(self, detector):
-        """Test calculating normalization statistics."""
-        training_data = np.random.randn(100, 50).astype(np.float32)
-        
-        detector._calculate_normalization_stats(training_data)
-        
-        assert detector.feature_mean is not None
-        assert detector.feature_std is not None
-        assert detector.feature_mean.shape == (50,)
-        assert detector.feature_std.shape == (50,)
-    
-    def test_create_dataloader(self, detector):
-        """Test creating data loader."""
-        data = np.random.randn(100, 50).astype(np.float32)
-        detector.feature_mean = torch.zeros(50)
-        detector.feature_std = torch.ones(50)
-        
-        dataloader = detector._create_dataloader(data, shuffle=True)
-        
-        assert dataloader is not None
-        assert dataloader.batch_size == detector.batch_size
-    
-    def test_is_anomalous_with_thresholds(self, detector):
-        """Test anomaly determination with thresholds."""
-        detector.anomaly_threshold = 10.0
-        detector.reconstruction_threshold = 8.0
-        detector.kl_threshold = 2.0
-        
-        # Normal case
-        is_anomaly = detector._is_anomalous(5.0, 4.0, 1.0)
-        assert is_anomaly is False
-        
-        # Anomalous case
-        is_anomaly = detector._is_anomalous(15.0, 10.0, 3.0)
-        assert is_anomaly is True
-    
-    def test_is_anomalous_without_thresholds(self, detector):
-        """Test anomaly determination without thresholds."""
-        # Should use fallback heuristic
-        is_anomaly = detector._is_anomalous(15.0, 10.0, 5.0)
-        assert is_anomaly is True
-        
-        is_anomaly = detector._is_anomalous(5.0, 3.0, 2.0)
-        assert is_anomaly is False
-    
-    def test_calculate_confidence(self, detector):
-        """Test confidence calculation."""
-        detector.anomaly_threshold = 10.0
-        detector.reconstruction_threshold = 8.0
-        detector.kl_threshold = 2.0
-        
-        confidence = detector._calculate_confidence(5.0, 4.0, 1.0)
-        
-        assert 0.1 <= confidence <= 0.99
-    
-    def test_calculate_confidence_without_thresholds(self, detector):
-        """Test confidence calculation without thresholds."""
-        confidence = detector._calculate_confidence(5.0, 4.0, 1.0)
-        
-        assert confidence == 0.5
-    
-    def test_generate_explanation_normal(self, detector):
-        """Test generating explanation for normal pattern."""
-        explanation = detector._generate_explanation(
+    def test_anomaly_result_defaults(self):
+        """Test VAEAnomalyResult with default values."""
+        result = VAEAnomalyResult(
             is_anomaly=False,
-            total_score=5.0,
-            recon_error=3.0,
-            kl_div=2.0,
-            context=None
+            anomaly_score=0.05
         )
         
-        assert "Normal pattern" in explanation
-    
-    def test_generate_explanation_anomaly(self, detector):
-        """Test generating explanation for anomaly."""
-        detector.reconstruction_threshold = 5.0
-        detector.kl_threshold = 3.0
-        
-        explanation = detector._generate_explanation(
+        assert result.reconstruction_error is None
+        assert result.kl_divergence is None
+        assert result.confidence is None
+        assert result.threshold is None
+        assert result.metadata == {}
+
+    def test_anomaly_result_serialization(self):
+        """Test VAEAnomalyResult serialization."""
+        result = VAEAnomalyResult(
             is_anomaly=True,
-            total_score=15.0,
-            recon_error=10.0,
-            kl_div=5.0,
-            context=None
+            anomaly_score=0.85,
+            reconstruction_error=0.15,
+            kl_divergence=0.05,
+            confidence=0.92,
+            threshold=0.1,
+            metadata={"model_version": "1.0.0"}
         )
         
-        assert "Anomaly detected" in explanation
-    
-    def test_generate_explanation_with_context(self, detector):
-        """Test generating explanation with context."""
-        detector.reconstruction_threshold = 5.0
+        serialized = result.to_dict()
+        assert serialized["is_anomaly"] is True
+        assert serialized["anomaly_score"] == 0.85
+        assert serialized["reconstruction_error"] == 0.15
+        assert serialized["metadata"]["model_version"] == "1.0.0"
+
+    def test_anomaly_result_deserialization(self):
+        """Test VAEAnomalyResult deserialization."""
+        data = {
+            "is_anomaly": False,
+            "anomaly_score": 0.05,
+            "reconstruction_error": 0.02,
+            "kl_divergence": 0.01,
+            "confidence": 0.88,
+            "threshold": 0.1,
+            "metadata": {"model_version": "1.0.0"}
+        }
         
-        explanation = detector._generate_explanation(
-            is_anomaly=True,
-            total_score=15.0,
-            recon_error=10.0,
-            kl_div=2.0,
-            context={"protocol_type": "http"}
-        )
-        
-        assert "http" in explanation
+        result = VAEAnomalyResult.from_dict(data)
+        assert result.is_anomaly is False
+        assert result.anomaly_score == 0.05
+        assert result.reconstruction_error == 0.02
+        assert result.metadata["model_version"] == "1.0.0"
 
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+class TestVAEDetector:
+    """Test VAEDetector main functionality."""
+
+    @pytest.fixture
+    def vae_config(self):
+        """Create VAE configuration."""
+        return VAEConfig(
+            input_dim=100,
+            hidden_dims=[64, 32],
+            latent_dim=16,
+            learning_rate=0.001,
+            batch_size=32,
+            epochs=10,  # Reduced for testing
+            beta=1.0,
+            anomaly_threshold=0.1,
+            device="cpu"
+        )
+
+    @pytest.fixture
+    def vae_detector(self, vae_config):
+        """Create VAEDetector instance."""
+        return VAEDetector(vae_config)
+
+    def test_vae_detector_initialization(self, vae_detector, vae_config):
+        """Test VAEDetector initialization."""
+        assert vae_detector.config == vae_config
+        assert vae_detector.encoder is not None
+        assert vae_detector.decoder is not None
+        assert vae_detector.loss_fn is not None
+        assert vae_detector.optimizer is not None
+        assert vae_detector.is_trained is False
+
+    def test_vae_detector_forward_pass(self, vae_detector):
+        """Test VAEDetector forward pass."""
+        batch_size = 32
+        input_data = torch.randn(batch_size, 100)
+        
+        reconstructed, mu, logvar = vae_detector.forward(input_data)
+        
+        assert reconstructed.shape == (batch_size, 100)
+        assert mu.shape == (batch_size, 16)
+        assert logvar.shape == (batch_size, 16)
+        assert torch.isfinite(reconstructed).all()
+        assert torch.isfinite(mu).all()
+        assert torch.isfinite(logvar).all()
+
+    def test_vae_detector_encode(self, vae_detector):
+        """Test VAEDetector encoding."""
+        batch_size = 32
+        input_data = torch.randn(batch_size, 100)
+        
+        mu, logvar = vae_detector.encode(input_data)
+        
+        assert mu.shape == (batch_size, 16)
+        assert logvar.shape == (batch_size, 16)
+
+    def test_vae_detector_decode(self, vae_detector):
+        """Test VAEDetector decoding."""
+        batch_size = 32
+        latent_data = torch.randn(batch_size, 16)
+        
+        reconstructed = vae_detector.decode(latent_data)
+        
+        assert reconstructed.shape == (batch_size, 100)
+
+    def test_vae_detector_sample(self, vae_detector):
+        """Test VAEDetector sampling from latent space."""
+        batch_size = 32
+        
+        samples = vae_detector.sample(batch_size)
+        
+        assert samples.shape == (batch_size, 100)
+        assert torch.isfinite(samples).all()
+
+    def test_vae_detector_train_step(self, vae_detector):
+        """Test VAEDetector training step."""
+        batch_size = 32
+        input_data = torch.randn(batch_size, 100)
+        
+        loss = vae_detector.train_step(input_data)
+        
+        assert torch.isfinite(loss).all()
+        assert loss >= 0
+
+    def test_vae_detector_eval_step(self, vae_detector):
+        """Test VAEDetector evaluation step."""
+        batch_size = 32
+        input_data = torch.randn(batch_size, 100)
+        
+        loss = vae_detector.eval_step(input_data)
+        
+        assert torch.isfinite(loss).all()
+        assert loss >= 0
+
+    def test_vae_detector_fit(self, vae_detector):
+        """Test VAEDetector training."""
+        # Create synthetic training data
+        train_data = torch.randn(1000, 100)
+        
+        # Train the model
+        vae_detector.fit(train_data)
+        
+        assert vae_detector.is_trained is True
+
+    def test_vae_detector_predict_anomaly(self, vae_detector):
+        """Test VAEDetector anomaly prediction."""
+        # Train the model first
+        train_data = torch.randn(1000, 100)
+        vae_detector.fit(train_data)
+        
+        # Test with normal data
+        normal_data = torch.randn(32, 100)
+        result = vae_detector.predict_anomaly(normal_data)
+        
+        assert isinstance(result, VAEAnomalyResult)
+        assert result.is_anomaly is not None
+        assert result.anomaly_score is not None
+        assert 0 <= result.anomaly_score <= 1
+
+    def test_vae_detector_predict_anomaly_batch(self, vae_detector):
+        """Test VAEDetector batch anomaly prediction."""
+        # Train the model first
+        train_data = torch.randn(1000, 100)
+        vae_detector.fit(train_data)
+        
+        # Test with batch data
+        batch_data = torch.randn(64, 100)
+        results = vae_detector.predict_anomaly_batch(batch_data)
+        
+        assert len(results) == 64
+        assert all(isinstance(result, VAEAnomalyResult) for result in results)
+
+    def test_vae_detector_compute_reconstruction_error(self, vae_detector):
+        """Test VAEDetector reconstruction error computation."""
+        batch_size = 32
+        input_data = torch.randn(batch_size, 100)
+        
+        recon_error = vae_detector.compute_reconstruction_error(input_data)
+        
+        assert recon_error.shape == (batch_size,)
+        assert torch.isfinite(recon_error).all()
+        assert (recon_error >= 0).all()
+
+    def test_vae_detector_compute_kl_divergence(self, vae_detector):
+        """Test VAEDetector KL divergence computation."""
+        batch_size = 32
+        input_data = torch.randn(batch_size, 100)
+        
+        kl_div = vae_detector.compute_kl_divergence(input_data)
+        
+        assert kl_div.shape == (batch_size,)
+        assert torch.isfinite(kl_div).all()
+        assert (kl_div >= 0).all()
+
+    def test_vae_detector_save_load(self, vae_detector, tmp_path):
+        """Test VAEDetector model saving and loading."""
+        # Train the model first
+        train_data = torch.randn(1000, 100)
+        vae_detector.fit(train_data)
+        
+        # Save the model
+        model_path = tmp_path / "vae_model.pt"
+        vae_detector.save_model(str(model_path))
+        
+        # Create new detector and load the model
+        new_detector = VAEDetector(vae_detector.config)
+        new_detector.load_model(str(model_path))
+        
+        # Test that loaded model produces same results
+        test_data = torch.randn(32, 100)
+        original_result = vae_detector.predict_anomaly(test_data)
+        loaded_result = new_detector.predict_anomaly(test_data)
+        
+        assert abs(original_result.anomaly_score - loaded_result.anomaly_score) < 1e-6
+
+    def test_vae_detector_get_model_info(self, vae_detector):
+        """Test VAEDetector model information."""
+        info = vae_detector.get_model_info()
+        
+        assert "config" in info
+        assert "encoder_params" in info
+        assert "decoder_params" in info
+        assert "total_params" in info
+        assert "is_trained" in info
+
+    def test_vae_detector_set_anomaly_threshold(self, vae_detector):
+        """Test VAEDetector anomaly threshold setting."""
+        new_threshold = 0.2
+        vae_detector.set_anomaly_threshold(new_threshold)
+        
+        assert vae_detector.config.anomaly_threshold == new_threshold
+
+    def test_vae_detector_error_handling(self, vae_detector):
+        """Test VAEDetector error handling."""
+        # Test with invalid input
+        with pytest.raises(VAEException):
+            vae_detector.predict_anomaly(None)
+        
+        # Test with wrong input shape
+        with pytest.raises(VAEException):
+            vae_detector.predict_anomaly(torch.randn(32, 50))  # Wrong dimension
+
+    def test_vae_detector_not_trained_error(self, vae_detector):
+        """Test VAEDetector error when not trained."""
+        test_data = torch.randn(32, 100)
+        
+        with pytest.raises(VAEException):
+            vae_detector.predict_anomaly(test_data)
+
+    def test_vae_detector_different_input_sizes(self, vae_detector):
+        """Test VAEDetector with different input sizes."""
+        # Train the model first
+        train_data = torch.randn(1000, 100)
+        vae_detector.fit(train_data)
+        
+        # Test with different batch sizes
+        for batch_size in [1, 16, 64, 128]:
+            test_data = torch.randn(batch_size, 100)
+            result = vae_detector.predict_anomaly(test_data)
+            
+            assert isinstance(result, VAEAnomalyResult)
+            assert result.anomaly_score is not None
+
+    def test_vae_detector_anomaly_detection_accuracy(self, vae_detector):
+        """Test VAEDetector anomaly detection accuracy."""
+        # Create normal and anomalous data
+        normal_data = torch.randn(1000, 100)
+        anomalous_data = torch.randn(100, 100) + 5  # Shifted distribution
+        
+        # Train on normal data
+        vae_detector.fit(normal_data)
+        
+        # Test anomaly detection
+        normal_results = vae_detector.predict_anomaly_batch(normal_data[:100])
+        anomalous_results = vae_detector.predict_anomaly_batch(anomalous_data)
+        
+        # Anomalous data should have higher anomaly scores
+        normal_scores = [result.anomaly_score for result in normal_results]
+        anomalous_scores = [result.anomaly_score for result in anomalous_results]
+        
+        assert np.mean(anomalous_scores) > np.mean(normal_scores)
+
+    def test_vae_detector_concurrent_access(self, vae_detector):
+        """Test VAEDetector concurrent access."""
+        # Train the model first
+        train_data = torch.randn(1000, 100)
+        vae_detector.fit(train_data)
+        
+        def predict_anomaly():
+            test_data = torch.randn(32, 100)
+            return vae_detector.predict_anomaly(test_data)
+        
+        # Run concurrent operations
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            futures = [executor.submit(predict_anomaly) for _ in range(10)]
+            results = [future.result() for future in futures]
+        
+        # All operations should complete successfully
+        assert len(results) == 10
+        assert all(isinstance(result, VAEAnomalyResult) for result in results)
+
+    def test_vae_detector_memory_efficiency(self, vae_detector):
+        """Test VAEDetector memory efficiency."""
+        # Test with large batch size
+        large_batch = torch.randn(1000, 100)
+        
+        # Should not cause memory issues
+        try:
+            vae_detector.forward(large_batch)
+        except RuntimeError as e:
+            if "out of memory" in str(e).lower():
+                pytest.skip("Insufficient memory for large batch test")
+            else:
+                raise
+
+    def test_vae_detector_gradient_flow(self, vae_detector):
+        """Test VAEDetector gradient flow during training."""
+        batch_size = 32
+        input_data = torch.randn(batch_size, 100)
+        
+        # Perform training step
+        loss = vae_detector.train_step(input_data)
+        
+        # Check that gradients are computed
+        for param in vae_detector.encoder.parameters():
+            if param.grad is not None:
+                assert torch.isfinite(param.grad).all()
+        
+        for param in vae_detector.decoder.parameters():
+            if param.grad is not None:
+                assert torch.isfinite(param.grad).all()
+
+    def test_vae_detector_hyperparameter_sensitivity(self):
+        """Test VAEDetector sensitivity to hyperparameters."""
+        # Test different beta values
+        for beta in [0.1, 0.5, 1.0, 2.0]:
+            config = VAEConfig(
+                input_dim=100,
+                hidden_dims=[64, 32],
+                latent_dim=16,
+                beta=beta,
+                epochs=5  # Reduced for testing
+            )
+            
+            detector = VAEDetector(config)
+            train_data = torch.randn(500, 100)
+            detector.fit(train_data)
+            
+            # Should train successfully with different beta values
+            assert detector.is_trained is True

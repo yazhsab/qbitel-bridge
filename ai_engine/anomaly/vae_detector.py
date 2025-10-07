@@ -751,3 +751,95 @@ class VAEDetector:
         # This would save to a temporary location during training
         # The actual save_model method is used for final model persistence
         pass
+
+
+# Additional classes for backward compatibility
+class VAEAnomalyDetector(VAEDetector):
+    """Alias for VAEDetector for backward compatibility."""
+    pass
+
+
+class VAEEncoder(nn.Module):
+    """Standalone VAE encoder for backward compatibility."""
+    
+    def __init__(self, input_dim: int, latent_dim: int = 32, hidden_dims: List[int] = None):
+        super(VAEEncoder, self).__init__()
+        
+        if hidden_dims is None:
+            hidden_dims = [512, 256, 128]
+        
+        # Encoder layers
+        encoder_layers = []
+        prev_dim = input_dim
+        
+        for hidden_dim in hidden_dims:
+            encoder_layers.extend([nn.Linear(prev_dim, hidden_dim), nn.ReLU()])
+            prev_dim = hidden_dim
+        
+        self.encoder = nn.Sequential(*encoder_layers)
+        
+        # Latent space parameters
+        self.fc_mu = nn.Linear(hidden_dims[-1], latent_dim)
+        self.fc_logvar = nn.Linear(hidden_dims[-1], latent_dim)
+    
+    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Forward pass through encoder."""
+        h = self.encoder(x)
+        mu = self.fc_mu(h)
+        logvar = self.fc_logvar(h)
+        return mu, logvar
+
+
+class VAEDecoder(nn.Module):
+    """Standalone VAE decoder for backward compatibility."""
+    
+    def __init__(self, latent_dim: int = 32, output_dim: int = 100, hidden_dims: List[int] = None):
+        super(VAEDecoder, self).__init__()
+        
+        if hidden_dims is None:
+            hidden_dims = [128, 256, 512]
+        
+        # Decoder layers
+        decoder_layers = []
+        prev_dim = latent_dim
+        
+        for hidden_dim in hidden_dims:
+            decoder_layers.extend([nn.Linear(prev_dim, hidden_dim), nn.ReLU()])
+            prev_dim = hidden_dim
+        
+        # Final reconstruction layer
+        decoder_layers.extend([
+            nn.Linear(prev_dim, output_dim),
+            nn.Sigmoid()
+        ])
+        
+        self.decoder = nn.Sequential(*decoder_layers)
+    
+    def forward(self, z: torch.Tensor) -> torch.Tensor:
+        """Forward pass through decoder."""
+        return self.decoder(z)
+
+
+class VAE(nn.Module):
+    """Complete VAE model for backward compatibility."""
+    
+    def __init__(self, input_dim: int, latent_dim: int = 32, hidden_dims: List[int] = None):
+        super(VAE, self).__init__()
+        
+        self.encoder = VAEEncoder(input_dim, latent_dim, hidden_dims)
+        self.decoder = VAEDecoder(latent_dim, input_dim, hidden_dims[::-1] if hidden_dims else None)
+    
+    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Forward pass through VAE."""
+        mu, logvar = self.encoder(x)
+        
+        # Reparameterization trick
+        if self.training:
+            std = torch.exp(0.5 * logvar)
+            eps = torch.randn_like(std)
+            z = mu + eps * std
+        else:
+            z = mu
+        
+        reconstruction = self.decoder(z)
+        return reconstruction, mu, logvar

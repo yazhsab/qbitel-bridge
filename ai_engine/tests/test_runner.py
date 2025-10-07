@@ -18,7 +18,7 @@ import subprocess
 from . import setup_test_environment, cleanup_test_environment, TestConfig
 
 
-class TestRunner:
+class TestRunnerClass:
     """
     Comprehensive test runner for CRONOS AI Engine.
 
@@ -706,6 +706,12 @@ def main():
     except Exception as e:
         print(f"Test run failed: {e}")
         sys.exit(1)
+
+
+# Factory function to create TestRunner instances
+def create_test_runner(config: Optional[Dict[str, Any]] = None) -> TestRunnerClass:
+    """Create a TestRunner instance."""
+    return TestRunnerClass(config)
 
 
 if __name__ == "__main__":

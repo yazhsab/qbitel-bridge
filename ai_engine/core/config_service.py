@@ -24,12 +24,42 @@ from contextlib import asynccontextmanager
 
 import yaml
 import aiofiles
-import etcd3
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
+
+# Optional imports with fallbacks
+try:
+    import etcd3
+    ETCD3_AVAILABLE = True
+except ImportError:
+    etcd3 = None
+    ETCD3_AVAILABLE = False
+
+try:
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler
+    WATCHDOG_AVAILABLE = True
+except ImportError:
+    Observer = None
+    FileSystemEventHandler = None
+    WATCHDOG_AVAILABLE = False
 
 from .exceptions import ConfigException, ValidationException
 from .structured_logging import get_logger
+
+
+# Additional exception classes for backward compatibility
+class ConfigValidationError(ValidationException):
+    """Raised when configuration validation fails."""
+    pass
+
+
+class ConfigLoadError(ConfigException):
+    """Raised when configuration loading fails."""
+    pass
+
+
+class ConfigSaveError(ConfigException):
+    """Raised when configuration saving fails."""
+    pass
 
 
 class ConfigEnvironment(str, Enum):
@@ -166,30 +196,46 @@ class ConfigWatcher:
             self.logger.info("Stopped configuration watching")
 
 
-class ConfigFileHandler(FileSystemEventHandler):
-    """File system event handler for configuration changes."""
+if WATCHDOG_AVAILABLE:
+    class ConfigFileHandler(FileSystemEventHandler):
+        """File system event handler for configuration changes."""
+        
+        def __init__(self, config_service: "ConfigurationService"):
+            self.config_service = config_service
+            self.logger = get_logger(__name__)
 
-    def __init__(self, config_service: "ConfigurationService"):
-        self.config_service = config_service
-        self.logger = get_logger(__name__)
+        def on_modified(self, event):
+            """Handle file modification events."""
+            if event.is_directory:
+                return
 
-    def on_modified(self, event):
-        """Handle file modification events."""
-        if event.is_directory:
-            return
+            file_path = Path(event.src_path)
+            if file_path.suffix in [".json", ".yaml", ".yml", ".toml"]:
+                asyncio.create_task(self.config_service.reload_file(file_path))
 
-        file_path = Path(event.src_path)
-        if file_path.suffix in [".json", ".yaml", ".yml", ".toml"]:
-            asyncio.create_task(self.config_service.reload_file(file_path))
+        def on_created(self, event):
+            """Handle file creation events."""
+            if event.is_directory:
+                return
 
-    def on_created(self, event):
-        """Handle file creation events."""
-        if event.is_directory:
-            return
+            file_path = Path(event.src_path)
+            if file_path.suffix in [".json", ".yaml", ".yml", ".toml"]:
+                asyncio.create_task(self.config_service.load_file(file_path))
+else:
+    class ConfigFileHandler:
+        """File system event handler for configuration changes (watchdog not available)."""
+        
+        def __init__(self, config_service: "ConfigurationService"):
+            self.config_service = config_service
+            self.logger = get_logger(__name__)
 
-        file_path = Path(event.src_path)
-        if file_path.suffix in [".json", ".yaml", ".yml", ".toml"]:
-            asyncio.create_task(self.config_service.load_file(file_path))
+        def on_modified(self, event):
+            """Handle file modification events (no-op when watchdog not available)."""
+            pass
+
+        def on_created(self, event):
+            """Handle file creation events (no-op when watchdog not available)."""
+            pass
 
 
 class ConfigurationStore:
@@ -482,6 +528,8 @@ class EtcdConfigurationStore(ConfigurationStore):
 
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
+        if not ETCD3_AVAILABLE:
+            raise ImportError("etcd3 is required for EtcdConfigStore but not available")
         self.etcd_client = etcd3.client(
             host=config.get("host", "localhost"),
             port=config.get("port", 2379),
@@ -1114,3 +1162,65 @@ def watch_config(key_pattern: str, callback: Callable[[str, Any, Any], None]):
     service = get_config_service()
     if service:
         service.watch(key_pattern, callback)
+
+
+# Additional classes for backward compatibility
+class EnvironmentConfigLoader:
+    """Environment variable configuration loader."""
+    
+    def __init__(self, prefix: str = "CRONOS_AI_"):
+        self.prefix = prefix
+    
+    def load(self) -> Dict[str, Any]:
+        """Load configuration from environment variables."""
+        config = {}
+        for key, value in os.environ.items():
+            if key.startswith(self.prefix):
+                config_key = key[len(self.prefix):].lower()
+                config[config_key] = value
+        return config
+
+
+class EtcdConfigBackend:
+    """etcd configuration backend (alias for EtcdConfigurationStore)."""
+    
+    def __init__(self, config: Dict[str, Any]):
+        self.store = EtcdConfigurationStore(config)
+    
+    async def get(self, key: str, default: Any = None) -> Any:
+        """Get configuration value."""
+        return await self.store.get(key, default)
+    
+    async def set(self, key: str, value: Any) -> bool:
+        """Set configuration value."""
+        return await self.store.set(key, value)
+
+
+class FileConfigBackend:
+    """File configuration backend (alias for FileConfigurationStore)."""
+    
+    def __init__(self, config: Dict[str, Any]):
+        self.store = FileConfigurationStore(config)
+    
+    async def get(self, key: str, default: Any = None) -> Any:
+        """Get configuration value."""
+        return await self.store.get(key, default)
+    
+    async def set(self, key: str, value: Any) -> bool:
+        """Set configuration value."""
+        return await self.store.set(key, value)
+
+
+class ConfigWatcher:
+    """Configuration watcher (alias for ConfigurationWatcher)."""
+    
+    def __init__(self, config_service: ConfigurationService):
+        self.watcher = ConfigurationWatcher(config_service)
+    
+    async def start_watching(self, paths: List[Path]):
+        """Start watching configuration files."""
+        await self.watcher.start_watching(paths)
+    
+    async def stop_watching(self):
+        """Stop watching configuration files."""
+        await self.watcher.stop_watching()

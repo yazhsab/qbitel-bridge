@@ -24,6 +24,9 @@ from ai_engine.core.dependency_manager import (
     DependencyValidator,
     DependencyMonitor,
     DependencyHealthCheck,
+    DependencyDefinition,
+    DependencyScope,
+    DependencyLifecycle,
 )
 
 

@@ -292,6 +292,33 @@ class CircuitBreaker:
             raise
 
 
+# Configuration class for ErrorHandler
+class ErrorHandlerConfig:
+    """Configuration for error handler."""
+    
+    def __init__(self, 
+                 max_retries: int = 3,
+                 retry_delay: float = 1.0,
+                 circuit_breaker_threshold: int = 5,
+                 circuit_breaker_timeout: float = 60.0,
+                 enable_metrics: bool = True,
+                 log_level: int = logging.ERROR,
+                 enable_persistent_storage: bool = True,
+                 enable_sentry: bool = True,
+                 max_error_records: int = 10000,
+                 circuit_breaker_enabled: bool = True):
+        self.max_retries = max_retries
+        self.retry_delay = retry_delay
+        self.circuit_breaker_threshold = circuit_breaker_threshold
+        self.circuit_breaker_timeout = circuit_breaker_timeout
+        self.enable_metrics = enable_metrics
+        self.log_level = log_level
+        self.enable_persistent_storage = enable_persistent_storage
+        self.enable_sentry = enable_sentry
+        self.max_error_records = max_error_records
+        self.circuit_breaker_enabled = circuit_breaker_enabled
+
+
 class ErrorHandler:
     """
     Comprehensive error handling system with recovery strategies,
@@ -299,12 +326,17 @@ class ErrorHandler:
     """
 
     def __init__(
-        self, enable_persistent_storage: bool = True, enable_sentry: bool = True
+        self, config: Optional[ErrorHandlerConfig] = None, enable_persistent_storage: bool = True, enable_sentry: bool = True
     ):
         self.logger = logging.getLogger(__name__)
+        
+        # Store config
+        if config is None:
+            config = ErrorHandlerConfig()
+        self.config = config
 
         # Error tracking
-        self.error_records: deque = deque(maxlen=10000)  # Keep last 10k errors
+        self.error_records: deque = deque(maxlen=config.max_error_records)  # Keep last N errors
         self.error_stats = defaultdict(int)
         self.component_errors = defaultdict(lambda: defaultdict(int))
 
@@ -316,8 +348,8 @@ class ErrorHandler:
         self.classification_rules = self._initialize_classification_rules()
 
         # External integrations
-        self.enable_persistent_storage = enable_persistent_storage
-        self.enable_sentry = enable_sentry
+        self.enable_persistent_storage = config.enable_persistent_storage
+        self.enable_sentry = config.enable_sentry
         self.persistent_storage = None
         self.sentry_tracker = None
 
@@ -975,3 +1007,56 @@ class HealthMonitor:
 
 # Global health monitor
 health_monitor = HealthMonitor(error_handler)
+
+
+# Additional classes for backward compatibility
+class ErrorLogger:
+    """Error logger for structured error logging."""
+    
+    def __init__(self, name: str = __name__):
+        self.logger = logging.getLogger(name)
+    
+    def log_error(self, error: Exception, context: Dict[str, Any] = None):
+        """Log an error with context."""
+        self.logger.error(f"Error: {error}", extra=context or {})
+    
+    def log_warning(self, message: str, context: Dict[str, Any] = None):
+        """Log a warning with context."""
+        self.logger.warning(message, extra=context or {})
+    
+    def log_info(self, message: str, context: Dict[str, Any] = None):
+        """Log info with context."""
+        self.logger.info(message, extra=context or {})
+
+
+class ErrorMetrics:
+    """Error metrics collection and reporting."""
+    
+    def __init__(self):
+        self.error_counts = defaultdict(int)
+        self.error_timestamps = []
+    
+    def record_error(self, error_type: str):
+        """Record an error occurrence."""
+        self.error_counts[error_type] += 1
+        self.error_timestamps.append(time.time())
+    
+    def get_error_rate(self, time_window: float = 3600) -> float:
+        """Get error rate in errors per hour."""
+        cutoff_time = time.time() - time_window
+        recent_errors = [t for t in self.error_timestamps if t > cutoff_time]
+        return len(recent_errors) / (time_window / 3600)
+    
+    def get_error_summary(self) -> Dict[str, Any]:
+        """Get error summary statistics."""
+        return {
+            "total_errors": sum(self.error_counts.values()),
+            "error_types": dict(self.error_counts),
+            "error_rate_per_hour": self.get_error_rate()
+        }
+
+
+# Additional classes for backward compatibility
+class ErrorHandlerException(Exception):
+    """Exception raised by error handler."""
+    pass

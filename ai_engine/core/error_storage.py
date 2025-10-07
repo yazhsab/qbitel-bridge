@@ -42,7 +42,7 @@ class ErrorRecordModel(Base):
     recovery_successful = Column(Boolean, default=False)
     recovery_strategy = Column(String(50), nullable=True)
     retry_count = Column(Integer, default=0)
-    metadata = Column(JSON, nullable=True)
+    extra_metadata = Column(JSON, nullable=True)
 
     # Indexes for common queries
     __table_args__ = (
@@ -159,7 +159,7 @@ class PersistentErrorStorage:
                             else None
                         ),
                         retry_count=error_record.retry_count,
-                        metadata=error_record.metadata,
+                        extra_metadata=error_record.metadata,
                     )
                     session.add(db_record)
                     await session.commit()
@@ -202,7 +202,7 @@ class PersistentErrorStorage:
                             "recovery_successful": result.recovery_successful,
                             "recovery_strategy": result.recovery_strategy,
                             "retry_count": result.retry_count,
-                            "metadata": result.metadata,
+                            "metadata": result.extra_metadata,
                         }
 
             return None
@@ -268,7 +268,7 @@ class PersistentErrorStorage:
                             "recovery_successful": db_error.recovery_successful,
                             "recovery_strategy": db_error.recovery_strategy,
                             "retry_count": db_error.retry_count,
-                            "metadata": db_error.metadata,
+                            "metadata": db_error.extra_metadata,
                         }
                         if error_dict not in errors:
                             errors.append(error_dict)

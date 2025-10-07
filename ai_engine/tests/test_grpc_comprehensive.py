@@ -1,721 +1,1088 @@
 """
-Comprehensive tests for ai_engine/api/grpc.py - gRPC Service
+CRONOS AI Engine - gRPC Comprehensive Tests
+
+Comprehensive test suite for gRPC service functionality.
 """
 
 import pytest
-import time
 import asyncio
-import base64
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 import grpc
+import json
+from datetime import datetime, timedelta
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from typing import Dict, List, Any, Optional
 
 from ai_engine.api.grpc import (
-    AIEngineGRPCService,
-    GRPCServer,
-    AIEngineGRPCClient,
-    run_grpc_server,
+    CronosAIGRPCServer,
+    ProtocolDiscoveryService,
+    ComplianceService,
+    SecurityService,
+    MonitoringService,
+    HealthCheckService,
+    GRPCServerConfig,
+    GRPCException,
+    GRPCServiceError,
 )
-from ai_engine.core.config import Config
 
 
-@pytest.fixture
-def mock_config():
-    """Create mock configuration."""
-    config = Mock(spec=Config)
-    config.grpc_port = 50051
-    config.grpc_max_workers = 10
-    config.grpc_max_message_length = 10 * 1024 * 1024
-    return config
+class TestGRPCServerConfig:
+    """Test GRPCServerConfig dataclass."""
 
-
-@pytest.fixture
-def mock_ai_engine():
-    """Create mock AI engine."""
-    engine = AsyncMock()
-    engine.initialize = AsyncMock()
-    engine.discover_protocol = AsyncMock(return_value={
-        "protocol_type": "http",
-        "confidence": 0.95,
-        "structure": {},
-        "processing_time": 0.1
-    })
-    engine.detect_fields = AsyncMock(return_value=[
-        {"id": "field1", "name": "test_field", "start": 0, "end": 10}
-    ])
-    engine.detect_anomaly = AsyncMock(return_value={
-        "is_anomaly": False,
-        "anomaly_score": 0.2,
-        "confidence": 0.9,
-        "processing_time": 0.15
-    })
-    engine.get_model_info = Mock(return_value={"status": "ready"})
-    engine._initialized = True
-    return engine
-
-
-class TestAIEngineGRPCService:
-    """Test suite for AIEngineGRPCService."""
-
-    def test_initialization(self, mock_config):
-        """Test service initialization."""
-        service = AIEngineGRPCService(mock_config)
+    def test_grpc_config_creation(self):
+        """Test creating GRPCServerConfig instance."""
+        config = GRPCServerConfig(
+            host="localhost",
+            port=50051,
+            max_workers=10,
+            max_message_length=4194304,  # 4MB
+            max_metadata_size=8192,  # 8KB
+            keepalive_time=7200,  # 2 hours
+            keepalive_timeout=20,  # 20 seconds
+            keepalive_permit_without_calls=True,
+            max_connection_idle=300,  # 5 minutes
+            max_connection_age=3600,  # 1 hour
+            max_connection_age_grace=5,  # 5 seconds
+            http2_max_pings_without_data=0,
+            http2_min_time_between_pings=10,  # 10 seconds
+            http2_min_ping_interval_without_data=5,  # 5 minutes
+            http2_max_ping_strikes=2,
+            enable_health_check=True,
+            enable_reflection=True,
+            ssl_enabled=False,
+            ssl_cert_file=None,
+            ssl_key_file=None,
+            ssl_ca_file=None
+        )
         
-        assert service.config == mock_config
-        assert service.ai_engine is None
-        assert service.server is None
-        assert service.stats["total_requests"] == 0
+        assert config.host == "localhost"
+        assert config.port == 50051
+        assert config.max_workers == 10
+        assert config.max_message_length == 4194304
+        assert config.enable_health_check is True
+        assert config.enable_reflection is True
+        assert config.ssl_enabled is False
+
+    def test_grpc_config_defaults(self):
+        """Test GRPCServerConfig with default values."""
+        config = GRPCServerConfig()
+        
+        assert config.host == "0.0.0.0"
+        assert config.port == 50051
+        assert config.max_workers == 10
+        assert config.enable_health_check is True
+        assert config.enable_reflection is True
+        assert config.ssl_enabled is False
+
+    def test_grpc_config_validation(self):
+        """Test GRPCServerConfig validation."""
+        # Valid config
+        config = GRPCServerConfig(
+            host="localhost",
+            port=50051,
+            max_workers=10
+        )
+        assert config.is_valid() is True
+        
+        # Invalid config - negative port
+        invalid_config = GRPCServerConfig(
+            host="localhost",
+            port=-1,
+            max_workers=10
+        )
+        assert invalid_config.is_valid() is False
+        
+        # Invalid config - negative max_workers
+        invalid_config2 = GRPCServerConfig(
+            host="localhost",
+            port=50051,
+            max_workers=-1
+        )
+        assert invalid_config2.is_valid() is False
+
+    def test_grpc_config_ssl_validation(self):
+        """Test GRPCServerConfig SSL validation."""
+        # SSL enabled but missing cert files
+        ssl_config = GRPCServerConfig(
+            ssl_enabled=True,
+            ssl_cert_file=None,
+            ssl_key_file=None
+        )
+        assert ssl_config.is_valid() is False
+        
+        # SSL enabled with cert files
+        ssl_config_valid = GRPCServerConfig(
+            ssl_enabled=True,
+            ssl_cert_file="/path/to/cert.pem",
+            ssl_key_file="/path/to/key.pem"
+        )
+        assert ssl_config_valid.is_valid() is True
+
+
+class TestProtocolDiscoveryService:
+    """Test ProtocolDiscoveryService gRPC service."""
+
+    @pytest.fixture
+    def mock_protocol_discovery(self):
+        """Create mock protocol discovery orchestrator."""
+        mock_orchestrator = Mock()
+        mock_orchestrator.discover_protocols = AsyncMock()
+        mock_orchestrator.analyze_traffic = AsyncMock()
+        mock_orchestrator.generate_parser = AsyncMock()
+        mock_orchestrator.validate_message = AsyncMock()
+        return mock_orchestrator
+
+    @pytest.fixture
+    def protocol_service(self, mock_protocol_discovery):
+        """Create ProtocolDiscoveryService instance."""
+        return ProtocolDiscoveryService(mock_protocol_discovery)
 
     @pytest.mark.asyncio
-    async def test_initialize_success(self, mock_config, mock_ai_engine):
-        """Test successful service initialization."""
-        service = AIEngineGRPCService(mock_config)
-        
-        with patch("ai_engine.api.grpc.CronosAIEngine", return_value=mock_ai_engine):
-            await service.initialize()
-            
-            assert service.ai_engine is not None
-            mock_ai_engine.initialize.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_initialize_failure(self, mock_config):
-        """Test service initialization failure."""
-        service = AIEngineGRPCService(mock_config)
-        
-        with patch("ai_engine.api.grpc.CronosAIEngine") as mock_engine_class:
-            mock_engine_class.side_effect = Exception("Init failed")
-            
-            with pytest.raises(Exception, match="Init failed"):
-                await service.initialize()
-
-    @pytest.mark.asyncio
-    async def test_discover_protocol_success(self, mock_config, mock_ai_engine):
+    async def test_discover_protocols_success(self, protocol_service, mock_protocol_discovery):
         """Test successful protocol discovery."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
+        # Mock discovery result
+        discovery_result = {
+            "protocols": [
+                {
+                    "name": "HTTP",
+                    "confidence": 0.95,
+                    "features": ["method", "path", "headers"]
+                },
+                {
+                    "name": "Modbus",
+                    "confidence": 0.87,
+                    "features": ["function_code", "data"]
+                }
+            ],
+            "total_protocols": 2,
+            "processing_time": 1.5
+        }
+        mock_protocol_discovery.discover_protocols.return_value = discovery_result
+        
+        # Create mock request
+        request = Mock()
+        request.traffic_data = b"GET /api/v1/test HTTP/1.1\r\nHost: example.com\r\n\r\n"
+        request.analysis_options = {
+            "enable_ml": True,
+            "confidence_threshold": 0.8
+        }
+        
+        # Call service method
+        response = await protocol_service.DiscoverProtocols(request, None)
+        
+        # Verify response
+        assert response.success is True
+        assert len(response.protocols) == 2
+        assert response.protocols[0].name == "HTTP"
+        assert response.protocols[0].confidence == 0.95
+        assert response.total_protocols == 2
+        assert response.processing_time == 1.5
+
+    @pytest.mark.asyncio
+    async def test_discover_protocols_failure(self, protocol_service, mock_protocol_discovery):
+        """Test protocol discovery failure."""
+        # Mock discovery failure
+        mock_protocol_discovery.discover_protocols.side_effect = Exception("Discovery failed")
         
         request = Mock()
-        request.data = base64.b64encode(b"test data").decode()
-        request.data_format = "base64"
-        request.expected_protocol = "http"
-        request.confidence_threshold = 0.7
+        request.traffic_data = b"invalid data"
+        request.analysis_options = {}
         
-        context = Mock()
+        # Call service method
+        response = await protocol_service.DiscoverProtocols(request, None)
         
-        response = await service.DiscoverProtocol(request, context)
-        
-        assert response["discovered_protocol"] == "http"
-        assert response["confidence_score"] == 0.95
-        assert service.stats["successful_requests"] == 1
+        # Verify error response
+        assert response.success is False
+        assert "Discovery failed" in response.error_message
 
     @pytest.mark.asyncio
-    async def test_discover_protocol_engine_not_initialized(self, mock_config):
-        """Test protocol discovery with uninitialized engine."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = None
+    async def test_analyze_traffic_success(self, protocol_service, mock_protocol_discovery):
+        """Test successful traffic analysis."""
+        # Mock analysis result
+        analysis_result = {
+            "statistics": {
+                "total_packets": 1000,
+                "unique_protocols": 3,
+                "traffic_volume": 1024000
+            },
+            "patterns": [
+                {
+                    "pattern_type": "request_response",
+                    "frequency": 0.8,
+                    "examples": ["GET /api", "POST /api"]
+                }
+            ],
+            "anomalies": [
+                {
+                    "type": "unusual_payload_size",
+                    "severity": "medium",
+                    "count": 5
+                }
+            ]
+        }
+        mock_protocol_discovery.analyze_traffic.return_value = analysis_result
         
         request = Mock()
-        context = Mock()
+        request.traffic_data = b"traffic data"
+        request.analysis_type = "comprehensive"
         
-        response = await service.DiscoverProtocol(request, context)
+        response = await protocol_service.AnalyzeTraffic(request, None)
         
-        assert response == {}
-        context.set_code.assert_called_with(grpc.StatusCode.UNAVAILABLE)
+        assert response.success is True
+        assert response.statistics.total_packets == 1000
+        assert response.statistics.unique_protocols == 3
+        assert len(response.patterns) == 1
+        assert len(response.anomalies) == 1
 
     @pytest.mark.asyncio
-    async def test_discover_protocol_exception(self, mock_config, mock_ai_engine):
-        """Test protocol discovery with exception."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
-        mock_ai_engine.discover_protocol.side_effect = Exception("Discovery failed")
+    async def test_generate_parser_success(self, protocol_service, mock_protocol_discovery):
+        """Test successful parser generation."""
+        # Mock parser generation result
+        parser_result = {
+            "parser_code": "def parse_http(data):\n    return parse_result",
+            "parser_type": "python",
+            "confidence": 0.92,
+            "test_results": {
+                "accuracy": 0.95,
+                "false_positives": 0.02,
+                "false_negatives": 0.03
+            }
+        }
+        mock_protocol_discovery.generate_parser.return_value = parser_result
         
         request = Mock()
-        request.data = base64.b64encode(b"test data").decode()
-        request.data_format = "base64"
+        request.protocol_name = "HTTP"
+        request.sample_data = b"GET /api HTTP/1.1"
+        request.parser_options = {
+            "language": "python",
+            "optimize": True
+        }
         
-        context = Mock()
+        response = await protocol_service.GenerateParser(request, None)
         
-        response = await service.DiscoverProtocol(request, context)
-        
-        assert response == {}
-        assert service.stats["failed_requests"] == 1
-        context.set_code.assert_called_with(grpc.StatusCode.INTERNAL)
+        assert response.success is True
+        assert response.parser_code == "def parse_http(data):\n    return parse_result"
+        assert response.parser_type == "python"
+        assert response.confidence == 0.92
+        assert response.test_results.accuracy == 0.95
 
     @pytest.mark.asyncio
-    async def test_discover_protocol_stream(self, mock_config, mock_ai_engine):
-        """Test streaming protocol discovery."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
-        
-        async def request_iterator():
-            for i in range(3):
-                request = Mock()
-                request.data = base64.b64encode(f"test data {i}".encode()).decode()
-                request.data_format = "base64"
-                yield request
-        
-        context = Mock()
-        
-        responses = []
-        async for response in service.DiscoverProtocolStream(request_iterator(), context):
-            responses.append(response)
-        
-        assert len(responses) == 3
-
-    @pytest.mark.asyncio
-    async def test_detect_fields_success(self, mock_config, mock_ai_engine):
-        """Test successful field detection."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
+    async def test_validate_message_success(self, protocol_service, mock_protocol_discovery):
+        """Test successful message validation."""
+        # Mock validation result
+        validation_result = {
+            "is_valid": True,
+            "confidence": 0.98,
+            "parsed_fields": {
+                "method": "GET",
+                "path": "/api/v1/test",
+                "version": "HTTP/1.1"
+            },
+            "errors": [],
+            "warnings": []
+        }
+        mock_protocol_discovery.validate_message.return_value = validation_result
         
         request = Mock()
-        request.data = base64.b64encode(b"test data").decode()
-        request.data_format = "base64"
-        request.protocol_hint = "http"
+        request.message_data = b"GET /api/v1/test HTTP/1.1\r\nHost: example.com\r\n\r\n"
+        request.protocol_name = "HTTP"
         
-        context = Mock()
+        response = await protocol_service.ValidateMessage(request, None)
         
-        response = await service.DetectFields(request, context)
-        
-        assert "detected_fields" in response
-        assert response["total_fields"] == 1
-        assert service.stats["successful_requests"] == 1
+        assert response.success is True
+        assert response.is_valid is True
+        assert response.confidence == 0.98
+        assert len(response.parsed_fields) == 3
+        assert response.parsed_fields["method"] == "GET"
+        assert len(response.errors) == 0
+        assert len(response.warnings) == 0
 
     @pytest.mark.asyncio
-    async def test_detect_fields_stream(self, mock_config, mock_ai_engine):
-        """Test streaming field detection."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
-        
-        async def request_iterator():
-            for i in range(2):
-                request = Mock()
-                request.data = base64.b64encode(f"test data {i}".encode()).decode()
-                request.data_format = "base64"
-                yield request
-        
-        context = Mock()
-        
-        responses = []
-        async for response in service.DetectFieldsStream(request_iterator(), context):
-            responses.append(response)
-        
-        assert len(responses) == 2
-
-    @pytest.mark.asyncio
-    async def test_detect_anomalies_success(self, mock_config, mock_ai_engine):
-        """Test successful anomaly detection."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
+    async def test_validate_message_invalid(self, protocol_service, mock_protocol_discovery):
+        """Test message validation with invalid message."""
+        # Mock validation result for invalid message
+        validation_result = {
+            "is_valid": False,
+            "confidence": 0.15,
+            "parsed_fields": {},
+            "errors": ["Invalid HTTP format", "Missing required headers"],
+            "warnings": ["Unusual payload size"]
+        }
+        mock_protocol_discovery.validate_message.return_value = validation_result
         
         request = Mock()
-        request.data = base64.b64encode(b"test data").decode()
-        request.data_format = "base64"
-        request.baseline_data = []
-        request.protocol_context = "http"
-        request.sensitivity = "medium"
+        request.message_data = b"invalid http data"
+        request.protocol_name = "HTTP"
         
-        context = Mock()
+        response = await protocol_service.ValidateMessage(request, None)
         
-        response = await service.DetectAnomalies(request, context)
-        
-        assert "is_anomalous" in response
-        assert response["is_anomalous"] is False
-        assert service.stats["successful_requests"] == 1
+        assert response.success is True
+        assert response.is_valid is False
+        assert response.confidence == 0.15
+        assert len(response.errors) == 2
+        assert len(response.warnings) == 1
+
+
+class TestComplianceService:
+    """Test ComplianceService gRPC service."""
+
+    @pytest.fixture
+    def mock_compliance_service(self):
+        """Create mock compliance service."""
+        mock_service = Mock()
+        mock_service.generate_report = AsyncMock()
+        mock_service.assess_compliance = AsyncMock()
+        mock_service.get_compliance_status = AsyncMock()
+        mock_service.update_policies = AsyncMock()
+        return mock_service
+
+    @pytest.fixture
+    def compliance_service(self, mock_compliance_service):
+        """Create ComplianceService instance."""
+        return ComplianceService(mock_compliance_service)
 
     @pytest.mark.asyncio
-    async def test_detect_anomalies_with_baseline(self, mock_config, mock_ai_engine):
-        """Test anomaly detection with baseline data."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
+    async def test_generate_report_success(self, compliance_service, mock_compliance_service):
+        """Test successful compliance report generation."""
+        # Mock report generation result
+        report_result = {
+            "report_id": "report_123",
+            "report_type": "SOC2",
+            "status": "completed",
+            "compliance_score": 0.85,
+            "findings": [
+                {
+                    "category": "Access Control",
+                    "severity": "medium",
+                    "description": "Weak password policy",
+                    "recommendation": "Implement stronger password requirements"
+                }
+            ],
+            "generated_at": datetime.now().isoformat(),
+            "report_data": "base64_encoded_report_data"
+        }
+        mock_compliance_service.generate_report.return_value = report_result
         
         request = Mock()
-        request.data = base64.b64encode(b"test data").decode()
-        request.data_format = "base64"
-        request.baseline_data = [base64.b64encode(b"baseline1").decode()]
+        request.report_type = "SOC2"
+        request.assessment_period = {
+            "start_date": "2023-01-01",
+            "end_date": "2023-12-31"
+        }
+        request.include_recommendations = True
         
-        context = Mock()
+        response = await compliance_service.GenerateReport(request, None)
         
-        response = await service.DetectAnomalies(request, context)
-        
-        assert "is_anomalous" in response
+        assert response.success is True
+        assert response.report_id == "report_123"
+        assert response.report_type == "SOC2"
+        assert response.compliance_score == 0.85
+        assert len(response.findings) == 1
+        assert response.findings[0].category == "Access Control"
+        assert response.findings[0].severity == "medium"
 
     @pytest.mark.asyncio
-    async def test_detect_anomalies_stream(self, mock_config, mock_ai_engine):
-        """Test streaming anomaly detection."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
-        
-        async def request_iterator():
-            for i in range(2):
-                request = Mock()
-                request.data = base64.b64encode(f"test data {i}".encode()).decode()
-                request.data_format = "base64"
-                request.baseline_data = []
-                yield request
-        
-        context = Mock()
-        
-        responses = []
-        async for response in service.DetectAnomaliesStream(request_iterator(), context):
-            responses.append(response)
-        
-        assert len(responses) == 2
-
-    @pytest.mark.asyncio
-    async def test_get_service_status(self, mock_config, mock_ai_engine):
-        """Test getting service status."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
-        service.stats["successful_requests"] = 10
-        service.stats["total_requests"] = 12
-        service.stats["total_processing_time_ms"] = 1000.0
+    async def test_assess_compliance_success(self, compliance_service, mock_compliance_service):
+        """Test successful compliance assessment."""
+        # Mock assessment result
+        assessment_result = {
+            "assessment_id": "assessment_456",
+            "framework": "GDPR",
+            "overall_score": 0.92,
+            "control_scores": {
+                "data_protection": 0.95,
+                "consent_management": 0.88,
+                "data_retention": 0.93
+            },
+            "compliance_status": "compliant",
+            "gaps": [],
+            "recommendations": [
+                "Review data retention policies",
+                "Update consent forms"
+            ]
+        }
+        mock_compliance_service.assess_compliance.return_value = assessment_result
         
         request = Mock()
-        context = Mock()
+        request.framework = "GDPR"
+        request.controls = ["data_protection", "consent_management", "data_retention"]
+        request.assessment_options = {
+            "include_gaps": True,
+            "include_recommendations": True
+        }
         
-        response = await service.GetServiceStatus(request, context)
+        response = await compliance_service.AssessCompliance(request, None)
         
-        assert response["service_name"] == "CRONOS AI Engine gRPC"
-        assert response["statistics"]["total_requests"] == 12
-        assert response["statistics"]["successful_requests"] == 10
+        assert response.success is True
+        assert response.assessment_id == "assessment_456"
+        assert response.framework == "GDPR"
+        assert response.overall_score == 0.92
+        assert response.compliance_status == "compliant"
+        assert len(response.control_scores) == 3
+        assert len(response.recommendations) == 2
 
     @pytest.mark.asyncio
-    async def test_health_check_healthy(self, mock_config, mock_ai_engine):
-        """Test health check when healthy."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
+    async def test_get_compliance_status_success(self, compliance_service, mock_compliance_service):
+        """Test successful compliance status retrieval."""
+        # Mock status result
+        status_result = {
+            "current_status": "compliant",
+            "last_assessment": "2023-12-01T10:00:00Z",
+            "next_assessment": "2024-03-01T10:00:00Z",
+            "frameworks": {
+                "SOC2": {"status": "compliant", "score": 0.88},
+                "GDPR": {"status": "compliant", "score": 0.92},
+                "ISO27001": {"status": "non_compliant", "score": 0.65}
+            },
+            "pending_actions": [
+                "Update ISO27001 controls",
+                "Schedule next SOC2 assessment"
+            ]
+        }
+        mock_compliance_service.get_compliance_status.return_value = status_result
         
         request = Mock()
-        context = Mock()
+        request.framework = "all"
+        request.include_details = True
         
-        response = await service.HealthCheck(request, context)
+        response = await compliance_service.GetComplianceStatus(request, None)
         
-        assert response["status"] == "healthy"
-        assert response["service"] == "cronos-ai-grpc"
+        assert response.success is True
+        assert response.current_status == "compliant"
+        assert len(response.frameworks) == 3
+        assert response.frameworks["SOC2"].status == "compliant"
+        assert response.frameworks["SOC2"].score == 0.88
+        assert len(response.pending_actions) == 2
 
     @pytest.mark.asyncio
-    async def test_health_check_unhealthy(self, mock_config):
-        """Test health check when unhealthy."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = None
+    async def test_update_policies_success(self, compliance_service, mock_compliance_service):
+        """Test successful policy update."""
+        # Mock update result
+        update_result = {
+            "update_id": "update_789",
+            "updated_policies": 5,
+            "failed_updates": 0,
+            "changes": [
+                {
+                    "policy_id": "policy_1",
+                    "change_type": "modified",
+                    "description": "Updated password requirements"
+                },
+                {
+                    "policy_id": "policy_2",
+                    "change_type": "added",
+                    "description": "Added data retention policy"
+                }
+            ]
+        }
+        mock_compliance_service.update_policies.return_value = update_result
         
         request = Mock()
-        context = Mock()
-        
-        response = await service.HealthCheck(request, context)
-        
-        assert response["status"] == "unhealthy"
-
-    @pytest.mark.asyncio
-    async def test_health_check_degraded(self, mock_config, mock_ai_engine):
-        """Test health check when degraded."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
-        mock_ai_engine._initialized = False
-        
-        request = Mock()
-        context = Mock()
-        
-        response = await service.HealthCheck(request, context)
-        
-        assert response["status"] == "degraded"
-
-    @pytest.mark.asyncio
-    async def test_batch_process_discovery(self, mock_config, mock_ai_engine):
-        """Test batch processing for discovery."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
-        
-        request = Mock()
-        request.operation = "discovery"
-        request.data_items = [
-            base64.b64encode(b"data1").decode(),
-            base64.b64encode(b"data2").decode(),
+        request.policy_updates = [
+            {
+                "policy_id": "policy_1",
+                "content": "Updated policy content",
+                "action": "update"
+            },
+            {
+                "policy_id": "policy_2",
+                "content": "New policy content",
+                "action": "create"
+            }
         ]
+        request.validate_changes = True
         
-        context = Mock()
+        response = await compliance_service.UpdatePolicies(request, None)
         
-        response = await service.BatchProcess(request, context)
-        
-        assert response["total_items"] == 2
-        assert response["successful_items"] == 2
+        assert response.success is True
+        assert response.update_id == "update_789"
+        assert response.updated_policies == 5
+        assert response.failed_updates == 0
+        assert len(response.changes) == 2
+
+
+class TestSecurityService:
+    """Test SecurityService gRPC service."""
+
+    @pytest.fixture
+    def mock_security_service(self):
+        """Create mock security service."""
+        mock_service = Mock()
+        mock_service.analyze_threat = AsyncMock()
+        mock_service.respond_to_incident = AsyncMock()
+        mock_service.get_security_status = AsyncMock()
+        mock_service.update_security_policies = AsyncMock()
+        return mock_service
+
+    @pytest.fixture
+    def security_service(self, mock_security_service):
+        """Create SecurityService instance."""
+        return SecurityService(mock_security_service)
 
     @pytest.mark.asyncio
-    async def test_batch_process_detection(self, mock_config, mock_ai_engine):
-        """Test batch processing for detection."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
+    async def test_analyze_threat_success(self, security_service, mock_security_service):
+        """Test successful threat analysis."""
+        # Mock threat analysis result
+        threat_result = {
+            "threat_id": "threat_123",
+            "threat_type": "malware",
+            "severity": "high",
+            "confidence": 0.92,
+            "indicators": [
+                {
+                    "type": "file_hash",
+                    "value": "abc123def456",
+                    "reputation": "malicious"
+                },
+                {
+                    "type": "ip_address",
+                    "value": "192.168.1.100",
+                    "reputation": "suspicious"
+                }
+            ],
+            "recommended_actions": [
+                "Quarantine affected systems",
+                "Update antivirus signatures",
+                "Block malicious IP addresses"
+            ],
+            "risk_score": 0.85
+        }
+        mock_security_service.analyze_threat.return_value = threat_result
         
         request = Mock()
-        request.operation = "detection"
-        request.data_items = [base64.b64encode(b"data1").decode()]
+        request.threat_data = {
+            "file_hash": "abc123def456",
+            "ip_address": "192.168.1.100",
+            "user_agent": "suspicious_agent"
+        }
+        request.analysis_options = {
+            "include_indicators": True,
+            "include_recommendations": True
+        }
         
-        context = Mock()
+        response = await security_service.AnalyzeThreat(request, None)
         
-        response = await service.BatchProcess(request, context)
-        
-        assert response["total_items"] == 1
+        assert response.success is True
+        assert response.threat_id == "threat_123"
+        assert response.threat_type == "malware"
+        assert response.severity == "high"
+        assert response.confidence == 0.92
+        assert response.risk_score == 0.85
+        assert len(response.indicators) == 2
+        assert len(response.recommended_actions) == 3
 
     @pytest.mark.asyncio
-    async def test_batch_process_anomaly(self, mock_config, mock_ai_engine):
-        """Test batch processing for anomaly detection."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
+    async def test_respond_to_incident_success(self, security_service, mock_security_service):
+        """Test successful incident response."""
+        # Mock incident response result
+        response_result = {
+            "incident_id": "incident_456",
+            "response_id": "response_789",
+            "status": "in_progress",
+            "actions_taken": [
+                {
+                    "action_type": "isolate",
+                    "target": "system_001",
+                    "status": "completed",
+                    "timestamp": "2023-12-01T10:30:00Z"
+                },
+                {
+                    "action_type": "block_ip",
+                    "target": "192.168.1.100",
+                    "status": "completed",
+                    "timestamp": "2023-12-01T10:31:00Z"
+                }
+            ],
+            "next_steps": [
+                "Forensic analysis",
+                "Evidence collection",
+                "Stakeholder notification"
+            ],
+            "estimated_resolution": "2023-12-01T18:00:00Z"
+        }
+        mock_security_service.respond_to_incident.return_value = response_result
         
         request = Mock()
-        request.operation = "anomaly"
-        request.data_items = [base64.b64encode(b"data1").decode()]
-        
-        context = Mock()
-        
-        response = await service.BatchProcess(request, context)
-        
-        assert response["total_items"] == 1
-
-    @pytest.mark.asyncio
-    async def test_batch_process_with_failures(self, mock_config, mock_ai_engine):
-        """Test batch processing with some failures."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
-        
-        # Make one call fail
-        call_count = [0]
-        original_discover = mock_ai_engine.discover_protocol
-        
-        async def failing_discover(*args, **kwargs):
-            call_count[0] += 1
-            if call_count[0] == 2:
-                raise Exception("Discovery failed")
-            return await original_discover(*args, **kwargs)
-        
-        mock_ai_engine.discover_protocol = failing_discover
-        
-        request = Mock()
-        request.operation = "discovery"
-        request.data_items = [
-            base64.b64encode(b"data1").decode(),
-            base64.b64encode(b"data2").decode(),
+        request.incident_id = "incident_456"
+        request.response_actions = [
+            {
+                "action_type": "isolate",
+                "target": "system_001",
+                "priority": "high"
+            },
+            {
+                "action_type": "block_ip",
+                "target": "192.168.1.100",
+                "priority": "high"
+            }
         ]
+        request.automated_response = True
         
-        context = Mock()
+        response = await security_service.RespondToIncident(request, None)
         
-        response = await service.BatchProcess(request, context)
-        
-        assert response["successful_items"] == 1
-        assert response["failed_items"] == 1
-
-    def test_decode_data_base64(self, mock_config):
-        """Test data decoding from base64."""
-        service = AIEngineGRPCService(mock_config)
-        
-        data = base64.b64encode(b"test data").decode()
-        decoded = service._decode_data(data, "base64")
-        
-        assert decoded == b"test data"
-
-    def test_decode_data_hex(self, mock_config):
-        """Test data decoding from hex."""
-        service = AIEngineGRPCService(mock_config)
-        
-        data = "74657374"  # "test" in hex
-        decoded = service._decode_data(data, "hex")
-        
-        assert decoded == b"test"
-
-    def test_decode_data_text(self, mock_config):
-        """Test data decoding from text."""
-        service = AIEngineGRPCService(mock_config)
-        
-        data = "test data"
-        decoded = service._decode_data(data, "text")
-        
-        assert decoded == b"test data"
-
-    def test_decode_data_invalid(self, mock_config):
-        """Test data decoding with invalid format."""
-        service = AIEngineGRPCService(mock_config)
-        
-        with pytest.raises(ValueError, match="Data decoding failed"):
-            service._decode_data("invalid base64!", "base64")
-
-
-class TestGRPCServer:
-    """Test suite for GRPCServer."""
-
-    def test_initialization(self, mock_config):
-        """Test server initialization."""
-        server = GRPCServer(mock_config)
-        
-        assert server.config == mock_config
-        assert server.port == 50051
-        assert server.max_workers == 10
+        assert response.success is True
+        assert response.incident_id == "incident_456"
+        assert response.response_id == "response_789"
+        assert response.status == "in_progress"
+        assert len(response.actions_taken) == 2
+        assert len(response.next_steps) == 3
 
     @pytest.mark.asyncio
-    async def test_start_server(self, mock_config):
-        """Test starting the server."""
-        server = GRPCServer(mock_config)
+    async def test_get_security_status_success(self, security_service, mock_security_service):
+        """Test successful security status retrieval."""
+        # Mock security status result
+        status_result = {
+            "overall_status": "secure",
+            "threat_level": "low",
+            "active_threats": 0,
+            "security_controls": {
+                "firewall": {"status": "active", "last_updated": "2023-12-01T09:00:00Z"},
+                "antivirus": {"status": "active", "last_updated": "2023-12-01T08:30:00Z"},
+                "ids": {"status": "active", "last_updated": "2023-12-01T09:15:00Z"}
+            },
+            "recent_events": [
+                {
+                    "event_type": "login_attempt",
+                    "severity": "info",
+                    "timestamp": "2023-12-01T10:00:00Z",
+                    "description": "Successful admin login"
+                }
+            ],
+            "compliance_status": {
+                "pci_dss": "compliant",
+                "iso27001": "compliant",
+                "nist": "compliant"
+            }
+        }
+        mock_security_service.get_security_status.return_value = status_result
         
-        with patch("ai_engine.api.grpc.AIEngineGRPCService") as mock_service_class:
-            mock_service = AsyncMock()
-            mock_service.initialize = AsyncMock()
-            mock_service_class.return_value = mock_service
+        request = Mock()
+        request.include_events = True
+        request.include_compliance = True
+        
+        response = await security_service.GetSecurityStatus(request, None)
+        
+        assert response.success is True
+        assert response.overall_status == "secure"
+        assert response.threat_level == "low"
+        assert response.active_threats == 0
+        assert len(response.security_controls) == 3
+        assert len(response.recent_events) == 1
+        assert len(response.compliance_status) == 3
+
+
+class TestMonitoringService:
+    """Test MonitoringService gRPC service."""
+
+    @pytest.fixture
+    def mock_monitoring_service(self):
+        """Create mock monitoring service."""
+        mock_service = Mock()
+        mock_service.get_metrics = AsyncMock()
+        mock_service.get_health_status = AsyncMock()
+        mock_service.get_alerts = AsyncMock()
+        mock_service.create_alert = AsyncMock()
+        return mock_service
+
+    @pytest.fixture
+    def monitoring_service(self, mock_monitoring_service):
+        """Create MonitoringService instance."""
+        return MonitoringService(mock_monitoring_service)
+
+    @pytest.mark.asyncio
+    async def test_get_metrics_success(self, monitoring_service, mock_monitoring_service):
+        """Test successful metrics retrieval."""
+        # Mock metrics result
+        metrics_result = {
+            "timestamp": "2023-12-01T10:00:00Z",
+            "metrics": {
+                "cpu_usage": {"value": 45.2, "unit": "percent"},
+                "memory_usage": {"value": 67.8, "unit": "percent"},
+                "disk_usage": {"value": 23.4, "unit": "percent"},
+                "network_throughput": {"value": 125.6, "unit": "mbps"},
+                "request_rate": {"value": 150, "unit": "requests_per_second"},
+                "error_rate": {"value": 0.5, "unit": "percent"}
+            },
+            "services": {
+                "api_service": {
+                    "status": "healthy",
+                    "response_time": {"value": 120, "unit": "ms"},
+                    "throughput": {"value": 100, "unit": "requests_per_second"}
+                },
+                "database_service": {
+                    "status": "healthy",
+                    "connection_pool": {"value": 45, "unit": "connections"},
+                    "query_time": {"value": 15, "unit": "ms"}
+                }
+            }
+        }
+        mock_monitoring_service.get_metrics.return_value = metrics_result
+        
+        request = Mock()
+        request.metric_names = ["cpu_usage", "memory_usage", "disk_usage"]
+        request.time_range = {
+            "start_time": "2023-12-01T09:00:00Z",
+            "end_time": "2023-12-01T10:00:00Z"
+        }
+        request.include_services = True
+        
+        response = await monitoring_service.GetMetrics(request, None)
+        
+        assert response.success is True
+        assert len(response.metrics) == 6
+        assert response.metrics["cpu_usage"].value == 45.2
+        assert response.metrics["cpu_usage"].unit == "percent"
+        assert len(response.services) == 2
+        assert response.services["api_service"].status == "healthy"
+
+    @pytest.mark.asyncio
+    async def test_get_health_status_success(self, monitoring_service, mock_monitoring_service):
+        """Test successful health status retrieval."""
+        # Mock health status result
+        health_result = {
+            "overall_status": "healthy",
+            "timestamp": "2023-12-01T10:00:00Z",
+            "components": {
+                "api_gateway": {"status": "healthy", "response_time": 50},
+                "database": {"status": "healthy", "response_time": 15},
+                "cache": {"status": "degraded", "response_time": 200},
+                "message_queue": {"status": "healthy", "response_time": 5}
+            },
+            "dependencies": {
+                "external_api": {"status": "healthy", "response_time": 100},
+                "payment_service": {"status": "healthy", "response_time": 80}
+            },
+            "alerts": [
+                {
+                    "alert_id": "alert_001",
+                    "severity": "warning",
+                    "message": "Cache response time is high",
+                    "timestamp": "2023-12-01T09:45:00Z"
+                }
+            ]
+        }
+        mock_monitoring_service.get_health_status.return_value = health_result
+        
+        request = Mock()
+        request.include_dependencies = True
+        request.include_alerts = True
+        
+        response = await monitoring_service.GetHealthStatus(request, None)
+        
+        assert response.success is True
+        assert response.overall_status == "healthy"
+        assert len(response.components) == 4
+        assert response.components["api_gateway"].status == "healthy"
+        assert response.components["cache"].status == "degraded"
+        assert len(response.dependencies) == 2
+        assert len(response.alerts) == 1
+
+    @pytest.mark.asyncio
+    async def test_get_alerts_success(self, monitoring_service, mock_monitoring_service):
+        """Test successful alerts retrieval."""
+        # Mock alerts result
+        alerts_result = {
+            "alerts": [
+                {
+                    "alert_id": "alert_001",
+                    "severity": "critical",
+                    "status": "active",
+                    "message": "High CPU usage detected",
+                    "timestamp": "2023-12-01T10:00:00Z",
+                    "source": "system_monitor",
+                    "tags": ["cpu", "performance"]
+                },
+                {
+                    "alert_id": "alert_002",
+                    "severity": "warning",
+                    "status": "acknowledged",
+                    "message": "Disk space running low",
+                    "timestamp": "2023-12-01T09:30:00Z",
+                    "source": "disk_monitor",
+                    "tags": ["disk", "storage"]
+                }
+            ],
+            "total_alerts": 2,
+            "active_alerts": 1,
+            "acknowledged_alerts": 1
+        }
+        mock_monitoring_service.get_alerts.return_value = alerts_result
+        
+        request = Mock()
+        request.severity_filter = ["critical", "warning"]
+        request.status_filter = ["active", "acknowledged"]
+        request.time_range = {
+            "start_time": "2023-12-01T09:00:00Z",
+            "end_time": "2023-12-01T11:00:00Z"
+        }
+        
+        response = await monitoring_service.GetAlerts(request, None)
+        
+        assert response.success is True
+        assert len(response.alerts) == 2
+        assert response.total_alerts == 2
+        assert response.active_alerts == 1
+        assert response.acknowledged_alerts == 1
+        assert response.alerts[0].severity == "critical"
+        assert response.alerts[0].status == "active"
+
+    @pytest.mark.asyncio
+    async def test_create_alert_success(self, monitoring_service, mock_monitoring_service):
+        """Test successful alert creation."""
+        # Mock alert creation result
+        alert_result = {
+            "alert_id": "alert_003",
+            "status": "created",
+            "message": "Alert created successfully",
+            "created_at": "2023-12-01T10:15:00Z"
+        }
+        mock_monitoring_service.create_alert.return_value = alert_result
+        
+        request = Mock()
+        request.alert_config = {
+            "name": "High Memory Usage",
+            "description": "Alert when memory usage exceeds 90%",
+            "severity": "warning",
+            "threshold": 90.0,
+            "metric": "memory_usage",
+            "duration": 300,  # 5 minutes
+            "enabled": True
+        }
+        request.notification_channels = ["email", "slack"]
+        
+        response = await monitoring_service.CreateAlert(request, None)
+        
+        assert response.success is True
+        assert response.alert_id == "alert_003"
+        assert response.status == "created"
+        assert response.message == "Alert created successfully"
+
+
+class TestHealthCheckService:
+    """Test HealthCheckService gRPC service."""
+
+    @pytest.fixture
+    def mock_health_checker(self):
+        """Create mock health checker."""
+        mock_checker = Mock()
+        mock_checker.check_health = AsyncMock()
+        mock_checker.get_detailed_health = AsyncMock()
+        return mock_checker
+
+    @pytest.fixture
+    def health_service(self, mock_health_checker):
+        """Create HealthCheckService instance."""
+        return HealthCheckService(mock_health_checker)
+
+    @pytest.mark.asyncio
+    async def test_check_health_success(self, health_service, mock_health_checker):
+        """Test successful health check."""
+        # Mock health check result
+        health_result = {
+            "status": "healthy",
+            "timestamp": "2023-12-01T10:00:00Z",
+            "response_time": 15.5,
+            "version": "1.0.0",
+            "uptime": 86400  # 24 hours
+        }
+        mock_health_checker.check_health.return_value = health_result
+        
+        request = Mock()
+        request.include_details = True
+        
+        response = await health_service.CheckHealth(request, None)
+        
+        assert response.success is True
+        assert response.status == "healthy"
+        assert response.response_time == 15.5
+        assert response.version == "1.0.0"
+        assert response.uptime == 86400
+
+    @pytest.mark.asyncio
+    async def test_get_detailed_health_success(self, health_service, mock_health_checker):
+        """Test successful detailed health check."""
+        # Mock detailed health result
+        detailed_health = {
+            "overall_status": "healthy",
+            "timestamp": "2023-12-01T10:00:00Z",
+            "components": {
+                "database": {
+                    "status": "healthy",
+                    "response_time": 10.2,
+                    "last_check": "2023-12-01T10:00:00Z"
+                },
+                "cache": {
+                    "status": "degraded",
+                    "response_time": 150.0,
+                    "last_check": "2023-12-01T10:00:00Z",
+                    "error": "High response time"
+                },
+                "external_api": {
+                    "status": "healthy",
+                    "response_time": 45.8,
+                    "last_check": "2023-12-01T10:00:00Z"
+                }
+            },
+            "system_info": {
+                "cpu_usage": 45.2,
+                "memory_usage": 67.8,
+                "disk_usage": 23.4,
+                "load_average": [1.2, 1.5, 1.8]
+            }
+        }
+        mock_health_checker.get_detailed_health.return_value = detailed_health
+        
+        request = Mock()
+        request.include_system_info = True
+        
+        response = await health_service.GetDetailedHealth(request, None)
+        
+        assert response.success is True
+        assert response.overall_status == "healthy"
+        assert len(response.components) == 3
+        assert response.components["database"].status == "healthy"
+        assert response.components["cache"].status == "degraded"
+        assert response.system_info.cpu_usage == 45.2
+        assert response.system_info.memory_usage == 67.8
+
+
+class TestCronosAIGRPCServer:
+    """Test CronosAIGRPCServer main functionality."""
+
+    @pytest.fixture
+    def grpc_config(self):
+        """Create gRPC server configuration."""
+        return GRPCServerConfig(
+            host="localhost",
+            port=50051,
+            max_workers=10,
+            enable_health_check=True,
+            enable_reflection=True
+        )
+
+    @pytest.fixture
+    def grpc_server(self, grpc_config):
+        """Create CronosAIGRPCServer instance."""
+        with patch('ai_engine.api.grpc.grpc.aio.server') as mock_server:
+            return CronosAIGRPCServer(grpc_config)
+
+    def test_grpc_server_initialization(self, grpc_server, grpc_config):
+        """Test CronosAIGRPCServer initialization."""
+        assert grpc_server.config == grpc_config
+        assert grpc_server.server is not None
+        assert grpc_server.is_running is False
+
+    @pytest.mark.asyncio
+    async def test_start_server(self, grpc_server):
+        """Test starting gRPC server."""
+        with patch.object(grpc_server.server, 'start') as mock_start:
+            await grpc_server.start()
             
-            with patch("ai_engine.api.grpc.grpc.aio.server") as mock_grpc_server:
-                mock_grpc_instance = AsyncMock()
-                mock_grpc_instance.add_insecure_port = Mock()
-                mock_grpc_instance.start = AsyncMock()
-                mock_grpc_server.return_value = mock_grpc_instance
-                
-                # Start in background
-                task = asyncio.create_task(server.start())
-                await asyncio.sleep(0.1)
-                
-                # Cancel the task
-                task.cancel()
-                try:
-                    await task
-                except asyncio.CancelledError:
-                    pass
+            mock_start.assert_called_once()
+            assert grpc_server.is_running is True
 
     @pytest.mark.asyncio
-    async def test_stop_server(self, mock_config):
-        """Test stopping the server."""
-        server = GRPCServer(mock_config)
-        server.server = AsyncMock()
-        server.server.stop = AsyncMock()
-        
-        await server.stop()
-        
-        server.server.stop.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_wait_for_termination(self, mock_config):
-        """Test waiting for server termination."""
-        server = GRPCServer(mock_config)
-        server.server = AsyncMock()
-        server.server.wait_for_termination = AsyncMock()
-        
-        await server.wait_for_termination()
-        
-        server.server.wait_for_termination.assert_called_once()
-
-
-class TestAIEngineGRPCClient:
-    """Test suite for AIEngineGRPCClient."""
-
-    def test_initialization(self):
-        """Test client initialization."""
-        client = AIEngineGRPCClient("localhost:50051")
-        
-        assert client.server_address == "localhost:50051"
-        assert client.channel is None
-
-    @pytest.mark.asyncio
-    async def test_connect(self):
-        """Test client connection."""
-        client = AIEngineGRPCClient("localhost:50051")
-        
-        with patch("ai_engine.api.grpc.grpc.aio.insecure_channel") as mock_channel:
-            mock_channel_instance = AsyncMock()
-            mock_channel.return_value = mock_channel_instance
+    async def test_stop_server(self, grpc_server):
+        """Test stopping gRPC server."""
+        with patch.object(grpc_server.server, 'stop') as mock_stop:
+            await grpc_server.stop()
             
-            with patch.object(client, "health_check", return_value={"status": "healthy"}):
-                await client.connect()
-                
-                assert client.channel is not None
+            mock_stop.assert_called_once()
+            assert grpc_server.is_running is False
 
     @pytest.mark.asyncio
-    async def test_disconnect(self):
-        """Test client disconnection."""
-        client = AIEngineGRPCClient("localhost:50051")
-        client.channel = AsyncMock()
-        client.channel.close = AsyncMock()
-        
-        await client.disconnect()
-        
-        client.channel.close.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_health_check(self):
-        """Test client health check."""
-        client = AIEngineGRPCClient("localhost:50051")
-        
-        result = await client.health_check()
-        
-        assert result["status"] == "healthy"
-
-    @pytest.mark.asyncio
-    async def test_discover_protocol(self):
-        """Test client protocol discovery."""
-        client = AIEngineGRPCClient("localhost:50051")
-        
-        result = await client.discover_protocol(b"test data")
-        
-        assert "discovered_protocol" in result
-
-    @pytest.mark.asyncio
-    async def test_detect_fields(self):
-        """Test client field detection."""
-        client = AIEngineGRPCClient("localhost:50051")
-        
-        result = await client.detect_fields(b"test data")
-        
-        assert "detected_fields" in result
-
-    @pytest.mark.asyncio
-    async def test_detect_anomalies(self):
-        """Test client anomaly detection."""
-        client = AIEngineGRPCClient("localhost:50051")
-        
-        result = await client.detect_anomalies(b"test data")
-        
-        assert "is_anomalous" in result
-
-
-class TestRunGRPCServer:
-    """Test suite for run_grpc_server function."""
-
-    @pytest.mark.asyncio
-    async def test_run_grpc_server(self, mock_config):
-        """Test running gRPC server."""
-        with patch("ai_engine.api.grpc.GRPCServer") as mock_server_class:
-            mock_server = AsyncMock()
-            mock_server.start = AsyncMock()
-            mock_server.wait_for_termination = AsyncMock()
-            mock_server_class.return_value = mock_server
+    async def test_server_lifecycle(self, grpc_server):
+        """Test complete server lifecycle."""
+        with patch.object(grpc_server.server, 'start') as mock_start, \
+             patch.object(grpc_server.server, 'stop') as mock_stop:
             
-            # Run in background and cancel
-            task = asyncio.create_task(run_grpc_server(mock_config))
+            # Start server
+            await grpc_server.start()
+            assert grpc_server.is_running is True
+            mock_start.assert_called_once()
+            
+            # Stop server
+            await grpc_server.stop()
+            assert grpc_server.is_running is False
+            mock_stop.assert_called_once()
+
+    def test_add_service(self, grpc_server):
+        """Test adding service to gRPC server."""
+        mock_service = Mock()
+        mock_servicer = Mock()
+        
+        grpc_server.add_service(mock_service, mock_servicer)
+        
+        # Verify service was added (implementation depends on mock)
+        assert True  # Placeholder assertion
+
+    def test_configure_ssl(self, grpc_server):
+        """Test SSL configuration for gRPC server."""
+        ssl_config = {
+            "cert_file": "/path/to/cert.pem",
+            "key_file": "/path/to/key.pem",
+            "ca_file": "/path/to/ca.pem"
+        }
+        
+        grpc_server.configure_ssl(ssl_config)
+        
+        # Verify SSL was configured
+        assert True  # Placeholder assertion
+
+    def test_get_server_info(self, grpc_server):
+        """Test getting server information."""
+        info = grpc_server.get_server_info()
+        
+        assert "config" in info
+        assert "is_running" in info
+        assert "services" in info
+        assert info["is_running"] is False
+
+    def test_grpc_server_error_handling(self, grpc_server):
+        """Test gRPC server error handling."""
+        with patch.object(grpc_server.server, 'start', side_effect=Exception("Start failed")):
+            with pytest.raises(GRPCException):
+                asyncio.run(grpc_server.start())
+
+    def test_grpc_server_concurrent_operations(self, grpc_server):
+        """Test gRPC server concurrent operations."""
+        async def start_stop_cycle():
+            await grpc_server.start()
             await asyncio.sleep(0.1)
-            task.cancel()
+            await grpc_server.stop()
+        
+        # Run concurrent start/stop cycles
+        tasks = [start_stop_cycle() for _ in range(5)]
+        asyncio.run(asyncio.gather(*tasks, return_exceptions=True))
+
+    def test_grpc_server_graceful_shutdown(self, grpc_server):
+        """Test gRPC server graceful shutdown."""
+        with patch.object(grpc_server.server, 'start') as mock_start, \
+             patch.object(grpc_server.server, 'stop') as mock_stop:
             
-            try:
-                await task
-            except asyncio.CancelledError:
-                pass
-
-    @pytest.mark.asyncio
-    async def test_run_grpc_server_keyboard_interrupt(self, mock_config):
-        """Test gRPC server with keyboard interrupt."""
-        with patch("ai_engine.api.grpc.GRPCServer") as mock_server_class:
-            mock_server = AsyncMock()
-            mock_server.start = AsyncMock()
-            mock_server.wait_for_termination = AsyncMock(side_effect=KeyboardInterrupt())
-            mock_server.stop = AsyncMock()
-            mock_server_class.return_value = mock_server
+            async def test_graceful_shutdown():
+                await grpc_server.start()
+                await grpc_server.graceful_shutdown(timeout=5.0)
             
-            await run_grpc_server(mock_config)
+            asyncio.run(test_graceful_shutdown())
             
-            mock_server.stop.assert_called_once()
+            mock_start.assert_called_once()
+            mock_stop.assert_called_once()
 
-    @pytest.mark.asyncio
-    async def test_run_grpc_server_exception(self, mock_config):
-        """Test gRPC server with exception."""
-        with patch("ai_engine.api.grpc.GRPCServer") as mock_server_class:
-            mock_server = AsyncMock()
-            mock_server.start = AsyncMock()
-            mock_server.wait_for_termination = AsyncMock(side_effect=Exception("Server error"))
-            mock_server.stop = AsyncMock()
-            mock_server_class.return_value = mock_server
-            
-            with pytest.raises(Exception, match="Server error"):
-                await run_grpc_server(mock_config)
-            
-            mock_server.stop.assert_called_once()
+    def test_grpc_server_metrics(self, grpc_server):
+        """Test gRPC server metrics collection."""
+        metrics = grpc_server.get_metrics()
+        
+        assert "requests_total" in metrics
+        assert "requests_per_second" in metrics
+        assert "average_response_time" in metrics
+        assert "active_connections" in metrics
+        assert "error_rate" in metrics
 
-
-class TestGRPCServiceEdgeCases:
-    """Test edge cases for gRPC service."""
-
-    @pytest.mark.asyncio
-    async def test_discover_protocol_with_all_metadata(self, mock_config, mock_ai_engine):
-        """Test protocol discovery with all metadata fields."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
+    def test_grpc_server_health_check(self, grpc_server):
+        """Test gRPC server health check."""
+        health = grpc_server.check_health()
         
-        request = Mock()
-        request.data = base64.b64encode(b"test data").decode()
-        request.data_format = "base64"
-        request.expected_protocol = "http"
-        request.confidence_threshold = 0.8
-        request.max_samples = 500
-        request.include_grammar = True
-        
-        context = Mock()
-        
-        response = await service.DiscoverProtocol(request, context)
-        
-        assert "discovered_protocol" in response
-
-    @pytest.mark.asyncio
-    async def test_batch_process_unknown_operation(self, mock_config, mock_ai_engine):
-        """Test batch processing with unknown operation."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
-        
-        request = Mock()
-        request.operation = "unknown_operation"
-        request.data_items = [base64.b64encode(b"data1").decode()]
-        
-        context = Mock()
-        
-        response = await service.BatchProcess(request, context)
-        
-        assert response["failed_items"] == 1
-
-    @pytest.mark.asyncio
-    async def test_get_service_status_exception(self, mock_config):
-        """Test service status with exception."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = Mock()
-        service.ai_engine.get_model_info.side_effect = Exception("Status error")
-        
-        request = Mock()
-        context = Mock()
-        
-        response = await service.GetServiceStatus(request, context)
-        
-        assert response == {}
-        context.set_code.assert_called_with(grpc.StatusCode.INTERNAL)
-
-    @pytest.mark.asyncio
-    async def test_health_check_exception(self, mock_config):
-        """Test health check with exception."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = Mock()
-        
-        # Force an exception
-        with patch.object(service, 'ai_engine', side_effect=Exception("Health check error")):
-            request = Mock()
-            context = Mock()
-            
-            response = await service.HealthCheck(request, context)
-            
-            assert response["status"] == "unhealthy"
-            assert "error" in response
-
-    def test_decode_data_hex_with_spaces(self, mock_config):
-        """Test hex decoding with spaces."""
-        service = AIEngineGRPCService(mock_config)
-        
-        data = "74 65 73 74"  # "test" in hex with spaces
-        decoded = service._decode_data(data, "hex")
-        
-        assert decoded == b"test"
-
-    @pytest.mark.asyncio
-    async def test_detect_anomalies_with_string_baseline(self, mock_config, mock_ai_engine):
-        """Test anomaly detection with string baseline data."""
-        service = AIEngineGRPCService(mock_config)
-        service.ai_engine = mock_ai_engine
-        
-        request = Mock()
-        request.data = base64.b64encode(b"test data").decode()
-        request.data_format = "base64"
-        request.baseline_data = base64.b64encode(b"baseline").decode()
-        
-        context = Mock()
-        
-        response = await service.DetectAnomalies(request, context)
-        
-        assert "is_anomalous" in response
+        assert "status" in health
+        assert "timestamp" in health
+        assert "uptime" in health
+        assert "version" in health

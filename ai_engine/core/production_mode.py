@@ -5,9 +5,11 @@ Centralized production mode detection and validation utilities.
 """
 
 import os
-from typing import Dict, List, Optional, Tuple
+import time
+from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
 import logging
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -363,3 +365,215 @@ def validate_production_ready() -> Tuple[bool, List[str]]:
 def get_production_status() -> Dict[str, bool]:
     """Get production requirements status."""
     return ProductionModeDetector.get_production_checklist()
+
+
+# Exception classes for production mode
+class ProductionModeError(Exception):
+    """Raised when production mode validation fails."""
+    pass
+
+
+class ProductionModeWarning(Warning):
+    """Warning for production mode issues."""
+    pass
+
+
+# Additional classes for backward compatibility
+class ProductionModeValidator:
+    """Validates production mode configurations."""
+    
+    def __init__(self):
+        self._validation_rules = []
+    
+    def add_rule(self, rule_func: callable):
+        """Add a validation rule."""
+        self._validation_rules.append(rule_func)
+    
+    def validate(self) -> Tuple[bool, List[str]]:
+        """Validate production mode configuration."""
+        errors = []
+        for rule_func in self._validation_rules:
+            try:
+                if not rule_func():
+                    errors.append(f"Validation rule failed: {rule_func.__name__}")
+            except Exception as e:
+                errors.append(f"Validation rule error: {e}")
+        return len(errors) == 0, errors
+
+
+class ProductionModeMonitor:
+    """Monitors production mode health."""
+    
+    def __init__(self):
+        self._metrics = {}
+        self._alerts = []
+    
+    def record_metric(self, name: str, value: float):
+        """Record a metric."""
+        self._metrics[name] = value
+    
+    def add_alert(self, message: str):
+        """Add an alert."""
+        self._alerts.append(message)
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get health status."""
+        return {
+            "metrics": self._metrics,
+            "alerts": self._alerts,
+            "status": "healthy" if not self._alerts else "degraded"
+        }
+
+
+class ProductionModeHealthCheck:
+    """Health check for production mode."""
+    
+    def __init__(self, name: str):
+        self.name = name
+        self.last_check = None
+        self.last_result = None
+    
+    def run_check(self) -> Dict[str, Any]:
+        """Run health check."""
+        try:
+            # Basic production mode check
+            is_prod = ProductionModeDetector.is_production_mode()
+            is_valid, errors = ProductionModeDetector.validate_production_environment()
+            
+            self.last_result = {
+                "status": "healthy" if is_valid else "unhealthy",
+                "is_production": is_prod,
+                "errors": errors
+            }
+        except Exception as e:
+            self.last_result = {
+                "status": "error",
+                "error": str(e)
+            }
+        
+        self.last_check = time.time()
+        return self.last_result
+
+
+class ProductionModeMetrics:
+    """Metrics collection for production mode."""
+    
+    def __init__(self):
+        self._counters = defaultdict(int)
+        self._gauges = {}
+        self._histograms = defaultdict(list)
+    
+    def increment_counter(self, name: str, value: int = 1):
+        """Increment a counter."""
+        self._counters[name] += value
+    
+    def set_gauge(self, name: str, value: float):
+        """Set a gauge value."""
+        self._gauges[name] = value
+    
+    def record_histogram(self, name: str, value: float):
+        """Record a histogram value."""
+        self._histograms[name].append(value)
+    
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get all metrics."""
+        return {
+            "counters": dict(self._counters),
+            "gauges": self._gauges,
+            "histograms": {k: len(v) for k, v in self._histograms.items()}
+        }
+
+
+class ProductionModeLogger:
+    """Logger for production mode."""
+    
+    def __init__(self, name: str = __name__):
+        self.logger = logging.getLogger(name)
+    
+    def log_production_event(self, event: str, level: str = "info"):
+        """Log a production event."""
+        getattr(self.logger, level)(f"Production event: {event}")
+    
+    def log_security_event(self, event: str):
+        """Log a security event."""
+        self.logger.warning(f"Security event: {event}")
+    
+    def log_performance_event(self, event: str, duration: float):
+        """Log a performance event."""
+        self.logger.info(f"Performance event: {event} (duration: {duration:.3f}s)")
+
+
+class ProductionModeSecurity:
+    """Security utilities for production mode."""
+    
+    def __init__(self):
+        self._security_checks = []
+    
+    def add_security_check(self, check_func: callable):
+        """Add a security check."""
+        self._security_checks.append(check_func)
+    
+    def run_security_audit(self) -> Dict[str, Any]:
+        """Run security audit."""
+        results = []
+        for check_func in self._security_checks:
+            try:
+                result = check_func()
+                results.append({"check": check_func.__name__, "result": result})
+            except Exception as e:
+                results.append({"check": check_func.__name__, "error": str(e)})
+        
+        return {"audit_results": results}
+
+
+class ProductionModePerformance:
+    """Performance monitoring for production mode."""
+    
+    def __init__(self):
+        self._performance_metrics = {}
+    
+    def record_performance(self, operation: str, duration: float):
+        """Record performance metric."""
+        if operation not in self._performance_metrics:
+            self._performance_metrics[operation] = []
+        self._performance_metrics[operation].append(duration)
+    
+    def get_performance_summary(self) -> Dict[str, Any]:
+        """Get performance summary."""
+        summary = {}
+        for operation, durations in self._performance_metrics.items():
+            if durations:
+                summary[operation] = {
+                    "avg_duration": sum(durations) / len(durations),
+                    "min_duration": min(durations),
+                    "max_duration": max(durations),
+                    "count": len(durations)
+                }
+        return summary
+
+
+class ProductionModeCompliance:
+    """Compliance checking for production mode."""
+    
+    def __init__(self):
+        self._compliance_rules = []
+    
+    def add_compliance_rule(self, rule_func: callable):
+        """Add a compliance rule."""
+        self._compliance_rules.append(rule_func)
+    
+    def check_compliance(self) -> Dict[str, Any]:
+        """Check compliance."""
+        results = []
+        for rule_func in self._compliance_rules:
+            try:
+                result = rule_func()
+                results.append({"rule": rule_func.__name__, "compliant": result})
+            except Exception as e:
+                results.append({"rule": rule_func.__name__, "error": str(e)})
+        
+        compliant_count = sum(1 for r in results if r.get("compliant", False))
+        return {
+            "compliance_rate": compliant_count / len(results) if results else 0,
+            "results": results
+        }
