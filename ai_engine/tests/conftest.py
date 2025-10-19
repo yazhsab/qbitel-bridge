@@ -89,6 +89,80 @@ def mock_llm_service():
     return llm
 
 
+@pytest.fixture(autouse=True)
+def mock_etcd3(monkeypatch):
+    """Mock etcd3 to avoid protobuf issues."""
+    from unittest.mock import MagicMock
+    import sys
+
+    # Create comprehensive etcd3 mock
+    mock_etcd = MagicMock()
+    mock_client = MagicMock()
+    mock_etcd.client = MagicMock(return_value=mock_client)
+
+    # Mock the module
+    sys.modules['etcd3'] = mock_etcd
+    sys.modules['etcd3.etcdrpc'] = MagicMock()
+    sys.modules['etcd3.etcdrpc.rpc_pb2'] = MagicMock()
+    sys.modules['etcd3.etcdrpc.kv_pb2'] = MagicMock()
+
+    yield mock_etcd
+
+    # Cleanup
+    for module in ['etcd3', 'etcd3.etcdrpc', 'etcd3.etcdrpc.rpc_pb2', 'etcd3.etcdrpc.kv_pb2']:
+        if module in sys.modules:
+            del sys.modules[module]
+
+
+@pytest.fixture
+def mock_password_hash():
+    """Mock password hashing for authentication tests."""
+    from unittest.mock import patch
+
+    with patch('passlib.hash.bcrypt.hash') as mock_hash:
+        with patch('passlib.hash.bcrypt.verify') as mock_verify:
+            mock_hash.return_value = "$2b$12$test_hashed_password_mock_value_12345"
+            mock_verify.return_value = True
+            yield {'hash': mock_hash, 'verify': mock_verify}
+
+
+@pytest.fixture
+def mock_auth_service():
+    """Mock authentication service functions."""
+    from unittest.mock import patch
+
+    mocks = {}
+    patches = []
+
+    # Try to patch various auth locations
+    auth_modules = [
+        'ai_engine.api.auth',
+        'ai_engine.api.auth_enterprise',
+    ]
+
+    for module in auth_modules:
+        try:
+            p1 = patch(f'{module}.hash_password', return_value="$2b$12$hashed")
+            p2 = patch(f'{module}.verify_password', return_value=True)
+            p3 = patch(f'{module}.get_api_key', return_value="test_api_key_12345")
+
+            mocks[f'{module}.hash'] = p1.start()
+            mocks[f'{module}.verify'] = p2.start()
+            mocks[f'{module}.api_key'] = p3.start()
+
+            patches.extend([p1, p2, p3])
+        except (ImportError, AttributeError):
+            pass
+
+    yield mocks
+
+    for p in patches:
+        try:
+            p.stop()
+        except:
+            pass
+
+
 # Pytest configuration
 def pytest_configure(config):
     """Configure pytest markers."""

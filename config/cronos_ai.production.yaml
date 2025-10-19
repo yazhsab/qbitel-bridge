@@ -141,18 +141,18 @@ security:
   jwt_secret: ""  # SET VIA JWT_SECRET ENVIRONMENT VARIABLE (min 32 chars)
   jwt_algorithm: "HS256"
   jwt_expiration_hours: 8  # Shorter expiration in production
-  
+
   # TLS/SSL
   tls_enabled: true  # REQUIRED in production
-  tls_cert_file: "/etc/cronos_ai/certs/server.crt"
-  tls_key_file: "/etc/cronos_ai/certs/server.key"
-  tls_ca_file: "/etc/cronos_ai/certs/ca.crt"
+  tls_cert_file: "${TLS_CERT_FILE:-/etc/cronos_ai/certs/server.crt}"
+  tls_key_file: "${TLS_KEY_FILE:-/etc/cronos_ai/certs/server.key}"
+  tls_ca_file: "${TLS_CA_FILE:-/etc/cronos_ai/certs/ca.crt}"
   tls_verify_client: true  # Enable mutual TLS
-  
+
   # Encryption
   encryption_key: ""  # SET VIA ENCRYPTION_KEY ENVIRONMENT VARIABLE (min 32 chars)
   encryption_algorithm: "AES-256-GCM"
-  
+
   # Audit Logging
   audit_logging_enabled: true
   audit_log_retention_days: 365  # 1 year retention for compliance
@@ -160,10 +160,10 @@ security:
 
 # Logging Configuration
 logging:
-  level: "INFO"  # Use INFO in production, DEBUG only for troubleshooting
+  level: "${LOG_LEVEL:-INFO}"  # Use INFO in production, DEBUG only for troubleshooting
   format: "json"  # Structured logging for production
-  output: "file"  # Log to file in production
-  file_path: "/var/log/cronos_ai/app.log"
+  output: "${LOG_OUTPUT:-file}"  # Log to file in production, stdout in containers
+  file_path: "${LOG_FILE_PATH:-/var/log/cronos_ai/app.log}"
   max_file_size_mb: 500
   backup_count: 10
   structured_logging: true
@@ -197,11 +197,11 @@ rate_limiting:
   per_ip_limit: 500  # requests per hour
 
 # CORS Configuration (Production)
+# Set CORS_ALLOWED_ORIGINS as comma-separated list, e.g.:
+# CORS_ALLOWED_ORIGINS="https://app.example.com,https://dashboard.example.com"
 cors:
   enabled: true
-  allowed_origins:
-    - "https://cronos-ai.example.com"
-    - "https://dashboard.example.com"
+  allowed_origins: "${CORS_ALLOWED_ORIGINS}"  # MUST be set via environment variable
   allowed_methods:
     - "GET"
     - "POST"

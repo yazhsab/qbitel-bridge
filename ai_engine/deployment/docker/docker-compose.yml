@@ -1,6 +1,68 @@
 version: '3.8'
 
+# Load environment variables from .env file
+# Copy .env.docker to .env and customize before running
+# Example: cp .env.docker .env
+
 services:
+  postgres:
+    image: timescale/timescaledb:latest-pg15
+    container_name: cronos-ai-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME:-cronos_ai}
+      - POSTGRES_USER=${DATABASE_USER:-cronos_user}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-changeme_in_production}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+    networks:
+      - cronos-ai-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-cronos_user} -d ${DATABASE_NAME:-cronos_ai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=1GB"
+      - "-c"
+      - "maintenance_work_mem=64MB"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "wal_buffers=16MB"
+      - "-c"
+      - "default_statistics_target=100"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "effective_io_concurrency=200"
+      - "-c"
+      - "work_mem=1310kB"
+      - "-c"
+      - "min_wal_size=1GB"
+      - "-c"
+      - "max_wal_size=4GB"
+      - "-c"
+      - "max_worker_processes=4"
+      - "-c"
+      - "max_parallel_workers_per_gather=2"
+      - "-c"
+      - "max_parallel_workers=4"
+      - "-c"
+      - "max_parallel_maintenance_workers=2"
+
   cronos-ai-engine:
     build:
       context: ../../
@@ -23,6 +85,15 @@ services:
       - AI_ENGINE_MODEL_PATH=/app/models
       - MLFLOW_TRACKING_URI=http://mlflow:5000
       - PROMETHEUS_METRICS_PORT=9090
+      # Database Configuration
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=${DATABASE_NAME:-cronos_ai}
+      - DATABASE_USER=${DATABASE_USER:-cronos_user}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-changeme_in_production}
+      # Redis Configuration
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     volumes:
       - ai_data:/app/data
       - ai_models:/app/models
@@ -31,8 +102,14 @@ services:
     networks:
       - cronos-ai-network
     depends_on:
-      - mlflow
-      - prometheus
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mlflow:
+        condition: service_started
+      prometheus:
+        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -155,6 +232,8 @@ services:
       retries: 3
 
 volumes:
+  postgres_data:
+    driver: local
   ai_data:
     driver: local
   ai_models:

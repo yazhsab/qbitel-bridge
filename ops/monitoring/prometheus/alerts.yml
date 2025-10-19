@@ -1,0 +1,415 @@
+# CRONOS AI - Prometheus Alert Rules
+#
+# This file defines alert rules for production monitoring
+# Severity Levels:
+#   - critical: Immediate action required, impacts service availability
+#   - warning: Should be addressed soon, may impact performance
+#   - info: Informational, for awareness
+#
+# Documentation: See /ops/monitoring/runbooks/ for alert remediation
+
+groups:
+  # ============================================================================
+  # SERVICE AVAILABILITY ALERTS
+  # ============================================================================
+  - name: service_availability
+    interval: 30s
+    rules:
+      - alert: ServiceDown
+        expr: up{job="cronos-ai-engine"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "CRONOS AI Engine is down"
+          description: "The CRONOS AI Engine instance {{ $labels.instance }} has been down for more than 1 minute."
+          runbook_url: "https://docs.cronos-ai.com/runbooks/service-down"
+
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[5m])) by (instance)
+            /
+            sum(rate(http_requests_total[5m])) by (instance)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "High HTTP error rate detected"
+          description: "Instance {{ $labels.instance }} has error rate of {{ $value | humanizePercentage }} (threshold: 5%)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/high-error-rate"
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, instance, endpoint)
+          ) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API latency (p99)"
+          description: "Instance {{ $labels.instance }} endpoint {{ $labels.endpoint }} has p99 latency of {{ $value }}s (threshold: 2s)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/high-latency"
+
+      - alert: VeryHighLatency
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, instance, endpoint)
+          ) > 5.0
+        for: 2m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "Very high API latency (p99 > 5s)"
+          description: "Instance {{ $labels.instance }} endpoint {{ $labels.endpoint }} has p99 latency of {{ $value }}s (threshold: 5s)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/high-latency"
+
+  # ============================================================================
+  # DATABASE ALERTS
+  # ============================================================================
+  - name: database
+    interval: 30s
+    rules:
+      - alert: DatabaseConnectionFailures
+        expr: rate(database_connection_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "High database connection error rate"
+          description: "Database connection errors {{ $value | humanize }}/s (threshold: 0.1/s)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/database-connection-failures"
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: database_connection_pool_active / database_connection_pool_max > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Database connection pool near exhaustion"
+          description: "Connection pool is {{ $value | humanizePercentage }} full (threshold: 90%)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/connection-pool-exhausted"
+
+      - alert: SlowDatabaseQueries
+        expr: histogram_quantile(0.99, rate(database_query_duration_seconds_bucket[5m])) > 1.0
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Slow database queries detected"
+          description: "Database p99 query time is {{ $value }}s (threshold: 1s)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/slow-queries"
+
+  # ============================================================================
+  # RESOURCE UTILIZATION ALERTS
+  # ============================================================================
+  - name: resources
+    interval: 30s
+    rules:
+      - alert: HighCPUUsage
+        expr: process_cpu_usage > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value | humanizePercentage }} on {{ $labels.instance }} (threshold: 80%)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/high-cpu"
+
+      - alert: CriticalCPUUsage
+        expr: process_cpu_usage > 0.95
+        for: 5m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "Critical CPU usage"
+          description: "CPU usage is {{ $value | humanizePercentage }} on {{ $labels.instance }} (threshold: 95%)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/high-cpu"
+
+      - alert: HighMemoryUsage
+        expr: process_memory_usage_bytes / process_memory_limit_bytes > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }} (threshold: 80%)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/high-memory"
+
+      - alert: CriticalMemoryUsage
+        expr: process_memory_usage_bytes / process_memory_limit_bytes > 0.95
+        for: 5m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "Critical memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }} (threshold: 95%)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/high-memory"
+
+      - alert: HighDiskUsage
+        expr: disk_usage_percent > 85
+        for: 10m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage is {{ $value }}% on {{ $labels.instance }} (threshold: 85%)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/high-disk"
+
+      - alert: CriticalDiskUsage
+        expr: disk_usage_percent > 95
+        for: 5m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "Critical disk usage"
+          description: "Disk usage is {{ $value }}% on {{ $labels.instance }} (threshold: 95%)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/high-disk"
+
+  # ============================================================================
+  # REDIS CACHE ALERTS
+  # ============================================================================
+  - name: redis
+    interval: 30s
+    rules:
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis instance {{ $labels.instance }} is down (caching disabled)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/redis-down"
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis memory usage is {{ $value | humanizePercentage }} (threshold: 90%)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/redis-memory"
+
+      - alert: RedisConnectionsHigh
+        expr: redis_connected_clients / redis_maxclients > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: cache
+        annotations:
+          summary: "Redis connection count high"
+          description: "Redis connections at {{ $value | humanizePercentage }} of max (threshold: 80%)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/redis-connections"
+
+  # ============================================================================
+  # AI ENGINE SPECIFIC ALERTS
+  # ============================================================================
+  - name: ai_engine
+    interval: 30s
+    rules:
+      - alert: ProtocolDiscoveryFailureRate
+        expr: rate(protocol_discovery_failures_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: ai_engine
+        annotations:
+          summary: "High protocol discovery failure rate"
+          description: "Protocol discovery failure rate is {{ $value }}/s (threshold: 0.05/s)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/protocol-discovery-failures"
+
+      - alert: ModelInferenceSlowdown
+        expr: histogram_quantile(0.99, rate(model_inference_duration_seconds_bucket[5m])) > 5.0
+        for: 5m
+        labels:
+          severity: warning
+          component: ai_engine
+        annotations:
+          summary: "Slow model inference detected"
+          description: "Model inference p99 latency is {{ $value }}s (threshold: 5s)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/slow-inference"
+
+      - alert: GPUUtilizationLow
+        expr: gpu_utilization_percent < 20 and ai_use_gpu == 1
+        for: 30m
+        labels:
+          severity: info
+          component: ai_engine
+        annotations:
+          summary: "Low GPU utilization"
+          description: "GPU utilization is {{ $value }}% for 30 minutes (may indicate GPU not being used)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/low-gpu-utilization"
+
+      - alert: ModelLoadFailures
+        expr: rate(model_load_failures_total[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          component: ai_engine
+        annotations:
+          summary: "Model loading failures detected"
+          description: "Model load failure rate is {{ $value }}/s"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/model-load-failures"
+
+  # ============================================================================
+  # LLM INTEGRATION ALERTS
+  # ============================================================================
+  - name: llm_integration
+    interval: 30s
+    rules:
+      - alert: LLMAPIErrors
+        expr: rate(llm_requests_total{status="error"}[5m]) / rate(llm_requests_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: llm
+        annotations:
+          summary: "High LLM API error rate"
+          description: "LLM {{ $labels.provider }} error rate is {{ $value | humanizePercentage }} (threshold: 10%)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/llm-errors"
+
+      - alert: LLMAPIRateLimitReached
+        expr: rate(llm_rate_limit_errors_total[1m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          component: llm
+        annotations:
+          summary: "LLM API rate limit reached"
+          description: "LLM {{ $labels.provider }} is rate limiting requests"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/llm-rate-limit"
+
+  # ============================================================================
+  # SECURITY ALERTS
+  # ============================================================================
+  - name: security
+    interval: 30s
+    rules:
+      - alert: HighAuthenticationFailureRate
+        expr: rate(authentication_failures_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Authentication failures: {{ $value }}/s (threshold: 10/s) - possible brute force attack"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/auth-failures"
+
+      - alert: UnauthorizedAccessAttempts
+        expr: rate(http_requests_total{status_code="401"}[5m]) > 50
+        for: 2m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "High rate of unauthorized access attempts"
+          description: "Unauthorized (401) requests: {{ $value }}/s (threshold: 50/s)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/unauthorized-access"
+
+      - alert: TLSCertificateExpiringSoon
+        expr: (tls_certificate_expiry_seconds < 86400 * 30) and (tls_certificate_expiry_seconds > 0)
+        for: 1h
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "TLS certificate expiring soon"
+          description: "TLS certificate expires in {{ $value | humanizeDuration }} (threshold: 30 days)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/tls-cert-expiry"
+
+      - alert: TLSCertificateExpiringCritical
+        expr: (tls_certificate_expiry_seconds < 86400 * 7) and (tls_certificate_expiry_seconds > 0)
+        for: 1h
+        labels:
+          severity: critical
+          component: security
+        annotations:
+          summary: "TLS certificate expiring very soon!"
+          description: "TLS certificate expires in {{ $value | humanizeDuration }} (threshold: 7 days)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/tls-cert-expiry"
+
+  # ============================================================================
+  # SLO ALERTS (Service Level Objectives)
+  # ============================================================================
+  - name: slo
+    interval: 30s
+    rules:
+      - alert: ErrorBudgetExhausted
+        expr: |
+          (
+            1 - (
+              sum(rate(http_requests_total{status_code!~"5.."}[30d]))
+              /
+              sum(rate(http_requests_total[30d]))
+            )
+          ) > 0.001  # 99.9% SLO, 0.1% error budget
+        for: 1h
+        labels:
+          severity: critical
+          component: slo
+        annotations:
+          summary: "Error budget exhausted"
+          description: "Error budget exhausted - error rate {{ $value | humanizePercentage }} exceeds SLO (99.9% availability)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/error-budget"
+
+      - alert: LatencySLOViolation
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 1.0
+        for: 15m
+        labels:
+          severity: warning
+          component: slo
+        annotations:
+          summary: "Latency SLO violation"
+          description: "p95 latency {{ $value }}s exceeds SLO target (1s)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/latency-slo"
+
+  # ============================================================================
+  # DEPENDENT SERVICES ALERTS
+  # ============================================================================
+  - name: dependencies
+    interval: 30s
+    rules:
+      - alert: ExternalServiceDown
+        expr: external_service_up == 0
+        for: 5m
+        labels:
+          severity: warning
+          component: dependencies
+        annotations:
+          summary: "External service unavailable"
+          description: "External service {{ $labels.service }} has been down for 5 minutes"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/external-service-down"
+
+      - alert: CircuitBreakerOpen
+        expr: circuit_breaker_state{state="open"} == 1
+        for: 5m
+        labels:
+          severity: warning
+          component: dependencies
+        annotations:
+          summary: "Circuit breaker open"
+          description: "Circuit breaker for {{ $labels.service }} is open (too many failures)"
+          runbook_url: "https://docs.cronos-ai.com/runbooks/circuit-breaker"

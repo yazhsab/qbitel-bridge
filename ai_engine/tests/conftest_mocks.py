@@ -54,4 +54,16 @@ sys.modules['qrcode'] = MagicMock()
 sys.modules['qrcode.image'] = MagicMock()
 sys.modules['qrcode.image.svg'] = MagicMock()
 
+# Mock etcd3 to avoid protobuf issues
+mock_etcd3 = MagicMock()
+mock_etcd3_client = MagicMock()
+mock_etcd3.client = MagicMock(return_value=mock_etcd3_client)
+mock_etcd3.Etcd3Client = MagicMock(return_value=mock_etcd3_client)
+
+sys.modules['etcd3'] = mock_etcd3
+sys.modules['etcd3.etcdrpc'] = MagicMock()
+sys.modules['etcd3.etcdrpc.rpc_pb2'] = MagicMock()
+sys.modules['etcd3.etcdrpc.kv_pb2'] = MagicMock()
+sys.modules['etcd3.etcdrpc.auth_pb2'] = MagicMock()
+
 print("✓ All optional dependencies mocked successfully")

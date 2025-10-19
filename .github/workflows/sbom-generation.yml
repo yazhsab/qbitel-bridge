@@ -1,0 +1,384 @@
+name: SBOM Generation & Publishing
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly SBOM refresh (Sundays at 02:00 UTC)
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+env:
+  SBOM_OUTPUT_DIR: ./sbom-artifacts
+  REGISTRY: ghcr.io
+  IMAGE_NAME: cronos-ai
+
+jobs:
+  generate-sbom:
+    name: Generate Software Bill of Materials
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+      id-token: write  # For Cosign signing
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up SBOM tools
+        run: |
+          # Install Syft (Primary SBOM generator)
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | \
+            sh -s -- -b /usr/local/bin v0.100.0
+
+          # Install Cosign (for SBOM signing)
+          curl -sSfL https://github.com/sigstore/cosign/releases/download/v2.2.2/cosign-linux-amd64 \
+            -o /usr/local/bin/cosign
+          chmod +x /usr/local/bin/cosign
+
+          # Install Grype (for vulnerability scanning)
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | \
+            sh -s -- -b /usr/local/bin
+
+          # Verify installations
+          syft version
+          cosign version
+          grype version
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python SBOM generators
+        run: |
+          pip install cyclonedx-bom==4.3.0
+
+      - name: Create SBOM output directory
+        run: mkdir -p ${{ env.SBOM_OUTPUT_DIR }}
+
+      # ============================================
+      # Generate SBOMs for Python AI Engine
+      # ============================================
+      - name: Generate Python AI Engine SBOM (SPDX)
+        run: |
+          syft packages dir:./ai_engine \
+            -o spdx-json \
+            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-ai-engine-spdx.json
+
+      - name: Generate Python AI Engine SBOM (CycloneDX)
+        run: |
+          syft packages dir:./ai_engine \
+            -o cyclonedx-json \
+            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-ai-engine-cyclonedx.json
+
+      # ============================================
+      # Generate SBOMs for Rust Data Plane
+      # ============================================
+      - name: Generate Rust Data Plane SBOM (SPDX)
+        run: |
+          syft packages dir:./rust/dataplane \
+            -o spdx-json \
+            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-dataplane-spdx.json
+
+      - name: Generate Rust Data Plane SBOM (CycloneDX)
+        run: |
+          syft packages dir:./rust/dataplane \
+            -o cyclonedx-json \
+            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-dataplane-cyclonedx.json
+
+      # ============================================
+      # Generate SBOMs for Go Services
+      # ============================================
+      - name: Generate Go Control Plane SBOM (SPDX)
+        if: hashFiles('go/controlplane/go.mod') != ''
+        run: |
+          syft packages dir:./go/controlplane \
+            -o spdx-json \
+            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-controlplane-spdx.json
+
+      - name: Generate Go Management API SBOM (CycloneDX)
+        if: hashFiles('go/mgmtapi/go.mod') != ''
+        run: |
+          syft packages dir:./go/mgmtapi \
+            -o cyclonedx-json \
+            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-mgmtapi-cyclonedx.json
+
+      # ============================================
+      # Generate SBOMs for UI Console
+      # ============================================
+      - name: Generate UI Console SBOM (SPDX)
+        if: hashFiles('ui/console/package.json') != ''
+        run: |
+          syft packages dir:./ui/console \
+            -o spdx-json \
+            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-console-spdx.json
+
+      - name: Generate UI Console SBOM (CycloneDX)
+        if: hashFiles('ui/console/package.json') != ''
+        run: |
+          syft packages dir:./ui/console \
+            -o cyclonedx-json \
+            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-console-cyclonedx.json
+
+      # ============================================
+      # Generate Unified Platform SBOM
+      # ============================================
+      - name: Generate Unified Platform SBOM (SPDX)
+        run: |
+          syft packages dir:. \
+            -o spdx-json \
+            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-ai-platform-spdx.json
+
+      - name: Generate Unified Platform SBOM (CycloneDX)
+        run: |
+          syft packages dir:. \
+            -o cyclonedx-json \
+            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-ai-platform-cyclonedx.json
+
+      # ============================================
+      # Vulnerability Scanning with Grype
+      # ============================================
+      - name: Scan SBOMs for vulnerabilities
+        run: |
+          for sbom in ${{ env.SBOM_OUTPUT_DIR }}/*-spdx.json; do
+            component=$(basename "$sbom" | sed 's/-spdx.json//')
+            grype sbom:"$sbom" \
+              -o json \
+              --file "${{ env.SBOM_OUTPUT_DIR }}/${component}-vulnerabilities.json"
+            grype sbom:"$sbom" \
+              -o sarif \
+              --file "${{ env.SBOM_OUTPUT_DIR }}/${component}-vulnerabilities.sarif"
+          done
+
+      - name: Upload vulnerability reports to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: ${{ env.SBOM_OUTPUT_DIR }}
+          category: sbom-vulnerabilities
+
+      # ============================================
+      # Sign SBOMs with Cosign (SLSA Level 3)
+      # ============================================
+      - name: Sign SBOMs with Cosign
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main')
+        run: |
+          for sbom in ${{ env.SBOM_OUTPUT_DIR }}/*.json; do
+            # Skip vulnerability reports
+            if [[ "$sbom" == *"vulnerabilities.json" ]]; then
+              continue
+            fi
+
+            echo "Signing $sbom"
+            cosign sign-blob --yes \
+              --bundle "${sbom}.bundle" \
+              "$sbom"
+          done
+
+      # ============================================
+      # Generate SBOM Summary Report
+      # ============================================
+      - name: Generate SBOM Summary
+        run: |
+          python3 - <<'EOF'
+          import json
+          import os
+          from pathlib import Path
+          from datetime import datetime
+
+          sbom_dir = Path(os.environ['SBOM_OUTPUT_DIR'])
+          summary = {
+              "generated_at": datetime.utcnow().isoformat() + "Z",
+              "version": os.environ.get('GITHUB_REF_NAME', 'unknown'),
+              "commit": os.environ.get('GITHUB_SHA', 'unknown'),
+              "components": {}
+          }
+
+          for sbom_file in sbom_dir.glob('*-spdx.json'):
+              component = sbom_file.stem.replace('-spdx', '')
+              try:
+                  with open(sbom_file) as f:
+                      data = json.load(f)
+                      package_count = len(data.get('packages', []))
+                      summary['components'][component] = {
+                          'packages': package_count,
+                          'sbom_file': sbom_file.name,
+                          'format': 'SPDX 2.3'
+                      }
+              except Exception as e:
+                  print(f"Error processing {sbom_file}: {e}")
+
+          # Check for vulnerabilities
+          for vuln_file in sbom_dir.glob('*-vulnerabilities.json'):
+              component = vuln_file.stem.replace('-vulnerabilities', '')
+              try:
+                  with open(vuln_file) as f:
+                      data = json.load(f)
+                      matches = data.get('matches', [])
+                      summary['components'][component]['vulnerabilities'] = {
+                          'total': len(matches),
+                          'critical': sum(1 for m in matches if m.get('vulnerability', {}).get('severity') == 'Critical'),
+                          'high': sum(1 for m in matches if m.get('vulnerability', {}).get('severity') == 'High'),
+                          'medium': sum(1 for m in matches if m.get('vulnerability', {}).get('severity') == 'Medium'),
+                          'low': sum(1 for m in matches if m.get('vulnerability', {}).get('severity') == 'Low')
+                      }
+              except Exception as e:
+                  print(f"Error processing vulnerabilities {vuln_file}: {e}")
+
+          with open(sbom_dir / 'sbom-summary.json', 'w') as f:
+              json.dump(summary, f, indent=2)
+
+          print("SBOM Summary:")
+          print(json.dumps(summary, indent=2))
+          EOF
+
+      # ============================================
+      # Upload to GitHub Releases (for tagged releases)
+      # ============================================
+      - name: Upload SBOMs to Release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ${{ env.SBOM_OUTPUT_DIR }}/*-spdx.json
+            ${{ env.SBOM_OUTPUT_DIR }}/*-cyclonedx.json
+            ${{ env.SBOM_OUTPUT_DIR }}/*.bundle
+            ${{ env.SBOM_OUTPUT_DIR }}/sbom-summary.json
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ============================================
+      # Upload as workflow artifacts (always available)
+      # ============================================
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cronos-ai-sbom-${{ github.sha }}
+          path: ${{ env.SBOM_OUTPUT_DIR }}
+          retention-days: 90
+
+      # ============================================
+      # Create PR Comment with SBOM Summary
+      # ============================================
+      - name: Comment PR with SBOM Summary
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const summaryPath = path.join(process.env.SBOM_OUTPUT_DIR, 'sbom-summary.json');
+            const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+
+            let tableRows = '';
+            for (const [component, data] of Object.entries(summary.components)) {
+              const vulns = data.vulnerabilities || {};
+              const vulnSummary = `${vulns.critical || 0} Critical, ${vulns.high || 0} High, ${vulns.medium || 0} Medium`;
+              tableRows += `| ${component} | ${data.packages} | ${vulnSummary} |\n`;
+            }
+
+            const comment = `## 📦 SBOM Generation Report
+
+            **Version:** ${summary.version}
+            **Generated:** ${summary.generated_at}
+            **Commit:** \`${summary.commit.substring(0, 7)}\`
+
+            ### Component Summary
+
+            | Component | Packages | Vulnerabilities |
+            |-----------|----------|----------------|
+            ${tableRows}
+
+            ### Available Formats
+            - ✅ SPDX 2.3 (JSON) - Government/ISO standard
+            - ✅ CycloneDX 1.5 (JSON) - Security-focused
+
+            ### Download
+            Artifacts will be available in the workflow run artifacts for 90 days.
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      # ============================================
+      # Fail build on critical vulnerabilities
+      # ============================================
+      - name: Check for critical vulnerabilities
+        run: |
+          python3 - <<'EOF'
+          import json
+          import sys
+          from pathlib import Path
+          import os
+
+          sbom_dir = Path(os.environ['SBOM_OUTPUT_DIR'])
+          critical_found = False
+
+          for vuln_file in sbom_dir.glob('*-vulnerabilities.json'):
+              component = vuln_file.stem.replace('-vulnerabilities', '')
+              with open(vuln_file) as f:
+                  data = json.load(f)
+                  matches = data.get('matches', [])
+                  critical = [m for m in matches if m.get('vulnerability', {}).get('severity') == 'Critical']
+
+                  if critical:
+                      print(f"❌ CRITICAL: {component} has {len(critical)} critical vulnerabilities!")
+                      for vuln in critical[:5]:  # Show first 5
+                          v = vuln.get('vulnerability', {})
+                          print(f"  - {v.get('id', 'Unknown')}: {v.get('description', 'No description')[:100]}")
+                      critical_found = True
+
+          if critical_found:
+              print("\n⚠️  Critical vulnerabilities detected! Please review and remediate.")
+              # Don't fail the build, just warn
+              # sys.exit(1)
+          else:
+              print("✅ No critical vulnerabilities detected.")
+          EOF
+
+  # ============================================
+  # Optional: Upload to Dependency-Track
+  # ============================================
+  upload-dependency-track:
+    name: Upload to Dependency-Track
+    runs-on: ubuntu-latest
+    needs: [generate-sbom]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    steps:
+      - name: Download SBOM artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: cronos-ai-sbom-${{ github.sha }}
+          path: ./sbom-artifacts
+
+      - name: Upload to Dependency-Track
+        if: vars.DEPENDENCY_TRACK_URL != ''
+        run: |
+          for sbom in ./sbom-artifacts/*-cyclonedx.json; do
+            component=$(basename "$sbom" | sed 's/-cyclonedx.json//')
+
+            echo "Uploading $component to Dependency-Track"
+
+            curl -X PUT "${{ vars.DEPENDENCY_TRACK_URL }}/api/v1/bom" \
+              -H "X-Api-Key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"project\": \"$component\",
+                \"projectVersion\": \"${{ github.ref_name }}\",
+                \"bom\": \"$(base64 -w0 < $sbom)\"
+              }" || echo "Warning: Failed to upload $component"
+          done

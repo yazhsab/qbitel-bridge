@@ -28,6 +28,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
+# Import encryption types
+from ai_engine.security.field_encryption import EncryptedString, EncryptedJSON, EncryptedText
+
 Base = declarative_base()
 
 
@@ -103,8 +106,8 @@ class User(Base):
     # Multi-factor authentication
     mfa_enabled = Column(Boolean, default=False, nullable=False)
     mfa_method = Column(Enum(MFAMethod), nullable=True)
-    mfa_secret = Column(String(255), nullable=True)  # Encrypted TOTP secret
-    mfa_backup_codes = Column(JSONB, nullable=True)  # Encrypted backup codes
+    mfa_secret = Column(EncryptedString(255), nullable=True)  # Encrypted TOTP secret
+    mfa_backup_codes = Column(EncryptedJSON, nullable=True)  # Encrypted backup codes (list of strings)
 
     # OAuth/SAML integration
     oauth_provider = Column(String(50), nullable=True)
@@ -324,7 +327,7 @@ class OAuthProvider(Base):
 
     # OAuth configuration
     client_id = Column(String(255), nullable=False)
-    client_secret_encrypted = Column(LargeBinary, nullable=False)  # Encrypted
+    client_secret_encrypted = Column(EncryptedText, nullable=False)  # Encrypted client secret
     authorization_endpoint = Column(String(500), nullable=False)
     token_endpoint = Column(String(500), nullable=False)
     userinfo_endpoint = Column(String(500), nullable=True)

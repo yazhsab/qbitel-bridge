@@ -260,9 +260,21 @@ def setup_middleware(app: FastAPI, config: Config):
         SecurityHeadersMiddleware, enable_hsts=enable_hsts, enable_csp=True
     )
 
-    # Advanced rate limiting (if enabled)
-    rate_limit_config = config.__dict__.get("rate_limiting", {})
-    if rate_limit_config.get("enabled", False):
+    # Rate limiting - ALWAYS ENABLED for production security
+    rate_limit_config = getattr(config, "rate_limiting", {})
+    if isinstance(rate_limit_config, dict):
+        rate_limit_enabled = rate_limit_config.get("enabled", True)  # Default to enabled
+        default_limit = rate_limit_config.get("default_limit", 100)
+        per_user_limit = rate_limit_config.get("per_user_limit", 1000)
+        burst_limit = rate_limit_config.get("burst_limit", 200)
+    else:
+        rate_limit_enabled = getattr(rate_limit_config, "enabled", True)
+        default_limit = getattr(rate_limit_config, "default_limit", 100)
+        per_user_limit = getattr(rate_limit_config, "per_user_limit", 1000)
+        burst_limit = getattr(rate_limit_config, "burst_limit", 200)
+
+    # Try advanced rate limiting with Redis backend (production-ready)
+    if rate_limit_enabled:
         try:
             from .rate_limiter import (
                 get_rate_limiter,
@@ -272,16 +284,26 @@ def setup_middleware(app: FastAPI, config: Config):
 
             # Create rate limit config
             rl_config = RateLimitConfig(
-                requests_per_minute=rate_limit_config.get("default_limit", 100),
-                requests_per_hour=rate_limit_config.get("per_user_limit", 1000),
-                burst_size=rate_limit_config.get("burst_limit", 200),
+                requests_per_minute=default_limit,
+                requests_per_hour=per_user_limit,
+                burst_size=burst_limit,
                 enable_per_user=True,
                 enable_per_ip=True,
                 enable_per_endpoint=True,
             )
 
             # Initialize rate limiter
-            redis_url = f"redis://{_get_config_value(config.redis, 'host', 'localhost')}:{_get_config_value(config.redis, 'port', 6379)}/0"
+            redis_host = _get_config_value(config.redis, 'host', 'localhost')
+            redis_port = _get_config_value(config.redis, 'port', 6379)
+            redis_password = _get_config_value(config.redis, 'password', '')
+
+            # Build Redis URL with password if provided
+            if redis_password:
+                redis_url = f"redis://:{redis_password}@{redis_host}:{redis_port}/0"
+            else:
+                redis_url = f"redis://{redis_host}:{redis_port}/0"
+
+            # Initialize rate limiter asynchronously
             loop = asyncio.new_event_loop()
             try:
                 asyncio.set_event_loop(loop)
@@ -295,21 +317,23 @@ def setup_middleware(app: FastAPI, config: Config):
             app.add_middleware(
                 AdvancedRateLimitMiddleware, rate_limiter=rate_limiter, config=rl_config
             )
-            logger.info("Advanced rate limiting enabled")
+            logger.info(f"✅ Advanced Redis-backed rate limiting enabled (limit: {default_limit}/min, burst: {burst_limit})")
         except Exception as e:
             logger.warning(
                 f"Failed to setup advanced rate limiting: {e}, falling back to simple rate limiting"
             )
-            # Fall back to simple rate limiting
+            # Fall back to simple in-memory rate limiting
             app.add_middleware(
                 RateLimitingMiddleware,
-                requests_per_minute=rate_limit_config.get("default_limit", 100),
+                requests_per_minute=default_limit,
             )
-
+            logger.info(f"⚠️  Simple in-memory rate limiting enabled (limit: {default_limit}/min)")
     else:
+        # Even if disabled in config, use basic rate limiting for security
+        logger.warning("⚠️  Rate limiting disabled in config - using conservative defaults for security")
         app.add_middleware(
             RateLimitingMiddleware,
-            requests_per_minute=rate_limit_config.get("default_limit", 100),
+            requests_per_minute=60,  # Conservative default
         )
 
     # Request logging and metrics

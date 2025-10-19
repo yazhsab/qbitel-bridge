@@ -48,8 +48,18 @@ from ..llm.security_orchestrator import (
 )
 from ..policy.policy_engine import get_policy_engine
 from .copilot_endpoints import router as copilot_router
+from .graceful_shutdown import (
+    initialize_shutdown_manager,
+    get_shutdown_manager,
+    RequestTrackingMiddleware,
+)
+from .input_validation import (
+    PayloadSizeLimitMiddleware,
+    ContentTypeValidationMiddleware,
+)
 from .translation_studio_endpoints import router as translation_router
 from .security_orchestrator_endpoints import router as security_router
+from .sbom import router as sbom_router
 from .auth import get_current_user, verify_token
 from .middleware import setup_middleware
 from .schemas import *
@@ -67,13 +77,92 @@ def create_app(config: Config = None) -> FastAPI:
     if config is None:
         config = get_config()
 
-    # Create FastAPI app
+    # Create FastAPI app with comprehensive OpenAPI metadata
     app = FastAPI(
-        title="CRONOS AI Engine with Protocol Intelligence Copilot",
-        description="Enterprise-grade AI-powered protocol analysis and cybersecurity intelligence",
+        title="CRONOS AI Protocol Discovery Engine",
+        description="""
+## CRONOS AI - Enterprise Protocol Discovery & Analysis Platform
+
+### Overview
+CRONOS AI provides AI-powered protocol discovery, field detection, and security analysis
+for legacy and modern network protocols. Our platform enables zero-touch integration
+with unknown protocols through advanced machine learning and LLM-enhanced analysis.
+
+### Key Features
+- **Automatic Protocol Discovery**: AI-driven protocol structure inference
+- **Field Detection**: Intelligent boundary and type detection
+- **Anomaly Detection**: Real-time protocol anomaly identification
+- **Protocol Translation**: Convert between protocol formats
+- **Security Orchestration**: Automated threat detection and response
+- **Protocol Copilot**: LLM-enhanced protocol analysis and documentation
+
+### API Versions
+- **v1**: Core protocol discovery and analysis
+- **v2**: Enhanced with LLM-powered Copilot features
+
+### Authentication
+All endpoints (except `/health` and `/docs`) require authentication via:
+- **JWT Tokens**: Bearer token in Authorization header
+- **API Keys**: X-API-Key header
+
+### Rate Limiting
+- Default: 100 requests/minute
+- Burst: 200 requests
+- Enterprise: Custom limits available
+
+### Support
+- Documentation: https://docs.cronos-ai.com
+- API Status: https://status.cronos-ai.com
+- Support: support@cronos-ai.com
+        """,
         version="2.0.0",
-        docs_url="/docs" if config.debug else None,
-        redoc_url="/redoc" if config.debug else None,
+        terms_of_service="https://cronos-ai.com/terms",
+        contact={
+            "name": "CRONOS AI Support",
+            "url": "https://cronos-ai.com/support",
+            "email": "support@cronos-ai.com"
+        },
+        license_info={
+            "name": "Commercial License",
+            "url": "https://cronos-ai.com/license"
+        },
+        docs_url="/docs",
+        redoc_url="/redoc",
+        openapi_url="/openapi.json",
+        openapi_tags=[
+            {
+                "name": "Health",
+                "description": "Service health and readiness endpoints"
+            },
+            {
+                "name": "Protocol Discovery",
+                "description": "AI-powered protocol structure discovery"
+            },
+            {
+                "name": "Field Detection",
+                "description": "Intelligent field boundary and type detection"
+            },
+            {
+                "name": "Anomaly Detection",
+                "description": "Real-time protocol anomaly identification"
+            },
+            {
+                "name": "Protocol Copilot",
+                "description": "LLM-enhanced protocol analysis and assistance"
+            },
+            {
+                "name": "Translation Studio",
+                "description": "Protocol format translation and conversion"
+            },
+            {
+                "name": "Security Orchestration",
+                "description": "Automated security threat detection and response"
+            },
+            {
+                "name": "Authentication",
+                "description": "User authentication and authorization"
+            }
+        ]
     )
 
     # Setup CORS with safe defaults that respect configured origins
@@ -98,10 +187,35 @@ def create_app(config: Config = None) -> FastAPI:
     # Setup additional middleware
     setup_middleware(app, config)
 
+    # Initialize graceful shutdown manager
+    shutdown_manager = initialize_shutdown_manager(
+        shutdown_timeout=int(os.getenv("SHUTDOWN_TIMEOUT", "30")),
+        max_request_duration_warn=int(os.getenv("MAX_REQUEST_DURATION_WARN", "10")),
+    )
+
+    # Add request tracking middleware for graceful shutdown
+    app.add_middleware(RequestTrackingMiddleware, shutdown_manager=shutdown_manager)
+    logger.info("✅ Graceful shutdown manager initialized")
+
+    # Add input validation middleware
+    max_payload_size = int(os.getenv("MAX_PAYLOAD_SIZE", str(10 * 1024 * 1024)))  # 10MB default
+    app.add_middleware(PayloadSizeLimitMiddleware, max_size=max_payload_size)
+    app.add_middleware(ContentTypeValidationMiddleware)
+    logger.info(f"✅ Input validation middleware initialized (max payload: {max_payload_size} bytes)")
+
     # Include routers
     app.include_router(copilot_router)
     app.include_router(translation_router)
     app.include_router(security_router)
+    app.include_router(sbom_router)
+
+    # Enhanced LLM Copilot
+    from .enhanced_copilot_endpoints import router as enhanced_copilot_router
+    app.include_router(enhanced_copilot_router)
+
+    # Threat Intelligence Platform
+    from .threat_intelligence_endpoints import router as threat_intel_router
+    app.include_router(threat_intel_router)
 
     # Enhanced API endpoints
     @app.get("/")
@@ -378,6 +492,17 @@ def create_app(config: Config = None) -> FastAPI:
         try:
             logger.info("Starting CRONOS AI Engine with all services...")
 
+            # Initialize encryption system (must be first for database field encryption)
+            from ai_engine.security.field_encryption import initialize_encryption
+            initialize_encryption()
+            logger.info("✅ Encryption system initialized")
+
+            # Initialize database connection pool
+            from ai_engine.core.database_manager import initialize_database_manager
+            environment = os.getenv("CRONOS_AI_ENVIRONMENT", "production")
+            db_manager = await initialize_database_manager(config.database, environment)
+            logger.info("✅ Database connection pool initialized")
+
             # Initialize AI Engine
             _ai_engine = CronosAIEngine(config)
             await _ai_engine.initialize()
@@ -400,10 +525,10 @@ def create_app(config: Config = None) -> FastAPI:
                 config, llm_service, alert_manager, policy_engine
             )
 
-            logger.info("CRONOS AI Engine with all services started successfully")
+            logger.info("✅ CRONOS AI Engine with all services started successfully")
 
         except Exception as e:
-            logger.error(f"Failed to start services: {e}")
+            logger.error(f"❌ Failed to start services: {e}")
             raise
 
     @app.on_event("shutdown")
@@ -414,6 +539,17 @@ def create_app(config: Config = None) -> FastAPI:
         try:
             logger.info("Shutting down CRONOS AI Engine and all services...")
 
+            # Step 1: Initiate graceful shutdown (wait for in-flight requests)
+            try:
+                shutdown_mgr = get_shutdown_manager()
+                await shutdown_mgr.initiate_shutdown()
+                logger.info("✅ Graceful shutdown complete (all requests completed)")
+            except RuntimeError:
+                logger.warning("Shutdown manager not initialized, skipping request tracking")
+            except Exception as e:
+                logger.error(f"Error during graceful shutdown: {e}")
+
+            # Step 2: Shutdown application services
             # Shutdown Translation Studio
             await shutdown_translation_studio()
 
@@ -433,16 +569,30 @@ def create_app(config: Config = None) -> FastAPI:
             # Shutdown Metrics Collector
             if _metrics_collector:
                 await _metrics_collector.shutdown()
-                logger.info("Metrics collector shutdown complete")
+                logger.info("✅ Metrics collector shutdown complete")
 
             # Shutdown AI Engine
             if _ai_engine:
                 await _ai_engine.shutdown()
 
-            logger.info("Services shutdown complete")
+            # Step 3: Graceful database shutdown (wait for active connections, then dispose)
+            try:
+                from ai_engine.core.database_manager import get_database_manager
+                db_manager = get_database_manager()
+                logger.info("Waiting for active database connections to complete...")
+                await db_manager.wait_for_active_connections(timeout=30)
+                logger.info("Disposing database engine...")
+                await db_manager.dispose()
+                logger.info("✅ Database shutdown complete")
+            except RuntimeError:
+                logger.warning("Database manager not initialized, skipping database shutdown")
+            except Exception as e:
+                logger.error(f"Error during database shutdown: {e}")
+
+            logger.info("✅ Services shutdown complete")
 
         except Exception as e:
-            logger.error(f"Error during shutdown: {e}")
+            logger.error(f"❌ Error during shutdown: {e}")
 
     return app
 

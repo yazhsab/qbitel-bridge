@@ -1,0 +1,223 @@
+---
+# CRONOS AI - Explainability Alert Rules
+# Prometheus alerting rules for AI explainability system
+
+groups:
+  - name: explainability_alerts
+    interval: 1m
+    rules:
+      # High explanation generation failure rate
+      - alert: HighExplanationFailureRate
+        expr: |
+          (
+            rate(cronos_explanations_generated_total{status="failure"}[5m]) /
+            rate(cronos_explanations_generated_total[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: explainability
+        annotations:
+          summary: "High explanation generation failure rate"
+          description: |
+            {{ $value | humanizePercentage }} of explanation generations are failing
+            for model {{ $labels.model_name }}.
+            LABELS: {{ $labels }}
+
+      # Critical explanation generation failure rate
+      - alert: CriticalExplanationFailureRate
+        expr: |
+          (
+            rate(cronos_explanations_generated_total{status="failure"}[5m]) /
+            rate(cronos_explanations_generated_total[5m])
+          ) > 0.20
+        for: 2m
+        labels:
+          severity: critical
+          component: explainability
+        annotations:
+          summary: "Critical explanation generation failure rate"
+          description: |
+            {{ $value | humanizePercentage }} of explanation generations are failing
+            for model {{ $labels.model_name }}. Immediate investigation required.
+
+      # Slow explanation generation
+      - alert: SlowExplanationGeneration
+        expr: |
+          histogram_quantile(0.95,
+            rate(cronos_explanation_generation_seconds_bucket[5m])
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          component: explainability
+        annotations:
+          summary: "Slow explanation generation (p95 > 50ms)"
+          description: |
+            95th percentile explanation generation time is {{ $value }}s
+            for model {{ $labels.model_name }}, exceeding 50ms target.
+
+      # Model drift detected
+      - alert: ModelDriftDetected
+        expr: cronos_model_drift_score > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: explainability
+        annotations:
+          summary: "Model drift detected"
+          description: |
+            Model {{ $labels.model_name }} (v{{ $labels.model_version }})
+            has drift score {{ $value }}, exceeding threshold of 0.05.
+            Current accuracy: {{ with query (printf "cronos_model_accuracy{model_name='%s'}" $labels.model_name) }}{{ . | first | value }}{{ end }}
+
+      # Critical model drift
+      - alert: CriticalModelDrift
+        expr: cronos_model_drift_score > 0.15
+        for: 2m
+        labels:
+          severity: critical
+          component: explainability
+        annotations:
+          summary: "Critical model drift detected"
+          description: |
+            Model {{ $labels.model_name }} has severe drift ({{ $value }}).
+            Immediate model retraining or rollback required.
+            Contact: ML Engineering team
+
+      # Model accuracy degradation
+      - alert: ModelAccuracyDegradation
+        expr: cronos_model_accuracy < 0.90
+        for: 10m
+        labels:
+          severity: warning
+          component: explainability
+        annotations:
+          summary: "Model accuracy below 90%"
+          description: |
+            Model {{ $labels.model_name }} accuracy has dropped to {{ $value | humanizePercentage }}.
+            Expected: >90%. Current drift score: {{ with query (printf "cronos_model_drift_score{model_name='%s'}" $labels.model_name) }}{{ . | first | value }}{{ end }}
+
+      # Low model confidence
+      - alert: LowAverageModelConfidence
+        expr: cronos_model_confidence_average < 0.70
+        for: 15m
+        labels:
+          severity: warning
+          component: explainability
+        annotations:
+          summary: "Low average model confidence"
+          description: |
+            Model {{ $labels.model_name }} average confidence is {{ $value | humanizePercentage }}.
+            This may indicate input distribution shift or model degradation.
+
+      # Audit trail write failures
+      - alert: AuditTrailWriteFailures
+        expr: rate(cronos_audit_trail_write_errors_total[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          component: explainability
+        annotations:
+          summary: "Audit trail write failures detected"
+          description: |
+            {{ $value | humanize }} audit trail write errors per second.
+            This is a compliance violation - decisions are not being logged!
+            Error type: {{ $labels.error_type }}
+
+      # High audit trail write latency
+      - alert: HighAuditTrailWriteLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(cronos_audit_trail_write_seconds_bucket[5m])
+          ) > 0.01
+        for: 10m
+        labels:
+          severity: warning
+          component: explainability
+        annotations:
+          summary: "High audit trail write latency (p95 > 10ms)"
+          description: |
+            95th percentile audit trail write latency is {{ $value }}s,
+            exceeding 10ms target. Database performance may be degraded.
+
+      # High human override rate
+      - alert: HighHumanOverrideRate
+        expr: cronos_human_override_rate > 0.10
+        for: 30m
+        labels:
+          severity: warning
+          component: explainability
+        annotations:
+          summary: "High human override rate"
+          description: |
+            {{ $value | humanizePercentage }} of AI decisions for {{ $labels.model_name }}
+            are being overridden by humans. Model may need retraining.
+
+      # No explainability data for 1 hour
+      - alert: ExplainabilitySystemDown
+        expr: |
+          (
+            absent(cronos_explanations_generated_total) or
+            rate(cronos_explanations_generated_total[1h]) == 0
+          )
+        for: 1h
+        labels:
+          severity: critical
+          component: explainability
+        annotations:
+          summary: "Explainability system appears down"
+          description: |
+            No explanations have been generated in the last hour.
+            Check explainability service health.
+
+      # Low explanation cache hit rate
+      - alert: LowExplanationCacheHitRate
+        expr: |
+          (
+            rate(cronos_explanation_cache_hits_total[10m]) /
+            (rate(cronos_explanation_cache_hits_total[10m]) + rate(cronos_explanation_cache_misses_total[10m]))
+          ) < 0.30
+        for: 30m
+        labels:
+          severity: info
+          component: explainability
+        annotations:
+          summary: "Low explanation cache hit rate"
+          description: |
+            Cache hit rate is {{ $value | humanizePercentage }} for {{ $labels.model_name }}.
+            Consider increasing cache size or TTL if performance is impacted.
+
+  - name: explainability_compliance
+    interval: 5m
+    rules:
+      # Missing audit trail for critical decisions
+      - alert: MissingAuditTrailForCriticalDecisions
+        expr: |
+          (
+            rate(cronos_explanations_generated_total{model_name=~"security.*"}[1h]) -
+            rate(cronos_audit_trail_writes_total{model_name=~"security.*"}[1h])
+          ) > 0
+        for: 5m
+        labels:
+          severity: critical
+          component: explainability
+          compliance: true
+        annotations:
+          summary: "Security decisions not being audited"
+          description: |
+            {{ $value }} security decisions per second are not being logged to audit trail.
+            This is a SOC2/compliance violation. Immediate action required.
+
+      # Drift monitoring not running
+      - alert: DriftMonitoringNotRunning
+        expr: absent_over_time(cronos_model_drift_score[2h])
+        for: 2h
+        labels:
+          severity: warning
+          component: explainability
+        annotations:
+          summary: "Model drift monitoring not running"
+          description: |
+            No drift metrics have been reported in 2 hours.
+            Drift monitor may be down or misconfigured.

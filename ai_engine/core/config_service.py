@@ -1211,16 +1211,4 @@ class FileConfigBackend:
         return await self.store.set(key, value)
 
 
-class ConfigWatcher:
-    """Configuration watcher (alias for ConfigurationWatcher)."""
-    
-    def __init__(self, config_service: ConfigurationService):
-        self.watcher = ConfigurationWatcher(config_service)
-    
-    async def start_watching(self, paths: List[Path]):
-        """Start watching configuration files."""
-        await self.watcher.start_watching(paths)
-    
-    async def stop_watching(self):
-        """Stop watching configuration files."""
-        await self.watcher.stop_watching()
+# ConfigWatcher class already defined above (line 167-196)

@@ -1,0 +1,225 @@
+{
+  "dashboard": {
+    "title": "CRONOS AI - Service Level Objectives (SLOs)",
+    "description": "Real-time SLO compliance monitoring and error budget tracking",
+    "tags": ["slo", "reliability", "production"],
+    "timezone": "browser",
+    "schemaVersion": 30,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "API Availability (30-day Rolling)",
+        "type": "gauge",
+        "gridPos": {"x": 0, "y": 0, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "100 * (1 - (sum(rate(http_requests_total{status_code=~\"5..\"}[30d])) / sum(rate(http_requests_total[30d]))))",
+            "legendFormat": "Availability %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 99,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 99.5, "color": "yellow"},
+                {"value": 99.9, "color": "green"}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        }
+      },
+      {
+        "id": 2,
+        "title": "Error Budget Remaining (%)",
+        "type": "gauge",
+        "gridPos": {"x": 6, "y": 0, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "100 * (1 - ((1 - (sum(rate(http_requests_total{status_code!~\"5..\"}[30d])) / sum(rate(http_requests_total[30d])))) / (1 - 0.999)))",
+            "legendFormat": "Error Budget %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 5, "color": "orange"},
+                {"value": 20, "color": "yellow"},
+                {"value": 50, "color": "green"}
+              ]
+            },
+            "unit": "percent"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "API Latency (p95)",
+        "type": "gauge",
+        "gridPos": {"x": 12, "y": 0, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p95 Latency"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 3,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "yellow"},
+                {"value": 2, "color": "red"}
+              ]
+            },
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Protocol Discovery Success Rate",
+        "type": "stat",
+        "gridPos": {"x": 18, "y": 0, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "100 * (sum(rate(protocol_discovery_success_total[30d])) / sum(rate(protocol_discovery_attempts_total[30d])))",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 90, "color": "yellow"},
+                {"value": 95, "color": "green"}
+              ]
+            },
+            "unit": "percent"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "SLO Compliance Summary",
+        "type": "table",
+        "gridPos": {"x": 0, "y": 8, "w": 24, "h": 10},
+        "targets": [
+          {
+            "expr": "100 * (1 - (sum(rate(http_requests_total{status_code=~\"5..\"}[30d])) / sum(rate(http_requests_total[30d]))))",
+            "legendFormat": "API Availability",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "Value": "Current %",
+                "__name__": "Service",
+                "job": "Job"
+              }
+            }
+          }
+        ],
+        "options": {
+          "showHeader": true,
+          "sortBy": [{"displayName": "Current %", "desc": false}]
+        }
+      },
+      {
+        "id": 6,
+        "title": "Error Budget Burn Rate (Last 1h vs Last 24h)",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 18, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{status_code=~\"5..\"}[1h])) / sum(rate(http_requests_total[1h]))",
+            "legendFormat": "1h Burn Rate"
+          },
+          {
+            "expr": "sum(rate(http_requests_total{status_code=~\"5..\"}[24h])) / sum(rate(http_requests_total[24h]))",
+            "legendFormat": "24h Burn Rate"
+          },
+          {
+            "expr": "0.001",
+            "legendFormat": "SLO Threshold (99.9%)"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "label": "Error Rate"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Latency Distribution",
+        "type": "heatmap",
+        "gridPos": {"x": 12, "y": 18, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(http_request_duration_seconds_bucket[5m])) by (le)",
+            "legendFormat": "{{le}}",
+            "format": "heatmap"
+          }
+        ]
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "iconColor": "blue",
+          "tags": ["deployment"]
+        },
+        {
+          "name": "Incidents",
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "iconColor": "red",
+          "tags": ["incident"]
+        }
+      ]
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "environment",
+          "type": "query",
+          "datasource": "Prometheus",
+          "query": "label_values(up, environment)",
+          "multi": false,
+          "includeAll": false,
+          "current": {"value": "production", "text": "production"}
+        }
+      ]
+    }
+  }
+}

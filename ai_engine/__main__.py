@@ -6,6 +6,7 @@ This module provides the main entry point for running the AI Engine.
 
 import asyncio
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -13,7 +14,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from .core.config import Config
+from .core.startup_validation import validate_startup
 from .api.server import run_production_server, run_development_server
+from .monitoring.sentry_integration import initialize_sentry, shutdown_sentry
+from .monitoring.opentelemetry_tracing import initialize_tracing, shutdown_tracing
 
 
 def main():
@@ -76,6 +80,40 @@ def main():
         logger.info(f"Version: 1.0.0")
         logger.info(f"Python: {sys.version}")
         logger.info(f"Mode: {'Development' if args.development else 'Production'}")
+
+        # Run startup validation
+        environment = os.getenv("CRONOS_ENVIRONMENT", "development" if args.development else "production")
+        logger.info(f"\n{'='*80}")
+        logger.info("Running startup validation...")
+        logger.info(f"{'='*80}\n")
+
+        validation_passed = validate_startup()
+
+        if not validation_passed:
+            if environment == "production":
+                logger.critical("Startup validation failed in production. Aborting startup.")
+                sys.exit(1)
+            else:
+                logger.warning("Startup validation found issues, but continuing in non-production environment...")
+                logger.warning("Please address the issues before deploying to production.")
+
+        logger.info("\n")
+
+        # Initialize Sentry APM (if configured)
+        logger.info("Initializing Sentry APM...")
+        sentry_initialized = initialize_sentry()
+        if sentry_initialized:
+            logger.info("✅ Sentry APM initialized successfully")
+        else:
+            logger.info("⚠️  Sentry APM not initialized (disabled or not configured)")
+
+        # Initialize OpenTelemetry distributed tracing (if configured)
+        logger.info("Initializing OpenTelemetry distributed tracing...")
+        tracing_initialized = initialize_tracing()
+        if tracing_initialized:
+            logger.info("✅ OpenTelemetry tracing initialized successfully")
+        else:
+            logger.info("⚠️  OpenTelemetry tracing not initialized (disabled or not configured)")
 
         # Load configuration
         config = Config()

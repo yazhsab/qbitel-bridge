@@ -77,12 +77,14 @@ class TestMainEntryPoint:
     @patch('sys.argv', ['ai_engine', '--model-path', '/models', '--data-path', '/data'])
     def test_main_with_custom_paths(self, mock_config, mock_run_prod):
         """Test main function with custom model and data paths."""
+        from ai_engine.__main__ import main
+
         mock_config_instance = Mock()
         mock_config.return_value = mock_config_instance
-        
+
         with pytest.raises(SystemExit):
             main()
-        
+
         assert mock_config_instance.model_path == '/models'
         assert mock_config_instance.data_path == '/data'
 
