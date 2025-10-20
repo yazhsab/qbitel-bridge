@@ -102,6 +102,7 @@ class TestRateLimiterBasicFunctionality:
     @pytest.mark.asyncio
     async def test_rate_limiter_allows_within_limit(self, rate_limiter):
         """Test that requests within limit are allowed."""
+
         # Mock Redis to return low count
         async def mock_execute_low():
             return [None, 5, None, None]
@@ -121,6 +122,7 @@ class TestRateLimiterBasicFunctionality:
     @pytest.mark.asyncio
     async def test_rate_limiter_blocks_over_limit(self, rate_limiter):
         """Test that requests over limit are blocked."""
+
         # Mock Redis to return high count (over limit)
         async def mock_execute_high():
             return [None, 15, None, None]
@@ -139,6 +141,7 @@ class TestRateLimiterBasicFunctionality:
     @pytest.mark.asyncio
     async def test_rate_limiter_metadata(self, rate_limiter):
         """Test that rate limiter returns proper metadata."""
+
         async def mock_execute_metadata():
             return [None, 3, None, None]
 
@@ -257,8 +260,9 @@ class TestProductionRateLimitingConfig:
         middleware_types = [type(m).__name__ for m in app.user_middleware]
 
         # Should have rate limiting middleware
-        assert any("RateLimit" in name for name in middleware_types), \
-            f"Rate limiting middleware not found. Middleware stack: {middleware_types}"
+        assert any(
+            "RateLimit" in name for name in middleware_types
+        ), f"Rate limiting middleware not found. Middleware stack: {middleware_types}"
 
 
 class TestRateLimitStrategies:
@@ -290,9 +294,7 @@ class TestRateLimitStrategies:
         async def mock_incr():
             return 5
 
-        rate_limiter.redis_client.incr = MagicMock(
-            return_value=mock_incr()
-        )
+        rate_limiter.redis_client.incr = MagicMock(return_value=mock_incr())
 
         is_allowed, metadata = await rate_limiter.check_rate_limit(
             "test_user", limit=10, window_seconds=60
@@ -311,12 +313,8 @@ class TestRateLimitStrategies:
         async def mock_hset():
             return True
 
-        rate_limiter.redis_client.hgetall = MagicMock(
-            return_value=mock_hgetall()
-        )
-        rate_limiter.redis_client.hset = MagicMock(
-            return_value=mock_hset()
-        )
+        rate_limiter.redis_client.hgetall = MagicMock(return_value=mock_hgetall())
+        rate_limiter.redis_client.hset = MagicMock(return_value=mock_hset())
 
         is_allowed, metadata = await rate_limiter.check_rate_limit(
             "test_user", limit=10, window_seconds=60
@@ -335,12 +333,8 @@ class TestRateLimitStrategies:
         async def mock_hset():
             return True
 
-        rate_limiter.redis_client.hgetall = MagicMock(
-            return_value=mock_hgetall()
-        )
-        rate_limiter.redis_client.hset = MagicMock(
-            return_value=mock_hset()
-        )
+        rate_limiter.redis_client.hgetall = MagicMock(return_value=mock_hgetall())
+        rate_limiter.redis_client.hset = MagicMock(return_value=mock_hset())
 
         is_allowed, metadata = await rate_limiter.check_rate_limit(
             "test_user", limit=10, window_seconds=60
@@ -383,7 +377,9 @@ class TestRateLimitingEdgeCases:
         assert is_allowed is True
 
     @pytest.mark.asyncio
-    async def test_whitelist_bypasses_rate_limiting(self, rate_limiter, rate_limit_config):
+    async def test_whitelist_bypasses_rate_limiting(
+        self, rate_limiter, rate_limit_config
+    ):
         """Test that whitelisted IPs bypass rate limiting."""
         rate_limit_config.whitelist_ips = ["192.168.1.100"]
 
@@ -417,7 +413,10 @@ class TestRateLimitingProduction:
 
         assert production_config["rate_limiting"]["enabled"] is True
         assert production_config["rate_limiting"]["default_limit"] > 0
-        assert production_config["rate_limiting"]["burst_limit"] >= production_config["rate_limiting"]["default_limit"]
+        assert (
+            production_config["rate_limiting"]["burst_limit"]
+            >= production_config["rate_limiting"]["default_limit"]
+        )
 
     def test_rate_limiting_always_active_in_middleware(self):
         """Test that rate limiting is always active in middleware setup."""
@@ -451,8 +450,9 @@ class TestRateLimitingProduction:
 
         # Verify some form of rate limiting is active
         middleware_names = [type(m).__name__ for m in app.user_middleware]
-        assert any("RateLimit" in str(name) for name in middleware_names), \
-            "Rate limiting middleware should always be present for security"
+        assert any(
+            "RateLimit" in str(name) for name in middleware_names
+        ), "Rate limiting middleware should always be present for security"
 
 
 if __name__ == "__main__":

@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 class DriftMonitorException(CronosAIException):
     """Exception raised by drift monitor."""
+
     pass
 
 
@@ -96,7 +97,9 @@ class ModelDriftMonitor:
         )
 
         if not baseline:
-            logger.warning(f"No baseline metrics for {model_name}, skipping drift check")
+            logger.warning(
+                f"No baseline metrics for {model_name}, skipping drift check"
+            )
             return {
                 "drift_detected": False,
                 "reason": "no_baseline",
@@ -104,7 +107,9 @@ class ModelDriftMonitor:
             }
 
         # Get recent metrics
-        recent_start = datetime.now(timezone.utc) - timedelta(hours=self.comparison_window_hours)
+        recent_start = datetime.now(timezone.utc) - timedelta(
+            hours=self.comparison_window_hours
+        )
         recent_metrics = await self._calculate_recent_metrics(
             model_name,
             model_version,
@@ -142,7 +147,9 @@ class ModelDriftMonitor:
             "metrics": {
                 "accuracy_drift": drift_scores.get("accuracy_drift", 0),
                 "confidence_drift": drift_scores.get("confidence_drift", 0),
-                "prediction_distribution_drift": drift_scores.get("distribution_drift", 0),
+                "prediction_distribution_drift": drift_scores.get(
+                    "distribution_drift", 0
+                ),
             },
             "baseline_metrics": {
                 "accuracy": baseline.get("accuracy"),
@@ -221,8 +228,7 @@ class ModelDriftMonitor:
 
             # Get baseline decisions
             result = await session.execute(
-                select(AIDecisionAudit)
-                .where(
+                select(AIDecisionAudit).where(
                     and_(
                         AIDecisionAudit.model_name == model_name,
                         AIDecisionAudit.model_version == model_version,
@@ -237,7 +243,9 @@ class ModelDriftMonitor:
                 return None
 
             # Calculate baseline metrics
-            baseline_metrics = self._calculate_metrics_from_decisions(baseline_decisions)
+            baseline_metrics = self._calculate_metrics_from_decisions(
+                baseline_decisions
+            )
             baseline_metrics["timestamp"] = baseline_start
 
             # Cache baseline
@@ -259,8 +267,7 @@ class ModelDriftMonitor:
         """Calculate metrics for recent time window."""
         async with self.async_session() as session:
             result = await session.execute(
-                select(AIDecisionAudit)
-                .where(
+                select(AIDecisionAudit).where(
                     and_(
                         AIDecisionAudit.model_name == model_name,
                         AIDecisionAudit.model_version == model_version,
@@ -367,9 +374,7 @@ class ModelDriftMonitor:
             "distribution_drift": 0.3,
         }
 
-        overall_drift = sum(
-            drift_scores.get(k, 0) * w for k, w in weights.items()
-        )
+        overall_drift = sum(drift_scores.get(k, 0) * w for k, w in weights.items())
         drift_scores["overall_drift"] = overall_drift
 
         return drift_scores
@@ -421,8 +426,12 @@ class ModelDriftMonitor:
                 recall=None,  # Not calculated yet
                 f1_score=None,  # Not calculated yet
                 average_confidence=drift_details["recent_metrics"]["avg_confidence"],
-                prediction_distribution=drift_details["recent_metrics"].get("prediction_distribution"),
-                confidence_distribution=drift_details["recent_metrics"].get("confidence_distribution"),
+                prediction_distribution=drift_details["recent_metrics"].get(
+                    "prediction_distribution"
+                ),
+                confidence_distribution=drift_details["recent_metrics"].get(
+                    "confidence_distribution"
+                ),
                 drift_score=drift_score,
                 drift_detected=drift_detected,
                 drift_details=drift_details,
@@ -436,7 +445,9 @@ class ModelDriftMonitor:
             session.add(drift_metric)
             await session.commit()
 
-            logger.info(f"Logged drift metric for {model_name} (drift_score={drift_score:.3f})")
+            logger.info(
+                f"Logged drift metric for {model_name} (drift_score={drift_score:.3f})"
+            )
 
     async def _trigger_drift_alert(
         self,
@@ -515,7 +526,9 @@ class ModelDriftMonitor:
         """
         return self._calculate_kl_divergence(p, q)
 
-    def _calculate_drift_score(self, baseline: Dict[str, Any], recent: Dict[str, Any]) -> float:
+    def _calculate_drift_score(
+        self, baseline: Dict[str, Any], recent: Dict[str, Any]
+    ) -> float:
         """
         Calculate overall drift score. Alias for _calculate_drift_scores.
         Helper method for testing and external use.

@@ -21,18 +21,19 @@ logger = logging.getLogger(__name__)
 VALIDATION_ERRORS = Counter(
     "input_validation_errors_total",
     "Total input validation errors",
-    ["error_type", "endpoint"]
+    ["error_type", "endpoint"],
 )
 PAYLOAD_SIZE = Histogram(
     "request_payload_size_bytes",
     "Request payload size in bytes",
     ["method", "endpoint"],
-    buckets=[100, 1000, 10_000, 100_000, 1_000_000, 10_000_000]
+    buckets=[100, 1000, 10_000, 100_000, 1_000_000, 10_000_000],
 )
 
 
 class ValidationError(Exception):
     """Input validation error."""
+
     pass
 
 
@@ -52,9 +53,9 @@ class InputValidator:
     # Maximum payload sizes (bytes)
     MAX_PAYLOAD_SIZES = {
         "default": 10 * 1024 * 1024,  # 10MB
-        "json": 5 * 1024 * 1024,      # 5MB
-        "form": 1 * 1024 * 1024,      # 1MB
-        "file": 50 * 1024 * 1024,     # 50MB
+        "json": 5 * 1024 * 1024,  # 5MB
+        "form": 1 * 1024 * 1024,  # 1MB
+        "file": 50 * 1024 * 1024,  # 50MB
     }
 
     # Dangerous patterns
@@ -82,7 +83,7 @@ class InputValidator:
     COMMAND_INJECTION_PATTERNS = [
         r"[;&|`$()]",
         r"\$\([^)]*\)",  # Command substitution
-        r"`[^`]*`",       # Backticks
+        r"`[^`]*`",  # Backticks
     ]
 
     PATH_TRAVERSAL_PATTERNS = [
@@ -97,16 +98,20 @@ class InputValidator:
     def __init__(self):
         """Initialize input validator."""
         # Compile regex patterns for performance
-        self.sql_patterns = [re.compile(p, re.IGNORECASE) for p in self.SQL_INJECTION_PATTERNS]
+        self.sql_patterns = [
+            re.compile(p, re.IGNORECASE) for p in self.SQL_INJECTION_PATTERNS
+        ]
         self.xss_patterns = [re.compile(p, re.IGNORECASE) for p in self.XSS_PATTERNS]
         self.cmd_patterns = [re.compile(p) for p in self.COMMAND_INJECTION_PATTERNS]
-        self.path_patterns = [re.compile(p, re.IGNORECASE) for p in self.PATH_TRAVERSAL_PATTERNS]
+        self.path_patterns = [
+            re.compile(p, re.IGNORECASE) for p in self.PATH_TRAVERSAL_PATTERNS
+        ]
 
     def validate_payload_size(
         self,
         content: bytes,
         content_type: Optional[str] = None,
-        max_size: Optional[int] = None
+        max_size: Optional[int] = None,
     ) -> bool:
         """
         Validate payload size.
@@ -190,7 +195,9 @@ class InputValidator:
         """
         for pattern in self.cmd_patterns:
             if pattern.search(value):
-                logger.warning(f"Potential command injection detected: {pattern.pattern}")
+                logger.warning(
+                    f"Potential command injection detected: {pattern.pattern}"
+                )
                 return True
         return False
 
@@ -211,10 +218,7 @@ class InputValidator:
         return False
 
     def sanitize_string(
-        self,
-        value: str,
-        max_length: Optional[int] = None,
-        allow_html: bool = False
+        self, value: str, max_length: Optional[int] = None, allow_html: bool = False
     ) -> str:
         """
         Sanitize string input.
@@ -241,7 +245,9 @@ class InputValidator:
 
         # Check for SQL injection
         if self.check_sql_injection(value):
-            VALIDATION_ERRORS.labels(error_type="sql_injection", endpoint="unknown").inc()
+            VALIDATION_ERRORS.labels(
+                error_type="sql_injection", endpoint="unknown"
+            ).inc()
             raise ValidationError("Potential SQL injection detected")
 
         # Check for XSS (unless HTML is explicitly allowed)
@@ -251,16 +257,22 @@ class InputValidator:
 
         # Check for command injection
         if self.check_command_injection(value):
-            VALIDATION_ERRORS.labels(error_type="command_injection", endpoint="unknown").inc()
+            VALIDATION_ERRORS.labels(
+                error_type="command_injection", endpoint="unknown"
+            ).inc()
             raise ValidationError("Potential command injection detected")
 
         # Check for path traversal
         if self.check_path_traversal(value):
-            VALIDATION_ERRORS.labels(error_type="path_traversal", endpoint="unknown").inc()
+            VALIDATION_ERRORS.labels(
+                error_type="path_traversal", endpoint="unknown"
+            ).inc()
             raise ValidationError("Potential path traversal detected")
 
         # Basic sanitization (strip control characters)
-        sanitized = "".join(char for char in value if ord(char) >= 32 or char in "\n\r\t")
+        sanitized = "".join(
+            char for char in value if ord(char) >= 32 or char in "\n\r\t"
+        )
 
         return sanitized
 
@@ -303,15 +315,21 @@ class InputValidator:
                     min_val = constraints.get("min")
                     max_val = constraints.get("max")
                     if min_val is not None and value < min_val:
-                        raise ValidationError(f"{field} below minimum: {value} < {min_val}")
+                        raise ValidationError(
+                            f"{field} below minimum: {value} < {min_val}"
+                        )
                     if max_val is not None and value > max_val:
-                        raise ValidationError(f"{field} above maximum: {value} > {max_val}")
+                        raise ValidationError(
+                            f"{field} above maximum: {value} > {max_val}"
+                        )
 
                 # List validation
                 if isinstance(value, list):
                     max_items = constraints.get("max_items")
                     if max_items and len(value) > max_items:
-                        raise ValidationError(f"{field} has too many items: {len(value)} > {max_items}")
+                        raise ValidationError(
+                            f"{field} has too many items: {len(value)} > {max_items}"
+                        )
 
         return True
 
@@ -346,8 +364,7 @@ class PayloadSizeLimitMiddleware(BaseHTTPMiddleware):
 
                 # Record payload size
                 PAYLOAD_SIZE.labels(
-                    method=request.method,
-                    endpoint=request.url.path
+                    method=request.method, endpoint=request.url.path
                 ).observe(size)
 
                 # Check size
@@ -357,17 +374,16 @@ class PayloadSizeLimitMiddleware(BaseHTTPMiddleware):
                         f"to {request.url.path}"
                     )
                     VALIDATION_ERRORS.labels(
-                        error_type="payload_too_large",
-                        endpoint=request.url.path
+                        error_type="payload_too_large", endpoint=request.url.path
                     ).inc()
 
                     return JSONResponse(
                         status_code=413,
                         content={
                             "detail": f"Payload too large: {size} bytes (max: {self.max_size} bytes)",
-                            "error_code": "PAYLOAD_TOO_LARGE"
+                            "error_code": "PAYLOAD_TOO_LARGE",
                         },
-                        headers={"Retry-After": "60"}
+                        headers={"Retry-After": "60"},
                     )
 
             except ValueError:
@@ -386,7 +402,11 @@ class ContentTypeValidationMiddleware(BaseHTTPMiddleware):
     """
 
     ALLOWED_CONTENT_TYPES = {
-        "POST": ["application/json", "multipart/form-data", "application/x-www-form-urlencoded"],
+        "POST": [
+            "application/json",
+            "multipart/form-data",
+            "application/x-www-form-urlencoded",
+        ],
         "PUT": ["application/json", "multipart/form-data"],
         "PATCH": ["application/json"],
     }
@@ -407,8 +427,7 @@ class ContentTypeValidationMiddleware(BaseHTTPMiddleware):
                         f"{request.url.path}"
                     )
                     VALIDATION_ERRORS.labels(
-                        error_type="invalid_content_type",
-                        endpoint=request.url.path
+                        error_type="invalid_content_type", endpoint=request.url.path
                     ).inc()
 
                     return JSONResponse(
@@ -416,8 +435,8 @@ class ContentTypeValidationMiddleware(BaseHTTPMiddleware):
                         content={
                             "detail": f"Unsupported Content-Type: {content_type}",
                             "allowed": allowed,
-                            "error_code": "UNSUPPORTED_MEDIA_TYPE"
-                        }
+                            "error_code": "UNSUPPORTED_MEDIA_TYPE",
+                        },
                     )
 
         response = await call_next(request)

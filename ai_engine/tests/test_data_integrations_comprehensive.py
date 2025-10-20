@@ -25,6 +25,7 @@ from ai_engine.core.config import Config
 @dataclass
 class MockComplianceAssessment:
     """Mock compliance assessment for testing."""
+
     assessment_id: str
     framework: str
     version: str
@@ -43,6 +44,7 @@ class MockComplianceAssessment:
 @dataclass
 class MockGap:
     """Mock compliance gap."""
+
     requirement_id: str
     requirement_title: str
     severity: Mock
@@ -56,6 +58,7 @@ class MockGap:
 @dataclass
 class MockRecommendation:
     """Mock recommendation."""
+
     id: str
     title: str
     description: str
@@ -69,6 +72,7 @@ class MockRecommendation:
 @dataclass
 class MockComplianceReport:
     """Mock compliance report."""
+
     report_id: str
     framework: str
     report_type: Mock
@@ -106,24 +110,39 @@ class TestTimescaleComplianceIntegration:
         """Test successful initialization."""
         mock_pool = AsyncMock()
         mock_conn = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
-        
-        with patch('ai_engine.compliance.data_integrations.asyncpg.create_pool', return_value=mock_pool):
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
+
+        with patch(
+            "ai_engine.compliance.data_integrations.asyncpg.create_pool",
+            return_value=mock_pool,
+        ):
             await timescale_integration.initialize()
             assert timescale_integration.connection_pool is not None
 
     @pytest.mark.asyncio
     async def test_initialization_import_error(self, timescale_integration):
         """Test initialization with import error."""
-        with patch('ai_engine.compliance.data_integrations.asyncpg.create_pool', side_effect=ImportError("asyncpg not found")):
+        with patch(
+            "ai_engine.compliance.data_integrations.asyncpg.create_pool",
+            side_effect=ImportError("asyncpg not found"),
+        ):
             with pytest.raises(IntegrationException, match="asyncpg library required"):
                 await timescale_integration.initialize()
 
     @pytest.mark.asyncio
     async def test_initialization_connection_error(self, timescale_integration):
         """Test initialization with connection error."""
-        with patch('ai_engine.compliance.data_integrations.asyncpg.create_pool', side_effect=Exception("Connection failed")):
-            with pytest.raises(IntegrationException, match="TimescaleDB initialization failed"):
+        with patch(
+            "ai_engine.compliance.data_integrations.asyncpg.create_pool",
+            side_effect=Exception("Connection failed"),
+        ):
+            with pytest.raises(
+                IntegrationException, match="TimescaleDB initialization failed"
+            ):
                 await timescale_integration.initialize()
 
     @pytest.mark.asyncio
@@ -131,7 +150,11 @@ class TestTimescaleComplianceIntegration:
         """Test successful table creation."""
         mock_conn = AsyncMock()
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
         await timescale_integration._create_tables()
@@ -141,9 +164,26 @@ class TestTimescaleComplianceIntegration:
     async def test_create_tables_hypertable_warning(self, timescale_integration):
         """Test table creation with hypertable warning."""
         mock_conn = AsyncMock()
-        mock_conn.execute = AsyncMock(side_effect=[None, None, None, None, None, Exception("Hypertable error"), None, None, None, None])
+        mock_conn.execute = AsyncMock(
+            side_effect=[
+                None,
+                None,
+                None,
+                None,
+                None,
+                Exception("Hypertable error"),
+                None,
+                None,
+                None,
+                None,
+            ]
+        )
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
         await timescale_integration._create_tables()
@@ -155,7 +195,11 @@ class TestTimescaleComplianceIntegration:
         mock_conn = AsyncMock()
         mock_conn.execute = AsyncMock(side_effect=Exception("Table creation failed"))
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
         with pytest.raises(IntegrationException, match="Table creation failed"):
@@ -178,7 +222,7 @@ class TestTimescaleComplianceIntegration:
             required_state="compliant",
             gap_description="Test gap",
             impact_assessment="High impact",
-            remediation_effort="medium"
+            remediation_effort="medium",
         )
 
         recommendation = MockRecommendation(
@@ -189,7 +233,7 @@ class TestTimescaleComplianceIntegration:
             implementation_steps=["step1", "step2"],
             estimated_effort_days=5,
             business_impact="Medium",
-            technical_requirements={"skill": "python"}
+            technical_requirements={"skill": "python"},
         )
 
         assessment = MockComplianceAssessment(
@@ -205,7 +249,7 @@ class TestTimescaleComplianceIntegration:
             not_assessed_requirements=0,
             next_assessment_due=datetime.utcnow() + timedelta(days=90),
             gaps=[gap],
-            recommendations=[recommendation]
+            recommendations=[recommendation],
         )
 
         mock_conn = AsyncMock()
@@ -214,9 +258,13 @@ class TestTimescaleComplianceIntegration:
         mock_transaction.__aenter__ = AsyncMock(return_value=mock_transaction)
         mock_transaction.__aexit__ = AsyncMock()
         mock_conn.transaction = Mock(return_value=mock_transaction)
-        
+
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
         result = await timescale_integration.store_assessment(assessment)
@@ -238,7 +286,7 @@ class TestTimescaleComplianceIntegration:
             not_assessed_requirements=0,
             next_assessment_due=datetime.utcnow() + timedelta(days=90),
             gaps=[],
-            recommendations=[]
+            recommendations=[],
         )
 
         mock_conn = AsyncMock()
@@ -247,9 +295,13 @@ class TestTimescaleComplianceIntegration:
         mock_transaction.__aenter__ = AsyncMock(return_value=mock_transaction)
         mock_transaction.__aexit__ = AsyncMock()
         mock_conn.transaction = Mock(return_value=mock_transaction)
-        
+
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
         with pytest.raises(IntegrationException, match="Assessment storage failed"):
@@ -271,17 +323,23 @@ class TestTimescaleComplianceIntegration:
             "not_assessed_requirements": 0,
             "next_assessment_due": datetime.utcnow() + timedelta(days=90),
             "gaps": [],
-            "recommendations": []
+            "recommendations": [],
         }
 
         mock_row = {"assessment_data": json.dumps(assessment_data, default=str)}
         mock_conn = AsyncMock()
         mock_conn.fetchrow = AsyncMock(return_value=mock_row)
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
-        with patch('ai_engine.compliance.data_integrations.ComplianceAssessment') as mock_assessment:
+        with patch(
+            "ai_engine.compliance.data_integrations.ComplianceAssessment"
+        ) as mock_assessment:
             result = await timescale_integration.get_latest_assessment("SOC2")
             mock_assessment.assert_called_once()
 
@@ -291,7 +349,11 @@ class TestTimescaleComplianceIntegration:
         mock_conn = AsyncMock()
         mock_conn.fetchrow = AsyncMock(return_value=None)
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
         result = await timescale_integration.get_latest_assessment("SOC2")
@@ -303,7 +365,11 @@ class TestTimescaleComplianceIntegration:
         mock_conn = AsyncMock()
         mock_conn.fetchrow = AsyncMock(side_effect=Exception("Query failed"))
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
         result = await timescale_integration.get_latest_assessment("SOC2")
@@ -326,12 +392,16 @@ class TestTimescaleComplianceIntegration:
             file_name="report.pdf",
             file_size=1024,
             checksum="abc123",
-            metadata={"key": "value"}
+            metadata={"key": "value"},
         )
 
         mock_conn = AsyncMock()
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
         await timescale_integration.store_report_metadata(report)
@@ -347,14 +417,18 @@ class TestTimescaleComplianceIntegration:
                 "avg_compliance": 85.5,
                 "avg_risk": 15.5,
                 "max_gaps": 5,
-                "max_critical_gaps": 2
+                "max_critical_gaps": 2,
             }
         ]
 
         mock_conn = AsyncMock()
         mock_conn.fetch = AsyncMock(return_value=mock_rows)
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
         result = await timescale_integration.get_compliance_trends(["SOC2"], days=30)
@@ -367,7 +441,11 @@ class TestTimescaleComplianceIntegration:
         mock_conn = AsyncMock()
         mock_conn.fetch = AsyncMock(side_effect=Exception("Query failed"))
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
         result = await timescale_integration.get_compliance_trends(["SOC2"], days=30)
@@ -379,7 +457,11 @@ class TestTimescaleComplianceIntegration:
         mock_conn = AsyncMock()
         mock_conn.execute = AsyncMock(return_value="DELETE 5")
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
         await timescale_integration.cleanup_old_data(retention_days=365)
@@ -391,7 +473,11 @@ class TestTimescaleComplianceIntegration:
         mock_conn = AsyncMock()
         mock_conn.execute = AsyncMock(return_value=None)
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
         await timescale_integration.cleanup_old_data(retention_days=365)
@@ -403,7 +489,11 @@ class TestTimescaleComplianceIntegration:
         mock_conn = AsyncMock()
         mock_conn.execute = AsyncMock(side_effect=Exception("Cleanup failed"))
         mock_pool = AsyncMock()
-        mock_pool.acquire = AsyncMock(return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()))
+        mock_pool.acquire = AsyncMock(
+            return_value=AsyncMock(
+                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
+            )
+        )
         timescale_integration.connection_pool = mock_pool
 
         await timescale_integration.cleanup_old_data(retention_days=365)
@@ -428,16 +518,16 @@ class TestTimescaleComplianceIntegration:
     def test_password_from_environment(self, mock_config):
         """Test password loading from environment."""
         mock_config.database.password = ""
-        with patch.dict('os.environ', {'CRONOS_AI_DB_PASSWORD': 'env_password'}):
+        with patch.dict("os.environ", {"CRONOS_AI_DB_PASSWORD": "env_password"}):
             integration = TimescaleComplianceIntegration(mock_config)
-            assert integration.password == 'env_password'
+            assert integration.password == "env_password"
 
     def test_password_from_database_password_env(self, mock_config):
         """Test password loading from DATABASE_PASSWORD env."""
         mock_config.database.password = ""
-        with patch.dict('os.environ', {'DATABASE_PASSWORD': 'db_password'}, clear=True):
+        with patch.dict("os.environ", {"DATABASE_PASSWORD": "db_password"}, clear=True):
             integration = TimescaleComplianceIntegration(mock_config)
-            assert integration.password == 'db_password'
+            assert integration.password == "db_password"
 
 
 class TestRedisComplianceCache:
@@ -464,8 +554,11 @@ class TestRedisComplianceCache:
         """Test successful initialization."""
         mock_redis = AsyncMock()
         mock_redis.ping = AsyncMock()
-        
-        with patch('ai_engine.compliance.data_integrations.redis.Redis', return_value=mock_redis):
+
+        with patch(
+            "ai_engine.compliance.data_integrations.redis.Redis",
+            return_value=mock_redis,
+        ):
             await redis_cache.initialize()
             assert redis_cache.redis_client is not None
             mock_redis.ping.assert_called_once()
@@ -473,7 +566,10 @@ class TestRedisComplianceCache:
     @pytest.mark.asyncio
     async def test_initialization_import_error(self, redis_cache):
         """Test initialization with import error."""
-        with patch('ai_engine.compliance.data_integrations.redis.Redis', side_effect=ImportError("redis not found")):
+        with patch(
+            "ai_engine.compliance.data_integrations.redis.Redis",
+            side_effect=ImportError("redis not found"),
+        ):
             with pytest.raises(IntegrationException, match="redis library required"):
                 await redis_cache.initialize()
 
@@ -482,9 +578,14 @@ class TestRedisComplianceCache:
         """Test initialization with connection error."""
         mock_redis = AsyncMock()
         mock_redis.ping = AsyncMock(side_effect=Exception("Connection failed"))
-        
-        with patch('ai_engine.compliance.data_integrations.redis.Redis', return_value=mock_redis):
-            with pytest.raises(IntegrationException, match="Redis initialization failed"):
+
+        with patch(
+            "ai_engine.compliance.data_integrations.redis.Redis",
+            return_value=mock_redis,
+        ):
+            with pytest.raises(
+                IntegrationException, match="Redis initialization failed"
+            ):
                 await redis_cache.initialize()
 
     @pytest.mark.asyncio
@@ -503,7 +604,7 @@ class TestRedisComplianceCache:
             not_assessed_requirements=0,
             next_assessment_due=datetime.utcnow() + timedelta(days=90),
             gaps=[],
-            recommendations=[]
+            recommendations=[],
         )
 
         mock_redis = AsyncMock()
@@ -531,7 +632,10 @@ class TestRedisComplianceCache:
         mock_redis = AsyncMock()
         redis_cache.redis_client = mock_redis
 
-        with patch('ai_engine.compliance.data_integrations.asdict', side_effect=TypeError("Cannot convert")):
+        with patch(
+            "ai_engine.compliance.data_integrations.asdict",
+            side_effect=TypeError("Cannot convert"),
+        ):
             await redis_cache.cache_assessment("SOC2", assessment)
             assert mock_redis.setex.call_count == 2
 
@@ -551,7 +655,7 @@ class TestRedisComplianceCache:
             not_assessed_requirements=0,
             next_assessment_due=datetime.utcnow() + timedelta(days=90),
             gaps=[],
-            recommendations=[]
+            recommendations=[],
         )
 
         mock_redis = AsyncMock()
@@ -577,14 +681,16 @@ class TestRedisComplianceCache:
             "not_assessed_requirements": 0,
             "next_assessment_due": (datetime.utcnow() + timedelta(days=90)).isoformat(),
             "gaps": [],
-            "recommendations": []
+            "recommendations": [],
         }
 
         mock_redis = AsyncMock()
         mock_redis.get = AsyncMock(return_value=pickle.dumps(assessment_data))
         redis_cache.redis_client = mock_redis
 
-        with patch('ai_engine.compliance.data_integrations.ComplianceAssessment') as mock_assessment:
+        with patch(
+            "ai_engine.compliance.data_integrations.ComplianceAssessment"
+        ) as mock_assessment:
             result = await redis_cache.get_assessment("SOC2")
             mock_assessment.assert_called_once()
 
@@ -718,11 +824,13 @@ class TestRedisComplianceCache:
     async def test_get_cache_statistics(self, redis_cache):
         """Test getting cache statistics."""
         mock_redis = AsyncMock()
-        mock_redis.keys = AsyncMock(return_value=[
-            b"compliance:assessment:SOC2",
-            b"compliance:meta:SOC2",
-            b"compliance:dashboard"
-        ])
+        mock_redis.keys = AsyncMock(
+            return_value=[
+                b"compliance:assessment:SOC2",
+                b"compliance:meta:SOC2",
+                b"compliance:dashboard",
+            ]
+        )
         redis_cache.redis_client = mock_redis
 
         result = await redis_cache.get_cache_statistics()
@@ -739,11 +847,13 @@ class TestRedisComplianceCache:
 
         result = await redis_cache.get_
         mock_redis = AsyncMock()
-        mock_redis.keys = AsyncMock(return_value=[
-            b"compliance:assessment:SOC2",
-            b"compliance:meta:SOC2",
-            b"compliance:dashboard"
-        ])
+        mock_redis.keys = AsyncMock(
+            return_value=[
+                b"compliance:assessment:SOC2",
+                b"compliance:meta:SOC2",
+                b"compliance:dashboard",
+            ]
+        )
         redis_cache.redis_client = mock_redis
 
         result = await redis_cache.get_cache_statistics()
@@ -804,8 +914,14 @@ class TestComplianceSecurityIntegration:
     @pytest.mark.asyncio
     async def test_initialization_error(self, security_integration):
         """Test initialization with error."""
-        with patch.object(security_integration, '_initialize_encryption', side_effect=Exception("Init failed")):
-            with pytest.raises(IntegrationException, match="Security integration failed"):
+        with patch.object(
+            security_integration,
+            "_initialize_encryption",
+            side_effect=Exception("Init failed"),
+        ):
+            with pytest.raises(
+                IntegrationException, match="Security integration failed"
+            ):
                 await security_integration.initialize()
 
     @pytest.mark.asyncio
@@ -860,7 +976,7 @@ class TestComplianceSecurityIntegration:
             resource="assessment",
             action="read",
             outcome="success",
-            details={"user": "test_user"}
+            details={"user": "test_user"},
         )
         # Should complete without error
 
@@ -870,10 +986,7 @@ class TestComplianceSecurityIntegration:
         mock_config.security.audit_logging = False
         integration = ComplianceSecurityIntegration(mock_config)
         await integration.log_security_event(
-            event_type="access",
-            resource="assessment",
-            action="read",
-            outcome="success"
+            event_type="access", resource="assessment", action="read", outcome="success"
         )
         # Should complete without error
 
@@ -881,22 +994,22 @@ class TestComplianceSecurityIntegration:
     async def test_log_security_event_no_details(self, security_integration):
         """Test logging security event without details."""
         await security_integration.log_security_event(
-            event_type="access",
-            resource="assessment",
-            action="read",
-            outcome="success"
+            event_type="access", resource="assessment", action="read", outcome="success"
         )
         # Should complete without error
 
     @pytest.mark.asyncio
     async def test_log_security_event_error(self, security_integration):
         """Test logging security event with error."""
-        with patch('ai_engine.compliance.data_integrations.json.dumps', side_effect=Exception("JSON error")):
+        with patch(
+            "ai_engine.compliance.data_integrations.json.dumps",
+            side_effect=Exception("JSON error"),
+        ):
             await security_integration.log_security_event(
                 event_type="access",
                 resource="assessment",
                 action="read",
-                outcome="success"
+                outcome="success",
             )
             # Should handle error gracefully
 
@@ -904,20 +1017,20 @@ class TestComplianceSecurityIntegration:
     async def test_validate_data_access_success(self, security_integration):
         """Test validating data access."""
         result = await security_integration.validate_data_access(
-            user="test_user",
-            resource="assessment",
-            action="read"
+            user="test_user", resource="assessment", action="read"
         )
         assert result is True
 
     @pytest.mark.asyncio
     async def test_validate_data_access_error(self, security_integration):
         """Test validating data access with error."""
-        with patch.object(security_integration, 'log_security_event', side_effect=Exception("Log failed")):
+        with patch.object(
+            security_integration,
+            "log_security_event",
+            side_effect=Exception("Log failed"),
+        ):
             result = await security_integration.validate_data_access(
-                user="test_user",
-                resource="assessment",
-                action="read"
+                user="test_user", resource="assessment", action="read"
             )
             assert result is False
 
@@ -939,6 +1052,7 @@ class TestIntegrationException:
     def test_exception_inheritance(self):
         """Test that IntegrationException inherits from CronosAIException."""
         from ai_engine.core.exceptions import CronosAIException
+
         exc = IntegrationException("Test error")
         assert isinstance(exc, CronosAIException)
 

@@ -28,6 +28,7 @@ import aiofiles
 # Optional imports with fallbacks
 try:
     import etcd3
+
     ETCD3_AVAILABLE = True
 except ImportError:
     etcd3 = None
@@ -36,6 +37,7 @@ except ImportError:
 try:
     from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler
+
     WATCHDOG_AVAILABLE = True
 except ImportError:
     Observer = None
@@ -49,16 +51,19 @@ from .structured_logging import get_logger
 # Additional exception classes for backward compatibility
 class ConfigValidationError(ValidationException):
     """Raised when configuration validation fails."""
+
     pass
 
 
 class ConfigLoadError(ConfigException):
     """Raised when configuration loading fails."""
+
     pass
 
 
 class ConfigSaveError(ConfigException):
     """Raised when configuration saving fails."""
+
     pass
 
 
@@ -197,9 +202,10 @@ class ConfigWatcher:
 
 
 if WATCHDOG_AVAILABLE:
+
     class ConfigFileHandler(FileSystemEventHandler):
         """File system event handler for configuration changes."""
-        
+
         def __init__(self, config_service: "ConfigurationService"):
             self.config_service = config_service
             self.logger = get_logger(__name__)
@@ -221,10 +227,12 @@ if WATCHDOG_AVAILABLE:
             file_path = Path(event.src_path)
             if file_path.suffix in [".json", ".yaml", ".yml", ".toml"]:
                 asyncio.create_task(self.config_service.load_file(file_path))
+
 else:
+
     class ConfigFileHandler:
         """File system event handler for configuration changes (watchdog not available)."""
-        
+
         def __init__(self, config_service: "ConfigurationService"):
             self.config_service = config_service
             self.logger = get_logger(__name__)
@@ -1167,30 +1175,30 @@ def watch_config(key_pattern: str, callback: Callable[[str, Any, Any], None]):
 # Additional classes for backward compatibility
 class EnvironmentConfigLoader:
     """Environment variable configuration loader."""
-    
+
     def __init__(self, prefix: str = "CRONOS_AI_"):
         self.prefix = prefix
-    
+
     def load(self) -> Dict[str, Any]:
         """Load configuration from environment variables."""
         config = {}
         for key, value in os.environ.items():
             if key.startswith(self.prefix):
-                config_key = key[len(self.prefix):].lower()
+                config_key = key[len(self.prefix) :].lower()
                 config[config_key] = value
         return config
 
 
 class EtcdConfigBackend:
     """etcd configuration backend (alias for EtcdConfigurationStore)."""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.store = EtcdConfigurationStore(config)
-    
+
     async def get(self, key: str, default: Any = None) -> Any:
         """Get configuration value."""
         return await self.store.get(key, default)
-    
+
     async def set(self, key: str, value: Any) -> bool:
         """Set configuration value."""
         return await self.store.set(key, value)
@@ -1198,14 +1206,14 @@ class EtcdConfigBackend:
 
 class FileConfigBackend:
     """File configuration backend (alias for FileConfigurationStore)."""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.store = FileConfigurationStore(config)
-    
+
     async def get(self, key: str, default: Any = None) -> Any:
         """Get configuration value."""
         return await self.store.get(key, default)
-    
+
     async def set(self, key: str, value: Any) -> bool:
         """Set configuration value."""
         return await self.store.set(key, value)

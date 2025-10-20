@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 class AuditLoggerException(CronosAIException):
     """Exception raised by audit logger."""
+
     pass
 
 
@@ -115,39 +116,34 @@ class DecisionAuditLogger:
                 id=uuid4(),
                 decision_id=explanation.decision_id,
                 timestamp=explanation.timestamp,
-
                 # Event context
                 event_type=event_type,
                 event_data=event_data,
-
                 # Model information
                 model_name=explanation.model_name,
                 model_version=explanation.model_version,
-                model_architecture=metadata.get('model_architecture'),
-
+                model_architecture=metadata.get("model_architecture"),
                 # Decision details
                 decision_output={"result": explanation.model_output},
                 confidence_score=explanation.confidence_score,
-
                 # Explainability data
                 explanation_method=explanation.explanation_method.value,
                 explanation_id=explanation.explanation_id,
-                feature_importance=[fi.__dict__ for fi in explanation.feature_importances],
+                feature_importance=[
+                    fi.__dict__ for fi in explanation.feature_importances
+                ],
                 top_features=[fi.__dict__ for fi in explanation.top_features],
                 decision_rationale=explanation.explanation_summary,
                 regulatory_justification=explanation.regulatory_justification,
                 counterfactual=explanation.counterfactual,
-
                 # Audit metadata
                 user_id=user_id,
                 session_id=session_id,
                 compliance_framework=compliance_framework,
                 request_id=request_id,
-
                 # Performance
                 inference_time_ms=inference_time_ms,
-                explanation_time_ms=explanation.metadata.get('explanation_time_ms'),
-
+                explanation_time_ms=explanation.metadata.get("explanation_time_ms"),
                 # Additional metadata
                 additional_metadata={
                     **explanation.metadata,
@@ -233,7 +229,9 @@ class DecisionAuditLogger:
         """
         async with self.async_session() as session:
             result = await session.execute(
-                select(AIDecisionAudit).where(AIDecisionAudit.decision_id == decision_id)
+                select(AIDecisionAudit).where(
+                    AIDecisionAudit.decision_id == decision_id
+                )
             )
             return result.scalar_one_or_none()
 
@@ -278,7 +276,9 @@ class DecisionAuditLogger:
             if end_date:
                 filters.append(AIDecisionAudit.timestamp <= end_date)
             if compliance_framework:
-                filters.append(AIDecisionAudit.compliance_framework == compliance_framework)
+                filters.append(
+                    AIDecisionAudit.compliance_framework == compliance_framework
+                )
             if min_confidence is not None:
                 filters.append(AIDecisionAudit.confidence_score >= min_confidence)
             if max_confidence is not None:
@@ -316,7 +316,9 @@ class DecisionAuditLogger:
         """
         async with self.async_session() as session:
             result = await session.execute(
-                select(AIDecisionAudit).where(AIDecisionAudit.decision_id == decision_id)
+                select(AIDecisionAudit).where(
+                    AIDecisionAudit.decision_id == decision_id
+                )
             )
             record = result.scalar_one_or_none()
 
@@ -364,7 +366,11 @@ class DecisionAuditLogger:
         total_decisions = len(decisions)
         human_reviewed_count = sum(1 for d in decisions if d.human_reviewed)
         human_override_count = sum(1 for d in decisions if d.human_override)
-        avg_confidence = sum(d.confidence_score for d in decisions) / total_decisions if total_decisions > 0 else 0
+        avg_confidence = (
+            sum(d.confidence_score for d in decisions) / total_decisions
+            if total_decisions > 0
+            else 0
+        )
 
         # Confidence distribution
         confidence_buckets = {
@@ -391,9 +397,17 @@ class DecisionAuditLogger:
             },
             "total_decisions": total_decisions,
             "human_reviewed_count": human_reviewed_count,
-            "human_reviewed_percentage": (human_reviewed_count / total_decisions * 100) if total_decisions > 0 else 0,
+            "human_reviewed_percentage": (
+                (human_reviewed_count / total_decisions * 100)
+                if total_decisions > 0
+                else 0
+            ),
             "human_override_count": human_override_count,
-            "human_override_percentage": (human_override_count / total_decisions * 100) if total_decisions > 0 else 0,
+            "human_override_percentage": (
+                (human_override_count / total_decisions * 100)
+                if total_decisions > 0
+                else 0
+            ),
             "average_confidence": avg_confidence,
             "confidence_distribution": confidence_buckets,
             "models_used": list(set(d.model_name for d in decisions)),
@@ -429,7 +443,7 @@ class DecisionAuditLogger:
                     f"Audit write failed (attempt {retry_count + 1}/{self.max_retries}): {e}"
                 )
                 # Exponential backoff
-                await asyncio.sleep(2 ** retry_count)
+                await asyncio.sleep(2**retry_count)
                 return await self._write_with_retry(record, retry_count + 1)
             else:
                 raise AuditLoggerException(

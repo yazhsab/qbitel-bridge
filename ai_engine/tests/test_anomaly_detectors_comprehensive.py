@@ -33,6 +33,7 @@ from ai_engine.core.exceptions import AnomalyDetectionException
 
 # ===== ENSEMBLE DETECTOR TESTS =====
 
+
 @pytest.fixture
 def ensemble_detector():
     """Create ensemble detector instance."""
@@ -304,7 +305,7 @@ def test_anomaly_result_to_dict():
         is_anomalous=True,
         individual_scores={"test": 0.8},
         explanation="Test anomaly",
-        metadata={"key": "value"}
+        metadata={"key": "value"},
     )
 
     dict_result = result.to_dict()
@@ -317,6 +318,7 @@ def test_anomaly_result_to_dict():
 
 
 # ===== ISOLATION FOREST TESTS =====
+
 
 @pytest.fixture
 def isolation_forest():
@@ -422,9 +424,7 @@ async def test_isolation_forest_update_baseline_empty(isolation_forest):
 def test_isolation_forest_settings():
     """Test isolation forest settings."""
     settings = IsolationForestSettings(
-        contamination=0.1,
-        window_size=256,
-        version="2.0.0"
+        contamination=0.1, window_size=256, version="2.0.0"
     )
 
     assert settings.contamination == 0.1
@@ -435,10 +435,7 @@ def test_isolation_forest_settings():
 def test_isolation_forest_result():
     """Test isolation forest result."""
     result = IsolationForestResult(
-        score=0.8,
-        threshold=0.5,
-        is_anomalous=True,
-        metadata={"test": "value"}
+        score=0.8, threshold=0.5, is_anomalous=True, metadata={"test": "value"}
     )
 
     assert result.score == 0.8
@@ -447,6 +444,7 @@ def test_isolation_forest_result():
 
 
 # ===== LSTM DETECTOR TESTS =====
+
 
 @pytest.fixture
 def lstm_detector():
@@ -567,11 +565,7 @@ async def test_lstm_update_threshold_bounds(lstm_detector):
 def test_lstm_model_metadata():
     """Test LSTM model metadata."""
     model = LSTMModel(
-        input_size=512,
-        hidden_size=128,
-        num_layers=3,
-        dropout=0.2,
-        version="2.0.0"
+        input_size=512, hidden_size=128, num_layers=3, dropout=0.2, version="2.0.0"
     )
 
     metadata = model.metadata()
@@ -586,10 +580,7 @@ def test_lstm_model_metadata():
 def test_lstm_detection_result():
     """Test LSTM detection result."""
     result = LSTMDetectionResult(
-        score=0.7,
-        confidence=0.85,
-        is_anomalous=True,
-        metadata={"key": "value"}
+        score=0.7, confidence=0.85, is_anomalous=True, metadata={"key": "value"}
     )
 
     assert result.score == 0.7
@@ -599,6 +590,7 @@ def test_lstm_detection_result():
 
 
 # ===== INTEGRATION TESTS =====
+
 
 @pytest.mark.asyncio
 async def test_ensemble_with_baseline_integration():
@@ -659,9 +651,9 @@ async def test_concurrent_detections():
     feature_sets = [np.random.rand(50) for _ in range(10)]
 
     # Run detections concurrently
-    results = await asyncio.gather(*[
-        detector.detect(features) for features in feature_sets
-    ])
+    results = await asyncio.gather(
+        *[detector.detect(features) for features in feature_sets]
+    )
 
     assert len(results) == 10
     assert all("score" in r for r in results)

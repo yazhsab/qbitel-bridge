@@ -12,7 +12,7 @@ from typing import Optional, Any
 
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from sqlalchemy.types import TypeDecorator, LargeBinary, String, Text
 
 logger = logging.getLogger(__name__)
@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 class EncryptionError(Exception):
     """Raised when encryption/decryption fails."""
+
     pass
 
 
@@ -34,7 +35,7 @@ class EncryptionKeyManager:
     - Environment-based key loading
     """
 
-    _instance: Optional['EncryptionKeyManager'] = None
+    _instance: Optional["EncryptionKeyManager"] = None
     _fernet: Optional[Fernet] = None
 
     def __init__(self):
@@ -48,7 +49,7 @@ class EncryptionKeyManager:
         EncryptionKeyManager._instance = self
 
     @classmethod
-    def get_instance(cls) -> 'EncryptionKeyManager':
+    def get_instance(cls) -> "EncryptionKeyManager":
         """
         Get singleton instance of EncryptionKeyManager.
 
@@ -144,7 +145,7 @@ class EncryptionKeyManager:
         salt = b"cronos_ai_encryption_salt_v1"
 
         # Derive 32 bytes (256 bits) for Fernet
-        kdf = PBKDF2(
+        kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
             salt=salt,
@@ -174,7 +175,7 @@ class EncryptionKeyManager:
             return None
 
         try:
-            return self._fernet.encrypt(plaintext.encode('utf-8'))
+            return self._fernet.encrypt(plaintext.encode("utf-8"))
         except Exception as e:
             logger.error(f"Encryption failed: {e}")
             raise EncryptionError(f"Encryption failed: {e}") from e
@@ -199,9 +200,11 @@ class EncryptionKeyManager:
             return None
 
         try:
-            return self._fernet.decrypt(ciphertext).decode('utf-8')
+            return self._fernet.decrypt(ciphertext).decode("utf-8")
         except InvalidToken as e:
-            logger.error("Decryption failed: Invalid token (wrong key or corrupted data)")
+            logger.error(
+                "Decryption failed: Invalid token (wrong key or corrupted data)"
+            )
             raise EncryptionError(
                 "Decryption failed: Invalid token. "
                 "This may indicate the encryption key has changed."

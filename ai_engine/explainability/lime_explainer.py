@@ -67,7 +67,7 @@ class LIMEDecisionExplainer(BaseExplainer):
             class_names=class_names,
             feature_selection=feature_selection,
             bow=False,  # Don't use bag-of-words (preserve word order)
-            split_expression=r'\W+',  # Split on non-word characters
+            split_expression=r"\W+",  # Split on non-word characters
         )
 
         logger.info(
@@ -102,7 +102,7 @@ class LIMEDecisionExplainer(BaseExplainer):
 
         # Convert input to text
         if isinstance(input_data, bytes):
-            input_text = input_data.decode('utf-8', errors='ignore')
+            input_text = input_data.decode("utf-8", errors="ignore")
         elif isinstance(input_data, str):
             input_text = input_data
         else:
@@ -117,7 +117,7 @@ class LIMEDecisionExplainer(BaseExplainer):
         # Generate LIME explanation
         try:
             # Explain predicted class (or specific class if provided)
-            label_to_explain = kwargs.get('predicted_class_idx', predicted_class_idx)
+            label_to_explain = kwargs.get("predicted_class_idx", predicted_class_idx)
 
             lime_exp = self.explainer.explain_instance(
                 input_text,
@@ -162,7 +162,9 @@ class LIMEDecisionExplainer(BaseExplainer):
             )
 
         # Calculate explanation time
-        explanation_time_ms = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
+        explanation_time_ms = (
+            datetime.now(timezone.utc) - start_time
+        ).total_seconds() * 1000
 
         return ExplanationResult(
             explanation_id=str(uuid4()),
@@ -244,7 +246,11 @@ class LIMEDecisionExplainer(BaseExplainer):
             feature_words = feature_text.split()
 
             # Find occurrences in original text
-            count = sum(1 for word in input_text.split() if word.lower() in [fw.lower() for fw in feature_words])
+            count = sum(
+                1
+                for word in input_text.split()
+                if word.lower() in [fw.lower() for fw in feature_words]
+            )
 
             # Generate description
             if importance_score > 0:
@@ -387,7 +393,9 @@ class LIMESecurityDecisionExplainer(LIMEDecisionExplainer):
     ):
         """Initialize security decision explainer."""
         # Default security decision classes
-        class_names = kwargs.pop('class_names', ['ALLOW', 'BLOCK', 'ESCALATE', 'QUARANTINE'])
+        class_names = kwargs.pop(
+            "class_names", ["ALLOW", "BLOCK", "ESCALATE", "QUARANTINE"]
+        )
 
         super().__init__(
             predict_fn=predict_fn,
@@ -422,13 +430,22 @@ class LIMESecurityDecisionExplainer(LIMEDecisionExplainer):
         # Extract threat indicators from features
         threat_indicators = []
         for f in features[:5]:
-            if any(word in f.feature_name.lower() for word in [
-                'suspicious', 'malicious', 'threat', 'attack', 'vulnerability',
-                'unauthorized', 'anomalous', 'blacklist'
-            ]):
+            if any(
+                word in f.feature_name.lower()
+                for word in [
+                    "suspicious",
+                    "malicious",
+                    "threat",
+                    "attack",
+                    "vulnerability",
+                    "unauthorized",
+                    "anomalous",
+                    "blacklist",
+                ]
+            ):
                 threat_indicators.append(f.feature_name)
 
-        if decision == 'BLOCK':
+        if decision == "BLOCK":
             if threat_indicators:
                 return (
                     f"Decision aligns with Zero Trust security policy. "
@@ -440,12 +457,12 @@ class LIMESecurityDecisionExplainer(LIMEDecisionExplainer):
                     "Decision based on security policy rules. "
                     "Recommended action: Block pending further investigation."
                 )
-        elif decision == 'ALLOW':
+        elif decision == "ALLOW":
             return (
                 "Decision based on whitelist verification and trust score analysis. "
                 "No significant threat indicators detected."
             )
-        elif decision == 'ESCALATE':
+        elif decision == "ESCALATE":
             return (
                 "Decision requires human review due to uncertain threat classification. "
                 "Escalating to security analyst for manual assessment."

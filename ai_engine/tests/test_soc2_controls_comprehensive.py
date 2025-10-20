@@ -85,7 +85,7 @@ class TestControlDetails:
     def test_cc61_control_details(self, soc2_manager):
         """Test CC6.1 control details."""
         control = soc2_manager.controls["CC6.1"]
-        
+
         assert control.control_id == "CC6.1"
         assert control.criteria == TrustServiceCriteria.SECURITY
         assert control.title == "Logical and Physical Access Controls"
@@ -96,7 +96,7 @@ class TestControlDetails:
     def test_a11_control_details(self, soc2_manager):
         """Test A1.1 control details."""
         control = soc2_manager.controls["A1.1"]
-        
+
         assert control.control_id == "A1.1"
         assert control.criteria == TrustServiceCriteria.AVAILABILITY
         assert "capacity" in control.title.lower()
@@ -105,7 +105,7 @@ class TestControlDetails:
     def test_pi11_control_details(self, soc2_manager):
         """Test PI1.1 control details."""
         control = soc2_manager.controls["PI1.1"]
-        
+
         assert control.control_id == "PI1.1"
         assert control.criteria == TrustServiceCriteria.PROCESSING_INTEGRITY
         assert control.status == ControlStatus.IMPLEMENTED
@@ -113,7 +113,7 @@ class TestControlDetails:
     def test_c11_control_details(self, soc2_manager):
         """Test C1.1 control details."""
         control = soc2_manager.controls["C1.1"]
-        
+
         assert control.control_id == "C1.1"
         assert control.criteria == TrustServiceCriteria.CONFIDENTIALITY
         assert control.status == ControlStatus.IMPLEMENTED
@@ -121,7 +121,7 @@ class TestControlDetails:
     def test_p31_control_details(self, soc2_manager):
         """Test P3.1 control details."""
         control = soc2_manager.controls["P3.1"]
-        
+
         assert control.control_id == "P3.1"
         assert control.criteria == TrustServiceCriteria.PRIVACY
         assert "notice" in control.title.lower()
@@ -134,13 +134,13 @@ class TestControlTesting:
     async def test_test_control_success(self, soc2_manager, mock_audit_manager):
         """Test successful control testing."""
         result = await soc2_manager.test_control("CC6.1")
-        
+
         assert result["control_id"] == "CC6.1"
         assert "tested_at" in result
         assert result["status"] == "passed"
         assert "findings" in result
         assert "recommendations" in result
-        
+
         mock_audit_manager.record_compliance_event.assert_called_once()
 
     @pytest.mark.asyncio
@@ -148,9 +148,9 @@ class TestControlTesting:
         """Test control testing updates control record."""
         control = soc2_manager.controls["CC6.2"]
         assert control.last_tested is None
-        
+
         await soc2_manager.test_control("CC6.2")
-        
+
         assert control.last_tested is not None
         assert control.test_results is not None
 
@@ -164,9 +164,9 @@ class TestControlTesting:
     async def test_test_control_without_audit_manager(self, mock_config):
         """Test control testing without audit manager."""
         manager = SOC2ControlsManager(mock_config, None)
-        
+
         result = await manager.test_control("CC6.1")
-        
+
         assert result is not None
         assert result["status"] == "passed"
 
@@ -174,7 +174,7 @@ class TestControlTesting:
     async def test_test_multiple_controls(self, soc2_manager):
         """Test testing multiple controls."""
         control_ids = ["CC6.1", "CC6.2", "A1.1"]
-        
+
         for control_id in control_ids:
             result = await soc2_manager.test_control(control_id)
             assert result["control_id"] == control_id
@@ -187,7 +187,7 @@ class TestComplianceVerification:
     async def test_verify_compliance_all_implemented(self, soc2_manager):
         """Test compliance verification when all controls implemented."""
         status = await soc2_manager.verify_compliance()
-        
+
         assert status["compliant"] is True
         assert "criteria_status" in status
         assert "issues" in status
@@ -198,7 +198,7 @@ class TestComplianceVerification:
     async def test_verify_compliance_criteria_status(self, soc2_manager):
         """Test compliance verification includes criteria status."""
         status = await soc2_manager.verify_compliance()
-        
+
         for criteria in TrustServiceCriteria:
             assert criteria.value in status["criteria_status"]
             criteria_status = status["criteria_status"][criteria.value]
@@ -211,9 +211,9 @@ class TestComplianceVerification:
         """Test compliance verification with unimplemented controls."""
         # Mark a control as not implemented
         soc2_manager.controls["CC6.1"].status = ControlStatus.NOT_IMPLEMENTED
-        
+
         status = await soc2_manager.verify_compliance()
-        
+
         assert status["compliant"] is False
         assert len(status["issues"]) > 0
 
@@ -223,18 +223,18 @@ class TestComplianceVerification:
         # Set a control as tested long ago
         control = soc2_manager.controls["CC6.1"]
         control.last_tested = datetime.utcnow() - timedelta(days=100)
-        
+
         status = await soc2_manager.verify_compliance()
-        
+
         assert any("testing" in rec.lower() for rec in status["recommendations"])
 
     @pytest.mark.asyncio
     async def test_verify_compliance_partially_implemented(self, soc2_manager):
         """Test compliance with partially implemented controls."""
         soc2_manager.controls["CC6.2"].status = ControlStatus.PARTIALLY_IMPLEMENTED
-        
+
         status = await soc2_manager.verify_compliance()
-        
+
         assert status["compliant"] is False
 
 
@@ -244,27 +244,29 @@ class TestControlRetrieval:
     def test_get_control_exists(self, soc2_manager):
         """Test getting existing control."""
         control = soc2_manager.get_control("CC6.1")
-        
+
         assert control is not None
         assert control.control_id == "CC6.1"
 
     def test_get_control_nonexistent(self, soc2_manager):
         """Test getting non-existent control."""
         control = soc2_manager.get_control("INVALID")
-        
+
         assert control is None
 
     def test_get_controls_by_criteria_security(self, soc2_manager):
         """Test getting controls by security criteria."""
         controls = soc2_manager.get_controls_by_criteria(TrustServiceCriteria.SECURITY)
-        
+
         assert len(controls) > 0
         assert all(c.criteria == TrustServiceCriteria.SECURITY for c in controls)
 
     def test_get_controls_by_criteria_availability(self, soc2_manager):
         """Test getting controls by availability criteria."""
-        controls = soc2_manager.get_controls_by_criteria(TrustServiceCriteria.AVAILABILITY)
-        
+        controls = soc2_manager.get_controls_by_criteria(
+            TrustServiceCriteria.AVAILABILITY
+        )
+
         assert len(controls) == 3  # A1.1, A1.2, A1.3
         assert all(c.criteria == TrustServiceCriteria.AVAILABILITY for c in controls)
 
@@ -281,7 +283,7 @@ class TestStatistics:
     def test_get_statistics_structure(self, soc2_manager):
         """Test statistics structure."""
         stats = soc2_manager.get_statistics()
-        
+
         assert "total_controls" in stats
         assert "by_status" in stats
         assert "by_criteria" in stats
@@ -290,28 +292,28 @@ class TestStatistics:
     def test_get_statistics_total_controls(self, soc2_manager):
         """Test total controls count."""
         stats = soc2_manager.get_statistics()
-        
+
         assert stats["total_controls"] == len(soc2_manager.controls)
         assert stats["total_controls"] > 0
 
     def test_get_statistics_by_status(self, soc2_manager):
         """Test statistics by status."""
         stats = soc2_manager.get_statistics()
-        
+
         for status in ControlStatus:
             assert status.value in stats["by_status"]
 
     def test_get_statistics_by_criteria(self, soc2_manager):
         """Test statistics by criteria."""
         stats = soc2_manager.get_statistics()
-        
+
         for criteria in TrustServiceCriteria:
             assert criteria.value in stats["by_criteria"]
 
     def test_get_statistics_testing_status(self, soc2_manager):
         """Test testing status statistics."""
         stats = soc2_manager.get_statistics()
-        
+
         assert "tested_last_30_days" in stats["testing_status"]
         assert "tested_last_90_days" in stats["testing_status"]
         assert "never_tested" in stats["testing_status"]
@@ -321,9 +323,9 @@ class TestStatistics:
         """Test statistics after testing controls."""
         # Test a control
         await soc2_manager.test_control("CC6.1")
-        
+
         stats = soc2_manager.get_statistics()
-        
+
         assert stats["testing_status"]["tested_last_30_days"] > 0
 
 
@@ -334,7 +336,7 @@ class TestComplianceReport:
     async def test_generate_compliance_report(self, soc2_manager):
         """Test generating compliance report."""
         report = await soc2_manager.generate_compliance_report()
-        
+
         assert "report_metadata" in report
         assert "executive_summary" in report
         assert "controls_assessment" in report
@@ -346,7 +348,7 @@ class TestComplianceReport:
     async def test_report_metadata(self, soc2_manager):
         """Test report metadata."""
         report = await soc2_manager.generate_compliance_report()
-        
+
         metadata = report["report_metadata"]
         assert "generated_at" in metadata
         assert metadata["report_type"] == "SOC2 Type II Compliance"
@@ -356,7 +358,7 @@ class TestComplianceReport:
     async def test_report_executive_summary(self, soc2_manager):
         """Test report executive summary."""
         report = await soc2_manager.generate_compliance_report()
-        
+
         summary = report["executive_summary"]
         assert "total_controls" in summary
         assert "implemented_controls" in summary
@@ -367,10 +369,10 @@ class TestComplianceReport:
     async def test_report_controls_assessment(self, soc2_manager):
         """Test report controls assessment."""
         report = await soc2_manager.generate_compliance_report()
-        
+
         assessment = report["controls_assessment"]
         assert len(assessment) == len(soc2_manager.controls)
-        
+
         for control_data in assessment:
             assert "control_id" in control_data
             assert "criteria" in control_data
@@ -382,7 +384,7 @@ class TestComplianceReport:
     async def test_report_includes_compliance_status(self, soc2_manager):
         """Test report includes compliance status."""
         report = await soc2_manager.generate_compliance_report()
-        
+
         assert "compliance_status" in report
         assert "compliant" in report["compliance_status"]
 
@@ -390,10 +392,10 @@ class TestComplianceReport:
     async def test_report_compliance_percentage(self, soc2_manager):
         """Test report calculates compliance percentage."""
         report = await soc2_manager.generate_compliance_report()
-        
+
         summary = report["executive_summary"]
         percentage = summary["compliance_percentage"]
-        
+
         assert 0 <= percentage <= 100
 
 
@@ -409,9 +411,9 @@ class TestDataClasses:
             description="Test Description",
             status=ControlStatus.IMPLEMENTED,
             evidence=["evidence1", "evidence2"],
-            responsible_party="Test Team"
+            responsible_party="Test Team",
         )
-        
+
         assert control.control_id == "TEST.1"
         assert control.criteria == TrustServiceCriteria.SECURITY
         assert control.title == "Test Control"
@@ -425,9 +427,9 @@ class TestDataClasses:
             criteria=TrustServiceCriteria.SECURITY,
             title="Test",
             description="Test",
-            status=ControlStatus.IMPLEMENTED
+            status=ControlStatus.IMPLEMENTED,
         )
-        
+
         assert control.evidence == []
         assert control.last_tested is None
         assert control.test_results is None
@@ -465,16 +467,20 @@ class TestControlEvidence:
     def test_security_control_evidence(self, soc2_manager):
         """Test security controls have appropriate evidence."""
         control = soc2_manager.controls["CC6.1"]
-        
-        assert any("IAM" in evidence or "MFA" in evidence or "access" in evidence.lower() 
-                  for evidence in control.evidence)
+
+        assert any(
+            "IAM" in evidence or "MFA" in evidence or "access" in evidence.lower()
+            for evidence in control.evidence
+        )
 
     def test_availability_control_evidence(self, soc2_manager):
         """Test availability controls have appropriate evidence."""
         control = soc2_manager.controls["A1.2"]
-        
-        assert any("backup" in evidence.lower() or "recovery" in evidence.lower() 
-                  for evidence in control.evidence)
+
+        assert any(
+            "backup" in evidence.lower() or "recovery" in evidence.lower()
+            for evidence in control.evidence
+        )
 
 
 class TestEdgeCases:
@@ -484,15 +490,15 @@ class TestEdgeCases:
     async def test_test_control_multiple_times(self, soc2_manager):
         """Test testing same control multiple times."""
         control_id = "CC6.1"
-        
+
         result1 = await soc2_manager.test_control(control_id)
         first_test_time = soc2_manager.controls[control_id].last_tested
-        
+
         await asyncio.sleep(0.01)  # Small delay
-        
+
         result2 = await soc2_manager.test_control(control_id)
         second_test_time = soc2_manager.controls[control_id].last_tested
-        
+
         assert result1 is not None
         assert result2 is not None
         assert second_test_time > first_test_time
@@ -502,9 +508,9 @@ class TestEdgeCases:
         """Test verification with no controls."""
         manager = SOC2ControlsManager(mock_config, None)
         manager.controls.clear()
-        
+
         status = await manager.verify_compliance()
-        
+
         # Should handle gracefully
         assert "criteria_status" in status
 
@@ -512,9 +518,9 @@ class TestEdgeCases:
         """Test getting controls when none exist for criteria."""
         manager = SOC2ControlsManager(mock_config, None)
         manager.controls.clear()
-        
+
         controls = manager.get_controls_by_criteria(TrustServiceCriteria.SECURITY)
-        
+
         assert len(controls) == 0
 
     @pytest.mark.asyncio
@@ -523,16 +529,16 @@ class TestEdgeCases:
         soc2_manager.controls["CC6.1"].status = ControlStatus.IMPLEMENTED
         soc2_manager.controls["CC6.2"].status = ControlStatus.PARTIALLY_IMPLEMENTED
         soc2_manager.controls["CC6.3"].status = ControlStatus.NOT_IMPLEMENTED
-        
+
         report = await soc2_manager.generate_compliance_report()
-        
+
         assert report is not None
         assert "executive_summary" in report
 
     def test_statistics_with_no_tests(self, soc2_manager):
         """Test statistics when no controls have been tested."""
         stats = soc2_manager.get_statistics()
-        
+
         assert stats["testing_status"]["never_tested"] == len(soc2_manager.controls)
         assert stats["testing_status"]["tested_last_30_days"] == 0
 
@@ -540,12 +546,12 @@ class TestEdgeCases:
     async def test_control_testing_records_timestamp(self, soc2_manager):
         """Test control testing records accurate timestamp."""
         before_test = datetime.utcnow()
-        
+
         await soc2_manager.test_control("CC6.1")
-        
+
         after_test = datetime.utcnow()
         control = soc2_manager.controls["CC6.1"]
-        
+
         assert before_test <= control.last_tested <= after_test
 
     def test_all_controls_have_required_fields(self, soc2_manager):
@@ -565,7 +571,7 @@ class TestControlCoverage:
     def test_security_criteria_coverage(self, soc2_manager):
         """Test security criteria has adequate control coverage."""
         controls = soc2_manager.get_controls_by_criteria(TrustServiceCriteria.SECURITY)
-        
+
         assert len(controls) >= 6  # At least CC6.1-CC6.8
 
     def test_all_criteria_have_controls(self, soc2_manager):
@@ -577,7 +583,7 @@ class TestControlCoverage:
     def test_control_distribution(self, soc2_manager):
         """Test controls are distributed across criteria."""
         stats = soc2_manager.get_statistics()
-        
+
         # Each criteria should have at least one control
         for criteria in TrustServiceCriteria:
             assert stats["by_criteria"][criteria.value] > 0

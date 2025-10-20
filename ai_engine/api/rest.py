@@ -120,49 +120,50 @@ All endpoints (except `/health` and `/docs`) require authentication via:
         contact={
             "name": "CRONOS AI Support",
             "url": "https://cronos-ai.com/support",
-            "email": "support@cronos-ai.com"
+            "email": "support@cronos-ai.com",
         },
         license_info={
             "name": "Commercial License",
-            "url": "https://cronos-ai.com/license"
+            "url": "https://cronos-ai.com/license",
         },
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
         openapi_tags=[
-            {
-                "name": "Health",
-                "description": "Service health and readiness endpoints"
-            },
+            {"name": "Health", "description": "Service health and readiness endpoints"},
             {
                 "name": "Protocol Discovery",
-                "description": "AI-powered protocol structure discovery"
+                "description": "AI-powered protocol structure discovery",
             },
             {
                 "name": "Field Detection",
-                "description": "Intelligent field boundary and type detection"
+                "description": "Intelligent field boundary and type detection",
             },
             {
                 "name": "Anomaly Detection",
-                "description": "Real-time protocol anomaly identification"
+                "description": "Real-time protocol anomaly identification",
             },
             {
                 "name": "Protocol Copilot",
-                "description": "LLM-enhanced protocol analysis and assistance"
+                "description": "LLM-enhanced protocol analysis and assistance",
             },
             {
                 "name": "Translation Studio",
-                "description": "Protocol format translation and conversion"
+                "description": "Protocol format translation and conversion",
             },
             {
                 "name": "Security Orchestration",
-                "description": "Automated security threat detection and response"
+                "description": "Automated security threat detection and response",
             },
             {
                 "name": "Authentication",
-                "description": "User authentication and authorization"
-            }
-        ]
+                "description": "User authentication and authorization",
+            },
+            {
+                "name": "marketplace",
+                "description": "Protocol Marketplace - Discovery, submission, and purchase of protocol definitions",
+            },
+        ],
     )
 
     # Setup CORS with safe defaults that respect configured origins
@@ -198,10 +199,14 @@ All endpoints (except `/health` and `/docs`) require authentication via:
     logger.info("✅ Graceful shutdown manager initialized")
 
     # Add input validation middleware
-    max_payload_size = int(os.getenv("MAX_PAYLOAD_SIZE", str(10 * 1024 * 1024)))  # 10MB default
+    max_payload_size = int(
+        os.getenv("MAX_PAYLOAD_SIZE", str(10 * 1024 * 1024))
+    )  # 10MB default
     app.add_middleware(PayloadSizeLimitMiddleware, max_size=max_payload_size)
     app.add_middleware(ContentTypeValidationMiddleware)
-    logger.info(f"✅ Input validation middleware initialized (max payload: {max_payload_size} bytes)")
+    logger.info(
+        f"✅ Input validation middleware initialized (max payload: {max_payload_size} bytes)"
+    )
 
     # Include routers
     app.include_router(copilot_router)
@@ -211,11 +216,19 @@ All endpoints (except `/health` and `/docs`) require authentication via:
 
     # Enhanced LLM Copilot
     from .enhanced_copilot_endpoints import router as enhanced_copilot_router
+
     app.include_router(enhanced_copilot_router)
 
     # Threat Intelligence Platform
     from .threat_intelligence_endpoints import router as threat_intel_router
+
     app.include_router(threat_intel_router)
+
+    # Protocol Marketplace
+    from .marketplace_endpoints import router as marketplace_router
+
+    app.include_router(marketplace_router)
+    logger.info("✅ Protocol Marketplace API endpoints registered")
 
     # Enhanced API endpoints
     @app.get("/")
@@ -233,10 +246,12 @@ All endpoints (except `/health` and `/docs`) require authentication via:
                 "Real-time WebSocket Communication",
                 "Enterprise Security",
                 "Compliance Reporting",
+                "Protocol Marketplace",
             ],
             "endpoints": {
                 "copilot": "/api/v1/copilot",
                 "websocket": "/api/v1/copilot/ws",
+                "marketplace": "/api/v1/marketplace",
                 "docs": "/docs",
                 "health": "/health",
             },
@@ -494,11 +509,13 @@ All endpoints (except `/health` and `/docs`) require authentication via:
 
             # Initialize encryption system (must be first for database field encryption)
             from ai_engine.security.field_encryption import initialize_encryption
+
             initialize_encryption()
             logger.info("✅ Encryption system initialized")
 
             # Initialize database connection pool
             from ai_engine.core.database_manager import initialize_database_manager
+
             environment = os.getenv("CRONOS_AI_ENVIRONMENT", "production")
             db_manager = await initialize_database_manager(config.database, environment)
             logger.info("✅ Database connection pool initialized")
@@ -545,7 +562,9 @@ All endpoints (except `/health` and `/docs`) require authentication via:
                 await shutdown_mgr.initiate_shutdown()
                 logger.info("✅ Graceful shutdown complete (all requests completed)")
             except RuntimeError:
-                logger.warning("Shutdown manager not initialized, skipping request tracking")
+                logger.warning(
+                    "Shutdown manager not initialized, skipping request tracking"
+                )
             except Exception as e:
                 logger.error(f"Error during graceful shutdown: {e}")
 
@@ -578,6 +597,7 @@ All endpoints (except `/health` and `/docs`) require authentication via:
             # Step 3: Graceful database shutdown (wait for active connections, then dispose)
             try:
                 from ai_engine.core.database_manager import get_database_manager
+
                 db_manager = get_database_manager()
                 logger.info("Waiting for active database connections to complete...")
                 await db_manager.wait_for_active_connections(timeout=30)
@@ -585,7 +605,9 @@ All endpoints (except `/health` and `/docs`) require authentication via:
                 await db_manager.dispose()
                 logger.info("✅ Database shutdown complete")
             except RuntimeError:
-                logger.warning("Database manager not initialized, skipping database shutdown")
+                logger.warning(
+                    "Database manager not initialized, skipping database shutdown"
+                )
             except Exception as e:
                 logger.error(f"Error during database shutdown: {e}")
 

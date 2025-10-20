@@ -40,6 +40,7 @@ from ai_engine.core.config import Config
 
 # Fixtures
 
+
 @pytest.fixture
 def config():
     """Test configuration."""
@@ -64,6 +65,7 @@ def mock_llm_service():
 
 # Predictive Threat Modeler Tests
 
+
 class TestPredictiveThreatModeler:
     """Test suite for PredictiveThreatModeler."""
 
@@ -80,7 +82,7 @@ class TestPredictiveThreatModeler:
         )
 
         # Mock LLM response with proper JSON
-        mock_llm_service.query.return_value.content = '''
+        mock_llm_service.query.return_value.content = """
         {
           "threat_vectors": [
             {
@@ -94,7 +96,7 @@ class TestPredictiveThreatModeler:
             }
           ]
         }
-        '''
+        """
 
         model = await modeler.model_threat_scenario(scenario)
 
@@ -115,10 +117,12 @@ class TestPredictiveThreatModeler:
             scenario_id="test_scenario_2",
             scenario_type=ScenarioType.ENCRYPTION_CHANGE,
             description="Downgrade encryption to TLS 1.0",
-            proposed_change={"encryption": {"algorithm": "TLS 1.0", "strength": "weaken"}},
+            proposed_change={
+                "encryption": {"algorithm": "TLS 1.0", "strength": "weaken"}
+            },
         )
 
-        mock_llm_service.query.return_value.content = '''
+        mock_llm_service.query.return_value.content = """
         {
           "threat_vectors": [
             {
@@ -132,7 +136,7 @@ class TestPredictiveThreatModeler:
             }
           ]
         }
-        '''
+        """
 
         model = await modeler.model_threat_scenario(scenario)
 
@@ -161,11 +165,14 @@ class TestPredictiveThreatModeler:
 
 # Playbook Generator Tests
 
+
 class TestPlaybookGenerator:
     """Test suite for PlaybookGenerator."""
 
     @pytest.mark.asyncio
-    async def test_generate_playbook_for_unauthorized_access(self, config, mock_llm_service):
+    async def test_generate_playbook_for_unauthorized_access(
+        self, config, mock_llm_service
+    ):
         """Test playbook generation for unauthorized access incident."""
         generator = PlaybookGenerator(config, llm_service=mock_llm_service)
 
@@ -181,7 +188,7 @@ class TestPlaybookGenerator:
         )
 
         # Mock LLM response
-        mock_llm_service.query.return_value.content = '''
+        mock_llm_service.query.return_value.content = """
         {
           "actions": [
             {
@@ -208,7 +215,7 @@ class TestPlaybookGenerator:
           "references": [],
           "confidence": 0.85
         }
-        '''
+        """
 
         playbook = await generator.generate_playbook(incident)
 
@@ -270,6 +277,7 @@ class TestPlaybookGenerator:
 
 # Protocol Fuzzer Tests
 
+
 class TestProtocolFuzzer:
     """Test suite for ProtocolFuzzer."""
 
@@ -278,11 +286,7 @@ class TestProtocolFuzzer:
         """Test complete fuzzing session."""
         fuzzer = ProtocolFuzzer(config, llm_service=mock_llm_service)
 
-        protocol_spec = {
-            "message_format": {
-                "fields": ["length", "type", "data"]
-            }
-        }
+        protocol_spec = {"message_format": {"fields": ["length", "type", "data"]}}
 
         session = await fuzzer.start_fuzzing_session(
             protocol_name="TestProtocol",
@@ -342,6 +346,7 @@ class TestProtocolFuzzer:
 
 # Protocol Handler Generator Tests
 
+
 class TestProtocolHandlerGenerator:
     """Test suite for ProtocolHandlerGenerator."""
 
@@ -351,13 +356,13 @@ class TestProtocolHandlerGenerator:
         generator = ProtocolHandlerGenerator(config, llm_service=mock_llm_service)
 
         # Mock LLM response with Python code
-        mock_llm_service.query.return_value.content = '''
+        mock_llm_service.query.return_value.content = """
         {
           "source_code": "import struct\\n\\nclass MessageParser:\\n    def parse(self, data: bytes):\\n        length, msg_type = struct.unpack('!HB', data[:3])\\n        return {'length': length, 'type': msg_type}",
           "dependencies": ["struct"],
           "security_notes": ["Input validation implemented", "Bounds checking added"]
         }
-        '''
+        """
 
         protocol_spec = ProtocolSpec(
             protocol_name="SimpleProtocol",
@@ -406,13 +411,13 @@ class TestProtocolHandlerGenerator:
         """Test Rust handler generation."""
         generator = ProtocolHandlerGenerator(config, llm_service=mock_llm_service)
 
-        mock_llm_service.query.return_value.content = '''
+        mock_llm_service.query.return_value.content = """
         {
           "source_code": "pub struct MessageHandler;\\n\\nimpl MessageHandler {\\n    pub fn handle(&self, data: &[u8]) -> Result<(), Error> {\\n        Ok(())\\n    }\\n}",
           "dependencies": ["tokio", "bytes"],
           "security_notes": ["Safe Rust practices used"]
         }
-        '''
+        """
 
         protocol_spec = ProtocolSpec(
             protocol_name="TestProtocol",
@@ -453,6 +458,7 @@ class TestProtocolHandlerGenerator:
 
 # Integration Tests
 
+
 class TestEnhancedCopilotIntegration:
     """Integration tests for enhanced copilot features."""
 
@@ -469,7 +475,7 @@ class TestEnhancedCopilotIntegration:
             proposed_change={"access_control": {"direction": "expand"}},
         )
 
-        mock_llm_service.query.return_value.content = '''
+        mock_llm_service.query.return_value.content = """
         {
           "threat_vectors": [
             {
@@ -483,7 +489,7 @@ class TestEnhancedCopilotIntegration:
             }
           ]
         }
-        '''
+        """
 
         threat_model = await modeler.model_threat_scenario(scenario)
 
@@ -504,7 +510,7 @@ class TestEnhancedCopilotIntegration:
                 description="Unauthorized access to production database",
             )
 
-            mock_llm_service.query.return_value.content = '''
+            mock_llm_service.query.return_value.content = """
             {
               "actions": [
                 {
@@ -522,15 +528,19 @@ class TestEnhancedCopilotIntegration:
               "references": [],
               "confidence": 0.9
             }
-            '''
+            """
 
             playbook = await generator.generate_playbook(incident)
 
             assert len(playbook.actions) > 0
-            assert any(action.priority == ActionPriority.CRITICAL for action in playbook.actions)
+            assert any(
+                action.priority == ActionPriority.CRITICAL
+                for action in playbook.actions
+            )
 
 
 # Performance Tests
+
 
 class TestEnhancedCopilotPerformance:
     """Performance tests for enhanced copilot."""
@@ -548,6 +558,7 @@ class TestEnhancedCopilotPerformance:
         )
 
         import time
+
         start = time.time()
         await modeler.model_threat_scenario(scenario)
         duration = time.time() - start
@@ -571,6 +582,7 @@ class TestEnhancedCopilotPerformance:
         )
 
         import time
+
         start = time.time()
         await generator.generate_playbook(incident)
         duration = time.time() - start

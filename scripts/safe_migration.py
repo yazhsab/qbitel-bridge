@@ -26,14 +26,14 @@ import re
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
 class MigrationSafetyError(Exception):
     """Raised when migration is unsafe."""
+
     pass
 
 
@@ -44,10 +44,10 @@ class SafeMigrationTool:
 
     # Dangerous SQL operations that require approval in production
     DANGEROUS_OPERATIONS = [
-        r'\bDROP\s+TABLE\b',
-        r'\bDROP\s+COLUMN\b',
-        r'\bTRUNCATE\b',
-        r'\bDELETE\s+FROM\b(?!\s+WHERE)',  # DELETE without WHERE
+        r"\bDROP\s+TABLE\b",
+        r"\bDROP\s+COLUMN\b",
+        r"\bTRUNCATE\b",
+        r"\bDELETE\s+FROM\b(?!\s+WHERE)",  # DELETE without WHERE
     ]
 
     def __init__(
@@ -97,21 +97,25 @@ class SafeMigrationTool:
         for pattern in self.DANGEROUS_OPERATIONS:
             matches = re.finditer(pattern, sql_content, re.IGNORECASE)
             for match in matches:
-                dangerous_found.append({
-                    'operation': match.group(0),
-                    'pattern': pattern,
-                    'line': sql_content[:match.start()].count('\n') + 1
-                })
-
-        if dangerous_found:
-            logger.warning(f"⚠️  Dangerous operations detected in {migration_file.name}:")
-            for danger in dangerous_found:
-                logger.warning(
-                    f"  Line {danger['line']}: {danger['operation']}"
+                dangerous_found.append(
+                    {
+                        "operation": match.group(0),
+                        "pattern": pattern,
+                        "line": sql_content[: match.start()].count("\n") + 1,
+                    }
                 )
 
+        if dangerous_found:
+            logger.warning(
+                f"⚠️  Dangerous operations detected in {migration_file.name}:"
+            )
+            for danger in dangerous_found:
+                logger.warning(f"  Line {danger['line']}: {danger['operation']}")
+
             if self.is_production and self.require_approval:
-                logger.error("❌ Dangerous operations require manual approval in production")
+                logger.error(
+                    "❌ Dangerous operations require manual approval in production"
+                )
                 logger.info("\nTo proceed, run with: --approve-dangerous")
                 raise MigrationSafetyError(
                     f"Dangerous operations detected. Manual approval required."
@@ -144,7 +148,8 @@ class SafeMigrationTool:
             "python3",
             "scripts/backup_database.py",
             "--full",
-            "--output", str(backup_path),
+            "--output",
+            str(backup_path),
             "--compress",
         ]
 
@@ -164,12 +169,7 @@ class SafeMigrationTool:
             str: Current revision hash
         """
         cmd = ["alembic", "current"]
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            cwd="ai_engine"
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd="ai_engine")
 
         if result.returncode != 0:
             logger.error(f"Failed to get current revision: {result.stderr}")
@@ -227,19 +227,15 @@ class SafeMigrationTool:
 
         try:
             result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                cwd="ai_engine",
-                check=True
+                cmd, capture_output=True, text=True, cwd="ai_engine", check=True
             )
 
             if dry_run:
-                print("\n" + "="*80)
+                print("\n" + "=" * 80)
                 print("MIGRATION SQL (DRY RUN)")
-                print("="*80)
+                print("=" * 80)
                 print(result.stdout)
-                print("="*80)
+                print("=" * 80)
             else:
                 logger.info("✅ Migration successful")
                 logger.info(result.stdout)
@@ -254,15 +250,15 @@ class SafeMigrationTool:
             logger.error(f"❌ Migration failed: {e.stderr}")
 
             if backup_path and not dry_run:
-                logger.info("\n" + "="*80)
+                logger.info("\n" + "=" * 80)
                 logger.info("MIGRATION FAILED - ROLLBACK INSTRUCTIONS")
-                logger.info("="*80)
+                logger.info("=" * 80)
                 logger.info(f"1. Backup available at: {backup_path}")
                 logger.info(f"2. To rollback, run:")
                 logger.info(f"   alembic downgrade {current_revision}")
                 logger.info(f"3. Or restore from backup:")
                 logger.info(f"   gunzip -c {backup_path} | psql -U user -d database")
-                logger.info("="*80)
+                logger.info("=" * 80)
 
             raise
 
@@ -312,19 +308,15 @@ class SafeMigrationTool:
 
         try:
             result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                cwd="ai_engine",
-                check=True
+                cmd, capture_output=True, text=True, cwd="ai_engine", check=True
             )
 
             if dry_run:
-                print("\n" + "="*80)
+                print("\n" + "=" * 80)
                 print("ROLLBACK SQL (DRY RUN)")
-                print("="*80)
+                print("=" * 80)
                 print(result.stdout)
-                print("="*80)
+                print("=" * 80)
             else:
                 logger.info("✅ Rollback successful")
                 logger.info(result.stdout)
@@ -342,23 +334,13 @@ class SafeMigrationTool:
     def show_history(self) -> None:
         """Show migration history."""
         cmd = ["alembic", "history", "--verbose"]
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            cwd="ai_engine"
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd="ai_engine")
         print(result.stdout)
 
     def show_current(self) -> None:
         """Show current migration state."""
         cmd = ["alembic", "current"]
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            cwd="ai_engine"
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd="ai_engine")
         print(result.stdout)
 
 
@@ -371,44 +353,40 @@ def main():
     parser.add_argument(
         "command",
         choices=["upgrade", "downgrade", "history", "current", "validate"],
-        help="Migration command"
+        help="Migration command",
     )
 
     parser.add_argument(
         "--target",
         default="head",
-        help="Target revision (default: head for upgrade, -1 for downgrade)"
+        help="Target revision (default: head for upgrade, -1 for downgrade)",
     )
 
     parser.add_argument(
         "--environment",
         default=os.getenv("CRONOS_AI_ENVIRONMENT", "development"),
         choices=["development", "staging", "production"],
-        help="Environment (default: from CRONOS_AI_ENVIRONMENT)"
+        help="Environment (default: from CRONOS_AI_ENVIRONMENT)",
     )
 
     parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show SQL without executing"
+        "--dry-run", action="store_true", help="Show SQL without executing"
     )
 
     parser.add_argument(
         "--no-backup",
         action="store_true",
-        help="Skip automatic backup (not recommended)"
+        help="Skip automatic backup (not recommended)",
     )
 
     parser.add_argument(
         "--approve-dangerous",
         action="store_true",
-        help="Approve dangerous operations in production"
+        help="Approve dangerous operations in production",
     )
 
     parser.add_argument(
-        "--migration-file",
-        type=Path,
-        help="Validate specific migration file"
+        "--migration-file", type=Path, help="Validate specific migration file"
     )
 
     args = parser.parse_args()

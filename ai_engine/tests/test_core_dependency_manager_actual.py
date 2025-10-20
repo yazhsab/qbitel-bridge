@@ -32,9 +32,9 @@ class TestDependencyInfo:
             name="test_package",
             package="test_package",
             required=True,
-            min_version="1.0.0"
+            min_version="1.0.0",
         )
-        
+
         assert info.name == "test_package"
         assert info.package == "test_package"
         assert info.required is True
@@ -56,9 +56,9 @@ class TestDependencyManager:
     def test_initialization(self, dependency_manager):
         """Test DependencyManager initialization."""
         assert dependency_manager is not None
-        assert hasattr(dependency_manager, 'LLM_DEPENDENCIES')
-        assert hasattr(dependency_manager, 'ML_DEPENDENCIES')
-        assert hasattr(dependency_manager, 'dependency_status')
+        assert hasattr(dependency_manager, "LLM_DEPENDENCIES")
+        assert hasattr(dependency_manager, "ML_DEPENDENCIES")
+        assert hasattr(dependency_manager, "dependency_status")
 
     def test_llm_dependencies_exist(self, dependency_manager):
         """Test that LLM dependencies are defined."""
@@ -81,55 +81,53 @@ class TestDependencyManager:
         """Test checking all dependencies."""
         # This should not raise an exception
         dependency_manager._check_all_dependencies()
-        
+
         # Verify that dependency status was updated
         assert len(dependency_manager.dependency_status) > 0
 
     def test_check_dependency_available(self, dependency_manager):
         """Test checking if a dependency is available."""
-        with patch('importlib.import_module') as mock_import:
+        with patch("importlib.import_module") as mock_import:
             mock_import.return_value = MagicMock()
-            
+
             # Test with a real dependency from the list
             openai_info = dependency_manager.LLM_DEPENDENCIES["openai"]
             result = dependency_manager._check_dependency(openai_info)
-            
+
             assert result.status == DependencyStatus.AVAILABLE
 
     def test_check_dependency_missing(self, dependency_manager):
         """Test checking a missing dependency."""
-        with patch('importlib.import_module') as mock_import:
+        with patch("importlib.import_module") as mock_import:
             mock_import.side_effect = ImportError("No module named 'nonexistent'")
-            
+
             # Create a test dependency info
             test_info = DependencyInfo(
-                name="Test Package",
-                package="nonexistent",
-                required=False
+                name="Test Package", package="nonexistent", required=False
             )
-            
+
             result = dependency_manager._check_dependency(test_info)
-            
+
             assert result.status == DependencyStatus.MISSING
             assert result.error_message is not None
 
     def test_check_dependency_version_mismatch(self, dependency_manager):
         """Test checking dependency with version mismatch."""
-        with patch('importlib.import_module') as mock_import:
+        with patch("importlib.import_module") as mock_import:
             mock_module = MagicMock()
             mock_module.__version__ = "0.9.0"  # Below min version
             mock_import.return_value = mock_module
-            
+
             # Create a test dependency info with min version
             test_info = DependencyInfo(
                 name="Test Package",
                 package="test_package",
                 required=False,
-                min_version="1.0.0"
+                min_version="1.0.0",
             )
-            
+
             result = dependency_manager._check_dependency(test_info)
-            
+
             assert result.status == DependencyStatus.VERSION_MISMATCH
             assert result.error_message is not None
 
@@ -137,13 +135,13 @@ class TestDependencyManager:
         """Test version comparison."""
         # Test equal versions
         assert dependency_manager._compare_versions("1.0.0", "1.0.0") == 0
-        
+
         # Test newer version
         assert dependency_manager._compare_versions("1.1.0", "1.0.0") > 0
-        
+
         # Test older version
         assert dependency_manager._compare_versions("0.9.0", "1.0.0") < 0
-        
+
         # Test with different formats
         assert dependency_manager._compare_versions("1.0", "1.0.0") < 0
 
@@ -157,24 +155,23 @@ class TestDependencyManager:
     def test_dependency_info_attributes(self, dependency_manager):
         """Test that dependency info has expected attributes."""
         openai_info = dependency_manager.LLM_DEPENDENCIES["openai"]
-        
-        assert hasattr(openai_info, 'name')
-        assert hasattr(openai_info, 'package')
-        assert hasattr(openai_info, 'required')
-        assert hasattr(openai_info, 'min_version')
-        assert hasattr(openai_info, 'status')
-        assert hasattr(openai_info, 'installed_version')
-        assert hasattr(openai_info, 'error_message')
-        assert hasattr(openai_info, 'fallback_available')
+
+        assert hasattr(openai_info, "name")
+        assert hasattr(openai_info, "package")
+        assert hasattr(openai_info, "required")
+        assert hasattr(openai_info, "min_version")
+        assert hasattr(openai_info, "status")
+        assert hasattr(openai_info, "installed_version")
+        assert hasattr(openai_info, "error_message")
+        assert hasattr(openai_info, "fallback_available")
 
     def test_required_dependencies(self, dependency_manager):
         """Test that some dependencies are marked as required."""
         # Check that some dependencies are required
         required_deps = [
-            dep for dep in dependency_manager.LLM_DEPENDENCIES.values()
-            if dep.required
+            dep for dep in dependency_manager.LLM_DEPENDENCIES.values() if dep.required
         ]
-        
+
         # There should be some required dependencies
         assert len(required_deps) >= 0  # Some may be required, some may not
 
@@ -182,10 +179,11 @@ class TestDependencyManager:
         """Test that some dependencies are marked as optional."""
         # Check that some dependencies are optional
         optional_deps = [
-            dep for dep in dependency_manager.LLM_DEPENDENCIES.values()
+            dep
+            for dep in dependency_manager.LLM_DEPENDENCIES.values()
             if not dep.required
         ]
-        
+
         # There should be some optional dependencies
         assert len(optional_deps) >= 0  # Some may be optional, some may not
 

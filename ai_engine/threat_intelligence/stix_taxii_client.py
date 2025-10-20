@@ -442,9 +442,7 @@ class STIXTAXIIClient:
             ).inc()
 
             if response.status != 200:
-                raise CronosAIException(
-                    f"TAXII request failed: HTTP {response.status}"
-                )
+                raise CronosAIException(f"TAXII request failed: HTTP {response.status}")
 
             data = await response.json()
 
@@ -463,7 +461,9 @@ class STIXTAXIIClient:
         """Fetch CSV-based IOC feed."""
         async with self.session.get(feed.url) as response:
             if response.status != 200:
-                raise CronosAIException(f"Failed to fetch CSV feed: HTTP {response.status}")
+                raise CronosAIException(
+                    f"Failed to fetch CSV feed: HTTP {response.status}"
+                )
 
             text = await response.text()
 
@@ -484,7 +484,9 @@ class STIXTAXIIClient:
                 value = parts[0].strip()
 
                 # Create indicator
-                indicator_id = f"indicator--{hashlib.sha256(value.encode()).hexdigest()}"
+                indicator_id = (
+                    f"indicator--{hashlib.sha256(value.encode()).hexdigest()}"
+                )
 
                 # Determine type
                 if "." in value and all(p.isdigit() for p in value.split(".")):
@@ -514,7 +516,9 @@ class STIXTAXIIClient:
         """Fetch JSON-based IOC feed."""
         async with self.session.get(feed.url) as response:
             if response.status != 200:
-                raise CronosAIException(f"Failed to fetch JSON feed: HTTP {response.status}")
+                raise CronosAIException(
+                    f"Failed to fetch JSON feed: HTTP {response.status}"
+                )
 
             data = await response.json()
 
@@ -540,7 +544,9 @@ class STIXTAXIIClient:
 
     def _parse_stix_indicator(self, stix_obj: Dict[str, Any]) -> STIXIndicator:
         """Parse STIX indicator object."""
-        indicator_id = stix_obj.get("id", f"indicator--{hashlib.sha256(str(stix_obj).encode()).hexdigest()}")
+        indicator_id = stix_obj.get(
+            "id", f"indicator--{hashlib.sha256(str(stix_obj).encode()).hexdigest()}"
+        )
 
         created = datetime.fromisoformat(
             stix_obj.get("created", datetime.utcnow().isoformat()).rstrip("Z")
@@ -554,9 +560,7 @@ class STIXTAXIIClient:
 
         valid_until = None
         if "valid_until" in stix_obj:
-            valid_until = datetime.fromisoformat(
-                stix_obj["valid_until"].rstrip("Z")
-            )
+            valid_until = datetime.fromisoformat(stix_obj["valid_until"].rstrip("Z"))
 
         indicator = STIXIndicator(
             id=indicator_id,
@@ -690,7 +694,9 @@ class STIXTAXIIClient:
 
         return results
 
-    async def check_ioc(self, value: str, ioc_type: Optional[str] = None) -> Optional[STIXIndicator]:
+    async def check_ioc(
+        self, value: str, ioc_type: Optional[str] = None
+    ) -> Optional[STIXIndicator]:
         """
         Check if a value matches any known IOC.
 

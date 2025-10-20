@@ -18,6 +18,7 @@ class TestLIMEDecisionExplainer:
     @pytest.fixture
     def mock_predict_fn(self):
         """Create mock prediction function."""
+
         def predict_fn(texts):
             """
             Mock LLM prediction function.
@@ -45,14 +46,14 @@ class TestLIMEDecisionExplainer:
             predict_fn=mock_predict_fn,
             model_name="security_decision_engine",
             model_version="1.0.0",
-            class_names=['ALLOW', 'BLOCK', 'ESCALATE'],
+            class_names=["ALLOW", "BLOCK", "ESCALATE"],
             num_samples=100,  # Reduce for faster tests
         )
 
         assert explainer.model_name == "security_decision_engine"
         assert explainer.model_version == "1.0.0"
         assert explainer.explanation_method == ExplanationType.LIME
-        assert explainer.class_names == ['ALLOW', 'BLOCK', 'ESCALATE']
+        assert explainer.class_names == ["ALLOW", "BLOCK", "ESCALATE"]
         assert explainer.num_samples == 100
 
     def test_explain_suspicious_event(self, mock_predict_fn):
@@ -61,7 +62,7 @@ class TestLIMEDecisionExplainer:
             predict_fn=mock_predict_fn,
             model_name="security_decision_engine",
             model_version="1.0.0",
-            class_names=['ALLOW', 'BLOCK', 'ESCALATE'],
+            class_names=["ALLOW", "BLOCK", "ESCALATE"],
             num_samples=100,
         )
 
@@ -90,7 +91,7 @@ class TestLIMEDecisionExplainer:
             predict_fn=mock_predict_fn,
             model_name="security_decision_engine",
             model_version="1.0.0",
-            class_names=['ALLOW', 'BLOCK', 'ESCALATE'],
+            class_names=["ALLOW", "BLOCK", "ESCALATE"],
             num_samples=100,
         )
 
@@ -111,7 +112,7 @@ class TestLIMEDecisionExplainer:
             predict_fn=mock_predict_fn,
             model_name="security_decision_engine",
             model_version="1.0.0",
-            class_names=['ALLOW', 'BLOCK', 'ESCALATE'],
+            class_names=["ALLOW", "BLOCK", "ESCALATE"],
             num_samples=50,  # Smaller for speed
         )
 
@@ -139,7 +140,7 @@ class TestLIMEDecisionExplainer:
             predict_fn=mock_predict_fn,
             model_name="security_decision_engine",
             model_version="1.0.0",
-            class_names=['ALLOW', 'BLOCK', 'ESCALATE'],
+            class_names=["ALLOW", "BLOCK", "ESCALATE"],
             num_samples=50,
         )
 
@@ -158,7 +159,7 @@ class TestLIMEDecisionExplainer:
             predict_fn=mock_predict_fn,
             model_name="security_decision_engine",
             model_version="1.0.0",
-            class_names=['ALLOW', 'BLOCK', 'ESCALATE'],
+            class_names=["ALLOW", "BLOCK", "ESCALATE"],
             num_samples=50,
         )
 
@@ -179,7 +180,7 @@ class TestLIMEDecisionExplainer:
             predict_fn=mock_predict_fn,
             model_name="security_decision_engine",
             model_version="1.0.0",
-            class_names=['ALLOW', 'BLOCK', 'ESCALATE'],
+            class_names=["ALLOW", "BLOCK", "ESCALATE"],
             num_samples=50,
         )
 
@@ -200,7 +201,7 @@ class TestLIMEDecisionExplainer:
             predict_fn=mock_predict_fn,
             model_name="security_decision_engine",
             model_version="1.0.0",
-            class_names=['ALLOW', 'BLOCK', 'ESCALATE'],
+            class_names=["ALLOW", "BLOCK", "ESCALATE"],
             num_samples=50,
         )
 
@@ -220,6 +221,7 @@ class TestLIMESecurityDecisionExplainer:
     @pytest.fixture
     def mock_security_predict_fn(self):
         """Create mock security prediction function."""
+
         def predict_fn(texts):
             results = []
             for text in texts:
@@ -242,7 +244,7 @@ class TestLIMESecurityDecisionExplainer:
         )
 
         assert explainer.model_name == "security_decision_engine"
-        assert explainer.class_names == ['ALLOW', 'BLOCK', 'ESCALATE', 'QUARANTINE']
+        assert explainer.class_names == ["ALLOW", "BLOCK", "ESCALATE", "QUARANTINE"]
 
     def test_security_policy_mapping_block(self, mock_security_predict_fn):
         """Test security policy mapping for BLOCK decision."""
@@ -260,7 +262,10 @@ class TestLIMESecurityDecisionExplainer:
         assert explanation.model_output == "BLOCK"
         # Check that regulatory justification includes security policy context
         assert "Security Policy Context" in explanation.regulatory_justification
-        assert "Zero Trust" in explanation.regulatory_justification or "threat" in explanation.regulatory_justification.lower()
+        assert (
+            "Zero Trust" in explanation.regulatory_justification
+            or "threat" in explanation.regulatory_justification.lower()
+        )
 
     def test_security_policy_mapping_allow(self, mock_security_predict_fn):
         """Test security policy mapping for ALLOW decision."""
@@ -277,7 +282,10 @@ class TestLIMESecurityDecisionExplainer:
 
         assert explanation.model_output == "ALLOW"
         assert "Security Policy Context" in explanation.regulatory_justification
-        assert "whitelist" in explanation.regulatory_justification.lower() or "no" in explanation.regulatory_justification.lower()
+        assert (
+            "whitelist" in explanation.regulatory_justification.lower()
+            or "no" in explanation.regulatory_justification.lower()
+        )
 
     def test_security_policy_mapping_escalate(self, mock_security_predict_fn):
         """Test security policy mapping for ESCALATE decision."""
@@ -294,7 +302,10 @@ class TestLIMESecurityDecisionExplainer:
 
         assert explanation.model_output == "ESCALATE"
         assert "Security Policy Context" in explanation.regulatory_justification
-        assert "human review" in explanation.regulatory_justification.lower() or "manual" in explanation.regulatory_justification.lower()
+        assert (
+            "human review" in explanation.regulatory_justification.lower()
+            or "manual" in explanation.regulatory_justification.lower()
+        )
 
     def test_security_policy_mapping_quarantine(self, mock_security_predict_fn):
         """Test security policy mapping for QUARANTINE decision."""
@@ -311,4 +322,7 @@ class TestLIMESecurityDecisionExplainer:
 
         assert explanation.model_output == "QUARANTINE"
         assert "Security Policy Context" in explanation.regulatory_justification
-        assert "quarantine" in explanation.regulatory_justification.lower() or "isolate" in explanation.regulatory_justification.lower()
+        assert (
+            "quarantine" in explanation.regulatory_justification.lower()
+            or "isolate" in explanation.regulatory_justification.lower()
+        )

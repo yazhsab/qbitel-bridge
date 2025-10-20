@@ -430,21 +430,25 @@ def check_dependencies() -> bool:
 # Exception classes for dependency management
 class DependencyResolutionError(Exception):
     """Raised when dependency resolution fails."""
+
     pass
 
 
 class DependencyCircularReferenceError(DependencyResolutionError):
     """Raised when circular dependency is detected."""
+
     pass
 
 
 class DependencyNotFoundError(DependencyResolutionError):
     """Raised when required dependency is not found."""
+
     pass
 
 
 class DependencyScope(Enum):
     """Dependency scope enumeration."""
+
     SINGLETON = "singleton"
     TRANSIENT = "transient"
     SCOPED = "scoped"
@@ -452,6 +456,7 @@ class DependencyScope(Enum):
 
 class DependencyLifecycle(Enum):
     """Dependency lifecycle enumeration."""
+
     PERMANENT = "permanent"
     TEMPORARY = "temporary"
 
@@ -459,13 +464,14 @@ class DependencyLifecycle(Enum):
 @dataclass
 class DependencyDefinition:
     """Definition of a dependency."""
+
     name: str
     factory: callable
     scope: DependencyScope = DependencyScope.TRANSIENT
     lifecycle: DependencyLifecycle = DependencyLifecycle.PERMANENT
     dependencies: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -473,9 +479,9 @@ class DependencyDefinition:
             "scope": self.scope.value,
             "lifecycle": self.lifecycle.value,
             "dependencies": self.dependencies,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "DependencyDefinition":
         """Create from dictionary."""
@@ -485,24 +491,26 @@ class DependencyDefinition:
             scope=DependencyScope(data["scope"]),
             lifecycle=DependencyLifecycle(data["lifecycle"]),
             dependencies=data.get("dependencies", []),
-            metadata=data.get("metadata", {})
+            metadata=data.get("metadata", {}),
         )
 
 
 class ServiceLocator:
     """Service locator for dependency injection."""
-    
+
     def __init__(self):
         self._services = {}
         self._singletons = {}
-    
-    def register(self, service_type: type, instance: Any = None, singleton: bool = False):
+
+    def register(
+        self, service_type: type, instance: Any = None, singleton: bool = False
+    ):
         """Register a service."""
         if singleton:
             self._singletons[service_type] = instance
         else:
             self._services[service_type] = instance
-    
+
     def get(self, service_type: type) -> Any:
         """Get a service instance."""
         if service_type in self._singletons:
@@ -514,25 +522,25 @@ class ServiceLocator:
 
 class DependencyRegistry:
     """Registry for managing dependencies."""
-    
+
     def __init__(self):
         self._dependencies = {}
         self._resolved = set()
-    
+
     def register(self, name: str, dependency_info: DependencyInfo):
         """Register a dependency."""
         self._dependencies[name] = dependency_info
-    
+
     def get(self, name: str) -> DependencyInfo:
         """Get dependency information."""
         if name not in self._dependencies:
             raise DependencyNotFoundError(f"Dependency {name} not found")
         return self._dependencies[name]
-    
+
     def is_resolved(self, name: str) -> bool:
         """Check if dependency is resolved."""
         return name in self._resolved
-    
+
     def mark_resolved(self, name: str):
         """Mark dependency as resolved."""
         self._resolved.add(name)
@@ -540,16 +548,18 @@ class DependencyRegistry:
 
 class DependencyResolver:
     """Resolves dependency dependencies."""
-    
+
     def __init__(self, registry: DependencyRegistry):
         self.registry = registry
         self._resolving = set()
-    
+
     def resolve(self, name: str) -> Any:
         """Resolve a dependency."""
         if name in self._resolving:
-            raise DependencyCircularReferenceError(f"Circular dependency detected: {name}")
-        
+            raise DependencyCircularReferenceError(
+                f"Circular dependency detected: {name}"
+            )
+
         self._resolving.add(name)
         try:
             dep_info = self.registry.get(name)
@@ -562,25 +572,25 @@ class DependencyResolver:
 
 class DependencyValidator:
     """Validates dependency configurations."""
-    
+
     def __init__(self):
         self._validation_rules = {}
-    
+
     def add_rule(self, name: str, rule_func: callable):
         """Add a validation rule."""
         self._validation_rules[name] = rule_func
-    
+
     def validate(self, dependency_info: DependencyInfo) -> Tuple[bool, List[str]]:
         """Validate dependency information."""
         errors = []
-        
+
         # Basic validation
         if not dependency_info.name:
             errors.append("Dependency name is required")
-        
+
         if not dependency_info.package:
             errors.append("Package name is required")
-        
+
         # Custom validation rules
         for rule_name, rule_func in self._validation_rules.items():
             try:
@@ -588,36 +598,36 @@ class DependencyValidator:
                     errors.append(f"Validation rule {rule_name} failed")
             except Exception as e:
                 errors.append(f"Validation rule {rule_name} error: {e}")
-        
+
         return len(errors) == 0, errors
 
 
 class DependencyMonitor:
     """Monitors dependency health and status."""
-    
+
     def __init__(self):
         self._health_checks = {}
         self._metrics = defaultdict(list)
-    
+
     def add_health_check(self, name: str, check_func: callable):
         """Add a health check."""
         self._health_checks[name] = check_func
-    
+
     def check_health(self, name: str) -> Dict[str, Any]:
         """Check dependency health."""
         if name not in self._health_checks:
             return {"status": "unknown", "error": "No health check configured"}
-        
+
         try:
             result = self._health_checks[name]()
             return {"status": "healthy", "result": result}
         except Exception as e:
             return {"status": "unhealthy", "error": str(e)}
-    
+
     def record_metric(self, name: str, value: float):
         """Record a metric."""
         self._metrics[name].append(value)
-    
+
     def get_metrics(self, name: str) -> List[float]:
         """Get metrics for a dependency."""
         return self._metrics.get(name, [])
@@ -625,13 +635,13 @@ class DependencyMonitor:
 
 class DependencyHealthCheck:
     """Health check for dependencies."""
-    
+
     def __init__(self, name: str, check_func: callable):
         self.name = name
         self.check_func = check_func
         self.last_check = None
         self.last_result = None
-    
+
     def run_check(self) -> Dict[str, Any]:
         """Run the health check."""
         try:
@@ -639,10 +649,10 @@ class DependencyHealthCheck:
             self.last_result = {"status": "healthy", "result": result}
         except Exception as e:
             self.last_result = {"status": "unhealthy", "error": str(e)}
-        
+
         self.last_check = time.time()
         return self.last_result
-    
+
     def is_healthy(self) -> bool:
         """Check if dependency is healthy."""
         if self.last_result is None:

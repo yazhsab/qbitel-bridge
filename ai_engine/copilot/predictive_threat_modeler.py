@@ -488,9 +488,7 @@ Format your response as JSON:
         )
 
         # Assess compliance impact
-        compliance_impact = self._assess_compliance_impact(
-            scenario, policy_violations
-        )
+        compliance_impact = self._assess_compliance_impact(scenario, policy_violations)
 
         # Estimate performance impact
         performance_impact = self._estimate_performance_impact(scenario)

@@ -36,6 +36,20 @@ from .middleware import (
     setup_middleware,
 )
 
+# Marketplace (optional import - may not be available in all deployments)
+try:
+    from .marketplace_endpoints import router as marketplace_router
+    from .marketplace_schemas import (
+        ProtocolSearchRequest,
+        ProtocolSubmitRequest,
+        ProtocolPurchaseRequest,
+        ReviewSubmitRequest,
+    )
+    _marketplace_available = True
+except ImportError:
+    _marketplace_available = False
+    marketplace_router = None
+
 __all__ = [
     # REST API
     "AIEngineAPI",
@@ -73,3 +87,13 @@ __all__ = [
     "ErrorHandlingMiddleware",
     "setup_middleware",
 ]
+
+# Add marketplace exports if available
+if _marketplace_available:
+    __all__.extend([
+        "marketplace_router",
+        "ProtocolSearchRequest",
+        "ProtocolSubmitRequest",
+        "ProtocolPurchaseRequest",
+        "ReviewSubmitRequest",
+    ])

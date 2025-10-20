@@ -285,9 +285,7 @@ class ThreatHunter:
             hunt_hypotheses = list(self.hypotheses.values())
         else:
             hunt_hypotheses = [
-                self.hypotheses[h_id]
-                for h_id in hypotheses
-                if h_id in self.hypotheses
+                self.hypotheses[h_id] for h_id in hypotheses if h_id in self.hypotheses
             ]
 
         # Sort by priority
@@ -379,9 +377,7 @@ class ThreatHunter:
 
         # Search for IOC matches in event history
         cutoff_time = datetime.utcnow() - timedelta(hours=time_range_hours)
-        relevant_events = [
-            e for e in self.event_history if e.timestamp >= cutoff_time
-        ]
+        relevant_events = [e for e in self.event_history if e.timestamp >= cutoff_time]
 
         for event in relevant_events:
             matched_iocs = []
@@ -393,9 +389,7 @@ class ThreatHunter:
 
             # Create finding if IOCs matched
             if matched_iocs:
-                finding = self._create_ioc_finding(
-                    hypothesis, event, matched_iocs
-                )
+                finding = self._create_ioc_finding(hypothesis, event, matched_iocs)
                 findings.append(finding)
 
         return findings
@@ -411,9 +405,7 @@ class ThreatHunter:
 
         # Get events in time range
         cutoff_time = datetime.utcnow() - timedelta(hours=time_range_hours)
-        relevant_events = [
-            e for e in self.event_history if e.timestamp >= cutoff_time
-        ]
+        relevant_events = [e for e in self.event_history if e.timestamp >= cutoff_time]
 
         # Map events to techniques and check for matches
         for event in relevant_events:
@@ -442,9 +434,7 @@ class ThreatHunter:
 
         # Analyze behavioral patterns
         cutoff_time = datetime.utcnow() - timedelta(hours=time_range_hours)
-        relevant_events = [
-            e for e in self.event_history if e.timestamp >= cutoff_time
-        ]
+        relevant_events = [e for e in self.event_history if e.timestamp >= cutoff_time]
 
         # Group events by source
         events_by_source: Dict[str, List[SecurityEvent]] = {}
@@ -651,13 +641,21 @@ class ThreatHunter:
             "total_findings": len(campaign.findings),
             "findings_by_severity": {
                 "critical": len(
-                    [f for f in campaign.findings if f.severity == FindingSeverity.CRITICAL]
+                    [
+                        f
+                        for f in campaign.findings
+                        if f.severity == FindingSeverity.CRITICAL
+                    ]
                 ),
                 "high": len(
                     [f for f in campaign.findings if f.severity == FindingSeverity.HIGH]
                 ),
                 "medium": len(
-                    [f for f in campaign.findings if f.severity == FindingSeverity.MEDIUM]
+                    [
+                        f
+                        for f in campaign.findings
+                        if f.severity == FindingSeverity.MEDIUM
+                    ]
                 ),
                 "low": len(
                     [f for f in campaign.findings if f.severity == FindingSeverity.LOW]

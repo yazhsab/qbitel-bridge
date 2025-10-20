@@ -24,12 +24,13 @@ from ai_engine.core.database_manager import TransactionError
 
 logger = logging.getLogger(__name__)
 
-P = ParamSpec('P')
-T = TypeVar('T')
+P = ParamSpec("P")
+T = TypeVar("T")
 
 
 class IsolationLevel:
     """SQL transaction isolation levels."""
+
     READ_UNCOMMITTED = "READ UNCOMMITTED"
     READ_COMMITTED = "READ COMMITTED"
     REPEATABLE_READ = "REPEATABLE READ"
@@ -78,11 +79,12 @@ def transactional(
         TransactionError: If transaction fails after all retries
         ValueError: If db parameter is missing
     """
+
     def decorator(func: Callable[P, T]) -> Callable[P, T]:
         @wraps(func)
         async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             # Extract db session from arguments
-            db = kwargs.get('db') or _find_session_in_args(args)
+            db = kwargs.get("db") or _find_session_in_args(args)
 
             if db is None:
                 raise ValueError(
@@ -152,7 +154,7 @@ def transactional(
                             ) from e
 
                         # Exponential backoff
-                        delay = retry_delay * (2 ** attempt)
+                        delay = retry_delay * (2**attempt)
                         logger.info(f"Retrying in {delay:.2f}s...")
                         await asyncio.sleep(delay)
 
@@ -194,6 +196,7 @@ def transactional(
             ) from last_exception
 
         return wrapper
+
     return decorator
 
 
@@ -221,9 +224,10 @@ def readonly_transaction(func: Callable[P, T]) -> Callable[P, T]:
     Returns:
         Decorated function
     """
+
     @wraps(func)
     async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-        db = kwargs.get('db') or _find_session_in_args(args)
+        db = kwargs.get("db") or _find_session_in_args(args)
 
         if db is None:
             raise ValueError(
@@ -317,10 +321,7 @@ def _find_session_in_args(args: tuple) -> Optional[AsyncSession]:
 
 
 async def execute_in_transaction(
-    db: AsyncSession,
-    operations: list[Callable],
-    *args,
-    **kwargs
+    db: AsyncSession, operations: list[Callable], *args, **kwargs
 ) -> list[Any]:
     """
     Execute multiple operations in a single transaction.
@@ -412,7 +413,9 @@ class TransactionContext:
             return False  # Re-raise exception
 
         if not self._committed and not self._rolled_back:
-            logger.debug("Transaction context exiting without commit/rollback, committing")
+            logger.debug(
+                "Transaction context exiting without commit/rollback, committing"
+            )
             await self.commit()
 
         return False
@@ -445,12 +448,7 @@ class TransactionContext:
 
 
 # Convenience function for common transaction patterns
-async def run_in_transaction(
-    db_manager,
-    operation: Callable,
-    *args,
-    **kwargs
-) -> Any:
+async def run_in_transaction(db_manager, operation: Callable, *args, **kwargs) -> Any:
     """
     Run an operation in a managed transaction.
 
@@ -480,5 +478,5 @@ async def run_in_transaction(
         TransactionError: If operation fails
     """
     async with db_manager.get_session() as session:
-        kwargs['db'] = session
+        kwargs["db"] = session
         return await operation(*args, **kwargs)

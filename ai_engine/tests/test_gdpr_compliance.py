@@ -47,7 +47,10 @@ def mock_audit_manager():
 @pytest.fixture
 def gdpr_manager(mock_config, mock_audit_manager):
     """Create GDPRComplianceManager instance."""
-    with patch('ai_engine.compliance.gdpr_compliance.AuditTrailManager', return_value=mock_audit_manager):
+    with patch(
+        "ai_engine.compliance.gdpr_compliance.AuditTrailManager",
+        return_value=mock_audit_manager,
+    ):
         manager = GDPRComplianceManager(mock_config)
         manager.audit_manager = mock_audit_manager
         return manager
@@ -63,7 +66,7 @@ class TestDataSubjectRequest:
             request_id="REQ001",
             subject_id="user_123",
             right=DataSubjectRight.ACCESS,
-            requested_at=now
+            requested_at=now,
         )
 
         assert request.request_id == "REQ001"
@@ -85,7 +88,7 @@ class TestConsentRecord:
             purpose="Marketing communications",
             legal_basis=LegalBasis.CONSENT,
             granted_at=now,
-            expires_at=now + timedelta(days=365)
+            expires_at=now + timedelta(days=365),
         )
 
         assert consent.consent_id == "CONSENT001"
@@ -101,7 +104,7 @@ class TestConsentRecord:
             subject_id="user_789",
             purpose="Data processing",
             legal_basis=LegalBasis.CONSENT,
-            granted_at=now
+            granted_at=now,
         )
 
         consent.withdrawn_at = datetime.utcnow()
@@ -124,7 +127,7 @@ class TestGDPRComplianceManager:
             subject_id="user_001",
             purpose="Analytics",
             legal_basis=LegalBasis.CONSENT,
-            metadata={"ip_address": "192.168.1.1"}
+            metadata={"ip_address": "192.168.1.1"},
         )
 
         assert consent_id is not None
@@ -135,9 +138,7 @@ class TestGDPRComplianceManager:
         """Test withdrawing consent."""
         # Record consent first
         consent_id = await gdpr_manager.record_consent(
-            subject_id="user_002",
-            purpose="Marketing",
-            legal_basis=LegalBasis.CONSENT
+            subject_id="user_002", purpose="Marketing", legal_basis=LegalBasis.CONSENT
         )
 
         # Withdraw consent
@@ -151,9 +152,7 @@ class TestGDPRComplianceManager:
     async def test_check_consent_valid(self, gdpr_manager):
         """Test checking if consent is valid."""
         consent_id = await gdpr_manager.record_consent(
-            subject_id="user_003",
-            purpose="Processing",
-            legal_basis=LegalBasis.CONSENT
+            subject_id="user_003", purpose="Processing", legal_basis=LegalBasis.CONSENT
         )
 
         is_valid = await gdpr_manager.check_consent(consent_id)
@@ -163,9 +162,7 @@ class TestGDPRComplianceManager:
     async def test_check_consent_withdrawn(self, gdpr_manager):
         """Test consent validity after withdrawal."""
         consent_id = await gdpr_manager.record_consent(
-            subject_id="user_004",
-            purpose="Analytics",
-            legal_basis=LegalBasis.CONSENT
+            subject_id="user_004", purpose="Analytics", legal_basis=LegalBasis.CONSENT
         )
 
         await gdpr_manager.withdraw_consent(consent_id)
@@ -177,8 +174,7 @@ class TestGDPRComplianceManager:
     async def test_submit_access_request(self, gdpr_manager):
         """Test submitting right to access request."""
         request_id = await gdpr_manager.submit_subject_request(
-            subject_id="user_005",
-            right=DataSubjectRight.ACCESS
+            subject_id="user_005", right=DataSubjectRight.ACCESS
         )
 
         assert request_id is not None
@@ -190,8 +186,7 @@ class TestGDPRComplianceManager:
     async def test_submit_erasure_request(self, gdpr_manager):
         """Test submitting right to erasure request."""
         request_id = await gdpr_manager.submit_subject_request(
-            subject_id="user_006",
-            right=DataSubjectRight.ERASURE
+            subject_id="user_006", right=DataSubjectRight.ERASURE
         )
 
         assert request_id in gdpr_manager.subject_requests
@@ -202,11 +197,12 @@ class TestGDPRComplianceManager:
     async def test_process_access_request(self, gdpr_manager):
         """Test processing right to access request."""
         request_id = await gdpr_manager.submit_subject_request(
-            subject_id="user_007",
-            right=DataSubjectRight.ACCESS
+            subject_id="user_007", right=DataSubjectRight.ACCESS
         )
 
-        with patch.object(gdpr_manager, '_gather_subject_data', new_callable=AsyncMock) as mock_gather:
+        with patch.object(
+            gdpr_manager, "_gather_subject_data", new_callable=AsyncMock
+        ) as mock_gather:
             mock_gather.return_value = {"name": "John Doe", "email": "john@example.com"}
 
             response = await gdpr_manager.process_access_request(request_id)
@@ -219,11 +215,12 @@ class TestGDPRComplianceManager:
     async def test_process_erasure_request(self, gdpr_manager):
         """Test processing right to erasure request."""
         request_id = await gdpr_manager.submit_subject_request(
-            subject_id="user_008",
-            right=DataSubjectRight.ERASURE
+            subject_id="user_008", right=DataSubjectRight.ERASURE
         )
 
-        with patch.object(gdpr_manager, '_delete_subject_data', new_callable=AsyncMock) as mock_delete:
+        with patch.object(
+            gdpr_manager, "_delete_subject_data", new_callable=AsyncMock
+        ) as mock_delete:
             mock_delete.return_value = True
 
             result = await gdpr_manager.process_erasure_request(request_id)
@@ -235,11 +232,12 @@ class TestGDPRComplianceManager:
     async def test_export_personal_data(self, gdpr_manager):
         """Test exporting personal data (portability)."""
         request_id = await gdpr_manager.submit_subject_request(
-            subject_id="user_009",
-            right=DataSubjectRight.PORTABILITY
+            subject_id="user_009", right=DataSubjectRight.PORTABILITY
         )
 
-        with patch.object(gdpr_manager, '_export_data_portable_format', new_callable=AsyncMock) as mock_export:
+        with patch.object(
+            gdpr_manager, "_export_data_portable_format", new_callable=AsyncMock
+        ) as mock_export:
             mock_export.return_value = {"format": "JSON", "data": {}}
 
             export_data = await gdpr_manager.export_subject_data(request_id)
@@ -256,7 +254,7 @@ class TestGDPRComplianceManager:
             purpose="Secure access control",
             legal_basis=LegalBasis.CONTRACT,
             data_categories=["authentication_tokens", "login_logs"],
-            recipients=["Internal systems"]
+            recipients=["Internal systems"],
         )
 
         assert activity_id is not None
@@ -269,7 +267,7 @@ class TestGDPRComplianceManager:
             breach_type="Unauthorized access",
             affected_subjects=["user_010", "user_011"],
             severity="high",
-            description="Database access breach"
+            description="Database access breach",
         )
 
         assert breach_id is not None
@@ -278,12 +276,12 @@ class TestGDPRComplianceManager:
     async def test_notify_supervisory_authority(self, gdpr_manager):
         """Test notifying supervisory authority of breach."""
         breach_id = await gdpr_manager.record_data_breach(
-            breach_type="Data leak",
-            affected_subjects=["user_012"],
-            severity="critical"
+            breach_type="Data leak", affected_subjects=["user_012"], severity="critical"
         )
 
-        with patch.object(gdpr_manager, '_notify_authority_impl', new_callable=AsyncMock) as mock_notify:
+        with patch.object(
+            gdpr_manager, "_notify_authority_impl", new_callable=AsyncMock
+        ) as mock_notify:
             mock_notify.return_value = True
 
             result = await gdpr_manager.notify_supervisory_authority(breach_id)
@@ -297,10 +295,12 @@ class TestGDPRComplianceManager:
         breach_id = await gdpr_manager.record_data_breach(
             breach_type="Data exposure",
             affected_subjects=["user_013", "user_014"],
-            severity="high"
+            severity="high",
         )
 
-        with patch.object(gdpr_manager, '_notify_subjects_impl', new_callable=AsyncMock) as mock_notify:
+        with patch.object(
+            gdpr_manager, "_notify_subjects_impl", new_callable=AsyncMock
+        ) as mock_notify:
             mock_notify.return_value = 2
 
             notified_count = await gdpr_manager.notify_affected_subjects(breach_id)
@@ -332,7 +332,7 @@ class TestGDPRComplianceManager:
             purpose="Old marketing",
             legal_basis=LegalBasis.CONSENT,
             granted_at=past_date,
-            expires_at=past_date + timedelta(days=365)
+            expires_at=past_date + timedelta(days=365),
         )
         gdpr_manager.consent_records["EXPIRED001"] = expired_consent
 
@@ -357,8 +357,7 @@ class TestGDPRComplianceManager:
     async def test_request_fulfillment_deadline(self, gdpr_manager):
         """Test that requests track 30-day deadline."""
         request_id = await gdpr_manager.submit_subject_request(
-            subject_id="user_018",
-            right=DataSubjectRight.ACCESS
+            subject_id="user_018", right=DataSubjectRight.ACCESS
         )
 
         request = gdpr_manager.subject_requests[request_id]

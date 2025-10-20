@@ -955,7 +955,7 @@ class TestAuthenticationServiceEdgeCases:
             with patch.dict(
                 "os.environ",
                 {"API_KEY": "fallback_api_key_at_least_32_chars"},
-                clear=True
+                clear=True,
             ):
                 api_key = initialize_auth()
 
@@ -985,7 +985,7 @@ class TestAuthenticationServiceEdgeCases:
                 "testuser",
                 "password",
                 ip_address="192.168.1.1",
-                user_agent="TestAgent/1.0"
+                user_agent="TestAgent/1.0",
             )
 
             assert result["access_token"] == "access_token"
@@ -995,9 +995,7 @@ class TestAuthenticationServiceEdgeCases:
     @pytest.mark.asyncio
     async def test_verify_token_generic_exception(self):
         """Test token verification with generic exception."""
-        credentials = HTTPAuthorizationCredentials(
-            scheme="Bearer", credentials="token"
-        )
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials="token")
 
         with patch("ai_engine.api.auth.get_auth_service") as mock_get_service:
             mock_service = AsyncMock()

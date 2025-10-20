@@ -38,6 +38,24 @@ try:
 except Exception:  # pragma: no cover - optional dependency
     ModelRegistry = ModelMetadata = ModelVersion = ModelStatus = ModelType = None
 
+# Marketplace models (optional)
+try:
+    from .marketplace import (
+        MarketplaceProtocol,
+        MarketplaceUser,
+        MarketplaceInstallation,
+        MarketplaceReview,
+        MarketplaceTransaction,
+        MarketplaceValidation,
+    )
+    from .database import Base
+    _marketplace_models_available = True
+except Exception:  # pragma: no cover - optional dependency
+    MarketplaceProtocol = MarketplaceUser = MarketplaceInstallation = None
+    MarketplaceReview = MarketplaceTransaction = MarketplaceValidation = None
+    Base = None
+    _marketplace_models_available = False
+
 __all__ = [
     # Base model primitives
     "BaseModel",
@@ -58,3 +76,15 @@ __all__ = [
     "ModelStatus",
     "ModelType",
 ]
+
+# Add marketplace model exports if available
+if _marketplace_models_available:
+    __all__.extend([
+        "MarketplaceProtocol",
+        "MarketplaceUser",
+        "MarketplaceInstallation",
+        "MarketplaceReview",
+        "MarketplaceTransaction",
+        "MarketplaceValidation",
+        "Base",
+    ])

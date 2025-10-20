@@ -29,7 +29,7 @@ def sbom_test_data(tmp_path):
         "creationInfo": {
             "created": "2025-10-19T14:30:00Z",
             "creators": ["Tool: syft-0.100.0"],
-            "licenseListVersion": "3.21"
+            "licenseListVersion": "3.21",
         },
         "packages": [
             {
@@ -38,7 +38,7 @@ def sbom_test_data(tmp_path):
                 "versionInfo": "0.104.1",
                 "supplier": "Organization: FastAPI",
                 "licenseConcluded": "MIT",
-                "downloadLocation": "https://pypi.org/project/fastapi/0.104.1"
+                "downloadLocation": "https://pypi.org/project/fastapi/0.104.1",
             },
             {
                 "SPDXID": "SPDXRef-Package-pydantic",
@@ -46,13 +46,13 @@ def sbom_test_data(tmp_path):
                 "versionInfo": "2.5.0",
                 "supplier": "Organization: Pydantic",
                 "licenseConcluded": "MIT",
-                "downloadLocation": "https://pypi.org/project/pydantic/2.5.0"
-            }
-        ]
+                "downloadLocation": "https://pypi.org/project/pydantic/2.5.0",
+            },
+        ],
     }
 
     spdx_file = v1_dir / "cronos-ai-platform-spdx.json"
-    with open(spdx_file, 'w') as f:
+    with open(spdx_file, "w") as f:
         json.dump(spdx_sbom, f, indent=2)
 
     # Create CycloneDX SBOM
@@ -65,21 +65,21 @@ def sbom_test_data(tmp_path):
             "component": {
                 "type": "application",
                 "name": "cronos-ai-platform",
-                "version": "1.0.0"
-            }
+                "version": "1.0.0",
+            },
         },
         "components": [
             {
                 "type": "library",
                 "name": "fastapi",
                 "version": "0.104.1",
-                "purl": "pkg:pypi/fastapi@0.104.1"
+                "purl": "pkg:pypi/fastapi@0.104.1",
             }
-        ]
+        ],
     }
 
     cyclonedx_file = v1_dir / "cronos-ai-platform-cyclonedx.json"
-    with open(cyclonedx_file, 'w') as f:
+    with open(cyclonedx_file, "w") as f:
         json.dump(cyclonedx_sbom, f, indent=2)
 
     # Create vulnerability report
@@ -90,33 +90,25 @@ def sbom_test_data(tmp_path):
                     "id": "CVE-2024-1234",
                     "severity": "Critical",
                     "description": "Test critical vulnerability",
-                    "cvss": [{"metrics": {"baseScore": 9.8}}]
+                    "cvss": [{"metrics": {"baseScore": 9.8}}],
                 },
-                "artifact": {
-                    "name": "fastapi",
-                    "version": "0.104.1"
-                }
+                "artifact": {"name": "fastapi", "version": "0.104.1"},
             },
             {
                 "vulnerability": {
                     "id": "CVE-2024-5678",
                     "severity": "High",
                     "description": "Test high vulnerability",
-                    "cvss": [{"metrics": {"baseScore": 7.5}}]
+                    "cvss": [{"metrics": {"baseScore": 7.5}}],
                 },
-                "artifact": {
-                    "name": "pydantic",
-                    "version": "2.5.0"
-                }
-            }
+                "artifact": {"name": "pydantic", "version": "2.5.0"},
+            },
         ],
-        "descriptor": {
-            "timestamp": "2025-10-19T15:00:00Z"
-        }
+        "descriptor": {"timestamp": "2025-10-19T15:00:00Z"},
     }
 
     vuln_file = v1_dir / "cronos-ai-platform-vulnerabilities.json"
-    with open(vuln_file, 'w') as f:
+    with open(vuln_file, "w") as f:
         json.dump(vuln_report, f, indent=2)
 
     # Create SBOM summary
@@ -134,14 +126,14 @@ def sbom_test_data(tmp_path):
                     "critical": 1,
                     "high": 1,
                     "medium": 0,
-                    "low": 0
-                }
+                    "low": 0,
+                },
             }
-        }
+        },
     }
 
     summary_file = v1_dir / "sbom-summary.json"
-    with open(summary_file, 'w') as f:
+    with open(summary_file, "w") as f:
         json.dump(summary, f, indent=2)
 
     return sbom_dir
@@ -151,6 +143,7 @@ def sbom_test_data(tmp_path):
 def sbom_api():
     """Import SBOM API module."""
     from ai_engine.api import sbom
+
     return sbom
 
 
@@ -162,6 +155,7 @@ class TestSBOMVersionEndpoints:
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
         import asyncio
+
         versions = asyncio.run(sbom_api.list_sbom_versions())
 
         assert "v1.0.0" in versions
@@ -172,17 +166,21 @@ class TestSBOMVersionEndpoints:
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
         import asyncio
+
         metadata = asyncio.run(sbom_api.get_version_metadata("v1.0.0"))
 
         assert metadata.version == "v1.0.0"
         assert metadata.commit == "abc123def456"
         assert "cronos-ai-platform" in metadata.components
 
-    def test_get_version_metadata_not_found(self, sbom_api, sbom_test_data, monkeypatch):
+    def test_get_version_metadata_not_found(
+        self, sbom_api, sbom_test_data, monkeypatch
+    ):
         """Test getting metadata for non-existent version."""
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
         import asyncio
+
         with pytest.raises(HTTPException) as exc:
             asyncio.run(sbom_api.get_version_metadata("v99.99.99"))
 
@@ -197,25 +195,29 @@ class TestSBOMDownloadEndpoint:
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
         import asyncio
-        response = asyncio.run(sbom_api.download_sbom(
-            version="v1.0.0",
-            component="cronos-ai-platform",
-            format="spdx"
-        ))
+
+        response = asyncio.run(
+            sbom_api.download_sbom(
+                version="v1.0.0", component="cronos-ai-platform", format="spdx"
+            )
+        )
 
         assert response is not None
-        assert "cronos-ai-platform-spdx.json" in response.headers.get("Content-Disposition", "")
+        assert "cronos-ai-platform-spdx.json" in response.headers.get(
+            "Content-Disposition", ""
+        )
 
     def test_download_sbom_cyclonedx(self, sbom_api, sbom_test_data, monkeypatch):
         """Test downloading CycloneDX format SBOM."""
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
         import asyncio
-        response = asyncio.run(sbom_api.download_sbom(
-            version="v1.0.0",
-            component="cronos-ai-platform",
-            format="cyclonedx"
-        ))
+
+        response = asyncio.run(
+            sbom_api.download_sbom(
+                version="v1.0.0", component="cronos-ai-platform", format="cyclonedx"
+            )
+        )
 
         assert response is not None
 
@@ -224,12 +226,13 @@ class TestSBOMDownloadEndpoint:
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
         import asyncio
+
         with pytest.raises(HTTPException) as exc:
-            asyncio.run(sbom_api.download_sbom(
-                version="v1.0.0",
-                component="non-existent-component",
-                format="spdx"
-            ))
+            asyncio.run(
+                sbom_api.download_sbom(
+                    version="v1.0.0", component="non-existent-component", format="spdx"
+                )
+            )
 
         assert exc.value.status_code == 404
 
@@ -242,10 +245,10 @@ class TestSBOMMetadataEndpoint:
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
         import asyncio
-        metadata = asyncio.run(sbom_api.get_sbom_metadata(
-            version="v1.0.0",
-            component="cronos-ai-platform"
-        ))
+
+        metadata = asyncio.run(
+            sbom_api.get_sbom_metadata(version="v1.0.0", component="cronos-ai-platform")
+        )
 
         assert metadata.component == "cronos-ai-platform"
         assert metadata.version == "v1.0.0"
@@ -264,11 +267,12 @@ class TestSBOMVulnerabilitiesEndpoint:
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
         import asyncio
-        result = asyncio.run(sbom_api.get_sbom_vulnerabilities(
-            version="v1.0.0",
-            component="cronos-ai-platform",
-            severity=None
-        ))
+
+        result = asyncio.run(
+            sbom_api.get_sbom_vulnerabilities(
+                version="v1.0.0", component="cronos-ai-platform", severity=None
+            )
+        )
 
         assert result["component"] == "cronos-ai-platform"
         assert result["summary"]["total"] == 2
@@ -276,29 +280,36 @@ class TestSBOMVulnerabilitiesEndpoint:
         assert result["summary"]["high"] == 1
         assert len(result["vulnerabilities"]) == 2
 
-    def test_get_sbom_vulnerabilities_filtered(self, sbom_api, sbom_test_data, monkeypatch):
+    def test_get_sbom_vulnerabilities_filtered(
+        self, sbom_api, sbom_test_data, monkeypatch
+    ):
         """Test getting filtered vulnerability report."""
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
         import asyncio
-        result = asyncio.run(sbom_api.get_sbom_vulnerabilities(
-            version="v1.0.0",
-            component="cronos-ai-platform",
-            severity="Critical"
-        ))
+
+        result = asyncio.run(
+            sbom_api.get_sbom_vulnerabilities(
+                version="v1.0.0", component="cronos-ai-platform", severity="Critical"
+            )
+        )
 
         assert len(result["vulnerabilities"]) == 1
         assert result["vulnerabilities"][0]["severity"] == "Critical"
 
-    def test_get_sbom_vulnerabilities_no_data(self, sbom_api, sbom_test_data, monkeypatch):
+    def test_get_sbom_vulnerabilities_no_data(
+        self, sbom_api, sbom_test_data, monkeypatch
+    ):
         """Test getting vulnerabilities when no scan data exists."""
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
         import asyncio
-        result = asyncio.run(sbom_api.get_sbom_vulnerabilities(
-            version="v1.0.0",
-            component="non-existent"
-        ))
+
+        result = asyncio.run(
+            sbom_api.get_sbom_vulnerabilities(
+                version="v1.0.0", component="non-existent"
+            )
+        )
 
         assert result["summary"]["total"] == 0
         assert len(result["vulnerabilities"]) == 0
@@ -312,6 +323,7 @@ class TestSBOMHealthEndpoint:
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
         import asyncio
+
         health = asyncio.run(sbom_api.sbom_health_check())
 
         assert health["status"] == "healthy"
@@ -325,6 +337,7 @@ class TestSBOMFormatsEndpoint:
     def test_list_supported_formats(self, sbom_api):
         """Test listing supported SBOM formats."""
         import asyncio
+
         formats = asyncio.run(sbom_api.list_supported_formats())
 
         assert len(formats["formats"]) == 2
@@ -343,10 +356,7 @@ class TestSBOMMetricsCollector:
 
         collector = SBOMMetricsCollector()
         collector.record_sbom_generation(
-            component_name="test-component",
-            format="spdx",
-            duration=1.5,
-            success=True
+            component_name="test-component", format="spdx", duration=1.5, success=True
         )
 
         # Metrics should be recorded without errors
@@ -362,7 +372,7 @@ class TestSBOMMetricsCollector:
             format="spdx",
             duration=0.5,
             success=False,
-            error_type="tool_failure"
+            error_type="tool_failure",
         )
 
         # Metrics should be recorded without errors
@@ -376,12 +386,7 @@ class TestSBOMMetricsCollector:
         collector.update_vulnerability_metrics(
             version="v1.0.0",
             component_name="test-component",
-            vulnerabilities={
-                "critical": 1,
-                "high": 2,
-                "medium": 3,
-                "low": 4
-            }
+            vulnerabilities={"critical": 1, "high": 2, "medium": 3, "low": 4},
         )
 
         # Metrics should be recorded without errors
@@ -393,9 +398,7 @@ class TestSBOMMetricsCollector:
 
         collector = SBOMMetricsCollector()
         collector.record_sbom_download(
-            version="v1.0.0",
-            component_name="test-component",
-            format="spdx"
+            version="v1.0.0", component_name="test-component", format="spdx"
         )
 
         # Metrics should be recorded without errors

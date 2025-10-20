@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 class APIKeyStatus(str, Enum):
     """API key status."""
+
     ACTIVE = "active"
     EXPIRED = "expired"
     REVOKED = "revoked"
@@ -146,8 +147,8 @@ class APIKeyManager:
                     APIKey.revoked_at.is_(None),
                     or_(
                         APIKey.expires_at.is_(None),
-                        APIKey.expires_at > datetime.utcnow()
-                    )
+                        APIKey.expires_at > datetime.utcnow(),
+                    ),
                 )
             )
         )
@@ -218,9 +219,7 @@ class APIKeyManager:
         api_key_hash = self.hash_api_key(api_key)
 
         # Look up key
-        result = await db.execute(
-            select(APIKey).where(APIKey.key_hash == api_key_hash)
-        )
+        result = await db.execute(select(APIKey).where(APIKey.key_hash == api_key_hash))
         key_obj = result.scalar_one_or_none()
 
         if not key_obj:
@@ -257,14 +256,18 @@ class APIKeyManager:
                     f"(key_id={key_obj.id}, name='{key_obj.name}')"
                 )
 
-        logger.debug(f"✅ API key verified (key_id={key_obj.id}, user_id={key_obj.user_id})")
+        logger.debug(
+            f"✅ API key verified (key_id={key_obj.id}, user_id={key_obj.user_id})"
+        )
 
         return {
             "key_id": key_obj.id,
             "user_id": key_obj.user_id,
             "name": key_obj.name,
             "scopes": key_obj.scopes,
-            "expires_at": key_obj.expires_at.isoformat() if key_obj.expires_at else None,
+            "expires_at": (
+                key_obj.expires_at.isoformat() if key_obj.expires_at else None
+            ),
             "days_until_expiration": days_until_expiration,
             "expiring_soon": (
                 days_until_expiration is not None
@@ -413,7 +416,9 @@ class APIKeyManager:
                 "key_prefix": key.key_prefix,
                 "expires_at": key.expires_at.isoformat(),
                 "days_until_expiration": (key.expires_at - datetime.utcnow()).days,
-                "last_used_at": key.last_used_at.isoformat() if key.last_used_at else None,
+                "last_used_at": (
+                    key.last_used_at.isoformat() if key.last_used_at else None
+                ),
             }
             for key in expiring_keys
         ]
@@ -451,7 +456,9 @@ class APIKeyManager:
                 "scopes": key.scopes,
                 "created_at": key.created_at.isoformat(),
                 "expires_at": key.expires_at.isoformat() if key.expires_at else None,
-                "last_used_at": key.last_used_at.isoformat() if key.last_used_at else None,
+                "last_used_at": (
+                    key.last_used_at.isoformat() if key.last_used_at else None
+                ),
                 "revoked_at": key.revoked_at.isoformat() if key.revoked_at else None,
                 "is_active": (
                     key.revoked_at is None
@@ -459,7 +466,8 @@ class APIKeyManager:
                 ),
                 "is_expiring_soon": (
                     key.expires_at is not None
-                    and (key.expires_at - datetime.utcnow()).days <= self.warning_days_before_expiration
+                    and (key.expires_at - datetime.utcnow()).days
+                    <= self.warning_days_before_expiration
                     and key.expires_at > datetime.utcnow()
                 ),
             }

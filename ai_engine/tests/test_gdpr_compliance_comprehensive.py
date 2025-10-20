@@ -62,16 +62,16 @@ class TestGDPRComplianceManagerInitialization:
         """Test initialization with default config values."""
         config = Config()
         manager = GDPRComplianceManager(config, None)
-        
+
         assert manager.data_controller == "CRONOS AI"
         assert manager.dpo_contact == "dpo@cronos-ai.com"
 
     @pytest.mark.asyncio
     async def test_initialize(self, gdpr_manager):
         """Test manager initialization."""
-        with patch.object(gdpr_manager, '_load_records', new_callable=AsyncMock):
+        with patch.object(gdpr_manager, "_load_records", new_callable=AsyncMock):
             await gdpr_manager.initialize()
-            
+
             # Should complete without error
 
 
@@ -86,19 +86,19 @@ class TestConsentManagement:
             purpose="Marketing communications",
             legal_basis=LegalBasis.CONSENT,
             expires_in_days=365,
-            metadata={"channel": "email"}
+            metadata={"channel": "email"},
         )
-        
+
         assert consent_id is not None
         assert consent_id in gdpr_manager.consent_records
-        
+
         consent = gdpr_manager.consent_records[consent_id]
         assert consent.subject_id == "user_123"
         assert consent.purpose == "Marketing communications"
         assert consent.legal_basis == LegalBasis.CONSENT
         assert consent.expires_at is not None
         assert consent.metadata["channel"] == "email"
-        
+
         mock_audit_manager.record_compliance_event.assert_called_once()
 
     @pytest.mark.asyncio
@@ -107,9 +107,9 @@ class TestConsentManagement:
         consent_id = await gdpr_manager.record_consent(
             subject_id="user_456",
             purpose="Service provision",
-            legal_basis=LegalBasis.CONTRACT
+            legal_basis=LegalBasis.CONTRACT,
         )
-        
+
         consent = gdpr_manager.consent_records[consent_id]
         assert consent.expires_at is None
 
@@ -120,9 +120,9 @@ class TestConsentManagement:
             consent_id = await gdpr_manager.record_consent(
                 subject_id=f"user_{basis.value}",
                 purpose=f"Purpose for {basis.value}",
-                legal_basis=basis
+                legal_basis=basis,
             )
-            
+
             consent = gdpr_manager.consent_records[consent_id]
             assert consent.legal_basis == basis
 
@@ -130,24 +130,22 @@ class TestConsentManagement:
     async def test_record_consent_without_audit_manager(self, mock_config):
         """Test recording consent without audit manager."""
         manager = GDPRComplianceManager(mock_config, None)
-        
+
         consent_id = await manager.record_consent(
-            subject_id="user_123",
-            purpose="Test purpose"
+            subject_id="user_123", purpose="Test purpose"
         )
-        
+
         assert consent_id is not None
 
     @pytest.mark.asyncio
     async def test_withdraw_consent_success(self, gdpr_manager, mock_audit_manager):
         """Test successful consent withdrawal."""
         consent_id = await gdpr_manager.record_consent(
-            subject_id="user_123",
-            purpose="Marketing"
+            subject_id="user_123", purpose="Marketing"
         )
-        
+
         result = await gdpr_manager.withdraw_consent(consent_id, "user_123")
-        
+
         assert result is True
         consent = gdpr_manager.consent_records[consent_id]
         assert consent.withdrawn_at is not None
@@ -162,10 +160,9 @@ class TestConsentManagement:
     async def test_withdraw_consent_wrong_subject(self, gdpr_manager):
         """Test withdrawing consent with wrong subject ID."""
         consent_id = await gdpr_manager.record_consent(
-            subject_id="user_123",
-            purpose="Marketing"
+            subject_id="user_123", purpose="Marketing"
         )
-        
+
         with pytest.raises(GDPRException, match="Subject ID mismatch"):
             await gdpr_manager.withdraw_consent(consent_id, "user_456")
 
@@ -179,12 +176,12 @@ class TestDataSubjectRights:
         request_id = await gdpr_manager.handle_subject_request(
             subject_id="user_123",
             right=DataSubjectRight.ACCESS,
-            details={"scope": "all_data"}
+            details={"scope": "all_data"},
         )
-        
+
         assert request_id is not None
         assert request_id in gdpr_manager.subject_requests
-        
+
         request = gdpr_manager.subject_requests[request_id]
         assert request.subject_id == "user_123"
         assert request.right == DataSubjectRight.ACCESS
@@ -195,10 +192,9 @@ class TestDataSubjectRights:
     async def test_handle_erasure_request(self, gdpr_manager):
         """Test handling right to erasure request."""
         request_id = await gdpr_manager.handle_subject_request(
-            subject_id="user_123",
-            right=DataSubjectRight.ERASURE
+            subject_id="user_123", right=DataSubjectRight.ERASURE
         )
-        
+
         request = gdpr_manager.subject_requests[request_id]
         assert request.right == DataSubjectRight.ERASURE
         assert request.status == "completed"
@@ -207,10 +203,9 @@ class TestDataSubjectRights:
     async def test_handle_portability_request(self, gdpr_manager):
         """Test handling right to data portability request."""
         request_id = await gdpr_manager.handle_subject_request(
-            subject_id="user_123",
-            right=DataSubjectRight.PORTABILITY
+            subject_id="user_123", right=DataSubjectRight.PORTABILITY
         )
-        
+
         request = gdpr_manager.subject_requests[request_id]
         assert request.right == DataSubjectRight.PORTABILITY
         assert request.status == "completed"
@@ -221,9 +216,9 @@ class TestDataSubjectRights:
         request_id = await gdpr_manager.handle_subject_request(
             subject_id="user_123",
             right=DataSubjectRight.RECTIFICATION,
-            details={"field": "email", "new_value": "new@example.com"}
+            details={"field": "email", "new_value": "new@example.com"},
         )
-        
+
         request = gdpr_manager.subject_requests[request_id]
         assert request.right == DataSubjectRight.RECTIFICATION
         assert request.details["field"] == "email"
@@ -232,10 +227,9 @@ class TestDataSubjectRights:
     async def test_handle_restriction_request(self, gdpr_manager):
         """Test handling right to restriction request."""
         request_id = await gdpr_manager.handle_subject_request(
-            subject_id="user_123",
-            right=DataSubjectRight.RESTRICTION
+            subject_id="user_123", right=DataSubjectRight.RESTRICTION
         )
-        
+
         request = gdpr_manager.subject_requests[request_id]
         assert request.right == DataSubjectRight.RESTRICTION
 
@@ -243,10 +237,9 @@ class TestDataSubjectRights:
     async def test_handle_object_request(self, gdpr_manager):
         """Test handling right to object request."""
         request_id = await gdpr_manager.handle_subject_request(
-            subject_id="user_123",
-            right=DataSubjectRight.OBJECT
+            subject_id="user_123", right=DataSubjectRight.OBJECT
         )
-        
+
         request = gdpr_manager.subject_requests[request_id]
         assert request.right == DataSubjectRight.OBJECT
 
@@ -254,10 +247,9 @@ class TestDataSubjectRights:
     async def test_access_request_includes_rights_info(self, gdpr_manager):
         """Test access request includes rights information."""
         request_id = await gdpr_manager.handle_subject_request(
-            subject_id="user_123",
-            right=DataSubjectRight.ACCESS
+            subject_id="user_123", right=DataSubjectRight.ACCESS
         )
-        
+
         request = gdpr_manager.subject_requests[request_id]
         assert "rights_information" in request.response_data
         assert "dpo_contact" in request.response_data["rights_information"]
@@ -276,12 +268,12 @@ class TestProcessingActivities:
             data_subjects=["customers"],
             recipients=["internal_systems"],
             retention_period="Account lifetime + 90 days",
-            security_measures=["encryption", "access_control"]
+            security_measures=["encryption", "access_control"],
         )
-        
+
         assert record_id is not None
         assert record_id in gdpr_manager.processing_records
-        
+
         record = gdpr_manager.processing_records[record_id]
         assert record.purpose == "User authentication"
         assert record.legal_basis == LegalBasis.CONTRACT
@@ -298,9 +290,9 @@ class TestProcessingActivities:
             data_subjects=["users"],
             recipients=["analytics_team"],
             retention_period="2 years",
-            security_measures=["pseudonymization"]
+            security_measures=["pseudonymization"],
         )
-        
+
         record = gdpr_manager.processing_records[record_id]
         assert record.controller_name == "CRONOS AI Test"
 
@@ -314,9 +306,9 @@ class TestProcessingActivities:
             data_subjects=["test"],
             recipients=["test"],
             retention_period="test",
-            security_measures=["test"]
+            security_measures=["test"],
         )
-        
+
         record = gdpr_manager.processing_records[record_id]
         assert record.created_at is not None
         assert record.updated_at is not None
@@ -329,7 +321,7 @@ class TestComplianceVerification:
     async def test_verify_compliance_no_issues(self, gdpr_manager):
         """Test compliance verification with no issues."""
         status = await gdpr_manager.verify_compliance()
-        
+
         assert status["compliant"] is True
         assert "issues" in status
         assert "recommendations" in status
@@ -340,17 +332,15 @@ class TestComplianceVerification:
         """Test verification detects expired consents."""
         # Create expired consent
         consent_id = await gdpr_manager.record_consent(
-            subject_id="user_123",
-            purpose="Marketing",
-            expires_in_days=1
+            subject_id="user_123", purpose="Marketing", expires_in_days=1
         )
-        
+
         # Set expiry to past
         consent = gdpr_manager.consent_records[consent_id]
         consent.expires_at = datetime.utcnow() - timedelta(days=1)
-        
+
         status = await gdpr_manager.verify_compliance()
-        
+
         assert len(status["issues"]) > 0
         assert any("expired consents" in issue.lower() for issue in status["issues"])
 
@@ -360,16 +350,16 @@ class TestComplianceVerification:
         # Create old pending request
         request_id = await gdpr_manager.handle_subject_request(
             subject_id="user_123",
-            right=DataSubjectRight.RESTRICTION  # Won't auto-complete
+            right=DataSubjectRight.RESTRICTION,  # Won't auto-complete
         )
-        
+
         # Set request date to past
         request = gdpr_manager.subject_requests[request_id]
         request.requested_at = datetime.utcnow() - timedelta(days=35)
         request.status = "pending"
-        
+
         status = await gdpr_manager.verify_compliance()
-        
+
         assert status["compliant"] is False
         assert any("30-day response time" in issue for issue in status["issues"])
 
@@ -377,9 +367,10 @@ class TestComplianceVerification:
     async def test_verify_compliance_no_processing_records(self, gdpr_manager):
         """Test verification recommends processing records."""
         status = await gdpr_manager.verify_compliance()
-        
-        assert any("processing activities" in rec.lower() 
-                  for rec in status["recommendations"])
+
+        assert any(
+            "processing activities" in rec.lower() for rec in status["recommendations"]
+        )
 
 
 class TestStatistics:
@@ -388,7 +379,7 @@ class TestStatistics:
     def test_get_statistics_empty(self, gdpr_manager):
         """Test statistics with no data."""
         stats = gdpr_manager.get_statistics()
-        
+
         assert stats["total_consents"] == 0
         assert stats["active_consents"] == 0
         assert stats["withdrawn_consents"] == 0
@@ -403,18 +394,23 @@ class TestStatistics:
         await gdpr_manager.record_consent("user_2", "Purpose 2")
         consent_id = await gdpr_manager.record_consent("user_3", "Purpose 3")
         await gdpr_manager.withdraw_consent(consent_id, "user_3")
-        
+
         # Add subject request
         await gdpr_manager.handle_subject_request("user_1", DataSubjectRight.ACCESS)
-        
+
         # Add processing record
         await gdpr_manager.record_processing_activity(
-            "Test", LegalBasis.CONSENT, ["data"], ["subjects"], 
-            ["recipients"], "period", ["measures"]
+            "Test",
+            LegalBasis.CONSENT,
+            ["data"],
+            ["subjects"],
+            ["recipients"],
+            "period",
+            ["measures"],
         )
-        
+
         stats = gdpr_manager.get_statistics()
-        
+
         assert stats["total_consents"] == 3
         assert stats["active_consents"] == 2
         assert stats["withdrawn_consents"] == 1
@@ -432,9 +428,9 @@ class TestDataClasses:
             request_id="req_123",
             subject_id="user_123",
             right=DataSubjectRight.ACCESS,
-            requested_at=datetime.utcnow()
+            requested_at=datetime.utcnow(),
         )
-        
+
         assert request.request_id == "req_123"
         assert request.subject_id == "user_123"
         assert request.right == DataSubjectRight.ACCESS
@@ -448,9 +444,9 @@ class TestDataClasses:
             subject_id="user_123",
             purpose="Marketing",
             legal_basis=LegalBasis.CONSENT,
-            granted_at=now
+            granted_at=now,
         )
-        
+
         assert consent.consent_id == "con_123"
         assert consent.subject_id == "user_123"
         assert consent.purpose == "Marketing"
@@ -470,9 +466,9 @@ class TestDataClasses:
             retention_period="1 year",
             security_measures=["encryption"],
             created_at=now,
-            updated_at=now
+            updated_at=now,
         )
-        
+
         assert record.record_id == "proc_123"
         assert record.controller_name == "Test Controller"
         assert "email" in record.data_categories
@@ -506,7 +502,7 @@ class TestRightsInformation:
     def test_get_rights_information(self, gdpr_manager):
         """Test getting rights information."""
         info = gdpr_manager._get_rights_information()
-        
+
         assert "right_to_access" in info
         assert "right_to_rectification" in info
         assert "right_to_erasure" in info
@@ -525,7 +521,7 @@ class TestEdgeCases:
         """Test multiple consents for same subject."""
         consent_id1 = await gdpr_manager.record_consent("user_123", "Purpose 1")
         consent_id2 = await gdpr_manager.record_consent("user_123", "Purpose 2")
-        
+
         assert consent_id1 != consent_id2
         assert len(gdpr_manager.consent_records) == 2
 
@@ -533,11 +529,9 @@ class TestEdgeCases:
     async def test_consent_with_metadata(self, gdpr_manager):
         """Test consent with custom metadata."""
         consent_id = await gdpr_manager.record_consent(
-            "user_123",
-            "Marketing",
-            metadata={"source": "web", "ip": "192.168.1.1"}
+            "user_123", "Marketing", metadata={"source": "web", "ip": "192.168.1.1"}
         )
-        
+
         consent = gdpr_manager.consent_records[consent_id]
         assert consent.metadata["source"] == "web"
         assert consent.metadata["ip"] == "192.168.1.1"
@@ -546,40 +540,37 @@ class TestEdgeCases:
     async def test_subject_request_without_details(self, gdpr_manager):
         """Test subject request without details."""
         request_id = await gdpr_manager.handle_subject_request(
-            "user_123",
-            DataSubjectRight.ACCESS
+            "user_123", DataSubjectRight.ACCESS
         )
-        
+
         request = gdpr_manager.subject_requests[request_id]
         assert request.details == {}
 
     @pytest.mark.asyncio
     async def test_verify_compliance_with_valid_consents(self, gdpr_manager):
         """Test verification with valid non-expired consents."""
-        await gdpr_manager.record_consent(
-            "user_123",
-            "Marketing",
-            expires_in_days=365
-        )
-        
+        await gdpr_manager.record_consent("user_123", "Marketing", expires_in_days=365)
+
         status = await gdpr_manager.verify_compliance()
-        
+
         # Should not have expired consent issues
-        assert not any("expired consents" in issue.lower() for issue in status["issues"])
+        assert not any(
+            "expired consents" in issue.lower() for issue in status["issues"]
+        )
 
     @pytest.mark.asyncio
     async def test_consent_without_expiry_not_expired(self, gdpr_manager):
         """Test consent without expiry is not considered expired."""
         await gdpr_manager.record_consent(
-            "user_123",
-            "Service provision",
-            legal_basis=LegalBasis.CONTRACT
+            "user_123", "Service provision", legal_basis=LegalBasis.CONTRACT
         )
-        
+
         status = await gdpr_manager.verify_compliance()
-        
+
         # Should not have expired consent issues
-        assert not any("expired consents" in issue.lower() for issue in status["issues"])
+        assert not any(
+            "expired consents" in issue.lower() for issue in status["issues"]
+        )
 
     @pytest.mark.asyncio
     async def test_load_records(self, gdpr_manager):
@@ -592,15 +583,17 @@ class TestEdgeCases:
         """Test all processing request methods."""
         # Create requests for all rights
         request_id = await gdpr_manager.handle_subject_request(
-            "user_123",
-            DataSubjectRight.ACCESS
+            "user_123", DataSubjectRight.ACCESS
         )
         request = gdpr_manager.subject_requests[request_id]
         assert request.completed_at is not None
-        
+
         # Test that processing methods complete requests
-        for right in [DataSubjectRight.ERASURE, DataSubjectRight.PORTABILITY, 
-                     DataSubjectRight.RECTIFICATION]:
+        for right in [
+            DataSubjectRight.ERASURE,
+            DataSubjectRight.PORTABILITY,
+            DataSubjectRight.RECTIFICATION,
+        ]:
             request_id = await gdpr_manager.handle_subject_request("user_123", right)
             request = gdpr_manager.subject_requests[request_id]
             assert request.status == "completed"

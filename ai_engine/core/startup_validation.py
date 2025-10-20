@@ -55,7 +55,9 @@ class StartupValidator:
     - Security requirements
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None, environment: str = "development"):
+    def __init__(
+        self, config: Optional[Dict[str, Any]] = None, environment: str = "development"
+    ):
         """Initialize startup validator."""
         self.config = config or {}
         self.environment = environment
@@ -105,11 +107,16 @@ class StartupValidator:
 
         # Additional secrets required for production
         if self.environment == "production":
-            required_secrets.extend([
-                ("DATABASE_PASSWORD", "Database password must be set"),
-                ("JWT_SECRET", "JWT secret must be set (minimum 32 characters)"),
-                ("ENCRYPTION_KEY", "Encryption key must be set (minimum 32 characters)"),
-            ])
+            required_secrets.extend(
+                [
+                    ("DATABASE_PASSWORD", "Database password must be set"),
+                    ("JWT_SECRET", "JWT secret must be set (minimum 32 characters)"),
+                    (
+                        "ENCRYPTION_KEY",
+                        "Encryption key must be set (minimum 32 characters)",
+                    ),
+                ]
+            )
         else:
             # Warnings for dev/staging
             optional_secrets = [
@@ -121,49 +128,63 @@ class StartupValidator:
             for secret_name, message in optional_secrets:
                 value = os.getenv(secret_name)
                 if not value:
-                    self.add_result(ValidationResult(
-                        check_name=f"Secret: {secret_name}",
-                        passed=True,  # Warning, not failure
-                        severity=ValidationSeverity.WARNING,
-                        message=f"{message} (using default for {self.environment})"
-                    ))
+                    self.add_result(
+                        ValidationResult(
+                            check_name=f"Secret: {secret_name}",
+                            passed=True,  # Warning, not failure
+                            severity=ValidationSeverity.WARNING,
+                            message=f"{message} (using default for {self.environment})",
+                        )
+                    )
 
         # Validate required secrets
         for secret_name, message in required_secrets:
             value = os.getenv(secret_name)
 
             if not value:
-                self.add_result(ValidationResult(
-                    check_name=f"Secret: {secret_name}",
-                    passed=False,
-                    severity=ValidationSeverity.CRITICAL,
-                    message=message,
-                    details={"env_var": secret_name}
-                ))
+                self.add_result(
+                    ValidationResult(
+                        check_name=f"Secret: {secret_name}",
+                        passed=False,
+                        severity=ValidationSeverity.CRITICAL,
+                        message=message,
+                        details={"env_var": secret_name},
+                    )
+                )
             elif secret_name in ["JWT_SECRET", "ENCRYPTION_KEY"]:
                 # Validate minimum length for cryptographic secrets
                 if len(value) < 32:
-                    self.add_result(ValidationResult(
-                        check_name=f"Secret: {secret_name}",
-                        passed=False,
-                        severity=ValidationSeverity.ERROR,
-                        message=f"{secret_name} must be at least 32 characters long (current: {len(value)})",
-                        details={"env_var": secret_name, "current_length": len(value), "required_length": 32}
-                    ))
+                    self.add_result(
+                        ValidationResult(
+                            check_name=f"Secret: {secret_name}",
+                            passed=False,
+                            severity=ValidationSeverity.ERROR,
+                            message=f"{secret_name} must be at least 32 characters long (current: {len(value)})",
+                            details={
+                                "env_var": secret_name,
+                                "current_length": len(value),
+                                "required_length": 32,
+                            },
+                        )
+                    )
                 else:
-                    self.add_result(ValidationResult(
+                    self.add_result(
+                        ValidationResult(
+                            check_name=f"Secret: {secret_name}",
+                            passed=True,
+                            severity=ValidationSeverity.INFO,
+                            message=f"{secret_name} is properly configured",
+                        )
+                    )
+            else:
+                self.add_result(
+                    ValidationResult(
                         check_name=f"Secret: {secret_name}",
                         passed=True,
                         severity=ValidationSeverity.INFO,
-                        message=f"{secret_name} is properly configured"
-                    ))
-            else:
-                self.add_result(ValidationResult(
-                    check_name=f"Secret: {secret_name}",
-                    passed=True,
-                    severity=ValidationSeverity.INFO,
-                    message=f"{secret_name} is configured"
-                ))
+                        message=f"{secret_name} is configured",
+                    )
+                )
 
         # Validate no default/weak passwords in production
         if self.environment == "production":
@@ -190,13 +211,15 @@ class StartupValidator:
         for secret_name in secrets_to_check:
             value = os.getenv(secret_name, "").lower()
             if any(pattern in value for pattern in weak_patterns):
-                self.add_result(ValidationResult(
-                    check_name=f"Weak Password: {secret_name}",
-                    passed=False,
-                    severity=ValidationSeverity.CRITICAL,
-                    message=f"{secret_name} contains weak/default password patterns. This is not allowed in production!",
-                    details={"env_var": secret_name}
-                ))
+                self.add_result(
+                    ValidationResult(
+                        check_name=f"Weak Password: {secret_name}",
+                        passed=False,
+                        severity=ValidationSeverity.CRITICAL,
+                        message=f"{secret_name} contains weak/default password patterns. This is not allowed in production!",
+                        details={"env_var": secret_name},
+                    )
+                )
 
     def validate_database_config(self):
         """Validate database configuration."""
@@ -212,49 +235,63 @@ class StartupValidator:
         for var in required_vars:
             value = os.getenv(var)
             if not value:
-                severity = ValidationSeverity.ERROR if self.environment == "production" else ValidationSeverity.WARNING
-                self.add_result(ValidationResult(
-                    check_name=f"Database Config: {var}",
-                    passed=False,
-                    severity=severity,
-                    message=f"{var} must be set",
-                    details={"env_var": var}
-                ))
+                severity = (
+                    ValidationSeverity.ERROR
+                    if self.environment == "production"
+                    else ValidationSeverity.WARNING
+                )
+                self.add_result(
+                    ValidationResult(
+                        check_name=f"Database Config: {var}",
+                        passed=False,
+                        severity=severity,
+                        message=f"{var} must be set",
+                        details={"env_var": var},
+                    )
+                )
             else:
                 # Validate port is numeric
                 if var == "DATABASE_PORT":
                     try:
                         port = int(value)
                         if not (1 <= port <= 65535):
-                            self.add_result(ValidationResult(
+                            self.add_result(
+                                ValidationResult(
+                                    check_name=f"Database Config: {var}",
+                                    passed=False,
+                                    severity=ValidationSeverity.ERROR,
+                                    message=f"Invalid port number: {port} (must be 1-65535)",
+                                    details={"env_var": var, "value": value},
+                                )
+                            )
+                        else:
+                            self.add_result(
+                                ValidationResult(
+                                    check_name=f"Database Config: {var}",
+                                    passed=True,
+                                    severity=ValidationSeverity.INFO,
+                                    message=f"{var} is valid: {port}",
+                                )
+                            )
+                    except ValueError:
+                        self.add_result(
+                            ValidationResult(
                                 check_name=f"Database Config: {var}",
                                 passed=False,
                                 severity=ValidationSeverity.ERROR,
-                                message=f"Invalid port number: {port} (must be 1-65535)",
-                                details={"env_var": var, "value": value}
-                            ))
-                        else:
-                            self.add_result(ValidationResult(
-                                check_name=f"Database Config: {var}",
-                                passed=True,
-                                severity=ValidationSeverity.INFO,
-                                message=f"{var} is valid: {port}"
-                            ))
-                    except ValueError:
-                        self.add_result(ValidationResult(
-                            check_name=f"Database Config: {var}",
-                            passed=False,
-                            severity=ValidationSeverity.ERROR,
-                            message=f"{var} must be a number, got: {value}",
-                            details={"env_var": var, "value": value}
-                        ))
+                                message=f"{var} must be a number, got: {value}",
+                                details={"env_var": var, "value": value},
+                            )
+                        )
                 else:
-                    self.add_result(ValidationResult(
-                        check_name=f"Database Config: {var}",
-                        passed=True,
-                        severity=ValidationSeverity.INFO,
-                        message=f"{var} is configured"
-                    ))
+                    self.add_result(
+                        ValidationResult(
+                            check_name=f"Database Config: {var}",
+                            passed=True,
+                            severity=ValidationSeverity.INFO,
+                            message=f"{var} is configured",
+                        )
+                    )
 
     def validate_redis_config(self):
         """Validate Redis configuration."""
@@ -264,46 +301,56 @@ class StartupValidator:
         redis_port = os.getenv("REDIS_PORT")
 
         if not redis_host:
-            self.add_result(ValidationResult(
-                check_name="Redis Config: REDIS_HOST",
-                passed=False,
-                severity=ValidationSeverity.WARNING,
-                message="REDIS_HOST not set, caching will be disabled"
-            ))
+            self.add_result(
+                ValidationResult(
+                    check_name="Redis Config: REDIS_HOST",
+                    passed=False,
+                    severity=ValidationSeverity.WARNING,
+                    message="REDIS_HOST not set, caching will be disabled",
+                )
+            )
         else:
-            self.add_result(ValidationResult(
-                check_name="Redis Config: REDIS_HOST",
-                passed=True,
-                severity=ValidationSeverity.INFO,
-                message=f"Redis host configured: {redis_host}"
-            ))
+            self.add_result(
+                ValidationResult(
+                    check_name="Redis Config: REDIS_HOST",
+                    passed=True,
+                    severity=ValidationSeverity.INFO,
+                    message=f"Redis host configured: {redis_host}",
+                )
+            )
 
         if redis_port:
             try:
                 port = int(redis_port)
                 if not (1 <= port <= 65535):
-                    self.add_result(ValidationResult(
+                    self.add_result(
+                        ValidationResult(
+                            check_name="Redis Config: REDIS_PORT",
+                            passed=False,
+                            severity=ValidationSeverity.ERROR,
+                            message=f"Invalid Redis port: {port}",
+                            details={"value": redis_port},
+                        )
+                    )
+                else:
+                    self.add_result(
+                        ValidationResult(
+                            check_name="Redis Config: REDIS_PORT",
+                            passed=True,
+                            severity=ValidationSeverity.INFO,
+                            message=f"Redis port is valid: {port}",
+                        )
+                    )
+            except ValueError:
+                self.add_result(
+                    ValidationResult(
                         check_name="Redis Config: REDIS_PORT",
                         passed=False,
                         severity=ValidationSeverity.ERROR,
-                        message=f"Invalid Redis port: {port}",
-                        details={"value": redis_port}
-                    ))
-                else:
-                    self.add_result(ValidationResult(
-                        check_name="Redis Config: REDIS_PORT",
-                        passed=True,
-                        severity=ValidationSeverity.INFO,
-                        message=f"Redis port is valid: {port}"
-                    ))
-            except ValueError:
-                self.add_result(ValidationResult(
-                    check_name="Redis Config: REDIS_PORT",
-                    passed=False,
-                    severity=ValidationSeverity.ERROR,
-                    message=f"REDIS_PORT must be a number, got: {redis_port}",
-                    details={"value": redis_port}
-                ))
+                        message=f"REDIS_PORT must be a number, got: {redis_port}",
+                        details={"value": redis_port},
+                    )
+                )
 
     def validate_security_config(self):
         """Validate security configuration."""
@@ -314,90 +361,110 @@ class StartupValidator:
             tls_enabled = os.getenv("TLS_ENABLED", "false").lower() == "true"
 
             if not tls_enabled:
-                self.add_result(ValidationResult(
-                    check_name="Security: TLS/SSL",
-                    passed=False,
-                    severity=ValidationSeverity.CRITICAL,
-                    message="TLS must be enabled in production!",
-                    details={"env_var": "TLS_ENABLED"}
-                ))
+                self.add_result(
+                    ValidationResult(
+                        check_name="Security: TLS/SSL",
+                        passed=False,
+                        severity=ValidationSeverity.CRITICAL,
+                        message="TLS must be enabled in production!",
+                        details={"env_var": "TLS_ENABLED"},
+                    )
+                )
             else:
                 # Validate certificate files exist
                 cert_file = os.getenv("TLS_CERT_FILE")
                 key_file = os.getenv("TLS_KEY_FILE")
 
                 if not cert_file or not key_file:
-                    self.add_result(ValidationResult(
-                        check_name="Security: TLS Certificates",
-                        passed=False,
-                        severity=ValidationSeverity.CRITICAL,
-                        message="TLS_CERT_FILE and TLS_KEY_FILE must be set when TLS is enabled",
-                        details={"cert_file": cert_file, "key_file": key_file}
-                    ))
+                    self.add_result(
+                        ValidationResult(
+                            check_name="Security: TLS Certificates",
+                            passed=False,
+                            severity=ValidationSeverity.CRITICAL,
+                            message="TLS_CERT_FILE and TLS_KEY_FILE must be set when TLS is enabled",
+                            details={"cert_file": cert_file, "key_file": key_file},
+                        )
+                    )
                 else:
                     # Check if files exist
                     if not Path(cert_file).exists():
-                        self.add_result(ValidationResult(
-                            check_name="Security: TLS Certificate File",
-                            passed=False,
-                            severity=ValidationSeverity.ERROR,
-                            message=f"TLS certificate file not found: {cert_file}",
-                            details={"file_path": cert_file}
-                        ))
+                        self.add_result(
+                            ValidationResult(
+                                check_name="Security: TLS Certificate File",
+                                passed=False,
+                                severity=ValidationSeverity.ERROR,
+                                message=f"TLS certificate file not found: {cert_file}",
+                                details={"file_path": cert_file},
+                            )
+                        )
 
                     if not Path(key_file).exists():
-                        self.add_result(ValidationResult(
-                            check_name="Security: TLS Key File",
-                            passed=False,
-                            severity=ValidationSeverity.ERROR,
-                            message=f"TLS key file not found: {key_file}",
-                            details={"file_path": key_file}
-                        ))
+                        self.add_result(
+                            ValidationResult(
+                                check_name="Security: TLS Key File",
+                                passed=False,
+                                severity=ValidationSeverity.ERROR,
+                                message=f"TLS key file not found: {key_file}",
+                                details={"file_path": key_file},
+                            )
+                        )
 
         # Check API key configuration
         api_key_enabled = os.getenv("API_KEY_ENABLED", "false").lower() == "true"
         if api_key_enabled and self.environment == "production":
-            self.add_result(ValidationResult(
-                check_name="Security: API Keys",
-                passed=True,
-                severity=ValidationSeverity.INFO,
-                message="API key authentication is enabled"
-            ))
+            self.add_result(
+                ValidationResult(
+                    check_name="Security: API Keys",
+                    passed=True,
+                    severity=ValidationSeverity.INFO,
+                    message="API key authentication is enabled",
+                )
+            )
 
         # Check CORS configuration in production
         if self.environment == "production":
             cors_origins = os.getenv("CORS_ALLOWED_ORIGINS")
             if not cors_origins:
-                self.add_result(ValidationResult(
-                    check_name="Security: CORS Origins",
-                    passed=False,
-                    severity=ValidationSeverity.CRITICAL,
-                    message="CORS_ALLOWED_ORIGINS must be set in production",
-                    details={"env_var": "CORS_ALLOWED_ORIGINS"}
-                ))
+                self.add_result(
+                    ValidationResult(
+                        check_name="Security: CORS Origins",
+                        passed=False,
+                        severity=ValidationSeverity.CRITICAL,
+                        message="CORS_ALLOWED_ORIGINS must be set in production",
+                        details={"env_var": "CORS_ALLOWED_ORIGINS"},
+                    )
+                )
             elif cors_origins == "*" or "example.com" in cors_origins.lower():
-                self.add_result(ValidationResult(
-                    check_name="Security: CORS Origins",
-                    passed=False,
-                    severity=ValidationSeverity.ERROR,
-                    message="CORS_ALLOWED_ORIGINS contains wildcard or example domains. Must use actual production domains!",
-                    details={"value": cors_origins}
-                ))
-            elif not all(origin.startswith("https://") for origin in cors_origins.split(",")):
-                self.add_result(ValidationResult(
-                    check_name="Security: CORS Origins",
-                    passed=False,
-                    severity=ValidationSeverity.ERROR,
-                    message="All CORS origins must use HTTPS in production",
-                    details={"value": cors_origins}
-                ))
+                self.add_result(
+                    ValidationResult(
+                        check_name="Security: CORS Origins",
+                        passed=False,
+                        severity=ValidationSeverity.ERROR,
+                        message="CORS_ALLOWED_ORIGINS contains wildcard or example domains. Must use actual production domains!",
+                        details={"value": cors_origins},
+                    )
+                )
+            elif not all(
+                origin.startswith("https://") for origin in cors_origins.split(",")
+            ):
+                self.add_result(
+                    ValidationResult(
+                        check_name="Security: CORS Origins",
+                        passed=False,
+                        severity=ValidationSeverity.ERROR,
+                        message="All CORS origins must use HTTPS in production",
+                        details={"value": cors_origins},
+                    )
+                )
             else:
-                self.add_result(ValidationResult(
-                    check_name="Security: CORS Origins",
-                    passed=True,
-                    severity=ValidationSeverity.INFO,
-                    message=f"CORS origins properly configured: {cors_origins}"
-                ))
+                self.add_result(
+                    ValidationResult(
+                        check_name="Security: CORS Origins",
+                        passed=True,
+                        severity=ValidationSeverity.INFO,
+                        message=f"CORS origins properly configured: {cors_origins}",
+                    )
+                )
 
     def validate_file_system(self):
         """Validate file system permissions and directories."""
@@ -405,8 +472,15 @@ class StartupValidator:
 
         # Required directories
         required_dirs = [
-            (os.getenv("AI_MODEL_CACHE_DIR", "/tmp/cronos_ai_models"), "Model cache directory"),
-            (os.getenv("LOG_FILE", "/var/log/cronos_ai/app.log"), "Log file directory", True),
+            (
+                os.getenv("AI_MODEL_CACHE_DIR", "/tmp/cronos_ai_models"),
+                "Model cache directory",
+            ),
+            (
+                os.getenv("LOG_FILE", "/var/log/cronos_ai/app.log"),
+                "Log file directory",
+                True,
+            ),
         ]
 
         for dir_or_file, description, *is_file in required_dirs:
@@ -415,28 +489,34 @@ class StartupValidator:
 
             # Check if parent directory exists and is writable
             if not parent_path.exists():
-                self.add_result(ValidationResult(
-                    check_name=f"File System: {description}",
-                    passed=False,
-                    severity=ValidationSeverity.WARNING,
-                    message=f"Directory does not exist: {parent_path} (will attempt to create)",
-                    details={"path": str(parent_path)}
-                ))
+                self.add_result(
+                    ValidationResult(
+                        check_name=f"File System: {description}",
+                        passed=False,
+                        severity=ValidationSeverity.WARNING,
+                        message=f"Directory does not exist: {parent_path} (will attempt to create)",
+                        details={"path": str(parent_path)},
+                    )
+                )
             elif not os.access(parent_path, os.W_OK):
-                self.add_result(ValidationResult(
-                    check_name=f"File System: {description}",
-                    passed=False,
-                    severity=ValidationSeverity.ERROR,
-                    message=f"Directory is not writable: {parent_path}",
-                    details={"path": str(parent_path)}
-                ))
+                self.add_result(
+                    ValidationResult(
+                        check_name=f"File System: {description}",
+                        passed=False,
+                        severity=ValidationSeverity.ERROR,
+                        message=f"Directory is not writable: {parent_path}",
+                        details={"path": str(parent_path)},
+                    )
+                )
             else:
-                self.add_result(ValidationResult(
-                    check_name=f"File System: {description}",
-                    passed=True,
-                    severity=ValidationSeverity.INFO,
-                    message=f"Directory is accessible: {parent_path}"
-                ))
+                self.add_result(
+                    ValidationResult(
+                        check_name=f"File System: {description}",
+                        passed=True,
+                        severity=ValidationSeverity.INFO,
+                        message=f"Directory is accessible: {parent_path}",
+                    )
+                )
 
     def validate_monitoring_config(self):
         """Validate monitoring and observability configuration."""
@@ -445,29 +525,35 @@ class StartupValidator:
         metrics_enabled = os.getenv("METRICS_ENABLED", "true").lower() == "true"
         prometheus_port = os.getenv("PROMETHEUS_PORT", "8000")
 
-        self.add_result(ValidationResult(
-            check_name="Monitoring: Metrics",
-            passed=True,
-            severity=ValidationSeverity.INFO,
-            message=f"Metrics collection is {'enabled' if metrics_enabled else 'disabled'}"
-        ))
+        self.add_result(
+            ValidationResult(
+                check_name="Monitoring: Metrics",
+                passed=True,
+                severity=ValidationSeverity.INFO,
+                message=f"Metrics collection is {'enabled' if metrics_enabled else 'disabled'}",
+            )
+        )
 
         if metrics_enabled:
             try:
                 port = int(prometheus_port)
-                self.add_result(ValidationResult(
-                    check_name="Monitoring: Prometheus Port",
-                    passed=True,
-                    severity=ValidationSeverity.INFO,
-                    message=f"Prometheus metrics port: {port}"
-                ))
+                self.add_result(
+                    ValidationResult(
+                        check_name="Monitoring: Prometheus Port",
+                        passed=True,
+                        severity=ValidationSeverity.INFO,
+                        message=f"Prometheus metrics port: {port}",
+                    )
+                )
             except ValueError:
-                self.add_result(ValidationResult(
-                    check_name="Monitoring: Prometheus Port",
-                    passed=False,
-                    severity=ValidationSeverity.ERROR,
-                    message=f"Invalid Prometheus port: {prometheus_port}"
-                ))
+                self.add_result(
+                    ValidationResult(
+                        check_name="Monitoring: Prometheus Port",
+                        passed=False,
+                        severity=ValidationSeverity.ERROR,
+                        message=f"Invalid Prometheus port: {prometheus_port}",
+                    )
+                )
 
     def validate_llm_config(self):
         """Validate LLM configuration if LLM features are enabled."""
@@ -487,28 +573,34 @@ class StartupValidator:
                 api_key = os.getenv(api_key_var)
 
                 if not api_key:
-                    self.add_result(ValidationResult(
-                        check_name=f"LLM: {llm_provider.upper()} API Key",
-                        passed=False,
-                        severity=ValidationSeverity.ERROR,
-                        message=f"{api_key_var} must be set for {llm_provider} provider",
-                        details={"env_var": api_key_var}
-                    ))
+                    self.add_result(
+                        ValidationResult(
+                            check_name=f"LLM: {llm_provider.upper()} API Key",
+                            passed=False,
+                            severity=ValidationSeverity.ERROR,
+                            message=f"{api_key_var} must be set for {llm_provider} provider",
+                            details={"env_var": api_key_var},
+                        )
+                    )
                 else:
-                    self.add_result(ValidationResult(
-                        check_name=f"LLM: {llm_provider.upper()} API Key",
-                        passed=True,
-                        severity=ValidationSeverity.INFO,
-                        message=f"API key configured for {llm_provider}"
-                    ))
+                    self.add_result(
+                        ValidationResult(
+                            check_name=f"LLM: {llm_provider.upper()} API Key",
+                            passed=True,
+                            severity=ValidationSeverity.INFO,
+                            message=f"API key configured for {llm_provider}",
+                        )
+                    )
             else:
-                self.add_result(ValidationResult(
-                    check_name="LLM: Provider",
-                    passed=False,
-                    severity=ValidationSeverity.WARNING,
-                    message=f"Unknown LLM provider: {llm_provider}",
-                    details={"provider": llm_provider}
-                ))
+                self.add_result(
+                    ValidationResult(
+                        check_name="LLM: Provider",
+                        passed=False,
+                        severity=ValidationSeverity.WARNING,
+                        message=f"Unknown LLM provider: {llm_provider}",
+                        details={"provider": llm_provider},
+                    )
+                )
 
     def print_summary(self) -> bool:
         """
@@ -517,9 +609,9 @@ class StartupValidator:
         Returns:
             True if all critical/error checks passed, False otherwise
         """
-        logger.info("\n" + "="*80)
+        logger.info("\n" + "=" * 80)
         logger.info("STARTUP VALIDATION SUMMARY")
-        logger.info("="*80)
+        logger.info("=" * 80)
 
         # Count results by severity
         counts = {
@@ -553,42 +645,48 @@ class StartupValidator:
 
         # Print failures
         if failed_critical:
-            logger.critical("\n" + "-"*80)
+            logger.critical("\n" + "-" * 80)
             logger.critical("CRITICAL FAILURES (Must Fix):")
-            logger.critical("-"*80)
+            logger.critical("-" * 80)
             for result in failed_critical:
                 logger.critical(f"  {result}")
 
         if failed_errors:
-            logger.error("\n" + "-"*80)
+            logger.error("\n" + "-" * 80)
             logger.error("ERRORS (Should Fix):")
-            logger.error("-"*80)
+            logger.error("-" * 80)
             for result in failed_errors:
                 logger.error(f"  {result}")
 
         if warnings:
-            logger.warning("\n" + "-"*80)
+            logger.warning("\n" + "-" * 80)
             logger.warning("WARNINGS (Review Recommended):")
-            logger.warning("-"*80)
+            logger.warning("-" * 80)
             for result in warnings:
                 logger.warning(f"  {result}")
 
-        logger.info("="*80)
+        logger.info("=" * 80)
 
         # Determine overall status
         has_critical_failures = len(failed_critical) > 0
         has_error_failures = len(failed_errors) > 0
 
         if has_critical_failures:
-            logger.critical("❌ VALIDATION FAILED: Critical issues must be resolved before starting!")
+            logger.critical(
+                "❌ VALIDATION FAILED: Critical issues must be resolved before starting!"
+            )
             logger.critical("   Application will NOT start.")
             return False
         elif has_error_failures and self.environment == "production":
-            logger.error("❌ VALIDATION FAILED: Errors found in production environment!")
+            logger.error(
+                "❌ VALIDATION FAILED: Errors found in production environment!"
+            )
             logger.error("   Fix errors before deploying to production.")
             return False
         elif has_error_failures:
-            logger.warning("⚠️  VALIDATION WARNING: Errors found but allowed in non-production environment")
+            logger.warning(
+                "⚠️  VALIDATION WARNING: Errors found but allowed in non-production environment"
+            )
             logger.warning("   Application will start, but errors should be fixed.")
             return True
         else:
@@ -624,8 +722,7 @@ def validate_startup(config: Optional[Dict[str, Any]] = None) -> bool:
 if __name__ == "__main__":
     # Allow running as standalone script
     logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(message)s"
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
     validate_startup()

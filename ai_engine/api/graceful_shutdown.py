@@ -35,6 +35,7 @@ INTERRUPTED_REQUESTS = Counter(
 @dataclass
 class RequestInfo:
     """Information about an active request."""
+
     request_id: str
     method: str
     path: str
@@ -102,7 +103,7 @@ class GracefulShutdownManager:
         method: str,
         path: str,
         client_ip: str = "unknown",
-        **metadata
+        **metadata,
     ):
         """
         Context manager to track an active request.
@@ -221,8 +222,7 @@ class GracefulShutdownManager:
         remaining = self.active_request_count
         if remaining == 0:
             logger.info(
-                f"✅ All requests completed. "
-                f"Shutdown took {shutdown_duration:.2f}s"
+                f"✅ All requests completed. " f"Shutdown took {shutdown_duration:.2f}s"
             )
         else:
             logger.warning(
@@ -386,18 +386,22 @@ class RequestTrackingMiddleware:
         # Check if shutting down
         if self.shutdown_manager.is_shutting_down:
             # Return 503 Service Unavailable
-            await send({
-                "type": "http.response.start",
-                "status": 503,
-                "headers": [
-                    [b"content-type", b"application/json"],
-                    [b"retry-after", b"60"],
-                ],
-            })
-            await send({
-                "type": "http.response.body",
-                "body": b'{"detail":"Service is shutting down. Please retry later."}',
-            })
+            await send(
+                {
+                    "type": "http.response.start",
+                    "status": 503,
+                    "headers": [
+                        [b"content-type", b"application/json"],
+                        [b"retry-after", b"60"],
+                    ],
+                }
+            )
+            await send(
+                {
+                    "type": "http.response.body",
+                    "body": b'{"detail":"Service is shutting down. Please retry later."}',
+                }
+            )
             return
 
         # Generate request ID

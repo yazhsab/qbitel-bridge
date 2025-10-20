@@ -109,7 +109,7 @@ class TestProductionModeDetector:
         """Test getting environment information."""
         with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}):
             info = ProductionModeDetector.get_environment_info()
-            
+
             assert isinstance(info, dict)
             assert "mode" in info
             assert "is_production" in info
@@ -119,13 +119,16 @@ class TestProductionModeDetector:
 
     def test_get_environment_info_with_additional_vars(self):
         """Test getting environment information with additional variables."""
-        with patch.dict(os.environ, {
-            "CRONOS_AI_ENVIRONMENT": "production",
-            "CRONOS_AI_VERSION": "1.0.0",
-            "CRONOS_AI_DEBUG": "false"
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "CRONOS_AI_ENVIRONMENT": "production",
+                "CRONOS_AI_VERSION": "1.0.0",
+                "CRONOS_AI_DEBUG": "false",
+            },
+        ):
             info = ProductionModeDetector.get_environment_info()
-            
+
             assert isinstance(info, dict)
             assert "mode" in info
             assert "is_production" in info
@@ -178,62 +181,61 @@ class TestProductionValidator:
         """Test validating production environment with additional checks."""
         with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}):
             result = validator.validate_production_environment(
-                check_debug_mode=True,
-                check_log_level=True
+                check_debug_mode=True, check_log_level=True
             )
             assert result is True
 
     def test_validate_production_environment_debug_mode_enabled(self, validator):
         """Test validating production environment with debug mode enabled."""
-        with patch.dict(os.environ, {
-            "CRONOS_AI_ENVIRONMENT": "production",
-            "CRONOS_AI_DEBUG": "true"
-        }):
+        with patch.dict(
+            os.environ,
+            {"CRONOS_AI_ENVIRONMENT": "production", "CRONOS_AI_DEBUG": "true"},
+        ):
             result = validator.validate_production_environment(check_debug_mode=True)
             assert result is False
 
     def test_validate_production_environment_debug_mode_disabled(self, validator):
         """Test validating production environment with debug mode disabled."""
-        with patch.dict(os.environ, {
-            "CRONOS_AI_ENVIRONMENT": "production",
-            "CRONOS_AI_DEBUG": "false"
-        }):
+        with patch.dict(
+            os.environ,
+            {"CRONOS_AI_ENVIRONMENT": "production", "CRONOS_AI_DEBUG": "false"},
+        ):
             result = validator.validate_production_environment(check_debug_mode=True)
             assert result is True
 
     def test_validate_production_environment_log_level_debug(self, validator):
         """Test validating production environment with debug log level."""
-        with patch.dict(os.environ, {
-            "CRONOS_AI_ENVIRONMENT": "production",
-            "CRONOS_AI_LOG_LEVEL": "DEBUG"
-        }):
+        with patch.dict(
+            os.environ,
+            {"CRONOS_AI_ENVIRONMENT": "production", "CRONOS_AI_LOG_LEVEL": "DEBUG"},
+        ):
             result = validator.validate_production_environment(check_log_level=True)
             assert result is False
 
     def test_validate_production_environment_log_level_info(self, validator):
         """Test validating production environment with info log level."""
-        with patch.dict(os.environ, {
-            "CRONOS_AI_ENVIRONMENT": "production",
-            "CRONOS_AI_LOG_LEVEL": "INFO"
-        }):
+        with patch.dict(
+            os.environ,
+            {"CRONOS_AI_ENVIRONMENT": "production", "CRONOS_AI_LOG_LEVEL": "INFO"},
+        ):
             result = validator.validate_production_environment(check_log_level=True)
             assert result is True
 
     def test_validate_production_environment_log_level_warning(self, validator):
         """Test validating production environment with warning log level."""
-        with patch.dict(os.environ, {
-            "CRONOS_AI_ENVIRONMENT": "production",
-            "CRONOS_AI_LOG_LEVEL": "WARNING"
-        }):
+        with patch.dict(
+            os.environ,
+            {"CRONOS_AI_ENVIRONMENT": "production", "CRONOS_AI_LOG_LEVEL": "WARNING"},
+        ):
             result = validator.validate_production_environment(check_log_level=True)
             assert result is True
 
     def test_validate_production_environment_log_level_error(self, validator):
         """Test validating production environment with error log level."""
-        with patch.dict(os.environ, {
-            "CRONOS_AI_ENVIRONMENT": "production",
-            "CRONOS_AI_LOG_LEVEL": "ERROR"
-        }):
+        with patch.dict(
+            os.environ,
+            {"CRONOS_AI_ENVIRONMENT": "production", "CRONOS_AI_LOG_LEVEL": "ERROR"},
+        ):
             result = validator.validate_production_environment(check_log_level=True)
             assert result is True
 
@@ -241,7 +243,7 @@ class TestProductionValidator:
         """Test getting validation results."""
         with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}):
             results = validator.get_validation_results()
-            
+
             assert isinstance(results, dict)
             assert "environment_check" in results
             assert "debug_mode_check" in results
@@ -252,7 +254,7 @@ class TestProductionValidator:
         """Test getting validation summary."""
         with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}):
             summary = validator.get_validation_summary()
-            
+
             assert isinstance(summary, dict)
             assert "total_checks" in summary
             assert "passed_checks" in summary
@@ -264,31 +266,38 @@ class TestProductionValidator:
 
     def test_validate_production_environment_with_custom_checks(self, validator):
         """Test validating production environment with custom checks."""
+
         def custom_check():
             return True
-        
+
         with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}):
             result = validator.validate_production_environment(
                 custom_checks=[custom_check]
             )
             assert result is True
 
-    def test_validate_production_environment_with_failing_custom_checks(self, validator):
+    def test_validate_production_environment_with_failing_custom_checks(
+        self, validator
+    ):
         """Test validating production environment with failing custom checks."""
+
         def custom_check():
             return False
-        
+
         with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}):
             result = validator.validate_production_environment(
                 custom_checks=[custom_check]
             )
             assert result is False
 
-    def test_validate_production_environment_with_exception_in_custom_check(self, validator):
+    def test_validate_production_environment_with_exception_in_custom_check(
+        self, validator
+    ):
         """Test validating production environment with exception in custom check."""
+
         def custom_check():
             raise Exception("Custom check failed")
-        
+
         with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}):
             result = validator.validate_production_environment(
                 custom_checks=[custom_check]

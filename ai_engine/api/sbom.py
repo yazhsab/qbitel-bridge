@@ -23,6 +23,7 @@ SBOM_FALLBACK_DIR = Path("./sbom-artifacts")  # Development fallback
 
 class SBOMVersion(BaseModel):
     """SBOM version metadata."""
+
     version: str = Field(..., description="Version identifier (e.g., v1.0.0)")
     generated_at: str = Field(..., description="ISO 8601 timestamp")
     commit: str = Field(..., description="Git commit SHA")
@@ -31,6 +32,7 @@ class SBOMVersion(BaseModel):
 
 class SBOMVulnerabilitySummary(BaseModel):
     """Vulnerability summary for SBOM."""
+
     total: int = Field(0, description="Total vulnerabilities")
     critical: int = Field(0, description="Critical severity count")
     high: int = Field(0, description="High severity count")
@@ -40,6 +42,7 @@ class SBOMVulnerabilitySummary(BaseModel):
 
 class SBOMMetadata(BaseModel):
     """SBOM metadata response."""
+
     component: str
     version: str
     format: str
@@ -59,7 +62,7 @@ def get_sbom_directory() -> Path:
     else:
         raise HTTPException(
             status_code=503,
-            detail="SBOM artifact directory not configured or not available"
+            detail="SBOM artifact directory not configured or not available",
         )
 
 
@@ -77,8 +80,9 @@ async def list_sbom_versions():
     try:
         sbom_dir = get_sbom_directory()
         versions = [
-            d.name for d in sbom_dir.iterdir()
-            if d.is_dir() and not d.name.startswith('.')
+            d.name
+            for d in sbom_dir.iterdir()
+            if d.is_dir() and not d.name.startswith(".")
         ]
         return sorted(versions, reverse=True)
     except Exception as e:
@@ -106,8 +110,7 @@ async def get_version_metadata(version: str):
 
         if not version_dir.exists():
             raise HTTPException(
-                status_code=404,
-                detail=f"SBOM version {version} not found"
+                status_code=404, detail=f"SBOM version {version} not found"
             )
 
         # Read summary file if available
@@ -116,23 +119,23 @@ async def get_version_metadata(version: str):
             with open(summary_file) as f:
                 summary = json.load(f)
                 return SBOMVersion(
-                    version=summary.get('version', version),
-                    generated_at=summary.get('generated_at', ''),
-                    commit=summary.get('commit', ''),
-                    components=list(summary.get('components', {}).keys())
+                    version=summary.get("version", version),
+                    generated_at=summary.get("generated_at", ""),
+                    commit=summary.get("commit", ""),
+                    components=list(summary.get("components", {}).keys()),
                 )
 
         # Fallback: scan directory for components
         components = []
-        for sbom_file in version_dir.glob('*-spdx.json'):
-            component = sbom_file.stem.replace('-spdx', '')
+        for sbom_file in version_dir.glob("*-spdx.json"):
+            component = sbom_file.stem.replace("-spdx", "")
             components.append(component)
 
         return SBOMVersion(
             version=version,
             generated_at=datetime.utcnow().isoformat() + "Z",
             commit="unknown",
-            components=sorted(components)
+            components=sorted(components),
         )
 
     except HTTPException:
@@ -146,7 +149,7 @@ async def get_version_metadata(version: str):
 async def download_sbom(
     version: str = Query(..., description="CRONOS AI version (e.g., v1.0.0)"),
     component: str = Query("cronos-ai-platform", description="Component name"),
-    format: Literal["spdx", "cyclonedx"] = Query("spdx", description="SBOM format")
+    format: Literal["spdx", "cyclonedx"] = Query("spdx", description="SBOM format"),
 ):
     """
     Download SBOM for a specific version and component.
@@ -171,13 +174,17 @@ async def download_sbom(
             sbom_file = sbom_dir / version / f"cronos-{component}-{format}.json"
 
         if not sbom_file.exists():
-            available = list((sbom_dir / version).glob(f"*-{format}.json")) if (sbom_dir / version).exists() else []
+            available = (
+                list((sbom_dir / version).glob(f"*-{format}.json"))
+                if (sbom_dir / version).exists()
+                else []
+            )
             available_names = [f.stem.replace(f"-{format}", "") for f in available]
 
             raise HTTPException(
                 status_code=404,
                 detail=f"SBOM not found for component '{component}' version '{version}' format '{format}'. "
-                       f"Available components: {available_names if available_names else 'none'}"
+                f"Available components: {available_names if available_names else 'none'}",
             )
 
         with open(sbom_file) as f:
@@ -189,13 +196,13 @@ async def download_sbom(
             "Content-Type": "application/json",
             "X-SBOM-Component": component,
             "X-SBOM-Version": version,
-            "X-SBOM-Format": format.upper()
+            "X-SBOM-Format": format.upper(),
         }
 
         return Response(
             content=json.dumps(sbom_data, indent=2),
             media_type="application/json",
-            headers=headers
+            headers=headers,
         )
 
     except HTTPException:
@@ -208,7 +215,7 @@ async def download_sbom(
 @router.get("/metadata")
 async def get_sbom_metadata(
     version: str = Query(..., description="CRONOS AI version"),
-    component: str = Query(..., description="Component name")
+    component: str = Query(..., description="Component name"),
 ) -> SBOMMetadata:
     """
     Get metadata about an SBOM without downloading the full file.
@@ -233,15 +240,15 @@ async def get_sbom_metadata(
         if not sbom_file.exists():
             raise HTTPException(
                 status_code=404,
-                detail=f"SBOM not found for component '{component}' version '{version}'"
+                detail=f"SBOM not found for component '{component}' version '{version}'",
             )
 
         # Read SBOM file
         with open(sbom_file) as f:
             sbom_data = json.load(f)
 
-        packages = len(sbom_data.get('packages', []))
-        generated_at = sbom_data.get('creationInfo', {}).get('created', '')
+        packages = len(sbom_data.get("packages", []))
+        generated_at = sbom_data.get("creationInfo", {}).get("created", "")
 
         # Check for vulnerability data
         vuln_summary = None
@@ -252,14 +259,30 @@ async def get_sbom_metadata(
         if vuln_file.exists():
             with open(vuln_file) as f:
                 vuln_data = json.load(f)
-                matches = vuln_data.get('matches', [])
+                matches = vuln_data.get("matches", [])
 
                 vuln_summary = SBOMVulnerabilitySummary(
                     total=len(matches),
-                    critical=sum(1 for m in matches if m.get('vulnerability', {}).get('severity') == 'Critical'),
-                    high=sum(1 for m in matches if m.get('vulnerability', {}).get('severity') == 'High'),
-                    medium=sum(1 for m in matches if m.get('vulnerability', {}).get('severity') == 'Medium'),
-                    low=sum(1 for m in matches if m.get('vulnerability', {}).get('severity') == 'Low')
+                    critical=sum(
+                        1
+                        for m in matches
+                        if m.get("vulnerability", {}).get("severity") == "Critical"
+                    ),
+                    high=sum(
+                        1
+                        for m in matches
+                        if m.get("vulnerability", {}).get("severity") == "High"
+                    ),
+                    medium=sum(
+                        1
+                        for m in matches
+                        if m.get("vulnerability", {}).get("severity") == "Medium"
+                    ),
+                    low=sum(
+                        1
+                        for m in matches
+                        if m.get("vulnerability", {}).get("severity") == "Low"
+                    ),
                 )
 
         return SBOMMetadata(
@@ -269,7 +292,7 @@ async def get_sbom_metadata(
             packages=packages,
             vulnerabilities=vuln_summary,
             generated_at=generated_at,
-            sbom_file=sbom_file.name
+            sbom_file=sbom_file.name,
         )
 
     except HTTPException:
@@ -283,7 +306,9 @@ async def get_sbom_metadata(
 async def get_sbom_vulnerabilities(
     version: str = Query(..., description="CRONOS AI version"),
     component: str = Query("cronos-ai-platform", description="Component name"),
-    severity: Optional[str] = Query(None, description="Filter by severity (Critical, High, Medium, Low)")
+    severity: Optional[str] = Query(
+        None, description="Filter by severity (Critical, High, Medium, Low)"
+    ),
 ):
     """
     Get known vulnerabilities for a specific version and component.
@@ -314,55 +339,81 @@ async def get_sbom_vulnerabilities(
                     "critical": 0,
                     "high": 0,
                     "medium": 0,
-                    "low": 0
+                    "low": 0,
                 },
-                "message": "No vulnerability scan results available"
+                "message": "No vulnerability scan results available",
             }
 
         with open(vuln_file) as f:
             vuln_data = json.load(f)
 
-        matches = vuln_data.get('matches', [])
+        matches = vuln_data.get("matches", [])
 
         # Filter by severity if requested
         if severity:
             matches = [
-                m for m in matches
-                if m.get('vulnerability', {}).get('severity', '').lower() == severity.lower()
+                m
+                for m in matches
+                if m.get("vulnerability", {}).get("severity", "").lower()
+                == severity.lower()
             ]
 
         # Build summary
         summary = {
             "total": len(matches),
-            "critical": sum(1 for m in matches if m.get('vulnerability', {}).get('severity') == 'Critical'),
-            "high": sum(1 for m in matches if m.get('vulnerability', {}).get('severity') == 'High'),
-            "medium": sum(1 for m in matches if m.get('vulnerability', {}).get('severity') == 'Medium'),
-            "low": sum(1 for m in matches if m.get('vulnerability', {}).get('severity') == 'Low')
+            "critical": sum(
+                1
+                for m in matches
+                if m.get("vulnerability", {}).get("severity") == "Critical"
+            ),
+            "high": sum(
+                1
+                for m in matches
+                if m.get("vulnerability", {}).get("severity") == "High"
+            ),
+            "medium": sum(
+                1
+                for m in matches
+                if m.get("vulnerability", {}).get("severity") == "Medium"
+            ),
+            "low": sum(
+                1
+                for m in matches
+                if m.get("vulnerability", {}).get("severity") == "Low"
+            ),
         }
 
         # Format vulnerabilities
         vulnerabilities = []
         for match in matches[:100]:  # Limit to 100 for performance
-            vuln = match.get('vulnerability', {})
-            artifact = match.get('artifact', {})
+            vuln = match.get("vulnerability", {})
+            artifact = match.get("artifact", {})
 
-            vulnerabilities.append({
-                "id": vuln.get('id', 'Unknown'),
-                "severity": vuln.get('severity', 'Unknown'),
-                "description": vuln.get('description', '')[:200],
-                "package": artifact.get('name', 'Unknown'),
-                "version": artifact.get('version', 'Unknown'),
-                "fixed_in": match.get('vulnerability', {}).get('fix', {}).get('versions', []),
-                "cvss_score": vuln.get('cvss', [{}])[0].get('metrics', {}).get('baseScore') if vuln.get('cvss') else None,
-                "urls": vuln.get('urls', [])
-            })
+            vulnerabilities.append(
+                {
+                    "id": vuln.get("id", "Unknown"),
+                    "severity": vuln.get("severity", "Unknown"),
+                    "description": vuln.get("description", "")[:200],
+                    "package": artifact.get("name", "Unknown"),
+                    "version": artifact.get("version", "Unknown"),
+                    "fixed_in": match.get("vulnerability", {})
+                    .get("fix", {})
+                    .get("versions", []),
+                    "cvss_score": (
+                        vuln.get("cvss", [{}])[0].get("metrics", {}).get("baseScore")
+                        if vuln.get("cvss")
+                        else None
+                    ),
+                    "urls": vuln.get("urls", []),
+                }
+            )
 
         return {
             "component": component,
             "version": version,
             "summary": summary,
             "vulnerabilities": vulnerabilities,
-            "scanned_at": vuln_data.get('descriptor', {}).get('timestamp', '')
+            "scanned_at": vuln_data.get("descriptor", {}).get("timestamp", ""),
         }
 
     except HTTPException:
@@ -386,21 +437,19 @@ async def sbom_health_check():
     try:
         sbom_dir = get_sbom_directory()
         versions = [
-            d.name for d in sbom_dir.iterdir()
-            if d.is_dir() and not d.name.startswith('.')
+            d.name
+            for d in sbom_dir.iterdir()
+            if d.is_dir() and not d.name.startswith(".")
         ]
 
         return {
             "status": "healthy",
             "sbom_directory": str(sbom_dir),
             "versions_available": len(versions),
-            "latest_version": sorted(versions, reverse=True)[0] if versions else None
+            "latest_version": sorted(versions, reverse=True)[0] if versions else None,
         }
     except Exception as e:
-        return {
-            "status": "unhealthy",
-            "error": str(e)
-        }
+        return {"status": "unhealthy", "error": str(e)}
 
 
 @router.get("/formats")
@@ -421,24 +470,21 @@ async def list_supported_formats():
                 "version": "2.3",
                 "description": "Software Package Data Exchange - ISO/IEC 5962 standard",
                 "use_case": "Government contracts, general distribution, license compliance",
-                "format_identifier": "spdx"
+                "format_identifier": "spdx",
             },
             {
                 "name": "CycloneDX",
                 "version": "1.5",
                 "description": "OWASP CycloneDX - Security-focused SBOM format",
                 "use_case": "Security teams, vulnerability management, DevSecOps",
-                "format_identifier": "cyclonedx"
-            }
+                "format_identifier": "cyclonedx",
+            },
         ],
         "compliance": [
             "Executive Order 14028 (EO 14028)",
             "NIST SSDF (Secure Software Development Framework)",
             "EU Cyber Resilience Act",
-            "NTIA Minimum Elements"
+            "NTIA Minimum Elements",
         ],
-        "verification": {
-            "signing": "Cosign (Sigstore)",
-            "slsa_level": "3"
-        }
+        "verification": {"signing": "Cosign (Sigstore)", "slsa_level": "3"},
     }

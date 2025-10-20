@@ -84,7 +84,9 @@ class TestRedisRateLimiter:
     @pytest.mark.asyncio
     async def test_initialize_success(self, rate_limiter, mock_redis):
         """Test successful Redis initialization."""
-        with patch("ai_engine.api.rate_limiter.redis.from_url", return_value=mock_redis):
+        with patch(
+            "ai_engine.api.rate_limiter.redis.from_url", return_value=mock_redis
+        ):
             await rate_limiter.initialize()
             assert rate_limiter.redis_client is not None
             mock_redis.ping.assert_called_once()
@@ -92,7 +94,10 @@ class TestRedisRateLimiter:
     @pytest.mark.asyncio
     async def test_initialize_failure(self, rate_limiter):
         """Test Redis initialization failure."""
-        with patch("ai_engine.api.rate_limiter.redis.from_url", side_effect=Exception("Connection failed")):
+        with patch(
+            "ai_engine.api.rate_limiter.redis.from_url",
+            side_effect=Exception("Connection failed"),
+        ):
             with pytest.raises(Exception):
                 await rate_limiter.initialize()
 
@@ -109,10 +114,10 @@ class TestRedisRateLimiter:
         mock_pipeline = AsyncMock()
         mock_pipeline.execute = AsyncMock(return_value=[None, 5, None, None])
         mock_redis.pipeline.return_value = mock_pipeline
-        
+
         rate_limiter.redis_client = mock_redis
         rate_limiter.config.strategy = RateLimitStrategy.SLIDING_WINDOW
-        
+
         is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", 100, 60)
         assert is_allowed is True
         assert metadata["limit"] == 100
@@ -124,10 +129,10 @@ class TestRedisRateLimiter:
         mock_pipeline = AsyncMock()
         mock_pipeline.execute = AsyncMock(return_value=[None, 100, None, None])
         mock_redis.pipeline.return_value = mock_pipeline
-        
+
         rate_limiter.redis_client = mock_redis
         rate_limiter.config.strategy = RateLimitStrategy.SLIDING_WINDOW
-        
+
         is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", 100, 60)
         assert is_allowed is False
         assert metadata["remaining"] == 0
@@ -137,10 +142,10 @@ class TestRedisRateLimiter:
         """Test fixed window check - request allowed."""
         mock_redis.incr = AsyncMock(return_value=1)
         mock_redis.expire = AsyncMock()
-        
+
         rate_limiter.redis_client = mock_redis
         rate_limiter.config.strategy = RateLimitStrategy.FIXED_WINDOW
-        
+
         is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", 100, 60)
         assert is_allowed is True
         assert metadata["limit"] == 100
@@ -150,10 +155,10 @@ class TestRedisRateLimiter:
     async def test_fixed_window_check_denied(self, rate_limiter, mock_redis):
         """Test fixed window check - request denied."""
         mock_redis.incr = AsyncMock(return_value=101)
-        
+
         rate_limiter.redis_client = mock_redis
         rate_limiter.config.strategy = RateLimitStrategy.FIXED_WINDOW
-        
+
         is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", 100, 60)
         assert is_allowed is False
         assert metadata["remaining"] == 0
@@ -164,10 +169,10 @@ class TestRedisRateLimiter:
         mock_redis.hgetall = AsyncMock(return_value={})
         mock_redis.hset = AsyncMock()
         mock_redis.expire = AsyncMock()
-        
+
         rate_limiter.redis_client = mock_redis
         rate_limiter.config.strategy = RateLimitStrategy.TOKEN_BUCKET
-        
+
         is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", 100, 60)
         assert is_allowed is True
         assert "tokens" in metadata
@@ -176,16 +181,15 @@ class TestRedisRateLimiter:
     async def test_token_bucket_check_refill(self, rate_limiter, mock_redis):
         """Test token bucket check - with refill."""
         current_time = time.time()
-        mock_redis.hgetall = AsyncMock(return_value={
-            "tokens": "50",
-            "last_refill": str(current_time - 30)
-        })
+        mock_redis.hgetall = AsyncMock(
+            return_value={"tokens": "50", "last_refill": str(current_time - 30)}
+        )
         mock_redis.hset = AsyncMock()
         mock_redis.expire = AsyncMock()
-        
+
         rate_limiter.redis_client = mock_redis
         rate_limiter.config.strategy = RateLimitStrategy.TOKEN_BUCKET
-        
+
         is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", 100, 60)
         assert is_allowed is True
 
@@ -193,16 +197,15 @@ class TestRedisRateLimiter:
     async def test_token_bucket_check_no_tokens(self, rate_limiter, mock_redis):
         """Test token bucket check - no tokens available."""
         current_time = time.time()
-        mock_redis.hgetall = AsyncMock(return_value={
-            "tokens": "0",
-            "last_refill": str(current_time)
-        })
+        mock_redis.hgetall = AsyncMock(
+            return_value={"tokens": "0", "last_refill": str(current_time)}
+        )
         mock_redis.hset = AsyncMock()
         mock_redis.expire = AsyncMock()
-        
+
         rate_limiter.redis_client = mock_redis
         rate_limiter.config.strategy = RateLimitStrategy.TOKEN_BUCKET
-        
+
         is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", 100, 60)
         assert is_allowed is False
 
@@ -212,10 +215,10 @@ class TestRedisRateLimiter:
         mock_redis.hgetall = AsyncMock(return_value={})
         mock_redis.hset = AsyncMock()
         mock_redis.expire = AsyncMock()
-        
+
         rate_limiter.redis_client = mock_redis
         rate_limiter.config.strategy = RateLimitStrategy.LEAKY_BUCKET
-        
+
         is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", 100, 60)
         assert is_allowed is True
         assert "water_level" in metadata
@@ -224,16 +227,15 @@ class TestRedisRateLimiter:
     async def test_leaky_bucket_check_with_leak(self, rate_limiter, mock_redis):
         """Test leaky bucket check - with water leak."""
         current_time = time.time()
-        mock_redis.hgetall = AsyncMock(return_value={
-            "water_level": "50",
-            "last_leak": str(current_time - 30)
-        })
+        mock_redis.hgetall = AsyncMock(
+            return_value={"water_level": "50", "last_leak": str(current_time - 30)}
+        )
         mock_redis.hset = AsyncMock()
         mock_redis.expire = AsyncMock()
-        
+
         rate_limiter.redis_client = mock_redis
         rate_limiter.config.strategy = RateLimitStrategy.LEAKY_BUCKET
-        
+
         is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", 100, 60)
         assert is_allowed is True
 
@@ -241,16 +243,15 @@ class TestRedisRateLimiter:
     async def test_leaky_bucket_check_overflow(self, rate_limiter, mock_redis):
         """Test leaky bucket check - bucket overflow."""
         current_time = time.time()
-        mock_redis.hgetall = AsyncMock(return_value={
-            "water_level": "100",
-            "last_leak": str(current_time)
-        })
+        mock_redis.hgetall = AsyncMock(
+            return_value={"water_level": "100", "last_leak": str(current_time)}
+        )
         mock_redis.hset = AsyncMock()
         mock_redis.expire = AsyncMock()
-        
+
         rate_limiter.redis_client = mock_redis
         rate_limiter.config.strategy = RateLimitStrategy.LEAKY_BUCKET
-        
+
         is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", 100, 60)
         assert is_allowed is False
 
@@ -259,7 +260,7 @@ class TestRedisRateLimiter:
         """Test rate limit check error - fail open."""
         mock_redis.pipeline.side_effect = Exception("Redis error")
         rate_limiter.redis_client = mock_redis
-        
+
         is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", 100, 60)
         assert is_allowed is True
         assert metadata == {}
@@ -269,7 +270,7 @@ class TestRedisRateLimiter:
         """Test resetting rate limit."""
         mock_redis.keys = AsyncMock(return_value=["rate_limit:sliding:test_user"])
         mock_redis.delete = AsyncMock()
-        
+
         rate_limiter.redis_client = mock_redis
         await rate_limiter.reset_limit("test_user")
         mock_redis.delete.assert_called_once()
@@ -278,7 +279,7 @@ class TestRedisRateLimiter:
     async def test_reset_limit_no_keys(self, rate_limiter, mock_redis):
         """Test resetting rate limit with no keys."""
         mock_redis.keys = AsyncMock(return_value=[])
-        
+
         rate_limiter.redis_client = mock_redis
         await rate_limiter.reset_limit("test_user")
 
@@ -319,7 +320,9 @@ class TestRateLimiter:
         """Test initialization creating new Redis client."""
         mock_redis = AsyncMock()
         mock_redis.ping = AsyncMock()
-        with patch("ai_engine.api.rate_limiter.redis.from_url", return_value=mock_redis):
+        with patch(
+            "ai_engine.api.rate_limiter.redis.from_url", return_value=mock_redis
+        ):
             await rate_limiter.initialize()
             assert rate_limiter.redis_client is not None
             assert rate_limiter._owns_client is True
@@ -327,7 +330,10 @@ class TestRateLimiter:
     @pytest.mark.asyncio
     async def test_initialize_failure(self, rate_limiter):
         """Test initialization failure."""
-        with patch("ai_engine.api.rate_limiter.redis.from_url", side_effect=Exception("Connection failed")):
+        with patch(
+            "ai_engine.api.rate_limiter.redis.from_url",
+            side_effect=Exception("Connection failed"),
+        ):
             await rate_limiter.initialize()
             assert rate_limiter.redis_client is None
 
@@ -337,7 +343,7 @@ class TestRateLimiter:
         mock_redis = AsyncMock()
         rate_limiter.redis_client = mock_redis
         rate_limiter._owns_client = True
-        
+
         await rate_limiter.shutdown()
         mock_redis.close.assert_called_once()
         assert rate_limiter.redis_client is None
@@ -348,7 +354,7 @@ class TestRateLimiter:
         mock_redis = AsyncMock()
         rate_limiter.redis_client = mock_redis
         rate_limiter._owns_client = False
-        
+
         await rate_limiter.shutdown()
         mock_redis.close.assert_not_called()
 
@@ -366,7 +372,7 @@ class TestRateLimiter:
         mock_redis.incr = AsyncMock()
         mock_redis.expire = AsyncMock()
         rate_limiter.redis_client = mock_redis
-        
+
         result = await rate_limiter.check_rate_limit("test_user")
         assert result is True
 
@@ -376,7 +382,7 @@ class TestRateLimiter:
         mock_redis = AsyncMock()
         mock_redis.get = AsyncMock(return_value="100")
         rate_limiter.redis_client = mock_redis
-        
+
         result = await rate_limiter.check_rate_limit("test_user")
         assert result is False
 
@@ -386,7 +392,7 @@ class TestRateLimiter:
         mock_redis = AsyncMock()
         mock_redis.get = AsyncMock(side_effect=Exception("Redis error"))
         rate_limiter.redis_client = mock_redis
-        
+
         result = await rate_limiter.check_rate_limit("test_user")
         assert result is True
 
@@ -396,7 +402,7 @@ class TestRateLimiter:
         mock_redis = AsyncMock()
         mock_redis.delete = AsyncMock()
         rate_limiter.redis_client = mock_redis
-        
+
         await rate_limiter.reset_rate_limit("test_user")
         mock_redis.delete.assert_called_once()
 
@@ -411,7 +417,7 @@ class TestRateLimiter:
         mock_redis = AsyncMock()
         mock_redis.delete = AsyncMock(side_effect=Exception("Redis error"))
         rate_limiter.redis_client = mock_redis
-        
+
         await rate_limiter.reset_rate_limit("test_user")
 
     @pytest.mark.asyncio
@@ -420,7 +426,7 @@ class TestRateLimiter:
         mock_redis = AsyncMock()
         mock_redis.get = AsyncMock(return_value=None)
         rate_limiter.redis_client = mock_redis
-        
+
         count = await rate_limiter._get_count("test_key")
         assert count == 0
 
@@ -430,7 +436,7 @@ class TestRateLimiter:
         mock_redis = AsyncMock()
         mock_redis.get = AsyncMock(return_value=b"42")
         rate_limiter.redis_client = mock_redis
-        
+
         count = await rate_limiter._get_count("test_key")
         assert count == 42
 
@@ -440,7 +446,7 @@ class TestRateLimiter:
         mock_redis = AsyncMock()
         mock_redis.get = AsyncMock(return_value="42")
         rate_limiter.redis_client = mock_redis
-        
+
         count = await rate_limiter._get_count("test_key")
         assert count == 42
 
@@ -450,7 +456,7 @@ class TestRateLimiter:
         mock_redis = AsyncMock()
         mock_redis.get = AsyncMock(return_value="invalid")
         rate_limiter.redis_client = mock_redis
-        
+
         count = await rate_limiter._get_count("test_key")
         assert count == 0
 
@@ -464,7 +470,7 @@ class TestRateLimiter:
         config = Mock()
         config.security = Mock()
         config.security.rate_limit_per_minute = 50
-        
+
         limiter = RateLimiter(config)
         assert limiter.rate_config.requests_per_minute == 50
 
@@ -476,7 +482,9 @@ class TestAdvancedRateLimitMiddleware:
     def mock_rate_limiter(self):
         """Create mock rate limiter."""
         limiter = AsyncMock()
-        limiter.check_rate_limit = AsyncMock(return_value=(True, {"limit": 100, "remaining": 99, "reset": 60}))
+        limiter.check_rate_limit = AsyncMock(
+            return_value=(True, {"limit": 100, "remaining": 99, "reset": 60})
+        )
         return limiter
 
     @pytest.fixture
@@ -490,16 +498,16 @@ class TestAdvancedRateLimitMiddleware:
     async def test_dispatch_whitelisted_ip(self, middleware, mock_rate_limiter):
         """Test dispatch with whitelisted IP."""
         middleware.config.whitelist_ips = ["127.0.0.1"]
-        
+
         request = Mock(spec=Request)
         request.url = Mock()
         request.url.path = "/api/test"
         request.client = Mock()
         request.client.host = "127.0.0.1"
         request.headers = Headers({})
-        
+
         call_next = AsyncMock(return_value=Response(content="OK"))
-        
+
         response = await middleware.dispatch(request, call_next)
         assert response.body == b"OK"
         mock_rate_limiter.check_rate_limit.assert_not_called()
@@ -508,16 +516,16 @@ class TestAdvancedRateLimitMiddleware:
     async def test_dispatch_blacklisted_ip(self, middleware):
         """Test dispatch with blacklisted IP."""
         middleware.config.blacklist_ips = ["192.168.1.1"]
-        
+
         request = Mock(spec=Request)
         request.url = Mock()
         request.url.path = "/api/test"
         request.client = Mock()
         request.client.host = "192.168.1.1"
         request.headers = Headers({})
-        
+
         call_next = AsyncMock()
-        
+
         response = await middleware.dispatch(request, call_next)
         assert response.status_code == 403
         call_next.assert_not_called()
@@ -528,7 +536,7 @@ class TestAdvancedRateLimitMiddleware:
         mock_rate_limiter.check_rate_limit = AsyncMock(
             return_value=(False, {"limit": 100, "remaining": 0, "reset": 60})
         )
-        
+
         request = Mock(spec=Request)
         request.url = Mock()
         request.url.path = "/api/test"
@@ -536,9 +544,9 @@ class TestAdvancedRateLimitMiddleware:
         request.client.host = "127.0.0.1"
         request.headers = Headers({})
         request.state = Mock()
-        
+
         call_next = AsyncMock()
-        
+
         response = await middleware.dispatch(request, call_next)
         assert response.status_code == 429
         assert "X-RateLimit-Limit" in response.headers
@@ -554,10 +562,10 @@ class TestAdvancedRateLimitMiddleware:
         request.client.host = "127.0.0.1"
         request.headers = Headers({})
         request.state = Mock()
-        
+
         mock_response = Response(content="OK")
         call_next = AsyncMock(return_value=mock_response)
-        
+
         response = await middleware.dispatch(request, call_next)
         assert response.status_code == 200
         assert "X-RateLimit-Limit" in response.headers
@@ -569,7 +577,7 @@ class TestAdvancedRateLimitMiddleware:
         request.headers = Headers({"X-Forwarded-For": "192.168.1.1, 10.0.0.1"})
         request.client = Mock()
         request.client.host = "127.0.0.1"
-        
+
         ip = middleware._get_client_ip(request)
         assert ip == "192.168.1.1"
 
@@ -579,7 +587,7 @@ class TestAdvancedRateLimitMiddleware:
         request.headers = Headers({"X-Real-IP": "192.168.1.1"})
         request.client = Mock()
         request.client.host = "127.0.0.1"
-        
+
         ip = middleware._get_client_ip(request)
         assert ip == "192.168.1.1"
 
@@ -589,7 +597,7 @@ class TestAdvancedRateLimitMiddleware:
         request.headers = Headers({})
         request.client = Mock()
         request.client.host = "192.168.1.1"
-        
+
         ip = middleware._get_client_ip(request)
         assert ip == "192.168.1.1"
 
@@ -598,7 +606,7 @@ class TestAdvancedRateLimitMiddleware:
         request = Mock(spec=Request)
         request.headers = Headers({})
         request.client = None
-        
+
         ip = middleware._get_client_ip(request)
         assert ip == "unknown"
 
@@ -608,7 +616,7 @@ class TestAdvancedRateLimitMiddleware:
         request.state = Mock()
         request.state.user_id = "user123"
         request.headers = Headers({})
-        
+
         user_id = middleware._get_user_id(request)
         assert user_id == "user123"
 
@@ -617,7 +625,7 @@ class TestAdvancedRateLimitMiddleware:
         request = Mock(spec=Request)
         request.state = Mock(spec=[])
         request.headers = Headers({"Authorization": "Bearer token123"})
-        
+
         user_id = middleware._get_user_id(request)
         assert user_id is None  # Would decode JWT in real implementation
 
@@ -626,7 +634,7 @@ class TestAdvancedRateLimitMiddleware:
         request = Mock(spec=Request)
         request.state = Mock(spec=[])
         request.headers = Headers({})
-        
+
         user_id = middleware._get_user_id(request)
         assert user_id is None
 
@@ -640,8 +648,10 @@ class TestGlobalRateLimiter:
         with patch("ai_engine.api.rate_limiter._rate_limiter", None):
             mock_limiter = AsyncMock()
             mock_limiter.initialize = AsyncMock()
-            
-            with patch("ai_engine.api.rate_limiter.RedisRateLimiter", return_value=mock_limiter):
+
+            with patch(
+                "ai_engine.api.rate_limiter.RedisRateLimiter", return_value=mock_limiter
+            ):
                 limiter1 = await get_rate_limiter()
                 limiter2 = await get_rate_limiter()
                 assert limiter1 is limiter2
@@ -652,10 +662,12 @@ class TestGlobalRateLimiter:
         with patch("ai_engine.api.rate_limiter._rate_limiter", None):
             mock_limiter = AsyncMock()
             mock_limiter.initialize = AsyncMock()
-            
+
             config = RateLimitConfig(requests_per_minute=50)
-            
-            with patch("ai_engine.api.rate_limiter.RedisRateLimiter", return_value=mock_limiter) as mock_class:
+
+            with patch(
+                "ai_engine.api.rate_limiter.RedisRateLimiter", return_value=mock_limiter
+            ) as mock_class:
                 await get_rate_limiter(config=config)
                 mock_class.assert_called_once()
 

@@ -675,7 +675,11 @@ class TestVAEAnomalyDetectorAdvanced:
         dataloader = detector._create_dataloader(data, shuffle=False)
 
         assert dataloader is not None
-        assert not dataloader.sampler.shuffle if hasattr(dataloader.sampler, 'shuffle') else True
+        assert (
+            not dataloader.sampler.shuffle
+            if hasattr(dataloader.sampler, "shuffle")
+            else True
+        )
 
     @pytest.mark.asyncio
     async def test_detect_with_high_anomaly_score(self, detector):
@@ -725,7 +729,10 @@ class TestVAEAnomalyDetectorAdvanced:
             context=None,
         )
 
-        assert "latent space" in explanation.lower() or "distribution" in explanation.lower()
+        assert (
+            "latent space" in explanation.lower()
+            or "distribution" in explanation.lower()
+        )
 
     def test_generate_explanation_no_specific_threshold_exceeded(self, detector):
         """Test explanation when only combined score exceeds threshold."""
@@ -769,7 +776,9 @@ class TestVAEAnomalyDetectorAdvanced:
         training_data = np.random.randn(100, 50)
         validation_data = np.random.randn(20, 50)
 
-        with patch.object(detector, "_save_best_model", new_callable=AsyncMock) as mock_save:
+        with patch.object(
+            detector, "_save_best_model", new_callable=AsyncMock
+        ) as mock_save:
             await detector.train(
                 training_data=training_data,
                 validation_data=validation_data,

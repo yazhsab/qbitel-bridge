@@ -30,28 +30,32 @@ class TracingConfig:
 
     def __init__(self):
         # Service information
-        self.service_name = os.getenv('OTEL_SERVICE_NAME', 'cronos-ai-engine')
-        self.service_version = os.getenv('CRONOS_VERSION', '1.0.0')
-        self.environment = os.getenv('CRONOS_ENVIRONMENT', 'development')
+        self.service_name = os.getenv("OTEL_SERVICE_NAME", "cronos-ai-engine")
+        self.service_version = os.getenv("CRONOS_VERSION", "1.0.0")
+        self.environment = os.getenv("CRONOS_ENVIRONMENT", "development")
 
         # Tracing configuration
-        self.enabled = os.getenv('OTEL_TRACING_ENABLED', 'true').lower() == 'true'
-        self.exporter_type = os.getenv('OTEL_EXPORTER_TYPE', 'jaeger')  # jaeger, otlp, console
+        self.enabled = os.getenv("OTEL_TRACING_ENABLED", "true").lower() == "true"
+        self.exporter_type = os.getenv(
+            "OTEL_EXPORTER_TYPE", "jaeger"
+        )  # jaeger, otlp, console
 
         # Jaeger configuration
-        self.jaeger_host = os.getenv('OTEL_JAEGER_HOST', 'localhost')
-        self.jaeger_port = int(os.getenv('OTEL_JAEGER_PORT', '6831'))
+        self.jaeger_host = os.getenv("OTEL_JAEGER_HOST", "localhost")
+        self.jaeger_port = int(os.getenv("OTEL_JAEGER_PORT", "6831"))
 
         # OTLP configuration
-        self.otlp_endpoint = os.getenv('OTEL_EXPORTER_OTLP_ENDPOINT', 'http://localhost:4317')
+        self.otlp_endpoint = os.getenv(
+            "OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317"
+        )
 
         # Sampling
-        self.sample_rate = float(os.getenv('OTEL_TRACE_SAMPLE_RATE', '1.0'))
+        self.sample_rate = float(os.getenv("OTEL_TRACE_SAMPLE_RATE", "1.0"))
 
         # Additional attributes
         self.resource_attributes = {
-            'deployment.environment': self.environment,
-            'service.namespace': 'cronos-ai',
+            "deployment.environment": self.environment,
+            "service.namespace": "cronos-ai",
         }
 
 
@@ -75,31 +79,34 @@ def initialize_tracing(config: Optional[TracingConfig] = None, app=None) -> bool
 
     try:
         # Create resource with service information
-        resource = Resource.create({
-            SERVICE_NAME: config.service_name,
-            SERVICE_VERSION: config.service_version,
-            **config.resource_attributes
-        })
+        resource = Resource.create(
+            {
+                SERVICE_NAME: config.service_name,
+                SERVICE_VERSION: config.service_version,
+                **config.resource_attributes,
+            }
+        )
 
         # Create tracer provider
         tracer_provider = TracerProvider(resource=resource)
 
         # Set up exporter based on configuration
-        if config.exporter_type == 'jaeger':
+        if config.exporter_type == "jaeger":
             exporter = JaegerExporter(
                 agent_host_name=config.jaeger_host,
                 agent_port=config.jaeger_port,
             )
-            logger.info(f"Using Jaeger exporter: {config.jaeger_host}:{config.jaeger_port}")
+            logger.info(
+                f"Using Jaeger exporter: {config.jaeger_host}:{config.jaeger_port}"
+            )
 
-        elif config.exporter_type == 'otlp':
+        elif config.exporter_type == "otlp":
             exporter = OTLPSpanExporter(
-                endpoint=config.otlp_endpoint,
-                insecure=True  # Use TLS in production
+                endpoint=config.otlp_endpoint, insecure=True  # Use TLS in production
             )
             logger.info(f"Using OTLP exporter: {config.otlp_endpoint}")
 
-        elif config.exporter_type == 'console':
+        elif config.exporter_type == "console":
             exporter = ConsoleSpanExporter()
             logger.info("Using console exporter (development)")
 
@@ -107,9 +114,7 @@ def initialize_tracing(config: Optional[TracingConfig] = None, app=None) -> bool
             raise ValueError(f"Unknown exporter type: {config.exporter_type}")
 
         # Add span processor
-        tracer_provider.add_span_processor(
-            BatchSpanProcessor(exporter)
-        )
+        tracer_provider.add_span_processor(BatchSpanProcessor(exporter))
 
         # Set global tracer provider
         trace.set_tracer_provider(tracer_provider)
@@ -177,7 +182,7 @@ def shutdown_tracing():
     """Shutdown tracing and flush remaining spans."""
     try:
         tracer_provider = trace.get_tracer_provider()
-        if hasattr(tracer_provider, 'shutdown'):
+        if hasattr(tracer_provider, "shutdown"):
             tracer_provider.shutdown()
             logger.info("OpenTelemetry tracing shutdown complete")
     except Exception as e:
@@ -197,7 +202,9 @@ def get_tracer(name: str = __name__) -> trace.Tracer:
     return trace.get_tracer(name)
 
 
-def trace_function(span_name: Optional[str] = None, attributes: Optional[Dict[str, Any]] = None):
+def trace_function(
+    span_name: Optional[str] = None, attributes: Optional[Dict[str, Any]] = None
+):
     """
     Decorator to trace a function with a custom span.
 
@@ -210,6 +217,7 @@ def trace_function(span_name: Optional[str] = None, attributes: Optional[Dict[st
         async def process_protocol(data):
             ...
     """
+
     def decorator(func: Callable) -> Callable:
         tracer = get_tracer(func.__module__)
 
@@ -223,17 +231,15 @@ def trace_function(span_name: Optional[str] = None, attributes: Optional[Dict[st
                         span.set_attribute(key, value)
 
                 # Add function details
-                span.set_attribute('code.function', func.__name__)
-                span.set_attribute('code.namespace', func.__module__)
+                span.set_attribute("code.function", func.__name__)
+                span.set_attribute("code.namespace", func.__module__)
 
                 try:
                     result = await func(*args, **kwargs)
                     span.set_status(trace.Status(trace.StatusCode.OK))
                     return result
                 except Exception as e:
-                    span.set_status(
-                        trace.Status(trace.StatusCode.ERROR, str(e))
-                    )
+                    span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
                     span.record_exception(e)
                     raise
 
@@ -246,21 +252,20 @@ def trace_function(span_name: Optional[str] = None, attributes: Optional[Dict[st
                     for key, value in attributes.items():
                         span.set_attribute(key, value)
 
-                span.set_attribute('code.function', func.__name__)
-                span.set_attribute('code.namespace', func.__module__)
+                span.set_attribute("code.function", func.__name__)
+                span.set_attribute("code.namespace", func.__module__)
 
                 try:
                     result = func(*args, **kwargs)
                     span.set_status(trace.Status(trace.StatusCode.OK))
                     return result
                 except Exception as e:
-                    span.set_status(
-                        trace.Status(trace.StatusCode.ERROR, str(e))
-                    )
+                    span.set_status(trace.Status(trace.StatusCode.ERROR, str(e)))
                     span.record_exception(e)
                     raise
 
         import asyncio
+
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
         else:
@@ -327,7 +332,9 @@ class TracedOperation:
             pass
     """
 
-    def __init__(self, operation_name: str, attributes: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self, operation_name: str, attributes: Optional[Dict[str, Any]] = None
+    ):
         self.operation_name = operation_name
         self.attributes = attributes or {}
         self.span = None
@@ -356,6 +363,7 @@ class TracedOperation:
 
 # Specialized tracers for common operations
 
+
 def trace_database_query(query: str, params: Optional[Dict] = None):
     """
     Create a span for a database query.
@@ -368,13 +376,13 @@ def trace_database_query(query: str, params: Optional[Dict] = None):
         TracedOperation context manager
     """
     attributes = {
-        'db.system': 'postgresql',
-        'db.statement': query[:200],  # Truncate long queries
+        "db.system": "postgresql",
+        "db.statement": query[:200],  # Truncate long queries
     }
     if params:
-        attributes['db.params'] = str(params)[:100]
+        attributes["db.params"] = str(params)[:100]
 
-    return TracedOperation('db.query', attributes)
+    return TracedOperation("db.query", attributes)
 
 
 def trace_llm_request(provider: str, model: str, prompt_length: int):
@@ -390,12 +398,12 @@ def trace_llm_request(provider: str, model: str, prompt_length: int):
         TracedOperation context manager
     """
     attributes = {
-        'llm.provider': provider,
-        'llm.model': model,
-        'llm.prompt_length': prompt_length,
+        "llm.provider": provider,
+        "llm.model": model,
+        "llm.prompt_length": prompt_length,
     }
 
-    return TracedOperation('llm.request', attributes)
+    return TracedOperation("llm.request", attributes)
 
 
 def trace_ai_inference(model_type: str, input_size: int):
@@ -410,11 +418,11 @@ def trace_ai_inference(model_type: str, input_size: int):
         TracedOperation context manager
     """
     attributes = {
-        'ai.model_type': model_type,
-        'ai.input_size': input_size,
+        "ai.model_type": model_type,
+        "ai.input_size": input_size,
     }
 
-    return TracedOperation('ai.inference', attributes)
+    return TracedOperation("ai.inference", attributes)
 
 
 def trace_cache_operation(operation: str, key: str, hit: Optional[bool] = None):
@@ -430,13 +438,13 @@ def trace_cache_operation(operation: str, key: str, hit: Optional[bool] = None):
         TracedOperation context manager
     """
     attributes = {
-        'cache.operation': operation,
-        'cache.key': key,
+        "cache.operation": operation,
+        "cache.key": key,
     }
     if hit is not None:
-        attributes['cache.hit'] = hit
+        attributes["cache.hit"] = hit
 
-    return TracedOperation('cache.operation', attributes)
+    return TracedOperation("cache.operation", attributes)
 
 
 # Health check helper
@@ -452,10 +460,7 @@ def get_tracing_health() -> Dict[str, Any]:
         tracer_provider = trace.get_tracer_provider()
 
         if not config.enabled:
-            return {
-                "status": "disabled",
-                "enabled": False
-            }
+            return {"status": "disabled", "enabled": False}
 
         if tracer_provider:
             return {
@@ -463,45 +468,42 @@ def get_tracing_health() -> Dict[str, Any]:
                 "enabled": True,
                 "service_name": config.service_name,
                 "exporter_type": config.exporter_type,
-                "sample_rate": config.sample_rate
+                "sample_rate": config.sample_rate,
             }
         else:
             return {
                 "status": "unhealthy",
                 "enabled": True,
-                "error": "Tracer provider not initialized"
+                "error": "Tracer provider not initialized",
             }
 
     except Exception as e:
-        return {
-            "status": "error",
-            "error": str(e),
-            "enabled": False
-        }
+        return {"status": "error", "error": str(e), "enabled": False}
 
 
 # Example usage for specific CRONOS AI operations
 
-@trace_function('protocol_discovery', {'component': 'ai_engine'})
+
+@trace_function("protocol_discovery", {"component": "ai_engine"})
 async def trace_protocol_discovery(packet_data: bytes):
     """Example traced protocol discovery function."""
-    add_span_attribute('packet_size', len(packet_data))
-    add_span_event('discovery_started', {'packet_hash': hash(packet_data)})
+    add_span_attribute("packet_size", len(packet_data))
+    add_span_event("discovery_started", {"packet_hash": hash(packet_data)})
     # Your protocol discovery logic here
     pass
 
 
-@trace_function('field_detection', {'component': 'ai_engine'})
+@trace_function("field_detection", {"component": "ai_engine"})
 async def trace_field_detection(protocol_data: Dict):
     """Example traced field detection function."""
-    add_span_attribute('field_count', len(protocol_data))
+    add_span_attribute("field_count", len(protocol_data))
     # Your field detection logic here
     pass
 
 
-@trace_function('anomaly_detection', {'component': 'ai_engine'})
+@trace_function("anomaly_detection", {"component": "ai_engine"})
 async def trace_anomaly_detection(sequence_data: list):
     """Example traced anomaly detection function."""
-    add_span_attribute('sequence_length', len(sequence_data))
+    add_span_attribute("sequence_length", len(sequence_data))
     # Your anomaly detection logic here
     pass

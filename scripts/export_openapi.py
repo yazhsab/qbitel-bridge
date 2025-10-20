@@ -48,17 +48,20 @@ def export_openapi(output_file: str, format: str = "json"):
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     if format == "json":
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             json.dump(openapi_schema, f, indent=2, sort_keys=False)
         print(f"✓ OpenAPI JSON specification exported to: {output_path}")
     elif format == "yaml":
         try:
             import yaml
-            with open(output_path, 'w') as f:
+
+            with open(output_path, "w") as f:
                 yaml.dump(openapi_schema, f, default_flow_style=False, sort_keys=False)
             print(f"✓ OpenAPI YAML specification exported to: {output_path}")
         except ImportError:
-            print("ERROR: PyYAML is required for YAML output. Install with: pip install pyyaml")
+            print(
+                "ERROR: PyYAML is required for YAML output. Install with: pip install pyyaml"
+            )
             sys.exit(1)
     else:
         print(f"ERROR: Unsupported format: {format}")
@@ -87,20 +90,20 @@ def main():
         description="Export OpenAPI specification for CRONOS AI API"
     )
     parser.add_argument(
-        "-o", "--output",
+        "-o",
+        "--output",
         default="docs/openapi.json",
-        help="Output file path (default: docs/openapi.json)"
+        help="Output file path (default: docs/openapi.json)",
     )
     parser.add_argument(
-        "-f", "--format",
+        "-f",
+        "--format",
         choices=["json", "yaml"],
         default="json",
-        help="Output format (default: json)"
+        help="Output format (default: json)",
     )
     parser.add_argument(
-        "--validate",
-        action="store_true",
-        help="Validate the OpenAPI specification"
+        "--validate", action="store_true", help="Validate the OpenAPI specification"
     )
 
     args = parser.parse_args()
@@ -112,10 +115,13 @@ def main():
             print("\nValidating OpenAPI specification...")
             try:
                 from openapi_spec_validator import validate_spec
+
                 validate_spec(schema)
                 print("✓ OpenAPI specification is valid!")
             except ImportError:
-                print("WARNING: openapi-spec-validator not installed. Skipping validation.")
+                print(
+                    "WARNING: openapi-spec-validator not installed. Skipping validation."
+                )
                 print("Install with: pip install openapi-spec-validator")
             except Exception as e:
                 print(f"✗ OpenAPI specification validation failed: {e}")
@@ -126,6 +132,7 @@ def main():
     except Exception as e:
         print(f"ERROR: Failed to export OpenAPI specification: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

@@ -13,12 +13,14 @@ class TestEnterpriseAuthenticationServiceBasic:
     @pytest.fixture
     def auth_service(self):
         """Create auth service with mocked config."""
-        with patch('ai_engine.api.auth_enterprise.get_config') as mock_config:
+        with patch("ai_engine.api.auth_enterprise.get_config") as mock_config:
             mock_config.return_value = Mock()
             mock_config.return_value.security = Mock()
-            mock_config.return_value.security.jwt_secret = "test_secret_key_that_is_long_enough_for_jwt"
-            
-            with patch('ai_engine.api.auth_enterprise.get_audit_logger') as mock_audit:
+            mock_config.return_value.security.jwt_secret = (
+                "test_secret_key_that_is_long_enough_for_jwt"
+            )
+
+            with patch("ai_engine.api.auth_enterprise.get_audit_logger") as mock_audit:
                 mock_audit.return_value = Mock()
                 return EnterpriseAuthenticationService()
 
@@ -36,13 +38,15 @@ class TestEnterpriseAuthenticationServiceBasic:
 
     def test_load_secret_key_failure(self):
         """Test secret key loading failure."""
-        with patch('ai_engine.api.auth_enterprise.get_config') as mock_config:
+        with patch("ai_engine.api.auth_enterprise.get_config") as mock_config:
             mock_config.return_value = Mock()
             mock_config.return_value.security = Mock()
             mock_config.return_value.security.jwt_secret = "short"
-            
-            with patch('ai_engine.api.auth_enterprise.get_audit_logger'):
-                with pytest.raises(ValueError, match="JWT secret not configured or too short"):
+
+            with patch("ai_engine.api.auth_enterprise.get_audit_logger"):
+                with pytest.raises(
+                    ValueError, match="JWT secret not configured or too short"
+                ):
                     EnterpriseAuthenticationService()
 
     def test_validate_password_strength_too_short(self, auth_service):
@@ -78,9 +82,9 @@ class TestEnterpriseAuthenticationServiceBasic:
         user_data = {
             "user_id": "user123",
             "username": "testuser",
-            "email": "test@example.com"
+            "email": "test@example.com",
         }
-        
+
         token = auth_service.create_access_token(user_data)
         assert token is not None
         assert isinstance(token, str)
@@ -91,9 +95,9 @@ class TestEnterpriseAuthenticationServiceBasic:
         user_data = {
             "user_id": "user123",
             "username": "testuser",
-            "email": "test@example.com"
+            "email": "test@example.com",
         }
-        
+
         token = auth_service.create_refresh_token(user_data)
         assert token is not None
         assert isinstance(token, str)
@@ -101,7 +105,7 @@ class TestEnterpriseAuthenticationServiceBasic:
 
     def test_generate_totp_secret(self, auth_service):
         """Test TOTP secret generation."""
-        with patch('ai_engine.api.auth_enterprise.pyotp.random_base32') as mock_random:
+        with patch("ai_engine.api.auth_enterprise.pyotp.random_base32") as mock_random:
             mock_random.return_value = "test_secret_key_123456"
             secret = auth_service.generate_totp_secret()
             assert secret is not None
@@ -128,11 +132,11 @@ class TestEnterpriseAuthenticationServiceBasic:
 
     def test_verify_totp(self, auth_service):
         """Test TOTP verification."""
-        with patch('ai_engine.api.auth_enterprise.pyotp.TOTP') as mock_totp:
+        with patch("ai_engine.api.auth_enterprise.pyotp.TOTP") as mock_totp:
             mock_totp_instance = Mock()
             mock_totp_instance.verify.return_value = True
             mock_totp.return_value = mock_totp_instance
-            
+
             result = auth_service.verify_totp("test_secret", "123456")
             assert isinstance(result, bool)
 
@@ -140,12 +144,12 @@ class TestEnterpriseAuthenticationServiceBasic:
         """Test auth service can handle concurrent operations."""
         # Test that multiple operations can be called without issues
         user_data = {"user_id": "user123", "username": "testuser"}
-        
+
         token1 = auth_service.create_access_token(user_data)
         token2 = auth_service.create_refresh_token(user_data)
         secret = auth_service.generate_totp_secret()
         codes = auth_service.generate_backup_codes()
-        
+
         assert token1 is not None
         assert token2 is not None
         assert secret is not None

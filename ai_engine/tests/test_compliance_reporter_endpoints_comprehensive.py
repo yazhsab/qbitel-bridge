@@ -51,6 +51,7 @@ from ai_engine.compliance.report_generator import ReportFormat, ReportType
 
 # Fixtures
 
+
 @pytest.fixture
 def mock_compliance_reporter():
     """Create mock compliance reporter."""
@@ -124,6 +125,7 @@ def sample_compliance_alert():
 
 # Report Generation Tests
 
+
 @pytest.mark.asyncio
 async def test_generate_compliance_report_success(
     mock_compliance_reporter, mock_background_tasks, sample_compliance_report
@@ -192,9 +194,7 @@ async def test_generate_compliance_report_all_formats():
     formats = ["pdf", "json", "html", "excel"]
 
     for fmt in formats:
-        request = ComplianceReportRequest(
-            protocol="test", standard="SOC2", format=fmt
-        )
+        request = ComplianceReportRequest(protocol="test", standard="SOC2", format=fmt)
 
         mock_reporter = AsyncMock()
         mock_report = Mock(
@@ -225,6 +225,7 @@ async def test_generate_compliance_report_all_formats():
 
 # Report Download Tests
 
+
 @pytest.mark.asyncio
 async def test_download_compliance_report_not_implemented():
     """Test report download endpoint (not yet implemented)."""
@@ -237,6 +238,7 @@ async def test_download_compliance_report_not_implemented():
 
 
 # Continuous Monitoring Tests
+
 
 @pytest.mark.asyncio
 async def test_start_continuous_monitoring_success(
@@ -332,6 +334,7 @@ async def test_start_monitoring_all_frequencies():
 
 # Monitoring Status Tests
 
+
 @pytest.mark.asyncio
 async def test_get_monitoring_status_success():
     """Test getting monitoring status."""
@@ -373,6 +376,7 @@ async def test_get_monitoring_status_failure(mock_compliance_reporter):
 
 
 # Compliance Alerts Tests
+
 
 @pytest.mark.asyncio
 async def test_get_compliance_alerts_success(
@@ -489,6 +493,7 @@ async def test_get_compliance_alerts_limit(mock_compliance_reporter):
 
 # Audit Evidence Tests
 
+
 @pytest.mark.asyncio
 async def test_generate_audit_evidence_success(
     mock_compliance_reporter, sample_audit_evidence
@@ -593,6 +598,7 @@ async def test_download_audit_evidence_not_implemented():
 
 # Framework Listing Tests
 
+
 @pytest.mark.asyncio
 async def test_list_compliance_frameworks_success(mock_compliance_reporter):
     """Test listing available compliance frameworks."""
@@ -648,6 +654,7 @@ async def test_list_compliance_frameworks_failure(mock_compliance_reporter):
 
 
 # Performance Metrics Tests
+
 
 @pytest.mark.asyncio
 async def test_get_performance_metrics_success():
@@ -712,6 +719,7 @@ async def test_get_performance_metrics_failure(mock_compliance_reporter):
 
 
 # Health Check Tests
+
 
 @pytest.mark.asyncio
 async def test_health_check_healthy():
@@ -778,6 +786,7 @@ async def test_health_check_exception():
 
 # Integration Tests
 
+
 @pytest.mark.asyncio
 async def test_full_compliance_workflow():
     """Test complete compliance workflow."""
@@ -801,9 +810,7 @@ async def test_full_compliance_workflow():
         assert health["status"] == "healthy"
 
         # 2. List frameworks
-        mock_reporter.regulatory_kb.get_available_frameworks.return_value = [
-            "SOC2"
-        ]
+        mock_reporter.regulatory_kb.get_available_frameworks.return_value = ["SOC2"]
         mock_reporter.regulatory_kb.get_framework_metadata.return_value = {
             "full_name": "SOC 2",
             "applicable_to": ["service_orgs"],
@@ -830,9 +837,7 @@ async def test_full_compliance_workflow():
         with patch(
             "ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"
         ):
-            request = ComplianceReportRequest(
-                protocol="workflow_test", standard="SOC2"
-            )
+            request = ComplianceReportRequest(protocol="workflow_test", standard="SOC2")
             report = await generate_compliance_report(
                 request, Mock(spec=BackgroundTasks)
             )
@@ -912,6 +917,7 @@ async def test_concurrent_report_generation(mock_compliance_reporter):
 
 # Request/Response Model Tests
 
+
 def test_compliance_report_request_validation():
     """Test ComplianceReportRequest validation."""
     request = ComplianceReportRequest(
@@ -954,6 +960,7 @@ def test_audit_request_model_validation():
 
 
 # Router Integration Tests
+
 
 def test_router_configuration():
     """Test router is properly configured."""

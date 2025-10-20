@@ -30,8 +30,10 @@ router = APIRouter(prefix="/api/v1/threat-intel", tags=["Threat Intelligence"])
 
 # Request/Response Models
 
+
 class EnrichEventRequest(BaseModel):
     """Request to enrich security event with TIP data."""
+
     event_id: str = Field(..., description="Unique event identifier")
     event_type: str = Field(..., description="Type of security event")
     severity: str = Field(..., description="Event severity level")
@@ -42,23 +44,31 @@ class EnrichEventRequest(BaseModel):
     destination_port: Optional[int] = Field(None, description="Destination port")
     protocol: Optional[str] = Field(None, description="Network protocol")
     user_id: Optional[str] = Field(None, description="User ID if available")
-    additional_context: Optional[Dict[str, Any]] = Field(None, description="Additional event context")
+    additional_context: Optional[Dict[str, Any]] = Field(
+        None, description="Additional event context"
+    )
 
 
 class EnrichEventResponse(BaseModel):
     """Response with TIP enrichment data."""
+
     event_id: str
     timestamp: str
     ioc_matches: List[Dict[str, Any]]
     ttp_mapping: Optional[Dict[str, Any]]
-    threat_score: float = Field(..., ge=0.0, le=1.0, description="Normalized threat score 0-1")
+    threat_score: float = Field(
+        ..., ge=0.0, le=1.0, description="Normalized threat score 0-1"
+    )
     recommendations: List[str]
     processing_time_ms: float
 
 
 class QueryIOCsRequest(BaseModel):
     """Request to query IOCs."""
-    indicator_type: Optional[str] = Field(None, description="Type of indicator (ipv4-addr, domain-name, etc)")
+
+    indicator_type: Optional[str] = Field(
+        None, description="Type of indicator (ipv4-addr, domain-name, etc)"
+    )
     labels: Optional[List[str]] = Field(None, description="Filter by labels")
     min_confidence: int = Field(0, ge=0, le=100, description="Minimum confidence score")
     limit: int = Field(100, ge=1, le=1000, description="Maximum results to return")
@@ -66,6 +76,7 @@ class QueryIOCsRequest(BaseModel):
 
 class QueryIOCsResponse(BaseModel):
     """Response with IOC query results."""
+
     indicators: List[Dict[str, Any]]
     total: int
     query_time_ms: float
@@ -73,13 +84,17 @@ class QueryIOCsResponse(BaseModel):
 
 class QueryTechniquesRequest(BaseModel):
     """Request to query MITRE ATT&CK techniques."""
-    query: Optional[str] = Field(None, description="Search query (technique name, ID, or description)")
+
+    query: Optional[str] = Field(
+        None, description="Search query (technique name, ID, or description)"
+    )
     tactic: Optional[str] = Field(None, description="Filter by tactic")
     limit: int = Field(10, ge=1, le=100, description="Maximum results to return")
 
 
 class QueryTechniquesResponse(BaseModel):
     """Response with technique query results."""
+
     techniques: List[Dict[str, Any]]
     total: int
     query_time_ms: float
@@ -87,13 +102,19 @@ class QueryTechniquesResponse(BaseModel):
 
 class ExecuteHuntRequest(BaseModel):
     """Request to execute threat hunting campaign."""
-    hypotheses: Optional[List[str]] = Field(None, description="Specific hypothesis IDs to hunt (None = all)")
-    time_range_hours: int = Field(24, ge=1, le=168, description="Time range to hunt in hours")
+
+    hypotheses: Optional[List[str]] = Field(
+        None, description="Specific hypothesis IDs to hunt (None = all)"
+    )
+    time_range_hours: int = Field(
+        24, ge=1, le=168, description="Time range to hunt in hours"
+    )
     description: Optional[str] = Field(None, description="Campaign description")
 
 
 class ExecuteHuntResponse(BaseModel):
     """Response with hunt campaign results."""
+
     campaign_id: str
     start_time: str
     end_time: str
@@ -106,6 +127,7 @@ class ExecuteHuntResponse(BaseModel):
 
 class FeedStatusResponse(BaseModel):
     """Response with IOC feed status."""
+
     feeds: List[Dict[str, Any]]
     total_feeds: int
     total_indicators: int
@@ -113,6 +135,7 @@ class FeedStatusResponse(BaseModel):
 
 class UpdateFeedResponse(BaseModel):
     """Response after updating IOC feed."""
+
     feed_id: str
     indicators_added: int
     update_time: str
@@ -121,6 +144,7 @@ class UpdateFeedResponse(BaseModel):
 
 class CoverageReportResponse(BaseModel):
     """Response with detection coverage report."""
+
     timestamp: str
     mitre_attack_coverage: Optional[Dict[str, Any]]
     ioc_feed_status: List[Dict[str, Any]]
@@ -128,6 +152,7 @@ class CoverageReportResponse(BaseModel):
 
 class HealthCheckResponse(BaseModel):
     """Response with TIP health status."""
+
     status: str
     initialized: bool
     components: Dict[str, bool]
@@ -138,6 +163,7 @@ class HealthCheckResponse(BaseModel):
 
 
 # API Endpoints
+
 
 @router.post("/enrich", response_model=EnrichEventResponse)
 async def enrich_security_event(
@@ -163,7 +189,7 @@ async def enrich_security_event(
         if not tip_manager._initialized:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Threat Intelligence Platform not initialized"
+                detail="Threat Intelligence Platform not initialized",
             )
 
         # Convert request to SecurityEvent
@@ -201,13 +227,13 @@ async def enrich_security_event(
         logger.error(f"TIP enrichment failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"TIP enrichment failed: {str(e)}"
+            detail=f"TIP enrichment failed: {str(e)}",
         )
     except Exception as e:
         logger.error(f"Unexpected error in TIP enrichment: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error during TIP enrichment"
+            detail="Internal server error during TIP enrichment",
         )
 
 
@@ -231,7 +257,7 @@ async def query_iocs(
         if not tip_manager._initialized:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Threat Intelligence Platform not initialized"
+                detail="Threat Intelligence Platform not initialized",
             )
 
         result = await tip_manager.query_threat_intelligence(
@@ -241,7 +267,7 @@ async def query_iocs(
                 "labels": request.labels,
                 "min_confidence": request.min_confidence,
                 "limit": request.limit,
-            }
+            },
         )
 
         query_time = (datetime.utcnow() - start_time).total_seconds() * 1000
@@ -256,13 +282,13 @@ async def query_iocs(
         logger.error(f"IOC query failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"IOC query failed: {str(e)}"
+            detail=f"IOC query failed: {str(e)}",
         )
     except Exception as e:
         logger.error(f"Unexpected error in IOC query: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error during IOC query"
+            detail="Internal server error during IOC query",
         )
 
 
@@ -286,7 +312,7 @@ async def query_techniques(
         if not tip_manager._initialized:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Threat Intelligence Platform not initialized"
+                detail="Threat Intelligence Platform not initialized",
             )
 
         result = await tip_manager.query_threat_intelligence(
@@ -295,7 +321,7 @@ async def query_techniques(
                 "query": request.query,
                 "tactic": request.tactic,
                 "limit": request.limit,
-            }
+            },
         )
 
         query_time = (datetime.utcnow() - start_time).total_seconds() * 1000
@@ -310,13 +336,13 @@ async def query_techniques(
         logger.error(f"Technique query failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Technique query failed: {str(e)}"
+            detail=f"Technique query failed: {str(e)}",
         )
     except Exception as e:
         logger.error(f"Unexpected error in technique query: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error during technique query"
+            detail="Internal server error during technique query",
         )
 
 
@@ -340,7 +366,7 @@ async def execute_threat_hunt(
         if not tip_manager._initialized:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Threat Intelligence Platform not initialized"
+                detail="Threat Intelligence Platform not initialized",
             )
 
         campaign = await tip_manager.execute_threat_hunt(
@@ -350,7 +376,8 @@ async def execute_threat_hunt(
 
         # Count high severity findings
         high_severity = sum(
-            1 for finding in campaign.findings
+            1
+            for finding in campaign.findings
             if finding.severity in ["high", "critical"]
         )
 
@@ -359,7 +386,11 @@ async def execute_threat_hunt(
         return ExecuteHuntResponse(
             campaign_id=campaign.campaign_id,
             start_time=campaign.start_time.isoformat(),
-            end_time=campaign.end_time.isoformat() if campaign.end_time else datetime.utcnow().isoformat(),
+            end_time=(
+                campaign.end_time.isoformat()
+                if campaign.end_time
+                else datetime.utcnow().isoformat()
+            ),
             hypotheses_tested=len(campaign.hypotheses_tested),
             findings_count=len(campaign.findings),
             high_severity_findings=high_severity,
@@ -371,13 +402,13 @@ async def execute_threat_hunt(
         logger.error(f"Threat hunt execution failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Threat hunt execution failed: {str(e)}"
+            detail=f"Threat hunt execution failed: {str(e)}",
         )
     except Exception as e:
         logger.error(f"Unexpected error in threat hunt execution: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error during threat hunt execution"
+            detail="Internal server error during threat hunt execution",
         )
 
 
@@ -401,7 +432,7 @@ async def get_feed_status(
         if not tip_manager._initialized:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Threat Intelligence Platform not initialized"
+                detail="Threat Intelligence Platform not initialized",
             )
 
         feeds = []
@@ -409,16 +440,20 @@ async def get_feed_status(
 
         if tip_manager.stix_client:
             for feed_id, feed in tip_manager.stix_client.ioc_feeds.items():
-                feeds.append({
-                    "feed_id": feed_id,
-                    "name": feed.name,
-                    "source": feed.source,
-                    "feed_type": feed.feed_type,
-                    "enabled": feed.enabled,
-                    "last_update": feed.last_update.isoformat() if feed.last_update else None,
-                    "update_interval_hours": feed.update_interval_hours,
-                    "indicators_count": feed.indicators_count,
-                })
+                feeds.append(
+                    {
+                        "feed_id": feed_id,
+                        "name": feed.name,
+                        "source": feed.source,
+                        "feed_type": feed.feed_type,
+                        "enabled": feed.enabled,
+                        "last_update": (
+                            feed.last_update.isoformat() if feed.last_update else None
+                        ),
+                        "update_interval_hours": feed.update_interval_hours,
+                        "indicators_count": feed.indicators_count,
+                    }
+                )
                 total_indicators += feed.indicators_count
 
         return FeedStatusResponse(
@@ -431,13 +466,13 @@ async def get_feed_status(
         logger.error(f"Failed to get feed status: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get feed status: {str(e)}"
+            detail=f"Failed to get feed status: {str(e)}",
         )
     except Exception as e:
         logger.error(f"Unexpected error getting feed status: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error getting feed status"
+            detail="Internal server error getting feed status",
         )
 
 
@@ -461,7 +496,7 @@ async def update_feed(
         if not tip_manager._initialized:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Threat Intelligence Platform not initialized"
+                detail="Threat Intelligence Platform not initialized",
             )
 
         results = await tip_manager.update_ioc_feeds(feed_ids=[feed_id])
@@ -469,7 +504,7 @@ async def update_feed(
         if feed_id not in results:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Feed not found: {feed_id}"
+                detail=f"Feed not found: {feed_id}",
             )
 
         indicators_added = results[feed_id]
@@ -488,13 +523,13 @@ async def update_feed(
         logger.error(f"Feed update failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Feed update failed: {str(e)}"
+            detail=f"Feed update failed: {str(e)}",
         )
     except Exception as e:
         logger.error(f"Unexpected error updating feed: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error during feed update"
+            detail="Internal server error during feed update",
         )
 
 
@@ -517,7 +552,7 @@ async def get_coverage_report(
         if not tip_manager._initialized:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Threat Intelligence Platform not initialized"
+                detail="Threat Intelligence Platform not initialized",
             )
 
         report = tip_manager.get_coverage_report()
@@ -532,13 +567,13 @@ async def get_coverage_report(
         logger.error(f"Failed to get coverage report: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get coverage report: {str(e)}"
+            detail=f"Failed to get coverage report: {str(e)}",
         )
     except Exception as e:
         logger.error(f"Unexpected error getting coverage report: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error getting coverage report"
+            detail="Internal server error getting coverage report",
         )
 
 

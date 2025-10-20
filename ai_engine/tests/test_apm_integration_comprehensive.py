@@ -37,9 +37,9 @@ class TestAPMTransaction:
             name="test_transaction",
             type=TransactionType.REQUEST,
             start_time=time.time(),
-            context={"user_id": "user123", "request_id": "req456"}
+            context={"user_id": "user123", "request_id": "req456"},
         )
-        
+
         assert transaction.transaction_id == "txn-123"
         assert transaction.name == "test_transaction"
         assert transaction.type == TransactionType.REQUEST
@@ -57,14 +57,14 @@ class TestAPMTransaction:
             transaction_id="txn-456",
             name="test_transaction",
             type=TransactionType.REQUEST,
-            start_time=start_time
+            start_time=start_time,
         )
-        
+
         # Wait a bit to ensure duration > 0
         time.sleep(0.01)
-        
+
         transaction.finish("success")
-        
+
         assert transaction.result == "success"
         assert transaction.end_time is not None
         assert transaction.end_time > start_time
@@ -77,11 +77,11 @@ class TestAPMTransaction:
             transaction_id="txn-789",
             name="error_transaction",
             type=TransactionType.REQUEST,
-            start_time=time.time()
+            start_time=time.time(),
         )
-        
+
         transaction.finish("error")
-        
+
         assert transaction.result == "error"
 
     def test_apm_transaction_add_error(self):
@@ -90,12 +90,12 @@ class TestAPMTransaction:
             transaction_id="txn-error",
             name="error_transaction",
             type=TransactionType.REQUEST,
-            start_time=time.time()
+            start_time=time.time(),
         )
-        
+
         error = ValueError("Test error message")
         transaction.add_error(error, handled=True)
-        
+
         assert len(transaction.errors) == 1
         error_data = transaction.errors[0]
         assert error_data["type"] == "ValueError"
@@ -109,12 +109,12 @@ class TestAPMTransaction:
             transaction_id="txn-unhandled",
             name="unhandled_error_transaction",
             type=TransactionType.REQUEST,
-            start_time=time.time()
+            start_time=time.time(),
         )
-        
+
         error = RuntimeError("Unhandled error")
         transaction.add_error(error, handled=False)
-        
+
         assert len(transaction.errors) == 1
         error_data = transaction.errors[0]
         assert error_data["handled"] is False
@@ -125,12 +125,12 @@ class TestAPMTransaction:
             transaction_id="txn-metric",
             name="metric_transaction",
             type=TransactionType.REQUEST,
-            start_time=time.time()
+            start_time=time.time(),
         )
-        
+
         transaction.set_custom_metric("response_time", 150.5)
         transaction.set_custom_metric("memory_usage", 1024.0)
-        
+
         assert transaction.custom_metrics["response_time"] == 150.5
         assert transaction.custom_metrics["memory_usage"] == 1024.0
 
@@ -140,13 +140,13 @@ class TestAPMTransaction:
             transaction_id="txn-multi-error",
             name="multi_error_transaction",
             type=TransactionType.REQUEST,
-            start_time=time.time()
+            start_time=time.time(),
         )
-        
+
         transaction.add_error(ValueError("First error"))
         transaction.add_error(RuntimeError("Second error"))
         transaction.add_error(KeyError("Third error"))
-        
+
         assert len(transaction.errors) == 3
         assert transaction.errors[0]["type"] == "ValueError"
         assert transaction.errors[1]["type"] == "RuntimeError"
@@ -186,9 +186,9 @@ class TestElasticAPMIntegration:
     @pytest.mark.asyncio
     async def test_elastic_apm_initialize(self, elastic_apm):
         """Test ElasticAPMIntegration initialization."""
-        with patch('aiohttp.ClientSession') as mock_session:
+        with patch("aiohttp.ClientSession") as mock_session:
             await elastic_apm.initialize()
-            
+
             assert elastic_apm._session is not None
             assert elastic_apm._flush_task is not None
             mock_session.assert_called_once()
@@ -200,9 +200,9 @@ class TestElasticAPMIntegration:
         elastic_apm._session = AsyncMock()
         elastic_apm._flush_task = AsyncMock()
         elastic_apm._flush_task.cancel = Mock()
-        
+
         await elastic_apm.shutdown()
-        
+
         elastic_apm._flush_task.cancel.assert_called_once()
         elastic_apm._session.close.assert_called_once()
 
@@ -213,13 +213,13 @@ class TestElasticAPMIntegration:
             transaction_id="txn-123",
             name="test_transaction",
             type=TransactionType.REQUEST,
-            start_time=time.time()
+            start_time=time.time(),
         )
         transaction.finish("success")
-        
-        with patch.object(elastic_apm, '_flush_batch') as mock_flush:
+
+        with patch.object(elastic_apm, "_flush_batch") as mock_flush:
             await elastic_apm.send_transaction(transaction)
-            
+
             assert len(elastic_apm._transaction_queue) == 1
             assert elastic_apm._transaction_queue[0] == transaction
 
@@ -232,23 +232,23 @@ class TestElasticAPMIntegration:
                 transaction_id=f"txn-{i}",
                 name=f"transaction_{i}",
                 type=TransactionType.REQUEST,
-                start_time=time.time()
+                start_time=time.time(),
             )
             transaction.finish("success")
             elastic_apm._transaction_queue.append(transaction)
-        
-        with patch.object(elastic_apm, '_flush_batch') as mock_flush:
+
+        with patch.object(elastic_apm, "_flush_batch") as mock_flush:
             # Add one more transaction to trigger flush
             extra_transaction = APMTransaction(
                 transaction_id="txn-extra",
                 name="extra_transaction",
                 type=TransactionType.REQUEST,
-                start_time=time.time()
+                start_time=time.time(),
             )
             extra_transaction.finish("success")
-            
+
             await elastic_apm.send_transaction(extra_transaction)
-            
+
             mock_flush.assert_called_once()
 
     @pytest.mark.asyncio
@@ -260,12 +260,12 @@ class TestElasticAPMIntegration:
                 transaction_id=f"txn-{i}",
                 name=f"transaction_{i}",
                 type=TransactionType.REQUEST,
-                start_time=time.time()
+                start_time=time.time(),
             )
             transaction.finish("success")
             elastic_apm._transaction_queue.append(transaction)
-        
-        with patch.object(elastic_apm, '_flush_batch') as mock_flush:
+
+        with patch.object(elastic_apm, "_flush_batch") as mock_flush:
             await elastic_apm.flush()
             mock_flush.assert_called_once()
 
@@ -274,22 +274,22 @@ class TestElasticAPMIntegration:
         """Test background flush loop."""
         elastic_apm._session = AsyncMock()
         elastic_apm._transaction_queue.append(Mock())
-        
-        with patch.object(elastic_apm, '_flush_batch') as mock_flush:
+
+        with patch.object(elastic_apm, "_flush_batch") as mock_flush:
             # Start flush loop
             task = asyncio.create_task(elastic_apm._flush_loop())
-            
+
             # Wait a bit for the loop to run
             await asyncio.sleep(0.1)
-            
+
             # Cancel the task
             task.cancel()
-            
+
             try:
                 await task
             except asyncio.CancelledError:
                 pass
-            
+
             # Should have called flush at least once
             mock_flush.assert_called()
 
@@ -303,21 +303,21 @@ class TestElasticAPMIntegration:
                 transaction_id=f"txn-{i}",
                 name=f"transaction_{i}",
                 type=TransactionType.REQUEST,
-                start_time=time.time()
+                start_time=time.time(),
             )
             transaction.finish("success")
             transactions.append(transaction)
-        
+
         elastic_apm._transaction_queue.extend(transactions)
         elastic_apm._session = AsyncMock()
-        
+
         # Mock successful response
         mock_response = AsyncMock()
         mock_response.status = 202
         elastic_apm._session.post.return_value.__aenter__.return_value = mock_response
-        
+
         await elastic_apm._flush_batch()
-        
+
         assert len(elastic_apm._transaction_queue) == 0
         assert elastic_apm.transactions_sent == 3
         elastic_apm._session.post.assert_called_once()
@@ -330,21 +330,21 @@ class TestElasticAPMIntegration:
             transaction_id="txn-error",
             name="error_transaction",
             type=TransactionType.REQUEST,
-            start_time=time.time()
+            start_time=time.time(),
         )
         transaction.add_error(ValueError("Test error"))
         transaction.finish("error")
-        
+
         elastic_apm._transaction_queue.append(transaction)
         elastic_apm._session = AsyncMock()
-        
+
         # Mock successful response
         mock_response = AsyncMock()
         mock_response.status = 202
         elastic_apm._session.post.return_value.__aenter__.return_value = mock_response
-        
+
         await elastic_apm._flush_batch()
-        
+
         assert elastic_apm.transactions_sent == 1
         assert elastic_apm.errors_sent == 1
 
@@ -355,21 +355,21 @@ class TestElasticAPMIntegration:
             transaction_id="txn-fail",
             name="fail_transaction",
             type=TransactionType.REQUEST,
-            start_time=time.time()
+            start_time=time.time(),
         )
         transaction.finish("success")
-        
+
         elastic_apm._transaction_queue.append(transaction)
         elastic_apm._session = AsyncMock()
-        
+
         # Mock failed response
         mock_response = AsyncMock()
         mock_response.status = 500
         elastic_apm._session.post.return_value.__aenter__.return_value = mock_response
-        
+
         # Should not raise exception
         await elastic_apm._flush_batch()
-        
+
         elastic_apm._session.post.assert_called_once()
 
     @pytest.mark.asyncio
@@ -379,19 +379,19 @@ class TestElasticAPMIntegration:
             transaction_id="txn-exception",
             name="exception_transaction",
             type=TransactionType.REQUEST,
-            start_time=time.time()
+            start_time=time.time(),
         )
         transaction.finish("success")
-        
+
         elastic_apm._transaction_queue.append(transaction)
         elastic_apm._session = AsyncMock()
-        
+
         # Mock exception
         elastic_apm._session.post.side_effect = Exception("Network error")
-        
+
         # Should not raise exception
         await elastic_apm._flush_batch()
-        
+
         elastic_apm._session.post.assert_called_once()
 
 
@@ -427,9 +427,9 @@ class TestDatadogAPMIntegration:
     @pytest.mark.asyncio
     async def test_datadog_apm_initialize(self, datadog_apm):
         """Test DatadogAPMIntegration initialization."""
-        with patch('aiohttp.ClientSession') as mock_session:
+        with patch("aiohttp.ClientSession") as mock_session:
             await datadog_apm.initialize()
-            
+
             assert datadog_apm._session is not None
             assert datadog_apm._flush_task is not None
             mock_session.assert_called_once()
@@ -441,9 +441,9 @@ class TestDatadogAPMIntegration:
         datadog_apm._session = AsyncMock()
         datadog_apm._flush_task = AsyncMock()
         datadog_apm._flush_task.cancel = Mock()
-        
+
         await datadog_apm.shutdown()
-        
+
         datadog_apm._flush_task.cancel.assert_called_once()
         datadog_apm._session.close.assert_called_once()
 
@@ -454,13 +454,13 @@ class TestDatadogAPMIntegration:
             transaction_id="txn-123",
             name="test_transaction",
             type=TransactionType.REQUEST,
-            start_time=time.time()
+            start_time=time.time(),
         )
         transaction.finish("success")
-        
-        with patch.object(datadog_apm, '_flush_batch') as mock_flush:
+
+        with patch.object(datadog_apm, "_flush_batch") as mock_flush:
             await datadog_apm.send_transaction(transaction)
-            
+
             assert len(datadog_apm._transaction_queue) == 1
             assert datadog_apm._transaction_queue[0] == transaction
 
@@ -474,21 +474,21 @@ class TestDatadogAPMIntegration:
                 transaction_id=f"txn-{i}",
                 name=f"transaction_{i}",
                 type=TransactionType.REQUEST,
-                start_time=time.time()
+                start_time=time.time(),
             )
             transaction.finish("success")
             transactions.append(transaction)
-        
+
         datadog_apm._transaction_queue.extend(transactions)
         datadog_apm._session = AsyncMock()
-        
+
         # Mock successful response
         mock_response = AsyncMock()
         mock_response.status = 200
         datadog_apm._session.put.return_value.__aenter__.return_value = mock_response
-        
+
         await datadog_apm._flush_batch()
-        
+
         assert len(datadog_apm._transaction_queue) == 0
         assert datadog_apm.transactions_sent == 3
         datadog_apm._session.put.assert_called_once()
@@ -500,21 +500,21 @@ class TestDatadogAPMIntegration:
             transaction_id="txn-fail",
             name="fail_transaction",
             type=TransactionType.REQUEST,
-            start_time=time.time()
+            start_time=time.time(),
         )
         transaction.finish("success")
-        
+
         datadog_apm._transaction_queue.append(transaction)
         datadog_apm._session = AsyncMock()
-        
+
         # Mock failed response
         mock_response = AsyncMock()
         mock_response.status = 500
         datadog_apm._session.put.return_value.__aenter__.return_value = mock_response
-        
+
         # Should not raise exception
         await datadog_apm._flush_batch()
-        
+
         datadog_apm._session.put.assert_called_once()
 
 
@@ -535,8 +535,10 @@ class TestAPMManager:
     @pytest.fixture
     def apm_manager(self, mock_config):
         """Create APMManager instance."""
-        with patch('ai_engine.monitoring.apm_integration.ElasticAPMIntegration'), \
-             patch('ai_engine.monitoring.apm_integration.DatadogAPMIntegration'):
+        with (
+            patch("ai_engine.monitoring.apm_integration.ElasticAPMIntegration"),
+            patch("ai_engine.monitoring.apm_integration.DatadogAPMIntegration"),
+        ):
             return APMManager(mock_config)
 
     def test_apm_manager_initialization(self, apm_manager, mock_config):
@@ -551,14 +553,14 @@ class TestAPMManager:
         # Mock integrations
         for integration in apm_manager.integrations:
             integration.initialize = AsyncMock()
-        
-        with patch('asyncio.create_task') as mock_create_task:
+
+        with patch("asyncio.create_task") as mock_create_task:
             await apm_manager.initialize()
-            
+
             # Should initialize all integrations
             for integration in apm_manager.integrations:
                 integration.initialize.assert_called_once()
-            
+
             # Should start metrics collection
             mock_create_task.assert_called()
 
@@ -568,16 +570,16 @@ class TestAPMManager:
         # Mock metrics task
         apm_manager._metrics_task = AsyncMock()
         apm_manager._metrics_task.cancel = Mock()
-        
+
         # Mock integrations
         for integration in apm_manager.integrations:
             integration.shutdown = AsyncMock()
-        
+
         await apm_manager.shutdown()
-        
+
         # Should cancel metrics task
         apm_manager._metrics_task.cancel.assert_called_once()
-        
+
         # Should shutdown all integrations
         for integration in apm_manager.integrations:
             integration.shutdown.assert_called_once()
@@ -588,19 +590,21 @@ class TestAPMManager:
         # Mock integrations
         for integration in apm_manager.integrations:
             integration.send_transaction = AsyncMock()
-        
-        async with apm_manager.transaction("test_operation", TransactionType.REQUEST) as txn:
+
+        async with apm_manager.transaction(
+            "test_operation", TransactionType.REQUEST
+        ) as txn:
             assert txn.name == "test_operation"
             assert txn.type == TransactionType.REQUEST
             assert txn.transaction_id in apm_manager._active_transactions
-            
+
             # Add some context
             txn.set_custom_metric("test_metric", 123.45)
-        
+
         # Should send transaction to all integrations
         for integration in apm_manager.integrations:
             integration.send_transaction.assert_called_once()
-        
+
         # Should remove from active transactions
         assert len(apm_manager._active_transactions) == 0
 
@@ -610,16 +614,18 @@ class TestAPMManager:
         # Mock integrations
         for integration in apm_manager.integrations:
             integration.send_transaction = AsyncMock()
-        
+
         with pytest.raises(ValueError):
-            async with apm_manager.transaction("error_operation", TransactionType.REQUEST) as txn:
+            async with apm_manager.transaction(
+                "error_operation", TransactionType.REQUEST
+            ) as txn:
                 assert txn.name == "error_operation"
                 raise ValueError("Test error")
-        
+
         # Should send transaction with error to all integrations
         for integration in apm_manager.integrations:
             integration.send_transaction.assert_called_once()
-        
+
         # Should remove from active transactions
         assert len(apm_manager._active_transactions) == 0
 
@@ -629,12 +635,14 @@ class TestAPMManager:
         # Mock integrations
         for integration in apm_manager.integrations:
             integration.send_transaction = AsyncMock()
-        
+
         context = {"user_id": "user123", "request_id": "req456"}
-        
-        async with apm_manager.transaction("context_operation", TransactionType.REQUEST, context) as txn:
+
+        async with apm_manager.transaction(
+            "context_operation", TransactionType.REQUEST, context
+        ) as txn:
             assert txn.context == context
-        
+
         # Should send transaction to all integrations
         for integration in apm_manager.integrations:
             integration.send_transaction.assert_called_once()
@@ -642,19 +650,21 @@ class TestAPMManager:
     @pytest.mark.asyncio
     async def test_apm_manager_collect_system_metrics(self, apm_manager):
         """Test system metrics collection."""
-        with patch('psutil.cpu_percent') as mock_cpu, \
-             patch('psutil.virtual_memory') as mock_memory, \
-             patch('psutil.disk_usage') as mock_disk, \
-             patch('psutil.net_io_counters') as mock_net:
-            
+        with (
+            patch("psutil.cpu_percent") as mock_cpu,
+            patch("psutil.virtual_memory") as mock_memory,
+            patch("psutil.disk_usage") as mock_disk,
+            patch("psutil.net_io_counters") as mock_net,
+        ):
+
             # Mock system metrics
             mock_cpu.return_value = 25.5
-            mock_memory.return_value = Mock(percent=60.0, available=1024*1024*1024)
-            mock_disk.return_value = Mock(percent=45.0, free=1024*1024*1024*1024)
+            mock_memory.return_value = Mock(percent=60.0, available=1024 * 1024 * 1024)
+            mock_disk.return_value = Mock(percent=45.0, free=1024 * 1024 * 1024 * 1024)
             mock_net.return_value = Mock(bytes_sent=1000, bytes_recv=2000)
-            
+
             await apm_manager._collect_system_metrics()
-            
+
             assert "cpu_percent" in apm_manager._system_metrics
             assert "memory_percent" in apm_manager._system_metrics
             assert "disk_percent" in apm_manager._system_metrics
@@ -667,11 +677,11 @@ class TestAPMManager:
         apm_manager._system_metrics = {
             "cpu_percent": 25.5,
             "memory_percent": 60.0,
-            "disk_percent": 45.0
+            "disk_percent": 45.0,
         }
-        
+
         metrics = apm_manager.get_system_metrics()
-        
+
         assert metrics["cpu_percent"] == 25.5
         assert metrics["memory_percent"] == 60.0
         assert metrics["disk_percent"] == 45.0
@@ -682,11 +692,11 @@ class TestAPMManager:
         apm_manager.integrations[0].transactions_sent = 100
         apm_manager.integrations[0].errors_sent = 5
         apm_manager.integrations[1].transactions_sent = 150
-        
+
         apm_manager._system_metrics = {"cpu_percent": 25.5}
-        
+
         stats = apm_manager.get_statistics()
-        
+
         assert stats["active_transactions"] == 0
         assert len(stats["integrations"]) == 2
         assert stats["system_metrics"]["cpu_percent"] == 25.5
@@ -701,13 +711,15 @@ class TestAPMIntegration:
         mock_config = Mock(spec=Config)
         mock_config.enable_elastic_apm = True
         mock_config.enable_datadog_apm = False
-        
-        with patch('ai_engine.monitoring.apm_integration.APMManager') as mock_manager_class:
+
+        with patch(
+            "ai_engine.monitoring.apm_integration.APMManager"
+        ) as mock_manager_class:
             mock_manager = AsyncMock()
             mock_manager_class.return_value = mock_manager
-            
+
             manager = await initialize_apm(mock_config)
-            
+
             assert manager == mock_manager
             mock_manager.initialize.assert_called_once()
 
@@ -715,23 +727,25 @@ class TestAPMIntegration:
         """Test getting global APM manager."""
         # Test when no manager is set
         from ai_engine.monitoring.apm_integration import _apm_manager
+
         original_manager = _apm_manager
-        
+
         try:
             # Clear global manager
             import ai_engine.monitoring.apm_integration
+
             ai_engine.monitoring.apm_integration._apm_manager = None
-            
+
             manager = get_apm_manager()
             assert manager is None
-            
+
             # Set a mock manager
             mock_manager = Mock()
             ai_engine.monitoring.apm_integration._apm_manager = mock_manager
-            
+
             manager = get_apm_manager()
             assert manager == mock_manager
-            
+
         finally:
             # Restore original manager
             ai_engine.monitoring.apm_integration._apm_manager = original_manager
@@ -745,23 +759,31 @@ class TestAPMIntegration:
         mock_config.service_name = "test-service"
         mock_config.environment = Mock()
         mock_config.environment.value = "test"
-        
-        with patch('ai_engine.monitoring.apm_integration.ElasticAPMIntegration') as mock_elastic, \
-             patch('ai_engine.monitoring.apm_integration.DatadogAPMIntegration') as mock_datadog:
-            
+
+        with (
+            patch(
+                "ai_engine.monitoring.apm_integration.ElasticAPMIntegration"
+            ) as mock_elastic,
+            patch(
+                "ai_engine.monitoring.apm_integration.DatadogAPMIntegration"
+            ) as mock_datadog,
+        ):
+
             # Mock integrations
             elastic_integration = AsyncMock()
             datadog_integration = AsyncMock()
             mock_elastic.return_value = elastic_integration
             mock_datadog.return_value = datadog_integration
-            
+
             manager = APMManager(mock_config)
-            
+
             # Test transaction
-            async with manager.transaction("test_operation", TransactionType.REQUEST) as txn:
+            async with manager.transaction(
+                "test_operation", TransactionType.REQUEST
+            ) as txn:
                 txn.set_custom_metric("response_time", 150.0)
                 txn.add_error(ValueError("Test error"), handled=True)
-            
+
             # Should send to both integrations
             elastic_integration.send_transaction.assert_called_once()
             datadog_integration.send_transaction.assert_called_once()
@@ -775,23 +797,27 @@ class TestAPMIntegration:
         mock_config.service_name = "test-service"
         mock_config.environment = Mock()
         mock_config.environment.value = "test"
-        
-        with patch('ai_engine.monitoring.apm_integration.ElasticAPMIntegration') as mock_elastic:
+
+        with patch(
+            "ai_engine.monitoring.apm_integration.ElasticAPMIntegration"
+        ) as mock_elastic:
             elastic_integration = AsyncMock()
             mock_elastic.return_value = elastic_integration
-            
+
             manager = APMManager(mock_config)
-            
+
             # Create multiple concurrent transactions
             async def create_transaction(transaction_id):
-                async with manager.transaction(f"operation_{transaction_id}", TransactionType.REQUEST) as txn:
+                async with manager.transaction(
+                    f"operation_{transaction_id}", TransactionType.REQUEST
+                ) as txn:
                     txn.set_custom_metric("transaction_id", transaction_id)
                     await asyncio.sleep(0.01)  # Simulate work
-            
+
             # Run concurrent transactions
             tasks = [create_transaction(i) for i in range(10)]
             await asyncio.gather(*tasks)
-            
+
             # Should have sent 10 transactions
             assert elastic_integration.send_transaction.call_count == 10
 
@@ -801,17 +827,17 @@ class TestAPMIntegration:
             TransactionType.REQUEST,
             TransactionType.BACKGROUND,
             TransactionType.SCHEDULED,
-            TransactionType.MESSAGE
+            TransactionType.MESSAGE,
         ]
-        
+
         for txn_type in transaction_types:
             transaction = APMTransaction(
                 transaction_id=f"txn-{txn_type.value}",
                 name=f"test_{txn_type.value}",
                 type=txn_type,
-                start_time=time.time()
+                start_time=time.time(),
             )
-            
+
             assert transaction.type == txn_type
             assert transaction.name == f"test_{txn_type.value}"
 
@@ -824,18 +850,22 @@ class TestAPMIntegration:
         mock_config.service_name = "test-service"
         mock_config.environment = Mock()
         mock_config.environment.value = "test"
-        
-        with patch('ai_engine.monitoring.apm_integration.ElasticAPMIntegration') as mock_elastic:
+
+        with patch(
+            "ai_engine.monitoring.apm_integration.ElasticAPMIntegration"
+        ) as mock_elastic:
             elastic_integration = AsyncMock()
             elastic_integration.send_transaction.side_effect = Exception("APM error")
             mock_elastic.return_value = elastic_integration
-            
+
             manager = APMManager(mock_config)
-            
+
             # Should not raise exception even if APM fails
-            async with manager.transaction("error_operation", TransactionType.REQUEST) as txn:
+            async with manager.transaction(
+                "error_operation", TransactionType.REQUEST
+            ) as txn:
                 txn.set_custom_metric("test", 123.0)
-            
+
             # Should have attempted to send
             elastic_integration.send_transaction.assert_called_once()
 
@@ -846,12 +876,12 @@ class TestAPMIntegration:
             name="serialization_test",
             type=TransactionType.REQUEST,
             start_time=time.time(),
-            context={"key": "value", "number": 123}
+            context={"key": "value", "number": 123},
         )
         transaction.finish("success")
         transaction.set_custom_metric("metric1", 456.789)
         transaction.add_error(ValueError("Test error"))
-        
+
         # Test that transaction can be converted to dict-like structure
         transaction_data = {
             "transaction_id": transaction.transaction_id,
@@ -861,9 +891,9 @@ class TestAPMIntegration:
             "result": transaction.result,
             "context": transaction.context,
             "custom_metrics": transaction.custom_metrics,
-            "errors": transaction.errors
+            "errors": transaction.errors,
         }
-        
+
         assert transaction_data["transaction_id"] == "txn-serialization"
         assert transaction_data["name"] == "serialization_test"
         assert transaction_data["type"] == "request"

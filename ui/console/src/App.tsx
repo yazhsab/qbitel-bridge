@@ -44,6 +44,7 @@ import {
   Badge,
   Timeline as TimelineIcon,
   Psychology as AIIcon,
+  Store as MarketplaceIcon,
 } from '@mui/icons-material';
 
 // Components
@@ -115,6 +116,7 @@ const theme = createTheme({
 // Navigation items
 const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: DashboardIcon, path: '/dashboard' },
+  { id: 'marketplace', label: 'Marketplace', icon: MarketplaceIcon, path: '/marketplace' },
   { id: 'devices', label: 'Device Management', icon: DevicesIcon, path: '/devices' },
   { id: 'protocols', label: 'Protocol Visualization', icon: TimelineIcon, path: '/protocols' },
   { id: 'ai-models', label: 'AI Model Monitoring', icon: AIIcon, path: '/ai-models' },

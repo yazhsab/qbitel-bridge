@@ -23,22 +23,24 @@ class SentryConfig:
 
     def __init__(self):
         # Core configuration
-        self.dsn = os.getenv('SENTRY_DSN', '')
-        self.environment = os.getenv('CRONOS_ENVIRONMENT', 'development')
-        self.release = os.getenv('CRONOS_VERSION', '1.0.0')
+        self.dsn = os.getenv("SENTRY_DSN", "")
+        self.environment = os.getenv("CRONOS_ENVIRONMENT", "development")
+        self.release = os.getenv("CRONOS_VERSION", "1.0.0")
 
         # Performance monitoring
-        self.traces_sample_rate = float(os.getenv('SENTRY_TRACES_SAMPLE_RATE', '0.1'))
-        self.profiles_sample_rate = float(os.getenv('SENTRY_PROFILES_SAMPLE_RATE', '0.1'))
+        self.traces_sample_rate = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1"))
+        self.profiles_sample_rate = float(
+            os.getenv("SENTRY_PROFILES_SAMPLE_RATE", "0.1")
+        )
 
         # Error filtering
-        self.enabled = os.getenv('SENTRY_ENABLED', 'true').lower() == 'true'
-        self.send_default_pii = os.getenv('SENTRY_SEND_PII', 'false').lower() == 'true'
+        self.enabled = os.getenv("SENTRY_ENABLED", "true").lower() == "true"
+        self.send_default_pii = os.getenv("SENTRY_SEND_PII", "false").lower() == "true"
 
         # Custom tags
         self.tags = {
-            'app': 'cronos-ai',
-            'component': 'ai-engine',
+            "app": "cronos-ai",
+            "component": "ai-engine",
         }
 
 
@@ -67,7 +69,7 @@ def initialize_sentry(config: Optional[SentryConfig] = None) -> bool:
         # Configure logging integration
         logging_integration = LoggingIntegration(
             level=logging.INFO,  # Capture info and above as breadcrumbs
-            event_level=logging.ERROR  # Send errors as events
+            event_level=logging.ERROR,  # Send errors as events
         )
 
         # Initialize Sentry
@@ -75,11 +77,9 @@ def initialize_sentry(config: Optional[SentryConfig] = None) -> bool:
             dsn=config.dsn,
             environment=config.environment,
             release=config.release,
-
             # Performance monitoring
             traces_sample_rate=config.traces_sample_rate,
             profiles_sample_rate=config.profiles_sample_rate,
-
             # Integrations
             integrations=[
                 FastApiIntegration(transaction_style="endpoint"),
@@ -89,18 +89,15 @@ def initialize_sentry(config: Optional[SentryConfig] = None) -> bool:
                 logging_integration,
                 ThreadingIntegration(propagate_hub=True),
             ],
-
             # Privacy settings
             send_default_pii=config.send_default_pii,
-
             # Error filtering
             before_send=before_send_filter,
             before_send_transaction=before_send_transaction_filter,
-
             # Additional options
             attach_stacktrace=True,
             max_breadcrumbs=50,
-            debug=config.environment == 'development',
+            debug=config.environment == "development",
         )
 
         # Set custom tags
@@ -131,7 +128,9 @@ def shutdown_sentry():
         logger.error(f"Error shutting down Sentry: {e}")
 
 
-def before_send_filter(event: Dict[str, Any], hint: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def before_send_filter(
+    event: Dict[str, Any], hint: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
     """
     Filter events before sending to Sentry.
 
@@ -143,37 +142,39 @@ def before_send_filter(event: Dict[str, Any], hint: Dict[str, Any]) -> Optional[
         Modified event or None to drop the event
     """
     # Filter out known noise
-    if 'exc_info' in hint:
-        exc_type, exc_value, tb = hint['exc_info']
+    if "exc_info" in hint:
+        exc_type, exc_value, tb = hint["exc_info"]
 
         # Ignore specific exceptions
         ignored_exceptions = [
-            'asyncio.CancelledError',
-            'ConnectionResetError',
-            'BrokenPipeError',
+            "asyncio.CancelledError",
+            "ConnectionResetError",
+            "BrokenPipeError",
         ]
 
         if exc_type.__name__ in ignored_exceptions:
             return None
 
     # Filter out health check errors
-    if 'request' in event:
-        url = event['request'].get('url', '')
-        if '/health' in url or '/metrics' in url:
+    if "request" in event:
+        url = event["request"].get("url", "")
+        if "/health" in url or "/metrics" in url:
             return None
 
     # Scrub sensitive data
-    if event.get('request', {}).get('headers'):
-        headers = event['request']['headers']
-        sensitive_headers = ['Authorization', 'X-API-Key', 'Cookie']
+    if event.get("request", {}).get("headers"):
+        headers = event["request"]["headers"]
+        sensitive_headers = ["Authorization", "X-API-Key", "Cookie"]
         for header in sensitive_headers:
             if header in headers:
-                headers[header] = '[Filtered]'
+                headers[header] = "[Filtered]"
 
     return event
 
 
-def before_send_transaction_filter(event: Dict[str, Any], hint: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def before_send_transaction_filter(
+    event: Dict[str, Any], hint: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
     """
     Filter transactions before sending to Sentry.
 
@@ -185,8 +186,8 @@ def before_send_transaction_filter(event: Dict[str, Any], hint: Dict[str, Any]) 
         Modified event or None to drop the transaction
     """
     # Don't track health check transactions
-    transaction_name = event.get('transaction', '')
-    if transaction_name in ['/health', '/metrics', '/ready']:
+    transaction_name = event.get("transaction", "")
+    if transaction_name in ["/health", "/metrics", "/ready"]:
         return None
 
     return event
@@ -195,8 +196,8 @@ def before_send_transaction_filter(event: Dict[str, Any], hint: Dict[str, Any]) 
 def capture_error(
     error: Exception,
     context: Optional[Dict[str, Any]] = None,
-    level: str = 'error',
-    fingerprint: Optional[list] = None
+    level: str = "error",
+    fingerprint: Optional[list] = None,
 ) -> Optional[str]:
     """
     Capture an error with additional context.
@@ -235,9 +236,7 @@ def capture_error(
 
 
 def capture_message(
-    message: str,
-    level: str = 'info',
-    context: Optional[Dict[str, Any]] = None
+    message: str, level: str = "info", context: Optional[Dict[str, Any]] = None
 ) -> Optional[str]:
     """
     Capture a message with optional context.
@@ -268,9 +267,9 @@ def capture_message(
 
 def add_breadcrumb(
     message: str,
-    category: str = 'default',
-    level: str = 'info',
-    data: Optional[Dict[str, Any]] = None
+    category: str = "default",
+    level: str = "info",
+    data: Optional[Dict[str, Any]] = None,
 ):
     """
     Add a breadcrumb for debugging context.
@@ -283,10 +282,7 @@ def add_breadcrumb(
     """
     try:
         sentry_sdk.add_breadcrumb(
-            message=message,
-            category=category,
-            level=level,
-            data=data or {}
+            message=message, category=category, level=level, data=data or {}
         )
     except Exception as e:
         logger.error(f"Failed to add breadcrumb: {e}")
@@ -302,11 +298,11 @@ def set_user(user_id: str, username: Optional[str] = None, email: Optional[str] 
         email: Email (optional, will be filtered if PII is disabled)
     """
     try:
-        user_data = {'id': user_id}
+        user_data = {"id": user_id}
         if username:
-            user_data['username'] = username
+            user_data["username"] = username
         if email and SentryConfig().send_default_pii:
-            user_data['email'] = email
+            user_data["email"] = email
 
         sentry_sdk.set_user(user_data)
     except Exception as e:
@@ -341,7 +337,7 @@ def set_context(name: str, context: Dict[str, Any]):
         logger.error(f"Failed to set context: {e}")
 
 
-def monitor_performance(transaction_name: str, operation: str = 'function'):
+def monitor_performance(transaction_name: str, operation: str = "function"):
     """
     Decorator to monitor function performance.
 
@@ -354,12 +350,12 @@ def monitor_performance(transaction_name: str, operation: str = 'function'):
         async def discover_protocol(data):
             ...
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
             with sentry_sdk.start_transaction(
-                op=operation,
-                name=transaction_name
+                op=operation, name=transaction_name
             ) as transaction:
                 try:
                     result = await func(*args, **kwargs)
@@ -367,17 +363,19 @@ def monitor_performance(transaction_name: str, operation: str = 'function'):
                     return result
                 except Exception as e:
                     transaction.set_status("internal_error")
-                    capture_error(e, context={
-                        'transaction': transaction_name,
-                        'operation': operation
-                    })
+                    capture_error(
+                        e,
+                        context={
+                            "transaction": transaction_name,
+                            "operation": operation,
+                        },
+                    )
                     raise
 
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
             with sentry_sdk.start_transaction(
-                op=operation,
-                name=transaction_name
+                op=operation, name=transaction_name
             ) as transaction:
                 try:
                     result = func(*args, **kwargs)
@@ -385,14 +383,18 @@ def monitor_performance(transaction_name: str, operation: str = 'function'):
                     return result
                 except Exception as e:
                     transaction.set_status("internal_error")
-                    capture_error(e, context={
-                        'transaction': transaction_name,
-                        'operation': operation
-                    })
+                    capture_error(
+                        e,
+                        context={
+                            "transaction": transaction_name,
+                            "operation": operation,
+                        },
+                    )
                     raise
 
         # Return appropriate wrapper based on function type
         import asyncio
+
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
         else:
@@ -414,12 +416,12 @@ def trace_span(operation: str, description: Optional[str] = None):
         def get_protocols():
             ...
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
             with sentry_sdk.start_span(
-                op=operation,
-                description=description or func.__name__
+                op=operation, description=description or func.__name__
             ) as span:
                 try:
                     result = await func(*args, **kwargs)
@@ -432,8 +434,7 @@ def trace_span(operation: str, description: Optional[str] = None):
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
             with sentry_sdk.start_span(
-                op=operation,
-                description=description or func.__name__
+                op=operation, description=description or func.__name__
             ) as span:
                 try:
                     result = func(*args, **kwargs)
@@ -444,6 +445,7 @@ def trace_span(operation: str, description: Optional[str] = None):
                     raise
 
         import asyncio
+
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
         else:
@@ -466,17 +468,18 @@ class SentryMiddleware:
 
         # Start transaction
         transaction = sentry_sdk.start_transaction(
-            op="http.server",
-            name=f"{scope['method']} {scope['path']}",
-            source="route"
+            op="http.server", name=f"{scope['method']} {scope['path']}", source="route"
         )
 
         # Add request context
-        sentry_sdk.set_context("request", {
-            "method": scope["method"],
-            "path": scope["path"],
-            "query_string": scope.get("query_string", b"").decode(),
-        })
+        sentry_sdk.set_context(
+            "request",
+            {
+                "method": scope["method"],
+                "path": scope["path"],
+                "query_string": scope.get("query_string", b"").decode(),
+            },
+        )
 
         try:
             with sentry_sdk.Hub(sentry_sdk.Hub.current):
@@ -503,24 +506,14 @@ def get_sentry_health() -> Dict[str, Any]:
             return {
                 "status": "healthy",
                 "dsn_configured": bool(client.dsn),
-                "enabled": True
+                "enabled": True,
             }
         elif not SentryConfig().enabled:
-            return {
-                "status": "disabled",
-                "enabled": False
-            }
+            return {"status": "disabled", "enabled": False}
         else:
-            return {
-                "status": "unhealthy",
-                "enabled": True
-            }
+            return {"status": "unhealthy", "enabled": True}
     except Exception as e:
-        return {
-            "status": "error",
-            "error": str(e),
-            "enabled": False
-        }
+        return {"status": "error", "error": str(e), "enabled": False}
 
 
 # Example usage context manager
@@ -541,8 +534,7 @@ class sentry_transaction:
 
     def __enter__(self):
         self.transaction = sentry_sdk.start_transaction(
-            op=self.operation,
-            name=self.name
+            op=self.operation, name=self.name
         )
         self.transaction.__enter__()
         return self.transaction

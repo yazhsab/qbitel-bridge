@@ -26,6 +26,13 @@ const AIModelMonitoring = lazy(() => import('../components/AIModelMonitoring'));
 const ThreatIntelligence = lazy(() => import('../components/ThreatIntelligence'));
 const AdvancedAnalytics = lazy(() => import('../components/AdvancedAnalytics'));
 
+// Marketplace Components
+const MarketplaceHome = lazy(() => import('../components/marketplace/MarketplaceHome'));
+const ProtocolDetails = lazy(() => import('../components/marketplace/ProtocolDetails'));
+const ProtocolSubmission = lazy(() => import('../components/marketplace/ProtocolSubmission'));
+const CreatorDashboard = lazy(() => import('../components/marketplace/CreatorDashboard'));
+const MyProtocols = lazy(() => import('../components/marketplace/MyProtocols'));
+
 interface AppRoutesProps {
   user: User;
   apiClient: DeviceApiClient;
@@ -174,6 +181,47 @@ export const routeConfigs: RouteConfig[] = [
     title: 'User Profile',
     description: 'User account and preferences',
     category: 'core',
+  },
+  // Marketplace Routes
+  {
+    path: '/marketplace',
+    component: MarketplaceHome,
+    title: 'Protocol Marketplace',
+    description: 'Discover and purchase protocol parsers',
+    category: 'core',
+    permissions: ['marketplace:read'],
+  },
+  {
+    path: '/marketplace/protocols/:protocolId',
+    component: ProtocolDetails,
+    title: 'Protocol Details',
+    description: 'View protocol information and purchase',
+    category: 'core',
+    permissions: ['marketplace:read'],
+  },
+  {
+    path: '/marketplace/submit',
+    component: ProtocolSubmission,
+    title: 'Submit Protocol',
+    description: 'Submit a new protocol to the marketplace',
+    category: 'core',
+    permissions: ['marketplace:write'],
+  },
+  {
+    path: '/marketplace/creator/dashboard',
+    component: CreatorDashboard,
+    title: 'Creator Dashboard',
+    description: 'Manage your submitted protocols',
+    category: 'core',
+    permissions: ['marketplace:creator'],
+  },
+  {
+    path: '/marketplace/my-protocols',
+    component: MyProtocols,
+    title: 'My Protocols',
+    description: 'View your installed protocols',
+    category: 'core',
+    permissions: ['marketplace:read'],
   },
 ];
 

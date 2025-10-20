@@ -415,8 +415,8 @@ def require_permissions(permissions: list):
         missing_permissions = [p for p in permissions if p not in user_permissions]
         if missing_permissions:
             raise HTTPException(
-                status_code=403, 
-                detail=f"Missing required permissions: {', '.join(missing_permissions)}"
+                status_code=403,
+                detail=f"Missing required permissions: {', '.join(missing_permissions)}",
             )
         return current_user
 

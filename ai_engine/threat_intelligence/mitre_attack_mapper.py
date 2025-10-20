@@ -198,7 +198,10 @@ class MITREATTACKMapper:
                 tactics=[MITRETactic.DISCOVERY],
                 platforms=["Windows", "Linux", "macOS"],
                 data_sources=["Network Traffic", "Process"],
-                detection_methods=["Monitor for port scans", "Detect network discovery tools"],
+                detection_methods=[
+                    "Monitor for port scans",
+                    "Detect network discovery tools",
+                ],
                 mitigations=["Network Segmentation", "Filter Network Traffic"],
             ),
             "T1190": ATTACKTechnique(
@@ -208,8 +211,15 @@ class MITREATTACKMapper:
                 tactics=[MITRETactic.INITIAL_ACCESS],
                 platforms=["Windows", "Linux", "macOS", "Network"],
                 data_sources=["Application Log", "Network Traffic"],
-                detection_methods=["Monitor for anomalous network traffic", "WAF alerts"],
-                mitigations=["Application Isolation", "Network Segmentation", "Privilege Security"],
+                detection_methods=[
+                    "Monitor for anomalous network traffic",
+                    "WAF alerts",
+                ],
+                mitigations=[
+                    "Application Isolation",
+                    "Network Segmentation",
+                    "Privilege Security",
+                ],
             ),
             "T1071": ATTACKTechnique(
                 technique_id="T1071",
@@ -218,7 +228,10 @@ class MITREATTACKMapper:
                 tactics=[MITRETactic.COMMAND_AND_CONTROL],
                 platforms=["Windows", "Linux", "macOS"],
                 data_sources=["Network Traffic", "Network Traffic Content"],
-                detection_methods=["Analyze network traffic patterns", "Detect C2 beacons"],
+                detection_methods=[
+                    "Analyze network traffic patterns",
+                    "Detect C2 beacons",
+                ],
                 mitigations=["Network Intrusion Prevention"],
                 subtechniques=["T1071.001", "T1071.002", "T1071.003", "T1071.004"],
             ),
@@ -226,10 +239,17 @@ class MITREATTACKMapper:
                 technique_id="T1078",
                 name="Valid Accounts",
                 description="Adversaries may obtain and abuse credentials.",
-                tactics=[MITRETactic.INITIAL_ACCESS, MITRETactic.PERSISTENCE, MITRETactic.PRIVILEGE_ESCALATION],
+                tactics=[
+                    MITRETactic.INITIAL_ACCESS,
+                    MITRETactic.PERSISTENCE,
+                    MITRETactic.PRIVILEGE_ESCALATION,
+                ],
                 platforms=["Windows", "Linux", "macOS", "Azure AD", "Google Workspace"],
                 data_sources=["Logon Session", "User Account"],
-                detection_methods=["Monitor for anomalous logons", "Detect credential stuffing"],
+                detection_methods=[
+                    "Monitor for anomalous logons",
+                    "Detect credential stuffing",
+                ],
                 mitigations=["Multi-factor Authentication", "Password Policies"],
                 subtechniques=["T1078.001", "T1078.002", "T1078.003", "T1078.004"],
             ),
@@ -240,7 +260,10 @@ class MITREATTACKMapper:
                 tactics=[MITRETactic.CREDENTIAL_ACCESS],
                 platforms=["Windows", "Linux", "macOS", "Azure AD"],
                 data_sources=["Application Log", "User Account"],
-                detection_methods=["Monitor for failed login attempts", "Detect password spraying"],
+                detection_methods=[
+                    "Monitor for failed login attempts",
+                    "Detect password spraying",
+                ],
                 mitigations=["Account Lockout Policy", "Multi-factor Authentication"],
                 subtechniques=["T1110.001", "T1110.002", "T1110.003", "T1110.004"],
             ),
@@ -251,9 +274,22 @@ class MITREATTACKMapper:
                 tactics=[MITRETactic.LATERAL_MOVEMENT],
                 platforms=["Windows", "Linux", "macOS"],
                 data_sources=["Network Traffic", "Process", "Logon Session"],
-                detection_methods=["Monitor for lateral movement", "Detect abnormal remote sessions"],
-                mitigations=["Disable Unnecessary Services", "Multi-factor Authentication"],
-                subtechniques=["T1021.001", "T1021.002", "T1021.003", "T1021.004", "T1021.005", "T1021.006"],
+                detection_methods=[
+                    "Monitor for lateral movement",
+                    "Detect abnormal remote sessions",
+                ],
+                mitigations=[
+                    "Disable Unnecessary Services",
+                    "Multi-factor Authentication",
+                ],
+                subtechniques=[
+                    "T1021.001",
+                    "T1021.002",
+                    "T1021.003",
+                    "T1021.004",
+                    "T1021.005",
+                    "T1021.006",
+                ],
             ),
             "T1048": ATTACKTechnique(
                 technique_id="T1048",
@@ -262,7 +298,10 @@ class MITREATTACKMapper:
                 tactics=[MITRETactic.EXFILTRATION],
                 platforms=["Windows", "Linux", "macOS"],
                 data_sources=["Network Traffic", "File"],
-                detection_methods=["Monitor for unusual outbound traffic", "Detect DNS exfiltration"],
+                detection_methods=[
+                    "Monitor for unusual outbound traffic",
+                    "Detect DNS exfiltration",
+                ],
                 mitigations=["Data Loss Prevention", "Network Segmentation"],
                 subtechniques=["T1048.001", "T1048.002", "T1048.003"],
             ),
@@ -273,7 +312,10 @@ class MITREATTACKMapper:
                 tactics=[MITRETactic.EXFILTRATION],
                 platforms=["Windows", "Linux", "macOS"],
                 data_sources=["Network Traffic"],
-                detection_methods=["Monitor C2 channels", "Detect large data transfers"],
+                detection_methods=[
+                    "Monitor C2 channels",
+                    "Detect large data transfers",
+                ],
                 mitigations=["Data Loss Prevention", "Network Intrusion Prevention"],
             ),
             "T1498": ATTACKTechnique(
@@ -283,7 +325,10 @@ class MITREATTACKMapper:
                 tactics=[MITRETactic.IMPACT],
                 platforms=["Windows", "Linux", "macOS", "Network"],
                 data_sources=["Network Traffic", "Sensor Health"],
-                detection_methods=["Monitor for traffic anomalies", "Detect volumetric attacks"],
+                detection_methods=[
+                    "Monitor for traffic anomalies",
+                    "Detect volumetric attacks",
+                ],
                 mitigations=["Filter Network Traffic", "DDoS Mitigation Services"],
                 subtechniques=["T1498.001", "T1498.002"],
             ),
@@ -294,7 +339,10 @@ class MITREATTACKMapper:
                 tactics=[MITRETactic.IMPACT],
                 platforms=["Windows", "Linux", "macOS"],
                 data_sources=["File", "Process", "Command"],
-                detection_methods=["Monitor for ransomware behavior", "Detect mass file encryption"],
+                detection_methods=[
+                    "Monitor for ransomware behavior",
+                    "Detect mass file encryption",
+                ],
                 mitigations=["Data Backup", "Behavior Prevention on Endpoint"],
             ),
             "T1068": ATTACKTechnique(
@@ -304,7 +352,10 @@ class MITREATTACKMapper:
                 tactics=[MITRETactic.PRIVILEGE_ESCALATION],
                 platforms=["Windows", "Linux", "macOS"],
                 data_sources=["Process", "Application Log"],
-                detection_methods=["Monitor for exploitation attempts", "Detect privilege escalation"],
+                detection_methods=[
+                    "Monitor for exploitation attempts",
+                    "Detect privilege escalation",
+                ],
                 mitigations=["Application Isolation", "Exploit Protection"],
             ),
             "T1557": ATTACKTechnique(
@@ -314,7 +365,10 @@ class MITREATTACKMapper:
                 tactics=[MITRETactic.CREDENTIAL_ACCESS, MITRETactic.COLLECTION],
                 platforms=["Windows", "Linux", "macOS", "Network"],
                 data_sources=["Network Traffic"],
-                detection_methods=["Monitor for ARP spoofing", "Detect SSL/TLS interception"],
+                detection_methods=[
+                    "Monitor for ARP spoofing",
+                    "Detect SSL/TLS interception",
+                ],
                 mitigations=["Encrypt Sensitive Information", "Filter Network Traffic"],
                 subtechniques=["T1557.001", "T1557.002", "T1557.003"],
             ),
@@ -325,7 +379,10 @@ class MITREATTACKMapper:
                 tactics=[MITRETactic.EXECUTION],
                 platforms=["Windows", "Linux", "macOS"],
                 data_sources=["Process", "File", "Command"],
-                detection_methods=["Monitor for suspicious executions", "User training"],
+                detection_methods=[
+                    "Monitor for suspicious executions",
+                    "User training",
+                ],
                 mitigations=["User Training", "Execution Prevention"],
                 subtechniques=["T1204.001", "T1204.002", "T1204.003"],
             ),
@@ -336,9 +393,19 @@ class MITREATTACKMapper:
                 tactics=[MITRETactic.EXECUTION],
                 platforms=["Windows", "Linux", "macOS"],
                 data_sources=["Process", "Command"],
-                detection_methods=["Monitor command-line activity", "Detect malicious scripts"],
+                detection_methods=[
+                    "Monitor command-line activity",
+                    "Detect malicious scripts",
+                ],
                 mitigations=["Execution Prevention", "Restrict Scripting"],
-                subtechniques=["T1059.001", "T1059.002", "T1059.003", "T1059.004", "T1059.005", "T1059.006"],
+                subtechniques=[
+                    "T1059.001",
+                    "T1059.002",
+                    "T1059.003",
+                    "T1059.004",
+                    "T1059.005",
+                    "T1059.006",
+                ],
             ),
         }
 
@@ -373,12 +440,12 @@ class MITREATTACKMapper:
             )
         )
 
-        coverage = (covered_techniques / total_techniques * 100) if total_techniques > 0 else 0
+        coverage = (
+            (covered_techniques / total_techniques * 100) if total_techniques > 0 else 0
+        )
         ATTACK_COVERAGE.set(coverage)
 
-    async def map_event_to_techniques(
-        self, event: SecurityEvent
-    ) -> TTPMapping:
+    async def map_event_to_techniques(self, event: SecurityEvent) -> TTPMapping:
         """
         Map security event to MITRE ATT&CK techniques.
 

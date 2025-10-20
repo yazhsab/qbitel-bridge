@@ -407,7 +407,10 @@ class ProtocolFuzzer:
             data_array[byte_pos] ^= 1 << bit_pos
             flipped_positions.append((byte_pos, bit_pos))
 
-        return bytes(data_array), f"Flipped {num_flips} bits at positions {flipped_positions}"
+        return (
+            bytes(data_array),
+            f"Flipped {num_flips} bits at positions {flipped_positions}",
+        )
 
     def _mutate_byte_flip(self, data: bytes) -> Tuple[bytes, str]:
         """Flip random bytes in the data."""
@@ -448,7 +451,10 @@ class ProtocolFuzzer:
         pos = random.randint(0, len(data_array) - 4)
         struct.pack_into("!I", data_array, pos, magic)
 
-        return bytes(data_array), f"Inserted magic number {hex(magic)} at position {pos}"
+        return (
+            bytes(data_array),
+            f"Inserted magic number {hex(magic)} at position {pos}",
+        )
 
     def _mutate_length_overflow(self, data: bytes) -> Tuple[bytes, str]:
         """Create length field overflow."""
@@ -470,7 +476,10 @@ class ProtocolFuzzer:
         pattern = random.choice(format_strings)
         mutated = data + pattern
 
-        return mutated, f"Appended format string pattern: {pattern.decode('ascii', errors='ignore')}"
+        return (
+            mutated,
+            f"Appended format string pattern: {pattern.decode('ascii', errors='ignore')}",
+        )
 
     async def _mutate_llm_guided(
         self, data: bytes, protocol_spec: Dict[str, Any]
@@ -631,8 +640,7 @@ Provide the mutation as:
         strategies_used = set(tc.strategy for tc in test_cases)
 
         return {
-            "mutation_strategy_coverage": len(strategies_used)
-            / len(MutationStrategy),
+            "mutation_strategy_coverage": len(strategies_used) / len(MutationStrategy),
             "estimated_code_coverage": random.uniform(0.6, 0.85),
             "field_coverage": random.uniform(0.7, 0.95),
         }

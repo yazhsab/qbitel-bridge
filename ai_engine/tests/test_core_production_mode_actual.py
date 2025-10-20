@@ -122,13 +122,16 @@ class TestProductionModeDetector:
 
     def test_validate_production_environment_with_required_vars(self):
         """Test validating production environment with required variables."""
-        with patch.dict(os.environ, {
-            "CRONOS_AI_ENVIRONMENT": "production",
-            "CRONOS_AI_DB_PASSWORD": "test_password",
-            "CRONOS_AI_REDIS_PASSWORD": "test_redis_password",
-            "CRONOS_AI_JWT_SECRET": "test_jwt_secret",
-            "CRONOS_AI_ENCRYPTION_KEY": "test_encryption_key"
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "CRONOS_AI_ENVIRONMENT": "production",
+                "CRONOS_AI_DB_PASSWORD": "test_password",
+                "CRONOS_AI_REDIS_PASSWORD": "test_redis_password",
+                "CRONOS_AI_JWT_SECRET": "test_jwt_secret",
+                "CRONOS_AI_ENCRYPTION_KEY": "test_encryption_key",
+            },
+        ):
             is_valid, errors = ProductionModeDetector.validate_production_environment()
             assert is_valid is True
             assert len(errors) == 0
@@ -197,13 +200,16 @@ class TestProductionValidator:
 
     def test_validate_production_environment_with_required_vars(self, validator):
         """Test validating production environment with required variables."""
-        with patch.dict(os.environ, {
-            "CRONOS_AI_ENVIRONMENT": "production",
-            "CRONOS_AI_DB_PASSWORD": "test_password",
-            "CRONOS_AI_REDIS_PASSWORD": "test_redis_password",
-            "CRONOS_AI_JWT_SECRET": "test_jwt_secret",
-            "CRONOS_AI_ENCRYPTION_KEY": "test_encryption_key"
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "CRONOS_AI_ENVIRONMENT": "production",
+                "CRONOS_AI_DB_PASSWORD": "test_password",
+                "CRONOS_AI_REDIS_PASSWORD": "test_redis_password",
+                "CRONOS_AI_JWT_SECRET": "test_jwt_secret",
+                "CRONOS_AI_ENCRYPTION_KEY": "test_encryption_key",
+            },
+        ):
             result = validator.validate_production_environment()
             assert result is True
 
@@ -217,7 +223,7 @@ class TestProductionValidator:
         """Test getting validation results."""
         with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}):
             results = validator.get_validation_results()
-            
+
             assert isinstance(results, dict)
             assert "environment_check" in results
             assert "required_variables_check" in results
@@ -226,7 +232,7 @@ class TestProductionValidator:
         """Test getting validation summary."""
         with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}):
             summary = validator.get_validation_summary()
-            
+
             assert isinstance(summary, dict)
             assert "total_checks" in summary
             assert "passed_checks" in summary
@@ -236,9 +242,10 @@ class TestProductionValidator:
 
     def test_validate_production_environment_with_custom_checks(self, validator):
         """Test validating production environment with custom checks."""
+
         def custom_check():
             return True
-        
+
         with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}):
             result = validator.validate_production_environment(
                 custom_checks=[custom_check]
@@ -246,22 +253,28 @@ class TestProductionValidator:
             # Should still be False because required env vars are missing
             assert result is False
 
-    def test_validate_production_environment_with_failing_custom_checks(self, validator):
+    def test_validate_production_environment_with_failing_custom_checks(
+        self, validator
+    ):
         """Test validating production environment with failing custom checks."""
+
         def custom_check():
             return False
-        
+
         with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}):
             result = validator.validate_production_environment(
                 custom_checks=[custom_check]
             )
             assert result is False
 
-    def test_validate_production_environment_with_exception_in_custom_check(self, validator):
+    def test_validate_production_environment_with_exception_in_custom_check(
+        self, validator
+    ):
         """Test validating production environment with exception in custom check."""
+
         def custom_check():
             raise Exception("Custom check failed")
-        
+
         with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}):
             result = validator.validate_production_environment(
                 custom_checks=[custom_check]

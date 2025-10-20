@@ -26,6 +26,7 @@ import json
 @dataclass
 class LoadTestConfig:
     """Configuration for load testing."""
+
     base_url: str = "http://localhost:8080"
     num_users: int = 100
     duration_seconds: int = 60
@@ -37,6 +38,7 @@ class LoadTestConfig:
 @dataclass
 class RequestResult:
     """Result of a single request."""
+
     endpoint: str
     method: str
     status_code: int
@@ -49,6 +51,7 @@ class RequestResult:
 @dataclass
 class LoadTestResults:
     """Aggregated results from load test."""
+
     test_name: str
     config: LoadTestConfig
     start_time: datetime
@@ -65,18 +68,27 @@ class LoadTestResults:
 
     @property
     def requests_per_second(self) -> float:
-        return self.total_requests / self.duration_seconds if self.duration_seconds > 0 else 0
+        return (
+            self.total_requests / self.duration_seconds
+            if self.duration_seconds > 0
+            else 0
+        )
 
     @property
     def success_rate(self) -> float:
-        return (self.successful_requests / self.total_requests * 100
-                if self.total_requests > 0 else 0)
+        return (
+            self.successful_requests / self.total_requests * 100
+            if self.total_requests > 0
+            else 0
+        )
 
     @property
     def error_rate(self) -> float:
         return 100 - self.success_rate
 
-    def get_latency_percentiles(self, percentiles: List[int] = [50, 75, 90, 95, 99]) -> Dict[int, float]:
+    def get_latency_percentiles(
+        self, percentiles: List[int] = [50, 75, 90, 95, 99]
+    ) -> Dict[int, float]:
         """Calculate latency percentiles."""
         durations = [r.duration for r in self.request_results if r.success]
         if not durations:
@@ -148,7 +160,9 @@ class LoadTestRunner:
         self.config = config
         self.results: Optional[LoadTestResults] = None
 
-    async def run_test(self, test_name: str, test_scenario: callable) -> LoadTestResults:
+    async def run_test(
+        self, test_name: str, test_scenario: callable
+    ) -> LoadTestResults:
         """
         Run a load test scenario.
 
@@ -161,7 +175,9 @@ class LoadTestRunner:
         """
         print(f"\n{'='*80}")
         print(f"Starting: {test_name}")
-        print(f"Configuration: {self.config.num_users} users, {self.config.duration_seconds}s duration")
+        print(
+            f"Configuration: {self.config.num_users} users, {self.config.duration_seconds}s duration"
+        )
         print(f"{'='*80}\n")
 
         results = LoadTestResults(
@@ -173,7 +189,11 @@ class LoadTestRunner:
 
         # Create async tasks for virtual users
         tasks = []
-        ramp_up_delay = self.config.ramp_up_seconds / self.config.num_users if self.config.num_users > 0 else 0
+        ramp_up_delay = (
+            self.config.ramp_up_seconds / self.config.num_users
+            if self.config.num_users > 0
+            else 0
+        )
 
         for user_id in range(self.config.num_users):
             task = asyncio.create_task(
@@ -197,7 +217,7 @@ class LoadTestRunner:
         user_id: int,
         test_scenario: callable,
         results: LoadTestResults,
-        initial_delay: float
+        initial_delay: float,
     ):
         """Run a single virtual user."""
         # Ramp-up delay
@@ -251,14 +271,16 @@ class LoadTestRunner:
         print(f"  Latency p95: {summary['performance']['latency_p95_ms']:.2f}ms")
         print(f"  Latency p99: {summary['performance']['latency_p99_ms']:.2f}ms")
         print(f"\nSLO Compliance:")
-        for check, passed in summary['slo_compliance'].items():
+        for check, passed in summary["slo_compliance"].items():
             status = "✅ PASS" if passed else "❌ FAIL"
             print(f"  {check}: {status}")
         print(f"{'='*80}\n")
 
 
 # Test Scenarios
-async def health_check_scenario(session: aiohttp.ClientSession, user_id: int) -> RequestResult:
+async def health_check_scenario(
+    session: aiohttp.ClientSession, user_id: int
+) -> RequestResult:
     """Test scenario: Health check endpoint."""
     start_time = time.time()
 
@@ -284,21 +306,23 @@ async def health_check_scenario(session: aiohttp.ClientSession, user_id: int) ->
         )
 
 
-async def protocol_discovery_scenario(session: aiohttp.ClientSession, user_id: int) -> RequestResult:
+async def protocol_discovery_scenario(
+    session: aiohttp.ClientSession, user_id: int
+) -> RequestResult:
     """Test scenario: Protocol discovery."""
     start_time = time.time()
 
     # Sample packet data (base64 encoded)
     payload = {
         "packet_data": "RVRIAAAAAAAAAAAAAAAAAAAAAAgARQAAKAABAABAAQO9wKgAAcCoAAEAAP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-        "timeout": 5
+        "timeout": 5,
     }
 
     try:
         async with session.post(
             "http://localhost:8080/api/v1/discover",
             json=payload,
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         ) as response:
             duration = time.time() - start_time
             return RequestResult(
@@ -338,7 +362,9 @@ async def baseline_test():
     )
 
     runner = LoadTestRunner(config)
-    results = await runner.run_test("Baseline Test (10 users, 60s)", health_check_scenario)
+    results = await runner.run_test(
+        "Baseline Test (10 users, 60s)", health_check_scenario
+    )
     return results
 
 
@@ -360,7 +386,9 @@ async def stress_test():
     )
 
     runner = LoadTestRunner(config)
-    results = await runner.run_test("Stress Test (100 users, 120s)", health_check_scenario)
+    results = await runner.run_test(
+        "Stress Test (100 users, 120s)", health_check_scenario
+    )
     return results
 
 
@@ -382,7 +410,9 @@ async def soak_test():
     )
 
     runner = LoadTestRunner(config)
-    results = await runner.run_test("Soak Test (20 users, 10 minutes)", health_check_scenario)
+    results = await runner.run_test(
+        "Soak Test (20 users, 10 minutes)", health_check_scenario
+    )
     return results
 
 
@@ -404,7 +434,9 @@ async def spike_test():
     )
 
     runner = LoadTestRunner(config)
-    results = await runner.run_test("Spike Test (200 users, 30s, fast ramp)", health_check_scenario)
+    results = await runner.run_test(
+        "Spike Test (200 users, 30s, fast ramp)", health_check_scenario
+    )
     return results
 
 
@@ -430,24 +462,25 @@ async def scalability_test():
 
         runner = LoadTestRunner(config)
         results = await runner.run_test(
-            f"Scalability Test ({num_users} users)",
-            health_check_scenario
+            f"Scalability Test ({num_users} users)", health_check_scenario
         )
         results_by_load[num_users] = results
 
     # Analyze scalability
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("Scalability Analysis")
-    print("="*80)
+    print("=" * 80)
     print(f"{'Users':<10} {'RPS':<15} {'p95 Latency (ms)':<20} {'Success Rate %'}")
-    print("-"*80)
+    print("-" * 80)
 
     for num_users, results in results_by_load.items():
         summary = results.get_summary()
-        print(f"{num_users:<10} "
-              f"{summary['requests']['requests_per_second']:<15.2f} "
-              f"{summary['performance']['latency_p95_ms']:<20.2f} "
-              f"{summary['performance']['success_rate_percent']:.2f}%")
+        print(
+            f"{num_users:<10} "
+            f"{summary['requests']['requests_per_second']:<15.2f} "
+            f"{summary['performance']['latency_p95_ms']:<20.2f} "
+            f"{summary['performance']['success_rate_percent']:.2f}%"
+        )
 
     return results_by_load
 
@@ -463,52 +496,62 @@ async def main():
 
     # 1. Baseline Test
     print("\n📊 Test 1/5: Baseline Test")
-    all_results['baseline'] = await baseline_test()
+    all_results["baseline"] = await baseline_test()
 
     # 2. Stress Test
     print("\n💪 Test 2/5: Stress Test")
-    all_results['stress'] = await stress_test()
+    all_results["stress"] = await stress_test()
 
     # 3. Spike Test (shorter, so run before soak)
     print("\n⚡ Test 3/5: Spike Test")
-    all_results['spike'] = await spike_test()
+    all_results["spike"] = await spike_test()
 
     # 4. Scalability Test
     print("\n📈 Test 4/5: Scalability Test")
-    all_results['scalability'] = await scalability_test()
+    all_results["scalability"] = await scalability_test()
 
     # 5. Soak Test (longest, run last - optional, comment out for quick runs)
     # print("\n🕒 Test 5/5: Soak Test (10 minutes)")
     # all_results['soak'] = await soak_test()
 
     # Final summary
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("FINAL SUMMARY - All Tests")
-    print("="*80)
+    print("=" * 80)
 
     for test_name, results in all_results.items():
-        if test_name == 'scalability':
+        if test_name == "scalability":
             continue  # Already printed
 
         if isinstance(results, LoadTestResults):
             summary = results.get_summary()
-            slo_passed = all(summary['slo_compliance'].values())
+            slo_passed = all(summary["slo_compliance"].values())
             status = "✅ PASS" if slo_passed else "❌ FAIL"
 
             print(f"\n{test_name.upper()}: {status}")
             print(f"  RPS: {summary['requests']['requests_per_second']:.2f}")
-            print(f"  Success Rate: {summary['performance']['success_rate_percent']:.2f}%")
+            print(
+                f"  Success Rate: {summary['performance']['success_rate_percent']:.2f}%"
+            )
             print(f"  p95 Latency: {summary['performance']['latency_p95_ms']:.2f}ms")
 
     # Save results to JSON
-    with open('load_test_results.json', 'w') as f:
-        json.dump({
-            name: results.get_summary() if isinstance(results, LoadTestResults) else str(results)
-            for name, results in all_results.items()
-        }, f, indent=2)
+    with open("load_test_results.json", "w") as f:
+        json.dump(
+            {
+                name: (
+                    results.get_summary()
+                    if isinstance(results, LoadTestResults)
+                    else str(results)
+                )
+                for name, results in all_results.items()
+            },
+            f,
+            indent=2,
+        )
 
     print(f"\n📁 Results saved to: load_test_results.json")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")
 
 
 if __name__ == "__main__":

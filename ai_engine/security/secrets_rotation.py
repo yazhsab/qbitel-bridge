@@ -136,7 +136,9 @@ class SecretsRotationManager:
 
     async def initialize(self):
         """Initialize the secrets rotation manager."""
-        self.logger.info(f"Initializing secrets rotation manager with backend: {self.backend}")
+        self.logger.info(
+            f"Initializing secrets rotation manager with backend: {self.backend}"
+        )
 
         # Load existing secret metadata
         await self._load_secret_metadata()
@@ -216,7 +218,9 @@ class SecretsRotationManager:
                 expires_at=datetime.now()
                 + timedelta(days=(policy.rotation_interval_days if policy else 90)),
                 rotated_at=datetime.now(),
-                rotation_count=(current_metadata.rotation_count + 1 if current_metadata else 1),
+                rotation_count=(
+                    current_metadata.rotation_count + 1 if current_metadata else 1
+                ),
             )
             self.secret_metadata[secret_type.value] = new_metadata
 
@@ -255,7 +259,9 @@ class SecretsRotationManager:
             }
 
         except Exception as e:
-            self.logger.error(f"Failed to rotate secret {secret_type}: {e}", exc_info=True)
+            self.logger.error(
+                f"Failed to rotate secret {secret_type}: {e}", exc_info=True
+            )
             return {
                 "status": "failed",
                 "secret_type": secret_type.value,
@@ -292,7 +298,9 @@ class SecretsRotationManager:
                 secret_type, secret_value, version
             )
         elif self.backend == SecretBackend.AZURE_KEY_VAULT:
-            return await self._write_to_azure_key_vault(secret_type, secret_value, version)
+            return await self._write_to_azure_key_vault(
+                secret_type, secret_value, version
+            )
         elif self.backend == SecretBackend.GCP_SECRET_MANAGER:
             return await self._write_to_gcp_secret_manager(
                 secret_type, secret_value, version
@@ -348,13 +356,17 @@ class SecretsRotationManager:
                 # Try to update existing secret
                 response = client.update_secret(
                     SecretId=secret_name,
-                    SecretString=json.dumps({"value": secret_value, "version": version}),
+                    SecretString=json.dumps(
+                        {"value": secret_value, "version": version}
+                    ),
                 )
             except client.exceptions.ResourceNotFoundException:
                 # Create new secret
                 response = client.create_secret(
                     Name=secret_name,
-                    SecretString=json.dumps({"value": secret_value, "version": version}),
+                    SecretString=json.dumps(
+                        {"value": secret_value, "version": version}
+                    ),
                     Tags=[
                         {"Key": "Application", "Value": "CRONOS-AI"},
                         {"Key": "Environment", "Value": "production"},
@@ -485,7 +497,9 @@ class SecretsRotationManager:
         self, secret_type: SecretType, new_secret: str, new_version: str
     ):
         """Update running applications with new secret."""
-        self.logger.info(f"Updating applications with new {secret_type} version {new_version}")
+        self.logger.info(
+            f"Updating applications with new {secret_type} version {new_version}"
+        )
 
         # Implementation depends on deployment strategy:
         # - Kubernetes: Update secret and trigger rolling restart

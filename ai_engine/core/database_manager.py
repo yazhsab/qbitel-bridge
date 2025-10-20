@@ -72,16 +72,19 @@ DB_CONNECTION_POOL_EXHAUSTED = Counter(
 
 class DatabaseError(Exception):
     """Base exception for database errors."""
+
     pass
 
 
 class ConnectionPoolExhausted(DatabaseError):
     """Raised when connection pool is exhausted."""
+
     pass
 
 
 class TransactionError(DatabaseError):
     """Raised when transaction fails."""
+
     pass
 
 
@@ -260,7 +263,9 @@ class DatabaseManager:
             ConnectionPoolExhausted: If connection pool is full
         """
         if not self._initialized:
-            raise DatabaseError("DatabaseManager not initialized. Call initialize() first.")
+            raise DatabaseError(
+                "DatabaseManager not initialized. Call initialize() first."
+            )
 
         if self._shutdown_event.is_set():
             raise DatabaseError("DatabaseManager is shutting down")
@@ -386,7 +391,7 @@ class DatabaseManager:
                     ) from e
 
                 # Exponential backoff
-                delay = retry_delay * (2 ** attempt)
+                delay = retry_delay * (2**attempt)
                 logger.warning(
                     f"Database operation failed (attempt {attempt + 1}/{max_retries}), "
                     f"retrying in {delay:.2f}s: {e}"
@@ -430,7 +435,9 @@ class DatabaseManager:
         Raises:
             TimeoutError: If timeout is exceeded
         """
-        logger.info(f"Waiting for {len(self._active_sessions)} active sessions to complete...")
+        logger.info(
+            f"Waiting for {len(self._active_sessions)} active sessions to complete..."
+        )
 
         start_time = time.time()
         while self._active_sessions:
@@ -511,8 +518,7 @@ def get_database_manager() -> DatabaseManager:
 
 
 async def initialize_database_manager(
-    config: DatabaseConfig,
-    environment: str = "production"
+    config: DatabaseConfig, environment: str = "production"
 ) -> DatabaseManager:
     """
     Initialize the global database manager.

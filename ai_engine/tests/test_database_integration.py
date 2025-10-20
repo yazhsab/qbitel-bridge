@@ -44,6 +44,7 @@ from ai_engine.models.database import Base, User, UserRole
 async def db_config():
     """Create test database configuration."""
     import os
+
     # Use test database
     return DatabaseConfig(
         host=os.getenv("TEST_DB_HOST", "localhost"),
@@ -125,6 +126,7 @@ class TestDatabaseConnectionPool:
     @pytest.mark.asyncio
     async def test_connection_pool_concurrent_access(self, db_manager):
         """Test connection pool handles concurrent access."""
+
         async def query_database(session_id: int):
             async with db_manager.get_session() as session:
                 result = await session.execute(text("SELECT 1"))
@@ -165,6 +167,7 @@ class TestTransactionManagement:
     @pytest.mark.asyncio
     async def test_automatic_commit_on_success(self, db_session):
         """Test transaction commits automatically on success."""
+
         @transactional()
         async def create_user(db: AsyncSession, username: str):
             user = User(
@@ -192,6 +195,7 @@ class TestTransactionManagement:
     @pytest.mark.asyncio
     async def test_automatic_rollback_on_exception(self, db_session):
         """Test transaction rolls back on exception."""
+
         @transactional()
         async def create_user_with_error(db: AsyncSession):
             user = User(
@@ -232,9 +236,7 @@ class TestTransactionManagement:
 
         @readonly_transaction
         async def get_user(db: AsyncSession, username: str):
-            result = await db.execute(
-                select(User).where(User.username == username)
-            )
+            result = await db.execute(select(User).where(User.username == username))
             return result.scalar_one_or_none()
 
         # Read user
@@ -288,6 +290,7 @@ class TestDatabaseCircuitBreaker:
     @pytest.mark.asyncio
     async def test_circuit_breaker_protects_database_operations(self, db_session):
         """Test circuit breaker protects database operations."""
+
         @with_database_circuit_breaker(name="test_operation")
         async def protected_query():
             async with db_session as session:
@@ -324,15 +327,13 @@ class TestDatabaseCircuitBreaker:
     @pytest.mark.asyncio
     async def test_circuit_breaker_fallback(self, db_session):
         """Test circuit breaker uses fallback when open."""
+
         async def fallback_function():
             return "fallback_value"
 
         call_count = 0
 
-        @with_database_circuit_breaker(
-            name="fallback_test",
-            fallback=fallback_function
-        )
+        @with_database_circuit_breaker(name="fallback_test", fallback=fallback_function)
         async def query_with_fallback():
             nonlocal call_count
             call_count += 1

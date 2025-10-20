@@ -527,9 +527,9 @@ class TestModelTrainer:
 
         with patch.object(trainer, "train_model", new_callable=AsyncMock) as mock_train:
             mock_train.return_value = Mock(status="completed")
-            
+
             # Mock torch.load to avoid weights_only issue
-            with patch('torch.load', return_value=checkpoint):
+            with patch("torch.load", return_value=checkpoint):
                 job = await trainer.resume_training(
                     checkpoint_path=str(checkpoint_path),
                     train_dataloader=train_loader,
@@ -671,14 +671,23 @@ class TestModelTrainerAdvanced:
         mock_config.training.gradient_clip_norm = 1.0
 
         history = await trainer._training_loop(
-            model, train_loader, None, optimizer, scheduler, criterion, mock_config.training, job
+            model,
+            train_loader,
+            None,
+            optimizer,
+            scheduler,
+            criterion,
+            mock_config.training,
+            job,
         )
 
         assert "train_loss" in history
         assert len(history["train_loss"]) == 1
 
     @pytest.mark.asyncio
-    async def test_training_loop_with_validation_and_early_stopping(self, trainer, mock_config):
+    async def test_training_loop_with_validation_and_early_stopping(
+        self, trainer, mock_config
+    ):
         """Test training loop with validation and early stopping."""
         model = SimpleModel()
         optimizer = torch.optim.Adam(model.parameters())
@@ -709,7 +718,14 @@ class TestModelTrainerAdvanced:
 
         with patch.object(trainer, "_save_checkpoint", new_callable=AsyncMock):
             history = await trainer._training_loop(
-                model, train_loader, val_loader, optimizer, scheduler, criterion, mock_config.training, job
+                model,
+                train_loader,
+                val_loader,
+                optimizer,
+                scheduler,
+                criterion,
+                mock_config.training,
+                job,
             )
 
             # Should stop early
@@ -794,7 +810,9 @@ class TestModelTrainerAdvanced:
 
         with patch("torch.distributed.is_available", return_value=True):
             with patch("torch.cuda.is_available", return_value=False):
-                with patch.object(trainer, "train_model", new_callable=AsyncMock) as mock_train:
+                with patch.object(
+                    trainer, "train_model", new_callable=AsyncMock
+                ) as mock_train:
                     await trainer.distributed_training(
                         model=model,
                         train_dataloader=train_loader,
@@ -817,7 +835,9 @@ class TestModelTrainerAdvanced:
 
         with patch("torch.distributed.is_available", return_value=True):
             with patch("torch.cuda.is_available", return_value=False):
-                with patch.object(trainer, "_training_loop_distributed", new_callable=AsyncMock):
+                with patch.object(
+                    trainer, "_training_loop_distributed", new_callable=AsyncMock
+                ):
                     job = await trainer.distributed_training(
                         model=model,
                         train_dataloader=train_loader,
@@ -919,13 +939,24 @@ class TestModelTrainerAdvanced:
                 with patch("mlflow.set_tags") as mock_set_tags:
                     with patch("mlflow.log_metrics"):
                         with patch("mlflow.pytorch.log_model"):
-                            with patch.object(trainer, "_prepare_model_for_training", return_value=model):
+                            with patch.object(
+                                trainer,
+                                "_prepare_model_for_training",
+                                return_value=model,
+                            ):
                                 with patch.object(
                                     trainer,
                                     "_training_loop",
-                                    return_value={"train_loss": [0.5], "best_val_loss": 0.4},
+                                    return_value={
+                                        "train_loss": [0.5],
+                                        "best_val_loss": 0.4,
+                                    },
                                 ):
-                                    with patch.object(trainer, "_save_best_model", return_value="/tmp/model.pt"):
+                                    with patch.object(
+                                        trainer,
+                                        "_save_best_model",
+                                        return_value="/tmp/model.pt",
+                                    ):
                                         job = await trainer.train_model(
                                             model=model,
                                             train_dataloader=train_loader,
@@ -946,7 +977,9 @@ class TestModelTrainerAdvanced:
 
         with patch("mlflow.start_run"):
             with patch.object(
-                trainer, "_prepare_model_for_training", side_effect=Exception("Training error")
+                trainer,
+                "_prepare_model_for_training",
+                side_effect=Exception("Training error"),
             ):
                 from ai_engine.core.exceptions import TrainingException
 

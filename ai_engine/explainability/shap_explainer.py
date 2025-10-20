@@ -171,7 +171,9 @@ class SHAPProtocolExplainer(BaseExplainer):
         )
 
         # Calculate explanation time
-        explanation_time_ms = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
+        explanation_time_ms = (
+            datetime.now(timezone.utc) - start_time
+        ).total_seconds() * 1000
 
         return ExplanationResult(
             explanation_id=str(uuid4()),
@@ -280,7 +282,9 @@ class SHAPProtocolExplainer(BaseExplainer):
             zip(shap_values, input_bytes)
         ):
             # Create human-readable description
-            char_repr = chr(byte_value) if 32 <= byte_value < 127 else f"\\x{byte_value:02x}"
+            char_repr = (
+                chr(byte_value) if 32 <= byte_value < 127 else f"\\x{byte_value:02x}"
+            )
             description = self._get_byte_description(byte_pos, byte_value, char_repr)
 
             feature_importances.append(

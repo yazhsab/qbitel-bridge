@@ -19,8 +19,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSONB
 
 # revision identifiers
-revision: str = '003'
-down_revision: Union[str, None] = '002'
+revision: str = "003"
+down_revision: Union[str, None] = "002"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -40,16 +40,22 @@ def upgrade() -> None:
     # 3. Write it back
 
     # Update mfa_secret to LargeBinary (for encrypted data)
-    op.alter_column('users', 'mfa_secret',
-                    existing_type=sa.String(255),
-                    type_=sa.LargeBinary(),
-                    existing_nullable=True)
+    op.alter_column(
+        "users",
+        "mfa_secret",
+        existing_type=sa.String(255),
+        type_=sa.LargeBinary(),
+        existing_nullable=True,
+    )
 
     # Update mfa_backup_codes to LargeBinary (for encrypted JSON)
-    op.alter_column('users', 'mfa_backup_codes',
-                    existing_type=JSONB(),
-                    type_=sa.LargeBinary(),
-                    existing_nullable=True)
+    op.alter_column(
+        "users",
+        "mfa_backup_codes",
+        existing_type=JSONB(),
+        type_=sa.LargeBinary(),
+        existing_nullable=True,
+    )
 
     # OAuth providers table - already LargeBinary, no change needed
     # client_secret_encrypted is already LargeBinary, just documenting
@@ -63,13 +69,19 @@ def downgrade() -> None:
     WARNING: This will lose encrypted data.
     """
     # Revert mfa_secret to String
-    op.alter_column('users', 'mfa_secret',
-                    existing_type=sa.LargeBinary(),
-                    type_=sa.String(255),
-                    existing_nullable=True)
+    op.alter_column(
+        "users",
+        "mfa_secret",
+        existing_type=sa.LargeBinary(),
+        type_=sa.String(255),
+        existing_nullable=True,
+    )
 
     # Revert mfa_backup_codes to JSONB
-    op.alter_column('users', 'mfa_backup_codes',
-                    existing_type=sa.LargeBinary(),
-                    type_=JSONB(),
-                    existing_nullable=True)
+    op.alter_column(
+        "users",
+        "mfa_backup_codes",
+        existing_type=sa.LargeBinary(),
+        type_=JSONB(),
+        existing_nullable=True,
+    )

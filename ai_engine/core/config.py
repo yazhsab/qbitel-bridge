@@ -432,6 +432,46 @@ class MonitoringConfig:
 
 
 @dataclass
+class MarketplaceConfig:
+    """Protocol Marketplace configuration."""
+
+    # Feature flags
+    enabled: bool = field(default_factory=lambda: os.getenv("MARKETPLACE_ENABLED", "false").lower() == "true")
+    validation_enabled: bool = True
+
+    # Storage configuration
+    s3_bucket: str = field(default_factory=lambda: os.getenv("MARKETPLACE_S3_BUCKET", "cronos-marketplace-protocols"))
+    cdn_url: str = field(default_factory=lambda: os.getenv("MARKETPLACE_CDN_URL", "https://cdn.cronos-ai.com"))
+
+    # Payment processing (Stripe)
+    stripe_api_key: Optional[str] = field(default_factory=lambda: os.getenv("STRIPE_API_KEY"))
+    stripe_connect_client_id: Optional[str] = field(default_factory=lambda: os.getenv("STRIPE_CONNECT_CLIENT_ID"))
+    stripe_webhook_secret: Optional[str] = field(default_factory=lambda: os.getenv("STRIPE_WEBHOOK_SECRET"))
+    platform_fee: float = field(default_factory=lambda: float(os.getenv("MARKETPLACE_PLATFORM_FEE", "0.30")))  # 30%
+
+    # Validation pipeline
+    validation_timeout_seconds: int = 600  # 10 minutes
+    validation_sandbox_enabled: bool = True
+
+    # Rate limiting for submissions
+    max_submissions_per_day: int = 10
+    max_protocols_per_user: int = 100
+
+    # Storage limits
+    max_spec_file_size_mb: int = 10
+    max_parser_code_size_mb: int = 5
+    max_test_data_size_mb: int = 50
+
+    # Review and rating
+    enable_reviews: bool = True
+    require_verified_purchase_for_review: bool = False
+
+    # Search and discovery
+    search_results_per_page: int = 20
+    featured_protocols_count: int = 10
+
+
+@dataclass
 class SecurityConfig:
     """Security configuration with production-ready validation."""
 
@@ -764,6 +804,11 @@ class Config:
     model_path: str = "models"
     data_path: str = "data"
 
+    # AWS Configuration (for S3, etc.)
+    aws_access_key_id: Optional[str] = field(default_factory=lambda: os.getenv("AWS_ACCESS_KEY_ID"))
+    aws_secret_access_key: Optional[str] = field(default_factory=lambda: os.getenv("AWS_SECRET_ACCESS_KEY"))
+    aws_region: str = field(default_factory=lambda: os.getenv("AWS_REGION", "us-east-1"))
+
     # Component configurations
     database: DatabaseConfig = field(default_factory=DatabaseConfig)
     redis: RedisConfig = field(default_factory=RedisConfig)
@@ -771,6 +816,7 @@ class Config:
     mlflow: MLflowConfig = field(default_factory=MLflowConfig)
     monitoring: MonitoringConfig = field(default_factory=MonitoringConfig)
     security: SecurityConfig = field(default_factory=SecurityConfig)
+    marketplace: MarketplaceConfig = field(default_factory=MarketplaceConfig)
 
     # Model configurations
     models: Dict[str, ModelConfig] = field(default_factory=dict)

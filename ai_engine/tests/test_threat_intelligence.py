@@ -70,6 +70,7 @@ def sample_stix_indicator():
 
 # STIX/TAXII Client Tests
 
+
 class TestSTIXTAXIIClient:
     """Test STIX/TAXII client functionality."""
 
@@ -137,10 +138,7 @@ class TestSTIXTAXIIClient:
         client.indicators_cache[sample_stix_indicator.id] = sample_stix_indicator
 
         # Query without type filter to get all indicators
-        results = await client.query_indicators(
-            indicator_type=None,
-            limit=10
-        )
+        results = await client.query_indicators(indicator_type=None, limit=10)
 
         assert len(results) > 0
         assert results[0].id == sample_stix_indicator.id
@@ -190,6 +188,7 @@ class TestSTIXTAXIIClient:
 
 # MITRE ATT&CK Mapper Tests
 
+
 class TestMITREATTACKMapper:
     """Test MITRE ATT&CK mapper functionality."""
 
@@ -231,7 +230,9 @@ class TestMITREATTACKMapper:
         assert any(tid in ["T1595", "T1046"] for tid in technique_ids)
 
     @pytest.mark.asyncio
-    async def test_map_unauthorized_access_to_techniques(self, config, sample_security_event):
+    async def test_map_unauthorized_access_to_techniques(
+        self, config, sample_security_event
+    ):
         """Test mapping unauthorized access to techniques."""
         mapper = MITREATTACKMapper(config)
         await mapper.initialize()
@@ -281,6 +282,7 @@ class TestMITREATTACKMapper:
 
 # Threat Hunter Tests
 
+
 class TestThreatHunter:
     """Test threat hunter functionality."""
 
@@ -291,9 +293,7 @@ class TestThreatHunter:
         attack_mapper = MITREATTACKMapper(config)
 
         hunter = ThreatHunter(
-            config,
-            stix_client=stix_client,
-            attack_mapper=attack_mapper
+            config, stix_client=stix_client, attack_mapper=attack_mapper
         )
 
         assert hunter.config == config
@@ -309,7 +309,9 @@ class TestThreatHunter:
         attack_mapper = MITREATTACKMapper(config)
         await attack_mapper.initialize()
 
-        hunter = ThreatHunter(config, stix_client=stix_client, attack_mapper=attack_mapper)
+        hunter = ThreatHunter(
+            config, stix_client=stix_client, attack_mapper=attack_mapper
+        )
         await hunter.initialize()
 
         assert len(hunter.hypotheses) > 0
@@ -325,7 +327,9 @@ class TestThreatHunter:
         attack_mapper = MITREATTACKMapper(config)
         await attack_mapper.initialize()
 
-        hunter = ThreatHunter(config, stix_client=stix_client, attack_mapper=attack_mapper)
+        hunter = ThreatHunter(
+            config, stix_client=stix_client, attack_mapper=attack_mapper
+        )
         await hunter.initialize()
 
         hunter.add_event_to_history(sample_security_event)
@@ -334,7 +338,9 @@ class TestThreatHunter:
         assert hunter.event_history[0].event_id == sample_security_event.event_id
 
     @pytest.mark.asyncio
-    async def test_execute_hunt_campaign_all_hypotheses(self, config, sample_security_event):
+    async def test_execute_hunt_campaign_all_hypotheses(
+        self, config, sample_security_event
+    ):
         """Test executing hunt campaign with all hypotheses."""
         stix_client = STIXTAXIIClient(config)
         await stix_client.initialize()
@@ -342,15 +348,16 @@ class TestThreatHunter:
         attack_mapper = MITREATTACKMapper(config)
         await attack_mapper.initialize()
 
-        hunter = ThreatHunter(config, stix_client=stix_client, attack_mapper=attack_mapper)
+        hunter = ThreatHunter(
+            config, stix_client=stix_client, attack_mapper=attack_mapper
+        )
         await hunter.initialize()
 
         # Add some events to history
         hunter.add_event_to_history(sample_security_event)
 
         campaign = await hunter.execute_hunt_campaign(
-            hypotheses=None,  # All hypotheses
-            time_range_hours=24
+            hypotheses=None, time_range_hours=24  # All hypotheses
         )
 
         assert campaign.campaign_id is not None
@@ -358,7 +365,9 @@ class TestThreatHunter:
         assert campaign.end_time is not None
 
     @pytest.mark.asyncio
-    async def test_execute_hunt_campaign_specific_hypothesis(self, config, sample_security_event):
+    async def test_execute_hunt_campaign_specific_hypothesis(
+        self, config, sample_security_event
+    ):
         """Test executing hunt campaign with specific hypothesis."""
         stix_client = STIXTAXIIClient(config)
         await stix_client.initialize()
@@ -366,21 +375,24 @@ class TestThreatHunter:
         attack_mapper = MITREATTACKMapper(config)
         await attack_mapper.initialize()
 
-        hunter = ThreatHunter(config, stix_client=stix_client, attack_mapper=attack_mapper)
+        hunter = ThreatHunter(
+            config, stix_client=stix_client, attack_mapper=attack_mapper
+        )
         await hunter.initialize()
 
         hunter.add_event_to_history(sample_security_event)
 
         campaign = await hunter.execute_hunt_campaign(
-            hypotheses=["h001"],  # Unknown IOCs hypothesis
-            time_range_hours=24
+            hypotheses=["h001"], time_range_hours=24  # Unknown IOCs hypothesis
         )
 
         assert len(campaign.hypotheses_tested) == 1
         assert campaign.hypotheses_tested[0] == "h001"
 
     @pytest.mark.asyncio
-    async def test_hunt_generates_findings(self, config, sample_security_event, sample_stix_indicator):
+    async def test_hunt_generates_findings(
+        self, config, sample_security_event, sample_stix_indicator
+    ):
         """Test that hunting generates findings when IOCs match."""
         stix_client = STIXTAXIIClient(config)
         await stix_client.initialize()
@@ -391,7 +403,9 @@ class TestThreatHunter:
         attack_mapper = MITREATTACKMapper(config)
         await attack_mapper.initialize()
 
-        hunter = ThreatHunter(config, stix_client=stix_client, attack_mapper=attack_mapper)
+        hunter = ThreatHunter(
+            config, stix_client=stix_client, attack_mapper=attack_mapper
+        )
         await hunter.initialize()
 
         # Add event with malicious IP
@@ -399,8 +413,7 @@ class TestThreatHunter:
         hunter.add_event_to_history(sample_security_event)
 
         campaign = await hunter.execute_hunt_campaign(
-            hypotheses=["h001"],  # Unknown IOCs
-            time_range_hours=24
+            hypotheses=["h001"], time_range_hours=24  # Unknown IOCs
         )
 
         # Should generate finding for malicious IP
@@ -408,6 +421,7 @@ class TestThreatHunter:
 
 
 # TIP Manager Tests
+
 
 class TestThreatIntelligenceManager:
     """Test TIP manager functionality."""
@@ -450,13 +464,17 @@ class TestThreatIntelligenceManager:
         assert enrichment["threat_score"] <= 1.0
 
     @pytest.mark.asyncio
-    async def test_process_event_with_ioc_match(self, config, sample_security_event, sample_stix_indicator):
+    async def test_process_event_with_ioc_match(
+        self, config, sample_security_event, sample_stix_indicator
+    ):
         """Test event processing with IOC match increases threat score."""
         manager = ThreatIntelligenceManager(config)
         await manager.initialize()
 
         # Add malicious indicator
-        manager.stix_client.indicators_cache[sample_stix_indicator.id] = sample_stix_indicator
+        manager.stix_client.indicators_cache[sample_stix_indicator.id] = (
+            sample_stix_indicator
+        )
 
         # Event with malicious IP
         sample_security_event.source_ip = "203.0.113.42"
@@ -472,15 +490,17 @@ class TestThreatIntelligenceManager:
         manager = ThreatIntelligenceManager(config)
         await manager.initialize()
 
-        manager.stix_client.indicators_cache[sample_stix_indicator.id] = sample_stix_indicator
+        manager.stix_client.indicators_cache[sample_stix_indicator.id] = (
+            sample_stix_indicator
+        )
 
         result = await manager.query_threat_intelligence(
             query_type="iocs",
             query_params={
                 "indicator_type": "ipv4-addr",
                 "min_confidence": 80,
-                "limit": 10
-            }
+                "limit": 10,
+            },
         )
 
         assert "indicators" in result
@@ -493,11 +513,7 @@ class TestThreatIntelligenceManager:
         await manager.initialize()
 
         result = await manager.query_threat_intelligence(
-            query_type="techniques",
-            query_params={
-                "query": "scanning",
-                "limit": 5
-            }
+            query_type="techniques", query_params={"query": "scanning", "limit": 5}
         )
 
         assert "techniques" in result
@@ -513,8 +529,7 @@ class TestThreatIntelligenceManager:
         manager.threat_hunter.add_event_to_history(sample_security_event)
 
         campaign = await manager.execute_threat_hunt(
-            hypotheses=None,
-            time_range_hours=24
+            hypotheses=None, time_range_hours=24
         )
 
         assert isinstance(campaign, HuntCampaign)
@@ -539,7 +554,7 @@ class TestThreatIntelligenceManager:
         manager.stix_client.ioc_feeds[feed.feed_id] = feed
 
         # Mock feed update
-        with patch.object(manager.stix_client, 'update_ioc_feed', return_value=5):
+        with patch.object(manager.stix_client, "update_ioc_feed", return_value=5):
             results = await manager.update_ioc_feeds(feed_ids=["test_feed"])
 
             assert "test_feed" in results
@@ -580,7 +595,9 @@ class TestThreatIntelligenceManager:
         assert not manager._initialized
 
     @pytest.mark.asyncio
-    async def test_process_event_before_initialization(self, config, sample_security_event):
+    async def test_process_event_before_initialization(
+        self, config, sample_security_event
+    ):
         """Test processing event before initialization raises error."""
         manager = ThreatIntelligenceManager(config)
 
@@ -589,6 +606,7 @@ class TestThreatIntelligenceManager:
 
 
 # Integration Tests
+
 
 class TestTIPIntegration:
     """Test TIP end-to-end integration scenarios."""
@@ -662,8 +680,7 @@ class TestTIPIntegration:
 
         # Execute hunt
         campaign = await manager.execute_threat_hunt(
-            hypotheses=["h001"],  # Unknown IOCs
-            time_range_hours=24
+            hypotheses=["h001"], time_range_hours=24  # Unknown IOCs
         )
 
         # Should find C2 communication
@@ -672,6 +689,7 @@ class TestTIPIntegration:
 
 
 # Performance Tests
+
 
 class TestTIPPerformance:
     """Test TIP performance characteristics."""
@@ -718,8 +736,7 @@ class TestTIPPerformance:
 
         start_time = datetime.utcnow()
         result = await manager.query_threat_intelligence(
-            query_type="iocs",
-            query_params={"limit": 100}
+            query_type="iocs", query_params={"limit": 100}
         )
         duration = (datetime.utcnow() - start_time).total_seconds()
 

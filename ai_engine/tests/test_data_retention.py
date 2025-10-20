@@ -46,7 +46,10 @@ def mock_audit_manager():
 @pytest.fixture
 def retention_manager(mock_config, mock_audit_manager):
     """Create DataRetentionManager instance."""
-    with patch('ai_engine.compliance.data_retention.AuditTrailManager', return_value=mock_audit_manager):
+    with patch(
+        "ai_engine.compliance.data_retention.AuditTrailManager",
+        return_value=mock_audit_manager,
+    ):
         manager = DataRetentionManager(mock_config)
         manager.audit_manager = mock_audit_manager
         return manager
@@ -61,7 +64,7 @@ def sample_policy():
         retention_period_days=90,
         archive_period_days=30,
         action_after_retention=RetentionAction.ARCHIVE,
-        description="Audit log retention policy"
+        description="Audit log retention policy",
     )
 
 
@@ -82,7 +85,7 @@ class TestRetentionPolicy:
         policy = RetentionPolicy(
             policy_id="POL002",
             data_category=DataCategory.USER_DATA,
-            retention_period_days=365
+            retention_period_days=365,
         )
         assert policy.archive_period_days is None
         assert policy.action_after_retention == RetentionAction.DELETE
@@ -103,7 +106,7 @@ class TestDataLifecycleRecord:
             data_category=DataCategory.PROTOCOL_ANALYSIS,
             data_identifier="analysis_12345",
             created_at=now,
-            retention_until=retention_date
+            retention_until=retention_date,
         )
 
         assert record.record_id == "REC001"
@@ -152,7 +155,7 @@ class TestDataRetentionManager:
         record_id = await retention_manager.register_data(
             data_category=DataCategory.AUDIT_LOGS,
             data_identifier="audit_001",
-            metadata={"source": "api"}
+            metadata={"source": "api"},
         )
 
         assert record_id is not None
@@ -163,12 +166,13 @@ class TestDataRetentionManager:
         """Test applying legal hold to data."""
         # Register data first
         record_id = await retention_manager.register_data(
-            data_category=DataCategory.USER_DATA,
-            data_identifier="user_data_001"
+            data_category=DataCategory.USER_DATA, data_identifier="user_data_001"
         )
 
         # Apply legal hold
-        result = await retention_manager.apply_legal_hold(record_id, reason="Litigation")
+        result = await retention_manager.apply_legal_hold(
+            record_id, reason="Litigation"
+        )
 
         assert result is True
         record = retention_manager.lifecycle_records[record_id]
@@ -178,8 +182,7 @@ class TestDataRetentionManager:
     async def test_release_legal_hold(self, retention_manager):
         """Test releasing legal hold."""
         record_id = await retention_manager.register_data(
-            data_category=DataCategory.USER_DATA,
-            data_identifier="user_data_002"
+            data_category=DataCategory.USER_DATA, data_identifier="user_data_002"
         )
 
         await retention_manager.apply_legal_hold(record_id, reason="Investigation")
@@ -201,7 +204,7 @@ class TestDataRetentionManager:
             data_category=DataCategory.AUDIT_LOGS,
             data_identifier="old_audit",
             created_at=old_date,
-            retention_until=old_date + timedelta(days=90)
+            retention_until=old_date + timedelta(days=90),
         )
         retention_manager.lifecycle_records["REC_EXPIRED"] = record
 
@@ -214,11 +217,12 @@ class TestDataRetentionManager:
     async def test_archive_data(self, retention_manager):
         """Test data archival."""
         record_id = await retention_manager.register_data(
-            data_category=DataCategory.BACKUPS,
-            data_identifier="backup_001"
+            data_category=DataCategory.BACKUPS, data_identifier="backup_001"
         )
 
-        with patch.object(retention_manager, '_archive_data_impl', new_callable=AsyncMock) as mock_archive:
+        with patch.object(
+            retention_manager, "_archive_data_impl", new_callable=AsyncMock
+        ) as mock_archive:
             mock_archive.return_value = True
 
             result = await retention_manager.archive_data(record_id)
@@ -230,11 +234,12 @@ class TestDataRetentionManager:
     async def test_delete_data(self, retention_manager):
         """Test data deletion."""
         record_id = await retention_manager.register_data(
-            data_category=DataCategory.SYSTEM_LOGS,
-            data_identifier="log_001"
+            data_category=DataCategory.SYSTEM_LOGS, data_identifier="log_001"
         )
 
-        with patch.object(retention_manager, '_delete_data_impl', new_callable=AsyncMock) as mock_delete:
+        with patch.object(
+            retention_manager, "_delete_data_impl", new_callable=AsyncMock
+        ) as mock_delete:
             mock_delete.return_value = True
 
             result = await retention_manager.delete_data(record_id)
@@ -246,11 +251,12 @@ class TestDataRetentionManager:
     async def test_anonymize_data(self, retention_manager):
         """Test data anonymization."""
         record_id = await retention_manager.register_data(
-            data_category=DataCategory.USER_DATA,
-            data_identifier="user_001"
+            data_category=DataCategory.USER_DATA, data_identifier="user_001"
         )
 
-        with patch.object(retention_manager, '_anonymize_data_impl', new_callable=AsyncMock) as mock_anon:
+        with patch.object(
+            retention_manager, "_anonymize_data_impl", new_callable=AsyncMock
+        ) as mock_anon:
             mock_anon.return_value = True
 
             result = await retention_manager.anonymize_data(record_id)
@@ -262,8 +268,7 @@ class TestDataRetentionManager:
     async def test_legal_hold_prevents_deletion(self, retention_manager):
         """Test that legal hold prevents data deletion."""
         record_id = await retention_manager.register_data(
-            data_category=DataCategory.USER_DATA,
-            data_identifier="protected_data"
+            data_category=DataCategory.USER_DATA, data_identifier="protected_data"
         )
 
         await retention_manager.apply_legal_hold(record_id, reason="Legal case")
@@ -279,8 +284,7 @@ class TestDataRetentionManager:
         # Register some data
         for i in range(5):
             await retention_manager.register_data(
-                data_category=DataCategory.AUDIT_LOGS,
-                data_identifier=f"audit_{i}"
+                data_category=DataCategory.AUDIT_LOGS, data_identifier=f"audit_{i}"
             )
 
         stats = await retention_manager.get_statistics()
@@ -301,7 +305,7 @@ class TestDataRetentionManager:
             data_category=DataCategory.AUDIT_LOGS,
             data_identifier="expired_data",
             created_at=old_date,
-            retention_until=old_date + timedelta(days=90)
+            retention_until=old_date + timedelta(days=90),
         )
         retention_manager.lifecycle_records["EXP001"] = record
 

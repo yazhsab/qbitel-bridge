@@ -7,7 +7,12 @@ from unittest.mock import Mock, patch, MagicMock
 import json
 
 from ai_engine.core.error_storage import PersistentErrorStorage, ErrorRecordModel
-from ai_engine.core.error_handling import ErrorRecord, ErrorSeverity, ErrorCategory, ErrorContext
+from ai_engine.core.error_handling import (
+    ErrorRecord,
+    ErrorSeverity,
+    ErrorCategory,
+    ErrorContext,
+)
 
 
 class TestPersistentErrorStorage:
@@ -16,9 +21,11 @@ class TestPersistentErrorStorage:
     def test_initialization(self):
         """Test basic initialization."""
         storage = PersistentErrorStorage()
-        
+
         assert storage.redis_url == "redis://localhost:6379/0"
-        assert storage.postgres_url == "postgresql+asyncpg://user:pass@localhost/cronos_ai"
+        assert (
+            storage.postgres_url == "postgresql+asyncpg://user:pass@localhost/cronos_ai"
+        )
         assert storage.redis_ttl == 86400
         assert storage.postgres_retention_days == 90
         assert storage.redis_client is None
@@ -31,9 +38,9 @@ class TestPersistentErrorStorage:
             redis_url="redis://custom:6379/1",
             postgres_url="postgresql+asyncpg://custom:pass@custom/custom",
             redis_ttl=3600,
-            postgres_retention_days=30
+            postgres_retention_days=30,
         )
-        
+
         assert storage.redis_url == "redis://custom:6379/1"
         assert storage.postgres_url == "postgresql+asyncpg://custom:pass@custom/custom"
         assert storage.redis_ttl == 3600
@@ -45,7 +52,7 @@ class TestPersistentErrorStorage:
         storage = PersistentErrorStorage()
         storage.redis_client = None
         storage.async_session_maker = None
-        
+
         error_record = ErrorRecord(
             error_id="test-error-123",
             timestamp=1234567890.0,
@@ -57,16 +64,15 @@ class TestPersistentErrorStorage:
             exception_message="Test error message",
             stack_trace="Test stack trace",
             context=ErrorContext(
-                component="test_component",
-                operation="test_operation"
+                component="test_component", operation="test_operation"
             ),
             recovery_attempted=False,
             recovery_successful=False,
             recovery_strategy=None,
             retry_count=0,
-            metadata={"test": "metadata"}
+            metadata={"test": "metadata"},
         )
-        
+
         # Should return True even without connections (no exception thrown)
         result = await storage.store_error(error_record)
         assert result is True
@@ -77,7 +83,7 @@ class TestPersistentErrorStorage:
         storage = PersistentErrorStorage()
         storage.redis_client = None
         storage.async_session_maker = None
-        
+
         result = await storage.get_error("non-existent-error")
         assert result is None
 
@@ -87,7 +93,7 @@ class TestPersistentErrorStorage:
         storage = PersistentErrorStorage()
         storage.redis_client = None
         storage.async_session_maker = None
-        
+
         result = await storage.get_errors_by_component("test_component")
         assert result == []
 
@@ -97,7 +103,7 @@ class TestPersistentErrorStorage:
         storage = PersistentErrorStorage()
         storage.redis_client = None
         storage.async_session_maker = None
-        
+
         result = await storage.get_error_statistics(24)
         # Should return empty stats structure
         assert isinstance(result, dict)
@@ -114,7 +120,7 @@ class TestPersistentErrorStorage:
         storage = PersistentErrorStorage()
         storage.redis_client = None
         storage.async_session_maker = None
-        
+
         result = await storage.cleanup_old_errors()
         assert result == 0
 
@@ -124,7 +130,7 @@ class TestPersistentErrorStorage:
         storage = PersistentErrorStorage()
         storage.redis_client = None
         storage.db_engine = None
-        
+
         # Should not raise an exception
         await storage.close()
 
@@ -132,18 +138,18 @@ class TestPersistentErrorStorage:
     async def test_close_with_connections(self):
         """Test closing with mock connections."""
         storage = PersistentErrorStorage()
-        
+
         # Mock connections with async methods
         mock_redis = Mock()
         mock_redis.close = Mock(return_value=None)
         mock_db_engine = Mock()
         mock_db_engine.dispose = Mock(return_value=None)
-        
+
         storage.redis_client = mock_redis
         storage.db_engine = mock_db_engine
-        
+
         await storage.close()
-        
+
         mock_redis.close.assert_called_once()
         # Note: dispose is not called because it's not awaited in the actual code
 
@@ -168,9 +174,9 @@ class TestErrorRecordModel:
             recovery_successful=False,
             recovery_strategy=None,
             retry_count=0,
-            extra_metadata={"test": "metadata"}
+            extra_metadata={"test": "metadata"},
         )
-        
+
         assert model.error_id == "test-123"
         assert model.severity == "HIGH"
         assert model.extra_metadata == {"test": "metadata"}
@@ -178,23 +184,23 @@ class TestErrorRecordModel:
     def test_model_fields(self):
         """Test that all required fields are present."""
         model = ErrorRecordModel()
-        
+
         # Check that all required fields exist
-        assert hasattr(model, 'error_id')
-        assert hasattr(model, 'timestamp')
-        assert hasattr(model, 'severity')
-        assert hasattr(model, 'category')
-        assert hasattr(model, 'component')
-        assert hasattr(model, 'operation')
-        assert hasattr(model, 'exception_type')
-        assert hasattr(model, 'exception_message')
-        assert hasattr(model, 'stack_trace')
-        assert hasattr(model, 'context')
-        assert hasattr(model, 'recovery_attempted')
-        assert hasattr(model, 'recovery_successful')
-        assert hasattr(model, 'recovery_strategy')
-        assert hasattr(model, 'retry_count')
-        assert hasattr(model, 'extra_metadata')
+        assert hasattr(model, "error_id")
+        assert hasattr(model, "timestamp")
+        assert hasattr(model, "severity")
+        assert hasattr(model, "category")
+        assert hasattr(model, "component")
+        assert hasattr(model, "operation")
+        assert hasattr(model, "exception_type")
+        assert hasattr(model, "exception_message")
+        assert hasattr(model, "stack_trace")
+        assert hasattr(model, "context")
+        assert hasattr(model, "recovery_attempted")
+        assert hasattr(model, "recovery_successful")
+        assert hasattr(model, "recovery_strategy")
+        assert hasattr(model, "retry_count")
+        assert hasattr(model, "extra_metadata")
 
     def test_model_table_name(self):
         """Test that the table name is correct."""
@@ -214,13 +220,14 @@ class TestGetErrorStorage:
     async def test_get_error_storage_creation(self):
         """Test that get_error_storage creates a new instance."""
         from ai_engine.core.error_storage import get_error_storage
-        
+
         # This will fail because it tries to initialize connections
         # but we can test that it creates the instance
         with pytest.raises(Exception):
             await get_error_storage()
-        
+
         # The function should have created a global instance
         from ai_engine.core.error_storage import _error_storage
+
         assert _error_storage is not None
         assert isinstance(_error_storage, PersistentErrorStorage)

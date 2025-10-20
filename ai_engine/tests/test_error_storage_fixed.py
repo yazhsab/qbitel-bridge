@@ -9,7 +9,12 @@ from datetime import datetime, timedelta
 import json
 
 from ai_engine.core.error_storage import PersistentErrorStorage, ErrorRecordModel
-from ai_engine.core.error_handling import ErrorRecord, ErrorSeverity, ErrorCategory, RecoveryStrategy
+from ai_engine.core.error_handling import (
+    ErrorRecord,
+    ErrorSeverity,
+    ErrorCategory,
+    RecoveryStrategy,
+)
 
 
 class TestPersistentErrorStorage:
@@ -66,29 +71,39 @@ class TestPersistentErrorStorage:
             operation="test_operation",
             exception_type="TestException",
             exception_message="Test error message",
-            stack_trace="Traceback (most recent call last):\n  File \"test.py\", line 1, in <module>\n    raise TestException()\nTestException: Test error message",
+            stack_trace='Traceback (most recent call last):\n  File "test.py", line 1, in <module>\n    raise TestException()\nTestException: Test error message',
             context=ErrorContext(
                 component="test_component",
                 operation="test_operation",
-                additional_data={"test": "context"}
+                additional_data={"test": "context"},
             ),
             recovery_attempted=False,
             recovery_successful=False,
             recovery_strategy=None,
             retry_count=0,
-            metadata={"test": "metadata"}
+            metadata={"test": "metadata"},
         )
 
     @pytest.mark.asyncio
-    async def test_initialization_success(self, mock_redis, mock_db_engine, mock_session_maker):
+    async def test_initialization_success(
+        self, mock_redis, mock_db_engine, mock_session_maker
+    ):
         """Test successful initialization."""
-        with patch('redis.asyncio.from_url', return_value=mock_redis), \
-             patch('sqlalchemy.ext.asyncio.create_async_engine', return_value=mock_db_engine), \
-             patch('sqlalchemy.ext.asyncio.async_sessionmaker', return_value=mock_session_maker):
-            
+        with (
+            patch("redis.asyncio.from_url", return_value=mock_redis),
+            patch(
+                "sqlalchemy.ext.asyncio.create_async_engine",
+                return_value=mock_db_engine,
+            ),
+            patch(
+                "sqlalchemy.ext.asyncio.async_sessionmaker",
+                return_value=mock_session_maker,
+            ),
+        ):
+
             storage = PersistentErrorStorage()
             await storage.initialize()
-            
+
             assert storage.redis_client is not None
             assert storage.db_engine is not None
             assert storage.async_session_maker is not None
@@ -96,21 +111,25 @@ class TestPersistentErrorStorage:
     @pytest.mark.asyncio
     async def test_initialization_failure(self):
         """Test initialization failure."""
-        with patch('redis.asyncio.from_url', side_effect=Exception("Redis connection failed")):
+        with patch(
+            "redis.asyncio.from_url", side_effect=Exception("Redis connection failed")
+        ):
             storage = PersistentErrorStorage()
-            
+
             with pytest.raises(Exception):
                 await storage.initialize()
 
     @pytest.mark.asyncio
-    async def test_store_error_success(self, mock_redis, mock_session, mock_session_maker, error_record):
+    async def test_store_error_success(
+        self, mock_redis, mock_session, mock_session_maker, error_record
+    ):
         """Test successful error storage."""
         storage = PersistentErrorStorage()
         storage.redis_client = mock_redis
         storage.async_session_maker = mock_session_maker
-        
+
         result = await storage.store_error(error_record)
-        
+
         assert result is True
         mock_redis.setex.assert_called_once()
         mock_redis.zadd.assert_called()
@@ -123,7 +142,7 @@ class TestPersistentErrorStorage:
         storage = PersistentErrorStorage()
         storage.redis_client = None
         storage.async_session_maker = None
-        
+
         # This should not raise an exception, just return False
         result = await storage.store_error(error_record)
         assert result is False
@@ -133,13 +152,13 @@ class TestPersistentErrorStorage:
         """Test getting error from Redis."""
         error_json = json.dumps(error_record.to_dict())
         mock_redis.get.return_value = error_json
-        
+
         storage = PersistentErrorStorage()
         storage.redis_client = mock_redis
         storage.async_session_maker = None
-        
+
         result = await storage.get_error("test-error-123")
-        
+
         assert result is not None
         assert result["error_id"] == "test-error-123"
         mock_redis.get.assert_called_once_with("error:test-error-123")
@@ -163,15 +182,15 @@ class TestPersistentErrorStorage:
         mock_db_record.recovery_strategy = None
         mock_db_record.retry_count = 0
         mock_db_record.extra_metadata = {"test": "metadata"}
-        
+
         mock_session.get.return_value = mock_db_record
-        
+
         storage = PersistentErrorStorage()
         storage.redis_client = None
         storage.async_session_maker = mock_session_maker
-        
+
         result = await storage.get_error("test-error-123")
-        
+
         assert result is not None
         assert result["error_id"] == "test-error-123"
         assert result["severity"] == "ERROR"
@@ -180,28 +199,30 @@ class TestPersistentErrorStorage:
     async def test_get_error_not_found(self, mock_redis):
         """Test getting non-existent error."""
         mock_redis.get.return_value = None
-        
+
         storage = PersistentErrorStorage()
         storage.redis_client = mock_redis
         storage.async_session_maker = None
-        
+
         result = await storage.get_error("non-existent-error")
-        
+
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_get_errors_by_component(self, mock_redis, mock_session, mock_session_maker):
+    async def test_get_errors_by_component(
+        self, mock_redis, mock_session, mock_session_maker
+    ):
         """Test getting errors by component."""
         mock_redis.zrangebyscore.return_value = ["error1", "error2"]
-        
+
         storage = PersistentErrorStorage()
         storage.redis_client = mock_redis
         storage.async_session_maker = mock_session_maker
-        
+
         # Mock the get_error method to return sample data
-        with patch.object(storage, 'get_error', return_value={"error_id": "error1"}):
+        with patch.object(storage, "get_error", return_value={"error_id": "error1"}):
             result = await storage.get_errors_by_component("test_component")
-            
+
             assert len(result) == 2
             assert result[0]["error_id"] == "error1"
 
@@ -212,15 +233,15 @@ class TestPersistentErrorStorage:
         mock_result = Mock()
         mock_result.scalar.return_value = 10  # total errors
         mock_result.first.return_value = (5, 3)  # recovery stats
-        
+
         mock_session.execute.return_value = mock_result
-        
+
         storage = PersistentErrorStorage()
         storage.redis_client = None
         storage.async_session_maker = mock_session_maker
-        
+
         result = await storage.get_error_statistics(24)
-        
+
         assert result["total_errors"] == 10
         assert result["time_window_hours"] == 24
 
@@ -229,15 +250,15 @@ class TestPersistentErrorStorage:
         """Test cleanup of old errors."""
         mock_result = Mock()
         mock_result.rowcount = 5
-        
+
         mock_session.execute.return_value = mock_result
-        
+
         storage = PersistentErrorStorage()
         storage.redis_client = None
         storage.async_session_maker = mock_session_maker
-        
+
         result = await storage.cleanup_old_errors()
-        
+
         assert result == 5
         mock_session.commit.assert_called_once()
 
@@ -247,9 +268,9 @@ class TestPersistentErrorStorage:
         storage = PersistentErrorStorage()
         storage.redis_client = mock_redis
         storage.db_engine = mock_db_engine
-        
+
         await storage.close()
-        
+
         mock_redis.close.assert_called_once()
         mock_db_engine.dispose.assert_called_once()
 
@@ -275,9 +296,9 @@ class TestErrorRecordModel:
             recovery_successful=False,
             recovery_strategy=None,
             retry_count=0,
-            extra_metadata={"test": "metadata"}
+            extra_metadata={"test": "metadata"},
         )
-        
+
         assert model.error_id == "test-123"
         assert model.severity == "ERROR"
         assert model.extra_metadata == {"test": "metadata"}

@@ -56,7 +56,7 @@ def sample_control():
         title="Logical and Physical Access Controls",
         description="Implement access controls to protect assets",
         status=ControlStatus.IMPLEMENTED,
-        responsible_party="Security Team"
+        responsible_party="Security Team",
     )
 
 
@@ -79,7 +79,7 @@ class TestSOC2Control:
             title="System Monitoring",
             description="Monitor system activities",
             status=ControlStatus.IMPLEMENTED,
-            evidence=["audit_logs.pdf", "monitoring_report.pdf"]
+            evidence=["audit_logs.pdf", "monitoring_report.pdf"],
         )
 
         assert len(control.evidence) == 2
@@ -124,7 +124,7 @@ class TestSOC2ControlsManager:
         await soc2_manager.update_control_status(
             "CC6.1",
             ControlStatus.PARTIALLY_IMPLEMENTED,
-            notes="Implementation in progress"
+            notes="Implementation in progress",
         )
 
         control = soc2_manager.get_control("CC6.1")
@@ -135,10 +135,7 @@ class TestSOC2ControlsManager:
         """Test adding evidence to a control."""
         await soc2_manager.register_control(sample_control)
 
-        await soc2_manager.add_evidence(
-            "CC6.1",
-            "access_control_logs_2024.pdf"
-        )
+        await soc2_manager.add_evidence("CC6.1", "access_control_logs_2024.pdf")
 
         control = soc2_manager.get_control("CC6.1")
         assert "access_control_logs_2024.pdf" in control.evidence
@@ -152,7 +149,7 @@ class TestSOC2ControlsManager:
             "passed": True,
             "findings": [],
             "tested_by": "auditor@example.com",
-            "test_date": datetime.utcnow().isoformat()
+            "test_date": datetime.utcnow().isoformat(),
         }
 
         await soc2_manager.test_control("CC6.1", test_results)
@@ -170,14 +167,14 @@ class TestSOC2ControlsManager:
             criteria=TrustServiceCriteria.SECURITY,
             title="Security Control",
             description="Test security control",
-            status=ControlStatus.IMPLEMENTED
+            status=ControlStatus.IMPLEMENTED,
         )
         availability_control = SOC2Control(
             control_id="A1.1",
             criteria=TrustServiceCriteria.AVAILABILITY,
             title="Availability Control",
             description="Test availability control",
-            status=ControlStatus.IMPLEMENTED
+            status=ControlStatus.IMPLEMENTED,
         )
 
         await soc2_manager.register_control(security_control)
@@ -188,7 +185,9 @@ class TestSOC2ControlsManager:
         )
 
         assert len(security_controls) >= 1
-        assert all(c.criteria == TrustServiceCriteria.SECURITY for c in security_controls)
+        assert all(
+            c.criteria == TrustServiceCriteria.SECURITY for c in security_controls
+        )
 
     @pytest.mark.asyncio
     async def test_list_controls_by_status(self, soc2_manager):
@@ -198,14 +197,14 @@ class TestSOC2ControlsManager:
             criteria=TrustServiceCriteria.SECURITY,
             title="Implemented Control",
             description="Test",
-            status=ControlStatus.IMPLEMENTED
+            status=ControlStatus.IMPLEMENTED,
         )
         pending_control = SOC2Control(
             control_id="CC6.3",
             criteria=TrustServiceCriteria.SECURITY,
             title="Pending Control",
             description="Test",
-            status=ControlStatus.PARTIALLY_IMPLEMENTED
+            status=ControlStatus.PARTIALLY_IMPLEMENTED,
         )
 
         await soc2_manager.register_control(implemented_control)
@@ -228,7 +227,7 @@ class TestSOC2ControlsManager:
             title="Old Control",
             description="Test",
             status=ControlStatus.IMPLEMENTED,
-            last_tested=datetime.utcnow() - timedelta(days=100)
+            last_tested=datetime.utcnow() - timedelta(days=100),
         )
 
         await soc2_manager.register_control(old_control)
@@ -250,7 +249,7 @@ class TestSOC2ControlsManager:
                 criteria=TrustServiceCriteria.SECURITY,
                 title=f"Control {i}",
                 description="Test control",
-                status=ControlStatus.IMPLEMENTED
+                status=ControlStatus.IMPLEMENTED,
             )
             await soc2_manager.register_control(control)
 
@@ -267,11 +266,7 @@ class TestSOC2ControlsManager:
         await soc2_manager.register_control(sample_control)
 
         # Add test results
-        test_results = {
-            "passed": True,
-            "effectiveness_score": 95,
-            "findings": []
-        }
+        test_results = {"passed": True, "effectiveness_score": 95, "findings": []}
         await soc2_manager.test_control("CC6.1", test_results)
 
         effectiveness = await soc2_manager.assess_control_effectiveness("CC6.1")
@@ -283,13 +278,15 @@ class TestSOC2ControlsManager:
     async def test_identify_control_gaps(self, soc2_manager):
         """Test identifying control gaps."""
         # Register some controls with different statuses
-        await soc2_manager.register_control(SOC2Control(
-            control_id="CC6.5",
-            criteria=TrustServiceCriteria.SECURITY,
-            title="Not Implemented",
-            description="Test",
-            status=ControlStatus.NOT_IMPLEMENTED
-        ))
+        await soc2_manager.register_control(
+            SOC2Control(
+                control_id="CC6.5",
+                criteria=TrustServiceCriteria.SECURITY,
+                title="Not Implemented",
+                description="Test",
+                status=ControlStatus.NOT_IMPLEMENTED,
+            )
+        )
 
         gaps = await soc2_manager.identify_control_gaps()
 
@@ -306,7 +303,7 @@ class TestSOC2ControlsManager:
                 criteria=criteria,
                 title=f"{criteria.value} control",
                 description="Test",
-                status=ControlStatus.IMPLEMENTED
+                status=ControlStatus.IMPLEMENTED,
             )
             await soc2_manager.register_control(control)
 
@@ -337,9 +334,7 @@ class TestSOC2ControlsManager:
 
         # Update control
         await soc2_manager.update_control_status(
-            "CC6.1",
-            ControlStatus.IMPLEMENTED,
-            notes="Updated"
+            "CC6.1", ControlStatus.IMPLEMENTED, notes="Updated"
         )
 
         # Verify timestamp tracking
@@ -355,7 +350,7 @@ class TestSOC2ControlsManager:
                 criteria=TrustServiceCriteria.SECURITY,
                 title=f"Control {i}",
                 description="Bulk test",
-                status=ControlStatus.IMPLEMENTED
+                status=ControlStatus.IMPLEMENTED,
             )
             for i in range(5)
         ]

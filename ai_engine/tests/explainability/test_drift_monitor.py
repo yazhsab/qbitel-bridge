@@ -131,8 +131,8 @@ class TestModelDriftMonitor:
         distribution = drift_monitor._calculate_distribution(decisions)
 
         assert distribution["HTTP"] == pytest.approx(0.5, rel=0.01)  # 2/4
-        assert distribution["TLS"] == pytest.approx(0.25, rel=0.01)   # 1/4
-        assert distribution["SSH"] == pytest.approx(0.25, rel=0.01)   # 1/4
+        assert distribution["TLS"] == pytest.approx(0.25, rel=0.01)  # 1/4
+        assert distribution["SSH"] == pytest.approx(0.25, rel=0.01)  # 1/4
 
     @pytest.mark.asyncio
     async def test_kl_divergence_identical(self, drift_monitor):
@@ -190,7 +190,7 @@ class TestModelDriftMonitor:
         baseline_accuracy = 0.95
         recent_accuracy = 0.75  # 20% drop
         baseline_conf = 0.90
-        recent_conf = 0.70      # 20% drop
+        recent_conf = 0.70  # 20% drop
         baseline_dist = {"HTTP": 0.5, "TLS": 0.5}
         recent_dist = {"HTTP": 0.9, "TLS": 0.1}  # Major shift
 

@@ -45,7 +45,7 @@ class TestErrorRecordModel:
             recovery_successful=False,
             recovery_strategy="RETRY",
             retry_count=3,
-            extra_metadata={"extra": "data"}
+            extra_metadata={"extra": "data"},
         )
 
         assert model.error_id == "test-error-123"
@@ -76,7 +76,7 @@ class TestErrorRecordModel:
             exception_type="ConnectionError",
             exception_message="Connection failed",
             stack_trace="Traceback...",
-            context={}
+            context={},
         )
 
         assert model.recovery_attempted in (False, None)
@@ -94,7 +94,7 @@ class TestPersistentErrorStorage:
         """Create PersistentErrorStorage instance."""
         return PersistentErrorStorage(
             redis_url="redis://localhost:6379/0",
-            postgres_url="postgresql+asyncpg://user:pass@localhost/cronos_ai"
+            postgres_url="postgresql+asyncpg://user:pass@localhost/cronos_ai",
         )
 
     @pytest.fixture
@@ -115,14 +115,17 @@ class TestPersistentErrorStorage:
             recovery_successful=False,
             recovery_strategy=RecoveryStrategy.RETRY,
             retry_count=3,
-            metadata={"extra": "data"}
+            metadata={"extra": "data"},
         )
 
     def test_persistent_error_storage_initialization(self, error_storage):
         """Test PersistentErrorStorage initialization."""
         assert error_storage is not None
         assert error_storage.redis_url == "redis://localhost:6379/0"
-        assert error_storage.postgres_url == "postgresql+asyncpg://user:pass@localhost/cronos_ai"
+        assert (
+            error_storage.postgres_url
+            == "postgresql+asyncpg://user:pass@localhost/cronos_ai"
+        )
         assert error_storage.redis_ttl == 86400
         assert error_storage.postgres_retention_days == 90
 
@@ -132,23 +135,28 @@ class TestPersistentErrorStorage:
             redis_url="redis://custom:6379/1",
             postgres_url="postgresql+asyncpg://custom:pass@localhost/custom_db",
             redis_ttl=3600,
-            postgres_retention_days=30
+            postgres_retention_days=30,
         )
 
         assert storage.redis_url == "redis://custom:6379/1"
-        assert storage.postgres_url == "postgresql+asyncpg://custom:pass@localhost/custom_db"
+        assert (
+            storage.postgres_url
+            == "postgresql+asyncpg://custom:pass@localhost/custom_db"
+        )
         assert storage.redis_ttl == 3600
         assert storage.postgres_retention_days == 30
 
     @pytest.mark.asyncio
     async def test_initialize_redis_connection(self, error_storage):
         """Test Redis connection initialization."""
-        with patch('ai_engine.core.error_storage.redis') as mock_redis:
+        with patch("ai_engine.core.error_storage.redis") as mock_redis:
             mock_redis_instance = AsyncMock()
             mock_redis.from_url = AsyncMock(return_value=mock_redis_instance)
             mock_redis_instance.ping = AsyncMock()
 
-            with patch('ai_engine.core.error_storage.create_async_engine') as mock_engine:
+            with patch(
+                "ai_engine.core.error_storage.create_async_engine"
+            ) as mock_engine:
                 mock_db_engine = AsyncMock()
                 mock_engine.return_value = mock_db_engine
                 mock_conn = AsyncMock()
@@ -199,11 +207,7 @@ class TestPersistentErrorStorage:
     async def test_get_error_from_redis(self, error_storage):
         """Test retrieving error from Redis."""
         mock_redis = AsyncMock()
-        error_data = {
-            "error_id": "test-123",
-            "severity": "ERROR",
-            "component": "test"
-        }
+        error_data = {"error_id": "test-123", "severity": "ERROR", "component": "test"}
         mock_redis.get = AsyncMock(return_value=json.dumps(error_data))
         error_storage.redis_client = mock_redis
 
@@ -243,10 +247,12 @@ class TestPersistentErrorStorage:
         """Test retrieving errors by component."""
         mock_redis = AsyncMock()
         mock_redis.zrangebyscore = AsyncMock(return_value=["error-1", "error-2"])
-        mock_redis.get = AsyncMock(side_effect=[
-            json.dumps({"error_id": "error-1", "component": "test"}),
-            json.dumps({"error_id": "error-2", "component": "test"})
-        ])
+        mock_redis.get = AsyncMock(
+            side_effect=[
+                json.dumps({"error_id": "error-1", "component": "test"}),
+                json.dumps({"error_id": "error-2", "component": "test"}),
+            ]
+        )
         error_storage.redis_client = mock_redis
 
         results = await error_storage.get_errors_by_component("test", limit=10)
@@ -320,11 +326,13 @@ class TestGetErrorStorage:
     @pytest.mark.asyncio
     async def test_get_error_storage_creates_instance(self):
         """Test that get_error_storage creates a new instance."""
-        with patch('ai_engine.core.error_storage._error_storage', None):
-            with patch.object(PersistentErrorStorage, 'initialize', new_callable=AsyncMock):
+        with patch("ai_engine.core.error_storage._error_storage", None):
+            with patch.object(
+                PersistentErrorStorage, "initialize", new_callable=AsyncMock
+            ):
                 storage = await get_error_storage(
                     redis_url="redis://localhost:6379",
-                    postgres_url="postgresql+asyncpg://user:pass@localhost/db"
+                    postgres_url="postgresql+asyncpg://user:pass@localhost/db",
                 )
 
                 assert storage is not None
@@ -335,7 +343,7 @@ class TestGetErrorStorage:
         """Test that get_error_storage returns existing instance."""
         existing_storage = PersistentErrorStorage()
 
-        with patch('ai_engine.core.error_storage._error_storage', existing_storage):
+        with patch("ai_engine.core.error_storage._error_storage", existing_storage):
             storage = await get_error_storage()
 
             assert storage is existing_storage

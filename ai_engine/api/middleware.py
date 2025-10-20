@@ -263,7 +263,9 @@ def setup_middleware(app: FastAPI, config: Config):
     # Rate limiting - ALWAYS ENABLED for production security
     rate_limit_config = getattr(config, "rate_limiting", {})
     if isinstance(rate_limit_config, dict):
-        rate_limit_enabled = rate_limit_config.get("enabled", True)  # Default to enabled
+        rate_limit_enabled = rate_limit_config.get(
+            "enabled", True
+        )  # Default to enabled
         default_limit = rate_limit_config.get("default_limit", 100)
         per_user_limit = rate_limit_config.get("per_user_limit", 1000)
         burst_limit = rate_limit_config.get("burst_limit", 200)
@@ -293,9 +295,9 @@ def setup_middleware(app: FastAPI, config: Config):
             )
 
             # Initialize rate limiter
-            redis_host = _get_config_value(config.redis, 'host', 'localhost')
-            redis_port = _get_config_value(config.redis, 'port', 6379)
-            redis_password = _get_config_value(config.redis, 'password', '')
+            redis_host = _get_config_value(config.redis, "host", "localhost")
+            redis_port = _get_config_value(config.redis, "port", 6379)
+            redis_password = _get_config_value(config.redis, "password", "")
 
             # Build Redis URL with password if provided
             if redis_password:
@@ -317,7 +319,9 @@ def setup_middleware(app: FastAPI, config: Config):
             app.add_middleware(
                 AdvancedRateLimitMiddleware, rate_limiter=rate_limiter, config=rl_config
             )
-            logger.info(f"✅ Advanced Redis-backed rate limiting enabled (limit: {default_limit}/min, burst: {burst_limit})")
+            logger.info(
+                f"✅ Advanced Redis-backed rate limiting enabled (limit: {default_limit}/min, burst: {burst_limit})"
+            )
         except Exception as e:
             logger.warning(
                 f"Failed to setup advanced rate limiting: {e}, falling back to simple rate limiting"
@@ -327,10 +331,14 @@ def setup_middleware(app: FastAPI, config: Config):
                 RateLimitingMiddleware,
                 requests_per_minute=default_limit,
             )
-            logger.info(f"⚠️  Simple in-memory rate limiting enabled (limit: {default_limit}/min)")
+            logger.info(
+                f"⚠️  Simple in-memory rate limiting enabled (limit: {default_limit}/min)"
+            )
     else:
         # Even if disabled in config, use basic rate limiting for security
-        logger.warning("⚠️  Rate limiting disabled in config - using conservative defaults for security")
+        logger.warning(
+            "⚠️  Rate limiting disabled in config - using conservative defaults for security"
+        )
         app.add_middleware(
             RateLimitingMiddleware,
             requests_per_minute=60,  # Conservative default

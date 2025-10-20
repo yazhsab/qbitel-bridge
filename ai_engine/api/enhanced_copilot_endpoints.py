@@ -48,13 +48,20 @@ router = APIRouter(prefix="/api/v1/copilot", tags=["Enhanced LLM Copilot"])
 
 # Pydantic models for request/response
 
+
 class ThreatScenarioRequest(BaseModel):
     """Request to model a threat scenario."""
 
-    scenario_type: str = Field(..., description="Type of scenario (port_change, protocol_change, etc.)")
+    scenario_type: str = Field(
+        ..., description="Type of scenario (port_change, protocol_change, etc.)"
+    )
     description: str = Field(..., description="Description of the proposed change")
-    proposed_change: Dict[str, Any] = Field(..., description="Details of the proposed change")
-    context: Optional[Dict[str, Any]] = Field(None, description="Current system context")
+    proposed_change: Dict[str, Any] = Field(
+        ..., description="Details of the proposed change"
+    )
+    context: Optional[Dict[str, Any]] = Field(
+        None, description="Current system context"
+    )
 
     @validator("scenario_type")
     def validate_scenario_type(cls, v):
@@ -98,8 +105,12 @@ class FuzzingRequest(BaseModel):
 
     protocol_name: str = Field(..., description="Name of the protocol to fuzz")
     protocol_spec: Dict[str, Any] = Field(..., description="Protocol specification")
-    max_test_cases: int = Field(1000, ge=100, le=10000, description="Maximum test cases")
-    duration_minutes: int = Field(60, ge=1, le=480, description="Maximum duration in minutes")
+    max_test_cases: int = Field(
+        1000, ge=100, le=10000, description="Maximum test cases"
+    )
+    duration_minutes: int = Field(
+        60, ge=1, le=480, description="Maximum duration in minutes"
+    )
 
 
 class FuzzingResponse(BaseModel):
@@ -155,6 +166,7 @@ async def get_config() -> Config:
 
 
 # Endpoints
+
 
 @router.post("/threat-model", response_model=ThreatModelResponse)
 async def model_threat_scenario(
@@ -245,7 +257,9 @@ async def generate_incident_playbook(
         from ..security.models import SecurityEventType, ThreatLevel
 
         incident = SecurityEvent(
-            event_id=request.incident.get("event_id", f"event_{int(datetime.utcnow().timestamp())}"),
+            event_id=request.incident.get(
+                "event_id", f"event_{int(datetime.utcnow().timestamp())}"
+            ),
             event_type=SecurityEventType(
                 request.incident.get("event_type", "suspicious_activity")
             ),
@@ -274,7 +288,9 @@ async def generate_incident_playbook(
 
     except Exception as e:
         logger.error(f"Playbook generation failed: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Playbook generation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Playbook generation failed: {str(e)}"
+        )
 
 
 @router.post("/fuzz-protocol", response_model=FuzzingResponse)

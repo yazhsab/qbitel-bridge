@@ -108,9 +108,7 @@ class ThreatIntelligenceManager:
 
         self.logger.info("Threat Intelligence Platform shutdown complete")
 
-    async def process_security_event(
-        self, event: SecurityEvent
-    ) -> Dict[str, Any]:
+    async def process_security_event(self, event: SecurityEvent) -> Dict[str, Any]:
         """
         Process security event through TIP pipeline.
 
@@ -299,7 +297,9 @@ class ThreatIntelligenceManager:
             "total": len(campaigns),
         }
 
-    async def update_ioc_feeds(self, feed_ids: Optional[List[str]] = None) -> Dict[str, int]:
+    async def update_ioc_feeds(
+        self, feed_ids: Optional[List[str]] = None
+    ) -> Dict[str, int]:
         """
         Update IOC feeds.
 

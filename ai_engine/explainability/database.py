@@ -32,10 +32,11 @@ Base = declarative_base()
 # Define JSONB type that falls back to JSON for SQLite
 class JSONBType(TypeDecorator):
     """JSONB type for PostgreSQL, JSON for other databases."""
+
     impl = JSON
 
     def load_dialect_impl(self, dialect):
-        if dialect.name == 'postgresql':
+        if dialect.name == "postgresql":
             return dialect.type_descriptor(JSONB())
         else:
             return dialect.type_descriptor(JSON())
@@ -46,11 +47,12 @@ class GUID(TypeDecorator):
     """Platform-independent GUID type.
     Uses PostgreSQL's UUID type, otherwise uses CHAR(36), storing as stringified hex values.
     """
+
     impl = CHAR
     cache_ok = True
 
     def load_dialect_impl(self, dialect):
-        if dialect.name == 'postgresql':
+        if dialect.name == "postgresql":
             return dialect.type_descriptor(PostgreSQL_UUID(as_uuid=True))
         else:
             return dialect.type_descriptor(CHAR(36))
@@ -58,7 +60,7 @@ class GUID(TypeDecorator):
     def process_bind_param(self, value, dialect):
         if value is None:
             return value
-        elif dialect.name == 'postgresql':
+        elif dialect.name == "postgresql":
             return value
         else:
             if isinstance(value, uuid_lib.UUID):
@@ -87,7 +89,9 @@ class AIDecisionAudit(Base):
     # Primary identification
     id = Column(GUID, primary_key=True, default=uuid4)
     decision_id = Column(String(255), nullable=False, unique=True, index=True)
-    timestamp = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow, index=True)
+    timestamp = Column(
+        DateTime(timezone=True), nullable=False, default=datetime.utcnow, index=True
+    )
 
     # Event context
     event_type = Column(String(50), nullable=False, index=True)
@@ -102,12 +106,16 @@ class AIDecisionAudit(Base):
     decision_output = Column(JSONBType, nullable=False)
     confidence_score = Column(
         Float,
-        CheckConstraint("confidence_score >= 0 AND confidence_score <= 1", name="valid_confidence"),
+        CheckConstraint(
+            "confidence_score >= 0 AND confidence_score <= 1", name="valid_confidence"
+        ),
         nullable=False,
     )
 
     # Explainability data
-    explanation_method = Column(String(50), nullable=False)  # 'SHAP', 'LIME', 'RULE_BASED'
+    explanation_method = Column(
+        String(50), nullable=False
+    )  # 'SHAP', 'LIME', 'RULE_BASED'
     explanation_id = Column(String(255), index=True)
     feature_importance = Column(JSONBType)  # Full feature importance data
     top_features = Column(JSONBType)  # Top N features for quick access
@@ -118,7 +126,9 @@ class AIDecisionAudit(Base):
     # Audit metadata
     user_id = Column(String(255), index=True)
     session_id = Column(String(255))
-    compliance_framework = Column(String(50), index=True)  # 'SOC2', 'HIPAA', 'PCI-DSS', 'EU_AI_ACT'
+    compliance_framework = Column(
+        String(50), index=True
+    )  # 'SOC2', 'HIPAA', 'PCI-DSS', 'EU_AI_ACT'
     request_id = Column(String(255))  # For tracing
 
     # Validation and review
@@ -160,7 +170,9 @@ class ModelDriftMetric(Base):
     __tablename__ = "model_drift_metrics"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    timestamp = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow, index=True)
+    timestamp = Column(
+        DateTime(timezone=True), nullable=False, default=datetime.utcnow, index=True
+    )
 
     # Model identification
     model_name = Column(String(100), nullable=False, index=True)
@@ -191,7 +203,9 @@ class ModelDriftMetric(Base):
     alert_triggered = Column(Boolean, default=False)
     alert_timestamp = Column(DateTime(timezone=True))
 
-    __table_args__ = (Index("idx_drift_alert", "model_name", "drift_detected", "timestamp"),)
+    __table_args__ = (
+        Index("idx_drift_alert", "model_name", "drift_detected", "timestamp"),
+    )
 
     def __repr__(self):
         return (
@@ -224,8 +238,12 @@ class ExplanationCache(Base):
     explanation_method = Column(String(50), nullable=False)
 
     # Cache metadata
-    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
-    last_accessed = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow, index=True)
+    created_at = Column(
+        DateTime(timezone=True), nullable=False, default=datetime.utcnow
+    )
+    last_accessed = Column(
+        DateTime(timezone=True), nullable=False, default=datetime.utcnow, index=True
+    )
     access_count = Column(Integer, default=1)
 
     # TTL

@@ -25,8 +25,8 @@ from ai_engine.security.resilience.circuit_breaker import (
 
 logger = logging.getLogger(__name__)
 
-P = ParamSpec('P')
-T = TypeVar('T')
+P = ParamSpec("P")
+T = TypeVar("T")
 
 
 class DatabaseCircuitBreakerManager:
@@ -58,9 +58,7 @@ class DatabaseCircuitBreakerManager:
         )
 
     def get_circuit_breaker(
-        self,
-        name: str,
-        config: Optional[CircuitBreakerConfig] = None
+        self, name: str, config: Optional[CircuitBreakerConfig] = None
     ) -> CircuitBreaker:
         """
         Get or create a circuit breaker for a specific database operation.
@@ -75,8 +73,7 @@ class DatabaseCircuitBreakerManager:
         if name not in self._circuit_breakers:
             breaker_config = config or self._default_config
             self._circuit_breakers[name] = CircuitBreaker(
-                name=f"db_{name}",
-                config=breaker_config
+                name=f"db_{name}", config=breaker_config
             )
             logger.info(f"Created circuit breaker for database operation: {name}")
 
@@ -155,6 +152,7 @@ def with_database_circuit_breaker(
     Returns:
         Decorated function with circuit breaker protection
     """
+
     def decorator(func: Callable[P, T]) -> Callable[P, T]:
         @wraps(func)
         async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
@@ -178,7 +176,9 @@ def with_database_circuit_breaker(
                     try:
                         return await fallback(*args, **kwargs)
                     except Exception as fb_error:
-                        logger.error(f"Fallback also failed for {func.__name__}: {fb_error}")
+                        logger.error(
+                            f"Fallback also failed for {func.__name__}: {fb_error}"
+                        )
                         raise
 
                 # No fallback available
@@ -195,6 +195,7 @@ def with_database_circuit_breaker(
                 raise
 
         return wrapper
+
     return decorator
 
 
@@ -213,7 +214,7 @@ async def is_database_available(circuit_breaker_name: str = "default") -> bool:
 
     return circuit_breaker._state in (
         CircuitBreakerState.CLOSED,
-        CircuitBreakerState.HALF_OPEN
+        CircuitBreakerState.HALF_OPEN,
     )
 
 
@@ -247,13 +248,11 @@ def get_database_health_status() -> dict[str, Any]:
 
     # Determine overall health
     all_closed = all(
-        state["state"] == CircuitBreakerState.CLOSED.value
-        for state in states.values()
+        state["state"] == CircuitBreakerState.CLOSED.value for state in states.values()
     )
 
     any_open = any(
-        state["state"] == CircuitBreakerState.OPEN.value
-        for state in states.values()
+        state["state"] == CircuitBreakerState.OPEN.value for state in states.values()
     )
 
     if all_closed:
@@ -280,6 +279,7 @@ if __name__ == "__main__":
     async def get_users(db: AsyncSession):
         """Example database read operation."""
         from sqlalchemy import select
+
         result = await db.execute(select("SELECT 1"))
         return result.fetchall()
 
@@ -289,12 +289,12 @@ if __name__ == "__main__":
         return [{"id": 1, "name": "cached_user"}]
 
     @with_database_circuit_breaker(
-        name="read_users_with_fallback",
-        fallback=get_cached_users
+        name="read_users_with_fallback", fallback=get_cached_users
     )
     async def get_users_with_fallback(db: AsyncSession):
         """Example with fallback to cache."""
         from sqlalchemy import select
+
         result = await db.execute(select("SELECT * FROM users"))
         return result.fetchall()
 

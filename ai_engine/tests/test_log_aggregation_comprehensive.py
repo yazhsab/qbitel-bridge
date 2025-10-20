@@ -44,9 +44,9 @@ class TestStructuredLog:
             user_id="user123",
             request_id="req123",
             fields={"key": "value", "number": 123},
-            tags=["tag1", "tag2"]
+            tags=["tag1", "tag2"],
         )
-        
+
         assert log.level == LogLevel.INFO
         assert log.message == "Test log message"
         assert log.logger_name == "test_logger"
@@ -67,9 +67,9 @@ class TestStructuredLog:
             message="Test log message",
             logger_name="test_logger",
             service="test_service",
-            environment="test"
+            environment="test",
         )
-        
+
         assert log.trace_id is None
         assert log.span_id is None
         assert log.user_id is None
@@ -89,11 +89,11 @@ class TestStructuredLog:
             trace_id="trace456",
             user_id="user456",
             fields={"error_code": "E001", "severity": "high"},
-            tags=["error", "critical"]
+            tags=["error", "critical"],
         )
-        
+
         data = log.to_dict()
-        
+
         assert data["timestamp"] == "2023-01-01T12:00:00"
         assert data["level"] == "error"
         assert data["message"] == "Error occurred"
@@ -114,11 +114,11 @@ class TestStructuredLog:
             message="Simple message",
             logger_name="simple_logger",
             service="simple_service",
-            environment="test"
+            environment="test",
         )
-        
+
         data = log.to_dict()
-        
+
         assert "trace_id" not in data
         assert "span_id" not in data
         assert "user_id" not in data
@@ -128,8 +128,14 @@ class TestStructuredLog:
 
     def test_structured_log_levels(self):
         """Test all log levels."""
-        levels = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARNING, LogLevel.ERROR, LogLevel.CRITICAL]
-        
+        levels = [
+            LogLevel.DEBUG,
+            LogLevel.INFO,
+            LogLevel.WARNING,
+            LogLevel.ERROR,
+            LogLevel.CRITICAL,
+        ]
+
         for level in levels:
             log = StructuredLog(
                 timestamp=datetime.now(),
@@ -137,9 +143,9 @@ class TestStructuredLog:
                 message=f"Test {level.value} message",
                 logger_name="test_logger",
                 service="test_service",
-                environment="test"
+                environment="test",
             )
-            
+
             assert log.level == level
             assert log.to_dict()["level"] == level.value
 
@@ -164,7 +170,10 @@ class TestElasticsearchLogAggregator:
 
     def test_es_aggregator_initialization(self, es_aggregator, mock_config):
         """Test ElasticsearchLogAggregator initialization."""
-        assert es_aggregator.es_hosts == ["http://localhost:9200", "http://localhost:9201"]
+        assert es_aggregator.es_hosts == [
+            "http://localhost:9200",
+            "http://localhost:9201",
+        ]
         assert es_aggregator.es_index_prefix == "cronos-ai-logs"
         assert es_aggregator.es_username == "elastic"
         assert es_aggregator.es_password == "password"
@@ -176,11 +185,13 @@ class TestElasticsearchLogAggregator:
     @pytest.mark.asyncio
     async def test_es_aggregator_initialize(self, es_aggregator):
         """Test ElasticsearchLogAggregator initialization."""
-        with patch('aiohttp.ClientSession') as mock_session, \
-             patch.object(es_aggregator, '_create_index_template') as mock_template:
-            
+        with (
+            patch("aiohttp.ClientSession") as mock_session,
+            patch.object(es_aggregator, "_create_index_template") as mock_template,
+        ):
+
             await es_aggregator.initialize()
-            
+
             assert es_aggregator._session is not None
             assert es_aggregator._flush_task is not None
             mock_session.assert_called_once()
@@ -193,10 +204,10 @@ class TestElasticsearchLogAggregator:
         es_aggregator._session = AsyncMock()
         es_aggregator._flush_task = AsyncMock()
         es_aggregator._flush_task.cancel = Mock()
-        
-        with patch.object(es_aggregator, 'flush') as mock_flush:
+
+        with patch.object(es_aggregator, "flush") as mock_flush:
             await es_aggregator.shutdown()
-            
+
             es_aggregator._flush_task.cancel.assert_called_once()
             es_aggregator._session.close.assert_called_once()
             mock_flush.assert_called_once()
@@ -210,12 +221,12 @@ class TestElasticsearchLogAggregator:
             message="Test log message",
             logger_name="test_logger",
             service="test_service",
-            environment="test"
+            environment="test",
         )
-        
-        with patch.object(es_aggregator, '_flush_batch') as mock_flush:
+
+        with patch.object(es_aggregator, "_flush_batch") as mock_flush:
             await es_aggregator.send_log(log)
-            
+
             assert len(es_aggregator._batch_queue) == 1
             assert es_aggregator._batch_queue[0] == log
 
@@ -230,11 +241,11 @@ class TestElasticsearchLogAggregator:
                 message=f"Message {i}",
                 logger_name="test_logger",
                 service="test_service",
-                environment="test"
+                environment="test",
             )
             es_aggregator._batch_queue.append(log)
-        
-        with patch.object(es_aggregator, '_flush_batch') as mock_flush:
+
+        with patch.object(es_aggregator, "_flush_batch") as mock_flush:
             # Add one more log to trigger flush
             extra_log = StructuredLog(
                 timestamp=datetime.now(),
@@ -242,11 +253,11 @@ class TestElasticsearchLogAggregator:
                 message="Extra message",
                 logger_name="test_logger",
                 service="test_service",
-                environment="test"
+                environment="test",
             )
-            
+
             await es_aggregator.send_log(extra_log)
-            
+
             mock_flush.assert_called_once()
 
     @pytest.mark.asyncio
@@ -258,12 +269,14 @@ class TestElasticsearchLogAggregator:
             message="Test message",
             logger_name="test_logger",
             service="test_service",
-            environment="test"
+            environment="test",
         )
-        
-        with patch.object(es_aggregator, '_flush_batch', side_effect=Exception("Flush error")):
+
+        with patch.object(
+            es_aggregator, "_flush_batch", side_effect=Exception("Flush error")
+        ):
             await es_aggregator.send_log(log)
-            
+
             # Should increment failed count
             assert es_aggregator.logs_failed == 1
 
@@ -278,11 +291,11 @@ class TestElasticsearchLogAggregator:
                 message=f"Message {i}",
                 logger_name="test_logger",
                 service="test_service",
-                environment="test"
+                environment="test",
             )
             es_aggregator._batch_queue.append(log)
-        
-        with patch.object(es_aggregator, '_flush_batch') as mock_flush:
+
+        with patch.object(es_aggregator, "_flush_batch") as mock_flush:
             await es_aggregator.flush()
             mock_flush.assert_called_once()
 
@@ -291,22 +304,22 @@ class TestElasticsearchLogAggregator:
         """Test background flush loop."""
         es_aggregator._session = AsyncMock()
         es_aggregator._batch_queue.append(Mock())
-        
-        with patch.object(es_aggregator, '_flush_batch') as mock_flush:
+
+        with patch.object(es_aggregator, "_flush_batch") as mock_flush:
             # Start flush loop
             task = asyncio.create_task(es_aggregator._flush_loop())
-            
+
             # Wait a bit for the loop to run
             await asyncio.sleep(0.1)
-            
+
             # Cancel the task
             task.cancel()
-            
+
             try:
                 await task
             except asyncio.CancelledError:
                 pass
-            
+
             # Should have called flush at least once
             mock_flush.assert_called()
 
@@ -322,21 +335,21 @@ class TestElasticsearchLogAggregator:
                 message=f"Message {i}",
                 logger_name="test_logger",
                 service="test_service",
-                environment="test"
+                environment="test",
             )
             logs.append(log)
-        
+
         es_aggregator._batch_queue.extend(logs)
         es_aggregator._session = AsyncMock()
-        
+
         # Mock successful response
         mock_response = AsyncMock()
         mock_response.status = 200
         mock_response.json = AsyncMock(return_value={"errors": False})
         es_aggregator._session.post.return_value.__aenter__.return_value = mock_response
-        
+
         await es_aggregator._flush_batch()
-        
+
         assert len(es_aggregator._batch_queue) == 0
         assert es_aggregator.logs_sent == 3
         es_aggregator._session.post.assert_called_once()
@@ -350,20 +363,22 @@ class TestElasticsearchLogAggregator:
             message="Test message",
             logger_name="test_logger",
             service="test_service",
-            environment="test"
+            environment="test",
         )
-        
+
         es_aggregator._batch_queue.append(log)
         es_aggregator._session = AsyncMock()
-        
+
         # Mock response with errors
         mock_response = AsyncMock()
         mock_response.status = 200
-        mock_response.json = AsyncMock(return_value={"errors": True, "items": [{"error": "mapping error"}]})
+        mock_response.json = AsyncMock(
+            return_value={"errors": True, "items": [{"error": "mapping error"}]}
+        )
         es_aggregator._session.post.return_value.__aenter__.return_value = mock_response
-        
+
         await es_aggregator._flush_batch()
-        
+
         # Should not increment sent count due to errors
         assert es_aggregator.logs_sent == 0
 
@@ -376,19 +391,19 @@ class TestElasticsearchLogAggregator:
             message="Test message",
             logger_name="test_logger",
             service="test_service",
-            environment="test"
+            environment="test",
         )
-        
+
         es_aggregator._batch_queue.append(log)
         es_aggregator._session = AsyncMock()
-        
+
         # Mock failed response
         mock_response = AsyncMock()
         mock_response.status = 500
         es_aggregator._session.post.return_value.__aenter__.return_value = mock_response
-        
+
         await es_aggregator._flush_batch()
-        
+
         # Should increment failed count
         assert es_aggregator.logs_failed == 1
 
@@ -401,17 +416,17 @@ class TestElasticsearchLogAggregator:
             message="Test message",
             logger_name="test_logger",
             service="test_service",
-            environment="test"
+            environment="test",
         )
-        
+
         es_aggregator._batch_queue.append(log)
         es_aggregator._session = AsyncMock()
-        
+
         # Mock exception
         es_aggregator._session.post.side_effect = Exception("Network error")
-        
+
         await es_aggregator._flush_batch()
-        
+
         # Should increment failed count
         assert es_aggregator.logs_failed == 1
 
@@ -419,29 +434,29 @@ class TestElasticsearchLogAggregator:
     async def test_es_aggregator_create_index_template(self, es_aggregator):
         """Test creating Elasticsearch index template."""
         es_aggregator._session = AsyncMock()
-        
+
         # Mock successful response
         mock_response = AsyncMock()
         mock_response.status = 200
         es_aggregator._session.put.return_value.__aenter__.return_value = mock_response
-        
+
         await es_aggregator._create_index_template()
-        
+
         es_aggregator._session.put.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_es_aggregator_create_index_template_failure(self, es_aggregator):
         """Test index template creation failure."""
         es_aggregator._session = AsyncMock()
-        
+
         # Mock failed response
         mock_response = AsyncMock()
         mock_response.status = 400
         es_aggregator._session.put.return_value.__aenter__.return_value = mock_response
-        
+
         # Should not raise exception
         await es_aggregator._create_index_template()
-        
+
         es_aggregator._session.put.assert_called_once()
 
 
@@ -475,9 +490,9 @@ class TestLokiLogAggregator:
     @pytest.mark.asyncio
     async def test_loki_aggregator_initialize(self, loki_aggregator):
         """Test LokiLogAggregator initialization."""
-        with patch('aiohttp.ClientSession') as mock_session:
+        with patch("aiohttp.ClientSession") as mock_session:
             await loki_aggregator.initialize()
-            
+
             assert loki_aggregator._session is not None
             assert loki_aggregator._flush_task is not None
             mock_session.assert_called_once()
@@ -489,10 +504,10 @@ class TestLokiLogAggregator:
         loki_aggregator._session = AsyncMock()
         loki_aggregator._flush_task = AsyncMock()
         loki_aggregator._flush_task.cancel = Mock()
-        
-        with patch.object(loki_aggregator, 'flush') as mock_flush:
+
+        with patch.object(loki_aggregator, "flush") as mock_flush:
             await loki_aggregator.shutdown()
-            
+
             loki_aggregator._flush_task.cancel.assert_called_once()
             loki_aggregator._session.close.assert_called_once()
             mock_flush.assert_called_once()
@@ -506,12 +521,12 @@ class TestLokiLogAggregator:
             message="Test log message",
             logger_name="test_logger",
             service="test_service",
-            environment="test"
+            environment="test",
         )
-        
-        with patch.object(loki_aggregator, '_flush_batch') as mock_flush:
+
+        with patch.object(loki_aggregator, "_flush_batch") as mock_flush:
             await loki_aggregator.send_log(log)
-            
+
             assert len(loki_aggregator._batch_queue) == 1
             assert loki_aggregator._batch_queue[0] == log
 
@@ -526,11 +541,11 @@ class TestLokiLogAggregator:
                 message=f"Message {i}",
                 logger_name="test_logger",
                 service="test_service",
-                environment="test"
+                environment="test",
             )
             loki_aggregator._batch_queue.append(log)
-        
-        with patch.object(loki_aggregator, '_flush_batch') as mock_flush:
+
+        with patch.object(loki_aggregator, "_flush_batch") as mock_flush:
             # Add one more log to trigger flush
             extra_log = StructuredLog(
                 timestamp=datetime.now(),
@@ -538,11 +553,11 @@ class TestLokiLogAggregator:
                 message="Extra message",
                 logger_name="test_logger",
                 service="test_service",
-                environment="test"
+                environment="test",
             )
-            
+
             await loki_aggregator.send_log(extra_log)
-            
+
             mock_flush.assert_called_once()
 
     @pytest.mark.asyncio
@@ -554,12 +569,14 @@ class TestLokiLogAggregator:
             message="Test message",
             logger_name="test_logger",
             service="test_service",
-            environment="test"
+            environment="test",
         )
-        
-        with patch.object(loki_aggregator, '_flush_batch', side_effect=Exception("Flush error")):
+
+        with patch.object(
+            loki_aggregator, "_flush_batch", side_effect=Exception("Flush error")
+        ):
             await loki_aggregator.send_log(log)
-            
+
             # Should increment failed count
             assert loki_aggregator.logs_failed == 1
 
@@ -575,20 +592,22 @@ class TestLokiLogAggregator:
                 message=f"Message {i}",
                 logger_name="test_logger",
                 service="test_service",
-                environment="test"
+                environment="test",
             )
             logs.append(log)
-        
+
         loki_aggregator._batch_queue.extend(logs)
         loki_aggregator._session = AsyncMock()
-        
+
         # Mock successful response
         mock_response = AsyncMock()
         mock_response.status = 204
-        loki_aggregator._session.post.return_value.__aenter__.return_value = mock_response
-        
+        loki_aggregator._session.post.return_value.__aenter__.return_value = (
+            mock_response
+        )
+
         await loki_aggregator._flush_batch()
-        
+
         assert len(loki_aggregator._batch_queue) == 0
         assert loki_aggregator.logs_sent == 3
         loki_aggregator._session.post.assert_called_once()
@@ -602,19 +621,21 @@ class TestLokiLogAggregator:
             message="Test message",
             logger_name="test_logger",
             service="test_service",
-            environment="test"
+            environment="test",
         )
-        
+
         loki_aggregator._batch_queue.append(log)
         loki_aggregator._session = AsyncMock()
-        
+
         # Mock failed response
         mock_response = AsyncMock()
         mock_response.status = 500
-        loki_aggregator._session.post.return_value.__aenter__.return_value = mock_response
-        
+        loki_aggregator._session.post.return_value.__aenter__.return_value = (
+            mock_response
+        )
+
         await loki_aggregator._flush_batch()
-        
+
         # Should increment failed count
         assert loki_aggregator.logs_failed == 1
 
@@ -627,17 +648,17 @@ class TestLokiLogAggregator:
             message="Test message",
             logger_name="test_logger",
             service="test_service",
-            environment="test"
+            environment="test",
         )
-        
+
         loki_aggregator._batch_queue.append(log)
         loki_aggregator._session = AsyncMock()
-        
+
         # Mock exception
         loki_aggregator._session.post.side_effect = Exception("Network error")
-        
+
         await loki_aggregator._flush_batch()
-        
+
         # Should increment failed count
         assert loki_aggregator.logs_failed == 1
 
@@ -652,11 +673,11 @@ class TestLokiLogAggregator:
             environment="production",
             trace_id="trace123",
             user_id="user123",
-            tags=["error", "critical"]
+            tags=["error", "critical"],
         )
-        
+
         labels = loki_aggregator._build_labels(log)
-        
+
         assert labels["level"] == "error"
         assert labels["logger"] == "error_logger"
         assert labels["service"] == "error_service"
@@ -674,11 +695,11 @@ class TestLokiLogAggregator:
             message="Simple message",
             logger_name="simple_logger",
             service="simple_service",
-            environment="test"
+            environment="test",
         )
-        
+
         labels = loki_aggregator._build_labels(log)
-        
+
         assert labels["level"] == "info"
         assert labels["logger"] == "simple_logger"
         assert labels["service"] == "simple_service"
@@ -704,8 +725,10 @@ class TestLogAggregationManager:
     @pytest.fixture
     def log_manager(self, mock_config):
         """Create LogAggregationManager instance."""
-        with patch('ai_engine.monitoring.log_aggregation.ElasticsearchLogAggregator'), \
-             patch('ai_engine.monitoring.log_aggregation.LokiLogAggregator'):
+        with (
+            patch("ai_engine.monitoring.log_aggregation.ElasticsearchLogAggregator"),
+            patch("ai_engine.monitoring.log_aggregation.LokiLogAggregator"),
+        ):
             return LogAggregationManager(mock_config)
 
     def test_log_manager_initialization(self, log_manager, mock_config):
@@ -720,9 +743,9 @@ class TestLogAggregationManager:
         # Mock aggregators
         for aggregator in log_manager.aggregators:
             aggregator.initialize = AsyncMock()
-        
+
         await log_manager.initialize()
-        
+
         # Should initialize all aggregators
         for aggregator in log_manager.aggregators:
             aggregator.initialize.assert_called_once()
@@ -733,9 +756,9 @@ class TestLogAggregationManager:
         # Mock aggregators
         for aggregator in log_manager.aggregators:
             aggregator.shutdown = AsyncMock()
-        
+
         await log_manager.shutdown()
-        
+
         # Should shutdown all aggregators
         for aggregator in log_manager.aggregators:
             aggregator.shutdown.assert_called_once()
@@ -746,7 +769,7 @@ class TestLogAggregationManager:
         # Mock aggregators
         for aggregator in log_manager.aggregators:
             aggregator.send_log = AsyncMock()
-        
+
         await log_manager.send_log(
             level=LogLevel.INFO,
             message="Test message",
@@ -754,13 +777,13 @@ class TestLogAggregationManager:
             trace_id="trace123",
             user_id="user123",
             fields={"key": "value"},
-            tags=["tag1", "tag2"]
+            tags=["tag1", "tag2"],
         )
-        
+
         # Should send to all aggregators
         for aggregator in log_manager.aggregators:
             aggregator.send_log.assert_called_once()
-            
+
             # Check the log structure
             call_args = aggregator.send_log.call_args[0][0]
             assert call_args.level == LogLevel.INFO
@@ -779,17 +802,17 @@ class TestLogAggregationManager:
         # Mock aggregators
         for aggregator in log_manager.aggregators:
             aggregator.send_log = AsyncMock()
-        
+
         await log_manager.send_log(
             level=LogLevel.WARNING,
             message="Warning message",
-            logger_name="warning_logger"
+            logger_name="warning_logger",
         )
-        
+
         # Should send to all aggregators
         for aggregator in log_manager.aggregators:
             aggregator.send_log.assert_called_once()
-            
+
             # Check the log structure
             call_args = aggregator.send_log.call_args[0][0]
             assert call_args.level == LogLevel.WARNING
@@ -805,15 +828,15 @@ class TestLogAggregationManager:
         """Test sending log with aggregator error."""
         # Mock aggregators - one succeeds, one fails
         log_manager.aggregators[0].send_log = AsyncMock()
-        log_manager.aggregators[1].send_log = AsyncMock(side_effect=Exception("Aggregator error"))
-        
+        log_manager.aggregators[1].send_log = AsyncMock(
+            side_effect=Exception("Aggregator error")
+        )
+
         # Should not raise exception
         await log_manager.send_log(
-            level=LogLevel.ERROR,
-            message="Error message",
-            logger_name="error_logger"
+            level=LogLevel.ERROR, message="Error message", logger_name="error_logger"
         )
-        
+
         # Both aggregators should have been called
         log_manager.aggregators[0].send_log.assert_called_once()
         log_manager.aggregators[1].send_log.assert_called_once()
@@ -825,13 +848,13 @@ class TestLogAggregationManager:
         log_manager.aggregators[0].logs_failed = 5
         log_manager.aggregators[1].logs_sent = 150
         log_manager.aggregators[1].logs_failed = 3
-        
+
         stats = log_manager.get_statistics()
-        
+
         assert stats["total_logs_sent"] == 250
         assert stats["total_logs_failed"] == 8
         assert len(stats["aggregators"]) == 2
-        
+
         # Check individual aggregator stats
         assert stats["aggregators"][0]["logs_sent"] == 100
         assert stats["aggregators"][0]["logs_failed"] == 5
@@ -851,13 +874,15 @@ class TestLogAggregationIntegration:
         mock_config.service_name = "test-service"
         mock_config.environment = Mock()
         mock_config.environment.value = "test"
-        
-        with patch('ai_engine.monitoring.log_aggregation.LogAggregationManager') as mock_manager_class:
+
+        with patch(
+            "ai_engine.monitoring.log_aggregation.LogAggregationManager"
+        ) as mock_manager_class:
             mock_manager = AsyncMock()
             mock_manager_class.return_value = mock_manager
-            
+
             manager = await initialize_log_aggregation(mock_config)
-            
+
             assert manager == mock_manager
             mock_manager.initialize.assert_called_once()
 
@@ -865,26 +890,30 @@ class TestLogAggregationIntegration:
         """Test getting global log aggregation manager."""
         # Test when no manager is set
         from ai_engine.monitoring.log_aggregation import _log_aggregation_manager
+
         original_manager = _log_aggregation_manager
-        
+
         try:
             # Clear global manager
             import ai_engine.monitoring.log_aggregation
+
             ai_engine.monitoring.log_aggregation._log_aggregation_manager = None
-            
+
             manager = get_log_aggregation_manager()
             assert manager is None
-            
+
             # Set a mock manager
             mock_manager = Mock()
             ai_engine.monitoring.log_aggregation._log_aggregation_manager = mock_manager
-            
+
             manager = get_log_aggregation_manager()
             assert manager == mock_manager
-            
+
         finally:
             # Restore original manager
-            ai_engine.monitoring.log_aggregation._log_aggregation_manager = original_manager
+            ai_engine.monitoring.log_aggregation._log_aggregation_manager = (
+                original_manager
+            )
 
     @pytest.mark.asyncio
     async def test_log_aggregation_workflow(self):
@@ -895,41 +924,45 @@ class TestLogAggregationIntegration:
         mock_config.service_name = "test-service"
         mock_config.environment = Mock()
         mock_config.environment.value = "test"
-        
-        with patch('ai_engine.monitoring.log_aggregation.ElasticsearchLogAggregator') as mock_es, \
-             patch('ai_engine.monitoring.log_aggregation.LokiLogAggregator') as mock_loki:
-            
+
+        with (
+            patch(
+                "ai_engine.monitoring.log_aggregation.ElasticsearchLogAggregator"
+            ) as mock_es,
+            patch(
+                "ai_engine.monitoring.log_aggregation.LokiLogAggregator"
+            ) as mock_loki,
+        ):
+
             # Mock aggregators
             es_aggregator = AsyncMock()
             loki_aggregator = AsyncMock()
             mock_es.return_value = es_aggregator
             mock_loki.return_value = loki_aggregator
-            
+
             manager = LogAggregationManager(mock_config)
-            
+
             # Send various log levels
             await manager.send_log(
-                level=LogLevel.INFO,
-                message="Info message",
-                logger_name="info_logger"
+                level=LogLevel.INFO, message="Info message", logger_name="info_logger"
             )
-            
+
             await manager.send_log(
                 level=LogLevel.ERROR,
                 message="Error message",
                 logger_name="error_logger",
                 trace_id="trace123",
-                fields={"error_code": "E001"}
+                fields={"error_code": "E001"},
             )
-            
+
             await manager.send_log(
                 level=LogLevel.WARNING,
                 message="Warning message",
                 logger_name="warning_logger",
                 user_id="user123",
-                tags=["warning", "important"]
+                tags=["warning", "important"],
             )
-            
+
             # Should send to both aggregators
             assert es_aggregator.send_log.call_count == 3
             assert loki_aggregator.send_log.call_count == 3
@@ -943,26 +976,28 @@ class TestLogAggregationIntegration:
         mock_config.service_name = "test-service"
         mock_config.environment = Mock()
         mock_config.environment.value = "test"
-        
-        with patch('ai_engine.monitoring.log_aggregation.ElasticsearchLogAggregator') as mock_es:
+
+        with patch(
+            "ai_engine.monitoring.log_aggregation.ElasticsearchLogAggregator"
+        ) as mock_es:
             es_aggregator = AsyncMock()
             mock_es.return_value = es_aggregator
-            
+
             manager = LogAggregationManager(mock_config)
-            
+
             # Create concurrent log sending tasks
             async def send_logs(log_id):
                 for i in range(10):
                     await manager.send_log(
                         level=LogLevel.INFO,
                         message=f"Concurrent message {log_id}-{i}",
-                        logger_name=f"concurrent_logger_{log_id}"
+                        logger_name=f"concurrent_logger_{log_id}",
                     )
-            
+
             # Run concurrent tasks
             tasks = [send_logs(i) for i in range(5)]
             await asyncio.gather(*tasks)
-            
+
             # Should have sent 50 logs total
             assert es_aggregator.send_log.call_count == 50
 
@@ -980,12 +1015,12 @@ class TestLogAggregationIntegration:
             user_id="user123",
             request_id="req123",
             fields={"error_code": "E001", "severity": "high"},
-            tags=["error", "critical", "urgent"]
+            tags=["error", "critical", "urgent"],
         )
-        
+
         # Serialize to dict
         data = original_log.to_dict()
-        
+
         # Verify all fields are present
         assert data["timestamp"] == "2023-01-01T12:00:00"
         assert data["level"] == "error"
@@ -1003,12 +1038,18 @@ class TestLogAggregationIntegration:
 
     def test_log_level_comparison(self):
         """Test log level comparison and ordering."""
-        levels = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARNING, LogLevel.ERROR, LogLevel.CRITICAL]
-        
+        levels = [
+            LogLevel.DEBUG,
+            LogLevel.INFO,
+            LogLevel.WARNING,
+            LogLevel.ERROR,
+            LogLevel.CRITICAL,
+        ]
+
         # Test ordering
         for i in range(len(levels) - 1):
             assert levels[i].value < levels[i + 1].value
-        
+
         # Test level values
         assert LogLevel.DEBUG.value == "debug"
         assert LogLevel.INFO.value == "info"
@@ -1025,27 +1066,31 @@ class TestLogAggregationIntegration:
         mock_config.service_name = "test-service"
         mock_config.environment = Mock()
         mock_config.environment.value = "test"
-        
-        with patch('ai_engine.monitoring.log_aggregation.ElasticsearchLogAggregator') as mock_es, \
-             patch('ai_engine.monitoring.log_aggregation.LokiLogAggregator') as mock_loki:
-            
+
+        with (
+            patch(
+                "ai_engine.monitoring.log_aggregation.ElasticsearchLogAggregator"
+            ) as mock_es,
+            patch(
+                "ai_engine.monitoring.log_aggregation.LokiLogAggregator"
+            ) as mock_loki,
+        ):
+
             # Mock aggregators - one fails, one succeeds
             es_aggregator = AsyncMock()
             es_aggregator.send_log.side_effect = Exception("ES connection failed")
             loki_aggregator = AsyncMock()
-            
+
             mock_es.return_value = es_aggregator
             mock_loki.return_value = loki_aggregator
-            
+
             manager = LogAggregationManager(mock_config)
-            
+
             # Should not raise exception even if one aggregator fails
             await manager.send_log(
-                level=LogLevel.INFO,
-                message="Test message",
-                logger_name="test_logger"
+                level=LogLevel.INFO, message="Test message", logger_name="test_logger"
             )
-            
+
             # Both aggregators should have been called
             es_aggregator.send_log.assert_called_once()
             loki_aggregator.send_log.assert_called_once()

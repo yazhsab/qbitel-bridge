@@ -176,7 +176,9 @@ class IncidentPlaybook:
     def get_critical_actions(self) -> List[PlaybookAction]:
         """Get all critical priority actions."""
         return [
-            action for action in self.actions if action.priority == ActionPriority.CRITICAL
+            action
+            for action in self.actions
+            if action.priority == ActionPriority.CRITICAL
         ]
 
 
@@ -194,7 +196,9 @@ class PlaybookGenerator:
 
         # Standard contact information (configurable)
         self.contact_info = {
-            "security_team": getattr(config, "security_team_email", "security@company.com"),
+            "security_team": getattr(
+                config, "security_team_email", "security@company.com"
+            ),
             "incident_commander": getattr(
                 config, "incident_commander_email", "incident-response@company.com"
             ),
@@ -288,9 +292,7 @@ class PlaybookGenerator:
         start_time = time.time()
 
         try:
-            self.logger.info(
-                f"Generating playbook for incident: {incident.event_id}"
-            )
+            self.logger.info(f"Generating playbook for incident: {incident.event_id}")
 
             # Classify incident type
             incident_type = self._classify_incident(incident)
@@ -313,9 +315,7 @@ class PlaybookGenerator:
                 incident_id=incident.event_id,
                 incident_type=incident_type,
                 severity=incident.threat_level.value,
-                affected_systems=context.get("affected_systems", [])
-                if context
-                else [],
+                affected_systems=context.get("affected_systems", []) if context else [],
                 detected_at=incident.timestamp,
                 generated_at=datetime.utcnow(),
                 ttl_hours=48,
@@ -521,12 +521,19 @@ Format as JSON:
                 "success_criteria", ["Incident resolved", "Systems restored"]
             )
             escalation_triggers = data.get(
-                "escalation_triggers", ["Incident persists >4 hours", "Critical data compromised"]
+                "escalation_triggers",
+                ["Incident persists >4 hours", "Critical data compromised"],
             )
             references = data.get("references", [])
             confidence = float(data.get("confidence", 0.7))
 
-            return actions, success_criteria, escalation_triggers, references, confidence
+            return (
+                actions,
+                success_criteria,
+                escalation_triggers,
+                references,
+                confidence,
+            )
 
         except Exception as e:
             self.logger.warning(f"Failed to parse LLM playbook response: {e}")
@@ -537,17 +544,29 @@ Format as JSON:
         """Infer action type from title."""
         title_lower = title.lower()
 
-        if any(word in title_lower for word in ["investigate", "analyze", "review", "check"]):
+        if any(
+            word in title_lower
+            for word in ["investigate", "analyze", "review", "check"]
+        ):
             return ActionType.INVESTIGATION
-        elif any(word in title_lower for word in ["contain", "isolate", "block", "disconnect"]):
+        elif any(
+            word in title_lower
+            for word in ["contain", "isolate", "block", "disconnect"]
+        ):
             return ActionType.CONTAINMENT
-        elif any(word in title_lower for word in ["remove", "remediate", "patch", "fix"]):
+        elif any(
+            word in title_lower for word in ["remove", "remediate", "patch", "fix"]
+        ):
             return ActionType.REMEDIATION
-        elif any(word in title_lower for word in ["notify", "communicate", "inform", "alert"]):
+        elif any(
+            word in title_lower for word in ["notify", "communicate", "inform", "alert"]
+        ):
             return ActionType.COMMUNICATION
         elif any(word in title_lower for word in ["document", "record", "log"]):
             return ActionType.DOCUMENTATION
-        elif any(word in title_lower for word in ["verify", "validate", "test", "confirm"]):
+        elif any(
+            word in title_lower for word in ["verify", "validate", "test", "confirm"]
+        ):
             return ActionType.VALIDATION
         else:
             return ActionType.INVESTIGATION
@@ -604,8 +623,15 @@ Format as JSON:
             ),
         ]
 
-        success_criteria = ["Incident resolved", "Systems secured", "Operations restored"]
-        escalation_triggers = ["Unable to contain within 2 hours", "Critical systems affected"]
+        success_criteria = [
+            "Incident resolved",
+            "Systems secured",
+            "Operations restored",
+        ]
+        escalation_triggers = [
+            "Unable to contain within 2 hours",
+            "Critical systems affected",
+        ]
         references = []
         confidence = 0.5
 

@@ -38,7 +38,7 @@ class TestTrainingJob:
             model_name="test_model",
             model_type="classification",
             config=Mock(spec=TrainingConfig),
-            status="pending"
+            status="pending",
         )
 
         assert job.job_id == "test-job-123"
@@ -57,7 +57,7 @@ class TestTrainingJob:
             model_type="regression",
             config=config_mock,
             status="running",
-            start_time=1234567890.0
+            start_time=1234567890.0,
         )
 
         job_dict = job.to_dict()
@@ -96,13 +96,13 @@ class TestModelTrainerInitialization:
 
     def test_trainer_device_selection_cpu(self, config):
         """Test device selection falls back to CPU."""
-        with patch('torch.cuda.is_available', return_value=False):
+        with patch("torch.cuda.is_available", return_value=False):
             trainer = ModelTrainer(config)
             assert trainer.device == torch.device("cpu")
 
     def test_trainer_device_selection_cuda(self, config):
         """Test device selection uses CUDA when available."""
-        with patch('torch.cuda.is_available', return_value=True):
+        with patch("torch.cuda.is_available", return_value=True):
             trainer = ModelTrainer(config)
             assert trainer.device == torch.device("cuda")
 
@@ -127,9 +127,15 @@ class TestModelTrainerInitialize:
     @pytest.mark.asyncio
     async def test_initialize_success(self, trainer):
         """Test successful initialization."""
-        with patch.object(trainer, '_initialize_mlflow', new_callable=AsyncMock) as mock_mlflow:
-            with patch.object(trainer, '_initialize_distributed', new_callable=AsyncMock) as mock_dist:
-                with patch.object(trainer, '_initialize_model_registry', new_callable=AsyncMock) as mock_registry:
+        with patch.object(
+            trainer, "_initialize_mlflow", new_callable=AsyncMock
+        ) as mock_mlflow:
+            with patch.object(
+                trainer, "_initialize_distributed", new_callable=AsyncMock
+            ) as mock_dist:
+                with patch.object(
+                    trainer, "_initialize_model_registry", new_callable=AsyncMock
+                ) as mock_registry:
                     await trainer.initialize()
 
                     mock_mlflow.assert_called_once()
@@ -138,7 +144,12 @@ class TestModelTrainerInitialize:
     @pytest.mark.asyncio
     async def test_initialize_mlflow_failure(self, trainer):
         """Test initialization handles MLflow failure."""
-        with patch.object(trainer, '_initialize_mlflow', new_callable=AsyncMock, side_effect=Exception("MLflow error")):
+        with patch.object(
+            trainer,
+            "_initialize_mlflow",
+            new_callable=AsyncMock,
+            side_effect=Exception("MLflow error"),
+        ):
             with pytest.raises(Exception, match="MLflow error"):
                 await trainer.initialize()
 
@@ -182,8 +193,10 @@ class TestModelTrainerTraining:
         train_loader = Mock(spec=torch.utils.data.DataLoader)
         val_loader = Mock(spec=torch.utils.data.DataLoader)
 
-        with patch.object(trainer, '_training_loop', new_callable=AsyncMock) as mock_loop:
-            with patch('uuid.uuid4', return_value=Mock(hex='test-job-id')):
+        with patch.object(
+            trainer, "_training_loop", new_callable=AsyncMock
+        ) as mock_loop:
+            with patch("uuid.uuid4", return_value=Mock(hex="test-job-id")):
                 mock_loop.return_value = {"best_metric": 0.95, "final_loss": 0.05}
 
                 job_id = await trainer.train_model(
@@ -192,7 +205,7 @@ class TestModelTrainerTraining:
                     val_loader=val_loader,
                     model_name="test_model",
                     model_type="classification",
-                    config=training_config
+                    config=training_config,
                 )
 
                 assert job_id in trainer.active_jobs
@@ -208,15 +221,20 @@ class TestModelTrainerTraining:
         train_loader = Mock()
         val_loader = Mock()
 
-        with patch.object(trainer, '_training_loop', new_callable=AsyncMock, side_effect=Exception("Training failed")):
-            with patch('uuid.uuid4', return_value=Mock(hex='test-job-id')):
+        with patch.object(
+            trainer,
+            "_training_loop",
+            new_callable=AsyncMock,
+            side_effect=Exception("Training failed"),
+        ):
+            with patch("uuid.uuid4", return_value=Mock(hex="test-job-id")):
                 job_id = await trainer.train_model(
                     model=model,
                     train_loader=train_loader,
                     val_loader=val_loader,
                     model_name="test_model",
                     model_type="classification",
-                    config=training_config
+                    config=training_config,
                 )
 
                 job = trainer.active_jobs[job_id]
@@ -251,7 +269,7 @@ class TestModelTrainerOptimizer:
         optimizer = trainer._create_optimizer(model, config)
 
         assert isinstance(optimizer, torch.optim.Adam)
-        assert optimizer.defaults['lr'] == 0.001
+        assert optimizer.defaults["lr"] == 0.001
 
     def test_create_optimizer_sgd(self, trainer):
         """Test creating SGD optimizer."""
@@ -265,7 +283,7 @@ class TestModelTrainerOptimizer:
         optimizer = trainer._create_optimizer(model, config)
 
         assert isinstance(optimizer, torch.optim.SGD)
-        assert optimizer.defaults['lr'] == 0.01
+        assert optimizer.defaults["lr"] == 0.01
 
     def test_create_optimizer_adamw(self, trainer):
         """Test creating AdamW optimizer."""
@@ -359,7 +377,7 @@ class TestModelTrainerJobManagement:
             config=Mock(),
             status="running",
             start_time=1234567890.0,
-            best_metric_value=0.95
+            best_metric_value=0.95,
         )
         trainer.active_jobs["job-123"] = job
 
@@ -383,7 +401,7 @@ class TestModelTrainerJobManagement:
             model_name="test_model",
             model_type="classification",
             config=Mock(),
-            status="running"
+            status="running",
         )
         trainer.active_jobs["job-456"] = job
 
@@ -426,16 +444,12 @@ class TestModelTrainerCheckpointing:
             model_name="test_model",
             model_type="classification",
             config=Mock(),
-            artifacts_path=str(tmp_path)
+            artifacts_path=str(tmp_path),
         )
 
-        with patch('torch.save') as mock_save:
+        with patch("torch.save") as mock_save:
             checkpoint_path = await trainer._save_checkpoint(
-                model=model,
-                optimizer=optimizer,
-                epoch=5,
-                loss=0.123,
-                job=job
+                model=model, optimizer=optimizer, epoch=5, loss=0.123, job=job
             )
 
             assert checkpoint_path is not None
@@ -443,10 +457,10 @@ class TestModelTrainerCheckpointing:
 
             # Verify checkpoint contains expected keys
             saved_data = mock_save.call_args[0][0]
-            assert 'epoch' in saved_data
-            assert 'model_state_dict' in saved_data
-            assert 'optimizer_state_dict' in saved_data
-            assert 'loss' in saved_data
+            assert "epoch" in saved_data
+            assert "model_state_dict" in saved_data
+            assert "optimizer_state_dict" in saved_data
+            assert "loss" in saved_data
 
 
 class TestModelTrainerDistributed:
@@ -468,7 +482,7 @@ class TestModelTrainerDistributed:
     @pytest.mark.asyncio
     async def test_initialize_distributed_not_available(self, trainer):
         """Test distributed init when not available."""
-        with patch('torch.distributed.is_available', return_value=False):
+        with patch("torch.distributed.is_available", return_value=False):
             await trainer._initialize_distributed()
 
             assert trainer.world_size == 1

@@ -346,9 +346,7 @@ Ensure the source code is complete and ready to use.
         # Last resort: return entire response
         return llm_response, [], ["Raw LLM response"]
 
-    def _clean_code_block(
-        self, code: str, language: ProgrammingLanguage
-    ) -> str:
+    def _clean_code_block(self, code: str, language: ProgrammingLanguage) -> str:
         """Clean code block by removing markdown formatting."""
         # Remove markdown code fences
         code = re.sub(r"^```\w*\n", "", code)
