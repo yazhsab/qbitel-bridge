@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 28px; font-weight: bold; fill: #1a1a1a; }
+      .subtitle { font-family: 'Segoe UI', Arial, sans-serif; font-size: 16px; fill: #555; }
+      .phase-box { stroke-width: 3; rx: 10; filter: url(#shadow); }
+      .label { font-family: 'Segoe UI', Arial, sans-serif; font-size: 15px; font-weight: 600; }
+      .sublabel { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; fill: #666; }
+      .feature { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; fill: #444; }
+      .connector { stroke: #10b981; stroke-width: 4; fill: none; marker-end: url(#arrowhead); }
+      .time-label { font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #10b981; }
+      .metric { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #059669; }
+    </style>
+
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.2"/>
+    </filter>
+
+    <marker id="arrowhead" markerWidth="14" markerHeight="14" refX="13" refY="7" orient="auto">
+      <polygon points="0 0, 14 7, 0 14" fill="#10b981" />
+    </marker>
+
+    <linearGradient id="grad-phase1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:0.1" />
+    </linearGradient>
+    <linearGradient id="grad-phase2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.1" />
+    </linearGradient>
+    <linearGradient id="grad-phase3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.1" />
+    </linearGradient>
+    <linearGradient id="grad-phase4" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#ec4899;stop-opacity:0.1" />
+    </linearGradient>
+    <linearGradient id="grad-phase5" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Title -->
+  <text x="800" y="40" class="title" text-anchor="middle">AI Protocol Discovery Pipeline</text>
+  <text x="800" y="65" class="subtitle" text-anchor="middle">5-Phase Autonomous Learning System: 2-4 Hours vs 6-12 Months Manual</text>
+
+  <!-- Input -->
+  <g id="input">
+    <rect x="650" y="100" width="300" height="80" class="phase-box" fill="#f3f4f6" stroke="#6b7280" />
+    <text x="800" y="130" class="label" text-anchor="middle" style="font-size: 16px;">Raw Protocol Data</text>
+    <text x="800" y="155" class="sublabel" text-anchor="middle">Binary Traffic • PCAP Files • Network Samples</text>
+    <text x="800" y="172" class="feature" text-anchor="middle">Unknown/Proprietary Protocols</text>
+  </g>
+
+  <path d="M 800 180 L 800 220" class="connector" />
+
+  <!-- Phase 1: Statistical Analysis -->
+  <g id="phase1">
+    <rect x="100" y="220" width="380" height="140" class="phase-box" fill="url(#grad-phase1)" stroke="#06b6d4" />
+    <text x="290" y="255" class="label" text-anchor="middle" style="font-size: 17px; fill: #0891b2;">Phase 1: Statistical Analysis</text>
+    <text x="290" y="280" class="time-label" text-anchor="middle">⏱ 5-10 seconds</text>
+
+    <text x="120" y="305" class="feature">📊 Analysis Components:</text>
+    <text x="130" y="323" class="feature">• Entropy Calculation (randomness detection)</text>
+    <text x="130" y="338" class="feature">• Byte Frequency Distribution</text>
+    <text x="130" y="353" class="feature">• Pattern Detection (repeating sequences)</text>
+
+    <rect x="120" y="365" width="340" height="1" fill="#06b6d4" opacity="0.3"/>
+    <text x="290" y="385" class="metric" text-anchor="middle">Output: Statistical Profile</text>
+  </g>
+
+  <!-- Phase 2: Protocol Classification -->
+  <g id="phase2">
+    <rect x="520" y="220" width="380" height="140" class="phase-box" fill="url(#grad-phase2)" stroke="#3b82f6" />
+    <text x="710" y="255" class="label" text-anchor="middle" style="font-size: 17px; fill: #2563eb;">Phase 2: ML Classification</text>
+    <text x="710" y="280" class="time-label" text-anchor="middle">⏱ 10-20 seconds</text>
+
+    <text x="540" y="305" class="feature">🎯 Classification Pipeline:</text>
+    <text x="550" y="323" class="feature">• Feature Extraction (structure, patterns)</text>
+    <text x="550" y="338" class="feature">• ML Model Inference (protocol type)</text>
+    <text x="550" y="353" class="feature">• Confidence Scoring (0.0-1.0)</text>
+
+    <rect x="540" y="365" width="340" height="1" fill="#3b82f6" opacity="0.3"/>
+    <text x="710" y="385" class="metric" text-anchor="middle">Output: Protocol Type (89% accuracy)</text>
+  </g>
+
+  <!-- Phase 3: Grammar Learning -->
+  <g id="phase3">
+    <rect x="940" y="220" width="560" height="140" class="phase-box" fill="url(#grad-phase3)" stroke="#8b5cf6" />
+    <text x="1220" y="255" class="label" text-anchor="middle" style="font-size: 17px; fill: #7c3aed;">Phase 3: Grammar Learning</text>
+    <text x="1220" y="280" class="time-label" text-anchor="middle">⏱ 1-2 minutes</text>
+
+    <rect x="960" y="295" width="250" height="65" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.5" rx="6"/>
+    <text x="1085" y="315" class="feature" style="font-weight: bold;">PCFG Inference Engine</text>
+    <text x="970" y="333" class="feature">• Extract grammar rules</text>
+    <text x="970" y="348" class="feature">• Build context-free grammar</text>
+
+    <rect x="1230" y="295" width="250" height="65" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.5" rx="6"/>
+    <text x="1355" y="315" class="feature" style="font-weight: bold;">Transformer Learning</text>
+    <text x="1240" y="333" class="feature">• Understand semantics</text>
+    <text x="1240" y="348" class="feature">• Learn field relationships</text>
+
+    <rect x="960" y="368" width="520" height="1" fill="#8b5cf6" opacity="0.3"/>
+    <text x="1220" y="388" class="metric" text-anchor="middle">Output: Protocol Grammar (Formal Specification)</text>
+  </g>
+
+  <!-- Connectors between phases -->
+  <path d="M 480 290 L 520 290" class="connector" />
+  <path d="M 900 290 L 940 290" class="connector" />
+
+  <!-- BiLSTM-CRF Field Detection (parallel to Phase 3) -->
+  <g id="field-detection">
+    <rect x="100" y="400" width="800" height="140" class="phase-box" fill="#fef3c7" stroke="#f59e0b" stroke-width="3" />
+    <text x="500" y="435" class="label" text-anchor="middle" style="font-size: 17px; fill: #d97706;">BiLSTM-CRF Field Detection (Parallel)</text>
+    <text x="500" y="460" class="time-label" text-anchor="middle">⏱ 30-60 seconds</text>
+
+    <text x="120" y="485" class="feature">🧠 Deep Learning Architecture:</text>
+    <text x="130" y="503" class="feature">• Bidirectional LSTM (contextual understanding)</text>
+    <text x="130" y="518" class="feature">• Conditional Random Fields (sequence labeling)</text>
+
+    <text x="480" y="485" class="feature">📋 IOB Tagging:</text>
+    <text x="490" y="503" class="feature">• B-FIELD (Begin), I-FIELD (Inside)</text>
+    <text x="490" y="518" class="feature">• O-FIELD (Outside)</text>
+
+    <rect x="120" y="530" width="760" height="1" fill="#f59e0b" opacity="0.3"/>
+    <text x="500" y="550" class="metric" text-anchor="middle">Output: Field Boundaries + Semantic Types (89% accuracy)</text>
+  </g>
+
+  <!-- Phase 4: Parser Generation -->
+  <g id="phase4">
+    <rect x="940" y="400" width="560" height="140" class="phase-box" fill="url(#grad-phase4)" stroke="#ec4899" />
+    <text x="1220" y="435" class="label" text-anchor="middle" style="font-size: 17px; fill: #db2777;">Phase 4: Parser Generation</text>
+    <text x="1220" y="460" class="time-label" text-anchor="middle">⏱ 30-60 seconds</text>
+
+    <text x="960" y="485" class="feature">⚙️ Code Generation Pipeline:</text>
+    <text x="970" y="503" class="feature">• Select parser template (based on protocol type)</text>
+    <text x="970" y="518" class="feature">• Generate production Python/Rust code</text>
+
+    <text x="1230" y="485" class="feature">✅ Validation:</text>
+    <text x="1240" y="503" class="feature">• Test with real traffic</text>
+    <text x="1240" y="518" class="feature">• Optimize performance</text>
+
+    <rect x="960" y="530" width="520" height="1" fill="#ec4899" opacity="0.3"/>
+    <text x="1220" y="550" class="metric" text-anchor="middle">Output: Production-Ready Parser Code</text>
+  </g>
+
+  <!-- Merge to output -->
+  <path d="M 500 540 L 500 580 L 800 580" class="connector" />
+  <path d="M 1220 540 L 1220 580 L 800 580" class="connector" />
+
+  <!-- Phase 5: Adaptive Learning -->
+  <g id="phase5">
+    <rect x="500" y="590" width="600" height="140" class="phase-box" fill="url(#grad-phase5)" stroke="#10b981" stroke-width="3" />
+    <text x="800" y="625" class="label" text-anchor="middle" style="font-size: 17px; fill: #059669;">Phase 5: Adaptive Learning (Background)</text>
+    <text x="800" y="650" class="time-label" text-anchor="middle">⏱ Continuous</text>
+
+    <text x="520" y="675" class="feature">🔄 Continuous Improvement:</text>
+    <text x="530" y="693" class="feature">• Monitor parsing errors in production</text>
+    <text x="530" y="708" class="feature">• Refine grammar rules automatically</text>
+
+    <text x="820" y="675" class="feature">📈 Self-Learning:</text>
+    <text x="830" y="693" class="feature">• Track success metrics</text>
+    <text x="830" y="708" class="feature">• Update field detection models</text>
+
+    <rect x="520" y="720" width="560" height="1" fill="#10b981" opacity="0.3"/>
+    <text x="800" y="740" class="metric" text-anchor="middle">Output: Ever-Improving Accuracy</text>
+  </g>
+
+  <!-- Final Output -->
+  <path d="M 800 730 L 800 770" class="connector" />
+
+  <g id="output">
+    <rect x="450" y="770" width="700" height="120" class="phase-box" fill="#ecfdf5" stroke="#10b981" stroke-width="3" />
+    <text x="800" y="805" class="label" text-anchor="middle" style="font-size: 18px; fill: #059669;">Complete Protocol Profile</text>
+
+    <text x="470" y="835" class="feature">✓ Protocol Grammar (formal specification)</text>
+    <text x="470" y="853" class="feature">✓ Field Mappings (semantic types)</text>
+    <text x="470" y="871" class="feature">✓ Production Parser (tested & validated)</text>
+
+    <text x="820" y="835" class="feature">✓ Confidence Scores (0.89 avg)</text>
+    <text x="820" y="853" class="feature">✓ Performance Metrics (50K msg/sec)</text>
+    <text x="820" y="871" class="feature">✓ Integration Artifacts (SDK, docs)</text>
+  </g>
+
+  <!-- Performance Comparison -->
+  <g id="comparison">
+    <rect x="100" y="920" width="700" height="60" fill="#fef2f2" stroke="#ef4444" stroke-width="2" rx="8"/>
+    <text x="450" y="945" class="label" text-anchor="middle" style="fill: #dc2626;">Traditional Manual Approach</text>
+    <text x="450" y="967" class="feature" text-anchor="middle">👨‍💻 6-12 months • $500K-$2M cost • Manual reverse engineering • Error-prone</text>
+
+    <rect x="840" y="920" width="660" height="60" fill="#ecfdf5" stroke="#10b981" stroke-width="2" rx="8"/>
+    <text x="1170" y="945" class="label" text-anchor="middle" style="fill: #059669;">CRONOS AI Automated Approach</text>
+    <text x="1170" y="967" class="feature" text-anchor="middle" style="font-weight: bold;">🤖 2-4 hours • $0 marginal cost • 89% accuracy • Fully autonomous</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="800" y="1000" class="subtitle" text-anchor="middle" style="font-size: 11px;">
+    © 2025 CRONOS AI - 99.9% Faster Protocol Discovery with AI/ML
+  </text>
+</svg>

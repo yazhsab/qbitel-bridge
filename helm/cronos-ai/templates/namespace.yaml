@@ -1,0 +1,13 @@
+{{- if .Values.createNamespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ include "cronos-ai.namespace" . }}
+  labels:
+    {{- include "cronos-ai.labels" . | nindent 4 }}
+    cronos.ai/managed: "true"
+  annotations:
+    {{- with .Values.commonAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}

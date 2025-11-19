@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1800" height="1200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 28px; font-weight: bold; fill: #1a1a1a; }
+      .subtitle { font-family: 'Segoe UI', Arial, sans-serif; font-size: 16px; fill: #555; }
+      .box { stroke-width: 2.5; rx: 10; filter: url(#shadow); }
+      .label { font-family: 'Segoe UI', Arial, sans-serif; font-size: 15px; font-weight: 600; }
+      .sublabel { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; fill: #666; }
+      .feature { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; fill: #444; }
+      .connector { stroke: #555; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+      .decision-line { stroke: #dc2626; stroke-width: 3; fill: none; marker-end: url(#arrowhead-red); }
+      .metric { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; font-weight: bold; }
+    </style>
+
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.15"/>
+    </filter>
+
+    <marker id="arrowhead" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto">
+      <polygon points="0 0, 12 6, 0 12" fill="#555" />
+    </marker>
+    <marker id="arrowhead-red" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto">
+      <polygon points="0 0, 12 6, 0 12" fill="#dc2626" />
+    </marker>
+    <marker id="arrowhead-green" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto">
+      <polygon points="0 0, 12 6, 0 12" fill="#10b981" />
+    </marker>
+
+    <linearGradient id="grad-input" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.05" />
+    </linearGradient>
+    <linearGradient id="grad-analysis" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:0.05" />
+    </linearGradient>
+    <linearGradient id="grad-decision" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ef4444;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#ef4444;stop-opacity:0.05" />
+    </linearGradient>
+    <linearGradient id="grad-execute" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:0.05" />
+    </linearGradient>
+  </defs>
+
+  <!-- Title -->
+  <text x="900" y="40" class="title" text-anchor="middle">Zero-Touch Decision Engine</text>
+  <text x="900" y="65" class="subtitle" text-anchor="middle">Autonomous Security Decision Making with LLM Intelligence</text>
+
+  <!-- Input -->
+  <g id="input">
+    <rect x="700" y="100" width="400" height="90" class="box" fill="url(#grad-input)" stroke="#3b82f6" />
+    <text x="900" y="130" class="label" text-anchor="middle" style="font-size: 17px;">Security Event Ingestion</text>
+    <text x="900" y="155" class="sublabel" text-anchor="middle">Anomaly Detected • Suspicious Activity • Policy Violation</text>
+    <text x="900" y="178" class="feature" text-anchor="middle">Event Normalization • Context Enrichment • Priority Assignment</text>
+  </g>
+
+  <path d="M 900 190 L 900 230" class="connector" />
+
+  <!-- Threat Analysis Pipeline -->
+  <g id="threat-analysis">
+    <rect x="100" y="230" width="1600" height="180" class="box" fill="url(#grad-analysis)" stroke="#f59e0b" stroke-width="3" />
+    <text x="900" y="260" class="label" text-anchor="middle" style="font-size: 18px; fill: #d97706;">Threat Analysis Pipeline</text>
+
+    <!-- ML Classification -->
+    <rect x="130" y="280" width="380" height="110" fill="#fffbeb" stroke="#f59e0b" stroke-width="2" rx="8"/>
+    <text x="320" y="305" class="label" text-anchor="middle" style="fill: #d97706;">ML Classification</text>
+    <text x="150" y="330" class="feature">• Anomaly Score (0.0-1.0)</text>
+    <text x="150" y="348" class="feature">• Threat Type Detection</text>
+    <text x="150" y="366" class="feature">• MITRE ATT&CK Mapping</text>
+    <text x="150" y="384" class="feature">• Severity Assessment</text>
+
+    <!-- LLM Analysis -->
+    <rect x="540" y="280" width="520" height="110" fill="#fffbeb" stroke="#f59e0b" stroke-width="2" rx="8"/>
+    <text x="800" y="305" class="label" text-anchor="middle" style="fill: #d97706;">LLM Contextual Analysis</text>
+    <text x="560" y="330" class="feature">• Threat Narrative Generation (natural language)</text>
+    <text x="560" y="348" class="feature">• TTP (Tactics, Techniques, Procedures) Extraction</text>
+    <text x="560" y="366" class="feature">• Historical Correlation & Pattern Matching</text>
+    <text x="560" y="384" class="feature">• Confidence Scoring (0.0-1.0)</text>
+
+    <!-- Business Impact -->
+    <rect x="1090" y="280" width="580" height="110" fill="#fffbeb" stroke="#f59e0b" stroke-width="2" rx="8"/>
+    <text x="1380" y="305" class="label" text-anchor="middle" style="fill: #d97706;">Business Impact Assessment</text>
+    <text x="1110" y="330" class="feature">• Financial Risk Calculation ($0 - $10M)</text>
+    <text x="1110" y="348" class="feature">• Operational Impact (uptime, productivity)</text>
+    <text x="1110" y="366" class="feature">• Regulatory Implications (GDPR, HIPAA, SOC 2)</text>
+    <text x="1110" y="384" class="feature">• Risk Category: Low (0-0.3) | Med (0.3-0.7) | High (0.7-1.0)</text>
+  </g>
+
+  <path d="M 900 410 L 900 450" class="connector" />
+
+  <!-- Response Generation -->
+  <g id="response-generation">
+    <rect x="300" y="450" width="1200" height="140" class="box" fill="#f3f4f6" stroke="#6b7280" />
+    <text x="900" y="480" class="label" text-anchor="middle" style="font-size: 18px;">Response Options Generation</text>
+
+    <rect x="330" y="500" width="350" height="70" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5" rx="6"/>
+    <text x="505" y="520" class="label" text-anchor="middle" style="font-size: 13px;">Low-Risk Actions</text>
+    <text x="350" y="540" class="feature">• Alert generation</text>
+    <text x="350" y="555" class="feature">• Log retention increase</text>
+
+    <rect x="710" y="500" width="380" height="70" fill="#fef9e7" stroke="#f59e0b" stroke-width="1.5" rx="6"/>
+    <text x="900" y="520" class="label" text-anchor="middle" style="font-size: 13px;">Medium-Risk Actions</text>
+    <text x="730" y="540" class="feature">• IP/Port blocking</text>
+    <text x="730" y="555" class="feature">• Rate limiting • Network segmentation</text>
+
+    <rect x="1120" y="500" width="350" height="70" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5" rx="6"/>
+    <text x="1295" y="520" class="label" text-anchor="middle" style="font-size: 13px;">High-Risk Actions</text>
+    <text x="1140" y="540" class="feature">• System isolation</text>
+    <text x="1140" y="555" class="feature">• Service shutdown • Credential revoke</text>
+  </g>
+
+  <path d="M 900 590 L 900 630" class="connector" />
+
+  <!-- LLM Decision Making -->
+  <g id="llm-decision">
+    <rect x="400" y="630" width="1000" height="120" class="box" fill="url(#grad-decision)" stroke="#ef4444" stroke-width="3" />
+    <text x="900" y="665" class="label" text-anchor="middle" style="font-size: 18px; fill: #dc2626;">LLM Decision Making Engine</text>
+
+    <text x="420" y="695" class="feature">🤖 Multi-Response Evaluation:</text>
+    <text x="430" y="713" class="feature">• Analyze all response options (low, medium, high risk)</text>
+    <text x="430" y="728" class="feature">• Calculate risk-benefit tradeoffs for each option</text>
+
+    <text x="900" y="695" class="feature">📊 Confidence Scoring:</text>
+    <text x="910" y="713" class="feature">• LLM assigns confidence (0.0-1.0)</text>
+    <text x="910" y="728" class="feature">• Based on threat evidence quality</text>
+
+    <text x="1200" y="695" class="feature">✅ Recommended Action:</text>
+    <text x="1210" y="713" class="feature">• Select optimal response</text>
+    <text x="1210" y="728" class="feature">• Include justification</text>
+  </g>
+
+  <path d="M 900 750 L 900 790" class="decision-line" />
+
+  <!-- Safety Constraints & Decision Matrix -->
+  <g id="safety-check">
+    <rect x="600" y="790" width="600" height="80" class="box" fill="#fef2f2" stroke="#dc2626" stroke-width="3" />
+    <text x="900" y="820" class="label" text-anchor="middle" style="font-size: 17px; fill: #dc2626;">Safety Constraints & Decision Matrix</text>
+    <text x="900" y="845" class="sublabel" text-anchor="middle">Confidence Threshold + Risk Category → Execution Decision</text>
+    <text x="900" y="862" class="feature" text-anchor="middle" style="font-weight: bold;">High Confidence (≥0.95) + Low Risk → Auto-Execute | Otherwise → Escalate</text>
+  </g>
+
+  <!-- Decision Branches -->
+  <path d="M 750 870 L 750 920 L 250 920 L 250 950" class="connector" stroke="#10b981" stroke-width="3" marker-end="url(#arrowhead-green)"/>
+  <path d="M 850 870 L 850 920 L 600 920 L 600 950" class="connector" stroke="#f59e0b" stroke-width="3"/>
+  <path d="M 1050 870 L 1050 920 L 1200 920 L 1200 950" class="connector" stroke="#ef4444" stroke-width="3"/>
+
+  <!-- Execution Outcomes -->
+  <g id="auto-execute">
+    <rect x="100" y="950" width="300" height="100" class="box" fill="#ecfdf5" stroke="#10b981" stroke-width="3" />
+    <text x="250" y="980" class="label" text-anchor="middle" style="font-size: 15px; fill: #059669;">✅ AUTONOMOUS</text>
+    <text x="250" y="1000" class="label" text-anchor="middle" style="font-size: 15px; fill: #059669;">EXECUTION</text>
+    <text x="250" y="1025" class="metric" text-anchor="middle" style="fill: #10b981;">Confidence ≥0.95 + Low Risk</text>
+    <text x="250" y="1042" class="feature" text-anchor="middle">Execute immediately, no human approval</text>
+  </g>
+
+  <g id="auto-approve">
+    <rect x="450" y="950" width="300" height="100" class="box" fill="#fffbeb" stroke="#f59e0b" stroke-width="3" />
+    <text x="600" y="980" class="label" text-anchor="middle" style="font-size: 15px; fill: #d97706;">⚠️ AUTO-APPROVE</text>
+    <text x="600" y="1000" class="label" text-anchor="middle" style="font-size: 15px; fill: #d97706;">& EXECUTE</text>
+    <text x="600" y="1025" class="metric" text-anchor="middle" style="fill: #d97706;">Confidence 0.85-0.95 + Med Risk</text>
+    <text x="600" y="1042" class="feature" text-anchor="middle">Auto-approve, execute with logging</text>
+  </g>
+
+  <g id="escalate">
+    <rect x="1050" y="950" width="300" height="100" class="box" fill="#fef2f2" stroke="#ef4444" stroke-width="3" />
+    <text x="1200" y="980" class="label" text-anchor="middle" style="font-size: 15px; fill: #dc2626;">❌ ESCALATE TO</text>
+    <text x="1200" y="1000" class="label" text-anchor="middle" style="font-size: 15px; fill: #dc2626;">HUMAN ANALYST</text>
+    <text x="1200" y="1025" class="metric" text-anchor="middle" style="fill: #dc2626;">Confidence <0.50 OR High Risk</text>
+    <text x="1200" y="1042" class="feature" text-anchor="middle">Requires human review & approval</text>
+  </g>
+
+  <!-- Outcome Tracking -->
+  <path d="M 250 1050 L 250 1080 L 900 1080 L 900 1110" class="connector"/>
+  <path d="M 600 1050 L 600 1080 L 900 1080" class="connector"/>
+  <path d="M 1200 1050 L 1200 1080 L 900 1080" class="connector"/>
+
+  <g id="outcome-tracking">
+    <rect x="600" y="1110" width="600" height="70" class="box" fill="#e0f2fe" stroke="#3b82f6" />
+    <text x="900" y="1140" class="label" text-anchor="middle" style="font-size: 16px;">Outcome Tracking & Learning</text>
+    <text x="900" y="1165" class="feature" text-anchor="middle">Track decision outcomes • Update success rates • Refine models • Improve accuracy</text>
+  </g>
+
+  <!-- Decision Matrix Table -->
+  <g id="matrix-table">
+    <rect x="1400" y="230" width="360" height="280" fill="#f9fafb" stroke="#6b7280" stroke-width="2" rx="8"/>
+    <text x="1580" y="260" class="label" text-anchor="middle" style="font-size: 16px;">Decision Matrix</text>
+
+    <!-- Header Row -->
+    <rect x="1415" y="275" width="100" height="35" fill="#e5e7eb" stroke="#9ca3af"/>
+    <text x="1465" y="297" class="feature" text-anchor="middle" style="font-weight: bold;">Confidence</text>
+
+    <rect x="1515" y="275" width="75" height="35" fill="#d1fae5" stroke="#9ca3af"/>
+    <text x="1552" y="297" class="feature" text-anchor="middle" style="font-size: 10px; font-weight: bold;">Low Risk</text>
+
+    <rect x="1590" y="275" width="75" height="35" fill="#fef9e7" stroke="#9ca3af"/>
+    <text x="1627" y="297" class="feature" text-anchor="middle" style="font-size: 10px; font-weight: bold;">Med Risk</text>
+
+    <rect x="1665" y="275" width="80" height="35" fill="#fee2e2" stroke="#9ca3af"/>
+    <text x="1705" y="297" class="feature" text-anchor="middle" style="font-size: 10px; font-weight: bold;">High Risk</text>
+
+    <!-- Row 1: High Confidence -->
+    <rect x="1415" y="310" width="100" height="40" fill="#e5e7eb" stroke="#9ca3af"/>
+    <text x="1465" y="333" class="feature" text-anchor="middle" style="font-weight: bold;">0.95-1.0</text>
+
+    <rect x="1515" y="310" width="75" height="40" fill="#10b981" stroke="#9ca3af"/>
+    <text x="1552" y="333" class="feature" text-anchor="middle" style="fill: white; font-weight: bold;">✅ Auto</text>
+
+    <rect x="1590" y="310" width="75" height="40" fill="#f59e0b" stroke="#9ca3af"/>
+    <text x="1627" y="333" class="feature" text-anchor="middle" style="fill: white; font-weight: bold;">⚠️ Approve</text>
+
+    <rect x="1665" y="310" width="80" height="40" fill="#ef4444" stroke="#9ca3af"/>
+    <text x="1705" y="333" class="feature" text-anchor="middle" style="fill: white; font-weight: bold;">❌ Escalate</text>
+
+    <!-- Row 2: Medium Confidence -->
+    <rect x="1415" y="350" width="100" height="40" fill="#e5e7eb" stroke="#9ca3af"/>
+    <text x="1465" y="373" class="feature" text-anchor="middle" style="font-weight: bold;">0.85-0.95</text>
+
+    <rect x="1515" y="350" width="75" height="40" fill="#10b981" stroke="#9ca3af"/>
+    <text x="1552" y="373" class="feature" text-anchor="middle" style="fill: white; font-weight: bold;">✅ Auto</text>
+
+    <rect x="1590" y="350" width="75" height="40" fill="#f59e0b" stroke="#9ca3af"/>
+    <text x="1627" y="373" class="feature" text-anchor="middle" style="fill: white; font-weight: bold;">⚠️ Approve</text>
+
+    <rect x="1665" y="350" width="80" height="40" fill="#ef4444" stroke="#9ca3af"/>
+    <text x="1705" y="373" class="feature" text-anchor="middle" style="fill: white; font-weight: bold;">❌ Escalate</text>
+
+    <!-- Row 3: Low-Med Confidence -->
+    <rect x="1415" y="390" width="100" height="40" fill="#e5e7eb" stroke="#9ca3af"/>
+    <text x="1465" y="413" class="feature" text-anchor="middle" style="font-weight: bold;">0.50-0.85</text>
+
+    <rect x="1515" y="390" width="75" height="40" fill="#f59e0b" stroke="#9ca3af"/>
+    <text x="1552" y="413" class="feature" text-anchor="middle" style="fill: white; font-weight: bold;">⚠️ Approve</text>
+
+    <rect x="1590" y="390" width="75" height="40" fill="#ef4444" stroke="#9ca3af"/>
+    <text x="1627" y="413" class="feature" text-anchor="middle" style="fill: white; font-weight: bold;">❌ Escalate</text>
+
+    <rect x="1665" y="390" width="80" height="40" fill="#ef4444" stroke="#9ca3af"/>
+    <text x="1705" y="413" class="feature" text-anchor="middle" style="fill: white; font-weight: bold;">❌ Escalate</text>
+
+    <!-- Row 4: Low Confidence -->
+    <rect x="1415" y="430" width="100" height="40" fill="#e5e7eb" stroke="#9ca3af"/>
+    <text x="1465" y="453" class="feature" text-anchor="middle" style="font-weight: bold;"><0.50</text>
+
+    <rect x="1515" y="430" width="75" height="40" fill="#ef4444" stroke="#9ca3af"/>
+    <text x="1552" y="453" class="feature" text-anchor="middle" style="fill: white; font-weight: bold;">❌ Escalate</text>
+
+    <rect x="1590" y="430" width="75" height="40" fill="#ef4444" stroke="#9ca3af"/>
+    <text x="1627" y="453" class="feature" text-anchor="middle" style="fill: white; font-weight: bold;">❌ Escalate</text>
+
+    <rect x="1665" y="430" width="80" height="40" fill="#ef4444" stroke="#9ca3af"/>
+    <text x="1705" y="453" class="feature" text-anchor="middle" style="fill: white; font-weight: bold;">❌ Escalate</text>
+
+    <text x="1580" y="495" class="metric" text-anchor="middle" style="font-size: 11px; fill: #10b981;">78% Autonomous Rate</text>
+  </g>
+
+  <!-- Performance Metrics -->
+  <g id="performance">
+    <rect x="100" y="1110" width="450" height="70" fill="#ecfdf5" stroke="#10b981" stroke-width="2" rx="8"/>
+    <text x="325" y="1135" class="label" text-anchor="middle" style="fill: #059669;">Performance Metrics</text>
+    <text x="120" y="1160" class="metric" style="fill: #10b981;">Autonomous: 78%</text>
+    <text x="250" y="1160" class="metric" style="fill: #10b981;">Latency: <180ms</text>
+    <text x="380" y="1160" class="metric" style="fill: #10b981;">Accuracy: 94%</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="900" y="1200" class="subtitle" text-anchor="middle" style="font-size: 11px;">
+    © 2025 CRONOS AI - 78% Autonomous Security Operations with Zero-Touch Decision Engine
+  </text>
+</svg>

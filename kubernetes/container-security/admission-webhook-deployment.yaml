@@ -1,0 +1,194 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cronos-admission-webhook
+  namespace: cronos-service-mesh
+  labels:
+    app: cronos-admission-webhook
+    app.kubernetes.io/name: admission-webhook
+    app.kubernetes.io/component: security
+    cronos.ai/quantum-safe: "true"
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: cronos-admission-webhook
+  template:
+    metadata:
+      labels:
+        app: cronos-admission-webhook
+        version: v1
+        cronos.ai/quantum-safe: "true"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9091"
+    spec:
+      serviceAccountName: cronos-admission-webhook
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: webhook
+        image: cronos/admission-webhook:latest
+        imagePullPolicy: Always
+        ports:
+        - name: https
+          containerPort: 8443
+          protocol: TCP
+        - name: metrics
+          containerPort: 9091
+          protocol: TCP
+        env:
+        - name: WEBHOOK_PORT
+          value: "8443"
+        - name: TLS_CERT_PATH
+          value: "/etc/webhook/certs/tls.crt"
+        - name: TLS_KEY_PATH
+          value: "/etc/webhook/certs/tls.key"
+        - name: POLICY_NAME
+          value: "default"
+        - name: REQUIRE_IMAGE_SIGNATURE
+          value: "true"
+        - name: REQUIRE_QUANTUM_SAFE
+          value: "true"
+        - name: MAX_CRITICAL_VULNERABILITIES
+          value: "0"
+        - name: MAX_HIGH_VULNERABILITIES
+          value: "5"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: https
+            scheme: HTTPS
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: https
+            scheme: HTTPS
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: webhook-certs
+          mountPath: /etc/webhook/certs
+          readOnly: true
+        - name: policy-config
+          mountPath: /etc/webhook/policy
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: webhook-certs
+        secret:
+          secretName: cronos-admission-webhook-tls
+      - name: policy-config
+        configMap:
+          name: admission-webhook-policy
+      - name: tmp
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cronos-admission-webhook
+  namespace: cronos-service-mesh
+  labels:
+    app: cronos-admission-webhook
+spec:
+  type: ClusterIP
+  ports:
+  - name: https
+    port: 443
+    targetPort: 8443
+    protocol: TCP
+  selector:
+    app: cronos-admission-webhook
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: cronos-validating-webhook
+  labels:
+    app: cronos-admission-webhook
+    cronos.ai/quantum-safe: "true"
+webhooks:
+- name: pod-security.cronos.ai
+  admissionReviewVersions: ["v1", "v1beta1"]
+  sideEffects: None
+  failurePolicy: Fail
+  timeoutSeconds: 10
+  clientConfig:
+    service:
+      name: cronos-admission-webhook
+      namespace: cronos-service-mesh
+      path: "/validate"
+    caBundle: "" # Will be injected by cert-manager or manually
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+    scope: "Namespaced"
+  namespaceSelector:
+    matchExpressions:
+    - key: cronos.ai/webhook
+      operator: In
+      values: ["enabled"]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: admission-webhook-policy
+  namespace: cronos-service-mesh
+data:
+  policy.yaml: |
+    name: default
+    enabled: true
+    enforce: true
+
+    # Image policies
+    require_image_signature: true
+    allowed_registries:
+    - gcr.io
+    - docker.io
+    - quay.io
+    - registry.k8s.io
+    - ghcr.io
+    blocked_registries:
+    - untrusted.io
+
+    # Vulnerability policies
+    max_critical_vulnerabilities: 0
+    max_high_vulnerabilities: 5
+
+    # Runtime policies
+    disallow_privileged: true
+    disallow_host_network: true
+    disallow_host_pid: true
+    require_read_only_root: false
+
+    # Quantum-safe requirements
+    require_quantum_safe_crypto: true

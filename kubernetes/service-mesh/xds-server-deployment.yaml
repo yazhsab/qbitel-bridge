@@ -1,0 +1,188 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cronos-xds-server
+  namespace: cronos-service-mesh
+  labels:
+    app: cronos-xds-server
+    app.kubernetes.io/name: xds-server
+    app.kubernetes.io/component: control-plane
+    cronos.ai/quantum-safe: "true"
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: cronos-xds-server
+  template:
+    metadata:
+      labels:
+        app: cronos-xds-server
+        version: v1
+        cronos.ai/quantum-safe: "true"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: cronos-xds-server
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: xds-server
+        image: cronos/xds-server:latest
+        imagePullPolicy: Always
+        ports:
+        - name: grpc
+          containerPort: 18000
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        - name: health
+          containerPort: 8081
+          protocol: TCP
+        env:
+        - name: XDS_PORT
+          value: "18000"
+        - name: METRICS_PORT
+          value: "9090"
+        - name: LOG_LEVEL
+          value: "info"
+        - name: ENABLE_ADS
+          value: "true"
+        - name: CACHE_TTL
+          value: "300"
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: health
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: health
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: config
+          mountPath: /etc/cronos/xds
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+        - name: certs
+          mountPath: /etc/cronos/certs
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: xds-server-config
+      - name: tmp
+        emptyDir: {}
+      - name: certs
+        secret:
+          secretName: xds-server-tls
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - cronos-xds-server
+              topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cronos-xds-server
+  namespace: cronos-service-mesh
+  labels:
+    app: cronos-xds-server
+    cronos.ai/quantum-safe: "true"
+spec:
+  type: ClusterIP
+  ports:
+  - name: grpc
+    port: 18000
+    targetPort: 18000
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: cronos-xds-server
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: xds-server-config
+  namespace: cronos-service-mesh
+data:
+  config.yaml: |
+    server:
+      port: 18000
+      enable_ads: true
+      cache_ttl: 300
+
+    quantum_encryption:
+      enabled: true
+      algorithm: kyber-1024
+      signature: dilithium-5
+
+    resources:
+      default_listener:
+        address: "0.0.0.0"
+        port: 15001
+        enable_quantum_filter: true
+
+    observability:
+      metrics_port: 9090
+      tracing_enabled: true
+      log_level: info
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cronos-xds-server
+  namespace: cronos-service-mesh
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: cronos-xds-server

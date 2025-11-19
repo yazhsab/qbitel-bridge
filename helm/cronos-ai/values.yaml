@@ -1,0 +1,275 @@
+# Default values for CRONOS AI Helm chart
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Global configuration
+global:
+  imagePullSecrets: []
+  storageClass: ""
+
+# XDS Server Configuration
+xdsServer:
+  enabled: true
+  replicaCount: 3
+
+  image:
+    repository: cronos/xds-server
+    pullPolicy: Always
+    tag: "latest"
+
+  service:
+    type: ClusterIP
+    grpcPort: 18000
+    metricsPort: 9090
+    sessionAffinity: ClientIP
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 10800
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 75
+
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+
+  config:
+    port: 18000
+    enableAds: true
+    cacheTtl: 300
+    quantumEncryption:
+      enabled: true
+      algorithm: kyber-1024
+      signature: dilithium-5
+    observability:
+      metricsPort: 9090
+      tracingEnabled: true
+      logLevel: info
+
+# Admission Webhook Configuration
+admissionWebhook:
+  enabled: true
+  replicaCount: 3
+
+  image:
+    repository: cronos/admission-webhook
+    pullPolicy: Always
+    tag: "latest"
+
+  service:
+    type: ClusterIP
+    httpsPort: 443
+    targetPort: 8443
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+
+  config:
+    port: 8443
+    requireImageSignature: true
+    requireQuantumSafe: true
+    maxCriticalVulnerabilities: 0
+    maxHighVulnerabilities: 5
+    allowedRegistries:
+      - gcr.io
+      - docker.io
+      - quay.io
+      - registry.k8s.io
+      - ghcr.io
+    blockedRegistries:
+      - untrusted.io
+    disallowPrivileged: true
+    disallowHostNetwork: true
+    disallowHostPid: true
+
+# Kafka Producer Configuration
+kafkaProducer:
+  enabled: false
+  replicaCount: 2
+
+  image:
+    repository: cronos/kafka-producer
+    pullPolicy: Always
+    tag: "latest"
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  kafka:
+    bootstrapServers: "kafka:9092"
+    topic: "cronos-security-events"
+    compressionType: snappy
+    batchSize: 16384
+    lingerMs: 10
+
+# AI Engine Configuration
+aiEngine:
+  enabled: true
+  replicaCount: 2
+
+  image:
+    repository: cronos/ai-engine
+    pullPolicy: Always
+    tag: "latest"
+
+  service:
+    type: ClusterIP
+    restPort: 8000
+    grpcPort: 50051
+    metricsPort: 9090
+
+  resources:
+    requests:
+      cpu: 2000m
+      memory: 4Gi
+    limits:
+      cpu: 4000m
+      memory: 8Gi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 75
+
+  config:
+    logLevel: INFO
+    workers: 4
+    enableObservability: true
+    device: cpu  # or cuda for GPU
+
+# Monitoring Configuration
+monitoring:
+  enabled: true
+
+  prometheus:
+    enabled: true
+    retention: 15d
+    scrapeInterval: 30s
+
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2Gi
+      limits:
+        cpu: 2000m
+        memory: 8Gi
+
+    persistence:
+      enabled: true
+      size: 50Gi
+      storageClass: ""
+
+  grafana:
+    enabled: true
+    adminPassword: "cronos-ai-admin"
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: ""
+
+    dashboards:
+      enabled: true
+      # Pre-configured dashboards will be loaded automatically
+
+# Security Configuration
+security:
+  podSecurityPolicy:
+    enabled: true
+
+  networkPolicy:
+    enabled: true
+
+  rbac:
+    create: true
+
+  serviceAccount:
+    create: true
+    name: ""
+
+  tls:
+    enabled: true
+    certManager:
+      enabled: true
+      issuer: letsencrypt-prod
+
+    # If not using cert-manager, provide certificates manually
+    certificates:
+      xdsServer:
+        secretName: xds-server-tls
+      admissionWebhook:
+        secretName: cronos-admission-webhook-tls
+
+# Namespace Configuration
+namespaceOverride: ""
+createNamespace: true
+
+# Additional labels to apply to all resources
+commonLabels:
+  app.kubernetes.io/managed-by: Helm
+  cronos.ai/quantum-safe: "true"
+
+# Additional annotations to apply to all resources
+commonAnnotations: {}
+
+# Node selector for all pods
+nodeSelector: {}
+
+# Tolerations for all pods
+tolerations: []
+
+# Affinity rules for all pods
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - cronos-xds-server
+            - cronos-admission-webhook
+        topologyKey: kubernetes.io/hostname

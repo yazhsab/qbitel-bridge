@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where:*)",
+      "Bash(npm:*)",
+      "Bash(pip install:*)",
+      "Bash(python convert_to_pdf.py:*)",
+      "Bash(python convert_to_pdf_professional.py:*)",
+      "Bash(python convert_to_html.py:*)",
+      "Bash(start \"\" \"QBITEL_AI_Product_Summary_Professional.html\")",
+      "Bash(tree:*)",
+      "Bash(find:*)",
+      "Bash(python:*)",
+      "Bash(del test_aes_gcm.py security_validation_aes_gcm.py)",
+      "Bash(dir:*)",
+      "Bash(mkdir:*)",
+      "Bash(del \"BREAKTHROUGH_INNOVATIONS.md\" \"INVESTOR_PITCH_DECK.md\" \"COMPLETE_PRODUCT_SUMMARY.md\" \"PHASE1_IMPLEMENTATION_PROGRESS.md\" \"PHASE1_QUICKSTART.md\" \"PHASE1_SPRINT_SUMMARY.md\" \"PHASE1_COMPLETE.md\" \"IMPLEMENTATION_SUMMARY.md\" \"PRODUCTION_GAPS_IMPLEMENTATION.md\" \"PRODUCTION_GAPS_IMPLEMENTATION_SUMMARY.md\" \"PRODUCTION_READINESS_GAPS.md\" \"PRODUCTION_READINESS_STATUS.md\" \"ENTERPRISE_EXPANSION_IMPLEMENTATION_PLAN.md\" \"CRONOS_AI_FINAL_PRODUCT_OVERVIEW.md\" \"architecture.md\" \"implementation-plan.md\")",
+      "Bash(rm:*)",
+      "Bash(start \"\" \"C:\\Users\\Yazhini\\cronos-ai\\investor_documents_html\\INVESTOR_PITCH_DECK.html\")",
+      "Bash(winget install:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -88,6 +88,11 @@ passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.3.0
 python-multipart==0.0.6
 
+# Post-Quantum Cryptography (PQC)
+kyber-py==1.0.1
+dilithium-py==1.3.0
+pycryptodomex==3.23.0
+
 # ============================================================================
 # Network & Communication
 # ============================================================================
@@ -97,6 +102,10 @@ websockets==12.0
 python-socketio==5.10.0
 grpcio==1.60.0
 grpcio-tools==1.60.0
+grpcio-reflection==1.60.0
+
+# Envoy xDS protocol buffers
+envoy-data-plane-api==0.1.0  # For Envoy xDS server implementation
 
 # ============================================================================
 # Data Processing
@@ -129,6 +138,20 @@ lime==0.2.0.1
 
 # Captum for PyTorch model interpretability
 captum==0.7.0
+
+# ============================================================================
+# Container Security & Runtime Monitoring
+# ============================================================================
+# eBPF monitoring (Linux only - BPF Compiler Collection)
+# Note: BCC requires system packages: bpfcc-tools python3-bpfcc on Ubuntu/Debian
+# Installation: apt-get install bpfcc-tools python3-bpfcc
+# For other distros, see: https://github.com/iovisor/bcc/blob/master/INSTALL.md
+bcc==0.30.0; sys_platform == "linux"
+
+# Container image analysis and vulnerability scanning
+# Note: These are optional for enhanced security validation
+# trivy-python==0.1.0  # Uncomment for Trivy integration
+# grype==0.1.0  # Uncomment for Grype integration
 
 # ============================================================================
 # Utilities

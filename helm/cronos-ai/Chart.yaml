@@ -1,0 +1,23 @@
+apiVersion: v2
+name: cronos-ai
+description: CRONOS AI - Quantum-Safe Security Platform for Enterprise
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - quantum-safe
+  - security
+  - post-quantum-cryptography
+  - service-mesh
+  - container-security
+maintainers:
+  - name: QBITEL Team
+    email: enterprise@qbitel.com
+home: https://github.com/qbitel/cronos-ai
+sources:
+  - https://github.com/qbitel/cronos-ai
+icon: https://cronos.ai/icon.png
+annotations:
+  cronos.ai/quantum-safe: "true"
+  cronos.ai/nist-level: "5"
+dependencies: []
