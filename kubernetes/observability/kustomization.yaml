@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: observability
+
+resources:
+  - namespace.yaml
+  - grafana.yaml
+  - loki.yaml
+  - tempo.yaml
+  - mimir.yaml
+  - promtail.yaml
+  - otel-collector.yaml
+
+commonLabels:
+  app.kubernetes.io/part-of: cronos-ai
+  app.kubernetes.io/managed-by: kustomize
+
+configMapGenerator:
+  - name: cronos-ai-dashboards
+    files:
+      - dashboards/overview.json
+      - dashboards/llm-operations.json
+      - dashboards/protocol-analysis.json
+      - dashboards/threat-detection.json

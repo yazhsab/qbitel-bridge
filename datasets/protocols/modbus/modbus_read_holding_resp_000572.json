@@ -1,0 +1,58 @@
+{
+  "protocol": "modbus_tcp",
+  "message_type": "read_holding_resp",
+  "timestamp": "2025-11-22T16:46:14.577495",
+  "function_code": 3,
+  "function_name": "read_holding_registers",
+  "transaction_id": 42479,
+  "unit_id": 194,
+  "byte_count": 32,
+  "register_count": 16,
+  "is_request": false,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42479
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 35
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 194
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 3
+    },
+    {
+      "name": "byte_count",
+      "offset": 8,
+      "length": 1,
+      "value": 32
+    },
+    {
+      "name": "register_values",
+      "offset": 9,
+      "length": 32,
+      "value": "281e46bfff97674dc0681379e3a8448ea214d4930c75a9af7c691b7f71c3a45d"
+    }
+  ],
+  "sample_index": 572,
+  "hash": "66211071bf6cc1950003c973e8ca9b316bea744c3eede96df1ec2f0e0b39e40a"
+}

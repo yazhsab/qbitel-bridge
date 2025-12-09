@@ -1,0 +1,2118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QBITEL AI - Professional Whiteboard Explainer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: #1a1a2e;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Video Container */
+        .video-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Whiteboard Area */
+        .whiteboard {
+            flex: 1;
+            background: #ffffff;
+            margin: 20px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        /* Scene Container */
+        .scene {
+            position: absolute;
+            inset: 0;
+            padding: 40px 60px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease;
+            overflow: hidden;
+        }
+
+        .scene.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Drawing Hand */
+        .drawing-hand {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.2));
+        }
+
+        .drawing-hand.visible {
+            opacity: 1;
+        }
+
+        .drawing-hand img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Typography */
+        .title {
+            font-size: 38px;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 15px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .title.animate {
+            animation: fadeSlideIn 0.8s ease forwards;
+        }
+
+        .title span.highlight {
+            color: #4f46e5;
+        }
+
+        .title span.red {
+            color: #dc2626;
+        }
+
+        .title span.green {
+            color: #16a34a;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #64748b;
+            margin-bottom: 25px;
+            opacity: 0;
+        }
+
+        .subtitle.animate {
+            animation: fadeSlideIn 0.8s ease 0.2s forwards;
+        }
+
+        /* Animations */
+        @keyframes fadeSlideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes drawLine {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes strikethrough {
+            to {
+                width: 100%;
+            }
+        }
+
+        /* Element Styles */
+        .element {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .element.animate {
+            animation: fadeSlideIn 0.6s ease forwards;
+        }
+
+        /* Cards */
+        .card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 30px;
+            border: 2px solid #e2e8f0;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .card.animate {
+            animation: fadeSlideIn 0.6s ease forwards;
+        }
+
+        .card.red-border {
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        .card.green-border {
+            border-color: #bbf7d0;
+            background: #f0fdf4;
+        }
+
+        .card.blue-border {
+            border-color: #bfdbfe;
+            background: #eff6ff;
+        }
+
+        .card.purple-border {
+            border-color: #ddd6fe;
+            background: #f5f3ff;
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .card-text {
+            font-size: 16px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .card-stat {
+            font-size: 36px;
+            font-weight: 800;
+            margin-top: 15px;
+        }
+
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        /* Flex Layouts */
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .flex-row {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* SVG Drawings */
+        .svg-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .draw-path {
+            stroke-dasharray: 2000;
+            stroke-dashoffset: 2000;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .draw-path.animate {
+            animation: drawLine 1.5s ease forwards;
+        }
+
+        /* Specific Scene Styles */
+
+        /* Scene 1: Intro */
+        .intro-content {
+            text-align: center;
+            padding-top: 80px;
+        }
+
+        .intro-logo {
+            font-size: 120px;
+            font-weight: 800;
+            color: #4f46e5;
+            letter-spacing: -2px;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .intro-logo.animate {
+            animation: scaleIn 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .intro-tagline {
+            font-size: 32px;
+            color: #64748b;
+            margin-top: 20px;
+            opacity: 0;
+        }
+
+        .intro-tagline.animate {
+            animation: fadeSlideIn 0.8s ease 0.5s forwards;
+        }
+
+        .intro-icons {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 60px;
+        }
+
+        .intro-icon {
+            font-size: 64px;
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        .intro-icon.animate {
+            animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Scene 2: Problem */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .problem-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 25px;
+            background: #fef2f2;
+            border: 2px solid #fecaca;
+            border-radius: 16px;
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+
+        .problem-card.animate {
+            animation: slideInLeft 0.6s ease forwards;
+        }
+
+        .problem-card .icon {
+            font-size: 42px;
+            flex-shrink: 0;
+        }
+
+        .problem-card .content h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #991b1b;
+            margin-bottom: 8px;
+        }
+
+        .problem-card .content p {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .problem-card .stat {
+            font-size: 28px;
+            font-weight: 800;
+            color: #dc2626;
+            margin-top: 10px;
+        }
+
+        /* Scene 3: Cost Comparison */
+        .comparison-container {
+            display: flex;
+            align-items: stretch;
+            gap: 40px;
+            margin-top: 40px;
+            height: calc(100% - 120px);
+        }
+
+        .comparison-box {
+            flex: 1;
+            padding: 40px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .comparison-box.animate {
+            animation: scaleIn 0.6s ease forwards;
+        }
+
+        .comparison-box.old {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border: 3px solid #fca5a5;
+        }
+
+        .comparison-box.new {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 3px solid #86efac;
+        }
+
+        .comparison-box .label {
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .comparison-box.old .label { color: #dc2626; }
+        .comparison-box.new .label { color: #16a34a; }
+
+        .comparison-box .amount {
+            font-size: 48px;
+            font-weight: 800;
+            position: relative;
+        }
+
+        .comparison-box.old .amount {
+            color: #dc2626;
+        }
+
+        .comparison-box.old .amount::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -10%;
+            width: 0;
+            height: 4px;
+            background: #dc2626;
+            transform: rotate(-5deg);
+        }
+
+        .comparison-box.old .amount.strikethrough::after {
+            animation: strikethrough 0.5s ease forwards;
+            width: 120%;
+        }
+
+        .comparison-box.new .amount {
+            color: #16a34a;
+        }
+
+        .comparison-box .time {
+            font-size: 24px;
+            color: #64748b;
+            margin-top: 15px;
+        }
+
+        .comparison-box .failure {
+            margin-top: 25px;
+            padding: 15px 30px;
+            background: #dc2626;
+            color: white;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .comparison-box .success {
+            margin-top: 25px;
+            padding: 15px 30px;
+            background: #16a34a;
+            color: white;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .vs-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .vs-divider.animate {
+            animation: scaleIn 0.5s ease 0.3s forwards;
+        }
+
+        .vs-circle {
+            width: 80px;
+            height: 80px;
+            background: #1e293b;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        /* Scene 4: Solution Hub */
+        .solution-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: calc(100% - 100px);
+            margin-top: 20px;
+        }
+
+        .hub-visual {
+            position: relative;
+            width: 600px;
+            height: 450px;
+        }
+
+        .hub-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 28px;
+            box-shadow: 0 20px 60px rgba(79, 70, 229, 0.4);
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 5;
+        }
+
+        .hub-center.animate {
+            animation: hubCenterIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes hubCenterIn {
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .hub-center span {
+            font-size: 18px;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .hub-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            height: 350px;
+            border: 3px dashed #c7d2fe;
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        .hub-ring.animate {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .hub-node {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            background: white;
+            border: 3px solid #e2e8f0;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        .hub-node.animate {
+            animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .hub-node span {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        .hub-node:nth-child(1) { top: -20px; left: 50%; transform: translateX(-50%) scale(0); }
+        .hub-node:nth-child(2) { top: 15%; right: -20px; }
+        .hub-node:nth-child(3) { bottom: 15%; right: -20px; }
+        .hub-node:nth-child(4) { bottom: -20px; left: 50%; transform: translateX(-50%) scale(0); }
+        .hub-node:nth-child(5) { bottom: 15%; left: -20px; }
+        .hub-node:nth-child(6) { top: 15%; left: -20px; }
+
+        .hub-node:nth-child(1).animate { animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; transform: translateX(-50%); }
+        .hub-node:nth-child(4).animate { animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; transform: translateX(-50%); }
+
+        .benefits-list {
+            position: absolute;
+            right: -280px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            background: #f0fdf4;
+            border: 2px solid #86efac;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #166534;
+            opacity: 0;
+            transform: translateX(30px);
+        }
+
+        .benefit-item.animate {
+            animation: slideInRight 0.5s ease forwards;
+        }
+
+        .benefit-item .check {
+            width: 24px;
+            height: 24px;
+            background: #16a34a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        /* Scene 5: Three Powers */
+        .powers-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-top: 50px;
+            height: calc(100% - 150px);
+        }
+
+        .power-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
+            border: 3px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .power-card.animate {
+            animation: slideInUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .power-card.blue { border-color: #93c5fd; background: linear-gradient(180deg, #eff6ff 0%, white 100%); }
+        .power-card.purple { border-color: #c4b5fd; background: linear-gradient(180deg, #f5f3ff 0%, white 100%); }
+        .power-card.green { border-color: #86efac; background: linear-gradient(180deg, #f0fdf4 0%, white 100%); }
+
+        .power-number {
+            font-size: 72px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+
+        .power-card.blue .power-number { color: #3b82f6; }
+        .power-card.purple .power-number { color: #8b5cf6; }
+        .power-card.green .power-number { color: #22c55e; }
+
+        .power-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+
+        .power-desc {
+            font-size: 16px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .power-stat {
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .power-card.blue .power-stat { background: #dbeafe; color: #1d4ed8; }
+        .power-card.purple .power-stat { background: #ede9fe; color: #7c3aed; }
+        .power-card.green .power-stat { background: #dcfce7; color: #16a34a; }
+
+        .power-icon {
+            font-size: 48px;
+            margin-top: auto;
+            padding-top: 20px;
+        }
+
+        /* Scene 6: Quantum Timeline */
+        .timeline-container {
+            margin-top: 30px;
+            position: relative;
+            padding: 0 40px;
+        }
+
+        .timeline-line {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        .timeline-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b 0%, #dc2626 100%);
+            border-radius: 3px;
+            width: 0;
+        }
+
+        .timeline-progress.animate {
+            animation: timelineGrow 2s ease forwards;
+        }
+
+        @keyframes timelineGrow {
+            to { width: 100%; }
+        }
+
+        .timeline-points {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            top: -25px;
+            left: 0;
+            right: 0;
+        }
+
+        .timeline-point {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .timeline-point.animate {
+            animation: slideInUp 0.5s ease forwards;
+        }
+
+        .timeline-dot {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .timeline-point.today .timeline-dot { border-color: #f59e0b; background: #fef3c7; }
+        .timeline-point.mid .timeline-dot { border-color: #f97316; background: #ffedd5; }
+        .timeline-point.danger .timeline-dot { border-color: #dc2626; background: #fee2e2; }
+
+        .timeline-year {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .timeline-point.danger .timeline-year { color: #dc2626; }
+
+        .timeline-label {
+            font-size: 12px;
+            color: #64748b;
+            text-align: center;
+            max-width: 120px;
+            margin-top: 5px;
+            line-height: 1.3;
+        }
+
+        .warning-box {
+            margin-top: 20px;
+            padding: 20px 30px;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border: 2px solid #fca5a5;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        .warning-box.animate {
+            animation: scaleIn 0.6s ease forwards;
+        }
+
+        .warning-box .icon {
+            font-size: 40px;
+            flex-shrink: 0;
+        }
+
+        .warning-box .content h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #dc2626;
+            margin-bottom: 6px;
+        }
+
+        .warning-box .content p {
+            font-size: 14px;
+            color: #7f1d1d;
+            line-height: 1.5;
+        }
+
+        .threat-stat {
+            margin-top: 15px;
+            text-align: center;
+            opacity: 0;
+        }
+
+        .threat-stat.animate {
+            animation: fadeSlideIn 0.6s ease forwards;
+        }
+
+        .threat-stat .amount {
+            font-size: 36px;
+            font-weight: 800;
+            color: #dc2626;
+        }
+
+        .threat-stat .label {
+            font-size: 16px;
+            color: #991b1b;
+        }
+
+        /* Scene 7: How It Works */
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .step-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            opacity: 0;
+            transform: translateX(-40px);
+        }
+
+        .step-row.animate {
+            animation: slideInLeft 0.6s ease forwards;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .step-row:nth-child(1) .step-number { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .step-row:nth-child(2) .step-number { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .step-row:nth-child(3) .step-number { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .step-row:nth-child(4) .step-number { background: linear-gradient(135deg, #22c55e, #16a34a); }
+
+        .step-content {
+            flex: 1;
+            padding: 15px 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .step-content h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .step-content p {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .step-content .highlight {
+            color: #16a34a;
+            font-weight: 700;
+        }
+
+        .step-arrow {
+            font-size: 24px;
+            color: #22c55e;
+            flex-shrink: 0;
+        }
+
+        .step-result {
+            margin-top: 15px;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 2px solid #86efac;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            opacity: 0;
+        }
+
+        .step-result.animate {
+            animation: scaleIn 0.6s ease forwards;
+        }
+
+        .step-result .icon {
+            font-size: 32px;
+        }
+
+        .step-result .text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #166534;
+        }
+
+        /* Scene 8: Industries */
+        .industries-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .industry-card {
+            padding: 18px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .industry-card.animate {
+            animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .industry-card .icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .industry-card .name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .industry-card .desc {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .industry-card .value {
+            font-size: 18px;
+            font-weight: 800;
+            color: #4f46e5;
+        }
+
+        .market-total {
+            margin-top: 20px;
+            text-align: center;
+            opacity: 0;
+        }
+
+        .market-total.animate {
+            animation: fadeSlideIn 0.6s ease forwards;
+        }
+
+        .market-total .amount {
+            font-size: 42px;
+            font-weight: 800;
+            color: #4f46e5;
+        }
+
+        .market-total .label {
+            font-size: 18px;
+            color: #64748b;
+        }
+
+        /* Scene 9: Roadmap */
+        .roadmap-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 80px;
+            padding: 0 40px;
+            position: relative;
+        }
+
+        .roadmap-line {
+            position: absolute;
+            top: 50px;
+            left: 120px;
+            right: 120px;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+        }
+
+        .roadmap-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #22c55e, #3b82f6, #8b5cf6);
+            width: 0;
+        }
+
+        .roadmap-progress.animate {
+            animation: timelineGrow 2s ease forwards;
+        }
+
+        .roadmap-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            z-index: 2;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .roadmap-item.animate {
+            animation: slideInUp 0.6s ease forwards;
+        }
+
+        .roadmap-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        #s9-y1 .roadmap-circle { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        #s9-y2 .roadmap-circle { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        #s9-y3 .roadmap-circle { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+        .roadmap-circle span {
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .roadmap-year {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .roadmap-metrics {
+            font-size: 18px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .roadmap-metrics strong {
+            color: #4f46e5;
+            font-size: 24px;
+        }
+
+        /* Scene 10: CTA */
+        .cta-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+
+        .cta-title {
+            font-size: 56px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 40px;
+            opacity: 0;
+        }
+
+        .cta-title.animate {
+            animation: fadeSlideIn 0.8s ease forwards;
+        }
+
+        .cta-title span {
+            color: #4f46e5;
+        }
+
+        .cta-features {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .cta-feature {
+            padding: 25px 40px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .cta-feature.animate {
+            animation: slideInUp 0.5s ease forwards;
+        }
+
+        .cta-feature .icon {
+            font-size: 36px;
+        }
+
+        .cta-feature .text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .cta-button {
+            padding: 25px 80px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 15px 40px rgba(79, 70, 229, 0.4);
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        .cta-button.animate {
+            animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .cta-thanks {
+            margin-top: 50px;
+            font-size: 36px;
+            color: #64748b;
+            opacity: 0;
+        }
+
+        .cta-thanks.animate {
+            animation: fadeSlideIn 0.6s ease forwards;
+        }
+
+        /* Control Bar */
+        .control-bar {
+            height: 80px;
+            background: #1a1a2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 0 40px;
+        }
+
+        .control-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .control-btn.play {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            font-size: 28px;
+        }
+
+        .control-btn.restart {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .control-btn.mute {
+            background: #6b7280;
+            color: white;
+        }
+
+        .control-btn.mute.muted {
+            background: #dc2626;
+        }
+
+        .progress-track {
+            flex: 1;
+            max-width: 600px;
+            height: 8px;
+            background: #374151;
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .scene-info {
+            color: #94a3b8;
+            font-size: 16px;
+            min-width: 100px;
+        }
+
+        /* Intro Screen */
+        .intro-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .intro-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .intro-screen .logo {
+            font-size: 80px;
+            font-weight: 800;
+            color: #4f46e5;
+            margin-bottom: 20px;
+        }
+
+        .intro-screen .tagline {
+            font-size: 28px;
+            color: #94a3b8;
+            margin-bottom: 60px;
+        }
+
+        .intro-screen .start-btn {
+            padding: 25px 70px;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .intro-screen .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 50px rgba(34, 197, 94, 0.4);
+        }
+
+        .intro-screen .sound-note {
+            margin-top: 30px;
+            color: #64748b;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Intro Screen -->
+    <div class="intro-screen" id="introScreen">
+        <div class="logo">QBITEL AI</div>
+        <div class="tagline">Professional Whiteboard Explainer</div>
+        <button class="start-btn" onclick="startPresentation()">
+            ▶ Start Presentation
+        </button>
+        <div class="sound-note">🔊 Enable sound for narration</div>
+    </div>
+
+    <!-- Video Container -->
+    <div class="video-container">
+        <!-- Whiteboard -->
+        <div class="whiteboard" id="whiteboard">
+            <!-- Drawing Hand -->
+            <div class="drawing-hand" id="drawingHand">
+                <svg viewBox="0 0 100 100" fill="none">
+                    <path d="M50 95 L55 75 L45 75 Z" fill="#1e293b"/>
+                    <path d="M35 80 L38 45 L28 25 L40 22 L48 45 L50 18 L62 17 L63 45 L68 15 L78 18 L73 50 L78 35 L88 40 L80 65 L75 85 L55 90 Z" fill="#fcd5b5" stroke="#e5c4a8" stroke-width="2"/>
+                </svg>
+            </div>
+
+            <!-- Scene 1: Introduction -->
+            <div class="scene active" id="scene1">
+                <div class="intro-content">
+                    <div class="intro-logo" id="s1-logo">QBITEL AI</div>
+                    <div class="intro-tagline" id="s1-tagline">Unified Quantum-Safe Security Platform</div>
+                    <div class="intro-icons">
+                        <div class="intro-icon" id="s1-icon1">🔐</div>
+                        <div class="intro-icon" id="s1-icon2">🤖</div>
+                        <div class="intro-icon" id="s1-icon3">⚛️</div>
+                        <div class="intro-icon" id="s1-icon4">☁️</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 2: The Problem -->
+            <div class="scene" id="scene2">
+                <div class="title" id="s2-title">The Problem <span class="red">❌</span></div>
+                <div class="subtitle" id="s2-subtitle">Why enterprise security is fundamentally broken</div>
+                <div class="problem-grid">
+                    <div class="problem-card" id="s2-card1">
+                        <div class="icon">🧩</div>
+                        <div class="content">
+                            <h3>Tool Sprawl</h3>
+                            <p>Companies use 10-15 different security tools that don't communicate</p>
+                            <div class="stat">10-15 tools</div>
+                        </div>
+                    </div>
+                    <div class="problem-card" id="s2-card2">
+                        <div class="icon">💰</div>
+                        <div class="content">
+                            <h3>Insane Costs</h3>
+                            <p>Traditional system upgrades cost a fortune and usually fail</p>
+                            <div class="stat">60% failure</div>
+                        </div>
+                    </div>
+                    <div class="problem-card" id="s2-card3">
+                        <div class="icon">⚛️</div>
+                        <div class="content">
+                            <h3>Quantum Threat</h3>
+                            <p>Quantum computers will break today's encryption by 2030</p>
+                            <div class="stat">$8.3T at risk</div>
+                        </div>
+                    </div>
+                    <div class="problem-card" id="s2-card4">
+                        <div class="icon">👥</div>
+                        <div class="content">
+                            <h3>Talent Shortage</h3>
+                            <p>Not enough security experts to protect enterprises</p>
+                            <div class="stat">3.4M shortage</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 3: Cost Comparison -->
+            <div class="scene" id="scene3">
+                <div class="title" id="s3-title">The Billion Dollar <span class="red">Nightmare</span></div>
+                <div class="comparison-container">
+                    <div class="comparison-box old" id="s3-old">
+                        <div class="label">Traditional Approach</div>
+                        <div class="amount" id="s3-amount">$100M - $1B</div>
+                        <div class="time">3-5 years</div>
+                        <div class="failure">60% Fail Rate!</div>
+                    </div>
+                    <div class="vs-divider" id="s3-vs">
+                        <div class="vs-circle">VS</div>
+                    </div>
+                    <div class="comparison-box new" id="s3-new">
+                        <div class="label">QBITEL AI</div>
+                        <div class="amount">90% Cheaper</div>
+                        <div class="time">90 days</div>
+                        <div class="success">Zero Downtime! ✓</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 4: Solution Hub -->
+            <div class="scene" id="scene4">
+                <div class="title" id="s4-title">The Solution: <span class="highlight">QBITEL AI</span></div>
+                <div class="solution-container">
+                    <div class="hub-visual">
+                        <div class="hub-ring" id="s4-ring"></div>
+                        <div class="hub-node" id="s4-node1">🏦<span>Banks</span></div>
+                        <div class="hub-node" id="s4-node2">☁️<span>Cloud</span></div>
+                        <div class="hub-node" id="s4-node3">🏥<span>Health</span></div>
+                        <div class="hub-node" id="s4-node4">⚡<span>Energy</span></div>
+                        <div class="hub-node" id="s4-node5">🏛️<span>Govt</span></div>
+                        <div class="hub-node" id="s4-node6">📡<span>Telecom</span></div>
+                        <div class="hub-center" id="s4-center">
+                            QBITEL
+                            <span>AI</span>
+                        </div>
+                        <div class="benefits-list">
+                            <div class="benefit-item" id="s4-b1"><span class="check">✓</span> No code changes</div>
+                            <div class="benefit-item" id="s4-b2"><span class="check">✓</span> Zero downtime</div>
+                            <div class="benefit-item" id="s4-b3"><span class="check">✓</span> 90 days deployment</div>
+                            <div class="benefit-item" id="s4-b4"><span class="check">✓</span> 90% cost savings</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 5: Three Powers -->
+            <div class="scene" id="scene5">
+                <div class="title" id="s5-title">Three <span class="highlight">Superpowers</span></div>
+                <div class="powers-container">
+                    <div class="power-card blue" id="s5-power1">
+                        <div class="power-number">01</div>
+                        <div class="power-title">Lightning Discovery</div>
+                        <div class="power-desc">AI automatically learns how any system communicates</div>
+                        <div class="power-stat">2-4 hours vs 6-12 months</div>
+                        <div class="power-icon">⚡</div>
+                    </div>
+                    <div class="power-card purple" id="s5-power2">
+                        <div class="power-number">02</div>
+                        <div class="power-title">Quantum-Safe</div>
+                        <div class="power-desc">NIST Level 5 encryption that's future-proof</div>
+                        <div class="power-stat">Kyber-1024 + Dilithium-5</div>
+                        <div class="power-icon">🔐</div>
+                    </div>
+                    <div class="power-card green" id="s5-power3">
+                        <div class="power-number">03</div>
+                        <div class="power-title">Autonomous AI</div>
+                        <div class="power-desc">AI handles security decisions automatically</div>
+                        <div class="power-stat">78% autonomous</div>
+                        <div class="power-icon">🤖</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 6: Quantum Threat -->
+            <div class="scene" id="scene6">
+                <div class="title" id="s6-title"><span class="red">⚠️ The Quantum Clock is Ticking</span></div>
+                <div class="timeline-container">
+                    <div class="timeline-line">
+                        <div class="timeline-progress" id="s6-progress"></div>
+                        <div class="timeline-points">
+                            <div class="timeline-point today" id="s6-t1">
+                                <div class="timeline-dot">📅</div>
+                                <div class="timeline-year">TODAY</div>
+                                <div class="timeline-label">Hackers stealing encrypted data</div>
+                            </div>
+                            <div class="timeline-point mid" id="s6-t2">
+                                <div class="timeline-dot">⚡</div>
+                                <div class="timeline-year">2027</div>
+                                <div class="timeline-label">Quantum computers advancing</div>
+                            </div>
+                            <div class="timeline-point danger" id="s6-t3">
+                                <div class="timeline-dot">💀</div>
+                                <div class="timeline-year">2030</div>
+                                <div class="timeline-label">NSA Deadline</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="warning-box" id="s6-warning">
+                    <div class="icon">🔓</div>
+                    <div class="content">
+                        <h3>"Harvest Now, Decrypt Later"</h3>
+                        <p>Attackers are stealing encrypted data TODAY, waiting to decrypt it when quantum computers are ready.</p>
+                    </div>
+                </div>
+                <div class="threat-stat" id="s6-stat">
+                    <div class="amount">$8.3 TRILLION</div>
+                    <div class="label">at risk from quantum attacks</div>
+                </div>
+            </div>
+
+            <!-- Scene 7: How It Works -->
+            <div class="scene" id="scene7">
+                <div class="title" id="s7-title">How It <span class="highlight">Works</span></div>
+                <div class="steps-container">
+                    <div class="step-row" id="s7-step1">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Connect</h3>
+                            <p>We plug into your network <span class="highlight">passively</span> - no agents needed</p>
+                        </div>
+                        <div class="step-arrow">→</div>
+                    </div>
+                    <div class="step-row" id="s7-step2">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Learn</h3>
+                            <p>AI watches traffic & learns how everything communicates in <span class="highlight">2-4 hours</span></p>
+                        </div>
+                        <div class="step-arrow">→</div>
+                    </div>
+                    <div class="step-row" id="s7-step3">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Wrap</h3>
+                            <p>Quantum-safe encryption added <span class="highlight">without touching your code</span></p>
+                        </div>
+                        <div class="step-arrow">→</div>
+                    </div>
+                    <div class="step-row" id="s7-step4">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3>Protect</h3>
+                            <p>AI handles <span class="highlight">78% of security decisions</span> automatically</p>
+                        </div>
+                        <div class="step-arrow">✓</div>
+                    </div>
+                </div>
+                <div class="step-result" id="s7-result">
+                    <div class="icon">🎉</div>
+                    <div class="text">Done in 90 days, not 5 years!</div>
+                </div>
+            </div>
+
+            <!-- Scene 8: Industries -->
+            <div class="scene" id="scene8">
+                <div class="title" id="s8-title">Who Needs <span class="highlight">QBITEL AI</span>?</div>
+                <div class="industries-grid">
+                    <div class="industry-card" id="s8-ind1">
+                        <div class="icon">🏦</div>
+                        <div class="name">Banking</div>
+                        <div class="desc">Legacy mainframes processing $50B/day</div>
+                        <div class="value">$300-400M</div>
+                    </div>
+                    <div class="industry-card" id="s8-ind2">
+                        <div class="icon">⚡</div>
+                        <div class="name">Energy</div>
+                        <div class="desc">SCADA systems that can't go down</div>
+                        <div class="value">$200-300M</div>
+                    </div>
+                    <div class="industry-card" id="s8-ind3">
+                        <div class="icon">🏥</div>
+                        <div class="name">Healthcare</div>
+                        <div class="desc">FDA-certified devices you can't modify</div>
+                        <div class="value">$200-300M</div>
+                    </div>
+                    <div class="industry-card" id="s8-ind4">
+                        <div class="icon">🏛️</div>
+                        <div class="name">Government</div>
+                        <div class="desc">NSA 2030 mandate compliance</div>
+                        <div class="value">$100-200M</div>
+                    </div>
+                    <div class="industry-card" id="s8-ind5">
+                        <div class="icon">📡</div>
+                        <div class="name">Telecom</div>
+                        <div class="desc">Billions of IoT devices</div>
+                        <div class="value">$150-250M</div>
+                    </div>
+                    <div class="industry-card" id="s8-ind6">
+                        <div class="icon">💼</div>
+                        <div class="name">Enterprise</div>
+                        <div class="desc">Hybrid cloud + legacy systems</div>
+                        <div class="value">$100-200M</div>
+                    </div>
+                </div>
+                <div class="market-total" id="s8-total">
+                    <div class="amount">$1.0 - 1.5 BILLION</div>
+                    <div class="label">Total Addressable Market</div>
+                </div>
+            </div>
+
+            <!-- Scene 9: Roadmap -->
+            <div class="scene" id="scene9">
+                <div class="title" id="s9-title">Growth <span class="highlight">Roadmap</span></div>
+                <div class="roadmap-container">
+                    <div class="roadmap-line">
+                        <div class="roadmap-progress" id="s9-progress"></div>
+                    </div>
+                    <div class="roadmap-item" id="s9-y1">
+                        <div class="roadmap-circle">Y1</div>
+                        <div class="roadmap-year">Year 1</div>
+                        <div class="roadmap-metrics">
+                            6 customers<br>
+                            <strong>$5M ARR</strong>
+                        </div>
+                    </div>
+                    <div class="roadmap-item" id="s9-y2">
+                        <div class="roadmap-circle">Y2</div>
+                        <div class="roadmap-year">Year 2</div>
+                        <div class="roadmap-metrics">
+                            16 customers<br>
+                            <strong>$15M ARR</strong>
+                        </div>
+                    </div>
+                    <div class="roadmap-item" id="s9-y3">
+                        <div class="roadmap-circle">Y3</div>
+                        <div class="roadmap-year">Year 3</div>
+                        <div class="roadmap-metrics">
+                            32 customers<br>
+                            <strong>$30M+ ARR</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 10: CTA -->
+            <div class="scene" id="scene10">
+                <div class="cta-container">
+                    <div class="cta-title" id="s10-title">Ready to <span>Secure Your Future</span>?</div>
+                    <div class="cta-features">
+                        <div class="cta-feature" id="s10-f1">
+                            <div class="icon">🚀</div>
+                            <div class="text">90-day pilot</div>
+                        </div>
+                        <div class="cta-feature" id="s10-f2">
+                            <div class="icon">💰</div>
+                            <div class="text">$50-100K POC</div>
+                        </div>
+                        <div class="cta-feature" id="s10-f3">
+                            <div class="icon">✅</div>
+                            <div class="text">Zero risk</div>
+                        </div>
+                    </div>
+                    <button class="cta-button" id="s10-btn">Schedule a Demo →</button>
+                    <div class="cta-thanks" id="s10-thanks">Thank You! 🙏</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Bar -->
+        <div class="control-bar">
+            <button class="control-btn restart" onclick="restartPresentation()" title="Restart">🔄</button>
+            <button class="control-btn play" id="playBtn" onclick="togglePlay()" title="Play/Pause">▶</button>
+            <button class="control-btn mute" id="muteBtn" onclick="toggleMute()" title="Mute">🔊</button>
+            <div class="progress-track" onclick="seekTo(event)">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="scene-info" id="sceneInfo">Scene 1/10</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // STATE & CONFIGURATION
+        // ============================================
+        let isPlaying = false;
+        let isMuted = false;
+        let currentScene = 0;
+        let animationTimeout = null;
+        let speechSynth = window.speechSynthesis;
+        let currentUtterance = null;
+
+        const hand = document.getElementById('drawingHand');
+        const playBtn = document.getElementById('playBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        const progressFill = document.getElementById('progressFill');
+        const sceneInfo = document.getElementById('sceneInfo');
+
+        // ============================================
+        // SCENE DEFINITIONS
+        // ============================================
+        const scenes = [
+            {
+                id: 'scene1',
+                duration: 8000,
+                narration: "Welcome to QBITEL AI. We're building a unified security platform that protects businesses from today's cyber threats and tomorrow's quantum attacks, all in one product.",
+                animations: [
+                    { el: 's1-logo', action: 'animate', delay: 500 },
+                    { el: 's1-tagline', action: 'animate', delay: 1500 },
+                    { el: 's1-icon1', action: 'animate', delay: 2500 },
+                    { el: 's1-icon2', action: 'animate', delay: 2800 },
+                    { el: 's1-icon3', action: 'animate', delay: 3100 },
+                    { el: 's1-icon4', action: 'animate', delay: 3400 }
+                ]
+            },
+            {
+                id: 'scene2',
+                duration: 14000,
+                narration: "Here's the problem. Most companies today use 10 to 15 different security tools from different vendors. They don't work well together. Add to that insane modernization costs, the looming quantum threat, and a massive shortage of security professionals.",
+                animations: [
+                    { el: 's2-title', action: 'animate', delay: 300 },
+                    { el: 's2-subtitle', action: 'animate', delay: 800 },
+                    { el: 's2-card1', action: 'animate', delay: 1500 },
+                    { el: 's2-card2', action: 'animate', delay: 2500 },
+                    { el: 's2-card3', action: 'animate', delay: 3500 },
+                    { el: 's2-card4', action: 'animate', delay: 4500 }
+                ]
+            },
+            {
+                id: 'scene3',
+                duration: 12000,
+                narration: "Let me show you the billion dollar nightmare. A large bank might spend 100 million to 1 billion dollars trying to upgrade legacy systems. It takes 3 to 5 years, and 60% of these projects fail. With QBITEL AI, we do it 90% cheaper in just 90 days with zero downtime.",
+                animations: [
+                    { el: 's3-title', action: 'animate', delay: 300 },
+                    { el: 's3-old', action: 'animate', delay: 1000 },
+                    { el: 's3-amount', action: 'strikethrough', delay: 2500 },
+                    { el: 's3-vs', action: 'animate', delay: 3500 },
+                    { el: 's3-new', action: 'animate', delay: 4500 }
+                ]
+            },
+            {
+                id: 'scene4',
+                duration: 14000,
+                narration: "Enter QBITEL AI. We work like a protective wrapper around your existing systems. Banks, cloud apps, healthcare, energy, government, telecom. All connected through one unified platform. No code changes. No downtime. Done in 90 days. 90% cheaper.",
+                animations: [
+                    { el: 's4-title', action: 'animate', delay: 300 },
+                    { el: 's4-ring', action: 'animate', delay: 800 },
+                    { el: 's4-center', action: 'animate', delay: 1200 },
+                    { el: 's4-node1', action: 'animate', delay: 1800 },
+                    { el: 's4-node2', action: 'animate', delay: 2100 },
+                    { el: 's4-node3', action: 'animate', delay: 2400 },
+                    { el: 's4-node4', action: 'animate', delay: 2700 },
+                    { el: 's4-node5', action: 'animate', delay: 3000 },
+                    { el: 's4-node6', action: 'animate', delay: 3300 },
+                    { el: 's4-b1', action: 'animate', delay: 4000 },
+                    { el: 's4-b2', action: 'animate', delay: 4400 },
+                    { el: 's4-b3', action: 'animate', delay: 4800 },
+                    { el: 's4-b4', action: 'animate', delay: 5200 }
+                ]
+            },
+            {
+                id: 'scene5',
+                duration: 14000,
+                narration: "QBITEL AI has three superpowers. First, lightning-fast discovery. Our AI learns how any system communicates in 2 to 4 hours, not 6 to 12 months. Second, quantum-safe encryption using NIST Level 5 standards. Third, 78% autonomous security decisions without human intervention.",
+                animations: [
+                    { el: 's5-title', action: 'animate', delay: 300 },
+                    { el: 's5-power1', action: 'animate', delay: 1000 },
+                    { el: 's5-power2', action: 'animate', delay: 3000 },
+                    { el: 's5-power3', action: 'animate', delay: 5000 }
+                ]
+            },
+            {
+                id: 'scene6',
+                duration: 16000,
+                narration: "Here's why this matters right now. Quantum computers will break today's encryption by 2030. But here's the scary part. Bad actors are doing harvest now, decrypt later attacks. They're stealing encrypted data today, planning to crack it open when quantum computers are ready. 8.3 trillion dollars of critical infrastructure is at risk.",
+                animations: [
+                    { el: 's6-title', action: 'animate', delay: 300 },
+                    { el: 's6-t1', action: 'animate', delay: 1000 },
+                    { el: 's6-t2', action: 'animate', delay: 2000 },
+                    { el: 's6-t3', action: 'animate', delay: 3000 },
+                    { el: 's6-progress', action: 'animate', delay: 3500 },
+                    { el: 's6-warning', action: 'animate', delay: 5000 },
+                    { el: 's6-stat', action: 'animate', delay: 7000 }
+                ]
+            },
+            {
+                id: 'scene7',
+                duration: 16000,
+                narration: "So how does it work? Step 1: We connect to your network passively, no agents needed. Step 2: Our AI watches and learns how everything communicates in 2 to 4 hours. Step 3: We wrap your systems in quantum-safe encryption without touching your code. Step 4: AI handles 78% of security decisions automatically. Done in 90 days, not 5 years!",
+                animations: [
+                    { el: 's7-title', action: 'animate', delay: 300 },
+                    { el: 's7-step1', action: 'animate', delay: 1000 },
+                    { el: 's7-step2', action: 'animate', delay: 3000 },
+                    { el: 's7-step3', action: 'animate', delay: 5000 },
+                    { el: 's7-step4', action: 'animate', delay: 7000 },
+                    { el: 's7-result', action: 'animate', delay: 9000 }
+                ]
+            },
+            {
+                id: 'scene8',
+                duration: 14000,
+                narration: "Who needs QBITEL AI? Banks processing trillions in transactions. Energy companies with SCADA systems that can never go down. Hospitals with FDA-certified devices. Government agencies facing quantum mandates. Telecom managing billions of devices. That's a 1 to 1.5 billion dollar market opportunity.",
+                animations: [
+                    { el: 's8-title', action: 'animate', delay: 300 },
+                    { el: 's8-ind1', action: 'animate', delay: 800 },
+                    { el: 's8-ind2', action: 'animate', delay: 1200 },
+                    { el: 's8-ind3', action: 'animate', delay: 1600 },
+                    { el: 's8-ind4', action: 'animate', delay: 2000 },
+                    { el: 's8-ind5', action: 'animate', delay: 2400 },
+                    { el: 's8-ind6', action: 'animate', delay: 2800 },
+                    { el: 's8-total', action: 'animate', delay: 4000 }
+                ]
+            },
+            {
+                id: 'scene9',
+                duration: 12000,
+                narration: "Our roadmap to market leadership. Year 1: 6 customers, 5 million in annual recurring revenue. Year 2: 16 customers, 15 million ARR. Year 3: 32 customers, over 30 million ARR with 130% net revenue retention as customers expand.",
+                animations: [
+                    { el: 's9-title', action: 'animate', delay: 300 },
+                    { el: 's9-y1', action: 'animate', delay: 1000 },
+                    { el: 's9-y2', action: 'animate', delay: 2500 },
+                    { el: 's9-y3', action: 'animate', delay: 4000 },
+                    { el: 's9-progress', action: 'animate', delay: 5000 }
+                ]
+            },
+            {
+                id: 'scene10',
+                duration: 10000,
+                narration: "Ready to secure your future? Start with a 90-day proof of concept for just 50 to 100 thousand dollars. Zero risk. Real results. Thank you for watching. Let's build a quantum-safe future together.",
+                animations: [
+                    { el: 's10-title', action: 'animate', delay: 300 },
+                    { el: 's10-f1', action: 'animate', delay: 1000 },
+                    { el: 's10-f2', action: 'animate', delay: 1500 },
+                    { el: 's10-f3', action: 'animate', delay: 2000 },
+                    { el: 's10-btn', action: 'animate', delay: 3000 },
+                    { el: 's10-thanks', action: 'animate', delay: 5000 }
+                ]
+            }
+        ];
+
+        // ============================================
+        // ANIMATION FUNCTIONS
+        // ============================================
+        function showScene(index) {
+            // Hide all scenes
+            document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+
+            // Show current scene
+            const scene = scenes[index];
+            document.getElementById(scene.id).classList.add('active');
+
+            // Update UI
+            sceneInfo.textContent = `Scene ${index + 1}/${scenes.length}`;
+            progressFill.style.width = ((index + 1) / scenes.length * 100) + '%';
+        }
+
+        function resetSceneAnimations(sceneIndex) {
+            const scene = scenes[sceneIndex];
+            scene.animations.forEach(anim => {
+                const el = document.getElementById(anim.el);
+                if (el) {
+                    el.classList.remove('animate', 'strikethrough');
+                }
+            });
+        }
+
+        function playSceneAnimations(sceneIndex) {
+            const scene = scenes[sceneIndex];
+
+            scene.animations.forEach(anim => {
+                setTimeout(() => {
+                    if (!isPlaying) return;
+                    const el = document.getElementById(anim.el);
+                    if (el) {
+                        if (anim.action === 'strikethrough') {
+                            el.classList.add('strikethrough');
+                        } else {
+                            el.classList.add('animate');
+                        }
+                    }
+                }, anim.delay);
+            });
+        }
+
+        function speak(text) {
+            return new Promise(resolve => {
+                if (isMuted || !speechSynth) {
+                    setTimeout(resolve, text.length * 55);
+                    return;
+                }
+
+                speechSynth.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.95;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+
+                const voices = speechSynth.getVoices();
+                const preferredVoice = voices.find(v =>
+                    v.name.includes('Google') && v.lang.startsWith('en')
+                ) || voices.find(v => v.lang.startsWith('en-US')) || voices.find(v => v.lang.startsWith('en'));
+
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                }
+
+                utterance.onend = resolve;
+                utterance.onerror = resolve;
+
+                currentUtterance = utterance;
+                speechSynth.speak(utterance);
+            });
+        }
+
+        async function playScene(index) {
+            if (index >= scenes.length) {
+                isPlaying = false;
+                playBtn.textContent = '▶';
+                return;
+            }
+
+            currentScene = index;
+            const scene = scenes[index];
+
+            // Reset and show scene
+            resetSceneAnimations(index);
+            showScene(index);
+
+            // Start animations
+            playSceneAnimations(index);
+
+            // Start narration
+            await speak(scene.narration);
+
+            // Small pause between scenes
+            await new Promise(r => setTimeout(r, 1000));
+
+            // Next scene
+            if (isPlaying) {
+                playScene(index + 1);
+            }
+        }
+
+        // ============================================
+        // CONTROL FUNCTIONS
+        // ============================================
+        function startPresentation() {
+            document.getElementById('introScreen').classList.add('hidden');
+
+            // Load voices
+            if (speechSynth) {
+                speechSynth.getVoices();
+            }
+
+            isPlaying = true;
+            playBtn.textContent = '⏸';
+            playScene(0);
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                isPlaying = false;
+                playBtn.textContent = '▶';
+                if (speechSynth) speechSynth.cancel();
+            } else {
+                isPlaying = true;
+                playBtn.textContent = '⏸';
+                playScene(currentScene);
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            muteBtn.textContent = isMuted ? '🔇' : '🔊';
+            muteBtn.classList.toggle('muted', isMuted);
+
+            if (isMuted && speechSynth) {
+                speechSynth.cancel();
+            }
+        }
+
+        function restartPresentation() {
+            if (speechSynth) speechSynth.cancel();
+
+            // Reset all animations
+            scenes.forEach((_, i) => resetSceneAnimations(i));
+
+            currentScene = 0;
+            isPlaying = true;
+            playBtn.textContent = '⏸';
+            playScene(0);
+        }
+
+        function seekTo(event) {
+            const track = event.currentTarget;
+            const rect = track.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            const targetScene = Math.floor(percent * scenes.length);
+
+            if (speechSynth) speechSynth.cancel();
+
+            // Reset current scene
+            resetSceneAnimations(currentScene);
+
+            currentScene = Math.max(0, Math.min(targetScene, scenes.length - 1));
+
+            if (isPlaying) {
+                playScene(currentScene);
+            } else {
+                showScene(currentScene);
+                playSceneAnimations(currentScene);
+            }
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', e => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (document.getElementById('introScreen').classList.contains('hidden')) {
+                    togglePlay();
+                } else {
+                    startPresentation();
+                }
+            } else if (e.code === 'KeyM') {
+                toggleMute();
+            } else if (e.code === 'KeyR') {
+                restartPresentation();
+            } else if (e.code === 'ArrowRight') {
+                if (currentScene < scenes.length - 1) {
+                    if (speechSynth) speechSynth.cancel();
+                    resetSceneAnimations(currentScene);
+                    currentScene++;
+                    if (isPlaying) {
+                        playScene(currentScene);
+                    } else {
+                        showScene(currentScene);
+                    }
+                }
+            } else if (e.code === 'ArrowLeft') {
+                if (currentScene > 0) {
+                    if (speechSynth) speechSynth.cancel();
+                    resetSceneAnimations(currentScene);
+                    currentScene--;
+                    if (isPlaying) {
+                        playScene(currentScene);
+                    } else {
+                        showScene(currentScene);
+                    }
+                }
+            }
+        });
+
+        // Load voices
+        if (speechSynth) {
+            speechSynth.onvoiceschanged = () => speechSynth.getVoices();
+        }
+    </script>
+</body>
+</html>

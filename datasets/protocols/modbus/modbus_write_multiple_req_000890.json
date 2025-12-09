@@ -1,0 +1,71 @@
+{
+  "protocol": "modbus_tcp",
+  "message_type": "write_multiple_req",
+  "timestamp": "2025-11-22T16:46:14.619692",
+  "function_code": 16,
+  "function_name": "write_multiple_registers",
+  "transaction_id": 42797,
+  "unit_id": 56,
+  "start_address": 49304,
+  "quantity": 112,
+  "byte_count": 224,
+  "is_request": true,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42797
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 231
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 56
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 16
+    },
+    {
+      "name": "start_address",
+      "offset": 8,
+      "length": 2,
+      "value": 49304
+    },
+    {
+      "name": "quantity",
+      "offset": 10,
+      "length": 2,
+      "value": 112
+    },
+    {
+      "name": "byte_count",
+      "offset": 12,
+      "length": 1,
+      "value": 224
+    },
+    {
+      "name": "register_values",
+      "offset": 13,
+      "length": 224,
+      "value": "9bda4f8bfd4d64b2c0a87c4ef5c6e82f85287b8c663ff6c7e111dc03bbba33f475a3ec403c3ec645ad0cc960bd86c99acd6ae5073497a7b8f80276798043f332cacb4db9a4401ca80c58c71b031829381c2aa7d925d424eb62848129472c76001847629bc01acff441646f251f87863ffcee7dd3b9a2d62346402445470ad26d29cb933ef6c420720e4f61d3863bdf7ad860a221d3ecde8c077c4b7322745baf474ccde83459c27bec85a4545fa05ed483849a8e7fdbde393b269e717117da830c0ca4fff52baaa2b21cc655f6f51a57b6324d0888c778ef563bd35bcbca0b6e"
+    }
+  ],
+  "sample_index": 890,
+  "hash": "4acd9df23e3d657b3d16cff963589464355efe738b920cb1198e10d561f4c095"
+}
