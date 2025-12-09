@@ -1,0 +1,260 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ADT^A01",
+  "timestamp": "2025-11-22T16:46:14.691775",
+  "trigger_event": "A01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "ADT"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "RegionalMedical"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "HIE"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122010614"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ADT^A01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "770701"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "EVN"
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATOAWHN2EC"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Wilson^James^S"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19570707"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "M"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "2683 Oak Ave^^Georgetown^MI^76303^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(351)275-4934"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "562-45-6491"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "I"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "SURG^343^4"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "66186^Miller^John^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VPD7Z4KSO03"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251105184014"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "J06.9"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "A"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "17259^Rodriguez^Richard^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251109164414"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "F32.9"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "F"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "21584^Wilson^James^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251110035014"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "3"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "J18.9"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "A"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "51992^Lopez^Richard^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251117191714"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 7,
+  "hash": "8655036b48d109b9da971a1062735922d6525b88e9a323663502e25e284fac40",
+  "sample_index": 213
+}

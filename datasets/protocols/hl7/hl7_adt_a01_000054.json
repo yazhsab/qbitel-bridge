@@ -1,0 +1,225 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ADT^A01",
+  "timestamp": "2025-11-22T16:46:14.648040",
+  "trigger_event": "A01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "ADT"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "MemorialHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "CDR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122032214"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ADT^A01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "770542"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "EVN"
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATOEAZC0B4"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Williams^Joseph^E"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19900910"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "M"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "4983 Lincoln Ave^^Salem^IL^11461^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(766)768-3316"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "226-15-1082"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "O"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "OBS^954^3"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "25023^Williams^John^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VT8K06MOXSF"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251025231714"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "Z23"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "A"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "86099^Davis^Jennifer^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251120084014"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "F32.9"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "A"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "23113^Jones^Robert^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251117190514"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 6,
+  "hash": "809d087d2cfdfd1e76e83aad5a7357d8de505c6f7cd3f992e743fcb6b11a1ee2",
+  "sample_index": 54
+}

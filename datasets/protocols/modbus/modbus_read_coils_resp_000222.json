@@ -1,0 +1,57 @@
+{
+  "protocol": "modbus_tcp",
+  "message_type": "read_coils_resp",
+  "timestamp": "2025-11-22T16:46:14.533195",
+  "function_code": 1,
+  "function_name": "read_coils",
+  "transaction_id": 42129,
+  "unit_id": 92,
+  "byte_count": 6,
+  "is_request": false,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42129
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 9
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 92
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 1
+    },
+    {
+      "name": "byte_count",
+      "offset": 8,
+      "length": 1,
+      "value": 6
+    },
+    {
+      "name": "coil_status",
+      "offset": 9,
+      "length": 6,
+      "value": "dc4a7dd25c57"
+    }
+  ],
+  "sample_index": 222,
+  "hash": "f550f7dacfe7b81dc3f9102e1ff14b9129ca7b888fda244c3d1b33477fbb0040"
+}

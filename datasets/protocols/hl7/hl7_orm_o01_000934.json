@@ -1,0 +1,314 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.959117",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "LAB"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "MemorialHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "HIE"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251121205714"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771422"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATQYX3QXC9"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Johnson^William^Y"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19470103"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "M"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "142 Lincoln Ave^^Franklin^NC^53730^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(740)694-5556"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "566-17-5013"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "E"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "OBS^718^4"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "45194^Miller^Joseph^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VNA9W3VYVXT"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251106131214"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDMFODB4W42A"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILFFWGYLLR6Z"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "2345-7^Glucose^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251118190014"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121185014"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "47536^Jones^Barbara^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDSF6AXWUNFD"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILO6UWMDCIY1"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "2951-2^Sodium^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251115021214"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121095114"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "37234^Wilson^Richard^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "3"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORD3T9APZRI8G"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FIL1YFYC8NA0P"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "3094-0^BUN^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251120023314"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251122124514"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "60775^Williams^Susan^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 9,
+  "hash": "d4b3154c6e40c114b3b152990d9e1ee7b3081252342a4b6adffc1275b2f5f5e8",
+  "sample_index": 934
+}

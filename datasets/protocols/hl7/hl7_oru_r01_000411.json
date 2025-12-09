@@ -1,0 +1,392 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORU^R01",
+  "timestamp": "2025-11-22T16:46:14.747446",
+  "trigger_event": "R01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "LAB"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "RegionalMedical"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "EHR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122161214"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORU^R01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "770899"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATXJ6HQJG5"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Hernandez^Jessica^R"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19410515"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "M"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "7307 Main St^^Georgetown^NC^94111^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(841)580-2862"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "588-63-7318"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "R"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "MED^574^2"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "47927^Smith^Jennifer^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "V6XNNZL0YDR"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251115183714"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDX9VSNH0E9H"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FIL2BVWV6YSHH"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "718-7^Hemoglobin^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251122093614"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121211414"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "59038^Gonzalez^Barbara^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "718-7^Hemoglobin^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "15.9"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "g/dL"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "12-17"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251122122514"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "2345-7^Glucose^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "121.5"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "mg/dL"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "70-200"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251120170514"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDSW1OQ9RQ53"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILUTIUMW6ASG"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "3094-0^BUN^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251115043614"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251122132614"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "56198^Martinez^Elizabeth^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "6690-2^WBC^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "6.4"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "10*3/uL"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "4.5-11"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121090814"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 8,
+  "hash": "05df2403fafd18874643bb780c0a1f51e426d077e8c42a5da4e0deb87f39e881",
+  "sample_index": 411
+}

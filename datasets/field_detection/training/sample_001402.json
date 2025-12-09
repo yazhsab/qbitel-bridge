@@ -1,0 +1,78 @@
+{
+  "protocol": "modbus",
+  "message_hex": "a651000000065b06bffe7c18",
+  "message_bytes": [
+    166,
+    81,
+    0,
+    0,
+    0,
+    6,
+    91,
+    6,
+    191,
+    254,
+    124,
+    24
+  ],
+  "tags": [
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-LENGTH",
+    "I-LENGTH",
+    "B-FIELD",
+    "B-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "I-FIELD"
+  ],
+  "length": 12,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42577
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 6
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 91
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 6
+    },
+    {
+      "name": "register_address",
+      "offset": 8,
+      "length": 2,
+      "value": 49150
+    },
+    {
+      "name": "register_value",
+      "offset": 10,
+      "length": 2,
+      "value": 31768
+    }
+  ],
+  "hash": "f54e4b506b88627c482acd32fa39bcf0cdfa33928f65e3ab3c5c53d4a8199307"
+}

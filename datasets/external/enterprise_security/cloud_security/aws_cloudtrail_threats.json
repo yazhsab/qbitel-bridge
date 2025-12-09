@@ -1,0 +1,127 @@
+{
+  "source": "CRONOS AI AWS Security Patterns",
+  "suspicious_api_calls": [
+    {
+      "api": "DescribeInstances",
+      "threat": "reconnaissance",
+      "context": "high volume from new identity"
+    },
+    {
+      "api": "ListBuckets",
+      "threat": "reconnaissance",
+      "context": "enumeration attempt"
+    },
+    {
+      "api": "GetCallerIdentity",
+      "threat": "reconnaissance",
+      "context": "identity discovery"
+    },
+    {
+      "api": "GetSecretValue",
+      "threat": "credential_access",
+      "context": "secrets manager access"
+    },
+    {
+      "api": "GetSSHPublicKey",
+      "threat": "credential_access",
+      "context": "SSH key extraction"
+    },
+    {
+      "api": "CreateAccessKey",
+      "threat": "persistence",
+      "context": "new long-term credentials"
+    },
+    {
+      "api": "StopLogging",
+      "threat": "defense_evasion",
+      "context": "CloudTrail disabled"
+    },
+    {
+      "api": "DeleteTrail",
+      "threat": "defense_evasion",
+      "context": "audit trail deletion"
+    },
+    {
+      "api": "PutBucketLogging",
+      "threat": "defense_evasion",
+      "context": "S3 logging disabled"
+    },
+    {
+      "api": "ModifyDBInstance",
+      "threat": "defense_evasion",
+      "context": "RDS audit disabled"
+    },
+    {
+      "api": "CopySnapshot",
+      "threat": "exfiltration",
+      "context": "EBS snapshot shared externally"
+    },
+    {
+      "api": "ModifySnapshotAttribute",
+      "threat": "exfiltration",
+      "context": "snapshot made public"
+    },
+    {
+      "api": "PutBucketPolicy",
+      "threat": "exfiltration",
+      "context": "S3 bucket made public"
+    },
+    {
+      "api": "CreatePolicyVersion",
+      "threat": "privilege_escalation",
+      "context": "policy modification"
+    },
+    {
+      "api": "AttachUserPolicy",
+      "threat": "privilege_escalation",
+      "context": "admin policy attached"
+    },
+    {
+      "api": "AssumeRole",
+      "threat": "privilege_escalation",
+      "context": "cross-account role assumption"
+    },
+    {
+      "api": "CreateUser",
+      "threat": "persistence",
+      "context": "backdoor account creation"
+    },
+    {
+      "api": "CreateLoginProfile",
+      "threat": "persistence",
+      "context": "console access enabled"
+    },
+    {
+      "api": "UpdateLoginProfile",
+      "threat": "persistence",
+      "context": "password changed"
+    },
+    {
+      "api": "DeleteBucket",
+      "threat": "impact",
+      "context": "data destruction"
+    },
+    {
+      "api": "TerminateInstances",
+      "threat": "impact",
+      "context": "resource destruction"
+    },
+    {
+      "api": "CreateNetworkAclEntry",
+      "threat": "impact",
+      "context": "network lockout"
+    }
+  ],
+  "anomaly_baselines": {
+    "api_calls_per_hour": 1000,
+    "unique_regions_per_day": 3,
+    "console_logins_off_hours": "flag",
+    "root_account_usage": "critical_alert"
+  },
+  "mitre_mapping": {
+    "StopLogging": "T1562.008",
+    "CreateAccessKey": "T1098.001",
+    "AssumeRole": "T1550.001",
+    "CopySnapshot": "T1537"
+  }
+}

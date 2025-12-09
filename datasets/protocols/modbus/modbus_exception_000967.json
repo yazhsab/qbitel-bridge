@@ -1,0 +1,53 @@
+{
+  "protocol": "modbus_tcp",
+  "message_type": "exception",
+  "timestamp": "2025-11-22T16:46:14.629289",
+  "function_code": 131,
+  "function_name": "exception_read_holding_registers",
+  "transaction_id": 42874,
+  "unit_id": 22,
+  "exception_code": 1,
+  "exception_message": "Illegal Function",
+  "is_request": false,
+  "is_exception": true,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42874
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 3
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 22
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 131
+    },
+    {
+      "name": "exception_code",
+      "offset": 8,
+      "length": 1,
+      "value": 1
+    }
+  ],
+  "sample_index": 967,
+  "hash": "689520f2eea749de48148c9a63fb6b1571a1c50431915bcf3aba268721ee1daa"
+}

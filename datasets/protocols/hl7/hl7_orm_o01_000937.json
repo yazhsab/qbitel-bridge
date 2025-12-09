@@ -1,0 +1,260 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.960277",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "LIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "MedicalCenter"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "EMR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122112414"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771425"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATGG30JSEP"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Anderson^Mary^H"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "20041205"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "M"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "3775 Oak Ave^^Salem^NC^27423^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(459)397-5778"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "343-53-9352"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "E"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "ER^111^1"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "15906^Jones^Linda^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VPGSK1QIURE"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251024000714"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORD3695NEQ2CN"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILI1RK9E2IJ0"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "6690-2^WBC^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251119025314"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251122002614"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "65439^Miller^Jessica^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDUFZD2YLDRK"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILLKQ7J8XWP2"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "777-3^Platelet^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251119193414"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121050114"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "18660^Hernandez^Joseph^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 7,
+  "hash": "027cc9a2b669e07252fb97b6e25b2efea1a559b15f42e22d8bbd205834467c89",
+  "sample_index": 937
+}

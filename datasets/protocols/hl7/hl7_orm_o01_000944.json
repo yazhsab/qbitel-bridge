@@ -1,0 +1,206 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.962541",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "RIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "RegionalMedical"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "EHR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122114114"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771432"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATAW0KA1C9"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Wilson^John^G"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19761020"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "2008 Washington Blvd^^Springfield^FL^19752^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(889)720-3887"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "169-58-1264"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "E"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "SURG^268^4"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "19115^Wilson^Linda^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VV6U13VOSHZ"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251103070614"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDD1TO9WXUKE"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILX8NRSVJ8JG"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "4544-3^Hematocrit^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251116092514"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121124614"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "87242^Hernandez^Patricia^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 5,
+  "hash": "27f7e5ba8d306aad9d5b04cf679fa57249e8879c6b3b386588888dcfec3e9c9c",
+  "sample_index": 944
+}

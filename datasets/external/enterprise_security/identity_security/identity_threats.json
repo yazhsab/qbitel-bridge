@@ -1,0 +1,77 @@
+{
+  "source": "CRONOS AI Identity Threat Patterns",
+  "attack_patterns": [
+    {
+      "type": "credential_stuffing",
+      "indicators": [
+        "multiple_failed_logins",
+        "known_breach_passwords",
+        "automated_requests"
+      ]
+    },
+    {
+      "type": "password_spraying",
+      "indicators": [
+        "single_password_many_accounts",
+        "low_failure_rate",
+        "distributed_sources"
+      ]
+    },
+    {
+      "type": "brute_force",
+      "indicators": [
+        "high_failure_rate",
+        "sequential_attempts",
+        "single_target"
+      ]
+    },
+    {
+      "type": "mfa_fatigue",
+      "indicators": [
+        "repeated_mfa_prompts",
+        "off_hours_attempts",
+        "multiple_denials"
+      ]
+    },
+    {
+      "type": "session_hijacking",
+      "indicators": [
+        "impossible_travel",
+        "user_agent_change",
+        "ip_change_mid_session"
+      ]
+    },
+    {
+      "type": "golden_ticket",
+      "indicators": [
+        "kerberos_anomaly",
+        "long_ticket_lifetime",
+        "service_impersonation"
+      ]
+    },
+    {
+      "type": "pass_the_hash",
+      "indicators": [
+        "ntlm_anomaly",
+        "lateral_movement",
+        "no_password_logon"
+      ]
+    },
+    {
+      "type": "oauth_token_theft",
+      "indicators": [
+        "token_reuse",
+        "scope_escalation",
+        "consent_phishing"
+      ]
+    }
+  ],
+  "breach_indicators": {
+    "sources": [
+      "HaveIBeenPwned API",
+      "Dehashed",
+      "Intelligence X"
+    ],
+    "detection": "Hash-based credential checking without storing passwords"
+  }
+}

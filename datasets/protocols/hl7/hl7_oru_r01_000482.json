@@ -1,0 +1,392 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORU^R01",
+  "timestamp": "2025-11-22T16:46:14.778015",
+  "trigger_event": "R01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "LIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "MedicalCenter"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "CDR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122094614"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORU^R01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "770970"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATEYWPAJO3"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Garcia^Patricia^D"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19560221"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "6330 Oak Ave^^Springfield^NC^95478^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(232)278-3893"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "984-77-5088"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "E"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "ER^637^4"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "88468^Smith^John^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "V7FAAYFAINA"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251024140814"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDG2L3AJ87WL"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILYZFPP4XGQ7"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "2951-2^Sodium^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251119093114"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121025314"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "90681^Jones^William^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "2160-0^Creatinine^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "1.1"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "mg/dL"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "0.6-1.5"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121061814"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDONO3YGU3ZN"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FIL0KACLW795Y"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "4544-3^Hematocrit^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251117123314"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251120201914"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "58425^Lopez^Linda^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "4544-3^Hematocrit^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "46.5"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "%"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "36-50"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121185514"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "2345-7^Glucose^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "98.6"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "mg/dL"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "70-200"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251120172014"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 8,
+  "hash": "21d5bdb71840a52866225aa118350a1ef36b91d1b786b7625d8f6f65dbd4c237",
+  "sample_index": 482
+}

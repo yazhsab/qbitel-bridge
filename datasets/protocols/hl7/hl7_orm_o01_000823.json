@@ -1,0 +1,206 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.923089",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "HIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "MemorialHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "HIE"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122142314"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771311"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PAT7VIC26W3"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Gonzalez^David^P"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19990323"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "M"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "1448 Maple Dr^^Clinton^PA^99569^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(409)752-8738"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "985-49-9045"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "O"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "OBS^732^1"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "87003^Garcia^David^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VXDO8MQD3UW"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251103122914"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDPMA1L2E0PG"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILF45DPMSSYW"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "718-7^Hemoglobin^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251120195714"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251120204814"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "60683^Miller^Patricia^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 5,
+  "hash": "c134863a8852e9d90d018fe773cd7203b36fbed77176fc2ecd9c1b943fe94c77",
+  "sample_index": 823
+}

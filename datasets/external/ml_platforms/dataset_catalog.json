@@ -1,0 +1,178 @@
+{
+  "generated_at": "2025-11-22T17:22:31.512521",
+  "platforms": {
+    "huggingface": {
+      "categories": {
+        "security": [
+          {
+            "id": "cais/mmlu",
+            "subset": "computer_security",
+            "description": "Security knowledge benchmark",
+            "size": "~10MB"
+          },
+          {
+            "id": "AI4Sec/cve-cwe-mapping",
+            "description": "CVE to CWE mappings",
+            "size": "~5MB"
+          }
+        ],
+        "network": [
+          {
+            "id": "rdpahalmern/ids2018",
+            "description": "Intrusion detection dataset (CSE-CIC-IDS2018)",
+            "size": "~500MB"
+          }
+        ],
+        "nlp_security": [
+          {
+            "id": "Hatman/security-paper-titles",
+            "description": "Security research paper titles",
+            "size": "~1MB"
+          }
+        ],
+        "malware": [
+          {
+            "id": "yashveersinghsohi/malware_analysis",
+            "description": "Malware analysis features",
+            "size": "~50MB"
+          }
+        ]
+      },
+      "requires_auth": false
+    },
+    "kaggle": {
+      "categories": {
+        "network_security": [
+          {
+            "id": "dhoogla/cicidss",
+            "name": "CICIDS2017 Network Intrusion",
+            "description": "Network intrusion detection dataset",
+            "size": "~600MB"
+          },
+          {
+            "id": "sampadab17/network-intrusion-detection",
+            "name": "NSL-KDD",
+            "description": "Classic IDS benchmark dataset",
+            "size": "~20MB"
+          },
+          {
+            "id": "mrwellsdavid/unsw-nb15",
+            "name": "UNSW-NB15",
+            "description": "Modern network intrusion dataset",
+            "size": "~200MB"
+          }
+        ],
+        "malware": [
+          {
+            "id": "claudelemante/malware-data",
+            "name": "Malware Detection Dataset",
+            "description": "PE file features for malware detection",
+            "size": "~50MB"
+          },
+          {
+            "id": "ang3loliveira/malware-analysis-datasets-pe-section-headers",
+            "name": "PE Section Headers",
+            "description": "PE malware headers analysis",
+            "size": "~100MB"
+          }
+        ],
+        "fraud": [
+          {
+            "id": "mlg-ulb/creditcardfraud",
+            "name": "Credit Card Fraud Detection",
+            "description": "Anonymized credit card transactions",
+            "size": "~150MB"
+          },
+          {
+            "id": "ealaxi/paysim1",
+            "name": "PaySim Fraud",
+            "description": "Synthetic financial fraud dataset",
+            "size": "~500MB"
+          }
+        ],
+        "anomaly": [
+          {
+            "id": "boltzmannbrain/nab",
+            "name": "NAB Dataset",
+            "description": "Numenta Anomaly Benchmark",
+            "size": "~10MB"
+          }
+        ],
+        "iot_security": [
+          {
+            "id": "francoisxa/ds2ostraffictraces",
+            "name": "IoT Network Traffic",
+            "description": "IoT device network traces",
+            "size": "~1GB"
+          }
+        ]
+      },
+      "requires_auth": true
+    },
+    "uci": {
+      "datasets": {
+        "kdd99": {
+          "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/kddcup99-mld/kddcup.data_10_percent.gz",
+          "description": "KDD Cup 1999 - Network intrusion (10%)",
+          "size": "~2MB compressed"
+        },
+        "spambase": {
+          "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/spambase/spambase.data",
+          "description": "Spam email classification",
+          "size": "~500KB"
+        }
+      },
+      "requires_auth": false
+    }
+  },
+  "setup_instructions": {
+    "huggingface": {
+      "install": "pip install datasets",
+      "usage": "fetcher.fetch_huggingface_dataset('dataset_id')"
+    },
+    "kaggle": {
+      "install": "pip install kaggle",
+      "setup": [
+        "1. Go to kaggle.com/account",
+        "2. Click 'Create New API Token'",
+        "3. Save kaggle.json to ~/.kaggle/",
+        "4. chmod 600 ~/.kaggle/kaggle.json"
+      ],
+      "usage": "fetcher.fetch_kaggle_dataset('owner/dataset')"
+    },
+    "uci": {
+      "install": "No installation required",
+      "usage": "fetcher.fetch_uci_dataset('kdd99')"
+    }
+  },
+  "recommended_for_cronos": {
+    "protocol_analysis": [
+      "Wireshark sample captures (manual)",
+      "PCAP datasets from Netresec"
+    ],
+    "intrusion_detection": [
+      "kaggle: dhoogla/cicidss (CICIDS2017)",
+      "kaggle: sampadab17/network-intrusion-detection (NSL-KDD)",
+      "kaggle: mrwellsdavid/unsw-nb15",
+      "uci: kdd99"
+    ],
+    "malware_analysis": [
+      "kaggle: claudelemante/malware-data",
+      "huggingface: yashveersinghsohi/malware_analysis",
+      "MalwareBazaar (already integrated)"
+    ],
+    "fraud_detection": [
+      "kaggle: mlg-ulb/creditcardfraud",
+      "kaggle: ealaxi/paysim1"
+    ],
+    "anomaly_detection": [
+      "NAB (already integrated)",
+      "kaggle: boltzmannbrain/nab"
+    ],
+    "threat_intelligence": [
+      "MITRE ATT&CK (already integrated)",
+      "URLhaus (already integrated)",
+      "huggingface: AI4Sec/cve-cwe-mapping"
+    ]
+  }
+}

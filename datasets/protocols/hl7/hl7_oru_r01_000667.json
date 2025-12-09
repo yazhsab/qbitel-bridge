@@ -1,0 +1,732 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORU^R01",
+  "timestamp": "2025-11-22T16:46:14.857178",
+  "trigger_event": "R01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "ADT"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "CommunityHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "EMR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122123214"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORU^R01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771155"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATP4GBX4TV"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Williams^John^L"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19610722"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "3405 Washington Blvd^^Salem^NC^90101^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(212)860-8398"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "886-58-2862"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "O"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "MED^108^2"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "69744^Rodriguez^Barbara^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VEY1ZI23MZA"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251104054014"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORD054RZRW19S"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILG6BYHADCBU"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "3094-0^BUN^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251120125714"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251122095214"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "81284^Wilson^Jessica^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "2160-0^Creatinine^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "0.9"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "mg/dL"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "0.6-1.5"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121131714"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "777-3^Platelet^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "295.1"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "10*3/uL"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "150-400"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251122032314"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "3"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "2823-3^Potassium^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "5.1"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "mEq/L"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "3.5-5.1"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251122043514"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORD05V76NHRU8"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILDXF870BTHE"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "777-3^Platelet^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251119014214"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251120234814"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "73187^Garcia^Patricia^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "4544-3^Hematocrit^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "39.0"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "%"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "36-50"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121122814"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "4544-3^Hematocrit^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "41.7"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "%"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "36-50"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121013514"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "3"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDVSF64ADK2D"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILBCXV00QBZA"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "2823-3^Potassium^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251120213314"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121151414"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "11747^Garcia^Mary^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "2951-2^Sodium^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "138.0"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "mEq/L"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "136-145"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121012814"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "4"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDCET3517JGT"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILSNXP5U5AIU"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "2160-0^Creatinine^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251116184914"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121013714"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "82375^Lopez^Jessica^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "777-3^Platelet^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "225.5"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "10*3/uL"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "150-400"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121235814"
+        }
+      ]
+    },
+    {
+      "segment": "OBX",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "value_type",
+          "position": 2,
+          "value": "NM"
+        },
+        {
+          "name": "observation_identifier",
+          "position": 3,
+          "value": "2160-0^Creatinine^LN"
+        },
+        {
+          "name": "observation_value",
+          "position": 5,
+          "value": "1.0"
+        },
+        {
+          "name": "units",
+          "position": 6,
+          "value": "mg/dL"
+        },
+        {
+          "name": "reference_range",
+          "position": 7,
+          "value": "0.6-1.5"
+        },
+        {
+          "name": "abnormal_flags",
+          "position": 8,
+          "value": ""
+        },
+        {
+          "name": "observation_result_status",
+          "position": 11,
+          "value": "F"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251122043914"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 15,
+  "hash": "5f8a19c8ecedd85e9c5300516e3956e813045c3c4d1af4fe9e7fc2c9e8949e79",
+  "sample_index": 667
+}

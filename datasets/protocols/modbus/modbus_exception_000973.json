@@ -1,0 +1,53 @@
+{
+  "protocol": "modbus_tcp",
+  "message_type": "exception",
+  "timestamp": "2025-11-22T16:46:14.629982",
+  "function_code": 144,
+  "function_name": "exception_write_multiple_registers",
+  "transaction_id": 42880,
+  "unit_id": 98,
+  "exception_code": 3,
+  "exception_message": "Illegal Data Value",
+  "is_request": false,
+  "is_exception": true,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42880
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 3
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 98
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 144
+    },
+    {
+      "name": "exception_code",
+      "offset": 8,
+      "length": 1,
+      "value": 3
+    }
+  ],
+  "sample_index": 973,
+  "hash": "8876c32d4bb09292de7cda3604b844ad0d60ebb6af408ba7886ed249d703281f"
+}

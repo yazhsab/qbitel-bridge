@@ -1,0 +1,225 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ADT^A01",
+  "timestamp": "2025-11-22T16:46:14.676502",
+  "trigger_event": "A01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "RIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "St.Mary'sHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "HIE"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122010114"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ADT^A01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "770647"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "EVN"
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATTNYFM7VH"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Jones^Barbara^K"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19770118"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "3028 Maple Dr^^Clinton^OH^12296^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(657)532-5877"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "751-14-2829"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "P"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "OBS^349^4"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "20031^Garcia^Linda^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "V0TOGTEFR6M"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251121120814"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "R10.9"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "F"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "49581^Miller^Elizabeth^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251030142514"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "I10"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "F"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "95576^Lopez^Robert^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251116173014"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 6,
+  "hash": "a3208cc104a7cc177a0477dd295d90cf1c7306560d1821e557d602fe1f6f7d3c",
+  "sample_index": 159
+}

@@ -1,0 +1,190 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ADT^A01",
+  "timestamp": "2025-11-22T16:46:14.668043",
+  "trigger_event": "A01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "ADT"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "CommunityHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "CDR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122061514"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ADT^A01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "770615"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "EVN"
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PAT77NTTRTI"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Garcia^Jessica^E"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19540112"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "2383 Maple Dr^^Madison^FL^82286^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(631)448-4452"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "947-38-1915"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "R"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "MED^130^2"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "28517^Johnson^Joseph^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VEZF0ZPBDUR"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251120161014"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "G43.909"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "A"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "79133^Lopez^Patricia^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251117005914"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 5,
+  "hash": "763c23977363de9737d97d98815291a2be03e3382663b41ae2d0438456c61985",
+  "sample_index": 127
+}

@@ -1,0 +1,260 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.922435",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "HIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "UniversityHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "EMR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122082314"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771309"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATPP8WR9I5"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Smith^Elizabeth^A"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19681021"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "9869 Oak Ave^^Clinton^NC^38332^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(790)325-9535"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "131-72-4820"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "E"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "ER^532^1"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "21486^Gonzalez^David^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VBVUBXCJT86"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251113184514"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORD7WRM2NMC40"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILQ9N7LA07BW"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "3094-0^BUN^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251118141514"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251122043714"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "75942^Wilson^John^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDD88ZB9WD76"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FIL32ZP23S2QU"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "777-3^Platelet^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251117082414"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251120235514"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "69625^Lopez^William^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 7,
+  "hash": "eb082b0afcebe30bfe3c3607e12e4a63e1998052936a2c73c6b46daf5a2f89d9",
+  "sample_index": 821
+}

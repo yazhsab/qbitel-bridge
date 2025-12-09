@@ -1,0 +1,225 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ADT^A01",
+  "timestamp": "2025-11-22T16:46:14.722067",
+  "trigger_event": "A01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "ADT"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "MemorialHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "EMR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122114814"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ADT^A01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "770814"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "EVN"
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PAT4NN4GCT8"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Johnson^Linda^J"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19460223"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "M"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "1450 Maple Dr^^Franklin^IL^16736^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(620)811-8099"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "777-33-7365"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "E"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "SURG^598^1"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "86513^Rodriguez^Mary^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VOJMGL1RLCF"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251105234814"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "J18.9"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "F"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "88365^Brown^John^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251103071414"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "I10"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "F"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "54660^Miller^Susan^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251111130914"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 6,
+  "hash": "44d4797650c887fd431d37345d9ded7a086e61a036384e40b0cbc08a6ce35d50",
+  "sample_index": 326
+}

@@ -1,0 +1,105 @@
+{
+  "source": "OWASP API Security Top 10 (2023)",
+  "vulnerabilities": [
+    {
+      "id": "API1",
+      "name": "Broken Object Level Authorization",
+      "severity": "critical",
+      "detection_patterns": [
+        "horizontal privilege escalation",
+        "IDOR",
+        "object ID manipulation"
+      ]
+    },
+    {
+      "id": "API2",
+      "name": "Broken Authentication",
+      "severity": "critical",
+      "detection_patterns": [
+        "credential stuffing",
+        "brute force",
+        "weak tokens",
+        "missing auth"
+      ]
+    },
+    {
+      "id": "API3",
+      "name": "Broken Object Property Level Authorization",
+      "severity": "high",
+      "detection_patterns": [
+        "mass assignment",
+        "excessive data exposure",
+        "parameter pollution"
+      ]
+    },
+    {
+      "id": "API4",
+      "name": "Unrestricted Resource Consumption",
+      "severity": "high",
+      "detection_patterns": [
+        "rate limit bypass",
+        "resource exhaustion",
+        "DoS"
+      ]
+    },
+    {
+      "id": "API5",
+      "name": "Broken Function Level Authorization",
+      "severity": "critical",
+      "detection_patterns": [
+        "privilege escalation",
+        "admin function access",
+        "RBAC bypass"
+      ]
+    },
+    {
+      "id": "API6",
+      "name": "Unrestricted Access to Sensitive Business Flows",
+      "severity": "high",
+      "detection_patterns": [
+        "business logic abuse",
+        "automated abuse",
+        "scalping"
+      ]
+    },
+    {
+      "id": "API7",
+      "name": "Server Side Request Forgery",
+      "severity": "high",
+      "detection_patterns": [
+        "SSRF",
+        "internal service access",
+        "cloud metadata access"
+      ]
+    },
+    {
+      "id": "API8",
+      "name": "Security Misconfiguration",
+      "severity": "medium",
+      "detection_patterns": [
+        "verbose errors",
+        "default credentials",
+        "unnecessary features"
+      ]
+    },
+    {
+      "id": "API9",
+      "name": "Improper Inventory Management",
+      "severity": "medium",
+      "detection_patterns": [
+        "shadow APIs",
+        "deprecated endpoints",
+        "undocumented endpoints"
+      ]
+    },
+    {
+      "id": "API10",
+      "name": "Unsafe Consumption of APIs",
+      "severity": "medium",
+      "detection_patterns": [
+        "third-party API trust",
+        "data injection via APIs"
+      ]
+    }
+  ]
+}

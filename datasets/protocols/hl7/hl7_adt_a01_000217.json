@@ -1,0 +1,225 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ADT^A01",
+  "timestamp": "2025-11-22T16:46:14.693000",
+  "trigger_event": "A01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "HIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "MemorialHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "CDR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122161114"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ADT^A01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "770705"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "EVN"
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATBFZV1JOS"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Garcia^Elizabeth^D"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19990903"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "274 Oak Ave^^Franklin^TX^20301^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(817)367-1007"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "488-24-4585"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "R"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "SURG^414^3"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "32111^Wilson^Jennifer^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VISYERUMEHC"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251121115114"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "R10.9"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "W"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "47324^Smith^Joseph^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251121131914"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "N39.0"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "A"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "62213^Davis^Michael^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251115193014"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 6,
+  "hash": "2bbb6d3f3a78706e8c102703cccba6f29af799368e91aab0b0efec7bcf8d5813",
+  "sample_index": 217
+}

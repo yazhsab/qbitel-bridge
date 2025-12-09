@@ -1,0 +1,12 @@
+{
+  "id": "pirocheto/phishing-url",
+  "description": "Phishing URL classification",
+  "splits": [
+    "train",
+    "test"
+  ],
+  "num_rows": {
+    "train": 7658,
+    "test": 3772
+  }
+}

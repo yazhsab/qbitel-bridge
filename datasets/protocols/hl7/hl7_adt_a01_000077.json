@@ -1,0 +1,225 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ADT^A01",
+  "timestamp": "2025-11-22T16:46:14.654125",
+  "trigger_event": "A01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "LIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "MemorialHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "CDR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251121215914"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ADT^A01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "770565"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "EVN"
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PAT2IGSB98V"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Smith^Mary^Y"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19540106"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "6633 Park Rd^^Clinton^GA^79798^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(439)588-7390"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "585-43-3378"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "P"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "OBS^767^3"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "45432^Jones^Michael^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VA7QY8YB7W8"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251113200914"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "G43.909"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "F"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "98065^Martinez^Richard^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251031173114"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "R10.9"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "A"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "51060^Rodriguez^James^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251111190214"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 6,
+  "hash": "2df4086c189b02900e1ea042f4179c4646154b8ac4bb4a64109d085ac11ffb48",
+  "sample_index": 77
+}

@@ -1,0 +1,206 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.924581",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "LIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "MemorialHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "HIE"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122075414"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771316"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATP9TEOSJ4"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Garcia^David^R"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19830120"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "5800 Park Rd^^Georgetown^OH^51425^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(316)756-1315"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "228-96-5743"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "R"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "OBS^158^4"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "18695^Brown^William^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "V8946S39PUI"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251111064214"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORD3XTVJCR779"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILPW87Y8EFDL"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "3094-0^BUN^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251119010814"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121225514"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "57990^Rodriguez^Mary^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 5,
+  "hash": "9fe7fb8a367d9b13beeee757f185c970c8abdfa06de3b8b3d2410d77ce15ed05",
+  "sample_index": 828
+}

@@ -1,0 +1,206 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.957169",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "HIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "RegionalMedical"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "EHR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122131514"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771416"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATTVC9XUKX"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Davis^Linda^V"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "20090911"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "2347 Oak Ave^^Salem^GA^95600^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(407)600-2896"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "752-80-1882"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "I"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "ICU^855^2"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "57647^Williams^Barbara^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VX9FV1HG4GB"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251111112414"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDUGX0ML6F15"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILUSIMMTH2PN"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "2823-3^Potassium^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251121135214"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121205614"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "39378^Gonzalez^Richard^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 5,
+  "hash": "b28a77bac1dfe3c55ac4593808de50f3367182df04a47e4d55dcea74178d97b0",
+  "sample_index": 928
+}

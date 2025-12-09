@@ -1,0 +1,190 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ADT^A01",
+  "timestamp": "2025-11-22T16:46:14.697361",
+  "trigger_event": "A01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "HIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "St.Mary'sHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "EHR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251121171614"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ADT^A01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "770721"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "EVN"
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATUTBT6AO3"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Miller^Mary^R"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19941022"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "M"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "9631 Park Rd^^Salem^MI^82030^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(650)519-9302"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "490-82-6117"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "P"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "SURG^352^4"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "56040^Johnson^Robert^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VLV92BEEVG4"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251107141914"
+        }
+      ]
+    },
+    {
+      "segment": "DG1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "diagnosis_coding_method",
+          "position": 2,
+          "value": "ICD10"
+        },
+        {
+          "name": "diagnosis_code",
+          "position": 3,
+          "value": "M79.3"
+        },
+        {
+          "name": "diagnosis_type",
+          "position": 6,
+          "value": "F"
+        },
+        {
+          "name": "diagnosing_clinician",
+          "position": 16,
+          "value": "61758^Brown^Barbara^MD"
+        },
+        {
+          "name": "diagnosis_datetime",
+          "position": 19,
+          "value": "20251102225814"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 5,
+  "hash": "88393ee4a56d40bff858298e2b04022482054de5323e9a9af110c6d08466b20d",
+  "sample_index": 233
+}

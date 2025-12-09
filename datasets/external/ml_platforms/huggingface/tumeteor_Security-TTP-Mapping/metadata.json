@@ -1,0 +1,14 @@
+{
+  "id": "tumeteor/Security-TTP-Mapping",
+  "description": "Security TTP Mapping",
+  "splits": [
+    "train",
+    "validation",
+    "test"
+  ],
+  "num_rows": {
+    "train": 14936,
+    "validation": 2630,
+    "test": 3170
+  }
+}

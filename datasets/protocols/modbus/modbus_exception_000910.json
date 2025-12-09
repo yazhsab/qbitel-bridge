@@ -1,0 +1,53 @@
+{
+  "protocol": "modbus_tcp",
+  "message_type": "exception",
+  "timestamp": "2025-11-22T16:46:14.622659",
+  "function_code": 134,
+  "function_name": "exception_write_single_register",
+  "transaction_id": 42817,
+  "unit_id": 146,
+  "exception_code": 5,
+  "exception_message": "Acknowledge",
+  "is_request": false,
+  "is_exception": true,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42817
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 3
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 146
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 134
+    },
+    {
+      "name": "exception_code",
+      "offset": 8,
+      "length": 1,
+      "value": 5
+    }
+  ],
+  "sample_index": 910,
+  "hash": "3048fc240aa22778b5abf40bbaa2c7e36c8a0aad772b0aeff538787f5a2e242e"
+}

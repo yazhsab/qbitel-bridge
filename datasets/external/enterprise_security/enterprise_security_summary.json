@@ -1,0 +1,23 @@
+{
+  "fetched_at": "2025-11-22T17:55:11.145924",
+  "security_domains": {
+    "cloud_security": 0,
+    "api_security": 6886,
+    "container_security": 32,
+    "identity_security": 25,
+    "network_security": 668,
+    "endpoint_security": 615
+  },
+  "details": {
+    "api_vulnerabilities": 10,
+    "sqli_patterns": 263,
+    "xss_patterns": 6613,
+    "k8s_cves": 6,
+    "falco_rules": 26,
+    "identity_threats": 8,
+    "common_usernames": 17,
+    "et_rules": 668,
+    "lolbas": 225,
+    "gtfobins": 390
+  }
+}

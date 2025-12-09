@@ -1,0 +1,24 @@
+{
+  "source": "SecLists",
+  "description": "Common usernames for brute-force detection",
+  "count": 17,
+  "usernames": [
+    "root",
+    "admin",
+    "test",
+    "guest",
+    "info",
+    "adm",
+    "mysql",
+    "user",
+    "administrator",
+    "oracle",
+    "ftp",
+    "pi",
+    "puppet",
+    "ansible",
+    "ec2-user",
+    "vagrant",
+    "azureuser"
+  ]
+}

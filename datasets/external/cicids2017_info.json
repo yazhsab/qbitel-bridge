@@ -1,0 +1,38 @@
+{
+  "name": "CICIDS2017",
+  "source": "Canadian Institute for Cybersecurity",
+  "url": "https://www.unb.ca/cic/datasets/ids-2017.html",
+  "size": "~6 GB",
+  "records": "2,830,743 flows",
+  "attacks": [
+    "Brute Force (FTP, SSH)",
+    "DoS (Hulk, GoldenEye, Slowloris, Slowhttptest)",
+    "DDoS",
+    "Web Attack (SQL Injection, XSS, Brute Force)",
+    "Infiltration",
+    "Botnet",
+    "Port Scan"
+  ],
+  "features": 80,
+  "format": "CSV (labeled flows)",
+  "license": "Research use",
+  "download_instructions": {
+    "step1": "Visit https://www.unb.ca/cic/datasets/ids-2017.html",
+    "step2": "Download the CSV files (MachineLearningCVE folder)",
+    "step3": "Place in datasets/external/cicids2017/",
+    "step4": "Run integrate_cicids.py to convert to CRONOS format"
+  },
+  "sample_columns": [
+    "Flow ID",
+    "Source IP",
+    "Source Port",
+    "Destination IP",
+    "Destination Port",
+    "Protocol",
+    "Timestamp",
+    "Flow Duration",
+    "Total Fwd Packets",
+    "Total Backward Packets",
+    "Label"
+  ]
+}

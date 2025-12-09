@@ -1,0 +1,15 @@
+{
+  "protocol": "modbus_tcp",
+  "version": "TCP/IP",
+  "total_samples": 1000,
+  "samples_by_type": {
+    "read_coils_req": 150,
+    "read_coils_resp": 100,
+    "read_holding_req": 200,
+    "read_holding_resp": 150,
+    "write_single_req": 150,
+    "write_multiple_req": 150,
+    "exception": 100
+  },
+  "generated_at": "2025-11-22T16:46:14.506739"
+}

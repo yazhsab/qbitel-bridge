@@ -1,0 +1,206 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.948121",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "ADT"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "MemorialHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "CDR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122023114"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771388"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATJ3FL8WYW"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Martinez^James^K"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "20070205"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "M"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "1933 Maple Dr^^Georgetown^FL^33892^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(483)356-9496"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "193-20-5440"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "P"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "SURG^373^3"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "41739^Miller^David^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VDY80QAFKFM"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251113172714"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDT9DNGUJ7X9"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILRU7GTNTXLR"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "6690-2^WBC^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251118105714"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251122130314"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "43750^Wilson^Michael^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 5,
+  "hash": "a68c2fdba9b49854cec3b5a156da002910cc7caee919eeac2c13161a4c122e32",
+  "sample_index": 900
+}

@@ -1,0 +1,66 @@
+{
+  "protocol": "modbus",
+  "message_hex": "a75d00000003ba8102",
+  "message_bytes": [
+    167,
+    93,
+    0,
+    0,
+    0,
+    3,
+    186,
+    129,
+    2
+  ],
+  "tags": [
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-LENGTH",
+    "I-LENGTH",
+    "B-FIELD",
+    "B-FIELD",
+    "B-FIELD"
+  ],
+  "length": 9,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42845
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 3
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 186
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 129
+    },
+    {
+      "name": "exception_code",
+      "offset": 8,
+      "length": 1,
+      "value": 2
+    }
+  ],
+  "hash": "3c3133005d1fd4a4d6f6188a678a91a1398f61fb6a7a18c82de727f018ae4418"
+}

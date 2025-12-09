@@ -1,0 +1,96 @@
+{
+  "protocol": "modbus",
+  "message_hex": "a48e0000000f04010c49d14f26f087adcb29a8c2a2",
+  "message_bytes": [
+    164,
+    142,
+    0,
+    0,
+    0,
+    15,
+    4,
+    1,
+    12,
+    73,
+    209,
+    79,
+    38,
+    240,
+    135,
+    173,
+    203,
+    41,
+    168,
+    194,
+    162
+  ],
+  "tags": [
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-LENGTH",
+    "I-LENGTH",
+    "B-FIELD",
+    "B-FIELD",
+    "B-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD"
+  ],
+  "length": 21,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42126
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 15
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 4
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 1
+    },
+    {
+      "name": "byte_count",
+      "offset": 8,
+      "length": 1,
+      "value": 12
+    },
+    {
+      "name": "coil_status",
+      "offset": 9,
+      "length": 12,
+      "value": "49d14f26f087adcb29a8c2a2"
+    }
+  ],
+  "hash": "c673f2ca98f2cd924e2bb56b630b9c3c819b797fb3714214e96a94b76f43ffb3"
+}

@@ -1,0 +1,53 @@
+{
+  "protocol": "modbus_tcp",
+  "message_type": "exception",
+  "timestamp": "2025-11-22T16:46:14.631475",
+  "function_code": 129,
+  "function_name": "exception_read_coils",
+  "transaction_id": 42891,
+  "unit_id": 22,
+  "exception_code": 6,
+  "exception_message": "Slave Device Busy",
+  "is_request": false,
+  "is_exception": true,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42891
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 3
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 22
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 129
+    },
+    {
+      "name": "exception_code",
+      "offset": 8,
+      "length": 1,
+      "value": 6
+    }
+  ],
+  "sample_index": 984,
+  "hash": "2ed4fe644685dabe10b1970b14d86b53034159bd12c5f3c932c71f1a57c2726a"
+}

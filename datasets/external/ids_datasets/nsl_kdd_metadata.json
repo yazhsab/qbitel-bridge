@@ -1,0 +1,21 @@
+{
+  "name": "NSL-KDD",
+  "description": "Network intrusion detection dataset - improved version of KDD99",
+  "files": [
+    "KDDTrain.txt",
+    "KDDTest.txt"
+  ],
+  "attack_types": [
+    "DoS",
+    "Probe",
+    "R2L",
+    "U2R"
+  ],
+  "features": 41,
+  "use_for": [
+    "VAE anomaly detection",
+    "Protocol traffic classification"
+  ],
+  "license": "Research use",
+  "source": "Canadian Institute for Cybersecurity"
+}

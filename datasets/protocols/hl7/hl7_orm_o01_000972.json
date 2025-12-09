@@ -1,0 +1,206 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.971850",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "ADT"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "UniversityHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "EMR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122000814"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771460"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATOPFWXEKH"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Williams^Jennifer^R"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19520207"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "4175 Maple Dr^^Salem^TX^83464^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(275)588-3535"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "453-14-5318"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "P"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "ICU^814^2"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "58790^Johnson^Elizabeth^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VBV37Q4I216"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251024202414"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDFNMFFU4RCF"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FIL7WN7LT01O1"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "3094-0^BUN^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251115043514"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251122090314"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "73088^Martinez^Linda^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 5,
+  "hash": "7b44566fdc5d065fa415f2a561d2b89f7f4cfbf7a7ba0faade3e824b5a5d26cc",
+  "sample_index": 972
+}

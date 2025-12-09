@@ -1,0 +1,206 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.964561",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "ADT"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "CommunityHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "EHR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122075514"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771438"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATGTA421V3"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Martinez^Joseph^H"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19700903"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "8515 Main St^^Georgetown^NY^53734^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(520)929-8892"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "846-86-1891"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "P"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "OBS^239^1"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "74426^Rodriguez^James^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VCRU7EHHDHL"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251101221914"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDOJVA3R25NH"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILBVOKPDEAF7"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "6690-2^WBC^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251118002814"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251120205014"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "57754^Martinez^Patricia^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 5,
+  "hash": "bdfe4b4a2b1c70cd59c48287a50ba1a4f566e2e536789541a1310e9e6b751804",
+  "sample_index": 950
+}

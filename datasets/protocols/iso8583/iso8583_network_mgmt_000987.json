@@ -1,0 +1,86 @@
+{
+  "protocol": "iso8583",
+  "mti": "0800",
+  "message_type": "network_mgmt",
+  "mti_description": "network_management_request",
+  "timestamp": "2025-11-22T16:46:14.504971",
+  "message_length": 52,
+  "fields": [
+    {
+      "field": "mti",
+      "name": "message_type_indicator",
+      "value": "0800",
+      "offset": 0,
+      "length": 4,
+      "type": "N"
+    },
+    {
+      "field": "bitmap",
+      "name": "bitmap",
+      "value": "0238000000800010",
+      "offset": 4,
+      "length": 8,
+      "type": "B",
+      "fields_present": [
+        7,
+        11,
+        12,
+        13,
+        41,
+        60
+      ]
+    },
+    {
+      "field": 7,
+      "name": "transmission_datetime",
+      "value": "1122164614",
+      "type": "N",
+      "offset": 12,
+      "length": 10
+    },
+    {
+      "field": 11,
+      "name": "stan",
+      "value": "671476",
+      "type": "N",
+      "offset": 22,
+      "length": 6
+    },
+    {
+      "field": 12,
+      "name": "local_time",
+      "value": "164614",
+      "type": "N",
+      "offset": 28,
+      "length": 6
+    },
+    {
+      "field": 13,
+      "name": "local_date",
+      "value": "1122",
+      "type": "N",
+      "offset": 34,
+      "length": 4
+    },
+    {
+      "field": 41,
+      "name": "terminal_id",
+      "value": "TERM2450",
+      "type": "ANS",
+      "length": 8,
+      "offset": 38
+    },
+    {
+      "field": 60,
+      "name": "additional_data",
+      "value": "301",
+      "type": "LLLVAR",
+      "length": 3,
+      "length_prefix": 3,
+      "offset": 46
+    }
+  ],
+  "field_count": 6,
+  "hash": "ed960b46bb537c5cfa8af2d34da3d93d38e05133b4e4668aa4806208b83796e6",
+  "sample_index": 987
+}

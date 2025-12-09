@@ -1,0 +1,260 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.941204",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "ADT"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "GeneralHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "CDR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251121194014"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771367"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PAT00NCV64S"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Williams^Jessica^J"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19590623"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "2087 Maple Dr^^Georgetown^NY^12587^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(542)964-1635"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "985-44-5391"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "P"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "ER^114^2"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "27178^Davis^William^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "V1ZO776VX60"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251107144314"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDN3S1N6TDUY"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FIL18QDDVFYPA"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "777-3^Platelet^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251115125514"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121185414"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "75567^Rodriguez^Mary^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDYPBO7QYI3F"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILFCZKWPJ49E"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "718-7^Hemoglobin^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251118102114"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121080514"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "46714^Rodriguez^Michael^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 7,
+  "hash": "9c627469192b240ad2a66469b9a0a33310f36e00eafae16d1805ee72e217104e",
+  "sample_index": 879
+}

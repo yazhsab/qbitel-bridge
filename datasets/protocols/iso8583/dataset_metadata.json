@@ -1,0 +1,13 @@
+{
+  "protocol": "iso8583",
+  "version": "1987/1993/2003",
+  "total_samples": 1000,
+  "samples_by_type": {
+    "auth_request": 300,
+    "auth_response": 250,
+    "financial_request": 250,
+    "reversal_request": 100,
+    "network_mgmt": 100
+  },
+  "generated_at": "2025-11-22T16:46:14.295235"
+}

@@ -1,0 +1,141 @@
+{
+  "generated_at": "2025-11-22T17:41:30.071336",
+  "cronos_ml_components": {
+    "bilstm_crf_field_detection": {
+      "purpose": "Automatic field boundary detection in protocol messages",
+      "data_requirements": [
+        "Binary protocol messages with labeled field boundaries",
+        "IOB-tagged sequences for supervised training",
+        "Multiple message types per protocol for generalization"
+      ],
+      "relevant_datasets": {
+        "synthetic": [
+          "ISO 8583 (generated)",
+          "Modbus (generated)",
+          "HL7 (generated)"
+        ],
+        "real_world": [
+          "ICS PCAP samples (need parsing)",
+          "Wireshark captures (need parsing)"
+        ]
+      },
+      "data_gap": "Real-world labeled field boundaries are rare; synthetic generation is appropriate"
+    },
+    "vae_anomaly_detection": {
+      "purpose": "Detect anomalous protocol traffic patterns",
+      "data_requirements": [
+        "Normal baseline traffic for training",
+        "Labeled anomalies for validation",
+        "Time-series or sequence data"
+      ],
+      "relevant_datasets": {
+        "synthetic": [
+          "Security events (generated)",
+          "Time series (generated)"
+        ],
+        "real_world": [
+          "NAB (fetched)",
+          "CICIDS2017 (manual)",
+          "UNSW-NB15 (manual)"
+        ]
+      },
+      "data_gap": "Need labeled IDS datasets; CICIDS2017 highly recommended"
+    },
+    "protocol_discovery": {
+      "purpose": "Identify unknown protocols from raw traffic",
+      "data_requirements": [
+        "Diverse protocol samples",
+        "Raw binary messages",
+        "Protocol labels for training"
+      ],
+      "relevant_datasets": {
+        "synthetic": [
+          "Multi-protocol samples (generated)"
+        ],
+        "real_world": [
+          "PCAP files with diverse protocols",
+          "ICS traffic captures"
+        ]
+      },
+      "data_gap": "PCAP parsing needed to extract protocol messages"
+    },
+    "threat_intelligence_correlation": {
+      "purpose": "Correlate traffic with known threats",
+      "data_requirements": [
+        "IOCs (IPs, domains, hashes)",
+        "MITRE ATT&CK mappings",
+        "Known malicious patterns"
+      ],
+      "relevant_datasets": {
+        "fetched": [
+          "MITRE ATT&CK (703 techniques)",
+          "URLhaus (5K URLs)",
+          "MalwareBazaar (700 hashes)"
+        ],
+        "huggingface": [
+          "Security TTP Mapping (21K)",
+          "Phishing URLs (11K)"
+        ]
+      },
+      "data_gap": "Good coverage from fetched sources"
+    }
+  },
+  "protocol_specific_recommendations": {
+    "iso8583": {
+      "status": "Synthetic only",
+      "reason": "PCI-DSS compliance prevents public datasets",
+      "recommendation": "Use generated samples; consider partnering with banks for real data"
+    },
+    "swift": {
+      "status": "Synthetic only",
+      "reason": "Regulated financial messaging",
+      "recommendation": "Use generated samples; SWIFT provides test environments for members"
+    },
+    "modbus": {
+      "status": "PCAP available",
+      "sources": [
+        "4SICS ICS-pcap",
+        "SWAT dataset (registration)"
+      ],
+      "recommendation": "Parse PCAP files for training; consider SWAT for labeled attacks"
+    },
+    "dnp3": {
+      "status": "PCAP available",
+      "sources": [
+        "4SICS ICS-pcap"
+      ],
+      "recommendation": "Parse PCAP files; limited public data available"
+    },
+    "hl7": {
+      "status": "Synthetic + test servers",
+      "sources": [
+        "HAPI FHIR server",
+        "Synthea generator"
+      ],
+      "recommendation": "Use synthetic; real HL7 data is PHI-protected"
+    }
+  },
+  "high_priority_datasets_to_acquire": [
+    {
+      "name": "CICIDS2017",
+      "url": "https://www.unb.ca/cic/datasets/ids-2017.html",
+      "size": "~6GB",
+      "value": "Labeled network attacks for VAE anomaly detection",
+      "how_to_get": "Manual download from UNB website"
+    },
+    {
+      "name": "SWAT Dataset",
+      "url": "https://itrust.sutd.edu.sg/itrust-labs_datasets/",
+      "size": "~50GB",
+      "value": "ICS/SCADA attack dataset with Modbus traffic",
+      "how_to_get": "Register with iTrust Singapore"
+    },
+    {
+      "name": "UNSW-NB15",
+      "url": "https://research.unsw.edu.au/projects/unsw-nb15-dataset",
+      "size": "~2GB",
+      "value": "Modern network attack types",
+      "how_to_get": "Manual download"
+    }
+  ]
+}

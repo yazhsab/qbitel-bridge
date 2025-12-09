@@ -1,0 +1,206 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.947849",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "LIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "CommunityHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "EMR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122132214"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771387"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATJEG2S1BL"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Williams^Joseph^M"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19720326"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "M"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "7536 Lincoln Ave^^Franklin^PA^15729^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(843)611-5278"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "683-68-7623"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "I"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "OBS^705^4"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "80887^Martinez^Michael^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "V2RW3Q46M6S"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251105043814"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORD87HUWXGHS2"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILW75DJ72LRX"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "4544-3^Hematocrit^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251115044314"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251120234514"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "23468^Anderson^Robert^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 5,
+  "hash": "cd4aae1e5f5bce4d39733ae5211d4467cf11630be2db30d13cd05896b4670406",
+  "sample_index": 899
+}

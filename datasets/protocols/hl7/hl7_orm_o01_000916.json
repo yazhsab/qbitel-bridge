@@ -1,0 +1,206 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.953194",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "HIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "MedicalCenter"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "HIE"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251121184414"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771404"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATHJXT072X"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Gonzalez^Susan^F"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19570506"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "572 Park Rd^^Springfield^NC^13408^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(327)587-5170"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "626-71-7348"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "O"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "OBS^851^4"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "95263^Davis^John^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VMBFSW2R1XA"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251116144114"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDV1RO71ENMB"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILM6Y1YJKZOR"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "777-3^Platelet^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251120040414"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121153514"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "60965^Martinez^Susan^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 5,
+  "hash": "ef60d6daadd5fd209a687ce0bcab1a260cf38a72f5de4ec6f4d4813d75a2b0ac",
+  "sample_index": 916
+}

@@ -1,0 +1,314 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.969265",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "HIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "St.Mary'sHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "CDR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122004114"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771452"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATAYDE8BHK"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Miller^Joseph^R"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19801001"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "M"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "5952 Washington Blvd^^Salem^TX^66992^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(213)639-4228"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "526-11-8274"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "P"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "ICU^397^3"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "93406^Gonzalez^Patricia^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "V5IZKGGDLY2"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251114145814"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDOBZMRTSXMV"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FIL77TSJM4SQG"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "3094-0^BUN^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251117121514"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121164614"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "39040^Gonzalez^John^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "2"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDUY9KFTQEE4"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILJ62PTUML6T"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "4544-3^Hematocrit^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251120095214"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251120233214"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "24094^Anderson^Richard^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "3"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDOIQS60QEYA"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILSR3OCVETE0"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "6690-2^WBC^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251122142314"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251122105614"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "77147^Lopez^Joseph^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 9,
+  "hash": "40f84bfc9e192f5c97d0997e3c488e83c06973ccd28ae9d9df11ef836bfd0211",
+  "sample_index": 964
+}

@@ -1,0 +1,64 @@
+{
+  "source": "Kubernetes Security Advisories",
+  "description": "Known Kubernetes vulnerabilities for detection",
+  "critical_cves": [
+    {
+      "id": "CVE-2024-21626",
+      "component": "runc",
+      "severity": "critical",
+      "type": "container_escape"
+    },
+    {
+      "id": "CVE-2022-0185",
+      "component": "kernel",
+      "severity": "critical",
+      "type": "container_escape"
+    },
+    {
+      "id": "CVE-2021-25741",
+      "component": "kubelet",
+      "severity": "high",
+      "type": "symlink_attack"
+    },
+    {
+      "id": "CVE-2020-8554",
+      "component": "kube-apiserver",
+      "severity": "medium",
+      "type": "mitm"
+    },
+    {
+      "id": "CVE-2019-11253",
+      "component": "kube-apiserver",
+      "severity": "high",
+      "type": "dos"
+    },
+    {
+      "id": "CVE-2018-1002105",
+      "component": "kube-apiserver",
+      "severity": "critical",
+      "type": "privilege_escalation"
+    }
+  ],
+  "detection_rules": [
+    {
+      "name": "privileged_container",
+      "pattern": "securityContext.privileged: true"
+    },
+    {
+      "name": "host_pid",
+      "pattern": "hostPID: true"
+    },
+    {
+      "name": "host_network",
+      "pattern": "hostNetwork: true"
+    },
+    {
+      "name": "host_path_mount",
+      "pattern": "hostPath.path: /"
+    },
+    {
+      "name": "root_user",
+      "pattern": "runAsUser: 0"
+    }
+  ]
+}

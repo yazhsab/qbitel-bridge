@@ -1,0 +1,206 @@
+{
+  "protocol": "iso8583",
+  "mti": "0100",
+  "message_type": "auth_request",
+  "mti_description": "authorization_request",
+  "timestamp": "2025-11-22T16:46:14.360520",
+  "message_length": 258,
+  "fields": [
+    {
+      "field": "mti",
+      "name": "message_type_indicator",
+      "value": "0100",
+      "offset": 0,
+      "length": 4,
+      "type": "N"
+    },
+    {
+      "field": "bitmap",
+      "name": "bitmap",
+      "value": "723c448120e09200",
+      "offset": 4,
+      "length": 8,
+      "type": "B",
+      "fields_present": [
+        2,
+        3,
+        4,
+        7,
+        11,
+        12,
+        13,
+        14,
+        18,
+        22,
+        25,
+        32,
+        35,
+        41,
+        42,
+        43,
+        49,
+        52,
+        55
+      ]
+    },
+    {
+      "field": 2,
+      "name": "pan",
+      "value": "4111111111368909",
+      "type": "LLVAR",
+      "length": 16,
+      "length_prefix": 2,
+      "offset": 12
+    },
+    {
+      "field": 3,
+      "name": "processing_code",
+      "value": "000000",
+      "type": "N",
+      "offset": 30,
+      "length": 6
+    },
+    {
+      "field": 4,
+      "name": "amount",
+      "value": "262162",
+      "type": "N",
+      "offset": 36,
+      "length": 12
+    },
+    {
+      "field": 7,
+      "name": "transmission_datetime",
+      "value": "1122164614",
+      "type": "N",
+      "offset": 48,
+      "length": 10
+    },
+    {
+      "field": 11,
+      "name": "stan",
+      "value": "670788",
+      "type": "N",
+      "offset": 58,
+      "length": 6
+    },
+    {
+      "field": 12,
+      "name": "local_time",
+      "value": "164614",
+      "type": "N",
+      "offset": 64,
+      "length": 6
+    },
+    {
+      "field": 13,
+      "name": "local_date",
+      "value": "1122",
+      "type": "N",
+      "offset": 70,
+      "length": 4
+    },
+    {
+      "field": 14,
+      "name": "expiry_date",
+      "value": "2612",
+      "type": "N",
+      "offset": 74,
+      "length": 4
+    },
+    {
+      "field": 18,
+      "name": "merchant_type",
+      "value": "5812",
+      "type": "N",
+      "offset": 78,
+      "length": 4
+    },
+    {
+      "field": 22,
+      "name": "pos_entry_mode",
+      "value": "051",
+      "type": "N",
+      "offset": 82,
+      "length": 3
+    },
+    {
+      "field": 25,
+      "name": "pos_condition",
+      "value": "16",
+      "type": "N",
+      "offset": 85,
+      "length": 2
+    },
+    {
+      "field": 32,
+      "name": "acquiring_inst",
+      "value": "559859",
+      "type": "LLVAR",
+      "length": 6,
+      "length_prefix": 2,
+      "offset": 87
+    },
+    {
+      "field": 35,
+      "name": "track2",
+      "value": "4111111111368909=261210124055934",
+      "type": "LLVAR",
+      "length": 32,
+      "length_prefix": 2,
+      "offset": 95
+    },
+    {
+      "field": 41,
+      "name": "terminal_id",
+      "value": "TERM3125",
+      "type": "ANS",
+      "length": 8,
+      "offset": 129
+    },
+    {
+      "field": 42,
+      "name": "merchant_id",
+      "value": "MERCH750820521",
+      "type": "ANS",
+      "length": 15,
+      "offset": 137
+    },
+    {
+      "field": 43,
+      "name": "merchant_name",
+      "value": "MERCHANT NAME 408                       ",
+      "type": "ANS",
+      "length": 40,
+      "offset": 152
+    },
+    {
+      "field": 49,
+      "name": "currency_code",
+      "value": "756",
+      "type": "N",
+      "offset": 192,
+      "length": 3
+    },
+    {
+      "field": 52,
+      "name": "pin_block",
+      "value": "b\">''\\x80i\\xfd\\xb6p\"",
+      "type": "B",
+      "length": 8,
+      "offset": 195
+    },
+    {
+      "field": 55,
+      "name": "emv_data",
+      "value": "b\"\\x9f&\\x08\\xe3\\x9a\\xbb\\x95}\\x88\\xa35\\x9f'\\x01\\x00\\x9f\\x10\\x07\\xb1\\xd2\\xf8\\x8f(hF\\x9f7\\x04v\\x9ck>\\x9f6\\x02_U\\x95\\x05H\\x12x\\xe1\\xe8\\x9a\\x03\\x19\\x0b\\x16\\x9c\\x01\\x00\"",
+      "type": "LLLVAR",
+      "length": 52,
+      "length_prefix": 3,
+      "offset": 203
+    }
+  ],
+  "field_count": 19,
+  "hash": "34b64270f4dbe86f3cf9a27de721cc3d76845a2012b5cdc3b56651f00add4340",
+  "sample_index": 299
+}

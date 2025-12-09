@@ -1,0 +1,206 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.978043",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "RIS"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "UniversityHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "EHR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251121224214"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771479"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PAT3V70FND0"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Johnson^Susan^T"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19470907"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "3953 Main St^^Salem^OH^10807^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(728)509-1653"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "353-42-6790"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "I"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "SURG^710^4"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "85724^Anderson^James^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "VM9OJK9U1TK"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251118150814"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORD9C00DOL4J0"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FILWKN35SDHYX"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "3094-0^BUN^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251117042114"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121221414"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "79403^Jones^Jessica^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 5,
+  "hash": "b4728db5077590cc27ad2bb03fcacf4b24bf44e435a7130dfd59a6030c594630",
+  "sample_index": 991
+}

@@ -1,0 +1,374 @@
+{
+  "generated_at": "2025-11-22T17:57:31.060068",
+  "platform": "CRONOS AI Enterprise Security Platform",
+  "version": "1.0",
+  "coverage_summary": {
+    "legacy_protocols": {
+      "datasets": 3,
+      "status": "covered"
+    },
+    "threat_intelligence": {
+      "datasets": 1,
+      "status": "covered"
+    },
+    "network_security": {
+      "datasets": 3,
+      "status": "covered"
+    },
+    "cloud_security": {
+      "datasets": 2,
+      "status": "covered"
+    },
+    "api_security": {
+      "datasets": 3,
+      "status": "covered"
+    },
+    "container_security": {
+      "datasets": 2,
+      "status": "covered"
+    },
+    "identity_security": {
+      "datasets": 2,
+      "status": "covered"
+    },
+    "endpoint_security": {
+      "datasets": 2,
+      "status": "covered"
+    },
+    "email_security": {
+      "datasets": 3,
+      "status": "covered"
+    },
+    "behavioral_analytics": {
+      "datasets": 2,
+      "status": "covered"
+    },
+    "dlp": {
+      "datasets": 2,
+      "status": "covered"
+    }
+  },
+  "security_domains": {
+    "legacy_protocols": {
+      "domain": "Legacy Protocol Security",
+      "description": "Banking, healthcare, industrial protocols",
+      "datasets": [
+        {
+          "name": "ISO8583 Protocol Messages",
+          "type": "synthetic",
+          "count": 1001,
+          "use_for": [
+            "field_detection",
+            "protocol_discovery",
+            "anomaly_detection"
+          ]
+        },
+        {
+          "name": "MODBUS Protocol Messages",
+          "type": "synthetic",
+          "count": 1001,
+          "use_for": [
+            "field_detection",
+            "protocol_discovery",
+            "anomaly_detection"
+          ]
+        },
+        {
+          "name": "HL7 Protocol Messages",
+          "type": "synthetic",
+          "count": 1001,
+          "use_for": [
+            "field_detection",
+            "protocol_discovery",
+            "anomaly_detection"
+          ]
+        }
+      ]
+    },
+    "threat_intelligence": {
+      "domain": "Threat Intelligence",
+      "description": "IOCs, MITRE ATT&CK, malware indicators",
+      "datasets": [
+        {
+          "name": "MITRE ATT&CK Enterprise",
+          "type": "real_world",
+          "source": "attack.mitre.org",
+          "count": 703,
+          "use_for": [
+            "threat_correlation",
+            "attack_mapping"
+          ]
+        }
+      ]
+    },
+    "network_security": {
+      "domain": "Network Security & IDS",
+      "description": "Intrusion detection, network anomalies",
+      "datasets": [
+        {
+          "name": "NSL-KDD Intrusion Detection",
+          "type": "real_world",
+          "source": "Canadian Institute for Cybersecurity",
+          "count": 50000,
+          "attack_types": {
+            "normal": 26555,
+            "dos": 18335,
+            "r2l": 427,
+            "probe": 4660,
+            "u2r": 23
+          },
+          "use_for": [
+            "vae_anomaly_detection",
+            "intrusion_detection"
+          ]
+        },
+        {
+          "name": "NAB Anomaly Benchmark",
+          "type": "real_world",
+          "source": "Numenta",
+          "count": "43K data points",
+          "use_for": [
+            "time_series_anomaly",
+            "baseline_learning"
+          ]
+        },
+        {
+          "name": "Emerging Threats Suricata Rules",
+          "type": "real_world",
+          "source": "Emerging Threats",
+          "count": 668,
+          "use_for": [
+            "network_signature_detection",
+            "IDS_rules"
+          ]
+        }
+      ]
+    },
+    "cloud_security": {
+      "domain": "Cloud Security",
+      "description": "AWS, Azure, GCP threat detection",
+      "datasets": [
+        {
+          "name": "AWS CloudTrail Threat Patterns",
+          "type": "curated",
+          "count": 22,
+          "use_for": [
+            "cloud_threat_detection",
+            "aws_monitoring"
+          ]
+        },
+        {
+          "name": "Azure Security Patterns",
+          "type": "curated",
+          "count": 5,
+          "use_for": [
+            "cloud_threat_detection",
+            "azure_monitoring"
+          ]
+        }
+      ]
+    },
+    "api_security": {
+      "domain": "API & Web Security",
+      "description": "OWASP vulnerabilities, injection attacks",
+      "datasets": [
+        {
+          "name": "OWASP API Security Top 10",
+          "type": "curated",
+          "count": 10,
+          "use_for": [
+            "api_vulnerability_detection",
+            "security_assessment"
+          ]
+        },
+        {
+          "name": "SQL Injection Patterns",
+          "type": "real_world",
+          "source": "PayloadBox",
+          "count": 263,
+          "use_for": [
+            "sqli_detection",
+            "waf_rules"
+          ]
+        },
+        {
+          "name": "XSS Attack Patterns",
+          "type": "real_world",
+          "source": "PayloadBox",
+          "count": 6613,
+          "use_for": [
+            "xss_detection",
+            "waf_rules"
+          ]
+        }
+      ]
+    },
+    "container_security": {
+      "domain": "Container & Kubernetes Security",
+      "description": "K8s vulnerabilities, runtime security",
+      "datasets": [
+        {
+          "name": "Kubernetes CVEs & Detection Rules",
+          "type": "curated",
+          "count": 11,
+          "use_for": [
+            "k8s_security_scanning",
+            "admission_control"
+          ]
+        },
+        {
+          "name": "Falco Runtime Security Rules",
+          "type": "real_world",
+          "source": "Falco Project",
+          "count": "26+ rules",
+          "use_for": [
+            "container_runtime_security",
+            "behavior_detection"
+          ]
+        }
+      ]
+    },
+    "identity_security": {
+      "domain": "Identity & Authentication Security",
+      "description": "Credential threats, authentication attacks",
+      "datasets": [
+        {
+          "name": "Identity Attack Patterns",
+          "type": "curated",
+          "count": 8,
+          "use_for": [
+            "credential_stuffing_detection",
+            "mfa_bypass_detection"
+          ]
+        },
+        {
+          "name": "Common Usernames (Brute Force Detection)",
+          "type": "real_world",
+          "source": "SecLists",
+          "count": 17,
+          "use_for": [
+            "brute_force_detection",
+            "enumeration_detection"
+          ]
+        }
+      ]
+    },
+    "endpoint_security": {
+      "domain": "Endpoint Security",
+      "description": "Living-off-the-land, malware indicators",
+      "datasets": [
+        {
+          "name": "LOLBAS (Windows LOL Binaries)",
+          "type": "real_world",
+          "source": "LOLBAS Project",
+          "count": 225,
+          "use_for": [
+            "endpoint_detection",
+            "behavioral_analysis"
+          ]
+        },
+        {
+          "name": "GTFOBins (Unix LOL Binaries)",
+          "type": "real_world",
+          "source": "GTFOBins Project",
+          "count": 390,
+          "use_for": [
+            "linux_endpoint_detection",
+            "privilege_escalation_detection"
+          ]
+        }
+      ]
+    },
+    "email_security": {
+      "domain": "Email & Phishing Security",
+      "description": "Phishing URLs, email threat patterns",
+      "datasets": [
+        {
+          "name": "OpenPhish Active Phishing URLs",
+          "type": "real_world",
+          "source": "OpenPhish",
+          "count": 300,
+          "use_for": [
+            "phishing_detection",
+            "url_filtering"
+          ]
+        },
+        {
+          "name": "Email Threat Detection Patterns",
+          "type": "curated",
+          "count": "5 categories",
+          "use_for": [
+            "bec_detection",
+            "phishing_email_detection"
+          ]
+        },
+        {
+          "name": "Phishing URL Dataset (HuggingFace)",
+          "type": "real_world",
+          "source": "Hugging Face",
+          "count": "11,430 URLs",
+          "use_for": [
+            "phishing_classification",
+            "ml_training"
+          ]
+        }
+      ]
+    },
+    "behavioral_analytics": {
+      "domain": "User & Entity Behavior Analytics",
+      "description": "Insider threats, anomaly baselines",
+      "datasets": [
+        {
+          "name": "UEBA Baseline Patterns",
+          "type": "curated",
+          "count": "5 user + 4 entity baselines",
+          "use_for": [
+            "insider_threat_detection",
+            "behavioral_anomaly"
+          ]
+        },
+        {
+          "name": "Insider Threat Indicators",
+          "type": "curated",
+          "count": 7,
+          "use_for": [
+            "insider_risk_scoring",
+            "hr_integration"
+          ]
+        }
+      ]
+    },
+    "dlp": {
+      "domain": "Data Loss Prevention",
+      "description": "PII/PHI detection, exfiltration patterns",
+      "datasets": [
+        {
+          "name": "Sensitive Data Detection Patterns",
+          "type": "curated",
+          "count": 14,
+          "categories": [
+            "pii",
+            "phi",
+            "financial",
+            "secrets"
+          ],
+          "use_for": [
+            "pii_detection",
+            "compliance_monitoring"
+          ]
+        },
+        {
+          "name": "Data Exfiltration Channel Patterns",
+          "type": "curated",
+          "count": 5,
+          "use_for": [
+            "exfiltration_detection",
+            "dlp_alerts"
+          ]
+        }
+      ]
+    }
+  },
+  "total_datasets": 25,
+  "coverage_score": "11/11 domains covered"
+}

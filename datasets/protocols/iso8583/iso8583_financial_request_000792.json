@@ -1,0 +1,223 @@
+{
+  "protocol": "iso8583",
+  "mti": "0200",
+  "message_type": "financial_request",
+  "mti_description": "financial_request",
+  "timestamp": "2025-11-22T16:46:14.473971",
+  "message_length": 220,
+  "fields": [
+    {
+      "field": "mti",
+      "name": "message_type_indicator",
+      "value": "0200",
+      "offset": 0,
+      "length": 4,
+      "type": "N"
+    },
+    {
+      "field": "bitmap",
+      "name": "bitmap",
+      "value": "723c46c128e09000",
+      "offset": 4,
+      "length": 8,
+      "type": "B",
+      "fields_present": [
+        2,
+        3,
+        4,
+        7,
+        11,
+        12,
+        13,
+        14,
+        18,
+        22,
+        23,
+        25,
+        26,
+        32,
+        35,
+        37,
+        41,
+        42,
+        43,
+        49,
+        52
+      ]
+    },
+    {
+      "field": 2,
+      "name": "pan",
+      "value": "4111111111366402",
+      "type": "LLVAR",
+      "length": 16,
+      "length_prefix": 2,
+      "offset": 12
+    },
+    {
+      "field": 3,
+      "name": "processing_code",
+      "value": "010000",
+      "type": "N",
+      "offset": 30,
+      "length": 6
+    },
+    {
+      "field": 4,
+      "name": "amount",
+      "value": "3656344",
+      "type": "N",
+      "offset": 36,
+      "length": 12
+    },
+    {
+      "field": 7,
+      "name": "transmission_datetime",
+      "value": "1122164614",
+      "type": "N",
+      "offset": 48,
+      "length": 10
+    },
+    {
+      "field": 11,
+      "name": "stan",
+      "value": "671281",
+      "type": "N",
+      "offset": 58,
+      "length": 6
+    },
+    {
+      "field": 12,
+      "name": "local_time",
+      "value": "164614",
+      "type": "N",
+      "offset": 64,
+      "length": 6
+    },
+    {
+      "field": 13,
+      "name": "local_date",
+      "value": "1122",
+      "type": "N",
+      "offset": 70,
+      "length": 4
+    },
+    {
+      "field": 14,
+      "name": "expiry_date",
+      "value": "2607",
+      "type": "N",
+      "offset": 74,
+      "length": 4
+    },
+    {
+      "field": 18,
+      "name": "merchant_type",
+      "value": "4121",
+      "type": "N",
+      "offset": 78,
+      "length": 4
+    },
+    {
+      "field": 22,
+      "name": "pos_entry_mode",
+      "value": "901",
+      "type": "N",
+      "offset": 82,
+      "length": 3
+    },
+    {
+      "field": 23,
+      "name": "card_sequence",
+      "value": "492",
+      "type": "N",
+      "offset": 85,
+      "length": 3
+    },
+    {
+      "field": 25,
+      "name": "pos_condition",
+      "value": "27",
+      "type": "N",
+      "offset": 88,
+      "length": 2
+    },
+    {
+      "field": 26,
+      "name": "pos_pin_capture",
+      "value": "12",
+      "type": "N",
+      "offset": 90,
+      "length": 2
+    },
+    {
+      "field": 32,
+      "name": "acquiring_inst",
+      "value": "622829",
+      "type": "LLVAR",
+      "length": 6,
+      "length_prefix": 2,
+      "offset": 92
+    },
+    {
+      "field": 35,
+      "name": "track2",
+      "value": "4111111111366402=260710183159757",
+      "type": "LLVAR",
+      "length": 32,
+      "length_prefix": 2,
+      "offset": 100
+    },
+    {
+      "field": 37,
+      "name": "retrieval_ref",
+      "value": "757817908135",
+      "type": "AN",
+      "length": 12,
+      "offset": 134
+    },
+    {
+      "field": 41,
+      "name": "terminal_id",
+      "value": "TERM3413",
+      "type": "ANS",
+      "length": 8,
+      "offset": 146
+    },
+    {
+      "field": 42,
+      "name": "merchant_id",
+      "value": "MERCH811403766",
+      "type": "ANS",
+      "length": 15,
+      "offset": 154
+    },
+    {
+      "field": 43,
+      "name": "merchant_name",
+      "value": "MERCHANT NAME 450                       ",
+      "type": "ANS",
+      "length": 40,
+      "offset": 169
+    },
+    {
+      "field": 49,
+      "name": "currency_code",
+      "value": "392",
+      "type": "N",
+      "offset": 209,
+      "length": 3
+    },
+    {
+      "field": 52,
+      "name": "pin_block",
+      "value": "b'5\\xc9j\\x13E-\\xa9\\xbc'",
+      "type": "B",
+      "length": 8,
+      "offset": 212
+    }
+  ],
+  "field_count": 21,
+  "hash": "f74e4faefc295d5032b1ec6d1d13c4b00bf5f4bbfd013793d10e9216690cee9b",
+  "sample_index": 792
+}

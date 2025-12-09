@@ -1,0 +1,11 @@
+{
+  "protocol": "hl7_v2",
+  "version": "2.5.1",
+  "total_samples": 1000,
+  "samples_by_type": {
+    "adt_a01": 400,
+    "oru_r01": 400,
+    "orm_o01": 200
+  },
+  "generated_at": "2025-11-22T16:46:14.633427"
+}

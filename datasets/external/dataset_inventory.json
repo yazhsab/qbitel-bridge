@@ -1,0 +1,214 @@
+{
+  "generated_at": "2025-11-22T17:43:59.608943",
+  "cronos_ai_version": "1.0",
+  "summary": {
+    "total_real_world_datasets": 5,
+    "total_synthetic_datasets": 9,
+    "total_records": 0
+  },
+  "datasets_by_ml_component": {
+    "bilstm_crf_field_detection": {
+      "description": "Automatic field boundary detection in protocol messages",
+      "datasets": [
+        "ISO8583 Protocol Samples",
+        "SWIFT Protocol Samples",
+        "MODBUS Protocol Samples",
+        "HL7 Protocol Samples",
+        "DNP3 Protocol Samples",
+        "FHIR Protocol Samples",
+        "Field Detection Training Set",
+        "Field Detection Validation Set",
+        "Field Detection Test Set"
+      ],
+      "data_gap": "None - synthetic generation is appropriate for labeled field data"
+    },
+    "vae_anomaly_detection": {
+      "description": "Detect anomalous protocol traffic patterns",
+      "datasets": [
+        "NAB (Numenta Anomaly Benchmark)",
+        "NSL-KDD"
+      ],
+      "data_gap": "Good coverage with NSL-KDD and NAB"
+    },
+    "threat_intelligence_correlation": {
+      "description": "Correlate traffic with known threats",
+      "datasets": [
+        "MITRE ATT&CK",
+        "tumeteor_Security-TTP-Mapping",
+        "pirocheto_phishing-url"
+      ],
+      "data_gap": "None - excellent coverage"
+    },
+    "protocol_discovery": {
+      "description": "Identify unknown protocols from raw traffic",
+      "datasets": [
+        "NSL-KDD",
+        "ISO8583 Protocol Samples",
+        "SWIFT Protocol Samples",
+        "MODBUS Protocol Samples",
+        "HL7 Protocol Samples",
+        "DNP3 Protocol Samples",
+        "FHIR Protocol Samples"
+      ],
+      "data_gap": "Limited - PCAP parsing needed for real protocol samples"
+    }
+  },
+  "real_world_datasets": [
+    {
+      "name": "MITRE ATT&CK",
+      "type": "threat_intelligence",
+      "records": 703,
+      "source": "attack.mitre.org",
+      "license": "Apache 2.0",
+      "use_for": [
+        "threat_intelligence_correlation"
+      ],
+      "status": "integrated"
+    },
+    {
+      "name": "NAB (Numenta Anomaly Benchmark)",
+      "type": "anomaly_detection",
+      "records": "43K data points",
+      "source": "github.com/numenta/NAB",
+      "license": "Apache 2.0",
+      "use_for": [
+        "vae_anomaly_detection"
+      ],
+      "status": "integrated"
+    },
+    {
+      "name": "NSL-KDD",
+      "type": "intrusion_detection",
+      "records": 50000,
+      "attack_distribution": {
+        "normal": 26555,
+        "dos": 18335,
+        "r2l": 427,
+        "probe": 4660,
+        "u2r": 23
+      },
+      "source": "Canadian Institute for Cybersecurity",
+      "license": "Research use",
+      "use_for": [
+        "vae_anomaly_detection",
+        "protocol_discovery"
+      ],
+      "status": "integrated"
+    },
+    {
+      "name": "tumeteor_Security-TTP-Mapping",
+      "type": "ml_platform",
+      "records": "unknown",
+      "source": "Hugging Face",
+      "use_for": [
+        "threat_intelligence_correlation"
+      ],
+      "status": "integrated"
+    },
+    {
+      "name": "pirocheto_phishing-url",
+      "type": "ml_platform",
+      "records": "unknown",
+      "source": "Hugging Face",
+      "use_for": [
+        "threat_intelligence_correlation"
+      ],
+      "status": "integrated"
+    }
+  ],
+  "synthetic_datasets": [
+    {
+      "name": "ISO8583 Protocol Samples",
+      "type": "protocol_messages",
+      "records": 1001,
+      "use_for": [
+        "bilstm_crf_field_detection",
+        "protocol_discovery"
+      ],
+      "status": "generated",
+      "note": "Synthetic - real data is regulated/unavailable"
+    },
+    {
+      "name": "SWIFT Protocol Samples",
+      "type": "protocol_messages",
+      "records": 0,
+      "use_for": [
+        "bilstm_crf_field_detection",
+        "protocol_discovery"
+      ],
+      "status": "generated",
+      "note": "Synthetic - real data is regulated/unavailable"
+    },
+    {
+      "name": "MODBUS Protocol Samples",
+      "type": "protocol_messages",
+      "records": 1001,
+      "use_for": [
+        "bilstm_crf_field_detection",
+        "protocol_discovery"
+      ],
+      "status": "generated",
+      "note": "Synthetic - real data is regulated/unavailable"
+    },
+    {
+      "name": "HL7 Protocol Samples",
+      "type": "protocol_messages",
+      "records": 1001,
+      "use_for": [
+        "bilstm_crf_field_detection",
+        "protocol_discovery"
+      ],
+      "status": "generated",
+      "note": "Synthetic - real data is regulated/unavailable"
+    },
+    {
+      "name": "DNP3 Protocol Samples",
+      "type": "protocol_messages",
+      "records": 0,
+      "use_for": [
+        "bilstm_crf_field_detection",
+        "protocol_discovery"
+      ],
+      "status": "generated",
+      "note": "Synthetic - real data is regulated/unavailable"
+    },
+    {
+      "name": "FHIR Protocol Samples",
+      "type": "protocol_messages",
+      "records": 0,
+      "use_for": [
+        "bilstm_crf_field_detection",
+        "protocol_discovery"
+      ],
+      "status": "generated",
+      "note": "Synthetic - real data is regulated/unavailable"
+    },
+    {
+      "name": "Field Detection Training Set",
+      "type": "labeled_field_boundaries",
+      "records": 2400,
+      "use_for": [
+        "bilstm_crf_field_detection"
+      ],
+      "status": "generated"
+    },
+    {
+      "name": "Field Detection Validation Set",
+      "type": "labeled_field_boundaries",
+      "records": 300,
+      "use_for": [
+        "bilstm_crf_field_detection"
+      ],
+      "status": "generated"
+    },
+    {
+      "name": "Field Detection Test Set",
+      "type": "labeled_field_boundaries",
+      "records": 300,
+      "use_for": [
+        "bilstm_crf_field_detection"
+      ],
+      "status": "generated"
+    }
+  ]
+}

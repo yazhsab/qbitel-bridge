@@ -1,0 +1,76 @@
+{
+  "source": "CRONOS AI Email Security Patterns",
+  "phishing_indicators": [
+    {
+      "type": "sender_spoofing",
+      "patterns": [
+        "Reply-To != From",
+        "display name mismatch",
+        "lookalike domain"
+      ]
+    },
+    {
+      "type": "urgency_language",
+      "patterns": [
+        "act now",
+        "immediate action",
+        "account suspended",
+        "verify immediately"
+      ]
+    },
+    {
+      "type": "malicious_links",
+      "patterns": [
+        "shortened URLs",
+        "IP-based URLs",
+        "typosquatting domains"
+      ]
+    },
+    {
+      "type": "attachment_threats",
+      "patterns": [
+        ".exe",
+        ".scr",
+        ".js",
+        ".vbs",
+        ".hta",
+        "macro-enabled"
+      ]
+    },
+    {
+      "type": "bec_indicators",
+      "patterns": [
+        "wire transfer",
+        "gift cards",
+        "CEO impersonation",
+        "payroll change"
+      ]
+    }
+  ],
+  "header_anomalies": [
+    {
+      "check": "SPF",
+      "fail_indicator": "spf=fail"
+    },
+    {
+      "check": "DKIM",
+      "fail_indicator": "dkim=fail"
+    },
+    {
+      "check": "DMARC",
+      "fail_indicator": "dmarc=fail"
+    },
+    {
+      "check": "Received_chain",
+      "anomaly": "suspicious hop countries"
+    }
+  ],
+  "attachment_heuristics": {
+    "double_extension": [
+      "report.pdf.exe",
+      "invoice.doc.js"
+    ],
+    "hidden_extension": "RLO unicode character",
+    "password_protected": "Encrypted archive without prior context"
+  }
+}

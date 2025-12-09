@@ -1,0 +1,14 @@
+{
+  "total_samples": 2000,
+  "normal_samples": 1200,
+  "anomalous_samples": 800,
+  "series_length": 100,
+  "anomaly_types": [
+    "spike",
+    "dip",
+    "shift",
+    "trend_change",
+    "variance_change"
+  ],
+  "generated_at": "2025-11-22T16:46:16.017986"
+}

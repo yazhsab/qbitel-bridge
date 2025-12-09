@@ -1,0 +1,132 @@
+{
+  "protocol": "modbus",
+  "message_hex": "a6b30000001bb710b0bf000a1468fd690717c3693b94027ba95ac774becd164f48",
+  "message_bytes": [
+    166,
+    179,
+    0,
+    0,
+    0,
+    27,
+    183,
+    16,
+    176,
+    191,
+    0,
+    10,
+    20,
+    104,
+    253,
+    105,
+    7,
+    23,
+    195,
+    105,
+    59,
+    148,
+    2,
+    123,
+    169,
+    90,
+    199,
+    116,
+    190,
+    205,
+    22,
+    79,
+    72
+  ],
+  "tags": [
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-LENGTH",
+    "I-LENGTH",
+    "B-FIELD",
+    "B-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD"
+  ],
+  "length": 33,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42675
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 27
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 183
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 16
+    },
+    {
+      "name": "start_address",
+      "offset": 8,
+      "length": 2,
+      "value": 45247
+    },
+    {
+      "name": "quantity",
+      "offset": 10,
+      "length": 2,
+      "value": 10
+    },
+    {
+      "name": "byte_count",
+      "offset": 12,
+      "length": 1,
+      "value": 20
+    },
+    {
+      "name": "register_values",
+      "offset": 13,
+      "length": 20,
+      "value": "68fd690717c3693b94027ba95ac774becd164f48"
+    }
+  ],
+  "hash": "ed0ee3ac51e530642dce8f152b50c92cafd28cce25bca24f5b510de71d3074e7"
+}

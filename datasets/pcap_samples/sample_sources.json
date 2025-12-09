@@ -1,0 +1,58 @@
+{
+  "source": "Wireshark Sample Captures",
+  "generated_at": "2025-11-22T16:54:46.128739",
+  "note": "Most PCAP files require manual download due to size",
+  "samples": {
+    "protocols": {
+      "modbus": {
+        "url": "https://wiki.wireshark.org/Modbus",
+        "description": "Modbus TCP/RTU protocol samples",
+        "manual_download": true
+      },
+      "dnp3": {
+        "url": "https://wiki.wireshark.org/DNP3",
+        "description": "DNP3 SCADA protocol samples",
+        "manual_download": true
+      },
+      "hl7": {
+        "url": "https://wiki.wireshark.org/HL7",
+        "description": "HL7 healthcare protocol samples",
+        "manual_download": true
+      },
+      "http": {
+        "url": "https://wiki.wireshark.org/SampleCaptures#HTTP",
+        "files": [
+          "http.cap",
+          "http_gzip.cap"
+        ],
+        "description": "HTTP protocol samples"
+      },
+      "ssl_tls": {
+        "url": "https://wiki.wireshark.org/SampleCaptures#SSL_with_decryption_keys",
+        "description": "TLS/SSL handshake samples"
+      },
+      "dns": {
+        "url": "https://wiki.wireshark.org/SampleCaptures#DNS",
+        "description": "DNS protocol samples"
+      }
+    },
+    "security": {
+      "malware": {
+        "url": "https://www.malware-traffic-analysis.net/",
+        "description": "Malware traffic captures (requires registration)",
+        "manual_download": true
+      },
+      "attacks": {
+        "url": "https://www.netresec.com/?page=MACCDC",
+        "description": "MACCDC attack traffic",
+        "manual_download": true
+      }
+    }
+  },
+  "download_instructions": {
+    "step1": "Visit the URLs listed for each protocol",
+    "step2": "Download the PCAP files manually",
+    "step3": "Place files in datasets/pcap_samples/<protocol>/",
+    "step4": "Run integrate_pcap.py to convert to training format"
+  }
+}

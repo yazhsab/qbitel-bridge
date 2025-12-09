@@ -1,0 +1,125 @@
+{
+  "source": "CRONOS AI DLP Patterns",
+  "sensitive_data_patterns": {
+    "pii": [
+      {
+        "name": "ssn",
+        "pattern": "\\d{3}-\\d{2}-\\d{4}",
+        "description": "US Social Security Number"
+      },
+      {
+        "name": "credit_card",
+        "pattern": "\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}",
+        "description": "Credit card number"
+      },
+      {
+        "name": "email",
+        "pattern": "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}",
+        "description": "Email address"
+      },
+      {
+        "name": "phone",
+        "pattern": "\\+?1?[\\s.-]?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}",
+        "description": "Phone number"
+      }
+    ],
+    "phi": [
+      {
+        "name": "mrn",
+        "pattern": "MRN[:\\s]?\\d{6,10}",
+        "description": "Medical Record Number"
+      },
+      {
+        "name": "npi",
+        "pattern": "\\d{10}",
+        "description": "National Provider Identifier"
+      },
+      {
+        "name": "dea",
+        "pattern": "[A-Z]{2}\\d{7}",
+        "description": "DEA Number"
+      }
+    ],
+    "financial": [
+      {
+        "name": "iban",
+        "pattern": "[A-Z]{2}\\d{2}[A-Z0-9]{4}\\d{7}([A-Z0-9]?){0,16}",
+        "description": "IBAN"
+      },
+      {
+        "name": "swift",
+        "pattern": "[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?",
+        "description": "SWIFT/BIC code"
+      },
+      {
+        "name": "routing",
+        "pattern": "\\d{9}",
+        "description": "ABA Routing Number"
+      }
+    ],
+    "secrets": [
+      {
+        "name": "aws_key",
+        "pattern": "AKIA[0-9A-Z]{16}",
+        "description": "AWS Access Key"
+      },
+      {
+        "name": "github_token",
+        "pattern": "ghp_[a-zA-Z0-9]{36}",
+        "description": "GitHub Token"
+      },
+      {
+        "name": "slack_token",
+        "pattern": "xox[baprs]-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24}",
+        "description": "Slack Token"
+      },
+      {
+        "name": "private_key",
+        "pattern": "-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----",
+        "description": "Private Key"
+      }
+    ]
+  },
+  "exfiltration_channels": [
+    {
+      "channel": "email",
+      "indicators": [
+        "large_attachment",
+        "external_recipient",
+        "sensitive_content"
+      ]
+    },
+    {
+      "channel": "cloud_storage",
+      "indicators": [
+        "public_link",
+        "external_share",
+        "bulk_upload"
+      ]
+    },
+    {
+      "channel": "usb",
+      "indicators": [
+        "mass_storage",
+        "encrypted_device",
+        "unknown_device"
+      ]
+    },
+    {
+      "channel": "web_upload",
+      "indicators": [
+        "file_sharing_site",
+        "personal_cloud",
+        "paste_site"
+      ]
+    },
+    {
+      "channel": "print",
+      "indicators": [
+        "bulk_print",
+        "sensitive_document",
+        "off_hours"
+      ]
+    }
+  ]
+}

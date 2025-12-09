@@ -1,0 +1,150 @@
+{
+  "protocol": "iso8583",
+  "mti": "0400",
+  "message_type": "reversal_request",
+  "mti_description": "reversal_request",
+  "timestamp": "2025-11-22T16:46:14.485090",
+  "message_length": 126,
+  "fields": [
+    {
+      "field": "mti",
+      "name": "message_type_indicator",
+      "value": "0400",
+      "offset": 0,
+      "length": 4,
+      "type": "N"
+    },
+    {
+      "field": "bitmap",
+      "name": "bitmap",
+      "value": "723800010cc08000",
+      "offset": 4,
+      "length": 8,
+      "type": "B",
+      "fields_present": [
+        2,
+        3,
+        4,
+        7,
+        11,
+        12,
+        13,
+        32,
+        37,
+        38,
+        41,
+        42,
+        49
+      ]
+    },
+    {
+      "field": 2,
+      "name": "pan",
+      "value": "5500000000503131",
+      "type": "LLVAR",
+      "length": 16,
+      "length_prefix": 2,
+      "offset": 12
+    },
+    {
+      "field": 3,
+      "name": "processing_code",
+      "value": "000000",
+      "type": "N",
+      "offset": 30,
+      "length": 6
+    },
+    {
+      "field": 4,
+      "name": "amount",
+      "value": "614952",
+      "type": "N",
+      "offset": 36,
+      "length": 12
+    },
+    {
+      "field": 7,
+      "name": "transmission_datetime",
+      "value": "1122164614",
+      "type": "N",
+      "offset": 48,
+      "length": 10
+    },
+    {
+      "field": 11,
+      "name": "stan",
+      "value": "671343",
+      "type": "N",
+      "offset": 58,
+      "length": 6
+    },
+    {
+      "field": 12,
+      "name": "local_time",
+      "value": "164614",
+      "type": "N",
+      "offset": 64,
+      "length": 6
+    },
+    {
+      "field": 13,
+      "name": "local_date",
+      "value": "1122",
+      "type": "N",
+      "offset": 70,
+      "length": 4
+    },
+    {
+      "field": 32,
+      "name": "acquiring_inst",
+      "value": "624405",
+      "type": "LLVAR",
+      "length": 6,
+      "length_prefix": 2,
+      "offset": 74
+    },
+    {
+      "field": 37,
+      "name": "retrieval_ref",
+      "value": "430906432573",
+      "type": "AN",
+      "length": 12,
+      "offset": 82
+    },
+    {
+      "field": 38,
+      "name": "auth_code",
+      "value": "657463",
+      "type": "AN",
+      "length": 6,
+      "offset": 94
+    },
+    {
+      "field": 41,
+      "name": "terminal_id",
+      "value": "TERM6870",
+      "type": "ANS",
+      "length": 8,
+      "offset": 100
+    },
+    {
+      "field": 42,
+      "name": "merchant_id",
+      "value": "MERCH108149630",
+      "type": "ANS",
+      "length": 15,
+      "offset": 108
+    },
+    {
+      "field": 49,
+      "name": "currency_code",
+      "value": "826",
+      "type": "N",
+      "offset": 123,
+      "length": 3
+    }
+  ],
+  "field_count": 13,
+  "hash": "503811eed3d24df91554500005b1529932cde5867928f4b12b9444d7f511392e",
+  "sample_index": 854
+}

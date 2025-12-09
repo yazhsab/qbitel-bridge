@@ -1,0 +1,91 @@
+{
+  "source": "CRONOS AI UEBA Patterns",
+  "user_baselines": [
+    {
+      "metric": "login_times",
+      "baseline": "historical 30-day pattern",
+      "anomaly": "> 3 std deviations"
+    },
+    {
+      "metric": "login_locations",
+      "baseline": "known locations",
+      "anomaly": "impossible travel"
+    },
+    {
+      "metric": "data_access_volume",
+      "baseline": "role-based average",
+      "anomaly": "> 5x normal"
+    },
+    {
+      "metric": "privileged_operations",
+      "baseline": "job function baseline",
+      "anomaly": "first-time admin action"
+    },
+    {
+      "metric": "file_access_patterns",
+      "baseline": "department norms",
+      "anomaly": "sensitive file access"
+    }
+  ],
+  "entity_baselines": [
+    {
+      "entity": "server",
+      "metric": "outbound_connections",
+      "anomaly": "new destination IPs"
+    },
+    {
+      "entity": "database",
+      "metric": "query_patterns",
+      "anomaly": "bulk export queries"
+    },
+    {
+      "entity": "api_endpoint",
+      "metric": "request_rate",
+      "anomaly": "sudden spike"
+    },
+    {
+      "entity": "service_account",
+      "metric": "api_calls",
+      "anomaly": "off-hours activity"
+    }
+  ],
+  "insider_threat_indicators": [
+    {
+      "indicator": "resignation_submitted",
+      "risk_multiplier": 3.0
+    },
+    {
+      "indicator": "performance_issues",
+      "risk_multiplier": 1.5
+    },
+    {
+      "indicator": "access_to_sensitive_data",
+      "risk_multiplier": 2.0
+    },
+    {
+      "indicator": "after_hours_access",
+      "risk_multiplier": 1.8
+    },
+    {
+      "indicator": "bulk_downloads",
+      "risk_multiplier": 2.5
+    },
+    {
+      "indicator": "usb_device_usage",
+      "risk_multiplier": 2.0
+    },
+    {
+      "indicator": "cloud_storage_uploads",
+      "risk_multiplier": 2.2
+    }
+  ],
+  "ml_features": [
+    "time_since_last_activity",
+    "deviation_from_peer_group",
+    "access_pattern_entropy",
+    "geographic_anomaly_score",
+    "privilege_usage_ratio",
+    "data_movement_volume",
+    "communication_pattern_change"
+  ]
+}

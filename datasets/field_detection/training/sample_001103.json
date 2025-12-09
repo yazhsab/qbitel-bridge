@@ -1,0 +1,128 @@
+{
+  "protocol": "modbus",
+  "message_hex": "a6ed00000019c310ae230009120a1cfd8b336e518abe7a261ef79e3249498d",
+  "message_bytes": [
+    166,
+    237,
+    0,
+    0,
+    0,
+    25,
+    195,
+    16,
+    174,
+    35,
+    0,
+    9,
+    18,
+    10,
+    28,
+    253,
+    139,
+    51,
+    110,
+    81,
+    138,
+    190,
+    122,
+    38,
+    30,
+    247,
+    158,
+    50,
+    73,
+    73,
+    141
+  ],
+  "tags": [
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-LENGTH",
+    "I-LENGTH",
+    "B-FIELD",
+    "B-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD"
+  ],
+  "length": 31,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42733
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 25
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 195
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 16
+    },
+    {
+      "name": "start_address",
+      "offset": 8,
+      "length": 2,
+      "value": 44579
+    },
+    {
+      "name": "quantity",
+      "offset": 10,
+      "length": 2,
+      "value": 9
+    },
+    {
+      "name": "byte_count",
+      "offset": 12,
+      "length": 1,
+      "value": 18
+    },
+    {
+      "name": "register_values",
+      "offset": 13,
+      "length": 18,
+      "value": "0a1cfd8b336e518abe7a261ef79e3249498d"
+    }
+  ],
+  "hash": "b1ac7485d280193b83b7bc7592c48c595e625bf8cb78be2071778a03a6a15b6e"
+}

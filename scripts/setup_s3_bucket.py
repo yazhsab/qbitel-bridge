@@ -135,29 +135,74 @@ def configure_bucket_versioning(bucket_name: str) -> bool:
         return False
 
 
-def configure_bucket_cors(bucket_name: str) -> bool:
+def configure_bucket_cors(bucket_name: str, allowed_origins: list[str] | None = None) -> bool:
     """
     Configure CORS for the bucket to allow web uploads.
 
+    SECURITY: Uses environment variable for allowed origins in production.
+    Set CORS_ALLOWED_ORIGINS environment variable with comma-separated list of domains.
+    Example: CORS_ALLOWED_ORIGINS=https://cronos.example.com,https://admin.example.com
+
     Args:
         bucket_name: Name of the S3 bucket
+        allowed_origins: Optional list of allowed origins. If not provided,
+                        reads from CORS_ALLOWED_ORIGINS env var.
+                        Falls back to restrictive default if not set.
 
     Returns:
         True if successful
     """
+    import os
+
     try:
         s3_client = boto3.client('s3')
 
         logger.info("Configuring CORS...")
 
+        # SECURITY: Get allowed origins from environment or parameter
+        if allowed_origins is None:
+            env_origins = os.getenv('CORS_ALLOWED_ORIGINS', '')
+            if env_origins:
+                allowed_origins = [origin.strip() for origin in env_origins.split(',') if origin.strip()]
+                logger.info(f"Using CORS origins from environment: {allowed_origins}")
+            else:
+                # SECURITY: Default to restrictive origin instead of wildcard
+                # In development, set CORS_ALLOWED_ORIGINS=http://localhost:3000
+                allowed_origins = ['https://cronos.example.com']
+                logger.warning("⚠️  CORS_ALLOWED_ORIGINS not set - using restrictive default")
+                logger.warning("    Set CORS_ALLOWED_ORIGINS env var for your domains")
+
+        # Validate origins - must be proper URLs, not wildcards
+        validated_origins = []
+        for origin in allowed_origins:
+            if origin == '*':
+                logger.warning("⚠️  Wildcard '*' origin rejected for security - skipping")
+                continue
+            if not origin.startswith(('http://', 'https://')):
+                logger.warning(f"⚠️  Invalid origin format '{origin}' - skipping")
+                continue
+            validated_origins.append(origin)
+
+        if not validated_origins:
+            logger.error("❌ No valid origins configured - CORS will not be set")
+            logger.error("   Set CORS_ALLOWED_ORIGINS=https://your-domain.com")
+            return False
+
         cors_configuration = {
             'CORSRules': [
                 {
-                    'AllowedHeaders': ['*'],
+                    'AllowedHeaders': [
+                        'Content-Type',
+                        'Content-Length',
+                        'Authorization',
+                        'X-Amz-Date',
+                        'X-Amz-Security-Token',
+                        'X-Amz-Content-Sha256',
+                    ],
                     'AllowedMethods': ['GET', 'PUT', 'POST', 'HEAD'],
-                    'AllowedOrigins': ['*'],  # TODO: Restrict to your domain in production
-                    'ExposeHeaders': ['ETag'],
-                    'MaxAgeSeconds': 3000
+                    'AllowedOrigins': validated_origins,
+                    'ExposeHeaders': ['ETag', 'Content-Length'],
+                    'MaxAgeSeconds': 3600
                 }
             ]
         }
@@ -167,8 +212,7 @@ def configure_bucket_cors(bucket_name: str) -> bool:
             CORSConfiguration=cors_configuration
         )
 
-        logger.info("✅ CORS configured")
-        logger.warning("⚠️  CORS allows all origins - restrict in production!")
+        logger.info(f"✅ CORS configured for origins: {validated_origins}")
         return True
 
     except ClientError as e:

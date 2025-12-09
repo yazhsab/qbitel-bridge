@@ -17,7 +17,12 @@
       "Bash(del \"BREAKTHROUGH_INNOVATIONS.md\" \"INVESTOR_PITCH_DECK.md\" \"COMPLETE_PRODUCT_SUMMARY.md\" \"PHASE1_IMPLEMENTATION_PROGRESS.md\" \"PHASE1_QUICKSTART.md\" \"PHASE1_SPRINT_SUMMARY.md\" \"PHASE1_COMPLETE.md\" \"IMPLEMENTATION_SUMMARY.md\" \"PRODUCTION_GAPS_IMPLEMENTATION.md\" \"PRODUCTION_GAPS_IMPLEMENTATION_SUMMARY.md\" \"PRODUCTION_READINESS_GAPS.md\" \"PRODUCTION_READINESS_STATUS.md\" \"ENTERPRISE_EXPANSION_IMPLEMENTATION_PLAN.md\" \"CRONOS_AI_FINAL_PRODUCT_OVERVIEW.md\" \"architecture.md\" \"implementation-plan.md\")",
       "Bash(rm:*)",
       "Bash(start \"\" \"C:\\Users\\Yazhini\\cronos-ai\\investor_documents_html\\INVESTOR_PITCH_DECK.html\")",
-      "Bash(winget install:*)"
+      "Bash(winget install:*)",
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(xargs ls:*)",
+      "Bash(git -C /Users/prabakarankannan/cronos-ai log --oneline -20)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": []

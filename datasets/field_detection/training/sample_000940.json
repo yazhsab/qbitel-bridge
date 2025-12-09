@@ -1,0 +1,140 @@
+{
+  "protocol": "modbus",
+  "message_hex": "a6c50000001fe510a9a1000c18ae793c2f807b16f38d5503fa6ed2a9332d758e00dab2b6e7",
+  "message_bytes": [
+    166,
+    197,
+    0,
+    0,
+    0,
+    31,
+    229,
+    16,
+    169,
+    161,
+    0,
+    12,
+    24,
+    174,
+    121,
+    60,
+    47,
+    128,
+    123,
+    22,
+    243,
+    141,
+    85,
+    3,
+    250,
+    110,
+    210,
+    169,
+    51,
+    45,
+    117,
+    142,
+    0,
+    218,
+    178,
+    182,
+    231
+  ],
+  "tags": [
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-LENGTH",
+    "I-LENGTH",
+    "B-FIELD",
+    "B-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD"
+  ],
+  "length": 37,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42693
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 31
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 229
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 16
+    },
+    {
+      "name": "start_address",
+      "offset": 8,
+      "length": 2,
+      "value": 43425
+    },
+    {
+      "name": "quantity",
+      "offset": 10,
+      "length": 2,
+      "value": 12
+    },
+    {
+      "name": "byte_count",
+      "offset": 12,
+      "length": 1,
+      "value": 24
+    },
+    {
+      "name": "register_values",
+      "offset": 13,
+      "length": 24,
+      "value": "ae793c2f807b16f38d5503fa6ed2a9332d758e00dab2b6e7"
+    }
+  ],
+  "hash": "ee87e349fe436833a29b0457a7f58e79e8a3b197cd5009e3d6865d4deb42123a"
+}

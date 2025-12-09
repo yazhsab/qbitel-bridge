@@ -1,0 +1,136 @@
+{
+  "protocol": "modbus",
+  "message_hex": "a6f00000001d7910b66c000b16ee990c448ab0b7b339c31243363638a32e57dccf92d3",
+  "message_bytes": [
+    166,
+    240,
+    0,
+    0,
+    0,
+    29,
+    121,
+    16,
+    182,
+    108,
+    0,
+    11,
+    22,
+    238,
+    153,
+    12,
+    68,
+    138,
+    176,
+    183,
+    179,
+    57,
+    195,
+    18,
+    67,
+    54,
+    54,
+    56,
+    163,
+    46,
+    87,
+    220,
+    207,
+    146,
+    211
+  ],
+  "tags": [
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-LENGTH",
+    "I-LENGTH",
+    "B-FIELD",
+    "B-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "B-FIELD",
+    "B-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD",
+    "I-FIELD"
+  ],
+  "length": 35,
+  "fields": [
+    {
+      "name": "transaction_id",
+      "offset": 0,
+      "length": 2,
+      "value": 42736
+    },
+    {
+      "name": "protocol_id",
+      "offset": 2,
+      "length": 2,
+      "value": 0
+    },
+    {
+      "name": "length",
+      "offset": 4,
+      "length": 2,
+      "value": 29
+    },
+    {
+      "name": "unit_id",
+      "offset": 6,
+      "length": 1,
+      "value": 121
+    },
+    {
+      "name": "function_code",
+      "offset": 7,
+      "length": 1,
+      "value": 16
+    },
+    {
+      "name": "start_address",
+      "offset": 8,
+      "length": 2,
+      "value": 46700
+    },
+    {
+      "name": "quantity",
+      "offset": 10,
+      "length": 2,
+      "value": 11
+    },
+    {
+      "name": "byte_count",
+      "offset": 12,
+      "length": 1,
+      "value": 22
+    },
+    {
+      "name": "register_values",
+      "offset": 13,
+      "length": 22,
+      "value": "ee990c448ab0b7b339c31243363638a32e57dccf92d3"
+    }
+  ],
+  "hash": "ac0c9e7d283bcf9d1fd8bf2b99aaf44b977272fb0af0986c497786966d7a5333"
+}

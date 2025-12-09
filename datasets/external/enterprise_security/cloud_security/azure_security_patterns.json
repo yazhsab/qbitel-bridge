@@ -1,0 +1,32 @@
+{
+  "source": "CRONOS AI Azure Security Patterns",
+  "suspicious_operations": [
+    {
+      "operation": "Microsoft.Authorization/roleAssignments/write",
+      "threat": "privilege_escalation"
+    },
+    {
+      "operation": "Microsoft.Compute/virtualMachines/extensions/write",
+      "threat": "execution"
+    },
+    {
+      "operation": "Microsoft.KeyVault/vaults/secrets/getSecret/action",
+      "threat": "credential_access"
+    },
+    {
+      "operation": "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete",
+      "threat": "impact"
+    },
+    {
+      "operation": "Microsoft.Network/networkSecurityGroups/securityRules/write",
+      "threat": "defense_evasion"
+    }
+  ],
+  "sentinel_detection_rules": [
+    "Suspicious Azure AD sign-in",
+    "Mass secret retrieval from Key Vault",
+    "Azure VM extension installation",
+    "Storage account key regeneration",
+    "Network security group rule modification"
+  ]
+}

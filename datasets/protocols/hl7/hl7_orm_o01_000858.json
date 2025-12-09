@@ -1,0 +1,206 @@
+{
+  "protocol": "hl7_v2",
+  "message_type": "ORM^O01",
+  "timestamp": "2025-11-22T16:46:14.934292",
+  "trigger_event": "O01",
+  "segments": [
+    {
+      "segment": "MSH",
+      "fields": [
+        {
+          "name": "field_separator",
+          "position": 1,
+          "value": "|"
+        },
+        {
+          "name": "encoding_characters",
+          "position": 2,
+          "value": "^~\\&"
+        },
+        {
+          "name": "sending_application",
+          "position": 3,
+          "value": "LAB"
+        },
+        {
+          "name": "sending_facility",
+          "position": 4,
+          "value": "St.Mary'sHospital"
+        },
+        {
+          "name": "receiving_application",
+          "position": 5,
+          "value": "CDR"
+        },
+        {
+          "name": "receiving_facility",
+          "position": 6,
+          "value": "MAINLAB"
+        },
+        {
+          "name": "datetime",
+          "position": 7,
+          "value": "20251122154714"
+        },
+        {
+          "name": "message_type",
+          "position": 9,
+          "value": "ORM^O01"
+        },
+        {
+          "name": "message_control_id",
+          "position": 10,
+          "value": "771346"
+        },
+        {
+          "name": "processing_id",
+          "position": 11,
+          "value": "P"
+        },
+        {
+          "name": "version_id",
+          "position": 12,
+          "value": "2.5.1"
+        }
+      ]
+    },
+    {
+      "segment": "PID",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_id",
+          "position": 3,
+          "value": "PATSFJVJUZH"
+        },
+        {
+          "name": "patient_name",
+          "position": 5,
+          "value": "Martinez^Richard^E"
+        },
+        {
+          "name": "date_of_birth",
+          "position": 7,
+          "value": "19630819"
+        },
+        {
+          "name": "sex",
+          "position": 8,
+          "value": "F"
+        },
+        {
+          "name": "address",
+          "position": 11,
+          "value": "9691 Maple Dr^^Springfield^OH^62778^USA"
+        },
+        {
+          "name": "phone",
+          "position": 13,
+          "value": "(866)264-3782"
+        },
+        {
+          "name": "ssn",
+          "position": 19,
+          "value": "884-18-6444"
+        }
+      ]
+    },
+    {
+      "segment": "PV1",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "patient_class",
+          "position": 2,
+          "value": "P"
+        },
+        {
+          "name": "assigned_location",
+          "position": 3,
+          "value": "SURG^726^4"
+        },
+        {
+          "name": "attending_doctor",
+          "position": 7,
+          "value": "25670^Wilson^Robert^MD"
+        },
+        {
+          "name": "visit_number",
+          "position": 19,
+          "value": "V769BUDC599"
+        },
+        {
+          "name": "admit_datetime",
+          "position": 44,
+          "value": "20251104034214"
+        }
+      ]
+    },
+    {
+      "segment": "ORC",
+      "fields": [
+        {
+          "name": "order_control",
+          "value": "NW"
+        }
+      ]
+    },
+    {
+      "segment": "OBR",
+      "fields": [
+        {
+          "name": "set_id",
+          "position": 1,
+          "value": "1"
+        },
+        {
+          "name": "placer_order_number",
+          "position": 2,
+          "value": "ORDXPZPWG6KBC"
+        },
+        {
+          "name": "filler_order_number",
+          "position": 3,
+          "value": "FIL78RGP9FDAU"
+        },
+        {
+          "name": "universal_service_id",
+          "position": 4,
+          "value": "2823-3^Potassium^LN"
+        },
+        {
+          "name": "requested_datetime",
+          "position": 7,
+          "value": "20251116212214"
+        },
+        {
+          "name": "observation_datetime",
+          "position": 14,
+          "value": "20251121042314"
+        },
+        {
+          "name": "ordering_provider",
+          "position": 16,
+          "value": "86431^Williams^Elizabeth^MD"
+        },
+        {
+          "name": "result_status",
+          "position": 25,
+          "value": "F"
+        }
+      ]
+    }
+  ],
+  "fields": [],
+  "segment_count": 5,
+  "hash": "ad79150a003559dbdb866776b9736f814abc6f602be6baf020419fe11c50c2f1",
+  "sample_index": 858
+}
