@@ -37,7 +37,7 @@ except ImportError:
         'AggregatedDiscoveryServiceServicer': MockServicer
     })()
     any_pb2 = type('any_pb2', (), {'Any': dict})()
-    logger.warning("Envoy protobuf packages not available. Install with: pip install envoy-data-plane-api")
+    logger.warning("Envoy protobuf packages not available. Install with: pip install xds-protos grpcio-tools")
 
 
 class XDSResourceType(Enum):
