@@ -5,13 +5,29 @@ pub mod client;
 pub mod server;
 pub mod validation;
 
-// New PQC modules
+// Core PQC modules (NIST Standards)
 pub mod kyber;
+pub mod mlkem;
+pub mod falcon;
+pub mod dilithium;
+pub mod hybrid;
+
+// Key management modules
 pub mod hsm;
 pub mod lifecycle;
 pub mod performance;
 pub mod rotation;
 pub mod config;
+
+// Domain-specific modules
+#[cfg(feature = "healthcare")]
+pub mod domains_healthcare;
+#[cfg(feature = "automotive")]
+pub mod domains_automotive;
+#[cfg(feature = "aviation")]
+pub mod domains_aviation;
+#[cfg(feature = "industrial")]
+pub mod domains_industrial;
 
 #[cfg(test)]
 mod tests;
@@ -25,7 +41,22 @@ pub use errors::TlsError;
 pub use validation::{CertificateValidator, ValidationPolicy, ValidationResult, CertificatePinning, OcspConfig};
 
 // Re-export key PQC types
+// Re-export Kyber types
 pub use kyber::{KyberKEM, KyberKeyPair, KyberPublicKey, KyberPrivateKey, KyberSharedSecret, KyberCiphertext, EncapsulationResult};
+
+// Re-export ML-KEM types (NIST FIPS 203)
+pub use mlkem::{MlKemEngine, MlKemKeyPair, MlKemPublicKey, MlKemPrivateKey, MlKemCiphertext, MlKemSharedSecret, MlKemSecurityLevel, MlKemEncapsulationResult};
+
+// Re-export Falcon types
+pub use falcon::{FalconEngine, FalconKeyPair, FalconPublicKey, FalconPrivateKey, FalconSignature, FalconSecurityLevel, FalconBatchVerifier, FalconDomainConfig, FalconDomain};
+
+// Re-export Dilithium types
+pub use dilithium::{DilithiumEngine, DilithiumKeyPair, DilithiumPublicKey, DilithiumPrivateKey, DilithiumSignature, DilithiumSecurityLevel};
+
+// Re-export Hybrid types
+pub use hybrid::{HybridKemEngine, HybridKeyExchange, HybridKemResult, X25519MlKem768, P384MlKem1024};
+
+// Re-export key management types
 pub use hsm::{HsmPqcManager, HsmKeyAttributes, HsmKeyType, HsmPool, HsmSlotConfig, HsmCredentials};
 pub use lifecycle::{KeyLifecycleManager, KeyMetadata, KeyLifecycleState, KeyUsagePolicy, LifecycleEvent, LifecycleEventType};
 pub use performance::{MemoryPool, BatchProcessor, SimdOperations, PerformanceMonitor, GlobalPerformanceManager};
