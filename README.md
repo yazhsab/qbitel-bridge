@@ -215,15 +215,15 @@ Four-layer polyglot architecture — each layer built in the language optimized 
 ├──────────────────────────────────────────────────────────────────────────┤
 │                        Go Control Plane                                  │
 │          Service Orchestration  ·  OPA Policy Engine  ·  Vault Secrets   │
-│          Device Agent (TPM 2.0)  ·  gRPC + REST Gateway                 │
+│          Device Agent (TPM 2.0)  ·  gRPC + REST Gateway                  │
 ├──────────────────────────────────────────────────────────────────────────┤
-│                        Python AI Engine  (FastAPI)                        │
-│   Protocol Discovery  ·  Multi-Agent System  ·  LLM/RAG (Ollama-first)  │
+│                        Python AI Engine  (FastAPI)                       │
+│   Protocol Discovery  ·  Multi-Agent System  ·  LLM/RAG (Ollama-first)   │
 │   Compliance Automation  ·  Anomaly Detection  ·  Security Orchestrator  │
 │   Legacy Whisperer  ·  Marketplace  ·  Protocol Copilot                  │
 ├──────────────────────────────────────────────────────────────────────────┤
-│                        Rust Data Plane                                    │
-│     PQC-TLS (ML-KEM / ML-DSA)  ·  DPDK Packet Processing                │
+│                        Rust Data Plane                                   │
+│     PQC-TLS (ML-KEM / ML-DSA)  ·  DPDK Packet Processing                 │
 │     Wire-Speed Encryption  ·  DPI Engine  ·  Protocol Adapters           │
 │     K8s Operator  ·  HA Clustering  ·  AI Bridge (PyO3)                  │
 └──────────────────────────────────────────────────────────────────────────┘
@@ -525,7 +525,7 @@ See [LICENSE](LICENSE) for full license details.
   <a href="https://bridge.qbitel.com">Website</a> &nbsp;&bull;&nbsp;
   <a href="docs/">Documentation</a> &nbsp;&bull;&nbsp;
   <a href="https://github.com/yazhsab/qbitel-bridge">GitHub</a> &nbsp;&bull;&nbsp;
-  <a href="mailto:enterprise@qbitel.com">Enterprise Support</a>
+  <a href="mailto:hello@qbitel.com">Enterprise Support</a>
 </p>
 
 <p align="center">
