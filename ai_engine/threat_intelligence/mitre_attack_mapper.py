@@ -1,5 +1,5 @@
 """
-CRONOS AI - MITRE ATT&CK Mapper
+QBITEL - MITRE ATT&CK Mapper
 
 Maps security events and threat intelligence to MITRE ATT&CK framework
 tactics, techniques, and procedures (TTPs).
@@ -17,20 +17,20 @@ import aiohttp
 from prometheus_client import Counter, Gauge
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..security.models import SecurityEvent, ThreatLevel
 
 
 # Prometheus metrics
 ATTACK_TECHNIQUE_DETECTIONS = Counter(
-    "cronos_mitre_attack_technique_detections_total",
+    "qbitel_mitre_attack_technique_detections_total",
     "MITRE ATT&CK technique detections",
     ["technique_id", "tactic"],
     registry=None,
 )
 
 ATTACK_COVERAGE = Gauge(
-    "cronos_mitre_attack_coverage_percent",
+    "qbitel_mitre_attack_coverage_percent",
     "Percentage of MITRE ATT&CK techniques with detection coverage",
     registry=None,
 )

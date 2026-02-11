@@ -322,8 +322,8 @@ kubectl apply -f ops/deploy/kubernetes/zero-touch-security/configmap.yaml
 kubectl apply -f ops/deploy/kubernetes/zero-touch-security/monitoring.yaml
 
 # Verify deployment
-kubectl get pods -n cronos-ai -l app=zero-touch-security
-kubectl logs -n cronos-ai -l app=zero-touch-security --tail=100
+kubectl get pods -n qbitel -l app=zero-touch-security
+kubectl logs -n qbitel -l app=zero-touch-security --tail=100
 ```
 
 ### Configuration
@@ -367,7 +367,7 @@ ANTHROPIC_API_KEY=<your-anthropic-api-key>
 # Database Configuration
 TIMESCALEDB_HOST=timescaledb-service
 TIMESCALEDB_PORT=5432
-TIMESCALEDB_DATABASE=cronos_security
+TIMESCALEDB_DATABASE=qbitel_security
 TIMESCALEDB_USER=<username>
 TIMESCALEDB_PASSWORD=<password>
 
@@ -419,10 +419,10 @@ Prometheus metrics are automatically exposed:
 
 ```
 # Security event metrics
-cronos_security_events_total{event_type, severity, status}
-cronos_threat_detection_duration_seconds{threat_type}
-cronos_automated_responses_total{response_type, status}
-cronos_active_threats{severity}
+qbitel_security_events_total{event_type, severity, status}
+qbitel_threat_detection_duration_seconds{threat_type}
+qbitel_automated_responses_total{response_type, status}
+qbitel_active_threats{severity}
 ```
 
 ## Usage Examples
@@ -550,10 +550,10 @@ pytest ai_engine/tests/test_security_orchestrator.py --cov=ai_engine.llm.securit
 
 ```bash
 # View orchestrator logs
-kubectl logs -n cronos-ai -l app=zero-touch-security --tail=100 -f
+kubectl logs -n qbitel -l app=zero-touch-security --tail=100 -f
 
 # Check metrics
-curl http://localhost:9090/metrics | grep cronos_security
+curl http://localhost:9090/metrics | grep qbitel_security
 
 # View incident details
 curl http://localhost:8080/api/v1/security/incidents/INC-001
@@ -597,10 +597,10 @@ curl http://localhost:8080/api/v1/security/incidents/INC-001
 ## Support
 
 For issues, questions, or contributions:
-- GitHub Issues: [cronos-ai/issues](https://github.com/cronos-ai/issues)
-- Documentation: [docs.cronos-ai.com](https://docs.cronos-ai.com)
-- Email: security@cronos-ai.com
+- GitHub Issues: [qbitel/issues](https://github.com/yazhsab/issues)
+- Documentation: [docs.qbitel.com](https://docs.qbitel.com)
+- Email: security@qbitel.com
 
 ## License
 
-Copyright © 2024 CRONOS AI. All rights reserved.
+Copyright © 2024 QBITEL. All rights reserved.

@@ -1,4 +1,4 @@
-"""Top-level package for the CRONOS AI engine."""
+"""Top-level package for the QBITEL Bridge engine."""
 
 __all__ = [
     "__version__",

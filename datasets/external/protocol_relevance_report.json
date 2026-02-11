@@ -1,6 +1,6 @@
 {
   "generated_at": "2025-11-22T17:41:30.071336",
-  "cronos_ml_components": {
+  "qbitel_ml_components": {
     "bilstm_crf_field_detection": {
       "purpose": "Automatic field boundary detection in protocol messages",
       "data_requirements": [

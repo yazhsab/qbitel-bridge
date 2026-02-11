@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
   useLocation,
+  useNavigate,
 } from 'react-router-dom';
 import {
   ThemeProvider,
@@ -66,6 +67,85 @@ import { DeviceApiClient } from './api/devices';
 
 // Types
 import type { User } from './types/auth';
+
+// ErrorBoundary to prevent white-screen crashes
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends Component<
+  { children: React.ReactNode },
+  ErrorBoundaryState
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          minHeight="100vh"
+          bgcolor="#f5f5f5"
+          p={3}
+        >
+          <Box
+            bgcolor="white"
+            p={4}
+            borderRadius={2}
+            boxShadow={3}
+            maxWidth={500}
+            width="100%"
+            textAlign="center"
+          >
+            <Typography variant="h5" color="error" gutterBottom>
+              Something went wrong
+            </Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              An unexpected error occurred. Please try refreshing the page.
+            </Typography>
+            <Typography variant="body2" color="text.secondary" paragraph sx={{ fontFamily: 'monospace' }}>
+              {this.state.error?.message || 'Unknown error'}
+            </Typography>
+            <button
+              onClick={() => {
+                this.setState({ hasError: false, error: null });
+                window.location.href = '/dashboard';
+              }}
+              style={{
+                padding: '10px 24px',
+                backgroundColor: '#1976d2',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '14px',
+                cursor: 'pointer',
+              }}
+            >
+              Reload Application
+            </button>
+          </Box>
+        </Box>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const drawerWidth = 240;
 
@@ -139,6 +219,7 @@ interface AppState {
 
 function AppContent() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [state, setState] = useState<AppState>({
     user: null,
     loading: true,
@@ -165,7 +246,7 @@ function AppContent() {
       // Handle callback if present
       if (location.pathname === '/callback') {
         await authService.handleCallback();
-        window.history.replaceState({}, document.title, '/dashboard');
+        navigate('/dashboard', { replace: true });
         return;
       }
 
@@ -260,7 +341,7 @@ function AppContent() {
         <Box display="flex" flexDirection="column" alignItems="center">
           <CircularProgress color="inherit" />
           <Typography variant="h6" sx={{ mt: 2 }}>
-            Loading QSLB Console...
+            Loading QBITEL Console...
           </Typography>
         </Box>
       </Backdrop>
@@ -291,10 +372,10 @@ function AppContent() {
           width="100%"
         >
           <Typography variant="h4" component="h1" gutterBottom color="primary">
-            QSLB Console
+            QBITEL Console
           </Typography>
           <Typography variant="body1" color="text.secondary" align="center" paragraph>
-            Quantum-Safe Load Balancer Management Console
+            Quantum-Safe Legacy Modernization Platform Management Console
           </Typography>
           <Typography variant="body2" color="text.secondary" align="center" paragraph>
             Please sign in to access the administrative interface.
@@ -356,7 +437,7 @@ function AppContent() {
           </IconButton>
           
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            QSLB Console
+            QBITEL Console
           </Typography>
 
           <IconButton color="inherit" sx={{ mr: 1 }}>
@@ -428,7 +509,7 @@ function AppContent() {
                 <ListItemButton
                   selected={isActive}
                   onClick={() => {
-                    window.history.pushState({}, '', item.path);
+                    navigate(item.path);
                     handleDrawerToggle();
                   }}
                   sx={{
@@ -501,12 +582,14 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <AppContent />
-      </Router>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Router>
+          <AppContent />
+        </Router>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

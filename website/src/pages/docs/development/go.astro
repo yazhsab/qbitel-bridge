@@ -1,0 +1,124 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Go Development | QBITEL Bridge Docs" description="Go development guide for the QBITEL Bridge control plane and management API: go test, golangci-lint, and project structure.">
+  <h1 class="text-3xl font-bold text-white mb-2">Go Development Guide</h1>
+  <p class="text-gray-400 mb-8">Set up your Go development environment for the control plane, management API, and edge device agent.</p>
+
+  <h2 id="prerequisites" class="text-2xl font-bold text-white mt-12 mb-4">Prerequisites</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Go</strong> 1.21+ installed</li>
+    <li><strong class="text-white">golangci-lint</strong> for comprehensive linting</li>
+    <li><strong class="text-white">protoc</strong> for gRPC protobuf compilation (optional)</li>
+  </ul>
+
+  <h2 id="project-structure" class="text-2xl font-bold text-white mt-12 mb-4">Project Structure</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">go/
+  controlplane/                 <span class="text-gray-500"># Service orchestration</span>
+    cmd/controlplane/main.go    <span class="text-gray-500"># Entrypoint</span>
+    internal/
+      policy/                   <span class="text-gray-500"># OPA policy engine</span>
+        bundles.go              <span class="text-gray-500"># Policy bundle management</span>
+        engine_test.go          <span class="text-gray-500"># Policy engine tests</span>
+      vault/                    <span class="text-gray-500"># HashiCorp Vault client</span>
+        client.go               <span class="text-gray-500"># Vault API integration</span>
+    go.mod                      <span class="text-gray-500"># Module definition</span>
+
+  mgmtapi/                      <span class="text-gray-500"># Management REST API</span>
+    cmd/mgmtapi/main.go         <span class="text-gray-500"># Entrypoint</span>
+    internal/
+      devices/                  <span class="text-gray-500"># Device lifecycle</span>
+        certificates.go         <span class="text-gray-500"># Certificate management</span>
+        lifecycle.go            <span class="text-gray-500"># Device lifecycle</span>
+    go.mod
+
+  agents/device-agent/          <span class="text-gray-500"># Edge device agent</span>
+    main.go                     <span class="text-gray-500"># Entrypoint</span>
+    internal/
+      tpm/sealing.go            <span class="text-gray-500"># TPM secret sealing</span>
+    go.mod</code></pre>
+
+  <h2 id="building" class="text-2xl font-bold text-white mt-12 mb-4">Building</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Build control plane</span>
+cd go/controlplane
+go build -trimpath -o ../../dist/controlplane ./cmd/controlplane
+
+<span class="text-gray-500"># Build management API</span>
+cd go/mgmtapi
+go build -trimpath -o ../../dist/mgmtapi ./cmd/mgmtapi
+
+<span class="text-gray-500"># Build device agent</span>
+cd go/agents/device-agent
+go build -trimpath -o ../../../dist/device-agent .
+
+<span class="text-gray-500"># Run the control plane</span>
+./dist/controlplane</code></pre>
+
+  <h2 id="testing" class="text-2xl font-bold text-white mt-12 mb-4">Testing</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run all tests for control plane</span>
+cd go/controlplane && go test ./...
+
+<span class="text-gray-500"># Run all tests for management API</span>
+cd go/mgmtapi && go test ./...
+
+<span class="text-gray-500"># Run with verbose output</span>
+go test -v ./...
+
+<span class="text-gray-500"># Run with coverage</span>
+go test -cover ./...
+
+<span class="text-gray-500"># Generate coverage report</span>
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
+
+<span class="text-gray-500"># Run a specific test</span>
+go test -run TestPolicyEngine ./internal/policy/</code></pre>
+
+  <h2 id="linting" class="text-2xl font-bold text-white mt-12 mb-4">Linting</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Install golangci-lint</span>
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+<span class="text-gray-500"># Run linter</span>
+golangci-lint run ./...
+
+<span class="text-gray-500"># Run with all enabled linters</span>
+golangci-lint run --enable-all ./...
+
+<span class="text-gray-500"># Format code</span>
+gofmt -w .</code></pre>
+
+  <h2 id="opa-policies" class="text-2xl font-bold text-white mt-12 mb-4">Working with OPA Policies</h2>
+  <p class="text-gray-300 mb-4">The control plane loads OPA policy bundles from <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ops/opa-policies/</code>. When adding new policies:</p>
+  <ol class="list-decimal list-inside text-gray-300 space-y-2 mb-6">
+    <li>Write the Rego policy in <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ops/opa-policies/</code></li>
+    <li>Add test cases alongside the policy file</li>
+    <li>Register the policy in the bundle loader (<code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">internal/policy/bundles.go</code>)</li>
+    <li>Run policy tests: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">go test ./internal/policy/ -v</code></li>
+  </ol>
+
+  <h2 id="vault" class="text-2xl font-bold text-white mt-12 mb-4">Vault Integration</h2>
+  <p class="text-gray-300 mb-4">The <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">vault</code> package provides a client for HashiCorp Vault operations. For local development, start a Vault dev server:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Start Vault in dev mode</span>
+vault server -dev
+
+<span class="text-gray-500"># Set environment variables</span>
+export VAULT_ADDR=http://127.0.0.1:8200
+export VAULT_TOKEN=dev-root-token</code></pre>
+
+  <h2 id="conventions" class="text-2xl font-bold text-white mt-12 mb-4">Code Conventions</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>Follow the standard <a href="https://go.dev/doc/effective_go" class="text-quantum-400 hover:underline">Effective Go</a> guidelines</li>
+    <li>Use <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">internal/</code> packages for non-exported code</li>
+    <li>Error handling: always wrap errors with context using <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">fmt.Errorf</code></li>
+    <li>Use structured logging with <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">slog</code></li>
+    <li>Table-driven tests for comprehensive coverage</li>
+  </ul>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/architecture/control-plane" class="text-quantum-400 hover:underline">Control Plane Architecture</a> -- understand the system design</li>
+    <li><a href="/docs/api/grpc-api" class="text-quantum-400 hover:underline">gRPC API Reference</a> -- service definitions and protobuf schemas</li>
+    <li><a href="/docs/security/zero-trust" class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- policy enforcement design</li>
+  </ul>
+</DocsLayout>

@@ -1,23 +1,23 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cronos-ai-prod
+  name: qbitel-prod
   labels:
-    name: cronos-ai-prod
+    name: qbitel-prod
     environment: production
-    app.kubernetes.io/name: cronos-ai
+    app.kubernetes.io/name: qbitel
     app.kubernetes.io/instance: production
     app.kubernetes.io/version: "1.0.0"
     app.kubernetes.io/managed-by: helm
   annotations:
-    kubernetes.io/managed-by: "cronos-ai-operator"
-    description: "CRONOS AI Production Environment"
+    kubernetes.io/managed-by: "qbitel-operator"
+    description: "QBITEL Production Environment"
 ---
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: cronos-ai-prod-quota
-  namespace: cronos-ai-prod
+  name: qbitel-prod-quota
+  namespace: qbitel-prod
 spec:
   hard:
     requests.cpu: "50"
@@ -33,8 +33,8 @@ spec:
 apiVersion: v1
 kind: LimitRange
 metadata:
-  name: cronos-ai-prod-limits
-  namespace: cronos-ai-prod
+  name: qbitel-prod-limits
+  namespace: qbitel-prod
 spec:
   limits:
   - default:
@@ -51,8 +51,8 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: cronos-ai-prod-network-policy
-  namespace: cronos-ai-prod
+  name: qbitel-prod-network-policy
+  namespace: qbitel-prod
 spec:
   podSelector: {}
   policyTypes:
@@ -62,7 +62,7 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          name: cronos-ai-prod
+          name: qbitel-prod
     - namespaceSelector:
         matchLabels:
           name: istio-system
@@ -79,7 +79,7 @@ spec:
   - to:
     - namespaceSelector:
         matchLabels:
-          name: cronos-ai-prod
+          name: qbitel-prod
   - to:
     - namespaceSelector:
         matchLabels:

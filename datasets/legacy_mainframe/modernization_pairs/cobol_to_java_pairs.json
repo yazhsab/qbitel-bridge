@@ -1,0 +1,380 @@
+{
+  "metadata": {
+    "title": "COBOL to Java Modernization Training Pairs",
+    "version": "1.0.0",
+    "description": "Training data for COBOL to Java code conversion using LLM",
+    "total_pairs": 100,
+    "categories": ["data_structures", "arithmetic", "control_flow", "file_operations", "string_handling", "error_handling", "database"]
+  },
+  "pairs": [
+    {
+      "id": "J001",
+      "category": "data_structures",
+      "description": "Simple record to Java class",
+      "cobol": "       01  CUSTOMER-RECORD.\n           05  CUST-ID         PIC 9(8).\n           05  CUST-NAME       PIC X(30).\n           05  CUST-BALANCE    PIC S9(9)V99 COMP-3.",
+      "java": "public class CustomerRecord {\n    private int custId;\n    private String custName;\n    private BigDecimal custBalance;\n\n    // Getters and Setters\n    public int getCustId() { return custId; }\n    public void setCustId(int custId) { this.custId = custId; }\n    public String getCustName() { return custName; }\n    public void setCustName(String custName) { this.custName = custName; }\n    public BigDecimal getCustBalance() { return custBalance; }\n    public void setCustBalance(BigDecimal custBalance) { this.custBalance = custBalance; }\n}"
+    },
+    {
+      "id": "J002",
+      "category": "data_structures",
+      "description": "Nested structure to nested Java classes",
+      "cobol": "       01  ORDER-RECORD.\n           05  ORDER-HEADER.\n               10  ORDER-ID      PIC 9(10).\n               10  ORDER-DATE    PIC 9(8).\n           05  ORDER-ITEMS OCCURS 10 TIMES.\n               10  ITEM-CODE     PIC X(10).\n               10  ITEM-QTY      PIC 9(5).\n               10  ITEM-PRICE    PIC S9(7)V99.",
+      "java": "public class OrderRecord {\n    private OrderHeader orderHeader;\n    private List<OrderItem> orderItems;\n\n    public static class OrderHeader {\n        private long orderId;\n        private LocalDate orderDate;\n        // getters/setters\n    }\n\n    public static class OrderItem {\n        private String itemCode;\n        private int itemQty;\n        private BigDecimal itemPrice;\n        // getters/setters\n    }\n}"
+    },
+    {
+      "id": "J003",
+      "category": "data_structures",
+      "description": "REDEFINES to Java union/polymorphism",
+      "cobol": "       01  TRANSACTION-RECORD.\n           05  TRANS-TYPE       PIC X.\n           05  TRANS-DATA       PIC X(100).\n           05  TRANS-CREDIT REDEFINES TRANS-DATA.\n               10  CR-AMOUNT    PIC S9(9)V99.\n               10  CR-ACCOUNT   PIC 9(12).\n           05  TRANS-DEBIT REDEFINES TRANS-DATA.\n               10  DB-AMOUNT    PIC S9(9)V99.\n               10  DB-ACCOUNT   PIC 9(12).",
+      "java": "public abstract class TransactionRecord {\n    protected String transType;\n\n    public static class CreditTransaction extends TransactionRecord {\n        private BigDecimal amount;\n        private String account;\n    }\n\n    public static class DebitTransaction extends TransactionRecord {\n        private BigDecimal amount;\n        private String account;\n    }\n\n    public static TransactionRecord parse(String transType, byte[] data) {\n        return switch (transType) {\n            case \"C\" -> parseCreditTransaction(data);\n            case \"D\" -> parseDebitTransaction(data);\n            default -> throw new IllegalArgumentException(\"Unknown type\");\n        };\n    }\n}"
+    },
+    {
+      "id": "J004",
+      "category": "data_structures",
+      "description": "88-level conditions to Java enum",
+      "cobol": "       01  WS-STATUS           PIC X.\n           88  STATUS-ACTIVE    VALUE 'A'.\n           88  STATUS-INACTIVE  VALUE 'I'.\n           88  STATUS-PENDING   VALUE 'P'.\n           88  STATUS-CLOSED    VALUE 'C'.",
+      "java": "public enum Status {\n    ACTIVE('A'),\n    INACTIVE('I'),\n    PENDING('P'),\n    CLOSED('C');\n\n    private final char code;\n\n    Status(char code) {\n        this.code = code;\n    }\n\n    public char getCode() {\n        return code;\n    }\n\n    public static Status fromCode(char code) {\n        return Arrays.stream(values())\n            .filter(s -> s.code == code)\n            .findFirst()\n            .orElseThrow(() -> new IllegalArgumentException(\"Unknown status: \" + code));\n    }\n}"
+    },
+    {
+      "id": "J005",
+      "category": "arithmetic",
+      "description": "Basic arithmetic operations",
+      "cobol": "           ADD WS-AMOUNT TO WS-TOTAL.\n           SUBTRACT WS-DISCOUNT FROM WS-TOTAL.\n           MULTIPLY WS-QUANTITY BY WS-PRICE GIVING WS-LINE-TOTAL.\n           DIVIDE WS-TOTAL BY WS-COUNT GIVING WS-AVERAGE\n               REMAINDER WS-REMAINDER.",
+      "java": "total = total.add(amount);\ntotal = total.subtract(discount);\nBigDecimal lineTotal = quantity.multiply(price);\nBigDecimal[] result = total.divideAndRemainder(count);\nBigDecimal average = result[0];\nBigDecimal remainder = result[1];"
+    },
+    {
+      "id": "J006",
+      "category": "arithmetic",
+      "description": "COMPUTE statement to expression",
+      "cobol": "           COMPUTE WS-INTEREST = WS-PRINCIPAL * WS-RATE / 100\n               * WS-YEARS.\n           COMPUTE WS-COMPOUND = WS-PRINCIPAL *\n               (1 + WS-RATE / 100) ** WS-YEARS.",
+      "java": "BigDecimal interest = principal\n    .multiply(rate)\n    .divide(BigDecimal.valueOf(100), MathContext.DECIMAL128)\n    .multiply(BigDecimal.valueOf(years));\n\nBigDecimal compound = principal.multiply(\n    BigDecimal.ONE.add(rate.divide(BigDecimal.valueOf(100)))\n    .pow(years)\n);"
+    },
+    {
+      "id": "J007",
+      "category": "arithmetic",
+      "description": "ROUNDED and ON SIZE ERROR",
+      "cobol": "           DIVIDE WS-TOTAL BY WS-COUNT GIVING WS-AVERAGE ROUNDED\n               ON SIZE ERROR\n                   MOVE 0 TO WS-AVERAGE\n                   DISPLAY 'OVERFLOW ERROR'\n               NOT ON SIZE ERROR\n                   DISPLAY 'CALCULATION OK'\n           END-DIVIDE.",
+      "java": "try {\n    BigDecimal average = total.divide(count, 2, RoundingMode.HALF_UP);\n    System.out.println(\"CALCULATION OK\");\n} catch (ArithmeticException e) {\n    BigDecimal average = BigDecimal.ZERO;\n    System.out.println(\"OVERFLOW ERROR\");\n}"
+    },
+    {
+      "id": "J008",
+      "category": "control_flow",
+      "description": "IF-ELSE to Java if-else",
+      "cobol": "           IF WS-AMOUNT > 1000\n               IF WS-CUSTOMER-TYPE = 'P'\n                   COMPUTE WS-DISCOUNT = WS-AMOUNT * 0.10\n               ELSE\n                   COMPUTE WS-DISCOUNT = WS-AMOUNT * 0.05\n               END-IF\n           ELSE\n               MOVE 0 TO WS-DISCOUNT\n           END-IF.",
+      "java": "BigDecimal discount;\nif (amount.compareTo(BigDecimal.valueOf(1000)) > 0) {\n    if (\"P\".equals(customerType)) {\n        discount = amount.multiply(BigDecimal.valueOf(0.10));\n    } else {\n        discount = amount.multiply(BigDecimal.valueOf(0.05));\n    }\n} else {\n    discount = BigDecimal.ZERO;\n}"
+    },
+    {
+      "id": "J009",
+      "category": "control_flow",
+      "description": "EVALUATE to switch expression",
+      "cobol": "           EVALUATE TRUE\n               WHEN WS-CODE = 'A'\n                   PERFORM PROCESS-ADD\n               WHEN WS-CODE = 'U'\n                   PERFORM PROCESS-UPDATE\n               WHEN WS-CODE = 'D'\n                   PERFORM PROCESS-DELETE\n               WHEN OTHER\n                   DISPLAY 'INVALID CODE'\n           END-EVALUATE.",
+      "java": "switch (code) {\n    case \"A\" -> processAdd();\n    case \"U\" -> processUpdate();\n    case \"D\" -> processDelete();\n    default -> System.out.println(\"INVALID CODE\");\n}"
+    },
+    {
+      "id": "J010",
+      "category": "control_flow",
+      "description": "PERFORM VARYING to for loop",
+      "cobol": "           PERFORM VARYING WS-INDEX FROM 1 BY 1\n               UNTIL WS-INDEX > 10\n               ADD WS-AMOUNT(WS-INDEX) TO WS-TOTAL\n           END-PERFORM.",
+      "java": "for (int i = 0; i < 10; i++) {\n    total = total.add(amounts.get(i));\n}"
+    },
+    {
+      "id": "J011",
+      "category": "control_flow",
+      "description": "PERFORM UNTIL to while loop",
+      "cobol": "           PERFORM UNTIL WS-EOF = 'Y'\n               READ INPUT-FILE INTO WS-RECORD\n                   AT END MOVE 'Y' TO WS-EOF\n                   NOT AT END PERFORM PROCESS-RECORD\n               END-READ\n           END-PERFORM.",
+      "java": "try (BufferedReader reader = Files.newBufferedReader(inputPath)) {\n    String line;\n    while ((line = reader.readLine()) != null) {\n        processRecord(line);\n    }\n}"
+    },
+    {
+      "id": "J012",
+      "category": "control_flow",
+      "description": "GO TO with paragraph to method calls",
+      "cobol": "       MAIN-LOGIC.\n           IF WS-ERROR\n               GO TO ERROR-ROUTINE\n           END-IF.\n           PERFORM NORMAL-PROCESS.\n           GO TO END-PROGRAM.\n\n       ERROR-ROUTINE.\n           DISPLAY 'ERROR OCCURRED'.\n\n       END-PROGRAM.\n           STOP RUN.",
+      "java": "public void mainLogic() {\n    try {\n        if (hasError) {\n            throw new ProcessingException(\"Error occurred\");\n        }\n        normalProcess();\n    } catch (ProcessingException e) {\n        errorRoutine();\n    }\n}\n\nprivate void errorRoutine() {\n    System.out.println(\"ERROR OCCURRED\");\n}"
+    },
+    {
+      "id": "J013",
+      "category": "file_operations",
+      "description": "Sequential file read to Java BufferedReader",
+      "cobol": "       FILE-CONTROL.\n           SELECT INPUT-FILE ASSIGN TO 'INPUT.DAT'\n               ORGANIZATION IS SEQUENTIAL\n               FILE STATUS IS WS-FILE-STATUS.\n\n           OPEN INPUT INPUT-FILE.\n           READ INPUT-FILE INTO WS-RECORD\n               AT END SET WS-EOF TO TRUE.\n           CLOSE INPUT-FILE.",
+      "java": "public List<Record> readSequentialFile(Path inputPath) throws IOException {\n    List<Record> records = new ArrayList<>();\n    try (BufferedReader reader = Files.newBufferedReader(inputPath)) {\n        String line;\n        while ((line = reader.readLine()) != null) {\n            records.add(parseRecord(line));\n        }\n    }\n    return records;\n}"
+    },
+    {
+      "id": "J014",
+      "category": "file_operations",
+      "description": "Sequential file write to Java BufferedWriter",
+      "cobol": "           OPEN OUTPUT OUTPUT-FILE.\n           MOVE WS-DATA TO OUTPUT-RECORD.\n           WRITE OUTPUT-RECORD.\n           CLOSE OUTPUT-FILE.",
+      "java": "public void writeSequentialFile(Path outputPath, List<Record> records) throws IOException {\n    try (BufferedWriter writer = Files.newBufferedWriter(outputPath)) {\n        for (Record record : records) {\n            writer.write(formatRecord(record));\n            writer.newLine();\n        }\n    }\n}"
+    },
+    {
+      "id": "J015",
+      "category": "file_operations",
+      "description": "Indexed file to Java Map/Database",
+      "cobol": "       FILE-CONTROL.\n           SELECT CUSTOMER-FILE ASSIGN TO 'CUSTOMER'\n               ORGANIZATION IS INDEXED\n               ACCESS MODE IS RANDOM\n               RECORD KEY IS CUST-ID\n               FILE STATUS IS WS-FILE-STATUS.\n\n           READ CUSTOMER-FILE\n               KEY IS CUST-ID\n               INVALID KEY DISPLAY 'NOT FOUND'.\n\n           WRITE CUSTOMER-RECORD\n               INVALID KEY DISPLAY 'DUPLICATE KEY'.",
+      "java": "public class CustomerRepository {\n    private final Map<String, CustomerRecord> cache = new ConcurrentHashMap<>();\n\n    public Optional<CustomerRecord> findById(String custId) {\n        return Optional.ofNullable(cache.get(custId));\n    }\n\n    public void save(CustomerRecord record) {\n        if (cache.containsKey(record.getCustId())) {\n            throw new DuplicateKeyException(\"Customer already exists\");\n        }\n        cache.put(record.getCustId(), record);\n    }\n}"
+    },
+    {
+      "id": "J016",
+      "category": "file_operations",
+      "description": "VSAM KSDS to database repository",
+      "cobol": "           START CUSTOMER-FILE KEY >= CUST-ID\n               INVALID KEY DISPLAY 'KEY NOT FOUND'.\n\n           READ CUSTOMER-FILE NEXT\n               AT END SET WS-EOF TO TRUE.\n\n           REWRITE CUSTOMER-RECORD\n               INVALID KEY DISPLAY 'UPDATE FAILED'.\n\n           DELETE CUSTOMER-FILE\n               INVALID KEY DISPLAY 'DELETE FAILED'.",
+      "java": "@Repository\npublic interface CustomerRepository extends JpaRepository<Customer, String> {\n    \n    @Query(\"SELECT c FROM Customer c WHERE c.custId >= :startId ORDER BY c.custId\")\n    List<Customer> findByIdGreaterThanEqual(@Param(\"startId\") String startId);\n    \n    @Modifying\n    @Query(\"UPDATE Customer c SET c.name = :name WHERE c.custId = :id\")\n    int updateCustomer(@Param(\"id\") String id, @Param(\"name\") String name);\n}"
+    },
+    {
+      "id": "J017",
+      "category": "string_handling",
+      "description": "STRING statement to StringBuilder",
+      "cobol": "           STRING WS-FIRST-NAME DELIMITED BY SPACE\n                  ' ' DELIMITED BY SIZE\n                  WS-LAST-NAME DELIMITED BY SPACE\n               INTO WS-FULL-NAME\n               WITH POINTER WS-PTR\n               ON OVERFLOW DISPLAY 'NAME TOO LONG'.",
+      "java": "StringBuilder fullName = new StringBuilder();\ntry {\n    fullName.append(firstName.trim())\n            .append(\" \")\n            .append(lastName.trim());\n    if (fullName.length() > MAX_NAME_LENGTH) {\n        throw new StringOverflowException(\"NAME TOO LONG\");\n    }\n} catch (StringOverflowException e) {\n    System.out.println(e.getMessage());\n}"
+    },
+    {
+      "id": "J018",
+      "category": "string_handling",
+      "description": "UNSTRING statement to String.split",
+      "cobol": "           UNSTRING WS-INPUT-LINE DELIMITED BY ','\n               INTO WS-FIELD-1\n                    WS-FIELD-2\n                    WS-FIELD-3\n               TALLYING IN WS-FIELD-COUNT\n               ON OVERFLOW DISPLAY 'TOO MANY FIELDS'.",
+      "java": "String[] fields = inputLine.split(\",\", -1);\nif (fields.length > 3) {\n    System.out.println(\"TOO MANY FIELDS\");\n} else {\n    String field1 = fields.length > 0 ? fields[0] : \"\";\n    String field2 = fields.length > 1 ? fields[1] : \"\";\n    String field3 = fields.length > 2 ? fields[2] : \"\";\n    int fieldCount = fields.length;\n}"
+    },
+    {
+      "id": "J019",
+      "category": "string_handling",
+      "description": "INSPECT REPLACING",
+      "cobol": "           INSPECT WS-TEXT\n               REPLACING ALL 'OLD' BY 'NEW'\n               REPLACING LEADING SPACES BY ZEROS\n               REPLACING FIRST 'ABC' BY 'XYZ'.",
+      "java": "String text = originalText\n    .replace(\"OLD\", \"NEW\")\n    .replaceFirst(\"^\\\\s+\", \"0\".repeat(\n        originalText.length() - originalText.stripLeading().length()))\n    .replaceFirst(\"ABC\", \"XYZ\");"
+    },
+    {
+      "id": "J020",
+      "category": "string_handling",
+      "description": "INSPECT TALLYING",
+      "cobol": "           MOVE ZERO TO WS-COUNT.\n           INSPECT WS-TEXT\n               TALLYING WS-COUNT FOR ALL 'A'\n               WS-COUNT FOR LEADING SPACES\n               WS-COUNT FOR CHARACTERS BEFORE INITIAL '.'.",
+      "java": "long countA = text.chars().filter(c -> c == 'A').count();\nint leadingSpaces = text.length() - text.stripLeading().length();\nint charsBeforePeriod = text.indexOf('.') == -1 ? text.length() : text.indexOf('.');\nint totalCount = (int) countA + leadingSpaces + charsBeforePeriod;"
+    },
+    {
+      "id": "J021",
+      "category": "string_handling",
+      "description": "Reference modification to substring",
+      "cobol": "           MOVE WS-FULL-STRING(5:10) TO WS-SUBSTRING.\n           MOVE WS-DATA(1:WS-LENGTH) TO WS-RESULT.\n           IF WS-RECORD(50:2) = 'AB'\n               DISPLAY 'MATCH FOUND'.",
+      "java": "String substring = fullString.substring(4, 14);  // 0-based indexing\nString result = data.substring(0, length);\nif (record.length() >= 51 && record.substring(49, 51).equals(\"AB\")) {\n    System.out.println(\"MATCH FOUND\");\n}"
+    },
+    {
+      "id": "J022",
+      "category": "error_handling",
+      "description": "File status handling to exceptions",
+      "cobol": "           READ CUSTOMER-FILE INTO WS-CUSTOMER.\n           EVALUATE WS-FILE-STATUS\n               WHEN '00'\n                   PERFORM PROCESS-CUSTOMER\n               WHEN '10'\n                   SET WS-EOF TO TRUE\n               WHEN '23'\n                   DISPLAY 'RECORD NOT FOUND'\n               WHEN OTHER\n                   DISPLAY 'FILE ERROR: ' WS-FILE-STATUS\n                   STOP RUN\n           END-EVALUATE.",
+      "java": "try {\n    Customer customer = customerRepository.findById(id)\n        .orElseThrow(() -> new RecordNotFoundException(\"RECORD NOT FOUND\"));\n    processCustomer(customer);\n} catch (EOFException e) {\n    eof = true;\n} catch (RecordNotFoundException e) {\n    System.out.println(e.getMessage());\n} catch (IOException e) {\n    System.out.println(\"FILE ERROR: \" + e.getMessage());\n    throw new RuntimeException(e);\n}"
+    },
+    {
+      "id": "J023",
+      "category": "error_handling",
+      "description": "DECLARATIVES to try-catch-finally",
+      "cobol": "       DECLARATIVES.\n       INPUT-ERROR SECTION.\n           USE AFTER STANDARD ERROR PROCEDURE ON INPUT-FILE.\n           DISPLAY 'INPUT FILE ERROR'.\n           STOP RUN.\n       END DECLARATIVES.\n\n       PROCEDURE DIVISION.\n           OPEN INPUT INPUT-FILE.\n           PERFORM READ-FILE.\n           CLOSE INPUT-FILE.",
+      "java": "public void processFile(Path inputPath) {\n    try (BufferedReader reader = Files.newBufferedReader(inputPath)) {\n        readFile(reader);\n    } catch (IOException e) {\n        System.out.println(\"INPUT FILE ERROR\");\n        throw new RuntimeException(e);\n    }\n}\n\nprivate void readFile(BufferedReader reader) throws IOException {\n    String line;\n    while ((line = reader.readLine()) != null) {\n        processLine(line);\n    }\n}"
+    },
+    {
+      "id": "J024",
+      "category": "database",
+      "description": "Embedded SQL SELECT to JPA",
+      "cobol": "           EXEC SQL\n               SELECT CUST_NAME, CUST_BALANCE\n               INTO :WS-CUST-NAME, :WS-CUST-BALANCE\n               FROM CUSTOMER\n               WHERE CUST_ID = :WS-CUST-ID\n           END-EXEC.\n\n           EVALUATE SQLCODE\n               WHEN 0\n                   CONTINUE\n               WHEN 100\n                   DISPLAY 'CUSTOMER NOT FOUND'\n               WHEN OTHER\n                   DISPLAY 'SQL ERROR: ' SQLCODE\n           END-EVALUATE.",
+      "java": "@Repository\npublic interface CustomerRepository extends JpaRepository<Customer, Long> {\n    \n    @Query(\"SELECT c FROM Customer c WHERE c.custId = :custId\")\n    Optional<Customer> findByCustId(@Param(\"custId\") String custId);\n}\n\n// Service usage\npublic CustomerDTO getCustomer(String custId) {\n    return customerRepository.findByCustId(custId)\n        .map(c -> new CustomerDTO(c.getCustName(), c.getCustBalance()))\n        .orElseThrow(() -> new CustomerNotFoundException(\"CUSTOMER NOT FOUND\"));\n}"
+    },
+    {
+      "id": "J025",
+      "category": "database",
+      "description": "Cursor processing to Stream",
+      "cobol": "           EXEC SQL\n               DECLARE CUST_CURSOR CURSOR FOR\n               SELECT CUST_ID, CUST_NAME, CUST_BALANCE\n               FROM CUSTOMER\n               WHERE CUST_STATUS = 'A'\n               ORDER BY CUST_NAME\n           END-EXEC.\n\n           EXEC SQL OPEN CUST_CURSOR END-EXEC.\n\n           PERFORM UNTIL SQLCODE = 100\n               EXEC SQL\n                   FETCH CUST_CURSOR\n                   INTO :WS-CUST-ID, :WS-CUST-NAME, :WS-CUST-BALANCE\n               END-EXEC\n               IF SQLCODE = 0\n                   PERFORM PROCESS-CUSTOMER\n               END-IF\n           END-PERFORM.\n\n           EXEC SQL CLOSE CUST_CURSOR END-EXEC.",
+      "java": "@Query(\"SELECT c FROM Customer c WHERE c.status = 'A' ORDER BY c.name\")\nStream<Customer> findActiveCustomers();\n\n// Service usage\n@Transactional(readOnly = true)\npublic void processActiveCustomers() {\n    try (Stream<Customer> customers = customerRepository.findActiveCustomers()) {\n        customers.forEach(this::processCustomer);\n    }\n}"
+    },
+    {
+      "id": "J026",
+      "category": "database",
+      "description": "Batch INSERT to JPA batch processing",
+      "cobol": "           PERFORM VARYING WS-INDEX FROM 1 BY 1\n               UNTIL WS-INDEX > WS-RECORD-COUNT\n               EXEC SQL\n                   INSERT INTO TRANSACTION\n                   (TRANS_ID, TRANS_DATE, TRANS_AMOUNT)\n                   VALUES (:WS-TRANS-ID(WS-INDEX),\n                           :WS-TRANS-DATE(WS-INDEX),\n                           :WS-TRANS-AMT(WS-INDEX))\n               END-EXEC\n           END-PERFORM.\n\n           EXEC SQL COMMIT END-EXEC.",
+      "java": "@Transactional\npublic void batchInsertTransactions(List<TransactionDTO> transactions) {\n    int batchSize = 50;\n    List<Transaction> batch = new ArrayList<>(batchSize);\n    \n    for (TransactionDTO dto : transactions) {\n        batch.add(mapToEntity(dto));\n        if (batch.size() >= batchSize) {\n            transactionRepository.saveAll(batch);\n            entityManager.flush();\n            entityManager.clear();\n            batch.clear();\n        }\n    }\n    \n    if (!batch.isEmpty()) {\n        transactionRepository.saveAll(batch);\n    }\n}"
+    },
+    {
+      "id": "J027",
+      "category": "database",
+      "description": "Dynamic SQL to Criteria API",
+      "cobol": "           STRING 'SELECT * FROM CUSTOMER WHERE 1=1'\n               DELIMITED SIZE INTO WS-SQL-STMT.\n\n           IF WS-CUST-NAME NOT = SPACES\n               STRING WS-SQL-STMT DELIMITED SIZE\n                      \" AND CUST_NAME LIKE '%\" DELIMITED SIZE\n                      WS-CUST-NAME DELIMITED SPACE\n                      \"%'\" DELIMITED SIZE\n               INTO WS-SQL-STMT\n           END-IF.\n\n           EXEC SQL\n               PREPARE STMT FROM :WS-SQL-STMT\n           END-EXEC.\n           EXEC SQL\n               EXECUTE STMT\n           END-EXEC.",
+      "java": "public List<Customer> searchCustomers(CustomerSearchCriteria criteria) {\n    CriteriaBuilder cb = entityManager.getCriteriaBuilder();\n    CriteriaQuery<Customer> query = cb.createQuery(Customer.class);\n    Root<Customer> customer = query.from(Customer.class);\n    \n    List<Predicate> predicates = new ArrayList<>();\n    \n    if (StringUtils.hasText(criteria.getCustName())) {\n        predicates.add(cb.like(\n            customer.get(\"custName\"),\n            \"%\" + criteria.getCustName() + \"%\"\n        ));\n    }\n    \n    query.where(predicates.toArray(new Predicate[0]));\n    return entityManager.createQuery(query).getResultList();\n}"
+    },
+    {
+      "id": "J028",
+      "category": "database",
+      "description": "Transaction with SAVEPOINT",
+      "cobol": "           EXEC SQL\n               SAVEPOINT SP1\n           END-EXEC.\n\n           PERFORM UPDATE-ACCOUNTS.\n\n           IF WS-ERROR\n               EXEC SQL\n                   ROLLBACK TO SAVEPOINT SP1\n               END-EXEC\n           ELSE\n               EXEC SQL\n                   COMMIT\n               END-EXEC\n           END-IF.",
+      "java": "@Transactional\npublic void updateWithSavepoint() {\n    TransactionStatus status = transactionManager.getTransaction(\n        new DefaultTransactionDefinition());\n    Object savepoint = status.createSavepoint();\n    \n    try {\n        updateAccounts();\n        if (hasError) {\n            status.rollbackToSavepoint(savepoint);\n        } else {\n            transactionManager.commit(status);\n        }\n    } catch (Exception e) {\n        status.rollbackToSavepoint(savepoint);\n        throw e;\n    }\n}"
+    },
+    {
+      "id": "J029",
+      "category": "data_structures",
+      "description": "OCCURS DEPENDING ON to dynamic list",
+      "cobol": "       01  ORDER-RECORD.\n           05  ORDER-ID           PIC 9(10).\n           05  LINE-COUNT         PIC 99.\n           05  ORDER-LINES OCCURS 1 TO 99 TIMES\n               DEPENDING ON LINE-COUNT.\n               10  LINE-ITEM      PIC X(20).\n               10  LINE-QTY       PIC 9(5).\n               10  LINE-PRICE     PIC S9(7)V99.",
+      "java": "public class OrderRecord {\n    private long orderId;\n    private List<OrderLine> orderLines = new ArrayList<>();\n    \n    public static class OrderLine {\n        private String lineItem;\n        private int lineQty;\n        private BigDecimal linePrice;\n    }\n    \n    public int getLineCount() {\n        return orderLines.size();\n    }\n    \n    public void addLine(OrderLine line) {\n        if (orderLines.size() >= 99) {\n            throw new IllegalStateException(\"Maximum 99 lines allowed\");\n        }\n        orderLines.add(line);\n    }\n}"
+    },
+    {
+      "id": "J030",
+      "category": "data_structures",
+      "description": "INDEXED BY to List iteration",
+      "cobol": "       01  WS-TABLE.\n           05  WS-ENTRY OCCURS 100 TIMES INDEXED BY WS-IDX.\n               10  WS-KEY         PIC X(10).\n               10  WS-VALUE       PIC 9(10).\n\n           SET WS-IDX TO 1.\n           SEARCH WS-ENTRY\n               AT END DISPLAY 'NOT FOUND'\n               WHEN WS-KEY(WS-IDX) = WS-SEARCH-KEY\n                   MOVE WS-VALUE(WS-IDX) TO WS-RESULT\n           END-SEARCH.",
+      "java": "public class EntryTable {\n    private final List<Entry> entries = new ArrayList<>(100);\n    \n    public record Entry(String key, long value) {}\n    \n    public Optional<Long> search(String searchKey) {\n        return entries.stream()\n            .filter(e -> e.key().equals(searchKey))\n            .map(Entry::value)\n            .findFirst();\n    }\n}"
+    },
+    {
+      "id": "J031",
+      "category": "arithmetic",
+      "description": "Intrinsic functions to Java methods",
+      "cobol": "           COMPUTE WS-MAX = FUNCTION MAX(A, B, C).\n           COMPUTE WS-MIN = FUNCTION MIN(A, B, C).\n           COMPUTE WS-MEAN = FUNCTION MEAN(A, B, C, D).\n           COMPUTE WS-LENGTH = FUNCTION LENGTH(WS-STRING).\n           COMPUTE WS-MOD = FUNCTION MOD(WS-NUM, WS-DIV).\n           MOVE FUNCTION UPPER-CASE(WS-TEXT) TO WS-UPPER.\n           MOVE FUNCTION LOWER-CASE(WS-TEXT) TO WS-LOWER.\n           MOVE FUNCTION TRIM(WS-DATA) TO WS-TRIMMED.",
+      "java": "int max = Collections.max(Arrays.asList(a, b, c));\nint min = Collections.min(Arrays.asList(a, b, c));\ndouble mean = Arrays.asList(a, b, c, d).stream()\n    .mapToDouble(Integer::doubleValue).average().orElse(0);\nint length = string.length();\nint mod = num % div;\nString upper = text.toUpperCase();\nString lower = text.toLowerCase();\nString trimmed = data.trim();"
+    },
+    {
+      "id": "J032",
+      "category": "control_flow",
+      "description": "PERFORM THRU to method extraction",
+      "cobol": "           PERFORM 1000-VALIDATE-INPUT THRU 1000-EXIT.\n           PERFORM 2000-PROCESS-DATA THRU 2000-EXIT.\n           PERFORM 3000-OUTPUT-RESULTS THRU 3000-EXIT.\n\n       1000-VALIDATE-INPUT.\n           IF WS-INPUT = SPACES\n               MOVE 'N' TO WS-VALID-FLAG\n               GO TO 1000-EXIT\n           END-IF.\n           MOVE 'Y' TO WS-VALID-FLAG.\n       1000-EXIT.\n           EXIT.",
+      "java": "public void process() {\n    validateInput();\n    processData();\n    outputResults();\n}\n\nprivate void validateInput() {\n    validFlag = !StringUtils.isBlank(input);\n}\n\nprivate void processData() {\n    // Process data logic\n}\n\nprivate void outputResults() {\n    // Output results logic\n}"
+    },
+    {
+      "id": "J033",
+      "category": "file_operations",
+      "description": "Fixed-length record parsing",
+      "cobol": "       01  CUSTOMER-RECORD.\n           05  CUST-ID           PIC 9(8).\n           05  CUST-NAME         PIC X(30).\n           05  CUST-ADDRESS      PIC X(50).\n           05  CUST-BALANCE      PIC S9(9)V99 COMP-3.\n           05  CUST-STATUS       PIC X.\n\n           READ CUSTOMER-FILE INTO CUSTOMER-RECORD.",
+      "java": "public class CustomerRecordParser {\n    private static final int CUST_ID_START = 0;\n    private static final int CUST_ID_LENGTH = 8;\n    private static final int CUST_NAME_START = 8;\n    private static final int CUST_NAME_LENGTH = 30;\n    private static final int CUST_ADDRESS_START = 38;\n    private static final int CUST_ADDRESS_LENGTH = 50;\n    private static final int CUST_BALANCE_START = 88;\n    private static final int CUST_BALANCE_LENGTH = 6; // COMP-3\n    private static final int CUST_STATUS_START = 94;\n    \n    public CustomerRecord parse(byte[] record) {\n        return new CustomerRecord(\n            Integer.parseInt(extractString(record, CUST_ID_START, CUST_ID_LENGTH).trim()),\n            extractString(record, CUST_NAME_START, CUST_NAME_LENGTH).trim(),\n            extractString(record, CUST_ADDRESS_START, CUST_ADDRESS_LENGTH).trim(),\n            parsePackedDecimal(record, CUST_BALANCE_START, CUST_BALANCE_LENGTH, 2),\n            extractString(record, CUST_STATUS_START, 1).charAt(0)\n        );\n    }\n}"
+    },
+    {
+      "id": "J034",
+      "category": "string_handling",
+      "description": "Date conversion",
+      "cobol": "           MOVE WS-DATE TO WS-FORMATTED-DATE.\n      * Input: YYYYMMDD, Output: MM/DD/YYYY\n           STRING WS-DATE(5:2) DELIMITED SIZE\n                  '/' DELIMITED SIZE\n                  WS-DATE(7:2) DELIMITED SIZE\n                  '/' DELIMITED SIZE\n                  WS-DATE(1:4) DELIMITED SIZE\n               INTO WS-FORMATTED-DATE.",
+      "java": "public String formatDate(String yyyymmdd) {\n    LocalDate date = LocalDate.parse(yyyymmdd, \n        DateTimeFormatter.BASIC_ISO_DATE);\n    return date.format(DateTimeFormatter.ofPattern(\"MM/dd/yyyy\"));\n}"
+    },
+    {
+      "id": "J035",
+      "category": "error_handling",
+      "description": "CALL with error handling",
+      "cobol": "           CALL 'SUBPROG' USING WS-INPUT WS-OUTPUT\n               ON EXCEPTION\n                   DISPLAY 'SUBPROGRAM NOT FOUND'\n                   MOVE -1 TO WS-RETURN-CODE\n               NOT ON EXCEPTION\n                   MOVE 0 TO WS-RETURN-CODE\n           END-CALL.",
+      "java": "public int callSubprogram(InputData input) {\n    try {\n        OutputData output = subprogramService.process(input);\n        return 0;\n    } catch (ServiceNotFoundException e) {\n        System.out.println(\"SUBPROGRAM NOT FOUND\");\n        return -1;\n    }\n}"
+    },
+    {
+      "id": "J036",
+      "category": "database",
+      "description": "CICS LINK to REST call",
+      "cobol": "           EXEC CICS LINK\n               PROGRAM('CUSTINQ')\n               COMMAREA(WS-COMMAREA)\n               LENGTH(WS-COMMAREA-LEN)\n               RESP(WS-RESP)\n               RESP2(WS-RESP2)\n           END-EXEC.\n\n           IF WS-RESP NOT = DFHRESP(NORMAL)\n               DISPLAY 'LINK FAILED'\n           END-IF.",
+      "java": "@FeignClient(name = \"customer-service\")\npublic interface CustomerServiceClient {\n    @GetMapping(\"/api/customers/{custId}\")\n    ResponseEntity<CustomerDTO> getCustomer(@PathVariable String custId);\n}\n\n// Usage\ntry {\n    ResponseEntity<CustomerDTO> response = customerClient.getCustomer(custId);\n    if (response.getStatusCode().is2xxSuccessful()) {\n        return response.getBody();\n    }\n} catch (FeignException e) {\n    log.error(\"LINK FAILED\", e);\n}"
+    },
+    {
+      "id": "J037",
+      "category": "database",
+      "description": "CICS READ to Redis cache",
+      "cobol": "           EXEC CICS READ\n               FILE('CUSTFILE')\n               INTO(WS-CUSTOMER-RECORD)\n               RIDFLD(WS-CUST-KEY)\n               RESP(WS-RESP)\n           END-EXEC.\n\n           IF WS-RESP = DFHRESP(NOTFND)\n               DISPLAY 'CUSTOMER NOT FOUND'\n           END-IF.",
+      "java": "@Service\npublic class CustomerCacheService {\n    @Autowired\n    private RedisTemplate<String, Customer> redisTemplate;\n    \n    public Optional<Customer> readCustomer(String custKey) {\n        Customer customer = redisTemplate.opsForValue().get(\"customer:\" + custKey);\n        if (customer == null) {\n            log.info(\"CUSTOMER NOT FOUND\");\n            return Optional.empty();\n        }\n        return Optional.of(customer);\n    }\n}"
+    },
+    {
+      "id": "J038",
+      "category": "database",
+      "description": "MQ PUT to Kafka producer",
+      "cobol": "           MOVE 'QUEUE.NAME' TO MQOD-OBJECTNAME.\n           CALL 'MQOPEN' USING HCONN MQOD MQOO-OUTPUT\n               HOBJ COMPCODE REASON.\n\n           MOVE WS-MESSAGE TO MQMD-MSGID.\n           CALL 'MQPUT' USING HCONN HOBJ MQMD MQPMO\n               MSGLEN WS-MESSAGE COMPCODE REASON.\n\n           CALL 'MQCLOSE' USING HCONN HOBJ MQCO-NONE\n               COMPCODE REASON.",
+      "java": "@Service\npublic class MessageProducerService {\n    @Autowired\n    private KafkaTemplate<String, String> kafkaTemplate;\n    \n    public void sendMessage(String topic, String message) {\n        CompletableFuture<SendResult<String, String>> future =\n            kafkaTemplate.send(topic, message);\n        \n        future.whenComplete((result, ex) -> {\n            if (ex != null) {\n                log.error(\"MQPUT failed: {}\", ex.getMessage());\n            } else {\n                log.info(\"Message sent: {}\", result.getRecordMetadata());\n            }\n        });\n    }\n}"
+    },
+    {
+      "id": "J039",
+      "category": "data_structures",
+      "description": "COMP/BINARY to Java primitive",
+      "cobol": "       01  WS-NUMERIC-FIELDS.\n           05  WS-HALFWORD       PIC S9(4) COMP.    *> 2 bytes\n           05  WS-FULLWORD       PIC S9(9) COMP.    *> 4 bytes\n           05  WS-DOUBLEWORD     PIC S9(18) COMP.   *> 8 bytes\n           05  WS-UNSIGNED-HW    PIC 9(4) COMP.     *> 2 bytes unsigned",
+      "java": "public class NumericFields {\n    private short halfword;      // 2 bytes, -32768 to 32767\n    private int fullword;        // 4 bytes\n    private long doubleword;     // 8 bytes\n    private int unsignedHw;      // Use int for unsigned short (0-65535)\n    \n    // For reading from bytes (big-endian as in mainframe)\n    public void readFromBytes(byte[] data, int offset) {\n        ByteBuffer buffer = ByteBuffer.wrap(data, offset, 16)\n            .order(ByteOrder.BIG_ENDIAN);\n        halfword = buffer.getShort();\n        fullword = buffer.getInt();\n        doubleword = buffer.getLong();\n        unsignedHw = Short.toUnsignedInt(buffer.getShort());\n    }\n}"
+    },
+    {
+      "id": "J040",
+      "category": "data_structures",
+      "description": "COMP-3 packed decimal to BigDecimal",
+      "cobol": "       01  WS-PACKED-FIELDS.\n           05  WS-AMOUNT         PIC S9(7)V99 COMP-3.  *> 5 bytes\n           05  WS-QUANTITY       PIC S9(5) COMP-3.     *> 3 bytes\n           05  WS-RATE           PIC S9(3)V9(4) COMP-3. *> 4 bytes",
+      "java": "public class PackedDecimalConverter {\n    \n    public static BigDecimal unpackDecimal(byte[] data, int offset, \n            int length, int decimalPlaces) {\n        StringBuilder sb = new StringBuilder();\n        \n        for (int i = 0; i < length - 1; i++) {\n            int b = data[offset + i] & 0xFF;\n            sb.append(b >> 4);      // High nibble\n            sb.append(b & 0x0F);    // Low nibble\n        }\n        \n        int lastByte = data[offset + length - 1] & 0xFF;\n        sb.append(lastByte >> 4);   // Last digit\n        \n        int sign = lastByte & 0x0F; // Sign nibble\n        \n        BigDecimal result = new BigDecimal(sb.toString())\n            .movePointLeft(decimalPlaces);\n        \n        return (sign == 0x0D) ? result.negate() : result;\n    }\n}"
+    },
+    {
+      "id": "J041",
+      "category": "control_flow",
+      "description": "Batch program structure to Spring Batch",
+      "cobol": "       PROCEDURE DIVISION.\n       0000-MAIN.\n           PERFORM 1000-INITIALIZE.\n           PERFORM 2000-PROCESS UNTIL WS-EOF = 'Y'.\n           PERFORM 3000-TERMINATE.\n           STOP RUN.\n\n       1000-INITIALIZE.\n           OPEN INPUT INPUT-FILE.\n           OPEN OUTPUT OUTPUT-FILE.\n\n       2000-PROCESS.\n           READ INPUT-FILE AT END MOVE 'Y' TO WS-EOF.\n           IF WS-EOF NOT = 'Y'\n               PERFORM 2100-PROCESS-RECORD\n           END-IF.\n\n       3000-TERMINATE.\n           CLOSE INPUT-FILE OUTPUT-FILE.\n           DISPLAY 'RECORDS PROCESSED: ' WS-RECORD-COUNT.",
+      "java": "@Configuration\n@EnableBatchProcessing\npublic class BatchJobConfig {\n    \n    @Bean\n    public Job processJob(JobRepository jobRepository, Step processStep) {\n        return new JobBuilder(\"processJob\", jobRepository)\n            .start(processStep)\n            .build();\n    }\n    \n    @Bean\n    public Step processStep(JobRepository jobRepository,\n            PlatformTransactionManager transactionManager,\n            ItemReader<InputRecord> reader,\n            ItemProcessor<InputRecord, OutputRecord> processor,\n            ItemWriter<OutputRecord> writer) {\n        return new StepBuilder(\"processStep\", jobRepository)\n            .<InputRecord, OutputRecord>chunk(100, transactionManager)\n            .reader(reader)\n            .processor(processor)\n            .writer(writer)\n            .listener(new StepExecutionListener() {\n                @Override\n                public ExitStatus afterStep(StepExecution stepExecution) {\n                    log.info(\"RECORDS PROCESSED: {}\", \n                        stepExecution.getReadCount());\n                    return ExitStatus.COMPLETED;\n                }\n            })\n            .build();\n    }\n}"
+    },
+    {
+      "id": "J042",
+      "category": "file_operations",
+      "description": "Report writer to Jasper Reports",
+      "cobol": "       01  PRINT-LINE.\n           05  PL-CUST-ID        PIC 9(8).\n           05  FILLER            PIC X(3) VALUE SPACES.\n           05  PL-CUST-NAME      PIC X(30).\n           05  FILLER            PIC X(3) VALUE SPACES.\n           05  PL-BALANCE        PIC $$$,$$$,$$9.99-.\n\n       01  PAGE-HEADER.\n           05  FILLER            PIC X(20) VALUE 'CUSTOMER REPORT'.\n           05  FILLER            PIC X(10) VALUE SPACES.\n           05  PH-DATE           PIC X(10).\n           05  FILLER            PIC X(5) VALUE SPACES.\n           05  PH-PAGE           PIC Z(3)9.\n\n           WRITE PRINT-RECORD FROM PAGE-HEADER\n               AFTER ADVANCING PAGE.",
+      "java": "// JasperReports template (customer_report.jrxml)\n@Service\npublic class ReportService {\n    \n    public byte[] generateCustomerReport(List<CustomerDTO> customers) \n            throws JRException {\n        JasperReport report = JasperCompileManager\n            .compileReport(\"reports/customer_report.jrxml\");\n        \n        Map<String, Object> parameters = new HashMap<>();\n        parameters.put(\"REPORT_DATE\", LocalDate.now().toString());\n        \n        JRBeanCollectionDataSource dataSource = \n            new JRBeanCollectionDataSource(customers);\n        \n        JasperPrint jasperPrint = JasperFillManager\n            .fillReport(report, parameters, dataSource);\n        \n        return JasperExportManager.exportReportToPdf(jasperPrint);\n    }\n}"
+    },
+    {
+      "id": "J043",
+      "category": "error_handling",
+      "description": "Abend handling to exception framework",
+      "cobol": "           CALL 'CEE3ABD' USING WS-ABEND-CODE BY VALUE 0.\n\n       * Or using CICS\n           EXEC CICS ABEND\n               ABCODE('CUST')\n               NODUMP\n           END-EXEC.\n\n       * Handle abend\n           EXEC CICS HANDLE ABEND\n               PROGRAM('ERRHNDLR')\n           END-EXEC.",
+      "java": "@ControllerAdvice\npublic class GlobalExceptionHandler {\n    \n    @ExceptionHandler(ApplicationAbendException.class)\n    public ResponseEntity<ErrorResponse> handleAbend(\n            ApplicationAbendException ex, HttpServletRequest request) {\n        \n        log.error(\"Application ABEND: {} at {}\", \n            ex.getAbendCode(), request.getRequestURI());\n        \n        ErrorResponse error = new ErrorResponse(\n            ex.getAbendCode(),\n            ex.getMessage(),\n            Instant.now()\n        );\n        \n        return ResponseEntity\n            .status(HttpStatus.INTERNAL_SERVER_ERROR)\n            .body(error);\n    }\n}\n\npublic class ApplicationAbendException extends RuntimeException {\n    private final String abendCode;\n    \n    public ApplicationAbendException(String abendCode, String message) {\n        super(message);\n        this.abendCode = abendCode;\n    }\n}"
+    },
+    {
+      "id": "J044",
+      "category": "database",
+      "description": "DB2 stored procedure call",
+      "cobol": "           EXEC SQL\n               CALL CALCULATE_INTEREST(\n                   :WS-ACCOUNT-ID,\n                   :WS-PRINCIPAL,\n                   :WS-RATE,\n                   :WS-INTEREST)\n           END-EXEC.",
+      "java": "@Repository\npublic class AccountRepository {\n    \n    @Autowired\n    private JdbcTemplate jdbcTemplate;\n    \n    public BigDecimal calculateInterest(String accountId, \n            BigDecimal principal, BigDecimal rate) {\n        return jdbcTemplate.execute(\n            (CallableStatementCreator) con -> {\n                CallableStatement cs = con.prepareCall(\n                    \"{call CALCULATE_INTEREST(?, ?, ?, ?)}\");\n                cs.setString(1, accountId);\n                cs.setBigDecimal(2, principal);\n                cs.setBigDecimal(3, rate);\n                cs.registerOutParameter(4, Types.DECIMAL);\n                return cs;\n            },\n            (CallableStatementCallback<BigDecimal>) cs -> {\n                cs.execute();\n                return cs.getBigDecimal(4);\n            }\n        );\n    }\n}"
+    },
+    {
+      "id": "J045",
+      "category": "string_handling",
+      "description": "MOVE with formatting to String.format",
+      "cobol": "           MOVE WS-AMOUNT TO WS-FORMATTED-AMT.\n      * WS-AMOUNT: PIC S9(7)V99 COMP-3\n      * WS-FORMATTED-AMT: PIC $,$$$,$$9.99-\n\n           MOVE WS-DATE TO WS-FORMATTED-DATE.\n      * WS-DATE: PIC 9(8) (YYYYMMDD)\n      * WS-FORMATTED-DATE: PIC 99/99/9999",
+      "java": "public class FormattingUtils {\n    private static final NumberFormat CURRENCY_FORMAT = \n        NumberFormat.getCurrencyInstance(Locale.US);\n    private static final DateTimeFormatter DATE_FORMATTER = \n        DateTimeFormatter.ofPattern(\"MM/dd/yyyy\");\n    \n    public String formatAmount(BigDecimal amount) {\n        String formatted = CURRENCY_FORMAT.format(amount.abs());\n        return amount.signum() < 0 ? formatted + \"-\" : formatted;\n    }\n    \n    public String formatDate(String yyyymmdd) {\n        LocalDate date = LocalDate.parse(yyyymmdd, \n            DateTimeFormatter.BASIC_ISO_DATE);\n        return date.format(DATE_FORMATTER);\n    }\n}"
+    },
+    {
+      "id": "J046",
+      "category": "control_flow",
+      "description": "ACCEPT FROM DATE/TIME to Java time",
+      "cobol": "           ACCEPT WS-CURRENT-DATE FROM DATE YYYYMMDD.\n           ACCEPT WS-CURRENT-TIME FROM TIME.\n           ACCEPT WS-DAY-OF-WEEK FROM DAY-OF-WEEK.\n\n           MOVE FUNCTION CURRENT-DATE TO WS-TIMESTAMP.\n      * Format: YYYYMMDDHHMMSSHH (with hundredths)",
+      "java": "public class DateTimeService {\n    \n    public String getCurrentDate() {\n        return LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);\n    }\n    \n    public String getCurrentTime() {\n        return LocalTime.now().format(DateTimeFormatter.ofPattern(\"HHmmssSSS\"));\n    }\n    \n    public int getDayOfWeek() {\n        return LocalDate.now().getDayOfWeek().getValue();\n    }\n    \n    public String getCurrentTimestamp() {\n        return LocalDateTime.now()\n            .format(DateTimeFormatter.ofPattern(\"yyyyMMddHHmmssSS\"));\n    }\n}"
+    },
+    {
+      "id": "J047",
+      "category": "data_structures",
+      "description": "COPY statement to Java imports",
+      "cobol": "           COPY CUSTCOPY.\n           COPY ERRCOPY REPLACING ==:TAG:== BY ==WS-==.\n           COPY SQLCOPY OF LIBRARY.",
+      "java": "// CUSTCOPY -> CustomerRecord.java import\nimport com.company.model.CustomerRecord;\nimport com.company.model.ErrorCodes;\nimport com.company.sql.SqlConstants;\n\n// Or use composition instead of copy\n@Data\npublic class Transaction {\n    @Embedded\n    private CustomerRecord customer;\n    \n    @Embedded\n    private ErrorCodes errorCodes;\n}"
+    },
+    {
+      "id": "J048",
+      "category": "file_operations",
+      "description": "Sort file processing",
+      "cobol": "           SORT SORT-FILE ON ASCENDING KEY SORT-KEY\n               USING INPUT-FILE\n               GIVING OUTPUT-FILE.\n\n       * Or with INPUT/OUTPUT PROCEDURE\n           SORT SORT-FILE ON ASCENDING KEY SORT-KEY\n               INPUT PROCEDURE IS 1000-SELECT-RECORDS\n               OUTPUT PROCEDURE IS 2000-WRITE-RECORDS.",
+      "java": "public class FileSortService {\n    \n    public void sortFile(Path inputPath, Path outputPath, \n            Comparator<Record> comparator) throws IOException {\n        \n        List<Record> records = Files.lines(inputPath)\n            .map(this::parseRecord)\n            .sorted(comparator)\n            .collect(Collectors.toList());\n        \n        try (BufferedWriter writer = Files.newBufferedWriter(outputPath)) {\n            for (Record record : records) {\n                writer.write(formatRecord(record));\n                writer.newLine();\n            }\n        }\n    }\n    \n    // With filtering (INPUT PROCEDURE equivalent)\n    public void sortWithFilter(Path inputPath, Path outputPath,\n            Predicate<Record> filter, Comparator<Record> comparator) \n            throws IOException {\n        \n        List<Record> records = Files.lines(inputPath)\n            .map(this::parseRecord)\n            .filter(filter)  // INPUT PROCEDURE selection\n            .sorted(comparator)\n            .collect(Collectors.toList());\n        \n        writeRecords(outputPath, records);  // OUTPUT PROCEDURE\n    }\n}"
+    },
+    {
+      "id": "J049",
+      "category": "database",
+      "description": "IMS DL/I calls to JPA hierarchy",
+      "cobol": "           CALL 'CBLTDLI' USING DLI-GU\n               PCB-MASK\n               SEGMENT-IO-AREA\n               SSA1.\n\n           CALL 'CBLTDLI' USING DLI-GN\n               PCB-MASK\n               SEGMENT-IO-AREA.\n\n           CALL 'CBLTDLI' USING DLI-ISRT\n               PCB-MASK\n               SEGMENT-IO-AREA\n               SSA1.",
+      "java": "@Entity\n@Table(name = \"customer_hierarchy\")\npublic class Customer {\n    @Id\n    private String customerId;\n    \n    @OneToMany(mappedBy = \"customer\", cascade = CascadeType.ALL)\n    private List<Order> orders = new ArrayList<>();\n    \n    @OneToMany(mappedBy = \"customer\", cascade = CascadeType.ALL)\n    private List<Address> addresses = new ArrayList<>();\n}\n\n@Repository\npublic interface CustomerRepository extends JpaRepository<Customer, String> {\n    \n    // GU - Get Unique\n    @Query(\"SELECT c FROM Customer c LEFT JOIN FETCH c.orders WHERE c.customerId = :id\")\n    Optional<Customer> findByIdWithOrders(@Param(\"id\") String id);\n    \n    // GN - Get Next (navigation)\n    @Query(\"SELECT c FROM Customer c WHERE c.customerId > :lastId ORDER BY c.customerId\")\n    List<Customer> findNextCustomers(@Param(\"lastId\") String lastId, Pageable pageable);\n}"
+    },
+    {
+      "id": "J050",
+      "category": "control_flow",
+      "description": "Screen section to REST API/React",
+      "cobol": "       SCREEN SECTION.\n       01  CUSTOMER-SCREEN.\n           05  LINE 1 COLUMN 1 VALUE 'CUSTOMER INQUIRY'.\n           05  LINE 3 COLUMN 1 VALUE 'CUST ID:'.\n           05  LINE 3 COLUMN 12 PIC X(8) USING WS-CUST-ID.\n           05  LINE 5 COLUMN 1 VALUE 'NAME:'.\n           05  LINE 5 COLUMN 12 PIC X(30) FROM WS-CUST-NAME.\n           05  LINE 7 COLUMN 1 VALUE 'BALANCE:'.\n           05  LINE 7 COLUMN 12 PIC $,$$$,$$9.99- FROM WS-BALANCE.\n\n           DISPLAY CUSTOMER-SCREEN.\n           ACCEPT CUSTOMER-SCREEN.",
+      "java": "// REST Controller\n@RestController\n@RequestMapping(\"/api/customers\")\npublic class CustomerController {\n    \n    @GetMapping(\"/{custId}\")\n    public ResponseEntity<CustomerDTO> getCustomer(@PathVariable String custId) {\n        return customerService.findById(custId)\n            .map(ResponseEntity::ok)\n            .orElse(ResponseEntity.notFound().build());\n    }\n}\n\n// React component\nfunction CustomerInquiry() {\n    const [custId, setCustId] = useState('');\n    const [customer, setCustomer] = useState(null);\n    \n    const handleSearch = async () => {\n        const response = await fetch(`/api/customers/${custId}`);\n        setCustomer(await response.json());\n    };\n    \n    return (\n        <div>\n            <h1>CUSTOMER INQUIRY</h1>\n            <label>CUST ID: <input value={custId} onChange={e => setCustId(e.target.value)} /></label>\n            <button onClick={handleSearch}>Search</button>\n            {customer && (\n                <>\n                    <p>NAME: {customer.name}</p>\n                    <p>BALANCE: {formatCurrency(customer.balance)}</p>\n                </>\n            )}\n        </div>\n    );\n}"
+    }
+  ],
+  "additional_patterns": {
+    "cobol_to_java_type_mapping": {
+      "PIC X(n)": "String",
+      "PIC 9(n)": "int/long",
+      "PIC S9(n)": "int/long",
+      "PIC S9(n)V9(m)": "BigDecimal",
+      "PIC S9(n)V9(m) COMP-3": "BigDecimal (packed)",
+      "PIC S9(n) COMP": "int/long (binary)",
+      "PIC S9(n) COMP-1": "float",
+      "PIC S9(n) COMP-2": "double"
+    },
+    "common_annotations": {
+      "@Entity": "Replace VSAM/DB2 file structures",
+      "@Service": "Replace COBOL paragraphs/sections",
+      "@Repository": "Replace file I/O operations",
+      "@Transactional": "Replace COMMIT/ROLLBACK logic",
+      "@Validated": "Replace field validation logic"
+    }
+  }
+}

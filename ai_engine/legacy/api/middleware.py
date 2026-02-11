@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Whisperer API Middleware
+QBITEL Engine - Legacy System Whisperer API Middleware
 
 Custom middleware for request processing, logging, rate limiting, and security.
 """

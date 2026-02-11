@@ -223,7 +223,7 @@ func (ae *AutomationEngine) initializeMetrics() {
 	ae.metrics = &AutomationMetrics{
 		PlaybooksExecuted: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "qslb_automation_playbooks_executed_total",
+				Name: "qbitel_automation_playbooks_executed_total",
 				Help: "Total number of automation playbooks executed",
 			},
 			[]string{"playbook_id", "category", "status"},
@@ -231,7 +231,7 @@ func (ae *AutomationEngine) initializeMetrics() {
 		
 		ExecutionDuration: promauto.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name:    "qslb_automation_execution_duration_seconds",
+				Name:    "qbitel_automation_execution_duration_seconds",
 				Help:    "Duration of automation playbook executions",
 				Buckets: prometheus.ExponentialBuckets(1, 2, 12),
 			},
@@ -240,7 +240,7 @@ func (ae *AutomationEngine) initializeMetrics() {
 		
 		ExecutionSuccess: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "qslb_automation_execution_success_total",
+				Name: "qbitel_automation_execution_success_total",
 				Help: "Total number of successful automation executions",
 			},
 			[]string{"playbook_id", "category"},
@@ -248,7 +248,7 @@ func (ae *AutomationEngine) initializeMetrics() {
 		
 		StepExecutions: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "qslb_automation_step_executions_total",
+				Name: "qbitel_automation_step_executions_total",
 				Help: "Total number of automation step executions",
 			},
 			[]string{"step_type", "status"},
@@ -256,7 +256,7 @@ func (ae *AutomationEngine) initializeMetrics() {
 		
 		SafetyCheckFailures: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "qslb_automation_safety_check_failures_total",
+				Name: "qbitel_automation_safety_check_failures_total",
 				Help: "Total number of safety check failures",
 			},
 			[]string{"playbook_id", "check_name"},

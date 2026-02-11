@@ -1,0 +1,19 @@
+{
+  "program_id": "ORDI877",
+  "domain": "retail",
+  "program_type": "interface_program",
+  "author": "T. DAVIS",
+  "lines_of_code": 171,
+  "complexity_level": "simple",
+  "complexity_score": 0.392,
+  "files_used": 1,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.899152",
+  "hash": "1ff485a88831a088784f93a11fb9f2bb"
+}

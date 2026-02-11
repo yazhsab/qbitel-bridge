@@ -1,8 +1,8 @@
-# CRONOS AI - Service Level Objectives (SLOs)
+# QBITEL - Service Level Objectives (SLOs)
 
 ## Overview
 
-This document defines the Service Level Objectives (SLOs) for CRONOS AI services. SLOs represent the target level of reliability and performance we commit to delivering to our users.
+This document defines the Service Level Objectives (SLOs) for QBITEL services. SLOs represent the target level of reliability and performance we commit to delivering to our users.
 
 **Last Updated**: 2025-01-18
 **Version**: 1.0
@@ -35,7 +35,7 @@ An **error budget** is the maximum amount of unreliability allowed within the SL
 
 ### 1. REST API Service
 
-**Service**: CRONOS AI REST API
+**Service**: QBITEL REST API
 **Tier**: Tier 1 (Critical)
 **Business Impact**: Direct user-facing API
 
@@ -87,7 +87,7 @@ histogram_quantile(0.95,
 
 ### 2. gRPC API Service
 
-**Service**: CRONOS AI gRPC API
+**Service**: QBITEL gRPC API
 **Tier**: Tier 1 (Critical)
 **Business Impact**: High-performance protocol processing
 

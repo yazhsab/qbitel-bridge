@@ -15,7 +15,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// LoadTestEngine provides comprehensive load testing capabilities for CronosAI
+// LoadTestEngine provides comprehensive load testing capabilities for QbitelAI
 type LoadTestEngine struct {
 	logger *zap.Logger
 	
@@ -218,7 +218,7 @@ func (lte *LoadTestEngine) initializeMetrics() {
 	lte.metrics = &LoadTestMetrics{
 		RequestsTotal: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "cronosai_load_test_requests_total",
+				Name: "qbitel_load_test_requests_total",
 				Help: "Total number of load test requests",
 			},
 			[]string{"scenario", "method", "status"},
@@ -226,7 +226,7 @@ func (lte *LoadTestEngine) initializeMetrics() {
 		
 		RequestDuration: promauto.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name:    "cronosai_load_test_request_duration_seconds",
+				Name:    "qbitel_load_test_request_duration_seconds",
 				Help:    "Load test request duration in seconds",
 				Buckets: prometheus.ExponentialBuckets(0.001, 2, 15),
 			},
@@ -235,7 +235,7 @@ func (lte *LoadTestEngine) initializeMetrics() {
 		
 		RequestsInFlight: promauto.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Name: "cronosai_load_test_requests_in_flight",
+				Name: "qbitel_load_test_requests_in_flight",
 				Help: "Number of load test requests currently in flight",
 			},
 			[]string{"scenario"},
@@ -243,7 +243,7 @@ func (lte *LoadTestEngine) initializeMetrics() {
 		
 		ErrorsTotal: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "cronosai_load_test_errors_total",
+				Name: "qbitel_load_test_errors_total",
 				Help: "Total number of load test errors",
 			},
 			[]string{"scenario", "error_type"},
@@ -251,7 +251,7 @@ func (lte *LoadTestEngine) initializeMetrics() {
 		
 		ErrorRate: promauto.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Name: "cronosai_load_test_error_rate",
+				Name: "qbitel_load_test_error_rate",
 				Help: "Load test error rate percentage",
 			},
 			[]string{"scenario"},
@@ -259,7 +259,7 @@ func (lte *LoadTestEngine) initializeMetrics() {
 		
 		Throughput: promauto.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Name: "cronosai_load_test_throughput_rps",
+				Name: "qbitel_load_test_throughput_rps",
 				Help: "Load test throughput in requests per second",
 			},
 			[]string{"scenario"},
@@ -267,7 +267,7 @@ func (lte *LoadTestEngine) initializeMetrics() {
 		
 		VirtualUsers: promauto.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Name: "cronosai_load_test_virtual_users",
+				Name: "qbitel_load_test_virtual_users",
 				Help: "Number of active virtual users",
 			},
 			[]string{"scenario"},
@@ -275,7 +275,7 @@ func (lte *LoadTestEngine) initializeMetrics() {
 		
 		ConnectionsActive: promauto.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Name: "cronosai_load_test_connections_active",
+				Name: "qbitel_load_test_connections_active",
 				Help: "Number of active connections",
 			},
 			[]string{"target"},
@@ -741,7 +741,7 @@ func (lte *LoadTestEngine) loadDefaultScenarios() {
 			{
 				Method:      "GET",
 				Path:        "/health",
-				Headers:     map[string]string{"User-Agent": "CronosAI-LoadTest/1.0"},
+				Headers:     map[string]string{"User-Agent": "QbitelAI-LoadTest/1.0"},
 				ContentType: "application/json",
 				Weight:      1.0,
 			},

@@ -1,6 +1,6 @@
-# CRONOS AI - Technical Architecture
+# QBITEL - Technical Architecture
 
-This document provides a comprehensive technical overview of the CRONOS AI platform architecture, component design, and implementation details.
+This document provides a comprehensive technical overview of the QBITEL platform architecture, component design, and implementation details.
 
 ## Table of Contents
 
@@ -16,13 +16,13 @@ This document provides a comprehensive technical overview of the CRONOS AI platf
 
 ## System Overview
 
-CRONOS AI is a distributed, cloud-native security platform designed for quantum-safe protection of legacy and modern systems. The architecture follows microservices patterns with strong security and observability.
+QBITEL is a distributed, cloud-native security platform designed for quantum-safe protection of legacy and modern systems. The architecture follows microservices patterns with strong security and observability.
 
-![QBITEL AI Platform Architecture](diagrams/01_system_architecture.svg)
+![QBITEL Bridge Platform Architecture](diagrams/01_system_architecture.svg)
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                        CRONOS AI Platform                         │
+│                        QBITEL Platform                         │
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                   │
 │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐       │
@@ -47,7 +47,7 @@ CRONOS AI is a distributed, cloud-native security platform designed for quantum-
 
 ## Agentic AI Architecture
 
-CRONOS AI implements a **multi-agent architecture** where specialized AI agents autonomously manage security operations, protocol discovery, and threat response. The system uses LLM-powered reasoning, autonomous orchestration, and adaptive learning to minimize human intervention while maintaining safety and explainability.
+QBITEL implements a **multi-agent architecture** where specialized AI agents autonomously manage security operations, protocol discovery, and threat response. The system uses LLM-powered reasoning, autonomous orchestration, and adaptive learning to minimize human intervention while maintaining safety and explainability.
 
 ![AI Agent Ecosystem](diagrams/02_ai_agent_ecosystem.svg)
 
@@ -55,7 +55,7 @@ CRONOS AI implements a **multi-agent architecture** where specialized AI agents 
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                   CRONOS AI Agent Ecosystem                       │
+│                   QBITEL Agent Ecosystem                       │
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                   │
 │  ┌─────────────────────┐         ┌─────────────────────┐        │
@@ -672,7 +672,7 @@ Unknown Protocol Data
 
 ### Autonomous Decision Metrics
 
-CRONOS AI agents track comprehensive metrics on autonomous operations:
+QBITEL agents track comprehensive metrics on autonomous operations:
 
 ```
 Agent Performance Dashboard
@@ -922,7 +922,7 @@ Event Streaming Architecture
 
 ### Post-Quantum Cryptography
 
-CRONOS AI implements NIST-approved post-quantum cryptography algorithms.
+QBITEL implements NIST-approved post-quantum cryptography algorithms.
 
 ![Post-Quantum Cryptography](diagrams/06_quantum_cryptography.svg)
 
@@ -1032,7 +1032,7 @@ Encryption Flow
    ├── Original Protocol Data
    └── Legacy System Communication
    │
-2. CRONOS Interception
+2. QBITEL Interception
    ├── Protocol Recognition
    ├── Data Extraction
    └── Validation
@@ -1062,7 +1062,7 @@ Encryption Flow
 ```
 Kubernetes Cluster
 │
-├── Namespace: cronos-service-mesh
+├── Namespace: qbitel-service-mesh
 │   ├── xDS Server Deployment (3 replicas)
 │   │   ├── Pod Disruption Budget
 │   │   ├── Anti-Affinity Rules
@@ -1079,7 +1079,7 @@ Kubernetes Cluster
 │       ├── Roles
 │       └── RoleBindings
 │
-├── Namespace: cronos-container-security
+├── Namespace: qbitel-container-security
 │   ├── Admission Webhook (3 replicas)
 │   │   ├── ValidatingWebhookConfiguration
 │   │   ├── TLS Certificates
@@ -1110,13 +1110,241 @@ Kubernetes Cluster
 - **Network Policies**: Restrict pod-to-pod communication
 - **RBAC**: Least-privilege access control
 
+## Rust Data Plane
+
+**Location**: `rust/dataplane/`
+
+The Rust data plane provides wire-speed cryptographic operations and protocol parsing for performance-critical paths.
+
+### PQC-TLS Implementation
+
+**Location**: `rust/dataplane/crates/pqc_tls/`
+
+```
+Rust Data Plane
+│
+├── PQC-TLS Library (pqc_tls crate)
+│   ├── ML-KEM (Kyber) Key Encapsulation
+│   │   ├── Kyber-512, Kyber-768, Kyber-1024
+│   │   └── Hybrid modes (X25519 + Kyber)
+│   │
+│   ├── ML-DSA (Dilithium) Digital Signatures
+│   │   ├── Dilithium-2, Dilithium-3, Dilithium-5
+│   │   └── Certificate signing and verification
+│   │
+│   ├── Falcon-1024 Signatures
+│   ├── SLH-DSA (SPHINCS+) Stateless Signatures
+│   │
+│   ├── Domain-Specific PQC Profiles
+│   │   ├── Banking (SWIFT/SEPA constraints)
+│   │   ├── Healthcare (pacemaker/insulin pump power limits)
+│   │   ├── Automotive (V2X/IEEE 1609.2 latency)
+│   │   ├── Aviation (ADS-B bandwidth constraints)
+│   │   └── Industrial (IEC 62351/SCADA cycles)
+│   │
+│   └── TLS 1.3 Integration
+│       ├── Post-quantum key exchange
+│       ├── Hybrid handshake
+│       └── Session resumption
+│
+├── Protocol Parser
+│   ├── Wire-format parsing
+│   ├── Binary protocol handling
+│   └── Zero-copy deserialization
+│
+└── Performance Targets
+    ├── Key generation: <1ms
+    ├── Encapsulation: <0.5ms
+    ├── Signature: <2ms
+    └── TLS handshake: <5ms
+```
+
+## Go Control Plane
+
+**Location**: `go/`
+
+The Go layer provides service orchestration, management APIs, and edge device agents.
+
+```
+Go Services
+│
+├── Control Plane (go/controlplane/)
+│   ├── Service Orchestration
+│   │   ├── Component lifecycle management
+│   │   ├── Health monitoring
+│   │   └── Configuration distribution
+│   │
+│   ├── Policy Engine
+│   │   ├── Security policy evaluation
+│   │   ├── Protocol routing rules
+│   │   └── Rate limiting and quotas
+│   │
+│   └── gRPC API
+│       ├── Internal service communication
+│       └── Streaming updates
+│
+├── Management API (go/mgmtapi/)
+│   ├── REST API Gateway
+│   │   ├── Protocol management endpoints
+│   │   ├── System configuration
+│   │   ├── Health and status
+│   │   └── Metrics aggregation
+│   │
+│   └── Authentication & Authorization
+│       ├── JWT validation
+│       ├── RBAC enforcement
+│       └── API key management
+│
+└── Device Agent (go/agents/device-agent/)
+    ├── Edge Protocol Collection
+    ├── Local PQC operations
+    ├── Heartbeat and telemetry
+    └── Offline-capable operation
+```
+
+## UI Console
+
+**Location**: `ui/console/`
+
+React/TypeScript admin dashboard providing visibility into all platform operations.
+
+```
+UI Console (React + TypeScript)
+│
+├── Dashboard
+│   ├── System health overview
+│   ├── Protocol discovery status
+│   ├── Security incident timeline
+│   └── Compliance scorecard
+│
+├── Protocol Management
+│   ├── Discovery results browser
+│   ├── Grammar visualization
+│   ├── Field mapping editor
+│   └── Parser testing sandbox
+│
+├── Protocol Copilot
+│   ├── Natural language protocol queries
+│   ├── Threat assessment interface
+│   └── Conversation history
+│
+├── Marketplace Interface
+│   ├── Protocol browsing and search
+│   ├── Publishing workflow
+│   └── License management
+│
+├── Security Operations
+│   ├── Incident management
+│   ├── Decision engine dashboard
+│   ├── Threat analysis views
+│   └── Audit log browser
+│
+└── Enterprise Features
+    ├── Multi-tenant management
+    ├── OIDC/SSO integration
+    ├── Role-based access control
+    └── Custom branding
+```
+
+## Legacy System Whisperer
+
+**Location**: `ai_engine/legacy/`
+
+Deep analysis engine for understanding and documenting undocumented legacy systems.
+
+```
+Legacy System Whisperer
+│
+├── COBOL Analysis
+│   ├── Copybook Parser
+│   │   ├── Field extraction (PIC clauses)
+│   │   ├── Record layout mapping
+│   │   ├── REDEFINES handling
+│   │   └── Level-number hierarchy
+│   │
+│   ├── JCL Analyzer
+│   │   ├── Job flow mapping
+│   │   ├── Dataset dependency graphs
+│   │   └── Step-level analysis
+│   │
+│   └── Business Rule Extractor
+│       ├── IF/EVALUATE detection
+│       ├── PERFORM flow analysis
+│       └── Natural language documentation
+│
+├── Mainframe Discovery
+│   ├── Dataset catalog scanning
+│   ├── Program call tree analysis
+│   ├── Data flow mapping
+│   └── Volume usage tracking
+│
+├── Predictive Analysis
+│   ├── Failure prediction (aging hardware)
+│   ├── Capacity forecasting
+│   ├── Modernization readiness scoring
+│   └── Risk assessment
+│
+└── Knowledge Retention
+    ├── System documentation generation
+    ├── Tribal knowledge capture
+    ├── Version history tracking
+    └── Configurable retention (default 5 years)
+```
+
+## Protocol Marketplace
+
+**Location**: `ai_engine/marketplace/`
+
+Community-driven platform for sharing, discovering, and commercializing protocol definitions.
+
+```
+Protocol Marketplace
+│
+├── Protocol Registry
+│   ├── Metadata Management
+│   │   ├── Name, version, description
+│   │   ├── Licensing (open/commercial)
+│   │   ├── Industry tags
+│   │   └── Compatibility matrix
+│   │
+│   ├── Validation Pipeline
+│   │   ├── Schema validation
+│   │   ├── Security scanning
+│   │   ├── Performance testing
+│   │   └── Compatibility checks
+│   │
+│   └── Version Management
+│       ├── Semantic versioning
+│       ├── Dependency resolution
+│       └── Deprecation tracking
+│
+├── Commerce (Stripe Connect)
+│   ├── Publisher accounts
+│   ├── Subscription management
+│   ├── Usage-based billing
+│   └── Revenue sharing
+│
+├── Storage (S3)
+│   ├── Protocol definition files
+│   ├── Grammar artifacts
+│   ├── Parser binaries
+│   └── Documentation assets
+│
+└── Frontend
+    ├── Search and discovery
+    ├── Publishing wizard
+    ├── Review and ratings
+    └── License management
+```
+
 ## Technology Stack
 
 ### Programming Languages
 
-- **Python 3.9+**: AI Engine, cloud-native components
-- **Rust**: High-performance data plane (future)
-- **Go**: Control plane components (future)
+- **Python 3.9+**: AI Engine, cloud-native components, compliance
+- **Rust**: High-performance data plane, PQC-TLS implementation
+- **Go**: Control plane, management API, device agents
+- **TypeScript/React**: Admin console UI
 
 ### AI/ML Frameworks
 
@@ -1127,9 +1355,10 @@ Kubernetes Cluster
 
 ### Cryptography
 
-- **kyber-py**: Kyber KEM implementation
-- **dilithium-py**: Dilithium signatures
-- **liboqs-python**: Comprehensive PQC library
+- **kyber-py**: Kyber KEM implementation (Python)
+- **dilithium-py**: Dilithium signatures (Python)
+- **liboqs-python**: Comprehensive PQC library (Python)
+- **oqs-rs / liboqs**: PQC implementation (Rust)
 - **cryptography**: AES-256-GCM, TLS
 
 ### Cloud-Native
@@ -1231,6 +1460,6 @@ Kubernetes Cluster
 
 ---
 
-**Last Updated**: 2025-01-16
-**Version**: 1.0
+**Last Updated**: 2025-02-08
+**Version**: 2.0
 **Status**: Production Architecture

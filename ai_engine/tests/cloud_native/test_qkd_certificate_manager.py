@@ -79,7 +79,7 @@ class TestQuantumCertificateManager:
     def test_generate_root_ca(self, cert_manager):
         """Test root CA generation"""
         root_ca = cert_manager.generate_root_ca(
-            subject="CN=Cronos Root CA,O=Cronos AI",
+            subject="CN=Qbitel Root CA,O=Qbitel AI",
             validity_years=10
         )
 
@@ -97,7 +97,7 @@ class TestQuantumCertificateManager:
 
         # Check metadata
         metadata = root_ca["metadata"]
-        assert "CN=Cronos Root CA" in metadata["subject"]
+        assert "CN=Qbitel Root CA" in metadata["subject"]
 
     def test_generate_service_certificate(self, cert_manager):
         """Test service certificate generation"""

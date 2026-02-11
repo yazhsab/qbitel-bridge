@@ -1,0 +1,19 @@
+{
+  "program_id": "SHPU294",
+  "domain": "transportation",
+  "program_type": "conversion_utility",
+  "author": "D. JONES",
+  "lines_of_code": 240,
+  "complexity_level": "complex",
+  "complexity_score": 0.672,
+  "files_used": 4,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.805900",
+  "hash": "c149a0b6f349aeded665fc5f2ab90f68"
+}

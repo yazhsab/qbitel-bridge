@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ##############################################################################
-# CRONOS AI Deployment Script
-# Automates the deployment of CRONOS AI to Kubernetes using Helm
+# QBITEL Deployment Script
+# Automates the deployment of QBITEL to Kubernetes using Helm
 ##############################################################################
 
 set -euo pipefail
@@ -16,9 +16,9 @@ NC='\033[0m' # No Color
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-HELM_CHART_DIR="$PROJECT_ROOT/helm/cronos-ai"
-NAMESPACE="${NAMESPACE:-cronos-service-mesh}"
-RELEASE_NAME="${RELEASE_NAME:-cronos-ai}"
+HELM_CHART_DIR="$PROJECT_ROOT/helm/qbitel"
+NAMESPACE="${NAMESPACE:-qbitel-service-mesh}"
+RELEASE_NAME="${RELEASE_NAME:-qbitel}"
 VALUES_FILE="${VALUES_FILE:-}"
 ENVIRONMENT="${ENVIRONMENT:-production}"
 
@@ -95,8 +95,8 @@ validate_helm_chart() {
     fi
 }
 
-deploy_cronos_ai() {
-    print_header "Deploying CRONOS AI"
+deploy_qbitel() {
+    print_header "Deploying QBITEL"
 
     cd "$HELM_CHART_DIR"
 
@@ -143,7 +143,7 @@ deploy_cronos_ai() {
 
     # Execute deployment
     if eval "$HELM_CMD"; then
-        print_success "CRONOS AI deployed successfully"
+        print_success "QBITEL deployed successfully"
     else
         print_error "Deployment failed"
         exit 1
@@ -157,8 +157,8 @@ verify_deployment() {
     echo "Waiting for deployments to be ready..."
 
     if kubectl wait --for=condition=available --timeout=300s \
-        deployment/cronos-xds-server \
-        deployment/cronos-admission-webhook \
+        deployment/qbitel-xds-server \
+        deployment/qbitel-admission-webhook \
         -n "$NAMESPACE" 2>/dev/null; then
         print_success "All deployments are ready"
     else
@@ -192,7 +192,7 @@ run_smoke_tests() {
 
     # Test 1: Check xDS Server health
     echo "Testing xDS Server health endpoint..."
-    if kubectl exec -n "$NAMESPACE" deployment/cronos-xds-server -- \
+    if kubectl exec -n "$NAMESPACE" deployment/qbitel-xds-server -- \
         curl -f http://localhost:8081/healthz &> /dev/null; then
         print_success "xDS Server is healthy"
     else
@@ -201,7 +201,7 @@ run_smoke_tests() {
 
     # Test 2: Check admission webhook
     echo "Testing Admission Webhook..."
-    if kubectl get validatingwebhookconfigurations cronos-validating-webhook &> /dev/null; then
+    if kubectl get validatingwebhookconfigurations qbitel-validating-webhook &> /dev/null; then
         print_success "Admission Webhook is configured"
     else
         print_warning "Admission Webhook configuration not found"
@@ -209,7 +209,7 @@ run_smoke_tests() {
 
     # Test 3: Verify quantum crypto implementation
     echo "Testing Quantum Cryptography..."
-    if kubectl exec -n "$NAMESPACE" deployment/cronos-xds-server -- \
+    if kubectl exec -n "$NAMESPACE" deployment/qbitel-xds-server -- \
         python3 -c "from ai_engine.cloud_native.service_mesh.istio.qkd_certificate_manager import QuantumCertificateManager; print('OK')" &> /dev/null; then
         print_success "Quantum Cryptography modules loaded successfully"
     else
@@ -222,7 +222,7 @@ show_access_info() {
 
     cat << EOF
 
-🎉 CRONOS AI has been successfully deployed!
+🎉 QBITEL has been successfully deployed!
 
 NAMESPACE: $NAMESPACE
 RELEASE: $RELEASE_NAME
@@ -231,15 +231,15 @@ ENVIRONMENT: $ENVIRONMENT
 To access the services:
 
 1. AI Engine API (REST):
-   kubectl port-forward -n $NAMESPACE svc/cronos-ai-engine 8000:8000
+   kubectl port-forward -n $NAMESPACE svc/qbitel-engine 8000:8000
    Then open: http://localhost:8000/docs
 
 2. xDS Server (gRPC):
-   kubectl port-forward -n $NAMESPACE svc/cronos-xds-server 18000:18000
+   kubectl port-forward -n $NAMESPACE svc/qbitel-xds-server 18000:18000
 
 3. Grafana Dashboards:
    kubectl port-forward -n $NAMESPACE svc/grafana 3000:3000
-   Default credentials: admin / cronos-ai-admin
+   Default credentials: admin / qbitel-admin
 
 4. Prometheus Metrics:
    kubectl port-forward -n $NAMESPACE svc/prometheus 9090:9090
@@ -247,7 +247,7 @@ To access the services:
 Useful commands:
 
   # View logs
-  kubectl logs -n $NAMESPACE deployment/cronos-xds-server -f
+  kubectl logs -n $NAMESPACE deployment/qbitel-xds-server -f
 
   # Check status
   kubectl get pods -n $NAMESPACE
@@ -258,14 +258,14 @@ Useful commands:
 For more information:
   helm status $RELEASE_NAME -n $NAMESPACE
 
-Documentation: https://github.com/qbitel/cronos-ai
+Documentation: https://github.com/qbitel/qbitel
 
 EOF
 }
 
 # Main execution
 main() {
-    print_header "CRONOS AI Deployment"
+    print_header "QBITEL Deployment"
     echo "Deploying to namespace: $NAMESPACE"
     echo "Release name: $RELEASE_NAME"
     echo "Environment: $ENVIRONMENT"
@@ -273,13 +273,13 @@ main() {
 
     check_prerequisites
     validate_helm_chart
-    deploy_cronos_ai
+    deploy_qbitel
     verify_deployment
     run_smoke_tests
     show_access_info
 
     print_header "Deployment Complete"
-    print_success "CRONOS AI is ready to use!"
+    print_success "QBITEL is ready to use!"
 }
 
 # Run main function

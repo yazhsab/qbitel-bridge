@@ -1,5 +1,5 @@
 """
-CRONOS AI - SBOM Health Metrics
+QBITEL - SBOM Health Metrics
 Prometheus metrics for SBOM generation and vulnerability tracking.
 """
 
@@ -14,25 +14,25 @@ logger = logging.getLogger(__name__)
 # ============================================
 
 SBOM_COMPONENTS = Gauge(
-    "cronos_sbom_total_components",
+    "qbitel_sbom_total_components",
     "Total number of components in SBOM",
     ["version", "component_name", "component_type"],
 )
 
 SBOM_PACKAGES = Gauge(
-    "cronos_sbom_total_packages",
+    "qbitel_sbom_total_packages",
     "Total number of packages in SBOM",
     ["version", "component_name", "ecosystem"],
 )
 
 SBOM_DIRECT_DEPENDENCIES = Gauge(
-    "cronos_sbom_direct_dependencies",
+    "qbitel_sbom_direct_dependencies",
     "Number of direct dependencies",
     ["version", "component_name"],
 )
 
 SBOM_TRANSITIVE_DEPENDENCIES = Gauge(
-    "cronos_sbom_transitive_dependencies",
+    "qbitel_sbom_transitive_dependencies",
     "Number of transitive (indirect) dependencies",
     ["version", "component_name"],
 )
@@ -42,37 +42,37 @@ SBOM_TRANSITIVE_DEPENDENCIES = Gauge(
 # ============================================
 
 SBOM_VULNERABILITIES = Gauge(
-    "cronos_sbom_vulnerabilities",
+    "qbitel_sbom_vulnerabilities",
     "Number of known vulnerabilities in SBOM",
     ["version", "component_name", "severity"],
 )
 
 SBOM_CRITICAL_VULNERABILITIES = Gauge(
-    "cronos_sbom_critical_vulnerabilities",
+    "qbitel_sbom_critical_vulnerabilities",
     "Number of CRITICAL severity vulnerabilities",
     ["version", "component_name"],
 )
 
 SBOM_HIGH_VULNERABILITIES = Gauge(
-    "cronos_sbom_high_vulnerabilities",
+    "qbitel_sbom_high_vulnerabilities",
     "Number of HIGH severity vulnerabilities",
     ["version", "component_name"],
 )
 
 SBOM_MEDIUM_VULNERABILITIES = Gauge(
-    "cronos_sbom_medium_vulnerabilities",
+    "qbitel_sbom_medium_vulnerabilities",
     "Number of MEDIUM severity vulnerabilities",
     ["version", "component_name"],
 )
 
 SBOM_LOW_VULNERABILITIES = Gauge(
-    "cronos_sbom_low_vulnerabilities",
+    "qbitel_sbom_low_vulnerabilities",
     "Number of LOW severity vulnerabilities",
     ["version", "component_name"],
 )
 
 SBOM_VULNERABILITY_AGE_DAYS = Histogram(
-    "cronos_sbom_vulnerability_age_days",
+    "qbitel_sbom_vulnerability_age_days",
     "Age of vulnerabilities in days since publication",
     ["version", "component_name", "severity"],
     buckets=[1, 7, 30, 90, 180, 365, float("inf")],
@@ -83,32 +83,32 @@ SBOM_VULNERABILITY_AGE_DAYS = Histogram(
 # ============================================
 
 SBOM_GENERATION_TIME = Histogram(
-    "cronos_sbom_generation_seconds",
+    "qbitel_sbom_generation_seconds",
     "SBOM generation time in seconds",
     ["component_name", "format"],
     buckets=[0.5, 1, 2, 5, 10, 30, 60, 120, 300, float("inf")],
 )
 
 SBOM_GENERATION_SUCCESS = Counter(
-    "cronos_sbom_generation_success_total",
+    "qbitel_sbom_generation_success_total",
     "Total successful SBOM generations",
     ["component_name", "format"],
 )
 
 SBOM_GENERATION_ERRORS = Counter(
-    "cronos_sbom_generation_errors_total",
+    "qbitel_sbom_generation_errors_total",
     "Total SBOM generation errors",
     ["component_name", "format", "error_type"],
 )
 
 SBOM_SIGNING_SUCCESS = Counter(
-    "cronos_sbom_signing_success_total",
+    "qbitel_sbom_signing_success_total",
     "Total successful SBOM signatures",
     ["component_name"],
 )
 
 SBOM_SIGNING_ERRORS = Counter(
-    "cronos_sbom_signing_errors_total",
+    "qbitel_sbom_signing_errors_total",
     "Total SBOM signing errors",
     ["component_name", "error_type"],
 )
@@ -118,20 +118,20 @@ SBOM_SIGNING_ERRORS = Counter(
 # ============================================
 
 SBOM_DEPENDENCY_AGE_DAYS = Histogram(
-    "cronos_sbom_dependency_age_days",
+    "qbitel_sbom_dependency_age_days",
     "Age of dependencies in days since last update",
     ["version", "component_name", "ecosystem"],
     buckets=[30, 90, 180, 365, 730, float("inf")],
 )
 
 SBOM_OUTDATED_DEPENDENCIES = Gauge(
-    "cronos_sbom_outdated_dependencies",
+    "qbitel_sbom_outdated_dependencies",
     "Number of dependencies with available updates",
     ["version", "component_name", "update_type"],
 )
 
 SBOM_EOL_DEPENDENCIES = Gauge(
-    "cronos_sbom_eol_dependencies",
+    "qbitel_sbom_eol_dependencies",
     "Number of end-of-life dependencies",
     ["version", "component_name"],
 )
@@ -141,13 +141,13 @@ SBOM_EOL_DEPENDENCIES = Gauge(
 # ============================================
 
 SBOM_LICENSE_TYPES = Gauge(
-    "cronos_sbom_license_types",
+    "qbitel_sbom_license_types",
     "Count of packages by license type",
     ["version", "component_name", "license"],
 )
 
 SBOM_LICENSE_VIOLATIONS = Gauge(
-    "cronos_sbom_license_violations",
+    "qbitel_sbom_license_violations",
     "Number of license policy violations",
     ["version", "component_name", "violation_type"],
 )
@@ -157,20 +157,20 @@ SBOM_LICENSE_VIOLATIONS = Gauge(
 # ============================================
 
 SBOM_API_REQUESTS = Counter(
-    "cronos_sbom_api_requests_total",
+    "qbitel_sbom_api_requests_total",
     "Total SBOM API requests",
     ["endpoint", "method", "status_code"],
 )
 
 SBOM_API_REQUEST_DURATION = Histogram(
-    "cronos_sbom_api_request_duration_seconds",
+    "qbitel_sbom_api_request_duration_seconds",
     "SBOM API request duration",
     ["endpoint", "method"],
     buckets=[0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10, float("inf")],
 )
 
 SBOM_DOWNLOADS = Counter(
-    "cronos_sbom_downloads_total",
+    "qbitel_sbom_downloads_total",
     "Total SBOM downloads",
     ["version", "component_name", "format"],
 )

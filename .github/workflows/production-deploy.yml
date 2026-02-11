@@ -1,4 +1,4 @@
-name: CRONOS AI Production Deployment
+name: QBITEL Production Deployment
 
 on:
   push:
@@ -21,7 +21,7 @@ on:
         type: boolean
 
 env:
-  REGISTRY: registry.cronos-ai.com
+  REGISTRY: ghcr.io
   HELM_VERSION: '3.12.0'
   KUBECTL_VERSION: '1.28.0'
 
@@ -88,7 +88,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/cronos-ai/${{ matrix.component }}
+          images: ${{ env.REGISTRY }}/qbitel/${{ matrix.component }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -128,7 +128,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_PASSWORD: testpass
-          POSTGRES_DB: cronos_ai_test
+          POSTGRES_DB: qbitel_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -172,7 +172,7 @@ jobs:
           cd tests/integration
           cargo test --release --all-features
         env:
-          DATABASE_URL: postgres://postgres:testpass@localhost/cronos_ai_test
+          DATABASE_URL: postgres://postgres:testpass@localhost/qbitel_test
           REDIS_URL: redis://localhost:6379
           RUST_LOG: info
 
@@ -206,22 +206,22 @@ jobs:
 
       - name: Configure kubectl for EKS
         run: |
-          aws eks update-kubeconfig --region us-east-1 --name cronos-ai-staging
+          aws eks update-kubeconfig --region us-east-1 --name qbitel-staging
 
       - name: Deploy to staging
         run: |
           chmod +x ./ops/deploy/scripts/deploy-production.sh
           ./ops/deploy/scripts/deploy-production.sh \
-            --namespace cronos-ai-staging \
-            --release cronos-ai-staging \
+            --namespace qbitel-staging \
+            --release qbitel-staging \
             --values-file ./ops/deploy/kubernetes/staging/values.yaml \
             --set image.tag=${{ github.sha }} \
             --timeout 1200
 
       - name: Run smoke tests
         run: |
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=cronos-ai -n cronos-ai-staging --timeout=600s
-          kubectl exec -n cronos-ai-staging deployment/cronos-ai-controlplane -- curl -f http://localhost:8080/health
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=qbitel -n qbitel-staging --timeout=600s
+          kubectl exec -n qbitel-staging deployment/qbitel-controlplane -- curl -f http://localhost:8080/health
 
   deploy-production:
     name: Deploy to Production
@@ -253,7 +253,7 @@ jobs:
 
       - name: Configure kubectl for EKS
         run: |
-          aws eks update-kubeconfig --region us-east-1 --name cronos-ai-production
+          aws eks update-kubeconfig --region us-east-1 --name qbitel-production
 
       - name: Pre-deployment validation
         run: |
@@ -262,49 +262,49 @@ jobs:
           kubectl top nodes
           
           # Check resource availability
-          kubectl describe quota -n cronos-ai-prod
+          kubectl describe quota -n qbitel-prod
 
       - name: Deploy to production
         run: |
           chmod +x ./ops/deploy/scripts/deploy-production.sh
           ./ops/deploy/scripts/deploy-production.sh \
-            --namespace cronos-ai-prod \
-            --release cronos-ai \
-            --values-file ./ops/deploy/kubernetes/production/helm/cronos-ai/values.yaml \
+            --namespace qbitel-prod \
+            --release qbitel \
+            --values-file ./ops/deploy/kubernetes/production/helm/qbitel/values.yaml \
             --set image.tag=${{ github.ref_name }} \
             --timeout 1800
 
       - name: Post-deployment validation
         run: |
           # Wait for all pods to be ready
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=cronos-ai -n cronos-ai-prod --timeout=1200s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=qbitel -n qbitel-prod --timeout=1200s
           
           # Run health checks
-          kubectl exec -n cronos-ai-prod deployment/cronos-ai-controlplane -- curl -f http://localhost:8080/health
+          kubectl exec -n qbitel-prod deployment/qbitel-controlplane -- curl -f http://localhost:8080/health
           
           # Check metrics endpoint
-          kubectl exec -n cronos-ai-prod daemonset/cronos-ai-dataplane -- curl -f http://localhost:9090/metrics
+          kubectl exec -n qbitel-prod daemonset/qbitel-dataplane -- curl -f http://localhost:9090/metrics
 
       - name: Run production tests
         run: |
           # Run a subset of critical tests in production
-          kubectl run cronos-ai-prod-test \
-            --image=${{ env.REGISTRY }}/cronos-ai/integration-tests:${{ github.ref_name }} \
+          kubectl run qbitel-prod-test \
+            --image=${{ env.REGISTRY }}/qbitel/integration-tests:${{ github.ref_name }} \
             --restart=Never \
             --rm -i \
-            -n cronos-ai-prod \
-            --env="DATAPLANE_ENDPOINT=http://cronos-ai-dataplane:9090" \
-            --env="CONTROLPLANE_ENDPOINT=http://cronos-ai-controlplane:8080" \
-            --env="TEST_NAMESPACE=cronos-ai-prod" \
+            -n qbitel-prod \
+            --env="DATAPLANE_ENDPOINT=http://qbitel-dataplane:9090" \
+            --env="CONTROLPLANE_ENDPOINT=http://qbitel-controlplane:8080" \
+            --env="TEST_NAMESPACE=qbitel-prod" \
             -- /app/integration-test-runner e2e --skip-performance
 
       - name: Create deployment notification
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          channel: '#cronos-ai-deployments'
+          channel: '#qbitel-deployments'
           text: |
-            🚀 CRONOS AI Production Deployment ${{ job.status }}
+            🚀 QBITEL Production Deployment ${{ job.status }}
             Version: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
             Deployed by: ${{ github.actor }}
@@ -341,16 +341,16 @@ jobs:
 
       - name: Configure kubectl for EKS
         run: |
-          aws eks update-kubeconfig --region us-east-1 --name cronos-ai-production
+          aws eks update-kubeconfig --region us-east-1 --name qbitel-production
 
       - name: Rollback deployment
         run: |
           # Get previous successful revision
-          PREVIOUS_REVISION=$(helm history cronos-ai -n cronos-ai-prod -o json | jq -r '[.[] | select(.status == "deployed")] | sort_by(.revision) | .[-2].revision')
+          PREVIOUS_REVISION=$(helm history qbitel -n qbitel-prod -o json | jq -r '[.[] | select(.status == "deployed")] | sort_by(.revision) | .[-2].revision')
           
           if [ "$PREVIOUS_REVISION" != "null" ] && [ "$PREVIOUS_REVISION" != "" ]; then
             echo "Rolling back to revision $PREVIOUS_REVISION"
-            helm rollback cronos-ai $PREVIOUS_REVISION -n cronos-ai-prod --wait --timeout=600s
+            helm rollback qbitel $PREVIOUS_REVISION -n qbitel-prod --wait --timeout=600s
           else
             echo "No previous successful deployment found for rollback"
             exit 1
@@ -358,8 +358,8 @@ jobs:
 
       - name: Verify rollback
         run: |
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=cronos-ai -n cronos-ai-prod --timeout=600s
-          kubectl exec -n cronos-ai-prod deployment/cronos-ai-controlplane -- curl -f http://localhost:8080/health
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=qbitel -n qbitel-prod --timeout=600s
+          kubectl exec -n qbitel-prod deployment/qbitel-controlplane -- curl -f http://localhost:8080/health
 
       - name: Rollback notification
         uses: 8398a7/action-slack@v3
@@ -367,8 +367,8 @@ jobs:
           status: custom
           custom_payload: |
             {
-              channel: '#cronos-ai-deployments',
-              text: '⚠️ CRONOS AI Production deployment failed and was rolled back',
+              channel: '#qbitel-deployments',
+              text: '⚠️ QBITEL Production deployment failed and was rolled back',
               color: 'warning',
               fields: [
                 {

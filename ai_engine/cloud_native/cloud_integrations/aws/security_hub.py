@@ -1,7 +1,7 @@
 """
 AWS Security Hub Integration
 
-Integrates CRONOS AI findings with AWS Security Hub for centralized
+Integrates QBITEL findings with AWS Security Hub for centralized
 security monitoring and compliance management.
 """
 
@@ -95,9 +95,9 @@ class AWSSecurityHubIntegration:
         # Build finding structure
         finding = {
             "SchemaVersion": "2018-10-08",
-            "Id": f"cronos-ai/{resource_id}/{int(time.time())}",
-            "ProductArn": f"arn:aws:securityhub:{self.region}:{self.account_id}:product/cronos-ai/quantum-security",
-            "GeneratorId": "cronos-ai-quantum-scanner",
+            "Id": f"qbitel/{resource_id}/{int(time.time())}",
+            "ProductArn": f"arn:aws:securityhub:{self.region}:{self.account_id}:product/qbitel/quantum-security",
+            "GeneratorId": "qbitel-quantum-scanner",
             "AwsAccountId": self.account_id,
             "Types": [finding_type],
             "CreatedAt": timestamp,
@@ -245,12 +245,12 @@ class AWSSecurityHubIntegration:
         """Create CloudFormation template for deployment"""
         return {
             "AWSTemplateFormatVersion": "2010-09-09",
-            "Description": "CRONOS AI Security Hub Integration",
+            "Description": "QBITEL Security Hub Integration",
             "Resources": {
-                "CronosSecurityHubIntegration": {
+                "QbitelSecurityHubIntegration": {
                     "Type": "AWS::SecurityHub::ProductSubscription",
                     "Properties": {
-                        "ProductArn": f"arn:aws:securityhub:{self.region}::product/cronos-ai/quantum-security"
+                        "ProductArn": f"arn:aws:securityhub:{self.region}::product/qbitel/quantum-security"
                     }
                 }
             }

@@ -1,7 +1,7 @@
 """
-CRONOS AI Engine - Base Model Classes
+QBITEL Engine - Base Model Classes
 
-This module provides base classes and interfaces for AI models in the CRONOS AI Engine.
+This module provides base classes and interfaces for AI models in the QBITEL Engine.
 """
 
 import abc
@@ -94,7 +94,7 @@ class ModelOutput:
 
 class BaseModel(nn.Module, abc.ABC):
     """
-    Abstract base class for all AI models in CRONOS AI Engine.
+    Abstract base class for all AI models in QBITEL Engine.
 
     This class provides common functionality for model lifecycle management,
     validation, and standardized interfaces.

@@ -20,8 +20,8 @@ dist/
 *.egg
 .wheels/
 *.log
-cronos_ai.log
-cronos_ai_engine.log
+qbitel_bridge.log
+qbitel_bridge_engine.log
 .coverage
 .coverage.*
 .htmlcov/
@@ -95,4 +95,7 @@ pytestdebug.log
 
 # Local overrides
 *.local
+
+# Knowledge base (local reference only)
+KNOWLEDGE_BASE.md
 

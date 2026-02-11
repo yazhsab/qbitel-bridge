@@ -1,5 +1,5 @@
 """
-CRONOS AI - Retrieval Augmented Generation (RAG) Engine
+QBITEL - Retrieval Augmented Generation (RAG) Engine
 Advanced RAG implementation for protocol intelligence with vector similarity search.
 
 Updated for 2024-2025 AI/ML trends:
@@ -329,12 +329,12 @@ else:
 
 # Metrics
 RAG_QUERY_COUNTER = Counter(
-    "cronos_rag_queries_total", "Total RAG queries", ["query_type"]
+    "qbitel_rag_queries_total", "Total RAG queries", ["query_type"]
 )
 RAG_QUERY_DURATION = Histogram(
-    "cronos_rag_query_duration_seconds", "RAG query duration"
+    "qbitel_rag_query_duration_seconds", "RAG query duration"
 )
-RAG_SIMILARITY_SCORE = Histogram("cronos_rag_similarity_score", "RAG similarity scores")
+RAG_SIMILARITY_SCORE = Histogram("qbitel_rag_similarity_score", "RAG similarity scores")
 
 logger = logging.getLogger(__name__)
 

@@ -276,7 +276,7 @@ class PQCEngine:
     """
     Unified post-quantum cryptography engine with domain-aware optimization.
 
-    This is the main entry point for all PQC operations in CRONOS AI.
+    This is the main entry point for all PQC operations in QBITEL.
     """
 
     def __init__(

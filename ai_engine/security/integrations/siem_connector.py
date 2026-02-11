@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - SIEM Integration Connectors
+QBITEL Engine - SIEM Integration Connectors
 
 Specialized connectors for SIEM systems like Splunk and QRadar.
 """
@@ -21,7 +21,7 @@ class SIEMConnector(BaseIntegrationConnector, ABC):
 
     def __init__(self, config):
         super().__init__(config)
-        self.logger = get_security_logger("cronos.security.integrations.siem")
+        self.logger = get_security_logger("qbitel.security.integrations.siem")
 
     @abstractmethod
     async def create_alert(self, security_event: SecurityEvent) -> IntegrationResult:
@@ -243,8 +243,8 @@ class SplunkConnector(SIEMConnector):
         return {
             "time": int(security_event.timestamp.timestamp()),
             "host": security_event.source_system,
-            "source": "cronos-ai-security-orchestrator",
-            "sourcetype": "cronos:security:event",
+            "source": "qbitel-security-orchestrator",
+            "sourcetype": "qbitel:security:event",
             "index": self.config.custom_config.get("index", "security"),
             "event": {
                 "event_id": security_event.event_id,
@@ -271,8 +271,8 @@ class SplunkConnector(SIEMConnector):
 
         return {
             "time": int(threat_analysis.analysis_timestamp.timestamp()),
-            "source": "cronos-ai-security-orchestrator",
-            "sourcetype": "cronos:security:threat_analysis",
+            "source": "qbitel-security-orchestrator",
+            "sourcetype": "qbitel:security:threat_analysis",
             "index": self.config.custom_config.get("index", "security"),
             "event": {
                 "event_id": threat_analysis.event_id,
@@ -322,8 +322,8 @@ class SplunkConnector(SIEMConnector):
 
         return {
             "time": int(automated_response.execution_timestamp.timestamp()),
-            "source": "cronos-ai-security-orchestrator",
-            "sourcetype": "cronos:security:automated_response",
+            "source": "qbitel-security-orchestrator",
+            "sourcetype": "qbitel:security:automated_response",
             "index": self.config.custom_config.get("index", "security"),
             "event": {
                 "response_id": automated_response.response_id,
@@ -377,7 +377,7 @@ class SplunkConnector(SIEMConnector):
 
         # This would create a notable event or alert in Splunk Enterprise Security
         alert_data = {
-            "title": f"CRONOS AI Security Alert: {security_event.event_type.value}",
+            "title": f"QBITEL Security Alert: {security_event.event_type.value}",
             "description": security_event.description,
             "severity": self._map_threat_level_to_splunk_severity(
                 security_event.threat_level.value
@@ -392,7 +392,7 @@ class SplunkConnector(SIEMConnector):
             return IntegrationResult(
                 success=True,
                 message="Alert created in Splunk",
-                response_data={"alert_id": f"cronos-{security_event.event_id}"},
+                response_data={"alert_id": f"qbitel-{security_event.event_id}"},
             )
         except Exception as e:
             return IntegrationResult(
@@ -510,7 +510,7 @@ class SplunkConnector(SIEMConnector):
         return {"error": "Search timeout"}
 
     def _map_threat_level_to_splunk_severity(self, threat_level: str) -> str:
-        """Map CRONOS threat level to Splunk severity."""
+        """Map QBITEL threat level to Splunk severity."""
 
         mapping = {
             "critical": "critical",
@@ -714,7 +714,7 @@ class QRadarConnector(SIEMConnector):
         """Convert SecurityEvent to QRadar event format."""
 
         return {
-            "qidname": f"CRONOS_AI_{security_event.event_type.value.upper()}",
+            "qidname": f"QBITEL_AI_{security_event.event_type.value.upper()}",
             "logsourceid": self.config.custom_config.get("log_source_id", 1),
             "starttime": int(security_event.timestamp.timestamp() * 1000),
             "eventcount": 1,
@@ -751,7 +751,7 @@ class QRadarConnector(SIEMConnector):
         """Convert ThreatAnalysis to QRadar event format."""
 
         return {
-            "qidname": "CRONOS_AI_THREAT_ANALYSIS",
+            "qidname": "QBITEL_AI_THREAT_ANALYSIS",
             "logsourceid": self.config.custom_config.get("log_source_id", 1),
             "starttime": int(threat_analysis.analysis_timestamp.timestamp() * 1000),
             "eventcount": 1,
@@ -782,7 +782,7 @@ class QRadarConnector(SIEMConnector):
         """Convert AutomatedResponse to QRadar event format."""
 
         return {
-            "qidname": "CRONOS_AI_AUTOMATED_RESPONSE",
+            "qidname": "QBITEL_AI_AUTOMATED_RESPONSE",
             "logsourceid": self.config.custom_config.get("log_source_id", 1),
             "starttime": int(automated_response.execution_timestamp.timestamp() * 1000),
             "eventcount": 1,
@@ -807,7 +807,7 @@ class QRadarConnector(SIEMConnector):
         }
 
     def _map_threat_level_to_magnitude(self, threat_level: str) -> int:
-        """Map CRONOS threat level to QRadar magnitude."""
+        """Map QBITEL threat level to QRadar magnitude."""
 
         mapping = {"critical": 10, "high": 8, "medium": 5, "low": 3, "informational": 1}
 
@@ -817,7 +817,7 @@ class QRadarConnector(SIEMConnector):
         """Create an offense in QRadar."""
 
         offense_data = {
-            "description": f"CRONOS AI Security Alert: {security_event.description}",
+            "description": f"QBITEL Security Alert: {security_event.description}",
             "assigned_to": self.config.custom_config.get("default_assignee", "admin"),
             "status": "OPEN",
         }

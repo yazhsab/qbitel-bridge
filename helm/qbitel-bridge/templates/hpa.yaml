@@ -1,0 +1,91 @@
+{{- if and .Values.aiEngine.enabled .Values.aiEngine.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "qbitel-bridge.fullname" . }}-ai-engine
+  namespace: {{ include "qbitel-bridge.namespace" . }}
+  labels:
+    {{- include "qbitel-bridge.aiEngine.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "qbitel-bridge.fullname" . }}-ai-engine
+  minReplicas: {{ .Values.aiEngine.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.aiEngine.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.aiEngine.autoscaling.targetCPUUtilizationPercentage }}
+{{- end }}
+---
+{{- if and .Values.xdsServer.enabled .Values.xdsServer.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "qbitel-bridge.fullname" . }}-xds-server
+  namespace: {{ include "qbitel-bridge.namespace" . }}
+  labels:
+    {{- include "qbitel-bridge.xdsServer.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "qbitel-bridge.fullname" . }}-xds-server
+  minReplicas: {{ .Values.xdsServer.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.xdsServer.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.xdsServer.autoscaling.targetCPUUtilizationPercentage }}
+    {{- if .Values.xdsServer.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.xdsServer.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}
+---
+{{- if and .Values.admissionWebhook.enabled .Values.admissionWebhook.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "qbitel-bridge.fullname" . }}-admission-webhook
+  namespace: {{ include "qbitel-bridge.namespace" . }}
+  labels:
+    {{- include "qbitel-bridge.admissionWebhook.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "qbitel-bridge.fullname" . }}-admission-webhook
+  minReplicas: {{ .Values.admissionWebhook.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.admissionWebhook.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.admissionWebhook.autoscaling.targetCPUUtilizationPercentage }}
+{{- end }}

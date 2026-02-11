@@ -1,5 +1,5 @@
 """
-CRONOS AI - Post-Quantum Cryptography Module
+QBITEL - Post-Quantum Cryptography Module
 
 This package provides a unified interface for post-quantum cryptography
 operations across all NIST-standardized algorithms and domain-specific

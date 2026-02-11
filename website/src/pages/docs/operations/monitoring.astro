@@ -1,0 +1,205 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Monitoring & Observability | QBITEL Bridge Docs" description="Monitoring and observability guide for QBITEL Bridge: Prometheus, Grafana, OpenTelemetry, distributed tracing, and alerting.">
+  <h1 class="text-3xl font-bold text-white mb-2">Monitoring & Observability</h1>
+  <p class="text-gray-400 mb-8">QBITEL Bridge provides comprehensive observability through metrics, distributed tracing, structured logging, and pre-built dashboards.</p>
+
+  <h2 id="observability-stack" class="text-2xl font-bold text-white mt-12 mb-4">Observability Stack</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Component</th>
+        <th class="text-left text-white py-2 pr-4">Role</th>
+        <th class="text-left text-white py-2">Port</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Prometheus</td>
+        <td class="text-gray-300 py-2 pr-4">Metrics collection and alerting</td>
+        <td class="text-gray-300 py-2">9090</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Grafana</td>
+        <td class="text-gray-300 py-2 pr-4">Dashboards and visualization</td>
+        <td class="text-gray-300 py-2">3000</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">OpenTelemetry Collector</td>
+        <td class="text-gray-300 py-2 pr-4">Telemetry data pipeline</td>
+        <td class="text-gray-300 py-2">4317 (gRPC)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Tempo</td>
+        <td class="text-gray-300 py-2 pr-4">Distributed tracing backend</td>
+        <td class="text-gray-300 py-2">3200</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Sentry</td>
+        <td class="text-gray-300 py-2 pr-4">Error tracking and alerting</td>
+        <td class="text-gray-300 py-2">--</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="deploy-monitoring" class="text-2xl font-bold text-white mt-12 mb-4">Deploy Monitoring Stack</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Deploy the full observability stack via Kustomize</span>
+kubectl apply -k kubernetes/observability/
+
+<span class="text-gray-500"># Or via Helm with monitoring enabled</span>
+helm install qbitel-bridge ./helm/qbitel-bridge \
+  --set monitoring.enabled=true
+
+<span class="text-gray-500"># Access Grafana</span>
+kubectl port-forward -n qbitel-monitoring svc/grafana 3000:3000
+<span class="text-gray-500"># Open http://localhost:3000 (admin / qbitel-admin)</span></code></pre>
+
+  <h2 id="metrics" class="text-2xl font-bold text-white mt-12 mb-4">Key Metrics</h2>
+
+  <h3 id="ai-engine-metrics" class="text-xl font-semibold text-white mt-8 mb-3">AI Engine Metrics</h3>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Metric</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">qbitel_discovery_requests_total</code></td>
+        <td class="text-gray-300 py-2">Total protocol discovery requests</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">qbitel_discovery_latency_seconds</code></td>
+        <td class="text-gray-300 py-2">Discovery processing latency histogram</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">qbitel_classification_accuracy</code></td>
+        <td class="text-gray-300 py-2">Protocol classification accuracy gauge</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">qbitel_threat_alerts_total</code></td>
+        <td class="text-gray-300 py-2">Total threat alerts by severity</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">qbitel_agent_decisions_total</code></td>
+        <td class="text-gray-300 py-2">Autonomous agent decisions by type</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">qbitel_llm_inference_seconds</code></td>
+        <td class="text-gray-300 py-2">LLM inference latency</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="system-metrics" class="text-xl font-semibold text-white mt-8 mb-3">System Metrics</h3>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Metric</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">qbitel_http_requests_total</code></td>
+        <td class="text-gray-300 py-2">HTTP request count by method and status</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">qbitel_http_request_duration_seconds</code></td>
+        <td class="text-gray-300 py-2">HTTP request duration histogram</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">qbitel_active_connections</code></td>
+        <td class="text-gray-300 py-2">Active connection count</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">qbitel_pqc_handshake_duration_seconds</code></td>
+        <td class="text-gray-300 py-2">PQC-TLS handshake duration</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="dashboards" class="text-2xl font-bold text-white mt-12 mb-4">Pre-Built Dashboards</h2>
+  <p class="text-gray-300 mb-4">QBITEL Bridge ships with several Grafana dashboards:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Operational Overview</strong> -- system health, request rates, error rates</li>
+    <li><strong class="text-white">Protocol Analysis</strong> -- discovery success rates, classification metrics</li>
+    <li><strong class="text-white">Threat Detection</strong> -- alert volumes, severity distribution, response times</li>
+    <li><strong class="text-white">LLM Operations</strong> -- inference latency, token usage, cache hit rates</li>
+    <li><strong class="text-white">SLO Dashboard</strong> -- service level objective tracking</li>
+    <li><strong class="text-white">Explainability</strong> -- model decision explanations and drift monitoring</li>
+  </ul>
+
+  <h2 id="distributed-tracing" class="text-2xl font-bold text-white mt-12 mb-4">Distributed Tracing</h2>
+  <p class="text-gray-300 mb-4">OpenTelemetry provides end-to-end distributed tracing across all components:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Configure OpenTelemetry exporter</span>
+export OTEL_EXPORTER_ENDPOINT=http://otel-collector:4317
+export OTEL_SERVICE_NAME=qbitel-ai-engine
+export OTEL_TRACES_SAMPLER=parentbased_traceidratio
+export OTEL_TRACES_SAMPLER_ARG=0.1  <span class="text-gray-500"># 10% sampling rate</span></code></pre>
+
+  <h2 id="alerting" class="text-2xl font-bold text-white mt-12 mb-4">Alerting Rules</h2>
+  <p class="text-gray-300 mb-4">Pre-configured Prometheus alerting rules are defined in <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ops/monitoring/prometheus/alerts.yml</code>:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">HighErrorRate</strong> -- fires when error rate exceeds 5% for 5 minutes</li>
+    <li><strong class="text-white">ServiceDown</strong> -- fires when health check fails for 2 minutes</li>
+    <li><strong class="text-white">HighLatency</strong> -- fires when p99 latency exceeds thresholds</li>
+    <li><strong class="text-white">LLMFailure</strong> -- fires when LLM inference fails repeatedly</li>
+    <li><strong class="text-white">ComplianceDrift</strong> -- fires when compliance status degrades</li>
+  </ul>
+
+  <h2 id="structured-logging" class="text-2xl font-bold text-white mt-12 mb-4">Structured Logging</h2>
+  <p class="text-gray-300 mb-4">All components emit structured JSON logs for aggregation:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">{'{'}
+  "timestamp": "2025-01-15T10:30:00Z",
+  "level": "INFO",
+  "service": "ai_engine",
+  "trace_id": "abc123",
+  "message": "Protocol discovery completed",
+  "protocol_count": 3,
+  "processing_time_ms": 245
+{'}'}</code></pre>
+
+  <h2 id="slo" class="text-2xl font-bold text-white mt-12 mb-4">Service Level Objectives</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">SLI</th>
+        <th class="text-left text-white py-2 pr-4">Target</th>
+        <th class="text-left text-white py-2">Window</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Availability</td>
+        <td class="text-gray-300 py-2 pr-4">99.9%</td>
+        <td class="text-gray-300 py-2">30-day rolling</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">API Latency (p99)</td>
+        <td class="text-gray-300 py-2 pr-4">&lt; 500ms</td>
+        <td class="text-gray-300 py-2">30-day rolling</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Error Rate</td>
+        <td class="text-gray-300 py-2 pr-4">&lt; 0.1%</td>
+        <td class="text-gray-300 py-2">30-day rolling</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Discovery Success Rate</td>
+        <td class="text-gray-300 py-2 pr-4">&gt; 95%</td>
+        <td class="text-gray-300 py-2">7-day rolling</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/operations/troubleshooting" class="text-quantum-400 hover:underline">Troubleshooting</a> -- use monitoring data to diagnose issues</li>
+    <li><a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> -- monitoring setup verification</li>
+    <li><a href="/docs/security/compliance-frameworks" class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- compliance monitoring dashboards</li>
+  </ul>
+</DocsLayout>

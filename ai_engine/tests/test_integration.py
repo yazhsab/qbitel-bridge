@@ -1,5 +1,5 @@
 """
-CRONOS AI - Integration Tests
+QBITEL - Integration Tests
 
 Comprehensive integration tests for critical system paths and component interactions.
 """

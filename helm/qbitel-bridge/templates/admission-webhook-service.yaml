@@ -1,0 +1,23 @@
+{{- if .Values.admissionWebhook.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "qbitel-bridge.fullname" . }}-admission-webhook
+  namespace: {{ include "qbitel-bridge.namespace" . }}
+  labels:
+    {{- include "qbitel-bridge.admissionWebhook.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.admissionWebhook.service.type }}
+  ports:
+    - name: https
+      port: {{ .Values.admissionWebhook.service.httpsPort }}
+      targetPort: https
+      protocol: TCP
+  selector:
+    {{- include "qbitel-bridge.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: admission-webhook
+{{- end }}

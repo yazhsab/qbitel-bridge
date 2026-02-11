@@ -1,13 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cronos-xds-server
-  namespace: cronos-service-mesh
+  name: qbitel-xds-server
+  namespace: qbitel-service-mesh
   labels:
-    app: cronos-xds-server
+    app: qbitel-xds-server
     app.kubernetes.io/name: xds-server
     app.kubernetes.io/component: control-plane
-    cronos.ai/quantum-safe: "true"
+    qbitel.ai/quantum-safe: "true"
 spec:
   replicas: 3
   strategy:
@@ -17,19 +17,19 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: cronos-xds-server
+      app: qbitel-xds-server
   template:
     metadata:
       labels:
-        app: cronos-xds-server
+        app: qbitel-xds-server
         version: v1
-        cronos.ai/quantum-safe: "true"
+        qbitel.ai/quantum-safe: "true"
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9090"
         prometheus.io/path: "/metrics"
     spec:
-      serviceAccountName: cronos-xds-server
+      serviceAccountName: qbitel-xds-server
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -38,7 +38,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: xds-server
-        image: cronos/xds-server:latest
+        image: qbitel/xds-server:latest
         imagePullPolicy: Always
         ports:
         - name: grpc
@@ -93,12 +93,12 @@ spec:
             - ALL
         volumeMounts:
         - name: config
-          mountPath: /etc/cronos/xds
+          mountPath: /etc/qbitel/xds
           readOnly: true
         - name: tmp
           mountPath: /tmp
         - name: certs
-          mountPath: /etc/cronos/certs
+          mountPath: /etc/qbitel/certs
           readOnly: true
       volumes:
       - name: config
@@ -119,17 +119,17 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - cronos-xds-server
+                  - qbitel-xds-server
               topologyKey: kubernetes.io/hostname
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cronos-xds-server
-  namespace: cronos-service-mesh
+  name: qbitel-xds-server
+  namespace: qbitel-service-mesh
   labels:
-    app: cronos-xds-server
-    cronos.ai/quantum-safe: "true"
+    app: qbitel-xds-server
+    qbitel.ai/quantum-safe: "true"
 spec:
   type: ClusterIP
   ports:
@@ -142,7 +142,7 @@ spec:
     targetPort: 9090
     protocol: TCP
   selector:
-    app: cronos-xds-server
+    app: qbitel-xds-server
   sessionAffinity: ClientIP
   sessionAffinityConfig:
     clientIP:
@@ -152,7 +152,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: xds-server-config
-  namespace: cronos-service-mesh
+  namespace: qbitel-service-mesh
 data:
   config.yaml: |
     server:
@@ -179,10 +179,10 @@ data:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: cronos-xds-server
-  namespace: cronos-service-mesh
+  name: qbitel-xds-server
+  namespace: qbitel-service-mesh
 spec:
   minAvailable: 2
   selector:
     matchLabels:
-      app: cronos-xds-server
+      app: qbitel-xds-server

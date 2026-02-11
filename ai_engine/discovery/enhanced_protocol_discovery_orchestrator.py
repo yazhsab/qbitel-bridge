@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Enhanced Protocol Discovery Orchestrator with LLM Integration
+QBITEL Engine - Enhanced Protocol Discovery Orchestrator with LLM Integration
 Extended version with Protocol Intelligence Copilot integration for natural language analysis.
 """
 
@@ -31,13 +31,13 @@ logger = logging.getLogger(__name__)
 
 # Enhanced metrics
 LLM_ANALYSIS_COUNTER = Counter(
-    "cronos_llm_protocol_analysis_total",
+    "qbitel_llm_protocol_analysis_total",
     "Total LLM protocol analyses",
     ["protocol_type", "analysis_type", "status"],
 )
 
 LLM_ANALYSIS_DURATION = Histogram(
-    "cronos_llm_analysis_duration_seconds", "LLM analysis duration", ["analysis_type"]
+    "qbitel_llm_analysis_duration_seconds", "LLM analysis duration", ["analysis_type"]
 )
 
 

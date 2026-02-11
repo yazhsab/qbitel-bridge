@@ -14,7 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
-	"github.com/qslb/go/controlplane/internal/policy"
+	"github.com/yazhsab/qbitel-bridge/go/controlplane/internal/policy"
 )
 
 // PolicyValidationRequest represents a policy validation request
@@ -422,15 +422,15 @@ func (s *ControlPlaneServer) handleAdminStatus(c *gin.Context) {
 func (s *ControlPlaneServer) loadDefaultBundles(ctx context.Context) error {
 	// Create a default security bundle
 	defaultBundle := &policy.CreateBundleRequest{
-		ID:          "qslb-default",
+		ID:          "qbitel-default",
 		Version:     "1.0.0",
-		Name:        "QSLB Default Security Policies",
-		Description: "Default security policies for QSLB",
-		Author:      "QSLB System",
+		Name:        "QBITEL Default Security Policies",
+		Description: "Default security policies for QBITEL",
+		Author:      "QBITEL System",
 		Tags:        []string{"default", "security"},
 		Policies: map[string]string{
 			"default": `
-				package qslb.default
+				package qbitel.default
 				
 				import rego.v1
 				
@@ -464,7 +464,7 @@ func (s *ControlPlaneServer) loadDefaultBundles(ctx context.Context) error {
 				}
 			`,
 			"rate_limiting": `
-				package qslb.rate_limiting
+				package qbitel.rate_limiting
 				
 				import rego.v1
 				

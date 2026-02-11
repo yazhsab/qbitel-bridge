@@ -52,7 +52,7 @@ export const EnterpriseThemeProvider: React.FC<EnterpriseThemeProviderProps> = (
     
     const handleSystemThemeChange = (e: MediaQueryListEvent) => {
       // Only auto-switch if user hasn't set a preference
-      const savedTheme = localStorage.getItem('cronos-ai-theme');
+      const savedTheme = localStorage.getItem('qbitel-theme');
       if (!savedTheme) {
         const newTheme = e.matches ? 'dark' : 'light';
         setCurrentTheme(newTheme);
@@ -195,11 +195,11 @@ export const useThemeCustomization = () => {
       customColors: colors,
     };
     
-    localStorage.setItem('cronos-ai-custom-theme', JSON.stringify(customThemeData));
+    localStorage.setItem('qbitel-custom-theme', JSON.stringify(customThemeData));
   };
   
   const resetTheme = () => {
-    localStorage.removeItem('cronos-ai-custom-theme');
+    localStorage.removeItem('qbitel-custom-theme');
     setTheme('light');
   };
   

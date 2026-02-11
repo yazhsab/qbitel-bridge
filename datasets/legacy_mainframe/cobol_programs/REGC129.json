@@ -1,0 +1,19 @@
+{
+  "program_id": "REGC129",
+  "domain": "government",
+  "program_type": "calculation_engine",
+  "author": "R. WILLIAMS",
+  "lines_of_code": 188,
+  "complexity_level": "simple",
+  "complexity_score": 0.405,
+  "files_used": 1,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.907649",
+  "hash": "07b59c5b2fc1a5129700419ea459b40d"
+}

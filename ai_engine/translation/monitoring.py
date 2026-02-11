@@ -1,5 +1,5 @@
 """
-CRONOS AI - Translation Studio Monitoring and Observability
+QBITEL - Translation Studio Monitoring and Observability
 Enterprise-grade monitoring, metrics collection, and health checking for translation operations.
 """
 
@@ -114,14 +114,14 @@ class PrometheusMetrics:
 
         # === Request Metrics ===
         self.requests_total = Counter(
-            "cronos_translation_requests_total",
+            "qbitel_translation_requests_total",
             "Total number of translation requests",
             ["component", "operation", "status"],
             registry=self.registry,
         )
 
         self.request_duration = Histogram(
-            "cronos_translation_request_duration_seconds",
+            "qbitel_translation_request_duration_seconds",
             "Translation request processing time",
             ["component", "operation"],
             buckets=[0.1, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0, 60.0],
@@ -130,14 +130,14 @@ class PrometheusMetrics:
 
         # === Protocol Discovery Metrics ===
         self.protocol_discoveries_total = Counter(
-            "cronos_translation_protocol_discoveries_total",
+            "qbitel_translation_protocol_discoveries_total",
             "Total protocol discoveries performed",
             ["protocol_type", "success"],
             registry=self.registry,
         )
 
         self.protocol_discovery_confidence = Histogram(
-            "cronos_translation_protocol_discovery_confidence",
+            "qbitel_translation_protocol_discovery_confidence",
             "Protocol discovery confidence scores",
             buckets=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
             registry=self.registry,
@@ -145,14 +145,14 @@ class PrometheusMetrics:
 
         # === API Generation Metrics ===
         self.api_generations_total = Counter(
-            "cronos_translation_api_generations_total",
+            "qbitel_translation_api_generations_total",
             "Total API specifications generated",
             ["api_style", "security_level", "success"],
             registry=self.registry,
         )
 
         self.api_generation_duration = Histogram(
-            "cronos_translation_api_generation_duration_seconds",
+            "qbitel_translation_api_generation_duration_seconds",
             "API generation processing time",
             ["api_style"],
             registry=self.registry,
@@ -160,14 +160,14 @@ class PrometheusMetrics:
 
         # === Code Generation Metrics ===
         self.sdk_generations_total = Counter(
-            "cronos_translation_sdk_generations_total",
+            "qbitel_translation_sdk_generations_total",
             "Total SDKs generated",
             ["language", "success"],
             registry=self.registry,
         )
 
         self.code_generation_duration = Histogram(
-            "cronos_translation_code_generation_duration_seconds",
+            "qbitel_translation_code_generation_duration_seconds",
             "Code generation processing time",
             ["language", "template_type"],
             registry=self.registry,
@@ -175,14 +175,14 @@ class PrometheusMetrics:
 
         # === Protocol Translation Metrics ===
         self.protocol_translations_total = Counter(
-            "cronos_translation_protocol_translations_total",
+            "qbitel_translation_protocol_translations_total",
             "Total protocol translations performed",
             ["source_protocol", "target_protocol", "success"],
             registry=self.registry,
         )
 
         self.translation_confidence = Histogram(
-            "cronos_translation_confidence_score",
+            "qbitel_translation_confidence_score",
             "Protocol translation confidence scores",
             ["source_protocol", "target_protocol"],
             buckets=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
@@ -191,14 +191,14 @@ class PrometheusMetrics:
 
         # === LLM Metrics ===
         self.llm_requests_total = Counter(
-            "cronos_translation_llm_requests_total",
+            "qbitel_translation_llm_requests_total",
             "Total LLM requests made",
             ["provider", "model", "operation", "status"],
             registry=self.registry,
         )
 
         self.llm_response_time = Histogram(
-            "cronos_translation_llm_response_time_seconds",
+            "qbitel_translation_llm_response_time_seconds",
             "LLM response time",
             ["provider", "model"],
             registry=self.registry,
@@ -206,7 +206,7 @@ class PrometheusMetrics:
 
         # === Error Metrics ===
         self.errors_total = Counter(
-            "cronos_translation_errors_total",
+            "qbitel_translation_errors_total",
             "Total errors by category and severity",
             ["component", "error_category", "error_severity"],
             registry=self.registry,
@@ -214,20 +214,20 @@ class PrometheusMetrics:
 
         # === Resource Metrics ===
         self.cpu_usage_percent = Gauge(
-            "cronos_translation_cpu_usage_percent",
+            "qbitel_translation_cpu_usage_percent",
             "CPU usage percentage",
             registry=self.registry,
         )
 
         self.memory_usage_bytes = Gauge(
-            "cronos_translation_memory_usage_bytes",
+            "qbitel_translation_memory_usage_bytes",
             "Memory usage in bytes",
             ["type"],  # 'used', 'available', 'total'
             registry=self.registry,
         )
 
         self.active_operations = Gauge(
-            "cronos_translation_active_operations",
+            "qbitel_translation_active_operations",
             "Number of currently active operations",
             ["component", "operation"],
             registry=self.registry,
@@ -235,7 +235,7 @@ class PrometheusMetrics:
 
         # === Service Health Metrics ===
         self.service_health = Gauge(
-            "cronos_translation_service_health",
+            "qbitel_translation_service_health",
             "Service health status (1=healthy, 0.5=degraded, 0=unhealthy)",
             ["service", "component"],
             registry=self.registry,
@@ -243,7 +243,7 @@ class PrometheusMetrics:
 
         # === Build Info ===
         self.build_info = Info(
-            "cronos_translation_build_info",
+            "qbitel_translation_build_info",
             "Translation Studio build information",
             registry=self.registry,
         )

@@ -1,5 +1,5 @@
 """
-CRONOS AI - Enhanced Protocol Discovery with API Generation
+QBITEL - Enhanced Protocol Discovery with API Generation
 Extends protocol discovery with automatic API generation and semantic analysis for Translation Studio.
 """
 
@@ -56,23 +56,23 @@ import hashlib
 
 # Metrics for API generation
 API_GENERATION_COUNTER = Counter(
-    "cronos_api_generation_total",
+    "qbitel_api_generation_total",
     "Total API generation attempts",
     ["protocol_type", "api_style", "status"],
 )
 
 API_GENERATION_DURATION = Histogram(
-    "cronos_api_generation_duration_seconds",
+    "qbitel_api_generation_duration_seconds",
     "API generation duration",
     ["protocol_type", "api_style"],
 )
 
 SCHEMA_EXTRACTION_DURATION = Histogram(
-    "cronos_schema_extraction_duration_seconds", "Protocol schema extraction duration"
+    "qbitel_schema_extraction_duration_seconds", "Protocol schema extraction duration"
 )
 
 SEMANTIC_ANALYSIS_COUNTER = Counter(
-    "cronos_semantic_analysis_total",
+    "qbitel_semantic_analysis_total",
     "Total semantic analyses performed",
     ["analysis_type", "status"],
 )

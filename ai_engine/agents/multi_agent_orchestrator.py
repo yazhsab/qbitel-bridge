@@ -1,5 +1,5 @@
 """
-CRONOS AI - Multi-Agent Orchestrator
+QBITEL - Multi-Agent Orchestrator
 
 The central orchestrator that integrates all multi-agent components:
 - Planning Agent for task decomposition
@@ -62,17 +62,17 @@ if TYPE_CHECKING:
 
 # Prometheus metrics
 ORCHESTRATOR_TASKS = Counter(
-    "cronos_orchestrator_tasks_total",
+    "qbitel_orchestrator_tasks_total",
     "Total tasks processed by orchestrator",
     ["task_type", "status"],
 )
 ORCHESTRATOR_AGENTS = Gauge(
-    "cronos_orchestrator_agents_total",
+    "qbitel_orchestrator_agents_total",
     "Total agents managed by orchestrator",
     ["agent_type"],
 )
 ORCHESTRATOR_LATENCY = Histogram(
-    "cronos_orchestrator_latency_seconds",
+    "qbitel_orchestrator_latency_seconds",
     "Task processing latency",
     ["task_type"],
 )
@@ -92,7 +92,7 @@ class OrchestratorMode(str, Enum):
 class OrchestratorConfig:
     """Configuration for the Multi-Agent Orchestrator."""
 
-    name: str = "cronos-orchestrator"
+    name: str = "qbitel-orchestrator"
     mode: OrchestratorMode = OrchestratorMode.STANDALONE
 
     # Planning Agent config
@@ -126,7 +126,7 @@ class OrchestratorConfig:
 
 class MultiAgentOrchestrator:
     """
-    Central orchestrator for the CRONOS AI multi-agent system.
+    Central orchestrator for the QBITEL multi-agent system.
 
     Provides unified access to:
     - Task submission and planning

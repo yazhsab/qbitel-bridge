@@ -1,11 +1,11 @@
 ##############################################################################
-# CRONOS AI Deployment Script (PowerShell)
-# Automates the deployment of CRONOS AI to Kubernetes using Helm
+# QBITEL Bridge Deployment Script (PowerShell)
+# Automates the deployment of QBITEL Bridge to Kubernetes using Helm
 ##############################################################################
 
 param(
-    [string]$Namespace = "cronos-service-mesh",
-    [string]$ReleaseName = "cronos-ai",
+    [string]$Namespace = "qbitel-service-mesh",
+    [string]$ReleaseName = "qbitel-bridge",
     [string]$ValuesFile = "",
     [string]$Environment = "production"
 )
@@ -15,7 +15,7 @@ $ErrorActionPreference = "Stop"
 # Configuration
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectRoot = Split-Path -Parent $ScriptDir
-$HelmChartDir = Join-Path $ProjectRoot "helm\cronos-ai"
+$HelmChartDir = Join-Path $ProjectRoot "helm\qbitel-bridge"
 
 # Functions
 function Print-Header {
@@ -120,8 +120,8 @@ function Validate-HelmChart {
     }
 }
 
-function Deploy-CronosAI {
-    Print-Header "Deploying CRONOS AI"
+function Deploy-QbitelBridge {
+    Print-Header "Deploying QBITEL Bridge"
 
     Push-Location $HelmChartDir
 
@@ -178,7 +178,7 @@ function Deploy-CronosAI {
         # Execute deployment
         helm $helmArgs
         if ($LASTEXITCODE -eq 0) {
-            Print-Success "CRONOS AI deployed successfully"
+            Print-Success "QBITEL Bridge deployed successfully"
         }
         else {
             Print-Error "Deployment failed"
@@ -198,8 +198,8 @@ function Verify-Deployment {
 
     try {
         kubectl wait --for=condition=available --timeout=300s `
-            deployment/cronos-xds-server `
-            deployment/cronos-admission-webhook `
+            deployment/qbitel-xds-server `
+            deployment/qbitel-admission-webhook `
             -n $Namespace 2>$null
         Print-Success "All deployments are ready"
     }
@@ -236,7 +236,7 @@ function Run-SmokeTests {
     # Test 1: Check xDS Server health
     Write-Host "Testing xDS Server health endpoint..."
     try {
-        kubectl exec -n $Namespace deployment/cronos-xds-server -- `
+        kubectl exec -n $Namespace deployment/qbitel-xds-server -- `
             curl -f http://localhost:8081/healthz 2>$null | Out-Null
         Print-Success "xDS Server is healthy"
     }
@@ -247,7 +247,7 @@ function Run-SmokeTests {
     # Test 2: Check admission webhook
     Write-Host "Testing Admission Webhook..."
     try {
-        kubectl get validatingwebhookconfigurations cronos-validating-webhook 2>$null | Out-Null
+        kubectl get validatingwebhookconfigurations qbitel-validating-webhook 2>$null | Out-Null
         Print-Success "Admission Webhook is configured"
     }
     catch {
@@ -257,7 +257,7 @@ function Run-SmokeTests {
     # Test 3: Verify quantum crypto implementation
     Write-Host "Testing Quantum Cryptography..."
     try {
-        kubectl exec -n $Namespace deployment/cronos-xds-server -- `
+        kubectl exec -n $Namespace deployment/qbitel-xds-server -- `
             python3 -c "from ai_engine.cloud_native.service_mesh.istio.qkd_certificate_manager import QuantumCertificateManager; print('OK')" 2>$null | Out-Null
         Print-Success "Quantum Cryptography modules loaded successfully"
     }
@@ -271,7 +271,7 @@ function Show-AccessInfo {
 
     Write-Host @"
 
-🎉 CRONOS AI has been successfully deployed!
+🎉 QBITEL Bridge has been successfully deployed!
 
 NAMESPACE: $Namespace
 RELEASE: $ReleaseName
@@ -280,15 +280,15 @@ ENVIRONMENT: $Environment
 To access the services:
 
 1. AI Engine API (REST):
-   kubectl port-forward -n $Namespace svc/cronos-ai-engine 8000:8000
+   kubectl port-forward -n $Namespace svc/qbitel-bridge-engine 8000:8000
    Then open: http://localhost:8000/docs
 
 2. xDS Server (gRPC):
-   kubectl port-forward -n $Namespace svc/cronos-xds-server 18000:18000
+   kubectl port-forward -n $Namespace svc/qbitel-xds-server 18000:18000
 
 3. Grafana Dashboards:
    kubectl port-forward -n $Namespace svc/grafana 3000:3000
-   Default credentials: admin / cronos-ai-admin
+   Default credentials: admin / qbitel-bridge-admin
 
 4. Prometheus Metrics:
    kubectl port-forward -n $Namespace svc/prometheus 9090:9090
@@ -296,7 +296,7 @@ To access the services:
 Useful commands:
 
   # View logs
-  kubectl logs -n $Namespace deployment/cronos-xds-server -f
+  kubectl logs -n $Namespace deployment/qbitel-xds-server -f
 
   # Check status
   kubectl get pods -n $Namespace
@@ -307,27 +307,27 @@ Useful commands:
 For more information:
   helm status $ReleaseName -n $Namespace
 
-Documentation: https://github.com/qbitel/cronos-ai
+Documentation: https://github.com/qbitel/qbitel-bridge
 
 "@
 }
 
 # Main execution
 function Main {
-    Print-Header "CRONOS AI Deployment"
+    Print-Header "QBITEL Bridge Deployment"
     Write-Host "Deploying to namespace: $Namespace"
     Write-Host "Release name: $ReleaseName"
     Write-Host "Environment: $Environment"
 
     Check-Prerequisites
     Validate-HelmChart
-    Deploy-CronosAI
+    Deploy-QbitelBridge
     Verify-Deployment
     Run-SmokeTests
     Show-AccessInfo
 
     Print-Header "Deployment Complete"
-    Print-Success "CRONOS AI is ready to use!"
+    Print-Success "QBITEL Bridge is ready to use!"
 }
 
 # Run main function

@@ -1,4 +1,4 @@
-//! Custom Resource Definitions for CRONOS AI services
+//! Custom Resource Definitions for QBITEL Bridge services
 
 use kube::CustomResource;
 use schemars::JsonSchema;
@@ -8,7 +8,7 @@ use std::collections::HashMap;
 /// DataPlane service configuration
 #[derive(CustomResource, Deserialize, Serialize, Clone, Debug, JsonSchema)]
 #[kube(
-    group = "cronos.ai",
+    group = "qbitel.ai",
     version = "v1",
     kind = "DataPlaneService",
     plural = "dataplanes",
@@ -81,7 +81,7 @@ pub struct DataPlaneStatus {
 /// ControlPlane service configuration
 #[derive(CustomResource, Deserialize, Serialize, Clone, Debug, JsonSchema)]
 #[kube(
-    group = "cronos.ai",
+    group = "qbitel.ai",
     version = "v1",
     kind = "ControlPlaneService",
     plural = "controlplanes",
@@ -139,7 +139,7 @@ pub struct ControlPlaneStatus {
 /// AI Engine service configuration
 #[derive(CustomResource, Deserialize, Serialize, Clone, Debug, JsonSchema)]
 #[kube(
-    group = "cronos.ai",
+    group = "qbitel.ai",
     version = "v1",
     kind = "AIEngineService",
     plural = "aiengines",
@@ -206,7 +206,7 @@ pub struct AIEngineStatus {
 /// Policy Engine service configuration
 #[derive(CustomResource, Deserialize, Serialize, Clone, Debug, JsonSchema)]
 #[kube(
-    group = "cronos.ai",
+    group = "qbitel.ai",
     version = "v1",
     kind = "PolicyEngineService",
     plural = "policyengines",
@@ -267,7 +267,7 @@ pub struct PolicyEngineStatus {
 /// Service Mesh configuration
 #[derive(CustomResource, Deserialize, Serialize, Clone, Debug, JsonSchema)]
 #[kube(
-    group = "cronos.ai",
+    group = "qbitel.ai",
     version = "v1",
     kind = "ServiceMeshConfig",
     plural = "servicemeshconfigs",

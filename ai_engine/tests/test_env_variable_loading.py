@@ -1,5 +1,5 @@
 """
-CRONOS AI - Environment Variable Loading Tests
+QBITEL - Environment Variable Loading Tests
 
 Comprehensive test suite for production-ready environment variable loading
 and validation across all configuration classes.
@@ -22,10 +22,10 @@ from ai_engine.core.config import (
 class TestDatabaseConfigEnvLoading:
     """Test DatabaseConfig environment variable loading and validation."""
 
-    def test_load_password_from_cronos_ai_prefix(self):
-        """Test loading password from CRONOS_AI_DB_PASSWORD."""
+    def test_load_password_from_qbitel_prefix(self):
+        """Test loading password from QBITEL_AI_DB_PASSWORD."""
         password = secrets.token_urlsafe(32)
-        with patch.dict(os.environ, {"CRONOS_AI_DB_PASSWORD": password}):
+        with patch.dict(os.environ, {"QBITEL_AI_DB_PASSWORD": password}):
             config = DatabaseConfig()
             assert config.password == password
 
@@ -36,24 +36,24 @@ class TestDatabaseConfigEnvLoading:
             config = DatabaseConfig()
             assert config.password == password
 
-    def test_cronos_ai_prefix_takes_priority(self):
-        """Test that CRONOS_AI_DB_PASSWORD takes priority."""
-        cronos_password = secrets.token_urlsafe(32)
+    def test_qbitel_prefix_takes_priority(self):
+        """Test that QBITEL_AI_DB_PASSWORD takes priority."""
+        qbitel_password = secrets.token_urlsafe(32)
         generic_password = secrets.token_urlsafe(32)
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_DB_PASSWORD": cronos_password,
+                "QBITEL_AI_DB_PASSWORD": qbitel_password,
                 "DATABASE_PASSWORD": generic_password,
             },
         ):
             config = DatabaseConfig()
-            assert config.password == cronos_password
+            assert config.password == qbitel_password
 
     def test_production_mode_requires_password(self):
         """Test that production mode requires a password."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException) as exc_info:
                 DatabaseConfig()
@@ -62,7 +62,7 @@ class TestDatabaseConfigEnvLoading:
     def test_development_mode_allows_missing_password(self):
         """Test that development mode allows missing password with warning."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "development"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
         ):
             config = DatabaseConfig()
             assert config.password == ""
@@ -73,8 +73,8 @@ class TestDatabaseConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_DB_PASSWORD": short_password,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_DB_PASSWORD": short_password,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -87,8 +87,8 @@ class TestDatabaseConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_DB_PASSWORD": weak_password,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_DB_PASSWORD": weak_password,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -101,8 +101,8 @@ class TestDatabaseConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_DB_PASSWORD": sequential_password,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_DB_PASSWORD": sequential_password,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -115,8 +115,8 @@ class TestDatabaseConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_DB_PASSWORD": repeated_password,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_DB_PASSWORD": repeated_password,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -129,8 +129,8 @@ class TestDatabaseConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_DB_PASSWORD": strong_password,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_DB_PASSWORD": strong_password,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             config = DatabaseConfig()
@@ -139,7 +139,7 @@ class TestDatabaseConfigEnvLoading:
     def test_database_url_generation(self):
         """Test database URL generation."""
         password = secrets.token_urlsafe(32)
-        with patch.dict(os.environ, {"CRONOS_AI_DB_PASSWORD": password}):
+        with patch.dict(os.environ, {"QBITEL_AI_DB_PASSWORD": password}):
             config = DatabaseConfig()
             url = config.url
             assert "postgresql://" in url
@@ -151,10 +151,10 @@ class TestDatabaseConfigEnvLoading:
 class TestRedisConfigEnvLoading:
     """Test RedisConfig environment variable loading and validation."""
 
-    def test_load_password_from_cronos_ai_prefix(self):
-        """Test loading password from CRONOS_AI_REDIS_PASSWORD."""
+    def test_load_password_from_qbitel_prefix(self):
+        """Test loading password from QBITEL_AI_REDIS_PASSWORD."""
         password = secrets.token_urlsafe(32)
-        with patch.dict(os.environ, {"CRONOS_AI_REDIS_PASSWORD": password}):
+        with patch.dict(os.environ, {"QBITEL_AI_REDIS_PASSWORD": password}):
             config = RedisConfig()
             assert config.password == password
 
@@ -168,7 +168,7 @@ class TestRedisConfigEnvLoading:
     def test_production_mode_requires_password(self):
         """Test that production mode requires Redis authentication."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException) as exc_info:
                 RedisConfig()
@@ -178,7 +178,7 @@ class TestRedisConfigEnvLoading:
     def test_development_mode_allows_missing_password(self):
         """Test that development mode allows missing password."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "development"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
         ):
             config = RedisConfig()
             assert config.password is None
@@ -189,8 +189,8 @@ class TestRedisConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_REDIS_PASSWORD": short_password,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_REDIS_PASSWORD": short_password,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -203,8 +203,8 @@ class TestRedisConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_REDIS_PASSWORD": weak_password,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_REDIS_PASSWORD": weak_password,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -217,8 +217,8 @@ class TestRedisConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_REDIS_PASSWORD": strong_password,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_REDIS_PASSWORD": strong_password,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             config = RedisConfig()
@@ -227,7 +227,7 @@ class TestRedisConfigEnvLoading:
     def test_redis_url_generation_with_auth(self):
         """Test Redis URL generation with authentication."""
         password = secrets.token_urlsafe(32)
-        with patch.dict(os.environ, {"CRONOS_AI_REDIS_PASSWORD": password}):
+        with patch.dict(os.environ, {"QBITEL_AI_REDIS_PASSWORD": password}):
             config = RedisConfig()
             url = config.url
             assert "redis://" in url
@@ -236,7 +236,7 @@ class TestRedisConfigEnvLoading:
     def test_redis_url_generation_without_auth(self):
         """Test Redis URL generation without authentication."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "development"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
         ):
             config = RedisConfig()
             url = config.url
@@ -247,10 +247,10 @@ class TestRedisConfigEnvLoading:
 class TestSecurityConfigEnvLoading:
     """Test SecurityConfig environment variable loading and validation."""
 
-    def test_load_jwt_secret_from_cronos_ai_prefix(self):
-        """Test loading JWT secret from CRONOS_AI_JWT_SECRET."""
+    def test_load_jwt_secret_from_qbitel_prefix(self):
+        """Test loading JWT secret from QBITEL_AI_JWT_SECRET."""
         jwt_secret = secrets.token_urlsafe(48)
-        with patch.dict(os.environ, {"CRONOS_AI_JWT_SECRET": jwt_secret}):
+        with patch.dict(os.environ, {"QBITEL_AI_JWT_SECRET": jwt_secret}):
             config = SecurityConfig()
             assert config.jwt_secret == jwt_secret
 
@@ -261,10 +261,10 @@ class TestSecurityConfigEnvLoading:
             config = SecurityConfig()
             assert config.jwt_secret == jwt_secret
 
-    def test_load_encryption_key_from_cronos_ai_prefix(self):
-        """Test loading encryption key from CRONOS_AI_ENCRYPTION_KEY."""
+    def test_load_encryption_key_from_qbitel_prefix(self):
+        """Test loading encryption key from QBITEL_AI_ENCRYPTION_KEY."""
         encryption_key = secrets.token_urlsafe(48)
-        with patch.dict(os.environ, {"CRONOS_AI_ENCRYPTION_KEY": encryption_key}):
+        with patch.dict(os.environ, {"QBITEL_AI_ENCRYPTION_KEY": encryption_key}):
             config = SecurityConfig()
             assert config.encryption_key == encryption_key
 
@@ -275,16 +275,16 @@ class TestSecurityConfigEnvLoading:
             config = SecurityConfig()
             assert config.encryption_key == encryption_key
 
-    def test_load_api_key_from_cronos_ai_prefix(self):
-        """Test loading API key from CRONOS_AI_API_KEY."""
-        api_key = f"cronos_{secrets.token_urlsafe(32)}"
-        with patch.dict(os.environ, {"CRONOS_AI_API_KEY": api_key}):
+    def test_load_api_key_from_qbitel_prefix(self):
+        """Test loading API key from QBITEL_AI_API_KEY."""
+        api_key = f"qbitel_{secrets.token_urlsafe(32)}"
+        with patch.dict(os.environ, {"QBITEL_AI_API_KEY": api_key}):
             config = SecurityConfig()
             assert config.api_key == api_key
 
     def test_load_api_key_from_generic_prefix(self):
         """Test loading API key from API_KEY."""
-        api_key = f"cronos_{secrets.token_urlsafe(32)}"
+        api_key = f"qbitel_{secrets.token_urlsafe(32)}"
         with patch.dict(os.environ, {"API_KEY": api_key}, clear=True):
             config = SecurityConfig()
             assert config.api_key == api_key
@@ -292,7 +292,7 @@ class TestSecurityConfigEnvLoading:
     def test_production_mode_requires_jwt_secret(self):
         """Test that production mode requires JWT secret."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException) as exc_info:
                 SecurityConfig()
@@ -303,7 +303,7 @@ class TestSecurityConfigEnvLoading:
         jwt_secret = secrets.token_urlsafe(48)
         with patch.dict(
             os.environ,
-            {"CRONOS_AI_ENVIRONMENT": "production", "CRONOS_AI_JWT_SECRET": jwt_secret},
+            {"QBITEL_AI_ENVIRONMENT": "production", "QBITEL_AI_JWT_SECRET": jwt_secret},
             clear=True,
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -317,9 +317,9 @@ class TestSecurityConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_JWT_SECRET": short_secret,
-                "CRONOS_AI_ENCRYPTION_KEY": encryption_key,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_JWT_SECRET": short_secret,
+                "QBITEL_AI_ENCRYPTION_KEY": encryption_key,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -333,9 +333,9 @@ class TestSecurityConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_JWT_SECRET": weak_secret,
-                "CRONOS_AI_ENCRYPTION_KEY": encryption_key,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_JWT_SECRET": weak_secret,
+                "QBITEL_AI_ENCRYPTION_KEY": encryption_key,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -349,9 +349,9 @@ class TestSecurityConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_JWT_SECRET": low_entropy_secret,
-                "CRONOS_AI_ENCRYPTION_KEY": encryption_key,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_JWT_SECRET": low_entropy_secret,
+                "QBITEL_AI_ENCRYPTION_KEY": encryption_key,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -364,10 +364,10 @@ class TestSecurityConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_JWT_SECRET": secrets.token_urlsafe(48),
-                "CRONOS_AI_ENCRYPTION_KEY": secrets.token_urlsafe(48),
-                "CRONOS_AI_API_KEY": short_key,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_JWT_SECRET": secrets.token_urlsafe(48),
+                "QBITEL_AI_ENCRYPTION_KEY": secrets.token_urlsafe(48),
+                "QBITEL_AI_API_KEY": short_key,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -381,10 +381,10 @@ class TestSecurityConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_JWT_SECRET": secrets.token_urlsafe(48),
-                "CRONOS_AI_ENCRYPTION_KEY": secrets.token_urlsafe(48),
-                "CRONOS_AI_API_KEY": no_digits_key,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_JWT_SECRET": secrets.token_urlsafe(48),
+                "QBITEL_AI_ENCRYPTION_KEY": secrets.token_urlsafe(48),
+                "QBITEL_AI_API_KEY": no_digits_key,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -395,15 +395,15 @@ class TestSecurityConfigEnvLoading:
         """Test that strong secrets pass all validations."""
         jwt_secret = secrets.token_urlsafe(48)
         encryption_key = secrets.token_urlsafe(48)
-        api_key = f"cronos_{secrets.token_urlsafe(32)}"
+        api_key = f"qbitel_{secrets.token_urlsafe(32)}"
 
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_JWT_SECRET": jwt_secret,
-                "CRONOS_AI_ENCRYPTION_KEY": encryption_key,
-                "CRONOS_AI_API_KEY": api_key,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_JWT_SECRET": jwt_secret,
+                "QBITEL_AI_ENCRYPTION_KEY": encryption_key,
+                "QBITEL_AI_API_KEY": api_key,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             config = SecurityConfig(cors_origins=["https://app.example.com"])
@@ -419,9 +419,9 @@ class TestSecurityConfigEnvLoading:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_JWT_SECRET": jwt_secret,
-                "CRONOS_AI_ENCRYPTION_KEY": encryption_key,
-                "CRONOS_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_JWT_SECRET": jwt_secret,
+                "QBITEL_AI_ENCRYPTION_KEY": encryption_key,
+                "QBITEL_AI_ENVIRONMENT": "production",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -442,11 +442,11 @@ class TestConfigIntegration:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "production",
-                "CRONOS_AI_DB_PASSWORD": db_password,
-                "CRONOS_AI_REDIS_PASSWORD": redis_password,
-                "CRONOS_AI_JWT_SECRET": jwt_secret,
-                "CRONOS_AI_ENCRYPTION_KEY": encryption_key,
+                "QBITEL_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_DB_PASSWORD": db_password,
+                "QBITEL_AI_REDIS_PASSWORD": redis_password,
+                "QBITEL_AI_JWT_SECRET": jwt_secret,
+                "QBITEL_AI_ENCRYPTION_KEY": encryption_key,
             },
         ):
             # Create config with explicit CORS origins for production
@@ -464,7 +464,7 @@ class TestConfigIntegration:
     def test_production_mode_validation(self):
         """Test that production mode enforces all security requirements."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException):
                 Config.load_from_env()
@@ -472,7 +472,7 @@ class TestConfigIntegration:
     def test_development_mode_allows_defaults(self):
         """Test that development mode allows default values."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "development"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
         ):
             config = Config.load_from_env()
             assert config.environment.value == "development"
@@ -484,38 +484,38 @@ class TestErrorMessages:
     def test_database_password_error_includes_remediation(self):
         """Test that database password error includes remediation steps."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException) as exc_info:
                 DatabaseConfig()
             error_msg = str(exc_info.value)
             assert "REQUIRED" in error_msg
-            assert "CRONOS_AI_DB_PASSWORD" in error_msg
+            assert "QBITEL_AI_DB_PASSWORD" in error_msg
             assert "Generate a secure password" in error_msg
             assert "python -c" in error_msg
 
     def test_redis_password_error_includes_remediation(self):
         """Test that Redis password error includes remediation steps."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException) as exc_info:
                 RedisConfig()
             error_msg = str(exc_info.value)
             assert "REQUIRED" in error_msg
-            assert "CRONOS_AI_REDIS_PASSWORD" in error_msg
+            assert "QBITEL_AI_REDIS_PASSWORD" in error_msg
             assert "Generate a secure password" in error_msg
 
     def test_jwt_secret_error_includes_remediation(self):
         """Test that JWT secret error includes remediation steps."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException) as exc_info:
                 SecurityConfig()
             error_msg = str(exc_info.value)
             assert "REQUIRED" in error_msg
-            assert "CRONOS_AI_JWT_SECRET" in error_msg
+            assert "QBITEL_AI_JWT_SECRET" in error_msg
             assert "Generate a secure JWT secret" in error_msg
             assert "secrets.token_urlsafe" in error_msg
 

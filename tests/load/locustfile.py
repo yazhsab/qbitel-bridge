@@ -1,7 +1,7 @@
 """
-CRONOS AI - Load Testing with Locust
+QBITEL - Load Testing with Locust
 
-Comprehensive load testing scenarios for CRONOS AI services.
+Comprehensive load testing scenarios for QBITEL services.
 """
 
 from locust import HttpUser, task, between, events
@@ -12,8 +12,8 @@ import time
 from typing import Dict, Any
 
 
-class CronosAIUser(FastHttpUser):
-    """Base user class for CRONOS AI load testing."""
+class QbitelAIUser(FastHttpUser):
+    """Base user class for QBITEL load testing."""
 
     wait_time = between(1, 3)  # Wait 1-3 seconds between tasks
 
@@ -199,7 +199,7 @@ class CronosAIUser(FastHttpUser):
         }
 
 
-class SpikeTestUser(CronosAIUser):
+class SpikeTestUser(QbitelAIUser):
     """User class for spike testing scenarios."""
 
     wait_time = between(0.1, 0.5)  # Aggressive load
@@ -210,7 +210,7 @@ class SpikeTestUser(CronosAIUser):
         self.protocol_discovery()
 
 
-class StressTestUser(CronosAIUser):
+class StressTestUser(QbitelAIUser):
     """User class for stress testing scenarios."""
 
     wait_time = between(0, 0.1)  # Minimal wait time
@@ -227,7 +227,7 @@ class StressTestUser(CronosAIUser):
         random.choice(endpoints)()
 
 
-class SoakTestUser(CronosAIUser):
+class SoakTestUser(QbitelAIUser):
     """User class for soak/endurance testing."""
 
     wait_time = between(2, 5)  # Moderate, sustained load
@@ -275,6 +275,154 @@ def on_test_stop(environment, **kwargs):
 
 
 # Load test scenarios
+class ZeroTouchSecurityUser(QbitelAIUser):
+    """User class focused on Zero-Touch Security testing."""
+
+    wait_time = between(0.5, 2)
+
+    @task(5)
+    def analyze_security_event(self):
+        """Test zero-touch security analysis endpoint."""
+        event_types = [
+            "intrusion_attempt",
+            "malware_detected",
+            "data_exfiltration",
+            "privilege_escalation",
+            "dos_attack",
+            "unauthorized_access",
+        ]
+
+        payload = {
+            "event_type": random.choice(event_types),
+            "severity": random.choice(["low", "medium", "high", "critical"]),
+            "source_ip": f"192.168.{random.randint(1, 255)}.{random.randint(1, 255)}",
+            "destination_ip": f"10.0.{random.randint(1, 255)}.{random.randint(1, 255)}",
+            "destination_port": random.choice([22, 80, 443, 3389, 5432]),
+            "protocol": random.choice(["SSH", "HTTP", "HTTPS", "RDP", "PostgreSQL"]),
+            "asset_id": f"server-{random.randint(1, 100):03d}",
+            "asset_type": random.choice(["linux_server", "windows_server", "database", "network_device"]),
+            "indicators": [random.choice([
+                "brute_force", "suspicious_user_agent", "c2_communication",
+                "unusual_time", "large_data_transfer", "privilege_abuse"
+            ])],
+        }
+
+        with self.client.post(
+            "/api/v1/zero-touch/analyze",
+            json=payload,
+            headers=self.headers,
+            catch_response=True,
+            name="/api/v1/zero-touch/analyze",
+        ) as response:
+            if response.status_code == 200:
+                result = response.json()
+                if "threat_level" in result and "confidence" in result:
+                    response.success()
+                else:
+                    response.failure("Missing threat analysis fields")
+            else:
+                response.failure(f"Status code: {response.status_code}")
+
+    @task(3)
+    def respond_to_threat(self):
+        """Test full zero-touch response pipeline."""
+        payload = {
+            "event_type": "intrusion_attempt",
+            "severity": "high",
+            "source_ip": f"192.168.{random.randint(1, 255)}.{random.randint(1, 255)}",
+            "destination_ip": "10.0.0.50",
+            "destination_port": 22,
+            "protocol": "SSH",
+            "asset_id": "server-prod-001",
+            "indicators": ["brute_force", "multiple_failed_logins"],
+        }
+
+        start_time = time.time()
+        with self.client.post(
+            "/api/v1/zero-touch/respond",
+            json=payload,
+            headers=self.headers,
+            catch_response=True,
+            name="/api/v1/zero-touch/respond",
+        ) as response:
+            response_time = (time.time() - start_time) * 1000
+            if response.status_code == 200:
+                result = response.json()
+                if result.get("processing_time_ms", 0) < 5000:  # 5 second SLA
+                    response.success()
+                else:
+                    response.failure(f"Response time exceeded SLA: {result.get('processing_time_ms')}ms")
+            else:
+                response.failure(f"Status code: {response.status_code}")
+
+    @task(2)
+    def simulate_response(self):
+        """Test response simulation (no execution)."""
+        payload = {
+            "event_type": "malware_detected",
+            "severity": "critical",
+            "source_ip": "10.0.0.100",
+            "asset_id": "workstation-042",
+            "indicators": ["trojan_signature", "c2_beacon"],
+        }
+
+        with self.client.post(
+            "/api/v1/zero-touch/simulate",
+            json=payload,
+            headers=self.headers,
+            catch_response=True,
+            name="/api/v1/zero-touch/simulate",
+        ) as response:
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"Status code: {response.status_code}")
+
+    @task(4)
+    def list_decisions(self):
+        """Test listing security decisions."""
+        with self.client.get(
+            "/api/v1/zero-touch/decisions",
+            params={"limit": 20},
+            headers=self.headers,
+            catch_response=True,
+            name="/api/v1/zero-touch/decisions",
+        ) as response:
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"Status code: {response.status_code}")
+
+    @task(2)
+    def get_metrics(self):
+        """Test zero-touch metrics endpoint."""
+        with self.client.get(
+            "/api/v1/zero-touch/metrics",
+            params={"time_range": "24h"},
+            headers=self.headers,
+            catch_response=True,
+            name="/api/v1/zero-touch/metrics",
+        ) as response:
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"Status code: {response.status_code}")
+
+    @task(1)
+    def get_pending_approvals(self):
+        """Test pending approvals endpoint."""
+        with self.client.get(
+            "/api/v1/zero-touch/pending-approvals",
+            headers=self.headers,
+            catch_response=True,
+            name="/api/v1/zero-touch/pending-approvals",
+        ) as response:
+            if response.status_code in [200, 404]:
+                response.success()
+            else:
+                response.failure(f"Status code: {response.status_code}")
+
+
 class LoadTestScenarios:
     """Predefined load test scenarios."""
 
@@ -308,9 +456,14 @@ class LoadTestScenarios:
         """Soak test: Sustained load over extended period."""
         return {"users": 100, "spawn_rate": 5, "run_time": "4h"}
 
+    @staticmethod
+    def zero_touch_benchmark():
+        """Zero-Touch Security benchmark: Focus on security response latency."""
+        return {"users": 100, "spawn_rate": 20, "run_time": "15m", "user_classes": [ZeroTouchSecurityUser]}
+
 
 if __name__ == "__main__":
-    print("CRONOS AI Load Testing")
+    print("QBITEL Load Testing")
     print("=" * 50)
     print("\nAvailable scenarios:")
     print("1. Baseline (10 users, 10 min)")

@@ -77,7 +77,7 @@ func (cm *CertificateManager) IssueCertificate(ctx context.Context, csr *x509.Ce
 		Subject: pkix.Name{
 			CommonName:         fmt.Sprintf("device-%s", device.ID),
 			Organization:       []string{device.OrganizationID},
-			OrganizationalUnit: []string{"QSLB Devices"},
+			OrganizationalUnit: []string{"QBITEL Devices"},
 			Country:            []string{"US"},
 			Province:           []string{"CA"},
 			Locality:           []string{"San Francisco"},
@@ -95,8 +95,8 @@ func (cm *CertificateManager) IssueCertificate(ctx context.Context, csr *x509.Ce
 
 	// Add SAN entries
 	template.DNSNames = []string{
-		fmt.Sprintf("%s.devices.qslb.local", device.ID),
-		fmt.Sprintf("%s.%s.devices.qslb.local", device.ID, device.OrganizationID),
+		fmt.Sprintf("%s.devices.qbitel.local", device.ID),
+		fmt.Sprintf("%s.%s.devices.qbitel.local", device.ID, device.OrganizationID),
 	}
 
 	// Sign certificate
@@ -265,7 +265,7 @@ func generateCA(commonName string, validity time.Duration, keySize int, parentCe
 		SerialNumber: big.NewInt(time.Now().UnixNano()),
 		Subject: pkix.Name{
 			CommonName:   commonName,
-			Organization: []string{"QSLB"},
+			Organization: []string{"QBITEL"},
 			Country:      []string{"US"},
 		},
 		NotBefore:             time.Now(),
@@ -354,7 +354,7 @@ func (cm *CertificateManager) RenewCertificate(ctx context.Context, certID strin
 	device := &Device{
 		ID:             deviceID,
 		OrganizationID: "default-org",
-		DeviceType:     "qslb-device",
+		DeviceType:     "qbitel-device",
 		Status:         DeviceStatusActive,
 	}
 
@@ -368,7 +368,7 @@ func (cm *CertificateManager) RenewCertificate(ctx context.Context, certID strin
 		Subject: pkix.Name{
 			CommonName:         fmt.Sprintf("device-%s", device.ID),
 			Organization:       []string{device.OrganizationID},
-			OrganizationalUnit: []string{"QSLB Devices"},
+			OrganizationalUnit: []string{"QBITEL Devices"},
 			Country:            []string{"US"},
 			Province:           []string{"CA"},
 			Locality:           []string{"San Francisco"},
@@ -386,8 +386,8 @@ func (cm *CertificateManager) RenewCertificate(ctx context.Context, certID strin
 
 	// Add SAN entries
 	template.DNSNames = []string{
-		fmt.Sprintf("%s.devices.qslb.local", device.ID),
-		fmt.Sprintf("%s.%s.devices.qslb.local", device.ID, device.OrganizationID),
+		fmt.Sprintf("%s.devices.qbitel.local", device.ID),
+		fmt.Sprintf("%s.%s.devices.qbitel.local", device.ID, device.OrganizationID),
 	}
 
 	// Sign the renewed certificate
@@ -519,7 +519,7 @@ func (cm *CertificateManager) initializeRootCA() error {
 		}
 	}
 
-	rootCert, rootKey, err := generateCA("QSLB Root CA", 10*365*24*time.Hour, 4096, nil, nil)
+	rootCert, rootKey, err := generateCA("QBITEL Root CA", 10*365*24*time.Hour, 4096, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -551,7 +551,7 @@ func (cm *CertificateManager) initializeIntermediateCA() error {
 		}
 	}
 
-	intermCert, intermKey, err := generateCA("QSLB Intermediate CA", 5*365*24*time.Hour, 2048, cm.rootCA, cm.rootKey)
+	intermCert, intermKey, err := generateCA("QBITEL Intermediate CA", 5*365*24*time.Hour, 2048, cm.rootCA, cm.rootKey)
 	if err != nil {
 		return err
 	}

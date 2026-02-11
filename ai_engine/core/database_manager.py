@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Database Connection Pool Manager
+QBITEL Engine - Database Connection Pool Manager
 
 Production-ready database session management with connection pooling,
 transaction management, circuit breaker integration, and comprehensive monitoring.

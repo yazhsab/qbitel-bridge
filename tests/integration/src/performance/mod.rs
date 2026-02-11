@@ -1,4 +1,4 @@
-//! Performance and benchmark tests for CRONOS AI components
+//! Performance and benchmark tests for QBITEL Bridge components
 
 use crate::{TestConfig, TestResults, IntegrationTest, utils};
 use std::time::{Duration, Instant};
@@ -14,7 +14,7 @@ pub mod aiengine_performance;
 pub mod policy_performance;
 pub mod memory_usage;
 
-/// Performance test suite for all CRONOS AI components
+/// Performance test suite for all QBITEL Bridge components
 pub struct PerformanceTestSuite {
     config: TestConfig,
     client: Client,

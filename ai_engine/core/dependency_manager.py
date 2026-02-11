@@ -1,5 +1,5 @@
 """
-CRONOS AI - Dependency Manager
+QBITEL - Dependency Manager
 Handles optional dependencies with fallback mechanisms and install checks.
 Supports air-gapped deployments with vendor shims.
 """
@@ -314,7 +314,7 @@ class DependencyManager:
             Formatted installation report
         """
         lines = ["=" * 80]
-        lines.append("CRONOS AI - Dependency Installation Report")
+        lines.append("QBITEL - Dependency Installation Report")
         lines.append("=" * 80)
         lines.append("")
 

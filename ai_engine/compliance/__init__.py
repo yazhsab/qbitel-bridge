@@ -1,5 +1,5 @@
 """
-CRONOS AI - Autonomous Compliance Reporter Module
+QBITEL - Autonomous Compliance Reporter Module
 
 Enterprise-grade compliance reporting system with regulatory intelligence,
 automated assessment, and blockchain-based audit trails.
@@ -101,5 +101,5 @@ __all__ = [
 ]
 
 __version__ = "1.0.0"
-__author__ = "CRONOS AI Team"
+__author__ = "QBITEL Team"
 __description__ = "Autonomous Compliance Reporter with Regulatory Intelligence"

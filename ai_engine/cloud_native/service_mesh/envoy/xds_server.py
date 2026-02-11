@@ -366,9 +366,9 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                             },
                             "http_filters": [
                                 {
-                                    "name": "cronos.filters.http.quantum_encryption",
+                                    "name": "qbitel.filters.http.quantum_encryption",
                                     "typed_config": {
-                                        "@type": "type.googleapis.com/cronos.extensions.filters.http.quantum_encryption.v3.QuantumEncryption",
+                                        "@type": "type.googleapis.com/qbitel.extensions.filters.http.quantum_encryption.v3.QuantumEncryption",
                                         "key_algorithm": "kyber-1024",
                                         "signature_algorithm": "dilithium-5",
                                         "enable_metrics": True,
@@ -400,7 +400,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                             },
                             "tls_certificate_sds_secret_configs": [
                                 {
-                                    "name": "cronos_quantum_cert",
+                                    "name": "qbitel_quantum_cert",
                                     "sds_config": {
                                         "api_config_source": {
                                             "api_type": "GRPC",
@@ -516,7 +516,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                     },
                     "tls_certificate_sds_secret_configs": [
                         {
-                            "name": "cronos_quantum_client_cert",
+                            "name": "qbitel_quantum_client_cert",
                             "sds_config": {
                                 "api_config_source": {
                                     "api_type": "GRPC",
@@ -532,7 +532,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                         }
                     ],
                     "validation_context_sds_secret_config": {
-                        "name": "cronos_quantum_validation_context",
+                        "name": "qbitel_quantum_validation_context",
                         "sds_config": {
                             "api_config_source": {
                                 "api_type": "GRPC",

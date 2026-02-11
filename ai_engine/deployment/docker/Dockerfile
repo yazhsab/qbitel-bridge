@@ -1,8 +1,8 @@
-# CRONOS AI Engine - Production Dockerfile
+# QBITEL Bridge AI Engine - Production Dockerfile
 # Multi-stage build for optimal image size and security
 
 # Build stage
-FROM python:3.9-slim as builder
+FROM python:3.11-slim as builder
 
 # Set build arguments
 ARG BUILD_VERSION=1.0.0
@@ -45,14 +45,14 @@ COPY --chown=builder:builder . ./app/
 RUN cd app && pip install -e .
 
 # Production stage
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 # Set metadata labels
-LABEL maintainer="CRONOS AI Team <team@cronos-ai.com>"
+LABEL maintainer="QBITEL Team <enterprise@qbitel.com>"
 LABEL version="${BUILD_VERSION}"
 LABEL build-date="${BUILD_DATE}"
 LABEL build-commit="${BUILD_COMMIT}"
-LABEL description="CRONOS AI Engine - Enterprise Protocol Discovery and Analysis"
+LABEL description="QBITEL Bridge AI Engine - Enterprise Protocol Discovery and Analysis"
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
@@ -62,24 +62,24 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Create application user
-RUN groupadd --gid 1000 cronos && \
-    useradd --uid 1000 --gid cronos --shell /bin/bash --create-home cronos
+RUN groupadd --gid 1000 qbitel && \
+    useradd --uid 1000 --gid qbitel --shell /bin/bash --create-home qbitel
 
 # Set up directories
 RUN mkdir -p /app/logs /app/data /app/models /app/config && \
-    chown -R cronos:cronos /app
+    chown -R qbitel:qbitel /app
 
 # Switch to app user
-USER cronos
+USER qbitel
 WORKDIR /app
 
 # Copy virtual environment from builder stage
-COPY --from=builder --chown=cronos:cronos /home/builder/venv /app/venv
+COPY --from=builder --chown=qbitel:qbitel /home/builder/venv /app/venv
 ENV PATH="/app/venv/bin:$PATH"
 ENV PYTHONPATH=/app
 
 # Copy application code
-COPY --from=builder --chown=cronos:cronos /home/builder/app/ /app/
+COPY --from=builder --chown=qbitel:qbitel /home/builder/app/ /app/
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1

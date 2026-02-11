@@ -2,7 +2,7 @@
 name = "dpi_engine"
 version = "0.1.0"
 edition = "2021"
-authors = ["CRONOS AI Team"]
+authors = ["QBITEL Team"]
 description = "Enterprise-grade Deep Packet Inspection engine with ML-based classification"
 
 [dependencies]

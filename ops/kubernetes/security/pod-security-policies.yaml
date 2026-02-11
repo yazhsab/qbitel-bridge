@@ -1,0 +1,612 @@
+# QBITEL — Kubernetes Pod Security Configuration
+# ================================================
+# This file contains security policies for QBITEL deployments using
+# Pod Security Standards (PSS) which replace the deprecated PodSecurityPolicy API.
+#
+# Kubernetes 1.25+ uses Pod Security Admission (PSA) instead of PSP.
+# These configurations enforce security at the namespace level.
+
+---
+# Namespace with Pod Security Standards enforcement
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: qbitel-production
+  labels:
+    # Enforce restricted Pod Security Standard
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: v1.28
+    # Warn on violations in restricted mode
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: v1.28
+    # Audit mode for logging violations
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/audit-version: v1.28
+    # Custom labels
+    app.kubernetes.io/name: qbitel
+    app.kubernetes.io/component: platform
+    environment: production
+
+---
+# NetworkPolicy - Deny all ingress by default
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: qbitel-production
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+
+---
+# NetworkPolicy - Deny all egress by default
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-egress
+  namespace: qbitel-production
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+
+---
+# NetworkPolicy - Allow QBITEL API pods to receive traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-qbitel-api-ingress
+  namespace: qbitel-production
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: qbitel
+      app.kubernetes.io/component: api
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow from monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090  # Metrics
+
+---
+# NetworkPolicy - Allow internal communication
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-internal-communication
+  namespace: qbitel-production
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: qbitel
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: qbitel
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: qbitel
+
+---
+# NetworkPolicy - Allow database access
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-database-egress
+  namespace: qbitel-production
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: qbitel
+  policyTypes:
+    - Egress
+  egress:
+    # PostgreSQL
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Redis
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+      ports:
+        - protocol: TCP
+          port: 6379
+
+---
+# NetworkPolicy - Allow DNS resolution
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: qbitel-production
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+# ResourceQuota - Limit resources in namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: qbitel-quota
+  namespace: qbitel-production
+spec:
+  hard:
+    # Pod limits
+    pods: "50"
+    # CPU limits
+    requests.cpu: "20"
+    limits.cpu: "40"
+    # Memory limits
+    requests.memory: "40Gi"
+    limits.memory: "80Gi"
+    # Storage
+    requests.storage: "500Gi"
+    persistentvolumeclaims: "20"
+    # Secrets and ConfigMaps
+    secrets: "50"
+    configmaps: "50"
+    # Services
+    services: "20"
+    services.loadbalancers: "2"
+    services.nodeports: "0"
+
+---
+# LimitRange - Default resource limits for pods
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: qbitel-limits
+  namespace: qbitel-production
+spec:
+  limits:
+    # Default limits for containers
+    - type: Container
+      default:
+        cpu: "500m"
+        memory: "512Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "128Mi"
+      max:
+        cpu: "4"
+        memory: "8Gi"
+      min:
+        cpu: "50m"
+        memory: "64Mi"
+    # Pod limits
+    - type: Pod
+      max:
+        cpu: "8"
+        memory: "16Gi"
+    # PVC limits
+    - type: PersistentVolumeClaim
+      max:
+        storage: "100Gi"
+      min:
+        storage: "1Gi"
+
+---
+# ServiceAccount with minimal permissions
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: qbitel-api
+  namespace: qbitel-production
+  labels:
+    app.kubernetes.io/name: qbitel
+    app.kubernetes.io/component: api
+automountServiceAccountToken: false
+
+---
+# ServiceAccount for workers
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: qbitel-worker
+  namespace: qbitel-production
+  labels:
+    app.kubernetes.io/name: qbitel
+    app.kubernetes.io/component: worker
+automountServiceAccountToken: false
+
+---
+# Role for API pods
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: qbitel-api-role
+  namespace: qbitel-production
+rules:
+  # Allow reading ConfigMaps
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  # Allow reading Secrets (for database credentials)
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["qbitel-db-credentials", "qbitel-redis-credentials", "qbitel-api-keys"]
+    verbs: ["get"]
+
+---
+# RoleBinding for API service account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: qbitel-api-binding
+  namespace: qbitel-production
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: qbitel-api-role
+subjects:
+  - kind: ServiceAccount
+    name: qbitel-api
+    namespace: qbitel-production
+
+---
+# Example secure deployment with all security contexts
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbitel-api
+  namespace: qbitel-production
+  labels:
+    app.kubernetes.io/name: qbitel
+    app.kubernetes.io/component: api
+    app.kubernetes.io/version: "1.0.0"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qbitel
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: qbitel
+        app.kubernetes.io/component: api
+      annotations:
+        # Prevent privilege escalation
+        container.apparmor.security.beta.kubernetes.io/qbitel-api: runtime/default
+    spec:
+      serviceAccountName: qbitel-api
+      automountServiceAccountToken: false
+
+      # Pod-level security context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534  # nobody user
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+
+      # Anti-affinity for high availability
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: qbitel
+                    app.kubernetes.io/component: api
+                topologyKey: kubernetes.io/hostname
+
+      # Topology spread for zone distribution
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: qbitel
+              app.kubernetes.io/component: api
+
+      containers:
+        - name: qbitel-api
+          image: ghcr.io/qbitel/api:v1.0.0
+          imagePullPolicy: Always
+
+          # Container-level security context
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+
+          # Resource limits (required for restricted PSS)
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+
+          # Health probes
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
+
+          # Environment variables from secrets
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: qbitel-db-credentials
+                  key: url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: qbitel-redis-credentials
+                  key: url
+            - name: LOG_LEVEL
+              value: "INFO"
+            - name: ENVIRONMENT
+              value: "production"
+
+          # Volume mounts for read-only filesystem
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /var/cache/qbitel
+            - name: config
+              mountPath: /etc/qbitel
+              readOnly: true
+
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 100Mi
+        - name: cache
+          emptyDir:
+            sizeLimit: 500Mi
+        - name: config
+          configMap:
+            name: qbitel-api-config
+
+---
+# PodDisruptionBudget for high availability
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: qbitel-api-pdb
+  namespace: qbitel-production
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qbitel
+      app.kubernetes.io/component: api
+
+---
+# HorizontalPodAutoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: qbitel-api-hpa
+  namespace: qbitel-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: qbitel-api
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 10
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 4
+          periodSeconds: 15
+      selectPolicy: Max
+
+---
+# Kyverno policy for additional validation (if Kyverno is installed)
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: qbitel-security-policy
+  annotations:
+    policies.kyverno.io/title: QBITEL Security Policy
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: high
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    # Require non-root user
+    - name: require-run-as-non-root
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - qbitel-production
+      validate:
+        message: "Pods must run as non-root user"
+        pattern:
+          spec:
+            securityContext:
+              runAsNonRoot: true
+
+    # Require resource limits
+    - name: require-resource-limits
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - qbitel-production
+      validate:
+        message: "Containers must have resource limits defined"
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  limits:
+                    memory: "?*"
+                    cpu: "?*"
+
+    # Disallow privileged containers
+    - name: disallow-privileged
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - qbitel-production
+      validate:
+        message: "Privileged containers are not allowed"
+        pattern:
+          spec:
+            containers:
+              - securityContext:
+                  privileged: false
+
+    # Require read-only root filesystem
+    - name: require-readonly-rootfs
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - qbitel-production
+      validate:
+        message: "Containers must have read-only root filesystem"
+        pattern:
+          spec:
+            containers:
+              - securityContext:
+                  readOnlyRootFilesystem: true
+
+    # Disallow host networking
+    - name: disallow-host-network
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - qbitel-production
+      validate:
+        message: "Host networking is not allowed"
+        pattern:
+          spec:
+            hostNetwork: false
+
+    # Require approved registries
+    - name: require-approved-registries
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - qbitel-production
+      validate:
+        message: "Images must be from approved registries (ghcr.io/qbitel)"
+        pattern:
+          spec:
+            containers:
+              - image: "ghcr.io/qbitel/*"

@@ -1,5 +1,5 @@
 """
-CRONOS AI - Translation Studio Integration
+QBITEL - Translation Studio Integration
 Integration layer between the existing Protocol Discovery Orchestrator and the Translation Studio.
 This module ensures seamless integration while maintaining backward compatibility.
 """
@@ -85,7 +85,7 @@ class IntegratedDiscoveryResult(BaseDiscoveryResult):
 class IntegratedProtocolDiscoveryOrchestrator:
     """
     Integrated Protocol Discovery Orchestrator that combines the existing
-    CRONOS AI protocol discovery with Translation Studio capabilities.
+    QBITEL protocol discovery with Translation Studio capabilities.
 
     This class provides seamless integration between the base discovery system
     and the enhanced translation features while maintaining backward compatibility.

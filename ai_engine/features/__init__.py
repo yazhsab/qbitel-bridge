@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Feature Engineering Module
+QBITEL Engine - Feature Engineering Module
 
 This module provides comprehensive feature engineering capabilities for
 extracting meaningful features from protocol messages and network traffic.

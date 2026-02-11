@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - API Schemas
+QBITEL Engine - API Schemas
 Pydantic models for request/response validation and documentation.
 """
 

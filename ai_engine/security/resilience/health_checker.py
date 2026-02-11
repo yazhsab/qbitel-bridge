@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Health Checker Implementation
+QBITEL Engine - Health Checker Implementation
 
 Enterprise-grade health monitoring with configurable checks,
 dependency tracking, and automated recovery for the Zero-Touch Security Orchestrator.
@@ -78,7 +78,7 @@ class HealthCheck(ABC):
     def __init__(self, config: HealthCheckConfig):
         self.config = config
         self.logger = get_security_logger(
-            f"cronos.security.resilience.health_check.{config.name}"
+            f"qbitel.security.resilience.health_check.{config.name}"
         )
 
         # State tracking
@@ -389,7 +389,7 @@ class HealthChecker:
 
     def __init__(self):
         self.health_checks: Dict[str, HealthCheck] = {}
-        self.logger = get_security_logger("cronos.security.resilience.health_checker")
+        self.logger = get_security_logger("qbitel.security.resilience.health_checker")
 
         # Background monitoring
         self._monitoring_tasks: Dict[str, asyncio.Task] = {}

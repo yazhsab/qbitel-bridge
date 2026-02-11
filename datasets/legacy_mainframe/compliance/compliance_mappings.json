@@ -1,0 +1,772 @@
+{
+  "metadata": {
+    "title": "Legacy Mainframe Compliance Mapping Dataset",
+    "version": "1.0.0",
+    "description": "Comprehensive compliance mappings for legacy mainframe modernization",
+    "frameworks": ["HIPAA", "PCI-DSS", "SOX", "GDPR", "SOC2"],
+    "generated_date": "2024-01-15"
+  },
+  "hipaa": {
+    "framework_info": {
+      "name": "Health Insurance Portability and Accountability Act",
+      "version": "Final Rule 2013",
+      "focus": "Protected Health Information (PHI)"
+    },
+    "controls": [
+      {
+        "control_id": "HIPAA-164.312(a)(1)",
+        "title": "Access Control",
+        "description": "Implement technical policies and procedures for electronic information systems that maintain ePHI",
+        "legacy_patterns": [
+          {
+            "pattern": "RACF user authentication",
+            "cobol_example": "CALL 'ICHEINTY' USING RACF-PARMS",
+            "detection_regex": "CALL\\s+['\"]ICHEINTY['\"]|RACF|ACEE",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "CICS security",
+            "cobol_example": "EXEC CICS VERIFY PASSWORD(user-pwd) END-EXEC",
+            "detection_regex": "EXEC\\s+CICS\\s+VERIFY|CICS.*SIGNON",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "DB2 authorization",
+            "cobol_example": "EXEC SQL SET CURRENT SQLID = 'ADMIN' END-EXEC",
+            "detection_regex": "SET\\s+CURRENT\\s+SQLID|GRANT|REVOKE",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Implement OAuth 2.0/OIDC authentication",
+          "Use role-based access control (RBAC)",
+          "Implement multi-factor authentication (MFA)",
+          "Maintain access control lists in cloud IAM"
+        ],
+        "migration_guidance": {
+          "from": "RACF/ACF2/TopSecret",
+          "to": ["AWS IAM", "Azure AD", "Okta", "Auth0"],
+          "key_considerations": [
+            "Map RACF groups to IAM roles",
+            "Preserve audit trail during migration",
+            "Implement equivalent access controls in modern system"
+          ]
+        }
+      },
+      {
+        "control_id": "HIPAA-164.312(a)(2)(iv)",
+        "title": "Encryption and Decryption",
+        "description": "Implement a mechanism to encrypt and decrypt ePHI",
+        "legacy_patterns": [
+          {
+            "pattern": "ICSF encryption",
+            "cobol_example": "CALL 'CSNBENC' USING ENCIPHER-PARMS",
+            "detection_regex": "CSNBENC|CSNBDEC|ICSF|CIPHER",
+            "risk_level": "critical"
+          },
+          {
+            "pattern": "Custom encryption routines",
+            "cobol_example": "PERFORM ENCRYPT-DATA VARYING I FROM 1 BY 1",
+            "detection_regex": "ENCRYPT|DECRYPT|CIPHER|SCRAMBLE",
+            "risk_level": "critical"
+          }
+        ],
+        "modern_requirements": [
+          "Use AES-256 encryption for data at rest",
+          "Implement TLS 1.3 for data in transit",
+          "Use AWS KMS or Azure Key Vault for key management",
+          "Implement envelope encryption for large datasets"
+        ],
+        "migration_guidance": {
+          "from": "ICSF/Custom encryption",
+          "to": ["AWS KMS", "Azure Key Vault", "HashiCorp Vault"],
+          "key_considerations": [
+            "Inventory all encryption keys",
+            "Plan key rotation strategy",
+            "Document encryption algorithms in use",
+            "Test decryption of historical data"
+          ]
+        }
+      },
+      {
+        "control_id": "HIPAA-164.312(b)",
+        "title": "Audit Controls",
+        "description": "Implement hardware, software, and/or procedural mechanisms to record and examine activity",
+        "legacy_patterns": [
+          {
+            "pattern": "SMF records",
+            "cobol_example": "WRITE SMF-RECORD FROM AUDIT-DATA",
+            "detection_regex": "SMF|WRITE.*AUDIT|LOG-RECORD",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "DB2 audit trace",
+            "cobol_example": "-- DB2 AUDIT configured at subsystem level",
+            "detection_regex": "AUDIT\\s+TRACE|DB2.*AUDIT",
+            "risk_level": "medium"
+          },
+          {
+            "pattern": "CICS journal",
+            "cobol_example": "EXEC CICS JOURNAL JFILEID(1) FROM(LOG-DATA) END-EXEC",
+            "detection_regex": "EXEC\\s+CICS\\s+JOURNAL|DFHJCT",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Implement centralized logging (ELK, Splunk)",
+          "Enable CloudTrail/Azure Monitor audit logs",
+          "Implement real-time alerting for security events",
+          "Retain audit logs for minimum 6 years"
+        ],
+        "migration_guidance": {
+          "from": "SMF/DB2 Audit/CICS Journal",
+          "to": ["AWS CloudTrail", "Azure Monitor", "Splunk", "ELK Stack"],
+          "key_considerations": [
+            "Map SMF record types to modern log categories",
+            "Preserve historical audit data",
+            "Implement log integrity verification"
+          ]
+        }
+      },
+      {
+        "control_id": "HIPAA-164.312(c)(1)",
+        "title": "Integrity",
+        "description": "Implement policies and procedures to protect ePHI from improper alteration or destruction",
+        "legacy_patterns": [
+          {
+            "pattern": "VSAM integrity",
+            "cobol_example": "OPEN I-O VSAM-FILE WITH LOCK",
+            "detection_regex": "OPEN.*WITH\\s+LOCK|VSAM.*SHAREOPTIONS",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "DB2 referential integrity",
+            "cobol_example": "EXEC SQL INSERT INTO PATIENT FOREIGN KEY END-EXEC",
+            "detection_regex": "FOREIGN\\s+KEY|REFERENTIAL|CONSTRAINT",
+            "risk_level": "medium"
+          },
+          {
+            "pattern": "Checksum validation",
+            "cobol_example": "COMPUTE CHECK-SUM = FUNCTION MOD(RECORD-TOTAL, 97)",
+            "detection_regex": "CHECK-?SUM|HASH|VERIFY-?TOTAL",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Implement database constraints and triggers",
+          "Use cryptographic checksums (SHA-256)",
+          "Implement version control for data changes",
+          "Enable soft deletes with audit trail"
+        ]
+      },
+      {
+        "control_id": "HIPAA-164.312(d)",
+        "title": "Person or Entity Authentication",
+        "description": "Implement procedures to verify that a person seeking access to ePHI is the one claimed",
+        "legacy_patterns": [
+          {
+            "pattern": "TSO logon",
+            "cobol_example": "// LOGON with RACF verification",
+            "detection_regex": "LOGON|USERID|PASSWORD.*VERIFY",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "Digital certificates",
+            "cobol_example": "CALL 'CSNDPKV' USING CERT-VERIFY-PARMS",
+            "detection_regex": "CSNDPKV|CERTIFICATE|PKI|X509",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Implement SSO with SAML/OIDC",
+          "Use certificate-based authentication for APIs",
+          "Implement biometric authentication where appropriate",
+          "Use hardware security keys for admin access"
+        ]
+      },
+      {
+        "control_id": "HIPAA-164.312(e)(1)",
+        "title": "Transmission Security",
+        "description": "Implement technical security measures to guard against unauthorized access to ePHI transmitted over an electronic communications network",
+        "legacy_patterns": [
+          {
+            "pattern": "SNA/LU6.2 encryption",
+            "cobol_example": "// VTAM encryption settings",
+            "detection_regex": "VTAM|LU6\\.2|SNA.*ENCRYPT",
+            "risk_level": "critical"
+          },
+          {
+            "pattern": "MQ SSL channels",
+            "cobol_example": "// MQ channel with SSLCIPH",
+            "detection_regex": "SSLCIPH|MQ.*SSL|MQCONN.*SECURE",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "FTP transmission",
+            "cobol_example": "// FTP with no encryption - VIOLATION",
+            "detection_regex": "FTP(?!S)|CONNECT.*21",
+            "risk_level": "critical"
+          }
+        ],
+        "modern_requirements": [
+          "Use TLS 1.2+ for all transmissions",
+          "Implement mTLS for service-to-service communication",
+          "Use VPN or private connectivity for sensitive data",
+          "Disable all legacy protocols (Telnet, FTP)"
+        ]
+      }
+    ],
+    "phi_data_elements": [
+      {"element": "Patient Name", "cobol_field_patterns": ["PATIENT-NAME", "PAT-NAME", "PT-NM"], "sensitivity": "high"},
+      {"element": "Social Security Number", "cobol_field_patterns": ["SSN", "SOC-SEC-NO", "SOCIAL-SEC"], "sensitivity": "critical"},
+      {"element": "Date of Birth", "cobol_field_patterns": ["DOB", "BIRTH-DATE", "DT-BIRTH"], "sensitivity": "high"},
+      {"element": "Medical Record Number", "cobol_field_patterns": ["MRN", "MED-REC-NO", "PATIENT-ID"], "sensitivity": "high"},
+      {"element": "Health Plan Beneficiary", "cobol_field_patterns": ["BENE-ID", "MEMBER-ID", "SUBSCRIBER-NO"], "sensitivity": "high"},
+      {"element": "Account Number", "cobol_field_patterns": ["ACCT-NO", "ACCOUNT-NBR", "BILLING-ACCT"], "sensitivity": "medium"},
+      {"element": "Diagnosis Code", "cobol_field_patterns": ["ICD-CODE", "DIAG-CD", "DX-CODE"], "sensitivity": "high"},
+      {"element": "Procedure Code", "cobol_field_patterns": ["CPT-CODE", "PROC-CD", "HCPCS"], "sensitivity": "medium"}
+    ]
+  },
+  "pci_dss": {
+    "framework_info": {
+      "name": "Payment Card Industry Data Security Standard",
+      "version": "4.0",
+      "focus": "Cardholder Data (CHD) and Sensitive Authentication Data (SAD)"
+    },
+    "controls": [
+      {
+        "control_id": "PCI-DSS-3.4",
+        "title": "Render PAN Unreadable",
+        "description": "Render PAN unreadable anywhere it is stored using strong cryptography",
+        "legacy_patterns": [
+          {
+            "pattern": "PAN stored in clear",
+            "cobol_example": "05 CARD-NUMBER PIC X(16). *> VIOLATION",
+            "detection_regex": "CARD-?NUM|PAN|ACCT-?NO.*PIC\\s+X\\(16\\)",
+            "risk_level": "critical"
+          },
+          {
+            "pattern": "Masked PAN display",
+            "cobol_example": "MOVE '****' TO CARD-NUMBER(1:4)",
+            "detection_regex": "MOVE\\s+['\"]\\*+['\"].*CARD",
+            "risk_level": "low"
+          },
+          {
+            "pattern": "Encrypted storage",
+            "cobol_example": "CALL 'CSNBENC' USING PAN-ENCRYPT-PARMS",
+            "detection_regex": "CSNBENC.*PAN|ENCRYPT.*CARD",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Use tokenization for PAN storage",
+          "Implement AES-256 encryption if storing",
+          "Use HSM for key management",
+          "Never store CVV/CVC"
+        ],
+        "migration_guidance": {
+          "from": "Clear text or weak encryption",
+          "to": ["Tokenization service", "Format-Preserving Encryption"],
+          "key_considerations": [
+            "Identify all PAN storage locations",
+            "Implement tokenization before migration",
+            "Update all systems to use tokens"
+          ]
+        }
+      },
+      {
+        "control_id": "PCI-DSS-3.5",
+        "title": "Protect Cryptographic Keys",
+        "description": "Protect cryptographic keys used for encryption of cardholder data",
+        "legacy_patterns": [
+          {
+            "pattern": "Hardcoded keys",
+            "cobol_example": "05 ENCRYPT-KEY PIC X(32) VALUE 'ABC123...' *> VIOLATION",
+            "detection_regex": "KEY.*VALUE\\s+['\"]|ENCRYPT.*PIC.*VALUE",
+            "risk_level": "critical"
+          },
+          {
+            "pattern": "ICSF key storage",
+            "cobol_example": "CALL 'CSNBKRC' USING KEY-RECORD-PARMS",
+            "detection_regex": "CSNBKRC|CKDS|PKDS|ICSF.*KEY",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Use HSM for key storage (AWS CloudHSM, Azure Dedicated HSM)",
+          "Implement automated key rotation",
+          "Use split knowledge for key custodians",
+          "Maintain key inventory and audit trail"
+        ]
+      },
+      {
+        "control_id": "PCI-DSS-4.1",
+        "title": "Strong Cryptography for Transmission",
+        "description": "Use strong cryptography and security protocols to safeguard CHD during transmission",
+        "legacy_patterns": [
+          {
+            "pattern": "Unencrypted MQ",
+            "cobol_example": "CALL 'MQPUT' USING CARD-DATA *> Check channel config",
+            "detection_regex": "MQPUT|MQGET|MQ.*CARD|MQ.*PAN",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "CICS socket",
+            "cobol_example": "EXEC CICS SOCKET SEND FROM(CARD-DATA) END-EXEC",
+            "detection_regex": "CICS\\s+SOCKET|TCP.*CARD|SOCKET.*PAN",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "File transfer",
+            "cobol_example": "// FTP PUT CARD.DATA (VIOLATION if not FTPS)",
+            "detection_regex": "FTP.*CARD|NDM.*PAN|CONNECT:DIRECT",
+            "risk_level": "critical"
+          }
+        ],
+        "modern_requirements": [
+          "TLS 1.2+ for all cardholder data transmission",
+          "Use point-to-point encryption (P2PE)",
+          "Implement certificate pinning for APIs",
+          "Disable SSL and early TLS versions"
+        ]
+      },
+      {
+        "control_id": "PCI-DSS-6.5",
+        "title": "Secure Coding Practices",
+        "description": "Develop applications based on secure coding guidelines",
+        "legacy_patterns": [
+          {
+            "pattern": "SQL injection vulnerability",
+            "cobol_example": "STRING 'SELECT * FROM CARDS WHERE PAN = ' CARD-INPUT INTO SQL-STMT",
+            "detection_regex": "STRING.*SELECT.*INTO|CONCATENATE.*SQL",
+            "risk_level": "critical"
+          },
+          {
+            "pattern": "Buffer overflow risk",
+            "cobol_example": "MOVE EXTERNAL-INPUT TO SMALL-FIELD",
+            "detection_regex": "MOVE\\s+\\w+-INPUT.*TO.*PIC\\s+X\\(",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "Unvalidated input",
+            "cobol_example": "ACCEPT CARD-NUMBER FROM CONSOLE",
+            "detection_regex": "ACCEPT.*CARD|ACCEPT.*PAN|ACCEPT.*FROM",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Use parameterized queries/prepared statements",
+          "Implement input validation and sanitization",
+          "Use secure coding frameworks",
+          "Perform regular code reviews and SAST"
+        ]
+      },
+      {
+        "control_id": "PCI-DSS-8.2",
+        "title": "User Identification",
+        "description": "Identify users and authenticate access to system components",
+        "legacy_patterns": [
+          {
+            "pattern": "Shared user ID",
+            "cobol_example": "// LOGON USERID(BATCHUSER) - shared account",
+            "detection_regex": "BATCH-?USER|SHARED-?ID|GENERIC-?USER",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "Weak password storage",
+            "cobol_example": "05 PASSWORD PIC X(8). *> Plain text storage",
+            "detection_regex": "PASSWORD.*PIC.*X\\(\\d\\)|PWD.*VALUE",
+            "risk_level": "critical"
+          }
+        ],
+        "modern_requirements": [
+          "Unique user IDs for all users",
+          "MFA for all remote access",
+          "Password hashing with bcrypt/Argon2",
+          "Automated account lockout"
+        ]
+      },
+      {
+        "control_id": "PCI-DSS-10.2",
+        "title": "Audit Trail",
+        "description": "Implement automated audit trails for all system components",
+        "legacy_patterns": [
+          {
+            "pattern": "SMF Type 80 records",
+            "cobol_example": "// SMF recording for RACF events",
+            "detection_regex": "SMF.*80|RACF.*AUDIT|TYPE80",
+            "risk_level": "medium"
+          },
+          {
+            "pattern": "Custom logging",
+            "cobol_example": "WRITE AUDIT-LOG FROM LOG-RECORD",
+            "detection_regex": "WRITE.*AUDIT|LOG-?RECORD|AUDIT-?FILE",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Log all access to cardholder data",
+          "Log all actions by admin users",
+          "Implement centralized log management",
+          "Retain logs for minimum 1 year"
+        ]
+      }
+    ],
+    "cardholder_data_elements": [
+      {"element": "Primary Account Number (PAN)", "cobol_field_patterns": ["CARD-NUMBER", "PAN", "ACCT-NO", "CARD-NO"], "storage_allowed": "encrypted/tokenized only"},
+      {"element": "Cardholder Name", "cobol_field_patterns": ["CARD-NAME", "CUST-NAME", "CH-NAME"], "storage_allowed": "yes"},
+      {"element": "Expiration Date", "cobol_field_patterns": ["EXP-DATE", "CARD-EXP", "VALID-THRU"], "storage_allowed": "yes"},
+      {"element": "Service Code", "cobol_field_patterns": ["SVC-CODE", "SERVICE-CD"], "storage_allowed": "yes"},
+      {"element": "CVV/CVC", "cobol_field_patterns": ["CVV", "CVC", "CVV2", "SECURITY-CODE"], "storage_allowed": "never"},
+      {"element": "PIN", "cobol_field_patterns": ["PIN", "PIN-BLOCK", "PIN-DATA"], "storage_allowed": "never"},
+      {"element": "Track Data", "cobol_field_patterns": ["TRACK-1", "TRACK-2", "MAG-STRIPE"], "storage_allowed": "never"}
+    ]
+  },
+  "sox": {
+    "framework_info": {
+      "name": "Sarbanes-Oxley Act",
+      "version": "2002",
+      "focus": "Financial Reporting and Internal Controls"
+    },
+    "controls": [
+      {
+        "control_id": "SOX-302",
+        "title": "Corporate Responsibility for Financial Reports",
+        "description": "CEO and CFO must certify financial reports",
+        "legacy_patterns": [
+          {
+            "pattern": "Financial calculation programs",
+            "cobol_example": "COMPUTE NET-INCOME = REVENUE - EXPENSES",
+            "detection_regex": "COMPUTE.*INCOME|COMPUTE.*REVENUE|FINANCIAL.*CALC",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "GL posting programs",
+            "cobol_example": "WRITE GL-RECORD FROM JOURNAL-ENTRY",
+            "detection_regex": "GL-?RECORD|JOURNAL|LEDGER|POSTING",
+            "risk_level": "high"
+          }
+        ],
+        "modern_requirements": [
+          "Implement segregation of duties",
+          "Maintain audit trail for all financial calculations",
+          "Version control for calculation logic",
+          "Automated reconciliation and validation"
+        ]
+      },
+      {
+        "control_id": "SOX-404",
+        "title": "Internal Control Assessment",
+        "description": "Annual assessment of internal controls over financial reporting",
+        "legacy_patterns": [
+          {
+            "pattern": "Batch job scheduling",
+            "cobol_example": "// JOB for month-end close processing",
+            "detection_regex": "MONTH-?END|CLOSE.*PROCESS|PERIOD.*END",
+            "risk_level": "medium"
+          },
+          {
+            "pattern": "Manual overrides",
+            "cobol_example": "IF OVERRIDE-FLAG = 'Y' MOVE MANUAL-AMT TO FINAL-AMT",
+            "detection_regex": "OVERRIDE|MANUAL-?AMT|FORCE-?POST|BYPASS",
+            "risk_level": "critical"
+          },
+          {
+            "pattern": "Approval workflows",
+            "cobol_example": "IF AMOUNT > APPROVAL-LIMIT PERFORM ESCALATE-APPROVAL",
+            "detection_regex": "APPROVAL|AUTHORIZE|LIMIT.*CHECK|ESCALATE",
+            "risk_level": "high"
+          }
+        ],
+        "modern_requirements": [
+          "Automated workflow with approval gates",
+          "Real-time control monitoring",
+          "Exception reporting and tracking",
+          "Role-based access for financial functions"
+        ]
+      }
+    ]
+  },
+  "gdpr": {
+    "framework_info": {
+      "name": "General Data Protection Regulation",
+      "version": "EU 2016/679",
+      "focus": "Personal Data Protection"
+    },
+    "controls": [
+      {
+        "control_id": "GDPR-Art17",
+        "title": "Right to Erasure (Right to be Forgotten)",
+        "description": "Data subjects have the right to have their personal data erased",
+        "legacy_patterns": [
+          {
+            "pattern": "VSAM delete",
+            "cobol_example": "DELETE CUSTOMER-FILE RECORD KEY IS CUST-ID",
+            "detection_regex": "DELETE.*FILE|DELETE.*RECORD|REMOVE.*CUST",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "DB2 delete",
+            "cobol_example": "EXEC SQL DELETE FROM CUSTOMER WHERE CUST_ID = :WS-CUST-ID END-EXEC",
+            "detection_regex": "DELETE\\s+FROM.*CUSTOMER|DELETE.*WHERE.*ID",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "Logical delete (soft)",
+            "cobol_example": "MOVE 'D' TO CUST-STATUS",
+            "detection_regex": "MOVE.*['\"]D['\"].*STATUS|DELETE-?FLAG|INACTIVE",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Implement data subject deletion APIs",
+          "Handle cascading deletes across systems",
+          "Maintain deletion audit logs",
+          "Verify deletion in backups within 30 days"
+        ],
+        "migration_guidance": {
+          "key_considerations": [
+            "Map all personal data storage locations",
+            "Identify data relationships and dependencies",
+            "Implement deletion request workflow",
+            "Handle backup data erasure requirements"
+          ]
+        }
+      },
+      {
+        "control_id": "GDPR-Art20",
+        "title": "Right to Data Portability",
+        "description": "Data subjects can receive their personal data in a machine-readable format",
+        "legacy_patterns": [
+          {
+            "pattern": "Report generation",
+            "cobol_example": "WRITE PRINT-LINE FROM CUSTOMER-DETAIL",
+            "detection_regex": "WRITE.*PRINT|REPORT.*CUSTOMER|EXTRACT.*DATA",
+            "risk_level": "medium"
+          },
+          {
+            "pattern": "File export",
+            "cobol_example": "WRITE EXPORT-FILE FROM CUST-RECORD",
+            "detection_regex": "EXPORT|EXTRACT|DOWNLOAD.*CUST",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Provide data export in JSON/XML format",
+          "Support standard data formats",
+          "Enable self-service data download",
+          "Include all personal data categories"
+        ]
+      },
+      {
+        "control_id": "GDPR-Art25",
+        "title": "Data Protection by Design",
+        "description": "Implement appropriate technical measures to protect personal data",
+        "legacy_patterns": [
+          {
+            "pattern": "Data minimization",
+            "cobol_example": "05 FILLER PIC X(100). *> Unused fields - check for PII",
+            "detection_regex": "FILLER.*PIC|UNUSED|RESERVED.*X\\(",
+            "risk_level": "low"
+          },
+          {
+            "pattern": "Purpose limitation",
+            "cobol_example": "*> Check if data used for original purpose only",
+            "detection_regex": "PURPOSE|CONSENT|MARKETING.*FLAG",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Collect only necessary data",
+          "Implement data classification",
+          "Apply pseudonymization/anonymization",
+          "Document data processing purposes"
+        ]
+      },
+      {
+        "control_id": "GDPR-Art32",
+        "title": "Security of Processing",
+        "description": "Implement appropriate security measures for personal data processing",
+        "legacy_patterns": [
+          {
+            "pattern": "Encryption at rest",
+            "cobol_example": "// SMS dataset encryption or VSAM encryption",
+            "detection_regex": "ENCRYPT|CIPHER|SMS.*ENCRYPT",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "Access logging",
+            "cobol_example": "WRITE AUDIT-LOG FROM ACCESS-RECORD",
+            "detection_regex": "AUDIT|ACCESS.*LOG|TRACE.*RECORD",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Encryption at rest and in transit",
+          "Regular security assessments",
+          "Incident response procedures",
+          "Staff security training"
+        ]
+      }
+    ],
+    "personal_data_elements": [
+      {"element": "Name", "cobol_field_patterns": ["CUST-NAME", "FIRST-NAME", "LAST-NAME", "SURNAME"], "category": "basic_identity"},
+      {"element": "Address", "cobol_field_patterns": ["ADDRESS", "STREET", "CITY", "POSTAL-CODE", "ZIP"], "category": "contact"},
+      {"element": "Email", "cobol_field_patterns": ["EMAIL", "E-MAIL", "EMAIL-ADDR"], "category": "contact"},
+      {"element": "Phone", "cobol_field_patterns": ["PHONE", "TEL-NO", "MOBILE", "CELL"], "category": "contact"},
+      {"element": "Date of Birth", "cobol_field_patterns": ["DOB", "BIRTH-DATE", "DT-BIRTH", "BIRTHDATE"], "category": "basic_identity"},
+      {"element": "National ID", "cobol_field_patterns": ["SSN", "NIN", "TAX-ID", "NATIONAL-ID"], "category": "government_id"},
+      {"element": "Financial Account", "cobol_field_patterns": ["BANK-ACCT", "IBAN", "SORT-CODE", "ROUTING"], "category": "financial"},
+      {"element": "IP Address", "cobol_field_patterns": ["IP-ADDR", "CLIENT-IP", "REMOTE-ADDR"], "category": "online_identifier"},
+      {"element": "Health Data", "cobol_field_patterns": ["DIAGNOSIS", "MEDICAL", "HEALTH", "PRESCRIPTION"], "category": "special_category"}
+    ]
+  },
+  "soc2": {
+    "framework_info": {
+      "name": "SOC 2 Type II",
+      "version": "AICPA 2017",
+      "focus": "Trust Services Criteria (Security, Availability, Processing Integrity, Confidentiality, Privacy)"
+    },
+    "controls": [
+      {
+        "control_id": "SOC2-CC6.1",
+        "title": "Logical Access Security",
+        "description": "Restrict logical access to the system",
+        "legacy_patterns": [
+          {
+            "pattern": "RACF profiles",
+            "cobol_example": "// RACF PERMIT for dataset access",
+            "detection_regex": "RACF|PERMIT|DATASET.*PROFILE",
+            "risk_level": "high"
+          },
+          {
+            "pattern": "Program access control",
+            "cobol_example": "IF USER-ROLE NOT = 'ADMIN' STOP RUN",
+            "detection_regex": "USER-?ROLE|ACCESS-?LEVEL|PERMISSION",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Implement least privilege access",
+          "Regular access reviews",
+          "Automated provisioning/deprovisioning",
+          "Just-in-time access for admin functions"
+        ]
+      },
+      {
+        "control_id": "SOC2-CC7.2",
+        "title": "Security Incident Management",
+        "description": "Respond to identified security incidents",
+        "legacy_patterns": [
+          {
+            "pattern": "Error handling and logging",
+            "cobol_example": "IF SQLCODE NOT = 0 PERFORM LOG-ERROR",
+            "detection_regex": "LOG-?ERROR|SECURITY.*ERROR|INCIDENT.*LOG",
+            "risk_level": "medium"
+          },
+          {
+            "pattern": "Abnormal termination",
+            "cobol_example": "IF ERROR-CONDITION CALL 'ABEND' USING ABEND-CODE",
+            "detection_regex": "ABEND|ABNORMAL.*END|STOP.*RUN.*ERROR",
+            "risk_level": "low"
+          }
+        ],
+        "modern_requirements": [
+          "Automated incident detection",
+          "Incident response playbooks",
+          "Security event correlation",
+          "Post-incident review process"
+        ]
+      },
+      {
+        "control_id": "SOC2-CC8.1",
+        "title": "Change Management",
+        "description": "Control changes to system components",
+        "legacy_patterns": [
+          {
+            "pattern": "Program versioning",
+            "cobol_example": "01 WS-PROGRAM-VERSION PIC X(10) VALUE 'V01.02.03'.",
+            "detection_regex": "VERSION|RELEASE|MOD-?DATE|CHANGE-?LOG",
+            "risk_level": "low"
+          },
+          {
+            "pattern": "Copybook management",
+            "cobol_example": "COPY CUSTCOPY.",
+            "detection_regex": "COPY\\s+\\w+|COPYBOOK|INCLUDE",
+            "risk_level": "medium"
+          }
+        ],
+        "modern_requirements": [
+          "Version control (Git)",
+          "Code review process",
+          "Automated testing",
+          "Approval gates for production"
+        ]
+      }
+    ]
+  },
+  "detection_patterns": {
+    "description": "Regex patterns for detecting compliance-relevant code in legacy systems",
+    "sensitive_data_patterns": [
+      {"name": "SSN Pattern", "regex": "\\b\\d{3}[- ]?\\d{2}[- ]?\\d{4}\\b", "frameworks": ["HIPAA", "GDPR"]},
+      {"name": "Credit Card Pattern", "regex": "\\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13})\\b", "frameworks": ["PCI-DSS"]},
+      {"name": "Email Pattern", "regex": "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}", "frameworks": ["GDPR"]},
+      {"name": "IP Address Pattern", "regex": "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b", "frameworks": ["GDPR"]},
+      {"name": "Date Pattern (Various)", "regex": "\\b(?:\\d{4}[-/]\\d{2}[-/]\\d{2}|\\d{2}[-/]\\d{2}[-/]\\d{4})\\b", "frameworks": ["All"]}
+    ],
+    "cobol_field_patterns": [
+      {"name": "Numeric ID Field", "regex": "\\d{2}\\s+\\w+(-ID|-NO|-NUM)\\s+PIC\\s+(9|S9)\\(\\d+\\)", "risk": "potential_identifier"},
+      {"name": "Name Field", "regex": "\\d{2}\\s+\\w+(-NAME)\\s+PIC\\s+X\\(\\d+\\)", "risk": "pii"},
+      {"name": "Address Field", "regex": "\\d{2}\\s+\\w+(-ADDR|-ADDRESS)\\s+PIC\\s+X\\(\\d+\\)", "risk": "pii"},
+      {"name": "Date Field", "regex": "\\d{2}\\s+\\w+(-DATE|-DT)\\s+PIC\\s+(9|X)\\(\\d+\\)", "risk": "temporal_data"},
+      {"name": "Amount Field", "regex": "\\d{2}\\s+\\w+(-AMT|-AMOUNT)\\s+PIC\\s+S?9+V9+", "risk": "financial_data"}
+    ]
+  },
+  "remediation_playbooks": {
+    "encryption_upgrade": {
+      "title": "Upgrade Legacy Encryption to Modern Standards",
+      "steps": [
+        "Inventory all encryption usage in legacy code",
+        "Identify encryption algorithms and key lengths",
+        "Map legacy encryption to modern equivalents",
+        "Implement key migration strategy",
+        "Test decryption of historical data",
+        "Deploy modern encryption with fallback",
+        "Phase out legacy encryption"
+      ],
+      "legacy_to_modern_mapping": [
+        {"legacy": "DES", "modern": "AES-256", "priority": "critical"},
+        {"legacy": "3DES", "modern": "AES-256", "priority": "high"},
+        {"legacy": "RC4", "modern": "AES-GCM", "priority": "critical"},
+        {"legacy": "MD5", "modern": "SHA-256", "priority": "critical"},
+        {"legacy": "SHA-1", "modern": "SHA-256", "priority": "high"}
+      ]
+    },
+    "access_control_modernization": {
+      "title": "Modernize Access Control from RACF to Cloud IAM",
+      "steps": [
+        "Export RACF user and group definitions",
+        "Map RACF groups to IAM roles",
+        "Define resource-based policies",
+        "Implement SSO integration",
+        "Configure MFA for all users",
+        "Test access scenarios",
+        "Migrate users in phases",
+        "Disable legacy access"
+      ]
+    },
+    "audit_log_migration": {
+      "title": "Migrate SMF/Audit Logs to Modern SIEM",
+      "steps": [
+        "Inventory SMF record types in use",
+        "Map SMF records to modern log formats",
+        "Configure log forwarding agents",
+        "Set up centralized log aggregation",
+        "Implement log parsing rules",
+        "Create compliance dashboards",
+        "Configure alerting rules",
+        "Validate log completeness"
+      ]
+    }
+  }
+}

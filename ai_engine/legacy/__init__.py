@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Whisperer
+QBITEL Engine - Legacy System Whisperer
 
 Enterprise-grade legacy system monitoring and predictive maintenance platform.
 Combines machine learning, LLM analysis, and tribal knowledge capture for
@@ -47,5 +47,5 @@ __all__ = [
 ]
 
 __version__ = "1.0.0"
-__author__ = "CRONOS AI Team"
+__author__ = "QBITEL Team"
 __description__ = "Legacy System Whisperer - AI-powered legacy system management"

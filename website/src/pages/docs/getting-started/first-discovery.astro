@@ -1,0 +1,127 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="First Discovery | QBITEL Bridge Docs" description="Tutorial: make your first protocol discovery request with QBITEL Bridge.">
+  <h1 class="text-3xl font-bold text-white mb-2">Your First Protocol Discovery</h1>
+  <p class="text-gray-400 mb-8">Walk through a complete protocol discovery workflow -- from capturing traffic to generating a parser.</p>
+
+  <h2 id="overview" class="text-2xl font-bold text-white mt-12 mb-4">Overview</h2>
+  <p class="text-gray-300 mb-4">QBITEL Bridge's protocol discovery pipeline takes raw network traffic and automatically identifies unknown protocols, learns their grammar, and generates parsers. This tutorial walks you through the entire process.</p>
+
+  <h2 id="prerequisites" class="text-2xl font-bold text-white mt-12 mb-4">Prerequisites</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>QBITEL Bridge running locally (see <a href="/docs/getting-started/quickstart" class="text-quantum-400 hover:underline">Quick Start</a>)</li>
+    <li>API accessible at <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">http://localhost:8000</code></li>
+    <li><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">curl</code> or any HTTP client installed</li>
+  </ul>
+
+  <h2 id="step-1-health-check" class="text-2xl font-bold text-white mt-12 mb-4">Step 1: Verify the API</h2>
+  <p class="text-gray-300 mb-4">Confirm the AI Engine is running and healthy:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">curl http://localhost:8000/health</code></pre>
+  <p class="text-gray-300 mb-4">Expected response:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">{'{'}
+  "status": "healthy",
+  "version": "1.0.0",
+  "components": {'{'}
+    "ai_engine": "ready",
+    "database": "connected",
+    "llm": "available"
+  {'}'}
+{'}'}</code></pre>
+
+  <h2 id="step-2-prepare-data" class="text-2xl font-bold text-white mt-12 mb-4">Step 2: Prepare Traffic Data</h2>
+  <p class="text-gray-300 mb-4">Protocol discovery accepts base64-encoded traffic samples. Encode your captured packets:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Encode a sample HTTP request</span>
+echo -n "GET /api/users HTTP/1.1\r\nHost: api.example.com\r\n\r\n" | base64
+
+<span class="text-gray-500"># Output: R0VUIC9hcGkvdXNlcnMgSFRUUC8xLjENCkhvc3Q6IGFwaS5leGFtcGxlLmNvbQ0KDQo=</span></code></pre>
+
+  <h2 id="step-3-analyze" class="text-2xl font-bold text-white mt-12 mb-4">Step 3: Submit a Discovery Request</h2>
+  <p class="text-gray-300 mb-4">Send the encoded traffic data to the discovery endpoint:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">curl -X POST http://localhost:8000/api/v1/discover \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your_api_key" \
+  -d '{'{'}
+    "packet_data": [
+      "R0VUIC9hcGkvdXNlcnMgSFRUUC8xLjENCkhvc3Q6IGFwaS5leGFtcGxlLmNvbQ0KDQo=",
+      "UE9TVCAvYXBpL2xvZ2luIEhUVFAvMS4xDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb24NCg0K"
+    ],
+    "metadata": {'{'}
+      "source": "manual_capture",
+      "confidence_threshold": 0.7
+    {'}'}
+  {'}'}'</code></pre>
+
+  <h2 id="step-4-results" class="text-2xl font-bold text-white mt-12 mb-4">Step 4: Understand the Results</h2>
+  <p class="text-gray-300 mb-4">The API returns discovered protocols with grammar rules, parsers, and confidence scores. Key fields in the response:</p>
+
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Field</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">discovered_protocols</code></td>
+        <td class="text-gray-300 py-2">Array of identified protocols with confidence scores</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">grammar</code></td>
+        <td class="text-gray-300 py-2">Learned PCFG rules with production probabilities</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">parser</code></td>
+        <td class="text-gray-300 py-2">Auto-generated parser with success rate metrics</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">validation_rules</code></td>
+        <td class="text-gray-300 py-2">Regex and structural validation rules</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">statistics</code></td>
+        <td class="text-gray-300 py-2">Traffic statistics: entropy, message lengths, binary ratio</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="step-5-classify" class="text-2xl font-bold text-white mt-12 mb-4">Step 5: Detect Fields in a Message</h2>
+  <p class="text-gray-300 mb-4">Once protocols are discovered, detect individual fields in messages:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">curl -X POST http://localhost:8000/api/v1/detect-fields \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your_api_key" \
+  -d '{'{'}
+    "packet_data": "R0VUIC9hcGkvdXNlcnMgSFRUUC8xLjE="
+  {'}'}'</code></pre>
+  <p class="text-gray-300 mb-4">The response includes detected fields, data types, and structural boundaries.</p>
+
+  <h2 id="step-6-copilot" class="text-2xl font-bold text-white mt-12 mb-4">Step 6: Use the Protocol Copilot</h2>
+  <p class="text-gray-300 mb-4">Ask the Protocol Copilot to explain what was discovered using natural language:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">curl -X POST http://localhost:8000/api/v1/copilot/query \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your_api_key" \
+  -d '{'{'}
+    "query": "Explain the protocol discovered in my last analysis",
+    "session_id": "your-session-id"
+  {'}'}'</code></pre>
+
+  <h2 id="discovery-pipeline" class="text-2xl font-bold text-white mt-12 mb-4">How the Discovery Pipeline Works</h2>
+  <p class="text-gray-300 mb-4">Behind the scenes, your request passes through these stages:</p>
+  <ol class="list-decimal list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Statistical Analysis</strong> -- extract entropy, byte distributions, and structural patterns</li>
+    <li><strong class="text-white">Pattern Extraction</strong> -- identify recurring delimiters, headers, and field boundaries</li>
+    <li><strong class="text-white">Grammar Learning</strong> -- infer a Probabilistic Context-Free Grammar (PCFG) from the traffic</li>
+    <li><strong class="text-white">Parser Generation</strong> -- automatically generate a parser from the learned grammar</li>
+    <li><strong class="text-white">ML Classification</strong> -- classify against known protocols using CNN, LSTM, and Random Forest models</li>
+    <li><strong class="text-white">Validation</strong> -- verify the discovered protocol with structural and semantic checks</li>
+  </ol>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/api/rest-api" class="text-quantum-400 hover:underline">REST API Reference</a> -- explore all available endpoints</li>
+    <li><a href="/docs/architecture/ai-engine" class="text-quantum-400 hover:underline">AI Engine Architecture</a> -- learn how the discovery pipeline is built</li>
+    <li><a href="/docs/security/pqc-algorithms" class="text-quantum-400 hover:underline">PQC Algorithms</a> -- understand quantum-safe encryption of discovered protocols</li>
+  </ul>
+</DocsLayout>

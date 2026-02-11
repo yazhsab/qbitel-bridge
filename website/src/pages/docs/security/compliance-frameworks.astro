@@ -1,0 +1,177 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Compliance Frameworks | QBITEL Bridge Docs" description="Automated compliance assessment and reporting for SOC 2, GDPR, HIPAA, PCI DSS, NIST 800-53, and more.">
+  <h1 class="text-3xl font-bold text-white mb-2">Compliance Frameworks</h1>
+  <p class="text-gray-400 mb-8">QBITEL Bridge provides automated compliance assessment, continuous monitoring, and report generation for major regulatory frameworks.</p>
+
+  <h2 id="supported-frameworks" class="text-2xl font-bold text-white mt-12 mb-4">Supported Frameworks</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Framework</th>
+        <th class="text-left text-white py-2 pr-4">Coverage</th>
+        <th class="text-left text-white py-2">Status</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">SOC 2 Type II</td>
+        <td class="text-gray-300 py-2 pr-4">Trust Services Criteria</td>
+        <td class="text-gray-300 py-2">Full automation</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">GDPR</td>
+        <td class="text-gray-300 py-2 pr-4">Data protection, right to erasure, DPIAs</td>
+        <td class="text-gray-300 py-2">Full automation</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">HIPAA</td>
+        <td class="text-gray-300 py-2 pr-4">PHI handling, access controls, audit trails</td>
+        <td class="text-gray-300 py-2">Full automation</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">PCI DSS</td>
+        <td class="text-gray-300 py-2 pr-4">Cardholder data protection</td>
+        <td class="text-gray-300 py-2">Full automation</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">NIST 800-53</td>
+        <td class="text-gray-300 py-2 pr-4">Federal security controls</td>
+        <td class="text-gray-300 py-2">Full automation</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">ISO 27001</td>
+        <td class="text-gray-300 py-2 pr-4">Information security management</td>
+        <td class="text-gray-300 py-2">Full automation</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">FedRAMP</td>
+        <td class="text-gray-300 py-2 pr-4">Federal cloud security</td>
+        <td class="text-gray-300 py-2">Supported</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">CIS Benchmarks</td>
+        <td class="text-gray-300 py-2 pr-4">System hardening</td>
+        <td class="text-gray-300 py-2">Supported</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">NIST CSF 2.0</td>
+        <td class="text-gray-300 py-2 pr-4">Cybersecurity framework</td>
+        <td class="text-gray-300 py-2">Supported</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="assessment-engine" class="text-2xl font-bold text-white mt-12 mb-4">Assessment Engine</h2>
+  <p class="text-gray-300 mb-4">The compliance assessment engine continuously evaluates your deployment against framework requirements:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Automated control testing</strong> -- verify technical controls are functioning</li>
+    <li><strong class="text-white">Evidence collection</strong> -- automatically gather audit evidence</li>
+    <li><strong class="text-white">Gap analysis</strong> -- identify compliance gaps with remediation recommendations</li>
+    <li><strong class="text-white">Continuous monitoring</strong> -- real-time compliance status tracking</li>
+  </ul>
+
+  <h2 id="generate-reports" class="text-2xl font-bold text-white mt-12 mb-4">Generate Compliance Reports</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Generate a SOC 2 compliance report</span>
+curl -X POST http://localhost:8000/api/v1/compliance/report \
+  -H "X-API-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "framework": "soc2",
+    "report_type": "type_ii",
+    "period_start": "2025-01-01",
+    "period_end": "2025-12-31"
+  {'}'}'
+
+<span class="text-gray-500"># Generate a GDPR DPIA report</span>
+curl -X POST http://localhost:8000/api/v1/compliance/report \
+  -H "X-API-Key: your_api_key" \
+  -d '{'{'}"framework": "gdpr", "report_type": "dpia"{'}'}'</code></pre>
+
+  <h2 id="audit-trail" class="text-2xl font-bold text-white mt-12 mb-4">Audit Trail</h2>
+  <p class="text-gray-300 mb-4">QBITEL Bridge maintains a comprehensive audit trail for compliance purposes:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>All API requests are logged with timestamps, user identity, and action</li>
+    <li>Security decisions are recorded with confidence scores and reasoning</li>
+    <li>Configuration changes are tracked with before/after values</li>
+    <li>Data access events are logged for GDPR and HIPAA compliance</li>
+    <li>Audit logs are tamper-evident with cryptographic signatures</li>
+  </ul>
+
+  <h2 id="data-retention" class="text-2xl font-bold text-white mt-12 mb-4">Data Retention</h2>
+  <p class="text-gray-300 mb-4">Configure data retention policies per compliance framework:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># config/compliance.yaml</span>
+data_retention:
+  audit_logs:
+    retention_days: 365
+    encryption: AES-256-GCM
+  security_events:
+    retention_days: 90
+  personal_data:
+    retention_days: 30
+    anonymization: true
+  compliance_reports:
+    retention_days: 2555  <span class="text-gray-500"># 7 years for SOC 2</span></code></pre>
+
+  <h2 id="gdpr-features" class="text-2xl font-bold text-white mt-12 mb-4">GDPR-Specific Features</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Right to erasure</strong> -- automated data deletion workflows</li>
+    <li><strong class="text-white">Data portability</strong> -- export personal data in machine-readable format</li>
+    <li><strong class="text-white">Consent management</strong> -- track and enforce consent policies</li>
+    <li><strong class="text-white">DPIA generation</strong> -- automated Data Protection Impact Assessments</li>
+    <li><strong class="text-white">Cross-border transfer</strong> -- validate data residency requirements</li>
+  </ul>
+
+  <h2 id="soc2-controls" class="text-2xl font-bold text-white mt-12 mb-4">SOC 2 Control Mapping</h2>
+  <p class="text-gray-300 mb-4">QBITEL Bridge maps its security controls to SOC 2 Trust Services Criteria:</p>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Criteria</th>
+        <th class="text-left text-white py-2">QBITEL Bridge Controls</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Security</td>
+        <td class="text-gray-300 py-2">PQC-TLS, mTLS, admission webhooks, OPA policies</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Availability</td>
+        <td class="text-gray-300 py-2">HA deployment, health checks, auto-scaling</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Processing Integrity</td>
+        <td class="text-gray-300 py-2">Input validation, checksums, audit trail</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Confidentiality</td>
+        <td class="text-gray-300 py-2">Encryption at rest and in transit, field-level encryption</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Privacy</td>
+        <td class="text-gray-300 py-2">Data retention, anonymization, consent tracking</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="sbom" class="text-2xl font-bold text-white mt-12 mb-4">Software Bill of Materials (SBOM)</h2>
+  <p class="text-gray-300 mb-4">Generate and manage SBOMs for supply chain compliance:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Generate SBOM</span>
+curl http://localhost:8000/api/v1/sbom/generate
+
+<span class="text-gray-500"># Verify SBOM signature</span>
+./scripts/verify_sbom_signature.sh
+
+<span class="text-gray-500"># Upload to Dependency-Track</span>
+./scripts/upload_sbom_to_dependency_track.sh</code></pre>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/security/zero-trust" class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- security controls in detail</li>
+    <li><a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> -- compliance verification steps</li>
+    <li><a href="/docs/operations/monitoring" class="text-quantum-400 hover:underline">Monitoring</a> -- compliance dashboards</li>
+  </ul>
+</DocsLayout>

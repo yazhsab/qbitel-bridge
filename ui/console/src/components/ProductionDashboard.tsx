@@ -437,7 +437,7 @@ const ProductionDashboard: React.FC<ProductionDashboardProps> = ({ apiClient }) 
       {/* Header */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant={isMobile ? "h5" : "h4"} component="h1">
-          CronosAI Production Dashboard
+          QbitelAI Production Dashboard
         </Typography>
         
         <Box display="flex" alignItems="center" gap={2}>

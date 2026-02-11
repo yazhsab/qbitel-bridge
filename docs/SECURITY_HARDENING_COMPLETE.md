@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the comprehensive security hardening implemented for CRONOS AI, addressing all critical security primitives including environment/secret validation, vault integration, secret rotation, audit logging, and MFA policies.
+This document describes the comprehensive security hardening implemented for QBITEL, addressing all critical security primitives including environment/secret validation, vault integration, secret rotation, audit logging, and MFA policies.
 
 ## Implementation Date
 
@@ -319,53 +319,53 @@ python scripts/rotate_secrets.py --all --backend vault
 
 ```bash
 # JWT Secret (minimum 32 characters)
-export CRONOS_AI_JWT_SECRET="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
+export QBITEL_AI_JWT_SECRET="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
 
 # Database Password (minimum 16 characters)
-export CRONOS_AI_DB_PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+export QBITEL_AI_DB_PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 
 # Redis Password (minimum 16 characters)
-export CRONOS_AI_REDIS_PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+export QBITEL_AI_REDIS_PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 
 # API Key (minimum 32 characters)
-export CRONOS_AI_API_KEY="cronos_$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+export QBITEL_AI_API_KEY="qbitel_$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 
 # Encryption Key (Fernet key)
-export CRONOS_AI_ENCRYPTION_KEY="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')"
+export QBITEL_AI_ENCRYPTION_KEY="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')"
 
 # Environment
-export CRONOS_AI_ENVIRONMENT="production"
+export QBITEL_AI_ENVIRONMENT="production"
 ```
 
 ### HashiCorp Vault Configuration
 
 ```bash
 # Enable Vault backend
-export CRONOS_AI_SECRETS_BACKEND="vault"
+export QBITEL_AI_SECRETS_BACKEND="vault"
 export VAULT_ADDR="https://vault.example.com:8200"
 export VAULT_TOKEN="your-vault-token"
 
 # Store secrets in Vault
-vault kv put secret/cronos-ai/jwt_secret value="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
-vault kv put secret/cronos-ai/database_password value="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
-vault kv put secret/cronos-ai/redis_password value="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
-vault kv put secret/cronos-ai/api_key value="cronos_$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+vault kv put secret/qbitel/jwt_secret value="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
+vault kv put secret/qbitel/database_password value="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+vault kv put secret/qbitel/redis_password value="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+vault kv put secret/qbitel/api_key value="qbitel_$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 ```
 
 ### AWS Secrets Manager Configuration
 
 ```bash
 # Enable AWS backend
-export CRONOS_AI_SECRETS_BACKEND="aws_secrets_manager"
+export QBITEL_AI_SECRETS_BACKEND="aws_secrets_manager"
 export AWS_REGION="us-east-1"
 
 # Store secrets in AWS
 aws secretsmanager create-secret \
-    --name cronos-ai/jwt_secret \
+    --name qbitel/jwt_secret \
     --secret-string "$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
 
 aws secretsmanager create-secret \
-    --name cronos-ai/database_password \
+    --name qbitel/database_password \
     --secret-string "$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 ```
 
@@ -482,9 +482,9 @@ python scripts/check_credentials.py
 ## Support
 
 For security issues or questions:
-- Email: security@cronos-ai.com
+- Email: security@qbitel.com
 - Slack: #security-team
-- On-call: security-oncall@cronos-ai.com
+- On-call: security-oncall@qbitel.com
 
 ---
 

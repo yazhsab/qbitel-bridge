@@ -1,0 +1,408 @@
+{
+  "metadata": {
+    "title": "COBOL Syntax Reference for RAG",
+    "version": "1.0.0",
+    "description": "Comprehensive COBOL syntax reference for Legacy Mainframe Modernization",
+    "generated_date": "2024-01-15",
+    "source": "IBM Enterprise COBOL Reference"
+  },
+  "divisions": {
+    "IDENTIFICATION": {
+      "purpose": "Contains program identification and documentation",
+      "required": true,
+      "paragraphs": {
+        "PROGRAM-ID": {
+          "required": true,
+          "syntax": "PROGRAM-ID. program-name [IS INITIAL|COMMON|RECURSIVE].",
+          "description": "Specifies the program name (max 8 characters for compatibility)",
+          "examples": ["PROGRAM-ID. CUSTMAST.", "PROGRAM-ID. ACCTPROC IS INITIAL."]
+        },
+        "AUTHOR": {
+          "required": false,
+          "syntax": "AUTHOR. comment-text.",
+          "description": "Documents the program author",
+          "deprecated": true
+        },
+        "INSTALLATION": {
+          "required": false,
+          "syntax": "INSTALLATION. comment-text.",
+          "description": "Documents the installation site"
+        },
+        "DATE-WRITTEN": {
+          "required": false,
+          "syntax": "DATE-WRITTEN. comment-text.",
+          "description": "Documents when the program was written"
+        },
+        "DATE-COMPILED": {
+          "required": false,
+          "syntax": "DATE-COMPILED. comment-text.",
+          "description": "Automatically inserted by compiler"
+        },
+        "SECURITY": {
+          "required": false,
+          "syntax": "SECURITY. comment-text.",
+          "description": "Documents security classification"
+        }
+      }
+    },
+    "ENVIRONMENT": {
+      "purpose": "Describes the computer environment and file mappings",
+      "required": false,
+      "sections": {
+        "CONFIGURATION": {
+          "paragraphs": {
+            "SOURCE-COMPUTER": "Specifies the compilation computer",
+            "OBJECT-COMPUTER": "Specifies the execution computer",
+            "SPECIAL-NAMES": "Maps implementor names to user-defined names"
+          }
+        },
+        "INPUT-OUTPUT": {
+          "paragraphs": {
+            "FILE-CONTROL": "Defines file assignments and organization"
+          }
+        }
+      }
+    },
+    "DATA": {
+      "purpose": "Defines all data items used in the program",
+      "required": true,
+      "sections": {
+        "FILE": {
+          "description": "Defines record structures for files",
+          "keywords": ["FD", "SD", "01"]
+        },
+        "WORKING-STORAGE": {
+          "description": "Defines variables that persist throughout execution",
+          "level_numbers": ["01", "77"]
+        },
+        "LOCAL-STORAGE": {
+          "description": "Defines variables initialized on each invocation",
+          "level_numbers": ["01", "77"]
+        },
+        "LINKAGE": {
+          "description": "Defines data passed from calling program",
+          "level_numbers": ["01", "77"]
+        }
+      }
+    },
+    "PROCEDURE": {
+      "purpose": "Contains the executable program logic",
+      "required": true,
+      "structure": {
+        "sections": "Named groups of paragraphs",
+        "paragraphs": "Named groups of sentences",
+        "sentences": "One or more statements ending with period",
+        "statements": "Single COBOL verb with operands"
+      }
+    }
+  },
+  "data_types": {
+    "PICTURE_clauses": {
+      "9": {
+        "meaning": "Numeric digit (0-9)",
+        "examples": ["PIC 9(5)", "PIC 99999"],
+        "storage": "1 byte per digit in display format"
+      },
+      "X": {
+        "meaning": "Alphanumeric character",
+        "examples": ["PIC X(20)", "PIC XXXX"],
+        "storage": "1 byte per character"
+      },
+      "A": {
+        "meaning": "Alphabetic character (A-Z, space)",
+        "examples": ["PIC A(10)"],
+        "storage": "1 byte per character"
+      },
+      "S": {
+        "meaning": "Sign (+ or -)",
+        "examples": ["PIC S9(5)", "PIC S9(7)V99"],
+        "storage": "Embedded in rightmost digit or separate"
+      },
+      "V": {
+        "meaning": "Implied decimal point",
+        "examples": ["PIC 9(5)V99", "PIC S9(7)V9(4)"],
+        "storage": "No storage, position marker only"
+      },
+      "P": {
+        "meaning": "Assumed decimal scaling position",
+        "examples": ["PIC 9(5)PP", "PIC PPP9(5)"],
+        "storage": "No storage for P positions"
+      }
+    },
+    "USAGE_clauses": {
+      "DISPLAY": {
+        "description": "One byte per character, human-readable",
+        "default": true,
+        "storage_formula": "bytes = digits + (sign ? 0 or 1 : 0)"
+      },
+      "COMP": {
+        "description": "Binary format, efficient for arithmetic",
+        "alias": "BINARY",
+        "storage": {
+          "1-4_digits": "2 bytes (halfword)",
+          "5-9_digits": "4 bytes (fullword)",
+          "10-18_digits": "8 bytes (doubleword)"
+        }
+      },
+      "COMP-3": {
+        "description": "Packed decimal, efficient for decimal arithmetic",
+        "alias": "PACKED-DECIMAL",
+        "storage_formula": "bytes = (digits + 1) / 2 rounded up",
+        "sign": "In low-order nibble (C=+, D=-)"
+      },
+      "COMP-4": {
+        "description": "Same as COMP (binary)",
+        "alias": "BINARY"
+      },
+      "COMP-5": {
+        "description": "Native binary, platform-dependent",
+        "storage": "Same as COMP but allows full range"
+      }
+    },
+    "level_numbers": {
+      "01": "Record level or independent item",
+      "02-49": "Group or elementary items within records",
+      "66": "RENAMES clause (alternative grouping)",
+      "77": "Independent elementary item",
+      "88": "Condition name (boolean)"
+    }
+  },
+  "file_organizations": {
+    "SEQUENTIAL": {
+      "description": "Records accessed in physical order",
+      "access_modes": ["SEQUENTIAL"],
+      "use_cases": ["Batch processing", "Report generation", "Tape files"],
+      "syntax": "ORGANIZATION IS SEQUENTIAL"
+    },
+    "INDEXED": {
+      "description": "Records accessed by key value",
+      "access_modes": ["SEQUENTIAL", "RANDOM", "DYNAMIC"],
+      "use_cases": ["Master files", "Lookup tables", "Online access"],
+      "syntax": "ORGANIZATION IS INDEXED\nACCESS MODE IS {SEQUENTIAL|RANDOM|DYNAMIC}\nRECORD KEY IS key-name\n[ALTERNATE RECORD KEY IS alt-key [WITH DUPLICATES]]",
+      "file_status_codes": {
+        "00": "Successful completion",
+        "02": "Duplicate key (with DUPLICATES)",
+        "10": "End of file",
+        "21": "Sequence error",
+        "22": "Duplicate key (no DUPLICATES)",
+        "23": "Record not found",
+        "24": "Boundary violation"
+      }
+    },
+    "RELATIVE": {
+      "description": "Records accessed by relative record number",
+      "access_modes": ["SEQUENTIAL", "RANDOM", "DYNAMIC"],
+      "use_cases": ["Direct access by position", "Hash tables"],
+      "syntax": "ORGANIZATION IS RELATIVE\nACCESS MODE IS {SEQUENTIAL|RANDOM|DYNAMIC}\nRELATIVE KEY IS data-name"
+    },
+    "LINE_SEQUENTIAL": {
+      "description": "Text file with variable-length records",
+      "access_modes": ["SEQUENTIAL"],
+      "use_cases": ["Text file processing", "Reports"],
+      "note": "IBM extension, records delimited by newlines"
+    }
+  },
+  "verbs": {
+    "data_movement": {
+      "MOVE": {
+        "syntax": "MOVE {identifier|literal} TO identifier-1 [identifier-2]...",
+        "description": "Transfers data from source to destination(s)",
+        "rules": [
+          "Alphanumeric to alphanumeric: left-justified, space-filled",
+          "Numeric to numeric: aligned on decimal point, zero-filled",
+          "CORRESPONDING moves matching-named fields"
+        ]
+      },
+      "INITIALIZE": {
+        "syntax": "INITIALIZE identifier-1 [identifier-2]...\n  [REPLACING {ALPHABETIC|ALPHANUMERIC|NUMERIC|...} DATA BY {literal|identifier}]",
+        "description": "Sets fields to default values (spaces for alpha, zeros for numeric)"
+      },
+      "STRING": {
+        "syntax": "STRING {identifier|literal} [DELIMITED BY {identifier|literal|SIZE}]...\n  INTO identifier\n  [WITH POINTER pointer]\n  [ON OVERFLOW statement]",
+        "description": "Concatenates strings"
+      },
+      "UNSTRING": {
+        "syntax": "UNSTRING identifier\n  [DELIMITED BY [ALL] {identifier|literal} [OR [ALL] {identifier|literal}]...]\n  INTO identifier-1 [DELIMITER IN identifier-d] [COUNT IN identifier-c]...\n  [WITH POINTER pointer]\n  [TALLYING IN identifier]\n  [ON OVERFLOW statement]",
+        "description": "Splits a string into multiple fields"
+      },
+      "INSPECT": {
+        "syntax": "INSPECT identifier\n  {TALLYING|REPLACING|CONVERTING}...",
+        "description": "Examines and optionally modifies characters in a string"
+      }
+    },
+    "arithmetic": {
+      "ADD": {
+        "syntax": "ADD {identifier|literal}... TO identifier-1 [ROUNDED] [identifier-2 [ROUNDED]]...\n  [ON SIZE ERROR statement] [NOT ON SIZE ERROR statement]",
+        "description": "Adds values together"
+      },
+      "SUBTRACT": {
+        "syntax": "SUBTRACT {identifier|literal}... FROM identifier-1 [ROUNDED]...\n  [GIVING identifier-2 [ROUNDED]...]\n  [ON SIZE ERROR statement]",
+        "description": "Subtracts values"
+      },
+      "MULTIPLY": {
+        "syntax": "MULTIPLY {identifier|literal} BY identifier-1 [ROUNDED]...\n  [GIVING identifier-2 [ROUNDED]...]\n  [ON SIZE ERROR statement]",
+        "description": "Multiplies values"
+      },
+      "DIVIDE": {
+        "syntax": "DIVIDE {identifier|literal} {INTO|BY} identifier-1\n  [GIVING identifier-2 [ROUNDED]]\n  [REMAINDER identifier-3]\n  [ON SIZE ERROR statement]",
+        "description": "Divides values"
+      },
+      "COMPUTE": {
+        "syntax": "COMPUTE identifier-1 [ROUNDED] [identifier-2 [ROUNDED]]...\n  = arithmetic-expression\n  [ON SIZE ERROR statement]",
+        "description": "Evaluates arithmetic expressions",
+        "operators": ["+", "-", "*", "/", "**"]
+      }
+    },
+    "control_flow": {
+      "IF": {
+        "syntax": "IF condition [THEN]\n  {statement}...\n[ELSE\n  {statement}...]\n[END-IF]",
+        "description": "Conditional execution",
+        "conditions": ["relation", "class", "condition-name", "sign", "complex"]
+      },
+      "EVALUATE": {
+        "syntax": "EVALUATE {identifier|expression|TRUE|FALSE}\n  [ALSO {identifier|expression|TRUE|FALSE}]...\n  {WHEN {ANY|condition|TRUE|FALSE|value [THRU value]}\n   [ALSO {ANY|condition|TRUE|FALSE|value [THRU value]}]...\n   {statement}...}...\n  [WHEN OTHER {statement}...]\n[END-EVALUATE]",
+        "description": "Multi-way branching (like switch/case)"
+      },
+      "PERFORM": {
+        "syntax": "PERFORM [procedure-name] [{THRU|THROUGH} procedure-name]\n  [{integer} TIMES]\n  [UNTIL condition]\n  [VARYING identifier FROM {identifier|literal} BY {identifier|literal} UNTIL condition]",
+        "description": "Executes paragraphs/sections, with optional looping",
+        "inline_syntax": "PERFORM [options] {statement}... END-PERFORM"
+      },
+      "GO_TO": {
+        "syntax": "GO TO procedure-name\n  [GO TO procedure-name... DEPENDING ON identifier]",
+        "description": "Unconditional branch (avoid in structured code)",
+        "modernization": "Replace with PERFORM or EVALUATE"
+      },
+      "STOP_RUN": {
+        "syntax": "STOP RUN",
+        "description": "Terminates program execution"
+      },
+      "EXIT": {
+        "syntax": "EXIT [PROGRAM|METHOD|FUNCTION|PERFORM|SECTION|PARAGRAPH]",
+        "description": "Provides exit point from procedure or program"
+      }
+    },
+    "file_operations": {
+      "OPEN": {
+        "syntax": "OPEN {INPUT|OUTPUT|I-O|EXTEND} file-name...",
+        "description": "Opens files for processing",
+        "modes": {
+          "INPUT": "Read only",
+          "OUTPUT": "Write only (creates new file)",
+          "I-O": "Read and write",
+          "EXTEND": "Append to existing file"
+        }
+      },
+      "CLOSE": {
+        "syntax": "CLOSE file-name...",
+        "description": "Closes files"
+      },
+      "READ": {
+        "syntax": "READ file-name [NEXT|PREVIOUS] [INTO identifier]\n  [AT END statement]\n  [NOT AT END statement]\n[END-READ]",
+        "description": "Reads a record from a file"
+      },
+      "WRITE": {
+        "syntax": "WRITE record-name [FROM identifier]\n  [{BEFORE|AFTER} ADVANCING {integer|identifier|PAGE} {LINES|LINE}]\n  [INVALID KEY statement]\n[END-WRITE]",
+        "description": "Writes a record to a file"
+      },
+      "REWRITE": {
+        "syntax": "REWRITE record-name [FROM identifier]\n  [INVALID KEY statement]\n[END-REWRITE]",
+        "description": "Updates an existing record"
+      },
+      "DELETE": {
+        "syntax": "DELETE file-name [RECORD]\n  [INVALID KEY statement]\n[END-DELETE]",
+        "description": "Deletes a record from indexed/relative file"
+      },
+      "START": {
+        "syntax": "START file-name KEY IS {=|>|>=|<|<=} data-name\n  [INVALID KEY statement]\n[END-START]",
+        "description": "Positions file pointer for indexed file"
+      }
+    },
+    "program_communication": {
+      "CALL": {
+        "syntax": "CALL {identifier|literal}\n  [USING {BY REFERENCE|BY CONTENT|BY VALUE} {identifier}...]\n  [RETURNING identifier]\n  [ON EXCEPTION statement]\n  [NOT ON EXCEPTION statement]\n[END-CALL]",
+        "description": "Calls another program",
+        "parameter_passing": {
+          "BY_REFERENCE": "Callee can modify original data",
+          "BY_CONTENT": "Callee receives copy, cannot modify original",
+          "BY_VALUE": "Callee receives value (for non-COBOL programs)"
+        }
+      },
+      "CANCEL": {
+        "syntax": "CANCEL {identifier|literal}...",
+        "description": "Releases memory for called program"
+      },
+      "GOBACK": {
+        "syntax": "GOBACK",
+        "description": "Returns to calling program or system"
+      }
+    }
+  },
+  "intrinsic_functions": {
+    "string_functions": {
+      "LENGTH": "Returns length of alphanumeric item",
+      "REVERSE": "Reverses character string",
+      "UPPER-CASE": "Converts to uppercase",
+      "LOWER-CASE": "Converts to lowercase",
+      "TRIM": "Removes leading/trailing spaces"
+    },
+    "numeric_functions": {
+      "ABS": "Absolute value",
+      "MAX": "Maximum value",
+      "MIN": "Minimum value",
+      "MOD": "Modulo (remainder)",
+      "INTEGER": "Integer part",
+      "INTEGER-PART": "Integer portion",
+      "NUMVAL": "Converts string to number",
+      "NUMVAL-C": "Converts currency string to number"
+    },
+    "date_functions": {
+      "CURRENT-DATE": "Returns current date and time (21 characters)",
+      "DATE-OF-INTEGER": "Converts integer to YYYYMMDD",
+      "INTEGER-OF-DATE": "Converts YYYYMMDD to integer",
+      "DAY-OF-INTEGER": "Converts integer to YYYYDDD",
+      "INTEGER-OF-DAY": "Converts YYYYDDD to integer"
+    },
+    "financial_functions": {
+      "ANNUITY": "Annuity calculation",
+      "PRESENT-VALUE": "Present value calculation"
+    }
+  },
+  "legacy_patterns": {
+    "patterns_to_modernize": {
+      "ALTER_statement": {
+        "description": "Dynamically modifies GO TO targets",
+        "risk": "critical",
+        "modernization": "Replace with EVALUATE or state variables"
+      },
+      "GO_TO_DEPENDING": {
+        "description": "Branch based on numeric value",
+        "risk": "medium",
+        "modernization": "Replace with EVALUATE"
+      },
+      "PERFORM_THRU": {
+        "description": "Executes range of paragraphs",
+        "risk": "low",
+        "modernization": "Ensure paragraphs are logically related"
+      },
+      "nested_programs": {
+        "description": "Programs within programs",
+        "risk": "medium",
+        "modernization": "Consider extracting to separate modules"
+      },
+      "REDEFINES": {
+        "description": "Overlays storage for different views",
+        "risk": "medium",
+        "modernization": "Use union types or explicit conversion"
+      }
+    },
+    "common_antipatterns": {
+      "excessive_go_to": "More than 5% GO TO statements",
+      "deep_nesting": "IF/EVALUATE nested more than 5 levels",
+      "long_paragraphs": "Paragraphs exceeding 100 lines",
+      "magic_numbers": "Hardcoded numeric literals",
+      "duplicated_code": "Similar code blocks repeated",
+      "missing_error_handling": "No file status checking"
+    }
+  }
+}

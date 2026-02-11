@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Database Circuit Breaker Integration
+QBITEL Engine - Database Circuit Breaker Integration
 
 Integrates circuit breaker pattern with database operations to prevent
 cascading failures when database is experiencing issues.

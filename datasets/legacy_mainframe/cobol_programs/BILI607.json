@@ -1,0 +1,19 @@
+{
+  "program_id": "BILI607",
+  "domain": "healthcare",
+  "program_type": "interface_program",
+  "author": "J. SMITH",
+  "lines_of_code": 248,
+  "complexity_level": "complex",
+  "complexity_score": 0.678,
+  "files_used": 4,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.864612",
+  "hash": "fb702eecba3f944ffae00b4d84418bf1"
+}

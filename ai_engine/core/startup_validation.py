@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Startup Validation
+QBITEL Engine - Startup Validation
 
 This module provides comprehensive startup validation to ensure all required
 configuration, secrets, and dependencies are properly configured before the
@@ -44,7 +44,7 @@ class ValidationResult:
 
 class StartupValidator:
     """
-    Comprehensive startup validator for CRONOS AI Engine.
+    Comprehensive startup validator for QBITEL Engine.
 
     Validates:
     - Required environment variables and secrets
@@ -473,11 +473,11 @@ class StartupValidator:
         # Required directories
         required_dirs = [
             (
-                os.getenv("AI_MODEL_CACHE_DIR", "/tmp/cronos_ai_models"),
+                os.getenv("AI_MODEL_CACHE_DIR", "/tmp/qbitel_models"),
                 "Model cache directory",
             ),
             (
-                os.getenv("LOG_FILE", "/var/log/cronos_ai/app.log"),
+                os.getenv("LOG_FILE", "/var/log/qbitel/app.log"),
                 "Log file directory",
                 True,
             ),
@@ -707,7 +707,7 @@ def validate_startup(config: Optional[Dict[str, Any]] = None) -> bool:
     Raises:
         SystemExit: If critical validation failures in production
     """
-    environment = os.getenv("CRONOS_ENVIRONMENT", "development")
+    environment = os.getenv("QBITEL_ENVIRONMENT", "development")
 
     validator = StartupValidator(config=config, environment=environment)
     passed = validator.validate_all()

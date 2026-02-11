@@ -1,5 +1,5 @@
 {
-  "source": "CRONOS AI AWS Security Patterns",
+  "source": "QBITEL AWS Security Patterns",
   "suspicious_api_calls": [
     {
       "api": "DescribeInstances",

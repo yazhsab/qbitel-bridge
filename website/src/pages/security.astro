@@ -1,0 +1,236 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Security Policy | QBITEL Bridge"
+  description="Report security vulnerabilities responsibly. Learn about our disclosure policy, safe harbor provisions, and security best practices."
+>
+  <PageHero
+    title="Security Policy"
+    description="The QBITEL Bridge team takes security vulnerabilities seriously. We appreciate your efforts to responsibly disclose any issues you find."
+    badge="Responsible Disclosure"
+  />
+
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+
+      <!-- Important Notice -->
+      <div class="card p-6 mb-12 border-l-4 border-l-red-500">
+        <h2 class="text-xl font-bold text-white mb-2">Do Not Use Public Issues</h2>
+        <p class="text-gray-300">
+          Please do <strong class="text-white">NOT</strong> report security vulnerabilities through public GitHub issues. Use the private reporting process described below to ensure vulnerabilities are handled safely.
+        </p>
+      </div>
+
+      <!-- Supported Versions -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Supported Versions</h2>
+        <div class="card overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-surface-600 bg-surface-900/50">
+                <th class="text-left p-4 text-gray-400 font-medium">Version</th>
+                <th class="text-left p-4 text-gray-400 font-medium">Supported</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-surface-700">
+                <td class="p-4 text-white font-mono">1.x</td>
+                <td class="p-4">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+                    Supported
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="p-4 text-white font-mono">0.x (pre-release)</td>
+                <td class="p-4">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+                    Not Supported
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- How to Report -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">How to Report a Vulnerability</h2>
+        <p class="text-gray-300 mb-6">
+          Send an email to <a href="mailto:security@qbitel.com" class="text-quantum-400 hover:underline font-semibold">security@qbitel.com</a> with the following information:
+        </p>
+        <div class="space-y-4">
+          <div class="card p-5">
+            <div class="flex items-start gap-3">
+              <span class="flex items-center justify-center w-7 h-7 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-xs shrink-0">1</span>
+              <div>
+                <h3 class="text-white font-semibold">Description</h3>
+                <p class="text-sm text-gray-400">A clear description of the vulnerability, including the affected component (AI engine, data plane, control plane, management API, UI).</p>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-start gap-3">
+              <span class="flex items-center justify-center w-7 h-7 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-xs shrink-0">2</span>
+              <div>
+                <h3 class="text-white font-semibold">Reproduction Steps</h3>
+                <p class="text-sm text-gray-400">Detailed steps to reproduce the issue, including any scripts, payloads, or configurations needed.</p>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-start gap-3">
+              <span class="flex items-center justify-center w-7 h-7 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-xs shrink-0">3</span>
+              <div>
+                <h3 class="text-white font-semibold">Affected Versions</h3>
+                <p class="text-sm text-gray-400">Which version(s) of QBITEL Bridge are affected. Run <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">qbitel version</code> to check.</p>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-start gap-3">
+              <span class="flex items-center justify-center w-7 h-7 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-xs shrink-0">4</span>
+              <div>
+                <h3 class="text-white font-semibold">Impact Assessment</h3>
+                <p class="text-sm text-gray-400">Any potential impact you have identified (data exposure, privilege escalation, denial of service, etc.).</p>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-start gap-3">
+              <span class="flex items-center justify-center w-7 h-7 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-xs shrink-0">5</span>
+              <div>
+                <h3 class="text-white font-semibold">Suggested Fix (Optional)</h3>
+                <p class="text-sm text-gray-400">If you have a suggested fix or mitigation, we welcome including it in your report.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- What to Expect -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-6">What to Expect</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="card p-6">
+            <div class="text-2xl font-bold gradient-text mb-1">48 hours</div>
+            <h3 class="text-white font-semibold mb-2">Acknowledgment</h3>
+            <p class="text-sm text-gray-400">We will acknowledge receipt of your report within 48 hours and assign a tracking ID.</p>
+          </div>
+          <div class="card p-6">
+            <div class="text-2xl font-bold gradient-text mb-1">5 days</div>
+            <h3 class="text-white font-semibold mb-2">Initial Assessment</h3>
+            <p class="text-sm text-gray-400">We will investigate and provide an initial severity assessment and estimated timeline within 5 business days.</p>
+          </div>
+          <div class="card p-6">
+            <div class="text-2xl font-bold gradient-text mb-1">30 days</div>
+            <h3 class="text-white font-semibold mb-2">Resolution</h3>
+            <p class="text-sm text-gray-400">We aim to release a fix for confirmed vulnerabilities within 30 days, depending on complexity.</p>
+          </div>
+          <div class="card p-6">
+            <div class="text-2xl font-bold gradient-text mb-1">90 days</div>
+            <h3 class="text-white font-semibold mb-2">Disclosure</h3>
+            <p class="text-sm text-gray-400">We follow a 90-day disclosure policy and will coordinate with you on public disclosure timing.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Safe Harbor -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Safe Harbor</h2>
+        <div class="card p-6 border-l-4 border-l-green-500">
+          <p class="text-gray-300 mb-4">
+            We consider security research conducted in good faith to be authorized and will not pursue legal action against researchers who:
+          </p>
+          <ul class="space-y-3 text-gray-300">
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              <span>Make a good faith effort to avoid privacy violations, data destruction, or service disruption</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              <span>Only interact with accounts they own or with explicit permission from the account holder</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              <span>Report vulnerabilities promptly and do not exploit them beyond what is necessary to confirm the issue</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Security Best Practices -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-6">Deployment Security Best Practices</h2>
+        <p class="text-gray-300 mb-6">When deploying QBITEL Bridge in production, follow these hardening recommendations:</p>
+        <div class="space-y-3">
+          <div class="card p-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-quantum-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              <div>
+                <span class="text-white font-medium">Always use TLS 1.3 in production</span>
+                <p class="text-sm text-gray-500 mt-1">Set <code class="text-quantum-400 bg-surface-900 px-1 rounded">tls_min_version: "TLSv1.3"</code> in your configuration</p>
+              </div>
+            </div>
+          </div>
+          <div class="card p-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-quantum-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              <div>
+                <span class="text-white font-medium">Set secrets via environment variables</span>
+                <p class="text-sm text-gray-500 mt-1">Never store credentials, API keys, or JWT secrets in configuration files</p>
+              </div>
+            </div>
+          </div>
+          <div class="card p-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-quantum-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              <div>
+                <span class="text-white font-medium">Enable audit logging</span>
+                <p class="text-sm text-gray-500 mt-1">Set <code class="text-quantum-400 bg-surface-900 px-1 rounded">audit_logging_enabled: true</code> for compliance and forensic analysis</p>
+              </div>
+            </div>
+          </div>
+          <div class="card p-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-quantum-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              <div>
+                <span class="text-white font-medium">Use verify-full SSL mode for databases</span>
+                <p class="text-sm text-gray-500 mt-1">Ensure database connections validate server certificates in production</p>
+              </div>
+            </div>
+          </div>
+          <div class="card p-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-quantum-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              <div>
+                <span class="text-white font-medium">Enable post-quantum cryptography</span>
+                <p class="text-sm text-gray-500 mt-1">Activate PQC for forward secrecy against future quantum computing threats</p>
+              </div>
+            </div>
+          </div>
+          <div class="card p-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-quantum-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              <div>
+                <span class="text-white font-medium">Rotate keys and secrets regularly</span>
+                <p class="text-sm text-gray-500 mt-1">Configure automatic rotation for JWT secrets, encryption keys, and PQC key pairs</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <CTABanner
+    title="Found a Security Issue?"
+    description="Report it privately to security@qbitel.com. We respond within 48 hours and provide safe harbor for good-faith research."
+  />
+</PageLayout>

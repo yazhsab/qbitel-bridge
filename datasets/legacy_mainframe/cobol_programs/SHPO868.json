@@ -1,0 +1,19 @@
+{
+  "program_id": "SHPO868",
+  "domain": "transportation",
+  "program_type": "online_transaction",
+  "author": "C. MILLER",
+  "lines_of_code": 242,
+  "complexity_level": "complex",
+  "complexity_score": 0.674,
+  "files_used": 4,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.880528",
+  "hash": "8c3bdf38bb9c562ce262d4dad87e0821"
+}

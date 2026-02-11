@@ -47,7 +47,7 @@ func TestBundleManager_CreateBundle(t *testing.T) {
 		Tags:        []string{"test", "example"},
 		Policies: map[string]string{
 			"test": `
-				package qslb.test
+				package qbitel.test
 				
 				default allow = false
 				
@@ -107,7 +107,7 @@ func TestBundleManager_CreateBundleWithSigning(t *testing.T) {
 		Version: "1.0.0",
 		Name:    "Signed Bundle",
 		Policies: map[string]string{
-			"test": "package qslb.test\ndefault allow = false",
+			"test": "package qbitel.test\ndefault allow = false",
 		},
 	}
 	
@@ -140,7 +140,7 @@ func TestBundleManager_CreateBundleValidation(t *testing.T) {
 			req: &CreateBundleRequest{
 				Version: "1.0.0",
 				Policies: map[string]string{
-					"test": "package qslb.test\ndefault allow = false",
+					"test": "package qbitel.test\ndefault allow = false",
 				},
 			},
 			expectError: true,
@@ -151,7 +151,7 @@ func TestBundleManager_CreateBundleValidation(t *testing.T) {
 			req: &CreateBundleRequest{
 				ID: "test-bundle",
 				Policies: map[string]string{
-					"test": "package qslb.test\ndefault allow = false",
+					"test": "package qbitel.test\ndefault allow = false",
 				},
 			},
 			expectError: true,
@@ -192,7 +192,7 @@ func TestBundleManager_CreateBundleDuplicate(t *testing.T) {
 		ID:      "duplicate-bundle",
 		Version: "1.0.0",
 		Policies: map[string]string{
-			"test": "package qslb.test\ndefault allow = false",
+			"test": "package qbitel.test\ndefault allow = false",
 		},
 	}
 	
@@ -257,7 +257,7 @@ func TestBundleManager_DeleteBundle(t *testing.T) {
 		ID:      "delete-test",
 		Version: "1.0.0",
 		Policies: map[string]string{
-			"test": "package qslb.test\ndefault allow = false",
+			"test": "package qbitel.test\ndefault allow = false",
 		},
 	}
 	
@@ -315,7 +315,7 @@ func TestBundleManager_ListBundles(t *testing.T) {
 			ID:      fmt.Sprintf("list-test-%d", i),
 			Version: "1.0.0",
 			Policies: map[string]string{
-				"test": "package qslb.test\ndefault allow = false",
+				"test": "package qbitel.test\ndefault allow = false",
 			},
 		}
 		
@@ -361,7 +361,7 @@ func TestBundleManager_GetStats(t *testing.T) {
 			ID:      fmt.Sprintf("stats-test-%d", i),
 			Version: "1.0.0",
 			Policies: map[string]string{
-				"test": "package qslb.test\ndefault allow = false",
+				"test": "package qbitel.test\ndefault allow = false",
 			},
 		}
 		
@@ -389,7 +389,7 @@ func TestCosignVerifier_VerifyBundle(t *testing.T) {
 		Version:   "1.0.0",
 		Signature: "cosign-sig-1234567890abcdef",
 		Policies: map[string]string{
-			"test": "package qslb.test\ndefault allow = false",
+			"test": "package qbitel.test\ndefault allow = false",
 		},
 	}
 	
@@ -419,7 +419,7 @@ func TestCosignVerifier_VerifyBundleInvalidSignature(t *testing.T) {
 				ID:      "no-sig-test",
 				Version: "1.0.0",
 				Policies: map[string]string{
-					"test": "package qslb.test\ndefault allow = false",
+					"test": "package qbitel.test\ndefault allow = false",
 				},
 			},
 			errorMsg: "bundle signature is missing",
@@ -431,7 +431,7 @@ func TestCosignVerifier_VerifyBundleInvalidSignature(t *testing.T) {
 				Version:   "1.0.0",
 				Signature: "invalid-signature-format",
 				Policies: map[string]string{
-					"test": "package qslb.test\ndefault allow = false",
+					"test": "package qbitel.test\ndefault allow = false",
 				},
 			},
 			errorMsg: "invalid signature format",
@@ -542,7 +542,7 @@ func BenchmarkBundleManager_CreateBundle(b *testing.B) {
 	req := &CreateBundleRequest{
 		Version: "1.0.0",
 		Policies: map[string]string{
-			"test": "package qslb.test\ndefault allow = false",
+			"test": "package qbitel.test\ndefault allow = false",
 		},
 	}
 	

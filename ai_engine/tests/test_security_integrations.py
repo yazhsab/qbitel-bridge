@@ -80,10 +80,10 @@ class TestIntegrationConfig:
             integration_type=IntegrationType.TICKETING,
             enabled=True,
             endpoint="https://jira.example.com",
-            credentials={"username": "cronos_bot", "api_token": "secret_token"},
+            credentials={"username": "qbitel_bot", "api_token": "secret_token"},
         )
 
-        assert config.credentials["username"] == "cronos_bot"
+        assert config.credentials["username"] == "qbitel_bot"
         assert "api_token" in config.credentials
 
     def test_config_with_rate_limiting(self):
@@ -282,7 +282,7 @@ class TestTicketingConnector:
             "summary": "Potential data exfiltration detected",
             "description": "Anomalous network traffic observed",
             "priority": "high",
-            "labels": ["security", "network", "cronos-ai"],
+            "labels": ["security", "network", "qbitel"],
         }
 
         result = await connector.create_ticket(ticket_data)
@@ -336,7 +336,7 @@ class TestTicketingConnector:
 
         result = await connector.add_comment(
             ticket_id="SEC-1234",
-            comment="CRONOS AI has completed automated analysis. No further threats detected.",
+            comment="QBITEL has completed automated analysis. No further threats detected.",
         )
 
         assert result.success is True
@@ -375,7 +375,7 @@ class TestNetworkSecurityConnector:
 
         result = await connector.block_ip(
             ip_address="203.0.113.42",
-            reason="Malicious activity detected by CRONOS AI",
+            reason="Malicious activity detected by QBITEL",
         )
 
         assert result.success is True

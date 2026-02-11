@@ -1,12 +1,12 @@
-# CRONOS AI Legacy System Whisperer - Kubernetes Deployment
+# QBITEL Legacy System Whisperer - Kubernetes Deployment
 # Production-ready Kubernetes configuration
 
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cronos-ai-legacy
+  name: qbitel-legacy
   labels:
-    name: cronos-ai-legacy
+    name: qbitel-legacy
     component: ai-engine
     version: v1.0.0
 
@@ -15,7 +15,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: legacy-whisperer-config
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
 data:
   config.yaml: |
     legacy_system_whisperer:
@@ -78,12 +78,12 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: legacy-whisperer-secrets
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
 type: Opaque
 data:
   # Base64 encoded secrets (replace with actual values)
-  db-password: Y3Jvbm9zMTIz  # cronos123
-  redis-password: Y3Jvbm9zMTIz  # cronos123
+  db-password: Y3Jvbm9zMTIz  # qbitel123
+  redis-password: Y3Jvbm9zMTIz  # qbitel123
   jwt-secret: bGVnYWN5LXNlY3JldC1rZXktcHJvZC0yMDI0  # legacy-secret-key-prod-2024
   openai-api-key: c2stWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWA==  # placeholder
   anthropic-api-key: c2stYW50aHJvcGljLWtleS1oZXJl  # placeholder
@@ -93,7 +93,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: legacy-whisperer
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
   labels:
     app: legacy-whisperer
     component: ai-engine
@@ -127,7 +127,7 @@ spec:
         fsGroup: 1000
       containers:
       - name: legacy-whisperer
-        image: cronos-ai/legacy-whisperer:v1.0.0
+        image: qbitel/legacy-whisperer:v1.0.0
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
@@ -138,46 +138,46 @@ spec:
           protocol: TCP
         env:
         # Database configuration
-        - name: CRONOS_AI_DB_HOST
+        - name: QBITEL_AI_DB_HOST
           value: "postgres-service"
-        - name: CRONOS_AI_DB_PORT
+        - name: QBITEL_AI_DB_PORT
           value: "5432"
-        - name: CRONOS_AI_DB_NAME
-          value: "cronos_ai"
-        - name: CRONOS_AI_DB_USER
-          value: "cronos"
-        - name: CRONOS_AI_DB_PASSWORD
+        - name: QBITEL_AI_DB_NAME
+          value: "qbitel"
+        - name: QBITEL_AI_DB_USER
+          value: "qbitel"
+        - name: QBITEL_AI_DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: legacy-whisperer-secrets
               key: db-password
         
         # Redis configuration
-        - name: CRONOS_AI_REDIS_HOST
+        - name: QBITEL_AI_REDIS_HOST
           value: "redis-service"
-        - name: CRONOS_AI_REDIS_PORT
+        - name: QBITEL_AI_REDIS_PORT
           value: "6379"
-        - name: CRONOS_AI_REDIS_PASSWORD
+        - name: QBITEL_AI_REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
               name: legacy-whisperer-secrets
               key: redis-password
         
         # Service configuration
-        - name: CRONOS_AI_ENVIRONMENT
+        - name: QBITEL_AI_ENVIRONMENT
           value: "production"
-        - name: CRONOS_AI_LOG_LEVEL
+        - name: QBITEL_AI_LOG_LEVEL
           value: "INFO"
-        - name: CRONOS_AI_DEBUG
+        - name: QBITEL_AI_DEBUG
           value: "false"
         
         # Security configuration
-        - name: CRONOS_AI_JWT_SECRET
+        - name: QBITEL_AI_JWT_SECRET
           valueFrom:
             secretKeyRef:
               name: legacy-whisperer-secrets
               key: jwt-secret
-        - name: CRONOS_AI_ENCRYPT_SENSITIVE_DATA
+        - name: QBITEL_AI_ENCRYPT_SENSITIVE_DATA
           value: "true"
         
         # LLM API Keys
@@ -199,11 +199,11 @@ spec:
           value: "6831"
         
         # Legacy System Whisperer specific
-        - name: CRONOS_AI_LEGACY_ENABLED
+        - name: QBITEL_AI_LEGACY_ENABLED
           value: "true"
-        - name: CRONOS_AI_LEGACY_MAX_SYSTEMS
+        - name: QBITEL_AI_LEGACY_MAX_SYSTEMS
           value: "5000"
-        - name: CRONOS_AI_LEGACY_MEMORY_LIMIT_MB
+        - name: QBITEL_AI_LEGACY_MEMORY_LIMIT_MB
           value: "8192"
         
         resources:
@@ -279,7 +279,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: legacy-whisperer-service
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
   labels:
     app: legacy-whisperer
     component: ai-engine
@@ -306,7 +306,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: legacy-whisperer
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
   labels:
     app: legacy-whisperer
     component: ai-engine
@@ -315,7 +315,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
   name: legacy-whisperer-role
 rules:
 - apiGroups: [""]
@@ -330,11 +330,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: legacy-whisperer-rolebinding
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
 subjects:
 - kind: ServiceAccount
   name: legacy-whisperer
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
 roleRef:
   kind: Role
   name: legacy-whisperer-role
@@ -345,7 +345,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: legacy-whisperer-data
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
 spec:
   accessModes:
     - ReadWriteOnce
@@ -359,7 +359,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: legacy-whisperer-hpa
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -406,7 +406,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: legacy-whisperer-pdb
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
 spec:
   minAvailable: 2
   selector:
@@ -418,7 +418,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: legacy-whisperer-ingress
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -429,10 +429,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - legacy-api.cronos-ai.com
+    - legacy-api.qbitel.com
     secretName: legacy-whisperer-tls
   rules:
-  - host: legacy-api.cronos-ai.com
+  - host: legacy-api.qbitel.com
     http:
       paths:
       - path: /
@@ -448,7 +448,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: legacy-whisperer-network-policy
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
 spec:
   podSelector:
     matchLabels:
@@ -475,7 +475,7 @@ spec:
   - to:
     - namespaceSelector:
         matchLabels:
-          name: cronos-ai-data
+          name: qbitel-data
     ports:
     - protocol: TCP
       port: 5432
@@ -495,7 +495,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: legacy-whisperer-monitor
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
   labels:
     app: legacy-whisperer
     component: ai-engine
@@ -514,7 +514,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: legacy-whisperer-alerts
-  namespace: cronos-ai-legacy
+  namespace: qbitel-legacy
   labels:
     app: legacy-whisperer
     component: ai-engine

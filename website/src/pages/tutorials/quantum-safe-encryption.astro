@@ -1,0 +1,235 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Enable Quantum-Safe Encryption | Tutorials | QBITEL Bridge"
+  description="Configure post-quantum cryptography for your protocol traffic. Choose algorithm profiles, set up hybrid encryption, and verify quantum resistance."
+>
+  <PageHero
+    title="Enable Quantum-Safe Encryption"
+    description="Configure post-quantum cryptography for your existing protocol traffic. Choose algorithm profiles, set up hybrid encryption, and verify quantum resistance with NIST-approved algorithms."
+    badge="Intermediate -- 45 min"
+    gradient="from-yellow-500 to-amber-400"
+  />
+
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+
+      <!-- Prerequisites -->
+      <div class="card p-6 mb-12">
+        <h2 class="text-xl font-bold text-white mb-4">Prerequisites</h2>
+        <ul class="space-y-2 text-gray-300">
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>QBITEL Bridge running (see <a href="/tutorials/discover-legacy-protocol" class="text-quantum-400 hover:underline">Discover a Legacy Protocol</a>)</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Basic understanding of TLS and key exchange concepts</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>OpenSSL 3.x installed (for verification steps)</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Overview of PQC Algorithms -->
+      <div class="card p-6 mb-12">
+        <h2 class="text-xl font-bold text-white mb-4">Available Algorithm Profiles</h2>
+        <p class="text-gray-300 mb-4">QBITEL Bridge supports multiple NIST-standardized post-quantum algorithms. Choose a profile based on your security and performance requirements.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left border-b border-surface-600">
+                <th class="pb-3 text-gray-400 font-medium">Profile</th>
+                <th class="pb-3 text-gray-400 font-medium">KEM Algorithm</th>
+                <th class="pb-3 text-gray-400 font-medium">Signature</th>
+                <th class="pb-3 text-gray-400 font-medium">Security Level</th>
+              </tr>
+            </thead>
+            <tbody class="text-gray-300">
+              <tr class="border-b border-surface-700">
+                <td class="py-3"><code class="text-quantum-400">standard</code></td>
+                <td class="py-3">ML-KEM-768</td>
+                <td class="py-3">ML-DSA-65</td>
+                <td class="py-3">NIST Level 3</td>
+              </tr>
+              <tr class="border-b border-surface-700">
+                <td class="py-3"><code class="text-quantum-400">high</code></td>
+                <td class="py-3">ML-KEM-1024</td>
+                <td class="py-3">ML-DSA-87</td>
+                <td class="py-3">NIST Level 5</td>
+              </tr>
+              <tr>
+                <td class="py-3"><code class="text-quantum-400">hybrid</code></td>
+                <td class="py-3">ML-KEM-768 + X25519</td>
+                <td class="py-3">ML-DSA-65 + Ed25519</td>
+                <td class="py-3">Level 3 + Classical</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">1</span>
+          <h2 class="text-2xl font-bold text-white">Configure the PQC Profile</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Update your QBITEL Bridge configuration to enable post-quantum cryptography. The <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">hybrid</code> profile is recommended for production because it provides quantum resistance while maintaining backward compatibility with classical TLS clients.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># config/qbitel.yaml</span>
+pqc:
+  enabled: true
+  profile: hybrid
+  kem_algorithm: ML-KEM-768
+  signature_algorithm: ML-DSA-65
+  classical_fallback:
+    kem: X25519
+    signature: Ed25519
+  key_rotation_interval: 24h
+  tls:
+    min_version: "TLSv1.3"
+    cipher_suites:
+      - TLS_AES_256_GCM_SHA384
+      - TLS_CHACHA20_POLY1305_SHA256</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">2</span>
+          <h2 class="text-2xl font-bold text-white">Generate PQC Key Pairs</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Use the QBITEL CLI to generate the hybrid key pairs that the data plane will use for key encapsulation and message signing.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Generate hybrid key pair (PQC + classical)</span>
+curl -X POST http://localhost:8000/api/v1/pqc/keygen \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "profile": "hybrid",
+    "label": "production-primary",
+    "store_in_vault": true
+  {'}'}'
+
+<span class="text-gray-500"># Response</span>
+{'{'}
+  "key_id": "pqc_key_01HXYZ...",
+  "algorithm": "ML-KEM-768+X25519",
+  "public_key_fingerprint": "SHA256:Qf8k...",
+  "created_at": "2025-01-15T10:30:00Z",
+  "rotation_due": "2025-01-16T10:30:00Z"
+{'}'}</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">3</span>
+          <h2 class="text-2xl font-bold text-white">Enable PQC on the Data Plane</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Apply the PQC configuration to the Rust data plane. This wraps all protocol traffic in a quantum-safe envelope without modifying the original protocol behavior.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Apply PQC to a specific protocol channel</span>
+curl -X PUT http://localhost:8000/api/v1/channels/ch_legacy9100/security \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "pqc_enabled": true,
+    "key_id": "pqc_key_01HXYZ...",
+    "encrypt_payload": true,
+    "sign_messages": true,
+    "classical_fallback": true
+  {'}'}'</code></pre>
+        </div>
+        <div class="card p-4 border-l-4 border-l-yellow-500 mb-4">
+          <p class="text-sm text-gray-300">
+            <span class="font-semibold text-yellow-400">Note:</span> With <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">classical_fallback: true</code>, clients that do not support PQC will still connect using classical X25519 key exchange. This ensures zero downtime during migration.
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">4</span>
+          <h2 class="text-2xl font-bold text-white">Test Hybrid Encryption</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Verify that traffic is being encrypted with the hybrid PQC scheme. The test endpoint performs a round-trip encapsulation and decapsulation.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Run the PQC self-test</span>
+curl -X POST http://localhost:8000/api/v1/pqc/test \
+  -H "Content-Type: application/json" \
+  -d '{'{'} "key_id": "pqc_key_01HXYZ..." {'}'}'
+
+<span class="text-gray-500"># Expected response</span>
+{'{'}
+  "status": "passed",
+  "kem_encapsulation": "success",
+  "kem_decapsulation": "success",
+  "signature_sign": "success",
+  "signature_verify": "success",
+  "latency_overhead_ms": 2.3,
+  "key_size_bytes": 1184,
+  "ciphertext_size_bytes": 1088
+{'}'}</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">5</span>
+          <h2 class="text-2xl font-bold text-white">Monitor PQC Metrics</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Check the Grafana dashboard to monitor PQC performance in production. Key metrics include encapsulation latency, key rotation events, and fallback rates.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Query PQC metrics via Prometheus</span>
+curl -s http://localhost:9091/api/v1/query?query=qbitel_pqc_encapsulation_duration_seconds
+
+<span class="text-gray-500"># Check the ratio of PQC vs classical connections</span>
+curl -s http://localhost:9091/api/v1/query?query=qbitel_pqc_connections_total</code></pre>
+        </div>
+        <div class="card p-4 border-l-4 border-l-quantum-500">
+          <p class="text-sm text-gray-300">
+            <span class="font-semibold text-quantum-400">What's next?</span> Once PQC is active, enable automatic key rotation in production. You can also combine PQC with the <a href="/tutorials/compliance-reporting" class="text-quantum-400 hover:underline">compliance engine</a> to generate evidence for NIST and FedRAMP audits.
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex items-center justify-between pt-8 border-t border-surface-600/50">
+        <a href="/tutorials/discover-legacy-protocol" class="btn-ghost text-sm">
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+          Previous: Discover a Protocol
+        </a>
+        <a href="/tutorials/build-protocol-adapter" class="btn-secondary text-sm">
+          Next: Build a Protocol Adapter
+          <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <CTABanner
+    title="Protect Your Infrastructure from Quantum Threats"
+    description="QBITEL Bridge makes post-quantum cryptography accessible today, before quantum computers arrive."
+  />
+</PageLayout>

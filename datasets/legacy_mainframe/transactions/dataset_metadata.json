@@ -1,0 +1,22 @@
+{
+  "generated_date": "2026-01-10T09:26:40.905231",
+  "total_records": 11000,
+  "files": {
+    "iso8583_transactions.json": {
+      "count": 3333,
+      "type": "ISO 8583 financial messages"
+    },
+    "cics_transactions.json": {
+      "count": 3333,
+      "type": "CICS online transactions"
+    },
+    "batch_transactions.json": {
+      "count": 3333,
+      "type": "Batch job records"
+    },
+    "customer_records.dat": {
+      "count": 1000,
+      "type": "Fixed-width customer master"
+    }
+  }
+}

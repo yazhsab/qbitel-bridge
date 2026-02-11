@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-quantum: #3b82f6;
+    --color-neon-cyan: #00f5ff;
+    --color-neon-green: #00ff88;
+    --color-surface-900: #0a0e1a;
+    --color-surface-800: #111827;
+    --color-surface-700: #1f2937;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-surface-900 text-gray-100 font-sans;
+  }
+
+  ::selection {
+    @apply bg-quantum-500/30 text-white;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-900;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-600 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-500;
+  }
+
+  /* Focus styles for accessibility */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-quantum-500;
+  }
+}
+
+@layer components {
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-quantum-400 via-neon-cyan to-quantum-400;
+    background-size: 200% auto;
+  }
+
+  .gradient-border {
+    @apply border border-transparent;
+    background-clip: padding-box;
+    border-image: linear-gradient(135deg, #3b82f6, #00f5ff) 1;
+  }
+
+  .glass {
+    @apply bg-surface-800/60 backdrop-blur-xl border border-surface-600/50;
+  }
+
+  .card {
+    @apply bg-surface-800 border border-surface-600 rounded-xl transition-all duration-300;
+  }
+
+  .card:hover {
+    @apply border-quantum-500/50 shadow-lg shadow-quantum-500/5;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white
+           bg-gradient-to-r from-quantum-600 to-quantum-500 hover:from-quantum-500 hover:to-quantum-400
+           transition-all duration-300 shadow-lg shadow-quantum-500/25 hover:shadow-quantum-500/40;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold
+           text-quantum-400 border border-quantum-500/30 hover:border-quantum-500 hover:bg-quantum-500/10
+           transition-all duration-300;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium
+           text-gray-300 hover:text-white hover:bg-surface-700 transition-all duration-200;
+  }
+
+  .section-heading {
+    @apply text-3xl md:text-4xl font-bold text-white mb-4;
+  }
+
+  .section-subheading {
+    @apply text-lg text-gray-400 max-w-3xl;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+           bg-quantum-500/10 text-quantum-400 border border-quantum-500/20;
+  }
+
+  .glow-line {
+    @apply h-px bg-gradient-to-r from-transparent via-quantum-500 to-transparent;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

@@ -112,7 +112,7 @@ graph TB
 1. **Clone the repository**
 ```bash
 git clone <repository-url>
-cd cronos-ai/ai_engine/legacy
+cd qbitel/ai_engine/legacy
 ```
 
 2. **Install dependencies**
@@ -292,15 +292,15 @@ python -m legacy.dev_server --config config/development.yaml
 
 ```bash
 # Build image
-docker build -t cronos-ai/legacy-whisperer:latest .
+docker build -t qbitel/legacy-whisperer:latest .
 
 # Run container
 docker run -d \
   --name legacy-whisperer \
   -p 8000:8000 \
-  -e CRONOS_AI_DB_HOST=postgres \
-  -e CRONOS_AI_REDIS_HOST=redis \
-  cronos-ai/legacy-whisperer:latest
+  -e QBITEL_AI_DB_HOST=postgres \
+  -e QBITEL_AI_REDIS_HOST=redis \
+  qbitel/legacy-whisperer:latest
 ```
 
 ### Kubernetes
@@ -308,7 +308,7 @@ docker run -d \
 ```bash
 # Deploy using Helm
 helm install legacy-whisperer ./helm/legacy-whisperer \
-  --namespace cronos-ai \
+  --namespace qbitel \
   --values values.production.yaml
 
 # Or use kubectl
@@ -426,7 +426,7 @@ kubectl logs -f deployment/legacy-whisperer | grep llm
 Enable debug logging:
 
 ```bash
-export CRONOS_AI_LOG_LEVEL=DEBUG
+export QBITEL_AI_LOG_LEVEL=DEBUG
 python -m legacy.dev_server --debug
 ```
 
@@ -503,10 +503,10 @@ Proprietary software. All rights reserved.
 
 ## Support
 
-- **Documentation**: [https://docs.cronos-ai.com/legacy-whisperer](https://docs.cronos-ai.com/legacy-whisperer)
-- **Support Portal**: [https://support.cronos-ai.com](https://support.cronos-ai.com)
-- **Community**: [https://community.cronos-ai.com](https://community.cronos-ai.com)
-- **Enterprise Support**: enterprise-support@cronos-ai.com
+- **Documentation**: [https://docs.qbitel.com/legacy-whisperer](https://docs.qbitel.com/legacy-whisperer)
+- **Support Portal**: [https://support.qbitel.com](https://support.qbitel.com)
+- **Community**: [https://community.qbitel.com](https://community.qbitel.com)
+- **Enterprise Support**: enterprise-support@qbitel.com
 
 ## Changelog
 

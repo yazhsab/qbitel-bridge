@@ -506,7 +506,7 @@ impl DpdkConfig {
     pub fn to_eal_args(&self) -> Vec<String> {
         let mut args = Vec::new();
         
-        args.push("cronos-dpdk".to_string());
+        args.push("qbitel-dpdk".to_string());
         
         // Core mask
         args.push("-c".to_string());

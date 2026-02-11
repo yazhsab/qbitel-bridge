@@ -6,7 +6,7 @@
 
 ## Description
 
-The CRONOS AI Engine service is not responding to health checks. This is a critical issue that requires immediate attention as it means the service is completely unavailable.
+The QBITEL Engine service is not responding to health checks. This is a critical issue that requires immediate attention as it means the service is completely unavailable.
 
 ## Impact
 
@@ -20,26 +20,26 @@ The CRONOS AI Engine service is not responding to health checks. This is a criti
 
 ```bash
 # Check Docker container status
-docker-compose ps cronos-ai-engine
+docker-compose ps qbitel-engine
 
 # Check Kubernetes pod status
-kubectl get pods -l app=cronos-ai-engine -n cronos-ai
+kubectl get pods -l app=qbitel-engine -n qbitel
 
 # Check systemd service (if running on VM)
-systemctl status cronos-ai
+systemctl status qbitel
 ```
 
 ### 2. Check recent logs
 
 ```bash
 # Docker logs
-docker-compose logs --tail=100 cronos-ai-engine
+docker-compose logs --tail=100 qbitel-engine
 
 # Kubernetes logs
-kubectl logs -l app=cronos-ai-engine -n cronos-ai --tail=100
+kubectl logs -l app=qbitel-engine -n qbitel --tail=100
 
 # System logs
-journalctl -u cronos-ai -n 100
+journalctl -u qbitel -n 100
 ```
 
 ### 3. Check health endpoint directly
@@ -77,13 +77,13 @@ curl -v http://localhost:8000/health
 
 ```bash
 # Docker
-docker-compose restart cronos-ai-engine
+docker-compose restart qbitel-engine
 
 # Kubernetes
-kubectl rollout restart deployment/cronos-ai-engine -n cronos-ai
+kubectl rollout restart deployment/qbitel-engine -n qbitel
 
 # Systemd
-systemctl restart cronos-ai
+systemctl restart qbitel
 ```
 
 ### If Restart Doesn't Help
@@ -91,7 +91,7 @@ systemctl restart cronos-ai
 1. **Check startup validation**:
 ```bash
 # Docker
-docker-compose logs cronos-ai-engine | grep "VALIDATION"
+docker-compose logs qbitel-engine | grep "VALIDATION"
 
 # Look for CRITICAL failures
 ```
@@ -107,7 +107,7 @@ echo $ENCRYPTION_KEY
 3. **Check database connectivity**:
 ```bash
 # Test database connection
-docker-compose exec postgres pg_isready -U cronos_user -d cronos_ai
+docker-compose exec postgres pg_isready -U qbitel_user -d qbitel
 ```
 
 4. **Check disk space**:

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Server Runner
+QBITEL Engine - Server Runner
 
 This module provides the main server runner for both REST and gRPC APIs.
 """
@@ -21,7 +21,7 @@ from .auth import initialize_auth
 
 class AIEngineServer:
     """
-    Main server class for CRONOS AI Engine APIs.
+    Main server class for QBITEL Engine APIs.
 
     This class manages both REST and gRPC servers and provides
     unified lifecycle management for the entire API stack.
@@ -235,7 +235,7 @@ class ServerManager:
     async def run(self) -> None:
         """Run the server with lifecycle management."""
         try:
-            self.logger.info("Starting CRONOS AI Engine Server Manager...")
+            self.logger.info("Starting QBITEL Engine Server Manager...")
 
             # Initialize and start server
             self.server = AIEngineServer(self.config)
@@ -356,7 +356,7 @@ def main() -> None:
     """Main entry point for server."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="CRONOS AI Engine Server")
+    parser = argparse.ArgumentParser(description="QBITEL Engine Server")
     parser.add_argument("--config", type=str, help="Configuration file path")
     parser.add_argument("--host", type=str, default="0.0.0.0", help="Host to bind to")
     parser.add_argument("--port", type=int, default=8000, help="Port to bind to")

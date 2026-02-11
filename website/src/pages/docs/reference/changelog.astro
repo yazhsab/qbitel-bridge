@@ -1,0 +1,88 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Changelog | QBITEL Bridge Docs" description="Version history and release notes for QBITEL Bridge.">
+  <h1 class="text-3xl font-bold text-white mb-2">Changelog</h1>
+  <p class="text-gray-400 mb-8">Version history and release notes for QBITEL Bridge. All notable changes to the platform are documented here.</p>
+
+  <h2 id="v1-0-0" class="text-2xl font-bold text-white mt-12 mb-4">v1.0.0 -- Initial Release</h2>
+  <p class="text-gray-400 mb-4">2025-01-15</p>
+
+  <h3 id="v1-0-0-highlights" class="text-xl font-semibold text-white mt-6 mb-3">Highlights</h3>
+  <p class="text-gray-300 mb-4">First production release of QBITEL Bridge with the complete four-layer architecture.</p>
+
+  <h3 id="v1-0-0-ai-engine" class="text-xl font-semibold text-white mt-6 mb-3">AI Engine</h3>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>Protocol discovery pipeline with PCFG inference, pattern extraction, and parser generation</li>
+    <li>Multi-agent orchestration system with planning, collaboration, and persistent memory</li>
+    <li>Zero-Touch Decision Engine with LLM-powered autonomous security response</li>
+    <li>Protocol Copilot for natural language protocol analysis</li>
+    <li>Ensemble anomaly detection (Isolation Forest, LSTM, VAE)</li>
+    <li>Compliance automation for SOC 2, GDPR, HIPAA, PCI DSS, NIST 800-53, ISO 27001</li>
+    <li>Legacy System Whisperer for COBOL, JCL, and mainframe protocol analysis</li>
+    <li>Protocol Marketplace with Stripe payments and S3 artifact storage</li>
+    <li>Translation Studio for protocol bridging and code generation</li>
+    <li>On-premise LLM support via Ollama, vLLM, and LocalAI</li>
+    <li>RAG Engine with Qdrant vector store and semantic caching</li>
+    <li>FastAPI REST API with OpenAPI documentation</li>
+    <li>gRPC API for high-performance inter-service communication</li>
+  </ul>
+
+  <h3 id="v1-0-0-data-plane" class="text-xl font-semibold text-white mt-6 mb-3">Rust Data Plane</h3>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>PQC-TLS implementation with ML-KEM-1024, ML-DSA-87, Falcon-1024, and SLH-DSA</li>
+    <li>DPDK-based packet capture with zero-copy processing</li>
+    <li>Deep packet inspection engine for protocol fingerprinting</li>
+    <li>AI Bridge for Python AI Engine integration</li>
+    <li>Kubernetes operator with CRD controllers for control plane, policy, and service mesh</li>
+    <li>I/O engine with high-availability clustering</li>
+  </ul>
+
+  <h3 id="v1-0-0-control-plane" class="text-xl font-semibold text-white mt-6 mb-3">Go Control Plane</h3>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>OPA policy engine with bundle management and runtime evaluation</li>
+    <li>HashiCorp Vault integration for dynamic secrets and PKI</li>
+    <li>Device lifecycle management with certificate issuance and rotation</li>
+    <li>Edge device agent with TPM sealing support</li>
+    <li>Management REST API built with Gin</li>
+  </ul>
+
+  <h3 id="v1-0-0-ui-console" class="text-xl font-semibold text-white mt-6 mb-3">UI Console</h3>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>React 18 with TypeScript and Vite</li>
+    <li>Production and enhanced dashboards with real-time metrics</li>
+    <li>Protocol marketplace interface (browse, search, submit, detail views)</li>
+    <li>Enterprise theme with Material UI</li>
+    <li>OIDC authentication with Okta, Azure AD, and Keycloak support</li>
+    <li>Responsive layout for desktop, tablet, and mobile</li>
+    <li>System settings management</li>
+  </ul>
+
+  <h3 id="v1-0-0-infrastructure" class="text-xl font-semibold text-white mt-6 mb-3">Infrastructure</h3>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>Helm chart for one-command Kubernetes deployment</li>
+    <li>Docker Compose for local development</li>
+    <li>Air-gapped deployment support with offline LLM models</li>
+    <li>Kubernetes admission webhooks for pod security validation</li>
+    <li>Istio service mesh integration with PQC certificate management</li>
+    <li>Prometheus, Grafana, and OpenTelemetry observability stack</li>
+    <li>Pre-built Grafana dashboards (operational, protocol, threat, LLM, SLO)</li>
+    <li>CI/CD pipeline with GitHub Actions</li>
+    <li>SBOM generation and signature verification</li>
+    <li>Automated backup and disaster recovery tooling</li>
+  </ul>
+
+  <h3 id="v1-0-0-cloud" class="text-xl font-semibold text-white mt-6 mb-3">Cloud Integrations</h3>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>AWS Security Hub connector</li>
+    <li>Azure Sentinel connector</li>
+    <li>GCP Security Command Center connector</li>
+    <li>Apache Kafka event streaming with PQC-encrypted producers</li>
+    <li>Envoy xDS server for traffic management</li>
+  </ul>
+
+  <div class="bg-surface-800 rounded-lg p-4 border border-surface-600/50 mt-8">
+    <p class="text-gray-400 text-sm">For the latest updates, check the <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">CHANGELOG.md</code> file in the repository root.</p>
+  </div>
+</DocsLayout>

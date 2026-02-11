@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Observability and Distributed Tracing
+QBITEL Engine - Observability and Distributed Tracing
 
 This module provides comprehensive observability capabilities including
 distributed tracing, performance monitoring, and system observability.

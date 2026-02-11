@@ -1,5 +1,5 @@
 """
-CRONOS AI - Database Integration Tests
+QBITEL - Database Integration Tests
 
 Tests for database connection pool, transaction management,
 circuit breaker integration, and encryption.
@@ -49,8 +49,8 @@ async def db_config():
     return DatabaseConfig(
         host=os.getenv("TEST_DB_HOST", "localhost"),
         port=int(os.getenv("TEST_DB_PORT", 5432)),
-        database=os.getenv("TEST_DB_NAME", "cronos_ai_test"),
-        username=os.getenv("TEST_DB_USER", "cronos"),
+        database=os.getenv("TEST_DB_NAME", "qbitel_test"),
+        username=os.getenv("TEST_DB_USER", "qbitel"),
         password=os.getenv("TEST_DB_PASSWORD", "test_password"),
         pool_size=5,
         max_overflow=10,

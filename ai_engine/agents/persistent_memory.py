@@ -1,5 +1,5 @@
 """
-CRONOS AI - Persistent Agent Memory with Compression and Relevance Decay
+QBITEL - Persistent Agent Memory with Compression and Relevance Decay
 
 This module provides:
 - SQLite-based persistent memory storage
@@ -40,17 +40,13 @@ from .agent_memory import (
     MemoryBackend,
 )
 
-# Redis with fallback
+# Redis async support (aioredis is deprecated; use redis.asyncio)
 try:
-    import aioredis
+    import redis.asyncio as aioredis
     REDIS_AVAILABLE = True
 except ImportError:
-    try:
-        import redis.asyncio as aioredis
-        REDIS_AVAILABLE = True
-    except ImportError:
-        REDIS_AVAILABLE = False
-        aioredis = None
+    REDIS_AVAILABLE = False
+    aioredis = None
 
 logger = logging.getLogger(__name__)
 
@@ -59,21 +55,21 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 MEMORY_PERSIST_COUNTER = Counter(
-    "cronos_memory_persist_total",
+    "qbitel_memory_persist_total",
     "Total memory persistence operations",
     ["operation", "backend"]
 )
 MEMORY_COMPRESSION_RATIO = Histogram(
-    "cronos_memory_compression_ratio",
+    "qbitel_memory_compression_ratio",
     "Memory compression ratio",
     buckets=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 )
 MEMORY_DECAY_APPLIED = Counter(
-    "cronos_memory_decay_applied_total",
+    "qbitel_memory_decay_applied_total",
     "Total relevance decay applications"
 )
 MEMORY_CONSOLIDATED = Counter(
-    "cronos_memory_consolidated_total",
+    "qbitel_memory_consolidated_total",
     "Total memories consolidated"
 )
 
@@ -760,7 +756,7 @@ class RedisPersistentBackend(MemoryBackend):
     def __init__(
         self,
         redis_url: str = "redis://localhost:6379",
-        prefix: str = "cronos:memory:",
+        prefix: str = "qbitel:memory:",
         compression_config: CompressionConfig = None,
         decay_config: RelevanceDecayConfig = None,
         ttl_seconds: int = 86400 * 90  # 90 days default

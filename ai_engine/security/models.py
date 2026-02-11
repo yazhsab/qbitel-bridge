@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Zero-Touch Security Orchestrator Models
+QBITEL Engine - Zero-Touch Security Orchestrator Models
 
 Enterprise-grade data models for autonomous security operations.
 """

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Enterprise IAM & Monitoring is CRONOS AI's comprehensive identity and access management platform with full observability. It provides enterprise-grade authentication, authorization, API key management, and complete monitoring with Prometheus metrics, distributed tracing, and alerting.
+Enterprise IAM & Monitoring is QBITEL's comprehensive identity and access management platform with full observability. It provides enterprise-grade authentication, authorization, API key management, and complete monitoring with Prometheus metrics, distributed tracing, and alerting.
 
 ---
 
@@ -18,7 +18,7 @@ Enterprise security requires robust identity and observability:
 - **Alert fatigue**: Too many alerts, not enough context
 - **Compliance requirements**: Audit trails and access reviews
 
-### The CRONOS AI Solution
+### The QBITEL Solution
 
 Enterprise IAM & Monitoring provides:
 - **Unified authentication**: OIDC, SAML, LDAP, API keys
@@ -39,7 +39,7 @@ Enterprise IAM & Monitoring provides:
 | **OIDC** | Azure AD, Okta, Auth0 | Web apps, SSO |
 | **SAML 2.0** | ADFS, Ping Identity | Enterprise SSO |
 | **LDAP** | Active Directory, OpenLDAP | Internal auth |
-| **API Key** | CRONOS-generated | Service-to-service |
+| **API Key** | QBITEL-generated | Service-to-service |
 | **JWT** | Self-issued, External | Stateless auth |
 | **mTLS** | Certificate-based | Zero-trust |
 
@@ -316,7 +316,7 @@ Authorization: Bearer {admin_token}
 Response:
 {
     "key_id": "key_abc123",
-    "api_key": "cronos_sk_live_xxxxxxxxxxxxxxxxxxxx",
+    "api_key": "qbitel_sk_live_xxxxxxxxxxxxxxxxxxxx",
     "name": "production-service-key",
     "permissions": [...],
     "rate_limit": 1000,
@@ -363,7 +363,7 @@ Response:
 {
     "old_key_id": "key_abc123",
     "new_key_id": "key_def456",
-    "new_api_key": "cronos_sk_live_yyyyyyyyyyyyyyyyyyyy",
+    "new_api_key": "qbitel_sk_live_yyyyyyyyyyyyyyyyyyyy",
     "old_key_expires_at": "2025-01-17T10:30:00Z",
     "new_key_expires_at": "2025-04-17T10:30:00Z"
 }
@@ -490,20 +490,20 @@ Response:
 GET /metrics
 
 Response:
-# HELP cronos_requests_total Total HTTP requests
-# TYPE cronos_requests_total counter
-cronos_requests_total{method="GET",endpoint="/api/v1/protocols",status="200"} 15847
+# HELP qbitel_requests_total Total HTTP requests
+# TYPE qbitel_requests_total counter
+qbitel_requests_total{method="GET",endpoint="/api/v1/protocols",status="200"} 15847
 
-# HELP cronos_request_duration_seconds HTTP request duration
-# TYPE cronos_request_duration_seconds histogram
-cronos_request_duration_seconds_bucket{method="GET",endpoint="/api/v1/protocols",le="0.1"} 14500
-cronos_request_duration_seconds_bucket{method="GET",endpoint="/api/v1/protocols",le="0.5"} 15700
-cronos_request_duration_seconds_bucket{method="GET",endpoint="/api/v1/protocols",le="1.0"} 15847
+# HELP qbitel_request_duration_seconds HTTP request duration
+# TYPE qbitel_request_duration_seconds histogram
+qbitel_request_duration_seconds_bucket{method="GET",endpoint="/api/v1/protocols",le="0.1"} 14500
+qbitel_request_duration_seconds_bucket{method="GET",endpoint="/api/v1/protocols",le="0.5"} 15700
+qbitel_request_duration_seconds_bucket{method="GET",endpoint="/api/v1/protocols",le="1.0"} 15847
 
-# HELP cronos_active_sessions Current active sessions
-# TYPE cronos_active_sessions gauge
-cronos_active_sessions{type="user"} 1234
-cronos_active_sessions{type="api_key"} 567
+# HELP qbitel_active_sessions Current active sessions
+# TYPE qbitel_active_sessions gauge
+qbitel_active_sessions{type="user"} 1234
+qbitel_active_sessions{type="api_key"} 567
 
 # ... (500+ metrics)
 ```
@@ -516,39 +516,39 @@ cronos_active_sessions{type="api_key"} 567
 
 **Request Metrics**:
 ```
-cronos_requests_total{method, endpoint, status}
-cronos_request_duration_seconds{method, endpoint}
-cronos_request_size_bytes{method, endpoint}
-cronos_response_size_bytes{method, endpoint}
+qbitel_requests_total{method, endpoint, status}
+qbitel_request_duration_seconds{method, endpoint}
+qbitel_request_size_bytes{method, endpoint}
+qbitel_response_size_bytes{method, endpoint}
 ```
 
 **Authentication Metrics**:
 ```
-cronos_auth_attempts_total{method, result}
-cronos_auth_failures_total{method, reason}
-cronos_mfa_challenges_total{method, result}
-cronos_sessions_active{type}
-cronos_api_keys_active
-cronos_api_key_usage_total{key_id}
+qbitel_auth_attempts_total{method, result}
+qbitel_auth_failures_total{method, reason}
+qbitel_mfa_challenges_total{method, result}
+qbitel_sessions_active{type}
+qbitel_api_keys_active
+qbitel_api_key_usage_total{key_id}
 ```
 
 **Security Metrics**:
 ```
-cronos_security_events_total{type, severity}
-cronos_security_decisions_total{decision}
-cronos_compliance_score{framework}
-cronos_threat_intel_matches_total{type}
+qbitel_security_events_total{type, severity}
+qbitel_security_decisions_total{decision}
+qbitel_compliance_score{framework}
+qbitel_threat_intel_matches_total{type}
 ```
 
 **System Metrics**:
 ```
-cronos_cpu_usage_percent
-cronos_memory_usage_bytes
-cronos_disk_usage_bytes
-cronos_goroutines_active
-cronos_db_connections_active
-cronos_cache_hits_total
-cronos_cache_misses_total
+qbitel_cpu_usage_percent
+qbitel_memory_usage_bytes
+qbitel_disk_usage_bytes
+qbitel_goroutines_active
+qbitel_db_connections_active
+qbitel_cache_hits_total
+qbitel_cache_misses_total
 ```
 
 ### Distributed Tracing (OpenTelemetry)
@@ -637,19 +637,19 @@ alerting:
 
   rules:
     - name: high_error_rate
-      condition: "rate(cronos_requests_total{status=~'5..'}[5m]) > 0.1"
+      condition: "rate(qbitel_requests_total{status=~'5..'}[5m]) > 0.1"
       severity: high
       channels: [security-team, ops-team]
       message: "High error rate detected: {{ $value | printf \"%.2f\" }}%"
 
     - name: authentication_failures
-      condition: "rate(cronos_auth_failures_total[5m]) > 10"
+      condition: "rate(qbitel_auth_failures_total[5m]) > 10"
       severity: high
       channels: [security-team]
       message: "High authentication failure rate"
 
     - name: security_incident
-      condition: "cronos_security_events_total{severity='critical'} > 0"
+      condition: "qbitel_security_events_total{severity='critical'} > 0"
       severity: critical
       channels: [security-critical, security-team]
       message: "Critical security incident detected"
@@ -668,7 +668,7 @@ alerting:
 ```yaml
 iam:
   enabled: true
-  service_name: "CRONOS AI Authentication Service"
+  service_name: "QBITEL Authentication Service"
   domain: "company.com"
 
   # Session Management
@@ -676,19 +676,19 @@ iam:
     timeout: 8h
     idle_timeout: 30m
     max_sessions_per_user: 5
-    cookie_name: "CRONOS_SESSION"
+    cookie_name: "QBITEL_SESSION"
     secure_cookie: true
     same_site: "Strict"
 
   # JWT Configuration
   jwt:
-    issuer: "cronos-auth"
-    audience: ["cronos-api", "cronos-console"]
+    issuer: "qbitel-auth"
+    audience: ["qbitel-api", "qbitel-console"]
     access_token_expiry: 1h
     refresh_token_expiry: 24h
     algorithm: "RS256"
-    private_key_path: /etc/cronos/jwt-private.pem
-    public_key_path: /etc/cronos/jwt-public.pem
+    private_key_path: /etc/qbitel/jwt-private.pem
+    public_key_path: /etc/qbitel/jwt-public.pem
 
   # OIDC Providers
   oidc:
@@ -714,7 +714,7 @@ iam:
         enabled: true
         entity_id: https://adfs.company.com
         sso_url: https://adfs.company.com/adfs/ls/
-        certificate_path: /etc/cronos/adfs-cert.pem
+        certificate_path: /etc/qbitel/adfs-cert.pem
 
   # LDAP Providers
   ldap:
@@ -725,7 +725,7 @@ iam:
         port: 636
         use_ssl: true
         base_dn: DC=company,DC=com
-        bind_dn: CN=cronos-service,OU=Services,DC=company,DC=com
+        bind_dn: CN=qbitel-service,OU=Services,DC=company,DC=com
         bind_password: ${LDAP_PASSWORD}
 
   # MFA Configuration
@@ -749,7 +749,7 @@ iam:
 
   # API Keys
   api_keys:
-    prefix: "cronos_sk_"
+    prefix: "qbitel_sk_"
     entropy_bits: 256
     default_expiry: 90d
     max_per_user: 10

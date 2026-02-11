@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Whisperer API Schemas
+QBITEL Engine - Legacy System Whisperer API Schemas
 
 Pydantic schemas for API request/response validation.
 """
@@ -614,14 +614,14 @@ class APIMetadata(BaseModel):
     description: str = "REST API for Legacy System Management and Predictive Analytics"
     contact: Dict[str, str] = Field(
         default_factory=lambda: {
-            "name": "CRONOS AI Engine Team",
-            "email": "support@cronos-ai.com",
+            "name": "QBITEL Engine Team",
+            "email": "support@qbitel.com",
         }
     )
     license: Dict[str, str] = Field(
         default_factory=lambda: {
-            "name": "Proprietary",
-            "url": "https://cronos-ai.com/license",
+            "name": "Apache-2.0",
+            "url": "https://github.com/yazhsab/qbitel-bridge/blob/main/LICENSE",
         }
     )
     supported_features: List[str] = Field(

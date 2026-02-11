@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy-Aware Response Manager
+QBITEL Engine - Legacy-Aware Response Manager
 
 Enterprise-grade response execution for legacy systems with safety constraints.
 """
@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest, get_llm_service
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..monitoring.metrics import MetricsCollector
 from .models import (
     SecurityEvent,
@@ -38,25 +38,25 @@ from prometheus_client import Counter, Histogram, Gauge, Summary
 
 # Prometheus metrics
 QUARANTINE_COUNTER = Counter(
-    "cronos_security_quarantine_total",
+    "qbitel_security_quarantine_total",
     "Quarantine operations",
     ["system_type", "status"],
 )
 QUARANTINE_DURATION = Histogram(
-    "cronos_security_quarantine_duration_seconds", "Quarantine operation duration"
+    "qbitel_security_quarantine_duration_seconds", "Quarantine operation duration"
 )
 LEGACY_RESPONSE_COUNTER = Counter(
-    "cronos_security_legacy_responses_total",
+    "qbitel_security_legacy_responses_total",
     "Legacy responses executed",
     ["protocol", "action"],
 )
 SAFETY_VIOLATIONS = Counter(
-    "cronos_security_safety_violations_total",
+    "qbitel_security_safety_violations_total",
     "Safety constraint violations",
     ["constraint_type"],
 )
 DEPENDENCY_CHECKS = Summary(
-    "cronos_security_dependency_check_duration_seconds", "Dependency check duration"
+    "qbitel_security_dependency_check_duration_seconds", "Dependency check duration"
 )
 
 logger = logging.getLogger(__name__)

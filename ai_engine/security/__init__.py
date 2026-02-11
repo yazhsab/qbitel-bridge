@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Zero-Touch Security Orchestrator
+QBITEL Engine - Zero-Touch Security Orchestrator
 
 Enterprise-grade autonomous security response system with legacy protocol awareness.
 """

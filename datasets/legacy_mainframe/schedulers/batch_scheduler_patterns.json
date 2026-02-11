@@ -1,0 +1,122 @@
+{
+  "metadata": {
+    "title": "Batch Scheduler Patterns",
+    "version": "1.0.0",
+    "description": "Enterprise job scheduling patterns with modern equivalents",
+    "schedulers": ["CA-7", "Control-M", "TWS/OPC", "Autosys"],
+    "total_patterns": 40
+  },
+  "ca7_patterns": [
+    {
+      "id": "CA7001",
+      "name": "Job Definition",
+      "description": "Define a batch job in CA-7",
+      "ca7_commands": "LJOB,JOB=DAILYBAT\nDJOB,JOB=DAILYBAT,\n     JCLLIB=PROD.JCL.LIB,\n     JCLMEM=DAILYBAT,\n     SYSTEM=PROD,\n     OWNER=BATCHADM,\n     LEADTIME=0015,\n     MAINID=ANY,\n     CLASS=A,\n     MSGCLASS=X,\n     PRESSION='',\n     INSERT-RQMT=(Y,N)\n",
+      "modern_equivalent": {
+        "airflow": "from airflow import DAG\nfrom airflow.operators.bash import BashOperator\nfrom datetime import datetime, timedelta\n\ndefault_args = {\n    'owner': 'batchadm',\n    'depends_on_past': False,\n    'retries': 1,\n    'retry_delay': timedelta(minutes=15),\n}\n\nwith DAG(\n    'daily_batch',\n    default_args=default_args,\n    description='Daily batch processing',\n    schedule_interval='0 6 * * *',\n    start_date=datetime(2023, 1, 1),\n    catchup=False,\n    tags=['production', 'daily'],\n) as dag:\n    \n    task = BashOperator(\n        task_id='daily_batch_job',\n        bash_command='python /scripts/daily_batch.py',\n    )",
+        "kubernetes_cronjob": "apiVersion: batch/v1\nkind: CronJob\nmetadata:\n  name: daily-batch\nspec:\n  schedule: \"0 6 * * *\"\n  jobTemplate:\n    spec:\n      template:\n        spec:\n          containers:\n          - name: daily-batch\n            image: batch-processor:latest\n            command: [\"python\", \"/app/daily_batch.py\"]\n            resources:\n              requests:\n                memory: \"2Gi\"\n                cpu: \"1\"\n          restartPolicy: OnFailure\n          activeDeadlineSeconds: 3600"
+      }
+    },
+    {
+      "id": "CA7002",
+      "name": "Job Dependencies",
+      "description": "Define predecessor/successor relationships",
+      "ca7_commands": "DEMAND,JOB=DAILYRPT,\n       PREDECESSOR=(DAILYBAT,DAILYEXT,DAILYVAL)\n\nADDRQ,JOB=DAILYRPT,\n      PRED-JOB=DAILYBAT,\n      PRED-SCHID=001\n\nADDRQ,JOB=DAILYRPT,\n      PRED-JOB=DAILYEXT,\n      PRED-SCHID=001\n\nADDRQ,JOB=DAILYRPT,\n      PRED-JOB=DAILYVAL,\n      PRED-SCHID=001",
+      "modern_equivalent": {
+        "airflow": "from airflow import DAG\nfrom airflow.operators.python import PythonOperator\n\nwith DAG('daily_processing', ...) as dag:\n    \n    daily_batch = PythonOperator(\n        task_id='daily_batch',\n        python_callable=run_daily_batch\n    )\n    \n    daily_extract = PythonOperator(\n        task_id='daily_extract',\n        python_callable=run_daily_extract\n    )\n    \n    daily_validate = PythonOperator(\n        task_id='daily_validate',\n        python_callable=run_daily_validate\n    )\n    \n    daily_report = PythonOperator(\n        task_id='daily_report',\n        python_callable=run_daily_report\n    )\n    \n    # Define dependencies (predecessors)\n    [daily_batch, daily_extract, daily_validate] >> daily_report",
+        "github_actions": "name: Daily Processing\non:\n  schedule:\n    - cron: '0 6 * * *'\n  workflow_dispatch:\n\njobs:\n  daily_batch:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - run: python scripts/daily_batch.py\n\n  daily_extract:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - run: python scripts/daily_extract.py\n\n  daily_validate:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - run: python scripts/daily_validate.py\n\n  daily_report:\n    needs: [daily_batch, daily_extract, daily_validate]\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - run: python scripts/daily_report.py"
+      }
+    },
+    {
+      "id": "CA7003",
+      "name": "Schedule Definition",
+      "description": "Define job schedule with calendars",
+      "ca7_commands": "DSCAL,CALNAME=BANKDAYS,\n      TYPE=WORK,\n      YEAR=2024,\n      EXCLUDE=(SAT,SUN,HOLIDAY)\n\nSCHD,JOB=DAILYBAT,\n     SCHID=001,\n     SCAL=BANKDAYS,\n     TIME=0600,\n     FREQUENCY=DAILY",
+      "modern_equivalent": {
+        "airflow": "from airflow import DAG\nfrom airflow.sensors.external_task import ExternalTaskSensor\nfrom datetime import datetime\nimport holidays\n\ndef is_business_day(execution_date):\n    us_holidays = holidays.US(years=execution_date.year)\n    if execution_date.weekday() >= 5:  # Weekend\n        return False\n    if execution_date in us_holidays:\n        return False\n    return True\n\nwith DAG(\n    'daily_batch',\n    schedule_interval='0 6 * * 1-5',  # Mon-Fri at 6 AM\n    ...\n) as dag:\n    \n    # Check if business day\n    check_business_day = ShortCircuitOperator(\n        task_id='check_business_day',\n        python_callable=lambda: is_business_day(\n            dag.get_dagrun().execution_date\n        )\n    )",
+        "python_schedule": "from apscheduler.schedulers.background import BackgroundScheduler\nfrom apscheduler.triggers.cron import CronTrigger\nimport holidays\n\ndef is_business_day():\n    today = datetime.now().date()\n    us_holidays = holidays.US(years=today.year)\n    return today.weekday() < 5 and today not in us_holidays\n\ndef run_if_business_day(job_func):\n    if is_business_day():\n        job_func()\n\nscheduler = BackgroundScheduler()\nscheduler.add_job(\n    lambda: run_if_business_day(daily_batch),\n    CronTrigger(hour=6, minute=0, day_of_week='mon-fri')\n)"
+      }
+    }
+  ],
+  "controlm_patterns": [
+    {
+      "id": "CTM001",
+      "name": "Job Flow Definition",
+      "description": "Control-M job flow with conditions",
+      "controlm_xml": "<FOLDER NAME=\"DAILY_PROCESSING\" DATACENTER=\"DC1\">\n  <JOB NAME=\"DAILY_BATCH\" TASKTYPE=\"Job\">\n    <CMDLINE>/scripts/daily_batch.sh</CMDLINE>\n    <INCOND NAME=\"FILE_ARRIVED\" ODATE=\"ODAT\"/>\n    <OUTCOND NAME=\"BATCH_DONE\" ODATE=\"ODAT\"/>\n    <SHOUT WHEN=\"NOTOK\" DEST=\"ONCALL\" MSG=\"Daily batch failed\"/>\n    <QUANTITATIVE NAME=\"CPU_POOL\" QUANT=\"1\"/>\n  </JOB>\n  \n  <JOB NAME=\"DAILY_REPORT\" TASKTYPE=\"Job\">\n    <CMDLINE>/scripts/daily_report.sh</CMDLINE>\n    <INCOND NAME=\"BATCH_DONE\" ODATE=\"ODAT\"/>\n    <INCOND NAME=\"EXTRACT_DONE\" ODATE=\"ODAT\"/>\n  </JOB>\n</FOLDER>",
+      "modern_equivalent": {
+        "airflow": "from airflow import DAG\nfrom airflow.operators.bash import BashOperator\nfrom airflow.sensors.filesystem import FileSensor\nfrom airflow.utils.trigger_rule import TriggerRule\n\nwith DAG('daily_processing', ...) as dag:\n    \n    # Wait for input file (INCOND FILE_ARRIVED)\n    wait_for_file = FileSensor(\n        task_id='wait_for_file',\n        filepath='/data/input/daily_*.dat',\n        poke_interval=300,\n        timeout=7200\n    )\n    \n    daily_batch = BashOperator(\n        task_id='daily_batch',\n        bash_command='/scripts/daily_batch.sh',\n        pool='cpu_pool',  # QUANTITATIVE resource\n        on_failure_callback=alert_oncall  # SHOUT WHEN=NOTOK\n    )\n    \n    daily_report = BashOperator(\n        task_id='daily_report',\n        bash_command='/scripts/daily_report.sh',\n        trigger_rule=TriggerRule.ALL_SUCCESS\n    )\n    \n    wait_for_file >> daily_batch >> daily_report"
+      }
+    },
+    {
+      "id": "CTM002",
+      "name": "File Watcher",
+      "description": "Monitor for file arrival",
+      "controlm_xml": "<JOB NAME=\"FILE_WATCH\" TASKTYPE=\"FileWatcher\">\n  <FILEWATCHER>\n    <PATH>/data/incoming</PATH>\n    <FILENAME>TRANS_*.DAT</FILENAME>\n    <MIN_FILE_SIZE>0</MIN_FILE_SIZE>\n    <MIN_FILE_AGE>60</MIN_FILE_AGE>\n    <CREATE_COND NAME=\"FILE_ARRIVED\"/>\n  </FILEWATCHER>\n</JOB>",
+      "modern_equivalent": {
+        "airflow": "from airflow.sensors.filesystem import FileSensor\nfrom airflow.providers.sftp.sensors.sftp import SFTPSensor\n\nfile_sensor = FileSensor(\n    task_id='wait_for_transactions',\n    filepath='/data/incoming/TRANS_*.DAT',\n    fs_conn_id='local_filesystem',\n    poke_interval=60,\n    timeout=3600,\n    mode='poke'\n)\n\n# For remote files\nsftp_sensor = SFTPSensor(\n    task_id='wait_for_sftp_file',\n    sftp_conn_id='sftp_default',\n    path='/remote/incoming/TRANS_*.DAT',\n    poke_interval=60\n)",
+        "python_watchdog": "from watchdog.observers import Observer\nfrom watchdog.events import FileSystemEventHandler\nimport time\nfrom pathlib import Path\n\nclass TransactionFileHandler(FileSystemEventHandler):\n    def __init__(self, callback, pattern='TRANS_*.DAT', min_age=60):\n        self.callback = callback\n        self.pattern = pattern\n        self.min_age = min_age\n    \n    def on_created(self, event):\n        if event.is_directory:\n            return\n        \n        filepath = Path(event.src_path)\n        if filepath.match(self.pattern):\n            # Check minimum age\n            time.sleep(self.min_age)\n            if filepath.exists():\n                self.callback(filepath)\n\nobserver = Observer()\nobserver.schedule(\n    TransactionFileHandler(process_file),\n    path='/data/incoming',\n    recursive=False\n)\nobserver.start()"
+      }
+    },
+    {
+      "id": "CTM003",
+      "name": "Resource Management",
+      "description": "Control concurrent job execution",
+      "controlm_xml": "<QUANTITATIVE NAME=\"DB_CONNECTIONS\" QUANT=\"10\"/>\n<QUANTITATIVE NAME=\"CPU_INTENSIVE\" QUANT=\"2\"/>\n\n<JOB NAME=\"DB_JOB\">\n  <QUANTITATIVE NAME=\"DB_CONNECTIONS\" QUANT=\"1\"/>\n</JOB>",
+      "modern_equivalent": {
+        "airflow": "from airflow import DAG\nfrom airflow.operators.python import PythonOperator\n\n# Define pools in Airflow UI or via CLI:\n# airflow pools set db_connections 10 \"Database connection pool\"\n# airflow pools set cpu_intensive 2 \"CPU intensive jobs\"\n\nwith DAG('resource_managed', ...) as dag:\n    \n    db_job = PythonOperator(\n        task_id='db_job',\n        python_callable=run_db_job,\n        pool='db_connections',\n        pool_slots=1\n    )\n    \n    cpu_job = PythonOperator(\n        task_id='cpu_intensive_job',\n        python_callable=run_cpu_job,\n        pool='cpu_intensive',\n        pool_slots=1\n    )",
+        "kubernetes": "apiVersion: batch/v1\nkind: Job\nmetadata:\n  name: db-job\nspec:\n  parallelism: 1  # Only 1 concurrent\n  template:\n    spec:\n      containers:\n      - name: db-job\n        resources:\n          limits:\n            memory: \"4Gi\"\n            cpu: \"2\"\n          requests:\n            memory: \"2Gi\"\n            cpu: \"1\""
+      }
+    }
+  ],
+  "tws_patterns": [
+    {
+      "id": "TWS001",
+      "name": "TWS/OPC Job Stream",
+      "description": "IBM Tivoli Workload Scheduler job stream",
+      "tws_definition": "SCHEDULE DAILYPROC\n  OPENS AT 0600 ON WORKDAYS\n  FOLLOWS NIGHTBATCH IN SYSID(PROD1)\n\nJOBS IN DAILYPROC\n  JOB DAILYBAT\n    FOLLOWS STARTUP\n    RUNS IN PROD.JCL.LIB(DAILYBAT)\n    RECOVERY STOP\n  END\n  \n  JOB DAILYRPT\n    FOLLOWS DAILYBAT\n    FOLLOWS DAILYEXT\n    RUNS IN PROD.JCL.LIB(DAILYRPT)\n    RECOVERY RERUN\n  END\nEND",
+      "modern_equivalent": {
+        "airflow": "from airflow import DAG\nfrom airflow.operators.trigger_dagrun import TriggerDagRunOperator\nfrom airflow.sensors.external_task import ExternalTaskSensor\n\nwith DAG('daily_processing', schedule='0 6 * * 1-5', ...) as dag:\n    \n    # Wait for night batch to complete\n    wait_night_batch = ExternalTaskSensor(\n        task_id='wait_night_batch',\n        external_dag_id='night_batch',\n        external_task_id='final_task',\n        mode='reschedule'\n    )\n    \n    daily_batch = BashOperator(\n        task_id='daily_batch',\n        bash_command='python daily_batch.py',\n        retries=0  # RECOVERY STOP\n    )\n    \n    daily_report = BashOperator(\n        task_id='daily_report',\n        bash_command='python daily_report.py',\n        retries=3,  # RECOVERY RERUN\n        retry_delay=timedelta(minutes=5)\n    )\n    \n    wait_night_batch >> daily_batch >> daily_report"
+      }
+    }
+  ],
+  "recovery_patterns": [
+    {
+      "id": "REC001",
+      "name": "Job Recovery Options",
+      "description": "Different recovery strategies",
+      "mainframe_patterns": {
+        "STOP": "Halt job stream on failure",
+        "RERUN": "Automatically rerun failed job",
+        "CONTINUE": "Continue with next job",
+        "RESTART": "Restart from checkpoint"
+      },
+      "modern_equivalent": {
+        "airflow": "from airflow.utils.trigger_rule import TriggerRule\n\n# STOP - default behavior, stops DAG on failure\njob1 = BashOperator(\n    task_id='job1',\n    bash_command='...',\n    trigger_rule=TriggerRule.ALL_SUCCESS\n)\n\n# RERUN - retry on failure\njob2 = BashOperator(\n    task_id='job2',\n    bash_command='...',\n    retries=3,\n    retry_delay=timedelta(minutes=5)\n)\n\n# CONTINUE - proceed even if upstream fails\njob3 = BashOperator(\n    task_id='job3',\n    bash_command='...',\n    trigger_rule=TriggerRule.ALL_DONE\n)\n\n# RESTART from checkpoint\n@task\ndef restartable_job(**context):\n    checkpoint = Variable.get('job_checkpoint', default_var=0)\n    for i in range(checkpoint, 100):\n        process_item(i)\n        Variable.set('job_checkpoint', i)\n    Variable.set('job_checkpoint', 0)  # Reset on success"
+      }
+    },
+    {
+      "id": "REC002",
+      "name": "Alerting and Notifications",
+      "description": "Job failure notifications",
+      "mainframe_pattern": "SHOUT WHEN=NOTOK DEST=ONCALL MSG='Job $JOB failed'",
+      "modern_equivalent": {
+        "airflow": "from airflow.operators.email import EmailOperator\nfrom airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator\n\ndef alert_on_failure(context):\n    task_instance = context['task_instance']\n    dag_id = context['dag'].dag_id\n    task_id = task_instance.task_id\n    execution_date = context['execution_date']\n    \n    message = f\"\"\"\\n    DAG: {dag_id}\\n    Task: {task_id}\\n    Execution Date: {execution_date}\\n    Log URL: {task_instance.log_url}\\n    \"\"\"\n    \n    # Send Slack alert\n    slack_alert = SlackWebhookOperator(\n        task_id='slack_alert',\n        http_conn_id='slack_webhook',\n        message=message,\n        channel='#oncall'\n    )\n    slack_alert.execute(context)\n\nwith DAG('monitored_dag', \n         default_args={'on_failure_callback': alert_on_failure},\n         ...) as dag:\n    pass"
+      }
+    }
+  ],
+  "migration_considerations": {
+    "challenges": [
+      "Complex job dependencies may require refactoring",
+      "Calendar and schedule conversions need careful mapping",
+      "Resource pools work differently in cloud environments",
+      "Recovery semantics differ between platforms"
+    ],
+    "best_practices": [
+      "Start with simple job chains before complex flows",
+      "Implement comprehensive monitoring and alerting",
+      "Use idempotent operations for safe reruns",
+      "Document dependency chains thoroughly"
+    ]
+  }
+}

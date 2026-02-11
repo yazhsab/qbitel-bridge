@@ -309,7 +309,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         """Test API key generation format."""
         api_key, key_hash = auth_service.generate_api_key()
 
-        assert api_key.startswith("cronos_")
+        assert api_key.startswith("qbitel_")
         assert len(key_hash) == 64  # SHA256 hex
 
         # Verify hash is correct
@@ -363,7 +363,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         api_key = APIKey(
             id="key123",
             key_hash="hash",
-            key_prefix="cronos_",
+            key_prefix="qbitel_",
             name="Test Key",
             user_id="user123",
             status=APIKeyStatus.ACTIVE,
@@ -387,7 +387,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         """Test API key verification with inactive user."""
         from ai_engine.models.database import APIKey, User, APIKeyStatus
 
-        api_key = "cronos_test_key"
+        api_key = "qbitel_test_key"
         key_hash = hashlib.sha256(api_key.encode()).hexdigest()
 
         mock_db = AsyncMock()
@@ -410,7 +410,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         """Test that API key usage is tracked."""
         from ai_engine.models.database import APIKey, User, APIKeyStatus
 
-        api_key = "cronos_test_key"
+        api_key = "qbitel_test_key"
         key_hash = hashlib.sha256(api_key.encode()).hexdigest()
 
         mock_db = AsyncMock()
@@ -777,7 +777,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         """Test API key verification handles concurrent usage."""
         from ai_engine.models.database import APIKey, User, APIKeyStatus
 
-        api_key = "cronos_test_key"
+        api_key = "qbitel_test_key"
         key_hash = hashlib.sha256(api_key.encode()).hexdigest()
 
         mock_db = AsyncMock()

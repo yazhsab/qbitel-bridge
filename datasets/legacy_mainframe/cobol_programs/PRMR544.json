@@ -1,0 +1,19 @@
+{
+  "program_id": "PRMR544",
+  "domain": "insurance",
+  "program_type": "report_generation",
+  "author": "C. MILLER",
+  "lines_of_code": 202,
+  "complexity_level": "medium",
+  "complexity_score": 0.492,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.903200",
+  "hash": "b5bfc71ac868882c9bbded7c4085b37f"
+}

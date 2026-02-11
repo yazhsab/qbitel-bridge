@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Security Audit Logging
+QBITEL Engine - Security Audit Logging
 
 Comprehensive audit logging for security events with compliance support.
 """
@@ -150,7 +150,7 @@ class AuditLogger:
         )
         file_handler.setFormatter(formatter)
 
-        audit_logger = logging.getLogger("cronos_ai.security.audit")
+        audit_logger = logging.getLogger("qbitel.security.audit")
         audit_logger.addHandler(file_handler)
         audit_logger.setLevel(logging.INFO)
 
@@ -164,7 +164,7 @@ class AuditLogger:
         if not self.enabled:
             return
 
-        audit_logger = logging.getLogger("cronos_ai.security.audit")
+        audit_logger = logging.getLogger("qbitel.security.audit")
 
         # Log to file
         if self.log_to_file:

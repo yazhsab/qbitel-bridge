@@ -1,5 +1,5 @@
 """
-CRONOS AI - Legacy System Whisperer Example
+QBITEL Bridge - Legacy System Whisperer Example
 Demonstrates usage of the Legacy System Whisperer for protocol analysis and modernization.
 """
 
@@ -236,7 +236,7 @@ async def example_complete_workflow():
 async def main():
     """Run all examples."""
     print("\n" + "=" * 60)
-    print("CRONOS AI - Legacy System Whisperer Examples")
+    print("QBITEL Bridge - Legacy System Whisperer Examples")
     print("=" * 60)
 
     try:

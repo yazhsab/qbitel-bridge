@@ -1,5 +1,5 @@
 """
-CRONOS AI - Pytest Configuration and Fixtures
+QBITEL - Pytest Configuration and Fixtures
 
 This module provides shared fixtures and configuration for all tests.
 """

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Authentication and Authorization
+QBITEL Engine - Authentication and Authorization
 Enterprise-grade authentication with JWT tokens and role-based access control.
 """
 
@@ -84,7 +84,7 @@ class AuthenticationService:
         ):
             raise AuthenticationError(
                 "JWT secret not configured in production mode!\n"
-                "REQUIRED: Configure JWT secret in secrets manager or set CRONOS_AI_JWT_SECRET.\n"
+                "REQUIRED: Configure JWT secret in secrets manager or set QBITEL_AI_JWT_SECRET.\n"
                 'Generate a secure secret: python -c "import secrets; print(secrets.token_urlsafe(48))"'
             )
 
@@ -531,7 +531,7 @@ def initialize_auth(config: Optional[Any] = None) -> str:
 
     Priority order:
     1. Secrets manager (Vault, AWS Secrets Manager, etc.)
-    2. CRONOS_AI_API_KEY environment variable
+    2. QBITEL_AI_API_KEY environment variable
     3. API_KEY environment variable
     4. Configuration file
 
@@ -562,7 +562,7 @@ def initialize_auth(config: Optional[Any] = None) -> str:
 
     # Try environment variables
     if not candidate:
-        candidate = os.getenv("CRONOS_AI_API_KEY") or os.getenv("API_KEY")
+        candidate = os.getenv("QBITEL_AI_API_KEY") or os.getenv("API_KEY")
 
     # Validate API key strength
     if candidate:
@@ -581,15 +581,15 @@ def initialize_auth(config: Optional[Any] = None) -> str:
         ):
             raise AuthenticationError(
                 "API key not configured in production mode!\n"
-                "REQUIRED: Configure API key in secrets manager or set CRONOS_AI_API_KEY.\n"
-                "Generate a secure key: python -c \"import secrets; print('cronos_' + secrets.token_urlsafe(32))\""
+                "REQUIRED: Configure API key in secrets manager or set QBITEL_AI_API_KEY.\n"
+                "Generate a secure key: python -c \"import secrets; print('qbitel_' + secrets.token_urlsafe(32))\""
             )
 
         # For development, generate a temporary key and warn
-        _api_key = f"cronos_ai_{secrets.token_urlsafe(24)}"
+        _api_key = f"qbitel_{secrets.token_urlsafe(24)}"
         logger.warning(
             "No API key configured. Generated temporary key for development. "
-            "Set CRONOS_AI_API_KEY environment variable for production."
+            "Set QBITEL_AI_API_KEY environment variable for production."
         )
 
     if security_cfg is not None and not getattr(security_cfg, "api_key", None):

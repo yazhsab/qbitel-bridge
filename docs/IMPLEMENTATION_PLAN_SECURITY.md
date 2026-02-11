@@ -1,8 +1,8 @@
-# CRONOS AI - Security Implementation Plan
+# QBITEL - Security Implementation Plan
 
 ## Executive Summary
 
-This document provides a detailed implementation plan for addressing critical security vulnerabilities and gaps identified in the CRONOS AI platform.
+This document provides a detailed implementation plan for addressing critical security vulnerabilities and gaps identified in the QBITEL platform.
 
 ---
 
@@ -60,7 +60,7 @@ torch>=2.6.0
 ```python
 # Add to ai_engine/core/model_loader.py (NEW FILE)
 """
-Secure Model Loading Utilities for CRONOS AI
+Secure Model Loading Utilities for QBITEL
 Addresses CVE-2025-32434 and implements defense-in-depth
 """
 
@@ -259,9 +259,9 @@ def configure_bucket_cors(bucket_name: str, allowed_origins: list = None) -> boo
         # SECURE: Only allow specific domains
         if allowed_origins is None:
             allowed_origins = [
-                'https://cronos-ai.example.com',
-                'https://app.cronos-ai.example.com',
-                'https://marketplace.cronos-ai.example.com',
+                'https://qbitel.example.com',
+                'https://app.qbitel.example.com',
+                'https://marketplace.qbitel.example.com',
             ]
             # Add localhost for development (remove in production)
             import os
@@ -318,7 +318,7 @@ def configure_bucket_cors(bucket_name: str, allowed_origins: list = None) -> boo
 ```python
 # ai_engine/marketplace/sandbox_executor.py (NEW FILE)
 """
-Sandboxed Protocol Parser Execution for CRONOS AI Marketplace
+Sandboxed Protocol Parser Execution for QBITEL Marketplace
 
 Uses multiple isolation layers:
 1. Process isolation with resource limits
@@ -396,7 +396,7 @@ class SandboxExecutor:
             Dict with execution result or error
         """
         # Create temporary directory for sandbox
-        sandbox_dir = tempfile.mkdtemp(prefix="cronos_sandbox_")
+        sandbox_dir = tempfile.mkdtemp(prefix="qbitel_sandbox_")
 
         try:
             # Write parser code to sandbox
@@ -617,7 +617,7 @@ def get_sandbox_executor() -> SandboxExecutor:
 ```python
 # ai_engine/marketplace/virus_scanner.py (NEW FILE)
 """
-Virus Scanning Integration for CRONOS AI Marketplace
+Virus Scanning Integration for QBITEL Marketplace
 
 Supports multiple scanning backends:
 1. ClamAV (local/daemon)
@@ -916,7 +916,7 @@ def get_virus_scanner() -> CompositeVirusScanner:
 ```python
 # ai_engine/security/siem_integration.py (NEW FILE)
 """
-SIEM Integration for CRONOS AI
+SIEM Integration for QBITEL
 
 Supports:
 1. Splunk (HEC - HTTP Event Collector)
@@ -980,7 +980,7 @@ class SecurityEvent:
         ext_str = " ".join(extension)
 
         return (
-            f"CEF:0|CRONOS-AI|SecurityPlatform|1.0|{self.event_type}|"
+            f"CEF:0|QBITEL|SecurityPlatform|1.0|{self.event_type}|"
             f"{self.event_type}|{cef_severity}|{ext_str}"
         )
 
@@ -1002,7 +1002,7 @@ class SecurityEvent:
             "user": {
                 "id": self.user_id,
             },
-            "cronos": {
+            "qbitel": {
                 "action": self.action,
                 "resource": self.resource,
                 "details": self.details,
@@ -1016,8 +1016,8 @@ class SplunkHECClient:
         self,
         hec_url: str,
         hec_token: str,
-        index: str = "cronos_security",
-        source: str = "cronos-ai",
+        index: str = "qbitel_security",
+        source: str = "qbitel",
         verify_ssl: bool = True
     ):
         self.hec_url = hec_url.rstrip('/')
@@ -1035,9 +1035,9 @@ class SplunkHECClient:
 
         payload = {
             "time": datetime.fromisoformat(event.timestamp.replace('Z', '+00:00')).timestamp(),
-            "host": "cronos-ai",
+            "host": "qbitel",
             "source": self.source,
-            "sourcetype": "cronos:security",
+            "sourcetype": "qbitel:security",
             "index": self.index,
             "event": asdict(event),
         }
@@ -1070,9 +1070,9 @@ class SplunkHECClient:
         for event in events:
             entry = {
                 "time": datetime.fromisoformat(event.timestamp.replace('Z', '+00:00')).timestamp(),
-                "host": "cronos-ai",
+                "host": "qbitel",
                 "source": self.source,
-                "sourcetype": "cronos:security",
+                "sourcetype": "qbitel:security",
                 "index": self.index,
                 "event": asdict(event),
             }
@@ -1101,7 +1101,7 @@ class ElasticClient:
         api_key: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        index_prefix: str = "cronos-security"
+        index_prefix: str = "qbitel-security"
     ):
         self.es_url = es_url.rstrip('/')
         self.api_key = api_key
@@ -1164,12 +1164,12 @@ class SyslogClient:
         ).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
         hostname = socket.gethostname()
-        app_name = "cronos-ai"
+        app_name = "qbitel"
         proc_id = "-"
         msg_id = event.event_type
 
         # Structured data
-        sd = f'[cronos@12345 eventId="{event.event_id}" action="{event.action or "-"}"]'
+        sd = f'[qbitel@12345 eventId="{event.event_id}" action="{event.action or "-"}"]'
 
         # Message
         msg = event.to_cef()
@@ -1350,10 +1350,10 @@ git checkout HEAD~1 -- requirements.txt ai_engine/requirements.txt
 pip install -r requirements.txt
 
 # Restart services
-systemctl restart cronos-ai
+systemctl restart qbitel
 
 # Monitor for issues
-tail -f /var/log/cronos-ai/error.log
+tail -f /var/log/qbitel/error.log
 ```
 
 ---

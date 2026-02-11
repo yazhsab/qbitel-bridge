@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Statistical Analyzer for Protocol Discovery
+QBITEL Engine - Statistical Analyzer for Protocol Discovery
 
 This module implements enterprise-grade statistical analysis for protocol discovery,
 including frequency analysis, entropy calculation, pattern detection, and field boundary identification.

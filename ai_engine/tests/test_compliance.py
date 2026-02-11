@@ -1,5 +1,5 @@
 """
-CRONOS AI - Compliance Module Tests
+QBITEL - Compliance Module Tests
 
 Comprehensive test suite for compliance reporting functionality
 including unit tests, integration tests, and end-to-end validation.
@@ -52,7 +52,7 @@ from ..compliance.data_integrations import (
     RedisComplianceCache,
 )
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 
 
 class TestRegulatoryKnowledgeBase:

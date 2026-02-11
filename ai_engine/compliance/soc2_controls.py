@@ -1,5 +1,5 @@
 """
-CRONOS AI - SOC2 Controls Implementation
+QBITEL - SOC2 Controls Implementation
 Production-ready SOC2 Type II compliance controls.
 """
 
@@ -11,13 +11,13 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from .audit_trail import AuditTrailManager, EventType, EventSeverity
 
 logger = logging.getLogger(__name__)
 
 
-class SOC2Exception(CronosAIException):
+class SOC2Exception(QbitelAIException):
     """SOC2 compliance exception."""
 
     pass

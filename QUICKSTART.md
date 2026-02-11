@@ -1,6 +1,6 @@
-# CRONOS AI - Quick Start Guide
+# QBITEL Bridge - Quick Start Guide
 
-Get CRONOS AI up and running in **10 minutes**.
+Get QBITEL Bridge up and running in **10 minutes**.
 
 ## Prerequisites
 
@@ -14,28 +14,28 @@ Get CRONOS AI up and running in **10 minutes**.
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/qbitel/cronos-ai.git
-cd cronos-ai
+git clone https://github.com/yazhsab/qbitel-bridge.git
+cd qbitel-bridge
 ```
 
 ### Step 2: Deploy with Helm
 
 ```bash
 # Deploy to Kubernetes
-helm install cronos-ai ./helm/cronos-ai \
-  --namespace cronos-service-mesh \
+helm install qbitel ./helm/qbitel-bridge \
+  --namespace qbitel-service-mesh \
   --create-namespace \
   --wait
 
 # Check deployment status
-kubectl get pods -n cronos-service-mesh
+kubectl get pods -n qbitel-service-mesh
 ```
 
 ### Step 3: Access Services
 
 ```bash
 # Access AI Engine API
-kubectl port-forward -n cronos-service-mesh svc/cronos-ai-engine 8000:8000
+kubectl port-forward -n qbitel-service-mesh svc/qbitel-engine 8000:8000
 
 # Open in browser
 # http://localhost:8000/docs
@@ -45,7 +45,7 @@ kubectl port-forward -n cronos-service-mesh svc/cronos-ai-engine 8000:8000
 
 ```bash
 # Run validation tests
-kubectl exec -n cronos-service-mesh deployment/cronos-xds-server -- \
+kubectl exec -n qbitel-service-mesh deployment/qbitel-xds-server -- \
   python -c "from ai_engine.cloud_native.service_mesh.istio.qkd_certificate_manager import QuantumCertificateManager; \
   mgr = QuantumCertificateManager(); \
   print('✓ Quantum Crypto: VALIDATED')"
@@ -62,7 +62,7 @@ chmod +x scripts/deploy.sh
 # Deploy
 ./scripts/deploy.sh \
   --environment development \
-  --namespace cronos-service-mesh
+  --namespace qbitel-service-mesh
 ```
 
 ### Windows (PowerShell)
@@ -71,7 +71,7 @@ chmod +x scripts/deploy.sh
 # Run deployment script
 .\scripts\deploy.ps1 `
   -Environment development `
-  -Namespace cronos-service-mesh
+  -Namespace qbitel-service-mesh
 ```
 
 ## Option 3: Local Development (Python)
@@ -80,7 +80,7 @@ chmod +x scripts/deploy.sh
 
 ```bash
 # Create virtual environment
-python3.9 -m venv venv
+python3 -m venv venv  # Requires Python 3.10+
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
@@ -112,19 +112,19 @@ python -m ai_engine
 ### Check All Pods Running
 
 ```bash
-kubectl get pods -n cronos-service-mesh
+kubectl get pods -n qbitel-service-mesh
 
 # Expected output:
 # NAME                                    READY   STATUS    RESTARTS
-# cronos-xds-server-xxx                   1/1     Running   0
-# cronos-admission-webhook-xxx            1/1     Running   0
-# cronos-ai-engine-xxx                    1/1     Running   0
+# qbitel-xds-server-xxx                   1/1     Running   0
+# qbitel-admission-webhook-xxx            1/1     Running   0
+# qbitel-engine-xxx                    1/1     Running   0
 ```
 
 ### Test xDS Server Health
 
 ```bash
-kubectl exec -n cronos-service-mesh deployment/cronos-xds-server -- \
+kubectl exec -n qbitel-service-mesh deployment/qbitel-xds-server -- \
   curl -f http://localhost:8081/healthz
 
 # Expected: OK
@@ -133,17 +133,17 @@ kubectl exec -n cronos-service-mesh deployment/cronos-xds-server -- \
 ### Access Grafana Dashboards
 
 ```bash
-kubectl port-forward -n cronos-service-mesh svc/grafana 3000:3000
+kubectl port-forward -n qbitel-service-mesh svc/grafana 3000:3000
 
 # Open http://localhost:3000
-# Default credentials: admin / cronos-ai-admin
+# Default credentials: admin / qbitel-admin
 ```
 
 ## Enable Admission Webhook for Your Namespace
 
 ```bash
 # Label your namespace to enable admission control
-kubectl label namespace <your-namespace> cronos.ai/webhook=enabled
+kubectl label namespace <your-namespace> qbitel.ai/webhook=enabled
 
 # Now all pod deployments in this namespace will be validated
 ```
@@ -155,7 +155,7 @@ kubectl label namespace <your-namespace> cronos.ai/webhook=enabled
 kubectl run test-app --image=nginx -n <your-namespace>
 
 # Check if it was validated by admission webhook
-kubectl describe pod test-app -n <your-namespace> | grep -i cronos
+kubectl describe pod test-app -n <your-namespace> | grep -i qbitel
 ```
 
 ## Run Performance Benchmarks
@@ -175,8 +175,8 @@ pytest ai_engine/tests/performance/test_benchmarks.py -v --benchmark-only
 ### Development Environment
 
 ```bash
-helm install cronos-ai ./helm/cronos-ai \
-  --namespace cronos-dev \
+helm install qbitel ./helm/qbitel-bridge \
+  --namespace qbitel-dev \
   --create-namespace \
   --set xdsServer.replicaCount=1 \
   --set admissionWebhook.replicaCount=1 \
@@ -186,8 +186,8 @@ helm install cronos-ai ./helm/cronos-ai \
 ### Production Environment
 
 ```bash
-helm install cronos-ai ./helm/cronos-ai \
-  --namespace cronos-service-mesh \
+helm install qbitel ./helm/qbitel-bridge \
+  --namespace qbitel-service-mesh \
   --create-namespace \
   --set xdsServer.replicaCount=5 \
   --set admissionWebhook.replicaCount=5 \
@@ -218,8 +218,8 @@ monitoring:
 EOF
 
 # Deploy with custom values
-helm install cronos-ai ./helm/cronos-ai \
-  --namespace cronos-service-mesh \
+helm install qbitel ./helm/qbitel-bridge \
+  --namespace qbitel-service-mesh \
   --create-namespace \
   -f my-values.yaml
 ```
@@ -230,10 +230,10 @@ helm install cronos-ai ./helm/cronos-ai \
 
 ```bash
 # Check pod events
-kubectl describe pod <pod-name> -n cronos-service-mesh
+kubectl describe pod <pod-name> -n qbitel-service-mesh
 
 # Check logs
-kubectl logs <pod-name> -n cronos-service-mesh
+kubectl logs <pod-name> -n qbitel-service-mesh
 
 # Common issues:
 # - Insufficient resources: Increase node memory/CPU
@@ -244,7 +244,7 @@ kubectl logs <pod-name> -n cronos-service-mesh
 
 ```bash
 # Temporarily disable webhook
-kubectl delete validatingwebhookconfigurations cronos-validating-webhook
+kubectl delete validatingwebhookconfigurations qbitel-validating-webhook
 
 # Deploy your pod
 kubectl apply -f your-pod.yaml
@@ -257,7 +257,7 @@ kubectl apply -f kubernetes/container-security/admission-webhook-deployment.yaml
 
 ```bash
 # Verify Kyber-1024 keys
-kubectl exec -n cronos-service-mesh deployment/cronos-xds-server -- \
+kubectl exec -n qbitel-service-mesh deployment/qbitel-xds-server -- \
   python -c "
 from ai_engine.cloud_native.service_mesh.istio.qkd_certificate_manager import QuantumCertificateManager, CertificateAlgorithm
 mgr = QuantumCertificateManager()
@@ -272,10 +272,10 @@ print('✓ NIST Level 5 Quantum Crypto: VALIDATED')
 
 ```bash
 # Uninstall Helm release
-helm uninstall cronos-ai --namespace cronos-service-mesh
+helm uninstall qbitel --namespace qbitel-service-mesh
 
 # Delete namespace (optional)
-kubectl delete namespace cronos-service-mesh
+kubectl delete namespace qbitel-service-mesh
 ```
 
 ## Next Steps
@@ -288,7 +288,7 @@ kubectl delete namespace cronos-service-mesh
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/qbitel/cronos-ai/issues)
+- **Issues**: [GitHub Issues](https://github.com/yazhsab/qbitel-bridge/issues)
 - **Documentation**: See [README.md](README.md)
 - **Enterprise Support**: enterprise@qbitel.com
 
@@ -296,4 +296,4 @@ kubectl delete namespace cronos-service-mesh
 
 **You're now running NIST Level 5 Quantum-Safe Security!** 🔒
 
-For detailed configuration options, see [helm/cronos-ai/README.md](helm/cronos-ai/README.md).
+For detailed configuration options, see [helm/qbitel-bridge/](helm/qbitel-bridge/).

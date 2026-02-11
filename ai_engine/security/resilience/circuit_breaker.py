@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Circuit Breaker Implementation
+QBITEL Engine - Circuit Breaker Implementation
 
 Enterprise-grade circuit breaker pattern to prevent cascading failures
 and provide graceful degradation for the Zero-Touch Security Orchestrator.
@@ -71,7 +71,7 @@ class CircuitBreaker:
         self.name = name
         self.config = config or CircuitBreakerConfig()
         self.logger = get_security_logger(
-            f"cronos.security.resilience.circuit_breaker.{name}"
+            f"qbitel.security.resilience.circuit_breaker.{name}"
         )
 
         # State management
@@ -428,7 +428,7 @@ class CircuitBreakerManager:
     def __init__(self):
         self.circuit_breakers: Dict[str, CircuitBreaker] = {}
         self.logger = get_security_logger(
-            "cronos.security.resilience.circuit_breaker_manager"
+            "qbitel.security.resilience.circuit_breaker_manager"
         )
 
     def get_circuit_breaker(

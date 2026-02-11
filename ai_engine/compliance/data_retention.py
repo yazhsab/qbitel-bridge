@@ -1,5 +1,5 @@
 """
-CRONOS AI - Data Retention Policy Implementation
+QBITEL - Data Retention Policy Implementation
 Production-ready data retention and lifecycle management.
 """
 
@@ -11,13 +11,13 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from .audit_trail import AuditTrailManager, EventType, EventSeverity
 
 logger = logging.getLogger(__name__)
 
 
-class DataRetentionException(CronosAIException):
+class DataRetentionException(QbitelAIException):
     """Data retention exception."""
 
     pass

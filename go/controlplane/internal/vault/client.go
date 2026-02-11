@@ -265,7 +265,7 @@ func (vc *VaultClient) authenticateWithToken() error {
 // authenticateWithCert authenticates using client certificates
 func (vc *VaultClient) authenticateWithCert(ctx context.Context) error {
 	data := map[string]interface{}{
-		"name": "qslb-client",
+		"name": "qbitel-client",
 	}
 
 	secret, err := vc.client.Logical().WriteWithContext(ctx, "auth/cert/login", data)
@@ -295,7 +295,7 @@ func (vc *VaultClient) authenticateWithKubernetes(ctx context.Context) error {
 	}
 
 	data := map[string]interface{}{
-		"role": "qslb-service",
+		"role": "qbitel-service",
 		"jwt":  string(jwt),
 	}
 

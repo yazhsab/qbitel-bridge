@@ -1,4 +1,4 @@
-"""CRONOS AI Engine - Pattern Extractor (lightweight implementation).
+"""QBITEL Engine - Pattern Extractor (lightweight implementation).
 
 The extractor surfaces repeated byte patterns along with frequency and
 statistical metadata that can be consumed by downstream modules and the

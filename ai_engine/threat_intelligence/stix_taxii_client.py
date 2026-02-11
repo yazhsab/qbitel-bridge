@@ -1,5 +1,5 @@
 """
-CRONOS AI - STIX/TAXII Client
+QBITEL - STIX/TAXII Client
 
 Implements STIX 2.1 and TAXII 2.1 protocol support for threat intelligence
 feed ingestion and sharing.
@@ -20,33 +20,33 @@ import aiohttp
 from prometheus_client import Counter, Histogram, Gauge
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 
 
 # Prometheus metrics
 STIX_OBJECTS_INGESTED = Counter(
-    "cronos_stix_objects_ingested_total",
+    "qbitel_stix_objects_ingested_total",
     "Total STIX objects ingested",
     ["object_type", "source"],
     registry=None,
 )
 
 TAXII_REQUESTS = Counter(
-    "cronos_taxii_requests_total",
+    "qbitel_taxii_requests_total",
     "Total TAXII requests",
     ["server", "endpoint", "status"],
     registry=None,
 )
 
 IOC_FEED_UPDATES = Counter(
-    "cronos_ioc_feed_updates_total",
+    "qbitel_ioc_feed_updates_total",
     "IOC feed update events",
     ["feed_name", "status"],
     registry=None,
 )
 
 THREAT_INTEL_AGE = Gauge(
-    "cronos_threat_intel_age_hours",
+    "qbitel_threat_intel_age_hours",
     "Age of threat intelligence data in hours",
     ["source"],
     registry=None,
@@ -341,7 +341,7 @@ class STIXTAXIIClient:
             Number of indicators ingested
         """
         if feed_id not in self.ioc_feeds:
-            raise CronosAIException(f"Unknown feed: {feed_id}")
+            raise QbitelAIException(f"Unknown feed: {feed_id}")
 
         feed = self.ioc_feeds[feed_id]
 
@@ -358,7 +358,7 @@ class STIXTAXIIClient:
             elif feed.feed_type == "json":
                 indicators = await self._fetch_json_feed(feed)
             else:
-                raise CronosAIException(f"Unsupported feed type: {feed.feed_type}")
+                raise QbitelAIException(f"Unsupported feed type: {feed.feed_type}")
 
             # Store indicators
             count = await self._store_indicators(indicators, feed.source)
@@ -381,7 +381,7 @@ class STIXTAXIIClient:
         except Exception as e:
             IOC_FEED_UPDATES.labels(feed_name=feed.name, status="error").inc()
             self.logger.error(f"Failed to update feed {feed.name}: {e}")
-            raise CronosAIException(f"Feed update failed: {e}")
+            raise QbitelAIException(f"Feed update failed: {e}")
 
     async def _fetch_stix_feed(self, feed: IOCFeed) -> List[STIXIndicator]:
         """Fetch STIX feed."""
@@ -392,7 +392,7 @@ class STIXTAXIIClient:
 
         async with self.session.get(feed.url, headers=headers) as response:
             if response.status != 200:
-                raise CronosAIException(
+                raise QbitelAIException(
                     f"Failed to fetch STIX feed: HTTP {response.status}"
                 )
 
@@ -414,7 +414,7 @@ class STIXTAXIIClient:
         # Get TAXII server for this feed
         server_name = feed.credentials.get("server") if feed.credentials else None
         if not server_name or server_name not in self.taxii_servers:
-            raise CronosAIException(f"TAXII server not configured for feed {feed.name}")
+            raise QbitelAIException(f"TAXII server not configured for feed {feed.name}")
 
         server = self.taxii_servers[server_name]
 
@@ -442,7 +442,7 @@ class STIXTAXIIClient:
             ).inc()
 
             if response.status != 200:
-                raise CronosAIException(f"TAXII request failed: HTTP {response.status}")
+                raise QbitelAIException(f"TAXII request failed: HTTP {response.status}")
 
             data = await response.json()
 
@@ -461,7 +461,7 @@ class STIXTAXIIClient:
         """Fetch CSV-based IOC feed."""
         async with self.session.get(feed.url) as response:
             if response.status != 200:
-                raise CronosAIException(
+                raise QbitelAIException(
                     f"Failed to fetch CSV feed: HTTP {response.status}"
                 )
 
@@ -516,7 +516,7 @@ class STIXTAXIIClient:
         """Fetch JSON-based IOC feed."""
         async with self.session.get(feed.url) as response:
             if response.status != 200:
-                raise CronosAIException(
+                raise QbitelAIException(
                     f"Failed to fetch JSON feed: HTTP {response.status}"
                 )
 

@@ -1,4 +1,4 @@
-# Production Dockerfile for Cronos xDS Server
+# Production Dockerfile for QBITEL Bridge xDS Server
 # Multi-stage build for minimal attack surface and optimized image size
 
 # Stage 1: Build environment
@@ -27,10 +27,10 @@ RUN pip install --no-cache-dir --user --upgrade pip && \
 FROM python:3.11-slim
 
 # Add labels
-LABEL maintainer="Cronos AI <security@cronos.ai>"
+LABEL maintainer="QBITEL Team <enterprise@qbitel.com>"
 LABEL description="Envoy xDS Server with Quantum-Safe Encryption"
 LABEL version="1.0.0"
-LABEL cronos.ai/quantum-safe="true"
+LABEL qbitel.com/quantum-safe="true"
 
 # Install runtime dependencies only
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -39,10 +39,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean
 
 # Create non-root user
-RUN groupadd -r cronos && useradd -r -g cronos -u 1000 cronos
+RUN groupadd -r qbitel && useradd -r -g qbitel -u 1000 qbitel
 
 # Copy Python packages from builder
-COPY --from=builder /root/.local /home/cronos/.local
+COPY --from=builder /root/.local /home/qbitel/.local
 
 # Set working directory
 WORKDIR /app
@@ -56,14 +56,14 @@ COPY docker/xds-server/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Create directories for certs and config
-RUN mkdir -p /etc/cronos/xds /etc/cronos/certs /tmp && \
-    chown -R cronos:cronos /app /etc/cronos /tmp
+RUN mkdir -p /etc/qbitel/xds /etc/qbitel/certs /tmp && \
+    chown -R qbitel:qbitel /app /etc/qbitel /tmp
 
 # Switch to non-root user
-USER cronos
+USER qbitel
 
 # Add Python packages to PATH
-ENV PATH=/home/cronos/.local/bin:$PATH
+ENV PATH=/home/qbitel/.local/bin:$PATH
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 

@@ -1,5 +1,5 @@
 """
-CRONOS AI - Agent Collaboration Framework
+QBITEL - Agent Collaboration Framework
 
 Provides multi-agent collaboration capabilities:
 - Consensus protocols for decision making
@@ -26,17 +26,17 @@ if TYPE_CHECKING:
 
 # Prometheus metrics
 COLLABORATION_SESSIONS = Counter(
-    "cronos_collaboration_sessions_total",
+    "qbitel_collaboration_sessions_total",
     "Total collaboration sessions",
     ["session_type", "status"],
 )
 CONSENSUS_ROUNDS = Counter(
-    "cronos_consensus_rounds_total",
+    "qbitel_consensus_rounds_total",
     "Total consensus rounds",
     ["protocol", "outcome"],
 )
 COLLABORATION_DURATION = Histogram(
-    "cronos_collaboration_duration_seconds",
+    "qbitel_collaboration_duration_seconds",
     "Collaboration session duration",
     ["session_type"],
 )

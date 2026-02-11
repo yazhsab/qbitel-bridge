@@ -24,7 +24,7 @@ class TestPersistentErrorStorage:
 
         assert storage.redis_url == "redis://localhost:6379/0"
         assert (
-            storage.postgres_url == "postgresql+asyncpg://user:pass@localhost/cronos_ai"
+            storage.postgres_url == "postgresql+asyncpg://user:pass@localhost/qbitel"
         )
         assert storage.redis_ttl == 86400
         assert storage.postgres_retention_days == 90

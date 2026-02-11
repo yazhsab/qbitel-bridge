@@ -1,0 +1,204 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="PQC Algorithms | QBITEL Bridge Docs" description="Post-quantum cryptography algorithms in QBITEL Bridge: ML-KEM (Kyber), ML-DSA (Dilithium), Falcon, and SLH-DSA (SPHINCS+).">
+  <h1 class="text-3xl font-bold text-white mb-2">Post-Quantum Cryptography Algorithms</h1>
+  <p class="text-gray-400 mb-8">QBITEL Bridge implements NIST-standardized post-quantum cryptographic algorithms to protect data against both classical and quantum computing threats.</p>
+
+  <h2 id="why-pqc" class="text-2xl font-bold text-white mt-12 mb-4">Why Post-Quantum Cryptography?</h2>
+  <p class="text-gray-300 mb-4">Current public-key cryptography (RSA, ECC) will be broken by sufficiently powerful quantum computers running Shor's algorithm. QBITEL Bridge uses NIST-standardized PQC algorithms to provide quantum-safe security today, protecting against "harvest now, decrypt later" attacks.</p>
+
+  <h2 id="algorithms" class="text-2xl font-bold text-white mt-12 mb-4">Supported Algorithms</h2>
+
+  <h3 id="ml-kem" class="text-xl font-semibold text-white mt-8 mb-3">ML-KEM (Kyber) -- Key Encapsulation</h3>
+  <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50 mb-6">
+    <table class="w-full">
+      <tbody class="divide-y divide-surface-600">
+        <tr>
+          <td class="text-gray-400 py-2 pr-4 w-40">Standard</td>
+          <td class="text-gray-300 py-2">FIPS 203</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Type</td>
+          <td class="text-gray-300 py-2">Key Encapsulation Mechanism (KEM)</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Security Level</td>
+          <td class="text-gray-300 py-2">ML-KEM-768 (Level 3), ML-KEM-1024 (Level 5)</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Use Case</td>
+          <td class="text-gray-300 py-2">TLS key exchange, session key establishment</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Public Key Size</td>
+          <td class="text-gray-300 py-2">1,568 bytes (ML-KEM-1024)</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Ciphertext Size</td>
+          <td class="text-gray-300 py-2">1,568 bytes (ML-KEM-1024)</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Basis</td>
+          <td class="text-gray-300 py-2">Module Learning With Errors (MLWE) lattice problem</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="ml-dsa" class="text-xl font-semibold text-white mt-8 mb-3">ML-DSA (Dilithium) -- Digital Signatures</h3>
+  <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50 mb-6">
+    <table class="w-full">
+      <tbody class="divide-y divide-surface-600">
+        <tr>
+          <td class="text-gray-400 py-2 pr-4 w-40">Standard</td>
+          <td class="text-gray-300 py-2">FIPS 204</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Type</td>
+          <td class="text-gray-300 py-2">Digital Signature Algorithm (DSA)</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Security Level</td>
+          <td class="text-gray-300 py-2">ML-DSA-65 (Level 3), ML-DSA-87 (Level 5)</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Use Case</td>
+          <td class="text-gray-300 py-2">Certificate signing, code signing, audit logs</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Public Key Size</td>
+          <td class="text-gray-300 py-2">2,592 bytes (ML-DSA-87)</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Signature Size</td>
+          <td class="text-gray-300 py-2">4,627 bytes (ML-DSA-87)</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Basis</td>
+          <td class="text-gray-300 py-2">Module Learning With Errors (MLWE) lattice problem</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="falcon" class="text-xl font-semibold text-white mt-8 mb-3">Falcon -- Compact Signatures</h3>
+  <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50 mb-6">
+    <table class="w-full">
+      <tbody class="divide-y divide-surface-600">
+        <tr>
+          <td class="text-gray-400 py-2 pr-4 w-40">Type</td>
+          <td class="text-gray-300 py-2">Digital Signature Algorithm</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Security Level</td>
+          <td class="text-gray-300 py-2">Falcon-512 (Level 1), Falcon-1024 (Level 5)</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Use Case</td>
+          <td class="text-gray-300 py-2">Bandwidth-constrained environments, IoT certificates</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Signature Size</td>
+          <td class="text-gray-300 py-2">1,280 bytes (Falcon-1024) -- smallest PQC signature</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Basis</td>
+          <td class="text-gray-300 py-2">NTRU lattice problem with fast Fourier sampling</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="slh-dsa" class="text-xl font-semibold text-white mt-8 mb-3">SLH-DSA (SPHINCS+) -- Hash-Based Signatures</h3>
+  <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50 mb-6">
+    <table class="w-full">
+      <tbody class="divide-y divide-surface-600">
+        <tr>
+          <td class="text-gray-400 py-2 pr-4 w-40">Standard</td>
+          <td class="text-gray-300 py-2">FIPS 205</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Type</td>
+          <td class="text-gray-300 py-2">Hash-based Stateless Signature</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Security Level</td>
+          <td class="text-gray-300 py-2">SLH-DSA-SHA2-256f (Level 5)</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Use Case</td>
+          <td class="text-gray-300 py-2">Long-term archival signatures, high-assurance signing</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Advantage</td>
+          <td class="text-gray-300 py-2">Security relies only on hash function properties -- most conservative assumption</td>
+        </tr>
+        <tr>
+          <td class="text-gray-400 py-2 pr-4">Basis</td>
+          <td class="text-gray-300 py-2">Hash function security (SHA-256, SHAKE-256)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="implementation" class="text-2xl font-bold text-white mt-12 mb-4">Implementation Details</h2>
+  <p class="text-gray-300 mb-4">QBITEL Bridge implements PQC at two layers:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Rust Data Plane</strong> (<code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">crates/pqc_tls/</code>) -- PQC-TLS termination using liboqs FFI bindings</li>
+    <li><strong class="text-white">Python AI Engine</strong> (<code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ai_engine/crypto/pqc_unified.py</code>) -- application-layer PQC for data encryption and signing</li>
+  </ul>
+
+  <h2 id="symmetric-encryption" class="text-2xl font-bold text-white mt-12 mb-4">Symmetric Encryption</h2>
+  <p class="text-gray-300 mb-4">PQC key exchange establishes symmetric keys for data encryption using:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">AES-256-GCM</strong> -- authenticated encryption for data at rest and in transit</li>
+    <li><strong class="text-white">ChaCha20-Poly1305</strong> -- alternative authenticated cipher for resource-constrained devices</li>
+  </ul>
+
+  <h2 id="performance" class="text-2xl font-bold text-white mt-12 mb-4">Performance Benchmarks</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Operation</th>
+        <th class="text-left text-white py-2 pr-4">Algorithm</th>
+        <th class="text-left text-white py-2">Latency</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Key generation</td>
+        <td class="text-gray-300 py-2 pr-4">ML-KEM-1024</td>
+        <td class="text-gray-300 py-2">&lt; 0.1 ms</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Encapsulation</td>
+        <td class="text-gray-300 py-2 pr-4">ML-KEM-1024</td>
+        <td class="text-gray-300 py-2">&lt; 0.2 ms</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Signing</td>
+        <td class="text-gray-300 py-2 pr-4">ML-DSA-87</td>
+        <td class="text-gray-300 py-2">&lt; 0.5 ms</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Verification</td>
+        <td class="text-gray-300 py-2 pr-4">ML-DSA-87</td>
+        <td class="text-gray-300 py-2">&lt; 0.3 ms</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Full TLS handshake</td>
+        <td class="text-gray-300 py-2 pr-4">ML-KEM + ML-DSA</td>
+        <td class="text-gray-300 py-2">&lt; 1 ms</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/architecture/data-plane" class="text-quantum-400 hover:underline">Rust Data Plane</a> -- PQC-TLS implementation details</li>
+    <li><a href="/docs/security/zero-trust" class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- PQC in the trust model</li>
+    <li><a href="/docs/security/compliance-frameworks" class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- PQC regulatory requirements</li>
+  </ul>
+</DocsLayout>

@@ -785,7 +785,7 @@
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["cronos-ai", "protocol"],
+  "tags": ["qbitel", "protocol"],
   "templating": {
     "list": []
   },
@@ -795,8 +795,8 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "CRONOS AI - Protocol Analysis",
-  "uid": "cronos-ai-protocol",
+  "title": "QBITEL - Protocol Analysis",
+  "uid": "qbitel-protocol",
   "version": 1,
   "weekStart": ""
 }

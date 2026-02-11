@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Sentry Integration
+QBITEL Engine - Sentry Integration
 Enterprise error tracking and monitoring with Sentry.
 """
 
@@ -14,7 +14,7 @@ from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from .error_handling import ErrorRecord, ErrorSeverity
-from .exceptions import CronosAIException
+from .exceptions import QbitelAIException
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class SentryErrorTracker:
         """
         self.dsn = dsn or os.getenv("SENTRY_DSN")
         self.environment = environment
-        self.release = release or os.getenv("CRONOS_AI_VERSION", "1.0.0")
+        self.release = release or os.getenv("QBITEL_AI_VERSION", "1.0.0")
         self.traces_sample_rate = traces_sample_rate
         self.profiles_sample_rate = profiles_sample_rate
         self.enable_tracing = enable_tracing
@@ -100,7 +100,7 @@ class SentryErrorTracker:
             )
 
             # Set global tags
-            sentry_sdk.set_tag("service", "cronos-ai-engine")
+            sentry_sdk.set_tag("service", "qbitel-engine")
             sentry_sdk.set_tag("component", "ai-engine")
 
             self.initialized = True
@@ -132,9 +132,9 @@ class SentryErrorTracker:
         # Add custom context
         if "exception" in hint:
             exc = hint["exception"]
-            if isinstance(exc, CronosAIException):
+            if isinstance(exc, QbitelAIException):
                 event["tags"] = event.get("tags", {})
-                event["tags"]["cronos_exception"] = True
+                event["tags"]["qbitel_exception"] = True
 
         return event
 
@@ -399,7 +399,7 @@ def get_sentry_tracker(
     if _sentry_tracker is None:
         _sentry_tracker = SentryErrorTracker(
             dsn=dsn,
-            environment=environment or os.getenv("CRONOS_ENVIRONMENT", "production"),
+            environment=environment or os.getenv("QBITEL_ENVIRONMENT", "production"),
             release=release,
         )
         _sentry_tracker.initialize()

@@ -1,4 +1,4 @@
-# CRONOS AI - Production Environment Configuration
+# QBITEL - Production Environment Configuration
 # This file contains production-specific overrides
 
 environment: production
@@ -11,10 +11,10 @@ worker_processes: 8  # Adjust based on CPU cores
 
 # Database - Production Settings
 database:
-  host: "${DB_HOST:-db.cronos-ai.internal}"
+  host: "${DB_HOST:-db.qbitel.internal}"
   port: 5432
-  database: "${DB_NAME:-cronos_ai_prod}"
-  username: "${DB_USER:-cronos_prod}"
+  database: "${DB_NAME:-qbitel_prod}"
+  username: "${DB_USER:-qbitel_prod}"
   password: ""  # MUST be set via DATABASE_PASSWORD env var
   ssl_mode: "verify-full"  # Strictest SSL mode
   connection_pool_size: 50
@@ -25,7 +25,7 @@ database:
 
 # Redis - Production Settings
 redis:
-  host: "${REDIS_HOST:-redis.cronos-ai.internal}"
+  host: "${REDIS_HOST:-redis.qbitel.internal}"
   port: 6379
   database: 0
   password: ""  # MUST be set via REDIS_PASSWORD env var
@@ -48,9 +48,9 @@ security:
   
   # TLS/SSL
   tls_enabled: true
-  tls_cert_file: "/etc/cronos-ai/certs/server.crt"
-  tls_key_file: "/etc/cronos-ai/certs/server.key"
-  tls_ca_file: "/etc/cronos-ai/certs/ca.crt"
+  tls_cert_file: "/etc/qbitel/certs/server.crt"
+  tls_key_file: "/etc/qbitel/certs/server.key"
+  tls_ca_file: "/etc/qbitel/certs/ca.crt"
   tls_verify_client: true
   tls_min_version: "TLSv1.3"
   tls_ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"
@@ -66,8 +66,8 @@ security:
   
   # Trusted hosts
   trusted_hosts:
-    - "api.cronos-ai.example.com"
-    - "*.cronos-ai.example.com"
+    - "api.qbitel.example.com"
+    - "*.qbitel.example.com"
 
 # Rate Limiting - Production Settings
 rate_limiting:
@@ -83,8 +83,8 @@ rate_limiting:
 cors:
   enabled: true
   allowed_origins:
-    - "https://cronos-ai.example.com"
-    - "https://dashboard.cronos-ai.example.com"
+    - "https://qbitel.example.com"
+    - "https://dashboard.qbitel.example.com"
   allowed_methods:
     - "GET"
     - "POST"
@@ -121,7 +121,7 @@ logging:
   level: "INFO"
   format: "json"
   output: "file"
-  file_path: "/var/log/cronos-ai/app.log"
+  file_path: "/var/log/qbitel/app.log"
   max_file_size_mb: 500
   backup_count: 10
   structured_logging: true
@@ -146,7 +146,7 @@ secrets_manager:
   vault_addr: "${VAULT_ADDR}"
   vault_token: "${VAULT_TOKEN}"
   vault_mount_point: "secret"
-  vault_path: "cronos-ai/production"
+  vault_path: "qbitel/production"
 
 # Error Tracking - Production Settings
 error_tracking:

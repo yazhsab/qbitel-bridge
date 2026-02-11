@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Security Orchestrator Monitoring
+QBITEL Engine - Security Orchestrator Monitoring
 
 Enterprise-grade monitoring with Prometheus metrics, health checks,
 and performance tracking for the Zero-Touch Security Orchestrator.
@@ -105,21 +105,21 @@ class PrometheusMetrics:
 
         # Service metrics
         self.service_info = Info(
-            "cronos_security_service_info",
+            "qbitel_security_service_info",
             "Security orchestrator service information",
             registry=self.registry,
         )
 
         # Health metrics
         self.component_health = Gauge(
-            "cronos_security_component_health",
+            "qbitel_security_component_health",
             "Component health status (1=healthy, 0=unhealthy)",
             ["component"],
             registry=self.registry,
         )
 
         self.health_check_duration = Histogram(
-            "cronos_security_health_check_duration_seconds",
+            "qbitel_security_health_check_duration_seconds",
             "Health check duration",
             ["component"],
             registry=self.registry,
@@ -127,71 +127,71 @@ class PrometheusMetrics:
 
         # Performance metrics
         self.cpu_usage = Gauge(
-            "cronos_security_cpu_usage_percent",
+            "qbitel_security_cpu_usage_percent",
             "CPU usage percentage",
             registry=self.registry,
         )
 
         self.memory_usage = Gauge(
-            "cronos_security_memory_usage_percent",
+            "qbitel_security_memory_usage_percent",
             "Memory usage percentage",
             registry=self.registry,
         )
 
         self.memory_used = Gauge(
-            "cronos_security_memory_used_bytes",
+            "qbitel_security_memory_used_bytes",
             "Memory used in bytes",
             registry=self.registry,
         )
 
         self.active_threads = Gauge(
-            "cronos_security_active_threads",
+            "qbitel_security_active_threads",
             "Number of active threads",
             registry=self.registry,
         )
 
         # Business metrics
         self.security_events_rate = Gauge(
-            "cronos_security_events_per_second",
+            "qbitel_security_events_per_second",
             "Security events processed per second",
             registry=self.registry,
         )
 
         self.decision_rate = Gauge(
-            "cronos_security_decisions_per_minute",
+            "qbitel_security_decisions_per_minute",
             "Security decisions made per minute",
             registry=self.registry,
         )
 
         self.response_time = Summary(
-            "cronos_security_response_time_seconds",
+            "qbitel_security_response_time_seconds",
             "Security response time",
             registry=self.registry,
         )
 
         self.error_rate = Gauge(
-            "cronos_security_error_rate",
+            "qbitel_security_error_rate",
             "Error rate (errors per total operations)",
             registry=self.registry,
         )
 
         # Component-specific metrics
         self.llm_requests_total = Counter(
-            "cronos_security_llm_requests_total",
+            "qbitel_security_llm_requests_total",
             "Total LLM requests made",
             ["provider", "status"],
             registry=self.registry,
         )
 
         self.quarantine_operations = Counter(
-            "cronos_security_quarantine_operations_total",
+            "qbitel_security_quarantine_operations_total",
             "Total quarantine operations",
             ["operation", "status"],
             registry=self.registry,
         )
 
         self.threat_analysis_duration = Histogram(
-            "cronos_security_threat_analysis_duration_seconds",
+            "qbitel_security_threat_analysis_duration_seconds",
             "Threat analysis duration",
             ["analysis_type"],
             registry=self.registry,
@@ -199,14 +199,14 @@ class PrometheusMetrics:
 
         # Alerting metrics
         self.critical_alerts = Counter(
-            "cronos_security_critical_alerts_total",
+            "qbitel_security_critical_alerts_total",
             "Total critical security alerts",
             ["alert_type"],
             registry=self.registry,
         )
 
         self.sla_violations = Counter(
-            "cronos_security_sla_violations_total",
+            "qbitel_security_sla_violations_total",
             "Total SLA violations",
             ["sla_type"],
             registry=self.registry,
@@ -220,7 +220,7 @@ class HealthCheckManager:
         self.health_checks: Dict[str, Callable] = {}
         self.health_results: Dict[str, HealthCheckResult] = {}
         self.config = get_security_config()
-        self.logger = get_security_logger("cronos.security.monitoring")
+        self.logger = get_security_logger("qbitel.security.monitoring")
 
         # Health check configuration
         self.check_interval = self.config.monitoring.health_checks.get(
@@ -434,7 +434,7 @@ class PerformanceMonitor:
     def __init__(self, prometheus_metrics: PrometheusMetrics):
         self.metrics = prometheus_metrics
         self.config = get_security_config()
-        self.logger = get_security_logger("cronos.security.monitoring")
+        self.logger = get_security_logger("qbitel.security.monitoring")
 
         # Performance tracking
         self.start_time = time.time()
@@ -600,7 +600,7 @@ class SecurityOrchestrationMonitor:
 
     def __init__(self):
         self.config = get_security_config()
-        self.logger = get_security_logger("cronos.security.monitoring")
+        self.logger = get_security_logger("qbitel.security.monitoring")
 
         # Core monitoring components
         self.prometheus_registry = CollectorRegistry()

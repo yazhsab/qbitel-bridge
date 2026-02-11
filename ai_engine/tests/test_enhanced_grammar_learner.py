@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Enhanced Grammar Learner Tests
+QBITEL Engine - Enhanced Grammar Learner Tests
 
 Comprehensive test suite for advanced grammar learning with:
 - Transformer-based learning

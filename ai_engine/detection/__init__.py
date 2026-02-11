@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Field Detection Module
+QBITEL Engine - Field Detection Module
 
 This module provides AI-powered field detection capabilities using BiLSTM-CRF
 models for sequence labeling and boundary detection in protocol messages.

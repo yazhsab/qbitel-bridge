@@ -1,0 +1,140 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Quick Start | QBITEL Bridge Docs" description="Get QBITEL Bridge up and running in 10 minutes with Helm or Docker Compose.">
+  <h1 class="text-3xl font-bold text-white mb-2">Quick Start</h1>
+  <p class="text-gray-400 mb-8">Get QBITEL Bridge deployed and running in under 10 minutes.</p>
+
+  <h2 id="prerequisites" class="text-2xl font-bold text-white mt-12 mb-4">Prerequisites</h2>
+  <p class="text-gray-300 mb-4">Before you begin, ensure you have the following installed:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Kubernetes cluster</strong> (1.24+) or Docker Desktop with Kubernetes enabled</li>
+    <li><strong class="text-white">Helm 3.8+</strong> installed</li>
+    <li><strong class="text-white">kubectl</strong> configured and connected to your cluster</li>
+    <li><strong class="text-white">4 GB RAM</strong> minimum (8 GB+ recommended)</li>
+  </ul>
+
+  <h2 id="option-1-helm" class="text-2xl font-bold text-white mt-12 mb-4">Option 1: Helm Deployment (Recommended)</h2>
+  <p class="text-gray-300 mb-4">The fastest way to deploy QBITEL Bridge to a Kubernetes cluster.</p>
+
+  <h3 id="step-1-clone" class="text-xl font-semibold text-white mt-8 mb-3">Step 1: Clone the Repository</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">git clone https://github.com/yazhsab/qbitel-bridge.git
+cd qbitel-bridge</code></pre>
+
+  <h3 id="step-2-deploy" class="text-xl font-semibold text-white mt-8 mb-3">Step 2: Deploy with Helm</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Deploy to Kubernetes</span>
+helm install qbitel ./helm/qbitel-bridge \
+  --namespace qbitel-service-mesh \
+  --create-namespace \
+  --wait
+
+<span class="text-gray-500"># Check deployment status</span>
+kubectl get pods -n qbitel-service-mesh</code></pre>
+
+  <h3 id="step-3-access" class="text-xl font-semibold text-white mt-8 mb-3">Step 3: Access Services</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Port-forward the AI Engine API</span>
+kubectl port-forward -n qbitel-service-mesh svc/qbitel-engine 8000:8000
+
+<span class="text-gray-500"># Open the API docs in your browser</span>
+open http://localhost:8000/docs</code></pre>
+
+  <h3 id="step-4-verify" class="text-xl font-semibold text-white mt-8 mb-3">Step 4: Verify the Installation</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Health check</span>
+curl http://localhost:8000/health
+
+<span class="text-gray-500"># Expected response:</span>
+<span class="text-gray-500"># {'{'}"status": "healthy", "version": "1.0.0"{'}'}</span></code></pre>
+
+  <h2 id="option-2-docker-compose" class="text-2xl font-bold text-white mt-12 mb-4">Option 2: Docker Compose</h2>
+  <p class="text-gray-300 mb-4">For local development and quick evaluation without Kubernetes.</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Start all services</span>
+cd ai_engine/deployment/docker
+docker-compose up -d
+
+<span class="text-gray-500"># View logs</span>
+docker-compose logs -f qbitel-engine
+
+<span class="text-gray-500"># Check service status</span>
+docker-compose ps</code></pre>
+
+  <p class="text-gray-300 mb-4">Docker Compose starts the following services:</p>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Service</th>
+        <th class="text-left text-white py-2 pr-4">Port</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">qbitel-engine</code></td>
+        <td class="text-gray-300 py-2 pr-4">8000</td>
+        <td class="text-gray-300 py-2">AI Engine REST + gRPC API</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">prometheus</code></td>
+        <td class="text-gray-300 py-2 pr-4">9091</td>
+        <td class="text-gray-300 py-2">Metrics collection</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">grafana</code></td>
+        <td class="text-gray-300 py-2 pr-4">3000</td>
+        <td class="text-gray-300 py-2">Dashboards and visualization</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">postgres</code></td>
+        <td class="text-gray-300 py-2 pr-4">5432</td>
+        <td class="text-gray-300 py-2">PostgreSQL database</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">redis</code></td>
+        <td class="text-gray-300 py-2 pr-4">6379</td>
+        <td class="text-gray-300 py-2">Caching and rate limiting</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">nginx</code></td>
+        <td class="text-gray-300 py-2 pr-4">80, 443</td>
+        <td class="text-gray-300 py-2">Reverse proxy and TLS termination</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="option-3-local-python" class="text-2xl font-bold text-white mt-12 mb-4">Option 3: Local Development (Python)</h2>
+  <p class="text-gray-300 mb-4">Run just the AI Engine locally for development.</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Create virtual environment</span>
+python3 -m venv venv
+source venv/bin/activate
+
+<span class="text-gray-500"># Install dependencies</span>
+pip install -r requirements.txt
+
+<span class="text-gray-500"># Start the AI Engine</span>
+python -m ai_engine
+
+<span class="text-gray-500"># Verify the API is running</span>
+curl http://localhost:8000/health</code></pre>
+
+  <h2 id="make-first-request" class="text-2xl font-bold text-white mt-12 mb-4">Make Your First Request</h2>
+  <p class="text-gray-300 mb-4">Once the API is running, submit a protocol discovery request:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">curl -X POST http://localhost:8000/api/v1/discover \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your_api_key" \
+  -d '{'{'}
+    "packet_data": [
+      "R0VUIC9hcGkvdXNlcnMgSFRUUC8xLjE="
+    ],
+    "metadata": {'{'}
+      "source": "manual_capture"
+    {'}'}
+  {'}'}'</code></pre>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/getting-started/installation" class="text-quantum-400 hover:underline">Full Installation Guide</a> -- install all components from source</li>
+    <li><a href="/docs/getting-started/configuration" class="text-quantum-400 hover:underline">Configuration Reference</a> -- customize environment variables and settings</li>
+    <li><a href="/docs/getting-started/first-discovery" class="text-quantum-400 hover:underline">First Discovery Tutorial</a> -- walk through a complete protocol discovery</li>
+    <li><a href="/docs/architecture/overview" class="text-quantum-400 hover:underline">Architecture Overview</a> -- understand how QBITEL Bridge works</li>
+  </ul>
+</DocsLayout>

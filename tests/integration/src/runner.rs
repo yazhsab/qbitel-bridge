@@ -1,9 +1,9 @@
-//! Integration test runner for CRONOS AI
+//! Integration test runner for QBITEL Bridge
 //! 
 //! Orchestrates and runs all integration test suites with proper setup,
 //! execution, and teardown procedures.
 
-use cronos_ai_integration_tests::{
+use qbitel_bridge_integration_tests::{
     init_test_logging, TestConfig, TestResults, IntegrationTest,
     e2e::E2ETestSuite,
     performance::PerformanceTestSuite,
@@ -17,7 +17,7 @@ use serde_json;
 
 #[derive(Parser)]
 #[command(name = "integration-test-runner")]
-#[command(about = "CRONOS AI Integration Test Runner")]
+#[command(about = "QBITEL Bridge Integration Test Runner")]
 #[command(version)]
 struct Cli {
     #[command(subcommand)]
@@ -28,7 +28,7 @@ struct Cli {
     config: String,
     
     /// Test environment namespace
-    #[arg(short, long, default_value = "cronos-ai-test")]
+    #[arg(short, long, default_value = "qbitel-bridge-test")]
     namespace: String,
     
     /// Enable verbose output
@@ -82,7 +82,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::env::set_var("RUST_LOG", "debug");
     }
     
-    info!("CRONOS AI Integration Test Runner starting");
+    info!("QBITEL Bridge Integration Test Runner starting");
     
     // Load test configuration
     let mut config = if std::path::Path::new(&cli.config).exists() {

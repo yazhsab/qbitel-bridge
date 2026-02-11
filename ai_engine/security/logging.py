@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Security Orchestrator Enterprise Logging
+QBITEL Engine - Security Orchestrator Enterprise Logging
 
 Enterprise-grade structured logging with security event tracking, audit trails,
 and compliance features.
@@ -185,7 +185,7 @@ class SecurityLogger:
     Enterprise security logger with structured logging, audit trails, and compliance features.
     """
 
-    def __init__(self, name: str = "cronos.security"):
+    def __init__(self, name: str = "qbitel.security"):
         self.logger_name = name
         self.logger = logging.getLogger(name)
         self.config = get_security_config()
@@ -655,7 +655,7 @@ class StructuredSecurityFormatter(logging.Formatter):
 _security_logger: Optional[SecurityLogger] = None
 
 
-def get_security_logger(name: str = "cronos.security") -> SecurityLogger:
+def get_security_logger(name: str = "qbitel.security") -> SecurityLogger:
     """Get global security logger instance."""
     global _security_logger
     if _security_logger is None:

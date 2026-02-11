@@ -1,5 +1,5 @@
 """
-CRONOS AI - Automated Incident Playbook Generator
+QBITEL - Automated Incident Playbook Generator
 
 Generates actionable incident response playbooks using LLM analysis of
 security events and best practices.
@@ -20,25 +20,25 @@ from prometheus_client import Counter, Histogram
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest, get_llm_service
 from ..security.models import SecurityEvent, ThreatLevel, SecurityEventType
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 
 
 # Prometheus metrics
 PLAYBOOK_GENERATION_COUNTER = Counter(
-    "cronos_playbook_generations_total",
+    "qbitel_playbook_generations_total",
     "Total playbooks generated",
     ["incident_type", "severity"],
     registry=None,
 )
 
 PLAYBOOK_GENERATION_DURATION = Histogram(
-    "cronos_playbook_generation_duration_seconds",
+    "qbitel_playbook_generation_duration_seconds",
     "Playbook generation duration",
     registry=None,
 )
 
 PLAYBOOK_EXECUTION_COUNTER = Counter(
-    "cronos_playbook_executions_total",
+    "qbitel_playbook_executions_total",
     "Total playbook executions",
     ["playbook_type", "status"],
     registry=None,
@@ -360,7 +360,7 @@ class PlaybookGenerator:
 
         except Exception as e:
             self.logger.error(f"Error generating playbook: {e}", exc_info=True)
-            raise CronosAIException(f"Playbook generation failed: {e}")
+            raise QbitelAIException(f"Playbook generation failed: {e}")
 
     def _classify_incident(self, incident: SecurityEvent) -> str:
         """Classify incident into a category."""

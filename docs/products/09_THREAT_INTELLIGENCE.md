@@ -2,7 +2,7 @@
 
 ## Overview
 
-Threat Intelligence Platform (TIP) is CRONOS AI's comprehensive threat detection and hunting solution. It integrates with MITRE ATT&CK framework, ingests STIX/TAXII feeds, and provides automated threat hunting to proactively identify and respond to emerging threats.
+Threat Intelligence Platform (TIP) is QBITEL's comprehensive threat detection and hunting solution. It integrates with MITRE ATT&CK framework, ingests STIX/TAXII feeds, and provides automated threat hunting to proactively identify and respond to emerging threats.
 
 ---
 
@@ -18,7 +18,7 @@ Security teams struggle with threat intelligence:
 - **Reactive posture**: Waiting for alerts instead of hunting threats
 - **Skill shortage**: Threat hunting requires specialized expertise
 
-### The CRONOS AI Solution
+### The QBITEL Solution
 
 Threat Intelligence Platform provides:
 - **MITRE ATT&CK mapping**: Automatic technique identification
@@ -152,7 +152,7 @@ LLM-generated attack explanations:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│              CRONOS Threat Intelligence Platform                 │
+│              QBITEL Threat Intelligence Platform                 │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
@@ -579,7 +579,7 @@ threat_intelligence:
 
   mitre_attack:
     enabled: true
-    local_database: /var/lib/cronos/mitre-attack.db
+    local_database: /var/lib/qbitel/mitre-attack.db
     update_interval: 24h
     auto_mapping: true
     confidence_threshold: 0.7
@@ -654,23 +654,23 @@ threat_intelligence:
 
 ```
 # Feed metrics
-cronos_threat_intel_feeds_total{status="active|error"}
-cronos_threat_intel_feed_polls_total{feed}
-cronos_threat_intel_indicators_ingested_total{feed, type}
+qbitel_threat_intel_feeds_total{status="active|error"}
+qbitel_threat_intel_feed_polls_total{feed}
+qbitel_threat_intel_indicators_ingested_total{feed, type}
 
 # IOC metrics
-cronos_threat_intel_iocs_total{type, severity}
-cronos_threat_intel_ioc_matches_total{type}
-cronos_threat_intel_ioc_age_days{type}
+qbitel_threat_intel_iocs_total{type, severity}
+qbitel_threat_intel_ioc_matches_total{type}
+qbitel_threat_intel_ioc_age_days{type}
 
 # MITRE ATT&CK metrics
-cronos_threat_intel_technique_detections_total{technique_id, tactic}
-cronos_threat_intel_attack_coverage_percent
+qbitel_threat_intel_technique_detections_total{technique_id, tactic}
+qbitel_threat_intel_attack_coverage_percent
 
 # Hunt metrics
-cronos_threat_intel_hunts_total{status}
-cronos_threat_intel_hunt_duration_seconds
-cronos_threat_intel_hunt_matches_total{severity}
+qbitel_threat_intel_hunts_total{status}
+qbitel_threat_intel_hunt_duration_seconds
+qbitel_threat_intel_hunt_matches_total{severity}
 ```
 
 ---
@@ -680,7 +680,7 @@ cronos_threat_intel_hunt_matches_total{severity}
 ### Use Case 1: Automatic IOC Alerting
 
 ```python
-from cronos_ai.threat_intel import ThreatIntelClient
+from qbitel.threat_intel import ThreatIntelClient
 
 client = ThreatIntelClient(api_key="your_api_key")
 

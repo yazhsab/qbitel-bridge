@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Enhanced Legacy System Anomaly Detector
+QBITEL Engine - Enhanced Legacy System Anomaly Detector
 
 Enhanced anomaly detection specifically designed for legacy systems,
 combining traditional ML approaches with LLM-powered analysis and

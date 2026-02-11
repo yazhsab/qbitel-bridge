@@ -1,0 +1,19 @@
+{
+  "program_id": "POLO451",
+  "domain": "insurance",
+  "program_type": "online_transaction",
+  "author": "S. BROWN",
+  "lines_of_code": 202,
+  "complexity_level": "medium",
+  "complexity_score": 0.492,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.930215",
+  "hash": "b841dbca830c507ba0c9ba3ef5da4777"
+}

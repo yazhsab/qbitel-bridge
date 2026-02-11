@@ -73,7 +73,7 @@ def stub_security_config(monkeypatch):
 def stub_security_logger(monkeypatch) -> Dict[str, _DummyLogger]:
     loggers: Dict[str, _DummyLogger] = {}
 
-    def _get_logger(name: str = "cronos.security") -> _DummyLogger:
+    def _get_logger(name: str = "qbitel.security") -> _DummyLogger:
         if name not in loggers:
             loggers[name] = _DummyLogger(name)
         return loggers[name]
@@ -119,7 +119,7 @@ async def test_health_check_manager_runs_registered_checks(stub_security_logger)
     assert unknown.status is HealthStatus.UNKNOWN
 
     # Verify logging captured the events
-    logger = stub_security_logger["cronos.security.monitoring"]
+    logger = stub_security_logger["qbitel.security.monitoring"]
     assert any(
         "Health check for database" in event["message"] for event in logger.events
     )
@@ -167,7 +167,7 @@ def test_performance_monitor_tracks_metrics(stub_security_logger):
 
     monitor.update_prometheus_metrics(metrics)
 
-    logger = stub_security_logger["cronos.security.monitoring"]
+    logger = stub_security_logger["qbitel.security.monitoring"]
     monitor_logger_messages = [event["message"] for event in logger.events]
     assert (
         any("Performance monitoring started" in msg for msg in monitor_logger_messages)
@@ -184,7 +184,7 @@ async def test_performance_monitor_start_stop_logs_events(stub_security_logger):
     await asyncio.sleep(0)
     await monitor.stop_monitoring()
 
-    logger = stub_security_logger["cronos.security.monitoring"]
+    logger = stub_security_logger["qbitel.security.monitoring"]
     messages = [event["message"] for event in logger.events]
     assert any("Performance monitoring started" in msg for msg in messages)
     assert any("Performance monitoring stopped" in msg for msg in messages)
@@ -226,7 +226,7 @@ async def test_security_monitor_lifecycle(monkeypatch, stub_security_logger):
     await monitor.stop()
     assert monitor._running is False
 
-    logger = stub_security_logger["cronos.security.monitoring"]
+    logger = stub_security_logger["qbitel.security.monitoring"]
     messages = [event["message"] for event in logger.events]
     assert any("Security orchestration monitor initialized" in msg for msg in messages)
     assert any(

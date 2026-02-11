@@ -1,0 +1,19 @@
+{
+  "program_id": "TRKV555",
+  "domain": "transportation",
+  "program_type": "data_validation",
+  "author": "R. WILLIAMS",
+  "lines_of_code": 279,
+  "complexity_level": "complex",
+  "complexity_score": 0.733,
+  "files_used": 4,
+  "verbs_used": 14,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.931552",
+  "hash": "3dea115f79d5cd999ea71715e72a007a"
+}

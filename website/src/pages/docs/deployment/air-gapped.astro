@@ -1,0 +1,125 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Air-Gapped Deployment | QBITEL Bridge Docs" description="Deploy QBITEL Bridge in fully offline, air-gapped environments with on-premise LLM inference via Ollama.">
+  <h1 class="text-3xl font-bold text-white mb-2">Air-Gapped Deployment</h1>
+  <p class="text-gray-400 mb-8">Deploy QBITEL Bridge in environments with no internet connectivity, using on-premise LLM inference and pre-loaded container images.</p>
+
+  <h2 id="overview" class="text-2xl font-bold text-white mt-12 mb-4">Overview</h2>
+  <p class="text-gray-300 mb-4">QBITEL Bridge fully supports air-gapped deployments where no outbound internet connectivity is available. All AI/ML inference runs locally using Ollama, and all container images and dependencies are pre-loaded.</p>
+  <div class="bg-surface-800 rounded-lg p-4 border border-quantum-500/30 mb-6">
+    <p class="text-quantum-400 font-semibold mb-1">Key Benefits</p>
+    <ul class="list-disc list-inside text-gray-300 space-y-1 text-sm">
+      <li>All LLM inference runs locally via Ollama -- no cloud API calls</li>
+      <li>No internet connectivity required after initial setup</li>
+      <li>All data stays within your infrastructure perimeter</li>
+      <li>No API keys or cloud accounts needed</li>
+      <li>Compliant with the strictest data residency regulations</li>
+    </ul>
+  </div>
+
+  <h2 id="preparation" class="text-2xl font-bold text-white mt-12 mb-4">Step 1: Prepare on a Connected Machine</h2>
+  <p class="text-gray-300 mb-4">On a machine with internet access, download all required images and models:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Pull LLM models via Ollama</span>
+ollama pull llama3.2:8b
+ollama pull llama3.2:70b
+
+<span class="text-gray-500"># Save container images to tar files</span>
+docker save qbitel/controlplane:latest > controlplane.tar
+docker save qbitel/mgmtapi:latest > mgmtapi.tar
+docker save qbitel/xds-server:latest > xds-server.tar
+docker save qbitel/admission-webhook:latest > admission-webhook.tar
+docker save qbitel/qbitel-engine:latest > qbitel-engine.tar
+
+<span class="text-gray-500"># Download Python packages for offline install</span>
+pip download -r requirements.txt -d ./offline-packages/</code></pre>
+
+  <h2 id="transfer" class="text-2xl font-bold text-white mt-12 mb-4">Step 2: Transfer to Air-Gapped Environment</h2>
+  <p class="text-gray-300 mb-4">Transfer the downloaded artifacts to the air-gapped environment using approved media (USB drive, secure file transfer):</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>Container image tar files</li>
+    <li>Ollama model files</li>
+    <li>Python offline packages directory</li>
+    <li>QBITEL Bridge source code or Helm chart</li>
+  </ul>
+
+  <h2 id="load-images" class="text-2xl font-bold text-white mt-12 mb-4">Step 3: Load Images</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Load container images on the air-gapped machine</span>
+docker load &lt; controlplane.tar
+docker load &lt; mgmtapi.tar
+docker load &lt; xds-server.tar
+docker load &lt; admission-webhook.tar
+docker load &lt; qbitel-engine.tar
+
+<span class="text-gray-500"># Install Python packages from local directory</span>
+pip install --no-index --find-links=./offline-packages/ -r requirements.txt</code></pre>
+
+  <h2 id="configure" class="text-2xl font-bold text-white mt-12 mb-4">Step 4: Configure for Air-Gapped Mode</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Set air-gapped environment variables</span>
+export QBITEL_LLM_PROVIDER=ollama
+export QBITEL_LLM_ENDPOINT=http://localhost:11434
+export QBITEL_AIRGAPPED_MODE=true
+export QBITEL_DISABLE_CLOUD_LLMS=true
+export QBITEL_LLM_MODEL=llama3.2:8b</code></pre>
+
+  <h2 id="deploy" class="text-2xl font-bold text-white mt-12 mb-4">Step 5: Deploy</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Start Ollama with the loaded model</span>
+ollama serve &
+
+<span class="text-gray-500"># Deploy with air-gapped flag</span>
+python -m ai_engine --airgapped
+
+<span class="text-gray-500"># Or via Helm with air-gapped values</span>
+helm install qbitel-bridge ./helm/qbitel-bridge \
+  --namespace qbitel-service-mesh \
+  --create-namespace \
+  --set airgapped.enabled=true \
+  --set llm.provider=ollama \
+  --set llm.endpoint=http://ollama:11434</code></pre>
+
+  <h2 id="model-selection" class="text-2xl font-bold text-white mt-12 mb-4">LLM Model Selection</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Model</th>
+        <th class="text-left text-white py-2 pr-4">Size</th>
+        <th class="text-left text-white py-2 pr-4">RAM Required</th>
+        <th class="text-left text-white py-2">Best For</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">llama3.2:8b</td>
+        <td class="text-gray-300 py-2 pr-4">4.7 GB</td>
+        <td class="text-gray-300 py-2 pr-4">8 GB</td>
+        <td class="text-gray-300 py-2">Development, resource-constrained</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">llama3.2:70b</td>
+        <td class="text-gray-300 py-2 pr-4">39 GB</td>
+        <td class="text-gray-300 py-2 pr-4">48 GB</td>
+        <td class="text-gray-300 py-2">Production, highest quality</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="verify" class="text-2xl font-bold text-white mt-12 mb-4">Verify Air-Gapped Operation</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Verify Ollama is serving the model</span>
+curl http://localhost:11434/api/tags
+
+<span class="text-gray-500"># Verify the AI Engine is running in air-gapped mode</span>
+curl http://localhost:8000/health
+
+<span class="text-gray-500"># Test a discovery request without internet</span>
+curl -X POST http://localhost:8000/api/v1/discover \
+  -H "Content-Type: application/json" \
+  -d '{'{'}"packet_data": "R0VUIC8gSFRUUC8xLjE="{'}'}'</code></pre>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> -- security hardening for production environments</li>
+    <li><a href="/docs/security/compliance-frameworks" class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- meet data residency requirements</li>
+    <li><a href="/docs/operations/troubleshooting" class="text-quantum-400 hover:underline">Troubleshooting</a> -- diagnose air-gapped deployment issues</li>
+  </ul>
+</DocsLayout>

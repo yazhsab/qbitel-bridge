@@ -1,5 +1,5 @@
 """
-CRONOS AI - Base Agent Implementation
+QBITEL - Base Agent Implementation
 
 Provides the foundational agent class that all specialized agents inherit from.
 Implements core agent lifecycle, capability management, and communication interfaces.
@@ -23,17 +23,17 @@ if TYPE_CHECKING:
 
 # Prometheus metrics
 AGENT_TASKS_COUNTER = Counter(
-    "cronos_agent_tasks_total",
+    "qbitel_agent_tasks_total",
     "Total tasks processed by agents",
     ["agent_type", "agent_id", "status"],
 )
 AGENT_TASK_DURATION = Histogram(
-    "cronos_agent_task_duration_seconds",
+    "qbitel_agent_task_duration_seconds",
     "Agent task processing duration",
     ["agent_type", "task_type"],
 )
 AGENT_ACTIVE_COUNT = Gauge(
-    "cronos_agent_active_count",
+    "qbitel_agent_active_count",
     "Number of active agents",
     ["agent_type"],
 )
@@ -142,7 +142,7 @@ class AgentTask:
 
 class BaseAgent(ABC):
     """
-    Base class for all CRONOS AI agents.
+    Base class for all QBITEL agents.
 
     Provides core functionality including:
     - Lifecycle management (start, stop, pause, resume)

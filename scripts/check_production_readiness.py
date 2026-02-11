@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - Production Readiness Check Script
+QBITEL - Production Readiness Check Script
 
 Comprehensive production readiness validation covering:
 - Infrastructure health
@@ -1465,7 +1465,7 @@ class ProductionReadinessChecker:
     def print_report(self, report: ReadinessReport):
         """Print production readiness report."""
         print("\n" + "=" * 80)
-        print("CRONOS AI - PRODUCTION READINESS REPORT")
+        print("QBITEL - PRODUCTION READINESS REPORT")
         print("=" * 80)
         print(f"\nTimestamp: {report.timestamp.isoformat()}")
         print(f"Overall Status: {report.overall_status.value}")
@@ -1575,7 +1575,7 @@ async def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="CRONOS AI Production Readiness Checker"
+        description="QBITEL Production Readiness Checker"
     )
     parser.add_argument("--config", help="Path to configuration file", default=None)
     parser.add_argument(

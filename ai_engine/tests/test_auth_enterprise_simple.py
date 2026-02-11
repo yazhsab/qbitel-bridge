@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Enterprise Authentication Simple Tests
+QBITEL Engine - Enterprise Authentication Simple Tests
 
 Simple test suite for enterprise authentication functionality.
 """

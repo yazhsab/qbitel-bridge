@@ -1,5 +1,5 @@
 """
-CRONOS AI - Comprehensive Marketplace Tests
+QBITEL - Comprehensive Marketplace Tests
 
 Unit tests for Protocol Marketplace functionality including API endpoints,
 validation pipeline, and knowledge base integration.
@@ -103,7 +103,7 @@ def sample_protocol(db_session, sample_marketplace_user):
         base_price=Decimal("499.00"),
         certification_status=CertificationStatus.CERTIFIED,
         status=ProtocolStatus.PUBLISHED,
-        min_cronos_version="1.0.0",
+        min_qbitel_version="1.0.0",
         published_at=datetime.utcnow(),
     )
     db_session.add(protocol)
@@ -165,7 +165,7 @@ class TestMarketplaceModels:
             author_id=sample_marketplace_user.user_id,
             author_type="community",
             license_type=LicenseType.FREE,
-            min_cronos_version="1.0.0",
+            min_qbitel_version="1.0.0",
         )
         db_session.add(protocol)
         db_session.commit()
@@ -193,7 +193,7 @@ class TestMarketplaceModels:
             license_type=LicenseType.PAID,
             price_model=PriceModel.ONE_TIME,
             base_price=Decimal("99.99"),
-            min_cronos_version="1.0.0",
+            min_qbitel_version="1.0.0",
         )
         db_session.add(protocol)
         db_session.commit()
@@ -541,7 +541,7 @@ class TestMarketplaceIntegration:
             "author_id": sample_marketplace_user.user_id,
             "author_type": "community",
             "license_type": LicenseType.FREE,
-            "min_cronos_version": "1.0.0",
+            "min_qbitel_version": "1.0.0",
         }
 
         protocol = MarketplaceProtocol(**protocol_data)
@@ -574,7 +574,7 @@ class TestMarketplacePerformance:
                 author_id=sample_marketplace_user.user_id,
                 author_type="community",
                 license_type=LicenseType.FREE,
-                min_cronos_version="1.0.0",
+                min_qbitel_version="1.0.0",
                 status=ProtocolStatus.PUBLISHED,
             )
             protocols.append(protocol)

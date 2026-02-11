@@ -231,7 +231,7 @@ class TestAPIKeyModel:
         """Test creating an API key."""
         api_key = APIKey(
             key_hash="sha256_hash_value",
-            key_prefix="cronos_",
+            key_prefix="qbitel_",
             name="Production Key",
             description="Key for production use",
             user_id=test_user.id,
@@ -243,7 +243,7 @@ class TestAPIKeyModel:
 
         assert api_key.id is not None
         assert api_key.key_hash == "sha256_hash_value"
-        assert api_key.key_prefix == "cronos_"
+        assert api_key.key_prefix == "qbitel_"
         assert api_key.name == "Production Key"
         assert api_key.status == APIKeyStatus.ACTIVE
         assert api_key.user_id == test_user.id

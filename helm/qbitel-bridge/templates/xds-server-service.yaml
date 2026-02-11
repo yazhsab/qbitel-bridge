@@ -1,0 +1,34 @@
+{{- if .Values.xdsServer.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "qbitel-bridge.fullname" . }}-xds-server
+  namespace: {{ include "qbitel-bridge.namespace" . }}
+  labels:
+    {{- include "qbitel-bridge.xdsServer.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.xdsServer.service.type }}
+  {{- if .Values.xdsServer.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.xdsServer.service.sessionAffinity }}
+  {{- with .Values.xdsServer.service.sessionAffinityConfig }}
+  sessionAffinityConfig:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  ports:
+    - name: grpc
+      port: {{ .Values.xdsServer.service.grpcPort }}
+      targetPort: grpc
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.xdsServer.service.metricsPort }}
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    {{- include "qbitel-bridge.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: xds-server
+{{- end }}

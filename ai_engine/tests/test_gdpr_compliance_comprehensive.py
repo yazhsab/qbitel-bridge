@@ -25,7 +25,7 @@ from ai_engine.core.config import Config
 def mock_config():
     """Create mock configuration."""
     config = Config()
-    config.data_controller_name = "CRONOS AI Test"
+    config.data_controller_name = "QBITEL Test"
     config.dpo_contact = "dpo@test.com"
     return config
 
@@ -51,7 +51,7 @@ class TestGDPRComplianceManagerInitialization:
         """Test successful initialization."""
         assert gdpr_manager.config == mock_config
         assert gdpr_manager.audit_manager == mock_audit_manager
-        assert gdpr_manager.data_controller == "CRONOS AI Test"
+        assert gdpr_manager.data_controller == "QBITEL Test"
         assert gdpr_manager.dpo_contact == "dpo@test.com"
         assert gdpr_manager.breach_notification_hours == 72
         assert len(gdpr_manager.consent_records) == 0
@@ -63,8 +63,8 @@ class TestGDPRComplianceManagerInitialization:
         config = Config()
         manager = GDPRComplianceManager(config, None)
 
-        assert manager.data_controller == "CRONOS AI"
-        assert manager.dpo_contact == "dpo@cronos-ai.com"
+        assert manager.data_controller == "QBITEL"
+        assert manager.dpo_contact == "dpo@qbitel.com"
 
     @pytest.mark.asyncio
     async def test_initialize(self, gdpr_manager):
@@ -294,7 +294,7 @@ class TestProcessingActivities:
         )
 
         record = gdpr_manager.processing_records[record_id]
-        assert record.controller_name == "CRONOS AI Test"
+        assert record.controller_name == "QBITEL Test"
 
     @pytest.mark.asyncio
     async def test_record_processing_activity_timestamps(self, gdpr_manager):

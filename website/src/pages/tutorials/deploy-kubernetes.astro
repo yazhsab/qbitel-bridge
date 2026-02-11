@@ -1,0 +1,258 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Deploy to Kubernetes | Tutorials | QBITEL Bridge"
+  description="Install QBITEL Bridge on Kubernetes using Helm. Configure resources, set up monitoring, and verify all components."
+>
+  <PageHero
+    title="Deploy to Kubernetes"
+    description="Install QBITEL Bridge on a Kubernetes cluster using Helm. Configure resource limits, enable observability, and verify all components are healthy and ready for production traffic."
+    badge="Intermediate -- 45 min"
+    gradient="from-yellow-500 to-amber-400"
+  />
+
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+
+      <!-- Prerequisites -->
+      <div class="card p-6 mb-12">
+        <h2 class="text-xl font-bold text-white mb-4">Prerequisites</h2>
+        <ul class="space-y-2 text-gray-300">
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>A running Kubernetes cluster (v1.28 or later) -- EKS, GKE, AKS, or local (kind, minikube)</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Helm 3.12+ and kubectl installed and configured</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>At least 4 CPU cores and 8 GB RAM available in your cluster</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Architecture Overview -->
+      <div class="card p-6 mb-12">
+        <h2 class="text-xl font-bold text-white mb-4">What Gets Deployed</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-surface-900/50 rounded-lg p-4 border border-surface-600/50">
+            <h3 class="text-sm font-semibold text-quantum-400 mb-2">Control Plane</h3>
+            <ul class="text-sm text-gray-400 space-y-1">
+              <li>AI Engine (Python) -- 2 replicas</li>
+              <li>Control Plane (Go) -- 2 replicas</li>
+              <li>Management API (Go) -- 2 replicas</li>
+            </ul>
+          </div>
+          <div class="bg-surface-900/50 rounded-lg p-4 border border-surface-600/50">
+            <h3 class="text-sm font-semibold text-quantum-400 mb-2">Data Plane</h3>
+            <ul class="text-sm text-gray-400 space-y-1">
+              <li>Data Plane DaemonSet (Rust) -- 1 per node</li>
+              <li>TimescaleDB -- 1 replica (StatefulSet)</li>
+              <li>Redis Cache -- 1 replica</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">1</span>
+          <h2 class="text-2xl font-bold text-white">Add the Helm Repository</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Add the QBITEL Helm chart repository and update your local chart cache.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Add the QBITEL Helm repo</span>
+helm repo add qbitel https://charts.qbitel.com
+helm repo update
+
+<span class="text-gray-500"># Search for available charts</span>
+helm search repo qbitel
+
+<span class="text-gray-500"># Output</span>
+NAME                    CHART VERSION   APP VERSION   DESCRIPTION
+qbitel/qbitel-bridge    1.0.0           1.0.0         QBITEL Bridge - AI Protocol Intelligence</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">2</span>
+          <h2 class="text-2xl font-bold text-white">Create a Values Override</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Create a <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">values-production.yaml</code> file to customize the deployment for your environment. This sets resource limits, enables PQC, and configures persistence.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># values-production.yaml</span>
+global:
+  environment: production
+  tls:
+    enabled: true
+    minVersion: "TLSv1.3"
+
+aiEngine:
+  replicas: 2
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+  pqc:
+    enabled: true
+    profile: hybrid
+
+dataplane:
+  resources:
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+    limits:
+      cpu: "4"
+      memory: "8Gi"
+
+timescaledb:
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: gp3
+
+monitoring:
+  prometheus:
+    enabled: true
+  grafana:
+    enabled: true
+  opentelemetry:
+    enabled: true
+    endpoint: "otel-collector:4317"
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: qbitel.your-domain.com
+      paths:
+        - path: /
+          pathType: Prefix</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">3</span>
+          <h2 class="text-2xl font-bold text-white">Install with Helm</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Create the namespace and install the chart with your production values.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Create namespace</span>
+kubectl create namespace qbitel-system
+
+<span class="text-gray-500"># Create secrets for database credentials</span>
+kubectl create secret generic qbitel-db-credentials \
+  --namespace qbitel-system \
+  --from-literal=username=qbitel \
+  --from-literal=password=$(openssl rand -base64 32)
+
+<span class="text-gray-500"># Install the chart</span>
+helm install qbitel-bridge qbitel/qbitel-bridge \
+  --namespace qbitel-system \
+  --values values-production.yaml \
+  --wait --timeout 5m</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">4</span>
+          <h2 class="text-2xl font-bold text-white">Verify the Deployment</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Confirm that all pods are running and passing health checks.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Check pod status</span>
+kubectl get pods -n qbitel-system
+
+<span class="text-gray-500"># Expected output</span>
+NAME                              READY   STATUS    RESTARTS   AGE
+qbitel-ai-engine-6d8f9c7-abc12   1/1     Running   0          2m
+qbitel-ai-engine-6d8f9c7-def34   1/1     Running   0          2m
+qbitel-controlplane-5b7c8-gh567  1/1     Running   0          2m
+qbitel-controlplane-5b7c8-ij890  1/1     Running   0          2m
+qbitel-mgmtapi-4a6b7-kl012       1/1     Running   0          2m
+qbitel-mgmtapi-4a6b7-mn345       1/1     Running   0          2m
+qbitel-dataplane-pq678            1/1     Running   0          2m
+qbitel-timescaledb-0              1/1     Running   0          2m
+qbitel-redis-0                    1/1     Running   0          2m
+
+<span class="text-gray-500"># Run the built-in health check</span>
+kubectl exec -n qbitel-system deploy/qbitel-ai-engine -- \
+  curl -s http://localhost:8000/health | jq
+
+<span class="text-gray-500"># Check the Kubernetes health endpoints</span>
+kubectl get endpoints -n qbitel-system</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">5</span>
+          <h2 class="text-2xl font-bold text-white">Access the Console and Grafana</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Port-forward to the management API and Grafana to verify the installation through the web interfaces.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Port-forward to the QBITEL console</span>
+kubectl port-forward -n qbitel-system svc/qbitel-mgmtapi 8080:8080 &
+
+<span class="text-gray-500"># Port-forward to Grafana</span>
+kubectl port-forward -n qbitel-system svc/qbitel-grafana 3001:3000 &
+
+<span class="text-gray-500"># Open in your browser</span>
+<span class="text-gray-500"># Console: http://localhost:8080</span>
+<span class="text-gray-500"># Grafana: http://localhost:3001 (admin / admin)</span></code></pre>
+        </div>
+        <div class="card p-4 border-l-4 border-l-quantum-500">
+          <p class="text-sm text-gray-300">
+            <span class="font-semibold text-quantum-400">What's next?</span> With QBITEL Bridge running on Kubernetes, you can scale the AI engine horizontally, enable auto-scaling with HPA, and integrate with your service mesh. Check the <a href="/docs/deployment" class="text-quantum-400 hover:underline">deployment docs</a> for advanced configuration.
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex items-center justify-between pt-8 border-t border-surface-600/50">
+        <a href="/tutorials/build-protocol-adapter" class="btn-ghost text-sm">
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+          Previous: Build a Protocol Adapter
+        </a>
+        <a href="/tutorials/compliance-reporting" class="btn-secondary text-sm">
+          Next: Compliance Reporting
+          <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <CTABanner
+    title="Ready for Production Kubernetes?"
+    description="QBITEL Bridge ships production-grade Helm charts with built-in observability, auto-scaling, and high availability."
+  />
+</PageLayout>

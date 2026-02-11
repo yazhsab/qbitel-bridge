@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Enhanced PCFG Inference (Production-Ready)
+QBITEL Engine - Enhanced PCFG Inference (Production-Ready)
 
 This module implements production-grade PCFG inference with:
 - Bayesian hyperparameter optimization

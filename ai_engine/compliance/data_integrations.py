@@ -1,5 +1,5 @@
 """
-CRONOS AI - Compliance Data Integrations
+QBITEL - Compliance Data Integrations
 
 Integration with TimescaleDB, Redis, and other data systems
 for compliance data storage, caching, and retrieval.
@@ -18,14 +18,14 @@ import types
 import sys
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from .regulatory_kb import ComplianceAssessment
 from .report_generator import ComplianceReport
 
 logger = logging.getLogger(__name__)
 
 
-class IntegrationException(CronosAIException):
+class IntegrationException(QbitelAIException):
     """Integration-specific exception."""
 
     pass
@@ -53,14 +53,14 @@ class TimescaleComplianceIntegration:
         # Connection settings
         self.host = getattr(config.database, "host", "localhost")
         self.port = getattr(config.database, "port", 5432)
-        self.database = getattr(config.database, "database", "cronos_ai")
-        self.username = getattr(config.database, "username", "cronos")
+        self.database = getattr(config.database, "database", "qbitel")
+        self.username = getattr(config.database, "username", "qbitel")
         self.password = getattr(config.database, "password", "")
 
         if not self.password:
             import os
 
-            self.password = os.getenv("CRONOS_AI_DB_PASSWORD") or os.getenv(
+            self.password = os.getenv("QBITEL_AI_DB_PASSWORD") or os.getenv(
                 "DATABASE_PASSWORD", ""
             )
 

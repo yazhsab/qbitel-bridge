@@ -102,8 +102,8 @@ class TestSecretsManagerEnvironment:
             assert value == "test_value"
 
     def test_get_secret_from_env_with_prefix(self, manager):
-        """Test getting secret with CRONOS_AI prefix."""
-        with patch.dict(os.environ, {"CRONOS_AI_TEST_KEY": "test_value"}):
+        """Test getting secret with QBITEL_AI prefix."""
+        with patch.dict(os.environ, {"QBITEL_AI_TEST_KEY": "test_value"}):
             value = manager.get_secret("test_key")
             assert value == "test_value"
 

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Protocol Discovery Production Enhancements
+QBITEL Engine - Protocol Discovery Production Enhancements
 
 This module provides production-ready enhancements for the protocol discovery engine,
 including advanced monitoring, caching, error handling, and performance optimization.
@@ -39,20 +39,20 @@ class DiscoveryMetrics:
     def __init__(self):
         # Discovery operation metrics
         self.discovery_requests_total = Counter(
-            "cronos_discovery_requests_total",
+            "qbitel_discovery_requests_total",
             "Total protocol discovery requests",
             ["protocol_type", "status", "cache_hit"],
         )
 
         self.discovery_duration_seconds = Histogram(
-            "cronos_discovery_duration_seconds",
+            "qbitel_discovery_duration_seconds",
             "Protocol discovery duration",
             ["protocol_type", "phase"],
             buckets=[0.01, 0.05, 0.1, 0.5, 1.0, 2.0, 5.0, 10.0],
         )
 
         self.discovery_confidence_score = Histogram(
-            "cronos_discovery_confidence_score",
+            "qbitel_discovery_confidence_score",
             "Discovery confidence scores",
             ["protocol_type"],
             buckets=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
@@ -60,94 +60,94 @@ class DiscoveryMetrics:
 
         # Component-specific metrics
         self.statistical_analysis_duration = Histogram(
-            "cronos_statistical_analysis_duration_seconds",
+            "qbitel_statistical_analysis_duration_seconds",
             "Statistical analysis duration",
             buckets=[0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0],
         )
 
         self.grammar_learning_duration = Histogram(
-            "cronos_grammar_learning_duration_seconds",
+            "qbitel_grammar_learning_duration_seconds",
             "Grammar learning duration",
             buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0],
         )
 
         self.parser_generation_duration = Histogram(
-            "cronos_parser_generation_duration_seconds",
+            "qbitel_parser_generation_duration_seconds",
             "Parser generation duration",
             buckets=[0.01, 0.05, 0.1, 0.5, 1.0, 2.0, 5.0],
         )
 
         self.classification_duration = Histogram(
-            "cronos_classification_duration_seconds",
+            "qbitel_classification_duration_seconds",
             "Protocol classification duration",
             buckets=[0.001, 0.005, 0.01, 0.05, 0.1, 0.5],
         )
 
         self.validation_duration = Histogram(
-            "cronos_validation_duration_seconds",
+            "qbitel_validation_duration_seconds",
             "Message validation duration",
             buckets=[0.001, 0.005, 0.01, 0.05, 0.1, 0.5],
         )
 
         # Cache metrics
         self.cache_operations_total = Counter(
-            "cronos_cache_operations_total",
+            "qbitel_cache_operations_total",
             "Total cache operations",
             ["operation", "cache_type", "status"],
         )
 
         self.cache_size_bytes = Gauge(
-            "cronos_cache_size_bytes", "Current cache size in bytes", ["cache_type"]
+            "qbitel_cache_size_bytes", "Current cache size in bytes", ["cache_type"]
         )
 
         self.cache_hit_rate = Gauge(
-            "cronos_cache_hit_rate", "Cache hit rate", ["cache_type"]
+            "qbitel_cache_hit_rate", "Cache hit rate", ["cache_type"]
         )
 
         # Resource metrics
         self.active_discoveries = Gauge(
-            "cronos_active_discoveries", "Number of active discovery operations"
+            "qbitel_active_discoveries", "Number of active discovery operations"
         )
 
         self.protocol_profiles_count = Gauge(
-            "cronos_protocol_profiles_count", "Number of learned protocol profiles"
+            "qbitel_protocol_profiles_count", "Number of learned protocol profiles"
         )
 
         self.model_memory_usage_bytes = Gauge(
-            "cronos_model_memory_usage_bytes",
+            "qbitel_model_memory_usage_bytes",
             "Memory usage by ML models",
             ["model_type"],
         )
 
         # Error metrics
         self.discovery_errors_total = Counter(
-            "cronos_discovery_errors_total",
+            "qbitel_discovery_errors_total",
             "Total discovery errors",
             ["error_type", "component"],
         )
 
         self.circuit_breaker_state = Gauge(
-            "cronos_circuit_breaker_state",
+            "qbitel_circuit_breaker_state",
             "Circuit breaker state (0=closed, 1=open, 2=half_open)",
             ["component"],
         )
 
         # LLM integration metrics
         self.llm_analysis_requests_total = Counter(
-            "cronos_llm_analysis_requests_total",
+            "qbitel_llm_analysis_requests_total",
             "Total LLM analysis requests",
             ["analysis_type", "status"],
         )
 
         self.llm_analysis_duration_seconds = Histogram(
-            "cronos_llm_analysis_duration_seconds",
+            "qbitel_llm_analysis_duration_seconds",
             "LLM analysis duration",
             ["analysis_type"],
             buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0],
         )
 
         self.llm_token_usage = Counter(
-            "cronos_llm_token_usage_total",
+            "qbitel_llm_token_usage_total",
             "Total LLM tokens used",
             ["provider", "operation"],
         )

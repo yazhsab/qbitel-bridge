@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Monitoring Module
+QBITEL Engine - Monitoring Module
 
 This module provides comprehensive monitoring, logging, and observability
 capabilities for the AI Engine.

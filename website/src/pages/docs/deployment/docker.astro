@@ -1,0 +1,117 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Docker Compose | QBITEL Bridge Docs" description="Deploy QBITEL Bridge with Docker Compose for local development and evaluation.">
+  <h1 class="text-3xl font-bold text-white mb-2">Docker Compose Deployment</h1>
+  <p class="text-gray-400 mb-8">Set up a multi-container development environment with Docker Compose, including the AI Engine, databases, and monitoring stack.</p>
+
+  <h2 id="prerequisites" class="text-2xl font-bold text-white mt-12 mb-4">Prerequisites</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Docker</strong> 20.10+ installed</li>
+    <li><strong class="text-white">Docker Compose</strong> 2.0+ installed</li>
+    <li><strong class="text-white">4 GB RAM</strong> available for containers</li>
+  </ul>
+
+  <h2 id="build-images" class="text-2xl font-bold text-white mt-12 mb-4">Build Docker Images</h2>
+  <p class="text-gray-300 mb-4">Build all required container images:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Build xDS Server</span>
+docker build -f docker/xds-server/Dockerfile -t qbitel/xds-server:latest .
+
+<span class="text-gray-500"># Build Admission Webhook</span>
+docker build -f docker/admission-webhook/Dockerfile -t qbitel/admission-webhook:latest .</code></pre>
+
+  <h2 id="start-services" class="text-2xl font-bold text-white mt-12 mb-4">Start Services</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Navigate to Docker configuration</span>
+cd ai_engine/deployment/docker
+
+<span class="text-gray-500"># Start all services in detached mode</span>
+docker-compose up -d
+
+<span class="text-gray-500"># View real-time logs</span>
+docker-compose logs -f qbitel-engine
+
+<span class="text-gray-500"># Check service status</span>
+docker-compose ps</code></pre>
+
+  <h2 id="services" class="text-2xl font-bold text-white mt-12 mb-4">Included Services</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Service</th>
+        <th class="text-left text-white py-2 pr-4">Port</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">qbitel-engine</code></td>
+        <td class="text-gray-300 py-2 pr-4">8000, 50051, 9090</td>
+        <td class="text-gray-300 py-2">AI Engine REST + gRPC + metrics</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">mlflow</code></td>
+        <td class="text-gray-300 py-2 pr-4">5000</td>
+        <td class="text-gray-300 py-2">Model registry and experiment tracking</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">prometheus</code></td>
+        <td class="text-gray-300 py-2 pr-4">9091</td>
+        <td class="text-gray-300 py-2">Metrics collection and alerting</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">grafana</code></td>
+        <td class="text-gray-300 py-2 pr-4">3000</td>
+        <td class="text-gray-300 py-2">Dashboards and visualization</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">postgres</code></td>
+        <td class="text-gray-300 py-2 pr-4">5432</td>
+        <td class="text-gray-300 py-2">Database for MLflow and application data</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">redis</code></td>
+        <td class="text-gray-300 py-2 pr-4">6379</td>
+        <td class="text-gray-300 py-2">Caching and rate limiting</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">nginx</code></td>
+        <td class="text-gray-300 py-2 pr-4">80, 443</td>
+        <td class="text-gray-300 py-2">Reverse proxy and TLS termination</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="access-services" class="text-2xl font-bold text-white mt-12 mb-4">Access Services</h2>
+  <p class="text-gray-300 mb-4">Once services are running, access them at:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">AI Engine API</strong>: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">http://localhost:8000</code></li>
+    <li><strong class="text-white">API Documentation</strong>: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">http://localhost:8000/docs</code></li>
+    <li><strong class="text-white">Grafana</strong>: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">http://localhost:3000</code> (admin / qbitel-admin)</li>
+    <li><strong class="text-white">Prometheus</strong>: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">http://localhost:9091</code></li>
+    <li><strong class="text-white">MLflow</strong>: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">http://localhost:5000</code></li>
+  </ul>
+
+  <h2 id="custom-config" class="text-2xl font-bold text-white mt-12 mb-4">Custom Configuration</h2>
+  <p class="text-gray-300 mb-4">Override default settings by creating a <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">.env</code> file alongside docker-compose.yml:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># .env</span>
+QBITEL_LOG_LEVEL=DEBUG
+QBITEL_DEVICE=cpu
+QBITEL_LLM_PROVIDER=ollama
+OLLAMA_URL=http://host.docker.internal:11434
+DATABASE_URL=postgresql://qbitel:password@postgres:5432/qbitel</code></pre>
+
+  <h2 id="stop-services" class="text-2xl font-bold text-white mt-12 mb-4">Stop and Clean Up</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Stop all services</span>
+docker-compose down
+
+<span class="text-gray-500"># Stop and remove volumes (full reset)</span>
+docker-compose down -v</code></pre>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/deployment/kubernetes" class="text-quantum-400 hover:underline">Kubernetes Deployment</a> -- deploy to a production cluster</li>
+    <li><a href="/docs/deployment/helm" class="text-quantum-400 hover:underline">Helm Charts</a> -- one-command production deployment</li>
+    <li><a href="/docs/operations/monitoring" class="text-quantum-400 hover:underline">Monitoring</a> -- configure Grafana dashboards</li>
+  </ul>
+</DocsLayout>

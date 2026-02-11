@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - AI/ML to Protocol Processing Bridge
+QBITEL - AI/ML to Protocol Processing Bridge
 Connects the AI/ML engine to the protocol processing pipeline for real-time inference.
 """
 

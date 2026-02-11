@@ -1,5 +1,5 @@
 """
-CRONOS AI - Explainability Database Schema
+QBITEL - Explainability Database Schema
 
 Database models for storing AI decision audit trails and explanations.
 """

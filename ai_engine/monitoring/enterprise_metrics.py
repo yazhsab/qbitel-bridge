@@ -1,5 +1,5 @@
 """
-Enterprise-grade monitoring and metrics for CRONOS AI Protocol Discovery.
+Enterprise-grade monitoring and metrics for QBITEL Bridge.
 Provides comprehensive metrics collection, Prometheus integration, and alerting.
 """
 

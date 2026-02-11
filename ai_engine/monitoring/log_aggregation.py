@@ -1,5 +1,5 @@
 """
-CRONOS AI - Log Aggregation System
+QBITEL - Log Aggregation System
 Production-ready log aggregation with ELK Stack and Grafana Loki integration.
 """
 
@@ -93,7 +93,7 @@ class ElasticsearchLogAggregator:
             config, "elasticsearch_hosts", ["http://localhost:9200"]
         )
         self.es_index_prefix = getattr(
-            config, "elasticsearch_index_prefix", "cronos-ai-logs"
+            config, "elasticsearch_index_prefix", "qbitel-logs"
         )
         self.es_username = getattr(config, "elasticsearch_username", None)
         self.es_password = getattr(config, "elasticsearch_password", None)
@@ -241,7 +241,7 @@ class ElasticsearchLogAggregator:
             "settings": {
                 "number_of_shards": 3,
                 "number_of_replicas": 1,
-                "index.lifecycle.name": "cronos-ai-logs-policy",
+                "index.lifecycle.name": "qbitel-logs-policy",
                 "index.lifecycle.rollover_alias": f"{self.es_index_prefix}",
             },
             "mappings": {
@@ -440,7 +440,7 @@ class LogAggregationManager:
         self.logger = logging.getLogger(__name__)
 
         # Service information
-        self.service_name = getattr(config, "service_name", "cronos-ai")
+        self.service_name = getattr(config, "service_name", "qbitel")
         self.environment = getattr(config.environment, "value", "development")
 
         # Aggregators

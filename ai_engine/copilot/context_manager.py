@@ -1,5 +1,5 @@
 """
-CRONOS AI - Conversation Context Manager
+QBITEL - Conversation Context Manager
 Manages conversation history and context for the Protocol Intelligence Copilot.
 """
 

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Transaction Management
+QBITEL Engine - Transaction Management
 
 Production-ready transaction management decorators and utilities
 for ensuring ACID properties and handling concurrent operations safely.

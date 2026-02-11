@@ -1,5 +1,5 @@
 """
-CRONOS AI - Compliance-specific LLM Prompt Templates
+QBITEL - Compliance-specific LLM Prompt Templates
 
 Enterprise-grade prompt management system for compliance reporting
 with framework-specific templates and dynamic prompt generation.
@@ -15,7 +15,7 @@ from pathlib import Path
 import jinja2
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from .regulatory_kb import (
     ComplianceAssessment,
     ComplianceGap,
@@ -27,7 +27,7 @@ from .regulatory_kb import (
 logger = logging.getLogger(__name__)
 
 
-class PromptException(CronosAIException):
+class PromptException(QbitelAIException):
     """Prompt template specific exception."""
 
     pass
@@ -980,7 +980,7 @@ Include all required disclosures and attestations.
                 ],
                 "assessment": assessment,
                 "assessment_period": "Current year",
-                "assessor_name": "CRONOS AI Compliance System",
+                "assessor_name": "QBITEL Compliance System",
                 "section_compliance": {},  # Would be populated from framework
                 "material_findings": material_findings,
             }

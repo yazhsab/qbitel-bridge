@@ -24,7 +24,7 @@ import ssl
 class MLPlatformFetcher:
     """Fetch datasets from major ML platforms."""
 
-    # Relevant datasets for CRONOS AI
+    # Relevant datasets for QBITEL
     DATASETS = {
         "huggingface": {
             "security": [
@@ -161,7 +161,7 @@ class MLPlatformFetcher:
         """Fetch URL content with SSL fallback."""
         req = urllib.request.Request(
             url,
-            headers={"User-Agent": "CRONOS-AI-Dataset-Fetcher/1.0"}
+            headers={"User-Agent": "QBITEL-Dataset-Fetcher/1.0"}
         )
         try:
             with urllib.request.urlopen(req, context=self.ssl_context, timeout=timeout) as response:
@@ -338,7 +338,7 @@ class MLPlatformFetcher:
                     "usage": "fetcher.fetch_uci_dataset('kdd99')"
                 }
             },
-            "recommended_for_cronos": {
+            "recommended_for_qbitel": {
                 "protocol_analysis": [
                     "Wireshark sample captures (manual)",
                     "PCAP datasets from Netresec"
@@ -394,7 +394,7 @@ class MLPlatformFetcher:
     def fetch_recommended_free(self) -> Dict:
         """Fetch recommended datasets that don't require auth."""
         print("=" * 60)
-        print("CRONOS AI - ML Platform Dataset Fetcher")
+        print("QBITEL - ML Platform Dataset Fetcher")
         print("=" * 60)
 
         results = {}
@@ -422,7 +422,7 @@ class MLPlatformFetcher:
     def interactive_fetch(self):
         """Interactive mode to select and fetch datasets."""
         print("=" * 60)
-        print("CRONOS AI - Interactive Dataset Fetcher")
+        print("QBITEL - Interactive Dataset Fetcher")
         print("=" * 60)
 
         print("\nAvailable platforms:")

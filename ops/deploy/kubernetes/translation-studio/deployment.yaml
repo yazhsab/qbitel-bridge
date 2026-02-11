@@ -2,16 +2,16 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cronos-translation-studio
+  name: qbitel-translation-studio
   labels:
-    app: cronos-ai
+    app: qbitel
     component: translation-studio
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: translation-studio-config
-  namespace: cronos-translation-studio
+  namespace: qbitel-translation-studio
 data:
   config.yaml: |
     service_name: "protocol-translation-studio"
@@ -54,7 +54,7 @@ data:
 #   --from-literal=anthropic-api-key="$ANTHROPIC_API_KEY" \
 #   --from-literal=database-password="$DATABASE_PASSWORD" \
 #   --from-literal=redis-password="$REDIS_PASSWORD" \
-#   -n cronos-translation-studio
+#   -n qbitel-translation-studio
 #
 # Or use External Secrets Operator, Sealed Secrets, or Vault
 ---
@@ -62,7 +62,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: translation-studio-secrets
-  namespace: cronos-translation-studio
+  namespace: qbitel-translation-studio
 type: Opaque
 # data:
 #   openai-api-key: <base64-encoded-value>
@@ -74,9 +74,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: translation-studio
-  namespace: cronos-translation-studio
+  namespace: qbitel-translation-studio
   labels:
-    app: cronos-ai
+    app: qbitel
     component: translation-studio
     version: v1
 spec:
@@ -88,12 +88,12 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
       component: translation-studio
   template:
     metadata:
       labels:
-        app: cronos-ai
+        app: qbitel
         component: translation-studio
         version: v1
       annotations:
@@ -130,7 +130,7 @@ spec:
       
       containers:
       - name: translation-studio
-        image: cronos-ai/translation-studio:1.0.0
+        image: qbitel/translation-studio:1.0.0
         imagePullPolicy: IfNotPresent
         
         ports:
@@ -142,9 +142,9 @@ spec:
           protocol: TCP
         
         env:
-        - name: CRONOS_AI_ENVIRONMENT
+        - name: QBITEL_AI_ENVIRONMENT
           value: "production"
-        - name: CRONOS_AI_SERVICE_NAME
+        - name: QBITEL_AI_SERVICE_NAME
           value: "translation-studio"
         - name: OPENAI_API_KEY
           valueFrom:
@@ -156,19 +156,19 @@ spec:
             secretKeyRef:
               name: translation-studio-secrets
               key: anthropic-api-key
-        - name: CRONOS_AI_DB_PASSWORD
+        - name: QBITEL_AI_DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: translation-studio-secrets
               key: database-password
-        - name: CRONOS_AI_REDIS_PASSWORD
+        - name: QBITEL_AI_REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
               name: translation-studio-secrets
               key: redis-password
-        - name: CRONOS_AI_DB_HOST
+        - name: QBITEL_AI_DB_HOST
           value: "postgres-service"
-        - name: CRONOS_AI_REDIS_HOST
+        - name: QBITEL_AI_REDIS_HOST
           value: "redis-service"
         
         volumeMounts:
@@ -236,9 +236,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: translation-studio-service
-  namespace: cronos-translation-studio
+  namespace: qbitel-translation-studio
   labels:
-    app: cronos-ai
+    app: qbitel
     component: translation-studio
 spec:
   type: ClusterIP
@@ -252,20 +252,20 @@ spec:
     targetPort: metrics
     protocol: TCP
   selector:
-    app: cronos-ai
+    app: qbitel
     component: translation-studio
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: translation-studio
-  namespace: cronos-translation-studio
+  namespace: qbitel-translation-studio
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: translation-studio-hpa
-  namespace: cronos-translation-studio
+  namespace: qbitel-translation-studio
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -318,23 +318,23 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: translation-studio-pdb
-  namespace: cronos-translation-studio
+  namespace: qbitel-translation-studio
 spec:
   minAvailable: 2
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
       component: translation-studio
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: translation-studio-network-policy
-  namespace: cronos-translation-studio
+  namespace: qbitel-translation-studio
 spec:
   podSelector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
       component: translation-studio
   policyTypes:
   - Ingress
@@ -343,14 +343,14 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          name: cronos-ai-gateway
+          name: qbitel-gateway
     ports:
     - protocol: TCP
       port: 8000
   - from:
     - namespaceSelector:
         matchLabels:
-          name: cronos-monitoring
+          name: qbitel-monitoring
     ports:
     - protocol: TCP
       port: 9090
@@ -358,14 +358,14 @@ spec:
   - to:
     - namespaceSelector:
         matchLabels:
-          name: cronos-database
+          name: qbitel-database
     ports:
     - protocol: TCP
       port: 5432
   - to:
     - namespaceSelector:
         matchLabels:
-          name: cronos-cache
+          name: qbitel-cache
     ports:
     - protocol: TCP
       port: 6379
@@ -379,14 +379,14 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: translation-studio-metrics
-  namespace: cronos-translation-studio
+  namespace: qbitel-translation-studio
   labels:
-    app: cronos-ai
+    app: qbitel
     component: translation-studio
 spec:
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
       component: translation-studio
   endpoints:
   - port: metrics
@@ -397,7 +397,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: translation-studio-cache
-  namespace: cronos-translation-studio
+  namespace: qbitel-translation-studio
 spec:
   accessModes:
   - ReadWriteMany

@@ -1,0 +1,19 @@
+{
+  "program_id": "TRKB605",
+  "domain": "transportation",
+  "program_type": "batch_processing",
+  "author": "S. BROWN",
+  "lines_of_code": 279,
+  "complexity_level": "complex",
+  "complexity_score": 0.718,
+  "files_used": 4,
+  "verbs_used": 13,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.948484",
+  "hash": "d52e4b89ca20c7b10cd1c42bbec00786"
+}

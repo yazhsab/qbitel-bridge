@@ -2,7 +2,7 @@
 
 ## Overview
 
-Translation Studio is CRONOS AI's automatic API and SDK generation platform that converts discovered protocols into modern REST APIs, GraphQL endpoints, and multi-language SDKs. It bridges the gap between legacy systems and modern application development, enabling seamless integration without manual coding.
+Translation Studio is QBITEL's automatic API and SDK generation platform that converts discovered protocols into modern REST APIs, GraphQL endpoints, and multi-language SDKs. It bridges the gap between legacy systems and modern application development, enabling seamless integration without manual coding.
 
 ---
 
@@ -18,7 +18,7 @@ After understanding a legacy protocol, organizations still face:
 - **Integration testing**: Each client requires extensive QA
 - **Security implementation**: OAuth, JWT, rate limiting must be hand-coded
 
-### The CRONOS AI Solution
+### The QBITEL Solution
 
 Translation Studio automatically generates:
 - OpenAPI 3.0 specifications from protocol grammar
@@ -331,7 +331,7 @@ Content-Type: application/json
 Response:
 {
     "connection_id": "conn_ws_12345",
-    "websocket_url": "wss://api.cronos-ai.com/translation/ws/conn_ws_12345",
+    "websocket_url": "wss://api.qbitel.com/translation/ws/conn_ws_12345",
     "status": "active"
 }
 ```
@@ -469,7 +469,7 @@ package main
 import (
     "context"
     "fmt"
-    banking "github.com/cronos-ai/iso8583-banking-sdk"
+    banking "github.com/yazhsab/iso8583-banking-sdk"
 )
 
 func main() {
@@ -545,24 +545,24 @@ func main() {
 
 ```bash
 # Core Settings
-CRONOS_TRANSLATION_ENABLED=true
-CRONOS_TRANSLATION_MAX_FILE_SIZE=10485760
-CRONOS_TRANSLATION_CONFIDENCE_THRESHOLD=0.7
-CRONOS_TRANSLATION_MAX_CONCURRENT=10
+QBITEL_TRANSLATION_ENABLED=true
+QBITEL_TRANSLATION_MAX_FILE_SIZE=10485760
+QBITEL_TRANSLATION_CONFIDENCE_THRESHOLD=0.7
+QBITEL_TRANSLATION_MAX_CONCURRENT=10
 
 # SDK Generation
-CRONOS_SDK_LANGUAGES=python,typescript,javascript,go,java,csharp
-CRONOS_SDK_INCLUDE_TESTS=true
-CRONOS_SDK_INCLUDE_MOCKS=true
+QBITEL_SDK_LANGUAGES=python,typescript,javascript,go,java,csharp
+QBITEL_SDK_INCLUDE_TESTS=true
+QBITEL_SDK_INCLUDE_MOCKS=true
 
 # Protocol Bridge
-CRONOS_BRIDGE_ENABLED=true
-CRONOS_BRIDGE_MAX_CONNECTIONS=1000
-CRONOS_BRIDGE_BUFFER_SIZE=10000
+QBITEL_BRIDGE_ENABLED=true
+QBITEL_BRIDGE_MAX_CONNECTIONS=1000
+QBITEL_BRIDGE_BUFFER_SIZE=10000
 
 # Caching
-CRONOS_TRANSLATION_CACHE_ENABLED=true
-CRONOS_TRANSLATION_CACHE_TTL=3600
+QBITEL_TRANSLATION_CACHE_ENABLED=true
+QBITEL_TRANSLATION_CACHE_TTL=3600
 ```
 
 ### YAML Configuration
@@ -619,28 +619,28 @@ translation:
 
 ```
 # Request metrics
-cronos_translation_requests_total{operation="discover|generate_api|generate_sdk|translate"}
-cronos_translation_request_duration_seconds{operation}
-cronos_translation_errors_total{operation, error_type}
+qbitel_translation_requests_total{operation="discover|generate_api|generate_sdk|translate"}
+qbitel_translation_request_duration_seconds{operation}
+qbitel_translation_errors_total{operation, error_type}
 
 # Discovery metrics
-cronos_translation_protocol_discoveries_total{protocol}
-cronos_translation_protocol_discovery_confidence{protocol}
+qbitel_translation_protocol_discoveries_total{protocol}
+qbitel_translation_protocol_discovery_confidence{protocol}
 
 # SDK generation metrics
-cronos_translation_sdk_generations_total{language}
-cronos_translation_code_generation_duration_seconds{language}
-cronos_translation_sdk_size_bytes{language}
+qbitel_translation_sdk_generations_total{language}
+qbitel_translation_code_generation_duration_seconds{language}
+qbitel_translation_sdk_size_bytes{language}
 
 # Bridge metrics
-cronos_translation_bridge_connections_active
-cronos_translation_bridge_messages_translated_total
-cronos_translation_bridge_latency_seconds
+qbitel_translation_bridge_connections_active
+qbitel_translation_bridge_messages_translated_total
+qbitel_translation_bridge_latency_seconds
 
 # System metrics
-cronos_translation_cpu_usage_percent
-cronos_translation_memory_usage_bytes
-cronos_translation_service_health
+qbitel_translation_cpu_usage_percent
+qbitel_translation_memory_usage_bytes
+qbitel_translation_service_health
 ```
 
 ### Health Check

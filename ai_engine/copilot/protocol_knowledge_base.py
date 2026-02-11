@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Knowledge Base
+QBITEL - Protocol Knowledge Base
 Specialized knowledge base for protocol intelligence with enterprise features.
 """
 
@@ -19,13 +19,13 @@ from prometheus_client import Counter, Histogram
 
 # Metrics
 KB_DOCUMENT_COUNTER = Counter(
-    "cronos_kb_documents_total", "Total knowledge base documents", ["collection"]
+    "qbitel_kb_documents_total", "Total knowledge base documents", ["collection"]
 )
 KB_QUERY_COUNTER = Counter(
-    "cronos_kb_queries_total", "Total knowledge base queries", ["type"]
+    "qbitel_kb_queries_total", "Total knowledge base queries", ["type"]
 )
 KB_UPDATE_DURATION = Histogram(
-    "cronos_kb_update_duration_seconds", "Knowledge base update duration"
+    "qbitel_kb_update_duration_seconds", "Knowledge base update duration"
 )
 
 logger = logging.getLogger(__name__)

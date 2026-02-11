@@ -1,0 +1,19 @@
+{
+  "program_id": "FRTV373",
+  "domain": "transportation",
+  "program_type": "data_validation",
+  "author": "C. MILLER",
+  "lines_of_code": 206,
+  "complexity_level": "simple",
+  "complexity_score": 0.45,
+  "files_used": 1,
+  "verbs_used": 14,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.868941",
+  "hash": "a8761a6bf4f1318331945ec0082fbfb6"
+}

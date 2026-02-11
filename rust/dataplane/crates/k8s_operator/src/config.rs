@@ -1,4 +1,4 @@
-//! Configuration for the CRONOS AI Kubernetes operator
+//! Configuration for the QBITEL Bridge Kubernetes operator
 
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -409,13 +409,13 @@ impl Default for OperatorConfig {
 impl Default for OperatorSettings {
     fn default() -> Self {
         Self {
-            name: "cronos-ai-operator".to_string(),
+            name: "qbitel-bridge-operator".to_string(),
             version: env!("CARGO_PKG_VERSION").to_string(),
             reconcile_interval_seconds: 300,
             worker_count: 4,
             leader_election_enabled: true,
-            leader_election_namespace: "cronos-ai-system".to_string(),
-            leader_election_lock_name: "cronos-ai-operator-leader".to_string(),
+            leader_election_namespace: "qbitel-bridge-system".to_string(),
+            leader_election_lock_name: "qbitel-bridge-operator-leader".to_string(),
             shutdown_timeout_seconds: 30,
         }
     }
@@ -574,7 +574,7 @@ impl Default for TracingConfig {
             enabled: true,
             endpoint: None,
             sampling_rate: 0.1,
-            service_name: "cronos-ai-operator".to_string(),
+            service_name: "qbitel-bridge-operator".to_string(),
         }
     }
 }
@@ -630,8 +630,8 @@ impl Default for RbacConfig {
     fn default() -> Self {
         Self {
             enabled: true,
-            service_account_name: "cronos-ai-operator".to_string(),
-            cluster_role_name: "cronos-ai-operator".to_string(),
+            service_account_name: "qbitel-bridge-operator".to_string(),
+            cluster_role_name: "qbitel-bridge-operator".to_string(),
             additional_permissions: vec![],
         }
     }
@@ -783,7 +783,7 @@ mod tests {
     fn test_default_config() {
         let config = OperatorConfig::default();
         assert!(config.validate().is_ok());
-        assert_eq!(config.operator.name, "cronos-ai-operator");
+        assert_eq!(config.operator.name, "qbitel-bridge-operator");
         assert_eq!(config.metrics.port, 8080);
         assert_eq!(config.health.port, 8081);
     }

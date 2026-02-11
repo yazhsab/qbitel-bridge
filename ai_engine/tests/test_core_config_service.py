@@ -47,7 +47,7 @@ class TestConfigurationService:
                 backend_type="etcd",
                 etcd_host="localhost",
                 etcd_port=2379,
-                etcd_prefix="/cronos/config",
+                etcd_prefix="/qbitel/config",
             )
             return service
 
@@ -61,13 +61,13 @@ class TestConfigurationService:
                 backend_type="etcd",
                 etcd_host="localhost",
                 etcd_port=2379,
-                etcd_prefix="/cronos/config",
+                etcd_prefix="/qbitel/config",
             )
 
             assert service.backend_type == "etcd"
             assert service.etcd_host == "localhost"
             assert service.etcd_port == 2379
-            assert service.etcd_prefix == "/cronos/config"
+            assert service.etcd_prefix == "/qbitel/config"
             mock_etcd3.client.assert_called_once_with(host="localhost", port=2379)
 
     @pytest.mark.asyncio
@@ -98,7 +98,7 @@ class TestConfigurationService:
         result = await config_service.get_config("database.host")
 
         assert result == "localhost"
-        mock_etcd_client.get.assert_called_once_with("/cronos/config/database/host")
+        mock_etcd_client.get.assert_called_once_with("/qbitel/config/database/host")
 
     @pytest.mark.asyncio
     async def test_get_config_not_found(self, config_service, mock_etcd_client):
@@ -129,7 +129,7 @@ class TestConfigurationService:
 
         assert result is True
         mock_etcd_client.put.assert_called_once_with(
-            "/cronos/config/database/host", "newhost"
+            "/qbitel/config/database/host", "newhost"
         )
 
     @pytest.mark.asyncio
@@ -148,7 +148,7 @@ class TestConfigurationService:
         result = await config_service.delete_config("database.host")
 
         assert result is True
-        mock_etcd_client.delete.assert_called_once_with("/cronos/config/database/host")
+        mock_etcd_client.delete.assert_called_once_with("/qbitel/config/database/host")
 
     @pytest.mark.asyncio
     async def test_delete_config_failure(self, config_service, mock_etcd_client):
@@ -171,7 +171,7 @@ class TestConfigurationService:
         assert len(result) == 2
         assert result[0] == {"host": "localhost"}
         assert result[1] == {"port": 5432}
-        mock_etcd_client.get_prefix.assert_called_once_with("/cronos/config/database")
+        mock_etcd_client.get_prefix.assert_called_once_with("/qbitel/config/database")
 
     @pytest.mark.asyncio
     async def test_watch_config(self, config_service, mock_etcd_client):
@@ -192,7 +192,7 @@ class TestConfigurationService:
 
         # Simulate watch event
         mock_etcd_client.watch_prefix.assert_called_once_with(
-            "/cronos/config/database/host"
+            "/qbitel/config/database/host"
         )
 
     @pytest.mark.asyncio
@@ -225,7 +225,7 @@ class TestConfigurationService:
         result = await config_service.export_config()
 
         assert isinstance(result, dict)
-        mock_etcd_client.get_prefix.assert_called_once_with("/cronos/config")
+        mock_etcd_client.get_prefix.assert_called_once_with("/qbitel/config")
 
     @pytest.mark.asyncio
     async def test_import_config(self, config_service, mock_etcd_client):
@@ -322,12 +322,12 @@ class TestEnvironmentConfigLoader:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_DATABASE_HOST": "localhost",
-                "CRONOS_DATABASE_PORT": "5432",
-                "CRONOS_API_HOST": "0.0.0.0",
+                "QBITEL_DATABASE_HOST": "localhost",
+                "QBITEL_DATABASE_PORT": "5432",
+                "QBITEL_API_HOST": "0.0.0.0",
             },
         ):
-            loader = EnvironmentConfigLoader(prefix="CRONOS_")
+            loader = EnvironmentConfigLoader(prefix="QBITEL_")
             config = loader.load()
 
             assert config["database"]["host"] == "localhost"
@@ -339,12 +339,12 @@ class TestEnvironmentConfigLoader:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_DATABASE_PORT": "5432",
-                "CRONOS_DEBUG": "true",
-                "CRONOS_TIMEOUT": "30.5",
+                "QBITEL_DATABASE_PORT": "5432",
+                "QBITEL_DEBUG": "true",
+                "QBITEL_TIMEOUT": "30.5",
             },
         ):
-            loader = EnvironmentConfigLoader(prefix="CRONOS_")
+            loader = EnvironmentConfigLoader(prefix="QBITEL_")
             config = loader.load()
 
             assert config["database"]["port"] == 5432
@@ -356,12 +356,12 @@ class TestEnvironmentConfigLoader:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_DATABASE_POSTGRES_HOST": "localhost",
-                "CRONOS_DATABASE_POSTGRES_PORT": "5432",
-                "CRONOS_DATABASE_REDIS_HOST": "redis-host",
+                "QBITEL_DATABASE_POSTGRES_HOST": "localhost",
+                "QBITEL_DATABASE_POSTGRES_PORT": "5432",
+                "QBITEL_DATABASE_REDIS_HOST": "redis-host",
             },
         ):
-            loader = EnvironmentConfigLoader(prefix="CRONOS_")
+            loader = EnvironmentConfigLoader(prefix="QBITEL_")
             config = loader.load()
 
             assert config["database"]["postgres"]["host"] == "localhost"
@@ -606,13 +606,13 @@ class TestConfigurationServiceIntegration:
             # Set environment variables
             with patch.dict(
                 os.environ,
-                {"CRONOS_DATABASE_HOST": "env-host", "CRONOS_API_PORT": "9000"},
+                {"QBITEL_DATABASE_HOST": "env-host", "QBITEL_API_PORT": "9000"},
             ):
                 service = ConfigurationService(
                     backend_type="file",
                     config_file=config_file,
                     enable_env_override=True,
-                    env_prefix="CRONOS_",
+                    env_prefix="QBITEL_",
                 )
 
                 # Set base config

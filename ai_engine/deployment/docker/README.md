@@ -1,6 +1,6 @@
-# CRONOS AI Docker Deployment
+# QBITEL Docker Deployment
 
-This directory contains the Docker Compose configuration for running CRONOS AI locally or in development environments.
+This directory contains the Docker Compose configuration for running QBITEL locally or in development environments.
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ This directory contains the Docker Compose configuration for running CRONOS AI l
 
 5. **View logs:**
    ```bash
-   docker-compose logs -f cronos-ai-engine
+   docker-compose logs -f qbitel-engine
    ```
 
 ## Services
@@ -44,7 +44,7 @@ The Docker Compose stack includes the following services:
 | Service | Port | Description |
 |---------|------|-------------|
 | **postgres** | 5432 | PostgreSQL 15 with TimescaleDB |
-| **cronos-ai-engine** | 8000 (REST), 50051 (gRPC), 9090 (Metrics) | Main AI Engine |
+| **qbitel-engine** | 8000 (REST), 50051 (gRPC), 9090 (Metrics) | Main AI Engine |
 | **redis** | 6379 | Redis cache |
 | **mlflow** | 5000 | MLflow tracking server |
 | **prometheus** | 9091 | Prometheus metrics collection |
@@ -59,7 +59,7 @@ After starting the services, you can access:
 - **API Documentation**: http://localhost:8000/docs
 - **Health Check**: http://localhost:8000/health
 - **Metrics**: http://localhost:9090/metrics
-- **Grafana**: http://localhost:3000 (admin/cronos-ai-admin)
+- **Grafana**: http://localhost:3000 (admin/qbitel-admin)
 - **Prometheus**: http://localhost:9091
 - **MLflow**: http://localhost:5000
 
@@ -69,7 +69,7 @@ The database is automatically initialized with:
 - TimescaleDB extension
 - UUID extension
 - pgcrypto extension
-- CRONOS AI schema
+- QBITEL schema
 
 ### Running Migrations
 
@@ -77,17 +77,17 @@ To apply database migrations:
 
 ```bash
 # From the ai_engine directory
-docker-compose exec cronos-ai-engine alembic upgrade head
+docker-compose exec qbitel-engine alembic upgrade head
 ```
 
 ### Accessing the Database
 
 ```bash
 # Connect to PostgreSQL
-docker-compose exec postgres psql -U cronos_user -d cronos_ai
+docker-compose exec postgres psql -U qbitel_user -d qbitel
 
 # Run a SQL query
-docker-compose exec postgres psql -U cronos_user -d cronos_ai -c "SELECT version();"
+docker-compose exec postgres psql -U qbitel_user -d qbitel -c "SELECT version();"
 ```
 
 ## Data Persistence
@@ -107,10 +107,10 @@ Data is persisted in Docker volumes:
 
 ```bash
 # Backup PostgreSQL data
-docker run --rm -v cronos-ai_postgres_data:/data -v $(pwd):/backup ubuntu tar czf /backup/postgres-backup.tar.gz /data
+docker run --rm -v qbitel_postgres_data:/data -v $(pwd):/backup ubuntu tar czf /backup/postgres-backup.tar.gz /data
 
 # Restore PostgreSQL data
-docker run --rm -v cronos-ai_postgres_data:/data -v $(pwd):/backup ubuntu tar xzf /backup/postgres-backup.tar.gz -C /
+docker run --rm -v qbitel_postgres_data:/data -v $(pwd):/backup ubuntu tar xzf /backup/postgres-backup.tar.gz -C /
 ```
 
 ## Production Deployment
@@ -144,7 +144,7 @@ docker-compose ps postgres
 docker-compose logs postgres
 
 # Verify database is ready
-docker-compose exec postgres pg_isready -U cronos_user -d cronos_ai
+docker-compose exec postgres pg_isready -U qbitel_user -d qbitel
 ```
 
 ### Reset Everything
@@ -182,20 +182,20 @@ After making code changes:
 
 ```bash
 # Rebuild and restart the AI engine
-docker-compose up -d --build cronos-ai-engine
+docker-compose up -d --build qbitel-engine
 
 # View logs
-docker-compose logs -f cronos-ai-engine
+docker-compose logs -f qbitel-engine
 ```
 
 ### Running Tests
 
 ```bash
 # Run tests inside the container
-docker-compose exec cronos-ai-engine pytest
+docker-compose exec qbitel-engine pytest
 
 # Run with coverage
-docker-compose exec cronos-ai-engine pytest --cov=ai_engine --cov-report=html
+docker-compose exec qbitel-engine pytest --cov=ai_engine --cov-report=html
 ```
 
 ### Accessing Logs
@@ -205,10 +205,10 @@ docker-compose exec cronos-ai-engine pytest --cov=ai_engine --cov-report=html
 docker-compose logs -f
 
 # Specific service
-docker-compose logs -f cronos-ai-engine
+docker-compose logs -f qbitel-engine
 
 # Last 100 lines
-docker-compose logs --tail=100 cronos-ai-engine
+docker-compose logs --tail=100 qbitel-engine
 ```
 
 ## Configuration
@@ -237,7 +237,7 @@ To use a custom configuration file:
 ## Security Notes
 
 1. **Change default passwords** in `.env`
-2. **Grafana default credentials**: admin/cronos-ai-admin (change in production)
+2. **Grafana default credentials**: admin/qbitel-admin (change in production)
 3. **Database is exposed on port 5432** (remove port mapping in production)
 4. **Redis has no authentication** (configure in production)
 5. **All services use HTTP** (enable HTTPS in production)
@@ -251,4 +251,4 @@ For issues or questions:
 
 ## License
 
-Copyright (c) 2024 CRONOS AI. All rights reserved.
+Copyright (c) 2024 QBITEL. All rights reserved.

@@ -1,0 +1,170 @@
+# QBITEL - UC1 Legacy Mainframe Modernization
+# Development Configuration
+
+# Service Configuration
+service:
+  name: "uc1-legacy-modernization"
+  version: "1.0.0"
+  environment: "development"
+  debug: true
+
+# Server Configuration
+server:
+  host: "127.0.0.1"
+  port: 8000
+  workers: 1
+  timeout: 60
+  keepalive: 5
+
+# Authentication
+auth:
+  enabled: false  # Disabled for development
+  method: "api_key"
+  rate_limit_requests: 1000
+  rate_limit_window_seconds: 60
+  jwt_expiry_hours: 24
+
+# Database Configuration
+database:
+  driver: "sqlite"
+  name: "uc1_demo"
+  echo: true
+
+# LLM Configuration
+llm:
+  primary_provider: "ollama"  # Use local Ollama for development
+  fallback_providers:
+    - "anthropic"
+    - "openai"
+
+  # Request settings
+  max_tokens: 2000
+  temperature: 0.2
+  timeout_seconds: 30
+  max_retries: 2
+  retry_delay_seconds: 1
+
+  # Rate limiting (relaxed for dev)
+  requests_per_minute: 1000
+  requests_per_hour: 10000
+
+  # Caching
+  response_caching: true
+  cache_ttl_hours: 1
+
+  # Provider-specific settings
+  openai:
+    model: "gpt-4o"
+    api_key: "${OPENAI_API_KEY}"
+
+  anthropic:
+    model: "claude-sonnet-4-5-20250929"
+    api_key: "${ANTHROPIC_API_KEY}"
+
+  ollama:
+    model: "llama3.2"
+    base_url: "http://localhost:11434"
+
+# Legacy System Whisperer Configuration
+legacy_whisperer:
+  enabled: true
+
+  # Anomaly detection (relaxed for dev)
+  anomaly_detection:
+    anomaly_threshold: 0.85
+    critical_anomaly_threshold: 0.95
+    llm_analysis_enabled: true
+    detection_interval_seconds: 60
+    enable_real_time_alerts: false
+
+  # Predictive analytics (faster for dev)
+  predictive_analytics:
+    failure_prediction_enabled: true
+    min_historical_data_days: 7
+    prediction_confidence_threshold: 0.7
+
+  # Knowledge capture
+  knowledge_capture:
+    llm_processing_enabled: true
+    peer_review_required: false
+    audit_trail_enabled: false
+    knowledge_retention_days: 365
+
+  # Decision support
+  decision_support:
+    multi_llm_consensus: false
+    detailed_timelines: true
+    max_recommendations: 5
+
+  # System limits (reduced for dev)
+  max_registered_systems: 100
+  max_concurrent_analyses: 5
+  memory_limit_mb: 1024
+
+# Monitoring Configuration
+monitoring:
+  enabled: true
+
+  # Prometheus metrics
+  prometheus:
+    enabled: true
+    port: 9090
+    path: "/metrics"
+
+  # Health checks
+  health_check:
+    enabled: true
+    interval_seconds: 60
+
+  # Logging
+  logging:
+    level: "DEBUG"
+    format: "text"
+    structured: false
+    rotation: false
+
+  # Tracing (disabled for dev)
+  tracing:
+    enabled: false
+
+# Security Configuration
+security:
+  encrypt_sensitive_data: false
+  tls:
+    enabled: false
+  cors:
+    allowed_origins:
+      - "*"
+    allow_credentials: true
+
+# COBOL Analysis Configuration
+cobol_analysis:
+  max_source_size_kb: 512
+  default_depth: "standard"
+  timeout_seconds: 60
+
+# Protocol Analysis Configuration
+protocol_analysis:
+  min_samples: 5
+  max_samples: 100
+  confidence_threshold: 0.7
+  timeout_seconds: 120
+
+# Code Generation Configuration
+code_generation:
+  supported_languages:
+    - python
+    - java
+    - go
+  supported_protocols:
+    - REST
+    - gRPC
+  include_tests: true
+  include_documentation: true
+
+# Cache Configuration
+cache:
+  enabled: true
+  backend: "memory"
+  ttl_seconds: 300
+  max_size_mb: 100

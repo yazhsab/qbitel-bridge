@@ -48,7 +48,7 @@
   </defs>
 
   <!-- Title -->
-  <text x="800" y="40" class="title" text-anchor="middle">CRONOS AI Agentic Architecture</text>
+  <text x="800" y="40" class="title" text-anchor="middle">QBITEL Bridge Agentic Architecture</text>
   <text x="800" y="65" class="subtitle" text-anchor="middle">Multi-Agent System with 78% Autonomous Security Operations</text>
 
   <!-- Core Agents Layer -->
@@ -280,6 +280,6 @@
 
   <!-- Footer -->
   <text x="800" y="1395" class="subtitle" text-anchor="middle" style="font-size: 11px;">
-    © 2025 CRONOS AI - World's First Multi-Agent Security Platform with 78% Autonomous Operations
+    © 2025 QBITEL Bridge - World's First Multi-Agent Security Platform with 78% Autonomous Operations
   </text>
 </svg>

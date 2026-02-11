@@ -69,7 +69,7 @@ jobs:
         image: timescale/timescaledb:latest-pg15
         env:
           POSTGRES_PASSWORD: testpass
-          POSTGRES_DB: cronos_test
+          POSTGRES_DB: qbitel_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -107,7 +107,7 @@ jobs:
 
       - name: Run integration tests
         env:
-          DATABASE_URL: postgresql://postgres:testpass@localhost:5432/cronos_test
+          DATABASE_URL: postgresql://postgres:testpass@localhost:5432/qbitel_test
           REDIS_URL: redis://localhost:6379
         run: |
           pytest ai_engine/tests/ \
@@ -208,7 +208,7 @@ jobs:
             --out json=load-test-results.json
         env:
           BASE_URL: http://localhost:8000
-          API_KEY: cronos_ai_test_key
+          API_KEY: qbitel_test_key
       
       - name: Upload load test results
         if: always()

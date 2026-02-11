@@ -1,5 +1,5 @@
 """
-CRONOS AI - Base Explainability Interfaces
+QBITEL - Base Explainability Interfaces
 
 Defines abstract base classes and common data structures for AI explainability.
 """

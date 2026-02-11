@@ -1,13 +1,13 @@
-# QSLB System Hardening Configuration
+# QBITEL System Hardening Configuration
 # Based on CIS Benchmarks, NIST Guidelines, and Security Best Practices
 
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: qslb-system-hardening
-  namespace: qslb-system
+  name: qbitel-system-hardening
+  namespace: qbitel-system
   labels:
-    app: qslb
+    app: qbitel
     component: security
     hardening: system
 data:
@@ -183,9 +183,9 @@ data:
         - chronyd
         - firewalld
         - fail2ban
-        - qslb-controlplane
-        - qslb-dataplane
-        - qslb-mgmtapi
+        - qbitel-controlplane
+        - qbitel-dataplane
+        - qbitel-mgmtapi
         
       # Service configurations
       service_configs:
@@ -248,11 +248,11 @@ data:
           - port: 443
             protocol: tcp
             source: "0.0.0.0/0"
-            comment: "HTTPS for QSLB API"
+            comment: "HTTPS for QBITEL API"
           - port: 8443
             protocol: tcp
             source: "10.0.0.0/8"
-            comment: "QSLB management interface"
+            comment: "QBITEL management interface"
           - port: 9090
             protocol: tcp
             source: "10.0.1.0/24"
@@ -349,13 +349,13 @@ data:
         enable_rbac: true
         default_role: "user"
         admin_roles:
-          - "qslb-admin"
+          - "qbitel-admin"
           - "system-admin"
         operator_roles:
-          - "qslb-operator"
+          - "qbitel-operator"
           - "network-operator"
         readonly_roles:
-          - "qslb-viewer"
+          - "qbitel-viewer"
           - "auditor"
 
   audit-hardening.yaml: |
@@ -404,10 +404,10 @@ data:
         - "-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -k delete"
         - "-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -k delete"
         
-        # QSLB specific
-        - "-w /etc/qslb/ -p wa -k qslb-config"
-        - "-w /var/lib/qslb/ -p wa -k qslb-data"
-        - "-w /var/log/qslb/ -p wa -k qslb-logs"
+        # QBITEL specific
+        - "-w /etc/qbitel/ -p wa -k qbitel-config"
+        - "-w /var/lib/qbitel/ -p wa -k qbitel-data"
+        - "-w /var/log/qbitel/ -p wa -k qbitel-logs"
         
       # Log retention
       retention:
@@ -419,7 +419,7 @@ data:
       # Log forwarding
       forwarding:
         enable_remote_logging: true
-        remote_log_server: "syslog.qslb.local"
+        remote_log_server: "syslog.qbitel.local"
         remote_log_port: 514
         protocol: "tcp"
         encryption: true
@@ -519,7 +519,7 @@ data:
           
         - name: "access_review"
           description: "Review user access and permissions"
-          command: "qslb-cli iam audit --users --roles --permissions"
+          command: "qbitel-cli iam audit --users --roles --permissions"
           manual_review_required: true
           
       # Monthly checks

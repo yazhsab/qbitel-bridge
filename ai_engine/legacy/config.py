@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Whisperer Configuration
+QBITEL Engine - Legacy System Whisperer Configuration
 
 Enterprise-grade configuration management for Legacy System Whisperer feature.
 Extends the existing configuration system with legacy-specific settings.
@@ -683,7 +683,7 @@ class LegacySystemWhispererConfig:
 
 def extend_base_config_with_legacy(base_config: BaseConfig) -> BaseConfig:
     """
-    Extend the base CRONOS AI configuration with Legacy System Whisperer settings.
+    Extend the base QBITEL configuration with Legacy System Whisperer settings.
 
     Args:
         base_config: Base configuration to extend
@@ -728,7 +728,7 @@ def load_legacy_config_from_file(
 
 
 def load_legacy_config_from_env(
-    prefix: str = "CRONOS_AI_LEGACY_",
+    prefix: str = "QBITEL_AI_LEGACY_",
 ) -> LegacySystemWhispererConfig:
     """Load Legacy System Whisperer configuration from environment variables."""
     config = LegacySystemWhispererConfig()

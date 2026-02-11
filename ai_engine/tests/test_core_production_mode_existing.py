@@ -2,7 +2,7 @@
 Comprehensive tests for ai_engine.core.production_mode module.
 
 This module provides production mode detection and validation for the
-CRONOS AI Engine components.
+QBITEL Engine components.
 """
 
 import pytest

@@ -1,4 +1,4 @@
-//! CRONOS AI DPDK Engine - High-Performance Packet Processing
+//! QBITEL Bridge DPDK Engine - High-Performance Packet Processing
 //!
 //! This module provides enterprise-grade DPDK integration for kernel bypass
 //! and zero-copy packet processing with advanced features including:
@@ -248,7 +248,7 @@ impl DpdkEngine {
         let mut argv: Vec<CString> = Vec::new();
         
         // Program name
-        argv.push(CString::new("cronos-dpdk").unwrap());
+        argv.push(CString::new("qbitel-dpdk").unwrap());
         
         // Core mask
         if !config.core_mask.is_empty() {
@@ -378,43 +378,164 @@ impl DpdkEngine {
         let flow_classifier = Arc::clone(&self.flow_classifier);
         let packet_processor = Arc::clone(&self.packet_processor);
         let analytics = Arc::clone(&self.analytics);
-        
-        let handle = tokio::task::spawn(async move {
-            info!("RX worker {} started", worker_id);
-            
+        let port_id = self.ports.first().map(|p| p.port_id).unwrap_or(0);
+        let queue_id = worker_id as u16;
+        let burst_size: u16 = 32;
+
+        let handle = tokio::task::spawn_blocking(move || {
+            info!("RX worker {} started on port {} queue {}", worker_id, port_id, queue_id);
+
+            let mut rx_bufs: Vec<*mut rte_mbuf> = vec![std::ptr::null_mut(); burst_size as usize];
+
             while !shutdown_signal.load(Ordering::Relaxed) {
-                // Packet receive loop would go here
-                // This is a simplified version - real implementation would:
-                // 1. Poll DPDK ports for packets
-                // 2. Classify packets using flow table
-                // 3. Process packets through the pipeline
-                // 4. Update statistics
-                
-                tokio::time::sleep(Duration::from_millis(1)).await;
+                // 1. Poll DPDK port for packets
+                let nb_rx = unsafe {
+                    rte_eth_rx_burst(
+                        port_id,
+                        queue_id,
+                        rx_bufs.as_mut_ptr(),
+                        burst_size,
+                    )
+                };
+
+                if nb_rx == 0 {
+                    // No packets available, brief pause to avoid busy spin
+                    std::thread::sleep(Duration::from_micros(10));
+                    continue;
+                }
+
+                let mut local_rx_bytes: u64 = 0;
+
+                for i in 0..nb_rx as usize {
+                    let mbuf = rx_bufs[i];
+                    if mbuf.is_null() {
+                        continue;
+                    }
+
+                    let pkt_len = unsafe { (*mbuf).pkt_len } as u64;
+                    local_rx_bytes += pkt_len;
+
+                    // 2. Classify the packet via the flow table
+                    if let Ok(pkt_buf) = PacketBuffer::from_mbuf(mbuf) {
+                        match flow_classifier.classify(&pkt_buf) {
+                            Ok(Some(action)) => {
+                                // 3. Process packet through the pipeline
+                                if let Err(e) = packet_processor.process_sync(&pkt_buf, &action) {
+                                    debug!("RX worker {} packet processing error: {}", worker_id, e);
+                                    let mut s = stats.write();
+                                    s.rx_errors += 1;
+                                }
+                                // Record flow table hit
+                                let mut s = stats.write();
+                                s.flow_table_hits += 1;
+                            }
+                            Ok(None) => {
+                                // Flow table miss — run default pipeline
+                                if let Err(e) = packet_processor.process_default_sync(&pkt_buf) {
+                                    debug!("RX worker {} default processing error: {}", worker_id, e);
+                                }
+                                let mut s = stats.write();
+                                s.flow_table_misses += 1;
+                            }
+                            Err(e) => {
+                                debug!("RX worker {} flow classification error: {}", worker_id, e);
+                            }
+                        }
+
+                        // 4. Submit to analytics
+                        let _ = analytics.record_packet(&pkt_buf);
+                    }
+
+                    // Free the mbuf
+                    unsafe { rte_pktmbuf_free(mbuf); }
+                }
+
+                // Update aggregate stats
+                {
+                    let mut s = stats.write();
+                    s.rx_packets += nb_rx as u64;
+                    s.rx_bytes += local_rx_bytes;
+                }
             }
-            
+
             info!("RX worker {} shutdown", worker_id);
         });
-        
+
         Ok(handle)
     }
-    
+
     /// Start a TX worker thread
-    async fn start_tx_worker(&self, worker_id: usize, _tx_channel: Sender<PacketBuffer>) -> Result<tokio::task::JoinHandle<()>> {
+    async fn start_tx_worker(&self, worker_id: usize, tx_channel: Sender<PacketBuffer>) -> Result<tokio::task::JoinHandle<()>> {
         let shutdown_signal = Arc::clone(&self.shutdown_signal);
         let stats = Arc::clone(&self.stats);
-        
-        let handle = tokio::task::spawn(async move {
-            info!("TX worker {} started", worker_id);
-            
+        let port_id = self.ports.first().map(|p| p.port_id).unwrap_or(0);
+        let queue_id = worker_id as u16;
+        let burst_size: u16 = 32;
+
+        let handle = tokio::task::spawn_blocking(move || {
+            info!("TX worker {} started on port {} queue {}", worker_id, port_id, queue_id);
+
+            let mut tx_bufs: Vec<*mut rte_mbuf> = Vec::with_capacity(burst_size as usize);
+
             while !shutdown_signal.load(Ordering::Relaxed) {
-                // Packet transmit loop would go here
-                tokio::time::sleep(Duration::from_millis(1)).await;
+                tx_bufs.clear();
+
+                // Drain up to burst_size packets from the channel
+                for _ in 0..burst_size {
+                    match tx_channel.try_recv() {
+                        Ok(pkt_buf) => {
+                            if let Some(mbuf) = pkt_buf.into_mbuf() {
+                                tx_bufs.push(mbuf);
+                            }
+                        }
+                        Err(crossbeam_channel::TryRecvError::Empty) => break,
+                        Err(crossbeam_channel::TryRecvError::Disconnected) => {
+                            warn!("TX channel disconnected for worker {}", worker_id);
+                            return;
+                        }
+                    }
+                }
+
+                if tx_bufs.is_empty() {
+                    std::thread::sleep(Duration::from_micros(10));
+                    continue;
+                }
+
+                // Transmit the burst
+                let nb_tx = unsafe {
+                    rte_eth_tx_burst(
+                        port_id,
+                        queue_id,
+                        tx_bufs.as_mut_ptr(),
+                        tx_bufs.len() as u16,
+                    )
+                };
+
+                let mut local_tx_bytes: u64 = 0;
+                for i in 0..nb_tx as usize {
+                    local_tx_bytes += unsafe { (*tx_bufs[i]).pkt_len } as u64;
+                }
+
+                // Free any unsent mbufs
+                let dropped = tx_bufs.len() as u16 - nb_tx;
+                if dropped > 0 {
+                    for i in nb_tx as usize..tx_bufs.len() {
+                        unsafe { rte_pktmbuf_free(tx_bufs[i]); }
+                    }
+                }
+
+                // Update stats
+                {
+                    let mut s = stats.write();
+                    s.tx_packets += nb_tx as u64;
+                    s.tx_bytes += local_tx_bytes;
+                    s.tx_dropped += dropped as u64;
+                }
             }
-            
+
             info!("TX worker {} shutdown", worker_id);
         });
-        
+
         Ok(handle)
     }
     
@@ -450,10 +571,23 @@ impl DpdkEngine {
             while !shutdown_signal.load(Ordering::Relaxed) {
                 interval.tick().await;
                 
-                // Update Prometheus metrics
+                // Update Prometheus metrics from real counters
                 let stats_guard = stats.read();
-                PACKETS_PROCESSED.inc_by(stats_guard.rx_packets);
-                MEMORY_USAGE.set(1024 * 1024 * 256); // Placeholder
+                let total_pkts = stats_guard.rx_packets + stats_guard.tx_packets;
+                PACKETS_PROCESSED.inc_by(total_pkts);
+                ACTIVE_FLOWS.set(stats_guard.flow_table_hits as i64);
+
+                // Query real DPDK memory usage via memzone stats
+                let mem_bytes: i64 = unsafe {
+                    let mut stats_info: rte_malloc_socket_stats = std::mem::zeroed();
+                    // Socket 0 is the primary NUMA node
+                    if rte_malloc_get_socket_stats(0, &mut stats_info) == 0 {
+                        (stats_info.heap_allocsz_bytes) as i64
+                    } else {
+                        0
+                    }
+                };
+                MEMORY_USAGE.set(mem_bytes);
             }
             
             info!("Statistics worker shutdown");

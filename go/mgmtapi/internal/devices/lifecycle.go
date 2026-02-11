@@ -281,7 +281,7 @@ func DefaultLifecycleConfig() *LifecycleConfig {
 		EnrollmentTimeout:       time.Minute * 10,
 		RequireTPMAttestation:   true,
 		RequireSecureBoot:       true,
-		AllowedManufacturers:    []string{"QSLB", "TrustedVendor"},
+		AllowedManufacturers:    []string{"QBITEL", "TrustedVendor"},
 		TrustedRootCAPath:       "",
 		TrustedEKCertsPath:      "",
 		PCRBaselinePath:         "",

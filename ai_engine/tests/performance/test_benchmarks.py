@@ -1,5 +1,5 @@
 """
-Performance Benchmarks for CRONOS AI
+Performance Benchmarks for QBITEL
 Tests throughput, latency, and resource usage of critical components
 """
 
@@ -196,8 +196,8 @@ class TestThroughputBenchmarks:
         for i in range(iterations):
             cert_manager.generate_certificate(
                 f"service-{i}",
-                "cronos-service-mesh",
-                [f"service-{i}.cronos-service-mesh.svc.cluster.local"]
+                "qbitel-service-mesh",
+                [f"service-{i}.qbitel-service-mesh.svc.cluster.local"]
             )
 
         elapsed_time = time.perf_counter() - start_time

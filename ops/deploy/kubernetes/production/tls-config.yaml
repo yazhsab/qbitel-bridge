@@ -9,7 +9,7 @@ spec:
   acme:
     # Production Let's Encrypt server
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: ops@cronos-ai.example.com  # CHANGE THIS
+    email: ops@qbitel.example.com  # CHANGE THIS
     privateKeySecretRef:
       name: letsencrypt-prod-account-key
     solvers:
@@ -18,7 +18,7 @@ spec:
           class: nginx
     - dns01:
         cloudflare:
-          email: ops@cronos-ai.example.com  # CHANGE THIS
+          email: ops@qbitel.example.com  # CHANGE THIS
           apiTokenSecretRef:
             name: cloudflare-api-token
             key: api-token
@@ -34,7 +34,7 @@ spec:
   acme:
     # Staging Let's Encrypt server (for testing)
     server: https://acme-staging-v02.api.letsencrypt.org/directory
-    email: ops@cronos-ai.example.com  # CHANGE THIS
+    email: ops@qbitel.example.com  # CHANGE THIS
     privateKeySecretRef:
       name: letsencrypt-staging-account-key
     solvers:
@@ -57,16 +57,16 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: cronos-ai-api-tls
-  namespace: cronos-ai-production
+  name: qbitel-api-tls
+  namespace: qbitel-production
 spec:
-  secretName: cronos-ai-api-tls
+  secretName: qbitel-api-tls
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-  - api.cronos-ai.example.com  # CHANGE THIS
-  - "*.api.cronos-ai.example.com"
+  - api.qbitel.example.com  # CHANGE THIS
+  - "*.api.qbitel.example.com"
   duration: 2160h  # 90 days
   renewBefore: 360h  # 15 days before expiry
   privateKey:
@@ -84,15 +84,15 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: cronos-ai-grpc-tls
-  namespace: cronos-ai-production
+  name: qbitel-grpc-tls
+  namespace: qbitel-production
 spec:
-  secretName: cronos-ai-grpc-tls
+  secretName: qbitel-grpc-tls
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-  - grpc.cronos-ai.example.com  # CHANGE THIS
+  - grpc.qbitel.example.com  # CHANGE THIS
   duration: 2160h  # 90 days
   renewBefore: 360h  # 15 days before expiry
   privateKey:
@@ -111,18 +111,18 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: cronos-ai-internal-mtls
-  namespace: cronos-ai-production
+  name: qbitel-internal-mtls
+  namespace: qbitel-production
 spec:
-  secretName: cronos-ai-internal-mtls
+  secretName: qbitel-internal-mtls
   issuerRef:
     name: selfsigned-issuer
     kind: ClusterIssuer
-  commonName: cronos-ai-internal
+  commonName: qbitel-internal
   dnsNames:
-  - "*.cronos-ai-production.svc.cluster.local"
-  - "cronos-ai-api.cronos-ai-production.svc.cluster.local"
-  - "cronos-ai-grpc.cronos-ai-production.svc.cluster.local"
+  - "*.qbitel-production.svc.cluster.local"
+  - "qbitel-api.qbitel-production.svc.cluster.local"
+  - "qbitel-grpc.qbitel-production.svc.cluster.local"
   duration: 8760h  # 1 year
   renewBefore: 720h  # 30 days before expiry
   privateKey:
@@ -142,7 +142,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cert-monitor-config
-  namespace: cronos-ai-production
+  namespace: qbitel-production
 data:
   check-interval: "3600"  # Check every hour
   alert-threshold-days: "15"  # Alert when cert expires in 15 days
@@ -153,7 +153,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: cert-rotation-check
-  namespace: cronos-ai-production
+  namespace: qbitel-production
 spec:
   schedule: "0 */6 * * *"  # Every 6 hours
   jobTemplate:
@@ -169,7 +169,7 @@ spec:
             - -c
             - |
               echo "Checking certificate expiry..."
-              kubectl get certificates -n cronos-ai-production -o json | \
+              kubectl get certificates -n qbitel-production -o json | \
               jq -r '.items[] | select(.status.notAfter != null) | 
                 "\(.metadata.name): expires \(.status.notAfter)"'
           restartPolicy: OnFailure
@@ -179,8 +179,8 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: cronos-ai-ingress
-  namespace: cronos-ai-production
+  name: qbitel-ingress
+  namespace: qbitel-production
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -196,16 +196,16 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - api.cronos-ai.example.com
-    secretName: cronos-ai-api-tls
+    - api.qbitel.example.com
+    secretName: qbitel-api-tls
   rules:
-  - host: api.cronos-ai.example.com
+  - host: api.qbitel.example.com
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: cronos-ai-api
+            name: qbitel-api
             port:
               number: 8080

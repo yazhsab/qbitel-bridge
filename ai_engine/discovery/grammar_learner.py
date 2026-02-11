@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Grammar Learner for Protocol Discovery
+QBITEL Engine - Grammar Learner for Protocol Discovery
 
 This module implements advanced grammar learning algorithms including enhanced PCFG inference,
 context-sensitive grammar generation, and probabilistic parsing for protocol structure discovery.

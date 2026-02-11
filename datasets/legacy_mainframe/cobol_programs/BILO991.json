@@ -1,0 +1,19 @@
+{
+  "program_id": "BILO991",
+  "domain": "healthcare",
+  "program_type": "online_transaction",
+  "author": "C. MILLER",
+  "lines_of_code": 172,
+  "complexity_level": "simple",
+  "complexity_score": 0.393,
+  "files_used": 1,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.826565",
+  "hash": "8e8eb3c9a3a170667f9e84b59a0a7c73"
+}

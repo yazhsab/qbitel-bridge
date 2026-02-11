@@ -1,5 +1,5 @@
 """
-CRONOS AI - Explainability Integration Example
+QBITEL - Explainability Integration Example
 
 Example of integrating explainability into the protocol classifier.
 This demonstrates how to use SHAP explainer with the existing CNN classifier.
@@ -190,7 +190,7 @@ async def example_usage():
     # Wrap with explainability
     explainable_classifier = ExplainableProtocolClassifier(
         classifier=classifier,
-        database_url="postgresql+asyncpg://user:pass@localhost/cronos_ai",
+        database_url="postgresql+asyncpg://user:pass@localhost/qbitel",
         enable_audit_logging=True,
         enable_explanations=True,
     )

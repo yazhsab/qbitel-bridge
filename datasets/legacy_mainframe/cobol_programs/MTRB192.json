@@ -1,0 +1,19 @@
+{
+  "program_id": "MTRB192",
+  "domain": "utilities",
+  "program_type": "batch_processing",
+  "author": "R. WILLIAMS",
+  "lines_of_code": 206,
+  "complexity_level": "simple",
+  "complexity_score": 0.435,
+  "files_used": 1,
+  "verbs_used": 13,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.933326",
+  "hash": "c55e34ee1a1ed0846074c88cbeb08872"
+}

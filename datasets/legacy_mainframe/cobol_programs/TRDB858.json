@@ -1,0 +1,19 @@
+{
+  "program_id": "TRDB858",
+  "domain": "finance",
+  "program_type": "batch_processing",
+  "author": "J. SMITH",
+  "lines_of_code": 208,
+  "complexity_level": "simple",
+  "complexity_score": 0.436,
+  "files_used": 1,
+  "verbs_used": 13,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.863220",
+  "hash": "a5993c696a36ce805ca125e9c2ba0744"
+}

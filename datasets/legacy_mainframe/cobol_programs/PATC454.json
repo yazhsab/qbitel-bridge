@@ -1,0 +1,19 @@
+{
+  "program_id": "PATC454",
+  "domain": "healthcare",
+  "program_type": "calculation_engine",
+  "author": "D. JONES",
+  "lines_of_code": 213,
+  "complexity_level": "medium",
+  "complexity_score": 0.5,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.848496",
+  "hash": "b63829785932a794f05740ebe4284719"
+}

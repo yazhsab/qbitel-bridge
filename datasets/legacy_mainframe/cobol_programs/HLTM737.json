@@ -1,0 +1,19 @@
+{
+  "program_id": "HLTM737",
+  "domain": "healthcare",
+  "program_type": "file_maintenance",
+  "author": "D. JONES",
+  "lines_of_code": 172,
+  "complexity_level": "simple",
+  "complexity_score": 0.393,
+  "files_used": 1,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.948196",
+  "hash": "ac4ef261353aa973a1da5c1e7e12b859"
+}

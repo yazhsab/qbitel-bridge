@@ -1,0 +1,19 @@
+{
+  "program_id": "BILB306",
+  "domain": "utilities",
+  "program_type": "batch_processing",
+  "author": "J. SMITH",
+  "lines_of_code": 233,
+  "complexity_level": "medium",
+  "complexity_score": 0.531,
+  "files_used": 2,
+  "verbs_used": 13,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.844329",
+  "hash": "0a8511b03691c495cabd2c44e55f4136"
+}

@@ -1,5 +1,5 @@
 """
-CRONOS AI Dataset Validator
+QBITEL Dataset Validator
 
 Comprehensive validation of all generated ML datasets.
 """
@@ -22,7 +22,7 @@ class ValidationResult:
 
 
 class DatasetValidator:
-    """Validate CRONOS AI datasets for ML training readiness."""
+    """Validate QBITEL datasets for ML training readiness."""
 
     def __init__(self, base_path: Optional[str] = None):
         if base_path:
@@ -493,7 +493,7 @@ class DatasetValidator:
         """Generate a validation report."""
         lines = []
         lines.append("=" * 70)
-        lines.append("CRONOS AI Dataset Validation Report")
+        lines.append("QBITEL Dataset Validation Report")
         lines.append("=" * 70)
 
         total_passed = 0

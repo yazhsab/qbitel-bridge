@@ -2,7 +2,7 @@
 
 ## Overview
 
-Cloud-Native Security is CRONOS AI's comprehensive platform for securing Kubernetes, service mesh, and containerized environments. It provides quantum-safe mTLS, eBPF-based runtime protection, secure event streaming, and deep integration with Istio/Envoy service meshes.
+Cloud-Native Security is QBITEL's comprehensive platform for securing Kubernetes, service mesh, and containerized environments. It provides quantum-safe mTLS, eBPF-based runtime protection, secure event streaming, and deep integration with Istio/Envoy service meshes.
 
 ---
 
@@ -18,7 +18,7 @@ Cloud-native environments introduce unique security challenges:
 - **Dynamic infrastructure**: IPs and services change constantly
 - **Quantum vulnerability**: TLS 1.3 uses quantum-vulnerable key exchange
 
-### The CRONOS AI Solution
+### The QBITEL Solution
 
 Cloud-Native Security provides:
 - **Quantum-safe mTLS**: Kyber-1024 key exchange for service mesh
@@ -102,7 +102,7 @@ Envoy configuration management at scale:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    CRONOS Cloud-Native Security                  │
+│                    QBITEL Cloud-Native Security                  │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
@@ -401,8 +401,8 @@ Response:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cronos-mesh-controller
-  namespace: cronos-security
+  name: qbitel-mesh-controller
+  namespace: qbitel-security
 spec:
   replicas: 3
   selector:
@@ -413,10 +413,10 @@ spec:
       labels:
         app: mesh-controller
     spec:
-      serviceAccountName: cronos-mesh-controller
+      serviceAccountName: qbitel-mesh-controller
       containers:
       - name: controller
-        image: cronos-ai/mesh-controller:latest
+        image: qbitel/mesh-controller:latest
         ports:
         - containerPort: 8080
           name: xds
@@ -458,8 +458,8 @@ spec:
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: cronos-ebpf-monitor
-  namespace: cronos-security
+  name: qbitel-ebpf-monitor
+  namespace: qbitel-security
 spec:
   selector:
     matchLabels:
@@ -473,7 +473,7 @@ spec:
       hostNetwork: true
       containers:
       - name: ebpf-monitor
-        image: cronos-ai/ebpf-monitor:latest
+        image: qbitel/ebpf-monitor:latest
         securityContext:
           privileged: true
           capabilities:
@@ -509,13 +509,13 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: cronos-image-validator
+  name: qbitel-image-validator
 webhooks:
-- name: image-validator.cronos-ai.com
+- name: image-validator.qbitel.com
   clientConfig:
     service:
-      name: cronos-admission-webhook
-      namespace: cronos-security
+      name: qbitel-admission-webhook
+      namespace: qbitel-security
       path: /validate-image
     caBundle: ${CA_BUNDLE}
   rules:
@@ -640,28 +640,28 @@ cloud_native:
 
 ```
 # Service mesh metrics
-cronos_mesh_proxies_total{status="connected|disconnected"}
-cronos_mesh_config_updates_total{type="lds|rds|cds|eds|sds"}
-cronos_mesh_config_latency_seconds
-cronos_mesh_mtls_handshakes_total{status="success|failure"}
+qbitel_mesh_proxies_total{status="connected|disconnected"}
+qbitel_mesh_config_updates_total{type="lds|rds|cds|eds|sds"}
+qbitel_mesh_config_latency_seconds
+qbitel_mesh_mtls_handshakes_total{status="success|failure"}
 
 # Container security metrics
-cronos_container_images_scanned_total{result="pass|fail"}
-cronos_container_vulnerabilities_total{severity="critical|high|medium|low"}
-cronos_container_admission_decisions_total{decision="allow|deny"}
-cronos_container_admission_latency_seconds
+qbitel_container_images_scanned_total{result="pass|fail"}
+qbitel_container_vulnerabilities_total{severity="critical|high|medium|low"}
+qbitel_container_admission_decisions_total{decision="allow|deny"}
+qbitel_container_admission_latency_seconds
 
 # eBPF metrics
-cronos_ebpf_events_total{type="execve|openat|connect|..."}
-cronos_ebpf_anomalies_detected_total
-cronos_ebpf_containers_monitored
-cronos_ebpf_cpu_overhead_percent
+qbitel_ebpf_events_total{type="execve|openat|connect|..."}
+qbitel_ebpf_anomalies_detected_total
+qbitel_ebpf_containers_monitored
+qbitel_ebpf_cpu_overhead_percent
 
 # Kafka metrics
-cronos_kafka_messages_produced_total{topic}
-cronos_kafka_messages_consumed_total{topic}
-cronos_kafka_produce_latency_seconds
-cronos_kafka_consumer_lag{topic, partition}
+qbitel_kafka_messages_produced_total{topic}
+qbitel_kafka_messages_consumed_total{topic}
+qbitel_kafka_produce_latency_seconds
+qbitel_kafka_consumer_lag{topic, partition}
 ```
 
 ---

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - Dependency Upgrade Migration Script
+QBITEL - Dependency Upgrade Migration Script
 
 This script safely upgrades dependencies to address security vulnerabilities
 and modernize the tech stack.
@@ -504,7 +504,7 @@ class DependencyMigrator:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="CRONOS AI Dependency Upgrade Migration Script"
+        description="QBITEL Dependency Upgrade Migration Script"
     )
     parser.add_argument(
         "--check",
@@ -548,7 +548,7 @@ def main():
     project_root = Path(args.project_root).resolve()
     migrator = DependencyMigrator(project_root)
 
-    print(f"\n{Colors.BOLD}CRONOS AI Dependency Migration Tool{Colors.RESET}")
+    print(f"\n{Colors.BOLD}QBITEL Dependency Migration Tool{Colors.RESET}")
     print(f"Project root: {project_root}\n")
 
     if args.check or not any([args.apply, args.rollback, args.verify]):

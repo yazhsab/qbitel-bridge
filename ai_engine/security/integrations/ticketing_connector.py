@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Ticketing System Integration Connectors
+QBITEL Engine - Ticketing System Integration Connectors
 
 Specialized connectors for ticketing systems like ServiceNow and Jira.
 """
@@ -22,7 +22,7 @@ class TicketingConnector(BaseIntegrationConnector, ABC):
 
     def __init__(self, config):
         super().__init__(config)
-        self.logger = get_security_logger("cronos.security.integrations.ticketing")
+        self.logger = get_security_logger("qbitel.security.integrations.ticketing")
 
     @abstractmethod
     async def create_ticket(self, security_event: SecurityEvent) -> IntegrationResult:
@@ -217,7 +217,7 @@ class ServiceNowConnector(TicketingConnector):
 
                 if automated_response.status.value == "completed":
                     update_data["resolution_notes"] = (
-                        f"Automatically resolved by CRONOS AI Security Orchestrator. Response ID: {automated_response.response_id}"
+                        f"Automatically resolved by QBITEL Security Orchestrator. Response ID: {automated_response.response_id}"
                     )
 
                 return await self.update_ticket(existing_ticket["sys_id"], update_data)
@@ -439,7 +439,7 @@ class ServiceNowConnector(TicketingConnector):
         )
 
         return {
-            "short_description": f"CRONOS AI Security Alert: {security_event.event_type.value}",
+            "short_description": f"QBITEL Security Alert: {security_event.event_type.value}",
             "description": security_event.description,
             "priority": priority,
             "urgency": urgency,
@@ -458,7 +458,7 @@ class ServiceNowConnector(TicketingConnector):
             "u_user": security_event.user,
             "u_threat_level": security_event.threat_level.value,
             "u_source_system": security_event.source_system,
-            "work_notes": f"Automated incident created by CRONOS AI Security Orchestrator\nEvent ID: {security_event.event_id}\nTimestamp: {security_event.timestamp.isoformat()}",
+            "work_notes": f"Automated incident created by QBITEL Security Orchestrator\nEvent ID: {security_event.event_id}\nTimestamp: {security_event.timestamp.isoformat()}",
         }
 
     def _convert_threat_analysis_to_incident(
@@ -496,7 +496,7 @@ Recommended Actions: {', '.join([action.value for action in threat_analysis.reco
         """
 
         return {
-            "short_description": f"CRONOS AI Threat Analysis: {threat_analysis.threat_category.value}",
+            "short_description": f"QBITEL Threat Analysis: {threat_analysis.threat_category.value}",
             "description": description,
             "priority": priority,
             "urgency": urgency,
@@ -539,7 +539,7 @@ Actions Taken:
 """
 
     def _map_threat_level_to_priority(self, threat_level: str) -> tuple[str, str]:
-        """Map CRONOS threat level to ServiceNow priority and urgency."""
+        """Map QBITEL threat level to ServiceNow priority and urgency."""
 
         mapping = {
             "critical": ("1", "1"),  # Critical priority, High urgency
@@ -741,7 +741,7 @@ class JiraConnector(TicketingConnector):
                     await self._transition_issue(
                         existing_ticket["key"],
                         "Done",
-                        f"Automatically resolved by CRONOS AI Security Orchestrator. Response ID: {automated_response.response_id}",
+                        f"Automatically resolved by QBITEL Security Orchestrator. Response ID: {automated_response.response_id}",
                     )
 
                 return result
@@ -1049,7 +1049,7 @@ class JiraConnector(TicketingConnector):
 
         search_url = f"{self.config.endpoint}/rest/api/2/search"
         params = {
-            "jql": f'project = {self.project_key} AND labels = "cronos-event-{event_id}"',
+            "jql": f'project = {self.project_key} AND labels = "qbitel-event-{event_id}"',
             "maxResults": 1,
         }
         headers = {"Authorization": self.auth_header, "Accept": "application/json"}
@@ -1083,13 +1083,13 @@ class JiraConnector(TicketingConnector):
         return {
             "fields": {
                 "project": {"key": self.project_key},
-                "summary": f"CRONOS AI Security Alert: {security_event.event_type.value}",
+                "summary": f"QBITEL Security Alert: {security_event.event_type.value}",
                 "description": security_event.description,
                 "issuetype": {"name": self.issue_type},
                 "priority": {"name": priority},
                 "labels": [
-                    "cronos-ai",
-                    f"cronos-event-{security_event.event_id}",
+                    "qbitel",
+                    f"qbitel-event-{security_event.event_id}",
                     f"threat-{security_event.threat_level.value}",
                     "security-incident",
                 ],
@@ -1139,13 +1139,13 @@ h4. Indicators of Compromise
         return {
             "fields": {
                 "project": {"key": self.project_key},
-                "summary": f"CRONOS AI Threat Analysis: {threat_analysis.threat_category.value}",
+                "summary": f"QBITEL Threat Analysis: {threat_analysis.threat_category.value}",
                 "description": description,
                 "issuetype": {"name": self.issue_type},
                 "priority": {"name": priority},
                 "labels": [
-                    "cronos-ai",
-                    f"cronos-event-{threat_analysis.event_id}",
+                    "qbitel",
+                    f"qbitel-event-{threat_analysis.event_id}",
                     f"threat-{threat_analysis.threat_level.value}",
                     "threat-analysis",
                 ],
@@ -1186,7 +1186,7 @@ h5. Actions Taken:
 """
 
     def _map_threat_level_to_jira_priority(self, threat_level: str) -> str:
-        """Map CRONOS threat level to Jira priority."""
+        """Map QBITEL threat level to Jira priority."""
 
         mapping = {
             "critical": "Highest",

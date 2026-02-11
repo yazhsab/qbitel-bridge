@@ -1,0 +1,254 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Telecommunications | QBITEL Bridge"
+  description="Quantum-safe 5G and network infrastructure security. Protect signaling protocols, carrier authentication, and network operations with AI-powered protocol discovery."
+>
+  <PageHero
+    title="Telecommunications"
+    description="Quantum-safe 5G and network infrastructure security. Protect signaling protocols and carrier authentication with zero-touch threat response for network operations."
+    badge="Telecommunications"
+    gradient="from-violet-500 to-purple-500"
+  />
+
+  <!-- Challenge Section -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          The <span class="gradient-text">Challenge</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Telecom networks carry the world's communications on infrastructure that spans multiple protocol generations. Legacy signaling protocols coexist with 5G systems, creating a vast attack surface.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="card p-6">
+          <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">SS7 Vulnerabilities</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Legacy SS7 signaling has well-known vulnerabilities that enable call interception, SMS hijacking, and location tracking. These protocols cannot be easily replaced while maintaining network connectivity.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">5G Security Gaps</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            5G introduces new attack vectors through network slicing, edge computing, and massive IoT. Current 5G-AKA authentication will not survive quantum attacks.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Multi-Generation Networks</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Carriers operate 3G, 4G, and 5G simultaneously with complex interworking. Each generation uses different signaling protocols that all need quantum-safe protection.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Supported Protocols -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Supported <span class="gradient-text">Protocols</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Deep protocol intelligence for every generation of telecom signaling, from legacy SS7 to 5G core network functions.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-violet-400 uppercase tracking-wider mb-1">4G/5G Signaling</h3>
+          <p class="text-xs text-gray-500 mb-3">Core network control plane</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">Diameter</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">HTTP/2 (5GC)</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">PFCP</span>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-violet-400 uppercase tracking-wider mb-1">Legacy Signaling</h3>
+          <p class="text-xs text-gray-500 mb-3">2G/3G interconnect</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">SS7</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">SIGTRAN</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">MAP</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">CAMEL</span>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-violet-400 uppercase tracking-wider mb-1">Voice & Media</h3>
+          <p class="text-xs text-gray-500 mb-3">Session and media control</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">SIP</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">RTP/SRTP</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">MEGACO</span>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-violet-400 uppercase tracking-wider mb-1">Data Plane</h3>
+          <p class="text-xs text-gray-500 mb-3">User data tunneling</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">GTP-U</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">GTP-C</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">GPRS</span>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-violet-400 uppercase tracking-wider mb-1">Messaging & AAA</h3>
+          <p class="text-xs text-gray-500 mb-3">Subscriber services</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">SMPP</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">RADIUS</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">TACACS+</span>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-violet-400 uppercase tracking-wider mb-1">AI Discovery</h3>
+          <p class="text-sm text-gray-400 mt-3">
+            Proprietary vendor protocols and custom network functions discovered from live network traffic.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QBITEL Solutions -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          QBITEL <span class="gradient-text">Solutions</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Quantum-safe security across all network generations with AI-powered protocol discovery and autonomous threat response.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500 bg-opacity-10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">Network Protocol Discovery</h3>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            AI discovers every protocol on the network, including undocumented vendor implementations and custom interworking functions. Maps the complete signaling topology across all network generations.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500 bg-opacity-10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">Quantum-Safe 5G Core</h3>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            PQC-protected signaling for 5G core network functions. Quantum-safe authentication for network slices, edge nodes, and service-based architecture interfaces.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500 bg-opacity-10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">SS7 Security Hardening</h3>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Wraps legacy SS7/SIGTRAN signaling with quantum-safe encryption and anomaly detection. Blocks location tracking, call interception, and SMS hijacking attacks without replacing SS7 infrastructure.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500 bg-opacity-10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">Zero-Touch NOC Operations</h3>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Autonomous threat response for network operations centers. Detects signaling storms, GTP tunneling attacks, and Diameter spoofing with sub-second automated response.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compliance -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          <span class="gradient-text">Compliance</span> Frameworks
+        </h2>
+        <p class="section-subheading mx-auto">
+          Automated compliance for telecom regulatory requirements across multiple jurisdictions and network standards.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card p-5 text-center">
+          <span class="text-xl font-bold text-violet-400">3GPP TS 33</span>
+          <p class="text-xs text-gray-400 mt-2">5G security architecture and procedures for network functions</p>
+        </div>
+        <div class="card p-5 text-center">
+          <span class="text-xl font-bold text-violet-400">GSMA FS.31</span>
+          <p class="text-xs text-gray-400 mt-2">Baseline security controls for telecom operators</p>
+        </div>
+        <div class="card p-5 text-center">
+          <span class="text-xl font-bold text-violet-400">NESAS</span>
+          <p class="text-xs text-gray-400 mt-2">Network Equipment Security Assurance Scheme</p>
+        </div>
+        <div class="card p-5 text-center">
+          <span class="text-xl font-bold text-violet-400">EU NIS2</span>
+          <p class="text-xs text-gray-400 mt-2">European directive on network and information systems security</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <CTABanner
+    title="Quantum-Safe Your Network Infrastructure"
+    description="Deploy PQC-protected signaling across all network generations. Discover every protocol on your network and respond to threats autonomously."
+  />
+</PageLayout>

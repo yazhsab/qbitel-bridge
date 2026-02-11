@@ -126,9 +126,9 @@ func (da *DeviceAgent) enroll(ctx context.Context) error {
 	// Create enrollment request
 	req := &EnrollmentRequest{
 		DeviceID:     da.deviceID,
-		DeviceType:   "qslb-device",
+		DeviceType:   "qbitel-device",
 		EKCert:       ekCert,
-		Manufacturer: "QSLB",
+		Manufacturer: "QBITEL",
 		Model:        "v1.0",
 		SerialNumber: da.deviceID,
 	}
@@ -230,7 +230,7 @@ func (da *DeviceAgent) generateMockCertificate(certType string) ([]byte, error) 
 		SerialNumber: big.NewInt(1),
 		Subject: pkix.Name{
 			CommonName:   fmt.Sprintf("%s-%s", certType, da.deviceID),
-			Organization: []string{"QSLB"},
+			Organization: []string{"QBITEL"},
 		},
 		NotBefore:    time.Now(),
 		NotAfter:     time.Now().Add(365 * 24 * time.Hour),
@@ -375,5 +375,5 @@ func getControlURL() string {
 	if url := os.Getenv("CONTROL_URL"); url != "" {
 		return url
 	}
-	return "https://control.qslb.local"
+	return "https://control.qbitel.local"
 }

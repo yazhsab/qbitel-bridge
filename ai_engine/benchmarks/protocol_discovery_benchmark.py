@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Protocol Discovery Benchmarking Framework
+QBITEL Engine - Protocol Discovery Benchmarking Framework
 
 This module provides comprehensive benchmarking capabilities for protocol
 discovery systems, including performance, accuracy, and scalability testing.

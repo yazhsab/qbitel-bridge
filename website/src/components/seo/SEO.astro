@@ -1,0 +1,52 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  type?: 'website' | 'article';
+  canonical?: string;
+}
+
+const {
+  title,
+  description,
+  image = '/og-image.png',
+  type = 'website',
+  canonical,
+} = Astro.props;
+
+const siteTitle = 'QBITEL Bridge';
+const fullTitle = title === siteTitle ? title : `${title} | ${siteTitle}`;
+const canonicalURL = canonical || new URL(Astro.url.pathname, Astro.site);
+const imageURL = new URL(image, Astro.site);
+---
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Open Graph -->
+<meta property="og:type" content={type} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:image" content={imageURL} />
+<meta property="og:site_name" content={siteTitle} />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageURL} />
+
+<!-- JSON-LD -->
+<script type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  'name': 'QBITEL Bridge',
+  'applicationCategory': 'SecurityApplication',
+  'operatingSystem': 'Linux, macOS, Windows',
+  'license': 'https://www.apache.org/licenses/LICENSE-2.0',
+  'url': 'https://bridge.qbitel.com',
+  'description': 'AI-powered quantum-safe legacy modernization platform',
+})} />

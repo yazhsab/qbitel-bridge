@@ -1,5 +1,5 @@
 """
-CRONOS AI - Automated Report Generator
+QBITEL - Automated Report Generator
 
 Enterprise-grade compliance report generation with multiple formats,
 LLM-powered content generation, and regulator-ready outputs.
@@ -19,7 +19,7 @@ from pathlib import Path
 
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest, get_llm_service
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..monitoring.enterprise_metrics import get_enterprise_metrics
 from .regulatory_kb import (
     ComplianceAssessment,
@@ -32,7 +32,7 @@ from .regulatory_kb import (
 logger = logging.getLogger(__name__)
 
 
-class ReportException(CronosAIException):
+class ReportException(QbitelAIException):
     """Report generation specific exception."""
 
     pass
@@ -752,7 +752,7 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
     {% endfor %}
     
     <div class="footer">
-        <p><em>This report was generated automatically by CRONOS AI Compliance Reporter on {{ content.metadata.generation_date }}.</em></p>
+        <p><em>This report was generated automatically by QBITEL Compliance Reporter on {{ content.metadata.generation_date }}.</em></p>
         </div>
 </body>
 </html>

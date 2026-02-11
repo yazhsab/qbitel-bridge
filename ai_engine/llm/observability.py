@@ -1,5 +1,5 @@
 """
-CRONOS AI - LLM Observability and Tracing
+QBITEL - LLM Observability and Tracing
 Comprehensive observability for LLM operations with Langfuse integration.
 
 This module provides:
@@ -43,34 +43,34 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 LLM_TRACE_COUNTER = Counter(
-    "cronos_llm_traces_total",
+    "qbitel_llm_traces_total",
     "Total LLM traces",
     ["provider", "operation", "status"]
 )
 LLM_COST_COUNTER = Counter(
-    "cronos_llm_cost_dollars_total",
+    "qbitel_llm_cost_dollars_total",
     "Total LLM cost in dollars",
     ["provider", "model"]
 )
 LLM_LATENCY_HISTOGRAM = Histogram(
-    "cronos_llm_latency_seconds",
+    "qbitel_llm_latency_seconds",
     "LLM operation latency",
     ["provider", "model", "operation"],
     buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0]
 )
 LLM_TOKEN_HISTOGRAM = Histogram(
-    "cronos_llm_tokens",
+    "qbitel_llm_tokens",
     "Token usage per request",
     ["provider", "model", "token_type"],
     buckets=[10, 50, 100, 500, 1000, 2000, 4000, 8000, 16000, 32000]
 )
 LLM_ERROR_COUNTER = Counter(
-    "cronos_llm_errors_total",
+    "qbitel_llm_errors_total",
     "Total LLM errors",
     ["provider", "error_type"]
 )
 ACTIVE_TRACES_GAUGE = Gauge(
-    "cronos_llm_active_traces",
+    "qbitel_llm_active_traces",
     "Currently active LLM traces"
 )
 

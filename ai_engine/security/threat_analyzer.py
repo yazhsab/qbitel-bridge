@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Threat Analyzer
+QBITEL Engine - Threat Analyzer
 
 Advanced threat analysis with ML models and LLM-powered contextual insights.
 """
@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest, get_llm_service
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..models.base import BaseModel, ModelInput, ModelOutput
 from .models import (
     SecurityEvent,
@@ -35,18 +35,18 @@ from prometheus_client import Counter, Histogram, Gauge
 
 # Prometheus metrics
 THREAT_ANALYSIS_COUNTER = Counter(
-    "cronos_threat_analysis_total",
+    "qbitel_threat_analysis_total",
     "Threat analysis requests",
     ["event_type", "threat_level"],
 )
 THREAT_ANALYSIS_DURATION = Histogram(
-    "cronos_threat_analysis_duration_seconds", "Threat analysis duration"
+    "qbitel_threat_analysis_duration_seconds", "Threat analysis duration"
 )
 THREAT_CONFIDENCE_GAUGE = Gauge(
-    "cronos_threat_confidence_latest", "Latest threat confidence score"
+    "qbitel_threat_confidence_latest", "Latest threat confidence score"
 )
 ML_MODEL_PREDICTIONS = Counter(
-    "cronos_threat_ml_predictions_total",
+    "qbitel_threat_ml_predictions_total",
     "ML model predictions",
     ["model_type", "prediction"],
 )

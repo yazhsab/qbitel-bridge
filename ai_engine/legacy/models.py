@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Whisperer Models
+QBITEL Engine - Legacy System Whisperer Models
 
 Data models and structures for legacy system management.
 """

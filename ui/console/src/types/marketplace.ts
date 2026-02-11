@@ -58,8 +58,8 @@ export interface QualityMetrics {
 }
 
 export interface Compatibility {
-  min_cronos_version: string;
-  supported_cronos_versions: string[];
+  min_qbitel_version: string;
+  supported_qbitel_versions: string[];
   dependencies: string[];
 }
 
@@ -205,7 +205,7 @@ export interface SubmitProtocolRequest {
   license_type: 'free' | 'paid' | 'enterprise';
   price_model?: 'one_time' | 'subscription' | 'usage_based';
   base_price?: number;
-  min_cronos_version: string;
+  min_qbitel_version: string;
 }
 
 export interface SubmitProtocolResponse {

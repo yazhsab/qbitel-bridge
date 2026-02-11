@@ -1,5 +1,5 @@
 """
-CRONOS AI - Backup Automation
+QBITEL - Backup Automation
 
 Automated backup scheduling, monitoring, and alerting system.
 """
@@ -424,7 +424,7 @@ async def main():
     from .backup_manager import BackupManager
 
     manager = BackupManager(
-        backup_root="/tmp/cronos_backups",
+        backup_root="/tmp/qbitel_backups",
         encryption_key="test_encryption_key",
         retention_days=30,
     )

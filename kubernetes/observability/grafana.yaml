@@ -60,10 +60,10 @@ data:
   dashboards.yaml: |
     apiVersion: 1
     providers:
-      - name: 'cronos-ai'
+      - name: 'qbitel'
         orgId: 1
-        folder: 'CRONOS AI'
-        folderUid: 'cronos-ai'
+        folder: 'QBITEL'
+        folderUid: 'qbitel'
         type: file
         disableDeletion: false
         editable: true
@@ -80,7 +80,7 @@ metadata:
 type: Opaque
 stringData:
   admin-user: admin
-  admin-password: cronos-ai-admin
+  admin-password: qbitel-admin
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -160,7 +160,7 @@ spec:
             name: grafana-dashboards-provider
         - name: grafana-dashboards
           configMap:
-            name: cronos-ai-dashboards
+            name: qbitel-dashboards
 ---
 apiVersion: v1
 kind: Service
@@ -190,7 +190,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: grafana.cronos-ai.local
+    - host: grafana.qbitel.local
       http:
         paths:
           - path: /

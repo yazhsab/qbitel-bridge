@@ -1,5 +1,5 @@
 """
-CRONOS AI - Compliance Integration Tests
+QBITEL - Compliance Integration Tests
 
 End-to-end integration tests for the complete compliance reporting system.
 Tests the full workflow from assessment to report generation with real components.
@@ -45,7 +45,7 @@ async def test_config():
     """Test configuration."""
     config = Mock(spec=Config)
     config.environment = "testing"
-    config.service_name = "cronos-ai-test"
+    config.service_name = "qbitel-test"
     config.version = "1.0.0"
 
     # Compliance configuration
@@ -60,7 +60,7 @@ async def test_config():
     config.database = Mock()
     config.database.host = "localhost"
     config.database.port = 5432
-    config.database.database = "cronos_ai_test"
+    config.database.database = "qbitel_test"
     config.database.username = "test"
     config.database.password = "test"
 

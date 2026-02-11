@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Whisperer Logging
+QBITEL Engine - Legacy System Whisperer Logging
 
 Enhanced logging system for Legacy System Whisperer feature.
 Provides structured, context-aware logging with enterprise-grade capabilities.

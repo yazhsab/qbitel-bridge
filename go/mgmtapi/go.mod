@@ -1,4 +1,4 @@
-module qslb/mgmtapi
+module github.com/yazhsab/qbitel-bridge/go/mgmtapi
 
 go 1.22
 

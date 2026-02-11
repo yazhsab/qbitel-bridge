@@ -1,5 +1,5 @@
 """
-Enterprise configuration management for CRONOS AI Protocol Discovery.
+Enterprise configuration management for QBITEL Bridge.
 Provides centralized, validated, and environment-aware configuration management.
 """
 
@@ -47,8 +47,8 @@ class DatabaseConfig:
 
     host: str = "localhost"
     port: int = 5432
-    database: str = "cronos_ai"
-    username: str = "cronos_user"
+    database: str = "qbitel"
+    username: str = "qbitel_user"
     password: str = ""
     ssl_mode: str = "prefer"
     connection_pool_size: int = 10
@@ -80,7 +80,7 @@ class RedisConfig:
 class AIEngineConfig:
     """AI Engine specific configuration."""
 
-    model_cache_dir: str = "/tmp/cronos_ai_models"
+    model_cache_dir: str = "/tmp/qbitel_models"
     use_gpu: bool = True
     gpu_memory_limit: float = 0.8
     batch_size: int = 32
@@ -126,7 +126,7 @@ class PerformanceConfig:
     cache_size: int = 10000
     cache_ttl: int = 3600
     use_redis_cache: bool = False
-    redis_cache_prefix: str = "cronos_ai:"
+    redis_cache_prefix: str = "qbitel:"
 
     # Memory Management
     buffer_size: int = 8192
@@ -238,7 +238,7 @@ class LoggingConfig:
     level: str = "INFO"
     format: str = "json"
     output: str = "stdout"
-    file_path: str = "/var/log/cronos_ai/app.log"
+    file_path: str = "/var/log/qbitel/app.log"
     max_file_size_mb: int = 100
     backup_count: int = 5
     structured_logging: bool = True
@@ -264,7 +264,7 @@ class MainConfig:
     logging: LoggingConfig = field(default_factory=LoggingConfig)
 
     # Application settings
-    app_name: str = "CRONOS AI Protocol Discovery"
+    app_name: str = "QBITEL Bridge"
     app_version: str = "1.0.0"
     api_host: str = "0.0.0.0"
     api_port: int = 8080
@@ -295,9 +295,9 @@ class ConfigManager:
 
         # Default configuration files to try
         self.config_files = [
-            "cronos_ai.yaml",
-            "cronos_ai.yml",
-            "cronos_ai.json",
+            "qbitel.yaml",
+            "qbitel.yml",
+            "qbitel.json",
             "config.yaml",
             "config.yml",
             "config.json",
@@ -340,11 +340,11 @@ class ConfigManager:
     def _auto_load_config(self) -> MainConfig:
         """Auto-discover and load configuration file."""
         # Try environment-specific files first
-        env = os.getenv("CRONOS_ENVIRONMENT", "development").lower()
+        env = os.getenv("QBITEL_ENVIRONMENT", "development").lower()
         env_files = [
-            f"cronos_ai.{env}.yaml",
-            f"cronos_ai.{env}.yml",
-            f"cronos_ai.{env}.json",
+            f"qbitel.{env}.yaml",
+            f"qbitel.{env}.yml",
+            f"qbitel.{env}.json",
         ]
 
         # Check environment-specific files
@@ -451,7 +451,7 @@ class ConfigManager:
             "API_HOST": (None, "api_host"),
             "API_PORT": (None, "api_port"),
             # Environment
-            "CRONOS_ENVIRONMENT": (None, "environment"),
+            "QBITEL_ENVIRONMENT": (None, "environment"),
             "DEBUG": (None, "debug"),
             # Security
             "JWT_SECRET": ("security", "jwt_secret"),
@@ -710,13 +710,13 @@ if __name__ == "__main__":
         "database": {
             "host": "localhost",
             "port": 5432,
-            "database": "cronos_ai_dev",
+            "database": "qbitel_dev",
             "username": "dev_user",
         },
         "ai_engine": {
             "use_gpu": False,
             "batch_size": 16,
-            "model_cache_dir": "/tmp/cronos_ai_dev_models",
+            "model_cache_dir": "/tmp/qbitel_dev_models",
         },
         "security": {"api_key_enabled": False, "tls_enabled": False},
     }

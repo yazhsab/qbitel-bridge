@@ -1,5 +1,5 @@
 """
-CRONOS AI - Enhanced LLM Copilot API Endpoints
+QBITEL - Enhanced LLM Copilot API Endpoints
 
 REST API endpoints for enhanced LLM copilot capabilities including predictive
 threat modeling, playbook generation, fuzzing, and code generation.

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Test Runner
+QBITEL Engine - Test Runner
 
 This module provides utilities for running comprehensive tests and benchmarks.
 """
@@ -20,7 +20,7 @@ from . import setup_test_environment, cleanup_test_environment, TestConfig
 
 class TestRunnerClass:
     """
-    Comprehensive test runner for CRONOS AI Engine.
+    Comprehensive test runner for QBITEL Engine.
 
     This class provides utilities for running different types of tests
     including unit tests, integration tests, performance benchmarks,
@@ -380,7 +380,7 @@ class TestRunnerClass:
 <!DOCTYPE html>
 <html>
 <head>
-    <title>CRONOS AI Engine - Test Report</title>
+    <title>QBITEL Engine - Test Report</title>
     <style>
         body {{ font-family: Arial, sans-serif; margin: 20px; }}
         .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
@@ -400,7 +400,7 @@ class TestRunnerClass:
 </head>
 <body>
     <div class="header">
-        <h1>CRONOS AI Engine - Test Report</h1>
+        <h1>QBITEL Engine - Test Report</h1>
         <p>Generated on: {time.strftime('%Y-%m-%d %H:%M:%S')}</p>
     </div>
     
@@ -629,7 +629,7 @@ def main():
     """Main CLI entry point for test runner."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="CRONOS AI Engine Test Runner")
+    parser = argparse.ArgumentParser(description="QBITEL Engine Test Runner")
     parser.add_argument(
         "--category",
         type=str,

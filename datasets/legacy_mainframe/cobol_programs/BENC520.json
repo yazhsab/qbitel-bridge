@@ -1,0 +1,19 @@
+{
+  "program_id": "BENC520",
+  "domain": "government",
+  "program_type": "calculation_engine",
+  "author": "P. WILSON",
+  "lines_of_code": 186,
+  "complexity_level": "simple",
+  "complexity_score": 0.404,
+  "files_used": 1,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.804642",
+  "hash": "1948afe9d80a0f4d06afe22e8351bd62"
+}

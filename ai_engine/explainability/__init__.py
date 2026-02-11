@@ -1,8 +1,8 @@
 """
-CRONOS AI - AI Explainability Module
+QBITEL - AI Explainability Module
 
 This module provides explainability and interpretability for AI/ML models
-used in CRONOS AI, meeting regulatory requirements for transparent AI systems.
+used in QBITEL, meeting regulatory requirements for transparent AI systems.
 
 Key Features:
 - SHAP-based explanations for deep learning models (CNN, LSTM)

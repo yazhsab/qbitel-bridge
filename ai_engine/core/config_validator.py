@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Configuration Validation
+QBITEL Engine - Configuration Validation
 Comprehensive validation for production configurations.
 """
 

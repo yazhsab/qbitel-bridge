@@ -1,0 +1,19 @@
+{
+  "program_id": "PRDM133",
+  "domain": "manufacturing",
+  "program_type": "file_maintenance",
+  "author": "T. DAVIS",
+  "lines_of_code": 244,
+  "complexity_level": "complex",
+  "complexity_score": 0.675,
+  "files_used": 4,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.912127",
+  "hash": "f72e0e505a81a40ce290951a3473941c"
+}

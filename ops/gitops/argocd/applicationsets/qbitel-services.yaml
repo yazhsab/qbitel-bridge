@@ -1,0 +1,247 @@
+---
+# QBITEL Services ApplicationSet
+# Automatically creates applications for each QBITEL service across environments
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: qbitel-services
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qbitel-services
+    app.kubernetes.io/part-of: qbitel-gitops
+spec:
+  generators:
+    # Matrix generator: services × environments
+    - matrix:
+        generators:
+          # Services
+          - list:
+              elements:
+                - service: protocol-copilot
+                  path: services/protocol-copilot
+                  port: 8080
+                - service: security-orchestrator
+                  path: services/security-orchestrator
+                  port: 8081
+                - service: legacy-whisperer
+                  path: services/legacy-whisperer
+                  port: 8082
+                - service: compliance-reporter
+                  path: services/compliance-reporter
+                  port: 8083
+                - service: translation-studio
+                  path: services/translation-studio
+                  port: 8084
+                - service: ai-gateway
+                  path: services/ai-gateway
+                  port: 8085
+          # Environments
+          - list:
+              elements:
+                - env: dev
+                  namespace: qbitel-dev
+                  branch: develop
+                  replicas: "1"
+                  autoSync: "true"
+                - env: staging
+                  namespace: qbitel-staging
+                  branch: "release/*"
+                  replicas: "2"
+                  autoSync: "true"
+                - env: prod
+                  namespace: qbitel-prod
+                  branch: main
+                  replicas: "3"
+                  autoSync: "false"
+
+  template:
+    metadata:
+      name: "qbitel-{{service}}-{{env}}"
+      namespace: argocd
+      labels:
+        app.kubernetes.io/name: "{{service}}"
+        app.kubernetes.io/instance: "{{env}}"
+        app.kubernetes.io/part-of: qbitel
+        environment: "{{env}}"
+      annotations:
+        notifications.argoproj.io/subscribe.on-sync-succeeded.slack: qbitel-deployments
+        notifications.argoproj.io/subscribe.on-sync-failed.slack: qbitel-alerts
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+
+    spec:
+      project: qbitel
+
+      source:
+        repoURL: https://github.com/yazhsab/qbitel.git
+        targetRevision: "{{branch}}"
+        path: "ops/gitops/environments/{{env}}/{{path}}"
+        helm:
+          releaseName: "{{service}}"
+          valueFiles:
+            - values.yaml
+            - "values-{{env}}.yaml"
+          parameters:
+            - name: replicaCount
+              value: "{{replicas}}"
+            - name: image.tag
+              value: "{{env}}-latest"
+            - name: service.port
+              value: "{{port}}"
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: "{{autoSync}}"
+          selfHeal: "{{autoSync}}"
+        syncOptions:
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+
+      ignoreDifferences:
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/replicas
+---
+# QBITEL Infrastructure Components ApplicationSet
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: qbitel-infrastructure
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: redis
+            chart: redis
+            repo: https://charts.bitnami.com/bitnami
+            version: "18.6.1"
+            namespace: qbitel-infra
+            values: |
+              auth:
+                enabled: true
+                existingSecret: redis-secret
+              master:
+                persistence:
+                  size: 10Gi
+              replica:
+                replicaCount: 2
+                persistence:
+                  size: 10Gi
+
+          - name: postgresql
+            chart: postgresql
+            repo: https://charts.bitnami.com/bitnami
+            version: "13.4.0"
+            namespace: qbitel-infra
+            values: |
+              auth:
+                existingSecret: postgresql-secret
+              primary:
+                persistence:
+                  size: 50Gi
+              readReplicas:
+                replicaCount: 2
+                persistence:
+                  size: 50Gi
+
+          - name: rabbitmq
+            chart: rabbitmq
+            repo: https://charts.bitnami.com/bitnami
+            version: "12.6.0"
+            namespace: qbitel-infra
+            values: |
+              auth:
+                existingPasswordSecret: rabbitmq-secret
+              replicaCount: 3
+              persistence:
+                size: 20Gi
+
+          - name: elasticsearch
+            chart: elasticsearch
+            repo: https://helm.elastic.co
+            version: "8.5.1"
+            namespace: qbitel-infra
+            values: |
+              replicas: 3
+              volumeClaimTemplate:
+                resources:
+                  requests:
+                    storage: 100Gi
+
+  template:
+    metadata:
+      name: "qbitel-{{name}}"
+      namespace: argocd
+      labels:
+        app.kubernetes.io/name: "{{name}}"
+        app.kubernetes.io/component: infrastructure
+    spec:
+      project: qbitel
+
+      source:
+        repoURL: "{{repo}}"
+        chart: "{{chart}}"
+        targetRevision: "{{version}}"
+        helm:
+          releaseName: "{{name}}"
+          values: "{{values}}"
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+---
+# Multi-Cluster ApplicationSet for QBITEL
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: qbitel-multi-cluster
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            qbitel: enabled
+        values:
+          environment: "{{metadata.labels.environment}}"
+          region: "{{metadata.labels.region}}"
+
+  template:
+    metadata:
+      name: "qbitel-core-{{name}}"
+      namespace: argocd
+    spec:
+      project: qbitel
+
+      source:
+        repoURL: https://github.com/yazhsab/qbitel.git
+        targetRevision: main
+        path: "ops/gitops/environments/{{values.environment}}/qbitel-core"
+
+      destination:
+        server: "{{server}}"
+        namespace: qbitel-{{values.environment}}
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

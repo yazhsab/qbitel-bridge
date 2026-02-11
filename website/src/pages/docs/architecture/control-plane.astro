@@ -1,0 +1,120 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Go Control Plane | QBITEL Bridge Docs" description="Architecture of the Go control plane: service orchestration, OPA policy engine, gRPC, and device management.">
+  <h1 class="text-3xl font-bold text-white mb-2">Go Control Plane</h1>
+  <p class="text-gray-400 mb-8">The Go control plane orchestrates services, enforces policies with OPA, and manages device lifecycle through gRPC.</p>
+
+  <h2 id="overview" class="text-2xl font-bold text-white mt-12 mb-4">Overview</h2>
+  <p class="text-gray-300 mb-4">The Go control plane sits between the data plane and the AI Engine, providing service orchestration, policy enforcement, and management APIs. It is built with Go for high concurrency and low latency.</p>
+
+  <h2 id="service-structure" class="text-2xl font-bold text-white mt-12 mb-4">Service Structure</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">go/
+  controlplane/               <span class="text-gray-500"># Service orchestration</span>
+    cmd/controlplane/         <span class="text-gray-500"># Main entrypoint</span>
+    internal/
+      policy/                 <span class="text-gray-500"># OPA policy engine</span>
+      vault/                  <span class="text-gray-500"># HashiCorp Vault client</span>
+  mgmtapi/                    <span class="text-gray-500"># Management REST API</span>
+    cmd/mgmtapi/              <span class="text-gray-500"># Main entrypoint</span>
+    internal/
+      devices/                <span class="text-gray-500"># Device lifecycle management</span>
+  agents/device-agent/        <span class="text-gray-500"># Edge device agent</span>
+    internal/
+      tpm/                    <span class="text-gray-500"># TPM sealing for secrets</span></code></pre>
+
+  <h2 id="opa-policy-engine" class="text-2xl font-bold text-white mt-12 mb-4">OPA Policy Engine</h2>
+  <p class="text-gray-300 mb-4">The control plane integrates Open Policy Agent (OPA) for fine-grained, declarative policy enforcement:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Policy Bundles</strong> -- load and manage Rego policy bundles</li>
+    <li><strong class="text-white">Runtime Evaluation</strong> -- evaluate policies against incoming requests in real time</li>
+    <li><strong class="text-white">Admission Control</strong> -- validate Kubernetes deployments before admission</li>
+    <li><strong class="text-white">Compliance Policies</strong> -- enforce SOC 2, GDPR, and HIPAA requirements</li>
+  </ul>
+
+  <h3 id="policy-example" class="text-xl font-semibold text-white mt-8 mb-3">Example Rego Policy</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">package qbitel.admission
+
+default allow = false
+
+allow {'{'}
+    input.request.kind.kind == "Pod"
+    not uses_privileged_container
+    has_resource_limits
+    has_security_context
+{'}'}
+
+uses_privileged_container {'{'}
+    some container
+    input.request.object.spec.containers[container].securityContext.privileged == true
+{'}'}
+
+has_resource_limits {'{'}
+    some container
+    input.request.object.spec.containers[container].resources.limits
+{'}'}</code></pre>
+
+  <h2 id="grpc-services" class="text-2xl font-bold text-white mt-12 mb-4">gRPC Services</h2>
+  <p class="text-gray-300 mb-4">The control plane exposes gRPC services for high-performance inter-service communication:</p>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Service</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">PolicyService</code></td>
+        <td class="text-gray-300 py-2">Policy evaluation and management</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">DeviceService</code></td>
+        <td class="text-gray-300 py-2">Device registration, lifecycle, and certificate management</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ConfigService</code></td>
+        <td class="text-gray-300 py-2">Configuration distribution to agents</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">HealthService</code></td>
+        <td class="text-gray-300 py-2">Health checks and readiness probes</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="vault-integration" class="text-2xl font-bold text-white mt-12 mb-4">HashiCorp Vault Integration</h2>
+  <p class="text-gray-300 mb-4">Secrets management is handled through HashiCorp Vault:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Dynamic secrets</strong> -- generate short-lived database credentials on demand</li>
+    <li><strong class="text-white">PKI engine</strong> -- issue and rotate X.509 certificates</li>
+    <li><strong class="text-white">Transit engine</strong> -- encrypt/decrypt data without exposing keys</li>
+    <li><strong class="text-white">Auto-renewal</strong> -- automatic token and lease renewal</li>
+  </ul>
+
+  <h2 id="device-management" class="text-2xl font-bold text-white mt-12 mb-4">Device Management</h2>
+  <p class="text-gray-300 mb-4">The management API handles the full device lifecycle:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Registration</strong> -- onboard new devices with certificate-based identity</li>
+    <li><strong class="text-white">Certificate Management</strong> -- issue, rotate, and revoke device certificates</li>
+    <li><strong class="text-white">Lifecycle Control</strong> -- provision, update, decommission, and quarantine devices</li>
+    <li><strong class="text-white">TPM Sealing</strong> -- seal secrets to the device's TPM for hardware-backed protection</li>
+  </ul>
+
+  <h2 id="edge-agent" class="text-2xl font-bold text-white mt-12 mb-4">Edge Device Agent</h2>
+  <p class="text-gray-300 mb-4">The device agent runs on edge nodes and communicates with the control plane:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>Lightweight Go binary for resource-constrained environments</li>
+    <li>mTLS connection to the control plane</li>
+    <li>Local policy caching for offline operation</li>
+    <li>TPM-backed secret storage</li>
+  </ul>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/development/go" class="text-quantum-400 hover:underline">Go Development Guide</a> -- contribute to the control plane</li>
+    <li><a href="/docs/api/grpc-api" class="text-quantum-400 hover:underline">gRPC API Reference</a> -- full service definitions</li>
+    <li><a href="/docs/security/zero-trust" class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- policy enforcement details</li>
+  </ul>
+</DocsLayout>

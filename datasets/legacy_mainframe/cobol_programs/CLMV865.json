@@ -1,0 +1,19 @@
+{
+  "program_id": "CLMV865",
+  "domain": "insurance",
+  "program_type": "data_validation",
+  "author": "C. MILLER",
+  "lines_of_code": 233,
+  "complexity_level": "medium",
+  "complexity_score": 0.546,
+  "files_used": 2,
+  "verbs_used": 14,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.828137",
+  "hash": "319bb33f2c733bfcb7fa9e77897cd90c"
+}

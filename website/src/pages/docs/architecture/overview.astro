@@ -1,0 +1,128 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="System Overview | QBITEL Bridge Docs" description="High-level architecture overview of the QBITEL Bridge distributed, cloud-native security platform.">
+  <h1 class="text-3xl font-bold text-white mb-2">System Architecture Overview</h1>
+  <p class="text-gray-400 mb-8">QBITEL Bridge is a distributed, cloud-native platform built with a four-layer polyglot architecture for quantum-safe protocol intelligence.</p>
+
+  <h2 id="design-principles" class="text-2xl font-bold text-white mt-12 mb-4">Design Principles</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Polyglot by design</strong> -- each component uses the language best suited to its workload</li>
+    <li><strong class="text-white">Cloud-native</strong> -- Kubernetes-first deployment with Helm, service mesh, and operator support</li>
+    <li><strong class="text-white">Quantum-safe</strong> -- post-quantum cryptography at every layer (ML-KEM, ML-DSA, Falcon)</li>
+    <li><strong class="text-white">Zero-trust</strong> -- mutual TLS, identity-based access, and microsegmentation throughout</li>
+    <li><strong class="text-white">AI-first</strong> -- autonomous multi-agent system with on-premise LLM intelligence</li>
+  </ul>
+
+  <h2 id="four-layers" class="text-2xl font-bold text-white mt-12 mb-4">Four-Layer Architecture</h2>
+  <p class="text-gray-300 mb-4">QBITEL Bridge comprises four primary layers, each implemented in the language best suited for its role:</p>
+
+  <div class="space-y-4 mb-8">
+    <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50">
+      <h3 class="text-white font-semibold mb-2">Layer 1: AI Engine (Python)</h3>
+      <p class="text-gray-300 text-sm">The intelligence core. Handles protocol discovery, ML classification, multi-agent orchestration, compliance automation, and LLM-powered analysis. Built with PyTorch, FastAPI, and LangGraph.</p>
+      <p class="text-gray-400 text-xs mt-2">Path: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ai_engine/</code></p>
+    </div>
+    <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50">
+      <h3 class="text-white font-semibold mb-2">Layer 2: Data Plane (Rust)</h3>
+      <p class="text-gray-300 text-sm">Wire-speed packet processing with PQC-TLS termination, deep packet inspection, and DPDK integration. Provides the performance-critical path for traffic analysis.</p>
+      <p class="text-gray-400 text-xs mt-2">Path: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">rust/dataplane/</code></p>
+    </div>
+    <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50">
+      <h3 class="text-white font-semibold mb-2">Layer 3: Control Plane (Go)</h3>
+      <p class="text-gray-300 text-sm">Service orchestration, OPA policy enforcement, device management, and gRPC-based inter-service communication. Built with Gin, OPA, and HashiCorp Vault integration.</p>
+      <p class="text-gray-400 text-xs mt-2">Path: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">go/</code></p>
+    </div>
+    <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50">
+      <h3 class="text-white font-semibold mb-2">Layer 4: UI Console (React/TypeScript)</h3>
+      <p class="text-gray-300 text-sm">Enterprise admin console with real-time dashboards, protocol marketplace, and compliance reporting. Built with React, Vite, Material UI, and TypeScript.</p>
+      <p class="text-gray-400 text-xs mt-2">Path: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ui/console/</code></p>
+    </div>
+  </div>
+
+  <h2 id="agent-ecosystem" class="text-2xl font-bold text-white mt-12 mb-4">Agentic AI Ecosystem</h2>
+  <p class="text-gray-300 mb-4">The platform implements a multi-agent architecture where specialized AI agents autonomously manage security operations:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Zero-Touch Decision Agent</strong> -- autonomous security analysis and response with LLM-powered reasoning</li>
+    <li><strong class="text-white">Protocol Discovery Agent</strong> -- learns unknown protocol grammars from raw traffic</li>
+    <li><strong class="text-white">Security Orchestrator</strong> -- coordinates multi-agent collaboration and escalation</li>
+    <li><strong class="text-white">Threat Analyzer</strong> -- ML-based threat classification with MITRE ATT&CK mapping</li>
+    <li><strong class="text-white">Compliance Monitor</strong> -- automated compliance assessment against regulatory frameworks</li>
+  </ul>
+
+  <h2 id="data-flow" class="text-2xl font-bold text-white mt-12 mb-4">Data Flow</h2>
+  <p class="text-gray-300 mb-4">A typical request flows through the system as follows:</p>
+  <ol class="list-decimal list-inside text-gray-300 space-y-2 mb-6">
+    <li>Network traffic enters the <strong class="text-white">Rust Data Plane</strong> for wire-speed capture and PQC-TLS termination</li>
+    <li>Packets are forwarded to the <strong class="text-white">Python AI Engine</strong> for protocol discovery and threat analysis</li>
+    <li>The <strong class="text-white">Go Control Plane</strong> enforces OPA policies and orchestrates service responses</li>
+    <li>Results are displayed in the <strong class="text-white">React UI Console</strong> with real-time dashboards</li>
+    <li>All communication is protected by <strong class="text-white">post-quantum cryptography</strong> (ML-KEM-1024, ML-DSA-87)</li>
+  </ol>
+
+  <h2 id="technology-stack" class="text-2xl font-bold text-white mt-12 mb-4">Technology Stack</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Category</th>
+        <th class="text-left text-white py-2">Technologies</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">AI/ML</td>
+        <td class="text-gray-300 py-2">PyTorch, scikit-learn, LangGraph, Ollama, RAG</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">APIs</td>
+        <td class="text-gray-300 py-2">FastAPI, gRPC, Gin (Go)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Data Plane</td>
+        <td class="text-gray-300 py-2">Rust, DPDK, liboqs, PQC-TLS</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Orchestration</td>
+        <td class="text-gray-300 py-2">Kubernetes, Helm, Istio, Envoy</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Databases</td>
+        <td class="text-gray-300 py-2">PostgreSQL, TimescaleDB, Redis, Qdrant</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Observability</td>
+        <td class="text-gray-300 py-2">Prometheus, Grafana, OpenTelemetry, Sentry</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Security</td>
+        <td class="text-gray-300 py-2">OPA, HashiCorp Vault, mTLS, PQC (ML-KEM, ML-DSA)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Streaming</td>
+        <td class="text-gray-300 py-2">Apache Kafka with PQC-encrypted producers</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Frontend</td>
+        <td class="text-gray-300 py-2">React, TypeScript, Vite, Material UI</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="cloud-native" class="text-2xl font-bold text-white mt-12 mb-4">Cloud-Native Integration</h2>
+  <p class="text-gray-300 mb-4">QBITEL Bridge integrates natively with cloud security services:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">AWS</strong> -- Security Hub integration for centralized findings</li>
+    <li><strong class="text-white">Azure</strong> -- Sentinel integration for SIEM correlation</li>
+    <li><strong class="text-white">GCP</strong> -- Security Command Center for threat detection</li>
+    <li><strong class="text-white">Kubernetes</strong> -- Custom operator, admission webhooks, and service mesh integration</li>
+  </ul>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/architecture/ai-engine" class="text-quantum-400 hover:underline">AI Engine</a> -- deep dive into the Python AI/ML layer</li>
+    <li><a href="/docs/architecture/data-plane" class="text-quantum-400 hover:underline">Rust Data Plane</a> -- wire-speed processing and PQC-TLS</li>
+    <li><a href="/docs/architecture/control-plane" class="text-quantum-400 hover:underline">Go Control Plane</a> -- policy enforcement and service orchestration</li>
+    <li><a href="/docs/architecture/ui-console" class="text-quantum-400 hover:underline">UI Console</a> -- React admin dashboard</li>
+  </ul>
+</DocsLayout>

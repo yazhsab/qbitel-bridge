@@ -24,7 +24,7 @@ from ai_engine.core.error_handling import (
     error_context,
 )
 from ai_engine.core.exceptions import (
-    CronosAIException,
+    QbitelAIException,
     ProtocolException,
     ModelException,
     InferenceException,
@@ -272,7 +272,7 @@ class TestCircuitBreaker:
         async def any_func():
             return "result"
 
-        with pytest.raises(CronosAIException, match="Circuit breaker is OPEN"):
+        with pytest.raises(QbitelAIException, match="Circuit breaker is OPEN"):
             await cb.call(any_func)
 
     @pytest.mark.asyncio

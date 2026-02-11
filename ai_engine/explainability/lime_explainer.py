@@ -1,5 +1,5 @@
 """
-CRONOS AI - LIME Explainer
+QBITEL - LIME Explainer
 
 LIME (Local Interpretable Model-agnostic Explanations) integration for
 LLM-based security decisions and policy generation.

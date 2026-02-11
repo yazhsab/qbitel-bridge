@@ -1,6 +1,6 @@
 # External Dataset Sources
 
-This directory contains scripts and documentation for integrating real-world public datasets into CRONOS AI training pipelines.
+This directory contains scripts and documentation for integrating real-world public datasets into QBITEL training pipelines.
 
 ## Quick Start
 

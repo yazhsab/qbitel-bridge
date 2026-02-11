@@ -1,5 +1,5 @@
 """
-CRONOS AI - Predictive Threat Modeling Module
+QBITEL - Predictive Threat Modeling Module
 
 Provides "What if?" scenario analysis for security decisions using LLM-powered
 threat modeling and policy engine simulation.
@@ -26,25 +26,25 @@ from ..security.models import (
 from ..security.decision_engine import ZeroTouchDecisionEngine
 from ..policy.policy_engine import PolicyEngine
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 
 
 # Prometheus metrics
 THREAT_MODEL_COUNTER = Counter(
-    "cronos_predictive_threat_models_total",
+    "qbitel_predictive_threat_models_total",
     "Total predictive threat models generated",
     ["scenario_type", "threat_level"],
     registry=None,
 )
 
 THREAT_MODEL_DURATION = Histogram(
-    "cronos_predictive_threat_model_duration_seconds",
+    "qbitel_predictive_threat_model_duration_seconds",
     "Threat model generation duration",
     registry=None,
 )
 
 SIMULATION_COUNTER = Counter(
-    "cronos_policy_simulations_total",
+    "qbitel_policy_simulations_total",
     "Total policy simulations executed",
     ["outcome"],
     registry=None,
@@ -311,7 +311,7 @@ class PredictiveThreatModeler:
 
         except Exception as e:
             self.logger.error(f"Error generating threat model: {e}", exc_info=True)
-            raise CronosAIException(f"Threat modeling failed: {e}")
+            raise QbitelAIException(f"Threat modeling failed: {e}")
 
     async def _analyze_threat_vectors(
         self, scenario: ThreatScenario, context: Optional[Dict[str, Any]]

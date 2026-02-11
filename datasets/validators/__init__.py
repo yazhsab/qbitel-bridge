@@ -1,5 +1,5 @@
 """
-CRONOS AI Dataset Validators
+QBITEL Dataset Validators
 
 Tools for validating and analyzing ML training datasets.
 """

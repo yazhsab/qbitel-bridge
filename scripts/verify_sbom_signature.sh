@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# CRONOS AI - Verify SBOM Signature
+# QBITEL - Verify SBOM Signature
 # Verifies SBOM authenticity using Cosign signatures
 #
 # Usage: ./verify_sbom_signature.sh <sbom-file>
-# Example: ./verify_sbom_signature.sh cronos-ai-engine-spdx.json
+# Example: ./verify_sbom_signature.sh qbitel-engine-spdx.json
 #
 
 set -euo pipefail
@@ -62,7 +62,7 @@ log_info "Bundle: $BUNDLE_FILE"
 # Note: Adjust certificate-identity-regexp and certificate-oidc-issuer based on your setup
 if cosign verify-blob \
     --bundle "$BUNDLE_FILE" \
-    --certificate-identity-regexp=".*@cronos-ai.com" \
+    --certificate-identity-regexp=".*@qbitel.com" \
     --certificate-oidc-issuer="https://github.com/login/oauth" \
     "$SBOM_FILE" &> /dev/null; then
 

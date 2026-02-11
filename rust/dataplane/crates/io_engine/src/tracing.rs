@@ -567,9 +567,9 @@ pub struct TracingStats {
 impl Default for TracingConfig {
     fn default() -> Self {
         Self {
-            service_name: "qslb-dataplane".to_string(),
+            service_name: "qbitel-dataplane".to_string(),
             service_version: "1.0.0".to_string(),
-            service_namespace: "qslb".to_string(),
+            service_namespace: "qbitel".to_string(),
             service_instance_id: Uuid::new_v4().to_string(),
             sampling_rate: 1.0,
             max_spans_per_trace: 1000,

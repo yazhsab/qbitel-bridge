@@ -1,0 +1,144 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="AI Engine | QBITEL Bridge Docs" description="Deep dive into the Python AI Engine: PyTorch, FastAPI, multi-agent orchestration, and protocol discovery pipeline.">
+  <h1 class="text-3xl font-bold text-white mb-2">AI Engine Architecture</h1>
+  <p class="text-gray-400 mb-8">The Python AI Engine is the intelligence core of QBITEL Bridge, handling protocol discovery, threat analysis, and autonomous security operations.</p>
+
+  <h2 id="overview" class="text-2xl font-bold text-white mt-12 mb-4">Overview</h2>
+  <p class="text-gray-300 mb-4">The AI Engine is a modular Python application built with FastAPI and PyTorch. It provides REST and gRPC APIs, an autonomous multi-agent system, and a complete ML pipeline for protocol discovery and security analysis.</p>
+
+  <h2 id="module-structure" class="text-2xl font-bold text-white mt-12 mb-4">Module Structure</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">ai_engine/
+  core/              <span class="text-gray-500"># Engine core, config, orchestrator</span>
+  agents/            <span class="text-gray-500"># Multi-agent orchestration system</span>
+  discovery/         <span class="text-gray-500"># Protocol discovery (PCFG, transformers)</span>
+  detection/         <span class="text-gray-500"># Field detection (BiLSTM-CRF)</span>
+  anomaly/           <span class="text-gray-500"># Anomaly detection (Isolation Forest, LSTM, VAE)</span>
+  security/          <span class="text-gray-500"># Zero-touch decision engine</span>
+  compliance/        <span class="text-gray-500"># Compliance automation (9 frameworks)</span>
+  copilot/           <span class="text-gray-500"># Protocol intelligence copilot</span>
+  crypto/            <span class="text-gray-500"># Post-quantum cryptography</span>
+  llm/               <span class="text-gray-500"># LLM service (Ollama, RAG, providers)</span>
+  marketplace/       <span class="text-gray-500"># Protocol marketplace (Stripe, S3)</span>
+  legacy/            <span class="text-gray-500"># Legacy System Whisperer (COBOL, JCL)</span>
+  cloud_native/      <span class="text-gray-500"># Service mesh, container security</span>
+  api/               <span class="text-gray-500"># REST (FastAPI) and gRPC APIs</span>
+  models/            <span class="text-gray-500"># ML model management and registry</span>
+  monitoring/        <span class="text-gray-500"># Metrics, logging, tracing</span>
+  tests/             <span class="text-gray-500"># Test suite (unit, integration, perf)</span></code></pre>
+
+  <h2 id="protocol-discovery" class="text-2xl font-bold text-white mt-12 mb-4">Protocol Discovery Pipeline</h2>
+  <p class="text-gray-300 mb-4">The discovery pipeline transforms raw network traffic into structured protocol definitions through six stages:</p>
+  <ol class="list-decimal list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Statistical Analysis</strong> -- byte distributions, entropy calculations, message length profiling</li>
+    <li><strong class="text-white">Pattern Extraction</strong> -- delimiter detection, header identification, field boundary analysis</li>
+    <li><strong class="text-white">PCFG Inference</strong> -- learn a Probabilistic Context-Free Grammar from traffic patterns</li>
+    <li><strong class="text-white">Parser Generation</strong> -- auto-generate parsers from the learned grammar</li>
+    <li><strong class="text-white">ML Classification</strong> -- classify using ensemble models (CNN, LSTM, Random Forest)</li>
+    <li><strong class="text-white">Validation</strong> -- verify discovered protocols with structural and semantic checks</li>
+  </ol>
+
+  <h3 id="key-modules" class="text-xl font-semibold text-white mt-8 mb-3">Key Discovery Modules</h3>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Module</th>
+        <th class="text-left text-white py-2">Responsibility</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">statistical_analyzer</code></td>
+        <td class="text-gray-300 py-2">Entropy, byte frequency, n-gram analysis</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">pattern_extractor</code></td>
+        <td class="text-gray-300 py-2">Recurring patterns, delimiters, headers</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">enhanced_pcfg_inference</code></td>
+        <td class="text-gray-300 py-2">Grammar learning with production probabilities</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">enhanced_parser_generator</code></td>
+        <td class="text-gray-300 py-2">Dynamic parser code generation</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">protocol_classifier</code></td>
+        <td class="text-gray-300 py-2">Ensemble ML classification</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="multi-agent-system" class="text-2xl font-bold text-white mt-12 mb-4">Multi-Agent System</h2>
+  <p class="text-gray-300 mb-4">The AI Engine implements a multi-agent orchestration framework where specialized agents collaborate autonomously:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Agent Pool</strong> -- manages agent lifecycle, resource allocation, and health monitoring</li>
+    <li><strong class="text-white">Agent Communication</strong> -- message-passing infrastructure between agents</li>
+    <li><strong class="text-white">Agent Memory</strong> -- persistent and working memory for context retention</li>
+    <li><strong class="text-white">Agent Collaboration</strong> -- task decomposition and result aggregation</li>
+    <li><strong class="text-white">Planning Agent</strong> -- breaks complex tasks into executable sub-goals</li>
+  </ul>
+
+  <h2 id="zero-touch-decision" class="text-2xl font-bold text-white mt-12 mb-4">Zero-Touch Decision Engine</h2>
+  <p class="text-gray-300 mb-4">The Zero-Touch Decision Agent provides autonomous security response with configurable confidence thresholds:</p>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Confidence</th>
+        <th class="text-left text-white py-2 pr-4">Risk Level</th>
+        <th class="text-left text-white py-2">Action</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">&ge; 0.95</td>
+        <td class="text-gray-300 py-2 pr-4">Low</td>
+        <td class="text-gray-300 py-2">Autonomous execution</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">&ge; 0.85</td>
+        <td class="text-gray-300 py-2 pr-4">Medium</td>
+        <td class="text-gray-300 py-2">Auto-approved with logging</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">&ge; 0.50</td>
+        <td class="text-gray-300 py-2 pr-4">Any</td>
+        <td class="text-gray-300 py-2">Escalated to operator</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">&lt; 0.50</td>
+        <td class="text-gray-300 py-2 pr-4">Any</td>
+        <td class="text-gray-300 py-2">Escalated to senior analyst</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="llm-integration" class="text-2xl font-bold text-white mt-12 mb-4">LLM Integration</h2>
+  <p class="text-gray-300 mb-4">The AI Engine integrates with on-premise LLM providers for air-gapped deployments:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Ollama</strong> -- primary provider for local LLM inference</li>
+    <li><strong class="text-white">vLLM</strong> -- high-throughput serving for production workloads</li>
+    <li><strong class="text-white">RAG Engine</strong> -- retrieval-augmented generation with Qdrant vector store</li>
+    <li><strong class="text-white">Semantic Cache</strong> -- caches LLM responses for repeated queries</li>
+    <li><strong class="text-white">Guardrails</strong> -- input/output validation for LLM safety</li>
+  </ul>
+
+  <h2 id="anomaly-detection" class="text-2xl font-bold text-white mt-12 mb-4">Anomaly Detection</h2>
+  <p class="text-gray-300 mb-4">An ensemble of anomaly detectors provides multi-layered threat detection:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Isolation Forest</strong> -- unsupervised anomaly scoring</li>
+    <li><strong class="text-white">LSTM Detector</strong> -- temporal sequence anomaly detection</li>
+    <li><strong class="text-white">VAE Detector</strong> -- variational autoencoder for reconstruction-based detection</li>
+    <li><strong class="text-white">Ensemble Detector</strong> -- weighted combination of all detector outputs</li>
+  </ul>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/api/rest-api" class="text-quantum-400 hover:underline">REST API Reference</a> -- explore the AI Engine's API endpoints</li>
+    <li><a href="/docs/development/python" class="text-quantum-400 hover:underline">Python Development Guide</a> -- contribute to the AI Engine</li>
+    <li><a href="/docs/architecture/data-plane" class="text-quantum-400 hover:underline">Rust Data Plane</a> -- understand the data pipeline</li>
+  </ul>
+</DocsLayout>

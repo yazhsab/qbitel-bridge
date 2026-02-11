@@ -396,7 +396,7 @@ const MyProtocols: React.FC<MyProtocolsProps> = ({ apiClient }) => {
                   button
                   onClick={() =>
                     handleDownloadFile(
-                      `https://api.cronos-ai.com/marketplace/download/${selectedInstallation.installation_id}/spec`,
+                      `${window.location.origin}/api/v1/marketplace/download/${selectedInstallation.installation_id}/spec`,
                       'protocol-spec.yaml'
                     )
                   }
@@ -408,7 +408,7 @@ const MyProtocols: React.FC<MyProtocolsProps> = ({ apiClient }) => {
                   button
                   onClick={() =>
                     handleDownloadFile(
-                      `https://api.cronos-ai.com/marketplace/download/${selectedInstallation.installation_id}/parser`,
+                      `${window.location.origin}/api/v1/marketplace/download/${selectedInstallation.installation_id}/parser`,
                       'parser.py'
                     )
                   }
@@ -420,7 +420,7 @@ const MyProtocols: React.FC<MyProtocolsProps> = ({ apiClient }) => {
                   button
                   onClick={() =>
                     handleDownloadFile(
-                      `https://api.cronos-ai.com/marketplace/download/${selectedInstallation.installation_id}/docs`,
+                      `${window.location.origin}/api/v1/marketplace/download/${selectedInstallation.installation_id}/docs`,
                       'documentation.pdf'
                     )
                   }

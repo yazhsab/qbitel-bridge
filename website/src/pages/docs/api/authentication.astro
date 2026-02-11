@@ -1,0 +1,188 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Authentication | QBITEL Bridge Docs" description="Authentication guide for QBITEL Bridge: JWT tokens, API keys, mutual TLS, and enterprise SSO integration.">
+  <h1 class="text-3xl font-bold text-white mb-2">Authentication</h1>
+  <p class="text-gray-400 mb-8">QBITEL Bridge supports multiple authentication methods: API keys for programmatic access, JWT tokens for user sessions, mTLS for service-to-service communication, and OIDC for enterprise SSO.</p>
+
+  <h2 id="authentication-methods" class="text-2xl font-bold text-white mt-12 mb-4">Authentication Methods</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Method</th>
+        <th class="text-left text-white py-2 pr-4">Use Case</th>
+        <th class="text-left text-white py-2">Security Level</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">API Key</td>
+        <td class="text-gray-300 py-2 pr-4">Programmatic API access</td>
+        <td class="text-gray-300 py-2">Standard</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">JWT Token</td>
+        <td class="text-gray-300 py-2 pr-4">User session authentication</td>
+        <td class="text-gray-300 py-2">Standard</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">mTLS</td>
+        <td class="text-gray-300 py-2 pr-4">Service-to-service communication</td>
+        <td class="text-gray-300 py-2">High</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">OIDC / SSO</td>
+        <td class="text-gray-300 py-2 pr-4">Enterprise user authentication</td>
+        <td class="text-gray-300 py-2">Enterprise</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="api-keys" class="text-2xl font-bold text-white mt-12 mb-4">API Key Authentication</h2>
+  <p class="text-gray-300 mb-4">Include the API key in the <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">X-API-Key</code> header:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">curl -H "X-API-Key: your_api_key_here" \
+  http://localhost:8000/api/v1/discover</code></pre>
+
+  <h3 id="generate-api-key" class="text-xl font-semibold text-white mt-8 mb-3">Generate an API Key</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Generate via the management API</span>
+curl -X POST http://localhost:8000/api/v1/auth/api-keys \
+  -H "Authorization: Bearer admin_token" \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "name": "my-integration",
+    "scopes": ["discovery:read", "discovery:write"],
+    "expires_in_days": 90
+  {'}'}'</code></pre>
+
+  <h3 id="rotate-api-key" class="text-xl font-semibold text-white mt-8 mb-3">Rotate API Keys</h3>
+  <p class="text-gray-300 mb-4">API keys can be rotated manually or automatically via the secrets rotation script:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">python scripts/rotate_secrets.py --type api-key --key-id key_12345</code></pre>
+
+  <h2 id="jwt" class="text-2xl font-bold text-white mt-12 mb-4">JWT Token Authentication</h2>
+  <p class="text-gray-300 mb-4">Include the JWT token in the <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">Authorization</code> header:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..." \
+  http://localhost:8000/api/v1/discover</code></pre>
+
+  <h3 id="obtain-jwt" class="text-xl font-semibold text-white mt-8 mb-3">Obtain a JWT Token</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "username": "admin",
+    "password": "your_password"
+  {'}'}'
+
+<span class="text-gray-500"># Response:</span>
+<span class="text-gray-500"># {'{'}</span>
+<span class="text-gray-500">#   "access_token": "eyJhbGci...",</span>
+<span class="text-gray-500">#   "token_type": "bearer",</span>
+<span class="text-gray-500">#   "expires_in": 3600</span>
+<span class="text-gray-500"># {'}'}</span></code></pre>
+
+  <h3 id="jwt-config" class="text-xl font-semibold text-white mt-8 mb-3">JWT Configuration</h3>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Variable</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_JWT_SECRET</code></td>
+        <td class="text-gray-300 py-2">Secret key for token signing (fallback: JWT_SECRET)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">JWT_ALGORITHM</code></td>
+        <td class="text-gray-300 py-2">Signing algorithm (default: HS256)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">JWT_EXPIRATION</code></td>
+        <td class="text-gray-300 py-2">Token expiration time in seconds (default: 3600)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="mtls" class="text-2xl font-bold text-white mt-12 mb-4">Mutual TLS (mTLS)</h2>
+  <p class="text-gray-300 mb-4">For service-to-service communication, enable mTLS to verify both client and server identities:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Enable mTLS</span>
+export MTLS_ENABLED=true
+export MTLS_CA_CERT=/path/to/ca.pem
+export MTLS_SERVER_CERT=/path/to/server-cert.pem
+export MTLS_SERVER_KEY=/path/to/server-key.pem
+
+<span class="text-gray-500"># Connect with client certificate</span>
+curl --cert client-cert.pem --key client-key.pem --cacert ca.pem \
+  https://qbitel-engine:8000/health</code></pre>
+
+  <h2 id="oidc" class="text-2xl font-bold text-white mt-12 mb-4">Enterprise SSO (OIDC)</h2>
+  <p class="text-gray-300 mb-4">The UI Console supports OpenID Connect (OIDC) for enterprise SSO integration:</p>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Provider</th>
+        <th class="text-left text-white py-2">Status</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Okta</td>
+        <td class="text-gray-300 py-2">Supported</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Azure AD</td>
+        <td class="text-gray-300 py-2">Supported</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Keycloak</td>
+        <td class="text-gray-300 py-2">Supported</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Auth0</td>
+        <td class="text-gray-300 py-2">Supported</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="text-gray-300 mb-4">Configure OIDC in the UI Console <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">.env</code>:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">VITE_OIDC_AUTHORITY=https://auth.example.com
+VITE_OIDC_CLIENT_ID=qbitel-console
+VITE_OIDC_REDIRECT_URI=http://localhost:3000/callback
+VITE_OIDC_SCOPE=openid profile email</code></pre>
+
+  <h2 id="rbac" class="text-2xl font-bold text-white mt-12 mb-4">Role-Based Access Control</h2>
+  <p class="text-gray-300 mb-4">QBITEL Bridge supports RBAC with the following default roles:</p>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Role</th>
+        <th class="text-left text-white py-2">Permissions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">admin</code></td>
+        <td class="text-gray-300 py-2">Full access to all endpoints and settings</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">analyst</code></td>
+        <td class="text-gray-300 py-2">Read/write access to discovery and security</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">viewer</code></td>
+        <td class="text-gray-300 py-2">Read-only access to dashboards and reports</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">api-client</code></td>
+        <td class="text-gray-300 py-2">API access with configured scopes</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/security/zero-trust" class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- identity-based security model</li>
+    <li><a href="/docs/api/rest-api" class="text-quantum-400 hover:underline">REST API Reference</a> -- endpoints requiring authentication</li>
+    <li><a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> -- security hardening steps</li>
+  </ul>
+</DocsLayout>

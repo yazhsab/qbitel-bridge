@@ -1,0 +1,351 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Legacy Mainframe Modernization | Tutorials | QBITEL Bridge"
+  description="End-to-end guide: discover COBOL copybook structures, generate modern parsers, wrap them in APIs, and secure with post-quantum cryptography."
+>
+  <PageHero
+    title="Legacy Mainframe Modernization"
+    description="End-to-end walkthrough covering the full modernization lifecycle: discover COBOL copybook structures, generate modern parsers, create API wrappers, and secure everything with post-quantum cryptography."
+    badge="Advanced -- 2 hours"
+    gradient="from-red-500 to-rose-400"
+  />
+
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+
+      <!-- Overview -->
+      <div class="card p-6 mb-12">
+        <h2 class="text-xl font-bold text-white mb-4">What You Will Build</h2>
+        <p class="text-gray-300 mb-4">This tutorial walks through a complete mainframe modernization scenario. By the end, you will have:</p>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-surface-900/50 rounded-lg p-4 border border-surface-600/50">
+            <div class="text-sm font-semibold text-quantum-400 mb-1">Phase 1: Discovery</div>
+            <p class="text-xs text-gray-400">Ingest COBOL copybooks and 3270 terminal traffic, reverse-engineer the data layouts and transaction flows</p>
+          </div>
+          <div class="bg-surface-900/50 rounded-lg p-4 border border-surface-600/50">
+            <div class="text-sm font-semibold text-quantum-400 mb-1">Phase 2: Translation</div>
+            <p class="text-xs text-gray-400">Generate modern parsers and REST APIs from the discovered structures, with typed SDKs</p>
+          </div>
+          <div class="bg-surface-900/50 rounded-lg p-4 border border-surface-600/50">
+            <div class="text-sm font-semibold text-quantum-400 mb-1">Phase 3: Security</div>
+            <p class="text-xs text-gray-400">Wrap all communication in quantum-safe encryption with zero changes to the mainframe</p>
+          </div>
+          <div class="bg-surface-900/50 rounded-lg p-4 border border-surface-600/50">
+            <div class="text-sm font-semibold text-quantum-400 mb-1">Phase 4: Operations</div>
+            <p class="text-xs text-gray-400">Deploy the bridge with monitoring, compliance reporting, and autonomous threat detection</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prerequisites -->
+      <div class="card p-6 mb-12">
+        <h2 class="text-xl font-bold text-white mb-4">Prerequisites</h2>
+        <ul class="space-y-2 text-gray-300">
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>QBITEL Bridge running with all components (see <a href="/tutorials/deploy-kubernetes" class="text-quantum-400 hover:underline">Deploy to Kubernetes</a>)</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Access to a mainframe environment or our sample COBOL copybooks and 3270 traffic captures</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Completed the beginner tutorials (Discovery, PQC, Translation Studio)</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Phase 1: Discovery -->
+      <div class="mb-4">
+        <h2 class="text-xl font-bold gradient-text uppercase tracking-wider">Phase 1: Discovery</h2>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">1</span>
+          <h2 class="text-2xl font-bold text-white">Ingest COBOL Copybooks</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          The Legacy Whisperer module can ingest COBOL copybooks directly to understand record layouts. Upload your copybook files to extract field definitions, PIC clauses, and nested structures.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Upload COBOL copybooks for analysis</span>
+curl -X POST http://localhost:8000/api/v1/legacy-whisperer/ingest \
+  -H "Content-Type: multipart/form-data" \
+  -F "copybooks=@CUST-REC.cpy" \
+  -F "copybooks=@TRANS-REC.cpy" \
+  -F "copybooks=@ACCT-REC.cpy" \
+  -F "system_type=mainframe_zos" \
+  -F "encoding=EBCDIC"
+
+<span class="text-gray-500"># Example COBOL copybook (CUST-REC.cpy)</span>
+<span class="text-gray-500"># 01 CUSTOMER-RECORD.</span>
+<span class="text-gray-500">#    05 CUST-ID           PIC 9(10).</span>
+<span class="text-gray-500">#    05 CUST-NAME         PIC X(40).</span>
+<span class="text-gray-500">#    05 CUST-ADDR.</span>
+<span class="text-gray-500">#       10 ADDR-LINE-1    PIC X(30).</span>
+<span class="text-gray-500">#       10 ADDR-LINE-2    PIC X(30).</span>
+<span class="text-gray-500">#       10 CITY           PIC X(20).</span>
+<span class="text-gray-500">#       10 STATE          PIC X(2).</span>
+<span class="text-gray-500">#       10 ZIP-CODE       PIC 9(5).</span>
+<span class="text-gray-500">#    05 ACCT-BALANCE      PIC S9(9)V99 COMP-3.</span></code></pre>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">2</span>
+          <h2 class="text-2xl font-bold text-white">Capture 3270 Terminal Traffic</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Capture the TN3270 terminal traffic between users and the mainframe. This reveals the transaction flows, screen navigation sequences, and data exchange patterns that the copybooks alone cannot describe.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Capture TN3270 traffic</span>
+curl -X POST http://localhost:8000/api/v1/capture/start \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "interface": "eth0",
+    "filter": "host 10.0.100.5 and port 23",
+    "protocol_hint": "tn3270",
+    "duration_seconds": 1800,
+    "options": {'{'}
+      "decode_ebcdic": true,
+      "track_screen_transitions": true
+    {'}'}
+  {'}'}'</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">3</span>
+          <h2 class="text-2xl font-bold text-white">Run Combined Analysis</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Combine the copybook layouts with the captured traffic to build a complete understanding of the mainframe system. The AI correlates data record structures with the transaction flows observed on the wire.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Run combined mainframe analysis</span>
+curl -X POST http://localhost:8000/api/v1/legacy-whisperer/analyze \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "ingest_id": "ing_cobol_001",
+    "capture_id": "cap_tn3270_001",
+    "analysis_mode": "full",
+    "options": {'{'}
+      "correlate_copybooks": true,
+      "map_transactions": true,
+      "infer_business_rules": true,
+      "generate_data_dictionary": true
+    {'}'}
+  {'}'}'</code></pre>
+        </div>
+        <div class="card p-4 border-l-4 border-l-quantum-500">
+          <p class="text-sm text-gray-300">
+            <span class="font-semibold text-quantum-400">AI-powered correlation:</span> The engine uses neural field detection to match PIC clause definitions from copybooks to the actual byte patterns observed in captured traffic, even when field usage differs from the specification.
+          </p>
+        </div>
+      </div>
+
+      <!-- Phase 2: Translation -->
+      <div class="mb-4 mt-16">
+        <h2 class="text-xl font-bold gradient-text uppercase tracking-wider">Phase 2: Translation</h2>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">4</span>
+          <h2 class="text-2xl font-bold text-white">Generate Modern Parsers</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          From the analysis results, generate parsers that can decode the legacy binary formats (EBCDIC-encoded COBOL records, packed decimals, COMP-3 fields) into modern structured data.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Generate parsers from analysis</span>
+curl -X POST http://localhost:8000/api/v1/translation/rules/generate \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "analysis_id": "anl_mainframe_001",
+    "output_languages": ["python", "go", "rust"],
+    "options": {'{'}
+      "handle_ebcdic": true,
+      "handle_comp3": true,
+      "handle_redefines": true,
+      "generate_roundtrip": true,
+      "include_validation": true
+    {'}'}
+  {'}'}'</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">5</span>
+          <h2 class="text-2xl font-bold text-white">Create REST API Wrappers</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Use Translation Studio to wrap the mainframe transactions in a REST API. Each CICS transaction becomes an endpoint, copybook records become JSON schemas, and screen flows become API workflows.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Generate REST API from mainframe transactions</span>
+curl -X POST http://localhost:8000/api/v1/translation/translate \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "analysis_id": "anl_mainframe_001",
+    "output_formats": ["openapi"],
+    "options": {'{'}
+      "api_prefix": "/api/v1/mainframe",
+      "map_transactions_to_endpoints": true,
+      "json_schema_from_copybooks": true,
+      "generate_sdks": ["python", "typescript"],
+      "include_tests": true
+    {'}'}
+  {'}'}'
+
+<span class="text-gray-500"># Generated endpoint mapping (example)</span>
+<span class="text-gray-500"># POST /api/v1/mainframe/customers         -> CICS INQC transaction</span>
+<span class="text-gray-500"># GET  /api/v1/mainframe/customers/{'{'}id{'}'}     -> CICS INQC with key</span>
+<span class="text-gray-500"># POST /api/v1/mainframe/transactions       -> CICS TRAN transaction</span>
+<span class="text-gray-500"># GET  /api/v1/mainframe/accounts/{'{'}id{'}'}/balance -> CICS BALI transaction</span></code></pre>
+        </div>
+      </div>
+
+      <!-- Phase 3: Security -->
+      <div class="mb-4 mt-16">
+        <h2 class="text-xl font-bold gradient-text uppercase tracking-wider">Phase 3: Security</h2>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">6</span>
+          <h2 class="text-2xl font-bold text-white">Enable PQC for Mainframe Traffic</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Wrap the mainframe communication channel in quantum-safe encryption. The Protocol Bridge sits between the modern API consumers and the mainframe, adding PQC without any changes to the mainframe itself.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Enable PQC on the mainframe bridge channel</span>
+curl -X PUT http://localhost:8000/api/v1/channels/ch_mainframe/security \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "pqc_enabled": true,
+    "profile": "high",
+    "encrypt_payload": true,
+    "sign_messages": true,
+    "field_level_encryption": {'{'}
+      "enabled": true,
+      "fields": ["ACCT-BALANCE", "CUST-SSN", "CUST-DOB"]
+    {'}'}
+  {'}'}'</code></pre>
+        </div>
+        <div class="card p-4 border-l-4 border-l-yellow-500">
+          <p class="text-sm text-gray-300">
+            <span class="font-semibold text-yellow-400">Field-level encryption:</span> Sensitive fields like account balances and personally identifiable information are encrypted individually, so they remain protected even if intermediate systems handle the decrypted message envelope.
+          </p>
+        </div>
+      </div>
+
+      <!-- Phase 4: Operations -->
+      <div class="mb-4 mt-16">
+        <h2 class="text-xl font-bold gradient-text uppercase tracking-wider">Phase 4: Operations</h2>
+      </div>
+
+      <!-- Step 7 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">7</span>
+          <h2 class="text-2xl font-bold text-white">Deploy and Monitor</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Deploy the complete mainframe bridge with monitoring, compliance reporting, and threat detection enabled. The zero-touch security orchestrator watches for anomalous patterns in mainframe traffic.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Deploy the mainframe bridge with full observability</span>
+curl -X POST http://localhost:8000/api/v1/translation/translate \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "translation_id": "tr_mainframe_001",
+    "mode": "bridge",
+    "listen_port": 8091,
+    "upstream_host": "10.0.100.5",
+    "upstream_port": 23,
+    "monitoring": {'{'}
+      "metrics_enabled": true,
+      "tracing_enabled": true,
+      "anomaly_detection": true,
+      "compliance_reporting": ["soc2", "pci_dss"]
+    {'}'},
+    "health_check_interval": "10s"
+  {'}'}'
+
+<span class="text-gray-500"># Verify the bridge is operational</span>
+curl http://localhost:8091/health
+
+<span class="text-gray-500"># Test a round-trip transaction through the bridge</span>
+curl -X POST http://localhost:8091/api/v1/mainframe/customers \
+  -H "Authorization: Bearer $API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{'{'} "customer_id": "1234567890" {'}'}'</code></pre>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="card p-6 mb-12 border-l-4 border-l-quantum-500">
+        <h2 class="text-xl font-bold text-white mb-4">What You Have Accomplished</h2>
+        <ul class="space-y-3 text-gray-300">
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-quantum-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Reverse-engineered COBOL copybook structures and 3270 transaction flows</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-quantum-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Generated modern parsers for EBCDIC, COMP-3, and packed decimal formats</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-quantum-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Created a REST API that translates modern HTTP calls to mainframe CICS transactions</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-quantum-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Secured all traffic with NIST Level 5 post-quantum cryptography</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-quantum-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Deployed with monitoring, compliance reporting, and autonomous threat detection</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex items-center justify-between pt-8 border-t border-surface-600/50">
+        <a href="/tutorials/compliance-reporting" class="btn-ghost text-sm">
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+          Previous: Compliance Reporting
+        </a>
+        <a href="/tutorials" class="btn-secondary text-sm">
+          All Tutorials
+          <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <CTABanner
+    title="Modernize Your Mainframe Without Replacing It"
+    description="QBITEL Bridge wraps legacy systems in modern, quantum-safe APIs without changing a single line of COBOL."
+  />
+</PageLayout>

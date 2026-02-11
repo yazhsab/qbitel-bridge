@@ -1,0 +1,215 @@
+# QBITEL Bridge - Production Configuration
+# 
+# SECURITY NOTICE:
+# - ALL sensitive values MUST be set via environment variables or secrets manager
+# - NEVER commit credentials to version control
+# - Use HashiCorp Vault, AWS Secrets Manager, or Azure Key Vault in production
+#
+# Required Environment Variables:
+# - QBITEL_AI_DB_PASSWORD or DATABASE_PASSWORD (required)
+# - QBITEL_AI_REDIS_PASSWORD or REDIS_PASSWORD (optional, if Redis requires auth)
+# - QBITEL_AI_JWT_SECRET or JWT_SECRET (required, min 32 chars)
+# - QBITEL_AI_ENCRYPTION_KEY or ENCRYPTION_KEY (required, min 32 chars)
+# - QBITEL_AI_API_KEY or API_KEY (required, min 32 chars)
+
+environment: production
+debug: false
+app_name: "QBITEL Bridge"
+app_version: "1.0.0"
+api_host: "0.0.0.0"
+api_port: 8080
+worker_processes: 4  # Adjust based on CPU cores
+
+# Database Configuration
+# Password MUST be set via DATABASE_PASSWORD environment variable
+database:
+  host: "${DB_HOST:-localhost}"
+  port: 5432
+  database: "${DB_NAME:-qbitel_prod}"
+  username: "${DB_USER:-qbitel_user}"
+  password: ""  # SET VIA ENVIRONMENT VARIABLE
+  ssl_mode: "require"  # Enforce SSL in production
+  connection_pool_size: 20
+  connection_timeout: 30
+
+# Redis Configuration
+# Password MUST be set via REDIS_PASSWORD environment variable if required
+redis:
+  host: "${REDIS_HOST:-localhost}"
+  port: 6379
+  database: 0
+  password: ""  # SET VIA ENVIRONMENT VARIABLE
+  ssl: true  # Enable SSL in production
+  connection_pool_size: 20
+  connection_timeout: 5
+
+# AI Engine Configuration
+ai_engine:
+  model_cache_dir: "/var/lib/qbitel/models"
+  use_gpu: true
+  gpu_memory_limit: 0.8
+  batch_size: 32
+  max_sequence_length: 512
+  ensemble_size: 5
+  learning_rate: 0.001
+  training_epochs: 100
+  early_stopping_patience: 10
+  model_save_frequency: 10
+  
+  # Statistical Analysis
+  entropy_window_size: 1000
+  pattern_min_frequency: 3
+  field_boundary_confidence_threshold: 0.7
+  
+  # Grammar Learning
+  pcfg_max_depth: 10
+  pcfg_min_rule_frequency: 2
+  em_max_iterations: 50
+  em_convergence_threshold: 0.000001
+  
+  # Classification
+  cnn_filter_sizes: [3, 4, 5]
+  cnn_num_filters: 100
+  lstm_hidden_size: 128
+  lstm_num_layers: 2
+  dropout_rate: 0.2
+  
+  # Validation
+  max_validation_rules: 100
+  validation_timeout: 5.0
+
+# Performance Configuration
+performance:
+  # Caching
+  cache_size: 50000
+  cache_ttl: 3600
+  use_redis_cache: true
+  redis_cache_prefix: "qbitel:prod:"
+  
+  # Memory Management
+  buffer_size: 16384
+  memory_pool_size: 5000
+  max_memory_usage_mb: 8192
+  gc_threshold: 0.8
+  
+  # Threading
+  max_threads: 0  # Auto-detect
+  io_thread_pool_size: 50
+  cpu_thread_pool_size: 0  # Auto-detect
+  
+  # Batching
+  batch_size: 2000
+  batch_flush_interval: 1.0
+  max_batch_delay: 5.0
+
+# Monitoring Configuration
+monitoring:
+  # Metrics Collection
+  metrics_enabled: true
+  metrics_flush_interval: 30.0
+  max_metric_points: 50000
+  
+  # Prometheus
+  prometheus_enabled: true
+  prometheus_host: "0.0.0.0"
+  prometheus_port: 8000
+  
+  # Health Checking
+  health_check_enabled: true
+  health_check_interval: 30.0
+  health_check_timeout: 10.0
+  
+  # Alerting
+  alerting_enabled: true
+  max_alerts: 10000
+  alert_retention_days: 90
+  
+  # Alert Thresholds
+  cpu_alert_threshold: 80.0
+  memory_alert_threshold: 80.0
+  disk_alert_threshold: 85.0
+  error_rate_alert_threshold: 0.01
+  response_time_alert_threshold: 2.0
+
+# Security Configuration
+# ALL secrets MUST be set via environment variables or secrets manager
+security:
+  # API Security
+  api_key_enabled: true  # REQUIRED in production
+  api_key_header: "X-API-Key"
+  jwt_enabled: true  # REQUIRED in production
+  jwt_secret: ""  # SET VIA JWT_SECRET ENVIRONMENT VARIABLE (min 32 chars)
+  jwt_algorithm: "HS256"
+  jwt_expiration_hours: 8  # Shorter expiration in production
+
+  # TLS/SSL
+  tls_enabled: true  # REQUIRED in production
+  tls_cert_file: "${TLS_CERT_FILE:-/etc/qbitel/certs/server.crt}"
+  tls_key_file: "${TLS_KEY_FILE:-/etc/qbitel/certs/server.key}"
+  tls_ca_file: "${TLS_CA_FILE:-/etc/qbitel/certs/ca.crt}"
+  tls_verify_client: true  # Enable mutual TLS
+
+  # Encryption
+  encryption_key: ""  # SET VIA ENCRYPTION_KEY ENVIRONMENT VARIABLE (min 32 chars)
+  encryption_algorithm: "AES-256-GCM"
+
+  # Audit Logging
+  audit_logging_enabled: true
+  audit_log_retention_days: 365  # 1 year retention for compliance
+  sensitive_field_masking: true
+
+# Logging Configuration
+logging:
+  level: "${LOG_LEVEL:-INFO}"  # Use INFO in production, DEBUG only for troubleshooting
+  format: "json"  # Structured logging for production
+  output: "${LOG_OUTPUT:-file}"  # Log to file in production, stdout in containers
+  file_path: "${LOG_FILE_PATH:-/var/log/qbitel/app.log}"
+  max_file_size_mb: 500
+  backup_count: 10
+  structured_logging: true
+  correlation_id_enabled: true
+  performance_logging: true
+  security_logging: true
+
+# Secrets Manager Configuration (Optional but Recommended)
+secrets_manager:
+  enabled: true
+  backend: "vault"  # Options: vault, aws_secrets_manager, azure_key_vault
+  
+  # HashiCorp Vault Configuration
+  vault_addr: "${VAULT_ADDR}"
+  vault_token: "${VAULT_TOKEN}"
+  vault_mount_point: "secret"
+  vault_path: "qbitel/production"
+  
+  # AWS Secrets Manager Configuration
+  # aws_region: "us-east-1"
+  
+  # Azure Key Vault Configuration
+  # azure_vault_url: "${AZURE_VAULT_URL}"
+
+# Rate Limiting (Production)
+rate_limiting:
+  enabled: true
+  default_limit: 100  # requests per minute
+  burst_limit: 200
+  per_user_limit: 1000  # requests per hour
+  per_ip_limit: 500  # requests per hour
+
+# CORS Configuration (Production)
+# Set CORS_ALLOWED_ORIGINS as comma-separated list, e.g.:
+# CORS_ALLOWED_ORIGINS="https://app.example.com,https://dashboard.example.com"
+cors:
+  enabled: true
+  allowed_origins: "${CORS_ALLOWED_ORIGINS}"  # MUST be set via environment variable
+  allowed_methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+  allowed_headers:
+    - "Authorization"
+    - "Content-Type"
+    - "X-API-Key"
+  allow_credentials: true
+  max_age: 3600

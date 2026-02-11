@@ -1,0 +1,201 @@
+---
+# Production Resource Quotas for Cost Control and Fair Usage
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: qbitel-compute-quota
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/component: resource-quota
+    environment: production
+spec:
+  hard:
+    # CPU limits
+    requests.cpu: "100"
+    limits.cpu: "200"
+    # Memory limits
+    requests.memory: "200Gi"
+    limits.memory: "400Gi"
+    # Pod limits
+    pods: "100"
+    # ReplicaSet limits
+    replicasets.apps: "50"
+    # Service limits
+    services: "30"
+    services.loadbalancers: "5"
+    services.nodeports: "10"
+    # PVC limits
+    persistentvolumeclaims: "50"
+    requests.storage: "1Ti"
+    # Secrets and ConfigMaps
+    secrets: "100"
+    configmaps: "100"
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: qbitel-vllm-compute-quota
+  namespace: qbitel-vllm
+  labels:
+    app.kubernetes.io/component: resource-quota
+    environment: production
+spec:
+  hard:
+    # GPU resources
+    requests.nvidia.com/gpu: "8"
+    limits.nvidia.com/gpu: "8"
+    # CPU for GPU nodes
+    requests.cpu: "64"
+    limits.cpu: "128"
+    # High memory for GPU workloads
+    requests.memory: "512Gi"
+    limits.memory: "1Ti"
+    # Pod limits
+    pods: "20"
+    # PVC for model storage
+    persistentvolumeclaims: "20"
+    requests.storage: "2Ti"
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: qbitel-observability-quota
+  namespace: qbitel-observability
+  labels:
+    app.kubernetes.io/component: resource-quota
+    environment: production
+spec:
+  hard:
+    requests.cpu: "32"
+    limits.cpu: "64"
+    requests.memory: "64Gi"
+    limits.memory: "128Gi"
+    pods: "50"
+    persistentvolumeclaims: "30"
+    requests.storage: "500Gi"
+---
+# Limit Ranges for default resource constraints
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: qbitel-limit-range
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/component: limit-range
+    environment: production
+spec:
+  limits:
+    # Default container limits
+    - type: Container
+      default:
+        cpu: "500m"
+        memory: "512Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "128Mi"
+      min:
+        cpu: "50m"
+        memory: "64Mi"
+      max:
+        cpu: "8"
+        memory: "16Gi"
+    # Pod-level limits
+    - type: Pod
+      max:
+        cpu: "16"
+        memory: "32Gi"
+    # PVC limits
+    - type: PersistentVolumeClaim
+      min:
+        storage: "1Gi"
+      max:
+        storage: "100Gi"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: qbitel-vllm-limit-range
+  namespace: qbitel-vllm
+  labels:
+    app.kubernetes.io/component: limit-range
+    environment: production
+spec:
+  limits:
+    # GPU container defaults
+    - type: Container
+      default:
+        cpu: "8"
+        memory: "32Gi"
+        nvidia.com/gpu: "1"
+      defaultRequest:
+        cpu: "4"
+        memory: "16Gi"
+        nvidia.com/gpu: "1"
+      min:
+        cpu: "2"
+        memory: "8Gi"
+      max:
+        cpu: "32"
+        memory: "128Gi"
+        nvidia.com/gpu: "4"
+    # Pod limits for GPU workloads
+    - type: Pod
+      max:
+        cpu: "64"
+        memory: "256Gi"
+        nvidia.com/gpu: "4"
+    # Large PVC for model storage
+    - type: PersistentVolumeClaim
+      min:
+        storage: "10Gi"
+      max:
+        storage: "500Gi"
+---
+# Priority Classes for workload prioritization
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: qbitel-critical
+  labels:
+    app.kubernetes.io/component: priority-class
+    environment: production
+value: 1000000
+globalDefault: false
+description: "Critical priority for core QBITEL services"
+preemptionPolicy: PreemptLowerPriority
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: qbitel-high
+  labels:
+    app.kubernetes.io/component: priority-class
+    environment: production
+value: 100000
+globalDefault: false
+description: "High priority for AI Gateway and processing services"
+preemptionPolicy: PreemptLowerPriority
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: qbitel-normal
+  labels:
+    app.kubernetes.io/component: priority-class
+    environment: production
+value: 10000
+globalDefault: true
+description: "Normal priority for standard workloads"
+preemptionPolicy: PreemptLowerPriority
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: qbitel-batch
+  labels:
+    app.kubernetes.io/component: priority-class
+    environment: production
+value: 1000
+globalDefault: false
+description: "Low priority for batch processing jobs"
+preemptionPolicy: Never

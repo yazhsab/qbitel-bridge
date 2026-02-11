@@ -1,10 +1,10 @@
-# CRONOS AI - Vendor Directory
+# QBITEL - Vendor Directory
 
 This directory contains vendor shims and fallback implementations for air-gapped deployments where external dependencies may not be available.
 
 ## Purpose
 
-In air-gapped or restricted network environments, CRONOS AI can operate with limited functionality using vendor shims that provide basic implementations of optional dependencies.
+In air-gapped or restricted network environments, QBITEL can operate with limited functionality using vendor shims that provide basic implementations of optional dependencies.
 
 ## Structure
 
@@ -39,7 +39,7 @@ For air-gapped deployments:
    # Install only required dependencies
    pip install -r requirements.txt --no-deps
    
-   # CRONOS AI will use vendor shims for missing optional dependencies
+   # QBITEL will use vendor shims for missing optional dependencies
    ```
 
 3. **Verification**:
@@ -82,4 +82,4 @@ When adding new vendor shims:
 
 ## License
 
-Vendor shims are part of CRONOS AI and follow the same license terms.
+Vendor shims are part of QBITEL and follow the same license terms.

@@ -1,0 +1,208 @@
+---
+# QBITEL Observability Stack Application
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qbitel-observability
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qbitel-observability
+    app.kubernetes.io/component: observability
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: qbitel
+
+  source:
+    repoURL: https://github.com/yazhsab/qbitel.git
+    targetRevision: main
+    path: kubernetes/observability
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qbitel-observability
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+# Prometheus Stack
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus-stack
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: prometheus-stack
+    app.kubernetes.io/component: monitoring
+spec:
+  project: qbitel
+
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 55.5.0
+    helm:
+      releaseName: prometheus
+      values: |
+        prometheus:
+          prometheusSpec:
+            retention: 30d
+            retentionSize: 50GB
+            resources:
+              requests:
+                memory: 2Gi
+                cpu: 500m
+              limits:
+                memory: 4Gi
+                cpu: 2000m
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 100Gi
+            serviceMonitorSelector: {}
+            serviceMonitorNamespaceSelector: {}
+            podMonitorSelector: {}
+            podMonitorNamespaceSelector: {}
+
+        grafana:
+          enabled: true
+          adminPassword: ${GRAFANA_ADMIN_PASSWORD}
+          persistence:
+            enabled: true
+            size: 10Gi
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+                - name: 'qbitel'
+                  orgId: 1
+                  folder: 'QBITEL'
+                  type: file
+                  disableDeletion: false
+                  editable: true
+                  options:
+                    path: /var/lib/grafana/dashboards/qbitel
+
+        alertmanager:
+          alertmanagerSpec:
+            storage:
+              volumeClaimTemplate:
+                spec:
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qbitel-observability
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+# OpenTelemetry Collector
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: otel-collector
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: otel-collector
+    app.kubernetes.io/component: observability
+spec:
+  project: qbitel
+
+  source:
+    repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
+    chart: opentelemetry-collector
+    targetRevision: 0.73.0
+    helm:
+      releaseName: otel-collector
+      values: |
+        mode: deployment
+        replicaCount: 2
+
+        config:
+          receivers:
+            otlp:
+              protocols:
+                grpc:
+                  endpoint: 0.0.0.0:4317
+                http:
+                  endpoint: 0.0.0.0:4318
+            prometheus:
+              config:
+                scrape_configs:
+                  - job_name: 'otel-collector'
+                    scrape_interval: 10s
+                    static_configs:
+                      - targets: ['localhost:8888']
+
+          processors:
+            batch:
+              timeout: 10s
+              send_batch_size: 1024
+            memory_limiter:
+              check_interval: 1s
+              limit_mib: 1000
+              spike_limit_mib: 200
+            resource:
+              attributes:
+                - key: service.namespace
+                  value: qbitel
+                  action: upsert
+
+          exporters:
+            otlp:
+              endpoint: tempo:4317
+              tls:
+                insecure: true
+            prometheus:
+              endpoint: 0.0.0.0:8889
+            loki:
+              endpoint: http://loki:3100/loki/api/v1/push
+
+          service:
+            pipelines:
+              traces:
+                receivers: [otlp]
+                processors: [memory_limiter, batch, resource]
+                exporters: [otlp]
+              metrics:
+                receivers: [otlp, prometheus]
+                processors: [memory_limiter, batch]
+                exporters: [prometheus]
+              logs:
+                receivers: [otlp]
+                processors: [memory_limiter, batch]
+                exporters: [loki]
+
+        resources:
+          requests:
+            memory: 512Mi
+            cpu: 250m
+          limits:
+            memory: 1Gi
+            cpu: 500m
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qbitel-observability
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

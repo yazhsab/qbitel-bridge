@@ -1,0 +1,129 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="React/TypeScript Development | QBITEL Bridge Docs" description="React and TypeScript development guide for the QBITEL Bridge UI Console: Vite, ESLint, Vitest, and component development.">
+  <h1 class="text-3xl font-bold text-white mb-2">React/TypeScript Development Guide</h1>
+  <p class="text-gray-400 mb-8">Set up your frontend development environment for the QBITEL Bridge UI Console with Vite, ESLint, and component-driven development.</p>
+
+  <h2 id="prerequisites" class="text-2xl font-bold text-white mt-12 mb-4">Prerequisites</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Node.js</strong> 18+ with npm</li>
+    <li><strong class="text-white">AI Engine API</strong> running at <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">http://localhost:8000</code> (for API integration)</li>
+  </ul>
+
+  <h2 id="setup" class="text-2xl font-bold text-white mt-12 mb-4">Environment Setup</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">cd ui/console
+
+<span class="text-gray-500"># Install dependencies</span>
+npm install
+
+<span class="text-gray-500"># Start development server with HMR</span>
+npm run dev
+<span class="text-gray-500"># Console available at http://localhost:3000</span>
+
+<span class="text-gray-500"># Build for production</span>
+npm run build
+
+<span class="text-gray-500"># Preview production build</span>
+npm run preview</code></pre>
+
+  <h2 id="project-structure" class="text-2xl font-bold text-white mt-12 mb-4">Project Structure</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">ui/console/
+  src/
+    App.tsx                     <span class="text-gray-500"># Root component</span>
+    api/                        <span class="text-gray-500"># API client layer</span>
+      devices.ts                <span class="text-gray-500"># Device API client</span>
+    auth/                       <span class="text-gray-500"># OIDC authentication</span>
+      oidc.ts                   <span class="text-gray-500"># OIDC configuration</span>
+    components/                 <span class="text-gray-500"># Shared components</span>
+      EnhancedDashboard.tsx     <span class="text-gray-500"># Main dashboard</span>
+      ProductionDashboard.tsx   <span class="text-gray-500"># Production monitoring view</span>
+      SystemSettings.tsx        <span class="text-gray-500"># System configuration</span>
+      marketplace/              <span class="text-gray-500"># Protocol marketplace</span>
+        MyProtocols.tsx         <span class="text-gray-500"># User's protocols</span>
+        ProtocolDetails.tsx     <span class="text-gray-500"># Protocol detail view</span>
+        ProtocolSubmission.tsx  <span class="text-gray-500"># Submit new protocol</span>
+      responsive/               <span class="text-gray-500"># Responsive layout</span>
+    config/                     <span class="text-gray-500"># App configuration</span>
+      production.ts             <span class="text-gray-500"># Production settings</span>
+    theme/                      <span class="text-gray-500"># Material UI theme</span>
+      EnterpriseTheme.ts        <span class="text-gray-500"># Enterprise theme definition</span>
+      ThemeProvider.tsx          <span class="text-gray-500"># Theme context provider</span>
+    types/                      <span class="text-gray-500"># TypeScript type definitions</span>
+      auth.ts                   <span class="text-gray-500"># Auth types</span>
+      marketplace.ts            <span class="text-gray-500"># Marketplace types</span>
+  pages/
+    index.tsx                   <span class="text-gray-500"># Landing page</span>
+  index.html                    <span class="text-gray-500"># HTML entry point</span>
+  vite.config.ts                <span class="text-gray-500"># Vite configuration</span>
+  package.json                  <span class="text-gray-500"># Dependencies and scripts</span></code></pre>
+
+  <h2 id="development-workflow" class="text-2xl font-bold text-white mt-12 mb-4">Development Workflow</h2>
+
+  <h3 id="scripts" class="text-xl font-semibold text-white mt-8 mb-3">Available Scripts</h3>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Command</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">npm run dev</code></td>
+        <td class="text-gray-300 py-2">Start Vite dev server with HMR</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">npm run build</code></td>
+        <td class="text-gray-300 py-2">Production build with TypeScript checking</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">npm test</code></td>
+        <td class="text-gray-300 py-2">Run test suite</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">npm run lint</code></td>
+        <td class="text-gray-300 py-2">Run ESLint</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">npm run preview</code></td>
+        <td class="text-gray-300 py-2">Preview production build locally</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="configuration" class="text-2xl font-bold text-white mt-12 mb-4">Environment Configuration</h2>
+  <p class="text-gray-300 mb-4">Create a <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">.env</code> file in <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ui/console/</code>:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">VITE_API_BASE_URL=http://localhost:8000
+VITE_OIDC_AUTHORITY=https://auth.example.com
+VITE_OIDC_CLIENT_ID=qbitel-console
+VITE_ENABLE_MARKETPLACE=true
+VITE_ENABLE_MONITORING=true</code></pre>
+
+  <h2 id="linting" class="text-2xl font-bold text-white mt-12 mb-4">Linting and Formatting</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run ESLint</span>
+npm run lint
+
+<span class="text-gray-500"># Fix auto-fixable issues</span>
+npx eslint src/ --fix
+
+<span class="text-gray-500"># Type check</span>
+npx tsc --noEmit</code></pre>
+
+  <h2 id="adding-components" class="text-2xl font-bold text-white mt-12 mb-4">Adding New Components</h2>
+  <ol class="list-decimal list-inside text-gray-300 space-y-2 mb-6">
+    <li>Create the component file in <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">src/components/</code></li>
+    <li>Define TypeScript interfaces for props in <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">src/types/</code></li>
+    <li>Use the enterprise theme tokens from <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">src/theme/</code></li>
+    <li>Write tests alongside the component</li>
+    <li>Ensure responsive behavior using the <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ResponsiveLayout</code> component</li>
+  </ol>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/architecture/ui-console" class="text-quantum-400 hover:underline">UI Console Architecture</a> -- understand the component architecture</li>
+    <li><a href="/docs/api/authentication" class="text-quantum-400 hover:underline">Authentication</a> -- configure OIDC and SSO</li>
+    <li><a href="/docs/development/testing" class="text-quantum-400 hover:underline">Testing Guide</a> -- testing strategies and tools</li>
+  </ul>
+</DocsLayout>

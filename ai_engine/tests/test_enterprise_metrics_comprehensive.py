@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Comprehensive Enterprise Metrics Tests
+QBITEL Engine - Comprehensive Enterprise Metrics Tests
 
 Complete test suite for enterprise metrics functionality including
 MetricsCollector, PrometheusExporter, AlertManager, HealthChecker,

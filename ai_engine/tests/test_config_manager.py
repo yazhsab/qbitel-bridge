@@ -44,8 +44,8 @@ class TestDatabaseConfig:
         config = DatabaseConfig()
         assert config.host == "localhost"
         assert config.port == 5432
-        assert config.database == "cronos_ai"
-        assert config.username == "cronos_user"
+        assert config.database == "qbitel"
+        assert config.username == "qbitel_user"
         assert config.connection_pool_size == 10
 
     def test_password_from_env(self):
@@ -400,7 +400,7 @@ class TestConfigManager:
     def test_auto_discover_config_file(self):
         """Test auto-discovery of configuration file."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            config_file = Path(tmpdir) / "cronos_ai.yaml"
+            config_file = Path(tmpdir) / "qbitel.yaml"
             config_data = {"environment": "testing"}
             with open(config_file, "w") as f:
                 yaml.dump(config_data, f)
@@ -413,10 +413,10 @@ class TestConfigManager:
     def test_environment_specific_config(self):
         """Test environment-specific configuration file."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            os.environ["CRONOS_ENVIRONMENT"] = "production"
+            os.environ["QBITEL_ENVIRONMENT"] = "production"
 
             try:
-                config_file = Path(tmpdir) / "cronos_ai.production.yaml"
+                config_file = Path(tmpdir) / "qbitel.production.yaml"
                 config_data = {"api_port": 7777}
                 with open(config_file, "w") as f:
                     yaml.dump(config_data, f)
@@ -426,7 +426,7 @@ class TestConfigManager:
 
                 assert config.api_port == 7777
             finally:
-                del os.environ["CRONOS_ENVIRONMENT"]
+                del os.environ["QBITEL_ENVIRONMENT"]
 
 
 class TestGlobalConfigFunctions:

@@ -1,0 +1,231 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Configuration | QBITEL Bridge Docs" description="Complete configuration reference for QBITEL Bridge environment variables, YAML settings, and service endpoints.">
+  <h1 class="text-3xl font-bold text-white mb-2">Configuration</h1>
+  <p class="text-gray-400 mb-8">Configure QBITEL Bridge through environment variables, YAML configuration files, and command-line arguments.</p>
+
+  <h2 id="configuration-methods" class="text-2xl font-bold text-white mt-12 mb-4">Configuration Methods</h2>
+  <p class="text-gray-300 mb-4">QBITEL Bridge supports three configuration methods, applied in order of precedence:</p>
+  <ol class="list-decimal list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Command-line arguments</strong> -- highest priority</li>
+    <li><strong class="text-white">Environment variables</strong> -- override YAML settings</li>
+    <li><strong class="text-white">YAML configuration files</strong> -- base configuration</li>
+  </ol>
+
+  <h2 id="yaml-configuration" class="text-2xl font-bold text-white mt-12 mb-4">YAML Configuration</h2>
+  <p class="text-gray-300 mb-4">Create a configuration file at <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">config/qbitel.yaml</code>:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># config/qbitel.yaml</span>
+rest_host: "127.0.0.1"
+rest_port: 8000
+grpc_port: 50051
+log_level: "INFO"
+enable_observability: true
+device: "cpu"  <span class="text-gray-500"># or "cuda" for GPU acceleration</span>
+
+<span class="text-gray-500"># Database</span>
+database_url: "postgresql://qbitel:password@localhost:5432/qbitel"
+redis_url: "redis://localhost:6379/0"
+
+<span class="text-gray-500"># LLM Configuration</span>
+llm_provider: "ollama"
+ollama_url: "http://localhost:11434"
+llm_model: "llama3.2:8b"
+
+<span class="text-gray-500"># Security</span>
+jwt_secret: "your-secret-key"
+api_key_enabled: true
+mtls_enabled: false</code></pre>
+
+  <p class="text-gray-300 mb-4">Run with a custom configuration file:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">python -m ai_engine --config config/qbitel.yaml</code></pre>
+
+  <h2 id="core-env-vars" class="text-2xl font-bold text-white mt-12 mb-4">Core Environment Variables</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Variable</th>
+        <th class="text-left text-white py-2 pr-4">Default</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_ENVIRONMENT</code></td>
+        <td class="text-gray-300 py-2 pr-4">development</td>
+        <td class="text-gray-300 py-2">Environment name (fallback: ENVIRONMENT)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_LOG_LEVEL</code></td>
+        <td class="text-gray-300 py-2 pr-4">INFO</td>
+        <td class="text-gray-300 py-2">Logging level (DEBUG, INFO, WARNING, ERROR)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_DB_HOST</code></td>
+        <td class="text-gray-300 py-2 pr-4">localhost</td>
+        <td class="text-gray-300 py-2">Database host (fallback: DATABASE_HOST)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_DB_PORT</code></td>
+        <td class="text-gray-300 py-2 pr-4">5432</td>
+        <td class="text-gray-300 py-2">Database port (fallback: DATABASE_PORT)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_DB_PASSWORD</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2">Database password (fallback: DATABASE_PASSWORD)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="database-config" class="text-2xl font-bold text-white mt-12 mb-4">Database Configuration</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Variable</th>
+        <th class="text-left text-white py-2 pr-4">Default</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_REDIS_PASSWORD</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2">Redis password</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_ENCRYPTION_KEY</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2">Encryption key for field-level encryption</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_API_KEY</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2">API key for authentication (fallback: API_KEY)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="llm-config" class="text-2xl font-bold text-white mt-12 mb-4">LLM Configuration</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Variable</th>
+        <th class="text-left text-white py-2 pr-4">Default</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_LLM_PROVIDER</code></td>
+        <td class="text-gray-300 py-2 pr-4">ollama</td>
+        <td class="text-gray-300 py-2">LLM provider: ollama, vllm, or localai</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">OLLAMA_URL</code></td>
+        <td class="text-gray-300 py-2 pr-4">http://localhost:11434</td>
+        <td class="text-gray-300 py-2">Ollama endpoint for on-premise LLM</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_LLM_MODEL</code></td>
+        <td class="text-gray-300 py-2 pr-4">llama3.2:8b</td>
+        <td class="text-gray-300 py-2">Default LLM model name</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_AIRGAPPED_MODE</code></td>
+        <td class="text-gray-300 py-2 pr-4">false</td>
+        <td class="text-gray-300 py-2">Enable air-gapped mode (no external API calls)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="security-config" class="text-2xl font-bold text-white mt-12 mb-4">Security Configuration</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Variable</th>
+        <th class="text-left text-white py-2 pr-4">Default</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_JWT_SECRET</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2">Secret key for JWT token signing (fallback: JWT_SECRET)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">API_KEY_ENABLED</code></td>
+        <td class="text-gray-300 py-2 pr-4">true</td>
+        <td class="text-gray-300 py-2">Enable API key authentication</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">MTLS_ENABLED</code></td>
+        <td class="text-gray-300 py-2 pr-4">false</td>
+        <td class="text-gray-300 py-2">Enable mutual TLS authentication</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">PQC_ENABLED</code></td>
+        <td class="text-gray-300 py-2 pr-4">true</td>
+        <td class="text-gray-300 py-2">Enable post-quantum cryptography</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="observability-config" class="text-2xl font-bold text-white mt-12 mb-4">Observability Configuration</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Variable</th>
+        <th class="text-left text-white py-2 pr-4">Default</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ENABLE_OBSERVABILITY</code></td>
+        <td class="text-gray-300 py-2 pr-4">true</td>
+        <td class="text-gray-300 py-2">Enable metrics, tracing, and logging</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">OTEL_EXPORTER_ENDPOINT</code></td>
+        <td class="text-gray-300 py-2 pr-4">http://localhost:4317</td>
+        <td class="text-gray-300 py-2">OpenTelemetry collector gRPC endpoint</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">SENTRY_DSN</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2">Sentry DSN for error tracking</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">PROMETHEUS_PORT</code></td>
+        <td class="text-gray-300 py-2 pr-4">9091</td>
+        <td class="text-gray-300 py-2">Prometheus metrics endpoint port</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="environment-specific" class="text-2xl font-bold text-white mt-12 mb-4">Environment-Specific Configuration</h2>
+  <p class="text-gray-300 mb-4">QBITEL Bridge ships with environment-specific YAML files:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">config/
+  qbitel.yaml                       <span class="text-gray-500"># Base configuration</span>
+  qbitel.production.yaml            <span class="text-gray-500"># Production overrides</span>
+  environments/
+    production.yaml                 <span class="text-gray-500"># Production environment settings</span>
+    staging.yaml                    <span class="text-gray-500"># Staging environment settings</span></code></pre>
+
+  <p class="text-gray-300 mb-4">Select an environment at startup:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Use development mode with hot-reloading</span>
+python -m ai_engine --development --reload
+
+<span class="text-gray-500"># Use production configuration</span>
+python -m ai_engine --config config/qbitel.production.yaml</code></pre>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/reference/environment-variables" class="text-quantum-400 hover:underline">Full Environment Variables Reference</a> -- complete list of all variables</li>
+    <li><a href="/docs/deployment/docker" class="text-quantum-400 hover:underline">Docker Compose Deployment</a> -- configure services in Docker</li>
+    <li><a href="/docs/security/zero-trust" class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- security configuration details</li>
+  </ul>
+</DocsLayout>

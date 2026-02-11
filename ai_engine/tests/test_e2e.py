@@ -1,5 +1,5 @@
 """
-CRONOS AI - End-to-End Tests
+QBITEL - End-to-End Tests
 
 Comprehensive end-to-end test scenarios covering complete user workflows.
 """
@@ -37,7 +37,7 @@ class TestCompleteWorkflows:
     @pytest.fixture
     def auth_headers(self):
         """Create authentication headers."""
-        return {"Authorization": "Bearer cronos_ai_test_key"}
+        return {"Authorization": "Bearer qbitel_test_key"}
 
     def test_complete_protocol_discovery_workflow(self, client, auth_headers):
         """
@@ -228,7 +228,7 @@ class TestCompleteWorkflows:
             response = client.post(
                 "/api/v1/discover",
                 json=payload,
-                headers={"Authorization": "Bearer cronos_ai_test_key"},
+                headers={"Authorization": "Bearer qbitel_test_key"},
             )
             # Should succeed or fail based on implementation
             assert response.status_code in [200, 401]
@@ -251,7 +251,7 @@ class TestMultiStepWorkflows:
         """
         Test workflow: Protocol discovery followed by field detection.
         """
-        auth_headers = {"Authorization": "Bearer cronos_ai_test_key"}
+        auth_headers = {"Authorization": "Bearer qbitel_test_key"}
         packet_data = base64.b64encode(b"GET / HTTP/1.1\r\n\r\n").decode()
 
         with patch("ai_engine.api.rest._ai_engine") as mock_engine:
@@ -374,7 +374,7 @@ class TestFailureScenarios:
         3. Receive 429 response
         4. Wait and retry successfully
         """
-        auth_headers = {"Authorization": "Bearer cronos_ai_test_key"}
+        auth_headers = {"Authorization": "Bearer qbitel_test_key"}
         payload = {"packet_data": base64.b64encode(b"test").decode(), "metadata": {}}
 
         # Make multiple rapid requests

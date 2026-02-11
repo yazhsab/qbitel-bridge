@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Enhanced PCFG Inference Tests
+QBITEL Engine - Enhanced PCFG Inference Tests
 
 Comprehensive test suite for production-ready PCFG inference with:
 - Bayesian hyperparameter optimization

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - API Tests
+QBITEL Engine - API Tests
 
 This module contains tests for REST and gRPC API endpoints.
 """
@@ -101,7 +101,7 @@ class TestRESTAPI:
         response = client.get("/")
         assert response.status_code == 200
         data = response.json()
-        assert data["message"].startswith("CRONOS AI Engine")
+        assert data["message"].startswith("QBITEL Engine")
         assert "features" in data
 
     def test_detection_requires_auth(self, client):
@@ -197,7 +197,7 @@ class TestRESTAPI:
     def test_app_startup_initializes_services(self, config):
         with ExitStack() as stack:
             mock_engine_cls = stack.enter_context(
-                patch("ai_engine.api.rest.CronosAIEngine")
+                patch("ai_engine.api.rest.QbitelAIEngine")
             )
             mock_init_llm = stack.enter_context(
                 patch(
@@ -492,7 +492,7 @@ class TestGRPCAPI:
         # Test status
         result = await grpc_service.GetServiceStatus(mock_request, mock_context)
 
-        assert result["service_name"] == "CRONOS AI Engine gRPC"
+        assert result["service_name"] == "QBITEL Engine gRPC"
         assert result["version"] == "1.0.0"
         assert "uptime_seconds" in result
         assert "statistics" in result
@@ -513,7 +513,7 @@ class TestGRPCAPI:
         result = await grpc_service.HealthCheck(mock_request, mock_context)
 
         assert result["status"] == "healthy"
-        assert result["service"] == "cronos-ai-grpc"
+        assert result["service"] == "qbitel-grpc"
         assert "timestamp" in result
 
     @pytest.mark.asyncio
@@ -563,8 +563,8 @@ class TestAPIAuthentication:
 
         assert api_key is not None
         assert (
-            api_key.startswith("cronos_ai_")
-            or api_key == "cronos_ai_mock_key_for_testing"
+            api_key.startswith("qbitel_")
+            or api_key == "qbitel_mock_key_for_testing"
         )
 
     def test_invalid_api_key(self, client, sample_data):

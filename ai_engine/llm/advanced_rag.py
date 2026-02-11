@@ -1,5 +1,5 @@
 """
-CRONOS AI - Advanced RAG Features
+QBITEL - Advanced RAG Features
 Multi-query expansion, contextual compression, and enhanced retrieval.
 
 Updated for 2024-2025 AI/ML trends:

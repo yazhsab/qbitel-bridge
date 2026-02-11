@@ -1,0 +1,262 @@
+"""
+QBITEL Engine - Numeric Error Codes
+
+Standardized error codes for API responses. Error codes are organized by category:
+- 1000-1999: Discovery errors
+- 2000-2999: Detection errors
+- 3000-3999: LLM errors
+- 4000-4999: Authentication/Authorization errors
+- 5000-5999: Validation errors
+- 6000-6999: Protocol errors
+- 7000-7999: Compliance errors
+- 8000-8999: Infrastructure errors
+- 9000-9999: System errors
+"""
+
+from enum import IntEnum
+from typing import Dict, Tuple
+from http import HTTPStatus
+
+
+class ErrorCode(IntEnum):
+    """Numeric error codes for API responses."""
+
+    # Discovery errors (1000-1999)
+    DISCOVERY_FAILED = 1000
+    DISCOVERY_TIMEOUT = 1001
+    INVALID_PROTOCOL_DATA = 1002
+    GRAMMAR_LEARNING_FAILED = 1003
+    PARSER_GENERATION_FAILED = 1004
+    CLASSIFICATION_FAILED = 1005
+    STATISTICAL_ANALYSIS_FAILED = 1006
+    DISCOVERY_SESSION_NOT_FOUND = 1007
+    DISCOVERY_CACHE_ERROR = 1008
+    DISCOVERY_PIPELINE_ERROR = 1009
+
+    # Detection errors (2000-2999)
+    FIELD_DETECTION_FAILED = 2000
+    MODEL_NOT_LOADED = 2001
+    INVALID_MESSAGE_FORMAT = 2002
+    DETECTION_TIMEOUT = 2003
+    ANOMALY_DETECTION_FAILED = 2004
+    FEATURE_EXTRACTION_FAILED = 2005
+    BOUNDARY_DETECTION_FAILED = 2006
+    TYPE_INFERENCE_FAILED = 2007
+
+    # LLM errors (3000-3999)
+    LLM_UNAVAILABLE = 3000
+    LLM_TIMEOUT = 3001
+    LLM_RATE_LIMITED = 3002
+    LLM_CONTEXT_TOO_LONG = 3003
+    LLM_INVALID_RESPONSE = 3004
+    LLM_PROVIDER_ERROR = 3005
+    RAG_ENGINE_ERROR = 3006
+    COPILOT_ERROR = 3007
+    EMBEDDING_FAILED = 3008
+
+    # Authentication errors (4000-4999)
+    UNAUTHORIZED = 4000
+    INVALID_TOKEN = 4001
+    TOKEN_EXPIRED = 4002
+    INSUFFICIENT_PERMISSIONS = 4003
+    INVALID_API_KEY = 4004
+    API_KEY_EXPIRED = 4005
+    API_KEY_REVOKED = 4006
+    MFA_REQUIRED = 4007
+    SESSION_EXPIRED = 4008
+    ACCOUNT_LOCKED = 4009
+    ACCOUNT_DISABLED = 4010
+
+    # Validation errors (5000-5999)
+    VALIDATION_ERROR = 5000
+    INVALID_INPUT = 5001
+    MISSING_REQUIRED_FIELD = 5002
+    INVALID_FORMAT = 5003
+    VALUE_OUT_OF_RANGE = 5004
+    PAYLOAD_TOO_LARGE = 5005
+    UNSUPPORTED_CONTENT_TYPE = 5006
+    INVALID_JSON = 5007
+    SCHEMA_VALIDATION_FAILED = 5008
+
+    # Protocol errors (6000-6999)
+    PROTOCOL_ERROR = 6000
+    UNKNOWN_PROTOCOL = 6001
+    PROTOCOL_PARSING_FAILED = 6002
+    PROTOCOL_VALIDATION_FAILED = 6003
+    UNSUPPORTED_PROTOCOL_VERSION = 6004
+    PROTOCOL_TRANSLATION_FAILED = 6005
+
+    # Compliance errors (7000-7999)
+    COMPLIANCE_ERROR = 7000
+    COMPLIANCE_CHECK_FAILED = 7001
+    POLICY_VIOLATION = 7002
+    AUDIT_LOG_FAILED = 7003
+    DATA_RETENTION_ERROR = 7004
+
+    # Infrastructure errors (8000-8999)
+    DATABASE_ERROR = 8000
+    DATABASE_CONNECTION_FAILED = 8001
+    DATABASE_QUERY_FAILED = 8002
+    CACHE_ERROR = 8003
+    CACHE_CONNECTION_FAILED = 8004
+    MESSAGE_QUEUE_ERROR = 8005
+    EXTERNAL_SERVICE_ERROR = 8006
+    NETWORK_ERROR = 8007
+    STORAGE_ERROR = 8008
+
+    # System errors (9000-9999)
+    INTERNAL_ERROR = 9000
+    SERVICE_UNAVAILABLE = 9001
+    RESOURCE_EXHAUSTED = 9002
+    CIRCUIT_BREAKER_OPEN = 9003
+    TIMEOUT = 9004
+    NOT_IMPLEMENTED = 9005
+    CONFIGURATION_ERROR = 9006
+    INITIALIZATION_FAILED = 9007
+    SHUTDOWN_IN_PROGRESS = 9008
+
+
+# Error code to HTTP status mapping
+ERROR_CODE_HTTP_STATUS: Dict[ErrorCode, HTTPStatus] = {
+    # Discovery errors -> 500/503
+    ErrorCode.DISCOVERY_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.DISCOVERY_TIMEOUT: HTTPStatus.GATEWAY_TIMEOUT,
+    ErrorCode.INVALID_PROTOCOL_DATA: HTTPStatus.BAD_REQUEST,
+    ErrorCode.GRAMMAR_LEARNING_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.PARSER_GENERATION_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.CLASSIFICATION_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.STATISTICAL_ANALYSIS_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.DISCOVERY_SESSION_NOT_FOUND: HTTPStatus.NOT_FOUND,
+    ErrorCode.DISCOVERY_CACHE_ERROR: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.DISCOVERY_PIPELINE_ERROR: HTTPStatus.INTERNAL_SERVER_ERROR,
+
+    # Detection errors
+    ErrorCode.FIELD_DETECTION_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.MODEL_NOT_LOADED: HTTPStatus.SERVICE_UNAVAILABLE,
+    ErrorCode.INVALID_MESSAGE_FORMAT: HTTPStatus.BAD_REQUEST,
+    ErrorCode.DETECTION_TIMEOUT: HTTPStatus.GATEWAY_TIMEOUT,
+    ErrorCode.ANOMALY_DETECTION_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.FEATURE_EXTRACTION_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.BOUNDARY_DETECTION_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.TYPE_INFERENCE_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+
+    # LLM errors
+    ErrorCode.LLM_UNAVAILABLE: HTTPStatus.SERVICE_UNAVAILABLE,
+    ErrorCode.LLM_TIMEOUT: HTTPStatus.GATEWAY_TIMEOUT,
+    ErrorCode.LLM_RATE_LIMITED: HTTPStatus.TOO_MANY_REQUESTS,
+    ErrorCode.LLM_CONTEXT_TOO_LONG: HTTPStatus.BAD_REQUEST,
+    ErrorCode.LLM_INVALID_RESPONSE: HTTPStatus.BAD_GATEWAY,
+    ErrorCode.LLM_PROVIDER_ERROR: HTTPStatus.BAD_GATEWAY,
+    ErrorCode.RAG_ENGINE_ERROR: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.COPILOT_ERROR: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.EMBEDDING_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+
+    # Authentication errors -> 401/403
+    ErrorCode.UNAUTHORIZED: HTTPStatus.UNAUTHORIZED,
+    ErrorCode.INVALID_TOKEN: HTTPStatus.UNAUTHORIZED,
+    ErrorCode.TOKEN_EXPIRED: HTTPStatus.UNAUTHORIZED,
+    ErrorCode.INSUFFICIENT_PERMISSIONS: HTTPStatus.FORBIDDEN,
+    ErrorCode.INVALID_API_KEY: HTTPStatus.UNAUTHORIZED,
+    ErrorCode.API_KEY_EXPIRED: HTTPStatus.UNAUTHORIZED,
+    ErrorCode.API_KEY_REVOKED: HTTPStatus.UNAUTHORIZED,
+    ErrorCode.MFA_REQUIRED: HTTPStatus.FORBIDDEN,
+    ErrorCode.SESSION_EXPIRED: HTTPStatus.UNAUTHORIZED,
+    ErrorCode.ACCOUNT_LOCKED: HTTPStatus.FORBIDDEN,
+    ErrorCode.ACCOUNT_DISABLED: HTTPStatus.FORBIDDEN,
+
+    # Validation errors -> 400/413/415
+    ErrorCode.VALIDATION_ERROR: HTTPStatus.BAD_REQUEST,
+    ErrorCode.INVALID_INPUT: HTTPStatus.BAD_REQUEST,
+    ErrorCode.MISSING_REQUIRED_FIELD: HTTPStatus.BAD_REQUEST,
+    ErrorCode.INVALID_FORMAT: HTTPStatus.BAD_REQUEST,
+    ErrorCode.VALUE_OUT_OF_RANGE: HTTPStatus.BAD_REQUEST,
+    ErrorCode.PAYLOAD_TOO_LARGE: HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+    ErrorCode.UNSUPPORTED_CONTENT_TYPE: HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+    ErrorCode.INVALID_JSON: HTTPStatus.BAD_REQUEST,
+    ErrorCode.SCHEMA_VALIDATION_FAILED: HTTPStatus.BAD_REQUEST,
+
+    # Protocol errors
+    ErrorCode.PROTOCOL_ERROR: HTTPStatus.BAD_REQUEST,
+    ErrorCode.UNKNOWN_PROTOCOL: HTTPStatus.BAD_REQUEST,
+    ErrorCode.PROTOCOL_PARSING_FAILED: HTTPStatus.BAD_REQUEST,
+    ErrorCode.PROTOCOL_VALIDATION_FAILED: HTTPStatus.BAD_REQUEST,
+    ErrorCode.UNSUPPORTED_PROTOCOL_VERSION: HTTPStatus.BAD_REQUEST,
+    ErrorCode.PROTOCOL_TRANSLATION_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+
+    # Compliance errors
+    ErrorCode.COMPLIANCE_ERROR: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.COMPLIANCE_CHECK_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.POLICY_VIOLATION: HTTPStatus.FORBIDDEN,
+    ErrorCode.AUDIT_LOG_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.DATA_RETENTION_ERROR: HTTPStatus.INTERNAL_SERVER_ERROR,
+
+    # Infrastructure errors -> 500/502/503
+    ErrorCode.DATABASE_ERROR: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.DATABASE_CONNECTION_FAILED: HTTPStatus.SERVICE_UNAVAILABLE,
+    ErrorCode.DATABASE_QUERY_FAILED: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.CACHE_ERROR: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.CACHE_CONNECTION_FAILED: HTTPStatus.SERVICE_UNAVAILABLE,
+    ErrorCode.MESSAGE_QUEUE_ERROR: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.EXTERNAL_SERVICE_ERROR: HTTPStatus.BAD_GATEWAY,
+    ErrorCode.NETWORK_ERROR: HTTPStatus.BAD_GATEWAY,
+    ErrorCode.STORAGE_ERROR: HTTPStatus.INTERNAL_SERVER_ERROR,
+
+    # System errors -> 500/503
+    ErrorCode.INTERNAL_ERROR: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.SERVICE_UNAVAILABLE: HTTPStatus.SERVICE_UNAVAILABLE,
+    ErrorCode.RESOURCE_EXHAUSTED: HTTPStatus.SERVICE_UNAVAILABLE,
+    ErrorCode.CIRCUIT_BREAKER_OPEN: HTTPStatus.SERVICE_UNAVAILABLE,
+    ErrorCode.TIMEOUT: HTTPStatus.GATEWAY_TIMEOUT,
+    ErrorCode.NOT_IMPLEMENTED: HTTPStatus.NOT_IMPLEMENTED,
+    ErrorCode.CONFIGURATION_ERROR: HTTPStatus.INTERNAL_SERVER_ERROR,
+    ErrorCode.INITIALIZATION_FAILED: HTTPStatus.SERVICE_UNAVAILABLE,
+    ErrorCode.SHUTDOWN_IN_PROGRESS: HTTPStatus.SERVICE_UNAVAILABLE,
+}
+
+
+def get_http_status_for_error(error_code: ErrorCode) -> HTTPStatus:
+    """Get HTTP status code for an error code."""
+    return ERROR_CODE_HTTP_STATUS.get(error_code, HTTPStatus.INTERNAL_SERVER_ERROR)
+
+
+def get_error_code_info(error_code: ErrorCode) -> Dict[str, any]:
+    """Get full information about an error code."""
+    http_status = get_http_status_for_error(error_code)
+    return {
+        "code": int(error_code),
+        "name": error_code.name,
+        "http_status": http_status.value,
+        "http_status_phrase": http_status.phrase,
+    }
+
+
+# Error category helpers
+def is_client_error(error_code: ErrorCode) -> bool:
+    """Check if error code represents a client error (4xx)."""
+    http_status = get_http_status_for_error(error_code)
+    return 400 <= http_status.value < 500
+
+
+def is_server_error(error_code: ErrorCode) -> bool:
+    """Check if error code represents a server error (5xx)."""
+    http_status = get_http_status_for_error(error_code)
+    return http_status.value >= 500
+
+
+def is_retryable(error_code: ErrorCode) -> bool:
+    """Check if error is retryable by the client."""
+    retryable_codes = {
+        ErrorCode.LLM_RATE_LIMITED,
+        ErrorCode.LLM_TIMEOUT,
+        ErrorCode.LLM_UNAVAILABLE,
+        ErrorCode.TIMEOUT,
+        ErrorCode.SERVICE_UNAVAILABLE,
+        ErrorCode.CIRCUIT_BREAKER_OPEN,
+        ErrorCode.DATABASE_CONNECTION_FAILED,
+        ErrorCode.CACHE_CONNECTION_FAILED,
+        ErrorCode.NETWORK_ERROR,
+        ErrorCode.EXTERNAL_SERVICE_ERROR,
+        ErrorCode.DISCOVERY_TIMEOUT,
+        ErrorCode.DETECTION_TIMEOUT,
+    }
+    return error_code in retryable_codes

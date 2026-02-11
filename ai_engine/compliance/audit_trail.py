@@ -1,5 +1,5 @@
 """
-CRONOS AI - Blockchain-based Audit Trail System
+QBITEL - Blockchain-based Audit Trail System
 
 Enterprise-grade audit trail management with blockchain integration
 for immutable compliance record keeping and regulatory verification.
@@ -23,13 +23,13 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 import secrets
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..monitoring.enterprise_metrics import get_enterprise_metrics
 
 logger = logging.getLogger(__name__)
 
 
-class AuditException(CronosAIException):
+class AuditException(QbitelAIException):
     """Audit trail specific exception."""
 
     pass
@@ -111,7 +111,7 @@ class AuditBlock:
     merkle_root: str
     block_hash: str
     nonce: int = 0
-    validator: str = "cronos_ai"
+    validator: str = "qbitel"
     signature: str = ""
 
     def calculate_hash(self) -> str:
@@ -202,9 +202,9 @@ class CryptographicManager:
     def _derive_encryption_key(self) -> bytes:
         """Derive encryption key from configuration."""
         # In production, this would use proper key derivation
-        master_key = getattr(self.config, "audit_master_key", "cronos_ai_audit_2024")
+        master_key = getattr(self.config, "audit_master_key", "qbitel_audit_2024")
         return hashlib.pbkdf2_hmac(
-            "sha256", master_key.encode(), b"cronos_ai_salt", 100000, 32
+            "sha256", master_key.encode(), b"qbitel_salt", 100000, 32
         )
 
     def sign_block(self, block: AuditBlock) -> str:
@@ -364,7 +364,7 @@ class BlockchainAuditTrail:
             events=[genesis_event],
             merkle_root="",
             block_hash="",
-            validator="cronos_ai",
+            validator="qbitel",
         )
 
         genesis_block.merkle_root = genesis_block.calculate_merkle_root()
@@ -416,7 +416,7 @@ class BlockchainAuditTrail:
                 events=self.pending_events.copy(),
                 merkle_root="",
                 block_hash="",
-                validator="cronos_ai",
+                validator="qbitel",
             )
 
             # Calculate hashes

@@ -1,4 +1,4 @@
-# CRONOS AI Security and Compliance Validation Configuration
+# QBITEL Security and Compliance Validation Configuration
 
 endpoints:
   dataplane: "http://localhost:9090"
@@ -8,7 +8,7 @@ endpoints:
   mgmtapi: "http://localhost:8002"
 
 kubernetes:
-  namespace: "cronos-ai-prod"
+  namespace: "qbitel-prod"
   context: "default"
   config_path: "~/.kube/config"
 
@@ -25,9 +25,9 @@ security:
   
   # Certificate paths for validation
   certificate_paths:
-    ca_cert: "/etc/ssl/certs/cronos-ai-ca.crt"
-    server_cert: "/etc/ssl/certs/cronos-ai-server.crt"
-    client_cert: "/etc/ssl/certs/cronos-ai-client.crt"
+    ca_cert: "/etc/ssl/certs/qbitel-ca.crt"
+    server_cert: "/etc/ssl/certs/qbitel-server.crt"
+    client_cert: "/etc/ssl/certs/qbitel-client.crt"
     
   # Key management configuration
   key_management:

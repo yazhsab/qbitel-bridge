@@ -1,0 +1,179 @@
+{
+  "metadata": {
+    "title": "IDCAMS and Mainframe Utility Control Statements",
+    "version": "1.0.0",
+    "description": "VSAM utilities, dataset management, and modern equivalents",
+    "utilities": ["IDCAMS", "IEBGENER", "IEBCOPY", "IEFBR14", "ICEGENER"],
+    "total_samples": 50
+  },
+  "idcams_commands": [
+    {
+      "id": "IDCAMS001",
+      "name": "Define KSDS Cluster",
+      "description": "Define a Key Sequenced Data Set",
+      "jcl": "//DEFKSDS  EXEC PGM=IDCAMS\n//SYSPRINT DD SYSOUT=*\n//SYSIN    DD *\n  DEFINE CLUSTER -\n         (NAME(PROD.CUSTOMER.MASTER) -\n          INDEXED -\n          KEYS(10 0) -\n          RECORDSIZE(200 500) -\n          FREESPACE(20 10) -\n          SHAREOPTIONS(2 3) -\n          SPEED -\n          ERASE) -\n       DATA -\n         (NAME(PROD.CUSTOMER.MASTER.DATA) -\n          CYLINDERS(100 50) -\n          CONTROLINTERVALSIZE(4096)) -\n       INDEX -\n         (NAME(PROD.CUSTOMER.MASTER.INDEX) -\n          CYLINDERS(10 5) -\n          CONTROLINTERVALSIZE(2048))\n/*",
+      "parameters": {
+        "NAME": "Cluster name",
+        "INDEXED": "Key Sequenced organization",
+        "KEYS": "(length offset) - Key definition",
+        "RECORDSIZE": "(avg max) - Record sizes",
+        "FREESPACE": "(CI% CA%) - Free space percentages",
+        "SHAREOPTIONS": "(cross-region cross-system)",
+        "SPEED": "Don't preformat during load",
+        "ERASE": "Overwrite when deleted"
+      },
+      "modern_equivalent": {
+        "description": "Create indexed table in PostgreSQL",
+        "sql": "CREATE TABLE customer_master (\n    customer_key VARCHAR(10) PRIMARY KEY,\n    customer_data VARCHAR(500),\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\n-- Create index matching VSAM alternate keys\nCREATE INDEX idx_customer_name ON customer_master(customer_name);\n\n-- Partitioning for large datasets\nCREATE TABLE customer_master_partitioned (\n    customer_key VARCHAR(10),\n    customer_data VARCHAR(500),\n    region_code CHAR(2)\n) PARTITION BY LIST (region_code);",
+        "java_jpa": "@Entity\n@Table(name = \"customer_master\", indexes = {\n    @Index(name = \"idx_customer_name\", columnList = \"customerName\")\n})\npublic class CustomerMaster {\n    @Id\n    @Column(length = 10)\n    private String customerKey;\n    \n    @Column(length = 500)\n    private String customerData;\n}"
+      }
+    },
+    {
+      "id": "IDCAMS002",
+      "name": "Define ESDS Cluster",
+      "description": "Define an Entry Sequenced Data Set",
+      "jcl": "//DEFESDS  EXEC PGM=IDCAMS\n//SYSPRINT DD SYSOUT=*\n//SYSIN    DD *\n  DEFINE CLUSTER -\n         (NAME(PROD.TRANS.LOG) -\n          NONINDEXED -\n          RECORDSIZE(100 100) -\n          CYLINDERS(500 100) -\n          SHAREOPTIONS(2 3) -\n          SPEED)\n/*",
+      "modern_equivalent": {
+        "description": "Append-only log table or message queue",
+        "sql": "-- Append-only transaction log\nCREATE TABLE transaction_log (\n    log_id BIGSERIAL PRIMARY KEY,\n    log_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    log_data TEXT\n);\n\n-- Make table append-only (no updates/deletes)\nREVOKE UPDATE, DELETE ON transaction_log FROM public;",
+        "kafka": "// Create Kafka topic for log-style data\nkafka-topics.sh --create \\\n    --topic transaction-log \\\n    --partitions 12 \\\n    --replication-factor 3 \\\n    --config retention.ms=604800000"
+      }
+    },
+    {
+      "id": "IDCAMS003",
+      "name": "Define RRDS Cluster",
+      "description": "Define a Relative Record Data Set",
+      "jcl": "//DEFRRDS  EXEC PGM=IDCAMS\n//SYSPRINT DD SYSOUT=*\n//SYSIN    DD *\n  DEFINE CLUSTER -\n         (NAME(PROD.SLOT.FILE) -\n          NUMBERED -\n          RECORDSIZE(256 256) -\n          RECORDS(10000) -\n          SHAREOPTIONS(2 3))\n/*",
+      "modern_equivalent": {
+        "description": "Array-indexed storage or Redis",
+        "redis": "# Redis equivalent for slot-based access\nimport redis\n\nr = redis.Redis()\n\n# Write to slot\nr.set(f'slot:{slot_number}', data)\n\n# Read from slot\ndata = r.get(f'slot:{slot_number}')",
+        "sql": "-- Table with numeric key for direct access\nCREATE TABLE slot_file (\n    slot_number INTEGER PRIMARY KEY,\n    slot_data BYTEA\n);\n\n-- Pre-populate slots\nINSERT INTO slot_file (slot_number, slot_data)\nSELECT generate_series(1, 10000), NULL;"
+      }
+    },
+    {
+      "id": "IDCAMS004",
+      "name": "Define Alternate Index",
+      "description": "Create alternate index for KSDS",
+      "jcl": "//DEFAIX   EXEC PGM=IDCAMS\n//SYSPRINT DD SYSOUT=*\n//SYSIN    DD *\n  DEFINE AIX -\n         (NAME(PROD.CUSTOMER.BYNAME) -\n          RELATE(PROD.CUSTOMER.MASTER) -\n          KEYS(30 10) -\n          NONUNIQUEKEY -\n          RECORDSIZE(60 100) -\n          CYLINDERS(20 5))\n  \n  DEFINE PATH -\n         (NAME(PROD.CUSTOMER.BYNAME.PATH) -\n          PATHENTRY(PROD.CUSTOMER.BYNAME))\n  \n  BLDINDEX -\n         INDATASET(PROD.CUSTOMER.MASTER) -\n         OUTDATASET(PROD.CUSTOMER.BYNAME)\n/*",
+      "modern_equivalent": {
+        "sql": "-- Create secondary index\nCREATE INDEX idx_customer_byname \n    ON customer_master(customer_name);\n\n-- Non-unique index (allowing duplicates)\nCREATE INDEX idx_customer_city \n    ON customer_master(city);\n\n-- Composite index\nCREATE INDEX idx_customer_region_status \n    ON customer_master(region, status);"
+      }
+    },
+    {
+      "id": "IDCAMS005",
+      "name": "REPRO - Copy Dataset",
+      "description": "Copy records between datasets",
+      "jcl": "//REPRO    EXEC PGM=IDCAMS\n//SYSPRINT DD SYSOUT=*\n//INPUT    DD DSN=PROD.SOURCE.FILE,DISP=SHR\n//OUTPUT   DD DSN=PROD.TARGET.FILE,DISP=OLD\n//SYSIN    DD *\n  REPRO -\n       INFILE(INPUT) -\n       OUTFILE(OUTPUT) -\n       FROMKEY(A0000) -\n       TOKEY(A9999) -\n       REPLACE\n/*",
+      "modern_equivalent": {
+        "sql": "-- Copy with range filter\nINSERT INTO target_table\nSELECT * FROM source_table\nWHERE key_field BETWEEN 'A0000' AND 'A9999'\nON CONFLICT (primary_key) DO UPDATE SET\n    field1 = EXCLUDED.field1,\n    field2 = EXCLUDED.field2;",
+        "python": "import shutil\nfrom pathlib import Path\n\ndef repro_dataset(\n    source: Path, \n    target: Path,\n    from_key: str = None,\n    to_key: str = None,\n    replace: bool = False\n):\n    with open(source, 'r') as src:\n        records = [line for line in src\n                   if (not from_key or line[:5] >= from_key) and\n                      (not to_key or line[:5] <= to_key)]\n    \n    mode = 'w' if replace else 'a'\n    with open(target, mode) as tgt:\n        tgt.writelines(records)"
+      }
+    },
+    {
+      "id": "IDCAMS006",
+      "name": "DELETE Dataset",
+      "description": "Delete VSAM cluster or non-VSAM dataset",
+      "jcl": "//DELETE   EXEC PGM=IDCAMS\n//SYSPRINT DD SYSOUT=*\n//SYSIN    DD *\n  DELETE PROD.CUSTOMER.MASTER -\n         CLUSTER -\n         PURGE -\n         ERASE\n  \n  IF LASTCC = 8 THEN -\n     SET MAXCC = 0\n/*",
+      "parameters": {
+        "CLUSTER": "Delete entire cluster including data and index",
+        "PURGE": "Override retention period",
+        "ERASE": "Overwrite data before deletion"
+      },
+      "modern_equivalent": {
+        "sql": "-- Drop table with cascade\nDROP TABLE IF EXISTS customer_master CASCADE;\n\n-- Truncate to remove all data but keep structure\nTRUNCATE TABLE customer_master;",
+        "python": "import os\nfrom pathlib import Path\nimport shutil\n\ndef delete_dataset(path: Path, purge: bool = False, erase: bool = False):\n    if not path.exists():\n        return  # Equivalent to IF LASTCC = 8\n    \n    if erase:\n        # Overwrite before delete\n        with open(path, 'r+b') as f:\n            size = f.seek(0, 2)\n            f.seek(0)\n            f.write(b'\\x00' * size)\n    \n    if path.is_dir():\n        shutil.rmtree(path)\n    else:\n        path.unlink()"
+      }
+    },
+    {
+      "id": "IDCAMS007",
+      "name": "LISTCAT - List Catalog",
+      "description": "Display catalog information",
+      "jcl": "//LISTCAT  EXEC PGM=IDCAMS\n//SYSPRINT DD SYSOUT=*\n//SYSIN    DD *\n  LISTCAT -\n         ENTRIES(PROD.CUSTOMER.*) -\n         ALL\n/*",
+      "output_fields": {
+        "ATTRIBUTES": "Dataset organization, key info",
+        "STATISTICS": "Record counts, CI/CA splits",
+        "ALLOCATION": "Space allocation",
+        "VOLUME": "Volume serial numbers"
+      },
+      "modern_equivalent": {
+        "sql": "-- PostgreSQL catalog query\nSELECT \n    table_name,\n    pg_size_pretty(pg_total_relation_size(quote_ident(table_name))),\n    (SELECT count(*) FROM quote_ident(table_name))\nFROM information_schema.tables\nWHERE table_schema = 'public'\nAND table_name LIKE 'customer%';",
+        "python": "import os\nfrom pathlib import Path\n\ndef list_catalog(pattern: str):\n    base_path = Path('.')\n    for path in base_path.glob(pattern):\n        stat = path.stat()\n        print(f'Name: {path.name}')\n        print(f'Size: {stat.st_size}')\n        print(f'Modified: {stat.st_mtime}')\n        print()"
+      }
+    },
+    {
+      "id": "IDCAMS008",
+      "name": "PRINT Dataset",
+      "description": "Print dataset contents",
+      "jcl": "//PRINT    EXEC PGM=IDCAMS\n//SYSPRINT DD SYSOUT=*\n//INPUT    DD DSN=PROD.CUSTOMER.MASTER,DISP=SHR\n//SYSIN    DD *\n  PRINT -\n       INFILE(INPUT) -\n       CHARACTER -\n       COUNT(100) -\n       SKIP(0) -\n       FROMKEY(A0001) -\n       TOKEY(A0100)\n/*",
+      "modern_equivalent": {
+        "sql": "-- Print with range and limit\nSELECT * FROM customer_master\nWHERE customer_key BETWEEN 'A0001' AND 'A0100'\nLIMIT 100;",
+        "python": "def print_dataset(\n    filepath: str,\n    count: int = 100,\n    skip: int = 0,\n    from_key: str = None,\n    to_key: str = None\n):\n    with open(filepath, 'r') as f:\n        for i, line in enumerate(f):\n            if i < skip:\n                continue\n            if i >= skip + count:\n                break\n            \n            key = line[:10]  # Assuming 10-char key\n            if from_key and key < from_key:\n                continue\n            if to_key and key > to_key:\n                break\n            \n            print(line, end='')"
+      }
+    },
+    {
+      "id": "IDCAMS009",
+      "name": "VERIFY Dataset",
+      "description": "Reset VSAM end-of-file marker after abnormal close",
+      "jcl": "//VERIFY   EXEC PGM=IDCAMS\n//SYSPRINT DD SYSOUT=*\n//SYSIN    DD *\n  VERIFY DATASET(PROD.CUSTOMER.MASTER)\n/*",
+      "modern_equivalent": {
+        "sql": "-- Database repair/verify\nREINDEX TABLE customer_master;\nVACUUM ANALYZE customer_master;\n\n-- Check table integrity\nSELECT * FROM pg_stat_user_tables\nWHERE relname = 'customer_master';",
+        "python": "# File integrity check\nimport hashlib\n\ndef verify_dataset(filepath: str) -> bool:\n    try:\n        with open(filepath, 'rb') as f:\n            # Read entire file to verify no corruption\n            hasher = hashlib.sha256()\n            while chunk := f.read(8192):\n                hasher.update(chunk)\n        return True\n    except Exception as e:\n        print(f'Verification failed: {e}')\n        return False"
+      }
+    },
+    {
+      "id": "IDCAMS010",
+      "name": "ALTER Dataset Attributes",
+      "description": "Modify dataset attributes",
+      "jcl": "//ALTER    EXEC PGM=IDCAMS\n//SYSPRINT DD SYSOUT=*\n//SYSIN    DD *\n  ALTER PROD.CUSTOMER.MASTER -\n        FREESPACE(30 15) -\n        SHAREOPTIONS(4 3) -\n        BUFFERSPACE(65536)\n/*",
+      "modern_equivalent": {
+        "sql": "-- Alter table settings\nALTER TABLE customer_master\n    SET (fillfactor = 70);  -- Similar to FREESPACE\n\n-- Change storage parameters\nALTER TABLE customer_master\n    SET TABLESPACE fast_storage;"
+      }
+    }
+  ],
+  "other_utilities": [
+    {
+      "id": "IEBGENER001",
+      "name": "IEBGENER - Copy Sequential Dataset",
+      "description": "Copy or reformat sequential datasets",
+      "jcl": "//COPY     EXEC PGM=IEBGENER\n//SYSPRINT DD SYSOUT=*\n//SYSUT1   DD DSN=PROD.INPUT.FILE,DISP=SHR\n//SYSUT2   DD DSN=PROD.OUTPUT.FILE,\n//            DISP=(NEW,CATLG,DELETE),\n//            SPACE=(TRK,(100,50),RLSE),\n//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=27920)\n//SYSIN    DD DUMMY",
+      "modern_equivalent": {
+        "bash": "# Simple copy\ncp input.dat output.dat\n\n# Copy with format conversion\ndd if=input.dat of=output.dat conv=ascii",
+        "python": "import shutil\n\ndef iebgener(input_file: str, output_file: str):\n    shutil.copy2(input_file, output_file)"
+      }
+    },
+    {
+      "id": "IEBCOPY001",
+      "name": "IEBCOPY - Copy PDS Members",
+      "description": "Copy or merge partitioned dataset members",
+      "jcl": "//COPY     EXEC PGM=IEBCOPY\n//SYSPRINT DD SYSOUT=*\n//SYSUT1   DD DSN=PROD.SOURCE.PDS,DISP=SHR\n//SYSUT2   DD DSN=PROD.TARGET.PDS,DISP=OLD\n//SYSIN    DD *\n  COPY OUTDD=SYSUT2,INDD=SYSUT1\n  SELECT MEMBER=((MEMBER1,,R),(MEMBER2,,R))\n/*",
+      "modern_equivalent": {
+        "bash": "# Copy specific files\ncp source/MEMBER1 target/MEMBER1\ncp source/MEMBER2 target/MEMBER2",
+        "python": "import shutil\nfrom pathlib import Path\n\ndef iebcopy(\n    source_dir: Path,\n    target_dir: Path,\n    members: list[str],\n    replace: bool = True\n):\n    for member in members:\n        src = source_dir / member\n        dst = target_dir / member\n        if replace or not dst.exists():\n            shutil.copy2(src, dst)"
+      }
+    },
+    {
+      "id": "IEFBR14001",
+      "name": "IEFBR14 - Null Program",
+      "description": "Used for dataset allocation/deletion only",
+      "jcl": "//CREATE   EXEC PGM=IEFBR14\n//NEWFILE  DD DSN=PROD.NEW.FILE,\n//            DISP=(NEW,CATLG,DELETE),\n//            SPACE=(CYL,(10,5),RLSE),\n//            DCB=(RECFM=FB,LRECL=80,BLKSIZE=27920)\n//DELETE   DD DSN=PROD.OLD.FILE,\n//            DISP=(OLD,DELETE,DELETE)",
+      "modern_equivalent": {
+        "bash": "# Create empty file\ntouch /path/to/new/file\n\n# Delete file\nrm /path/to/old/file",
+        "python": "from pathlib import Path\n\n# Create\nPath('/path/to/new/file').touch()\n\n# Delete\nPath('/path/to/old/file').unlink(missing_ok=True)"
+      }
+    }
+  ],
+  "condition_code_handling": {
+    "description": "IDCAMS condition code handling patterns",
+    "codes": {
+      "0": "Successful completion",
+      "4": "Warning - some functions may not have completed",
+      "8": "Error - dataset not found or similar",
+      "12": "Severe error",
+      "16": "Critical error"
+    },
+    "if_then_else": "  IF LASTCC = 8 THEN -\n     SET MAXCC = 0\n  ELSE -\n     SET MAXCC = 12",
+    "modern_equivalent": {
+      "python": "import sys\n\ndef check_condition_code(cc: int):\n    if cc == 0:\n        return  # Success\n    elif cc == 4:\n        print('Warning: partial completion')\n    elif cc == 8:\n        print('Error: item not found')\n        # Optionally suppress error\n        return 0\n    else:\n        print(f'Critical error: {cc}')\n        sys.exit(cc)"
+    }
+  }
+}

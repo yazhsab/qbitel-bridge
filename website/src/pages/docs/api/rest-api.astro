@@ -1,0 +1,166 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="REST API | QBITEL Bridge Docs" description="Complete REST API reference for QBITEL Bridge: protocol discovery, classification, copilot, compliance, and threat intelligence endpoints.">
+  <h1 class="text-3xl font-bold text-white mb-2">REST API Reference</h1>
+  <p class="text-gray-400 mb-8">The QBITEL Bridge AI Engine exposes a FastAPI-powered REST API on port 8000. Interactive API documentation is available at <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">/docs</code> (Swagger UI).</p>
+
+  <h2 id="base-url" class="text-2xl font-bold text-white mt-12 mb-4">Base URL</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">http://localhost:8000/api/v1</code></pre>
+
+  <h2 id="authentication" class="text-2xl font-bold text-white mt-12 mb-4">Authentication</h2>
+  <p class="text-gray-300 mb-4">All API endpoints require authentication via API key or JWT token:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># API Key</span>
+X-API-Key: your_api_key_here
+
+<span class="text-gray-500"># JWT Bearer Token</span>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...</code></pre>
+
+  <h2 id="health" class="text-2xl font-bold text-white mt-12 mb-4">Health Check</h2>
+
+  <h3 id="get-health" class="text-xl font-semibold text-white mt-8 mb-3"><span class="text-green-400 font-mono text-sm mr-2">GET</span> /health</h3>
+  <p class="text-gray-300 mb-4">Check the health status of the AI Engine and its dependencies.</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">curl http://localhost:8000/health</code></pre>
+  <p class="text-gray-300 mb-2"><strong class="text-white">Response:</strong></p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">{'{'}
+  "status": "healthy",
+  "version": "1.0.0",
+  "components": {'{'}
+    "ai_engine": "ready",
+    "database": "connected",
+    "llm": "available"
+  {'}'}
+{'}'}</code></pre>
+
+  <h2 id="discovery" class="text-2xl font-bold text-white mt-12 mb-4">Protocol Discovery</h2>
+
+  <h3 id="post-discover" class="text-xl font-semibold text-white mt-8 mb-3"><span class="text-yellow-400 font-mono text-sm mr-2">POST</span> /api/v1/discover</h3>
+  <p class="text-gray-300 mb-4">Discover protocols from base64-encoded network traffic data.</p>
+  <p class="text-gray-300 mb-2"><strong class="text-white">Request Body:</strong></p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">{'{'}
+  "packet_data": [
+    "R0VUIC9hcGkvdXNlcnMgSFRUUC8xLjE=",
+    "UE9TVCAvYXBpL2xvZ2luIEhUVFAvMS4x"
+  ],
+  "metadata": {'{'}
+    "source": "manual_capture",
+    "confidence_threshold": 0.7
+  {'}'}
+{'}'}</code></pre>
+  <p class="text-gray-300 mb-2"><strong class="text-white">Response:</strong></p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">{'{'}
+  "success": true,
+  "request_id": "req_12345",
+  "processing_time_ms": 245,
+  "discovered_protocols": [
+    {'{'}
+      "id": "proto_001",
+      "name": "http_variant_1",
+      "confidence": 0.94,
+      "grammar": {'{'} ... {'}'},
+      "parser": {'{'} ... {'}'},
+      "validation_rules": [ ... ]
+    {'}'}
+  ]
+{'}'}</code></pre>
+
+  <h3 id="post-detect-fields" class="text-xl font-semibold text-white mt-8 mb-3"><span class="text-yellow-400 font-mono text-sm mr-2">POST</span> /api/v1/detect-fields</h3>
+  <p class="text-gray-300 mb-4">Detect fields in a protocol message.</p>
+  <p class="text-gray-300 mb-2"><strong class="text-white">Request Body:</strong></p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">{'{'}
+  "packet_data": "R0VUIC9hcGkvdXNlcnMgSFRUUC8xLjE="
+{'}'}</code></pre>
+  <p class="text-gray-300 mb-2"><strong class="text-white">Response:</strong></p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">{'{'}
+  "fields": [
+    {'{'}
+      "name": "method",
+      "type": "string",
+      "value": "GET",
+      "offset": 0,
+      "length": 3
+    {'}'},
+    {'{'}
+      "name": "path",
+      "type": "string",
+      "value": "/api/users",
+      "offset": 4,
+      "length": 10
+    {'}'}
+  ]
+{'}'}</code></pre>
+
+  <h2 id="copilot" class="text-2xl font-bold text-white mt-12 mb-4">Protocol Copilot</h2>
+
+  <h3 id="post-copilot-query" class="text-xl font-semibold text-white mt-8 mb-3"><span class="text-yellow-400 font-mono text-sm mr-2">POST</span> /api/v1/copilot/query</h3>
+  <p class="text-gray-300 mb-4">Query the Protocol Copilot with natural language questions about protocols, grammars, or security.</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">{'{'}
+  "query": "Explain the grammar rules for the discovered HTTP variant",
+  "session_id": "session_abc123"
+{'}'}</code></pre>
+
+  <h2 id="zero-touch-security" class="text-2xl font-bold text-white mt-12 mb-4">Zero-Touch Security</h2>
+
+  <h3 id="post-analyze-threat" class="text-xl font-semibold text-white mt-8 mb-3"><span class="text-yellow-400 font-mono text-sm mr-2">POST</span> /api/v1/zero-touch/analyze</h3>
+  <p class="text-gray-300 mb-4">Submit a security event for autonomous threat analysis and response.</p>
+
+  <h3 id="get-decisions" class="text-xl font-semibold text-white mt-8 mb-3"><span class="text-green-400 font-mono text-sm mr-2">GET</span> /api/v1/zero-touch/decisions</h3>
+  <p class="text-gray-300 mb-4">List recent security decisions with confidence scores and actions taken.</p>
+
+  <h2 id="compliance" class="text-2xl font-bold text-white mt-12 mb-4">Compliance</h2>
+
+  <h3 id="post-compliance-report" class="text-xl font-semibold text-white mt-8 mb-3"><span class="text-yellow-400 font-mono text-sm mr-2">POST</span> /api/v1/compliance/reports/generate</h3>
+  <p class="text-gray-300 mb-4">Generate a compliance assessment report for a specified framework (SOC 2, GDPR, HIPAA, etc.).</p>
+
+  <h3 id="get-compliance-frameworks" class="text-xl font-semibold text-white mt-8 mb-3"><span class="text-green-400 font-mono text-sm mr-2">GET</span> /api/v1/compliance/frameworks</h3>
+  <p class="text-gray-300 mb-4">List all supported compliance frameworks.</p>
+
+  <h2 id="marketplace" class="text-2xl font-bold text-white mt-12 mb-4">Protocol Marketplace</h2>
+
+  <h3 id="get-protocols" class="text-xl font-semibold text-white mt-8 mb-3"><span class="text-green-400 font-mono text-sm mr-2">GET</span> /api/v1/marketplace/protocols/search</h3>
+  <p class="text-gray-300 mb-4">Search available protocol definitions in the marketplace.</p>
+
+  <h3 id="post-protocol" class="text-xl font-semibold text-white mt-8 mb-3"><span class="text-yellow-400 font-mono text-sm mr-2">POST</span> /api/v1/marketplace/protocols</h3>
+  <p class="text-gray-300 mb-4">Submit a new protocol definition to the marketplace.</p>
+
+  <h2 id="error-handling" class="text-2xl font-bold text-white mt-12 mb-4">Error Handling</h2>
+  <p class="text-gray-300 mb-4">All errors follow a consistent format:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">{'{'}
+  "success": false,
+  "error": {'{'}
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid traffic data format",
+    "details": {'{'} ... {'}'}
+  {'}'}
+{'}'}</code></pre>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">HTTP Status</th>
+        <th class="text-left text-white py-2">Meaning</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr><td class="text-gray-300 py-2 pr-4">400</td><td class="text-gray-300 py-2">Bad Request -- invalid input</td></tr>
+      <tr><td class="text-gray-300 py-2 pr-4">401</td><td class="text-gray-300 py-2">Unauthorized -- invalid or missing credentials</td></tr>
+      <tr><td class="text-gray-300 py-2 pr-4">403</td><td class="text-gray-300 py-2">Forbidden -- insufficient permissions</td></tr>
+      <tr><td class="text-gray-300 py-2 pr-4">404</td><td class="text-gray-300 py-2">Not Found -- resource does not exist</td></tr>
+      <tr><td class="text-gray-300 py-2 pr-4">429</td><td class="text-gray-300 py-2">Too Many Requests -- rate limit exceeded</td></tr>
+      <tr><td class="text-gray-300 py-2 pr-4">500</td><td class="text-gray-300 py-2">Internal Server Error</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="rate-limiting" class="text-2xl font-bold text-white mt-12 mb-4">Rate Limiting</h2>
+  <p class="text-gray-300 mb-4">API requests are rate-limited per API key. Rate limit headers are included in every response:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1700000000</code></pre>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/api/grpc-api" class="text-quantum-400 hover:underline">gRPC API Reference</a> -- high-performance gRPC services</li>
+    <li><a href="/docs/api/authentication" class="text-quantum-400 hover:underline">Authentication</a> -- JWT, API keys, and mTLS configuration</li>
+    <li><a href="/docs/getting-started/first-discovery" class="text-quantum-400 hover:underline">First Discovery Tutorial</a> -- hands-on API walkthrough</li>
+  </ul>
+</DocsLayout>

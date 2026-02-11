@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Intelligence Copilot
+QBITEL - Protocol Intelligence Copilot
 Natural language interface for protocol analysis and cybersecurity intelligence.
 """
 

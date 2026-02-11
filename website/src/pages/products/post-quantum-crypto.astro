@@ -1,0 +1,273 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Post-Quantum Cryptography | QBITEL Bridge"
+  description="NIST Level 5 quantum-safe encryption with ML-KEM Kyber-1024, ML-DSA Dilithium-5, and domain-specific PQC profiles for every industry."
+>
+  <PageHero
+    title="Post-Quantum Cryptography"
+    description="Protect against 'harvest now, decrypt later' attacks with NIST-approved algorithms. ML-KEM (Kyber-1024), ML-DSA (Dilithium-5), Falcon-1024, and SLH-DSA with domain-specific profiles for banking, healthcare, automotive, aviation, and industrial environments."
+    badge="Quantum-Safe"
+    gradient="from-cyan-500 to-blue-500"
+  />
+
+  <!-- Key Metrics -->
+  <section class="py-12 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">NIST 5</div>
+          <div class="text-sm text-gray-400">Security Level</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">&lt;1ms</div>
+          <div class="text-sm text-gray-400">Encryption Overhead</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">10K</div>
+          <div class="text-sm text-gray-400">Messages/sec</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">4</div>
+          <div class="text-sm text-gray-400">PQC Algorithms</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="section-heading">
+            The <span class="gradient-text">Quantum Threat</span>
+          </h2>
+          <p class="text-gray-400 mb-6 leading-relaxed">
+            Current cryptographic standards face an existential threat from quantum computing. RSA-2048 and ECDSA, the backbone of internet security, will be broken by sufficiently powerful quantum computers. Nation-state adversaries are already harvesting encrypted data today, planning to decrypt it when quantum computers become available.
+          </p>
+          <p class="text-gray-400 leading-relaxed">
+            QBITEL implements NIST-approved post-quantum algorithms at the highest security level (Level 5, equivalent to AES-256), ensuring your data remains protected against both current and future threats.
+          </p>
+        </div>
+        <div class="space-y-3">
+          <div class="card p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-white font-semibold text-sm">RSA-2048</div>
+                <div class="text-xs text-gray-400">Widely used today</div>
+              </div>
+              <div class="badge text-red-400 border-red-500/20 bg-red-500/10">Broken by ~2030</div>
+            </div>
+          </div>
+          <div class="card p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-white font-semibold text-sm">ECDSA (256-bit)</div>
+                <div class="text-xs text-gray-400">Modern standard</div>
+              </div>
+              <div class="badge text-red-400 border-red-500/20 bg-red-500/10">Broken by ~2030</div>
+            </div>
+          </div>
+          <div class="card p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-white font-semibold text-sm">ML-KEM (Kyber-1024)</div>
+                <div class="text-xs text-gray-400">QBITEL default</div>
+              </div>
+              <div class="badge text-neon-green border-green-500/20 bg-green-500/10">Quantum-Safe</div>
+            </div>
+          </div>
+          <div class="card p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-white font-semibold text-sm">ML-DSA (Dilithium-5)</div>
+                <div class="text-xs text-gray-400">QBITEL default</div>
+              </div>
+              <div class="badge text-neon-green border-green-500/20 bg-green-500/10">Quantum-Safe</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          PQC <span class="gradient-text">Algorithms</span>
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">ML-KEM (Kyber-1024)</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Module-Lattice-Based Key Encapsulation Mechanism replacing RSA/ECDH for key exchange. NIST Level 5 security with ~256-bit quantum resistance.</p>
+          <div class="grid grid-cols-2 gap-3 p-3 rounded-lg bg-surface-900/50 border border-surface-600/50">
+            <div class="text-center">
+              <div class="text-sm font-bold text-quantum-400">1,568 B</div>
+              <div class="text-[10px] text-gray-500">Public Key</div>
+            </div>
+            <div class="text-center">
+              <div class="text-sm font-bold text-quantum-400">8.2ms</div>
+              <div class="text-[10px] text-gray-500">Key Generation</div>
+            </div>
+            <div class="text-center">
+              <div class="text-sm font-bold text-quantum-400">9.1ms</div>
+              <div class="text-[10px] text-gray-500">Encapsulation</div>
+            </div>
+            <div class="text-center">
+              <div class="text-sm font-bold text-quantum-400">10.5ms</div>
+              <div class="text-[10px] text-gray-500">Decapsulation</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">ML-DSA (Dilithium-5)</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Module-Lattice-Based Digital Signature Algorithm replacing RSA/ECDSA for digital signatures. NIST Level 5 security with ~256-bit quantum resistance.</p>
+          <div class="grid grid-cols-2 gap-3 p-3 rounded-lg bg-surface-900/50 border border-surface-600/50">
+            <div class="text-center">
+              <div class="text-sm font-bold text-quantum-400">2,592 B</div>
+              <div class="text-[10px] text-gray-500">Public Key</div>
+            </div>
+            <div class="text-center">
+              <div class="text-sm font-bold text-quantum-400">12.3ms</div>
+              <div class="text-[10px] text-gray-500">Key Generation</div>
+            </div>
+            <div class="text-center">
+              <div class="text-sm font-bold text-quantum-400">15.8ms</div>
+              <div class="text-[10px] text-gray-500">Signing</div>
+            </div>
+            <div class="text-center">
+              <div class="text-sm font-bold text-quantum-400">6.2ms</div>
+              <div class="text-[10px] text-gray-500">Verification</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Hybrid Cryptography</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Combines classical and post-quantum algorithms for defense-in-depth during the transition period. ECDH-P384 + Kyber-1024 for key exchange, ECDSA + Dilithium-5 for signatures.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Classical security (current protection)
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Quantum security (future protection)
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Seamless migration path
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Domain-Specific Profiles</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Pre-configured PQC profiles optimized for specific industry requirements including key sizes, algorithm selection, performance tuning, and compliance alignment.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Banking (FIPS 140-3, PCI DSS)
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Healthcare (HIPAA, FHIR-PQC)
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Automotive, Aviation, Industrial
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical Details -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Implementation <span class="gradient-text">Stack</span>
+        </h2>
+      </div>
+
+      <div class="max-w-4xl mx-auto">
+        <div class="card p-6 lg:p-8">
+          <div class="space-y-4">
+            <div class="flex items-center gap-4 p-4 rounded-lg bg-surface-900/50 border border-surface-600/50">
+              <div class="w-12 h-12 rounded-lg bg-[#dea584]/10 border border-[#dea584]/30 flex items-center justify-center flex-shrink-0">
+                <span class="text-[#dea584] font-bold text-sm">Rs</span>
+              </div>
+              <div class="flex-1">
+                <div class="text-white font-semibold">Rust Data Plane</div>
+                <div class="text-xs text-gray-400">liboqs + oqs-rs bindings for wire-speed PQC-TLS termination. Tokio async runtime for non-blocking I/O.</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 p-4 rounded-lg bg-surface-900/50 border border-surface-600/50">
+              <div class="w-12 h-12 rounded-lg bg-[#3572A5]/10 border border-[#3572A5]/30 flex items-center justify-center flex-shrink-0">
+                <span class="text-[#3572A5] font-bold text-sm">Py</span>
+              </div>
+              <div class="flex-1">
+                <div class="text-white font-semibold">Python AI Engine</div>
+                <div class="text-xs text-gray-400">Unified PQC service with domain-specific profiles, key management, and compliance integration.</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 p-4 rounded-lg bg-surface-900/50 border border-surface-600/50">
+              <div class="w-12 h-12 rounded-lg bg-[#00ADD8]/10 border border-[#00ADD8]/30 flex items-center justify-center flex-shrink-0">
+                <span class="text-[#00ADD8] font-bold text-sm">Go</span>
+              </div>
+              <div class="flex-1">
+                <div class="text-white font-semibold">Go Control Plane</div>
+                <div class="text-xs text-gray-400">Certificate management, key rotation, and policy enforcement for PQC across the service mesh.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTABanner
+    title="Ready for Quantum-Safe Security?"
+    description="Protect your data today against tomorrow's quantum threats with NIST Level 5 post-quantum cryptography."
+  />
+</PageLayout>

@@ -1,0 +1,172 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Installation | QBITEL Bridge Docs" description="Full installation guide for all QBITEL Bridge components: Python AI Engine, Rust Data Plane, Go Control Plane, and React UI Console.">
+  <h1 class="text-3xl font-bold text-white mb-2">Installation</h1>
+  <p class="text-gray-400 mb-8">Complete installation guide for building QBITEL Bridge from source across all four language stacks.</p>
+
+  <h2 id="system-requirements" class="text-2xl font-bold text-white mt-12 mb-4">System Requirements</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Resource</th>
+        <th class="text-left text-white py-2 pr-4">Minimum</th>
+        <th class="text-left text-white py-2">Recommended</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">CPU</td>
+        <td class="text-gray-300 py-2 pr-4">2 cores</td>
+        <td class="text-gray-300 py-2">4+ cores</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">RAM</td>
+        <td class="text-gray-300 py-2 pr-4">4 GB</td>
+        <td class="text-gray-300 py-2">8 GB+</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Storage</td>
+        <td class="text-gray-300 py-2 pr-4">20 GB</td>
+        <td class="text-gray-300 py-2">50 GB+ SSD</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">OS</td>
+        <td class="text-gray-300 py-2 pr-4" colspan="2">Linux (Ubuntu 20.04+), macOS, Windows with WSL2</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">GPU</td>
+        <td class="text-gray-300 py-2 pr-4" colspan="2">Optional -- NVIDIA CUDA for AI model training</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="software-prerequisites" class="text-2xl font-bold text-white mt-12 mb-4">Software Prerequisites</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Component</th>
+        <th class="text-left text-white py-2 pr-4">Version</th>
+        <th class="text-left text-white py-2">Purpose</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Python</td>
+        <td class="text-gray-300 py-2 pr-4">3.9+</td>
+        <td class="text-gray-300 py-2">AI Engine, compliance, security</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Rust</td>
+        <td class="text-gray-300 py-2 pr-4">1.70+ (with cargo)</td>
+        <td class="text-gray-300 py-2">Data plane, PQC-TLS</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Go</td>
+        <td class="text-gray-300 py-2 pr-4">1.21+</td>
+        <td class="text-gray-300 py-2">Control plane, management API</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Node.js</td>
+        <td class="text-gray-300 py-2 pr-4">18+ (with npm)</td>
+        <td class="text-gray-300 py-2">UI console</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Docker</td>
+        <td class="text-gray-300 py-2 pr-4">20.10+</td>
+        <td class="text-gray-300 py-2">Container builds</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Git</td>
+        <td class="text-gray-300 py-2 pr-4">2.30+</td>
+        <td class="text-gray-300 py-2">Version control</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="clone-repository" class="text-2xl font-bold text-white mt-12 mb-4">Clone the Repository</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">git clone https://github.com/yazhsab/qbitel-bridge.git
+cd qbitel-bridge</code></pre>
+
+  <h2 id="build-all" class="text-2xl font-bold text-white mt-12 mb-4">Build All Components</h2>
+  <p class="text-gray-300 mb-4">The unified Makefile builds everything in one command:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Build all components</span>
+make build
+
+<span class="text-gray-500"># Run all tests</span>
+make test</code></pre>
+
+  <h2 id="python-ai-engine" class="text-2xl font-bold text-white mt-12 mb-4">Python AI Engine</h2>
+  <p class="text-gray-300 mb-4">The AI Engine is the core intelligence layer, built with Python, PyTorch, and FastAPI.</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Create and activate virtual environment</span>
+python3 -m venv venv
+source venv/bin/activate  <span class="text-gray-500"># Windows: venv\Scripts\activate</span>
+
+<span class="text-gray-500"># Install dependencies</span>
+pip install --upgrade pip
+pip install -r requirements.txt
+
+<span class="text-gray-500"># Install pre-commit hooks</span>
+pre-commit install
+
+<span class="text-gray-500"># Verify installation</span>
+pytest ai_engine/tests/ -v --tb=short
+
+<span class="text-gray-500"># Start the engine</span>
+python -m ai_engine</code></pre>
+
+  <h2 id="rust-data-plane" class="text-2xl font-bold text-white mt-12 mb-4">Rust Data Plane</h2>
+  <p class="text-gray-300 mb-4">The data plane handles wire-speed packet processing with PQC-TLS.</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Build the data plane</span>
+cd rust/dataplane
+cargo build --locked
+
+<span class="text-gray-500"># Run tests</span>
+cargo test
+
+<span class="text-gray-500"># Run linter</span>
+cargo clippy --all-targets --all-features -- -D warnings
+
+<span class="text-gray-500"># Format code</span>
+cargo fmt</code></pre>
+
+  <h2 id="go-control-plane" class="text-2xl font-bold text-white mt-12 mb-4">Go Control Plane</h2>
+  <p class="text-gray-300 mb-4">The control plane orchestrates services and enforces policy with OPA.</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Build control plane</span>
+cd go/controlplane
+go build -trimpath -o ../../dist/controlplane ./cmd/controlplane
+
+<span class="text-gray-500"># Build management API</span>
+cd go/mgmtapi
+go build -trimpath -o ../../dist/mgmtapi ./cmd/mgmtapi
+
+<span class="text-gray-500"># Run tests</span>
+cd go/controlplane && go test ./...
+cd go/mgmtapi && go test ./...</code></pre>
+
+  <h2 id="ui-console" class="text-2xl font-bold text-white mt-12 mb-4">UI Console</h2>
+  <p class="text-gray-300 mb-4">The React-based admin console provides dashboards and management interfaces.</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">cd ui/console
+npm install
+npm run dev
+<span class="text-gray-500"># Console available at http://localhost:3000</span></code></pre>
+
+  <h2 id="verify-installation" class="text-2xl font-bold text-white mt-12 mb-4">Verify Installation</h2>
+  <p class="text-gray-300 mb-4">Run the full test suite to verify everything is installed correctly:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run all tests across all components</span>
+make test
+
+<span class="text-gray-500"># Or run each component's tests individually</span>
+pytest ai_engine/tests/ -v              <span class="text-gray-500"># Python</span>
+cd rust/dataplane && cargo test         <span class="text-gray-500"># Rust</span>
+cd go/controlplane && go test ./...     <span class="text-gray-500"># Go</span>
+cd ui/console && npm test               <span class="text-gray-500"># React</span></code></pre>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/getting-started/configuration" class="text-quantum-400 hover:underline">Configuration Reference</a> -- set up environment variables and YAML config</li>
+    <li><a href="/docs/getting-started/first-discovery" class="text-quantum-400 hover:underline">First Discovery Tutorial</a> -- make your first protocol discovery request</li>
+    <li><a href="/docs/development/python" class="text-quantum-400 hover:underline">Python Development Guide</a> -- IDE setup, linting, and code style</li>
+  </ul>
+</DocsLayout>

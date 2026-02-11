@@ -300,7 +300,7 @@ class TestMainEntryPoint:
                         call[0][0] for call in mock_logger_instance.info.call_args_list
                     ]
                     assert any(
-                        "Starting CRONOS AI Engine" in str(call) for call in info_calls
+                        "Starting QBITEL Engine" in str(call) for call in info_calls
                     )
                     assert any("Version" in str(call) for call in info_calls)
 

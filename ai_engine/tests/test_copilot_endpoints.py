@@ -1,5 +1,5 @@
 """
-Tests for CRONOS AI Protocol Intelligence Copilot API Endpoints
+Tests for QBITEL Protocol Intelligence Copilot API Endpoints
 """
 
 import pytest
@@ -239,14 +239,14 @@ class TestProcessCopilotQuery:
         assert call_args[0][0].context == request.context
 
     @pytest.mark.asyncio
-    async def test_process_query_cronos_exception(
+    async def test_process_query_qbitel_exception(
         self, mock_copilot, mock_current_user, mock_background_tasks
     ):
-        """Test query processing with CronosAIException."""
-        from ai_engine.core.exceptions import CronosAIException
+        """Test query processing with QbitelAIException."""
+        from ai_engine.core.exceptions import QbitelAIException
 
         request = CopilotQueryRequest(query="What protocol is this?")
-        mock_copilot.process_query.side_effect = CronosAIException("Processing failed")
+        mock_copilot.process_query.side_effect = QbitelAIException("Processing failed")
 
         with pytest.raises(HTTPException) as exc_info:
             await process_copilot_query(

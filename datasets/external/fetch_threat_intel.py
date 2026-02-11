@@ -39,7 +39,7 @@ class ThreatIntelFetcher:
         print(f"  Fetching: {url}")
         req = urllib.request.Request(
             url,
-            headers={"User-Agent": "CRONOS-AI-Dataset-Fetcher/1.0"}
+            headers={"User-Agent": "QBITEL-Dataset-Fetcher/1.0"}
         )
         # Try with verified SSL first, fall back to unverified if certificate issues
         try:
@@ -332,7 +332,7 @@ class ThreatIntelFetcher:
 
         # Save merged file
         output = {
-            "source": "CRONOS AI Merged IOCs",
+            "source": "QBITEL Merged IOCs",
             "fetched_at": datetime.now().isoformat(),
             "sources": ioc_files,
             "count": len(all_iocs),
@@ -348,7 +348,7 @@ class ThreatIntelFetcher:
     def fetch_all(self) -> Dict:
         """Fetch all threat intelligence sources."""
         print("=" * 60)
-        print("CRONOS AI - Threat Intelligence Fetcher")
+        print("QBITEL - Threat Intelligence Fetcher")
         print("=" * 60)
 
         results = {}

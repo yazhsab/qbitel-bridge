@@ -1,0 +1,219 @@
+---
+import LandingLayout from '@/layouts/LandingLayout.astro';
+import HomeHero from '@/components/hero/HomeHero.astro';
+import StatsBar from '@/components/content/StatsBar.astro';
+import FeatureGrid from '@/components/content/FeatureGrid.astro';
+import IndustryCard from '@/components/content/IndustryCard.astro';
+import TechStackBadge from '@/components/content/TechStackBadge.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+import { howItWorks } from '@/data/features';
+import { industries } from '@/data/industries';
+---
+
+<LandingLayout
+  title="QBITEL Bridge"
+  description="AI-powered quantum-safe legacy modernization platform. Discover undocumented protocols, apply NIST Level 5 post-quantum cryptography, and operate with zero-touch autonomous security."
+>
+  <!-- Hero -->
+  <HomeHero />
+
+  <!-- Stats -->
+  <StatsBar />
+
+  <!-- How It Works -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          How <span class="gradient-text">QBITEL Bridge</span> Works
+        </h2>
+        <p class="section-subheading mx-auto">
+          Five automated phases take you from undocumented legacy protocols to quantum-safe, compliant, autonomously-operated systems.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-5 gap-4">
+        {howItWorks.map((item, i) => (
+          <div class="relative group">
+            <div class="card p-5 h-full text-center">
+              <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-quantum-500 to-neon-cyan text-white font-bold text-sm mb-3">
+                {item.step}
+              </div>
+              <h3 class="text-lg font-bold text-white mb-2">{item.title}</h3>
+              <p class="text-sm text-gray-400">{item.description}</p>
+            </div>
+            {i < howItWorks.length - 1 && (
+              <div class="hidden md:block absolute top-1/2 -right-2 w-4 text-surface-600 z-10">
+                <svg viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" fill="none" />
+                </svg>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <FeatureGrid />
+
+  <!-- Architecture Preview -->
+  <section class="py-16 lg:py-24 border-t border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          <span class="gradient-text">Four-Layer</span> Architecture
+        </h2>
+        <p class="section-subheading mx-auto">
+          Purpose-built with the right language for each layer: Rust for speed, Python for intelligence, Go for orchestration, React for experience.
+        </p>
+      </div>
+
+      <div class="max-w-4xl mx-auto space-y-3">
+        <!-- UI Layer -->
+        <div class="card p-4 flex items-center gap-4 group">
+          <div class="w-12 h-12 rounded-lg bg-[#3178c6]/10 border border-[#3178c6]/30 flex items-center justify-center flex-shrink-0">
+            <span class="text-[#3178c6] font-bold text-sm">TS</span>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <h3 class="text-white font-semibold">UI Console</h3>
+              <span class="text-xs text-gray-500">React + TypeScript + Material UI</span>
+            </div>
+            <p class="text-sm text-gray-400">Admin dashboard, protocol copilot, marketplace, security operations center</p>
+          </div>
+        </div>
+
+        <!-- Go Layer -->
+        <div class="card p-4 flex items-center gap-4 group">
+          <div class="w-12 h-12 rounded-lg bg-[#00ADD8]/10 border border-[#00ADD8]/30 flex items-center justify-center flex-shrink-0">
+            <span class="text-[#00ADD8] font-bold text-sm">Go</span>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <h3 class="text-white font-semibold">Control Plane</h3>
+              <span class="text-xs text-gray-500">Gin + OPA + gRPC</span>
+            </div>
+            <p class="text-sm text-gray-400">Policy orchestration, management API, device agents, edge coordination</p>
+          </div>
+        </div>
+
+        <!-- Python Layer -->
+        <div class="card p-4 flex items-center gap-4 group">
+          <div class="w-12 h-12 rounded-lg bg-[#3572A5]/10 border border-[#3572A5]/30 flex items-center justify-center flex-shrink-0">
+            <span class="text-[#3572A5] font-bold text-sm">Py</span>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <h3 class="text-white font-semibold">AI Engine</h3>
+              <span class="text-xs text-gray-500">PyTorch + FastAPI + Transformers</span>
+            </div>
+            <p class="text-sm text-gray-400">Protocol discovery, LLM/RAG, multi-agent orchestration, compliance, marketplace</p>
+          </div>
+        </div>
+
+        <!-- Rust Layer -->
+        <div class="card p-4 flex items-center gap-4 group">
+          <div class="w-12 h-12 rounded-lg bg-[#dea584]/10 border border-[#dea584]/30 flex items-center justify-center flex-shrink-0">
+            <span class="text-[#dea584] font-bold text-sm">Rs</span>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <h3 class="text-white font-semibold">Data Plane</h3>
+              <span class="text-xs text-gray-500">Tokio + liboqs + oqs-rs</span>
+            </div>
+            <p class="text-sm text-gray-400">PQC-TLS termination, wire-speed encryption, high-performance protocol parsing</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-8">
+        <a href="/docs/architecture/overview" class="btn-secondary">
+          Explore Architecture
+          <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Industries -->
+  <section class="py-16 lg:py-24 border-t border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Built For <span class="gradient-text">Critical Industries</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Domain-specific PQC profiles, protocol support, and compliance frameworks tailored to your industry.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {industries.map((industry) => (
+          <IndustryCard
+            title={industry.title}
+            description={industry.description}
+            protocols={industry.protocols}
+            href={industry.href}
+            icon={industry.icon}
+            color={industry.color}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <TechStackBadge />
+
+  <!-- Open Source Banner -->
+  <section class="py-16 lg:py-20 border-t border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="card p-8 lg:p-12 text-center bg-gradient-to-b from-surface-800 to-surface-900">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neon-green/10 border border-neon-green/20 mb-6">
+          <span class="flex h-2 w-2 rounded-full bg-neon-green" />
+          <span class="text-sm text-neon-green font-medium">100% Open Source</span>
+        </div>
+        <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">
+          Transparent Security You Can Trust
+        </h2>
+        <p class="text-gray-400 max-w-2xl mx-auto mb-6">
+          Every line of cryptographic code is open for review. No black boxes, no vendor lock-in.
+          Apache 2.0 licensed. Community-driven development.
+        </p>
+        <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Apache 2.0 License
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Full Source Available
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            No Vendor Lock-in
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Community Driven
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <CTABanner />
+</LandingLayout>

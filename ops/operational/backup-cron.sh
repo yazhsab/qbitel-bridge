@@ -1,40 +1,40 @@
 #!/bin/bash
 #
-# CRONOS AI - Automated Backup Cron Job
+# QBITEL - Automated Backup Cron Job
 #
 # Install this cron job to run automated backups:
 #
-# 1. Copy this script to /usr/local/bin/cronos-backup.sh
-# 2. Make it executable: chmod +x /usr/local/bin/cronos-backup.sh
+# 1. Copy this script to /usr/local/bin/qbitel-backup.sh
+# 2. Make it executable: chmod +x /usr/local/bin/qbitel-backup.sh
 # 3. Add to crontab: crontab -e
 # 4. Add these lines:
 #
 #    # Daily full backup at 2 AM
-#    0 2 * * * /usr/local/bin/cronos-backup.sh daily >> /var/log/cronos_ai/backup.log 2>&1
+#    0 2 * * * /usr/local/bin/qbitel-backup.sh daily >> /var/log/qbitel/backup.log 2>&1
 #
 #    # Weekly backup on Sunday at 3 AM
-#    0 3 * * 0 /usr/local/bin/cronos-backup.sh weekly >> /var/log/cronos_ai/backup.log 2>&1
+#    0 3 * * 0 /usr/local/bin/qbitel-backup.sh weekly >> /var/log/qbitel/backup.log 2>&1
 #
 #    # Monthly backup on 1st of month at 4 AM
-#    0 4 1 * * /usr/local/bin/cronos-backup.sh monthly >> /var/log/cronos_ai/backup.log 2>&1
+#    0 4 1 * * /usr/local/bin/qbitel-backup.sh monthly >> /var/log/qbitel/backup.log 2>&1
 #
 #    # Cleanup old backups daily at 5 AM
-#    0 5 * * * /usr/local/bin/cronos-backup.sh cleanup >> /var/log/cronos_ai/backup.log 2>&1
+#    0 5 * * * /usr/local/bin/qbitel-backup.sh cleanup >> /var/log/qbitel/backup.log 2>&1
 #
 
 set -euo pipefail
 
 # Configuration
-CRONOS_AI_HOME="${CRONOS_AI_HOME:-/opt/cronos_ai}"
-BACKUP_SCRIPT="${CRONOS_AI_HOME}/scripts/backup_database.py"
+QBITEL_AI_HOME="${QBITEL_AI_HOME:-/opt/qbitel}"
+BACKUP_SCRIPT="${QBITEL_AI_HOME}/scripts/backup_database.py"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
-LOG_FILE="${LOG_FILE:-/var/log/cronos_ai/backup.log}"
+LOG_FILE="${LOG_FILE:-/var/log/qbitel/backup.log}"
 
 # Ensure log directory exists
 mkdir -p "$(dirname "$LOG_FILE")"
 
 # Load environment variables from .env if exists
-ENV_FILE="${CRONOS_AI_HOME}/.env.production"
+ENV_FILE="${QBITEL_AI_HOME}/.env.production"
 if [ -f "$ENV_FILE" ]; then
     # shellcheck disable=SC1090
     source "$ENV_FILE"

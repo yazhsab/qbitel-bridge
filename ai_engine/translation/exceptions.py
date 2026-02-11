@@ -1,5 +1,5 @@
 """
-CRONOS AI - Translation Studio Exceptions
+QBITEL - Translation Studio Exceptions
 Enterprise-grade exception handling for protocol translation, API generation, and SDK creation.
 """
 

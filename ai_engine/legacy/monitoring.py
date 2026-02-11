@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Whisperer Monitoring
+QBITEL Engine - Legacy System Whisperer Monitoring
 
 Comprehensive monitoring and observability for Legacy System Whisperer feature.
 Provides metrics collection, health monitoring, alerting, and dashboard integration.

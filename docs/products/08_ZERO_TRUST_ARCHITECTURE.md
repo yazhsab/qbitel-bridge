@@ -2,7 +2,7 @@
 
 ## Overview
 
-Zero-Trust Architecture is CRONOS AI's implementation of the "never trust, always verify" security model. It provides continuous identity verification, device posture assessment, micro-segmentation, and risk-based access control with quantum-safe cryptography at every layer.
+Zero-Trust Architecture is QBITEL's implementation of the "never trust, always verify" security model. It provides continuous identity verification, device posture assessment, micro-segmentation, and risk-based access control with quantum-safe cryptography at every layer.
 
 ---
 
@@ -18,7 +18,7 @@ Traditional perimeter-based security fails in modern environments:
 - **Static access**: Permissions rarely reviewed or revoked
 - **Credential theft**: Stolen credentials grant broad access
 
-### The CRONOS AI Solution
+### The QBITEL Solution
 
 Zero-Trust Architecture enforces:
 - **Continuous verification**: Every request authenticated and authorized
@@ -634,22 +634,22 @@ zero_trust:
 
 ```
 # Access decisions
-cronos_zero_trust_decisions_total{decision="allow|deny|step_up"}
-cronos_zero_trust_decision_latency_seconds
-cronos_zero_trust_risk_score{user, resource}
+qbitel_zero_trust_decisions_total{decision="allow|deny|step_up"}
+qbitel_zero_trust_decision_latency_seconds
+qbitel_zero_trust_risk_score{user, resource}
 
 # Device posture
-cronos_zero_trust_devices_total{status="compliant|non_compliant"}
-cronos_zero_trust_device_health_score{device_id}
-cronos_zero_trust_device_checks_total{check, result}
+qbitel_zero_trust_devices_total{status="compliant|non_compliant"}
+qbitel_zero_trust_device_health_score{device_id}
+qbitel_zero_trust_device_checks_total{check, result}
 
 # Network policies
-cronos_zero_trust_network_policies_total{namespace}
-cronos_zero_trust_blocked_connections_total{source, destination}
+qbitel_zero_trust_network_policies_total{namespace}
+qbitel_zero_trust_blocked_connections_total{source, destination}
 
 # Identity
-cronos_zero_trust_authentications_total{method, result}
-cronos_zero_trust_mfa_challenges_total{method, result}
+qbitel_zero_trust_authentications_total{method, result}
+qbitel_zero_trust_mfa_challenges_total{method, result}
 ```
 
 ---

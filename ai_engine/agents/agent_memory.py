@@ -1,5 +1,5 @@
 """
-CRONOS AI - Agent Memory and Learning Persistence
+QBITEL - Agent Memory and Learning Persistence
 
 Provides long-term memory management for agents with:
 - Short-term working memory (per-session)
@@ -26,17 +26,17 @@ from prometheus_client import Counter, Gauge, Histogram
 
 # Prometheus metrics
 MEMORY_OPERATIONS = Counter(
-    "cronos_memory_operations_total",
+    "qbitel_memory_operations_total",
     "Total memory operations",
     ["operation", "memory_type"],
 )
 MEMORY_SIZE = Gauge(
-    "cronos_memory_size_entries",
+    "qbitel_memory_size_entries",
     "Number of entries in memory",
     ["agent_id", "memory_type"],
 )
 MEMORY_RETRIEVAL_TIME = Histogram(
-    "cronos_memory_retrieval_seconds",
+    "qbitel_memory_retrieval_seconds",
     "Memory retrieval time",
     ["memory_type"],
 )
@@ -692,9 +692,15 @@ class AgentMemoryManager:
                 await asyncio.sleep(10)
 
     async def _cleanup_expired(self) -> None:
-        """Clean up expired memory entries."""
-        # This would iterate through backend and remove expired entries
-        pass
+        """Clean up expired memory entries from all backends."""
+        for backend in self.backends.values():
+            try:
+                all_entries = await backend.retrieve(limit=1000)
+                for entry in all_entries:
+                    if hasattr(entry, 'is_expired') and entry.is_expired():
+                        await backend.delete(entry.id)
+            except Exception as e:
+                self.logger.warning(f"Cleanup error for backend: {e}")
 
     def _calculate_importance(self, content: Dict[str, Any]) -> float:
         """Calculate importance score for memory content."""

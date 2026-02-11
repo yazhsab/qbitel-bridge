@@ -1,19 +1,19 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cronos-service-mesh
+  name: qbitel-service-mesh
   labels:
-    name: cronos-service-mesh
-    app.kubernetes.io/name: cronos-ai
+    name: qbitel-service-mesh
+    app.kubernetes.io/name: qbitel
     app.kubernetes.io/component: service-mesh
-    app.kubernetes.io/part-of: cronos-platform
-    cronos.ai/quantum-safe: "true"
+    app.kubernetes.io/part-of: qbitel-platform
+    qbitel.ai/quantum-safe: "true"
 ---
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: cronos-service-mesh-quota
-  namespace: cronos-service-mesh
+  name: qbitel-service-mesh-quota
+  namespace: qbitel-service-mesh
 spec:
   hard:
     requests.cpu: "20"
@@ -26,8 +26,8 @@ spec:
 apiVersion: v1
 kind: LimitRange
 metadata:
-  name: cronos-service-mesh-limits
-  namespace: cronos-service-mesh
+  name: qbitel-service-mesh-limits
+  namespace: qbitel-service-mesh
 spec:
   limits:
   - max:

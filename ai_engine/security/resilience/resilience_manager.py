@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Resilience Manager
+QBITEL Engine - Resilience Manager
 
 Unified resilience management system that orchestrates circuit breakers,
 retry policies, bulkhead isolation, health checking, timeout management,
@@ -109,7 +109,7 @@ class ResilienceManager:
 
     def __init__(self, config: Optional[ResilienceConfig] = None):
         self.config = config or ResilienceConfig()
-        self.logger = get_security_logger("cronos.security.resilience.manager")
+        self.logger = get_security_logger("qbitel.security.resilience.manager")
 
         # Component managers
         self._circuit_breaker_manager: Optional[CircuitBreakerManager] = None

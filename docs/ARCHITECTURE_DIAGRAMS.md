@@ -1,6 +1,6 @@
-# CRONOS AI - Architecture Diagrams
+# QBITEL - Architecture Diagrams
 
-This document contains architecture diagrams for the modernized CRONOS AI platform.
+This document contains architecture diagrams for the modernized QBITEL platform.
 
 ---
 
@@ -8,7 +8,7 @@ This document contains architecture diagrams for the modernized CRONOS AI platfo
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                           CRONOS AI Platform v2.0                                │
+│                           QBITEL Platform v2.0                                │
 │                      Quantum-Safe Enterprise Security                            │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                   │
@@ -355,7 +355,7 @@ This document contains architecture diagrams for the modernized CRONOS AI platfo
 │                                      │                                          │
 │                                      ▼                                          │
 │  ┌────────────────────────────────────────────────────────────────────────────┐ │
-│  │                    NAMESPACE: cronos-ai-prod                                │ │
+│  │                    NAMESPACE: qbitel-prod                                │ │
 │  │                    (Pod Security: Restricted)                               │ │
 │  │                                                                             │ │
 │  │   ┌─────────────────────────────────────────────────────────────────────┐ │ │

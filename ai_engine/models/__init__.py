@@ -1,4 +1,4 @@
-"""Top-level exports for the CRONOS AI model toolkit.
+"""Top-level exports for the QBITEL model toolkit.
 
 This module makes the commonly used model primitives available from
 ``ai_engine.models`` so internal and integration code can rely on the

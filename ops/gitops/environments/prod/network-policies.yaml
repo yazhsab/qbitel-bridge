@@ -1,0 +1,410 @@
+---
+# Production Network Policies for Zero Trust Security
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/component: network-policy
+    environment: production
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# Allow DNS resolution
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/component: network-policy
+    environment: production
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# QBITEL Core network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: qbitel-core-policy
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/name: qbitel-core
+    app.kubernetes.io/component: network-policy
+    environment: production
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: qbitel-core
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow from AI Gateway
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ai-gateway
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow from Protocol Copilot
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: protocol-copilot
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow from Legacy Whisperer
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: legacy-whisperer
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow health checks from monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbitel-observability
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    # Allow to PostgreSQL
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbitel
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow to Redis
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbitel
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    # Allow to AI Gateway
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ai-gateway
+      ports:
+        - protocol: TCP
+          port: 8000
+    # Allow to observability
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbitel-observability
+      ports:
+        - protocol: TCP
+          port: 4317  # OTLP gRPC
+        - protocol: TCP
+          port: 4318  # OTLP HTTP
+---
+# AI Gateway network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ai-gateway-policy
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/name: ai-gateway
+    app.kubernetes.io/component: network-policy
+    environment: production
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ai-gateway
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8000
+    # Allow from core service
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: qbitel-core
+      ports:
+        - protocol: TCP
+          port: 8000
+    # Allow from Protocol Copilot
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: protocol-copilot
+      ports:
+        - protocol: TCP
+          port: 8000
+    # Allow from Legacy Whisperer
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: legacy-whisperer
+      ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    # Allow to vLLM namespace
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbitel-vllm
+      ports:
+        - protocol: TCP
+          port: 8000
+    # Allow to Redis for caching
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    # Allow to external LLM providers (OpenAI, Anthropic, etc.)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow to observability
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbitel-observability
+      ports:
+        - protocol: TCP
+          port: 4317
+        - protocol: TCP
+          port: 4318
+---
+# vLLM network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vllm-policy
+  namespace: qbitel-vllm
+  labels:
+    app.kubernetes.io/name: vllm
+    app.kubernetes.io/component: network-policy
+    environment: production
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: vllm
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Only allow from AI Gateway
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbitel
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ai-gateway
+      ports:
+        - protocol: TCP
+          port: 8000
+    # Allow health checks from monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbitel-observability
+      ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    # Allow to model storage (S3/GCS)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow to observability
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbitel-observability
+      ports:
+        - protocol: TCP
+          port: 4317
+---
+# Protocol Copilot network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: protocol-copilot-policy
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/name: protocol-copilot
+    app.kubernetes.io/component: network-policy
+    environment: production
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: protocol-copilot
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: qbitel-core
+      ports:
+        - protocol: TCP
+          port: 8080
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbitel-observability
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ai-gateway
+      ports:
+        - protocol: TCP
+          port: 8000
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: qbitel-core
+      ports:
+        - protocol: TCP
+          port: 8080
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbitel-observability
+      ports:
+        - protocol: TCP
+          port: 4317
+---
+# Legacy Whisperer network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: legacy-whisperer-policy
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/name: legacy-whisperer
+    app.kubernetes.io/component: network-policy
+    environment: production
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: legacy-whisperer
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: qbitel-core
+      ports:
+        - protocol: TCP
+          port: 8080
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbitel-observability
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ai-gateway
+      ports:
+        - protocol: TCP
+          port: 8000
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qbitel-observability
+      ports:
+        - protocol: TCP
+          port: 4317

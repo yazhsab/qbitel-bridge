@@ -1,0 +1,19 @@
+{
+  "program_id": "BOMV131",
+  "domain": "manufacturing",
+  "program_type": "data_validation",
+  "author": "C. MILLER",
+  "lines_of_code": 208,
+  "complexity_level": "simple",
+  "complexity_score": 0.451,
+  "files_used": 1,
+  "verbs_used": 14,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.889971",
+  "hash": "cbfa86ee2fae77231b82b278b62eee54"
+}

@@ -1,4 +1,4 @@
-# CRONOS AI - Comprehensive Knowledge Base
+# QBITEL - Comprehensive Knowledge Base
 
 **Version**: 2.1.0
 **Last Updated**: 2025-11-22
@@ -34,9 +34,9 @@
 
 ## 1. Project Overview
 
-### 1.1 What is CRONOS AI?
+### 1.1 What is QBITEL?
 
-CRONOS AI is an **enterprise-grade, quantum-safe security platform** that provides:
+QBITEL is an **enterprise-grade, quantum-safe security platform** that provides:
 
 - **AI-Powered Protocol Discovery** - Automatically learns undocumented/proprietary protocols
 - **Post-Quantum Cryptography** - NIST Level 5 compliant (Kyber-1024, Dilithium-5)
@@ -88,7 +88,7 @@ Apache License 2.0
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           CRONOS AI Platform                            │
+│                           QBITEL Platform                            │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐ │
 │  │   REST API   │  │   gRPC API   │  │  WebSocket   │  │  Admin UI   │ │
@@ -156,7 +156,7 @@ Apache License 2.0
 ## 3. Directory Structure
 
 ```
-cronos-ai/
+qbitel/
 ├── ai_engine/                    # Core AI/ML engine (Python)
 │   ├── __main__.py              # Application entry point
 │   ├── api/                     # REST & gRPC API layer
@@ -237,12 +237,12 @@ cronos-ai/
 │       └── src/api/             # API clients
 │
 ├── config/                      # Configuration files
-│   ├── cronos_ai.yaml           # Default config
-│   ├── cronos_ai.production.yaml # Production config
+│   ├── qbitel.yaml           # Default config
+│   ├── qbitel.production.yaml # Production config
 │   └── environments/            # Environment-specific
 │
 ├── helm/                        # Helm charts
-│   └── cronos-ai/               # Main Helm chart
+│   └── qbitel/               # Main Helm chart
 │
 ├── kubernetes/                  # Kubernetes manifests
 │   ├── service-mesh/            # Istio configs
@@ -283,10 +283,10 @@ cronos-ai/
 
 ### 4.1 AI Engine Core (`ai_engine/core/engine.py`)
 
-The `CronosAIEngine` class is the main orchestrator:
+The `QbitelAIEngine` class is the main orchestrator:
 
 ```python
-class CronosAIEngine:
+class QbitelAIEngine:
     """Central AI engine orchestrating all ML/AI capabilities"""
 
     # State machine: "initialized" -> "ready" -> "stopped"/"failed"
@@ -306,9 +306,9 @@ class CronosAIEngine:
 ```
 
 **Metrics exposed:**
-- `cronos_ai_inference_total` (Counter)
-- `cronos_ai_inference_duration_seconds` (Histogram)
-- `cronos_ai_model_accuracy` (Gauge)
+- `qbitel_inference_total` (Counter)
+- `qbitel_inference_duration_seconds` (Histogram)
+- `qbitel_model_accuracy` (Gauge)
 
 ### 4.2 Protocol Discovery Orchestrator (`ai_engine/discovery/protocol_discovery_orchestrator.py`)
 
@@ -444,7 +444,7 @@ class SecurityOrchestratorService:
 ```python
 def create_app(config: Config) -> FastAPI:
     app = FastAPI(
-        title="CRONOS AI Protocol Discovery Engine",
+        title="QBITEL Bridge Engine",
         version="2.0.0",
         description="Enterprise-grade AI-powered protocol discovery"
     )
@@ -905,8 +905,8 @@ model:
 
 | File | Purpose | Environment |
 |------|---------|-------------|
-| `config/cronos_ai.yaml` | Default config | Development |
-| `config/cronos_ai.production.yaml` | Production config | Production |
+| `config/qbitel.yaml` | Default config | Development |
+| `config/qbitel.production.yaml` | Production config | Production |
 | `config/environments/staging.yaml` | Staging overrides | Staging |
 | `config/compliance.yaml` | Compliance config | All |
 
@@ -918,8 +918,8 @@ model:
 # Database
 DATABASE_HOST=db.example.com
 DATABASE_PORT=5432
-DATABASE_NAME=cronos_ai_prod
-DATABASE_USER=cronos
+DATABASE_NAME=qbitel_prod
+DATABASE_USER=qbitel
 DATABASE_PASSWORD=<32+ chars, from secrets manager>
 
 # Redis
@@ -934,13 +934,13 @@ ENCRYPTION_KEY=<32+ chars, AES-256-GCM>
 
 # TLS
 TLS_ENABLED=true
-TLS_CERT_FILE=/etc/cronos_ai/certs/server.crt
-TLS_KEY_FILE=/etc/cronos_ai/certs/server.key
+TLS_CERT_FILE=/etc/qbitel/certs/server.crt
+TLS_KEY_FILE=/etc/qbitel/certs/server.key
 
 # LLM (On-premise default)
-CRONOS_LLM_PROVIDER=ollama
-CRONOS_LLM_ENDPOINT=http://localhost:11434
-CRONOS_AIRGAPPED_MODE=true
+QBITEL_LLM_PROVIDER=ollama
+QBITEL_LLM_ENDPOINT=http://localhost:11434
+QBITEL_AIRGAPPED_MODE=true
 
 # Monitoring
 SENTRY_DSN=<sentry endpoint>
@@ -949,7 +949,7 @@ LOG_LEVEL=INFO
 
 ### 11.3 Configuration Loading Order
 
-1. Load base config from `config/cronos_ai.yaml`
+1. Load base config from `config/qbitel.yaml`
 2. Override with environment-specific config
 3. Load environment variables (highest priority)
 4. Fetch secrets from secrets manager (Vault, AWS SM)
@@ -1054,16 +1054,16 @@ kubectl apply -f kubernetes/service-mesh/xds-server-deployment.yaml
 kubectl apply -f kubernetes/container-security/admission-webhook-deployment.yaml
 
 # Verify
-kubectl get pods -n cronos-service-mesh
+kubectl get pods -n qbitel-service-mesh
 ```
 
 ### 14.3 Helm Deployment
 
 ```bash
-helm install cronos-ai ./helm/cronos-ai \
-  --namespace cronos-ai \
+helm install qbitel ./helm/qbitel \
+  --namespace qbitel \
   --create-namespace \
-  --values ./helm/cronos-ai/values-production.yaml
+  --values ./helm/qbitel/values-production.yaml
 ```
 
 ### 14.4 Air-Gapped Deployment
@@ -1077,9 +1077,9 @@ ollama pull llama3.2:8b
 ollama pull mixtral:8x7b
 
 # 3. Configure for air-gapped mode
-export CRONOS_LLM_PROVIDER=ollama
-export CRONOS_AIRGAPPED_MODE=true
-export CRONOS_DISABLE_CLOUD_LLMS=true
+export QBITEL_LLM_PROVIDER=ollama
+export QBITEL_AIRGAPPED_MODE=true
+export QBITEL_DISABLE_CLOUD_LLMS=true
 
 # 4. Deploy
 python -m ai_engine --airgapped
@@ -1105,7 +1105,7 @@ python -m ai_engine --airgapped
 
 ```python
 # Exception hierarchy
-CronosAIException (base)
+QbitelAIException (base)
 ├── ConfigurationException
 ├── ModelException
 │   ├── ModelLoadException
@@ -1162,7 +1162,7 @@ from fastapi import FastAPI, Depends
 from pydantic import BaseModel, Field
 
 from ai_engine.core.config import Config
-from ai_engine.core.exceptions import CronosAIException
+from ai_engine.core.exceptions import QbitelAIException
 
 
 # Type hints required
@@ -1276,10 +1276,10 @@ if __name__ == "__main__":
 
 | Log Type | Location |
 |----------|----------|
-| Application | `/var/log/cronos-ai/app.log` |
-| Access | `/var/log/cronos-ai/access.log` |
-| Error | `/var/log/cronos-ai/error.log` |
-| Audit | `/var/log/cronos-ai/audit.log` |
+| Application | `/var/log/qbitel/app.log` |
+| Access | `/var/log/qbitel/access.log` |
+| Error | `/var/log/qbitel/error.log` |
+| Audit | `/var/log/qbitel/audit.log` |
 | Container | `docker logs <container>` |
 
 ### 17.3 Health Check Endpoints
@@ -1401,7 +1401,7 @@ POST   /v1/devices/:id/certificate/revoke - Revoke certificate
 **Environment Variables**:
 ```bash
 DEVICE_ID=<device-id>
-CONTROL_URL=https://control.qslb.local
+CONTROL_URL=https://control.qbitel.local
 ```
 
 ### 18.5 Go Coding Standards
@@ -1420,7 +1420,7 @@ import (
     "go.uber.org/zap"
 
     // Internal
-    "github.com/qslb/go/controlplane/internal/vault"
+    "github.com/yazhsab/go/controlplane/internal/vault"
 )
 
 // Struct with configuration pattern
@@ -1659,8 +1659,8 @@ ui/console/
 **OIDC Configuration**:
 ```typescript
 {
-  authority: 'https://auth.qslb.local',
-  clientId: 'qslb-console',
+  authority: 'https://auth.qbitel.local',
+  clientId: 'qbitel-console',
   scope: 'openid profile email roles permissions organization',
   automaticSilentRenew: true,
 }
@@ -1732,7 +1732,7 @@ HEARTBEAT, SYSTEM_STATUS, NOTIFICATION
   server: {
     port: 3000,
     proxy: {
-      '/api': { target: 'https://api.qslb.local' }
+      '/api': { target: 'https://api.qbitel.local' }
     }
   },
   build: {
@@ -1865,7 +1865,7 @@ docker-compose down -v && docker-compose up -d --build
 
 ## Appendix C: Contact & Support
 
-- **GitHub Issues**: https://github.com/qbitel/cronos-ai/issues
+- **GitHub Issues**: https://github.com/yazhsab/qbitel-bridge/issues
 - **Documentation**: `/docs/` directory
 - **Enterprise Support**: enterprise@qbitel.com
 

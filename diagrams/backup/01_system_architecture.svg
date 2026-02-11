@@ -44,7 +44,7 @@
   </defs>
 
   <!-- Title -->
-  <text x="700" y="40" class="title" text-anchor="middle">CRONOS AI Platform Architecture</text>
+  <text x="700" y="40" class="title" text-anchor="middle">QBITEL Bridge Platform Architecture</text>
   <text x="700" y="65" class="subtitle" text-anchor="middle">Complete Enterprise Security Platform for the Quantum Age</text>
 
   <!-- External Systems Layer -->
@@ -241,6 +241,6 @@
 
   <!-- Footer -->
   <text x="700" y="1595" class="subtitle" text-anchor="middle" style="font-size: 11px;">
-    © 2025 CRONOS AI - Complete Enterprise Security Platform for the Quantum Age
+    © 2025 QBITEL Bridge - Complete Enterprise Security Platform for the Quantum Age
   </text>
 </svg>

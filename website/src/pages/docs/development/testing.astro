@@ -1,0 +1,151 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Testing Guide | QBITEL Bridge Docs" description="Comprehensive testing guide for QBITEL Bridge: unit tests, integration tests, end-to-end tests, and performance benchmarks.">
+  <h1 class="text-3xl font-bold text-white mb-2">Testing Guide</h1>
+  <p class="text-gray-400 mb-8">QBITEL Bridge uses a multi-layered testing strategy covering unit, integration, end-to-end, performance, and security testing across all four language stacks.</p>
+
+  <h2 id="testing-strategy" class="text-2xl font-bold text-white mt-12 mb-4">Testing Strategy</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Level</th>
+        <th class="text-left text-white py-2 pr-4">Scope</th>
+        <th class="text-left text-white py-2">Tools</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Unit</td>
+        <td class="text-gray-300 py-2 pr-4">Individual functions and classes</td>
+        <td class="text-gray-300 py-2">pytest, cargo test, go test, Vitest</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Integration</td>
+        <td class="text-gray-300 py-2 pr-4">Component interactions</td>
+        <td class="text-gray-300 py-2">pytest, httpx, testcontainers</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">End-to-End</td>
+        <td class="text-gray-300 py-2 pr-4">Full system workflows</td>
+        <td class="text-gray-300 py-2">pytest, custom e2e framework</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Performance</td>
+        <td class="text-gray-300 py-2 pr-4">Throughput, latency, load</td>
+        <td class="text-gray-300 py-2">pytest-benchmark, k6, Locust</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Security</td>
+        <td class="text-gray-300 py-2 pr-4">Vulnerability scanning</td>
+        <td class="text-gray-300 py-2">Bandit, cargo audit, OWASP ZAP</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Chaos</td>
+        <td class="text-gray-300 py-2 pr-4">Resilience under failure</td>
+        <td class="text-gray-300 py-2">Custom chaos experiments</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="running-all" class="text-2xl font-bold text-white mt-12 mb-4">Running All Tests</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run the complete test suite across all components</span>
+make test</code></pre>
+
+  <h2 id="python-tests" class="text-2xl font-bold text-white mt-12 mb-4">Python Tests (pytest)</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run all Python tests</span>
+pytest ai_engine/tests/ -v
+
+<span class="text-gray-500"># Run with coverage</span>
+pytest ai_engine/tests/ --cov=ai_engine --cov-report=html
+
+<span class="text-gray-500"># Run specific test categories</span>
+pytest ai_engine/tests/test_api.py -v                    <span class="text-gray-500"># API tests</span>
+pytest ai_engine/tests/test_protocol_discovery.py -v     <span class="text-gray-500"># Discovery tests</span>
+pytest ai_engine/tests/test_compliance.py -v             <span class="text-gray-500"># Compliance tests</span>
+pytest ai_engine/tests/test_auth.py -v                   <span class="text-gray-500"># Auth tests</span>
+
+<span class="text-gray-500"># Run performance benchmarks</span>
+pytest ai_engine/tests/performance/test_benchmarks.py -v --benchmark-only
+
+<span class="text-gray-500"># Run only fast unit tests</span>
+pytest ai_engine/tests/ -v -m "not integration and not slow"</code></pre>
+
+  <h3 id="test-fixtures" class="text-xl font-semibold text-white mt-8 mb-3">Test Fixtures</h3>
+  <p class="text-gray-300 mb-4">Shared fixtures are defined in <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ai_engine/tests/conftest.py</code>. Key fixtures include database sessions, mock LLM providers, and test traffic data.</p>
+
+  <h2 id="rust-tests" class="text-2xl font-bold text-white mt-12 mb-4">Rust Tests (cargo test)</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">cd rust/dataplane
+
+<span class="text-gray-500"># Run all tests</span>
+cargo test
+
+<span class="text-gray-500"># Run tests for a specific crate</span>
+cargo test -p pqc_tls
+cargo test -p dpi_engine
+
+<span class="text-gray-500"># Run with output visible</span>
+cargo test -- --nocapture
+
+<span class="text-gray-500"># Run integration tests</span>
+cargo test --test integration</code></pre>
+
+  <h2 id="go-tests" class="text-2xl font-bold text-white mt-12 mb-4">Go Tests (go test)</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run control plane tests</span>
+cd go/controlplane && go test ./...
+
+<span class="text-gray-500"># Run management API tests</span>
+cd go/mgmtapi && go test ./...
+
+<span class="text-gray-500"># Run with coverage</span>
+go test -cover ./...
+
+<span class="text-gray-500"># Run specific test</span>
+go test -run TestPolicyBundles ./internal/policy/</code></pre>
+
+  <h2 id="frontend-tests" class="text-2xl font-bold text-white mt-12 mb-4">Frontend Tests</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">cd ui/console
+
+<span class="text-gray-500"># Run test suite</span>
+npm test
+
+<span class="text-gray-500"># Run with coverage</span>
+npm test -- --coverage</code></pre>
+
+  <h2 id="integration-tests" class="text-2xl font-bold text-white mt-12 mb-4">Integration Tests</h2>
+  <p class="text-gray-300 mb-4">Integration tests verify interactions between components and require running services:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run Python integration tests</span>
+pytest tests/integration/ -v
+
+<span class="text-gray-500"># Run e2e flow tests</span>
+pytest tests/integration/test_uc1_e2e_flow.py -v
+
+<span class="text-gray-500"># Run with Docker services</span>
+./tests/integration/run_integration_tests.sh</code></pre>
+
+  <h2 id="load-tests" class="text-2xl font-bold text-white mt-12 mb-4">Load and Performance Tests</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run k6 load tests</span>
+k6 run tests/load/k6-load-test.js
+
+<span class="text-gray-500"># Run Locust load tests</span>
+locust -f tests/load/locustfile.py --host http://localhost:8000
+
+<span class="text-gray-500"># Run comprehensive load test</span>
+python tests/load/comprehensive_load_test.py</code></pre>
+
+  <h2 id="chaos-tests" class="text-2xl font-bold text-white mt-12 mb-4">Chaos Engineering</h2>
+  <p class="text-gray-300 mb-4">Chaos experiments validate system resilience under failure conditions:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run chaos experiments (Kubernetes required)</span>
+kubectl apply -f tests/chaos/chaos-experiments.yaml</code></pre>
+
+  <h2 id="ci-cd" class="text-2xl font-bold text-white mt-12 mb-4">CI/CD Integration</h2>
+  <p class="text-gray-300 mb-4">Tests run automatically in the CI/CD pipeline defined in <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">.github/workflows/</code>. The pipeline runs unit tests on every pull request and integration tests on merge to main.</p>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> -- verify performance targets</li>
+    <li><a href="/docs/operations/monitoring" class="text-quantum-400 hover:underline">Monitoring</a> -- set up test result dashboards</li>
+    <li><a href="/docs/security/compliance-frameworks" class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- compliance testing requirements</li>
+  </ul>
+</DocsLayout>

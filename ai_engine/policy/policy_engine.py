@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Dynamic Policy Engine
+QBITEL Engine - Dynamic Policy Engine
 
 This module provides comprehensive policy management and enforcement
 with support for dynamic rule evaluation, compliance monitoring,

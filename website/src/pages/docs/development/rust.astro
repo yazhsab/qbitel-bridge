@@ -1,0 +1,123 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Rust Development | QBITEL Bridge Docs" description="Rust development guide for the QBITEL Bridge data plane: cargo, clippy, rustfmt, and PQC-TLS crate development.">
+  <h1 class="text-3xl font-bold text-white mb-2">Rust Development Guide</h1>
+  <p class="text-gray-400 mb-8">Set up your Rust development environment for the data plane, including building, testing, linting, and contributing to PQC-TLS.</p>
+
+  <h2 id="prerequisites" class="text-2xl font-bold text-white mt-12 mb-4">Prerequisites</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Rust</strong> 1.70+ with cargo (install via <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">rustup</code>)</li>
+    <li><strong class="text-white">liboqs</strong> -- Open Quantum Safe library for PQC algorithms</li>
+    <li><strong class="text-white">pkg-config</strong> and <strong class="text-white">cmake</strong> -- for native dependency builds</li>
+  </ul>
+
+  <h2 id="setup" class="text-2xl font-bold text-white mt-12 mb-4">Environment Setup</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Install Rust (if not already installed)</span>
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+<span class="text-gray-500"># Navigate to the data plane</span>
+cd rust/dataplane
+
+<span class="text-gray-500"># Build all crates</span>
+cargo build --locked
+
+<span class="text-gray-500"># Run tests</span>
+cargo test
+
+<span class="text-gray-500"># Run linter</span>
+cargo clippy --all-targets --all-features -- -D warnings
+
+<span class="text-gray-500"># Format code</span>
+cargo fmt</code></pre>
+
+  <h2 id="crate-structure" class="text-2xl font-bold text-white mt-12 mb-4">Crate Structure</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">rust/dataplane/
+  Cargo.toml             <span class="text-gray-500"># Workspace manifest</span>
+  crates/
+    pqc_tls/             <span class="text-gray-500"># Post-quantum TLS (ML-KEM, ML-DSA)</span>
+    dpdk_engine/         <span class="text-gray-500"># DPDK packet capture</span>
+    dpi_engine/          <span class="text-gray-500"># Deep packet inspection</span>
+    io_engine/           <span class="text-gray-500"># I/O engine, HA clustering, metrics</span>
+    ai_bridge/           <span class="text-gray-500"># Python AI Engine bridge</span>
+    k8s_operator/        <span class="text-gray-500"># Kubernetes operator</span>
+  bin/
+    qbitel-bridge/       <span class="text-gray-500"># Main binary</span></code></pre>
+
+  <h2 id="building" class="text-2xl font-bold text-white mt-12 mb-4">Building</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Build all crates in debug mode</span>
+cargo build
+
+<span class="text-gray-500"># Build in release mode (optimized)</span>
+cargo build --release
+
+<span class="text-gray-500"># Build a specific crate</span>
+cargo build -p pqc_tls
+
+<span class="text-gray-500"># Build with all features enabled</span>
+cargo build --all-features</code></pre>
+
+  <h2 id="testing" class="text-2xl font-bold text-white mt-12 mb-4">Testing</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run all tests</span>
+cargo test
+
+<span class="text-gray-500"># Run tests for a specific crate</span>
+cargo test -p pqc_tls
+
+<span class="text-gray-500"># Run a specific test</span>
+cargo test test_kyber_key_exchange
+
+<span class="text-gray-500"># Run tests with output</span>
+cargo test -- --nocapture
+
+<span class="text-gray-500"># Run integration tests</span>
+cargo test --test integration</code></pre>
+
+  <h2 id="code-quality" class="text-2xl font-bold text-white mt-12 mb-4">Code Quality</h2>
+
+  <h3 id="clippy" class="text-xl font-semibold text-white mt-8 mb-3">Linting with Clippy</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run Clippy with strict settings</span>
+cargo clippy --all-targets --all-features -- -D warnings
+
+<span class="text-gray-500"># Apply automatic fixes</span>
+cargo clippy --fix</code></pre>
+
+  <h3 id="rustfmt" class="text-xl font-semibold text-white mt-8 mb-3">Formatting with rustfmt</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Format all files</span>
+cargo fmt
+
+<span class="text-gray-500"># Check formatting without modifying</span>
+cargo fmt -- --check</code></pre>
+
+  <h3 id="security-audit" class="text-xl font-semibold text-white mt-8 mb-3">Dependency Audit</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Audit dependencies for known vulnerabilities</span>
+cargo audit
+
+<span class="text-gray-500"># Check for outdated dependencies</span>
+cargo outdated</code></pre>
+
+  <h2 id="pqc-development" class="text-2xl font-bold text-white mt-12 mb-4">PQC-TLS Development</h2>
+  <p class="text-gray-300 mb-4">The <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">pqc_tls</code> crate wraps the liboqs library and provides a Rust-native API for quantum-safe cryptography. When adding new algorithms:</p>
+  <ol class="list-decimal list-inside text-gray-300 space-y-2 mb-6">
+    <li>Add the algorithm binding in <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">crates/pqc_tls/src/</code></li>
+    <li>Write unit tests verifying key generation, encapsulation, and decapsulation</li>
+    <li>Add benchmarks using the <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">criterion</code> crate</li>
+    <li>Verify against NIST test vectors</li>
+  </ol>
+
+  <h2 id="k8s-operator" class="text-2xl font-bold text-white mt-12 mb-4">Kubernetes Operator Development</h2>
+  <p class="text-gray-300 mb-4">The <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">k8s_operator</code> crate uses the <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">kube-rs</code> framework. Controllers are organized by resource type:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">controller/controlplane.rs</code> -- control plane resources</li>
+    <li><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">controller/policy.rs</code> -- OPA policy resources</li>
+    <li><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">controller/servicemesh.rs</code> -- service mesh resources</li>
+  </ul>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/architecture/data-plane" class="text-quantum-400 hover:underline">Data Plane Architecture</a> -- understand the crate design</li>
+    <li><a href="/docs/security/pqc-algorithms" class="text-quantum-400 hover:underline">PQC Algorithms</a> -- algorithm specifications</li>
+    <li><a href="/docs/development/testing" class="text-quantum-400 hover:underline">Testing Guide</a> -- integration and performance testing</li>
+  </ul>
+</DocsLayout>

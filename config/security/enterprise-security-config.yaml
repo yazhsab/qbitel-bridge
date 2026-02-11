@@ -1,4 +1,4 @@
-# QSLB Enterprise Security Configuration
+# QBITEL Enterprise Security Configuration
 # Production-Ready, Enterprise-Grade Security Architecture
 # Implements Zero-Trust, ML-based Threat Detection, SIEM Integration, HSM, Compliance Automation, SOAR, and SSO
 
@@ -82,9 +82,9 @@ siem_integration:
     host: "splunk.enterprise.local"
     port: 8088
     token: "${SPLUNK_HEC_TOKEN}"
-    index: "qslb_security"
-    source_type: "qslb:security"
-    source: "qslb"
+    index: "qbitel_security"
+    source_type: "qbitel:security"
+    source: "qbitel"
     use_https: true
     verify_ssl: true
   
@@ -93,8 +93,8 @@ siem_integration:
     addresses: ["https://elastic.enterprise.local:9200"]
     username: "${ELASTIC_USERNAME}"
     password: "${ELASTIC_PASSWORD}"
-    index: "qslb-security"
-    pipeline: "qslb-enrichment"
+    index: "qbitel-security"
+    pipeline: "qbitel-enrichment"
     use_https: true
     verify_ssl: true
   
@@ -215,7 +215,7 @@ soar_platform:
   auto_ticket_creation: true
   
   # Playbook Settings
-  playbook_directory: "/etc/qslb/playbooks"
+  playbook_directory: "/etc/qbitel/playbooks"
   default_playbooks:
     - "malware-response"
     - "data-breach-response"
@@ -264,18 +264,18 @@ soar_platform:
 # Enterprise Authentication Configuration
 enterprise_authentication:
   enabled: true
-  service_name: "QSLB Authentication Service"
+  service_name: "QBITEL Authentication Service"
   domain: "enterprise.local"
   base_url: "https://auth.enterprise.local"
   
   # Session Management
   session_timeout: "8h"
   max_sessions: 5
-  session_cookie_name: "QSLB_SESSION"
+  session_cookie_name: "QBITEL_SESSION"
   
   # Token Settings
-  token_issuer: "qslb-auth"
-  token_audience: ["qslb-api", "qslb-console"]
+  token_issuer: "qbitel-auth"
+  token_audience: ["qbitel-api", "qbitel-console"]
   token_expiry: "1h"
   refresh_token_expiry: "24h"
   
@@ -313,7 +313,7 @@ enterprise_authentication:
       host: "ldap.enterprise.local"
       port: 636
       use_ssl: true
-      bind_dn: "CN=qslb-service,OU=Service Accounts,DC=enterprise,DC=local"
+      bind_dn: "CN=qbitel-service,OU=Service Accounts,DC=enterprise,DC=local"
       bind_password: "${LDAP_BIND_PASSWORD}"
       base_dn: "DC=enterprise,DC=local"
       user_filter: "(&(objectClass=user)(sAMAccountName=%s))"
@@ -395,7 +395,7 @@ audit_logging:
   # Log destinations
   destinations:
     - type: "file"
-      path: "/var/log/qslb/security-audit.log"
+      path: "/var/log/qbitel/security-audit.log"
       format: "json"
       rotation: "daily"
       compression: true
@@ -533,9 +533,9 @@ zero_touch_integrations:
     retry_delay_seconds: 5
     rate_limit_requests_per_minute: 100
     custom_config:
-      index: "cronos-security"
+      index: "qbitel-security"
       log_source_id: 1001
-      default_assignee: "cronos-ai"
+      default_assignee: "qbitel"
       auto_create_alerts: true
       alert_severity_mapping:
         critical: "critical"
@@ -561,8 +561,8 @@ zero_touch_integrations:
     custom_config:
       # ServiceNow specific
       table_name: "incident"
-      default_caller: "cronos-ai-system"
-      security_group: "CRONOS AI Security Operations"
+      default_caller: "qbitel-system"
+      security_group: "QBITEL Security Operations"
       auto_assign: true
       priority_mapping:
         critical: "1"  # Critical
@@ -601,19 +601,19 @@ zero_touch_integrations:
       retry_attempts: 2
       rate_limit_requests_per_minute: 1000  # Slack's API limit
       custom_config:
-        default_channel: "#cronos-security-alerts"
-        threat_analysis_channel: "#cronos-threat-intel"
-        operations_channel: "#cronos-security-ops"
-        executive_channel: "#cronos-executive-alerts"
+        default_channel: "#qbitel-security-alerts"
+        threat_analysis_channel: "#qbitel-threat-intel"
+        operations_channel: "#qbitel-security-ops"
+        executive_channel: "#qbitel-executive-alerts"
         
         # Channel routing by severity
         channel_mapping:
-          critical: "#cronos-critical-alerts"
-          high: "#cronos-high-priority"
-          medium: "#cronos-security-alerts"
-          low: "#cronos-security-alerts"
-          informational: "#cronos-security-info"
-          default: "#cronos-security-alerts"
+          critical: "#qbitel-critical-alerts"
+          high: "#qbitel-high-priority"
+          medium: "#qbitel-security-alerts"
+          low: "#qbitel-security-alerts"
+          informational: "#qbitel-security-info"
+          default: "#qbitel-security-alerts"
         
         # Message formatting
         use_rich_formatting: true
@@ -643,17 +643,17 @@ zero_touch_integrations:
         
         # Default recipients
         default_recipients:
-          - "cronos-security-team@enterprise.com"
+          - "qbitel-security-team@enterprise.com"
           - "soc@enterprise.com"
         
         # Team-specific distributions
         security_team_recipients:
-          - "cronos-security-team@enterprise.com"
+          - "qbitel-security-team@enterprise.com"
           - "threat-intel@enterprise.com"
           - "malware-analysis@enterprise.com"
           
         operations_team_recipients:
-          - "cronos-security-ops@enterprise.com"
+          - "qbitel-security-ops@enterprise.com"
           - "incident-response@enterprise.com"
           - "forensics@enterprise.com"
           
@@ -666,16 +666,16 @@ zero_touch_integrations:
         recipient_mapping:
           critical:
             - "ciso@enterprise.com"
-            - "cronos-security-team@enterprise.com"
+            - "qbitel-security-team@enterprise.com"
             - "incident-response@enterprise.com"
             - "security-leadership@enterprise.com"
           high:
-            - "cronos-security-team@enterprise.com"
+            - "qbitel-security-team@enterprise.com"
             - "soc@enterprise.com"
             - "incident-response@enterprise.com"
           medium:
             - "soc@enterprise.com"
-            - "cronos-security-ops@enterprise.com"
+            - "qbitel-security-ops@enterprise.com"
           low:
             - "soc@enterprise.com"
           informational:
@@ -685,7 +685,7 @@ zero_touch_integrations:
         
         # Email templates
         use_templates: true
-        template_directory: "/etc/cronos-ai/templates/email"
+        template_directory: "/etc/qbitel/templates/email"
         include_attachments: false  # Security policy
         max_email_size: "10MB"
   
@@ -711,13 +711,13 @@ zero_touch_integrations:
         max_auto_blocks_per_hour: 100
         
         # Block list management
-        block_list_name: "CRONOS_AI_BLOCKED"
+        block_list_name: "QBITEL_AI_BLOCKED"
         use_dynamic_blocking: true
         enable_geo_blocking: false
         
         # Rule management
-        rule_prefix: "CRONOS_AI_"
-        rule_description_template: "Blocked by CRONOS AI - {reason} - {timestamp}"
+        rule_prefix: "QBITEL_AI_"
+        rule_description_template: "Blocked by QBITEL - {reason} - {timestamp}"
         auto_cleanup_rules: true
         rule_cleanup_interval: "24h"
         
@@ -759,8 +759,8 @@ zero_touch_integrations:
           - name: "emerging_threats"
             url: "https://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz"
             enabled: true
-          - name: "cronos_custom"
-            url: "${CRONOS_SIGNATURE_FEED}"
+          - name: "qbitel_custom"
+            url: "${QBITEL_SIGNATURE_FEED}"
             enabled: true
         
         # Event processing
@@ -907,7 +907,7 @@ integration_environment_overrides:
     zero_touch_integrations:
       enhanced_siem:
         custom_config:
-          index: "cronos-security-staging"
+          index: "qbitel-security-staging"
       ticketing_system:
         auto_create_tickets: false
         custom_config:
@@ -915,11 +915,11 @@ integration_environment_overrides:
       communication_systems:
         slack:
           custom_config:
-            default_channel: "#cronos-security-staging"
+            default_channel: "#qbitel-security-staging"
         email:
           custom_config:
             default_recipients:
-              - "cronos-security-staging@enterprise.com"
+              - "qbitel-security-staging@enterprise.com"
       network_security_systems:
         firewall:
           auto_block_threshold: "critical"
@@ -939,7 +939,7 @@ integration_environment_overrides:
         email:
           custom_config:
             default_recipients:
-              - "cronos-dev@enterprise.com"
+              - "qbitel-dev@enterprise.com"
       network_security_systems:
         firewall:
           enabled: false

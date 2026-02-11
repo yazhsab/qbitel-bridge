@@ -1,5 +1,5 @@
 """
-Alembic Environment Configuration for CRONOS AI Engine
+Alembic Environment Configuration for QBITEL Engine
 
 This module configures Alembic for database migrations with production-ready features:
 - Environment variable support
@@ -33,8 +33,8 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Get database configuration from environment
-cronos_config = get_config()
-db_config = cronos_config.database
+qbitel_config = get_config()
+db_config = qbitel_config.database
 
 # Override sqlalchemy.url with environment variables
 config.set_main_option(

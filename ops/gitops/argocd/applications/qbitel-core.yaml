@@ -1,0 +1,194 @@
+---
+# QBITEL Core Application - Development
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qbitel-core-dev
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qbitel-core
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/part-of: qbitel
+    environment: development
+  annotations:
+    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: qbitel-deployments
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: qbitel-alerts
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: qbitel
+
+  source:
+    repoURL: https://github.com/yazhsab/qbitel.git
+    targetRevision: develop
+    path: ops/gitops/environments/dev/qbitel-core
+    helm:
+      releaseName: qbitel-core
+      valueFiles:
+        - values.yaml
+        - values-dev.yaml
+      parameters:
+        - name: image.tag
+          value: "dev-latest"
+        - name: replicaCount
+          value: "1"
+        - name: resources.requests.memory
+          value: "512Mi"
+        - name: resources.requests.cpu
+          value: "250m"
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qbitel-dev
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # Health checks
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+
+  # Revision history
+  revisionHistoryLimit: 10
+---
+# QBITEL Core Application - Staging
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qbitel-core-staging
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qbitel-core
+    app.kubernetes.io/instance: staging
+    app.kubernetes.io/part-of: qbitel
+    environment: staging
+  annotations:
+    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: qbitel-deployments
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: qbitel-alerts
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: qbitel
+
+  source:
+    repoURL: https://github.com/yazhsab/qbitel.git
+    targetRevision: release/*
+    path: ops/gitops/environments/staging/qbitel-core
+    helm:
+      releaseName: qbitel-core
+      valueFiles:
+        - values.yaml
+        - values-staging.yaml
+      parameters:
+        - name: image.tag
+          value: "staging-latest"
+        - name: replicaCount
+          value: "2"
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qbitel-staging
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
+---
+# QBITEL Core Application - Production
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qbitel-core-prod
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qbitel-core
+    app.kubernetes.io/instance: prod
+    app.kubernetes.io/part-of: qbitel
+    environment: production
+  annotations:
+    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: qbitel-deployments
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: qbitel-alerts
+    notifications.argoproj.io/subscribe.on-sync-failed.pagerduty: qbitel-oncall
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: qbitel
+
+  source:
+    repoURL: https://github.com/yazhsab/qbitel.git
+    targetRevision: main
+    path: ops/gitops/environments/prod/qbitel-core
+    helm:
+      releaseName: qbitel-core
+      valueFiles:
+        - values.yaml
+        - values-prod.yaml
+      parameters:
+        - name: replicaCount
+          value: "3"
+        - name: resources.requests.memory
+          value: "2Gi"
+        - name: resources.requests.cpu
+          value: "1000m"
+        - name: autoscaling.enabled
+          value: "true"
+        - name: autoscaling.minReplicas
+          value: "3"
+        - name: autoscaling.maxReplicas
+          value: "10"
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qbitel-prod
+
+  # Production requires manual sync
+  syncPolicy:
+    automated: null  # Manual sync required
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 10m
+
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+      jsonPointers:
+        - /spec/minReplicas
+        - /spec/maxReplicas

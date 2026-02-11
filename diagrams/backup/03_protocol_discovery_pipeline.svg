@@ -192,12 +192,12 @@
     <text x="450" y="967" class="feature" text-anchor="middle">👨‍💻 6-12 months • $500K-$2M cost • Manual reverse engineering • Error-prone</text>
 
     <rect x="840" y="920" width="660" height="60" fill="#ecfdf5" stroke="#10b981" stroke-width="2" rx="8"/>
-    <text x="1170" y="945" class="label" text-anchor="middle" style="fill: #059669;">CRONOS AI Automated Approach</text>
+    <text x="1170" y="945" class="label" text-anchor="middle" style="fill: #059669;">QBITEL Bridge Automated Approach</text>
     <text x="1170" y="967" class="feature" text-anchor="middle" style="font-weight: bold;">🤖 2-4 hours • $0 marginal cost • 89% accuracy • Fully autonomous</text>
   </g>
 
   <!-- Footer -->
   <text x="800" y="1000" class="subtitle" text-anchor="middle" style="font-size: 11px;">
-    © 2025 CRONOS AI - 99.9% Faster Protocol Discovery with AI/ML
+    © 2025 QBITEL Bridge - 99.9% Faster Protocol Discovery with AI/ML
   </text>
 </svg>

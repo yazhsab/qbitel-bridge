@@ -7,14 +7,14 @@ from typing import Generator
 import pytest
 
 
-DEFAULT_ENV_FLAG = "CRONOS_TEST_ENV"
+DEFAULT_ENV_FLAG = "QBITEL_TEST_ENV"
 
 
 def setup_test_environment() -> None:
     """Apply baseline environment variables for tests."""
 
     os.environ.setdefault(DEFAULT_ENV_FLAG, "1")
-    os.environ.setdefault("CRONOS_ENV", "testing")
+    os.environ.setdefault("QBITEL_ENV", "testing")
 
 
 def cleanup_test_environment() -> None:

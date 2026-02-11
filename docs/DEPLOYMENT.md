@@ -1,8 +1,8 @@
-# CRONOS AI Protocol Discovery - Deployment Guide
+# QBITEL Bridge - Deployment Guide
 
 ## 🚀 **Production Deployment Guide**
 
-This guide covers complete production deployment of the CRONOS AI Protocol Discovery System with enterprise-grade configurations, monitoring, and security.
+This guide covers complete production deployment of the QBITEL Bridge System with enterprise-grade configurations, monitoring, and security.
 
 ## 📋 **Table of Contents**
 
@@ -87,17 +87,17 @@ graph TB
 
 ```bash
 # Clone repository
-git clone https://github.com/cronos-ai/protocol-discovery.git
+git clone https://github.com/yazhsab/protocol-discovery.git
 cd protocol-discovery
 
 # Build production image
-docker build -f ops/deploy/docker/dockerfiles/production.Dockerfile -t cronos-ai/protocol-discovery:v1.0.0 .
+docker build -f ops/deploy/docker/dockerfiles/production.Dockerfile -t qbitel/protocol-discovery:v1.0.0 .
 
 # Tag for registry
-docker tag cronos-ai/protocol-discovery:v1.0.0 your-registry.com/cronos-ai/protocol-discovery:v1.0.0
+docker tag qbitel/protocol-discovery:v1.0.0 your-registry.com/qbitel/protocol-discovery:v1.0.0
 
 # Push to registry
-docker push your-registry.com/cronos-ai/protocol-discovery:v1.0.0
+docker push your-registry.com/qbitel/protocol-discovery:v1.0.0
 ```
 
 ### **2. Docker Compose Setup**
@@ -109,14 +109,14 @@ version: '3.8'
 
 services:
   # Protocol Discovery API
-  cronos-api:
-    image: your-registry.com/cronos-ai/protocol-discovery:v1.0.0
+  qbitel-api:
+    image: your-registry.com/qbitel/protocol-discovery:v1.0.0
     restart: unless-stopped
     ports:
       - "8080:8080"
       - "8000:8000"  # Prometheus metrics
     environment:
-      - CRONOS_ENVIRONMENT=production
+      - QBITEL_ENVIRONMENT=production
       - DATABASE_HOST=postgresql
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - REDIS_HOST=redis
@@ -124,10 +124,10 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
     volumes:
-      - ./config/cronos_ai.production.yaml:/app/config/cronos_ai.yaml:ro
+      - ./config/qbitel.production.yaml:/app/config/qbitel.yaml:ro
       - ./ssl:/etc/ssl/certs:ro
-      - cronos-models:/opt/cronos_ai/models
-      - cronos-logs:/var/log/cronos_ai
+      - qbitel-models:/opt/qbitel/models
+      - qbitel-logs:/var/log/qbitel
     depends_on:
       - postgresql
       - redis
@@ -153,8 +153,8 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=cronos_ai_prod
-      - POSTGRES_USER=cronos_prod_user
+      - POSTGRES_DB=qbitel_prod
+      - POSTGRES_USER=qbitel_prod_user
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
     volumes:
       - postgresql-data:/var/lib/postgresql/data
@@ -168,7 +168,7 @@ services:
           cpus: '4'
           memory: 16G
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U cronos_prod_user"]
+      test: ["CMD-SHELL", "pg_isready -U qbitel_prod_user"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -236,19 +236,19 @@ services:
       - ./ops/deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/ssl/certs:ro
     depends_on:
-      - cronos-api
+      - qbitel-api
 
 volumes:
   postgresql-data:
   redis-data:
   prometheus-data:
   grafana-data:
-  cronos-models:
-  cronos-logs:
+  qbitel-models:
+  qbitel-logs:
 
 networks:
   default:
-    name: cronos-network
+    name: qbitel-network
 ```
 
 ### **3. Environment Configuration**
@@ -280,10 +280,10 @@ docker-compose -f docker-compose.production.yml --env-file .env.production up -d
 docker-compose -f docker-compose.production.yml ps
 
 # View logs
-docker-compose -f docker-compose.production.yml logs -f cronos-api
+docker-compose -f docker-compose.production.yml logs -f qbitel-api
 
 # Scale API services
-docker-compose -f docker-compose.production.yml up -d --scale cronos-api=5
+docker-compose -f docker-compose.production.yml up -d --scale qbitel-api=5
 ```
 
 ## ☸️ **Kubernetes Deployment**
@@ -295,9 +295,9 @@ docker-compose -f docker-compose.production.yml up -d --scale cronos-api=5
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cronos-ai-prod
+  name: qbitel-prod
   labels:
-    name: cronos-ai-prod
+    name: qbitel-prod
 ```
 
 ### **2. Secrets Management**
@@ -307,8 +307,8 @@ metadata:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cronos-secrets
-  namespace: cronos-ai-prod
+  name: qbitel-secrets
+  namespace: qbitel-prod
 type: Opaque
 stringData:
   database-password: "your_secure_db_password"
@@ -324,10 +324,10 @@ stringData:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cronos-config
-  namespace: cronos-ai-prod
+  name: qbitel-config
+  namespace: qbitel-prod
 data:
-  cronos_ai.yaml: |
+  qbitel.yaml: |
     environment: production
     debug: false
     api_host: "0.0.0.0"
@@ -336,8 +336,8 @@ data:
     database:
       host: "postgresql-service"
       port: 5432
-      database: "cronos_ai_prod"
-      username: "cronos_prod_user"
+      database: "qbitel_prod"
+      username: "qbitel_prod_user"
       connection_pool_size: 20
     
     redis:
@@ -357,7 +357,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgresql
-  namespace: cronos-ai-prod
+  namespace: qbitel-prod
 spec:
   serviceName: postgresql-service
   replicas: 1
@@ -376,13 +376,13 @@ spec:
         - containerPort: 5432
         env:
         - name: POSTGRES_DB
-          value: "cronos_ai_prod"
+          value: "qbitel_prod"
         - name: POSTGRES_USER
-          value: "cronos_prod_user"
+          value: "qbitel_prod_user"
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-secrets
+              name: qbitel-secrets
               key: database-password
         volumeMounts:
         - name: postgresql-storage
@@ -408,7 +408,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgresql-service
-  namespace: cronos-ai-prod
+  namespace: qbitel-prod
 spec:
   selector:
     app: postgresql
@@ -425,7 +425,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
-  namespace: cronos-ai-prod
+  namespace: qbitel-prod
 spec:
   replicas: 3
   selector:
@@ -453,7 +453,7 @@ spec:
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-secrets
+              name: qbitel-secrets
               key: redis-password
         resources:
           requests:
@@ -468,7 +468,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis-service
-  namespace: cronos-ai-prod
+  namespace: qbitel-prod
 spec:
   selector:
     app: redis
@@ -480,56 +480,56 @@ spec:
 ### **6. Main Application Deployment**
 
 ```yaml
-# cronos-api.yaml
+# qbitel-api.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cronos-api
-  namespace: cronos-ai-prod
+  name: qbitel-api
+  namespace: qbitel-prod
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: cronos-api
+      app: qbitel-api
   template:
     metadata:
       labels:
-        app: cronos-api
+        app: qbitel-api
     spec:
       containers:
-      - name: cronos-api
-        image: your-registry.com/cronos-ai/protocol-discovery:v1.0.0
+      - name: qbitel-api
+        image: your-registry.com/qbitel/protocol-discovery:v1.0.0
         ports:
         - containerPort: 8080
         - containerPort: 8000
         env:
-        - name: CRONOS_ENVIRONMENT
+        - name: QBITEL_ENVIRONMENT
           value: "production"
         - name: DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-secrets
+              name: qbitel-secrets
               key: database-password
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-secrets
+              name: qbitel-secrets
               key: redis-password
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:
-              name: cronos-secrets
+              name: qbitel-secrets
               key: jwt-secret
         - name: ENCRYPTION_KEY
           valueFrom:
             secretKeyRef:
-              name: cronos-secrets
+              name: qbitel-secrets
               key: encryption-key
         volumeMounts:
         - name: config-volume
           mountPath: /app/config
         - name: model-storage
-          mountPath: /opt/cronos_ai/models
+          mountPath: /opt/qbitel/models
         resources:
           requests:
             memory: "8Gi"
@@ -552,7 +552,7 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: cronos-config
+          name: qbitel-config
       - name: model-storage
         persistentVolumeClaim:
           claimName: model-storage-pvc
@@ -561,11 +561,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cronos-api-service
-  namespace: cronos-ai-prod
+  name: qbitel-api-service
+  namespace: qbitel-prod
 spec:
   selector:
-    app: cronos-api
+    app: qbitel-api
   ports:
   - name: api
     port: 8080
@@ -580,7 +580,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: model-storage-pvc
-  namespace: cronos-ai-prod
+  namespace: qbitel-prod
 spec:
   accessModes:
     - ReadWriteMany
@@ -596,8 +596,8 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: cronos-ingress
-  namespace: cronos-ai-prod
+  name: qbitel-ingress
+  namespace: qbitel-prod
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -606,17 +606,17 @@ metadata:
 spec:
   tls:
   - hosts:
-    - api.cronos-ai.yourdomain.com
-    secretName: cronos-tls
+    - api.qbitel.yourdomain.com
+    secretName: qbitel-tls
   rules:
-  - host: api.cronos-ai.yourdomain.com
+  - host: api.qbitel.yourdomain.com
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: cronos-api-service
+            name: qbitel-api-service
             port:
               number: 8080
 ```
@@ -630,19 +630,19 @@ kubectl apply -f secrets.yaml
 kubectl apply -f configmap.yaml
 kubectl apply -f postgresql.yaml
 kubectl apply -f redis.yaml
-kubectl apply -f cronos-api.yaml
+kubectl apply -f qbitel-api.yaml
 kubectl apply -f ingress.yaml
 
 # Check deployment status
-kubectl get pods -n cronos-ai-prod
-kubectl get services -n cronos-ai-prod
-kubectl get ingress -n cronos-ai-prod
+kubectl get pods -n qbitel-prod
+kubectl get services -n qbitel-prod
+kubectl get ingress -n qbitel-prod
 
 # Scale deployment
-kubectl scale deployment cronos-api --replicas=5 -n cronos-ai-prod
+kubectl scale deployment qbitel-api --replicas=5 -n qbitel-prod
 
 # View logs
-kubectl logs -f deployment/cronos-api -n cronos-ai-prod
+kubectl logs -f deployment/qbitel-api -n qbitel-prod
 ```
 
 ## 🗄️ **Database Setup**
@@ -651,12 +651,12 @@ kubectl logs -f deployment/cronos-api -n cronos-ai-prod
 
 ```sql
 -- Create database and user
-CREATE DATABASE cronos_ai_prod;
-CREATE USER cronos_prod_user WITH ENCRYPTED PASSWORD 'your_secure_password';
-GRANT ALL PRIVILEGES ON DATABASE cronos_ai_prod TO cronos_prod_user;
+CREATE DATABASE qbitel_prod;
+CREATE USER qbitel_prod_user WITH ENCRYPTED PASSWORD 'your_secure_password';
+GRANT ALL PRIVILEGES ON DATABASE qbitel_prod TO qbitel_prod_user;
 
--- Connect to cronos_ai_prod database
-\c cronos_ai_prod;
+-- Connect to qbitel_prod database
+\c qbitel_prod;
 
 -- Create tables
 CREATE TABLE protocols (
@@ -695,8 +695,8 @@ CREATE INDEX idx_discovery_sessions_hash ON discovery_sessions(traffic_data_hash
 CREATE INDEX idx_metrics_name_timestamp ON metrics(metric_name, timestamp);
 
 -- Grant permissions
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO cronos_prod_user;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO cronos_prod_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO qbitel_prod_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO qbitel_prod_user;
 ```
 
 ### **2. Database Backup Script**
@@ -706,16 +706,16 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO cronos_prod_user;
 # backup-db.sh
 
 DB_HOST=${DATABASE_HOST:-localhost}
-DB_NAME=${DATABASE_NAME:-cronos_ai_prod}
-DB_USER=${DATABASE_USER:-cronos_prod_user}
-BACKUP_DIR=${BACKUP_DIR:-/var/backups/cronos_ai}
+DB_NAME=${DATABASE_NAME:-qbitel_prod}
+DB_USER=${DATABASE_USER:-qbitel_prod_user}
+BACKUP_DIR=${BACKUP_DIR:-/var/backups/qbitel}
 RETENTION_DAYS=${RETENTION_DAYS:-30}
 
 # Create backup directory
 mkdir -p $BACKUP_DIR
 
 # Create backup
-BACKUP_FILE="$BACKUP_DIR/cronos_ai_backup_$(date +%Y%m%d_%H%M%S).sql"
+BACKUP_FILE="$BACKUP_DIR/qbitel_backup_$(date +%Y%m%d_%H%M%S).sql"
 
 echo "Creating database backup..."
 PGPASSWORD=$DATABASE_PASSWORD pg_dump -h $DB_HOST -U $DB_USER -d $DB_NAME > $BACKUP_FILE
@@ -743,13 +743,13 @@ fi
 ```bash
 # Generate SSL certificates (for testing - use proper CA in production)
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout ssl/cronos_ai.key \
-  -out ssl/cronos_ai.crt \
-  -subj "/C=US/ST=State/L=City/O=Organization/CN=api.cronos-ai.yourdomain.com"
+  -keyout ssl/qbitel.key \
+  -out ssl/qbitel.crt \
+  -subj "/C=US/ST=State/L=City/O=Organization/CN=api.qbitel.yourdomain.com"
 
 # Set proper permissions
-chmod 600 ssl/cronos_ai.key
-chmod 644 ssl/cronos_ai.crt
+chmod 600 ssl/qbitel.key
+chmod 644 ssl/qbitel.crt
 ```
 
 ### **2. API Key Management**
@@ -820,9 +820,9 @@ alerting:
           - alertmanager:9093
 
 scrape_configs:
-  - job_name: 'cronos-api'
+  - job_name: 'qbitel-api'
     static_configs:
-      - targets: ['cronos-api:8000']
+      - targets: ['qbitel-api:8000']
     scrape_interval: 5s
     metrics_path: '/metrics'
     
@@ -844,7 +844,7 @@ scrape_configs:
 ```yaml
 # rules.yaml
 groups:
-- name: cronos-ai-alerts
+- name: qbitel-alerts
   rules:
   - alert: HighErrorRate
     expr: rate(protocol_discovery_errors_total[5m]) > 0.05
@@ -888,7 +888,7 @@ groups:
 ```json
 {
   "dashboard": {
-    "title": "CRONOS AI Protocol Discovery",
+    "title": "QBITEL Bridge",
     "panels": [
       {
         "title": "Request Rate",
@@ -939,24 +939,24 @@ groups:
 
 ```nginx
 # nginx.conf
-upstream cronos_api {
-    server cronos-api-1:8080 weight=1 max_fails=3 fail_timeout=30s;
-    server cronos-api-2:8080 weight=1 max_fails=3 fail_timeout=30s;
-    server cronos-api-3:8080 weight=1 max_fails=3 fail_timeout=30s;
+upstream qbitel_api {
+    server qbitel-api-1:8080 weight=1 max_fails=3 fail_timeout=30s;
+    server qbitel-api-2:8080 weight=1 max_fails=3 fail_timeout=30s;
+    server qbitel-api-3:8080 weight=1 max_fails=3 fail_timeout=30s;
 }
 
 server {
     listen 80;
-    server_name api.cronos-ai.yourdomain.com;
+    server_name api.qbitel.yourdomain.com;
     return 301 https://$server_name$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name api.cronos-ai.yourdomain.com;
+    server_name api.qbitel.yourdomain.com;
     
-    ssl_certificate /etc/ssl/certs/cronos_ai.crt;
-    ssl_certificate_key /etc/ssl/certs/cronos_ai.key;
+    ssl_certificate /etc/ssl/certs/qbitel.crt;
+    ssl_certificate_key /etc/ssl/certs/qbitel.key;
     
     # Security headers
     add_header X-Frame-Options DENY;
@@ -970,7 +970,7 @@ server {
     location / {
         limit_req zone=api burst=20 nodelay;
         
-        proxy_pass http://cronos_api;
+        proxy_pass http://qbitel_api;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -990,13 +990,13 @@ server {
         allow 10.0.0.0/8;
         deny all;
         
-        proxy_pass http://cronos_api;
+        proxy_pass http://qbitel_api;
         proxy_set_header Host $host;
     }
     
     location /health {
         access_log off;
-        proxy_pass http://cronos_api;
+        proxy_pass http://qbitel_api;
     }
 }
 ```
@@ -1012,15 +1012,15 @@ server {
 set -euo pipefail
 
 # Configuration
-BACKUP_ROOT="/var/backups/cronos_ai"
+BACKUP_ROOT="/var/backups/qbitel"
 DATE=$(date +%Y%m%d_%H%M%S)
 RETENTION_DAYS=30
-S3_BUCKET="cronos-ai-backups"
+S3_BUCKET="qbitel-backups"
 
 # Create backup directory
 mkdir -p "$BACKUP_ROOT/$DATE"
 
-echo "Starting comprehensive backup for CRONOS AI..."
+echo "Starting comprehensive backup for QBITEL..."
 
 # 1. Database backup
 echo "Backing up PostgreSQL database..."
@@ -1038,14 +1038,14 @@ redis-cli -h $REDIS_HOST -a $REDIS_PASSWORD --rdb "$BACKUP_ROOT/$DATE/redis.rdb"
 
 # 3. ML Models backup
 echo "Backing up ML models..."
-tar -czf "$BACKUP_ROOT/$DATE/models.tar.gz" /opt/cronos_ai/models/
+tar -czf "$BACKUP_ROOT/$DATE/models.tar.gz" /opt/qbitel/models/
 
 # 4. Configuration backup
 echo "Backing up configuration files..."
 tar -czf "$BACKUP_ROOT/$DATE/config.tar.gz" \
   /app/config/ \
-  /etc/ssl/certs/cronos_ai.* \
-  /etc/nginx/sites-available/cronos-ai
+  /etc/ssl/certs/qbitel.* \
+  /etc/nginx/sites-available/qbitel
 
 # 5. Create manifest
 echo "Creating backup manifest..."
@@ -1071,20 +1071,20 @@ EOF
 # 6. Create archive
 echo "Creating backup archive..."
 cd "$BACKUP_ROOT"
-tar -czf "cronos_ai_backup_$DATE.tar.gz" "$DATE/"
+tar -czf "qbitel_backup_$DATE.tar.gz" "$DATE/"
 
 # 7. Upload to S3 (if configured)
 if [[ -n "${AWS_ACCESS_KEY_ID:-}" ]]; then
   echo "Uploading backup to S3..."
-  aws s3 cp "cronos_ai_backup_$DATE.tar.gz" "s3://$S3_BUCKET/backups/"
+  aws s3 cp "qbitel_backup_$DATE.tar.gz" "s3://$S3_BUCKET/backups/"
 fi
 
 # 8. Cleanup old backups
 echo "Cleaning up old backups..."
-find "$BACKUP_ROOT" -name "cronos_ai_backup_*.tar.gz" -mtime +$RETENTION_DAYS -delete
+find "$BACKUP_ROOT" -name "qbitel_backup_*.tar.gz" -mtime +$RETENTION_DAYS -delete
 rm -rf "$BACKUP_ROOT/$DATE"
 
-echo "Backup completed successfully: cronos_ai_backup_$DATE.tar.gz"
+echo "Backup completed successfully: qbitel_backup_$DATE.tar.gz"
 ```
 
 ### **2. Recovery Script**
@@ -1096,7 +1096,7 @@ echo "Backup completed successfully: cronos_ai_backup_$DATE.tar.gz"
 set -euo pipefail
 
 BACKUP_FILE="$1"
-RECOVERY_DIR="/tmp/cronos_ai_recovery"
+RECOVERY_DIR="/tmp/qbitel_recovery"
 
 if [[ -z "$BACKUP_FILE" ]]; then
   echo "Usage: $0 <backup_file>"
@@ -1170,7 +1170,7 @@ tar -xzf config.tar.gz -C /
 rm -rf "$RECOVERY_DIR"
 
 echo "Recovery completed successfully!"
-echo "Please restart the CRONOS AI services to apply the restored configuration."
+echo "Please restart the QBITEL services to apply the restored configuration."
 ```
 
 ## 🚀 **Performance Tuning**
@@ -1256,29 +1256,29 @@ SELECT pg_reload_conf();
 
 ```bash
 # Check memory usage
-kubectl top pods -n cronos-ai-prod
+kubectl top pods -n qbitel-prod
 
 # Check detailed memory breakdown
-kubectl exec -it cronos-api-xxx -n cronos-ai-prod -- python -c "
+kubectl exec -it qbitel-api-xxx -n qbitel-prod -- python -c "
 from ai_engine.core.performance_optimizer import get_performance_optimizer
 print(get_performance_optimizer().get_system_metrics())
 "
 
 # Solution: Increase memory limits or reduce cache sizes
-kubectl patch deployment cronos-api -n cronos-ai-prod -p '{"spec":{"template":{"spec":{"containers":[{"name":"cronos-api","resources":{"limits":{"memory":"32Gi"}}}]}}}}'
+kubectl patch deployment qbitel-api -n qbitel-prod -p '{"spec":{"template":{"spec":{"containers":[{"name":"qbitel-api","resources":{"limits":{"memory":"32Gi"}}}]}}}}'
 ```
 
 #### **2. Database Connection Issues**
 
 ```bash
 # Test database connectivity
-kubectl exec -it cronos-api-xxx -n cronos-ai-prod -- python -c "
+kubectl exec -it qbitel-api-xxx -n qbitel-prod -- python -c "
 import psycopg2
 try:
     conn = psycopg2.connect(
         host='postgresql-service',
-        database='cronos_ai_prod', 
-        user='cronos_prod_user',
+        database='qbitel_prod', 
+        user='qbitel_prod_user',
         password='$DATABASE_PASSWORD'
     )
     print('Database connection successful')
@@ -1288,7 +1288,7 @@ except Exception as e:
 "
 
 # Check database logs
-kubectl logs statefulset/postgresql -n cronos-ai-prod
+kubectl logs statefulset/postgresql -n qbitel-prod
 
 # Solution: Check connection pool settings and increase if needed
 ```
@@ -1297,13 +1297,13 @@ kubectl logs statefulset/postgresql -n cronos-ai-prod
 
 ```bash
 # Check API response times
-curl -w "Total time: %{time_total}s\n" -s -o /dev/null https://api.cronos-ai.yourdomain.com/health
+curl -w "Total time: %{time_total}s\n" -s -o /dev/null https://api.qbitel.yourdomain.com/health
 
 # Check metrics
-curl https://api.cronos-ai.yourdomain.com/metrics | grep protocol_discovery_duration
+curl https://api.qbitel.yourdomain.com/metrics | grep protocol_discovery_duration
 
 # Enable debug logging temporarily
-kubectl set env deployment/cronos-api LOG_LEVEL=DEBUG -n cronos-ai-prod
+kubectl set env deployment/qbitel-api LOG_LEVEL=DEBUG -n qbitel-prod
 
 # Solution: Enable GPU acceleration, increase cache sizes, tune batch sizes
 ```
@@ -1312,10 +1312,10 @@ kubectl set env deployment/cronos-api LOG_LEVEL=DEBUG -n cronos-ai-prod
 
 ```bash
 # Test SSL certificate
-openssl s_client -connect api.cronos-ai.yourdomain.com:443 -servername api.cronos-ai.yourdomain.com
+openssl s_client -connect api.qbitel.yourdomain.com:443 -servername api.qbitel.yourdomain.com
 
 # Check certificate expiry
-openssl x509 -in ssl/cronos_ai.crt -text -noout | grep "Not After"
+openssl x509 -in ssl/qbitel.crt -text -noout | grep "Not After"
 
 # Solution: Renew certificates and restart services
 ```
@@ -1326,12 +1326,12 @@ openssl x509 -in ssl/cronos_ai.crt -text -noout | grep "Not After"
 #!/bin/bash
 # health-check.sh
 
-echo "CRONOS AI System Health Check"
+echo "QBITEL System Health Check"
 echo "============================="
 
 # API Health
 echo "1. API Health Check:"
-api_response=$(curl -s -o /dev/null -w "%{http_code}" https://api.cronos-ai.yourdomain.com/health)
+api_response=$(curl -s -o /dev/null -w "%{http_code}" https://api.qbitel.yourdomain.com/health)
 if [[ $api_response == "200" ]]; then
   echo "✅ API is healthy"
 else
@@ -1340,7 +1340,7 @@ fi
 
 # Database Health
 echo "2. Database Health Check:"
-db_response=$(kubectl exec -it postgresql-0 -n cronos-ai-prod -- pg_isready -U cronos_prod_user 2>/dev/null | grep "accepting connections")
+db_response=$(kubectl exec -it postgresql-0 -n qbitel-prod -- pg_isready -U qbitel_prod_user 2>/dev/null | grep "accepting connections")
 if [[ -n "$db_response" ]]; then
   echo "✅ Database is healthy"
 else
@@ -1349,7 +1349,7 @@ fi
 
 # Redis Health
 echo "3. Redis Health Check:"
-redis_response=$(kubectl exec -it deployment/redis -n cronos-ai-prod -- redis-cli -a $REDIS_PASSWORD ping 2>/dev/null)
+redis_response=$(kubectl exec -it deployment/redis -n qbitel-prod -- redis-cli -a $REDIS_PASSWORD ping 2>/dev/null)
 if [[ "$redis_response" == "PONG" ]]; then
   echo "✅ Redis is healthy"
 else
@@ -1358,11 +1358,11 @@ fi
 
 # Check resource usage
 echo "4. Resource Usage:"
-kubectl top pods -n cronos-ai-prod
+kubectl top pods -n qbitel-prod
 
 # Check recent errors
 echo "5. Recent Errors:"
-kubectl logs --since=1h -l app=cronos-api -n cronos-ai-prod | grep ERROR | tail -5
+kubectl logs --since=1h -l app=qbitel-api -n qbitel-prod | grep ERROR | tail -5
 
 echo "============================="
 echo "Health check completed"
@@ -1372,4 +1372,4 @@ echo "Health check completed"
 
 **Deployment Guide Version**: v1.0.0  
 **Last Updated**: 2024-01-15  
-**Support**: deployment-support@cronos-ai.com
+**Support**: deployment-support@qbitel.com

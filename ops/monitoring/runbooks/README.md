@@ -1,4 +1,4 @@
-# CRONOS AI - Monitoring Runbooks
+# QBITEL - Monitoring Runbooks
 
 ## Overview
 
@@ -49,19 +49,19 @@ This directory contains operational runbooks for responding to alerts from Prome
 
 ```bash
 # Check service status
-kubectl get pods -n cronos-ai
+kubectl get pods -n qbitel
 
 # View logs
-kubectl logs -l app=cronos-ai-engine -n cronos-ai --tail=100
+kubectl logs -l app=qbitel-engine -n qbitel --tail=100
 
 # Check metrics
-curl http://prometheus:9090/api/v1/query?query=up{job="cronos-ai"}
+curl http://prometheus:9090/api/v1/query?query=up{job="qbitel"}
 
 # Restart service
-kubectl rollout restart deployment/cronos-ai-engine -n cronos-ai
+kubectl rollout restart deployment/qbitel-engine -n qbitel
 
 # Scale service
-kubectl scale deployment/cronos-ai-engine --replicas=5 -n cronos-ai
+kubectl scale deployment/qbitel-engine --replicas=5 -n qbitel
 ```
 
 ## Creating New Runbooks
@@ -104,15 +104,15 @@ After resolving an incident:
 
 ## Monitoring Dashboards
 
-- **Grafana**: http://grafana.cronos-ai.com
-- **Prometheus**: http://prometheus.cronos-ai.com
-- **Alert Manager**: http://alertmanager.cronos-ai.com
+- **Grafana**: http://grafana.qbitel.com
+- **Prometheus**: http://prometheus.qbitel.com
+- **Alert Manager**: http://alertmanager.qbitel.com
 
 ## Contact Information
 
 - **On-Call Engineer**: Check PagerDuty schedule
-- **DevOps Team**: devops@cronos-ai.com
-- **Slack Channel**: #cronos-ai-incidents
+- **DevOps Team**: devops@qbitel.com
+- **Slack Channel**: #qbitel-incidents
 
 ## Related Documentation
 
@@ -124,4 +124,4 @@ After resolving an incident:
 ---
 
 **Last Updated**: 2025-01-18
-**Maintained By**: CRONOS AI DevOps Team
+**Maintained By**: QBITEL DevOps Team

@@ -110,7 +110,7 @@ class EnvoyObservability:
                             "request_id": "%REQ(X-REQUEST-ID)%",
                             "authority": "%REQ(:AUTHORITY)%",
                             "upstream_host": "%UPSTREAM_HOST%",
-                            "quantum_encrypted": "%REQ(X-CRONOS-QUANTUM-ENCRYPTED)%"
+                            "quantum_encrypted": "%REQ(X-QBITEL-QUANTUM-ENCRYPTED)%"
                         }
                     }
                 }

@@ -1,0 +1,187 @@
+{
+  "metadata": {
+    "title": "COBOL to Python Modernization Pairs",
+    "version": "1.0.0",
+    "description": "Training pairs for COBOL to Python code conversion",
+    "total_pairs": 100,
+    "categories": ["data_structures", "arithmetic", "control_flow", "file_operations", "string_handling"]
+  },
+  "pairs": [
+    {
+      "id": "DS001",
+      "category": "data_structures",
+      "description": "Simple record structure",
+      "cobol": "       01 CUSTOMER-RECORD.\n           05 CUST-ID          PIC 9(8).\n           05 CUST-NAME        PIC X(30).\n           05 CUST-BALANCE     PIC S9(9)V99 COMP-3.\n           05 CUST-STATUS      PIC X(1).",
+      "python": "@dataclass\nclass CustomerRecord:\n    cust_id: int\n    cust_name: str\n    cust_balance: Decimal\n    cust_status: str\n\n    @classmethod\n    def from_cobol(cls, data: bytes) -> 'CustomerRecord':\n        return cls(\n            cust_id=int(data[0:8].decode('cp037')),\n            cust_name=data[8:38].decode('cp037').strip(),\n            cust_balance=packed_to_decimal(data[38:44], 2),\n            cust_status=data[44:45].decode('cp037')\n        )",
+      "notes": "COMP-3 requires packed decimal conversion, EBCDIC encoding"
+    },
+    {
+      "id": "DS002",
+      "category": "data_structures",
+      "description": "Nested group structure",
+      "cobol": "       01 EMPLOYEE-RECORD.\n           05 EMP-ID           PIC 9(6).\n           05 EMP-NAME.\n              10 FIRST-NAME    PIC X(15).\n              10 LAST-NAME     PIC X(20).\n           05 EMP-ADDRESS.\n              10 STREET        PIC X(30).\n              10 CITY          PIC X(20).\n              10 STATE         PIC X(2).\n              10 ZIP           PIC 9(5).",
+      "python": "@dataclass\nclass EmployeeName:\n    first_name: str\n    last_name: str\n\n@dataclass\nclass EmployeeAddress:\n    street: str\n    city: str\n    state: str\n    zip_code: str\n\n@dataclass\nclass EmployeeRecord:\n    emp_id: int\n    emp_name: EmployeeName\n    emp_address: EmployeeAddress",
+      "notes": "Nested COBOL groups map to nested dataclasses"
+    },
+    {
+      "id": "DS003",
+      "category": "data_structures",
+      "description": "88-level condition names",
+      "cobol": "       01 WS-STATUS          PIC X(1).\n           88 STATUS-ACTIVE    VALUE 'A'.\n           88 STATUS-INACTIVE  VALUE 'I'.\n           88 STATUS-PENDING   VALUE 'P'.\n           88 STATUS-CLOSED    VALUE 'C'.",
+      "python": "from enum import Enum\n\nclass Status(Enum):\n    ACTIVE = 'A'\n    INACTIVE = 'I'\n    PENDING = 'P'\n    CLOSED = 'C'\n\n    @property\n    def is_active(self) -> bool:\n        return self == Status.ACTIVE\n\n    @property\n    def is_inactive(self) -> bool:\n        return self == Status.INACTIVE",
+      "notes": "88-level conditions map to Enum with property methods"
+    },
+    {
+      "id": "DS004",
+      "category": "data_structures",
+      "description": "OCCURS clause (array)",
+      "cobol": "       01 TRANSACTION-TABLE.\n           05 TRANS-COUNT      PIC 9(3) COMP.\n           05 TRANS-ENTRY OCCURS 100 TIMES.\n              10 TRANS-DATE    PIC 9(8).\n              10 TRANS-AMOUNT  PIC S9(9)V99 COMP-3.\n              10 TRANS-TYPE    PIC X(1).",
+      "python": "@dataclass\nclass TransactionEntry:\n    trans_date: date\n    trans_amount: Decimal\n    trans_type: str\n\n@dataclass\nclass TransactionTable:\n    trans_count: int\n    trans_entries: List[TransactionEntry] = field(default_factory=list)\n\n    def __post_init__(self):\n        if len(self.trans_entries) > 100:\n            raise ValueError('Maximum 100 transactions allowed')",
+      "notes": "OCCURS maps to List with optional size validation"
+    },
+    {
+      "id": "DS005",
+      "category": "data_structures",
+      "description": "REDEFINES clause",
+      "cobol": "       01 DATE-FIELD.\n           05 DATE-NUMERIC     PIC 9(8).\n           05 DATE-PARTS REDEFINES DATE-NUMERIC.\n              10 DATE-YEAR     PIC 9(4).\n              10 DATE-MONTH    PIC 9(2).\n              10 DATE-DAY      PIC 9(2).",
+      "python": "from typing import Union\nfrom datetime import date\n\n@dataclass\nclass DateField:\n    _raw_value: str\n\n    @property\n    def as_numeric(self) -> int:\n        return int(self._raw_value)\n\n    @property\n    def year(self) -> int:\n        return int(self._raw_value[0:4])\n\n    @property\n    def month(self) -> int:\n        return int(self._raw_value[4:6])\n\n    @property\n    def day(self) -> int:\n        return int(self._raw_value[6:8])\n\n    @property\n    def as_date(self) -> date:\n        return date(self.year, self.month, self.day)",
+      "notes": "REDEFINES maps to computed properties on same underlying data"
+    },
+    {
+      "id": "AR001",
+      "category": "arithmetic",
+      "description": "ADD statement",
+      "cobol": "           ADD WS-AMOUNT TO WS-TOTAL\n           ADD 1 TO WS-COUNTER\n           ADD WS-A WS-B GIVING WS-C",
+      "python": "ws_total += ws_amount\nws_counter += 1\nws_c = ws_a + ws_b",
+      "notes": "Simple arithmetic conversion"
+    },
+    {
+      "id": "AR002",
+      "category": "arithmetic",
+      "description": "COMPUTE with ROUNDED",
+      "cobol": "           COMPUTE WS-RESULT ROUNDED =\n               (WS-PRINCIPAL * WS-RATE * WS-TERM) / 12\n               ON SIZE ERROR\n                   MOVE 0 TO WS-RESULT\n                   ADD 1 TO WS-ERROR-COUNT\n           END-COMPUTE",
+      "python": "try:\n    ws_result = round(\n        (ws_principal * ws_rate * ws_term) / Decimal('12'),\n        2  # ROUNDED typically means 2 decimal places\n    )\nexcept (OverflowError, InvalidOperation):\n    ws_result = Decimal('0')\n    ws_error_count += 1",
+      "notes": "ON SIZE ERROR maps to exception handling"
+    },
+    {
+      "id": "AR003",
+      "category": "arithmetic",
+      "description": "Financial calculation with precision",
+      "cobol": "           COMPUTE WS-INTEREST =\n               WS-BALANCE * WS-ANNUAL-RATE / 36500\n           COMPUTE WS-NEW-BALANCE =\n               WS-BALANCE + WS-INTEREST - WS-PAYMENT",
+      "python": "from decimal import Decimal, ROUND_HALF_UP\n\n# Use Decimal for financial precision\nws_interest = (ws_balance * ws_annual_rate / Decimal('36500')).quantize(\n    Decimal('0.01'), rounding=ROUND_HALF_UP\n)\nws_new_balance = ws_balance + ws_interest - ws_payment",
+      "notes": "Financial calculations must use Decimal for precision"
+    },
+    {
+      "id": "CF001",
+      "category": "control_flow",
+      "description": "Simple IF statement",
+      "cobol": "           IF WS-BALANCE > WS-LIMIT\n               MOVE 'Y' TO WS-OVER-LIMIT\n               PERFORM 5000-SEND-ALERT\n           ELSE\n               MOVE 'N' TO WS-OVER-LIMIT\n           END-IF",
+      "python": "if ws_balance > ws_limit:\n    ws_over_limit = 'Y'\n    send_alert()  # 5000-SEND-ALERT\nelse:\n    ws_over_limit = 'N'",
+      "notes": "Direct IF conversion, PERFORM becomes function call"
+    },
+    {
+      "id": "CF002",
+      "category": "control_flow",
+      "description": "EVALUATE statement",
+      "cobol": "           EVALUATE WS-TRANS-TYPE\n               WHEN 'D'\n                   PERFORM 3100-PROCESS-DEPOSIT\n               WHEN 'W'\n                   PERFORM 3200-PROCESS-WITHDRAWAL\n               WHEN 'T'\n                   PERFORM 3300-PROCESS-TRANSFER\n               WHEN OTHER\n                   PERFORM 8000-INVALID-TRANS\n           END-EVALUATE",
+      "python": "match ws_trans_type:  # Python 3.10+ match statement\n    case 'D':\n        process_deposit()\n    case 'W':\n        process_withdrawal()\n    case 'T':\n        process_transfer()\n    case _:\n        handle_invalid_transaction()\n\n# Alternative for older Python:\ntrans_handlers = {\n    'D': process_deposit,\n    'W': process_withdrawal,\n    'T': process_transfer,\n}\ntrans_handlers.get(ws_trans_type, handle_invalid_transaction)()",
+      "notes": "EVALUATE maps to match/case or dictionary dispatch"
+    },
+    {
+      "id": "CF003",
+      "category": "control_flow",
+      "description": "PERFORM VARYING loop",
+      "cobol": "           PERFORM VARYING WS-INDEX FROM 1 BY 1\n               UNTIL WS-INDEX > WS-MAX-ENTRIES\n               OR WS-FOUND = 'Y'\n               IF ENTRY-KEY(WS-INDEX) = WS-SEARCH-KEY\n                   MOVE 'Y' TO WS-FOUND\n                   MOVE WS-INDEX TO WS-FOUND-INDEX\n               END-IF\n           END-PERFORM",
+      "python": "ws_found = False\nws_found_index = 0\n\nfor ws_index in range(1, ws_max_entries + 1):\n    if entry_key[ws_index - 1] == ws_search_key:  # Adjust for 0-based indexing\n        ws_found = True\n        ws_found_index = ws_index\n        break",
+      "notes": "PERFORM VARYING maps to for loop, watch for 1-based indexing"
+    },
+    {
+      "id": "CF004",
+      "category": "control_flow",
+      "description": "PERFORM UNTIL loop",
+      "cobol": "           PERFORM UNTIL END-OF-FILE\n               READ INPUT-FILE\n                   AT END\n                       SET END-OF-FILE TO TRUE\n                   NOT AT END\n                       PERFORM 2000-PROCESS-RECORD\n               END-READ\n           END-PERFORM",
+      "python": "while True:\n    record = input_file.readline()\n    if not record:  # End of file\n        break\n    process_record(record)",
+      "notes": "PERFORM UNTIL maps to while loop with break condition"
+    },
+    {
+      "id": "FO001",
+      "category": "file_operations",
+      "description": "Sequential file read",
+      "cobol": "           OPEN INPUT CUSTOMER-FILE\n           IF WS-CUST-STATUS NOT = '00'\n               DISPLAY 'ERROR OPENING FILE'\n               STOP RUN\n           END-IF\n           \n           PERFORM UNTIL END-OF-FILE\n               READ CUSTOMER-FILE\n                   AT END SET END-OF-FILE TO TRUE\n                   NOT AT END\n                       ADD 1 TO WS-RECORD-COUNT\n                       PERFORM 2000-PROCESS-CUSTOMER\n               END-READ\n           END-PERFORM\n           \n           CLOSE CUSTOMER-FILE",
+      "python": "def process_customer_file(filepath: str) -> int:\n    record_count = 0\n    \n    try:\n        with open(filepath, 'rb') as customer_file:\n            while True:\n                record_data = customer_file.read(RECORD_LENGTH)\n                if not record_data:\n                    break\n                    \n                record_count += 1\n                customer = CustomerRecord.from_cobol(record_data)\n                process_customer(customer)\n                \n    except IOError as e:\n        logging.error(f'Error opening file: {e}')\n        raise\n        \n    return record_count",
+      "notes": "COBOL file operations map to context managers"
+    },
+    {
+      "id": "FO002",
+      "category": "file_operations",
+      "description": "Indexed file access",
+      "cobol": "           MOVE WS-SEARCH-KEY TO CUST-KEY\n           READ CUSTOMER-FILE\n               INVALID KEY\n                   SET RECORD-NOT-FOUND TO TRUE\n               NOT INVALID KEY\n                   PERFORM 3000-DISPLAY-CUSTOMER\n           END-READ",
+      "python": "def find_customer(customer_id: str) -> Optional[CustomerRecord]:\n    \"\"\"Find customer by ID using indexed access.\"\"\"\n    try:\n        # Using database or indexed storage\n        result = customer_index.get(customer_id)\n        if result:\n            return CustomerRecord.from_dict(result)\n        return None\n    except KeyError:\n        return None\n\n# Or with database:\ndef find_customer_db(session: Session, customer_id: str) -> Optional[Customer]:\n    return session.query(Customer).filter(\n        Customer.cust_id == customer_id\n    ).first()",
+      "notes": "Indexed files map to databases or dictionaries"
+    },
+    {
+      "id": "FO003",
+      "category": "file_operations",
+      "description": "File write with error handling",
+      "cobol": "           WRITE OUTPUT-RECORD FROM WS-OUTPUT-AREA\n               INVALID KEY\n                   ADD 1 TO WS-ERROR-COUNT\n                   PERFORM 8000-LOG-ERROR\n               NOT INVALID KEY\n                   ADD 1 TO WS-RECORDS-WRITTEN\n           END-WRITE",
+      "python": "def write_record(record: OutputRecord) -> bool:\n    \"\"\"Write record to output file.\"\"\"\n    global records_written, error_count\n    \n    try:\n        output_file.write(record.to_bytes())\n        records_written += 1\n        return True\n    except IOError as e:\n        error_count += 1\n        log_error(f'Write failed: {e}')\n        return False",
+      "notes": "INVALID KEY maps to exception handling"
+    },
+    {
+      "id": "SH001",
+      "category": "string_handling",
+      "description": "STRING concatenation",
+      "cobol": "           STRING WS-FIRST-NAME DELIMITED BY SPACE\n                  ' ' DELIMITED BY SIZE\n                  WS-LAST-NAME DELIMITED BY SPACE\n               INTO WS-FULL-NAME\n               WITH POINTER WS-PTR\n               ON OVERFLOW\n                   MOVE 'Y' TO WS-OVERFLOW-FLAG\n           END-STRING",
+      "python": "def concatenate_name(first_name: str, last_name: str, max_length: int = 50) -> tuple[str, bool]:\n    \"\"\"Concatenate names with overflow detection.\"\"\"\n    full_name = f\"{first_name.strip()} {last_name.strip()}\"\n    overflow = len(full_name) > max_length\n    \n    if overflow:\n        full_name = full_name[:max_length]\n        \n    return full_name, overflow",
+      "notes": "STRING maps to f-strings or join with length checking"
+    },
+    {
+      "id": "SH002",
+      "category": "string_handling",
+      "description": "UNSTRING parsing",
+      "cobol": "           UNSTRING WS-INPUT-LINE DELIMITED BY ','\n               INTO WS-FIELD-1\n                    WS-FIELD-2\n                    WS-FIELD-3\n               TALLYING IN WS-FIELD-COUNT\n               ON OVERFLOW\n                   MOVE 'Y' TO WS-OVERFLOW-FLAG\n           END-UNSTRING",
+      "python": "def parse_csv_line(input_line: str, max_fields: int = 3) -> tuple[list[str], int, bool]:\n    \"\"\"Parse comma-delimited line.\"\"\"\n    fields = input_line.split(',')\n    field_count = len(fields)\n    overflow = field_count > max_fields\n    \n    # Pad or truncate to expected field count\n    result = (fields[:max_fields] + [''] * max_fields)[:max_fields]\n    \n    return result, min(field_count, max_fields), overflow\n\n# Usage:\nfields, count, overflow = parse_csv_line(ws_input_line)\nws_field_1, ws_field_2, ws_field_3 = fields",
+      "notes": "UNSTRING maps to split() with overflow handling"
+    },
+    {
+      "id": "SH003",
+      "category": "string_handling",
+      "description": "INSPECT REPLACING",
+      "cobol": "           INSPECT WS-TEXT\n               REPLACING ALL '-' BY ' '\n           INSPECT WS-AMOUNT\n               REPLACING LEADING SPACES BY ZEROS",
+      "python": "# Replace all occurrences\nws_text = ws_text.replace('-', ' ')\n\n# Replace leading spaces with zeros\nws_amount = ws_amount.lstrip().zfill(len(ws_amount))",
+      "notes": "INSPECT maps to string methods"
+    },
+    {
+      "id": "SH004",
+      "category": "string_handling",
+      "description": "INSPECT TALLYING",
+      "cobol": "           INSPECT WS-TEXT\n               TALLYING WS-COUNT FOR ALL 'A'\n                                 FOR ALL 'E'\n                                 FOR ALL 'I'\n                                 FOR ALL 'O'\n                                 FOR ALL 'U'",
+      "python": "def count_vowels(text: str) -> int:\n    \"\"\"Count all vowels in text.\"\"\"\n    vowels = 'AEIOU'\n    return sum(1 for char in text.upper() if char in vowels)\n\nws_count = count_vowels(ws_text)",
+      "notes": "INSPECT TALLYING maps to comprehension with sum()"
+    },
+    {
+      "id": "ER001",
+      "category": "error_handling",
+      "description": "File status error handling",
+      "cobol": "           READ CUSTOMER-FILE\n           EVALUATE WS-FILE-STATUS\n               WHEN '00'\n                   CONTINUE\n               WHEN '10'\n                   SET END-OF-FILE TO TRUE\n               WHEN '23'\n                   PERFORM 8100-RECORD-NOT-FOUND\n               WHEN OTHER\n                   MOVE WS-FILE-STATUS TO WS-ERROR-CODE\n                   PERFORM 8000-FILE-ERROR\n           END-EVALUATE",
+      "python": "class FileStatusError(Exception):\n    \"\"\"COBOL file status equivalent.\"\"\"\n    def __init__(self, status: str, message: str):\n        self.status = status\n        self.message = message\n        super().__init__(f'{status}: {message}')\n\ndef read_customer() -> Optional[CustomerRecord]:\n    try:\n        record = customer_file.read_record()\n        if record is None:\n            return None  # Status '10' - EOF\n        return record\n    except KeyError:\n        handle_record_not_found()  # Status '23'\n        return None\n    except IOError as e:\n        handle_file_error(str(e))\n        raise",
+      "notes": "COBOL file status maps to typed exceptions"
+    },
+    {
+      "id": "DB001",
+      "category": "database",
+      "description": "Embedded SQL SELECT",
+      "cobol": "           EXEC SQL\n               SELECT CUST_NAME, CUST_BALANCE\n               INTO :WS-CUST-NAME, :WS-CUST-BALANCE\n               FROM CUSTOMER\n               WHERE CUST_ID = :WS-CUST-ID\n           END-EXEC\n           \n           EVALUATE SQLCODE\n               WHEN 0\n                   CONTINUE\n               WHEN 100\n                   SET RECORD-NOT-FOUND TO TRUE\n               WHEN OTHER\n                   PERFORM 8200-SQL-ERROR\n           END-EVALUATE",
+      "python": "from sqlalchemy import select\nfrom sqlalchemy.exc import NoResultFound, SQLAlchemyError\n\ndef get_customer(session: Session, cust_id: str) -> Optional[Customer]:\n    \"\"\"Fetch customer by ID.\"\"\"\n    try:\n        stmt = select(Customer).where(Customer.cust_id == cust_id)\n        result = session.execute(stmt).scalar_one()\n        return result\n    except NoResultFound:\n        return None  # SQLCODE 100\n    except SQLAlchemyError as e:\n        handle_sql_error(e)\n        raise",
+      "notes": "Embedded SQL maps to ORM queries with exception handling"
+    },
+    {
+      "id": "DB002",
+      "category": "database",
+      "description": "SQL cursor processing",
+      "cobol": "           EXEC SQL\n               DECLARE CUST_CURSOR CURSOR FOR\n               SELECT CUST_ID, CUST_NAME, CUST_BALANCE\n               FROM CUSTOMER\n               WHERE CUST_STATUS = 'A'\n               ORDER BY CUST_NAME\n           END-EXEC\n           \n           EXEC SQL OPEN CUST_CURSOR END-EXEC\n           \n           PERFORM UNTIL SQLCODE NOT = 0\n               EXEC SQL\n                   FETCH CUST_CURSOR\n                   INTO :WS-CUST-ID, :WS-CUST-NAME, :WS-CUST-BALANCE\n               END-EXEC\n               IF SQLCODE = 0\n                   PERFORM 3000-PROCESS-CUSTOMER\n               END-IF\n           END-PERFORM\n           \n           EXEC SQL CLOSE CUST_CURSOR END-EXEC",
+      "python": "def process_active_customers(session: Session) -> None:\n    \"\"\"Process all active customers.\"\"\"\n    stmt = (\n        select(Customer)\n        .where(Customer.cust_status == 'A')\n        .order_by(Customer.cust_name)\n    )\n    \n    # Stream results to avoid loading all into memory\n    for customer in session.execute(stmt).scalars():\n        process_customer(customer)\n\n# Or with explicit cursor for very large datasets:\ndef process_active_customers_chunked(session: Session, chunk_size: int = 1000):\n    \"\"\"Process active customers in chunks.\"\"\"\n    offset = 0\n    while True:\n        customers = session.execute(\n            select(Customer)\n            .where(Customer.cust_status == 'A')\n            .order_by(Customer.cust_name)\n            .offset(offset)\n            .limit(chunk_size)\n        ).scalars().all()\n        \n        if not customers:\n            break\n            \n        for customer in customers:\n            process_customer(customer)\n            \n        offset += chunk_size",
+      "notes": "Cursor processing maps to ORM iteration or chunked queries"
+    }
+  ]
+}

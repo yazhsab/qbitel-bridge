@@ -193,7 +193,7 @@ policies:
   security-baseline:
     name: "Security Baseline"
     version: "1.0"
-    description: "Basic security policies for CRONOS AI"
+    description: "Basic security policies for QBITEL Bridge"
     rules:
       - name: "no-root-containers"
         engine: "rego"

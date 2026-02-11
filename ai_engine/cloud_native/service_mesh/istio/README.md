@@ -5,7 +5,7 @@ Quantum-safe security integration for Istio service mesh with automatic sidecar 
 ## Features
 
 ### 1. Automatic Sidecar Injection
-- **Quantum-safe proxy**: Injects CRONOS AI quantum encryption sidecar alongside Envoy
+- **Quantum-safe proxy**: Injects QBITEL quantum encryption sidecar alongside Envoy
 - **Transparent integration**: Zero application code changes required
 - **Namespace-scoped**: Controlled via labels and annotations
 - **Resource-efficient**: Minimal CPU/memory overhead (<100m CPU, <128Mi RAM)
@@ -37,8 +37,8 @@ from ai_engine.cloud_native.service_mesh.istio import IstioSidecarInjector
 
 # Initialize injector
 injector = IstioSidecarInjector(
-    namespace="cronos-system",
-    webhook_name="cronos-sidecar-injector"
+    namespace="qbitel-system",
+    webhook_name="qbitel-sidecar-injector"
 )
 
 # Create webhook configuration
@@ -53,7 +53,7 @@ webhook_config = injector.create_webhook_configuration()
 Label your namespace to enable automatic sidecar injection:
 
 ```bash
-kubectl label namespace my-app cronos-injection=enabled
+kubectl label namespace my-app qbitel-injection=enabled
 ```
 
 ### 3. Generate Quantum Certificates
@@ -66,7 +66,7 @@ cert_manager = QuantumCertificateManager()
 
 # Generate root CA
 root_ca = cert_manager.generate_root_ca(
-    subject="CN=CRONOS AI Root CA,O=CRONOS AI,C=US",
+    subject="CN=QBITEL Root CA,O=QBITEL,C=US",
     validity_years=10
 )
 
@@ -156,7 +156,7 @@ policies = policy_mgr.create_complete_service_policies(service_policy)
 │                    │                                  │
 │                    ▼                                  │
 │  ┌────────────────────────────────────────────────┐  │
-│  │  Mutating Webhook (CRONOS AI)                  │  │
+│  │  Mutating Webhook (QBITEL)                  │  │
 │  │  - Check injection labels                      │  │
 │  │  - Inject quantum-safe sidecar                 │  │
 │  │  - Inject init container (iptables)            │  │
@@ -167,7 +167,7 @@ policies = policy_mgr.create_complete_service_policies(service_policy)
 │  ┌────────────────────────────────────────────────┐  │
 │  │  Modified Pod Spec                             │  │
 │  │  ┌──────────────┐  ┌──────────────────────┐   │  │
-│  │  │ App Container│  │ CRONOS Quantum Proxy │   │  │
+│  │  │ App Container│  │ QBITEL Quantum Proxy │   │  │
 │  │  │              │  │ (Kyber + Dilithium)  │   │  │
 │  │  └──────────────┘  └──────────────────────┘   │  │
 │  └────────────────────────────────────────────────┘  │
@@ -197,7 +197,7 @@ policies = policy_mgr.create_complete_service_policies(service_policy)
 │                    ▼                            │
 │  ┌──────────────────────────────────────────┐  │
 │  │  Mounted in Sidecar                      │  │
-│  │  /etc/cronos/certs/                      │  │
+│  │  /etc/qbitel/certs/                      │  │
 │  └──────────────────────────────────────────┘  │
 └────────────────────────────────────────────────┘
 ```
@@ -210,7 +210,7 @@ policies = policy_mgr.create_complete_service_policies(service_policy)
 from ai_engine.cloud_native.service_mesh.istio import SidecarConfig
 
 config = SidecarConfig(
-    image="cronos-ai/quantum-sidecar:latest",
+    image="qbitel/quantum-sidecar:latest",
     cpu_request="100m",
     cpu_limit="500m",
     memory_request="128Mi",
@@ -384,7 +384,7 @@ Check namespace label:
 kubectl get namespace my-namespace --show-labels
 ```
 
-Should have: `cronos-injection=enabled`
+Should have: `qbitel-injection=enabled`
 
 ### Certificate Errors
 
@@ -422,4 +422,4 @@ See module docstrings for detailed API documentation:
 
 ## License
 
-Copyright © 2025 CRONOS AI. All rights reserved.
+Copyright © 2025 QBITEL. All rights reserved.

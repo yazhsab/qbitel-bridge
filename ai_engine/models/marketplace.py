@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Marketplace Database Models
+QBITEL - Protocol Marketplace Database Models
 
 Database models for the Protocol Marketplace ecosystem including protocols,
 users, installations, reviews, and transactions.
@@ -68,7 +68,7 @@ class AuthorType(str, PyEnum):
     """Author type enumeration."""
     COMMUNITY = "community"
     VENDOR = "vendor"
-    CRONOS = "cronos"
+    QBITEL = "qbitel"
     ENTERPRISE = "enterprise"
 
 
@@ -185,8 +185,8 @@ class MarketplaceProtocol(Base):
     active_installations = Column(Integer, default=0)
 
     # Compatibility
-    min_cronos_version = Column(String(50), nullable=False)
-    supported_cronos_versions = Column(ARRAY(String), default=list)
+    min_qbitel_version = Column(String(50), nullable=False)
+    supported_qbitel_versions = Column(ARRAY(String), default=list)
     dependencies = Column(JSONB, default=dict)
 
     # Status
@@ -429,7 +429,7 @@ class MarketplaceTransaction(Base):
     payment_method = Column(String(50))
 
     # Revenue sharing
-    platform_fee = Column(DECIMAL(10, 2))  # CRONOS AI fee (30%)
+    platform_fee = Column(DECIMAL(10, 2))  # QBITEL fee (30%)
     creator_revenue = Column(DECIMAL(10, 2))  # Creator revenue (70%)
     payout_status = Column(String(50), default="pending")  # pending, paid, failed
     payout_date = Column(DateTime(timezone=True))

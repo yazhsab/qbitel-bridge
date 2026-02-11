@@ -49,7 +49,7 @@ class TestAIEngineGRPCService:
     @pytest.mark.asyncio
     async def test_initialize_service(self, service):
         """Test service initialization."""
-        with patch("ai_engine.api.grpc.CronosAIEngine") as mock_engine:
+        with patch("ai_engine.api.grpc.QbitelAIEngine") as mock_engine:
             mock_engine_instance = AsyncMock()
             mock_engine.return_value = mock_engine_instance
 
@@ -62,7 +62,7 @@ class TestAIEngineGRPCService:
     async def test_initialize_service_failure(self, service):
         """Test service initialization failure."""
         with patch(
-            "ai_engine.api.grpc.CronosAIEngine", side_effect=Exception("Init failed")
+            "ai_engine.api.grpc.QbitelAIEngine", side_effect=Exception("Init failed")
         ):
             with pytest.raises(Exception):
                 await service.initialize()
@@ -269,7 +269,7 @@ class TestAIEngineGRPCService:
 
         response = await service.GetServiceStatus(request, context)
 
-        assert response["service_name"] == "CRONOS AI Engine gRPC"
+        assert response["service_name"] == "QBITEL Engine gRPC"
         assert response["statistics"]["total_requests"] == 100
         assert response["statistics"]["successful_requests"] == 95
         assert response["statistics"]["success_rate"] == 0.95
@@ -287,7 +287,7 @@ class TestAIEngineGRPCService:
         response = await service.HealthCheck(request, context)
 
         assert response["status"] == "healthy"
-        assert response["service"] == "cronos-ai-grpc"
+        assert response["service"] == "qbitel-grpc"
 
     @pytest.mark.asyncio
     async def test_health_check_unhealthy(self, service):

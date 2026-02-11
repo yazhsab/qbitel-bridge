@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Model Trainer Unit Tests
+QBITEL Engine - Model Trainer Unit Tests
 
 Comprehensive unit tests for the model training infrastructure.
 """

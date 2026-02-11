@@ -1,8 +1,8 @@
-# CRONOS AI - Dependency Management Guide
+# QBITEL - Dependency Management Guide
 
 ## Overview
 
-CRONOS AI uses a structured approach to dependency management that supports:
+QBITEL uses a structured approach to dependency management that supports:
 - **Reproducible builds** with pinned versions
 - **Optional dependencies** with graceful fallbacks
 - **Air-gapped deployments** with vendor shims
@@ -61,7 +61,7 @@ pip install -r requirements.txt -r requirements-prod.txt
 
 ### Required Dependencies
 
-These must be installed for CRONOS AI to function:
+These must be installed for QBITEL to function:
 
 | Package | Purpose | Min Version |
 |---------|---------|-------------|
@@ -87,7 +87,7 @@ These enable specific LLM features but are not required:
 
 ### Automatic Checking
 
-CRONOS AI automatically checks dependencies on startup:
+QBITEL automatically checks dependencies on startup:
 
 ```python
 from ai_engine.core.dependency_manager import check_dependencies
@@ -107,7 +107,7 @@ python scripts/check_dependencies.py
 **Output Example**:
 ```
 ================================================================================
-CRONOS AI - Dependency Installation Report
+QBITEL - Dependency Installation Report
 ================================================================================
 
 Required Dependencies:
@@ -154,7 +154,7 @@ For highly restricted environments:
 # Install only required dependencies
 pip install torch torchcrf fastapi psutil prometheus-client
 
-# CRONOS AI will use vendor shims for missing optional features
+# QBITEL will use vendor shims for missing optional features
 ```
 
 **Limitations in fallback mode**:
@@ -216,7 +216,7 @@ The Dockerfile automatically:
 
 **Build command**:
 ```bash
-docker build -f ai_engine/deployment/docker/Dockerfile -t cronos-ai:latest .
+docker build -f ai_engine/deployment/docker/Dockerfile -t qbitel:latest .
 ```
 
 ## Troubleshooting
@@ -258,7 +258,7 @@ export OLLAMA_HOST="http://localhost:11434"
 
 Or in configuration file:
 ```yaml
-# config/cronos_ai.yaml
+# config/qbitel.yaml
 llm:
   openai_api_key: ${OPENAI_API_KEY}
   anthropic_api_key: ${ANTHROPIC_API_KEY}
@@ -308,7 +308,7 @@ For dependency-related issues:
 1. **Check** dependency status: `python scripts/check_dependencies.py`
 2. **Review** logs for import errors
 3. **Consult** this documentation
-4. **Contact** CRONOS AI support team
+4. **Contact** QBITEL support team
 
 ## References
 

@@ -1,0 +1,19 @@
+{
+  "program_id": "HLTV407",
+  "domain": "healthcare",
+  "program_type": "data_validation",
+  "author": "S. BROWN",
+  "lines_of_code": 207,
+  "complexity_level": "simple",
+  "complexity_score": 0.451,
+  "files_used": 1,
+  "verbs_used": 14,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.939046",
+  "hash": "8db91067de463616e238efce4418f2e8"
+}

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Retry Policy Implementation
+QBITEL Engine - Retry Policy Implementation
 
 Enterprise-grade retry mechanisms with exponential backoff, jitter,
 and intelligent failure classification for the Zero-Touch Security Orchestrator.
@@ -174,7 +174,7 @@ class RetryPolicy:
         ]
         self.failure_classifier = failure_classifier or self._default_failure_classifier
 
-        self.logger = get_security_logger("cronos.security.resilience.retry_policy")
+        self.logger = get_security_logger("qbitel.security.resilience.retry_policy")
         self._stats = RetryStats()
 
     def _default_failure_classifier(
@@ -434,7 +434,7 @@ class RetryManager:
 
     def __init__(self):
         self.retry_policies: Dict[str, RetryPolicy] = {}
-        self.logger = get_security_logger("cronos.security.resilience.retry_manager")
+        self.logger = get_security_logger("qbitel.security.resilience.retry_manager")
 
     def create_policy(
         self,

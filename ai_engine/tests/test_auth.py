@@ -1,5 +1,5 @@
 """
-Tests for CRONOS AI Engine Authentication and Authorization
+Tests for QBITEL Engine Authentication and Authorization
 """
 
 import pytest
@@ -731,7 +731,7 @@ class TestInitializeAuth:
 
             with patch.dict(
                 "os.environ",
-                {"CRONOS_AI_API_KEY": "env_api_key_at_least_32_characters"},
+                {"QBITEL_AI_API_KEY": "env_api_key_at_least_32_characters"},
             ):
                 api_key = initialize_auth()
 
@@ -1033,7 +1033,7 @@ class TestAuthenticationServiceEdgeCases:
 
             with patch.dict(
                 "os.environ",
-                {"CRONOS_AI_API_KEY": "env_key_at_least_32_characters"},
+                {"QBITEL_AI_API_KEY": "env_key_at_least_32_characters"},
             ):
                 api_key = initialize_auth()
 

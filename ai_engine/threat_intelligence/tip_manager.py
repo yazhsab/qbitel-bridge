@@ -1,5 +1,5 @@
 """
-CRONOS AI - Threat Intelligence Platform Manager
+QBITEL - Threat Intelligence Platform Manager
 
 Central manager integrating all TIP components: STIX/TAXII, MITRE ATT&CK,
 and threat hunting.
@@ -13,7 +13,7 @@ from datetime import datetime
 from prometheus_client import Gauge
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..security.models import SecurityEvent
 from .stix_taxii_client import STIXTAXIIClient, STIXIndicator, get_stix_taxii_client
 from .mitre_attack_mapper import MITREATTACKMapper, TTPMapping, get_mitre_attack_mapper
@@ -22,7 +22,7 @@ from .threat_hunter import ThreatHunter, HuntCampaign, get_threat_hunter
 
 # Prometheus metrics
 TIP_HEALTH_STATUS = Gauge(
-    "cronos_tip_health_status",
+    "qbitel_tip_health_status",
     "Threat Intelligence Platform health status",
     ["component"],
     registry=None,
@@ -87,7 +87,7 @@ class ThreatIntelligenceManager:
         except Exception as e:
             self.logger.error(f"Failed to initialize TIP: {e}", exc_info=True)
             TIP_HEALTH_STATUS.labels(component="overall").set(0)
-            raise CronosAIException(f"TIP initialization failed: {e}")
+            raise QbitelAIException(f"TIP initialization failed: {e}")
 
     async def shutdown(self):
         """Shutdown TIP manager and all components."""
@@ -119,7 +119,7 @@ class ThreatIntelligenceManager:
             TIP enrichment data including IOC matches, TTP mappings, etc.
         """
         if not self._initialized:
-            raise CronosAIException("TIP not initialized")
+            raise QbitelAIException("TIP not initialized")
 
         enrichment = {
             "event_id": event.event_id,
@@ -204,10 +204,10 @@ class ThreatIntelligenceManager:
             Hunt campaign with findings
         """
         if not self._initialized:
-            raise CronosAIException("TIP not initialized")
+            raise QbitelAIException("TIP not initialized")
 
         if not self.threat_hunter:
-            raise CronosAIException("Threat hunter not available")
+            raise QbitelAIException("Threat hunter not available")
 
         campaign = await self.threat_hunter.execute_hunt_campaign(
             hypotheses=hypotheses,
@@ -232,7 +232,7 @@ class ThreatIntelligenceManager:
             Query results
         """
         if not self._initialized:
-            raise CronosAIException("TIP not initialized")
+            raise QbitelAIException("TIP not initialized")
 
         if query_type == "iocs":
             return await self._query_iocs(query_params)
@@ -241,7 +241,7 @@ class ThreatIntelligenceManager:
         elif query_type == "hunts":
             return await self._query_hunts(query_params)
         else:
-            raise CronosAIException(f"Unknown query type: {query_type}")
+            raise QbitelAIException(f"Unknown query type: {query_type}")
 
     async def _query_iocs(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Query IOCs from STIX/TAXII client."""
@@ -310,7 +310,7 @@ class ThreatIntelligenceManager:
             Update statistics per feed
         """
         if not self._initialized or not self.stix_client:
-            raise CronosAIException("TIP not initialized")
+            raise QbitelAIException("TIP not initialized")
 
         results = {}
 

@@ -1,0 +1,107 @@
+{{- if .Values.aiEngine.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "qbitel-bridge.fullname" . }}-ai-engine
+  namespace: {{ include "qbitel-bridge.namespace" . }}
+  labels:
+    {{- include "qbitel-bridge.aiEngine.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.aiEngine.autoscaling.enabled }}
+  replicas: {{ .Values.aiEngine.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "qbitel-bridge.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: ai-engine
+  template:
+    metadata:
+      labels:
+        {{- include "qbitel-bridge.aiEngine.labels" . | nindent 8 }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.aiEngine.service.metricsPort }}"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: {{ include "qbitel-bridge.serviceAccountName" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: ai-engine
+          image: {{ include "qbitel-bridge.aiEngine.image" . }}
+          imagePullPolicy: {{ .Values.aiEngine.image.pullPolicy }}
+          ports:
+            - name: rest
+              containerPort: {{ .Values.aiEngine.service.restPort }}
+              protocol: TCP
+            - name: grpc
+              containerPort: {{ .Values.aiEngine.service.grpcPort }}
+              protocol: TCP
+            - name: metrics
+              containerPort: {{ .Values.aiEngine.service.metricsPort }}
+              protocol: TCP
+          env:
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "qbitel-bridge.fullname" . }}-config
+                  key: LOG_LEVEL
+            - name: WORKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "qbitel-bridge.fullname" . }}-config
+                  key: WORKERS
+            - name: DEVICE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "qbitel-bridge.fullname" . }}-config
+                  key: DEVICE
+            - name: ENABLE_OBSERVABILITY
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "qbitel-bridge.fullname" . }}-config
+                  key: ENABLE_OBSERVABILITY
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: rest
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: rest
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.aiEngine.resources | nindent 12 }}
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+{{- end }}

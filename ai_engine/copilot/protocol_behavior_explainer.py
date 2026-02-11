@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Behavior Explainer
+QBITEL - Protocol Behavior Explainer
 Provides natural language explanations of protocol behavior and message patterns.
 """
 
@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 import json
 
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest
 from ..llm.rag_engine import RAGEngine
 
@@ -165,7 +165,7 @@ class ProtocolBehaviorExplainer:
 
         except Exception as e:
             self.logger.error(f"Failed to explain protocol behavior: {e}")
-            raise CronosAIException(f"Behavior explanation failed: {e}")
+            raise QbitelAIException(f"Behavior explanation failed: {e}")
 
     async def _analyze_message_patterns(
         self, messages: List[bytes], protocol_type: str

@@ -1,7 +1,7 @@
 """
-CRONOS AI - Protocol Marketplace Module
+QBITEL - Protocol Marketplace Module
 
-The Protocol Marketplace transforms CRONOS AI from a product into an ecosystem by
+The Protocol Marketplace transforms QBITEL from a product into an ecosystem by
 enabling community contributions, vendor partnerships, and protocol monetization.
 
 Key Features:

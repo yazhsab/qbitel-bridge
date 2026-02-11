@@ -1,5 +1,5 @@
 """
-CRONOS AI - SBOM API Endpoints
+QBITEL - SBOM API Endpoints
 Provides REST API for Software Bill of Materials access and distribution.
 Meets EO 14028 requirements for federal software procurement.
 """
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/sbom", tags=["SBOM"])
 
 # SBOM storage configuration
-SBOM_DIR = Path("/var/cronos-ai/sbom-artifacts")
+SBOM_DIR = Path("/var/qbitel/sbom-artifacts")
 SBOM_FALLBACK_DIR = Path("./sbom-artifacts")  # Development fallback
 
 
@@ -147,8 +147,8 @@ async def get_version_metadata(version: str):
 
 @router.get("/download")
 async def download_sbom(
-    version: str = Query(..., description="CRONOS AI version (e.g., v1.0.0)"),
-    component: str = Query("cronos-ai-platform", description="Component name"),
+    version: str = Query(..., description="QBITEL version (e.g., v1.0.0)"),
+    component: str = Query("qbitel-platform", description="Component name"),
     format: Literal["spdx", "cyclonedx"] = Query("spdx", description="SBOM format"),
 ):
     """
@@ -156,14 +156,14 @@ async def download_sbom(
 
     Args:
         version: Version identifier (e.g., v1.0.0, main)
-        component: Component name (e.g., cronos-ai-engine, cronos-dataplane)
+        component: Component name (e.g., qbitel-engine, qbitel-dataplane)
         format: SBOM format (spdx or cyclonedx)
 
     Returns:
         SBOM JSON document
 
     Example:
-        GET /api/v1/sbom/download?version=v1.0.0&component=cronos-ai-engine&format=spdx
+        GET /api/v1/sbom/download?version=v1.0.0&component=qbitel-engine&format=spdx
     """
     try:
         sbom_dir = get_sbom_directory()
@@ -171,7 +171,7 @@ async def download_sbom(
 
         if not sbom_file.exists():
             # Try alternative naming
-            sbom_file = sbom_dir / version / f"cronos-{component}-{format}.json"
+            sbom_file = sbom_dir / version / f"qbitel-{component}-{format}.json"
 
         if not sbom_file.exists():
             available = (
@@ -214,7 +214,7 @@ async def download_sbom(
 
 @router.get("/metadata")
 async def get_sbom_metadata(
-    version: str = Query(..., description="CRONOS AI version"),
+    version: str = Query(..., description="QBITEL version"),
     component: str = Query(..., description="Component name"),
 ) -> SBOMMetadata:
     """
@@ -228,14 +228,14 @@ async def get_sbom_metadata(
         Metadata including package counts and vulnerability summary
 
     Example:
-        GET /api/v1/sbom/metadata?version=v1.0.0&component=cronos-ai-engine
+        GET /api/v1/sbom/metadata?version=v1.0.0&component=qbitel-engine
     """
     try:
         sbom_dir = get_sbom_directory()
         sbom_file = sbom_dir / version / f"{component}-spdx.json"
 
         if not sbom_file.exists():
-            sbom_file = sbom_dir / version / f"cronos-{component}-spdx.json"
+            sbom_file = sbom_dir / version / f"qbitel-{component}-spdx.json"
 
         if not sbom_file.exists():
             raise HTTPException(
@@ -254,7 +254,7 @@ async def get_sbom_metadata(
         vuln_summary = None
         vuln_file = sbom_dir / version / f"{component}-vulnerabilities.json"
         if not vuln_file.exists():
-            vuln_file = sbom_dir / version / f"cronos-{component}-vulnerabilities.json"
+            vuln_file = sbom_dir / version / f"qbitel-{component}-vulnerabilities.json"
 
         if vuln_file.exists():
             with open(vuln_file) as f:
@@ -304,8 +304,8 @@ async def get_sbom_metadata(
 
 @router.get("/vulnerabilities")
 async def get_sbom_vulnerabilities(
-    version: str = Query(..., description="CRONOS AI version"),
-    component: str = Query("cronos-ai-platform", description="Component name"),
+    version: str = Query(..., description="QBITEL version"),
+    component: str = Query("qbitel-platform", description="Component name"),
     severity: Optional[str] = Query(
         None, description="Filter by severity (Critical, High, Medium, Low)"
     ),
@@ -322,14 +322,14 @@ async def get_sbom_vulnerabilities(
         Vulnerability report with CVE details
 
     Example:
-        GET /api/v1/sbom/vulnerabilities?version=v1.0.0&component=cronos-ai-engine&severity=Critical
+        GET /api/v1/sbom/vulnerabilities?version=v1.0.0&component=qbitel-engine&severity=Critical
     """
     try:
         sbom_dir = get_sbom_directory()
         vuln_file = sbom_dir / version / f"{component}-vulnerabilities.json"
 
         if not vuln_file.exists():
-            vuln_file = sbom_dir / version / f"cronos-{component}-vulnerabilities.json"
+            vuln_file = sbom_dir / version / f"qbitel-{component}-vulnerabilities.json"
 
         if not vuln_file.exists():
             return {

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Comprehensive Log Aggregation Tests
+QBITEL Engine - Comprehensive Log Aggregation Tests
 
 Complete test suite for log aggregation functionality including
 Elasticsearch, Loki, and LogAggregationManager components.
@@ -158,7 +158,7 @@ class TestElasticsearchLogAggregator:
         """Create mock configuration."""
         config = Mock(spec=Config)
         config.elasticsearch_hosts = ["http://localhost:9200", "http://localhost:9201"]
-        config.elasticsearch_index_prefix = "cronos-ai-logs"
+        config.elasticsearch_index_prefix = "qbitel-logs"
         config.elasticsearch_username = "elastic"
         config.elasticsearch_password = "password"
         return config
@@ -174,7 +174,7 @@ class TestElasticsearchLogAggregator:
             "http://localhost:9200",
             "http://localhost:9201",
         ]
-        assert es_aggregator.es_index_prefix == "cronos-ai-logs"
+        assert es_aggregator.es_index_prefix == "qbitel-logs"
         assert es_aggregator.es_username == "elastic"
         assert es_aggregator.es_password == "password"
         assert es_aggregator._batch_size == 500

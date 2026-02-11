@@ -36,7 +36,7 @@ from ai_engine.api.copilot_endpoints import (
     log_query_analytics,
 )
 from ai_engine.copilot.protocol_copilot import CopilotQuery, CopilotResponse
-from ai_engine.core.exceptions import CronosAIException
+from ai_engine.core.exceptions import QbitelAIException
 
 
 # Fixtures
@@ -244,13 +244,13 @@ async def test_process_copilot_query_background_task(
 
 
 @pytest.mark.asyncio
-async def test_process_copilot_query_cronos_exception(
+async def test_process_copilot_query_qbitel_exception(
     mock_copilot, mock_current_user, mock_background_tasks
 ):
-    """Test handling of CronosAIException."""
+    """Test handling of QbitelAIException."""
     request = CopilotQueryRequest(query="Test")
 
-    mock_copilot.process_query.side_effect = CronosAIException("Processing failed")
+    mock_copilot.process_query.side_effect = QbitelAIException("Processing failed")
 
     with pytest.raises(HTTPException) as exc_info:
         await process_copilot_query(

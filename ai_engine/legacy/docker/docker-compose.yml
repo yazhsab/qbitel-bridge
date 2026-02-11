@@ -1,4 +1,4 @@
-# CRONOS AI Legacy System Whisperer - Docker Compose Configuration
+# QBITEL Legacy System Whisperer - Docker Compose Configuration
 # Complete development and testing environment
 
 version: '3.8'
@@ -9,9 +9,9 @@ services:
     image: timescale/timescaledb:latest-pg14
     container_name: legacy-whisperer-postgres
     environment:
-      POSTGRES_DB: cronos_ai
-      POSTGRES_USER: cronos
-      POSTGRES_PASSWORD: cronos123
+      POSTGRES_DB: qbitel
+      POSTGRES_USER: qbitel
+      POSTGRES_PASSWORD: qbitel123
       TIMESCALEDB_TELEMETRY: 'off'
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -19,7 +19,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U cronos -d cronos_ai"]
+      test: ["CMD-SHELL", "pg_isready -U qbitel -d qbitel"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -31,7 +31,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: legacy-whisperer-redis
-    command: redis-server --appendonly yes --requirepass cronos123
+    command: redis-server --appendonly yes --requirepass qbitel123
     volumes:
       - redis_data:/data
       - ./redis.conf:/usr/local/etc/redis/redis.conf
@@ -133,41 +133,41 @@ services:
     container_name: legacy-whisperer-app
     environment:
       # Database configuration
-      CRONOS_AI_DB_HOST: postgres
-      CRONOS_AI_DB_PORT: 5432
-      CRONOS_AI_DB_NAME: cronos_ai
-      CRONOS_AI_DB_USER: cronos
-      CRONOS_AI_DB_PASSWORD: cronos123
+      QBITEL_AI_DB_HOST: postgres
+      QBITEL_AI_DB_PORT: 5432
+      QBITEL_AI_DB_NAME: qbitel
+      QBITEL_AI_DB_USER: qbitel
+      QBITEL_AI_DB_PASSWORD: qbitel123
       
       # Redis configuration
-      CRONOS_AI_REDIS_HOST: redis
-      CRONOS_AI_REDIS_PORT: 6379
-      CRONOS_AI_REDIS_PASSWORD: cronos123
+      QBITEL_AI_REDIS_HOST: redis
+      QBITEL_AI_REDIS_PORT: 6379
+      QBITEL_AI_REDIS_PASSWORD: qbitel123
       
       # Service configuration
-      CRONOS_AI_ENVIRONMENT: development
-      CRONOS_AI_DEBUG: 'true'
-      CRONOS_AI_LOG_LEVEL: DEBUG
+      QBITEL_AI_ENVIRONMENT: development
+      QBITEL_AI_DEBUG: 'true'
+      QBITEL_AI_LOG_LEVEL: DEBUG
       
       # LLM configuration
-      CRONOS_AI_LEGACY_LLM_PROVIDER: ollama
-      CRONOS_AI_LLM_OLLAMA_BASE_URL: http://ollama:11434
+      QBITEL_AI_LEGACY_LLM_PROVIDER: ollama
+      QBITEL_AI_LLM_OLLAMA_BASE_URL: http://ollama:11434
       
       # Monitoring configuration
-      CRONOS_AI_MONITORING_ENABLED: 'true'
-      CRONOS_AI_METRICS_PORT: 8080
+      QBITEL_AI_MONITORING_ENABLED: 'true'
+      QBITEL_AI_METRICS_PORT: 8080
       JAEGER_AGENT_HOST: jaeger
       JAEGER_AGENT_PORT: 6831
       
       # Security configuration
-      CRONOS_AI_JWT_SECRET: dev-secret-key-change-in-production
-      CRONOS_AI_ENCRYPT_SENSITIVE_DATA: 'false'  # Disabled for development
+      QBITEL_AI_JWT_SECRET: dev-secret-key-change-in-production
+      QBITEL_AI_ENCRYPT_SENSITIVE_DATA: 'false'  # Disabled for development
       
       # Legacy System Whisperer specific
-      CRONOS_AI_LEGACY_ENABLED: 'true'
-      CRONOS_AI_LEGACY_MAX_SYSTEMS: 100
-      CRONOS_AI_LEGACY_ANOMALY_THRESHOLD: 0.85
-      CRONOS_AI_LEGACY_PREDICTION_ENABLED: 'true'
+      QBITEL_AI_LEGACY_ENABLED: 'true'
+      QBITEL_AI_LEGACY_MAX_SYSTEMS: 100
+      QBITEL_AI_LEGACY_ANOMALY_THRESHOLD: 0.85
+      QBITEL_AI_LEGACY_PREDICTION_ENABLED: 'true'
     volumes:
       - ../../../:/app
       - legacy_logs:/app/logs
@@ -230,7 +230,7 @@ services:
     image: postgres:14-alpine
     container_name: legacy-whisperer-backup
     environment:
-      PGPASSWORD: cronos123
+      PGPASSWORD: qbitel123
     volumes:
       - ./backups:/backups
       - ./backup-script.sh:/backup-script.sh
@@ -277,9 +277,9 @@ services:
     build:
       target: development
     environment:
-      CRONOS_AI_ENVIRONMENT: development
-      CRONOS_AI_DEBUG: 'true'
-      CRONOS_AI_AUTO_RELOAD: 'true'
+      QBITEL_AI_ENVIRONMENT: development
+      QBITEL_AI_DEBUG: 'true'
+      QBITEL_AI_AUTO_RELOAD: 'true'
     volumes:
       - ../../../:/app:cached  # Use cached mount for better performance on macOS
     stdin_open: true
@@ -289,7 +289,7 @@ services:
   # Development database with sample data
   postgres:
     environment:
-      POSTGRES_DB: cronos_ai_dev
+      POSTGRES_DB: qbitel_dev
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
       - ./sample-data.sql:/docker-entrypoint-initdb.d/sample-data.sql
@@ -299,7 +299,7 @@ services:
     image: dpage/pgadmin4:latest
     container_name: legacy-whisperer-pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@cronos-ai.com
+      PGADMIN_DEFAULT_EMAIL: admin@qbitel.com
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
@@ -314,7 +314,7 @@ services:
     image: rediscommander/redis-commander:latest
     container_name: legacy-whisperer-redis-ui
     environment:
-      REDIS_HOSTS: local:redis:6379:0:cronos123
+      REDIS_HOSTS: local:redis:6379:0:qbitel123
     ports:
       - "8081:8081"
     networks:

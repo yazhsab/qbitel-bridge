@@ -1,0 +1,19 @@
+{
+  "program_id": "ORDR256",
+  "domain": "retail",
+  "program_type": "report_generation",
+  "author": "P. WILSON",
+  "lines_of_code": 200,
+  "complexity_level": "medium",
+  "complexity_score": 0.49,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.857604",
+  "hash": "f1e944019858a9b186d3eb7b86de928e"
+}

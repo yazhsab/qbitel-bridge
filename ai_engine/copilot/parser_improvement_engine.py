@@ -1,5 +1,5 @@
 """
-CRONOS AI - Parser Improvement Engine
+QBITEL - Parser Improvement Engine
 Provides intelligent suggestions for parser improvements based on errors and analysis.
 """
 
@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from collections import defaultdict, Counter
 
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest
 from ..llm.rag_engine import RAGEngine
 
@@ -179,7 +179,7 @@ class ParserImprovementEngine:
 
         except Exception as e:
             self.logger.error(f"Parser analysis failed: {e}")
-            raise CronosAIException(f"Parser analysis failed: {e}")
+            raise QbitelAIException(f"Parser analysis failed: {e}")
 
     async def suggest_parser_improvements(
         self, parser_code: str, errors: List[str], context: Dict[str, Any] = None

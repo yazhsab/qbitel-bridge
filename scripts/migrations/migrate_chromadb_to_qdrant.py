@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - ChromaDB to Qdrant Migration Script
+QBITEL - ChromaDB to Qdrant Migration Script
 
 Migrates all vector data from ChromaDB to Qdrant for production deployment.
 
@@ -421,7 +421,7 @@ class ChromaDBToQdrantMigrator:
 
 async def main():
     parser = argparse.ArgumentParser(
-        description="CRONOS AI ChromaDB to Qdrant Migration"
+        description="QBITEL ChromaDB to Qdrant Migration"
     )
     parser.add_argument(
         "--check",
@@ -465,7 +465,7 @@ async def main():
         batch_size=args.batch_size,
     )
 
-    print(f"\n{Colors.BOLD}CRONOS AI Vector Database Migration Tool{Colors.RESET}")
+    print(f"\n{Colors.BOLD}QBITEL Vector Database Migration Tool{Colors.RESET}")
     print(f"ChromaDB -> Qdrant\n")
 
     if args.check or not any([args.migrate, args.verify]):

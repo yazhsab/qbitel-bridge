@@ -1,0 +1,129 @@
+# ============================================================================
+# QBITEL - Prometheus Configuration
+# ============================================================================
+# Production-ready Prometheus configuration for Legacy System Whisperer
+# ============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'qbitel-production'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+      scheme: http
+      timeout: 10s
+
+# Load alerting rules
+rule_files:
+  - /etc/prometheus/alerts.yml
+  - /etc/prometheus/recording_rules.yml
+
+# Scrape configurations
+scrape_configs:
+  # ==========================================================================
+  # Prometheus self-monitoring
+  # ==========================================================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # ==========================================================================
+  # Legacy System Whisperer Application
+  # ==========================================================================
+  - job_name: 'legacy-whisperer'
+    static_configs:
+      - targets: ['legacy-whisperer:8080']
+        labels:
+          service: 'legacy-whisperer'
+          component: 'ai-engine'
+    metrics_path: /metrics
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    honor_labels: true
+
+  # ==========================================================================
+  # PostgreSQL/TimescaleDB
+  # ==========================================================================
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: 'postgres'
+          component: 'database'
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # ==========================================================================
+  # Redis
+  # ==========================================================================
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
+          component: 'cache'
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # ==========================================================================
+  # Node Exporter (System Metrics)
+  # ==========================================================================
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node'
+          component: 'infrastructure'
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # ==========================================================================
+  # Docker Container Metrics (cAdvisor)
+  # ==========================================================================
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          service: 'cadvisor'
+          component: 'infrastructure'
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # ==========================================================================
+  # Kubernetes Service Discovery (if using K8s)
+  # ==========================================================================
+  # Uncomment when deploying to Kubernetes
+  # - job_name: 'kubernetes-pods'
+  #   kubernetes_sd_configs:
+  #     - role: pod
+  #   relabel_configs:
+  #     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+  #       action: keep
+  #       regex: true
+  #     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+  #       action: replace
+  #       target_label: __metrics_path__
+  #       regex: (.+)
+  #     - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+  #       action: replace
+  #       regex: ([^:]+)(?::\d+)?;(\d+)
+  #       replacement: $1:$2
+  #       target_label: __address__
+  #     - source_labels: [__meta_kubernetes_namespace]
+  #       action: replace
+  #       target_label: kubernetes_namespace
+  #     - source_labels: [__meta_kubernetes_pod_name]
+  #       action: replace
+  #       target_label: kubernetes_pod_name
+  #     - source_labels: [__meta_kubernetes_pod_label_app]
+  #       action: replace
+  #       target_label: app

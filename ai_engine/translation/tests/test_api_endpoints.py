@@ -1,5 +1,5 @@
 """
-CRONOS AI - Translation Studio API Endpoints Tests
+QBITEL - Translation Studio API Endpoints Tests
 Enterprise-grade integration and unit tests for translation studio REST API endpoints.
 """
 

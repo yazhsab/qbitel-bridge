@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Secret Rotation Script for CRONOS AI
+Secret Rotation Script for QBITEL
 
 This script helps rotate secrets in production environments.
 Supports HashiCorp Vault, AWS Secrets Manager, and Azure Key Vault.
@@ -92,7 +92,7 @@ def rotate_database_password(
 
         logger.warning(
             "⚠️  IMPORTANT: Update the database user password manually:\n"
-            f"   ALTER USER cronos_user WITH PASSWORD '{new_password}';\n"
+            f"   ALTER USER qbitel_user WITH PASSWORD '{new_password}';\n"
             "   Then restart the application to use the new password."
         )
 
@@ -248,7 +248,7 @@ def rotate_encryption_key(
 def main():
     """Main function."""
     parser = argparse.ArgumentParser(
-        description="Rotate secrets for CRONOS AI",
+        description="Rotate secrets for QBITEL",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

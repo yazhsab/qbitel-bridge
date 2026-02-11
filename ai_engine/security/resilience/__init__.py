@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Security Resilience Framework
+QBITEL Engine - Security Resilience Framework
 
 Enterprise-grade resilience patterns including circuit breakers, retry mechanisms,
 bulkhead isolation, and graceful degradation for the Zero-Touch Security Orchestrator.

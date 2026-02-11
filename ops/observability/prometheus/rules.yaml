@@ -1,25 +1,25 @@
 groups:
-  - name: cronosai.critical
+  - name: qbitelai.critical
     interval: 30s
     rules:
       # Service availability alerts
-      - alert: CronosAIServiceDown
-        expr: up{job=~"cronosai-.*"} == 0
+      - alert: QbitelAIServiceDown
+        expr: up{job=~"qbitelai-.*"} == 0
         for: 1m
         labels:
           severity: critical
           component: "{{ $labels.job }}"
         annotations:
-          summary: "QSLB service {{ $labels.job }} is down"
+          summary: "QBITEL service {{ $labels.job }} is down"
           description: "Service {{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute"
-          runbook_url: "https://runbooks.qslb.io/service-down"
+          runbook_url: "https://runbooks.qbitel.io/service-down"
 
       # High error rate alerts
-      - alert: CronosAIHighErrorRate
+      - alert: QbitelAIHighErrorRate
         expr: |
           (
-            rate(cronosai_requests_total{status=~"5.."}[5m]) /
-            rate(cronosai_requests_total[5m])
+            rate(qbitelai_requests_total{status=~"5.."}[5m]) /
+            rate(qbitelai_requests_total[5m])
           ) * 100 > 5
         for: 2m
         labels:
@@ -28,13 +28,13 @@ groups:
         annotations:
           summary: "High error rate detected in {{ $labels.service }}"
           description: "Error rate is {{ $value | humanizePercentage }} for service {{ $labels.service }}"
-          runbook_url: "https://runbooks.cronosai.io/high-error-rate"
+          runbook_url: "https://runbooks.qbitelai.io/high-error-rate"
 
       # High latency alerts
-      - alert: CronosAIHighLatency
+      - alert: QbitelAIHighLatency
         expr: |
           histogram_quantile(0.95,
-            rate(cronosai_request_duration_seconds_bucket[5m])
+            rate(qbitelai_request_duration_seconds_bucket[5m])
           ) > 0.5
         for: 3m
         labels:
@@ -43,13 +43,13 @@ groups:
         annotations:
           summary: "High latency detected in {{ $labels.service }}"
           description: "95th percentile latency is {{ $value | humanizeDuration }} for service {{ $labels.service }}"
-          runbook_url: "https://runbooks.cronosai.io/high-latency"
+          runbook_url: "https://runbooks.qbitelai.io/high-latency"
 
       # Memory usage alerts
-      - alert: CronosAIHighMemoryUsage
+      - alert: QbitelAIHighMemoryUsage
         expr: |
           (
-            process_resident_memory_bytes{job=~"cronosai-.*"} /
+            process_resident_memory_bytes{job=~"qbitelai-.*"} /
             node_memory_MemTotal_bytes
           ) * 100 > 80
         for: 5m
@@ -59,12 +59,12 @@ groups:
         annotations:
           summary: "High memory usage in {{ $labels.job }}"
           description: "Memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
-          runbook_url: "https://runbooks.cronosai.io/high-memory"
+          runbook_url: "https://runbooks.qbitelai.io/high-memory"
 
       # CPU usage alerts
-      - alert: CronosAIHighCPUUsage
+      - alert: QbitelAIHighCPUUsage
         expr: |
-          rate(process_cpu_seconds_total{job=~"cronosai-.*"}[5m]) * 100 > 80
+          rate(process_cpu_seconds_total{job=~"qbitelai-.*"}[5m]) * 100 > 80
         for: 5m
         labels:
           severity: critical
@@ -72,12 +72,12 @@ groups:
         annotations:
           summary: "High CPU usage in {{ $labels.job }}"
           description: "CPU usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
-          runbook_url: "https://runbooks.cronosai.io/high-cpu"
+          runbook_url: "https://runbooks.qbitelai.io/high-cpu"
 
       # Connection pool exhaustion
-      - alert: CronosAIConnectionPoolExhausted
+      - alert: QbitelAIConnectionPoolExhausted
         expr: |
-          cronosai_connection_pool_active / cronosai_connection_pool_max > 0.9
+          qbitelai_connection_pool_active / qbitelai_connection_pool_max > 0.9
         for: 2m
         labels:
           severity: critical
@@ -85,17 +85,17 @@ groups:
         annotations:
           summary: "Connection pool nearly exhausted"
           description: "Connection pool utilization is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
-          runbook_url: "https://runbooks.cronosai.io/connection-pool-exhausted"
+          runbook_url: "https://runbooks.qbitelai.io/connection-pool-exhausted"
 
-  - name: cronosai.warning
+  - name: qbitelai.warning
     interval: 60s
     rules:
       # Moderate error rate
-      - alert: CronosAIModerateErrorRate
+      - alert: QbitelAIModerateErrorRate
         expr: |
           (
-            rate(cronosai_requests_total{status=~"5.."}[5m]) /
-            rate(cronosai_requests_total[5m])
+            rate(qbitelai_requests_total{status=~"5.."}[5m]) /
+            rate(qbitelai_requests_total[5m])
           ) * 100 > 1
         for: 5m
         labels:
@@ -106,10 +106,10 @@ groups:
           description: "Error rate is {{ $value | humanizePercentage }} for service {{ $labels.service }}"
 
       # Moderate latency
-      - alert: CronosAIModerateLatency
+      - alert: QbitelAIModerateLatency
         expr: |
           histogram_quantile(0.95,
-            rate(cronosai_request_duration_seconds_bucket[5m])
+            rate(qbitelai_request_duration_seconds_bucket[5m])
           ) > 0.2
         for: 5m
         labels:
@@ -120,9 +120,9 @@ groups:
           description: "95th percentile latency is {{ $value | humanizeDuration }} for service {{ $labels.service }}"
 
       # Certificate expiration
-      - alert: CronosAICertificateExpiringSoon
+      - alert: QbitelAICertificateExpiringSoon
         expr: |
-          (cronosai_certificate_expiry_timestamp - time()) / 86400 < 30
+          (qbitelai_certificate_expiry_timestamp - time()) / 86400 < 30
         for: 1h
         labels:
           severity: warning
@@ -130,12 +130,12 @@ groups:
         annotations:
           summary: "Certificate expiring soon"
           description: "Certificate {{ $labels.certificate_id }} expires in {{ $value }} days"
-          runbook_url: "https://runbooks.cronosai.io/certificate-expiry"
+          runbook_url: "https://runbooks.qbitelai.io/certificate-expiry"
 
       # Device health issues
-      - alert: CronosAIDeviceHealthDegraded
+      - alert: QbitelAIDeviceHealthDegraded
         expr: |
-          cronosai_device_health_status{status!="healthy"} > 0
+          qbitelai_device_health_status{status!="healthy"} > 0
         for: 10m
         labels:
           severity: warning
@@ -145,10 +145,10 @@ groups:
           description: "Device {{ $labels.device_id }} has health status {{ $labels.status }}"
 
       # Policy engine issues
-      - alert: CronosAIPolicyEvaluationSlow
+      - alert: QbitelAIPolicyEvaluationSlow
         expr: |
           histogram_quantile(0.95,
-            rate(cronosai_policy_evaluation_duration_seconds_bucket[5m])
+            rate(qbitelai_policy_evaluation_duration_seconds_bucket[5m])
           ) > 0.01
         for: 5m
         labels:
@@ -158,13 +158,13 @@ groups:
           summary: "Policy evaluation is slow"
           description: "95th percentile policy evaluation time is {{ $value | humanizeDuration }}"
 
-  - name: cronosai.security
+  - name: qbitelai.security
     interval: 30s
     rules:
       # Failed authentication attempts
-      - alert: CronosAIHighFailedAuthRate
+      - alert: QbitelAIHighFailedAuthRate
         expr: |
-          rate(cronosai_auth_failures_total[5m]) > 10
+          rate(qbitelai_auth_failures_total[5m]) > 10
         for: 2m
         labels:
           severity: critical
@@ -172,12 +172,12 @@ groups:
         annotations:
           summary: "High authentication failure rate"
           description: "Authentication failure rate is {{ $value }} per second"
-          runbook_url: "https://runbooks.cronosai.io/auth-failures"
+          runbook_url: "https://runbooks.qbitelai.io/auth-failures"
 
       # TPM attestation failures
-      - alert: QSLBTPMAttestationFailures
+      - alert: QBITELTPMAttestationFailures
         expr: |
-          rate(qslb_tpm_attestation_failures_total[5m]) > 1
+          rate(qbitel_tpm_attestation_failures_total[5m]) > 1
         for: 1m
         labels:
           severity: critical
@@ -185,12 +185,12 @@ groups:
         annotations:
           summary: "TPM attestation failures detected"
           description: "TPM attestation failure rate is {{ $value }} per second"
-          runbook_url: "https://runbooks.cronosai.io/tpm-failures"
+          runbook_url: "https://runbooks.qbitelai.io/tpm-failures"
 
       # Certificate validation failures
-      - alert: CronosAICertValidationFailures
+      - alert: QbitelAICertValidationFailures
         expr: |
-          rate(cronosai_cert_validation_failures_total[5m]) > 0.1
+          rate(qbitelai_cert_validation_failures_total[5m]) > 0.1
         for: 2m
         labels:
           severity: warning
@@ -200,9 +200,9 @@ groups:
           description: "Certificate validation failure rate is {{ $value }} per second"
 
       # Suspicious device behavior
-      - alert: CronosAISuspiciousDeviceBehavior
+      - alert: QbitelAISuspiciousDeviceBehavior
         expr: |
-          cronosai_device_compliance_violations_total > 0
+          qbitelai_device_compliance_violations_total > 0
         for: 1m
         labels:
           severity: critical
@@ -210,15 +210,15 @@ groups:
         annotations:
           summary: "Device compliance violations detected"
           description: "Device {{ $labels.device_id }} has compliance violations: {{ $labels.violation_type }}"
-          runbook_url: "https://runbooks.cronosai.io/compliance-violations"
+          runbook_url: "https://runbooks.qbitelai.io/compliance-violations"
 
-  - name: cronosai.performance
+  - name: qbitelai.performance
     interval: 60s
     rules:
       # Throughput degradation
-      - alert: CronosAIThroughputDegraded
+      - alert: QbitelAIThroughputDegraded
         expr: |
-          rate(cronosai_bytes_processed_total[5m]) < 1000000  # Less than 1MB/s
+          rate(qbitelai_bytes_processed_total[5m]) < 1000000  # Less than 1MB/s
         for: 5m
         labels:
           severity: warning
@@ -228,9 +228,9 @@ groups:
           description: "Current throughput is {{ $value | humanizeBytes }}/s"
 
       # Connection count high
-      - alert: CronosAIHighConnectionCount
+      - alert: QbitelAIHighConnectionCount
         expr: |
-          cronosai_connections_active > 10000
+          qbitelai_connections_active > 10000
         for: 5m
         labels:
           severity: warning
@@ -240,9 +240,9 @@ groups:
           description: "Active connections: {{ $value }}"
 
       # Circuit breaker open
-      - alert: CronosAICircuitBreakerOpen
+      - alert: QbitelAICircuitBreakerOpen
         expr: |
-          cronosai_circuit_breaker_state{state="open"} > 0
+          qbitelai_circuit_breaker_state{state="open"} > 0
         for: 1m
         labels:
           severity: warning
@@ -250,12 +250,12 @@ groups:
         annotations:
           summary: "Circuit breaker is open"
           description: "Circuit breaker for {{ $labels.target }} is open"
-          runbook_url: "https://runbooks.cronosai.io/circuit-breaker"
+          runbook_url: "https://runbooks.qbitelai.io/circuit-breaker"
 
       # Backpressure active
-      - alert: CronosAIBackpressureActive
+      - alert: QbitelAIBackpressureActive
         expr: |
-          cronosai_backpressure_active > 0
+          qbitelai_backpressure_active > 0
         for: 2m
         labels:
           severity: warning
@@ -264,15 +264,15 @@ groups:
           summary: "Backpressure is active"
           description: "Backpressure is active on {{ $labels.instance }}"
 
-  - name: cronosai.business
+  - name: qbitelai.business
     interval: 300s
     rules:
       # SLA breach detection
-      - alert: CronosAISLABreach
+      - alert: QbitelAISLABreach
         expr: |
           (
-            rate(cronosai_requests_total{status=~"2.."}[1h]) /
-            rate(cronosai_requests_total[1h])
+            rate(qbitelai_requests_total{status=~"2.."}[1h]) /
+            rate(qbitelai_requests_total[1h])
           ) * 100 < 99.9
         for: 5m
         labels:
@@ -281,15 +281,15 @@ groups:
         annotations:
           summary: "SLA breach detected"
           description: "Availability is {{ $value | humanizePercentage }} (below 99.9% SLA)"
-          runbook_url: "https://runbooks.cronosai.io/sla-breach"
+          runbook_url: "https://runbooks.qbitelai.io/sla-breach"
 
       # Device enrollment rate anomaly
-      - alert: CronosAIDeviceEnrollmentAnomaly
+      - alert: QbitelAIDeviceEnrollmentAnomaly
         expr: |
           abs(
-            rate(cronosai_device_enrollments_total[1h]) -
-            rate(cronosai_device_enrollments_total[1h] offset 24h)
-          ) / rate(cronosai_device_enrollments_total[1h] offset 24h) > 0.5
+            rate(qbitelai_device_enrollments_total[1h]) -
+            rate(qbitelai_device_enrollments_total[1h] offset 24h)
+          ) / rate(qbitelai_device_enrollments_total[1h] offset 24h) > 0.5
         for: 10m
         labels:
           severity: warning
@@ -299,9 +299,9 @@ groups:
           description: "Device enrollment rate has changed significantly compared to 24h ago"
 
       # Policy update failures
-      - alert: CronosAIPolicyUpdateFailures
+      - alert: QbitelAIPolicyUpdateFailures
         expr: |
-          rate(cronosai_policy_update_failures_total[1h]) > 0
+          rate(qbitelai_policy_update_failures_total[1h]) > 0
         for: 5m
         labels:
           severity: warning
@@ -310,11 +310,11 @@ groups:
           summary: "Policy update failures"
           description: "Policy update failure rate is {{ $value }} per second"
 
-  - name: cronosai.capacity
+  - name: qbitelai.capacity
     interval: 300s
     rules:
       # Disk space low
-      - alert: CronosAIDiskSpaceLow
+      - alert: QbitelAIDiskSpaceLow
         expr: |
           (
             node_filesystem_avail_bytes{mountpoint="/"} /
@@ -327,10 +327,10 @@ groups:
         annotations:
           summary: "Disk space low"
           description: "Available disk space is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
-          runbook_url: "https://runbooks.cronosai.io/disk-space-low"
+          runbook_url: "https://runbooks.qbitelai.io/disk-space-low"
 
       # Network bandwidth utilization high
-      - alert: CronosAIHighNetworkUtilization
+      - alert: QbitelAIHighNetworkUtilization
         expr: |
           rate(node_network_transmit_bytes_total[5m]) * 8 > 800000000  # 800 Mbps
         for: 5m
@@ -342,11 +342,11 @@ groups:
           description: "Network transmit rate is {{ $value | humanizeBitsPerSec }} on {{ $labels.instance }}"
 
       # File descriptor usage high
-      - alert: CronosAIHighFileDescriptorUsage
+      - alert: QbitelAIHighFileDescriptorUsage
         expr: |
           (
-            process_open_fds{job=~"cronosai-.*"} /
-            process_max_fds{job=~"cronosai-.*"}
+            process_open_fds{job=~"qbitelai-.*"} /
+            process_max_fds{job=~"qbitelai-.*"}
           ) * 100 > 80
         for: 5m
         labels:
@@ -356,98 +356,98 @@ groups:
           summary: "High file descriptor usage"
           description: "File descriptor usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
 
-  - name: cronosai.recording
+  - name: qbitelai.recording
     interval: 30s
     rules:
       # Request rate recording rules
-      - record: cronosai:request_rate_5m
-        expr: rate(cronosai_requests_total[5m])
+      - record: qbitelai:request_rate_5m
+        expr: rate(qbitelai_requests_total[5m])
 
-      - record: cronosai:request_rate_1h
-        expr: rate(cronosai_requests_total[1h])
+      - record: qbitelai:request_rate_1h
+        expr: rate(qbitelai_requests_total[1h])
 
       # Error rate recording rules
-      - record: cronosai:error_rate_5m
+      - record: qbitelai:error_rate_5m
         expr: |
-          rate(cronosai_requests_total{status=~"5.."}[5m]) /
-          rate(cronosai_requests_total[5m])
+          rate(qbitelai_requests_total{status=~"5.."}[5m]) /
+          rate(qbitelai_requests_total[5m])
 
-      - record: cronosai:error_rate_1h
+      - record: qbitelai:error_rate_1h
         expr: |
-          rate(cronosai_requests_total{status=~"5.."}[1h]) /
-          rate(cronosai_requests_total[1h])
+          rate(qbitelai_requests_total{status=~"5.."}[1h]) /
+          rate(qbitelai_requests_total[1h])
 
       # Latency recording rules
-      - record: cronosai:latency_p50_5m
+      - record: qbitelai:latency_p50_5m
         expr: |
           histogram_quantile(0.50,
-            rate(cronosai_request_duration_seconds_bucket[5m])
+            rate(qbitelai_request_duration_seconds_bucket[5m])
           )
 
-      - record: cronosai:latency_p95_5m
+      - record: qbitelai:latency_p95_5m
         expr: |
           histogram_quantile(0.95,
-            rate(cronosai_request_duration_seconds_bucket[5m])
+            rate(qbitelai_request_duration_seconds_bucket[5m])
           )
 
-      - record: cronosai:latency_p99_5m
+      - record: qbitelai:latency_p99_5m
         expr: |
           histogram_quantile(0.99,
-            rate(cronosai_request_duration_seconds_bucket[5m])
+            rate(qbitelai_request_duration_seconds_bucket[5m])
           )
 
       # Throughput recording rules
-      - record: cronosai:throughput_bytes_5m
-        expr: rate(cronosai_bytes_processed_total[5m])
+      - record: qbitelai:throughput_bytes_5m
+        expr: rate(qbitelai_bytes_processed_total[5m])
 
-      - record: cronosai:throughput_requests_5m
-        expr: rate(cronosai_requests_total[5m])
+      - record: qbitelai:throughput_requests_5m
+        expr: rate(qbitelai_requests_total[5m])
 
       # Availability recording rules
-      - record: cronosai:availability_5m
+      - record: qbitelai:availability_5m
         expr: |
           (
-            rate(cronosai_requests_total{status=~"2.."}[5m]) /
-            rate(cronosai_requests_total[5m])
+            rate(qbitelai_requests_total{status=~"2.."}[5m]) /
+            rate(qbitelai_requests_total[5m])
           ) * 100
 
-      - record: cronosai:availability_1h
+      - record: qbitelai:availability_1h
         expr: |
           (
-            rate(cronosai_requests_total{status=~"2.."}[1h]) /
-            rate(cronosai_requests_total[1h])
+            rate(qbitelai_requests_total{status=~"2.."}[1h]) /
+            rate(qbitelai_requests_total[1h])
           ) * 100
 
-      - record: cronosai:availability_24h
+      - record: qbitelai:availability_24h
         expr: |
           (
-            rate(cronosai_requests_total{status=~"2.."}[24h]) /
-            rate(cronosai_requests_total[24h])
+            rate(qbitelai_requests_total{status=~"2.."}[24h]) /
+            rate(qbitelai_requests_total[24h])
           ) * 100
 
       # Resource utilization recording rules
-      - record: cronosai:cpu_utilization_5m
+      - record: qbitelai:cpu_utilization_5m
         expr: |
-          rate(process_cpu_seconds_total{job=~"cronosai-.*"}[5m]) * 100
+          rate(process_cpu_seconds_total{job=~"qbitelai-.*"}[5m]) * 100
 
-      - record: cronosai:memory_utilization_5m
+      - record: qbitelai:memory_utilization_5m
         expr: |
           (
-            process_resident_memory_bytes{job=~"cronosai-.*"} /
+            process_resident_memory_bytes{job=~"qbitelai-.*"} /
             node_memory_MemTotal_bytes
           ) * 100
 
       # Device health recording rules
-      - record: cronosai:device_health_ratio
+      - record: qbitelai:device_health_ratio
         expr: |
           (
-            count(cronosai_device_health_status{status="healthy"}) /
-            count(cronosai_device_health_status)
+            count(qbitelai_device_health_status{status="healthy"}) /
+            count(qbitelai_device_health_status)
           ) * 100
 
       # Policy evaluation performance
-      - record: cronosai:policy_evaluation_p95_5m
+      - record: qbitelai:policy_evaluation_p95_5m
         expr: |
           histogram_quantile(0.95,
-            rate(cronosai_policy_evaluation_duration_seconds_bucket[5m])
+            rate(qbitelai_policy_evaluation_duration_seconds_bucket[5m])
           )

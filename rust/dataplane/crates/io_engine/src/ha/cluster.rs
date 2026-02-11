@@ -652,7 +652,7 @@ pub struct ClusterStatus {
 impl Default for ClusterConfig {
     fn default() -> Self {
         Self {
-            node_name: "qslb-node".to_string(),
+            node_name: "qbitel-node".to_string(),
             bind_addr: "0.0.0.0:7946".parse().unwrap(),
             cluster_addrs: Vec::new(),
             heartbeat_interval: Duration::from_secs(5),

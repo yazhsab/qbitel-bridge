@@ -3,10 +3,14 @@ members = [
   "crates/pqc_tls",
   "crates/io_engine",
   "crates/adapter_sdk",
+  "crates/dpdk_engine",
+  "crates/dpi_engine",
+  "crates/ai_bridge",
+  "crates/k8s_operator",
   "crates/adapters/tn3270e",
   "crates/adapters/iso8583",
   "crates/adapters/modbus",
   "crates/adapters/hl7_mllp",
-  "bin/cronosai-bridge",
+  "bin/qbitelai-bridge",
 ]
 resolver = "2"

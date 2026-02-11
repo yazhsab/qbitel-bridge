@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Whisperer API
+QBITEL Engine - Legacy System Whisperer API
 
 REST API endpoints for Legacy System Whisperer feature.
 """

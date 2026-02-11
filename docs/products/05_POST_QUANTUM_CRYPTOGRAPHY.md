@@ -2,7 +2,7 @@
 
 ## Overview
 
-Post-Quantum Cryptography (PQC) is CRONOS AI's quantum-safe encryption platform implementing NIST Level 5 cryptographic algorithms. It protects data against both current and future quantum computing attacks using Kyber-1024 for key encapsulation and Dilithium-5 for digital signatures.
+Post-Quantum Cryptography (PQC) is QBITEL's quantum-safe encryption platform implementing NIST Level 5 cryptographic algorithms. It protects data against both current and future quantum computing attacks using Kyber-1024 for key encapsulation and Dilithium-5 for digital signatures.
 
 ---
 
@@ -28,9 +28,9 @@ Nation-state adversaries are actively:
 3. **Waiting** for quantum computers
 4. **Decrypting** historical data when capable
 
-### The CRONOS AI Solution
+### The QBITEL Solution
 
-CRONOS AI implements NIST-approved post-quantum algorithms:
+QBITEL implements NIST-approved post-quantum algorithms:
 - **Kyber-1024**: Key encapsulation (replacing RSA/ECDH)
 - **Dilithium-5**: Digital signatures (replacing RSA/ECDSA)
 - **Hybrid mode**: Combined classical + post-quantum for transition
@@ -44,7 +44,7 @@ CRONOS AI implements NIST-approved post-quantum algorithms:
 
 Highest security category approved by NIST:
 
-| Security Level | Classical Equivalent | Quantum Resistance | CRONOS AI |
+| Security Level | Classical Equivalent | Quantum Resistance | QBITEL |
 |----------------|---------------------|-------------------|-----------|
 | Level 1 | AES-128 | ~64-bit | Not used |
 | Level 2 | SHA-256 | ~128-bit | Not used |
@@ -123,7 +123,7 @@ Quantum-safe certificate lifecycle:
 
 ```
 ┌─────────────────────────────────────────────┐
-│           CRONOS AI PQC Platform            │
+│           QBITEL PQC Platform            │
 ├─────────────────────────────────────────────┤
 │                                             │
 │  ┌─────────────┐      ┌─────────────────┐  │
@@ -279,8 +279,8 @@ X-API-Key: your_api_key
 
 {
     "subject": {
-        "common_name": "payment-service.cronos.local",
-        "organization": "CRONOS AI",
+        "common_name": "payment-service.qbitel.local",
+        "organization": "QBITEL",
         "organizational_unit": "Security",
         "country": "US"
     },
@@ -288,7 +288,7 @@ X-API-Key: your_api_key
     "signature_algorithm": "dilithium-5",
     "validity_days": 90,
     "san": [
-        "payment-service.cronos.local",
+        "payment-service.qbitel.local",
         "payment-service.prod.svc.cluster.local",
         "10.0.0.100"
     ],
@@ -299,8 +299,8 @@ X-API-Key: your_api_key
 Response:
 {
     "certificate_id": "cert_pqc_xyz789",
-    "subject": "CN=payment-service.cronos.local,O=CRONOS AI",
-    "issuer": "CN=CRONOS AI Root CA",
+    "subject": "CN=payment-service.qbitel.local,O=QBITEL",
+    "issuer": "CN=QBITEL Root CA",
     "serial_number": "01:23:45:67:89:ab:cd:ef",
     "not_before": "2025-01-16T10:30:00Z",
     "not_after": "2025-04-16T10:30:00Z",
@@ -452,23 +452,23 @@ Response:
 
 ```bash
 # PQC Settings
-CRONOS_PQC_ENABLED=true
-CRONOS_PQC_DEFAULT_KEY_ALGORITHM=kyber-1024
-CRONOS_PQC_DEFAULT_SIG_ALGORITHM=dilithium-5
+QBITEL_PQC_ENABLED=true
+QBITEL_PQC_DEFAULT_KEY_ALGORITHM=kyber-1024
+QBITEL_PQC_DEFAULT_SIG_ALGORITHM=dilithium-5
 
 # Certificate Management
-CRONOS_PQC_CERT_VALIDITY_DAYS=90
-CRONOS_PQC_CERT_ROTATION_THRESHOLD=30
-CRONOS_PQC_AUTO_ROTATION=true
+QBITEL_PQC_CERT_VALIDITY_DAYS=90
+QBITEL_PQC_CERT_ROTATION_THRESHOLD=30
+QBITEL_PQC_AUTO_ROTATION=true
 
 # Performance
-CRONOS_PQC_CACHE_ENABLED=true
-CRONOS_PQC_CACHE_TTL=3600
-CRONOS_PQC_MAX_BATCH_SIZE=1000
+QBITEL_PQC_CACHE_ENABLED=true
+QBITEL_PQC_CACHE_TTL=3600
+QBITEL_PQC_MAX_BATCH_SIZE=1000
 
 # Hybrid Mode
-CRONOS_PQC_HYBRID_MODE=true
-CRONOS_PQC_CLASSICAL_ALGORITHM=ecdsa-p384
+QBITEL_PQC_HYBRID_MODE=true
+QBITEL_PQC_CLASSICAL_ALGORITHM=ecdsa-p384
 ```
 
 ### YAML Configuration
@@ -497,8 +497,8 @@ security:
       rotation_threshold_days: 30
       auto_rotation: true
       rotation_interval: "24h"
-      ca_certificate: "/etc/cronos/ca.crt"
-      ca_private_key: "/etc/cronos/ca.key"
+      ca_certificate: "/etc/qbitel/ca.crt"
+      ca_private_key: "/etc/qbitel/ca.key"
 
     # Key storage
     key_storage:
@@ -527,7 +527,7 @@ security:
 ### Python SDK
 
 ```python
-from cronos_ai.pqc import QuantumCrypto
+from qbitel.pqc import QuantumCrypto
 
 # Initialize
 crypto = QuantumCrypto(api_key="your_api_key")
@@ -593,7 +593,7 @@ spec:
 
   # Quantum-safe issuer
   issuerRef:
-    name: cronos-pqc-issuer
+    name: qbitel-pqc-issuer
     kind: ClusterIssuer
 
   # Subject
@@ -624,7 +624,7 @@ spec:
 
 ```bash
 # Inventory current cryptographic usage
-cronos-cli pqc inventory --scan-all
+qbitel-cli pqc inventory --scan-all
 
 # Output:
 # RSA-2048 keys: 1,547
@@ -665,10 +665,10 @@ crypto.configure(
 
 ```bash
 # Validate PQC deployment
-cronos-cli pqc validate --comprehensive
+qbitel-cli pqc validate --comprehensive
 
 # Generate compliance report
-cronos-cli pqc compliance-report --framework=nist
+qbitel-cli pqc compliance-report --framework=nist
 ```
 
 ---
@@ -711,27 +711,27 @@ Every cryptographic operation is logged:
 
 ```
 # Key operations
-cronos_pqc_key_generations_total{algorithm}
-cronos_pqc_key_rotations_total{algorithm}
-cronos_pqc_key_revocations_total{reason}
+qbitel_pqc_key_generations_total{algorithm}
+qbitel_pqc_key_rotations_total{algorithm}
+qbitel_pqc_key_revocations_total{reason}
 
 # Certificate operations
-cronos_pqc_certificates_issued_total
-cronos_pqc_certificates_expired_total
-cronos_pqc_certificates_revoked_total
-cronos_pqc_certificate_days_until_expiry{certificate_id}
+qbitel_pqc_certificates_issued_total
+qbitel_pqc_certificates_expired_total
+qbitel_pqc_certificates_revoked_total
+qbitel_pqc_certificate_days_until_expiry{certificate_id}
 
 # Cryptographic operations
-cronos_pqc_encryptions_total{algorithm}
-cronos_pqc_decryptions_total{algorithm}
-cronos_pqc_signatures_total{algorithm}
-cronos_pqc_verifications_total{algorithm}
-cronos_pqc_operation_duration_seconds{operation, algorithm}
+qbitel_pqc_encryptions_total{algorithm}
+qbitel_pqc_decryptions_total{algorithm}
+qbitel_pqc_signatures_total{algorithm}
+qbitel_pqc_verifications_total{algorithm}
+qbitel_pqc_operation_duration_seconds{operation, algorithm}
 
 # Performance
-cronos_pqc_throughput_ops_per_second{operation}
-cronos_pqc_cache_hits_total
-cronos_pqc_cache_misses_total
+qbitel_pqc_throughput_ops_per_second{operation}
+qbitel_pqc_cache_hits_total
+qbitel_pqc_cache_misses_total
 ```
 
 ---

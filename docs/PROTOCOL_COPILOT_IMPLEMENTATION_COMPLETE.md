@@ -163,7 +163,7 @@ POST /api/v1/copilot/behavior/explain
 
 ### WebSocket API
 ```javascript
-const ws = new WebSocket('wss://api.cronos-ai.com/api/v1/copilot/ws?token=<jwt>');
+const ws = new WebSocket('wss://api.qbitel.com/api/v1/copilot/ws?token=<jwt>');
 ```
 
 ---
@@ -172,21 +172,21 @@ const ws = new WebSocket('wss://api.cronos-ai.com/api/v1/copilot/ws?token=<jwt>'
 
 ### Environment Variables
 ```bash
-CRONOS_AI_OPENAI_API_KEY=sk-...
-CRONOS_AI_ANTHROPIC_API_KEY=sk-ant-...
-CRONOS_AI_DB_PASSWORD=<secure_password>
-CRONOS_AI_REDIS_PASSWORD=<secure_password>
-CRONOS_AI_JWT_SECRET=<secure_secret>
-CRONOS_AI_ENVIRONMENT=production
+QBITEL_AI_OPENAI_API_KEY=sk-...
+QBITEL_AI_ANTHROPIC_API_KEY=sk-ant-...
+QBITEL_AI_DB_PASSWORD=<secure_password>
+QBITEL_AI_REDIS_PASSWORD=<secure_password>
+QBITEL_AI_JWT_SECRET=<secure_secret>
+QBITEL_AI_ENVIRONMENT=production
 ```
 
 ### Docker Deployment
 ```bash
 docker run -d \
-  --name cronos-copilot \
+  --name qbitel-copilot \
   -p 8000:8000 \
-  -e CRONOS_AI_OPENAI_API_KEY=$OPENAI_KEY \
-  cronos-ai-copilot:latest
+  -e QBITEL_AI_OPENAI_API_KEY=$OPENAI_KEY \
+  qbitel-copilot:latest
 ```
 
 ---
@@ -273,7 +273,7 @@ The Protocol Intelligence Copilot is **100% production-ready** with all requeste
 
 ---
 
-**Implementation Team:** CRONOS AI Engineering  
+**Implementation Team:** QBITEL Engineering  
 **Date:** October 1, 2025  
 **Version:** 2.0.0  
 **Status:** ✅ PRODUCTION READY

@@ -1,5 +1,5 @@
 """
-CRONOS AI - Automated Threat Hunter
+QBITEL - Automated Threat Hunter
 
 Proactive threat hunting using IOCs, behavioral analytics, and MITRE ATT&CK
 techniques to identify hidden threats.
@@ -16,7 +16,7 @@ from enum import Enum
 from prometheus_client import Counter, Histogram, Gauge
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..security.models import SecurityEvent, ThreatLevel
 from .stix_taxii_client import STIXIndicator, STIXTAXIIClient
 from .mitre_attack_mapper import MITREATTACKMapper, ATTACKTechnique
@@ -24,21 +24,21 @@ from .mitre_attack_mapper import MITREATTACKMapper, ATTACKTechnique
 
 # Prometheus metrics
 HUNT_CAMPAIGNS_EXECUTED = Counter(
-    "cronos_threat_hunt_campaigns_total",
+    "qbitel_threat_hunt_campaigns_total",
     "Total threat hunting campaigns executed",
     ["hunt_type"],
     registry=None,
 )
 
 HUNT_FINDINGS_DISCOVERED = Counter(
-    "cronos_threat_hunt_findings_total",
+    "qbitel_threat_hunt_findings_total",
     "Threat hunting findings discovered",
     ["severity", "finding_type"],
     registry=None,
 )
 
 HUNT_CAMPAIGN_DURATION = Histogram(
-    "cronos_threat_hunt_campaign_duration_seconds",
+    "qbitel_threat_hunt_campaign_duration_seconds",
     "Duration of hunting campaigns",
     registry=None,
 )
@@ -343,7 +343,7 @@ class ThreatHunter:
             campaign.status = "failed"
             campaign.end_time = datetime.utcnow()
             self.logger.error(f"Hunt campaign {campaign_id} failed: {e}")
-            raise CronosAIException(f"Hunt campaign failed: {e}")
+            raise QbitelAIException(f"Hunt campaign failed: {e}")
 
     async def _hunt_hypothesis(
         self, hypothesis: HuntHypothesis, time_range_hours: int

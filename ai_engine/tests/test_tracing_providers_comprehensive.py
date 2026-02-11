@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Comprehensive Distributed Tracing Tests
+QBITEL Engine - Comprehensive Distributed Tracing Tests
 
 Complete test suite for distributed tracing functionality including
 JaegerTracingProvider, ZipkinTracingProvider, and tracing provider factory.
@@ -54,7 +54,7 @@ class TestJaegerConfig:
         assert config.agent_host == "localhost"
         assert config.agent_port == 6831
         assert config.collector_endpoint is None
-        assert config.service_name == "cronos-ai"
+        assert config.service_name == "qbitel"
         assert config.sampling_rate == 1.0
         assert config.max_tag_value_length == 1024
         assert config.max_packet_size == 65000
@@ -82,7 +82,7 @@ class TestZipkinConfig:
         config = ZipkinConfig()
 
         assert config.endpoint == "http://localhost:9411"
-        assert config.service_name == "cronos-ai"
+        assert config.service_name == "qbitel"
         assert config.sampling_rate == 1.0
         assert config.max_tag_value_length == 1024
 

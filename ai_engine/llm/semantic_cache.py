@@ -1,5 +1,5 @@
 """
-CRONOS AI - Semantic Caching for LLM Responses
+QBITEL - Semantic Caching for LLM Responses
 Intelligent caching that matches semantically similar queries.
 
 Features:

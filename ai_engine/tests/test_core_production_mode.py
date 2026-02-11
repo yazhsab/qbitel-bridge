@@ -2,7 +2,7 @@
 Comprehensive tests for ai_engine.core.production_mode module.
 
 This module provides production mode detection, configuration, and
-environment-specific behavior for the CRONOS AI Engine.
+environment-specific behavior for the QBITEL Engine.
 """
 
 import pytest
@@ -183,7 +183,7 @@ class TestProductionModeDetector:
 
     def test_detect_from_environment_variable(self, detector):
         """Test detecting production mode from environment variable."""
-        with patch.dict(os.environ, {"CRONOS_ENVIRONMENT": "production"}):
+        with patch.dict(os.environ, {"QBITEL_ENVIRONMENT": "production"}):
             result = detector.detect()
 
             assert result.environment == EnvironmentType.PRODUCTION
@@ -192,7 +192,7 @@ class TestProductionModeDetector:
 
     def test_detect_from_environment_variable_development(self, detector):
         """Test detecting development mode from environment variable."""
-        with patch.dict(os.environ, {"CRONOS_ENVIRONMENT": "development"}):
+        with patch.dict(os.environ, {"QBITEL_ENVIRONMENT": "development"}):
             result = detector.detect()
 
             assert result.environment == EnvironmentType.DEVELOPMENT
@@ -201,7 +201,7 @@ class TestProductionModeDetector:
 
     def test_detect_from_environment_variable_staging(self, detector):
         """Test detecting staging mode from environment variable."""
-        with patch.dict(os.environ, {"CRONOS_ENVIRONMENT": "staging"}):
+        with patch.dict(os.environ, {"QBITEL_ENVIRONMENT": "staging"}):
             result = detector.detect()
 
             assert result.environment == EnvironmentType.STAGING
@@ -210,7 +210,7 @@ class TestProductionModeDetector:
 
     def test_detect_from_environment_variable_testing(self, detector):
         """Test detecting testing mode from environment variable."""
-        with patch.dict(os.environ, {"CRONOS_ENVIRONMENT": "testing"}):
+        with patch.dict(os.environ, {"QBITEL_ENVIRONMENT": "testing"}):
             result = detector.detect()
 
             assert result.environment == EnvironmentType.TESTING
@@ -219,7 +219,7 @@ class TestProductionModeDetector:
 
     def test_detect_from_environment_variable_invalid(self, detector):
         """Test detecting invalid environment variable."""
-        with patch.dict(os.environ, {"CRONOS_ENVIRONMENT": "invalid"}):
+        with patch.dict(os.environ, {"QBITEL_ENVIRONMENT": "invalid"}):
             with pytest.raises(ProductionModeError, match="Invalid environment type"):
                 detector.detect()
 
@@ -287,7 +287,7 @@ class TestProductionModeDetector:
         ):
             with patch("ai_engine.core.production_mode.os.getenv", return_value=None):
                 with patch(
-                    "ai_engine.core.production_mode.sys.argv", ["/usr/bin/cronos-ai"]
+                    "ai_engine.core.production_mode.sys.argv", ["/usr/bin/qbitel"]
                 ):
                     result = detector.detect_from_heuristics()
 
@@ -311,7 +311,7 @@ class TestProductionModeDetector:
 
     def test_detect_auto(self, detector):
         """Test automatic detection with multiple sources."""
-        with patch.dict(os.environ, {"CRONOS_ENVIRONMENT": "production"}):
+        with patch.dict(os.environ, {"QBITEL_ENVIRONMENT": "production"}):
             result = detector.detect_auto()
 
             assert result.environment == EnvironmentType.PRODUCTION
@@ -331,7 +331,7 @@ class TestProductionModeDetector:
 
     def test_get_detection_info(self, detector):
         """Test getting detection information."""
-        with patch.dict(os.environ, {"CRONOS_ENVIRONMENT": "production"}):
+        with patch.dict(os.environ, {"QBITEL_ENVIRONMENT": "production"}):
             detector.detect()
 
             info = detector.get_detection_info()
@@ -368,7 +368,7 @@ class TestProductionModeManager:
 
     def test_initialize_with_detection(self, manager):
         """Test ProductionModeManager initialization with auto-detection."""
-        with patch.dict(os.environ, {"CRONOS_ENVIRONMENT": "production"}):
+        with patch.dict(os.environ, {"QBITEL_ENVIRONMENT": "production"}):
             manager.initialize_with_detection()
 
             assert manager._config is not None
@@ -1302,7 +1302,7 @@ class TestProductionModeIntegration:
         detector = ProductionModeDetector()
 
         # Detect production mode
-        with patch.dict(os.environ, {"CRONOS_ENVIRONMENT": "production"}):
+        with patch.dict(os.environ, {"QBITEL_ENVIRONMENT": "production"}):
             config = detector.detect()
 
             assert config.environment == EnvironmentType.PRODUCTION
@@ -1366,7 +1366,7 @@ class TestProductionModeIntegration:
         manager = ProductionModeManager()
 
         # Detect and initialize
-        with patch.dict(os.environ, {"CRONOS_ENVIRONMENT": "production"}):
+        with patch.dict(os.environ, {"QBITEL_ENVIRONMENT": "production"}):
             config = detector.detect()
             manager.initialize(config)
 
@@ -1395,7 +1395,7 @@ class TestProductionModeIntegration:
         # Initialize manager
         manager = ProductionModeManager()
 
-        with patch.dict(os.environ, {"CRONOS_ENVIRONMENT": "production"}):
+        with patch.dict(os.environ, {"QBITEL_ENVIRONMENT": "production"}):
             config = manager.detect_and_initialize()
 
         # Register health check

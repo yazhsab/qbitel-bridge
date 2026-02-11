@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Feature Extractors
+QBITEL Engine - Feature Extractors
 
 This module implements comprehensive feature extraction capabilities for
 protocol messages and network traffic analysis.

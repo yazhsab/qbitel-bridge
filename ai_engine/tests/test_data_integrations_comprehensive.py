@@ -518,7 +518,7 @@ class TestTimescaleComplianceIntegration:
     def test_password_from_environment(self, mock_config):
         """Test password loading from environment."""
         mock_config.database.password = ""
-        with patch.dict("os.environ", {"CRONOS_AI_DB_PASSWORD": "env_password"}):
+        with patch.dict("os.environ", {"QBITEL_AI_DB_PASSWORD": "env_password"}):
             integration = TimescaleComplianceIntegration(mock_config)
             assert integration.password == "env_password"
 
@@ -1050,11 +1050,11 @@ class TestIntegrationException:
         assert str(exc) == "Test error"
 
     def test_exception_inheritance(self):
-        """Test that IntegrationException inherits from CronosAIException."""
-        from ai_engine.core.exceptions import CronosAIException
+        """Test that IntegrationException inherits from QbitelAIException."""
+        from ai_engine.core.exceptions import QbitelAIException
 
         exc = IntegrationException("Test error")
-        assert isinstance(exc, CronosAIException)
+        assert isinstance(exc, QbitelAIException)
 
 
 if __name__ == "__main__":

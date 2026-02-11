@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document details the complete implementation of the **Dynamic Parser Generation Enhancement** (Month 2, Section 1.2) for the CRONOS AI Protocol Discovery Engine. This implementation provides production-grade parser generation with advanced optimization, streaming support, and error recovery mechanisms.
+This document details the complete implementation of the **Dynamic Parser Generation Enhancement** (Month 2, Section 1.2) for the QBITEL Bridge Engine. This implementation provides production-grade parser generation with advanced optimization, streaming support, and error recovery mechanisms.
 
 ## Implementation Status: ✅ COMPLETE
 

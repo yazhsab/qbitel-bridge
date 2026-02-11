@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Bulkhead Isolation Implementation
+QBITEL Engine - Bulkhead Isolation Implementation
 
 Enterprise-grade bulkhead pattern to isolate resources and prevent
 cascading failures in the Zero-Touch Security Orchestrator.
@@ -98,7 +98,7 @@ class ResourcePool:
         self.degraded_capacity_threshold = degraded_capacity_threshold
         self.rejection_threshold = rejection_threshold
 
-        self.logger = get_security_logger(f"cronos.security.resilience.bulkhead.{name}")
+        self.logger = get_security_logger(f"qbitel.security.resilience.bulkhead.{name}")
 
         # Resource management
         self._semaphore = asyncio.Semaphore(capacity)
@@ -464,7 +464,7 @@ class BulkheadManager:
 
     def __init__(self):
         self.resource_pools: Dict[str, ResourcePool] = {}
-        self.logger = get_security_logger("cronos.security.resilience.bulkhead_manager")
+        self.logger = get_security_logger("qbitel.security.resilience.bulkhead_manager")
 
         # Global metrics
         self._total_pools = 0

@@ -1,0 +1,62 @@
+QBITEL Bridge
+Copyright 2025 QBITEL Contributors
+
+This product includes software developed by the QBITEL project
+(https://github.com/qbitel/qbitel-bridge).
+
+Licensed under the Apache License, Version 2.0.
+
+===============================================================================
+
+Third-Party Dependencies and Licenses
+===============================================================================
+
+Python Dependencies:
+  - PyTorch (BSD-3-Clause) - https://pytorch.org/
+  - Transformers (Apache-2.0) - https://github.com/huggingface/transformers
+  - Scikit-learn (BSD-3-Clause) - https://scikit-learn.org/
+  - FastAPI (MIT) - https://fastapi.tiangolo.com/
+  - Pydantic (MIT) - https://pydantic-docs.helpmanual.io/
+  - SHAP (MIT) - https://github.com/shap/shap
+  - LIME (BSD-2-Clause) - https://github.com/marcotcr/lime
+  - ChromaDB (Apache-2.0) - https://github.com/chroma-core/chroma
+  - kafka-python (Apache-2.0) - https://github.com/dpkp/kafka-python
+  - grpcio (Apache-2.0) - https://grpc.io/
+  - cryptography (Apache-2.0 / BSD-3-Clause) - https://cryptography.io/
+  - kyber-py (MIT) - Kyber KEM implementation
+  - dilithium-py (MIT) - Dilithium signature implementation
+  - liboqs-python (MIT) - Open Quantum Safe project bindings
+  - Prometheus client (Apache-2.0) - https://github.com/prometheus/client_python
+  - OpenTelemetry (Apache-2.0) - https://opentelemetry.io/
+  - Stripe (MIT) - https://github.com/stripe/stripe-python
+  - boto3 (Apache-2.0) - https://aws.amazon.com/sdk-for-python/
+
+Rust Dependencies:
+  - liboqs / oqs-rs (MIT) - Open Quantum Safe library
+  - tokio (MIT) - Async runtime
+  - serde (MIT / Apache-2.0) - Serialization framework
+
+Go Dependencies:
+  - Gin (MIT) - https://github.com/gin-gonic/gin
+  - OPA (Apache-2.0) - https://www.openpolicyagent.org/
+  - Cosign (Apache-2.0) - https://github.com/sigstore/cosign
+  - Zap (MIT) - https://github.com/uber-go/zap
+
+JavaScript/TypeScript Dependencies:
+  - React (MIT) - https://reactjs.org/
+  - Vite (MIT) - https://vitejs.dev/
+
+Infrastructure:
+  - Kubernetes (Apache-2.0) - https://kubernetes.io/
+  - Istio (Apache-2.0) - https://istio.io/
+  - Envoy Proxy (Apache-2.0) - https://www.envoyproxy.io/
+  - Trivy (Apache-2.0) - https://github.com/aquasecurity/trivy
+  - Prometheus (Apache-2.0) - https://prometheus.io/
+  - Grafana (AGPL-3.0) - https://grafana.com/
+  - Jaeger (Apache-2.0) - https://www.jaegertracing.io/
+
+===============================================================================
+
+This NOTICE file is provided for informational purposes only and does not
+modify the terms of the Apache License, Version 2.0 under which this
+software is distributed.

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - Automated PostgreSQL Backup System
+QBITEL - Automated PostgreSQL Backup System
 Production-ready database backup with verification and retention management.
 
 Features:
@@ -38,12 +38,12 @@ class BackupConfig:
         # Database connection
         self.db_host = os.getenv("DATABASE_HOST", "localhost")
         self.db_port = int(os.getenv("DATABASE_PORT", "5432"))
-        self.db_name = os.getenv("DATABASE_NAME", "cronos_ai_prod")
-        self.db_user = os.getenv("DATABASE_USER", "cronos_user")
+        self.db_name = os.getenv("DATABASE_NAME", "qbitel_prod")
+        self.db_user = os.getenv("DATABASE_USER", "qbitel_user")
         self.db_password = os.getenv("DATABASE_PASSWORD", "")
 
         # Backup configuration
-        self.backup_dir = Path(os.getenv("BACKUP_DIR", "/var/backups/cronos_ai"))
+        self.backup_dir = Path(os.getenv("BACKUP_DIR", "/var/backups/qbitel"))
         self.retention_days = int(os.getenv("BACKUP_RETENTION_DAYS", "30"))
         self.compression_enabled = (
             os.getenv("BACKUP_COMPRESS", "true").lower() == "true"
@@ -56,7 +56,7 @@ class BackupConfig:
             "BACKUP_CLOUD_BACKEND", "none"
         )  # s3, azure, gcs, none
         self.s3_bucket = os.getenv("BACKUP_S3_BUCKET", "")
-        self.s3_prefix = os.getenv("BACKUP_S3_PREFIX", "cronos-ai/backups")
+        self.s3_prefix = os.getenv("BACKUP_S3_PREFIX", "qbitel/backups")
         self.azure_container = os.getenv("BACKUP_AZURE_CONTAINER", "")
         self.gcs_bucket = os.getenv("BACKUP_GCS_BUCKET", "")
 
@@ -482,7 +482,7 @@ class PostgreSQLBackup:
 def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
-        description="CRONOS AI Database Backup Tool",
+        description="QBITEL Database Backup Tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -507,10 +507,10 @@ Examples:
 Environment Variables:
   DATABASE_HOST              PostgreSQL host (default: localhost)
   DATABASE_PORT              PostgreSQL port (default: 5432)
-  DATABASE_NAME              Database name (default: cronos_ai_prod)
-  DATABASE_USER              Database user (default: cronos_user)
+  DATABASE_NAME              Database name (default: qbitel_prod)
+  DATABASE_USER              Database user (default: qbitel_user)
   DATABASE_PASSWORD          Database password (required)
-  BACKUP_DIR                 Backup directory (default: /var/backups/cronos_ai)
+  BACKUP_DIR                 Backup directory (default: /var/backups/qbitel)
   BACKUP_RETENTION_DAYS      Retention period in days (default: 30)
   BACKUP_COMPRESS            Enable compression (default: true)
   BACKUP_ENCRYPT             Enable encryption (default: false)

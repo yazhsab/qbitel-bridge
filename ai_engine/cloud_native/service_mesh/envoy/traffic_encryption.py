@@ -472,9 +472,9 @@ class EastWestEncryption:
             Dict containing Envoy filter configuration
         """
         return {
-            "name": "cronos.filters.http.quantum_encryption",
+            "name": "qbitel.filters.http.quantum_encryption",
             "typed_config": {
-                "@type": "type.googleapis.com/cronos.extensions.filters.http.quantum_encryption.v3.QuantumEncryption",
+                "@type": "type.googleapis.com/qbitel.extensions.filters.http.quantum_encryption.v3.QuantumEncryption",
                 "encryption_mode": self.mode.value,
                 "key_algorithm": "kyber-1024",
                 "signature_algorithm": "dilithium-5",
@@ -483,12 +483,12 @@ class EastWestEncryption:
                 "enable_metrics": True,
                 "metrics_prefix": "quantum_encryption",
                 "stat_prefix": "quantum_encryption",
-                "header_prefix": "x-cronos-",
+                "header_prefix": "x-qbitel-",
                 "enable_request_encryption": True,
                 "enable_response_encryption": True,
                 "minimum_body_size": 0,  # Encrypt all bodies
                 "metadata": {
-                    "provider": "CRONOS AI",
+                    "provider": "QBITEL",
                     "security_level": "NIST Level 5",
                     "forward_secrecy": True
                 }
@@ -509,13 +509,13 @@ class EastWestEncryption:
                 "type_url": "type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm",
                 "value": {
                     "config": {
-                        "name": "cronos_quantum_encryption",
-                        "root_id": "cronos_quantum_encryption_root",
+                        "name": "qbitel_quantum_encryption",
+                        "root_id": "qbitel_quantum_encryption_root",
                         "vm_config": {
                             "runtime": "envoy.wasm.runtime.v8",
                             "code": {
                                 "local": {
-                                    "filename": "/etc/cronos/filters/quantum_encryption.wasm"
+                                    "filename": "/etc/qbitel/filters/quantum_encryption.wasm"
                                 }
                             }
                         },

@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
-	"qslb/mgmtapi/internal/devices"
+	"github.com/yazhsab/qbitel-bridge/go/mgmtapi/internal/devices"
 )
 
 var startTime = time.Now()

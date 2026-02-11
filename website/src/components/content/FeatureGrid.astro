@@ -1,0 +1,38 @@
+---
+import FeatureCard from './FeatureCard.astro';
+import { coreFeatures } from '@/data/features';
+---
+
+<section class="py-16 lg:py-24">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="section-heading">
+        Everything You Need to <span class="gradient-text">Modernize Legacy Systems</span>
+      </h2>
+      <p class="section-subheading mx-auto">
+        A comprehensive platform combining AI discovery, quantum-safe cryptography, autonomous security, and automated compliance.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-4">
+      {coreFeatures.map((feature) => (
+        <FeatureCard
+          title={feature.title}
+          description={feature.description}
+          icon={feature.icon}
+          href={feature.href}
+          badge={feature.badge}
+        />
+      ))}
+    </div>
+
+    <div class="text-center mt-8">
+      <a href="/products" class="btn-secondary">
+        View All Products
+        <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>

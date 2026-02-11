@@ -1,4 +1,4 @@
-//! Error types for the CRONOS AI Kubernetes operator
+//! Error types for the QBITEL Bridge Kubernetes operator
 
 use thiserror::Error;
 

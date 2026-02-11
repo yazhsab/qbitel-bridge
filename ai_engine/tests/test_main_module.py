@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Main Module Tests
+QBITEL Engine - Main Module Tests
 
 Comprehensive test suite for the main entry point module.
 """
@@ -500,9 +500,9 @@ class TestMainModule:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "production",
-                "CRONOS_AI_LOG_LEVEL": "WARNING",
-                "CRONOS_AI_API_PORT": "9000",
+                "QBITEL_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_LOG_LEVEL": "WARNING",
+                "QBITEL_AI_API_PORT": "9000",
             },
         ):
             config = __main__.load_configuration()

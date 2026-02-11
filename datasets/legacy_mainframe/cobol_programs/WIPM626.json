@@ -1,0 +1,19 @@
+{
+  "program_id": "WIPM626",
+  "domain": "manufacturing",
+  "program_type": "file_maintenance",
+  "author": "M. JOHNSON",
+  "lines_of_code": 196,
+  "complexity_level": "medium",
+  "complexity_score": 0.487,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.914631",
+  "hash": "2ded834f44ffbd8b3b4d2c1478341705"
+}

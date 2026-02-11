@@ -1,7 +1,7 @@
 """
 Istio Sidecar Injector
 
-Automatically injects CRONOS AI quantum-safe security sidecars into Kubernetes pods
+Automatically injects QBITEL quantum-safe security sidecars into Kubernetes pods
 for transparent encryption of service-to-service traffic.
 """
 
@@ -17,9 +17,9 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class SidecarConfig:
-    """Configuration for CRONOS AI security sidecar"""
+    """Configuration for QBITEL security sidecar"""
 
-    image: str = "cronos-ai/quantum-sidecar:latest"
+    image: str = "qbitel/quantum-sidecar:latest"
     cpu_request: str = "100m"
     cpu_limit: str = "500m"
     memory_request: str = "128Mi"
@@ -34,7 +34,7 @@ class SidecarConfig:
 
 class IstioSidecarInjector:
     """
-    Manages automatic injection of CRONOS AI quantum-safe security sidecars
+    Manages automatic injection of QBITEL quantum-safe security sidecars
     into Istio service mesh pods.
 
     This replaces or augments the default Istio Envoy sidecar with quantum-safe
@@ -43,15 +43,15 @@ class IstioSidecarInjector:
 
     def __init__(
         self,
-        namespace: str = "cronos-system",
+        namespace: str = "qbitel-system",
         config: Optional[SidecarConfig] = None,
-        webhook_name: str = "cronos-sidecar-injector"
+        webhook_name: str = "qbitel-sidecar-injector"
     ):
         """
         Initialize the Istio sidecar injector.
 
         Args:
-            namespace: Kubernetes namespace for CRONOS AI components
+            namespace: Kubernetes namespace for QBITEL components
             config: Sidecar configuration settings
             webhook_name: Name of the mutating webhook configuration
         """
@@ -73,16 +73,16 @@ class IstioSidecarInjector:
             "metadata": {
                 "name": self.webhook_name,
                 "labels": {
-                    "app": "cronos-ai",
+                    "app": "qbitel",
                     "component": "sidecar-injector"
                 }
             },
             "webhooks": [
                 {
-                    "name": f"{self.webhook_name}.cronos-ai.io",
+                    "name": f"{self.webhook_name}.qbitel.io",
                     "clientConfig": {
                         "service": {
-                            "name": "cronos-sidecar-injector",
+                            "name": "qbitel-sidecar-injector",
                             "namespace": self.namespace,
                             "path": "/inject"
                         },
@@ -101,7 +101,7 @@ class IstioSidecarInjector:
                     "sideEffects": "None",
                     "namespaceSelector": {
                         "matchLabels": {
-                            "cronos-injection": "enabled"
+                            "qbitel-injection": "enabled"
                         }
                     }
                 }
@@ -113,7 +113,7 @@ class IstioSidecarInjector:
 
     def inject_sidecar(self, pod_spec: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Inject CRONOS AI quantum-safe sidecar into a pod specification.
+        Inject QBITEL quantum-safe sidecar into a pod specification.
 
         Args:
             pod_spec: Original Kubernetes pod specification
@@ -148,19 +148,19 @@ class IstioSidecarInjector:
             pod_spec["metadata"]["annotations"] = {}
 
         pod_spec["metadata"]["annotations"].update({
-            "cronos.ai/sidecar-injected": "true",
-            "cronos.ai/quantum-algorithm": self.config.quantum_algorithm,
-            "cronos.ai/signature-algorithm": self.config.signature_algorithm,
-            "cronos.ai/version": "1.0.0"
+            "qbitel.ai/sidecar-injected": "true",
+            "qbitel.ai/quantum-algorithm": self.config.quantum_algorithm,
+            "qbitel.ai/signature-algorithm": self.config.signature_algorithm,
+            "qbitel.ai/version": "1.0.0"
         })
 
-        logger.info("Successfully injected CRONOS AI sidecar into pod")
+        logger.info("Successfully injected QBITEL sidecar into pod")
         return pod_spec
 
     def _create_sidecar_container(self) -> Dict[str, Any]:
         """Create the sidecar container specification"""
         return {
-            "name": "cronos-quantum-proxy",
+            "name": "qbitel-quantum-proxy",
             "image": self.config.image,
             "imagePullPolicy": "IfNotPresent",
             "args": [
@@ -207,7 +207,7 @@ class IstioSidecarInjector:
                     }
                 },
                 {
-                    "name": "CRONOS_QUANTUM_ENABLED",
+                    "name": "QBITEL_QUANTUM_ENABLED",
                     "value": "true"
                 }
             ],
@@ -223,13 +223,13 @@ class IstioSidecarInjector:
             },
             "volumeMounts": [
                 {
-                    "name": "cronos-certs",
-                    "mountPath": "/etc/cronos/certs",
+                    "name": "qbitel-certs",
+                    "mountPath": "/etc/qbitel/certs",
                     "readOnly": True
                 },
                 {
-                    "name": "cronos-config",
-                    "mountPath": "/etc/cronos/config",
+                    "name": "qbitel-config",
+                    "mountPath": "/etc/qbitel/config",
                     "readOnly": True
                 }
             ],
@@ -262,10 +262,10 @@ class IstioSidecarInjector:
     def _create_init_container(self) -> Dict[str, Any]:
         """Create the init container for iptables setup"""
         return {
-            "name": "cronos-init",
+            "name": "qbitel-init",
             "image": self.config.image,
             "imagePullPolicy": "IfNotPresent",
-            "command": ["cronos-iptables"],
+            "command": ["qbitel-iptables"],
             "args": [
                 "-p", str(self.config.proxy_port),
                 "-u", "1337",
@@ -298,16 +298,16 @@ class IstioSidecarInjector:
         """Create volume specifications for certificates and config"""
         return [
             {
-                "name": "cronos-certs",
+                "name": "qbitel-certs",
                 "secret": {
-                    "secretName": "cronos-quantum-certs",
+                    "secretName": "qbitel-quantum-certs",
                     "optional": False
                 }
             },
             {
-                "name": "cronos-config",
+                "name": "qbitel-config",
                 "configMap": {
-                    "name": "cronos-mesh-config",
+                    "name": "qbitel-mesh-config",
                     "optional": False
                 }
             }
@@ -325,11 +325,11 @@ class IstioSidecarInjector:
         """
         # Check for explicit annotation to skip injection
         annotations = pod.get("metadata", {}).get("annotations", {})
-        if annotations.get("cronos.ai/inject") == "false":
+        if annotations.get("qbitel.ai/inject") == "false":
             return False
 
         # Check if already injected
-        if annotations.get("cronos.ai/sidecar-injected") == "true":
+        if annotations.get("qbitel.ai/sidecar-injected") == "true":
             return False
 
         # Check namespace label
@@ -339,7 +339,7 @@ class IstioSidecarInjector:
         labels = pod.get("metadata", {}).get("labels", {})
 
         # Inject if explicitly requested or if namespace is labeled
-        if annotations.get("cronos.ai/inject") == "true":
+        if annotations.get("qbitel.ai/inject") == "true":
             return True
 
         # Add more sophisticated injection logic here
@@ -360,7 +360,7 @@ class IstioSidecarInjector:
             "template": {
                 "metadata": {
                     "annotations": {
-                        "cronos.ai/sidecar-injected": "true"
+                        "qbitel.ai/sidecar-injected": "true"
                     }
                 },
                 "spec": {
@@ -389,10 +389,10 @@ def create_injection_webhook_service() -> Dict[str, Any]:
         "apiVersion": "v1",
         "kind": "Service",
         "metadata": {
-            "name": "cronos-sidecar-injector",
-            "namespace": "cronos-system",
+            "name": "qbitel-sidecar-injector",
+            "namespace": "qbitel-system",
             "labels": {
-                "app": "cronos-ai",
+                "app": "qbitel",
                 "component": "sidecar-injector"
             }
         },
@@ -406,7 +406,7 @@ def create_injection_webhook_service() -> Dict[str, Any]:
                 }
             ],
             "selector": {
-                "app": "cronos-ai",
+                "app": "qbitel",
                 "component": "sidecar-injector"
             },
             "type": "ClusterIP"

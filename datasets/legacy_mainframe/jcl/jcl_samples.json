@@ -1,0 +1,134 @@
+{
+  "metadata": {
+    "title": "JCL (Job Control Language) Samples for RAG",
+    "version": "1.0.0",
+    "description": "Comprehensive JCL samples for legacy mainframe modernization",
+    "total_samples": 50
+  },
+  "samples": [
+    {
+      "id": "JCL001",
+      "name": "Simple Batch Job",
+      "description": "Basic batch job to execute a COBOL program",
+      "jcl": "//CUSTJOB  JOB (ACCT),'CUSTOMER BATCH',\n//         CLASS=A,MSGCLASS=X,NOTIFY=&SYSUID\n//*\n//* CUSTOMER MASTER FILE PROCESSING\n//*\n//STEP1    EXEC PGM=CUSTMAST\n//STEPLIB  DD  DSN=PROD.LOADLIB,DISP=SHR\n//CUSTIN   DD  DSN=PROD.CUSTOMER.MASTER,DISP=SHR\n//CUSTOUT  DD  DSN=PROD.CUSTOMER.OUTPUT,\n//             DISP=(NEW,CATLG,DELETE),\n//             SPACE=(CYL,(10,5),RLSE),\n//             DCB=(RECFM=FB,LRECL=200,BLKSIZE=0)\n//SYSOUT   DD  SYSOUT=*\n//SYSPRINT DD  SYSOUT=*",
+      "modern_equivalent": {
+        "type": "kubernetes_job",
+        "yaml": "apiVersion: batch/v1\nkind: Job\nmetadata:\n  name: customer-batch\nspec:\n  template:\n    spec:\n      containers:\n      - name: customer-processor\n        image: qbitel/customer-processor:latest\n        env:\n        - name: INPUT_PATH\n          value: s3://prod-data/customer/master\n        - name: OUTPUT_PATH\n          value: s3://prod-data/customer/output\n      restartPolicy: Never"
+      },
+      "mapping_notes": [
+        "JOB -> Kubernetes Job metadata",
+        "EXEC PGM -> Container image",
+        "DD DSN -> Environment variables with S3/storage paths",
+        "STEPLIB -> Container image layer",
+        "SYSOUT -> stdout/stderr logging"
+      ]
+    },
+    {
+      "id": "JCL002",
+      "name": "Multi-Step Job",
+      "description": "Job with multiple sequential steps",
+      "jcl": "//MULTISTEP JOB (ACCT),'MULTI STEP JOB',CLASS=A\n//*\n//STEP1    EXEC PGM=EXTRACT\n//INPUT    DD  DSN=PROD.DAILY.TRANS,DISP=SHR\n//OUTPUT   DD  DSN=&&TEMP1,DISP=(NEW,PASS),\n//             SPACE=(CYL,(5,2))\n//*\n//STEP2    EXEC PGM=SORT\n//SORTIN   DD  DSN=&&TEMP1,DISP=(OLD,DELETE)\n//SORTOUT  DD  DSN=&&TEMP2,DISP=(NEW,PASS),\n//             SPACE=(CYL,(5,2))\n//SYSIN    DD  *\n  SORT FIELDS=(1,10,CH,A)\n/*\n//*\n//STEP3    EXEC PGM=REPORT,COND=(0,NE)\n//INPUT    DD  DSN=&&TEMP2,DISP=(OLD,DELETE)\n//REPORT   DD  SYSOUT=*",
+      "modern_equivalent": {
+        "type": "airflow_dag",
+        "python": "from airflow import DAG\nfrom airflow.operators.python import PythonOperator\nfrom datetime import datetime\n\nwith DAG('multi_step_job', start_date=datetime(2024, 1, 1)) as dag:\n    extract = PythonOperator(\n        task_id='extract',\n        python_callable=extract_daily_trans\n    )\n    \n    sort = PythonOperator(\n        task_id='sort',\n        python_callable=sort_transactions\n    )\n    \n    report = PythonOperator(\n        task_id='report',\n        python_callable=generate_report,\n        trigger_rule='all_success'  # COND=(0,NE)\n    )\n    \n    extract >> sort >> report"
+      },
+      "mapping_notes": [
+        "Multi-step JCL -> DAG with task dependencies",
+        "&&TEMP -> XCom or intermediate storage",
+        "COND parameter -> trigger_rule",
+        "SORT utility -> Python sort or Spark"
+      ]
+    },
+    {
+      "id": "JCL003",
+      "name": "Procedure Call",
+      "description": "Job calling a cataloged procedure",
+      "jcl": "//PROCJOB  JOB (ACCT),'PROC EXAMPLE',CLASS=A\n//*\n//STEP1    EXEC PROC=COBOLCMP,\n//         SRCLIB='DEV.COBOL.SOURCE',\n//         LOADLIB='DEV.LOADLIB',\n//         MEMBER='CUSTMAST'\n//*\n//STEP2    EXEC PGM=CUSTMAST,\n//         COND=(4,LT,STEP1)\n//STEPLIB  DD  DSN=DEV.LOADLIB,DISP=SHR\n//CUSTIN   DD  DSN=TEST.CUSTOMER.DATA,DISP=SHR",
+      "modern_equivalent": {
+        "type": "github_actions",
+        "yaml": "name: Build and Run COBOL\non: [push]\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n    - uses: actions/checkout@v3\n    - name: Compile COBOL\n      run: cobc -x -o custmast src/custmast.cbl\n    - name: Upload artifact\n      uses: actions/upload-artifact@v3\n      with:\n        name: custmast\n        path: custmast\n  \n  run:\n    needs: build\n    if: success()\n    runs-on: ubuntu-latest\n    steps:\n    - uses: actions/download-artifact@v3\n    - name: Run program\n      run: ./custmast"
+      },
+      "mapping_notes": [
+        "PROC -> Reusable workflow or job template",
+        "Symbolic parameters -> Workflow inputs",
+        "COND based on prior step -> needs + if conditions"
+      ]
+    },
+    {
+      "id": "JCL004",
+      "name": "GDG Processing",
+      "description": "Job using Generation Data Groups",
+      "jcl": "//GDGJOB   JOB (ACCT),'GDG EXAMPLE',CLASS=A\n//*\n//* READ PREVIOUS GENERATION, WRITE NEW GENERATION\n//*\n//STEP1    EXEC PGM=GDGPROC\n//INPUT    DD  DSN=PROD.DAILY.BALANCE(-1),DISP=SHR\n//OUTPUT   DD  DSN=PROD.DAILY.BALANCE(+1),\n//             DISP=(NEW,CATLG,DELETE),\n//             SPACE=(CYL,(10,5)),\n//             DCB=(RECFM=FB,LRECL=100)\n//CURRENT  DD  DSN=PROD.DAILY.BALANCE(0),DISP=SHR",
+      "modern_equivalent": {
+        "type": "versioned_storage",
+        "description": "Use S3 versioning or timestamped paths",
+        "python": "from datetime import datetime, timedelta\nimport boto3\n\ndef get_gdg_paths(base_path: str, generation: int = 0) -> str:\n    \"\"\"Get GDG-style versioned path.\"\"\"\n    s3 = boto3.client('s3')\n    \n    # List all versions sorted by date\n    versions = list_versions(base_path)\n    \n    if generation == 0:  # Current\n        return versions[-1] if versions else None\n    elif generation == -1:  # Previous\n        return versions[-2] if len(versions) > 1 else None\n    elif generation == 1:  # New\n        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')\n        return f\"{base_path}/{timestamp}\"\n    \n    return versions[generation] if abs(generation) < len(versions) else None"
+      },
+      "mapping_notes": [
+        "GDG(-1) -> Previous version lookup",
+        "GDG(+1) -> New timestamped version",
+        "GDG(0) -> Current/latest version",
+        "Consider S3 versioning or explicit version paths"
+      ]
+    },
+    {
+      "id": "JCL005",
+      "name": "DB2 Batch Job",
+      "description": "Job executing DB2 batch program",
+      "jcl": "//DB2JOB   JOB (ACCT),'DB2 BATCH',CLASS=A\n//*\n//JOBLIB   DD  DSN=DB2.SDSNLOAD,DISP=SHR\n//         DD  DSN=PROD.LOADLIB,DISP=SHR\n//*\n//STEP1    EXEC PGM=IKJEFT01,DYNAMNBR=20\n//SYSTSPRT DD  SYSOUT=*\n//SYSTSIN  DD  *\n  DSN SYSTEM(DB2P)\n  RUN PROGRAM(CUSTUPDT) PLAN(CUSTPLAN) -\n      PARMS('/BATCH')\n  END\n/*\n//SYSPRINT DD  SYSOUT=*",
+      "modern_equivalent": {
+        "type": "python_sqlalchemy",
+        "python": "from sqlalchemy import create_engine\nfrom sqlalchemy.orm import Session\nimport os\n\ndef run_customer_update():\n    \"\"\"Modern equivalent of DB2 batch program.\"\"\"\n    engine = create_engine(os.environ['DATABASE_URL'])\n    \n    with Session(engine) as session:\n        try:\n            # Equivalent business logic\n            update_customers(session)\n            session.commit()\n        except Exception as e:\n            session.rollback()\n            raise\n\nif __name__ == '__main__':\n    run_customer_update()"
+      },
+      "mapping_notes": [
+        "DSN SYSTEM -> Database connection string",
+        "PLAN -> ORM session/connection",
+        "IKJEFT01 -> Direct program invocation",
+        "COMMIT/ROLLBACK handled by session"
+      ]
+    },
+    {
+      "id": "JCL006",
+      "name": "VSAM File Definition",
+      "description": "IDCAMS job to define VSAM cluster",
+      "jcl": "//DEFVSAM  JOB (ACCT),'DEFINE VSAM',CLASS=A\n//*\n//STEP1    EXEC PGM=IDCAMS\n//SYSPRINT DD  SYSOUT=*\n//SYSIN    DD  *\n  DEFINE CLUSTER -\n    (NAME(PROD.CUSTOMER.KSDS) -\n     INDEXED -\n     KEYS(10 0) -\n     RECORDSIZE(200 200) -\n     SHAREOPTIONS(2 3) -\n     CYLINDERS(100 50)) -\n  DATA -\n    (NAME(PROD.CUSTOMER.KSDS.DATA)) -\n  INDEX -\n    (NAME(PROD.CUSTOMER.KSDS.INDEX))\n/*",
+      "modern_equivalent": {
+        "type": "database_schema",
+        "sql": "-- PostgreSQL equivalent\nCREATE TABLE customer (\n    customer_key VARCHAR(10) PRIMARY KEY,  -- KEYS(10 0)\n    record_data VARCHAR(200) NOT NULL       -- RECORDSIZE(200 200)\n);\n\n-- Index is automatic with PRIMARY KEY\n\n-- For Redis equivalent:\n-- Key: customer:{customer_key}\n-- Value: record_data",
+        "terraform": "resource \"aws_dynamodb_table\" \"customer\" {\n  name           = \"customer\"\n  billing_mode   = \"PAY_PER_REQUEST\"\n  hash_key       = \"customer_key\"\n\n  attribute {\n    name = \"customer_key\"\n    type = \"S\"\n  }\n}"
+      },
+      "mapping_notes": [
+        "VSAM KSDS -> Database table with primary key",
+        "KEYS(10 0) -> Primary key definition",
+        "RECORDSIZE -> Column size constraints",
+        "INDEX -> Automatic with primary key or explicit index"
+      ]
+    }
+  ],
+  "common_utilities": {
+    "SORT": {
+      "description": "DFSORT/SYNCSORT for sorting and merging",
+      "modern": "pandas.sort_values(), PySpark, or database ORDER BY"
+    },
+    "IDCAMS": {
+      "description": "Access Method Services for VSAM",
+      "modern": "Database DDL, Terraform for infrastructure"
+    },
+    "IEBGENER": {
+      "description": "Copy sequential datasets",
+      "modern": "cp, aws s3 cp, or Python shutil"
+    },
+    "IEBCOPY": {
+      "description": "Copy PDS members",
+      "modern": "git, artifact repository"
+    },
+    "IKJEFT01": {
+      "description": "TSO batch terminal monitor",
+      "modern": "Direct program invocation, shell scripts"
+    },
+    "IEFBR14": {
+      "description": "Dummy program for allocation only",
+      "modern": "Terraform resource creation, mkdir"
+    }
+  }
+}

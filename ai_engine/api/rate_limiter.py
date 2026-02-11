@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Advanced Rate Limiting
+QBITEL Engine - Advanced Rate Limiting
 Production-ready rate limiting with Redis backend and multiple strategies.
 """
 

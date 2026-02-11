@@ -1,0 +1,18 @@
+---
+# ArgoCD Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+  labels:
+    app.kubernetes.io/name: argocd
+    app.kubernetes.io/part-of: qbitel-gitops
+---
+# QBITEL GitOps Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: qbitel-gitops
+  labels:
+    app.kubernetes.io/name: qbitel-gitops
+    app.kubernetes.io/part-of: qbitel

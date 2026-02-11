@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Security Orchestrator Integrations
+QBITEL Engine - Security Orchestrator Integrations
 
 Enterprise integrations with SIEM, ticketing, communication platforms,
 and network security tools for comprehensive security orchestration.

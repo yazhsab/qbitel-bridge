@@ -31,8 +31,8 @@ def mock_config():
     """Create mock configuration."""
     config = Mock(spec=Config)
     config.gdpr_enabled = True
-    config.data_controller = "CRONOS AI Inc."
-    config.dpo_contact = "dpo@cronos.ai"
+    config.data_controller = "QBITEL Inc."
+    config.dpo_contact = "dpo@qbitel.ai"
     return config
 
 

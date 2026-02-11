@@ -1,0 +1,19 @@
+{
+  "program_id": "FRTR199",
+  "domain": "transportation",
+  "program_type": "report_generation",
+  "author": "P. WILSON",
+  "lines_of_code": 240,
+  "complexity_level": "complex",
+  "complexity_score": 0.672,
+  "files_used": 4,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.902031",
+  "hash": "91cc9c5b3608dd6be6f27629bbcf67a7"
+}

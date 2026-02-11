@@ -2,7 +2,7 @@
 
 ## Overview
 
-Enterprise Compliance is CRONOS AI's automated compliance management platform that continuously assesses, monitors, and reports on regulatory requirements. It supports 9 major compliance frameworks with automated evidence collection, gap analysis, and audit-ready reporting.
+Enterprise Compliance is QBITEL's automated compliance management platform that continuously assesses, monitors, and reports on regulatory requirements. It supports 9 major compliance frameworks with automated evidence collection, gap analysis, and audit-ready reporting.
 
 ---
 
@@ -18,7 +18,7 @@ Compliance management is costly and resource-intensive:
 - **Multiple frameworks**: SOC 2, GDPR, PCI-DSS, HIPAA all require separate efforts
 - **Continuous compliance**: Point-in-time audits miss ongoing violations
 
-### The CRONOS AI Solution
+### The QBITEL Solution
 
 Enterprise Compliance provides:
 - **9 framework support**: SOC 2, GDPR, PCI-DSS, HIPAA, NIST CSF, ISO 27001, NERC CIP, FedRAMP, CMMC
@@ -495,10 +495,10 @@ compliance:
       - pdf
       - json
       - csv
-    templates_path: /etc/cronos/report-templates
+    templates_path: /etc/qbitel/report-templates
     branding:
       enabled: true
-      logo_path: /etc/cronos/logo.png
+      logo_path: /etc/qbitel/logo.png
 
   notifications:
     gap_created:
@@ -520,41 +520,41 @@ compliance:
 
 ```
 # Assessment metrics
-cronos_compliance_assessments_total{framework, status}
-cronos_compliance_assessment_duration_seconds{framework}
-cronos_compliance_controls_evaluated_total{framework}
-cronos_compliance_controls_passing_total{framework}
-cronos_compliance_controls_failing_total{framework}
+qbitel_compliance_assessments_total{framework, status}
+qbitel_compliance_assessment_duration_seconds{framework}
+qbitel_compliance_controls_evaluated_total{framework}
+qbitel_compliance_controls_passing_total{framework}
+qbitel_compliance_controls_failing_total{framework}
 
 # Compliance scores
-cronos_compliance_score{framework}
-cronos_compliance_pass_rate{framework}
+qbitel_compliance_score{framework}
+qbitel_compliance_pass_rate{framework}
 
 # Gap metrics
-cronos_compliance_gaps_total{framework, risk_level, status}
-cronos_compliance_gaps_overdue_total{framework}
-cronos_compliance_gap_age_days{framework}
+qbitel_compliance_gaps_total{framework, risk_level, status}
+qbitel_compliance_gaps_overdue_total{framework}
+qbitel_compliance_gap_age_days{framework}
 
 # Evidence metrics
-cronos_compliance_evidence_collected_total{framework, type}
-cronos_compliance_evidence_age_days{framework}
+qbitel_compliance_evidence_collected_total{framework, type}
+qbitel_compliance_evidence_age_days{framework}
 
 # Report metrics
-cronos_compliance_reports_generated_total{framework, format}
-cronos_compliance_report_generation_time_seconds
+qbitel_compliance_reports_generated_total{framework, format}
+qbitel_compliance_report_generation_time_seconds
 ```
 
 ### Dashboard Example
 
 ```promql
 # Overall compliance score
-avg(cronos_compliance_score) by (framework)
+avg(qbitel_compliance_score) by (framework)
 
 # Gap remediation velocity
-rate(cronos_compliance_gaps_total{status="closed"}[30d])
+rate(qbitel_compliance_gaps_total{status="closed"}[30d])
 
 # Overdue gaps trend
-cronos_compliance_gaps_overdue_total
+qbitel_compliance_gaps_overdue_total
 ```
 
 ---
@@ -564,7 +564,7 @@ cronos_compliance_gaps_overdue_total
 ### Python SDK
 
 ```python
-from cronos_ai.compliance import ComplianceClient
+from qbitel.compliance import ComplianceClient
 
 client = ComplianceClient(api_key="your_api_key")
 

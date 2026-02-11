@@ -7,7 +7,7 @@
     "buildDefinition": {
       "buildType": "https://slsa.dev/provenance/v1",
       "externalParameters": {
-        "workflow": "cronosai-ci",
+        "workflow": "qbitelai-ci",
         "source": "github.com/OWNER/REPO"
       },
       "resolvedDependencies": []

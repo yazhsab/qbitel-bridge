@@ -1,4 +1,4 @@
-# CRONOS AI - Istio Service Mesh Configuration
+# QBITEL - Istio Service Mesh Configuration
 # Production-ready service mesh with security, observability, and traffic management
 
 ---
@@ -6,10 +6,10 @@
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
-  name: cronos-ai-gateway
-  namespace: cronos-ai
+  name: qbitel-gateway
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-gateway
 spec:
   selector:
@@ -21,17 +21,17 @@ spec:
       protocol: HTTPS
     tls:
       mode: SIMPLE
-      credentialName: cronos-ai-tls-cert
+      credentialName: qbitel-tls-cert
     hosts:
-    - "cronos-ai.example.com"
-    - "api.cronos-ai.example.com"
+    - "qbitel.example.com"
+    - "api.qbitel.example.com"
   - port:
       number: 80
       name: http
       protocol: HTTP
     hosts:
-    - "cronos-ai.example.com"
-    - "api.cronos-ai.example.com"
+    - "qbitel.example.com"
+    - "api.qbitel.example.com"
     tls:
       httpsRedirect: true
 
@@ -40,17 +40,17 @@ spec:
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: cronos-ai-virtualservice
-  namespace: cronos-ai
+  name: qbitel-virtualservice
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-routing
 spec:
   hosts:
-  - "cronos-ai.example.com"
-  - "api.cronos-ai.example.com"
+  - "qbitel.example.com"
+  - "api.qbitel.example.com"
   gateways:
-  - cronos-ai-gateway
+  - qbitel-gateway
   http:
   # Management Console Routes
   - match:
@@ -58,7 +58,7 @@ spec:
         prefix: /
       headers:
         host:
-          exact: cronos-ai.example.com
+          exact: qbitel.example.com
     route:
     - destination:
         host: management-console-service
@@ -80,7 +80,7 @@ spec:
         prefix: /api/v1
       headers:
         host:
-          exact: api.cronos-ai.example.com
+          exact: api.qbitel.example.com
     route:
     - destination:
         host: ai-engine-service
@@ -137,9 +137,9 @@ apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
   name: ai-engine-destination-rule
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-routing
 spec:
   host: ai-engine-service
@@ -186,9 +186,9 @@ apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
   name: protocol-processor-destination-rule
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-routing
 spec:
   host: protocol-processor-service
@@ -215,9 +215,9 @@ apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
   name: security-analyzer-destination-rule
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-routing
 spec:
   host: security-analyzer-service
@@ -242,15 +242,15 @@ spec:
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:
-  name: cronos-ai-peer-auth
-  namespace: cronos-ai
+  name: qbitel-peer-auth
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-security
 spec:
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
   mtls:
     mode: STRICT
 
@@ -259,21 +259,21 @@ spec:
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: cronos-ai-authz-policy
-  namespace: cronos-ai
+  name: qbitel-authz-policy
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-security
 spec:
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
   rules:
   # Allow AI Engine to communicate with all services
   - from:
     - source:
-        principals: ["cluster.local/ns/cronos-ai/sa/cronos-ai-service-account"]
-        namespaces: ["cronos-ai"]
+        principals: ["cluster.local/ns/qbitel/sa/qbitel-service-account"]
+        namespaces: ["qbitel"]
     to:
     - operation:
         methods: ["GET", "POST", "PUT", "DELETE"]
@@ -298,21 +298,21 @@ spec:
 apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication
 metadata:
-  name: cronos-ai-jwt-auth
-  namespace: cronos-ai
+  name: qbitel-jwt-auth
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-security
 spec:
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
       component: ai-engine
   jwtRules:
-  - issuer: "cronos-ai-auth-service"
+  - issuer: "qbitel-auth-service"
     jwksUri: "http://ai-engine-service:8080/.well-known/jwks.json"
     audiences:
-    - "cronos-ai-api"
+    - "qbitel-api"
     fromHeaders:
     - name: "Authorization"
       prefix: "Bearer "
@@ -322,15 +322,15 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: cronos-ai-service-monitor
-  namespace: cronos-ai
+  name: qbitel-service-monitor
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: monitoring
 spec:
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
   endpoints:
   - port: metrics
     interval: 30s
@@ -342,22 +342,22 @@ spec:
     honorLabels: true
   namespaceSelector:
     matchNames:
-    - cronos-ai
+    - qbitel
 
 ---
 # Telemetry Configuration for Enhanced Observability
 apiVersion: telemetry.istio.io/v1alpha1
 kind: Telemetry
 metadata:
-  name: cronos-ai-telemetry
-  namespace: cronos-ai
+  name: qbitel-telemetry
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-observability
 spec:
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
   metrics:
   - providers:
     - name: prometheus
@@ -389,16 +389,16 @@ spec:
 apiVersion: extensions.istio.io/v1alpha1
 kind: WasmPlugin
 metadata:
-  name: cronos-ai-security-wasm
-  namespace: cronos-ai
+  name: qbitel-security-wasm
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-security
 spec:
   selector:
     matchLabels:
-      app: cronos-ai
-  url: oci://ghcr.io/cronos-ai/security-wasm:latest
+      app: qbitel
+  url: oci://ghcr.io/qbitel/security-wasm:latest
   phase: AUTHN
   pluginConfig:
     max_request_size: 1048576  # 1MB
@@ -415,15 +415,15 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: cronos-ai-request-processing
-  namespace: cronos-ai
+  name: qbitel-request-processing
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-envoy
 spec:
   workloadSelector:
     labels:
-      app: cronos-ai
+      app: qbitel
   configPatches:
   - applyTo: HTTP_FILTER
     match:
@@ -440,7 +440,7 @@ spec:
           "@type": type.googleapis.com/udpa.type.v1.TypedStruct
           type_url: type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
           value:
-            stat_prefix: cronos_ai_rate_limiter
+            stat_prefix: qbitel_rate_limiter
             token_bucket:
               max_tokens: 1000
               tokens_per_fill: 1000
@@ -461,15 +461,15 @@ spec:
 apiVersion: networking.istio.io/v1beta1
 kind: Sidecar
 metadata:
-  name: cronos-ai-sidecar
-  namespace: cronos-ai
+  name: qbitel-sidecar
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-sidecar
 spec:
   workloadSelector:
     labels:
-      app: cronos-ai
+      app: qbitel
   ingress:
   - port:
       number: 8080
@@ -499,15 +499,15 @@ spec:
 apiVersion: v1
 kind: EnvoyFilter
 metadata:
-  name: cronos-ai-proxy-config
-  namespace: cronos-ai
+  name: qbitel-proxy-config
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-envoy
 spec:
   workloadSelector:
     labels:
-      app: cronos-ai
+      app: qbitel
   configPatches:
   - applyTo: BOOTSTRAP
     patch:
@@ -518,28 +518,28 @@ spec:
           typed_config:
             "@type": type.googleapis.com/envoy.extensions.wasm.v3.WasmService
             singleton: true
-            name: cronos_ai_bootstrap
+            name: qbitel_bootstrap
             config:
-              name: cronos_ai_bootstrap
-              root_id: cronos_ai_bootstrap
+              name: qbitel_bootstrap
+              root_id: qbitel_bootstrap
               vm_config:
-                vm_id: cronos_ai_bootstrap
+                vm_id: qbitel_bootstrap
                 runtime: envoy.wasm.runtime.v8
                 code:
                   local:
                     inline_string: |
-                      class CronosAIBootstrap {
+                      class QbitelAIBootstrap {
                         constructor(rootContext) {
                           this.rootContext = rootContext;
                         }
                         
                         onVmStart() {
-                          console.log("CRONOS AI Bootstrap: VM Started");
+                          console.log("QBITEL Bootstrap: VM Started");
                           return true;
                         }
                         
                         onConfigure() {
-                          console.log("CRONOS AI Bootstrap: Configuration loaded");
+                          console.log("QBITEL Bootstrap: Configuration loaded");
                           return true;
                         }
                       }
@@ -550,9 +550,9 @@ apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: ai-engine-canary
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-canary
 spec:
   hosts:
@@ -581,13 +581,13 @@ spec:
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
-  name: cronos-ai-circuit-breaker
-  namespace: cronos-ai
+  name: qbitel-circuit-breaker
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: istio-resilience
 spec:
-  host: "*.cronos-ai.svc.cluster.local"
+  host: "*.qbitel.svc.cluster.local"
   trafficPolicy:
     outlierDetection:
       consecutiveGatewayErrors: 3
@@ -617,56 +617,56 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cronos-ai-falco-rules
-  namespace: cronos-ai
+  name: qbitel-falco-rules
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: security-monitoring
 data:
-  cronos_ai_rules.yaml: |
-    - rule: CRONOS AI Suspicious Network Activity
-      desc: Detect suspicious network connections from CRONOS AI pods
+  qbitel_rules.yaml: |
+    - rule: QBITEL Suspicious Network Activity
+      desc: Detect suspicious network connections from QBITEL pods
       condition: >
         k8s_audit and ka.verb in (create, update, patch) and
-        ka.target.namespace = "cronos-ai" and
+        ka.target.namespace = "qbitel" and
         ka.target.kind = "Pod" and
         outbound and not fd.connected
       output: >
-        Suspicious outbound connection from CRONOS AI pod
+        Suspicious outbound connection from QBITEL pod
         (user=%ka.user.name verb=%ka.verb pod=%ka.target.name
         namespace=%ka.target.namespace connection=%fd.name)
       priority: WARNING
-      tags: [network, k8s, cronos-ai]
+      tags: [network, k8s, qbitel]
     
-    - rule: CRONOS AI Unauthorized File Access
-      desc: Detect unauthorized file system access in CRONOS AI containers
+    - rule: QBITEL Unauthorized File Access
+      desc: Detect unauthorized file system access in QBITEL containers
       condition: >
-        spawned_process and container.image.repository startswith "cronos-ai/" and
+        spawned_process and container.image.repository startswith "qbitel/" and
         proc.name in (cat, less, tail, head, awk, sed, grep, find) and
         fd.name startswith "/etc" and not fd.name startswith "/etc/ssl"
       output: >
-        Unauthorized file access in CRONOS AI container
+        Unauthorized file access in QBITEL container
         (user=%user.name process=%proc.name file=%fd.name
         container=%container.name image=%container.image)
       priority: WARNING
-      tags: [filesystem, security, cronos-ai]
+      tags: [filesystem, security, qbitel]
 
 ---
 # Service Mesh Configuration Validation
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cronos-ai-mesh-validation
-  namespace: cronos-ai
+  name: qbitel-mesh-validation
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: validation
 data:
   validation-script.sh: |
     #!/bin/bash
     set -e
     
-    echo "Validating CRONOS AI Service Mesh Configuration..."
+    echo "Validating QBITEL Service Mesh Configuration..."
     
     # Check if Istio is installed
     kubectl get namespace istio-system > /dev/null 2>&1 || {
@@ -675,31 +675,31 @@ data:
     }
     
     # Validate gateway configuration
-    kubectl get gateway cronos-ai-gateway -n cronos-ai > /dev/null 2>&1 || {
-      echo "Error: CRONOS AI gateway not found"
+    kubectl get gateway qbitel-gateway -n qbitel > /dev/null 2>&1 || {
+      echo "Error: QBITEL gateway not found"
       exit 1
     }
     
     # Check virtual service
-    kubectl get virtualservice cronos-ai-virtualservice -n cronos-ai > /dev/null 2>&1 || {
-      echo "Error: CRONOS AI virtual service not found"
+    kubectl get virtualservice qbitel-virtualservice -n qbitel > /dev/null 2>&1 || {
+      echo "Error: QBITEL virtual service not found"
       exit 1
     }
     
     # Validate destination rules
-    kubectl get destinationrule ai-engine-destination-rule -n cronos-ai > /dev/null 2>&1 || {
+    kubectl get destinationrule ai-engine-destination-rule -n qbitel > /dev/null 2>&1 || {
       echo "Error: AI Engine destination rule not found"
       exit 1
     }
     
     # Check peer authentication
-    kubectl get peerauthentication cronos-ai-peer-auth -n cronos-ai > /dev/null 2>&1 || {
+    kubectl get peerauthentication qbitel-peer-auth -n qbitel > /dev/null 2>&1 || {
       echo "Error: Peer authentication not found"
       exit 1
     }
     
     # Validate authorization policies
-    kubectl get authorizationpolicy cronos-ai-authz-policy -n cronos-ai > /dev/null 2>&1 || {
+    kubectl get authorizationpolicy qbitel-authz-policy -n qbitel > /dev/null 2>&1 || {
       echo "Error: Authorization policy not found"
       exit 1
     }
@@ -710,17 +710,17 @@ data:
     #!/bin/bash
     set -e
     
-    echo "Performing CRONOS AI service mesh health check..."
+    echo "Performing QBITEL service mesh health check..."
     
     # Check Envoy sidecar status
-    kubectl exec -n cronos-ai deployment/ai-engine -c istio-proxy -- pilot-agent request GET stats/ready
-    kubectl exec -n cronos-ai deployment/protocol-processor -c istio-proxy -- pilot-agent request GET stats/ready
-    kubectl exec -n cronos-ai deployment/security-analyzer -c istio-proxy -- pilot-agent request GET stats/ready
+    kubectl exec -n qbitel deployment/ai-engine -c istio-proxy -- pilot-agent request GET stats/ready
+    kubectl exec -n qbitel deployment/protocol-processor -c istio-proxy -- pilot-agent request GET stats/ready
+    kubectl exec -n qbitel deployment/security-analyzer -c istio-proxy -- pilot-agent request GET stats/ready
     
     # Test mTLS connectivity
-    kubectl exec -n cronos-ai deployment/ai-engine -c ai-engine -- curl -s http://protocol-processor-service:8080/health
+    kubectl exec -n qbitel deployment/ai-engine -c ai-engine -- curl -s http://protocol-processor-service:8080/health
     
     # Validate certificate rotation
-    kubectl exec -n cronos-ai deployment/ai-engine -c istio-proxy -- pilot-agent request GET certs
+    kubectl exec -n qbitel deployment/ai-engine -c istio-proxy -- pilot-agent request GET certs
     
     echo "Service mesh health check completed successfully!"

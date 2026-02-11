@@ -1,0 +1,351 @@
+{
+  "metadata": {
+    "title": "Mainframe Knowledge Base for Legacy Modernization",
+    "version": "1.0.0",
+    "description": "Comprehensive mainframe knowledge for RAG-based modernization assistance",
+    "categories": ["cobol", "jcl", "cics", "db2", "ims", "vsam", "security", "operations"]
+  },
+  "cobol_knowledge": {
+    "language_overview": {
+      "title": "COBOL Language Overview",
+      "content": "COBOL (Common Business-Oriented Language) is a compiled English-like programming language designed for business applications. First developed in 1959, it remains one of the most widely used languages in enterprise computing, particularly in banking, insurance, and government systems. COBOL processes an estimated 95% of ATM transactions and 80% of in-person transactions globally.",
+      "key_characteristics": [
+        "English-like syntax for readability",
+        "Strong support for decimal arithmetic (critical for financial calculations)",
+        "Excellent file handling capabilities",
+        "Self-documenting through verbose syntax",
+        "Strict data typing with PICTURE clauses",
+        "Hierarchical data structures"
+      ],
+      "modernization_relevance": "Understanding COBOL's strengths helps identify which features need special attention during modernization. Financial precision, file handling patterns, and data structure definitions are critical to preserve."
+    },
+    "data_division_concepts": {
+      "title": "COBOL Data Division Deep Dive",
+      "content": "The Data Division defines all data items used by a COBOL program. It is divided into sections: FILE SECTION for file records, WORKING-STORAGE SECTION for program variables, LOCAL-STORAGE SECTION for reentrant data, and LINKAGE SECTION for passed parameters.",
+      "level_numbers": {
+        "01": "Record level or independent item - defines the start of a data structure",
+        "02-49": "Subordinate items within a group - defines hierarchical structure",
+        "66": "RENAMES clause - provides alternative grouping of elementary items",
+        "77": "Independent elementary item - standalone variable not part of a group",
+        "88": "Condition name - creates named boolean conditions"
+      },
+      "picture_clause_mastery": {
+        "numeric_editing": "PIC Z(5)9.99 displays leading zeros as spaces with decimal point",
+        "signed_numbers": "PIC S9(7)V99 stores 7 integer digits, 2 decimal places with sign",
+        "alphanumeric": "PIC X(50) stores up to 50 characters",
+        "justified": "PIC X(20) JUSTIFIED RIGHT aligns data to the right"
+      }
+    },
+    "procedure_division_patterns": {
+      "title": "COBOL Procedure Division Best Practices",
+      "content": "The Procedure Division contains the executable logic. Well-structured COBOL uses a hierarchical paragraph organization with clear naming conventions.",
+      "recommended_structure": {
+        "0000-MAIN": "Main control logic - orchestrates program flow",
+        "1000-INITIALIZATION": "Setup tasks - open files, initialize variables",
+        "2000-PROCESS": "Main processing loop - core business logic",
+        "3000-SUBROUTINES": "Reusable logic blocks - validation, calculations",
+        "8000-ERROR-HANDLING": "Error management - logging, recovery",
+        "9000-TERMINATION": "Cleanup - close files, display statistics"
+      },
+      "modernization_mapping": {
+        "paragraphs": "Map to functions/methods in target language",
+        "sections": "Map to classes or modules",
+        "perform_loops": "Map to for/while loops",
+        "evaluate": "Map to switch/case statements"
+      }
+    }
+  },
+  "jcl_knowledge": {
+    "overview": {
+      "title": "Job Control Language (JCL) Overview",
+      "content": "JCL is the command language of IBM mainframe operating systems (z/OS, OS/390, MVS). It tells the system which program to execute, what files to use, and how to handle output. Understanding JCL is essential for comprehending how COBOL programs are executed in production.",
+      "statement_types": {
+        "JOB": "Identifies the job and provides accounting/scheduling info",
+        "EXEC": "Identifies the program or procedure to execute",
+        "DD": "Data Definition - describes datasets used by the program",
+        "PROC": "Procedure - cataloged set of JCL statements",
+        "INCLUDE": "Includes JCL from a library member"
+      }
+    },
+    "common_dd_parameters": {
+      "DSN": "Dataset name - the file being referenced",
+      "DISP": "Disposition - (status, normal-end, abnormal-end)",
+      "DCB": "Data Control Block - RECFM, LRECL, BLKSIZE",
+      "SPACE": "Space allocation for new datasets",
+      "UNIT": "Device type (SYSDA for disk, TAPE for tape)",
+      "VOL": "Volume serial number"
+    },
+    "modernization_considerations": {
+      "title": "JCL to Modern Equivalents",
+      "mappings": [
+        {"jcl": "JOB statement", "modern": "Container orchestration job definition (Kubernetes Job)"},
+        {"jcl": "EXEC PGM=", "modern": "Container/microservice invocation"},
+        {"jcl": "DD DSN=", "modern": "Environment variables, ConfigMaps, or S3/blob storage references"},
+        {"jcl": "DISP=(OLD,KEEP)", "modern": "File locking and transaction handling"},
+        {"jcl": "COND parameter", "modern": "Error handling and conditional execution in CI/CD pipelines"}
+      ]
+    }
+  },
+  "cics_knowledge": {
+    "overview": {
+      "title": "CICS Transaction Server Overview",
+      "content": "CICS (Customer Information Control System) is a transaction server that runs primarily on IBM mainframes. It provides online transaction processing (OLTP) capabilities, allowing multiple users to execute transactions concurrently. CICS manages terminal I/O, transaction routing, security, and recovery.",
+      "key_concepts": {
+        "transaction": "A unit of work identified by a 4-character transaction ID",
+        "program": "COBOL or other language program invoked by a transaction",
+        "terminal": "User interface device (3270 terminal or modern equivalent)",
+        "temporary_storage": "Scratch pad memory for inter-transaction data",
+        "transient_data": "Queues for asynchronous processing"
+      }
+    },
+    "common_cics_commands": {
+      "terminal_io": {
+        "SEND MAP": "Sends screen data to terminal",
+        "RECEIVE MAP": "Receives data from terminal",
+        "SEND TEXT": "Sends unformatted text"
+      },
+      "program_control": {
+        "LINK": "Calls another program, expects return",
+        "XCTL": "Transfers control, no return expected",
+        "RETURN": "Returns to calling program or CICS"
+      },
+      "data_access": {
+        "READ": "Reads a record from a file",
+        "WRITE": "Writes a new record",
+        "REWRITE": "Updates an existing record",
+        "DELETE": "Removes a record"
+      },
+      "temp_storage": {
+        "WRITEQ TS": "Writes to temporary storage queue",
+        "READQ TS": "Reads from temporary storage queue",
+        "DELETEQ TS": "Deletes temporary storage queue"
+      }
+    },
+    "modernization_patterns": {
+      "title": "CICS to REST API Migration",
+      "patterns": [
+        {"cics_pattern": "Transaction ID", "modern_pattern": "REST endpoint route"},
+        {"cics_pattern": "BMS Map", "modern_pattern": "JSON schema / React component"},
+        {"cics_pattern": "COMMAREA", "modern_pattern": "Request/Response DTOs"},
+        {"cics_pattern": "Temporary Storage", "modern_pattern": "Redis cache"},
+        {"cics_pattern": "Transient Data", "modern_pattern": "Message queue (Kafka, RabbitMQ)"}
+      ]
+    }
+  },
+  "db2_knowledge": {
+    "overview": {
+      "title": "DB2 for z/OS Overview",
+      "content": "DB2 is IBM's relational database management system for mainframes. COBOL programs access DB2 through embedded SQL statements, which are preprocessed by the DB2 precompiler to generate standard COBOL code with DB2 API calls.",
+      "embedded_sql_syntax": {
+        "declaration": "EXEC SQL INCLUDE SQLCA END-EXEC declares SQL communication area",
+        "select": "EXEC SQL SELECT ... INTO :host-vars FROM table END-EXEC",
+        "cursor": "EXEC SQL DECLARE cursor CURSOR FOR SELECT... END-EXEC",
+        "dml": "EXEC SQL INSERT/UPDATE/DELETE... END-EXEC",
+        "commit": "EXEC SQL COMMIT END-EXEC"
+      }
+    },
+    "host_variables": {
+      "title": "Host Variable Concepts",
+      "content": "Host variables are COBOL variables used to exchange data with DB2. They are prefixed with colon (:) in SQL statements.",
+      "declaration_rules": [
+        "Declared in WORKING-STORAGE or LINKAGE SECTION",
+        "Must match DB2 column data types",
+        "Indicator variables handle NULLs"
+      ],
+      "type_mapping": {
+        "CHAR": "PIC X(n)",
+        "VARCHAR": "01 VAR-NAME. 49 VAR-LEN PIC S9(4) COMP. 49 VAR-TEXT PIC X(n).",
+        "INTEGER": "PIC S9(9) COMP",
+        "SMALLINT": "PIC S9(4) COMP",
+        "DECIMAL": "PIC S9(p-s)V9(s) COMP-3",
+        "DATE": "PIC X(10)",
+        "TIMESTAMP": "PIC X(26)"
+      }
+    },
+    "modernization_considerations": {
+      "title": "DB2 to Modern Database Migration",
+      "considerations": [
+        "DB2 date/time formats may differ from target database",
+        "Cursor-based processing maps to ORM patterns or streaming",
+        "SQLCA error handling maps to exception handling",
+        "Plan/package binding maps to prepared statements",
+        "DCLGEN copybooks map to ORM entity definitions"
+      ]
+    }
+  },
+  "vsam_knowledge": {
+    "overview": {
+      "title": "VSAM (Virtual Storage Access Method) Overview",
+      "content": "VSAM is IBM's high-performance file storage access method. It provides indexed, sequential, and relative record access for datasets on mainframe systems.",
+      "dataset_types": {
+        "KSDS": {
+          "name": "Key-Sequenced Data Set",
+          "description": "Records accessed by primary key, maintains index",
+          "use_cases": ["Master files", "Lookup tables"],
+          "modern_equivalent": "Indexed database table or key-value store"
+        },
+        "ESDS": {
+          "name": "Entry-Sequenced Data Set",
+          "description": "Records stored in entry order, accessed sequentially or by RBA",
+          "use_cases": ["Log files", "Transaction journals"],
+          "modern_equivalent": "Append-only log, sequential file"
+        },
+        "RRDS": {
+          "name": "Relative Record Data Set",
+          "description": "Records accessed by relative record number",
+          "use_cases": ["Hash tables", "Direct access by position"],
+          "modern_equivalent": "Array-based storage, memory-mapped file"
+        },
+        "LDS": {
+          "name": "Linear Data Set",
+          "description": "Unstructured byte stream",
+          "use_cases": ["Binary data", "Memory-mapped regions"],
+          "modern_equivalent": "Blob storage, binary file"
+        }
+      }
+    },
+    "file_status_codes": {
+      "00": "Successful completion",
+      "02": "Duplicate key detected (alternate index)",
+      "10": "End of file reached",
+      "21": "Sequence error on sequential write",
+      "22": "Duplicate primary key",
+      "23": "Record not found",
+      "24": "Key outside valid range",
+      "35": "File not found",
+      "39": "File attribute mismatch",
+      "41": "File already open",
+      "42": "File not open",
+      "43": "DELETE without prior READ",
+      "44": "Record length error",
+      "46": "READ attempted beyond end of file",
+      "47": "READ on OUTPUT-mode file",
+      "48": "WRITE on INPUT-mode file",
+      "49": "REWRITE/DELETE on sequential file"
+    }
+  },
+  "security_knowledge": {
+    "racf_overview": {
+      "title": "RACF (Resource Access Control Facility) Overview",
+      "content": "RACF is IBM's security management system for z/OS. It controls access to datasets, transactions, and system resources through user profiles, group memberships, and access rules.",
+      "key_concepts": {
+        "user_profile": "Defines user identity and attributes",
+        "group": "Collection of users with common access needs",
+        "dataset_profile": "Defines access rules for datasets",
+        "general_resource": "Non-dataset resources (transactions, programs)"
+      },
+      "access_levels": {
+        "NONE": "No access allowed",
+        "READ": "Read-only access",
+        "UPDATE": "Read and modify",
+        "CONTROL": "Full control including delete",
+        "ALTER": "Complete authority including profile changes"
+      }
+    },
+    "modernization_mapping": {
+      "title": "RACF to Modern Security",
+      "mappings": [
+        {"racf": "User Profile", "modern": "Identity Provider (LDAP, OAuth)"},
+        {"racf": "Group", "modern": "Role-Based Access Control (RBAC) role"},
+        {"racf": "Dataset Profile", "modern": "Resource-based IAM policy"},
+        {"racf": "General Resource", "modern": "API authorization policy"},
+        {"racf": "Access Levels", "modern": "Permission sets (read, write, admin)"}
+      ]
+    }
+  },
+  "modernization_strategies": {
+    "approaches": {
+      "rehost": {
+        "name": "Rehosting (Lift and Shift)",
+        "description": "Move COBOL applications to run on modern infrastructure without code changes",
+        "pros": ["Fastest implementation", "Lowest risk", "Preserves investment"],
+        "cons": ["Technical debt remains", "Limited cloud benefits", "Vendor lock-in possible"],
+        "when_to_use": "Urgent data center exit, limited budget, stable applications"
+      },
+      "replatform": {
+        "name": "Replatforming",
+        "description": "Move to modern platform with minimal code changes",
+        "pros": ["Moderate effort", "Some modernization benefits", "Lower risk than rewrite"],
+        "cons": ["Partial modernization", "May need ongoing translation"],
+        "when_to_use": "Need cloud benefits, can't justify full rewrite"
+      },
+      "refactor": {
+        "name": "Refactoring",
+        "description": "Incrementally modernize code structure without changing functionality",
+        "pros": ["Gradual improvement", "Reduced risk", "Skills transfer"],
+        "cons": ["Long timeline", "Requires COBOL expertise"],
+        "when_to_use": "Strategic applications, hybrid approach needed"
+      },
+      "rewrite": {
+        "name": "Rewriting",
+        "description": "Complete redevelopment in modern language/platform",
+        "pros": ["Full modernization", "Modern architecture", "No legacy constraints"],
+        "cons": ["Highest risk", "Longest timeline", "Most expensive"],
+        "when_to_use": "Small applications, complete business transformation"
+      },
+      "replace": {
+        "name": "Replacement",
+        "description": "Replace with commercial off-the-shelf (COTS) software",
+        "pros": ["No development needed", "Vendor support", "Modern features"],
+        "cons": ["Customization limits", "Integration challenges", "Ongoing licensing"],
+        "when_to_use": "Commodity functions, industry-standard processes"
+      }
+    },
+    "decision_framework": {
+      "factors": [
+        {"factor": "Business Criticality", "high": "Refactor/Replatform", "low": "Replace/Rewrite"},
+        {"factor": "Code Quality", "high": "Refactor", "low": "Rewrite"},
+        {"factor": "Documentation", "high": "Any approach", "low": "Refactor (discover as you go)"},
+        {"factor": "Timeline Pressure", "high": "Rehost/Replace", "low": "Refactor/Rewrite"},
+        {"factor": "Budget", "high": "Rewrite", "low": "Rehost/Replatform"}
+      ]
+    }
+  },
+  "common_issues": {
+    "cobol_challenges": [
+      {
+        "issue": "GOTO statements creating spaghetti code",
+        "impact": "Difficult to trace program flow",
+        "solution": "Create control flow graph, refactor to structured code"
+      },
+      {
+        "issue": "Implicit data conversions",
+        "impact": "Subtle bugs in calculations",
+        "solution": "Make all conversions explicit in target code"
+      },
+      {
+        "issue": "REDEFINES creating multiple views of data",
+        "impact": "Complex memory layouts",
+        "solution": "Use union types or explicit parsing"
+      },
+      {
+        "issue": "COMP-3 packed decimal precision",
+        "impact": "Financial calculation accuracy",
+        "solution": "Use decimal types (Python Decimal, Java BigDecimal)"
+      },
+      {
+        "issue": "Copybook dependencies",
+        "impact": "Hidden data structure changes",
+        "solution": "Analyze full copybook dependency graph"
+      }
+    ],
+    "integration_challenges": [
+      {
+        "issue": "Character encoding (EBCDIC vs ASCII)",
+        "solution": "Implement conversion layer at integration points"
+      },
+      {
+        "issue": "Fixed-width records to structured data",
+        "solution": "Create parsing logic based on copybook definitions"
+      },
+      {
+        "issue": "Batch window dependencies",
+        "solution": "Implement near-real-time processing with queues"
+      },
+      {
+        "issue": "Transaction semantics (CICS)",
+        "solution": "Implement distributed transaction patterns or saga pattern"
+      }
+    ]
+  }
+}

@@ -1,0 +1,158 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import ProductCard from '@/components/content/ProductCard.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+import { products } from '@/data/products';
+---
+
+<PageLayout
+  title="Products | QBITEL Bridge"
+  description="Explore the QBITEL Bridge product suite: AI protocol discovery, post-quantum cryptography, zero-touch security, and more."
+>
+  <PageHero
+    title="The QBITEL Bridge Product Suite"
+    description="Ten integrated products that take you from undocumented legacy protocols to quantum-safe, autonomously-operated, compliant systems."
+    badge="10 Products"
+  />
+
+  <!-- Platform Overview -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          One Platform, <span class="gradient-text">Complete Protection</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          QBITEL Bridge combines AI-driven protocol intelligence with quantum-safe cryptography and autonomous security operations into a single, unified platform.
+        </p>
+      </div>
+
+      <!-- Key platform stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">150+</div>
+          <div class="text-sm text-gray-400">Protocols Supported</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">NIST 5</div>
+          <div class="text-sm text-gray-400">Security Level</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">78%</div>
+          <div class="text-sm text-gray-400">Autonomous Operations</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">9</div>
+          <div class="text-sm text-gray-400">Compliance Frameworks</div>
+        </div>
+      </div>
+
+      <!-- Product Cards Grid -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {products.map((product) => (
+          <ProductCard
+            title={product.title}
+            tagline={product.tagline}
+            description={product.description}
+            href={product.href}
+            color={product.color}
+            features={product.features}
+            metrics={product.metrics}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Integration Diagram -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          How Products <span class="gradient-text">Work Together</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Each product is standalone, but they integrate seamlessly to create a comprehensive security and modernization platform.
+        </p>
+      </div>
+
+      <div class="max-w-4xl mx-auto space-y-4">
+        <!-- Discovery Layer -->
+        <div class="card p-5">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+            <h3 class="text-lg font-bold text-white">Discovery Layer</h3>
+          </div>
+          <div class="grid md:grid-cols-3 gap-3">
+            <a href="/products/protocol-discovery" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-blue-500/50 transition-colors">
+              <div class="text-sm font-semibold text-white">AI Protocol Discovery</div>
+              <div class="text-xs text-gray-500">Reverse-engineer protocols</div>
+            </a>
+            <a href="/products/translation-studio" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-purple-500/50 transition-colors">
+              <div class="text-sm font-semibold text-white">Translation Studio</div>
+              <div class="text-xs text-gray-500">Generate APIs and SDKs</div>
+            </a>
+            <a href="/products/protocol-marketplace" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-green-500/50 transition-colors">
+              <div class="text-sm font-semibold text-white">Protocol Marketplace</div>
+              <div class="text-xs text-gray-500">Share and monetize parsers</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Security Layer -->
+        <div class="card p-5">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+            <h3 class="text-lg font-bold text-white">Security Layer</h3>
+          </div>
+          <div class="grid md:grid-cols-4 gap-3">
+            <a href="/products/zero-touch-security" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-red-500/50 transition-colors">
+              <div class="text-sm font-semibold text-white">Zero-Touch Security</div>
+              <div class="text-xs text-gray-500">Autonomous SOC</div>
+            </a>
+            <a href="/products/post-quantum-crypto" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-cyan-500/50 transition-colors">
+              <div class="text-sm font-semibold text-white">Post-Quantum Crypto</div>
+              <div class="text-xs text-gray-500">Quantum-safe encryption</div>
+            </a>
+            <a href="/products/threat-intelligence" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-rose-500/50 transition-colors">
+              <div class="text-sm font-semibold text-white">Threat Intelligence</div>
+              <div class="text-xs text-gray-500">Threat detection and hunting</div>
+            </a>
+            <a href="/products/iam-monitoring" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-sky-500/50 transition-colors">
+              <div class="text-sm font-semibold text-white">IAM Monitoring</div>
+              <div class="text-xs text-gray-500">Identity intelligence</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Operations Layer -->
+        <div class="card p-5">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+            <h3 class="text-lg font-bold text-white">Operations Layer</h3>
+          </div>
+          <div class="grid md:grid-cols-3 gap-3">
+            <a href="/products/cloud-native-security" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-indigo-500/50 transition-colors">
+              <div class="text-sm font-semibold text-white">Cloud-Native Security</div>
+              <div class="text-xs text-gray-500">K8s and service mesh</div>
+            </a>
+            <a href="/products/enterprise-compliance" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-emerald-500/50 transition-colors">
+              <div class="text-sm font-semibold text-white">Enterprise Compliance</div>
+              <div class="text-xs text-gray-500">9-framework automation</div>
+            </a>
+            <a href="/products/legacy-whisperer" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-amber-500/50 transition-colors">
+              <div class="text-sm font-semibold text-white">Legacy Whisperer</div>
+              <div class="text-xs text-gray-500">Mainframe modernization</div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTABanner
+    title="Ready to Modernize Your Infrastructure?"
+    description="Start with any product and expand as you grow. All products are included in the open-source platform."
+  />
+</PageLayout>

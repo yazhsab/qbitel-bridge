@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Custom Exceptions
+QBITEL Engine - Custom Exceptions
 
 This module defines custom exception classes for the AI Engine.
 """
@@ -7,8 +7,8 @@ This module defines custom exception classes for the AI Engine.
 from typing import Any, Dict, Optional
 
 
-class CronosAIException(Exception):
-    """Base exception for all CRONOS AI Engine errors."""
+class QbitelAIException(Exception):
+    """Base exception for all QBITEL Engine errors."""
 
     def __init__(
         self,
@@ -18,7 +18,7 @@ class CronosAIException(Exception):
     ):
         super().__init__(message)
         self.message = message
-        self.error_code = error_code or "CRONOS_AI_ERROR"
+        self.error_code = error_code or "QBITEL_AI_ERROR"
         self.context = context or {}
 
     def __str__(self) -> str:
@@ -27,7 +27,7 @@ class CronosAIException(Exception):
         return f"{self.message} (Code: {self.error_code})"
 
 
-class ConfigurationException(CronosAIException):
+class ConfigurationException(QbitelAIException):
     """Exception raised for configuration-related errors."""
 
     def __init__(self, message: str, config_key: Optional[str] = None):
@@ -38,7 +38,7 @@ class ConfigurationException(CronosAIException):
         )
 
 
-class ModelException(CronosAIException):
+class ModelException(QbitelAIException):
     """Exception raised for model-related errors."""
 
     def __init__(
@@ -56,7 +56,7 @@ class ModelException(CronosAIException):
         super().__init__(message, error_code="MODEL_ERROR", context=context)
 
 
-class ModelVersionException(CronosAIException):
+class ModelVersionException(QbitelAIException):
     """Exception raised for model version management issues."""
 
     def __init__(
@@ -74,7 +74,7 @@ class ModelVersionException(CronosAIException):
         super().__init__(message, error_code="MODEL_VERSION_ERROR", context=context)
 
 
-class DiscoveryException(CronosAIException):
+class DiscoveryException(QbitelAIException):
     """Exception raised during protocol discovery workflows."""
 
     def __init__(self, message: str, request_id: Optional[str] = None):
@@ -82,7 +82,7 @@ class DiscoveryException(CronosAIException):
         super().__init__(message, error_code="DISCOVERY_ERROR", context=context)
 
 
-class InferenceException(CronosAIException):
+class InferenceException(QbitelAIException):
     """Exception raised during model inference."""
 
     def __init__(
@@ -100,7 +100,7 @@ class InferenceException(CronosAIException):
         super().__init__(message, error_code="INFERENCE_ERROR", context=context)
 
 
-class TrainingException(CronosAIException):
+class TrainingException(QbitelAIException):
     """Exception raised during model training."""
 
     def __init__(
@@ -121,7 +121,7 @@ class TrainingException(CronosAIException):
         super().__init__(message, error_code="TRAINING_ERROR", context=context)
 
 
-class DataException(CronosAIException):
+class DataException(QbitelAIException):
     """Exception raised for data processing errors."""
 
     def __init__(
@@ -139,7 +139,7 @@ class DataException(CronosAIException):
         super().__init__(message, error_code="DATA_ERROR", context=context)
 
 
-class ProtocolException(CronosAIException):
+class ProtocolException(QbitelAIException):
     """Exception raised for protocol analysis errors."""
 
     def __init__(
@@ -157,7 +157,7 @@ class ProtocolException(CronosAIException):
         super().__init__(message, error_code="PROTOCOL_ERROR", context=context)
 
 
-class FieldDetectionException(CronosAIException):
+class FieldDetectionException(QbitelAIException):
     """Exception raised for field detection errors."""
 
     def __init__(
@@ -175,7 +175,7 @@ class FieldDetectionException(CronosAIException):
         super().__init__(message, error_code="FIELD_DETECTION_ERROR", context=context)
 
 
-class AnomalyDetectionException(CronosAIException):
+class AnomalyDetectionException(QbitelAIException):
     """Exception raised for anomaly detection errors."""
 
     def __init__(
@@ -193,7 +193,7 @@ class AnomalyDetectionException(CronosAIException):
         super().__init__(message, error_code="ANOMALY_DETECTION_ERROR", context=context)
 
 
-class FeatureExtractionException(CronosAIException):
+class FeatureExtractionException(QbitelAIException):
     """Exception raised for feature extraction errors."""
 
     def __init__(
@@ -213,7 +213,7 @@ class FeatureExtractionException(CronosAIException):
         )
 
 
-class ModelRegistryException(CronosAIException):
+class ModelRegistryException(QbitelAIException):
     """Exception raised for model registry operations."""
 
     def __init__(
@@ -231,7 +231,7 @@ class ModelRegistryException(CronosAIException):
         super().__init__(message, error_code="MODEL_REGISTRY_ERROR", context=context)
 
 
-class ServingException(CronosAIException):
+class ServingException(QbitelAIException):
     """Exception raised during model serving operations."""
 
     def __init__(
@@ -249,7 +249,7 @@ class ServingException(CronosAIException):
         super().__init__(message, error_code="SERVING_ERROR", context=context)
 
 
-class AIEngineException(CronosAIException):
+class AIEngineException(QbitelAIException):
     """High-level exception for AI Engine orchestration failures."""
 
     def __init__(self, message: str, component: Optional[str] = None):
@@ -279,7 +279,7 @@ class ValidationException(AIEngineException):
         self.context.update(context)
 
 
-class ConfigException(CronosAIException):
+class ConfigException(QbitelAIException):
     """Exception raised for configuration service errors."""
 
     def __init__(self, message: str, key: Optional[str] = None):
@@ -287,7 +287,7 @@ class ConfigException(CronosAIException):
         super().__init__(message, error_code="CONFIG_SERVICE_ERROR", context=context)
 
 
-class PolicyException(CronosAIException):
+class PolicyException(QbitelAIException):
     """Exception raised within the policy engine domain."""
 
     def __init__(self, message: str, policy_id: Optional[str] = None):
@@ -295,7 +295,7 @@ class PolicyException(CronosAIException):
         super().__init__(message, error_code="POLICY_ERROR", context=context)
 
 
-class ComplianceException(CronosAIException):
+class ComplianceException(QbitelAIException):
     """Exception raised for compliance assessment operations."""
 
     def __init__(self, message: str, framework: Optional[str] = None):
@@ -303,7 +303,7 @@ class ComplianceException(CronosAIException):
         super().__init__(message, error_code="COMPLIANCE_ERROR", context=context)
 
 
-class SecurityException(CronosAIException):
+class SecurityException(QbitelAIException):
     """Exception raised for security orchestration failures."""
 
     def __init__(self, message: str, domain: Optional[str] = None):
@@ -311,7 +311,7 @@ class SecurityException(CronosAIException):
         super().__init__(message, error_code="SECURITY_ERROR", context=context)
 
 
-class LLMException(CronosAIException):
+class LLMException(QbitelAIException):
     """LLM-related exception shared across providers."""
 
     def __init__(self, message: str, provider: Optional[str] = None):
@@ -319,7 +319,7 @@ class LLMException(CronosAIException):
         super().__init__(message, error_code="LLM_ERROR", context=context)
 
 
-class TranslationException(CronosAIException):
+class TranslationException(QbitelAIException):
     """Exception raised by translation studio endpoints."""
 
     def __init__(self, message: str, translation_id: Optional[str] = None):
@@ -327,7 +327,7 @@ class TranslationException(CronosAIException):
         super().__init__(message, error_code="TRANSLATION_ERROR", context=context)
 
 
-class ObservabilityException(CronosAIException):
+class ObservabilityException(QbitelAIException):
     """Exception raised for observability subsystem failures."""
 
     def __init__(self, message: str, subsystem: Optional[str] = None):
@@ -371,7 +371,7 @@ class HealthCheckException(ObservabilityException):
             self.context["component"] = component
 
 
-class SLAViolationException(CronosAIException):
+class SLAViolationException(QbitelAIException):
     """Exception raised when service level objectives are violated."""
 
     def __init__(self, message: str, sla_threshold_ms: Optional[float] = None):
@@ -379,7 +379,7 @@ class SLAViolationException(CronosAIException):
         super().__init__(message, error_code="SLA_VIOLATION", context=context)
 
 
-class DeploymentException(CronosAIException):
+class DeploymentException(QbitelAIException):
     """Exception raised for deployment lifecycle errors."""
 
     def __init__(self, message: str, deployment_id: Optional[str] = None):
@@ -387,7 +387,7 @@ class DeploymentException(CronosAIException):
         super().__init__(message, error_code="DEPLOYMENT_ERROR", context=context)
 
 
-class EnsembleException(CronosAIException):
+class EnsembleException(QbitelAIException):
     """Exception raised for ensemble model coordination errors."""
 
     def __init__(self, message: str, ensemble_id: Optional[str] = None):
@@ -395,7 +395,7 @@ class EnsembleException(CronosAIException):
         super().__init__(message, error_code="ENSEMBLE_ERROR", context=context)
 
 
-class ThreatAnalysisException(CronosAIException):
+class ThreatAnalysisException(QbitelAIException):
     """Exception raised for threat analysis operations."""
 
     def __init__(self, message: str, threat_type: Optional[str] = None):

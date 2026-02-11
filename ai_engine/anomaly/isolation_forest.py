@@ -1,4 +1,4 @@
-"""CRONOS AI Engine - Isolation Forest Detector (heuristic stub)."""
+"""QBITEL Engine - Isolation Forest Detector (heuristic stub)."""
 
 from __future__ import annotations
 

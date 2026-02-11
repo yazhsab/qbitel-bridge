@@ -395,9 +395,9 @@ const ProtocolDetails: React.FC<ProtocolDetailsProps> = ({ apiClient }) => {
                   <Typography variant="body1" fontWeight="600">{protocol.industry || 'N/A'}</Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography variant="body2" color="text.secondary">Min CRONOS Version</Typography>
+                  <Typography variant="body2" color="text.secondary">Min QBITEL Version</Typography>
                   <Typography variant="body1" fontWeight="600">
-                    {protocol.compatibility?.min_cronos_version || 'N/A'}
+                    {protocol.compatibility?.min_qbitel_version || 'N/A'}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>

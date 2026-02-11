@@ -1,8 +1,8 @@
 [package]
-name = "cronos-ai-integration-tests"
+name = "qbitel-integration-tests"
 version = "0.1.0"
 edition = "2021"
-description = "Comprehensive integration tests for CRONOS AI"
+description = "Comprehensive integration tests for QBITEL"
 
 [dependencies]
 # Test framework

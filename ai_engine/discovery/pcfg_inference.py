@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - PCFG (Probabilistic Context-Free Grammar) Inference
+QBITEL Engine - PCFG (Probabilistic Context-Free Grammar) Inference
 
 This module implements advanced PCFG inference for automatic protocol grammar
 learning from network traffic samples.

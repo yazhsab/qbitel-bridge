@@ -541,14 +541,14 @@ class TestEnvironmentVariableLoading:
     def test_load_config_from_env_with_values(self):
         """Test loading config from environment with set values."""
         env_vars = {
-            "CRONOS_AI_LEGACY_ENABLED": "false",
-            "CRONOS_AI_LEGACY_SERVICE_NAME": "env-test-service",
-            "CRONOS_AI_LEGACY_ANOMALY_THRESHOLD": "0.80",
-            "CRONOS_AI_LEGACY_PREDICTION_ENABLED": "false",
-            "CRONOS_AI_LEGACY_LLM_PROVIDER": "anthropic",
-            "CRONOS_AI_LEGACY_LLM_MAX_TOKENS": "2000",
-            "CRONOS_AI_LEGACY_MAX_SYSTEMS": "100",
-            "CRONOS_AI_LEGACY_MEMORY_LIMIT_MB": "1024",
+            "QBITEL_AI_LEGACY_ENABLED": "false",
+            "QBITEL_AI_LEGACY_SERVICE_NAME": "env-test-service",
+            "QBITEL_AI_LEGACY_ANOMALY_THRESHOLD": "0.80",
+            "QBITEL_AI_LEGACY_PREDICTION_ENABLED": "false",
+            "QBITEL_AI_LEGACY_LLM_PROVIDER": "anthropic",
+            "QBITEL_AI_LEGACY_LLM_MAX_TOKENS": "2000",
+            "QBITEL_AI_LEGACY_MAX_SYSTEMS": "100",
+            "QBITEL_AI_LEGACY_MEMORY_LIMIT_MB": "1024",
         }
 
         with patch.dict("os.environ", env_vars):

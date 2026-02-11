@@ -1,0 +1,19 @@
+{
+  "program_id": "BENV770",
+  "domain": "government",
+  "program_type": "data_validation",
+  "author": "P. WILSON",
+  "lines_of_code": 233,
+  "complexity_level": "medium",
+  "complexity_score": 0.546,
+  "files_used": 2,
+  "verbs_used": 14,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.898321",
+  "hash": "45a8a22fd8edbde305d98f591876f8dc"
+}

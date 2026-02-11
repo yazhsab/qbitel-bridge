@@ -1,0 +1,61 @@
+apiVersion: v2
+name: qbitel
+description: QBITEL - Enterprise Network Intelligence Platform
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+kubeVersion: ">=1.24.0"
+
+keywords:
+  - network
+  - ai
+  - security
+  - dpi
+  - monitoring
+  - enterprise
+
+home: https://github.com/yazhsab/qbitel
+sources:
+  - https://github.com/yazhsab/qbitel
+
+maintainers:
+  - name: QBITEL Team
+    email: engineering@qbitel.com
+    url: https://qbitel.com
+
+annotations:
+  category: Networking
+  licenses: Apache-2.0
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial production release
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/images: |
+    - name: qbitel-dataplane
+      image: qbitel/dataplane:1.0.0
+    - name: qbitel-controlplane
+      image: qbitel/controlplane:1.0.0
+    - name: qbitel-aiengine
+      image: qbitel/aiengine:1.0.0
+    - name: qbitel-policy-engine
+      image: qbitel/policy-engine:1.0.0
+    - name: qbitel-operator
+      image: qbitel/k8s-operator:1.0.0
+
+dependencies:
+  - name: postgresql
+    version: "12.1.2"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: postgresql.enabled
+  - name: redis
+    version: "17.3.7"  
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: redis.enabled
+  - name: prometheus
+    version: "15.16.1"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    condition: monitoring.prometheus.enabled
+  - name: grafana
+    version: "6.50.7"
+    repository: "https://grafana.github.io/helm-charts"
+    condition: monitoring.grafana.enabled

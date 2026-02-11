@@ -1,0 +1,19 @@
+{
+  "program_id": "SSNC563",
+  "domain": "government",
+  "program_type": "calculation_engine",
+  "author": "D. JONES",
+  "lines_of_code": 255,
+  "complexity_level": "complex",
+  "complexity_score": 0.684,
+  "files_used": 4,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.889129",
+  "hash": "2cf8943601211c14eedf35e7c3724cc8"
+}

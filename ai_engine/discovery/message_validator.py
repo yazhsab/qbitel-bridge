@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Message Validator
+QBITEL Engine - Message Validator
 
 This module implements comprehensive message validation including syntax checking,
 semantic analysis, integrity verification, and protocol compliance validation.

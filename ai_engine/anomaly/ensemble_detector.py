@@ -1,4 +1,4 @@
-"""CRONOS AI Engine - Ensemble Anomaly Detector
+"""QBITEL Engine - Ensemble Anomaly Detector
 
 Lightweight ensemble detector that combines statistical heuristics with
 pluggable anomaly detection backends. The implementation intentionally

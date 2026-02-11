@@ -1,0 +1,345 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Enterprise | QBITEL Bridge"
+  description="Enterprise deployment options, SLA guarantees, support tiers, and professional services for QBITEL Bridge."
+>
+  <PageHero
+    title="QBITEL Bridge for Enterprise"
+    description="The same open-source platform, with enterprise-grade support, SLA guarantees, and professional services for mission-critical deployments."
+    badge="Enterprise"
+    gradient="from-quantum-500 to-neon-cyan"
+  />
+
+  <!-- Value Proposition -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Why <span class="gradient-text">Enterprise?</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          QBITEL Bridge is fully functional as an open-source project. Enterprise plans add the support, guarantees, and services that large organizations require.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="card p-6 text-center">
+          <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-quantum-500/10 mx-auto mb-4">
+            <svg class="w-6 h-6 text-quantum-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          </div>
+          <h3 class="text-white font-bold mb-2">24/7 Support</h3>
+          <p class="text-sm text-gray-400">Direct access to the engineering team with guaranteed response times for production incidents.</p>
+        </div>
+
+        <div class="card p-6 text-center">
+          <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-quantum-500/10 mx-auto mb-4">
+            <svg class="w-6 h-6 text-quantum-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <h3 class="text-white font-bold mb-2">SLA Guarantees</h3>
+          <p class="text-sm text-gray-400">Contractual uptime commitments, response time SLAs, and dedicated escalation paths.</p>
+        </div>
+
+        <div class="card p-6 text-center">
+          <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-quantum-500/10 mx-auto mb-4">
+            <svg class="w-6 h-6 text-quantum-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+            </svg>
+          </div>
+          <h3 class="text-white font-bold mb-2">Professional Services</h3>
+          <p class="text-sm text-gray-400">Implementation assistance, custom protocol adapter development, and architecture reviews.</p>
+        </div>
+
+        <div class="card p-6 text-center">
+          <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-quantum-500/10 mx-auto mb-4">
+            <svg class="w-6 h-6 text-quantum-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h3 class="text-white font-bold mb-2">Compliance Reports</h3>
+          <p class="text-sm text-gray-400">Pre-built compliance assessments, audit support, and evidence packages for regulatory reviews.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deployment Options -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Deployment <span class="gradient-text">Options</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Deploy QBITEL Bridge wherever your infrastructure lives. We support every major cloud provider and on-premises environments.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="card p-6">
+          <h3 class="text-lg font-bold text-white mb-3">Self-Hosted</h3>
+          <p class="text-sm text-gray-400 mb-4">Deploy on your own infrastructure using our Helm charts and Kubernetes operators. Full control over data, networking, and security.</p>
+          <ul class="space-y-2 text-sm text-gray-300">
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Any Kubernetes cluster (1.28+)
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Air-gapped environments
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Full data sovereignty
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Bare metal or VM support
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <h3 class="text-lg font-bold text-white mb-3">Cloud-Managed</h3>
+          <p class="text-sm text-gray-400 mb-4">Deploy on EKS, GKE, or AKS with our managed Kubernetes operators. We handle updates, scaling, and monitoring.</p>
+          <ul class="space-y-2 text-sm text-gray-300">
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              AWS, Azure, GCP
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Auto-scaling and HA
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Managed upgrades
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Cloud-native integrations
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <h3 class="text-lg font-bold text-white mb-3">Hybrid</h3>
+          <p class="text-sm text-gray-400 mb-4">Data plane on-premises near your legacy systems, control plane and AI engine in the cloud. Best of both worlds.</p>
+          <ul class="space-y-2 text-sm text-gray-300">
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Local data processing
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Cloud AI inference
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Secure tunnel between sites
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              PQC-encrypted data transit
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Support Tiers -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Support <span class="gradient-text">Tiers</span>
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Community -->
+        <div class="card p-6">
+          <h3 class="text-lg font-bold text-white mb-1">Community</h3>
+          <p class="text-sm text-gray-400 mb-4">Free, forever</p>
+          <div class="text-3xl font-bold text-white mb-6">$0</div>
+          <ul class="space-y-3 text-sm text-gray-300 mb-6">
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Full platform (all 10 products)
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              GitHub Discussions support
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Community Slack channel
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Public documentation
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-gray-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              <span class="text-gray-500">No SLA guarantees</span>
+            </li>
+          </ul>
+          <a href="/docs/getting-started/quickstart" class="btn-secondary w-full text-sm">Get Started</a>
+        </div>
+
+        <!-- Professional -->
+        <div class="card p-6 border-quantum-500/50 ring-1 ring-quantum-500/20">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="text-lg font-bold text-white">Professional</h3>
+            <span class="badge">Popular</span>
+          </div>
+          <p class="text-sm text-gray-400 mb-4">For growing teams</p>
+          <div class="text-3xl font-bold text-white mb-6">Custom</div>
+          <ul class="space-y-3 text-sm text-gray-300 mb-6">
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Everything in Community
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Business-hours support (8x5)
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              4-hour response SLA (P1)
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              99.9% uptime SLA
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Deployment assistance
+            </li>
+          </ul>
+          <a href="mailto:enterprise@qbitel.com" class="btn-primary w-full text-sm">Contact Sales</a>
+        </div>
+
+        <!-- Enterprise -->
+        <div class="card p-6">
+          <h3 class="text-lg font-bold text-white mb-1">Enterprise</h3>
+          <p class="text-sm text-gray-400 mb-4">For mission-critical deployments</p>
+          <div class="text-3xl font-bold text-white mb-6">Custom</div>
+          <ul class="space-y-3 text-sm text-gray-300 mb-6">
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Everything in Professional
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              24/7 support with dedicated TAM
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              1-hour response SLA (P1)
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              99.99% uptime SLA
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Custom protocol adapter development
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              On-site architecture reviews
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              Audit and compliance support
+            </li>
+          </ul>
+          <a href="mailto:enterprise@qbitel.com" class="btn-primary w-full text-sm">Contact Sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLA Details -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          SLA <span class="gradient-text">Details</span>
+        </h2>
+      </div>
+
+      <div class="card overflow-hidden max-w-4xl mx-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-surface-600 bg-surface-900/50">
+              <th class="text-left p-4 text-gray-400 font-medium">Priority</th>
+              <th class="text-left p-4 text-gray-400 font-medium">Description</th>
+              <th class="text-left p-4 text-gray-400 font-medium">Professional</th>
+              <th class="text-left p-4 text-gray-400 font-medium">Enterprise</th>
+            </tr>
+          </thead>
+          <tbody class="text-gray-300">
+            <tr class="border-b border-surface-700">
+              <td class="p-4"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-500/10 text-red-400">P1</span></td>
+              <td class="p-4">Production system down</td>
+              <td class="p-4 text-white font-medium">4 hours</td>
+              <td class="p-4 text-white font-medium">1 hour</td>
+            </tr>
+            <tr class="border-b border-surface-700">
+              <td class="p-4"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-500/10 text-orange-400">P2</span></td>
+              <td class="p-4">Major feature impaired</td>
+              <td class="p-4 text-white font-medium">8 hours</td>
+              <td class="p-4 text-white font-medium">4 hours</td>
+            </tr>
+            <tr class="border-b border-surface-700">
+              <td class="p-4"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-500/10 text-yellow-400">P3</span></td>
+              <td class="p-4">Minor feature issue</td>
+              <td class="p-4 text-white font-medium">24 hours</td>
+              <td class="p-4 text-white font-medium">8 hours</td>
+            </tr>
+            <tr>
+              <td class="p-4"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/10 text-blue-400">P4</span></td>
+              <td class="p-4">General inquiry</td>
+              <td class="p-4 text-white font-medium">48 hours</td>
+              <td class="p-4 text-white font-medium">24 hours</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="section-heading">
+        Talk to Our <span class="gradient-text">Enterprise Team</span>
+      </h2>
+      <p class="section-subheading mx-auto mb-8">
+        Tell us about your infrastructure, legacy systems, and security requirements. We will put together a deployment plan and support package tailored to your organization.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="mailto:enterprise@qbitel.com" class="btn-primary text-base">
+          Contact Enterprise Sales
+          <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+        <a href="/docs/getting-started/quickstart" class="btn-secondary text-base">
+          Try It Free First
+        </a>
+      </div>
+    </div>
+  </section>
+</PageLayout>

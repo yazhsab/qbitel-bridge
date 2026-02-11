@@ -1,8 +1,8 @@
-# CRONOS AI Protocol Discovery - API Documentation
+# QBITEL Bridge - API Documentation
 
 ## 🚀 **API Overview**
 
-The CRONOS AI Protocol Discovery System provides both REST and Python APIs for protocol discovery, classification, and management operations.
+The QBITEL Bridge System provides both REST and Python APIs for protocol discovery, classification, and management operations.
 
 ## 📋 **Table of Contents**
 
@@ -542,7 +542,7 @@ from ai_engine.core.config_manager import load_config
 
 async def discover_protocols():
     # Load configuration
-    config = load_config("config/cronos_ai.yaml")
+    config = load_config("config/qbitel.yaml")
     
     # Initialize orchestrator
     orchestrator = ProtocolDiscoveryOrchestrator(config.ai_engine)
@@ -668,8 +668,8 @@ async def batch_discovery_example():
 For API-related questions and issues:
 
 - **Documentation**: [docs/README.md](README.md)
-- **Issues**: [GitHub Issues](https://github.com/cronos-ai/protocol-discovery/issues)
-- **API Support**: api-support@cronos-ai.com
+- **Issues**: [GitHub Issues](https://github.com/yazhsab/protocol-discovery/issues)
+- **API Support**: api-support@qbitel.com
 
 ---
 

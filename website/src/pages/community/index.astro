@@ -1,0 +1,177 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Community | QBITEL Bridge"
+  description="Join the QBITEL Bridge open-source community. Contribute code, share protocol parsers, report issues, and connect with other engineers."
+>
+  <PageHero
+    title="Join the Community"
+    description="QBITEL Bridge is built by a global community of security engineers, protocol specialists, and infrastructure experts. Get involved, share your work, and help shape the future of protocol intelligence."
+    badge="Open Source"
+  />
+
+  <!-- Community Links -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- GitHub Repository -->
+        <a href="https://github.com/yazhsab/qbitel-bridge" target="_blank" rel="noopener noreferrer" class="card p-6 group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-surface-900 border border-surface-600">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white group-hover:text-quantum-400 transition-colors">GitHub Repository</h3>
+          </div>
+          <p class="text-sm text-gray-400 mb-4">Browse the source code, open issues, submit pull requests, and star the repository to show your support.</p>
+          <span class="text-sm text-quantum-400 font-medium">github.com/yazhsab/qbitel-bridge</span>
+        </a>
+
+        <!-- Discussions -->
+        <a href="https://github.com/yazhsab/qbitel-bridge/discussions" target="_blank" rel="noopener noreferrer" class="card p-6 group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-surface-900 border border-surface-600">
+              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white group-hover:text-quantum-400 transition-colors">Discussions</h3>
+          </div>
+          <p class="text-sm text-gray-400 mb-4">Ask questions, share ideas, discuss architecture decisions, and connect with maintainers and other community members.</p>
+          <span class="text-sm text-quantum-400 font-medium">Join the conversation</span>
+        </a>
+
+        <!-- Contributing -->
+        <a href="/community/contributing" class="card p-6 group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-surface-900 border border-surface-600">
+              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white group-hover:text-quantum-400 transition-colors">Contributing Guide</h3>
+          </div>
+          <p class="text-sm text-gray-400 mb-4">Learn how to contribute code, documentation, and protocol parsers. Includes development setup, coding standards, and PR guidelines.</p>
+          <span class="text-sm text-quantum-400 font-medium">Read the guide</span>
+        </a>
+
+        <!-- Code of Conduct -->
+        <a href="/community/code-of-conduct" class="card p-6 group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-surface-900 border border-surface-600">
+              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white group-hover:text-quantum-400 transition-colors">Code of Conduct</h3>
+          </div>
+          <p class="text-sm text-gray-400 mb-4">Our commitment to providing a welcoming, inclusive, and harassment-free community for everyone.</p>
+          <span class="text-sm text-quantum-400 font-medium">Read the CoC</span>
+        </a>
+
+        <!-- Protocol Marketplace -->
+        <a href="/products/protocol-marketplace" class="card p-6 group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-surface-900 border border-surface-600">
+              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white group-hover:text-quantum-400 transition-colors">Protocol Marketplace</h3>
+          </div>
+          <p class="text-sm text-gray-400 mb-4">Share and discover protocol parsers, adapters, and specifications created by the community. Monetize your expertise.</p>
+          <span class="text-sm text-quantum-400 font-medium">Explore the marketplace</span>
+        </a>
+
+        <!-- Security Policy -->
+        <a href="/security" class="card p-6 group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-surface-900 border border-surface-600">
+              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white group-hover:text-quantum-400 transition-colors">Security Policy</h3>
+          </div>
+          <p class="text-sm text-gray-400 mb-4">Report vulnerabilities responsibly. We follow a 90-day disclosure policy and provide safe harbor for good-faith security research.</p>
+          <span class="text-sm text-quantum-400 font-medium">Report a vulnerability</span>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- How to Get Involved -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Ways to <span class="gradient-text">Get Involved</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Whether you write code, documentation, or protocol specifications, there is a place for you in the QBITEL community.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div class="space-y-6">
+          <div class="flex items-start gap-4">
+            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm shrink-0">1</div>
+            <div>
+              <h3 class="text-white font-semibold mb-1">Report Bugs and Request Features</h3>
+              <p class="text-sm text-gray-400">Found a bug or have an idea? Open an issue on GitHub using our templates. Every report helps improve the platform.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm shrink-0">2</div>
+            <div>
+              <h3 class="text-white font-semibold mb-1">Contribute Protocol Parsers</h3>
+              <p class="text-sm text-gray-400">Have expertise with a specific legacy protocol? Submit a parser to the marketplace and help others modernize similar systems.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm shrink-0">3</div>
+            <div>
+              <h3 class="text-white font-semibold mb-1">Improve Documentation</h3>
+              <p class="text-sm text-gray-400">Good documentation is critical. Fix typos, add examples, write tutorials, or translate docs into other languages.</p>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-6">
+          <div class="flex items-start gap-4">
+            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm shrink-0">4</div>
+            <div>
+              <h3 class="text-white font-semibold mb-1">Submit Pull Requests</h3>
+              <p class="text-sm text-gray-400">Pick up a good-first-issue, fix a bug, or implement a feature. Our contributing guide covers setup, coding standards, and the review process.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm shrink-0">5</div>
+            <div>
+              <h3 class="text-white font-semibold mb-1">Help Others in Discussions</h3>
+              <p class="text-sm text-gray-400">Answer questions, share deployment experiences, and review architecture proposals in GitHub Discussions.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm shrink-0">6</div>
+            <div>
+              <h3 class="text-white font-semibold mb-1">Spread the Word</h3>
+              <p class="text-sm text-gray-400">Star the repo, share blog posts, present at meetups, or write about your experience using QBITEL Bridge.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTABanner
+    title="Ready to Contribute?"
+    description="Fork the repository, pick an issue, and submit your first pull request. We review all contributions within 48 hours."
+  />
+</PageLayout>

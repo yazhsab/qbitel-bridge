@@ -1,5 +1,5 @@
 """
-CRONOS AI - Threat Intelligence Platform Comprehensive Test Suite
+QBITEL - Threat Intelligence Platform Comprehensive Test Suite
 
 Tests for STIX/TAXII client, MITRE ATT&CK mapper, threat hunter, and TIP manager.
 Achieves >90% code coverage across all TIP components.
@@ -12,7 +12,7 @@ from typing import Dict, Any, List
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
 from ai_engine.core.config import Config
-from ai_engine.core.exceptions import CronosAIException
+from ai_engine.core.exceptions import QbitelAIException
 from ai_engine.security.models import SecurityEvent, ThreatLevel, SecurityEventType
 from ai_engine.threat_intelligence import (
     STIXTAXIIClient,
@@ -601,7 +601,7 @@ class TestThreatIntelligenceManager:
         """Test processing event before initialization raises error."""
         manager = ThreatIntelligenceManager(config)
 
-        with pytest.raises(CronosAIException, match="TIP not initialized"):
+        with pytest.raises(QbitelAIException, match="TIP not initialized"):
             await manager.process_security_event(sample_security_event)
 
 

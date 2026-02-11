@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - API Middleware
+QBITEL Engine - API Middleware
 Enterprise-grade middleware for security, monitoring, and performance.
 """
 

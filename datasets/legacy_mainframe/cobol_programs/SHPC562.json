@@ -1,0 +1,19 @@
+{
+  "program_id": "SHPC562",
+  "domain": "transportation",
+  "program_type": "calculation_engine",
+  "author": "D. JONES",
+  "lines_of_code": 213,
+  "complexity_level": "medium",
+  "complexity_score": 0.5,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.889434",
+  "hash": "d26c92ab4b5e84391f03da273f7c3ad8"
+}

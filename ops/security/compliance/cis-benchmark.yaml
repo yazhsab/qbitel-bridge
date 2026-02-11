@@ -1,18 +1,18 @@
-# CIS Benchmark Compliance Configuration for QSLB
+# CIS Benchmark Compliance Configuration for QBITEL
 # Based on CIS Controls v8 and CIS Benchmarks for Linux and Kubernetes
 
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: qslb-cis-benchmark
-  namespace: qslb-system
+  name: qbitel-cis-benchmark
+  namespace: qbitel-system
   labels:
-    app: qslb
+    app: qbitel
     component: security
     compliance: cis
 data:
   cis-controls.yaml: |
-    # CIS Controls v8 Implementation for QSLB
+    # CIS Controls v8 Implementation for QBITEL
     controls:
       # Control 1: Inventory and Control of Enterprise Assets
       control_1:
@@ -27,11 +27,11 @@ data:
         checks:
           - name: "device_inventory_complete"
             description: "All devices are inventoried and tracked"
-            command: "qslb-cli devices list --verify-inventory"
+            command: "qbitel-cli devices list --verify-inventory"
             expected: "all_devices_tracked"
           - name: "unauthorized_device_detection"
             description: "No unauthorized devices detected"
-            command: "qslb-cli security scan --unauthorized-devices"
+            command: "qbitel-cli security scan --unauthorized-devices"
             expected: "no_unauthorized_devices"
 
       # Control 2: Inventory and Control of Software Assets
@@ -47,11 +47,11 @@ data:
         checks:
           - name: "software_inventory_current"
             description: "Software inventory is current and complete"
-            command: "qslb-cli software inventory --verify"
+            command: "qbitel-cli software inventory --verify"
             expected: "inventory_current"
           - name: "unauthorized_software_detection"
             description: "No unauthorized software detected"
-            command: "qslb-cli security scan --unauthorized-software"
+            command: "qbitel-cli security scan --unauthorized-software"
             expected: "no_unauthorized_software"
 
       # Control 3: Data Protection
@@ -67,11 +67,11 @@ data:
         checks:
           - name: "encryption_at_rest_enabled"
             description: "All sensitive data encrypted at rest"
-            command: "qslb-cli security verify --encryption-at-rest"
+            command: "qbitel-cli security verify --encryption-at-rest"
             expected: "all_data_encrypted"
           - name: "encryption_in_transit_enabled"
             description: "All communications use post-quantum encryption"
-            command: "qslb-cli security verify --encryption-in-transit"
+            command: "qbitel-cli security verify --encryption-in-transit"
             expected: "pq_tls_enabled"
 
       # Control 4: Secure Configuration of Enterprise Assets and Software
@@ -87,11 +87,11 @@ data:
         checks:
           - name: "secure_configuration_baseline"
             description: "All systems follow secure configuration baseline"
-            command: "qslb-cli compliance scan --baseline"
+            command: "qbitel-cli compliance scan --baseline"
             expected: "baseline_compliant"
           - name: "configuration_drift_detection"
             description: "No configuration drift detected"
-            command: "qslb-cli security scan --configuration-drift"
+            command: "qbitel-cli security scan --configuration-drift"
             expected: "no_drift_detected"
 
       # Control 5: Account Management
@@ -107,11 +107,11 @@ data:
         checks:
           - name: "privileged_accounts_managed"
             description: "All privileged accounts are properly managed"
-            command: "qslb-cli iam verify --privileged-accounts"
+            command: "qbitel-cli iam verify --privileged-accounts"
             expected: "accounts_managed"
           - name: "inactive_accounts_disabled"
             description: "Inactive accounts are disabled"
-            command: "qslb-cli iam scan --inactive-accounts"
+            command: "qbitel-cli iam scan --inactive-accounts"
             expected: "no_inactive_accounts"
 
       # Control 6: Access Control Management
@@ -127,11 +127,11 @@ data:
         checks:
           - name: "rbac_properly_configured"
             description: "RBAC is properly configured and enforced"
-            command: "qslb-cli iam verify --rbac"
+            command: "qbitel-cli iam verify --rbac"
             expected: "rbac_enforced"
           - name: "least_privilege_enforced"
             description: "Least privilege principle is enforced"
-            command: "qslb-cli iam verify --least-privilege"
+            command: "qbitel-cli iam verify --least-privilege"
             expected: "least_privilege_enforced"
 
       # Control 7: Continuous Vulnerability Management
@@ -147,11 +147,11 @@ data:
         checks:
           - name: "vulnerability_scanning_active"
             description: "Vulnerability scanning is active and current"
-            command: "qslb-cli security scan --vulnerabilities"
+            command: "qbitel-cli security scan --vulnerabilities"
             expected: "scanning_active"
           - name: "critical_vulnerabilities_patched"
             description: "Critical vulnerabilities are patched within SLA"
-            command: "qslb-cli security verify --critical-patches"
+            command: "qbitel-cli security verify --critical-patches"
             expected: "critical_patched"
 
       # Control 8: Audit Log Management
@@ -167,11 +167,11 @@ data:
         checks:
           - name: "audit_logging_enabled"
             description: "Comprehensive audit logging is enabled"
-            command: "qslb-cli logging verify --audit-logs"
+            command: "qbitel-cli logging verify --audit-logs"
             expected: "audit_logging_enabled"
           - name: "log_integrity_protected"
             description: "Log integrity is protected"
-            command: "qslb-cli logging verify --integrity"
+            command: "qbitel-cli logging verify --integrity"
             expected: "integrity_protected"
 
       # Control 9: Email and Web Browser Protections
@@ -187,7 +187,7 @@ data:
         checks:
           - name: "web_filtering_enabled"
             description: "Web filtering is enabled and configured"
-            command: "qslb-cli security verify --web-filtering"
+            command: "qbitel-cli security verify --web-filtering"
             expected: "filtering_enabled"
 
       # Control 10: Malware Defenses
@@ -203,7 +203,7 @@ data:
         checks:
           - name: "antimalware_active"
             description: "Antimalware protection is active and updated"
-            command: "qslb-cli security verify --antimalware"
+            command: "qbitel-cli security verify --antimalware"
             expected: "antimalware_active"
 
       # Control 11: Data Recovery
@@ -219,11 +219,11 @@ data:
         checks:
           - name: "backups_current"
             description: "Backups are current and tested"
-            command: "qslb-cli backup verify --current"
+            command: "qbitel-cli backup verify --current"
             expected: "backups_current"
           - name: "recovery_tested"
             description: "Recovery procedures are tested"
-            command: "qslb-cli backup verify --recovery-test"
+            command: "qbitel-cli backup verify --recovery-test"
             expected: "recovery_tested"
 
       # Control 12: Network Infrastructure Management
@@ -239,11 +239,11 @@ data:
         checks:
           - name: "network_segmentation_implemented"
             description: "Network segmentation is properly implemented"
-            command: "qslb-cli network verify --segmentation"
+            command: "qbitel-cli network verify --segmentation"
             expected: "segmentation_active"
           - name: "secure_protocols_enforced"
             description: "Only secure protocols are allowed"
-            command: "qslb-cli network verify --secure-protocols"
+            command: "qbitel-cli network verify --secure-protocols"
             expected: "secure_protocols_only"
 
       # Control 13: Network Monitoring and Defense
@@ -259,11 +259,11 @@ data:
         checks:
           - name: "network_monitoring_active"
             description: "Network monitoring is active and alerting"
-            command: "qslb-cli monitoring verify --network"
+            command: "qbitel-cli monitoring verify --network"
             expected: "monitoring_active"
           - name: "intrusion_detection_enabled"
             description: "Network intrusion detection is enabled"
-            command: "qslb-cli security verify --ids"
+            command: "qbitel-cli security verify --ids"
             expected: "ids_enabled"
 
       # Control 14: Security Awareness and Skills Training
@@ -279,7 +279,7 @@ data:
         checks:
           - name: "security_training_current"
             description: "Security training is current for all users"
-            command: "qslb-cli training verify --current"
+            command: "qbitel-cli training verify --current"
             expected: "training_current"
 
       # Control 15: Service Provider Management
@@ -295,7 +295,7 @@ data:
         checks:
           - name: "vendor_assessments_current"
             description: "Vendor security assessments are current"
-            command: "qslb-cli vendor verify --assessments"
+            command: "qbitel-cli vendor verify --assessments"
             expected: "assessments_current"
 
       # Control 16: Application Software Security
@@ -311,7 +311,7 @@ data:
         checks:
           - name: "secure_development_implemented"
             description: "Secure development practices are implemented"
-            command: "qslb-cli development verify --secure-practices"
+            command: "qbitel-cli development verify --secure-practices"
             expected: "secure_practices_active"
 
       # Control 17: Incident Response Management
@@ -327,7 +327,7 @@ data:
         checks:
           - name: "incident_response_plan_current"
             description: "Incident response plan is current and tested"
-            command: "qslb-cli incident verify --plan"
+            command: "qbitel-cli incident verify --plan"
             expected: "plan_current"
 
       # Control 18: Penetration Testing
@@ -343,7 +343,7 @@ data:
         checks:
           - name: "penetration_testing_current"
             description: "Penetration testing is current and comprehensive"
-            command: "qslb-cli testing verify --penetration"
+            command: "qbitel-cli testing verify --penetration"
             expected: "testing_current"
 
   compliance-schedule.yaml: |

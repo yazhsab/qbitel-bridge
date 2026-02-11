@@ -678,7 +678,7 @@
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["cronos-ai", "overview"],
+  "tags": ["qbitel", "overview"],
   "templating": {
     "list": []
   },
@@ -688,8 +688,8 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "CRONOS AI - Overview",
-  "uid": "cronos-ai-overview",
+  "title": "QBITEL - Overview",
+  "uid": "qbitel-overview",
   "version": 1,
   "weekStart": ""
 }

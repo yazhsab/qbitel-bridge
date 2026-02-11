@@ -1,5 +1,5 @@
 /**
- * CRONOS AI - K6 Load Testing Script
+ * QBITEL - K6 Load Testing Script
  * 
  * Comprehensive load testing for API endpoints and system performance.
  */
@@ -35,7 +35,7 @@ export const options = {
 
 // Configuration
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:8000';
-const API_KEY = __ENV.API_KEY || 'cronos_ai_test_key';
+const API_KEY = __ENV.API_KEY || 'qbitel_test_key';
 
 // Helper function to create auth headers
 function getAuthHeaders() {

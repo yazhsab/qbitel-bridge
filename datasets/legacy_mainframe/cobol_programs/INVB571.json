@@ -1,0 +1,19 @@
+{
+  "program_id": "INVB571",
+  "domain": "retail",
+  "program_type": "batch_processing",
+  "author": "M. JOHNSON",
+  "lines_of_code": 277,
+  "complexity_level": "complex",
+  "complexity_score": 0.717,
+  "files_used": 4,
+  "verbs_used": 13,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.934204",
+  "hash": "97d3252f812948c13100849e70728b8f"
+}

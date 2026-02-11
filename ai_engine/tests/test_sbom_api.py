@@ -1,5 +1,5 @@
 """
-CRONOS AI - SBOM API Tests
+QBITEL - SBOM API Tests
 Comprehensive test suite for SBOM endpoints.
 """
 
@@ -24,8 +24,8 @@ def sbom_test_data(tmp_path):
         "spdxVersion": "SPDX-2.3",
         "dataLicense": "CC0-1.0",
         "SPDXID": "SPDXRef-DOCUMENT",
-        "name": "cronos-ai-platform-v1.0.0",
-        "documentNamespace": "https://sbom.cronos-ai.com/v1.0.0/platform",
+        "name": "qbitel-platform-v1.0.0",
+        "documentNamespace": "https://github.com/yazhsab/qbitel-bridge/sbom/v1.0.0/platform",
         "creationInfo": {
             "created": "2025-10-19T14:30:00Z",
             "creators": ["Tool: syft-0.100.0"],
@@ -51,7 +51,7 @@ def sbom_test_data(tmp_path):
         ],
     }
 
-    spdx_file = v1_dir / "cronos-ai-platform-spdx.json"
+    spdx_file = v1_dir / "qbitel-platform-spdx.json"
     with open(spdx_file, "w") as f:
         json.dump(spdx_sbom, f, indent=2)
 
@@ -64,7 +64,7 @@ def sbom_test_data(tmp_path):
             "timestamp": "2025-10-19T14:30:00Z",
             "component": {
                 "type": "application",
-                "name": "cronos-ai-platform",
+                "name": "qbitel-platform",
                 "version": "1.0.0",
             },
         },
@@ -78,7 +78,7 @@ def sbom_test_data(tmp_path):
         ],
     }
 
-    cyclonedx_file = v1_dir / "cronos-ai-platform-cyclonedx.json"
+    cyclonedx_file = v1_dir / "qbitel-platform-cyclonedx.json"
     with open(cyclonedx_file, "w") as f:
         json.dump(cyclonedx_sbom, f, indent=2)
 
@@ -107,7 +107,7 @@ def sbom_test_data(tmp_path):
         "descriptor": {"timestamp": "2025-10-19T15:00:00Z"},
     }
 
-    vuln_file = v1_dir / "cronos-ai-platform-vulnerabilities.json"
+    vuln_file = v1_dir / "qbitel-platform-vulnerabilities.json"
     with open(vuln_file, "w") as f:
         json.dump(vuln_report, f, indent=2)
 
@@ -117,9 +117,9 @@ def sbom_test_data(tmp_path):
         "version": "v1.0.0",
         "commit": "abc123def456",
         "components": {
-            "cronos-ai-platform": {
+            "qbitel-platform": {
                 "packages": 2,
-                "sbom_file": "cronos-ai-platform-spdx.json",
+                "sbom_file": "qbitel-platform-spdx.json",
                 "format": "SPDX 2.3",
                 "vulnerabilities": {
                     "total": 2,
@@ -171,7 +171,7 @@ class TestSBOMVersionEndpoints:
 
         assert metadata.version == "v1.0.0"
         assert metadata.commit == "abc123def456"
-        assert "cronos-ai-platform" in metadata.components
+        assert "qbitel-platform" in metadata.components
 
     def test_get_version_metadata_not_found(
         self, sbom_api, sbom_test_data, monkeypatch
@@ -198,12 +198,12 @@ class TestSBOMDownloadEndpoint:
 
         response = asyncio.run(
             sbom_api.download_sbom(
-                version="v1.0.0", component="cronos-ai-platform", format="spdx"
+                version="v1.0.0", component="qbitel-platform", format="spdx"
             )
         )
 
         assert response is not None
-        assert "cronos-ai-platform-spdx.json" in response.headers.get(
+        assert "qbitel-platform-spdx.json" in response.headers.get(
             "Content-Disposition", ""
         )
 
@@ -215,7 +215,7 @@ class TestSBOMDownloadEndpoint:
 
         response = asyncio.run(
             sbom_api.download_sbom(
-                version="v1.0.0", component="cronos-ai-platform", format="cyclonedx"
+                version="v1.0.0", component="qbitel-platform", format="cyclonedx"
             )
         )
 
@@ -247,10 +247,10 @@ class TestSBOMMetadataEndpoint:
         import asyncio
 
         metadata = asyncio.run(
-            sbom_api.get_sbom_metadata(version="v1.0.0", component="cronos-ai-platform")
+            sbom_api.get_sbom_metadata(version="v1.0.0", component="qbitel-platform")
         )
 
-        assert metadata.component == "cronos-ai-platform"
+        assert metadata.component == "qbitel-platform"
         assert metadata.version == "v1.0.0"
         assert metadata.packages == 2
         assert metadata.format == "SPDX 2.3"
@@ -270,11 +270,11 @@ class TestSBOMVulnerabilitiesEndpoint:
 
         result = asyncio.run(
             sbom_api.get_sbom_vulnerabilities(
-                version="v1.0.0", component="cronos-ai-platform", severity=None
+                version="v1.0.0", component="qbitel-platform", severity=None
             )
         )
 
-        assert result["component"] == "cronos-ai-platform"
+        assert result["component"] == "qbitel-platform"
         assert result["summary"]["total"] == 2
         assert result["summary"]["critical"] == 1
         assert result["summary"]["high"] == 1
@@ -290,7 +290,7 @@ class TestSBOMVulnerabilitiesEndpoint:
 
         result = asyncio.run(
             sbom_api.get_sbom_vulnerabilities(
-                version="v1.0.0", component="cronos-ai-platform", severity="Critical"
+                version="v1.0.0", component="qbitel-platform", severity="Critical"
             )
         )
 

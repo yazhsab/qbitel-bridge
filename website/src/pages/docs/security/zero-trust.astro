@@ -1,0 +1,135 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Zero-Trust Architecture | QBITEL Bridge Docs" description="Zero-trust security architecture in QBITEL Bridge: identity-based access, microsegmentation, mTLS, and continuous verification.">
+  <h1 class="text-3xl font-bold text-white mb-2">Zero-Trust Architecture</h1>
+  <p class="text-gray-400 mb-8">QBITEL Bridge implements a zero-trust security model: never trust, always verify. Every request is authenticated, authorized, and encrypted regardless of network location.</p>
+
+  <h2 id="principles" class="text-2xl font-bold text-white mt-12 mb-4">Core Principles</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Verify explicitly</strong> -- authenticate and authorize every request based on all available data points</li>
+    <li><strong class="text-white">Least privilege access</strong> -- limit access to the minimum required for each task</li>
+    <li><strong class="text-white">Assume breach</strong> -- minimize blast radius and segment access; verify end-to-end encryption</li>
+    <li><strong class="text-white">Continuous verification</strong> -- re-evaluate trust continuously, not just at session start</li>
+  </ul>
+
+  <h2 id="identity-layer" class="text-2xl font-bold text-white mt-12 mb-4">Identity-Based Access</h2>
+  <p class="text-gray-300 mb-4">Every entity in QBITEL Bridge has a cryptographic identity:</p>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Entity</th>
+        <th class="text-left text-white py-2 pr-4">Identity Mechanism</th>
+        <th class="text-left text-white py-2">Verification</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Users</td>
+        <td class="text-gray-300 py-2 pr-4">JWT / OIDC tokens</td>
+        <td class="text-gray-300 py-2">IdP verification + RBAC</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Services</td>
+        <td class="text-gray-300 py-2 pr-4">mTLS certificates</td>
+        <td class="text-gray-300 py-2">CA chain validation</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Devices</td>
+        <td class="text-gray-300 py-2 pr-4">X.509 + TPM attestation</td>
+        <td class="text-gray-300 py-2">Certificate + hardware binding</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">API Clients</td>
+        <td class="text-gray-300 py-2 pr-4">API keys with scopes</td>
+        <td class="text-gray-300 py-2">Key validation + rate limiting</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="microsegmentation" class="text-2xl font-bold text-white mt-12 mb-4">Network Microsegmentation</h2>
+  <p class="text-gray-300 mb-4">Network policies restrict pod-to-pod communication to only authorized paths:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Example: AI Engine can only communicate with</span>
+<span class="text-gray-500"># the control plane and database pods</span>
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ai-engine-policy
+  namespace: qbitel-service-mesh
+spec:
+  podSelector:
+    matchLabels:
+      app: qbitel-engine
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: controlplane
+      ports:
+        - port: 8000
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgres
+      ports:
+        - port: 5432</code></pre>
+
+  <h2 id="mtls" class="text-2xl font-bold text-white mt-12 mb-4">Service Mesh mTLS</h2>
+  <p class="text-gray-300 mb-4">All inter-service communication is encrypted with mutual TLS via the Istio service mesh:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Automatic mTLS</strong> -- Istio sidecar proxies handle certificate management</li>
+    <li><strong class="text-white">PQC certificates</strong> -- quantum-safe certificate rotation via the QKD Certificate Manager</li>
+    <li><strong class="text-white">Certificate rotation</strong> -- automatic rotation with configurable intervals</li>
+    <li><strong class="text-white">STRICT mode</strong> -- reject any plaintext connections</li>
+  </ul>
+
+  <h2 id="opa-authorization" class="text-2xl font-bold text-white mt-12 mb-4">OPA Policy Authorization</h2>
+  <p class="text-gray-300 mb-4">The Go control plane uses Open Policy Agent (OPA) for fine-grained authorization decisions:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>Request-level authorization based on identity, action, and resource</li>
+    <li>Admission control for Kubernetes pod deployments</li>
+    <li>Compliance policy enforcement (e.g., require encryption, restrict data access)</li>
+    <li>Audit logging of all policy decisions</li>
+  </ul>
+
+  <h2 id="secrets-management" class="text-2xl font-bold text-white mt-12 mb-4">Secrets Management</h2>
+  <p class="text-gray-300 mb-4">Secrets are managed through HashiCorp Vault with the following practices:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Dynamic secrets</strong> -- short-lived credentials generated on demand</li>
+    <li><strong class="text-white">Automatic rotation</strong> -- API keys and certificates rotate on schedule</li>
+    <li><strong class="text-white">Transit encryption</strong> -- encrypt/decrypt without exposing raw keys</li>
+    <li><strong class="text-white">Audit logging</strong> -- every secret access is logged</li>
+    <li><strong class="text-white">TPM sealing</strong> -- edge device secrets sealed to hardware</li>
+  </ul>
+
+  <h2 id="admission-control" class="text-2xl font-bold text-white mt-12 mb-4">Admission Control</h2>
+  <p class="text-gray-300 mb-4">The Kubernetes admission webhook validates all deployments before they are admitted to the cluster:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>Reject privileged containers</li>
+    <li>Require resource limits on all pods</li>
+    <li>Enforce security context constraints</li>
+    <li>Validate image signatures and provenance</li>
+    <li>Check for known vulnerabilities in container images</li>
+  </ul>
+
+  <h2 id="zero-touch-security" class="text-2xl font-bold text-white mt-12 mb-4">Zero-Touch Security Response</h2>
+  <p class="text-gray-300 mb-4">The Zero-Touch Decision Engine provides autonomous threat response within the zero-trust framework:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>Automatic network isolation of compromised workloads</li>
+    <li>Certificate revocation for compromised identities</li>
+    <li>Dynamic policy updates in response to detected threats</li>
+    <li>Human escalation for high-risk decisions</li>
+  </ul>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/security/pqc-algorithms" class="text-quantum-400 hover:underline">PQC Algorithms</a> -- quantum-safe encryption details</li>
+    <li><a href="/docs/api/authentication" class="text-quantum-400 hover:underline">Authentication</a> -- configure identity mechanisms</li>
+    <li><a href="/docs/security/compliance-frameworks" class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- regulatory compliance</li>
+  </ul>
+</DocsLayout>

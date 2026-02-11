@@ -1,5 +1,5 @@
 """
-CRONOS AI - Legacy System Whisperer Tests
+QBITEL Bridge - Legacy System Whisperer Tests
 Comprehensive test suite for legacy protocol analysis and modernization.
 """
 

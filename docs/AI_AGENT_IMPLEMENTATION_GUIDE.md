@@ -1,4 +1,4 @@
-# CRONOS AI - Implementation Guide for AI Coding Agents
+# QBITEL - Implementation Guide for AI Coding Agents
 
 **Version**: 1.0.0
 **Purpose**: Detailed implementation reference for AI coding agents working on enhancements and new features
@@ -65,8 +65,8 @@ This guide provides implementation details for AI coding agents. Each section in
 
 | Purpose | Path |
 |---------|------|
-| Default config | `config/cronos_ai.yaml` |
-| Production config | `config/cronos_ai.production.yaml` |
+| Default config | `config/qbitel.yaml` |
+| Production config | `config/qbitel.production.yaml` |
 | Compliance config | `config/compliance.yaml` |
 | Security config | `config/security/enterprise-security-config.yaml` |
 | Environment configs | `config/environments/` |
@@ -75,7 +75,7 @@ This guide provides implementation details for AI coding agents. Each section in
 
 | Purpose | Path |
 |---------|------|
-| Helm charts | `helm/cronos-ai/` |
+| Helm charts | `helm/qbitel/` |
 | Kubernetes manifests | `kubernetes/` |
 | Docker configs | `docker/` |
 | CI/CD pipelines | `.github/workflows/` |
@@ -289,13 +289,13 @@ logger = logging.getLogger(__name__)
 
 # Metrics
 FEATURE_REQUESTS = Counter(
-    "cronos_feature_requests_total",
+    "qbitel_feature_requests_total",
     "Total feature requests",
     ["operation", "status"]
 )
 
 FEATURE_DURATION = Histogram(
-    "cronos_feature_duration_seconds",
+    "qbitel_feature_duration_seconds",
     "Feature operation duration",
     ["operation"]
 )
@@ -1614,7 +1614,7 @@ async def on_security_event(event_data: Dict):
         timestamp=datetime.utcnow(),
         data=event_data,
     )
-    await publisher.publish(event, "cronos.security.events")
+    await publisher.publish(event, "qbitel.security.events")
 ```
 
 ---
@@ -1653,7 +1653,7 @@ import numpy as np
 
 # 4. Local imports
 from ai_engine.core.config import Config
-from ai_engine.core.exceptions import CronosAIException
+from ai_engine.core.exceptions import QbitelAIException
 ```
 
 ### Commit Message Format

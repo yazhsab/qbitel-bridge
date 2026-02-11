@@ -1,0 +1,19 @@
+{
+  "program_id": "POSB486",
+  "domain": "retail",
+  "program_type": "batch_processing",
+  "author": "J. SMITH",
+  "lines_of_code": 231,
+  "complexity_level": "medium",
+  "complexity_score": 0.53,
+  "files_used": 2,
+  "verbs_used": 13,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.865597",
+  "hash": "654ba84fb9769f8365feb08ee31490c7"
+}

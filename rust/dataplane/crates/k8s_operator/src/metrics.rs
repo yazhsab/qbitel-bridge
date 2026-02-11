@@ -1,4 +1,4 @@
-//! Metrics collection and export for the CRONOS AI operator
+//! Metrics collection and export for the QBITEL Bridge operator
 
 use prometheus::{
     Counter, CounterVec, Gauge, GaugeVec, Histogram, HistogramVec, IntCounter, IntCounterVec,
@@ -59,87 +59,87 @@ impl OperatorMetrics {
         
         // Reconciliation metrics
         let reconcile_counter = IntCounterVec::new(
-            Opts::new("cronos_ai_operator_reconcile_total", "Total number of reconciliations"),
+            Opts::new("qbitel_bridge_operator_reconcile_total", "Total number of reconciliations"),
             &["controller", "resource_type"],
         )?;
         
         let reconcile_success_counter = IntCounterVec::new(
-            Opts::new("cronos_ai_operator_reconcile_success_total", "Total number of successful reconciliations"),
+            Opts::new("qbitel_bridge_operator_reconcile_success_total", "Total number of successful reconciliations"),
             &["controller", "resource_type"],
         )?;
         
         let reconcile_error_counter = IntCounterVec::new(
-            Opts::new("cronos_ai_operator_reconcile_errors_total", "Total number of reconciliation errors"),
+            Opts::new("qbitel_bridge_operator_reconcile_errors_total", "Total number of reconciliation errors"),
             &["controller", "resource_type", "error_type"],
         )?;
         
         let reconcile_duration_histogram = HistogramVec::new(
-            prometheus::HistogramOpts::new("cronos_ai_operator_reconcile_duration_seconds", "Reconciliation duration"),
+            prometheus::HistogramOpts::new("qbitel_bridge_operator_reconcile_duration_seconds", "Reconciliation duration"),
             &["controller", "resource_type"],
         )?;
         
         // Resource metrics
         let resources_total = IntGaugeVec::new(
-            Opts::new("cronos_ai_operator_resources_total", "Total number of resources"),
+            Opts::new("qbitel_bridge_operator_resources_total", "Total number of resources"),
             &["resource_type", "namespace"],
         )?;
         
         let resources_ready = IntGaugeVec::new(
-            Opts::new("cronos_ai_operator_resources_ready", "Number of ready resources"),
+            Opts::new("qbitel_bridge_operator_resources_ready", "Number of ready resources"),
             &["resource_type", "namespace"],
         )?;
         
         let resources_error = IntGaugeVec::new(
-            Opts::new("cronos_ai_operator_resources_error", "Number of resources in error state"),
+            Opts::new("qbitel_bridge_operator_resources_error", "Number of resources in error state"),
             &["resource_type", "namespace"],
         )?;
         
         // Controller health metrics
         let controller_up = IntGaugeVec::new(
-            Opts::new("cronos_ai_operator_controller_up", "Controller health status (1 = up, 0 = down)"),
+            Opts::new("qbitel_bridge_operator_controller_up", "Controller health status (1 = up, 0 = down)"),
             &["controller"],
         )?;
         
         let controller_last_success = GaugeVec::new(
-            Opts::new("cronos_ai_operator_controller_last_success_timestamp", "Timestamp of last successful reconciliation"),
+            Opts::new("qbitel_bridge_operator_controller_last_success_timestamp", "Timestamp of last successful reconciliation"),
             &["controller"],
         )?;
         
         // Kubernetes API metrics
         let k8s_api_requests_total = IntCounterVec::new(
-            Opts::new("cronos_ai_operator_k8s_requests_total", "Total Kubernetes API requests"),
+            Opts::new("qbitel_bridge_operator_k8s_requests_total", "Total Kubernetes API requests"),
             &["method", "code"],
         )?;
         
         let k8s_api_request_duration = HistogramVec::new(
-            prometheus::HistogramOpts::new("cronos_ai_operator_k8s_request_duration_seconds", "Kubernetes API request duration"),
+            prometheus::HistogramOpts::new("qbitel_bridge_operator_k8s_request_duration_seconds", "Kubernetes API request duration"),
             &["method"],
         )?;
         
         let k8s_api_errors_total = IntCounterVec::new(
-            Opts::new("cronos_ai_operator_k8s_errors_total", "Total Kubernetes API errors"),
+            Opts::new("qbitel_bridge_operator_k8s_errors_total", "Total Kubernetes API errors"),
             &["method", "code"],
         )?;
         
         // Custom resource metrics
-        let dataplane_instances = IntGauge::new("cronos_ai_dataplane_instances", "Number of DataPlane instances")?;
-        let controlplane_instances = IntGauge::new("cronos_ai_controlplane_instances", "Number of ControlPlane instances")?;
-        let aiengine_instances = IntGauge::new("cronos_ai_aiengine_instances", "Number of AIEngine instances")?;
-        let policy_engine_instances = IntGauge::new("cronos_ai_policy_engine_instances", "Number of PolicyEngine instances")?;
-        let servicemesh_configs = IntGauge::new("cronos_ai_servicemesh_configs", "Number of ServiceMesh configurations")?;
+        let dataplane_instances = IntGauge::new("qbitel_bridge_dataplane_instances", "Number of DataPlane instances")?;
+        let controlplane_instances = IntGauge::new("qbitel_bridge_controlplane_instances", "Number of ControlPlane instances")?;
+        let aiengine_instances = IntGauge::new("qbitel_bridge_aiengine_instances", "Number of AIEngine instances")?;
+        let policy_engine_instances = IntGauge::new("qbitel_bridge_policy_engine_instances", "Number of PolicyEngine instances")?;
+        let servicemesh_configs = IntGauge::new("qbitel_bridge_servicemesh_configs", "Number of ServiceMesh configurations")?;
         
         // Performance metrics
-        let operator_memory_usage = Gauge::new("cronos_ai_operator_memory_usage_bytes", "Operator memory usage in bytes")?;
-        let operator_cpu_usage = Gauge::new("cronos_ai_operator_cpu_usage_percent", "Operator CPU usage percentage")?;
-        let goroutines_total = IntGauge::new("cronos_ai_operator_goroutines", "Number of goroutines")?;
+        let operator_memory_usage = Gauge::new("qbitel_bridge_operator_memory_usage_bytes", "Operator memory usage in bytes")?;
+        let operator_cpu_usage = Gauge::new("qbitel_bridge_operator_cpu_usage_percent", "Operator CPU usage percentage")?;
+        let goroutines_total = IntGauge::new("qbitel_bridge_operator_goroutines", "Number of goroutines")?;
         
         // Error tracking
         let errors_by_type = IntCounterVec::new(
-            Opts::new("cronos_ai_operator_errors_by_type_total", "Total errors by type"),
+            Opts::new("qbitel_bridge_operator_errors_by_type_total", "Total errors by type"),
             &["error_type", "severity"],
         )?;
         
-        let warnings_total = IntCounter::new("cronos_ai_operator_warnings_total", "Total warnings")?;
+        let warnings_total = IntCounter::new("qbitel_bridge_operator_warnings_total", "Total warnings")?;
         
         // Register all metrics
         registry.register(Box::new(reconcile_counter.clone()))?;
@@ -452,8 +452,8 @@ mod tests {
         metrics.record_reconciliation_success("dataplane", "DataPlaneService", Duration::from_millis(100));
         
         let output = metrics.export_metrics().unwrap();
-        assert!(output.contains("cronos_ai_operator_reconcile_total"));
-        assert!(output.contains("cronos_ai_operator_reconcile_success_total"));
+        assert!(output.contains("qbitel_bridge_operator_reconcile_total"));
+        assert!(output.contains("qbitel_bridge_operator_reconcile_success_total"));
     }
     
     #[tokio::test]
@@ -464,6 +464,6 @@ mod tests {
         metrics.record_error(&error);
         
         let output = metrics.export_metrics().unwrap();
-        assert!(output.contains("cronos_ai_operator_errors_by_type_total"));
+        assert!(output.contains("qbitel_bridge_operator_errors_by_type_total"));
     }
 }

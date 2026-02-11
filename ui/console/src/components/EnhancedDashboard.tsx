@@ -404,7 +404,7 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ apiClient }) => {
       {/* Header */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1" gutterBottom>
-          CronosAI Dashboard
+          QbitelAI Dashboard
         </Typography>
         
         <Box display="flex" alignItems="center" gap={2}>

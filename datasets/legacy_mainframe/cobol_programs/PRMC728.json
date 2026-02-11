@@ -1,0 +1,19 @@
+{
+  "program_id": "PRMC728",
+  "domain": "insurance",
+  "program_type": "calculation_engine",
+  "author": "P. WILSON",
+  "lines_of_code": 213,
+  "complexity_level": "medium",
+  "complexity_score": 0.5,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.895179",
+  "hash": "31f68facb3b92bdd7987dac92b840f1e"
+}

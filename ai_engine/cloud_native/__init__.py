@@ -1,5 +1,5 @@
 """
-CRONOS AI - Cloud-Native Security Platform
+QBITEL - Cloud-Native Security Platform
 Phase 1: Cloud-Native Foundation
 
 This module provides enterprise-grade security for cloud-native applications including:
@@ -10,7 +10,7 @@ This module provides enterprise-grade security for cloud-native applications inc
 """
 
 __version__ = "1.0.0"
-__author__ = "CRONOS AI Team"
+__author__ = "QBITEL Team"
 
 from typing import Dict, List, Optional
 

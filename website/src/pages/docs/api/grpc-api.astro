@@ -1,0 +1,129 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="gRPC API | QBITEL Bridge Docs" description="gRPC API reference for QBITEL Bridge: high-performance streaming services for real-time protocol analysis and control plane communication.">
+  <h1 class="text-3xl font-bold text-white mb-2">gRPC API Reference</h1>
+  <p class="text-gray-400 mb-8">QBITEL Bridge exposes gRPC services on port 50051 for high-performance, low-latency communication between components and external integrations.</p>
+
+  <h2 id="overview" class="text-2xl font-bold text-white mt-12 mb-4">Overview</h2>
+  <p class="text-gray-300 mb-4">The gRPC API is used for inter-service communication between the data plane, AI Engine, and control plane. It supports unary RPCs, server streaming, and bidirectional streaming for real-time analysis.</p>
+
+  <h2 id="connection" class="text-2xl font-bold text-white mt-12 mb-4">Connection</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Default gRPC endpoint</span>
+localhost:50051
+
+<span class="text-gray-500"># With TLS</span>
+grpcs://qbitel-engine.qbitel-service-mesh.svc.cluster.local:50051</code></pre>
+
+  <h2 id="services" class="text-2xl font-bold text-white mt-12 mb-4">Service Definitions</h2>
+
+  <h3 id="discovery-service" class="text-xl font-semibold text-white mt-8 mb-3">DiscoveryService</h3>
+  <p class="text-gray-300 mb-4">Protocol discovery and classification operations.</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">service DiscoveryService {'{'}
+  <span class="text-gray-500">// Analyze traffic and discover protocols</span>
+  rpc AnalyzeTraffic(AnalyzeRequest) returns (AnalyzeResponse);
+
+  <span class="text-gray-500">// Classify a single message</span>
+  rpc ClassifyMessage(ClassifyRequest) returns (ClassifyResponse);
+
+  <span class="text-gray-500">// Stream traffic for real-time discovery</span>
+  rpc StreamAnalyze(stream TrafficChunk) returns (stream DiscoveryEvent);
+
+  <span class="text-gray-500">// Get discovery status</span>
+  rpc GetStatus(StatusRequest) returns (StatusResponse);
+{'}'}</code></pre>
+
+  <h3 id="security-service" class="text-xl font-semibold text-white mt-8 mb-3">SecurityService</h3>
+  <p class="text-gray-300 mb-4">Security analysis and threat response operations.</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">service SecurityService {'{'}
+  <span class="text-gray-500">// Analyze a security event</span>
+  rpc AnalyzeEvent(SecurityEvent) returns (AnalysisResult);
+
+  <span class="text-gray-500">// Stream security events for real-time analysis</span>
+  rpc StreamEvents(stream SecurityEvent) returns (stream ThreatAlert);
+
+  <span class="text-gray-500">// Get security decisions</span>
+  rpc GetDecisions(DecisionQuery) returns (DecisionList);
+{'}'}</code></pre>
+
+  <h3 id="policy-service" class="text-xl font-semibold text-white mt-8 mb-3">PolicyService</h3>
+  <p class="text-gray-300 mb-4">OPA policy evaluation and management (Go control plane).</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">service PolicyService {'{'}
+  <span class="text-gray-500">// Evaluate a policy decision</span>
+  rpc Evaluate(PolicyInput) returns (PolicyDecision);
+
+  <span class="text-gray-500">// List loaded policies</span>
+  rpc ListPolicies(Empty) returns (PolicyList);
+
+  <span class="text-gray-500">// Reload policy bundles</span>
+  rpc ReloadPolicies(ReloadRequest) returns (ReloadResponse);
+{'}'}</code></pre>
+
+  <h3 id="device-service" class="text-xl font-semibold text-white mt-8 mb-3">DeviceService</h3>
+  <p class="text-gray-300 mb-4">Device lifecycle and certificate management (Go management API).</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">service DeviceService {'{'}
+  <span class="text-gray-500">// Register a new device</span>
+  rpc Register(DeviceRegistration) returns (DeviceInfo);
+
+  <span class="text-gray-500">// Issue a certificate</span>
+  rpc IssueCertificate(CertRequest) returns (CertResponse);
+
+  <span class="text-gray-500">// Rotate device certificate</span>
+  rpc RotateCertificate(RotateRequest) returns (CertResponse);
+
+  <span class="text-gray-500">// Get device status</span>
+  rpc GetDeviceStatus(DeviceId) returns (DeviceStatus);
+{'}'}</code></pre>
+
+  <h3 id="health-service" class="text-xl font-semibold text-white mt-8 mb-3">HealthService</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">service HealthService {'{'}
+  <span class="text-gray-500">// Standard gRPC health check</span>
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+  rpc Watch(HealthCheckRequest) returns (stream HealthCheckResponse);
+{'}'}</code></pre>
+
+  <h2 id="client-examples" class="text-2xl font-bold text-white mt-12 mb-4">Client Examples</h2>
+
+  <h3 id="python-client" class="text-xl font-semibold text-white mt-8 mb-3">Python Client</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">import grpc
+from qbitel.proto import discovery_pb2, discovery_pb2_grpc
+
+channel = grpc.insecure_channel('localhost:50051')
+stub = discovery_pb2_grpc.DiscoveryServiceStub(channel)
+
+request = discovery_pb2.AnalyzeRequest(
+    traffic_data=[b"GET /api/users HTTP/1.1"],
+    max_protocols=5
+)
+response = stub.AnalyzeTraffic(request)
+print(f"Discovered {'{'}len(response.protocols){'}'} protocols")</code></pre>
+
+  <h3 id="go-client" class="text-xl font-semibold text-white mt-8 mb-3">Go Client</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+if err != nil {'{'}
+    log.Fatalf("failed to connect: %v", err)
+{'}'}
+defer conn.Close()
+
+client := pb.NewDiscoveryServiceClient(conn)
+resp, err := client.AnalyzeTraffic(ctx, &pb.AnalyzeRequest{'{'}
+    TrafficData: [][]byte{'{'}[]byte("GET /api HTTP/1.1"){'}'},
+{'}'})</code></pre>
+
+  <h2 id="tls-config" class="text-2xl font-bold text-white mt-12 mb-4">TLS Configuration</h2>
+  <p class="text-gray-300 mb-4">For production, use mTLS for all gRPC connections:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">creds = grpc.ssl_channel_credentials(
+    root_certificates=open('ca.pem', 'rb').read(),
+    private_key=open('client-key.pem', 'rb').read(),
+    certificate_chain=open('client-cert.pem', 'rb').read()
+)
+channel = grpc.secure_channel('qbitel-engine:50051', creds)</code></pre>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/api/rest-api" class="text-quantum-400 hover:underline">REST API Reference</a> -- FastAPI endpoints</li>
+    <li><a href="/docs/api/authentication" class="text-quantum-400 hover:underline">Authentication</a> -- mTLS and token configuration</li>
+    <li><a href="/docs/architecture/control-plane" class="text-quantum-400 hover:underline">Control Plane Architecture</a> -- gRPC service design</li>
+  </ul>
+</DocsLayout>

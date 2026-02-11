@@ -1,7 +1,7 @@
 {
   "dashboard": {
-    "title": "CRONOS AI - Explainability & Model Monitoring",
-    "tags": ["cronos-ai", "explainability", "ml-monitoring"],
+    "title": "QBITEL - Explainability & Model Monitoring",
+    "tags": ["qbitel", "explainability", "ml-monitoring"],
     "timezone": "browser",
     "schemaVersion": 38,
     "version": 1,
@@ -14,7 +14,7 @@
         "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
         "targets": [
           {
-            "expr": "rate(cronos_explanations_generated_total{status=\"success\"}[5m])",
+            "expr": "rate(qbitel_explanations_generated_total{status=\"success\"}[5m])",
             "legendFormat": "{{model_name}} - {{explanation_method}}",
             "refId": "A"
           }
@@ -31,7 +31,7 @@
         "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
         "targets": [
           {
-            "expr": "sum(rate(cronos_explanations_generated_total{status=\"success\"}[5m])) / sum(rate(cronos_explanations_generated_total[5m]))",
+            "expr": "sum(rate(qbitel_explanations_generated_total{status=\"success\"}[5m])) / sum(rate(qbitel_explanations_generated_total[5m]))",
             "refId": "A"
           }
         ],
@@ -56,12 +56,12 @@
         "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
         "targets": [
           {
-            "expr": "histogram_quantile(0.95, rate(cronos_explanation_generation_seconds_bucket[5m]))",
+            "expr": "histogram_quantile(0.95, rate(qbitel_explanation_generation_seconds_bucket[5m]))",
             "legendFormat": "{{model_name}} - p95",
             "refId": "A"
           },
           {
-            "expr": "histogram_quantile(0.50, rate(cronos_explanation_generation_seconds_bucket[5m]))",
+            "expr": "histogram_quantile(0.50, rate(qbitel_explanation_generation_seconds_bucket[5m]))",
             "legendFormat": "{{model_name}} - p50",
             "refId": "B"
           }
@@ -88,7 +88,7 @@
         "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
         "targets": [
           {
-            "expr": "cronos_model_drift_score",
+            "expr": "qbitel_model_drift_score",
             "legendFormat": "{{model_name}} v{{model_version}}",
             "refId": "A"
           }
@@ -108,7 +108,7 @@
         "gridPos": {"h": 4, "w": 6, "x": 0, "y": 16},
         "targets": [
           {
-            "expr": "cronos_model_accuracy",
+            "expr": "qbitel_model_accuracy",
             "refId": "A"
           }
         ],
@@ -134,7 +134,7 @@
         "gridPos": {"h": 4, "w": 6, "x": 6, "y": 16},
         "targets": [
           {
-            "expr": "cronos_model_confidence_average",
+            "expr": "qbitel_model_confidence_average",
             "refId": "A"
           }
         ],
@@ -160,7 +160,7 @@
         "gridPos": {"h": 4, "w": 6, "x": 12, "y": 16},
         "targets": [
           {
-            "expr": "increase(cronos_drift_alerts_triggered_total[24h])",
+            "expr": "increase(qbitel_drift_alerts_triggered_total[24h])",
             "refId": "A"
           }
         ],
@@ -185,7 +185,7 @@
         "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
         "targets": [
           {
-            "expr": "rate(cronos_audit_trail_writes_total[5m])",
+            "expr": "rate(qbitel_audit_trail_writes_total[5m])",
             "legendFormat": "{{model_name}} - {{compliance_framework}}",
             "refId": "A"
           }
@@ -202,12 +202,12 @@
         "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
         "targets": [
           {
-            "expr": "histogram_quantile(0.95, rate(cronos_audit_trail_write_seconds_bucket[5m]))",
+            "expr": "histogram_quantile(0.95, rate(qbitel_audit_trail_write_seconds_bucket[5m]))",
             "legendFormat": "p95",
             "refId": "A"
           },
           {
-            "expr": "histogram_quantile(0.50, rate(cronos_audit_trail_write_seconds_bucket[5m]))",
+            "expr": "histogram_quantile(0.50, rate(qbitel_audit_trail_write_seconds_bucket[5m]))",
             "legendFormat": "p50",
             "refId": "B"
           }
@@ -224,7 +224,7 @@
         "gridPos": {"h": 8, "w": 12, "x": 0, "y": 28},
         "targets": [
           {
-            "expr": "rate(cronos_human_reviews_total[1h])",
+            "expr": "rate(qbitel_human_reviews_total[1h])",
             "legendFormat": "{{model_name}} - {{review_outcome}}",
             "refId": "A"
           }
@@ -241,7 +241,7 @@
         "gridPos": {"h": 4, "w": 6, "x": 12, "y": 28},
         "targets": [
           {
-            "expr": "cronos_human_override_rate",
+            "expr": "qbitel_human_override_rate",
             "refId": "A"
           }
         ],
@@ -267,12 +267,12 @@
         "gridPos": {"h": 8, "w": 12, "x": 0, "y": 36},
         "targets": [
           {
-            "expr": "rate(cronos_explanation_cache_hits_total[5m])",
+            "expr": "rate(qbitel_explanation_cache_hits_total[5m])",
             "legendFormat": "Cache Hits - {{model_name}}",
             "refId": "A"
           },
           {
-            "expr": "rate(cronos_explanation_cache_misses_total[5m])",
+            "expr": "rate(qbitel_explanation_cache_misses_total[5m])",
             "legendFormat": "Cache Misses - {{model_name}}",
             "refId": "B"
           }
@@ -289,7 +289,7 @@
         "gridPos": {"h": 4, "w": 6, "x": 12, "y": 36},
         "targets": [
           {
-            "expr": "rate(cronos_explanation_cache_hits_total[10m]) / (rate(cronos_explanation_cache_hits_total[10m]) + rate(cronos_explanation_cache_misses_total[10m]))",
+            "expr": "rate(qbitel_explanation_cache_hits_total[10m]) / (rate(qbitel_explanation_cache_hits_total[10m]) + rate(qbitel_explanation_cache_misses_total[10m]))",
             "refId": "A"
           }
         ],
@@ -314,7 +314,7 @@
         {
           "name": "model_name",
           "type": "query",
-          "query": "label_values(cronos_model_drift_score, model_name)",
+          "query": "label_values(qbitel_model_drift_score, model_name)",
           "refresh": 1,
           "multi": true,
           "includeAll": true

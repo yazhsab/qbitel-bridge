@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Tribal Knowledge Capture
+QBITEL Engine - Tribal Knowledge Capture
 
 System for capturing, formalizing, and leveraging tribal knowledge about legacy systems.
 Converts expert insights into structured, searchable, and actionable knowledge base.
@@ -18,7 +18,7 @@ import re
 
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from .models import FormalizedKnowledge, LegacySystemContext, SystemType
 
 
@@ -379,7 +379,7 @@ class TribalKnowledgeCapture:
         """Capture and process expert input during a session."""
 
         if session_id not in self.active_sessions:
-            raise CronosAIException(f"Session {session_id} not found")
+            raise QbitelAIException(f"Session {session_id} not found")
 
         session = self.active_sessions[session_id]
         session.raw_input.append(expert_input)
@@ -725,7 +725,7 @@ class TribalKnowledgeCapture:
         """Finalize a knowledge extraction session."""
 
         if session_id not in self.active_sessions:
-            raise CronosAIException(f"Session {session_id} not found")
+            raise QbitelAIException(f"Session {session_id} not found")
 
         session = self.active_sessions[session_id]
         session.end_time = datetime.now()
@@ -771,7 +771,7 @@ class TribalKnowledgeCapture:
         """Validate existing knowledge using additional data or expert cross-reference."""
 
         if knowledge_id not in self.knowledge_base:
-            raise CronosAIException(f"Knowledge {knowledge_id} not found")
+            raise QbitelAIException(f"Knowledge {knowledge_id} not found")
 
         knowledge = self.knowledge_base[knowledge_id]
 

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Main Entry Point
+QBITEL Engine - Main Entry Point
 
 This module provides the main entry point for running the AI Engine.
 """
@@ -21,11 +21,11 @@ from .monitoring.opentelemetry_tracing import initialize_tracing, shutdown_traci
 
 
 def main():
-    """Main entry point for CRONOS AI Engine."""
+    """Main entry point for QBITEL Engine."""
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="CRONOS AI Engine - Enterprise Protocol Discovery, Field Detection, and Anomaly Detection"
+        description="QBITEL Engine - Enterprise Protocol Discovery, Field Detection, and Anomaly Detection"
     )
 
     # Server configuration
@@ -65,7 +65,7 @@ def main():
 
     # Only add file handler in development mode
     if args.development:
-        log_handlers.append(logging.FileHandler("cronos_ai_engine.log"))
+        log_handlers.append(logging.FileHandler("qbitel_engine.log"))
 
     logging.basicConfig(
         level=getattr(logging, args.log_level.upper()),
@@ -76,14 +76,14 @@ def main():
     logger = logging.getLogger(__name__)
 
     try:
-        logger.info("Starting CRONOS AI Engine...")
+        logger.info("Starting QBITEL Engine...")
         logger.info(f"Version: 1.0.0")
         logger.info(f"Python: {sys.version}")
         logger.info(f"Mode: {'Development' if args.development else 'Production'}")
 
         # Run startup validation
         environment = os.getenv(
-            "CRONOS_ENVIRONMENT", "development" if args.development else "production"
+            "QBITEL_ENVIRONMENT", "development" if args.development else "production"
         )
         logger.info(f"\n{'='*80}")
         logger.info("Running startup validation...")
@@ -161,7 +161,7 @@ def main():
         logger.info("Shutdown requested by user")
         sys.exit(0)
     except Exception as e:
-        logger.error(f"Failed to start CRONOS AI Engine: {e}")
+        logger.error(f"Failed to start QBITEL Engine: {e}")
         sys.exit(1)
 
 

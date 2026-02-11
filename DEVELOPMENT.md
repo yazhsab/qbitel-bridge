@@ -1,6 +1,6 @@
-# CRONOS AI - Development Guide
+# QBITEL Bridge - Development Guide
 
-This guide provides information for developers who want to contribute to CRONOS AI or extend its functionality.
+This guide provides information for developers who want to contribute to QBITEL Bridge or extend its functionality.
 
 ## Table of Contents
 
@@ -17,37 +17,85 @@ This guide provides information for developers who want to contribute to CRONOS 
 
 ### Prerequisites
 
-- Python 3.9 or higher
-- Git
-- Docker and Docker Compose
-- Virtual environment tool (venv or conda)
-- IDE (VS Code, PyCharm, or similar)
+| Component | Requirement | Purpose |
+|-----------|------------|---------|
+| Python | 3.9+ | AI Engine, compliance, security |
+| Rust | 1.70+ (with cargo) | Data plane, PQC-TLS |
+| Go | 1.21+ | Control plane, mgmt API |
+| Node.js | 18+ (with npm) | UI console |
+| Docker | 20.10+ | Containerized development |
+| Git | 2.30+ | Version control |
 
-### Initial Setup
+### Initial Setup (All Components)
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/qbitel/cronos-ai.git
-cd cronos-ai
+git clone https://github.com/yazhsab/qbitel-bridge.git
+cd qbitel-bridge
 
-# 2. Create and activate virtual environment
+# 2. Build everything with make
+make build
+
+# 3. Run all tests
+make test
+```
+
+### Python AI Engine Setup
+
+```bash
+# Create and activate virtual environment
 python3.9 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# 3. Upgrade pip
+# Install dependencies
 pip install --upgrade pip
-
-# 4. Install development dependencies
 pip install -r requirements.txt
 pip install -r ai_engine/requirements.txt
-pip install -r requirements-dev.txt  # Optional: dev tools
 
-# 5. Install pre-commit hooks (optional)
+# Install pre-commit hooks (optional)
 pre-commit install
 
-# 6. Verify installation
-python -c "import ai_engine; print(ai_engine.__version__)"
+# Verify installation
 pytest ai_engine/tests/ -v --tb=short
+```
+
+### Rust Data Plane Setup
+
+```bash
+# Build the data plane
+cd rust/dataplane && cargo build --locked
+
+# Run tests
+cargo test
+
+# Run linter
+cargo clippy --all-targets --all-features -- -D warnings
+
+# Format code
+cargo fmt
+```
+
+### Go Services Setup
+
+```bash
+# Build control plane
+cd go/controlplane && go build -trimpath -o ../../dist/controlplane ./cmd/controlplane
+
+# Build management API
+cd go/mgmtapi && go build -trimpath -o ../../dist/mgmtapi ./cmd/mgmtapi
+
+# Run tests
+cd go/controlplane && go test ./...
+cd go/mgmtapi && go test ./...
+```
+
+### UI Console Setup
+
+```bash
+cd ui/console
+npm install
+npm run dev
+# Console available at http://localhost:3000
 ```
 
 ### IDE Configuration
@@ -86,82 +134,45 @@ Create `.vscode/settings.json`:
 ## Project Structure
 
 ```
-cronos-ai/
-├── ai_engine/                  # Main AI Engine package
-│   ├── __init__.py
-│   ├── __main__.py            # Entry point
-│   │
-│   ├── core/                  # Core engine components
-│   │   ├── engine.py          # Main AI Engine
-│   │   ├── config.py          # Configuration management
-│   │   └── orchestrator.py    # Workflow orchestration
-│   │
-│   ├── discovery/             # Protocol discovery
-│   │   ├── pcfg_inference.py
-│   │   ├── grammar_learner.py
-│   │   └── parser_generator.py
-│   │
-│   ├── detection/             # Field & anomaly detection
-│   │   ├── field_detector.py
-│   │   └── anomaly_detector.py
-│   │
-│   ├── cloud_native/          # Cloud-native security
-│   │   ├── service_mesh/
-│   │   │   ├── qkd_certificate_manager.py
-│   │   │   ├── xds_server.py
-│   │   │   └── traffic_encryption.py
-│   │   ├── container_security/
-│   │   │   ├── vulnerability_scanner.py
-│   │   │   ├── webhook_server.py
-│   │   │   └── ebpf_monitor.py
-│   │   ├── cloud_platforms/
-│   │   │   ├── security_hub.py
-│   │   │   ├── sentinel.py
-│   │   │   └── security_command_center.py
-│   │   └── event_streaming/
-│   │       ├── secure_producer.py
-│   │       └── threat_detector.py
-│   │
-│   ├── llm/                   # LLM integrations
-│   │   ├── openai_client.py
-│   │   ├── anthropic_client.py
-│   │   └── rag_engine.py
-│   │
-│   ├── compliance/            # Compliance automation
-│   │   ├── gdpr_automation.py
-│   │   ├── soc2_controls.py
-│   │   └── compliance_reporter.py
-│   │
-│   ├── api/                   # API layer
-│   │   ├── rest_api.py        # FastAPI REST
-│   │   └── grpc_server.py     # gRPC service
-│   │
-│   ├── monitoring/            # Observability
-│   │   ├── metrics.py
-│   │   ├── tracing.py
-│   │   └── health.py
-│   │
-│   └── tests/                 # Test suite
-│       ├── unit/
-│       ├── integration/
-│       ├── cloud_native/
-│       ├── security/
-│       └── performance/
+qbitel-bridge/
+├── ai_engine/                 # Python AI Engine
+│   ├── core/                  # Main engine, config, orchestrator
+│   ├── agents/                # Multi-agent orchestration system
+│   ├── discovery/             # Protocol discovery (PCFG, transformers)
+│   ├── detection/             # Field detection (BiLSTM-CRF), anomaly detection
+│   ├── security/              # Zero-touch decision engine
+│   ├── legacy/                # Legacy System Whisperer (COBOL, JCL)
+│   ├── marketplace/           # Protocol marketplace (Stripe, S3)
+│   ├── copilot/               # Protocol intelligence copilot
+│   ├── crypto/                # Post-quantum cryptography (Python)
+│   ├── compliance/            # Compliance automation (9 frameworks)
+│   ├── llm/                   # LLM service (Ollama, RAG, providers)
+│   ├── cloud_native/          # Service mesh, container security, cloud SDKs
+│   ├── api/                   # REST (FastAPI) and gRPC APIs
+│   └── tests/                 # Test suite (unit, integration, perf)
 │
+├── rust/dataplane/            # Rust high-performance data plane
+│   └── crates/pqc_tls/        # PQC-TLS (ML-KEM, ML-DSA, Falcon, SLH-DSA)
+│
+├── go/                        # Go services
+│   ├── controlplane/          # Service orchestration
+│   ├── mgmtapi/               # Management REST API
+│   └── agents/device-agent/   # Edge device agent
+│
+├── ui/console/                # React admin console (TypeScript)
+│
+├── helm/qbitel-bridge/        # Helm chart for Kubernetes deployment
+├── ops/                       # Operations (deploy, monitoring, secrets)
 ├── docker/                    # Docker configurations
-│   ├── xds-server/
-│   ├── admission-webhook/
-│   └── kafka-producer/
-│
 ├── kubernetes/                # Kubernetes manifests
-│   ├── service-mesh/
-│   ├── container-security/
-│   └── monitoring/
-│
-├── docs/                      # Additional documentation
-├── scripts/                   # Utility scripts
-├── requirements.txt           # Production dependencies
-└── requirements-dev.txt       # Development dependencies
+├── samples/cobol/             # 500+ COBOL sample programs
+├── demos/                     # End-to-end demo scenarios
+├── tests/                     # Conformance, fuzz, and perf tests
+├── security/                  # PKI, validation, policy
+├── docs/                      # Full documentation suite
+├── Makefile                   # Unified build system
+├── requirements.txt           # Python production dependencies
+└── requirements-dev.txt       # Python development dependencies
 ```
 
 ## Development Workflow
@@ -226,17 +237,21 @@ git commit -m "docs: Update API documentation for field detection"
 
 ## Testing
 
-### Running Tests
+### Running All Tests
 
 ```bash
-# Run all tests
+# Run all tests across all languages
+make test
+```
+
+### Python Tests
+
+```bash
+# Run all Python tests
 pytest ai_engine/tests/ -v
 
 # Run specific test file
 pytest ai_engine/tests/test_core.py -v
-
-# Run specific test function
-pytest ai_engine/tests/test_core.py::test_engine_initialization -v
 
 # Run tests by marker
 pytest ai_engine/tests/ -v -m "cloud_native"
@@ -245,10 +260,45 @@ pytest ai_engine/tests/ -v -m "integration"
 
 # Run with coverage
 pytest ai_engine/tests/ --cov=ai_engine --cov-report=html
-open htmlcov/index.html
 
 # Run performance tests
 pytest ai_engine/tests/performance/ -v --benchmark-only
+```
+
+### Rust Tests
+
+```bash
+cd rust/dataplane
+
+# Run all tests
+cargo test
+
+# Run with output
+cargo test -- --nocapture
+
+# Run specific test
+cargo test test_kyber_encapsulation
+```
+
+### Go Tests
+
+```bash
+# Control plane tests
+cd go/controlplane && go test ./...
+
+# Management API tests
+cd go/mgmtapi && go test ./...
+
+# With coverage
+cd go/controlplane && go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
+```
+
+### UI Console Tests
+
+```bash
+cd ui/console
+npm test
 ```
 
 ### Writing Tests
@@ -314,75 +364,64 @@ class TestXDSServerIntegration:
 
 ## Code Quality
 
-### Code Formatting
-
-Use Black for consistent formatting:
+### Linting (All Languages)
 
 ```bash
-# Format all Python files
+# Run all linters
+make lint
+```
+
+### Python
+
+```bash
+# Format with Black
 black ai_engine/
+black ai_engine/ --check  # check only
 
-# Check formatting without changes
-black ai_engine/ --check
+# Lint with flake8
+flake8 ai_engine/ --max-line-length=120 --ignore=E203,W503
 
-# Format specific file
-black ai_engine/core/engine.py
-```
-
-### Linting
-
-Use flake8 for linting:
-
-```bash
-# Lint entire project
-flake8 ai_engine/
-
-# Lint specific file
-flake8 ai_engine/core/engine.py
-
-# With specific rules
-flake8 ai_engine/ --max-line-length=100 --ignore=E203,W503
-```
-
-### Type Checking
-
-Use mypy for type checking:
-
-```bash
-# Type check entire project
+# Type check with mypy
 mypy ai_engine/
-
-# Type check specific module
-mypy ai_engine/core/
 ```
 
-### Code Quality Configuration
+### Rust
 
-Create `setup.cfg`:
+```bash
+cd rust/dataplane
 
-```ini
-[flake8]
-max-line-length = 100
-exclude = .git,__pycache__,venv,build,dist
-ignore = E203,W503
+# Lint with clippy (deny warnings)
+cargo clippy --all-targets --all-features -- -D warnings
 
-[mypy]
-python_version = 3.9
-warn_return_any = True
-warn_unused_configs = True
-disallow_untyped_defs = True
+# Format
+cargo fmt
+cargo fmt -- --check  # check only
 
-[tool:pytest]
-testpaths = ai_engine/tests
-python_files = test_*.py
-python_classes = Test*
-python_functions = test_*
-markers =
-    unit: Unit tests
-    integration: Integration tests
-    cloud_native: Cloud-native tests
-    security: Security tests
-    performance: Performance tests
+# Security audit
+cargo audit
+```
+
+### Go
+
+```bash
+# Lint with golangci-lint
+cd go/controlplane && golangci-lint run ./...
+cd go/mgmtapi && golangci-lint run ./...
+
+# Security scan with gosec
+cd go/controlplane && gosec ./...
+cd go/mgmtapi && gosec ./...
+
+# Format
+gofmt -w go/
+```
+
+### UI Console
+
+```bash
+cd ui/console
+npm run lint
+npm run format
 ```
 
 ## Adding New Features
@@ -530,22 +569,22 @@ async def discover_protocol(request: ProtocolRequest):
 # ai_engine/api/grpc_server.py
 import grpc
 from concurrent import futures
-from proto import cronos_pb2, cronos_pb2_grpc
+from proto import qbitel_pb2, qbitel_pb2_grpc
 
-class CronosServicer(cronos_pb2_grpc.CronosServiceServicer):
+class QbitelServicer(qbitel_pb2_grpc.QbitelServiceServicer):
 
     async def DiscoverProtocol(self, request, context):
         """gRPC method for protocol discovery."""
         try:
             # Implementation
-            return cronos_pb2.ProtocolResponse(
+            return qbitel_pb2.ProtocolResponse(
                 protocol_type="HTTP",
                 confidence=0.95
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
-            return cronos_pb2.ProtocolResponse()
+            return qbitel_pb2.ProtocolResponse()
 ```
 
 ## Contributing Guidelines
@@ -720,9 +759,9 @@ By contributing, you agree that your contributions will be licensed under the Ap
 **Happy Coding!** 🚀
 
 For questions or support, reach out via:
-- GitHub Issues: https://github.com/qbitel/cronos-ai/issues
+- GitHub Issues: https://github.com/yazhsab/qbitel-bridge/issues
 - Developer Chat: [Link to Slack/Discord]
 - Email: developers@qbitel.com
 
-**Last Updated**: 2025-01-16
-**Version**: 1.0
+**Last Updated**: 2025-02-08
+**Version**: 2.0

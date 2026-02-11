@@ -1,5 +1,5 @@
 """
-CRONOS AI - Production Mode Detection Utility
+QBITEL - Production Mode Detection Utility
 
 Centralized production mode detection and validation utilities.
 """
@@ -43,7 +43,7 @@ class ProductionModeDetector:
             bool: True if in production mode, False otherwise
         """
         env = os.getenv(
-            "CRONOS_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
+            "QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
         ).lower()
         return env in ProductionModeDetector.PRODUCTION_ALIASES
 
@@ -56,7 +56,7 @@ class ProductionModeDetector:
             EnvironmentMode: The current environment mode
         """
         env = os.getenv(
-            "CRONOS_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
+            "QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
         ).lower()
 
         if env in ProductionModeDetector.PRODUCTION_ALIASES:
@@ -83,10 +83,10 @@ class ProductionModeDetector:
 
         # Check required environment variables
         required_vars = {
-            "CRONOS_AI_DB_PASSWORD": "Database password",
-            "CRONOS_AI_REDIS_PASSWORD": "Redis password",
-            "CRONOS_AI_JWT_SECRET": "JWT secret",
-            "CRONOS_AI_ENCRYPTION_KEY": "Encryption key",
+            "QBITEL_AI_DB_PASSWORD": "Database password",
+            "QBITEL_AI_REDIS_PASSWORD": "Redis password",
+            "QBITEL_AI_JWT_SECRET": "JWT secret",
+            "QBITEL_AI_ENCRYPTION_KEY": "Encryption key",
         }
 
         for var_name, description in required_vars.items():
@@ -108,11 +108,11 @@ class ProductionModeDetector:
         """
         checklist = {
             "production_mode_enabled": ProductionModeDetector.is_production_mode(),
-            "database_password_set": bool(os.getenv("CRONOS_AI_DB_PASSWORD")),
-            "redis_password_set": bool(os.getenv("CRONOS_AI_REDIS_PASSWORD")),
-            "jwt_secret_set": bool(os.getenv("CRONOS_AI_JWT_SECRET")),
-            "encryption_key_set": bool(os.getenv("CRONOS_AI_ENCRYPTION_KEY")),
-            "api_key_set": bool(os.getenv("CRONOS_AI_API_KEY")),
+            "database_password_set": bool(os.getenv("QBITEL_AI_DB_PASSWORD")),
+            "redis_password_set": bool(os.getenv("QBITEL_AI_REDIS_PASSWORD")),
+            "jwt_secret_set": bool(os.getenv("QBITEL_AI_JWT_SECRET")),
+            "encryption_key_set": bool(os.getenv("QBITEL_AI_ENCRYPTION_KEY")),
+            "api_key_set": bool(os.getenv("QBITEL_AI_API_KEY")),
         }
 
         return checklist

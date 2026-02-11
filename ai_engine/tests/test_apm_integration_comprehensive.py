@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Comprehensive APM Integration Tests
+QBITEL Engine - Comprehensive APM Integration Tests
 
 Complete test suite for Application Performance Monitoring integration
 with Elastic APM, Datadog APM, and APM Manager functionality.

@@ -1,5 +1,5 @@
 """
-CRONOS AI - Model Drift Monitor
+QBITEL - Model Drift Monitor
 
 Monitors AI model performance over time and alerts on degradation.
 Detects concept drift, data drift, and model performance degradation.
@@ -18,12 +18,12 @@ from sqlalchemy import select, and_
 
 from .database import AIDecisionAudit, ModelDriftMetric
 from .metrics import update_drift_metrics, record_drift_alert
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 
 logger = logging.getLogger(__name__)
 
 
-class DriftMonitorException(CronosAIException):
+class DriftMonitorException(QbitelAIException):
     """Exception raised by drift monitor."""
 
     pass

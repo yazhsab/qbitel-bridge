@@ -58,7 +58,7 @@ class TestSentryErrorTracker:
 
     def test_initialization_with_version_from_env(self, mock_sentry_sdk):
         """Test initialization with version from environment."""
-        with patch.dict("os.environ", {"CRONOS_AI_VERSION": "2.0.0"}):
+        with patch.dict("os.environ", {"QBITEL_AI_VERSION": "2.0.0"}):
             tracker = SentryErrorTracker()
 
             assert tracker.release == "2.0.0"

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zero-touch-security-orchestrator
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
     app: zero-touch-security
     component: orchestrator
@@ -37,7 +37,7 @@ spec:
       
       containers:
       - name: security-orchestrator
-        image: cronos-ai/zero-touch-security:latest
+        image: qbitel/zero-touch-security:latest
         imagePullPolicy: Always
         
         ports:
@@ -64,15 +64,15 @@ spec:
               name: llm-credentials
               key: anthropic-api-key
         - name: REDIS_HOST
-          value: "redis-service.cronos-ai.svc.cluster.local"
+          value: "redis-service.qbitel.svc.cluster.local"
         - name: REDIS_PORT
           value: "6379"
         - name: TIMESCALEDB_HOST
-          value: "timescaledb-service.cronos-ai.svc.cluster.local"
+          value: "timescaledb-service.qbitel.svc.cluster.local"
         - name: TIMESCALEDB_PORT
           value: "5432"
         - name: TIMESCALEDB_DATABASE
-          value: "cronos_security"
+          value: "qbitel_security"
         - name: TIMESCALEDB_USER
           valueFrom:
             secretKeyRef:
@@ -154,7 +154,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: zero-touch-security-service
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
     app: zero-touch-security
     component: orchestrator
@@ -178,7 +178,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: zero-touch-security
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
     app: zero-touch-security
 
@@ -187,7 +187,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: zero-touch-security-role
-  namespace: cronos-ai
+  namespace: qbitel
 rules:
 - apiGroups: [""]
   resources: ["pods", "services", "endpoints"]
@@ -204,7 +204,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: zero-touch-security-rolebinding
-  namespace: cronos-ai
+  namespace: qbitel
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -212,14 +212,14 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: zero-touch-security
-  namespace: cronos-ai
+  namespace: qbitel
 
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: security-orchestrator-config
-  namespace: cronos-ai
+  namespace: qbitel
 data:
   config.yaml: |
     security_orchestrator:
@@ -277,7 +277,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: zero-touch-security-hpa
-  namespace: cronos-ai
+  namespace: qbitel
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -331,7 +331,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: zero-touch-security-pdb
-  namespace: cronos-ai
+  namespace: qbitel
 spec:
   minAvailable: 2
   selector:
@@ -344,7 +344,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: zero-touch-security-netpol
-  namespace: cronos-ai
+  namespace: qbitel
 spec:
   podSelector:
     matchLabels:
@@ -356,7 +356,7 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          name: cronos-ai
+          name: qbitel
     - podSelector:
         matchLabels:
           app: api-gateway
@@ -367,7 +367,7 @@ spec:
   - to:
     - namespaceSelector:
         matchLabels:
-          name: cronos-ai
+          name: qbitel
     ports:
     - protocol: TCP
       port: 6379  # Redis

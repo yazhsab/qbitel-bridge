@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Protocol Classifier
+QBITEL Engine - Protocol Classifier
 
 This module implements ML-based protocol classification using multiple algorithms
 including CNN, LSTM, and ensemble methods for robust protocol identification.

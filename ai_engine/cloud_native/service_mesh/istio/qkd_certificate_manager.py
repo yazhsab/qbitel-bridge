@@ -94,7 +94,7 @@ class QuantumCertificateManager:
 
     def generate_root_ca(
         self,
-        subject: str = "CN=CRONOS AI Root CA,O=CRONOS AI,C=US",
+        subject: str = "CN=QBITEL Root CA,O=QBITEL,C=US",
         validity_years: int = 10
     ) -> Dict[str, Any]:
         """
@@ -183,7 +183,7 @@ class QuantumCertificateManager:
             "signature_public_key": base64.b64encode(sig_public_key).decode(),
             "metadata": CertificateMetadata(
                 service_name="root-ca",
-                namespace="cronos-system",
+                namespace="qbitel-system",
                 valid_from=valid_from,
                 valid_until=valid_until,
                 key_algorithm=self.key_algorithm,
@@ -222,7 +222,7 @@ class QuantumCertificateManager:
         Returns:
             Dict containing service certificate and private keys
         """
-        subject = f"CN={service_name}.{namespace}.svc.cluster.local,O=CRONOS AI"
+        subject = f"CN={service_name}.{namespace}.svc.cluster.local,O=QBITEL"
         logger.info(f"Generating service certificate: {subject}")
 
         # Generate service Kyber key pair for key exchange
@@ -362,14 +362,14 @@ class QuantumCertificateManager:
                 "name": secret_name,
                 "namespace": namespace,
                 "labels": {
-                    "app": "cronos-ai",
+                    "app": "qbitel",
                     "component": "quantum-certs"
                 },
                 "annotations": {
-                    "cronos.ai/cert-serial": cert_data["metadata"]["serial_number"],
-                    "cronos.ai/valid-until": cert_data["metadata"]["valid_until"],
-                    "cronos.ai/key-algorithm": cert_data["metadata"]["key_algorithm"],
-                    "cronos.ai/signature-algorithm": cert_data["metadata"]["signature_algorithm"]
+                    "qbitel.ai/cert-serial": cert_data["metadata"]["serial_number"],
+                    "qbitel.ai/valid-until": cert_data["metadata"]["valid_until"],
+                    "qbitel.ai/key-algorithm": cert_data["metadata"]["key_algorithm"],
+                    "qbitel.ai/signature-algorithm": cert_data["metadata"]["signature_algorithm"]
                 }
             },
             "type": "kubernetes.io/tls",

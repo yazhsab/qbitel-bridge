@@ -1,6 +1,6 @@
 import { User, UserManager, WebStorageStateStore } from 'oidc-client-ts';
 
-export interface QSLBUser {
+export interface QBITELUser {
   id: string;
   email: string;
   name: string;
@@ -106,7 +106,7 @@ export class OIDCAuthService {
     return this.userManager.signinSilent();
   }
 
-  transformUser(oidcUser: User): QSLBUser {
+  transformUser(oidcUser: User): QBITELUser {
     const profile = oidcUser.profile;
     
     return {
@@ -122,32 +122,32 @@ export class OIDCAuthService {
     };
   }
 
-  hasRole(user: QSLBUser, role: string): boolean {
+  hasRole(user: QBITELUser, role: string): boolean {
     return user.roles.includes(role);
   }
 
-  hasPermission(user: QSLBUser, permission: string): boolean {
+  hasPermission(user: QBITELUser, permission: string): boolean {
     return user.permissions.includes(permission);
   }
 
-  hasAnyRole(user: QSLBUser, roles: string[]): boolean {
+  hasAnyRole(user: QBITELUser, roles: string[]): boolean {
     return roles.some(role => user.roles.includes(role));
   }
 
-  hasAnyPermission(user: QSLBUser, permissions: string[]): boolean {
+  hasAnyPermission(user: QBITELUser, permissions: string[]): boolean {
     return permissions.some(permission => user.permissions.includes(permission));
   }
 
-  isTokenExpired(user: QSLBUser): boolean {
+  isTokenExpired(user: QBITELUser): boolean {
     return new Date() >= user.sessionExpiry;
   }
 
-  getTokenExpiryTime(user: QSLBUser): number {
+  getTokenExpiryTime(user: QBITELUser): number {
     return user.sessionExpiry.getTime() - Date.now();
   }
 
   // Role-based access control helpers
-  canAccessDeviceManagement(user: QSLBUser): boolean {
+  canAccessDeviceManagement(user: QBITELUser): boolean {
     return this.hasAnyPermission(user, [
       'device:read',
       'device:write',
@@ -155,28 +155,28 @@ export class OIDCAuthService {
     ]);
   }
 
-  canManageDevices(user: QSLBUser): boolean {
+  canManageDevices(user: QBITELUser): boolean {
     return this.hasAnyPermission(user, [
       'device:write',
       'device:admin'
     ]);
   }
 
-  canSuspendDevices(user: QSLBUser): boolean {
+  canSuspendDevices(user: QBITELUser): boolean {
     return this.hasAnyPermission(user, [
       'device:suspend',
       'device:admin'
     ]);
   }
 
-  canDecommissionDevices(user: QSLBUser): boolean {
+  canDecommissionDevices(user: QBITELUser): boolean {
     return this.hasAnyPermission(user, [
       'device:decommission',
       'device:admin'
     ]);
   }
 
-  canAccessPolicyManagement(user: QSLBUser): boolean {
+  canAccessPolicyManagement(user: QBITELUser): boolean {
     return this.hasAnyPermission(user, [
       'policy:read',
       'policy:write',
@@ -184,37 +184,37 @@ export class OIDCAuthService {
     ]);
   }
 
-  canManagePolicies(user: QSLBUser): boolean {
+  canManagePolicies(user: QBITELUser): boolean {
     return this.hasAnyPermission(user, [
       'policy:write',
       'policy:admin'
     ]);
   }
 
-  canAccessComplianceReports(user: QSLBUser): boolean {
+  canAccessComplianceReports(user: QBITELUser): boolean {
     return this.hasAnyPermission(user, [
       'compliance:read',
       'compliance:admin'
     ]);
   }
 
-  canAccessAuditLogs(user: QSLBUser): boolean {
+  canAccessAuditLogs(user: QBITELUser): boolean {
     return this.hasAnyPermission(user, [
       'audit:read',
       'audit:admin'
     ]);
   }
 
-  canAccessSystemSettings(user: QSLBUser): boolean {
+  canAccessSystemSettings(user: QBITELUser): boolean {
     return this.hasAnyRole(user, ['admin', 'system_admin']);
   }
 
-  canAccessOrganizationSettings(user: QSLBUser): boolean {
+  canAccessOrganizationSettings(user: QBITELUser): boolean {
     return this.hasAnyRole(user, ['admin', 'org_admin']);
   }
 
   // Audit logging
-  async logUserAction(user: QSLBUser, action: string, resource: string, details?: any): Promise<void> {
+  async logUserAction(user: QBITELUser, action: string, resource: string, details?: any): Promise<void> {
     try {
       const auditEvent = {
         userId: user.id,
@@ -245,10 +245,10 @@ export class OIDCAuthService {
 
   private getSessionId(): string {
     // Generate or retrieve session ID
-    let sessionId = sessionStorage.getItem('qslb_session_id');
+    let sessionId = sessionStorage.getItem('qbitel_session_id');
     if (!sessionId) {
       sessionId = crypto.randomUUID();
-      sessionStorage.setItem('qslb_session_id', sessionId);
+      sessionStorage.setItem('qbitel_session_id', sessionId);
     }
     return sessionId;
   }
@@ -277,8 +277,8 @@ export class OIDCAuthService {
     setInterval(async () => {
       const user = await this.getUser();
       if (user) {
-        const qslbUser = this.transformUser(user);
-        const timeToExpiry = this.getTokenExpiryTime(qslbUser);
+        const qbitelUser = this.transformUser(user);
+        const timeToExpiry = this.getTokenExpiryTime(qbitelUser);
         
         // Renew token if expiring within 5 minutes
         if (timeToExpiry < 5 * 60 * 1000 && timeToExpiry > 0) {
@@ -353,8 +353,8 @@ export class OIDCAuthService {
 
 // Default configuration
 export const defaultAuthConfig: AuthConfig = {
-  authority: (import.meta as any).env?.VITE_OIDC_AUTHORITY || 'https://auth.qslb.local',
-  clientId: (import.meta as any).env?.VITE_OIDC_CLIENT_ID || 'qslb-console',
+  authority: (import.meta as any).env?.VITE_OIDC_AUTHORITY || 'https://auth.qbitel.local',
+  clientId: (import.meta as any).env?.VITE_OIDC_CLIENT_ID || 'qbitel-console',
   redirectUri: `${window.location.origin}/auth/callback`,
   postLogoutRedirectUri: `${window.location.origin}/`,
   responseType: 'code',

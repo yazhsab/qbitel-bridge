@@ -1,0 +1,19 @@
+{
+  "program_id": "HLTA486",
+  "domain": "healthcare",
+  "program_type": "audit_trail",
+  "author": "J. SMITH",
+  "lines_of_code": 174,
+  "complexity_level": "simple",
+  "complexity_score": 0.394,
+  "files_used": 1,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.912949",
+  "hash": "fbd9cb355d2574ad3d54291020145d65"
+}

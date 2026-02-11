@@ -2,7 +2,7 @@
 Comprehensive tests for ai_engine.core.dependency_manager module.
 
 This module provides dependency management, injection, and lifecycle
-management for the CRONOS AI Engine components.
+management for the QBITEL Engine components.
 """
 
 import pytest

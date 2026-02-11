@@ -1,6 +1,6 @@
 {
   "dashboard": {
-    "title": "CRONOS AI - Service Level Objectives (SLOs)",
+    "title": "QBITEL - Service Level Objectives (SLOs)",
     "description": "Real-time SLO compliance monitoring and error budget tracking",
     "tags": ["slo", "reliability", "production"],
     "timezone": "browser",

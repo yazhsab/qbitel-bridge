@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Zero-Touch Decision Engine
+QBITEL Engine - Zero-Touch Decision Engine
 
 Enterprise-grade autonomous security decision making with LLM integration.
 """
@@ -14,7 +14,7 @@ from dataclasses import asdict
 
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest, get_llm_service
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..monitoring.metrics import MetricsCollector
 from .models import (
     SecurityEventType,
@@ -58,24 +58,24 @@ def _get_metric(metric_cls, name: str, *args, **kwargs):
 # Prometheus metrics
 DECISION_COUNTER = _get_metric(
     Counter,
-    "cronos_security_decisions_total",
+    "qbitel_security_decisions_total",
     "Security decisions made",
     ["decision_type", "confidence_level"],
 )
 DECISION_DURATION = _get_metric(
-    Histogram, "cronos_security_decision_duration_seconds", "Decision making duration"
+    Histogram, "qbitel_security_decision_duration_seconds", "Decision making duration"
 )
 RESPONSE_EXECUTION_COUNTER = _get_metric(
     Counter,
-    "cronos_security_responses_total",
+    "qbitel_security_responses_total",
     "Security responses executed",
     ["response_type", "status"],
 )
 AUTO_EXECUTE_GAUGE = _get_metric(
-    Gauge, "cronos_security_auto_executions", "Autonomous executions per hour"
+    Gauge, "qbitel_security_auto_executions", "Autonomous executions per hour"
 )
 HUMAN_ESCALATIONS_GAUGE = _get_metric(
-    Gauge, "cronos_security_human_escalations", "Human escalations per hour"
+    Gauge, "qbitel_security_human_escalations", "Human escalations per hour"
 )
 
 logger = logging.getLogger(__name__)

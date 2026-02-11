@@ -2,7 +2,7 @@
 Comprehensive tests for ai_engine.core.error_handling module.
 
 This module provides error handling, logging, and recovery mechanisms
-for the CRONOS AI Engine.
+for the QBITEL Engine.
 """
 
 import pytest

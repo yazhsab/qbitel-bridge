@@ -1,5 +1,5 @@
 {
-  "source": "CRONOS AI Azure Security Patterns",
+  "source": "QBITEL Azure Security Patterns",
   "suspicious_operations": [
     {
       "operation": "Microsoft.Authorization/roleAssignments/write",

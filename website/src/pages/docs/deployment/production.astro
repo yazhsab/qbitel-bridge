@@ -1,0 +1,130 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Production Checklist | QBITEL Bridge Docs" description="Production deployment checklist for QBITEL Bridge: security hardening, TLS, monitoring, backups, and scaling.">
+  <h1 class="text-3xl font-bold text-white mb-2">Production Deployment Checklist</h1>
+  <p class="text-gray-400 mb-8">Ensure your QBITEL Bridge deployment is production-ready with this comprehensive checklist covering security, performance, monitoring, and operations.</p>
+
+  <h2 id="security-hardening" class="text-2xl font-bold text-white mt-12 mb-4">Security Hardening</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><input type="checkbox" disabled class="mr-2" />Enable PQC-TLS for all inter-service communication</li>
+    <li><input type="checkbox" disabled class="mr-2" />Configure mTLS between all microservices</li>
+    <li><input type="checkbox" disabled class="mr-2" />Set strong <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">JWT_SECRET</code> (256-bit minimum)</li>
+    <li><input type="checkbox" disabled class="mr-2" />Enable API key rotation with secrets manager</li>
+    <li><input type="checkbox" disabled class="mr-2" />Deploy admission webhook for pod security validation</li>
+    <li><input type="checkbox" disabled class="mr-2" />Configure network policies to restrict pod-to-pod traffic</li>
+    <li><input type="checkbox" disabled class="mr-2" />Enable audit logging for all API endpoints</li>
+    <li><input type="checkbox" disabled class="mr-2" />Run security validation suite: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">./security/validation/run-security-validation.sh</code></li>
+  </ul>
+
+  <h2 id="tls-configuration" class="text-2xl font-bold text-white mt-12 mb-4">TLS Configuration</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Generate TLS certificates</span>
+./scripts/generate-webhook-certs.sh
+
+<span class="text-gray-500"># Apply TLS configuration</span>
+kubectl apply -f ops/deploy/kubernetes/production/tls-config.yaml
+
+<span class="text-gray-500"># Verify TLS is active</span>
+kubectl get secrets -n qbitel-service-mesh | grep tls</code></pre>
+
+  <h2 id="resource-allocation" class="text-2xl font-bold text-white mt-12 mb-4">Resource Allocation</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Component</th>
+        <th class="text-left text-white py-2 pr-4">CPU Request</th>
+        <th class="text-left text-white py-2 pr-4">Memory Request</th>
+        <th class="text-left text-white py-2">Replicas</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">AI Engine</td>
+        <td class="text-gray-300 py-2 pr-4">1000m</td>
+        <td class="text-gray-300 py-2 pr-4">2Gi</td>
+        <td class="text-gray-300 py-2">3+</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">xDS Server</td>
+        <td class="text-gray-300 py-2 pr-4">500m</td>
+        <td class="text-gray-300 py-2 pr-4">1Gi</td>
+        <td class="text-gray-300 py-2">5+</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Admission Webhook</td>
+        <td class="text-gray-300 py-2 pr-4">250m</td>
+        <td class="text-gray-300 py-2 pr-4">512Mi</td>
+        <td class="text-gray-300 py-2">5+</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Control Plane</td>
+        <td class="text-gray-300 py-2 pr-4">500m</td>
+        <td class="text-gray-300 py-2 pr-4">512Mi</td>
+        <td class="text-gray-300 py-2">3+</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="high-availability" class="text-2xl font-bold text-white mt-12 mb-4">High Availability</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><input type="checkbox" disabled class="mr-2" />Deploy 3+ replicas of all critical services</li>
+    <li><input type="checkbox" disabled class="mr-2" />Configure pod anti-affinity to spread across nodes</li>
+    <li><input type="checkbox" disabled class="mr-2" />Set up pod disruption budgets (PDB)</li>
+    <li><input type="checkbox" disabled class="mr-2" />Configure horizontal pod autoscaling (HPA)</li>
+    <li><input type="checkbox" disabled class="mr-2" />Use persistent volumes for stateful data</li>
+    <li><input type="checkbox" disabled class="mr-2" />Configure database replication</li>
+  </ul>
+
+  <h2 id="monitoring" class="text-2xl font-bold text-white mt-12 mb-4">Monitoring and Alerting</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><input type="checkbox" disabled class="mr-2" />Deploy Prometheus with persistent storage</li>
+    <li><input type="checkbox" disabled class="mr-2" />Configure Grafana dashboards (pre-built dashboards included)</li>
+    <li><input type="checkbox" disabled class="mr-2" />Set up OpenTelemetry Collector for distributed tracing</li>
+    <li><input type="checkbox" disabled class="mr-2" />Configure alerting rules for SLO violations</li>
+    <li><input type="checkbox" disabled class="mr-2" />Enable Sentry for error tracking</li>
+    <li><input type="checkbox" disabled class="mr-2" />Set up log aggregation with structured JSON logging</li>
+  </ul>
+
+  <h2 id="backup-dr" class="text-2xl font-bold text-white mt-12 mb-4">Backup and Disaster Recovery</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><input type="checkbox" disabled class="mr-2" />Configure automated database backups</li>
+    <li><input type="checkbox" disabled class="mr-2" />Set up ML model artifact backups</li>
+    <li><input type="checkbox" disabled class="mr-2" />Test disaster recovery procedures</li>
+    <li><input type="checkbox" disabled class="mr-2" />Document RTO and RPO targets</li>
+    <li><input type="checkbox" disabled class="mr-2" />Configure cross-region replication (if applicable)</li>
+  </ul>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run automated backup</span>
+python scripts/backup_database.py --target s3://your-backup-bucket/
+
+<span class="text-gray-500"># Test disaster recovery</span>
+python ops/operational/dr_testing.py</code></pre>
+
+  <h2 id="performance" class="text-2xl font-bold text-white mt-12 mb-4">Performance Validation</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run performance benchmarks</span>
+pytest ai_engine/tests/performance/test_benchmarks.py -v --benchmark-only
+
+<span class="text-gray-500"># Expected results:</span>
+<span class="text-gray-500"># - PQC encryption: < 1ms latency</span>
+<span class="text-gray-500"># - Throughput: 100K+ msg/s</span>
+<span class="text-gray-500"># - All benchmarks PASS</span>
+
+<span class="text-gray-500"># Run load tests</span>
+python tests/load/comprehensive_load_test.py</code></pre>
+
+  <h2 id="compliance" class="text-2xl font-bold text-white mt-12 mb-4">Compliance Verification</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><input type="checkbox" disabled class="mr-2" />Run CIS benchmark validation</li>
+    <li><input type="checkbox" disabled class="mr-2" />Verify SOC 2 control compliance</li>
+    <li><input type="checkbox" disabled class="mr-2" />Validate GDPR data handling procedures</li>
+    <li><input type="checkbox" disabled class="mr-2" />Generate SBOM (Software Bill of Materials)</li>
+    <li><input type="checkbox" disabled class="mr-2" />Run security compliance validator</li>
+  </ul>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/operations/monitoring" class="text-quantum-400 hover:underline">Monitoring Guide</a> -- detailed monitoring and alerting setup</li>
+    <li><a href="/docs/security/compliance-frameworks" class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- detailed compliance documentation</li>
+    <li><a href="/docs/operations/troubleshooting" class="text-quantum-400 hover:underline">Troubleshooting</a> -- diagnose and resolve production issues</li>
+  </ul>
+</DocsLayout>

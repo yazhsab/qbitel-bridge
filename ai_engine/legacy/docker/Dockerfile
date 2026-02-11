@@ -1,4 +1,4 @@
-# CRONOS AI Engine - Legacy System Whisperer
+# QBITEL Bridge AI Engine - Legacy System Whisperer
 # Production-ready Docker image
 
 FROM python:3.11-slim as builder
@@ -10,9 +10,9 @@ ARG VCS_REF
 
 # Labels for container metadata
 LABEL org.label-schema.build-date=$BUILD_DATE \
-      org.label-schema.name="CRONOS AI Legacy System Whisperer" \
+      org.label-schema.name="QBITEL Bridge Legacy System Whisperer" \
       org.label-schema.description="AI-powered legacy system management and predictive analytics" \
-      org.label-schema.url="https://cronos-ai.com" \
+      org.label-schema.url="https://qbitel.com/bridge" \
       org.label-schema.vcs-ref=$VCS_REF \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"
@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Create application user
-RUN groupadd -r cronos && useradd -r -g cronos cronos
+RUN groupadd -r qbitel && useradd -r -g qbitel qbitel
 
 # Set work directory
 WORKDIR /app
@@ -56,7 +56,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Create application user
-RUN groupadd -r cronos && useradd -r -g cronos cronos
+RUN groupadd -r qbitel && useradd -r -g qbitel qbitel
 
 # Set work directory
 WORKDIR /app
@@ -66,11 +66,11 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/pytho
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code
-COPY --chown=cronos:cronos . .
+COPY --chown=qbitel:qbitel . .
 
 # Create necessary directories
 RUN mkdir -p /app/logs /app/data /app/config && \
-    chown -R cronos:cronos /app
+    chown -R qbitel:qbitel /app
 
 # Set Python path
 ENV PYTHONPATH=/app
@@ -78,17 +78,17 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 # Default configuration
-ENV CRONOS_AI_ENVIRONMENT=production
-ENV CRONOS_AI_LOG_LEVEL=INFO
-ENV CRONOS_AI_DB_POOL_SIZE=20
-ENV CRONOS_AI_REDIS_MAX_CONNECTIONS=100
+ENV QBITEL_BRIDGE_ENVIRONMENT=production
+ENV QBITEL_BRIDGE_LOG_LEVEL=INFO
+ENV QBITEL_BRIDGE_DB_POOL_SIZE=20
+ENV QBITEL_BRIDGE_REDIS_MAX_CONNECTIONS=100
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8000/api/v1/legacy-system-whisperer/health || exit 1
 
 # Switch to non-root user
-USER cronos
+USER qbitel
 
 # Expose port
 EXPOSE 8000
@@ -112,20 +112,20 @@ RUN pip install --no-cache-dir \
     pre-commit
 
 # Copy application code
-COPY --chown=cronos:cronos . .
+COPY --chown=qbitel:qbitel . .
 
 # Create necessary directories
 RUN mkdir -p /app/logs /app/data /app/config && \
-    chown -R cronos:cronos /app
+    chown -R qbitel:qbitel /app
 
 # Development environment variables
-ENV CRONOS_AI_ENVIRONMENT=development
-ENV CRONOS_AI_DEBUG=true
-ENV CRONOS_AI_LOG_LEVEL=DEBUG
+ENV QBITEL_BRIDGE_ENVIRONMENT=development
+ENV QBITEL_BRIDGE_DEBUG=true
+ENV QBITEL_BRIDGE_LOG_LEVEL=DEBUG
 ENV PYTHONPATH=/app
 
 # Switch to non-root user
-USER cronos
+USER qbitel
 
 # Expose ports (main app + jupyter)
 EXPOSE 8000 8888
@@ -142,8 +142,8 @@ COPY ai_engine/legacy/tests/ ./ai_engine/legacy/tests/
 COPY ai_engine/legacy/pytest.ini ./
 
 # Set test environment
-ENV CRONOS_AI_ENVIRONMENT=testing
-ENV CRONOS_AI_TESTING=true
+ENV QBITEL_BRIDGE_ENVIRONMENT=testing
+ENV QBITEL_BRIDGE_TESTING=true
 
 # Run tests by default
 CMD ["pytest", "ai_engine/legacy/tests/", "-v", "--cov=ai_engine/legacy", "--cov-report=html", "--cov-report=term"]

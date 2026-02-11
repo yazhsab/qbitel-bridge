@@ -1,0 +1,236 @@
+---
+# QBITEL Gateway Application
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qbitel-gateway-dev
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qbitel-gateway
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/component: ai-gateway
+    environment: development
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: qbitel
+
+  source:
+    repoURL: https://github.com/yazhsab/qbitel.git
+    targetRevision: develop
+    path: ops/gitops/environments/dev/ai-gateway
+    helm:
+      releaseName: ai-gateway
+      values: |
+        replicaCount: 1
+
+        image:
+          repository: qbitel/ai-gateway
+          tag: dev-latest
+          pullPolicy: Always
+
+        service:
+          type: ClusterIP
+          port: 8080
+
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+
+        # Semantic cache configuration
+        cache:
+          enabled: true
+          similarity_threshold: 0.92
+          ttl_seconds: 3600
+          max_entries: 10000
+
+        # Rate limiting
+        rateLimiting:
+          enabled: true
+          global_requests_per_minute: 1000
+          user_requests_per_minute: 60
+
+        # Cost tracking
+        costTracking:
+          enabled: true
+          daily_budget: 100.0
+          alert_threshold: 0.8
+
+        # Provider configuration
+        providers:
+          openai:
+            enabled: true
+            models:
+              - gpt-4o
+              - gpt-4o-mini
+          anthropic:
+            enabled: true
+            models:
+              - claude-sonnet-4-20250514
+          vllm:
+            enabled: true
+            endpoint: http://vllm-service:8000
+
+        # Redis for caching
+        redis:
+          host: redis-master.qbitel-dev
+          port: 6379
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qbitel-dev
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+# AI Gateway - Staging
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qbitel-gateway-staging
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qbitel-gateway
+    app.kubernetes.io/instance: staging
+    environment: staging
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: qbitel
+
+  source:
+    repoURL: https://github.com/yazhsab/qbitel.git
+    targetRevision: release/*
+    path: ops/gitops/environments/staging/ai-gateway
+    helm:
+      releaseName: ai-gateway
+      values: |
+        replicaCount: 2
+
+        image:
+          repository: qbitel/ai-gateway
+          tag: staging-latest
+
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+
+        cache:
+          enabled: true
+          similarity_threshold: 0.92
+
+        rateLimiting:
+          enabled: true
+          global_requests_per_minute: 5000
+
+        costTracking:
+          enabled: true
+          daily_budget: 500.0
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qbitel-staging
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+# AI Gateway - Production
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qbitel-gateway-prod
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qbitel-gateway
+    app.kubernetes.io/instance: prod
+    environment: production
+  annotations:
+    notifications.argoproj.io/subscribe.on-sync-failed.pagerduty: qbitel-oncall
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: qbitel
+
+  source:
+    repoURL: https://github.com/yazhsab/qbitel.git
+    targetRevision: main
+    path: ops/gitops/environments/prod/ai-gateway
+    helm:
+      releaseName: ai-gateway
+      values: |
+        replicaCount: 3
+
+        image:
+          repository: qbitel/ai-gateway
+          pullPolicy: IfNotPresent
+
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+
+        autoscaling:
+          enabled: true
+          minReplicas: 3
+          maxReplicas: 20
+          targetCPUUtilizationPercentage: 70
+          targetMemoryUtilizationPercentage: 80
+
+        cache:
+          enabled: true
+          similarity_threshold: 0.95
+          ttl_seconds: 7200
+
+        rateLimiting:
+          enabled: true
+          global_requests_per_minute: 10000
+          user_requests_per_minute: 120
+
+        costTracking:
+          enabled: true
+          daily_budget: 5000.0
+          alert_threshold: 0.7
+
+        # High availability
+        podDisruptionBudget:
+          enabled: true
+          minAvailable: 2
+
+        # Affinity for spread
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchLabels:
+                      app: ai-gateway
+                  topologyKey: kubernetes.io/hostname
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qbitel-prod
+
+  # Production: manual sync only
+  syncPolicy:
+    automated: null
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground

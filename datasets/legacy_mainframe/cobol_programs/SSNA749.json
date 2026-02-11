@@ -1,0 +1,19 @@
+{
+  "program_id": "SSNA749",
+  "domain": "government",
+  "program_type": "audit_trail",
+  "author": "R. WILLIAMS",
+  "lines_of_code": 173,
+  "complexity_level": "simple",
+  "complexity_score": 0.393,
+  "files_used": 1,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.916363",
+  "hash": "906241bf8f310c8790e87bb2a0b39c70"
+}

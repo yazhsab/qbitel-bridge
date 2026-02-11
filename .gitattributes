@@ -1,0 +1,92 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code - always LF
+*.py text eol=lf
+*.rs text eol=lf
+*.go text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.jsx text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.vue text eol=lf
+
+# Config files - always LF
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.cfg text eol=lf
+*.ini text eol=lf
+*.conf text eol=lf
+*.env text eol=lf
+
+# Documentation - always LF
+*.md text eol=lf
+*.txt text eol=lf
+*.rst text eol=lf
+
+# Shell scripts - always LF
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Windows scripts - always CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Docker
+Dockerfile text eol=lf
+*.dockerfile text eol=lf
+docker-compose*.yml text eol=lf
+
+# Kubernetes
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# Makefiles - always LF (tabs are significant)
+Makefile text eol=lf
+
+# SQL
+*.sql text eol=lf
+
+# Protocol Buffers
+*.proto text eol=lf
+
+# COBOL samples
+*.cbl text eol=lf
+*.cob text eol=lf
+*.cpy text eol=lf
+
+# Binary files - no conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text eol=lf
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.tgz binary
+*.bz2 binary
+*.xz binary
+*.pdf binary
+
+# Lock files
+Cargo.lock text eol=lf
+go.sum text eol=lf
+package-lock.json text eol=lf
+
+# Linguist overrides for GitHub language stats
+*.cbl linguist-language=COBOL
+*.sql linguist-detectable=false
+docs/** linguist-documentation
+samples/** linguist-vendored

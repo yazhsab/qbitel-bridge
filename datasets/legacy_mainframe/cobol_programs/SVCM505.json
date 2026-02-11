@@ -1,0 +1,19 @@
+{
+  "program_id": "SVCM505",
+  "domain": "telecommunications",
+  "program_type": "file_maintenance",
+  "author": "P. WILSON",
+  "lines_of_code": 244,
+  "complexity_level": "complex",
+  "complexity_score": 0.675,
+  "files_used": 4,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.801499",
+  "hash": "52509c3901a2d940dcb261e18d7991e2"
+}

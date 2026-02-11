@@ -1,0 +1,251 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Aviation & Aerospace | QBITEL Bridge"
+  description="Quantum-resistant cryptography for 50-year aviation lifecycles. Prevent ADS-B spoofing, secure ACARS messaging, and protect air traffic management systems."
+>
+  <PageHero
+    title="Aviation & Aerospace"
+    description="Securing the skies for the quantum era. Quantum-resistant cryptography designed for 50-year aviation lifecycles with zero disruption to flight operations."
+    badge="Aviation & Aerospace"
+    gradient="from-sky-500 to-cyan-500"
+  />
+
+  <!-- Challenge Section -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          The <span class="gradient-text">Challenge</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Aviation systems operate for 50+ years with safety certification cycles that take a decade. Aircraft communications use legacy protocols with no built-in encryption, making them vulnerable to spoofing and interception.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="card p-6">
+          <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">50-Year Lifecycles</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Aircraft and air traffic systems remain in service for decades. Cryptography deployed today must withstand quantum attacks that emerge during this timeframe.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">ADS-B Spoofing</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            ADS-B broadcasts aircraft position in plaintext with no authentication. Attackers can inject false aircraft positions, creating ghost aircraft that disrupt air traffic management.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Certification Complexity</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Aviation safety certifications (DO-178C, DO-326A) take years and cost millions. Any changes to avionics software require full recertification.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Supported Protocols -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Supported <span class="gradient-text">Protocols</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Comprehensive coverage of aviation communication protocols from air-to-ground data links to avionics bus standards.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-sky-400 uppercase tracking-wider mb-1">Surveillance</h3>
+          <p class="text-xs text-gray-500 mb-3">Aircraft position and tracking</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">ADS-B</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">Mode S</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">MLAT</span>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-sky-400 uppercase tracking-wider mb-1">Data Link</h3>
+          <p class="text-xs text-gray-500 mb-3">Air-ground communication</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">ACARS</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">CPDLC</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">VDL Mode 2</span>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-sky-400 uppercase tracking-wider mb-1">Avionics Bus</h3>
+          <p class="text-xs text-gray-500 mb-3">Internal aircraft systems</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">ARINC 429</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">ARINC 664</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">MIL-STD-1553</span>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-sky-400 uppercase tracking-wider mb-1">ATM Systems</h3>
+          <p class="text-xs text-gray-500 mb-3">Air traffic management</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">ASTERIX</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">SWIM</span>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-sky-400 uppercase tracking-wider mb-1">Airline Operations</h3>
+          <p class="text-xs text-gray-500 mb-3">Flight operations and dispatch</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">ARINC 620</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">Type B</span>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-sky-400 uppercase tracking-wider mb-1">AI Discovery</h3>
+          <p class="text-sm text-gray-400 mt-3">
+            Legacy and proprietary avionics protocols discovered from data link traffic without active probing.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QBITEL Solutions -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          QBITEL <span class="gradient-text">Solutions</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Purpose-built for aviation constraints: 50-year crypto agility, certification-compatible deployment, and safety-critical awareness.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-sky-500 to-cyan-500 bg-opacity-10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">ADS-B Authentication</h3>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Quantum-safe authentication layer for ADS-B messages. Prevents position spoofing and ghost aircraft injection at the ground station level without modifying aircraft transponders.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-sky-500 to-cyan-500 bg-opacity-10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">50-Year PQC Agility</h3>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Cryptographic architecture designed for aviation lifecycle requirements. Supports algorithm migration across multiple cryptographic generations without system recertification.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-sky-500 to-cyan-500 bg-opacity-10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">ACARS Encryption</h3>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            End-to-end quantum-safe encryption for ACARS messages carrying flight plans, weather data, and operational communications. Transparent to existing airline operations systems.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-sky-500 to-cyan-500 bg-opacity-10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">ATM Threat Detection</h3>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Autonomous threat detection for air traffic management systems. Identifies spoofed surveillance data, unauthorized data link access, and anomalous communication patterns.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compliance -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          <span class="gradient-text">Compliance</span> Frameworks
+        </h2>
+        <p class="section-subheading mx-auto">
+          Automated compliance evidence for aviation cybersecurity standards and airworthiness requirements.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card p-5 text-center">
+          <span class="text-xl font-bold text-sky-400">EUROCAE ED-153</span>
+          <p class="text-xs text-gray-400 mt-2">European aviation cybersecurity guidance for air traffic management</p>
+        </div>
+        <div class="card p-5 text-center">
+          <span class="text-xl font-bold text-sky-400">DO-326A</span>
+          <p class="text-xs text-gray-400 mt-2">Airborne systems security process guidance</p>
+        </div>
+        <div class="card p-5 text-center">
+          <span class="text-xl font-bold text-sky-400">DO-356A</span>
+          <p class="text-xs text-gray-400 mt-2">Airworthiness security methods and considerations</p>
+        </div>
+        <div class="card p-5 text-center">
+          <span class="text-xl font-bold text-sky-400">ICAO Annex 17</span>
+          <p class="text-xs text-gray-400 mt-2">International aviation security standards and recommended practices</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <CTABanner
+    title="Secure Aviation for the Quantum Era"
+    description="Deploy quantum-resistant cryptography designed for 50-year aviation lifecycles. Prevent ADS-B spoofing and protect air traffic management without recertification."
+  />
+</PageLayout>

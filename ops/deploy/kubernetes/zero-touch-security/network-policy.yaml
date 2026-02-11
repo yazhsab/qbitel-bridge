@@ -1,15 +1,15 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: cronos-security-orchestrator-netpol
-  namespace: cronos-security
+  name: qbitel-security-orchestrator-netpol
+  namespace: qbitel-security
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/name: qbitel-security-orchestrator
     app.kubernetes.io/component: security
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: cronos-security-orchestrator
+      app.kubernetes.io/name: qbitel-security-orchestrator
       app.kubernetes.io/component: security
   policyTypes:
   - Ingress
@@ -40,7 +40,7 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          name: cronos-security
+          name: qbitel-security
     ports:
     - protocol: TCP
       port: 8080
@@ -102,10 +102,10 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: cronos-security-deny-all-default
-  namespace: cronos-security
+  name: qbitel-security-deny-all-default
+  namespace: qbitel-security
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/name: qbitel-security-orchestrator
     app.kubernetes.io/component: security
 spec:
   podSelector: {}

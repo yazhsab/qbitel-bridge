@@ -1,0 +1,19 @@
+{
+  "program_id": "QTYR664",
+  "domain": "manufacturing",
+  "program_type": "report_generation",
+  "author": "C. MILLER",
+  "lines_of_code": 196,
+  "complexity_level": "medium",
+  "complexity_score": 0.487,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.808132",
+  "hash": "dd25f66efa047c71cabc4a8a8adb213f"
+}

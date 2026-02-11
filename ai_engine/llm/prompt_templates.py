@@ -1,5 +1,5 @@
 """
-CRONOS AI - Prompt Template Management
+QBITEL - Prompt Template Management
 Version-controlled prompt templates with A/B testing and analytics.
 
 Features:

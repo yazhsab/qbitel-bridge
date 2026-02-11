@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Marketplace API Endpoints
+QBITEL - Protocol Marketplace API Endpoints
 
 FastAPI endpoints for the Protocol Marketplace including discovery, submission,
 purchase, and review functionality.
@@ -156,8 +156,8 @@ def build_protocol_detail(protocol: MarketplaceProtocol) -> ProtocolDetail:
             active_installations=protocol.active_installations,
         ),
         compatibility=CompatibilityInfo(
-            min_cronos_version=protocol.min_cronos_version,
-            supported_cronos_versions=protocol.supported_cronos_versions,
+            min_qbitel_version=protocol.min_qbitel_version,
+            supported_qbitel_versions=protocol.supported_qbitel_versions,
             dependencies=protocol.dependencies,
         ),
         reviews_summary=None,  # TODO: Calculate from reviews
@@ -384,7 +384,7 @@ async def submit_protocol(
             license_type=request.license_type,
             price_model=request.price_model,
             base_price=request.base_price,
-            min_cronos_version=request.min_cronos_version,
+            min_qbitel_version=request.min_qbitel_version,
             dependencies=request.dependencies,
             status=ProtocolStatus.PENDING_VALIDATION,
             certification_status=CertificationStatus.PENDING,
@@ -615,7 +615,7 @@ async def purchase_protocol(
             protocol_id=protocol_id,
             customer_id=current_user.id,
             installed_version=protocol.version,
-            license_key=f"CRONOS-{protocol.protocol_name.upper()}-{uuid.uuid4().hex[:12]}",
+            license_key=f"QBITEL-{protocol.protocol_name.upper()}-{uuid.uuid4().hex[:12]}",
             license_type=request.license_type,
             status=InstallationStatus.ACTIVE,
             environment=request.environment,

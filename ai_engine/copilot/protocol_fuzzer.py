@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Fuzzing Integration
+QBITEL - Protocol Fuzzing Integration
 
 Integrates protocol fuzzing for vulnerability discovery using LLM-guided
 mutation strategies and intelligent test case generation.
@@ -21,33 +21,33 @@ from prometheus_client import Counter, Histogram, Gauge
 
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest, get_llm_service
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 
 
 # Prometheus metrics
 FUZZING_SESSION_COUNTER = Counter(
-    "cronos_fuzzing_sessions_total",
+    "qbitel_fuzzing_sessions_total",
     "Total fuzzing sessions executed",
     ["protocol_type"],
     registry=None,
 )
 
 FUZZING_TEST_CASES_COUNTER = Counter(
-    "cronos_fuzzing_test_cases_total",
+    "qbitel_fuzzing_test_cases_total",
     "Total fuzzing test cases generated",
     ["mutation_strategy"],
     registry=None,
 )
 
 FUZZING_VULNERABILITIES_COUNTER = Counter(
-    "cronos_fuzzing_vulnerabilities_found",
+    "qbitel_fuzzing_vulnerabilities_found",
     "Vulnerabilities discovered via fuzzing",
     ["severity"],
     registry=None,
 )
 
 FUZZING_SESSION_DURATION = Histogram(
-    "cronos_fuzzing_session_duration_seconds",
+    "qbitel_fuzzing_session_duration_seconds",
     "Fuzzing session duration",
     registry=None,
 )
@@ -290,7 +290,7 @@ class ProtocolFuzzer:
             self.logger.error(f"Fuzzing session error: {e}", exc_info=True)
             session.status = "error"
             session.end_time = datetime.utcnow()
-            raise CronosAIException(f"Fuzzing session failed: {e}")
+            raise QbitelAIException(f"Fuzzing session failed: {e}")
 
     async def _generate_test_cases(
         self, protocol_name: str, protocol_spec: Dict[str, Any], max_cases: int

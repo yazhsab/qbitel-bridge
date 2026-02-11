@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Translation Studio Models
+QBITEL - Protocol Translation Studio Models
 Enterprise-grade data structures for protocol translation, API generation, and code generation.
 """
 
@@ -17,10 +17,10 @@ import hashlib
 import uuid
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 
 
-class TranslationException(CronosAIException):
+class TranslationException(QbitelAIException):
     """Translation-specific exceptions."""
 
     pass
@@ -257,7 +257,7 @@ class APISpecification:
                 ] = endpoint.security
 
         if self.extensions:
-            openapi_spec.setdefault("x-cronos-extensions", self.extensions)
+            openapi_spec.setdefault("x-qbitel-extensions", self.extensions)
 
         return openapi_spec
 

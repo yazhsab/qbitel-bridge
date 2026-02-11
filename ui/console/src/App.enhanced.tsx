@@ -202,7 +202,7 @@ const EnhancedApp: React.FC = () => {
               sx={{ color: 'white' }}
             />
             <Typography variant="h5" sx={{ fontWeight: 600, color: 'white' }}>
-              Loading CronosAI Console...
+              Loading QbitelAI Console...
             </Typography>
             <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.8)' }}>
               Enterprise-grade AI-powered network security platform
@@ -322,7 +322,7 @@ const EnhancedApp: React.FC = () => {
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              CronosAI Console
+              QbitelAI Console
             </Typography>
             
             <Typography 

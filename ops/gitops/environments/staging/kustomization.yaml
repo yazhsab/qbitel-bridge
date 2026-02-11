@@ -1,0 +1,167 @@
+---
+# Staging Environment Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: qbitel-staging
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+# Inherit from base
+resources:
+  - ../base
+  # Additional staging-specific resources
+  - ingress.yaml
+  - hpa.yaml
+
+# Staging namespace
+namespace: qbitel-staging
+
+# Staging-specific labels
+commonLabels:
+  environment: staging
+  app.kubernetes.io/instance: qbitel-staging
+
+# Staging annotations
+commonAnnotations:
+  qbitel.io/environment: "staging"
+  qbitel.io/auto-deploy: "false"
+  qbitel.io/approval-required: "true"
+
+# ConfigMap overrides for staging
+configMapGenerator:
+  - name: qbitel-config
+    behavior: merge
+    literals:
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=staging
+      - FEATURE_FLAGS_ENABLED=true
+      - HOT_RELOAD=false
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.qbitel-observability-staging:4317
+      - JAEGER_ENDPOINT=http://jaeger.qbitel-observability-staging:14268/api/traces
+      - CACHE_TTL=300
+      - AI_GATEWAY_MOCK_MODE=false
+      - VLLM_MODEL_CACHE_SIZE=8GB
+      - RATE_LIMIT_ENABLED=true
+      - RATE_LIMIT_RPS=100
+
+# Staging secrets
+secretGenerator:
+  - name: qbitel-secrets
+    behavior: merge
+    type: Opaque
+    envs:
+      - secrets.env.staging
+
+# Staging images (use release candidates)
+images:
+  - name: qbitel/core
+    newName: ghcr.io/qbitel/qbitel-core
+    newTag: rc-latest
+  - name: qbitel/ai-gateway
+    newName: ghcr.io/qbitel/ai-gateway
+    newTag: rc-latest
+  - name: qbitel/protocol-copilot
+    newName: ghcr.io/qbitel/protocol-copilot
+    newTag: rc-latest
+  - name: qbitel/legacy-whisperer
+    newName: ghcr.io/qbitel/legacy-whisperer
+    newTag: rc-latest
+  - name: qbitel/vllm
+    newName: ghcr.io/qbitel/vllm-server
+    newTag: rc-latest
+
+# Staging resource patches
+patches:
+  # Moderate replica counts for staging
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+    target:
+      kind: Deployment
+      labelSelector: "tier=frontend"
+
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+    target:
+      kind: Deployment
+      labelSelector: "tier=backend"
+
+  # Staging resource limits (production-like but smaller)
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+    target:
+      kind: Deployment
+      labelSelector: "tier!=gpu"
+
+  # GPU workloads for staging
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            memory: "4Gi"
+            cpu: "2"
+            nvidia.com/gpu: "1"
+          limits:
+            memory: "8Gi"
+            cpu: "4"
+            nvidia.com/gpu: "1"
+    target:
+      kind: Deployment
+      labelSelector: "tier=gpu"
+
+  # Enable liveness and readiness probes
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe
+        value:
+          httpGet:
+            path: /health/live
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 3
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe
+        value:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+    target:
+      kind: Deployment
+
+  # PodDisruptionBudget for staging
+  - patch: |-
+      - op: replace
+        path: /spec/minAvailable
+        value: 1
+    target:
+      kind: PodDisruptionBudget
+
+# Staging components
+components:
+  - ../../components/monitoring
+  - ../../components/tracing
+  - ../../components/ingress
+
+# Generator options
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    environment: staging

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Security Orchestrator Configuration Management
+QBITEL Engine - Security Orchestrator Configuration Management
 
 Enterprise-grade configuration management with environment-specific overrides and validation.
 """
@@ -421,7 +421,7 @@ class SecurityConfigManager:
             )
 
         # Determine environment
-        self.environment = environment or os.getenv("CRONOS_ENVIRONMENT", "development")
+        self.environment = environment or os.getenv("QBITEL_ENVIRONMENT", "development")
 
         # Configuration cache
         self._config_cache: Optional[SecurityOrchestratorConfig] = None

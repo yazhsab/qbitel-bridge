@@ -1,8 +1,8 @@
-# CRONOS AI Security and Compliance Validation Framework
+# QBITEL Security and Compliance Validation Framework
 
 ## Overview
 
-The CRONOS AI Security and Compliance Validation Framework is a comprehensive enterprise-grade solution designed to validate security controls and compliance requirements for production deployments. This framework ensures that CRONOS AI meets the highest standards for security, privacy, and regulatory compliance.
+The QBITEL Security and Compliance Validation Framework is a comprehensive enterprise-grade solution designed to validate security controls and compliance requirements for production deployments. This framework ensures that QBITEL meets the highest standards for security, privacy, and regulatory compliance.
 
 ## Features
 
@@ -54,7 +54,7 @@ security/validation/
 
 1. **Clone the repository and navigate to the validation directory**:
    ```bash
-   cd cronos-ai/security/validation/
+   cd qbitel/security/validation/
    ```
 
 2. **Install Python dependencies**:
@@ -320,11 +320,11 @@ jobs:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cronos-ai-security-config
+  name: qbitel-security-config
 data:
   security-config.yaml: |
     endpoints:
-      dataplane: "http://cronos-dataplane:9090"
+      dataplane: "http://qbitel-dataplane:9090"
       # ... service endpoints
 ```
 
@@ -356,7 +356,7 @@ data:
    kubectl cluster-info
    
    # Check namespace access
-   kubectl get pods -n cronos-ai-prod
+   kubectl get pods -n qbitel-prod
    ```
 
 4. **Configuration File Not Found**
@@ -419,6 +419,6 @@ Enable debug mode for detailed troubleshooting:
 
 ## Conclusion
 
-The CRONOS AI Security and Compliance Validation Framework provides comprehensive enterprise-grade security validation capabilities. It ensures that CRONOS AI deployments meet the highest standards for security, privacy, and regulatory compliance while providing actionable insights for continuous improvement.
+The QBITEL Security and Compliance Validation Framework provides comprehensive enterprise-grade security validation capabilities. It ensures that QBITEL deployments meet the highest standards for security, privacy, and regulatory compliance while providing actionable insights for continuous improvement.
 
 For additional support or questions, please refer to the project documentation or contact the security team.

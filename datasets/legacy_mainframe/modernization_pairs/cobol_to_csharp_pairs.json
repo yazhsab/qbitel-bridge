@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "title": "COBOL to C#/.NET Modernization Training Pairs",
+    "version": "1.0.0",
+    "description": "Training data for COBOL to C#/.NET code conversion",
+    "total_pairs": 60,
+    "target_framework": ".NET 8.0"
+  },
+  "pairs": [
+    {
+      "id": "CS001",
+      "category": "data_structures",
+      "description": "Record to C# class",
+      "cobol": "       01  CUSTOMER-RECORD.\n           05  CUST-ID         PIC 9(8).\n           05  CUST-NAME       PIC X(30).\n           05  CUST-BALANCE    PIC S9(9)V99 COMP-3.\n           05  CUST-STATUS     PIC X.\n              88  ACTIVE       VALUE 'A'.\n              88  INACTIVE     VALUE 'I'.\n              88  CLOSED       VALUE 'C'.",
+      "csharp": "public class CustomerRecord\n{\n    public int CustId { get; set; }\n    public string CustName { get; set; } = string.Empty;\n    public decimal CustBalance { get; set; }\n    public char CustStatus { get; set; }\n\n    public bool IsActive => CustStatus == 'A';\n    public bool IsInactive => CustStatus == 'I';\n    public bool IsClosed => CustStatus == 'C';\n}\n\n// Or using record type (C# 9+)\npublic record CustomerRecord(\n    int CustId,\n    string CustName,\n    decimal CustBalance,\n    char CustStatus\n)\n{\n    public bool IsActive => CustStatus == 'A';\n    public bool IsInactive => CustStatus == 'I';\n    public bool IsClosed => CustStatus == 'C';\n}"
+    },
+    {
+      "id": "CS002",
+      "category": "data_structures",
+      "description": "Nested structure with OCCURS to class hierarchy",
+      "cobol": "       01  ORDER-RECORD.\n           05  ORDER-ID        PIC 9(10).\n           05  ORDER-DATE      PIC 9(8).\n           05  CUSTOMER-INFO.\n               10  CUST-ID     PIC X(10).\n               10  CUST-NAME   PIC X(50).\n           05  LINE-COUNT      PIC 99.\n           05  ORDER-LINES OCCURS 1 TO 99 TIMES\n               DEPENDING ON LINE-COUNT.\n               10  LINE-NUM    PIC 999.\n               10  PRODUCT-ID  PIC X(10).\n               10  QUANTITY    PIC 9(5).\n               10  UNIT-PRICE  PIC S9(7)V99.\n               10  LINE-TOTAL  PIC S9(9)V99.",
+      "csharp": "public class OrderRecord\n{\n    public long OrderId { get; set; }\n    public DateOnly OrderDate { get; set; }\n    public CustomerInfo Customer { get; set; } = new();\n    public List<OrderLine> OrderLines { get; set; } = new();\n\n    public int LineCount => OrderLines.Count;\n}\n\npublic class CustomerInfo\n{\n    public string CustId { get; set; } = string.Empty;\n    public string CustName { get; set; } = string.Empty;\n}\n\npublic class OrderLine\n{\n    public int LineNum { get; set; }\n    public string ProductId { get; set; } = string.Empty;\n    public int Quantity { get; set; }\n    public decimal UnitPrice { get; set; }\n    public decimal LineTotal => Quantity * UnitPrice;\n}"
+    },
+    {
+      "id": "CS003",
+      "category": "data_structures",
+      "description": "REDEFINES to explicit union/struct",
+      "cobol": "       01  TRANSACTION-RECORD.\n           05  TRANS-TYPE      PIC X(2).\n           05  TRANS-DATA      PIC X(100).\n           05  TRANS-DEPOSIT REDEFINES TRANS-DATA.\n               10  DEP-AMOUNT  PIC S9(9)V99 COMP-3.\n               10  DEP-SOURCE  PIC X(20).\n           05  TRANS-WITHDRAWAL REDEFINES TRANS-DATA.\n               10  WD-AMOUNT   PIC S9(9)V99 COMP-3.\n               10  WD-DEST     PIC X(20).\n               10  WD-REASON   PIC X(50).",
+      "csharp": "public abstract class TransactionRecord\n{\n    public string TransType { get; set; } = string.Empty;\n\n    public static TransactionRecord Parse(string transType, byte[] data)\n    {\n        return transType switch\n        {\n            \"DP\" => new DepositTransaction().ParseData(data),\n            \"WD\" => new WithdrawalTransaction().ParseData(data),\n            _ => throw new ArgumentException($\"Unknown transaction type: {transType}\")\n        };\n    }\n}\n\npublic class DepositTransaction : TransactionRecord\n{\n    public decimal Amount { get; set; }\n    public string Source { get; set; } = string.Empty;\n\n    public DepositTransaction ParseData(byte[] data)\n    {\n        // Parse packed decimal and string from byte array\n        return this;\n    }\n}\n\npublic class WithdrawalTransaction : TransactionRecord\n{\n    public decimal Amount { get; set; }\n    public string Destination { get; set; } = string.Empty;\n    public string Reason { get; set; } = string.Empty;\n}"
+    },
+    {
+      "id": "CS004",
+      "category": "arithmetic",
+      "description": "COMPUTE with precision",
+      "cobol": "           COMPUTE WS-INTEREST ROUNDED =\n               WS-PRINCIPAL * WS-RATE / 100 * WS-DAYS / 365\n               ON SIZE ERROR\n                   MOVE ZEROES TO WS-INTEREST\n                   SET WS-OVERFLOW TO TRUE\n           END-COMPUTE.\n\n           COMPUTE WS-COMPOUND =\n               WS-PRINCIPAL * (1 + WS-RATE / 100) ** WS-YEARS.",
+      "csharp": "// Simple interest with rounding\ndecimal interest;\ntry\n{\n    interest = Math.Round(\n        principal * rate / 100m * days / 365m,\n        2,\n        MidpointRounding.AwayFromZero\n    );\n}\ncatch (OverflowException)\n{\n    interest = 0m;\n    overflow = true;\n}\n\n// Compound interest\ndecimal compound = principal * (decimal)Math.Pow(\n    (double)(1m + rate / 100m),\n    years\n);"
+    },
+    {
+      "id": "CS005",
+      "category": "control_flow",
+      "description": "EVALUATE to switch expression",
+      "cobol": "           EVALUATE TRUE ALSO WS-REGION\n               WHEN WS-AMOUNT > 10000 ALSO 'EAST'\n                   COMPUTE WS-DISCOUNT = WS-AMOUNT * 0.15\n               WHEN WS-AMOUNT > 10000 ALSO 'WEST'\n                   COMPUTE WS-DISCOUNT = WS-AMOUNT * 0.12\n               WHEN WS-AMOUNT > 5000 ALSO ANY\n                   COMPUTE WS-DISCOUNT = WS-AMOUNT * 0.10\n               WHEN OTHER\n                   MOVE ZEROES TO WS-DISCOUNT\n           END-EVALUATE.",
+      "csharp": "decimal discount = (amount, region) switch\n{\n    ( > 10000m, \"EAST\") => amount * 0.15m,\n    ( > 10000m, \"WEST\") => amount * 0.12m,\n    ( > 5000m, _) => amount * 0.10m,\n    _ => 0m\n};"
+    },
+    {
+      "id": "CS006",
+      "category": "control_flow",
+      "description": "PERFORM VARYING to for/foreach",
+      "cobol": "           PERFORM VARYING WS-INDEX FROM 1 BY 1\n               UNTIL WS-INDEX > WS-COUNT\n               OR WS-FOUND = 'Y'\n               IF ITEM-CODE(WS-INDEX) = WS-SEARCH-CODE\n                   MOVE 'Y' TO WS-FOUND\n                   MOVE WS-INDEX TO WS-FOUND-INDEX\n               END-IF\n           END-PERFORM.",
+      "csharp": "// Using LINQ (preferred)\nvar found = items\n    .Select((item, index) => new { Item = item, Index = index })\n    .FirstOrDefault(x => x.Item.Code == searchCode);\n\nif (found != null)\n{\n    foundIndex = found.Index;\n}\n\n// Or traditional for loop\nint foundIndex = -1;\nfor (int i = 0; i < count && foundIndex == -1; i++)\n{\n    if (items[i].Code == searchCode)\n    {\n        foundIndex = i;\n    }\n}"
+    },
+    {
+      "id": "CS007",
+      "category": "file_operations",
+      "description": "Sequential file read to StreamReader",
+      "cobol": "       FILE-CONTROL.\n           SELECT INPUT-FILE ASSIGN TO 'INPUT.DAT'\n               ORGANIZATION IS SEQUENTIAL\n               FILE STATUS IS WS-FILE-STATUS.\n\n       PROCEDURE DIVISION.\n           OPEN INPUT INPUT-FILE.\n           PERFORM UNTIL WS-EOF = 'Y'\n               READ INPUT-FILE INTO WS-RECORD\n                   AT END MOVE 'Y' TO WS-EOF\n                   NOT AT END PERFORM PROCESS-RECORD\n               END-READ\n           END-PERFORM.\n           CLOSE INPUT-FILE.",
+      "csharp": "public async IAsyncEnumerable<CustomerRecord> ReadCustomersAsync(string filePath)\n{\n    await using var reader = new StreamReader(filePath);\n    string? line;\n    while ((line = await reader.ReadLineAsync()) != null)\n    {\n        yield return ParseFixedWidthRecord(line);\n    }\n}\n\n// Or simpler synchronous version\npublic IEnumerable<CustomerRecord> ReadCustomers(string filePath)\n{\n    foreach (var line in File.ReadLines(filePath))\n    {\n        yield return ParseFixedWidthRecord(line);\n    }\n}"
+    },
+    {
+      "id": "CS008",
+      "category": "file_operations",
+      "description": "Indexed file to Entity Framework",
+      "cobol": "       FILE-CONTROL.\n           SELECT CUSTOMER-FILE ASSIGN TO 'CUSTFILE'\n               ORGANIZATION IS INDEXED\n               ACCESS MODE IS RANDOM\n               RECORD KEY IS CUST-ID\n               ALTERNATE KEY IS CUST-SSN WITH DUPLICATES\n               FILE STATUS IS WS-FILE-STATUS.\n\n           READ CUSTOMER-FILE KEY IS CUST-ID\n               INVALID KEY DISPLAY 'NOT FOUND'.\n\n           WRITE CUSTOMER-RECORD\n               INVALID KEY DISPLAY 'DUPLICATE'.\n\n           REWRITE CUSTOMER-RECORD\n               INVALID KEY DISPLAY 'UPDATE FAILED'.\n\n           DELETE CUSTOMER-FILE\n               INVALID KEY DISPLAY 'DELETE FAILED'.",
+      "csharp": "// Entity Framework Core DbContext\npublic class CustomerDbContext : DbContext\n{\n    public DbSet<Customer> Customers { get; set; }\n\n    protected override void OnModelCreating(ModelBuilder modelBuilder)\n    {\n        modelBuilder.Entity<Customer>(entity =>\n        {\n            entity.HasKey(e => e.CustId);\n            entity.HasIndex(e => e.CustSsn);  // Alternate key\n        });\n    }\n}\n\n// Repository pattern\npublic class CustomerRepository\n{\n    private readonly CustomerDbContext _context;\n\n    public async Task<Customer?> GetByIdAsync(string custId)\n    {\n        return await _context.Customers.FindAsync(custId);\n    }\n\n    public async Task<Customer> CreateAsync(Customer customer)\n    {\n        if (await _context.Customers.AnyAsync(c => c.CustId == customer.CustId))\n            throw new DuplicateKeyException(\"Customer already exists\");\n        \n        _context.Customers.Add(customer);\n        await _context.SaveChangesAsync();\n        return customer;\n    }\n\n    public async Task UpdateAsync(Customer customer)\n    {\n        _context.Entry(customer).State = EntityState.Modified;\n        await _context.SaveChangesAsync();\n    }\n\n    public async Task DeleteAsync(string custId)\n    {\n        var customer = await GetByIdAsync(custId)\n            ?? throw new NotFoundException(\"Customer not found\");\n        _context.Customers.Remove(customer);\n        await _context.SaveChangesAsync();\n    }\n}"
+    },
+    {
+      "id": "CS009",
+      "category": "string_handling",
+      "description": "STRING/UNSTRING to string methods",
+      "cobol": "           STRING WS-FIRST-NAME DELIMITED BY SPACE\n                  ' ' DELIMITED BY SIZE\n                  WS-MIDDLE-INIT DELIMITED BY SIZE\n                  '. ' DELIMITED BY SIZE\n                  WS-LAST-NAME DELIMITED BY SPACE\n               INTO WS-FULL-NAME.\n\n           UNSTRING WS-FULL-ADDRESS\n               DELIMITED BY ', '\n               INTO WS-CITY WS-STATE WS-ZIP\n               TALLYING WS-FIELD-COUNT.",
+      "csharp": "// STRING equivalent\nstring fullName = $\"{firstName.Trim()} {middleInit}. {lastName.Trim()}\";\n\n// Or with StringBuilder for complex cases\nvar sb = new StringBuilder();\nsb.Append(firstName.AsSpan().TrimEnd());\nsb.Append(' ');\nsb.Append(middleInit);\nsb.Append(\". \");\nsb.Append(lastName.AsSpan().TrimEnd());\nstring fullName = sb.ToString();\n\n// UNSTRING equivalent\nstring[] parts = fullAddress.Split(\", \");\nint fieldCount = parts.Length;\n(string city, string state, string zip) = parts.Length >= 3\n    ? (parts[0], parts[1], parts[2])\n    : (parts.ElementAtOrDefault(0) ?? \"\", \n       parts.ElementAtOrDefault(1) ?? \"\", \n       parts.ElementAtOrDefault(2) ?? \"\");"
+    },
+    {
+      "id": "CS010",
+      "category": "string_handling",
+      "description": "INSPECT to string methods",
+      "cobol": "           INSPECT WS-TEXT\n               REPLACING ALL 'OLD' BY 'NEW'\n               REPLACING LEADING SPACES BY ZEROS.\n\n           MOVE ZERO TO WS-COUNT.\n           INSPECT WS-TEXT\n               TALLYING WS-COUNT FOR ALL 'X'\n               WS-COUNT FOR LEADING SPACES.",
+      "csharp": "// REPLACING\nstring text = originalText.Replace(\"OLD\", \"NEW\");\nint leadingSpaces = text.TakeWhile(char.IsWhiteSpace).Count();\ntext = new string('0', leadingSpaces) + text.TrimStart();\n\n// TALLYING\nint count = text.Count(c => c == 'X');\ncount += text.TakeWhile(char.IsWhiteSpace).Count();\n\n// Using Span<char> for performance\nReadOnlySpan<char> span = text.AsSpan();\nint xCount = 0;\nforeach (char c in span)\n{\n    if (c == 'X') xCount++;\n}"
+    },
+    {
+      "id": "CS011",
+      "category": "database",
+      "description": "Embedded SQL to Entity Framework/Dapper",
+      "cobol": "           EXEC SQL\n               SELECT CUST_NAME, CUST_BALANCE, CUST_STATUS\n               INTO :WS-CUST-NAME, :WS-CUST-BALANCE, :WS-CUST-STATUS\n               FROM CUSTOMER\n               WHERE CUST_ID = :WS-CUST-ID\n           END-EXEC.\n           EVALUATE SQLCODE\n               WHEN 0\n                   CONTINUE\n               WHEN 100\n                   SET NOT-FOUND TO TRUE\n               WHEN OTHER\n                   PERFORM HANDLE-SQL-ERROR\n           END-EVALUATE.",
+      "csharp": "// Entity Framework\npublic async Task<CustomerDto?> GetCustomerAsync(string custId)\n{\n    return await _context.Customers\n        .Where(c => c.CustId == custId)\n        .Select(c => new CustomerDto\n        {\n            CustName = c.CustName,\n            CustBalance = c.CustBalance,\n            CustStatus = c.CustStatus\n        })\n        .FirstOrDefaultAsync();\n}\n\n// Dapper (closer to embedded SQL)\npublic async Task<CustomerDto?> GetCustomerAsync(string custId)\n{\n    const string sql = @\"\n        SELECT CUST_NAME AS CustName, \n               CUST_BALANCE AS CustBalance, \n               CUST_STATUS AS CustStatus\n        FROM CUSTOMER\n        WHERE CUST_ID = @CustId\";\n    \n    return await _connection.QueryFirstOrDefaultAsync<CustomerDto>(\n        sql, \n        new { CustId = custId }\n    );\n}"
+    },
+    {
+      "id": "CS012",
+      "category": "database",
+      "description": "Cursor to IAsyncEnumerable",
+      "cobol": "           EXEC SQL\n               DECLARE CUST_CURSOR CURSOR FOR\n               SELECT CUST_ID, CUST_NAME, CUST_BALANCE\n               FROM CUSTOMER\n               WHERE CUST_STATUS = 'A'\n               ORDER BY CUST_NAME\n           END-EXEC.\n\n           EXEC SQL OPEN CUST_CURSOR END-EXEC.\n           PERFORM UNTIL SQLCODE = 100\n               EXEC SQL\n                   FETCH CUST_CURSOR\n                   INTO :WS-CUST-ID, :WS-CUST-NAME, :WS-CUST-BALANCE\n               END-EXEC\n               IF SQLCODE = 0\n                   PERFORM PROCESS-CUSTOMER\n               END-IF\n           END-PERFORM.\n           EXEC SQL CLOSE CUST_CURSOR END-EXEC.",
+      "csharp": "// Entity Framework with streaming\npublic async IAsyncEnumerable<Customer> GetActiveCustomersAsync(\n    [EnumeratorCancellation] CancellationToken cancellationToken = default)\n{\n    await foreach (var customer in _context.Customers\n        .Where(c => c.CustStatus == 'A')\n        .OrderBy(c => c.CustName)\n        .AsAsyncEnumerable()\n        .WithCancellation(cancellationToken))\n    {\n        yield return customer;\n    }\n}\n\n// Usage\nawait foreach (var customer in GetActiveCustomersAsync())\n{\n    await ProcessCustomerAsync(customer);\n}"
+    },
+    {
+      "id": "CS013",
+      "category": "error_handling",
+      "description": "File status handling to exceptions",
+      "cobol": "           READ CUSTOMER-FILE INTO WS-CUSTOMER.\n           EVALUATE WS-FILE-STATUS\n               WHEN '00'\n                   PERFORM PROCESS-CUSTOMER\n               WHEN '10'\n                   SET END-OF-FILE TO TRUE\n               WHEN '23'\n                   DISPLAY 'RECORD NOT FOUND'\n               WHEN '35'\n                   DISPLAY 'FILE NOT FOUND'\n               WHEN OTHER\n                   DISPLAY 'FILE ERROR: ' WS-FILE-STATUS\n                   PERFORM ABEND-ROUTINE\n           END-EVALUATE.",
+      "csharp": "public class FileProcessor\n{\n    public async Task<Customer?> ReadCustomerAsync(string key)\n    {\n        try\n        {\n            return await _repository.GetByKeyAsync(key);\n        }\n        catch (FileNotFoundException)\n        {\n            _logger.LogError(\"File not found\");\n            throw;\n        }\n        catch (KeyNotFoundException)\n        {\n            _logger.LogWarning(\"Record not found: {Key}\", key);\n            return null;\n        }\n        catch (IOException ex)\n        {\n            _logger.LogError(ex, \"File error during read\");\n            throw new ApplicationException($\"File error: {ex.Message}\", ex);\n        }\n    }\n}"
+    },
+    {
+      "id": "CS014",
+      "category": "cics_conversion",
+      "description": "CICS SEND/RECEIVE to ASP.NET",
+      "cobol": "           EXEC CICS RECEIVE\n               MAP('CUSTMAP')\n               MAPSET('CUSTINQ')\n               INTO(CUSTMAPI)\n           END-EXEC.\n\n           PERFORM VALIDATE-INPUT.\n           PERFORM GET-CUSTOMER-DATA.\n\n           EXEC CICS SEND\n               MAP('CUSTMAP')\n               MAPSET('CUSTINQ')\n               FROM(CUSTMAPO)\n               ERASE\n           END-EXEC.\n\n           EXEC CICS RETURN\n               TRANSID('CINQ')\n               COMMAREA(WS-COMMAREA)\n           END-EXEC.",
+      "csharp": "// ASP.NET Core Minimal API\napp.MapGet(\"/api/customers/{custId}\", async (\n    string custId,\n    ICustomerService customerService) =>\n{\n    var customer = await customerService.GetCustomerAsync(custId);\n    return customer is not null \n        ? Results.Ok(customer) \n        : Results.NotFound();\n});\n\napp.MapPost(\"/api/customers\", async (\n    CustomerRequest request,\n    ICustomerService customerService,\n    IValidator<CustomerRequest> validator) =>\n{\n    var validationResult = await validator.ValidateAsync(request);\n    if (!validationResult.IsValid)\n        return Results.ValidationProblem(validationResult.ToDictionary());\n\n    var customer = await customerService.CreateCustomerAsync(request);\n    return Results.Created($\"/api/customers/{customer.CustId}\", customer);\n});\n\n// Blazor component (for UI modernization)\n@page \"/customer/{CustId}\"\n@inject ICustomerService CustomerService\n\n<h1>Customer Inquiry</h1>\n\n@if (customer is not null)\n{\n    <div class=\"customer-details\">\n        <p>Name: @customer.CustName</p>\n        <p>Balance: @customer.CustBalance.ToString(\"C\")</p>\n    </div>\n}\n\n@code {\n    [Parameter] public string CustId { get; set; } = \"\";\n    private Customer? customer;\n\n    protected override async Task OnInitializedAsync()\n    {\n        customer = await CustomerService.GetCustomerAsync(CustId);\n    }\n}"
+    },
+    {
+      "id": "CS015",
+      "category": "batch_processing",
+      "description": "Batch program structure to .NET background service",
+      "cobol": "       PROCEDURE DIVISION.\n       0000-MAIN.\n           PERFORM 1000-INITIALIZE.\n           PERFORM 2000-PROCESS UNTIL END-OF-FILE.\n           PERFORM 3000-FINALIZE.\n           STOP RUN.\n\n       1000-INITIALIZE.\n           OPEN INPUT INPUT-FILE.\n           OPEN OUTPUT OUTPUT-FILE.\n           INITIALIZE WS-COUNTERS.\n\n       2000-PROCESS.\n           READ INPUT-FILE INTO WS-INPUT-REC\n               AT END SET END-OF-FILE TO TRUE\n               NOT AT END PERFORM 2100-PROCESS-RECORD\n           END-READ.\n\n       3000-FINALIZE.\n           CLOSE INPUT-FILE OUTPUT-FILE.\n           DISPLAY 'RECORDS READ:    ' WS-READ-COUNT.\n           DISPLAY 'RECORDS WRITTEN: ' WS-WRITE-COUNT.\n           DISPLAY 'RECORDS ERRORS:  ' WS-ERROR-COUNT.",
+      "csharp": "// Background service with hosted service pattern\npublic class BatchProcessingService : BackgroundService\n{\n    private readonly ILogger<BatchProcessingService> _logger;\n    private readonly IServiceProvider _serviceProvider;\n\n    protected override async Task ExecuteAsync(CancellationToken stoppingToken)\n    {\n        var stats = new ProcessingStatistics();\n        \n        try\n        {\n            using var scope = _serviceProvider.CreateScope();\n            var processor = scope.ServiceProvider\n                .GetRequiredService<IRecordProcessor>();\n            \n            await foreach (var record in ReadRecordsAsync(stoppingToken))\n            {\n                stats.RecordsRead++;\n                try\n                {\n                    await processor.ProcessAsync(record, stoppingToken);\n                    stats.RecordsWritten++;\n                }\n                catch (Exception ex)\n                {\n                    stats.RecordsError++;\n                    _logger.LogError(ex, \"Error processing record\");\n                }\n            }\n        }\n        finally\n        {\n            _logger.LogInformation(\n                \"Batch complete - Read: {Read}, Written: {Written}, Errors: {Errors}\",\n                stats.RecordsRead, stats.RecordsWritten, stats.RecordsError);\n        }\n    }\n}\n\n// Or using Channels for high-throughput\npublic class ChannelBasedBatchProcessor\n{\n    public async Task ProcessAsync(CancellationToken ct)\n    {\n        var channel = Channel.CreateBounded<InputRecord>(1000);\n        \n        var producer = ProduceAsync(channel.Writer, ct);\n        var consumers = Enumerable.Range(0, Environment.ProcessorCount)\n            .Select(_ => ConsumeAsync(channel.Reader, ct));\n        \n        await Task.WhenAll(consumers.Prepend(producer));\n    }\n}"
+    }
+  ]
+}

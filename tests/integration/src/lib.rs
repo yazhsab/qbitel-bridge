@@ -1,6 +1,6 @@
-//! CRONOS AI Integration Tests
+//! QBITEL Bridge Integration Tests
 //! 
-//! Comprehensive integration test suite covering all CRONOS AI components
+//! Comprehensive integration test suite covering all QBITEL Bridge components
 //! including dataplane, control plane, AI engine, policy engine, and
 //! Kubernetes orchestration.
 
@@ -65,7 +65,7 @@ impl Default for TestConfig {
             metrics_endpoint: std::env::var("METRICS_ENDPOINT")
                 .unwrap_or_else(|_| "http://localhost:9090/metrics".to_string()),
             k8s_namespace: std::env::var("TEST_NAMESPACE")
-                .unwrap_or_else(|_| "cronos-ai-test".to_string()),
+                .unwrap_or_else(|_| "qbitel-bridge-test".to_string()),
             test_data_dir: std::env::var("TEST_DATA_DIR")
                 .unwrap_or_else(|_| "./test_data".to_string()),
             timeout_seconds: std::env::var("TEST_TIMEOUT_SECONDS")
@@ -432,15 +432,15 @@ mod tests {
     #[test]
     fn test_parse_prometheus_metrics() {
         let content = r#"
-# HELP cronos_ai_packets_total Total packets processed
-# TYPE cronos_ai_packets_total counter
-cronos_ai_packets_total{component="dataplane"} 12345
-cronos_ai_cpu_usage 0.75
+# HELP qbitel_bridge_packets_total Total packets processed
+# TYPE qbitel_bridge_packets_total counter
+qbitel_bridge_packets_total{component="dataplane"} 12345
+qbitel_bridge_cpu_usage 0.75
 "#;
         
         let metrics = utils::parse_prometheus_metrics(content);
         assert_eq!(metrics.len(), 2);
-        assert_eq!(metrics.get("cronos_ai_packets_total{component=\"dataplane\"}"), Some(&12345.0));
-        assert_eq!(metrics.get("cronos_ai_cpu_usage"), Some(&0.75));
+        assert_eq!(metrics.get("qbitel_bridge_packets_total{component=\"dataplane\"}"), Some(&12345.0));
+        assert_eq!(metrics.get("qbitel_bridge_cpu_usage"), Some(&0.75));
     }
 }

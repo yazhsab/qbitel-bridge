@@ -1,7 +1,7 @@
 """
 GCP Security Command Center Integration
 
-Integrates CRONOS AI findings with Google Cloud Security Command Center.
+Integrates QBITEL findings with Google Cloud Security Command Center.
 """
 
 import logging
@@ -36,14 +36,14 @@ class GCPSecurityCommandCenterIntegration:
     ) -> Dict[str, Any]:
         """Create a security finding"""
         finding = {
-            "name": f"organizations/{self.organization_id}/sources/cronos-ai/findings/{finding_id}",
-            "parent": f"organizations/{self.organization_id}/sources/cronos-ai",
+            "name": f"organizations/{self.organization_id}/sources/qbitel/findings/{finding_id}",
+            "parent": f"organizations/{self.organization_id}/sources/qbitel",
             "resourceName": resource_name,
             "category": category,
             "severity": severity,
             "findingClass": "THREAT",
             "sourceProperties": {
-                "provider": "CRONOS AI",
+                "provider": "QBITEL",
                 "quantum_safe": True
             }
         }
@@ -55,12 +55,12 @@ class GCPSecurityCommandCenterIntegration:
         """Create Deployment Manager template"""
         return {
             "resources": [{
-                "name": "cronos-ai-scc-source",
+                "name": "qbitel-scc-source",
                 "type": "gcp-types/securitycenter-v1:organizations.sources",
                 "properties": {
                     "parent": f"organizations/{self.organization_id}",
                     "source": {
-                        "displayName": "CRONOS AI Quantum Security",
+                        "displayName": "QBITEL Quantum Security",
                         "description": "Quantum-safe security findings"
                     }
                 }

@@ -1,0 +1,121 @@
+{
+  "metadata": {
+    "title": "IMS Database and Transaction Manager Definitions",
+    "version": "1.0.0",
+    "description": "IMS DBD, PSB, DL/I call patterns with modern equivalents",
+    "total_samples": 50
+  },
+  "dbd_definitions": [
+    {
+      "id": "DBD001",
+      "name": "Customer Database",
+      "description": "Hierarchical customer database definition",
+      "dbd_source": "         DBD   NAME=CUSTDB,ACCESS=(HIDAM,VSAM)\n*\n         DATASET DD1=CUSTDD,DEVICE=3390,OVFLW=CUSTOVFL\n         SEGM  NAME=CUSTOMER,BYTES=300,PARENT=0\n         FIELD NAME=(CUSTKEY,SEQ,U),BYTES=10,START=1,TYPE=C\n         FIELD NAME=CUSTNAME,BYTES=50,START=11,TYPE=C\n         FIELD NAME=CUSTTYPE,BYTES=1,START=61,TYPE=C\n         FIELD NAME=CUSTSTATUS,BYTES=1,START=62,TYPE=C\n         FIELD NAME=CUSTSSN,BYTES=9,START=63,TYPE=C\n         FIELD NAME=CUSTBAL,BYTES=8,START=72,TYPE=P\n         FIELD NAME=CUSTCRLIM,BYTES=6,START=80,TYPE=P\n         FIELD NAME=CUSTOPENDT,BYTES=4,START=86,TYPE=P\n*\n         SEGM  NAME=ADDRESS,BYTES=200,PARENT=CUSTOMER\n         FIELD NAME=(ADDRKEY,SEQ,U),BYTES=2,START=1,TYPE=C\n         FIELD NAME=ADDRTYPE,BYTES=1,START=3,TYPE=C\n         FIELD NAME=ADDRLINE1,BYTES=50,START=4,TYPE=C\n         FIELD NAME=ADDRLINE2,BYTES=50,START=54,TYPE=C\n         FIELD NAME=ADDRCITY,BYTES=30,START=104,TYPE=C\n         FIELD NAME=ADDRSTATE,BYTES=2,START=134,TYPE=C\n         FIELD NAME=ADDRZIP,BYTES=10,START=136,TYPE=C\n*\n         SEGM  NAME=ACCOUNT,BYTES=150,PARENT=CUSTOMER\n         FIELD NAME=(ACCTKEY,SEQ,U),BYTES=12,START=1,TYPE=C\n         FIELD NAME=ACCTTYPE,BYTES=2,START=13,TYPE=C\n         FIELD NAME=ACCTSTATUS,BYTES=1,START=15,TYPE=C\n         FIELD NAME=ACCTBAL,BYTES=8,START=16,TYPE=P\n         FIELD NAME=ACCTAVAIL,BYTES=8,START=24,TYPE=P\n         FIELD NAME=ACCTRATE,BYTES=4,START=32,TYPE=P\n         FIELD NAME=ACCTOPENDT,BYTES=4,START=36,TYPE=P\n*\n         SEGM  NAME=TRANS,BYTES=100,PARENT=ACCOUNT\n         FIELD NAME=(TRANSKEY,SEQ,U),BYTES=20,START=1,TYPE=C\n         FIELD NAME=TRANSTYPE,BYTES=2,START=21,TYPE=C\n         FIELD NAME=TRANSAMT,BYTES=6,START=23,TYPE=P\n         FIELD NAME=TRANSDT,BYTES=4,START=29,TYPE=P\n         FIELD NAME=TRANSTM,BYTES=4,START=33,TYPE=P\n         FIELD NAME=TRANSDESC,BYTES=50,START=37,TYPE=C\n*\n         DBDGEN\n         FINISH\n         END",
+      "modern_equivalent": {
+        "description": "IMS hierarchical structure maps to JPA entity relationships",
+        "jpa_entities": "@Entity\n@Table(name = \"customer\")\npublic class Customer {\n    @Id\n    @Column(name = \"cust_key\", length = 10)\n    private String custKey;\n    \n    @Column(name = \"cust_name\", length = 50)\n    private String custName;\n    \n    @Column(name = \"cust_balance\", precision = 15, scale = 2)\n    private BigDecimal custBalance;\n    \n    @OneToMany(mappedBy = \"customer\", cascade = CascadeType.ALL)\n    private List<Address> addresses = new ArrayList<>();\n    \n    @OneToMany(mappedBy = \"customer\", cascade = CascadeType.ALL)\n    private List<Account> accounts = new ArrayList<>();\n}\n\n@Entity\n@Table(name = \"address\")\npublic class Address {\n    @EmbeddedId\n    private AddressId id;  // Composite key: custKey + addrKey\n    \n    @ManyToOne\n    @MapsId(\"custKey\")\n    private Customer customer;\n    \n    @Column(name = \"addr_type\", length = 1)\n    private String addrType;\n    // ... other fields\n}\n\n@Entity\n@Table(name = \"account\")\npublic class Account {\n    @Id\n    @Column(name = \"acct_key\", length = 12)\n    private String acctKey;\n    \n    @ManyToOne\n    @JoinColumn(name = \"cust_key\")\n    private Customer customer;\n    \n    @OneToMany(mappedBy = \"account\", cascade = CascadeType.ALL)\n    private List<Transaction> transactions = new ArrayList<>();\n}"
+      },
+      "hierarchy_diagram": "CUSTOMER (Root)\n├── ADDRESS (Child)\n├── ACCOUNT (Child)\n│   └── TRANS (Grandchild)"
+    }
+  ],
+  "psb_definitions": [
+    {
+      "id": "PSB001",
+      "name": "Customer Inquiry PSB",
+      "description": "Program Specification Block for customer inquiry",
+      "psb_source": "         PCB   TYPE=DB,DBDNAME=CUSTDB,PROCOPT=G,KEYLEN=10\n         SENSEG NAME=CUSTOMER,PARENT=0\n         SENSEG NAME=ADDRESS,PARENT=CUSTOMER\n         SENSEG NAME=ACCOUNT,PARENT=CUSTOMER\n*\n         PSBGEN PSBNAME=CUSTINQ,LANG=COBOL\n         END",
+      "procopt_reference": {
+        "G": "Get (read only)",
+        "I": "Insert",
+        "R": "Replace (update)",
+        "D": "Delete",
+        "A": "All (GIRD)",
+        "K": "Key sensitivity only",
+        "L": "Load",
+        "LS": "Load with sequential insert",
+        "GS": "Get with path call"
+      }
+    },
+    {
+      "id": "PSB002",
+      "name": "Customer Maintenance PSB",
+      "description": "PSB for customer add/update/delete",
+      "psb_source": "         PCB   TYPE=DB,DBDNAME=CUSTDB,PROCOPT=A,KEYLEN=10\n         SENSEG NAME=CUSTOMER,PARENT=0,PROCOPT=A\n         SENFLD NAME=CUSTKEY,START=1\n         SENFLD NAME=CUSTNAME,START=11\n         SENFLD NAME=CUSTTYPE,START=61\n         SENFLD NAME=CUSTSTATUS,START=62\n         SENFLD NAME=CUSTBAL,START=72\n         SENSEG NAME=ADDRESS,PARENT=CUSTOMER,PROCOPT=A\n         SENSEG NAME=ACCOUNT,PARENT=CUSTOMER,PROCOPT=G\n*\n         PSBGEN PSBNAME=CUSTMNT,LANG=COBOL\n         END"
+    }
+  ],
+  "dli_calls": [
+    {
+      "id": "DLI001",
+      "name": "Get Unique (GU)",
+      "description": "Retrieve a specific segment",
+      "cobol_example": "       WORKING-STORAGE SECTION.\n       01  WS-FUNCTION      PIC X(4).\n       01  WS-STATUS-CODE   PIC X(2).\n       01  WS-CUSTOMER-SSA.\n           05  FILLER       PIC X(9) VALUE 'CUSTOMER('.\n           05  FILLER       PIC X(8) VALUE 'CUSTKEY '.\n           05  FILLER       PIC X(2) VALUE ' ='.\n           05  WS-CUST-KEY  PIC X(10).\n           05  FILLER       PIC X(1) VALUE ')'.\n       01  WS-CUSTOMER-SEG  PIC X(300).\n\n       PROCEDURE DIVISION.\n           MOVE 'GU  ' TO WS-FUNCTION.\n           MOVE '1234567890' TO WS-CUST-KEY.\n           CALL 'CBLTDLI' USING WS-FUNCTION\n                                DB-PCB-MASK\n                                WS-CUSTOMER-SEG\n                                WS-CUSTOMER-SSA.\n           IF STATUS-OK\n               PERFORM PROCESS-CUSTOMER\n           ELSE IF STATUS-NOT-FOUND\n               DISPLAY 'CUSTOMER NOT FOUND'\n           ELSE\n               PERFORM HANDLE-ERROR\n           END-IF.",
+      "modern_equivalent": "// JPA Repository equivalent\n@Repository\npublic interface CustomerRepository extends JpaRepository<Customer, String> {\n    Optional<Customer> findByCustKey(String custKey);\n}\n\n// Service usage\npublic Customer getCustomer(String custKey) {\n    return customerRepository.findByCustKey(custKey)\n        .orElseThrow(() -> new CustomerNotFoundException(custKey));\n}"
+    },
+    {
+      "id": "DLI002",
+      "name": "Get Next (GN)",
+      "description": "Sequential retrieval of segments",
+      "cobol_example": "       PROCEDURE DIVISION.\n           MOVE 'GN  ' TO WS-FUNCTION.\n           PERFORM UNTIL STATUS-END-DB\n               CALL 'CBLTDLI' USING WS-FUNCTION\n                                    DB-PCB-MASK\n                                    WS-CUSTOMER-SEG\n               IF STATUS-OK\n                   PERFORM PROCESS-CUSTOMER\n               END-IF\n           END-PERFORM.",
+      "modern_equivalent": "// Stream-based retrieval\n@Transactional(readOnly = true)\npublic void processAllCustomers(Consumer<Customer> processor) {\n    try (Stream<Customer> customers = customerRepository.streamAll()) {\n        customers.forEach(processor);\n    }\n}"
+    },
+    {
+      "id": "DLI003",
+      "name": "Get Next within Parent (GNP)",
+      "description": "Retrieve child segments under current parent",
+      "cobol_example": "       PROCEDURE DIVISION.\n      * First, position to parent\n           MOVE 'GU  ' TO WS-FUNCTION.\n           MOVE '1234567890' TO WS-CUST-KEY.\n           CALL 'CBLTDLI' USING WS-FUNCTION\n                                DB-PCB-MASK\n                                WS-CUSTOMER-SEG\n                                WS-CUSTOMER-SSA.\n      * Then get all accounts under this customer\n           MOVE 'GNP ' TO WS-FUNCTION.\n           PERFORM UNTIL STATUS-END-PARENT\n               CALL 'CBLTDLI' USING WS-FUNCTION\n                                    DB-PCB-MASK\n                                    WS-ACCOUNT-SEG\n                                    WS-ACCOUNT-SSA\n               IF STATUS-OK\n                   PERFORM PROCESS-ACCOUNT\n               END-IF\n           END-PERFORM.",
+      "modern_equivalent": "// Fetch child entities through parent\npublic List<Account> getCustomerAccounts(String custKey) {\n    Customer customer = customerRepository.findByCustKey(custKey)\n        .orElseThrow(() -> new CustomerNotFoundException(custKey));\n    return customer.getAccounts();\n}\n\n// Or direct query\n@Query(\"SELECT a FROM Account a WHERE a.customer.custKey = :custKey\")\nList<Account> findAccountsByCustomerKey(@Param(\"custKey\") String custKey);"
+    },
+    {
+      "id": "DLI004",
+      "name": "Insert (ISRT)",
+      "description": "Insert a new segment",
+      "cobol_example": "       PROCEDURE DIVISION.\n           MOVE 'ISRT' TO WS-FUNCTION.\n      * Build customer segment\n           INITIALIZE WS-CUSTOMER-SEG.\n           MOVE WS-NEW-CUST-KEY TO CUST-KEY OF WS-CUSTOMER-SEG.\n           MOVE WS-NEW-CUST-NAME TO CUST-NAME OF WS-CUSTOMER-SEG.\n      * Insert under root\n           CALL 'CBLTDLI' USING WS-FUNCTION\n                                DB-PCB-MASK\n                                WS-CUSTOMER-SEG\n                                WS-CUSTOMER-SSA-UNQUAL.\n           IF STATUS-OK\n               DISPLAY 'CUSTOMER INSERTED'\n           ELSE IF STATUS-DUP-KEY\n               DISPLAY 'DUPLICATE CUSTOMER KEY'\n           ELSE\n               PERFORM HANDLE-ERROR\n           END-IF.",
+      "modern_equivalent": "@Transactional\npublic Customer createCustomer(CustomerDTO dto) {\n    if (customerRepository.existsById(dto.getCustKey())) {\n        throw new DuplicateKeyException(\"Customer already exists\");\n    }\n    Customer customer = customerMapper.toEntity(dto);\n    return customerRepository.save(customer);\n}"
+    },
+    {
+      "id": "DLI005",
+      "name": "Replace (REPL)",
+      "description": "Update an existing segment",
+      "cobol_example": "       PROCEDURE DIVISION.\n      * First get the segment with hold\n           MOVE 'GHU ' TO WS-FUNCTION.\n           CALL 'CBLTDLI' USING WS-FUNCTION\n                                DB-PCB-MASK\n                                WS-CUSTOMER-SEG\n                                WS-CUSTOMER-SSA.\n           IF STATUS-OK\n      * Modify the segment\n               MOVE 'NEW NAME' TO CUST-NAME OF WS-CUSTOMER-SEG\n      * Replace it\n               MOVE 'REPL' TO WS-FUNCTION\n               CALL 'CBLTDLI' USING WS-FUNCTION\n                                    DB-PCB-MASK\n                                    WS-CUSTOMER-SEG\n               IF STATUS-OK\n                   DISPLAY 'CUSTOMER UPDATED'\n               ELSE\n                   PERFORM HANDLE-ERROR\n               END-IF\n           END-IF.",
+      "modern_equivalent": "@Transactional\npublic Customer updateCustomer(String custKey, CustomerDTO dto) {\n    Customer customer = customerRepository.findByCustKey(custKey)\n        .orElseThrow(() -> new CustomerNotFoundException(custKey));\n    customerMapper.updateEntity(customer, dto);\n    return customerRepository.save(customer);\n}"
+    },
+    {
+      "id": "DLI006",
+      "name": "Delete (DLET)",
+      "description": "Delete a segment and its dependents",
+      "cobol_example": "       PROCEDURE DIVISION.\n      * Get with hold for delete\n           MOVE 'GHU ' TO WS-FUNCTION.\n           CALL 'CBLTDLI' USING WS-FUNCTION\n                                DB-PCB-MASK\n                                WS-CUSTOMER-SEG\n                                WS-CUSTOMER-SSA.\n           IF STATUS-OK\n      * Delete it (and all child segments)\n               MOVE 'DLET' TO WS-FUNCTION\n               CALL 'CBLTDLI' USING WS-FUNCTION\n                                    DB-PCB-MASK\n                                    WS-CUSTOMER-SEG\n               IF STATUS-OK\n                   DISPLAY 'CUSTOMER AND DEPENDENTS DELETED'\n               ELSE\n                   PERFORM HANDLE-ERROR\n               END-IF\n           END-IF.",
+      "modern_equivalent": "@Transactional\npublic void deleteCustomer(String custKey) {\n    Customer customer = customerRepository.findByCustKey(custKey)\n        .orElseThrow(() -> new CustomerNotFoundException(custKey));\n    // CascadeType.ALL handles child deletion\n    customerRepository.delete(customer);\n}"
+    },
+    {
+      "id": "DLI007",
+      "name": "Path Call with Multiple SSAs",
+      "description": "Navigate hierarchy with multiple qualified SSAs",
+      "cobol_example": "       01  WS-CUSTOMER-SSA.\n           05  FILLER       PIC X(9) VALUE 'CUSTOMER('.\n           05  FILLER       PIC X(8) VALUE 'CUSTKEY '.\n           05  FILLER       PIC X(2) VALUE ' ='.\n           05  WS-CUST-KEY  PIC X(10).\n           05  FILLER       PIC X(1) VALUE ')'.\n       01  WS-ACCOUNT-SSA.\n           05  FILLER       PIC X(8) VALUE 'ACCOUNT('.\n           05  FILLER       PIC X(8) VALUE 'ACCTKEY '.\n           05  FILLER       PIC X(2) VALUE ' ='.\n           05  WS-ACCT-KEY  PIC X(12).\n           05  FILLER       PIC X(1) VALUE ')'.\n       01  WS-TRANS-SSA-UNQUAL PIC X(8) VALUE 'TRANS   '.\n\n       PROCEDURE DIVISION.\n      * Get transactions for specific customer/account\n           MOVE 'GU  ' TO WS-FUNCTION.\n           MOVE '1234567890' TO WS-CUST-KEY.\n           MOVE 'ACCT00000001' TO WS-ACCT-KEY.\n           CALL 'CBLTDLI' USING WS-FUNCTION\n                                DB-PCB-MASK\n                                WS-TRANS-SEG\n                                WS-CUSTOMER-SSA\n                                WS-ACCOUNT-SSA\n                                WS-TRANS-SSA-UNQUAL.",
+      "modern_equivalent": "@Query(\"\"\"\n    SELECT t FROM Transaction t\n    JOIN t.account a\n    JOIN a.customer c\n    WHERE c.custKey = :custKey\n      AND a.acctKey = :acctKey\n    ORDER BY t.transDate DESC\n\"\"\")\nList<Transaction> findTransactionsByCustomerAndAccount(\n    @Param(\"custKey\") String custKey,\n    @Param(\"acctKey\") String acctKey);"
+    }
+  ],
+  "status_codes": {
+    "  ": {"description": "Successful call", "action": "Continue processing"},
+    "GA": {"description": "Segment returned from lower level", "action": "Continue"},
+    "GB": {"description": "End of database", "action": "Stop iteration"},
+    "GC": {"description": "Returned to higher level", "action": "Continue"},
+    "GE": {"description": "Segment not found", "action": "Handle not found"},
+    "GK": {"description": "Different segment type or end of segment type", "action": "Check segment type"},
+    "II": {"description": "Duplicate segment (insert failed)", "action": "Handle duplicate"},
+    "DJ": {"description": "Segment sequence error", "action": "Fix data order"},
+    "LB": {"description": "Deadlock detected", "action": "Retry transaction"},
+    "DA": {"description": "Root segment unavailable", "action": "Wait and retry"},
+    "AB": {"description": "ABEND condition", "action": "Log and terminate"}
+  },
+  "command_codes": {
+    "D": "Path call - retrieve/establish position on path",
+    "F": "First occurrence of segment type",
+    "L": "Last occurrence of segment type",
+    "N": "Path call - no position on segment",
+    "P": "Set parentage at this segment",
+    "Q": "Enqueue segment for exclusive use",
+    "U": "Maintain current position",
+    "V": "Maintain current position in path",
+    "-": "Null - no command code"
+  }
+}

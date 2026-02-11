@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the production-ready implementation of Advanced Grammar Learning (Month 3) for the CRONOS AI Engine. The implementation provides state-of-the-art grammar learning capabilities with transformer-based deep learning, hierarchical grammar support, active learning, and transfer learning.
+This document describes the production-ready implementation of Advanced Grammar Learning (Month 3) for the QBITEL Engine. The implementation provides state-of-the-art grammar learning capabilities with transformer-based deep learning, hierarchical grammar support, active learning, and transfer learning.
 
 ## Table of Contents
 

@@ -390,7 +390,7 @@ class TestAuthFunctions:
     def test_initialize_auth_from_env(self):
         """Test initializing auth from environment."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_API_KEY": "test_api_key_with_32_characters_min"}
+            os.environ, {"QBITEL_AI_API_KEY": "test_api_key_with_32_characters_min"}
         ):
             with patch("ai_engine.api.auth.get_secrets_manager") as mock_secrets:
                 mock_mgr = Mock()

@@ -1,4 +1,4 @@
-//! Controller modules for CRONOS AI services
+//! Controller modules for QBITEL Bridge services
 
 pub mod dataplane;
 pub mod controlplane;
@@ -49,11 +49,11 @@ pub fn default_error_policy(
     }
 }
 
-/// Generate common labels for CRONOS AI resources
+/// Generate common labels for QBITEL Bridge resources
 pub fn common_labels() -> std::collections::BTreeMap<String, String> {
     let mut labels = std::collections::BTreeMap::new();
-    labels.insert("app.kubernetes.io/name".to_string(), "cronos-ai".to_string());
-    labels.insert("app.kubernetes.io/managed-by".to_string(), "cronos-ai-operator".to_string());
+    labels.insert("app.kubernetes.io/name".to_string(), "qbitel-bridge".to_string());
+    labels.insert("app.kubernetes.io/managed-by".to_string(), "qbitel-bridge-operator".to_string());
     labels.insert("app.kubernetes.io/version".to_string(), env!("CARGO_PKG_VERSION").to_string());
     labels
 }
@@ -69,17 +69,17 @@ pub fn resource_labels(component: &str, instance: &str) -> std::collections::BTr
 /// Generate selector labels for matching resources
 pub fn selector_labels(component: &str, instance: &str) -> std::collections::BTreeMap<String, String> {
     let mut labels = std::collections::BTreeMap::new();
-    labels.insert("app.kubernetes.io/name".to_string(), "cronos-ai".to_string());
+    labels.insert("app.kubernetes.io/name".to_string(), "qbitel-bridge".to_string());
     labels.insert("app.kubernetes.io/component".to_string(), component.to_string());
     labels.insert("app.kubernetes.io/instance".to_string(), instance.to_string());
     labels
 }
 
-/// Common annotations for CRONOS AI resources
+/// Common annotations for QBITEL Bridge resources
 pub fn common_annotations() -> std::collections::BTreeMap<String, String> {
     let mut annotations = std::collections::BTreeMap::new();
-    annotations.insert("cronos.ai/operator-version".to_string(), env!("CARGO_PKG_VERSION").to_string());
-    annotations.insert("cronos.ai/managed-by-operator".to_string(), "true".to_string());
+    annotations.insert("qbitel.ai/operator-version".to_string(), env!("CARGO_PKG_VERSION").to_string());
+    annotations.insert("qbitel.ai/managed-by-operator".to_string(), "true".to_string());
     annotations
 }
 

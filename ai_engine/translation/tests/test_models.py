@@ -1,5 +1,5 @@
 """
-CRONOS AI - Translation Studio Models Tests
+QBITEL - Translation Studio Models Tests
 Enterprise-grade unit tests for translation studio data models and structures.
 """
 
@@ -197,8 +197,8 @@ class TestAPISpecification:
         sample_api_specification.extensions = {"graphql": {"endpoint": "/graphql"}}
         openapi_dict = sample_api_specification.to_openapi_dict()
 
-        assert "x-cronos-extensions" in openapi_dict
-        assert "graphql" in openapi_dict["x-cronos-extensions"]
+        assert "x-qbitel-extensions" in openapi_dict
+        assert "graphql" in openapi_dict["x-qbitel-extensions"]
 
     def test_create_api_specification_factory(self, sample_protocol_schema):
         """Test API specification factory function."""

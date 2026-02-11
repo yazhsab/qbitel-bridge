@@ -1,0 +1,19 @@
+{
+  "program_id": "BNKC596",
+  "domain": "banking",
+  "program_type": "calculation_engine",
+  "author": "R. WILLIAMS",
+  "lines_of_code": 215,
+  "complexity_level": "medium",
+  "complexity_score": 0.502,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.878796",
+  "hash": "1a9d8376a1b1aaaa453a5503094f67f1"
+}

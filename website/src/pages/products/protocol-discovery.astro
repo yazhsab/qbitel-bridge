@@ -1,0 +1,321 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="AI Protocol Discovery | QBITEL Bridge"
+  description="Automatically discover and reverse-engineer undocumented protocols with a 5-phase AI pipeline achieving 89%+ classification accuracy."
+>
+  <PageHero
+    title="AI Protocol Discovery"
+    description="Discover undocumented protocols in hours, not months. A 5-phase automated pipeline using statistical analysis, ML classification, grammar learning, parser generation, and adaptive learning."
+    badge="Flagship Product"
+    gradient="from-blue-500 to-cyan-500"
+  />
+
+  <!-- Key Metrics -->
+  <section class="py-12 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">89%+</div>
+          <div class="text-sm text-gray-400">Classification Accuracy</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">2-4 hrs</div>
+          <div class="text-sm text-gray-400">Discovery Time</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">50K</div>
+          <div class="text-sm text-gray-400">Messages/sec Throughput</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">150+</div>
+          <div class="text-sm text-gray-400">Protocol Types</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="section-heading">
+            The <span class="gradient-text">Protocol Problem</span>
+          </h2>
+          <p class="text-gray-400 mb-6 leading-relaxed">
+            Organizations worldwide are blocked by undocumented legacy protocols. Over 60% of enterprise protocols have no documentation, the engineers who understood them have retired, and manual reverse engineering costs $500K-$2M per protocol taking 6-12 months.
+          </p>
+          <p class="text-gray-400 leading-relaxed">
+            Digital transformation initiatives stall when they hit protocol barriers. Critical integrations are delayed, security vulnerabilities go undetected in opaque protocol implementations, and compliance audits fail due to lack of protocol visibility.
+          </p>
+        </div>
+        <div class="space-y-4">
+          <div class="card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div>
+                <div class="text-white font-semibold">60%+ Undocumented</div>
+                <div class="text-sm text-gray-400">Enterprise protocols lacking any documentation</div>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <div class="text-white font-semibold">$500K-$2M Per Protocol</div>
+                <div class="text-sm text-gray-400">Manual reverse engineering cost</div>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <div class="text-white font-semibold">6-12 Months</div>
+                <div class="text-sm text-gray-400">Traditional reverse engineering timeline</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5-Phase Pipeline -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          The <span class="gradient-text">5-Phase</span> Discovery Pipeline
+        </h2>
+        <p class="section-subheading mx-auto">
+          From raw network traffic to production-ready parsers, fully automated.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-5 gap-4">
+        <div class="card p-5 text-center relative group">
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold text-sm mb-3">1</div>
+          <h3 class="text-lg font-bold text-white mb-2">Statistical Analysis</h3>
+          <p class="text-sm text-gray-400">Entropy calculation, byte frequency distribution, pattern detection, binary vs. text classification</p>
+          <div class="text-xs text-gray-500 mt-3 badge">5-10 seconds</div>
+        </div>
+
+        <div class="card p-5 text-center relative group">
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold text-sm mb-3">2</div>
+          <h3 class="text-lg font-bold text-white mb-2">ML Classification</h3>
+          <p class="text-sm text-gray-400">CNN feature extraction, BiLSTM sequence learning, multi-class classification with confidence scoring</p>
+          <div class="text-xs text-gray-500 mt-3 badge">10-20 seconds</div>
+        </div>
+
+        <div class="card p-5 text-center relative group">
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold text-sm mb-3">3</div>
+          <h3 class="text-lg font-bold text-white mb-2">Grammar Learning</h3>
+          <p class="text-sm text-gray-400">PCFG inference with EM algorithm, rule extraction, transformer-based semantic learning</p>
+          <div class="text-xs text-gray-500 mt-3 badge">1-2 minutes</div>
+        </div>
+
+        <div class="card p-5 text-center relative group">
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold text-sm mb-3">4</div>
+          <h3 class="text-lg font-bold text-white mb-2">Parser Generation</h3>
+          <p class="text-sm text-gray-400">Template-based parser generation, validation logic, performance optimization, live testing</p>
+          <div class="text-xs text-gray-500 mt-3 badge">30-60 seconds</div>
+        </div>
+
+        <div class="card p-5 text-center relative group">
+          <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold text-sm mb-3">5</div>
+          <h3 class="text-lg font-bold text-white mb-2">Adaptive Learning</h3>
+          <p class="text-sm text-gray-400">Error analysis feedback loop, grammar refinement, field detection improvement, model retraining</p>
+          <div class="text-xs text-gray-500 mt-3 badge">Continuous</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature Cards -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Core <span class="gradient-text">Capabilities</span>
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Statistical Analysis Engine</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Analyzes raw protocol traffic to extract fundamental characteristics including entropy profiles, byte frequency distributions, and structural patterns.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Entropy calculation (structured data at 4.2 bits/byte)
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Pattern detection with repeating sequence identification
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Binary vs. text format classification
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Deep Learning Classification</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Uses CNN + BiLSTM architectures for multi-class protocol classification with confidence scoring across 150+ known protocol families.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              CNN feature extraction for spatial pattern recognition
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              BiLSTM sequence learning for temporal context
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Confidence scoring for classification certainty
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-green-500/10 border border-green-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">PCFG Grammar Learning</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Automatically learns protocol grammars using Probabilistic Context-Free Grammars with Expectation-Maximization for probabilistic inference.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              EM algorithm for probabilistic rule inference
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Transformer models for semantic field learning
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Continuous refinement from parsing errors
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Automatic Parser Generation</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Generates production-ready parsers from learned grammars with built-in validation logic and performance optimization for high-throughput environments.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              50,000+ messages/sec parser throughput
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Multi-language template-based generation
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Real-traffic validation testing
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical Details -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Technical <span class="gradient-text">Architecture</span>
+        </h2>
+      </div>
+
+      <div class="max-w-4xl mx-auto">
+        <div class="card p-6 lg:p-8">
+          <h3 class="text-lg font-bold text-white mb-6">Core Components</h3>
+          <div class="space-y-4">
+            <div class="flex items-start gap-4 p-4 rounded-lg bg-surface-900/50 border border-surface-600/50">
+              <div class="badge">Orchestrator</div>
+              <div class="flex-1">
+                <div class="text-sm text-white font-semibold">Protocol Discovery Orchestrator</div>
+                <div class="text-xs text-gray-400">Main coordination layer managing the 5-phase pipeline. 1,400+ lines of orchestration logic.</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-4 p-4 rounded-lg bg-surface-900/50 border border-surface-600/50">
+              <div class="badge">ML</div>
+              <div class="flex-1">
+                <div class="text-sm text-white font-semibold">Protocol Classifier</div>
+                <div class="text-xs text-gray-400">CNN + BiLSTM deep learning model for multi-class protocol classification with confidence scoring.</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-4 p-4 rounded-lg bg-surface-900/50 border border-surface-600/50">
+              <div class="badge">Grammar</div>
+              <div class="flex-1">
+                <div class="text-sm text-white font-semibold">Enhanced PCFG Inference</div>
+                <div class="text-xs text-gray-400">Probabilistic Context-Free Grammar inference engine with EM algorithm for rule extraction.</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-4 p-4 rounded-lg bg-surface-900/50 border border-surface-600/50">
+              <div class="badge">Parser</div>
+              <div class="flex-1">
+                <div class="text-sm text-white font-semibold">Dynamic Parser Generator</div>
+                <div class="text-xs text-gray-400">Template-based parser generation with validation, optimization, and real-traffic testing.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTABanner
+    title="Ready to Discover Your Protocols?"
+    description="Start analyzing undocumented protocols in minutes with the open-source AI Protocol Discovery engine."
+  />
+</PageLayout>

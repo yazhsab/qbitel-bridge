@@ -1,0 +1,19 @@
+{
+  "program_id": "LEDV341",
+  "domain": "banking",
+  "program_type": "data_validation",
+  "author": "P. WILSON",
+  "lines_of_code": 285,
+  "complexity_level": "complex",
+  "complexity_score": 0.738,
+  "files_used": 4,
+  "verbs_used": 14,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.856995",
+  "hash": "8f2c542c9d8404bf70c0164efb9c641c"
+}

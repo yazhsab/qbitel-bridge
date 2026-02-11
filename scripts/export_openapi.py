@@ -3,7 +3,7 @@
 Export OpenAPI specification from FastAPI application.
 
 This script generates the OpenAPI (Swagger) specification file
-for the CRONOS AI API.
+for the QBITEL API.
 
 Usage:
     python scripts/export_openapi.py
@@ -87,7 +87,7 @@ def export_openapi(output_file: str, format: str = "json"):
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Export OpenAPI specification for CRONOS AI API"
+        description="Export OpenAPI specification for QBITEL API"
     )
     parser.add_argument(
         "-o",

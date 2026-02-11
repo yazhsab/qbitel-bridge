@@ -1,30 +1,30 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cronos-security
+  name: qbitel-security
   labels:
-    name: cronos-security
-    app.kubernetes.io/name: cronos-security-orchestrator
+    name: qbitel-security
+    app.kubernetes.io/name: qbitel-security-orchestrator
     app.kubernetes.io/version: "1.0.0"
     app.kubernetes.io/component: security
-    app.kubernetes.io/part-of: cronos-ai
+    app.kubernetes.io/part-of: qbitel
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: cronos-security-orchestrator
-  namespace: cronos-security
+  name: qbitel-security-orchestrator
+  namespace: qbitel-security
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/name: qbitel-security-orchestrator
     app.kubernetes.io/component: security
 automountServiceAccountToken: true
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: cronos-security-orchestrator
+  name: qbitel-security-orchestrator
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/name: qbitel-security-orchestrator
 rules:
 # Read access to pods and services for health monitoring
 - apiGroups: [""]
@@ -46,14 +46,14 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: cronos-security-orchestrator
+  name: qbitel-security-orchestrator
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/name: qbitel-security-orchestrator
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cronos-security-orchestrator
+  name: qbitel-security-orchestrator
 subjects:
 - kind: ServiceAccount
-  name: cronos-security-orchestrator
-  namespace: cronos-security
+  name: qbitel-security-orchestrator
+  namespace: qbitel-security

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Error Recovery Manager Implementation
+QBITEL Engine - Error Recovery Manager Implementation
 
 Enterprise-grade error recovery with automated recovery strategies,
 fallback mechanisms, and graceful degradation for the Zero-Touch Security Orchestrator.
@@ -276,7 +276,7 @@ class ErrorRecoveryManager:
     """
 
     def __init__(self):
-        self.logger = get_security_logger("cronos.security.resilience.error_recovery")
+        self.logger = get_security_logger("qbitel.security.resilience.error_recovery")
 
         # Recovery plans
         self.recovery_plans: Dict[str, RecoveryPlan] = {}

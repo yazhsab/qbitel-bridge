@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Dynamic Parser Generator
+QBITEL Engine - Dynamic Parser Generator
 
 This module implements dynamic parser generation from learned grammars, including
 code generation for runtime parsers, validation logic, and performance optimization.

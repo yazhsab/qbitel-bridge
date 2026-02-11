@@ -1,8 +1,8 @@
-# CRONOS AI - Cloud-Native Modernization Implementation Plan
+# QBITEL - Cloud-Native Modernization Implementation Plan
 
 ## Executive Summary
 
-This document provides a detailed implementation plan for modernizing the cloud-native infrastructure of CRONOS AI, including Kubernetes upgrades, GitOps adoption, and observability improvements.
+This document provides a detailed implementation plan for modernizing the cloud-native infrastructure of QBITEL, including Kubernetes upgrades, GitOps adoption, and observability improvements.
 
 ---
 
@@ -16,11 +16,11 @@ This document provides a detailed implementation plan for modernizing the cloud-
 #### Implementation
 
 ```yaml
-# kubernetes/namespaces/cronos-ai-prod.yaml
+# kubernetes/namespaces/qbitel-prod.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cronos-ai-prod
+  name: qbitel-prod
   labels:
     # Enforce restricted security standard
     pod-security.kubernetes.io/enforce: restricted
@@ -32,14 +32,14 @@ metadata:
     pod-security.kubernetes.io/warn: baseline
     pod-security.kubernetes.io/warn-version: v1.28
     # Custom labels
-    app.kubernetes.io/part-of: cronos-ai
+    app.kubernetes.io/part-of: qbitel
     environment: production
 ---
 # Staging namespace with less strict policies for testing
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cronos-ai-staging
+  name: qbitel-staging
   labels:
     pod-security.kubernetes.io/enforce: baseline
     pod-security.kubernetes.io/enforce-version: v1.28
@@ -47,7 +47,7 @@ metadata:
     pod-security.kubernetes.io/audit-version: v1.28
     pod-security.kubernetes.io/warn: restricted
     pod-security.kubernetes.io/warn-version: v1.28
-    app.kubernetes.io/part-of: cronos-ai
+    app.kubernetes.io/part-of: qbitel
     environment: staging
 ```
 
@@ -59,12 +59,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ai-engine
-  namespace: cronos-ai-prod
+  namespace: qbitel-prod
   labels:
     app: ai-engine
     app.kubernetes.io/name: ai-engine
     app.kubernetes.io/component: core
-    app.kubernetes.io/part-of: cronos-ai
+    app.kubernetes.io/part-of: qbitel
 spec:
   replicas: 3
   selector:
@@ -100,7 +100,7 @@ spec:
 
       containers:
         - name: ai-engine
-          image: gcr.io/cronos-ai-prod/ai-engine:v2.0.0@sha256:abc123...
+          image: gcr.io/qbitel-prod/ai-engine:v2.0.0@sha256:abc123...
           imagePullPolicy: IfNotPresent
 
           # Container-level security context
@@ -158,7 +158,7 @@ spec:
             - name: tmp
               mountPath: /tmp
             - name: cache
-              mountPath: /var/cache/cronos
+              mountPath: /var/cache/qbitel
             - name: models
               mountPath: /models
               readOnly: true
@@ -216,7 +216,7 @@ apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
   name: ai-engine-l7-policy
-  namespace: cronos-ai-prod
+  namespace: qbitel-prod
 spec:
   endpointSelector:
     matchLabels:
@@ -316,11 +316,11 @@ spec:
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
-  name: cronos-ai-default-deny
+  name: qbitel-default-deny
 spec:
   endpointSelector:
     matchLabels:
-      io.kubernetes.pod.namespace: cronos-ai-prod
+      io.kubernetes.pod.namespace: qbitel-prod
   ingress:
     - {}
   egress:
@@ -338,8 +338,8 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: cronos-ai-gateway
-  namespace: cronos-ai-prod
+  name: qbitel-gateway
+  namespace: qbitel-prod
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
@@ -349,11 +349,11 @@ spec:
     - name: https
       protocol: HTTPS
       port: 443
-      hostname: "*.cronos-ai.example.com"
+      hostname: "*.qbitel.example.com"
       tls:
         mode: Terminate
         certificateRefs:
-          - name: cronos-ai-tls
+          - name: qbitel-tls
             kind: Secret
       allowedRoutes:
         namespaces:
@@ -365,11 +365,11 @@ spec:
     - name: grpc
       protocol: HTTPS
       port: 443
-      hostname: grpc.cronos-ai.example.com
+      hostname: grpc.qbitel.example.com
       tls:
         mode: Terminate
         certificateRefs:
-          - name: cronos-ai-tls
+          - name: qbitel-tls
       allowedRoutes:
         namespaces:
           from: Same
@@ -381,14 +381,14 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: ai-engine-routes
-  namespace: cronos-ai-prod
+  namespace: qbitel-prod
 spec:
   parentRefs:
-    - name: cronos-ai-gateway
+    - name: qbitel-gateway
       sectionName: https
 
   hostnames:
-    - api.cronos-ai.example.com
+    - api.qbitel.example.com
 
   rules:
     # Protocol Analysis API
@@ -452,7 +452,7 @@ apiVersion: gateway.networking.k8s.io/v1alpha2
 kind: BackendTLSPolicy
 metadata:
   name: ai-engine-tls-policy
-  namespace: cronos-ai-prod
+  namespace: qbitel-prod
 spec:
   targetRef:
     group: ""
@@ -462,7 +462,7 @@ spec:
     caCertRefs:
       - name: internal-ca
         kind: ConfigMap
-    hostname: ai-engine.cronos-ai-prod.svc.cluster.local
+    hostname: ai-engine.qbitel-prod.svc.cluster.local
 ```
 
 ---
@@ -486,11 +486,11 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 ### 3.2 Application Configuration
 
 ```yaml
-# argocd/applications/cronos-ai-prod.yaml
+# argocd/applications/qbitel-prod.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cronos-ai-prod
+  name: qbitel-prod
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -498,18 +498,18 @@ spec:
   project: production
 
   source:
-    repoURL: https://github.com/qbitel/cronos-ai
+    repoURL: https://github.com/yazhsab/qbitel-bridge
     targetRevision: main
     path: kubernetes/overlays/production
 
     # Kustomize configuration
     kustomize:
       images:
-        - gcr.io/cronos-ai-prod/ai-engine
+        - gcr.io/qbitel-prod/ai-engine
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: cronos-ai-prod
+    namespace: qbitel-prod
 
   # Sync policy
   syncPolicy:
@@ -549,11 +549,11 @@ spec:
   description: Production applications
 
   sourceRepos:
-    - 'https://github.com/qbitel/cronos-ai'
-    - 'https://github.com/qbitel/cronos-ai-config'
+    - 'https://github.com/yazhsab/qbitel-bridge'
+    - 'https://github.com/yazhsab/qbitel-config'
 
   destinations:
-    - namespace: 'cronos-ai-prod'
+    - namespace: 'qbitel-prod'
       server: 'https://kubernetes.default.svc'
     - namespace: 'monitoring'
       server: 'https://kubernetes.default.svc'
@@ -669,7 +669,7 @@ data:
   # Services
   service.slack: |
     token: $slack-token
-    channel: cronos-deployments
+    channel: qbitel-deployments
 
   service.pagerduty: |
     key: $pagerduty-key
@@ -701,8 +701,8 @@ spec:
           kinds:
             - Pod
           namespaces:
-            - cronos-ai-prod
-            - cronos-ai-staging
+            - qbitel-prod
+            - qbitel-staging
       validate:
         message: "Pods must run as non-root"
         pattern:
@@ -720,7 +720,7 @@ spec:
           kinds:
             - Pod
           namespaces:
-            - cronos-ai-prod
+            - qbitel-prod
       validate:
         message: "Containers must have read-only root filesystem"
         pattern:
@@ -735,7 +735,7 @@ spec:
           kinds:
             - Pod
           namespaces:
-            - cronos-ai-prod
+            - qbitel-prod
       validate:
         message: "Containers must drop all capabilities"
         pattern:
@@ -765,15 +765,15 @@ spec:
           kinds:
             - Pod
           namespaces:
-            - cronos-ai-prod
+            - qbitel-prod
       validate:
-        message: "Images must come from approved registries: gcr.io/cronos-ai-prod, ghcr.io/qbitel"
+        message: "Images must come from approved registries: gcr.io/qbitel-prod, ghcr.io/qbitel"
         pattern:
           spec:
             containers:
-              - image: "gcr.io/cronos-ai-prod/* | ghcr.io/qbitel/*"
+              - image: "gcr.io/qbitel-prod/* | ghcr.io/qbitel/*"
             initContainers:
-              - image: "gcr.io/cronos-ai-prod/* | ghcr.io/qbitel/*"
+              - image: "gcr.io/qbitel-prod/* | ghcr.io/qbitel/*"
 ---
 # Require resource limits
 apiVersion: kyverno.io/v1
@@ -794,8 +794,8 @@ spec:
           kinds:
             - Pod
           namespaces:
-            - cronos-ai-prod
-            - cronos-ai-staging
+            - qbitel-prod
+            - qbitel-staging
       validate:
         message: "CPU and memory limits are required"
         pattern:
@@ -816,7 +816,7 @@ metadata:
   name: require-quantum-safe-label
   annotations:
     policies.kyverno.io/title: Require Quantum-Safe Label
-    policies.kyverno.io/category: CRONOS AI Security
+    policies.kyverno.io/category: QBITEL Security
     policies.kyverno.io/severity: medium
 spec:
   validationFailureAction: audit  # Audit mode first, then enforce
@@ -828,7 +828,7 @@ spec:
           kinds:
             - Pod
           namespaces:
-            - cronos-ai-prod
+            - qbitel-prod
       validate:
         message: "Pods handling cryptographic operations must have quantum-safe label"
         pattern:
@@ -857,13 +857,13 @@ spec:
           kinds:
             - Pod
           namespaces:
-            - cronos-ai-*
+            - qbitel-*
       mutate:
         patchStrategicMerge:
           metadata:
             labels:
               +(app.kubernetes.io/managed-by): kyverno
-              +(app.kubernetes.io/part-of): cronos-ai
+              +(app.kubernetes.io/part-of): qbitel
 ---
 # Add security context defaults
 apiVersion: kyverno.io/v1
@@ -881,7 +881,7 @@ spec:
           kinds:
             - Pod
           namespaces:
-            - cronos-ai-*
+            - qbitel-*
       mutate:
         patchStrategicMerge:
           spec:
@@ -904,7 +904,7 @@ spec:
             - Namespace
           selector:
             matchLabels:
-              app.kubernetes.io/part-of: cronos-ai
+              app.kubernetes.io/part-of: qbitel
       generate:
         apiVersion: networking.k8s.io/v1
         kind: NetworkPolicy
@@ -1097,46 +1097,46 @@ spec:
       dashboardproviders.yaml:
         apiVersion: 1
         providers:
-          - name: 'cronos-ai'
+          - name: 'qbitel'
             orgId: 1
-            folder: 'CRONOS AI'
+            folder: 'QBITEL'
             type: file
             disableDeletion: false
             editable: true
             options:
-              path: /var/lib/grafana/dashboards/cronos-ai
+              path: /var/lib/grafana/dashboards/qbitel
 
     dashboardsConfigMaps:
-      cronos-ai: grafana-dashboards-cronos
+      qbitel: grafana-dashboards-qbitel
 
     ingress:
       enabled: true
       ingressClassName: nginx
       hosts:
-        - grafana.cronos-ai.example.com
+        - grafana.qbitel.example.com
       tls:
         - secretName: grafana-tls
           hosts:
-            - grafana.cronos-ai.example.com
+            - grafana.qbitel.example.com
 ```
 
-### 5.2 CRONOS AI Dashboards
+### 5.2 QBITEL Dashboards
 
 ```yaml
-# kubernetes/observability/dashboards/cronos-ai-overview.yaml
+# kubernetes/observability/dashboards/qbitel-overview.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-dashboards-cronos
+  name: grafana-dashboards-qbitel
   namespace: monitoring
   labels:
     grafana_dashboard: "1"
 data:
-  cronos-ai-overview.json: |
+  qbitel-overview.json: |
     {
       "dashboard": {
-        "title": "CRONOS AI Overview",
-        "uid": "cronos-overview",
+        "title": "QBITEL Overview",
+        "uid": "qbitel-overview",
         "panels": [
           {
             "title": "Protocol Analysis Requests",
@@ -1284,10 +1284,10 @@ data:
 ### ArgoCD Rollback
 ```bash
 # List application history
-argocd app history cronos-ai-prod
+argocd app history qbitel-prod
 
 # Rollback to previous revision
-argocd app rollback cronos-ai-prod <revision>
+argocd app rollback qbitel-prod <revision>
 ```
 
 ### Kyverno Emergency Disable

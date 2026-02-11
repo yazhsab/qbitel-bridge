@@ -1,5 +1,5 @@
 """
-CRONOS AI - Autonomous Compliance Reporter Tests
+QBITEL - Autonomous Compliance Reporter Tests
 
 Comprehensive test suite for compliance reporter functionality including:
 - Report generation

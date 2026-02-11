@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Production Protocol Discovery System
+QBITEL Engine - Production Protocol Discovery System
 
 This module implements enterprise-ready protocol discovery with SLA guarantees,
 explainable AI, model versioning, and A/B testing capabilities.
@@ -31,33 +31,33 @@ from ..models.base import BaseModel, ModelInput, ModelOutput
 
 # Prometheus metrics
 DISCOVERY_SLA_VIOLATIONS = Counter(
-    "cronos_discovery_sla_violations_total",
+    "qbitel_discovery_sla_violations_total",
     "Total SLA violations in protocol discovery",
     ["model_version", "sla_threshold_ms"],
 )
 
 DISCOVERY_LATENCY = Histogram(
-    "cronos_discovery_latency_ms",
+    "qbitel_discovery_latency_ms",
     "Protocol discovery latency in milliseconds",
     ["model_version", "quality_mode"],
     buckets=[10, 25, 50, 100, 250, 500, 1000, 2500, 5000],
 )
 
 DISCOVERY_CONFIDENCE = Histogram(
-    "cronos_discovery_confidence",
+    "qbitel_discovery_confidence",
     "Protocol discovery confidence scores",
     ["model_version"],
     buckets=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99],
 )
 
 AB_TEST_REQUESTS = Counter(
-    "cronos_discovery_ab_test_requests_total",
+    "qbitel_discovery_ab_test_requests_total",
     "Total A/B test requests",
     ["variant", "model_version"],
 )
 
 MODEL_VERSION_ACTIVE = Gauge(
-    "cronos_discovery_model_version_active",
+    "qbitel_discovery_model_version_active",
     "Active model version indicator",
     ["model_version", "deployment_type"],
 )

@@ -1,0 +1,19 @@
+{
+  "program_id": "ORDV787",
+  "domain": "retail",
+  "program_type": "data_validation",
+  "author": "T. DAVIS",
+  "lines_of_code": 235,
+  "complexity_level": "medium",
+  "complexity_score": 0.548,
+  "files_used": 2,
+  "verbs_used": 14,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.803529",
+  "hash": "50da64158237b68c6c43998a7ac0b8bf"
+}

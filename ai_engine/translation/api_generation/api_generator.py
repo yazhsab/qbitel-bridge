@@ -1,5 +1,5 @@
 """
-CRONOS AI - API Generation Engine
+QBITEL - API Generation Engine
 Advanced API generation with OpenAPI 3.0 support, intelligent endpoint design, and multi-style API generation.
 """
 
@@ -15,7 +15,7 @@ import yaml
 import hashlib
 
 from ...core.config import Config
-from ...core.exceptions import CronosAIException
+from ...core.exceptions import QbitelAIException
 from ...llm.unified_llm_service import UnifiedLLMService, LLMRequest, LLMResponse
 
 from ..models import (
@@ -42,29 +42,29 @@ from .schema_utils import (
 
 # Metrics for API generation
 API_SPEC_GENERATION_COUNTER = Counter(
-    "cronos_api_spec_generation_total",
+    "qbitel_api_spec_generation_total",
     "Total API specification generations",
     ["style", "format", "status"],
 )
 
 API_SPEC_GENERATION_DURATION = Histogram(
-    "cronos_api_spec_generation_duration_seconds",
+    "qbitel_api_spec_generation_duration_seconds",
     "API specification generation duration",
     ["style"],
 )
 
 OPENAPI_VALIDATION_COUNTER = Counter(
-    "cronos_openapi_validation_total", "OpenAPI specification validations", ["status"]
+    "qbitel_openapi_validation_total", "OpenAPI specification validations", ["status"]
 )
 
 ENDPOINT_GENERATION_GAUGE = Gauge(
-    "cronos_generated_endpoints_total", "Total generated API endpoints"
+    "qbitel_generated_endpoints_total", "Total generated API endpoints"
 )
 
 logger = logging.getLogger(__name__)
 
 
-class APIGenerationException(CronosAIException):
+class APIGenerationException(QbitelAIException):
     """API generation specific exceptions."""
 
     pass

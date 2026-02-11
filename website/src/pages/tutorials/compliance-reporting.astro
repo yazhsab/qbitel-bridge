@@ -1,0 +1,290 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Automated Compliance Reporting | Tutorials | QBITEL Bridge"
+  description="Configure compliance frameworks, map controls, and generate audit-ready reports with QBITEL Bridge's autonomous compliance engine."
+>
+  <PageHero
+    title="Automated Compliance Reporting"
+    description="Configure the compliance engine for SOC 2, PCI DSS, HIPAA, or other frameworks. Map controls to your infrastructure and generate audit-ready reports automatically."
+    badge="Advanced -- 1 hour"
+    gradient="from-red-500 to-rose-400"
+  />
+
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+
+      <!-- Prerequisites -->
+      <div class="card p-6 mb-12">
+        <h2 class="text-xl font-bold text-white mb-4">Prerequisites</h2>
+        <ul class="space-y-2 text-gray-300">
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>QBITEL Bridge deployed and operational (Docker or Kubernetes)</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Audit logging enabled (<code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">audit_logging_enabled: true</code>)</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Familiarity with at least one compliance framework (SOC 2, PCI DSS, HIPAA, etc.)</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Supported Frameworks -->
+      <div class="card p-6 mb-12">
+        <h2 class="text-xl font-bold text-white mb-4">Supported Compliance Frameworks</h2>
+        <div class="grid grid-cols-3 md:grid-cols-5 gap-3">
+          <div class="bg-surface-900/50 rounded-lg p-3 text-center border border-surface-600/50">
+            <div class="text-sm font-semibold text-white">SOC 2</div>
+            <div class="text-xs text-gray-500">Type II</div>
+          </div>
+          <div class="bg-surface-900/50 rounded-lg p-3 text-center border border-surface-600/50">
+            <div class="text-sm font-semibold text-white">PCI DSS</div>
+            <div class="text-xs text-gray-500">v4.0</div>
+          </div>
+          <div class="bg-surface-900/50 rounded-lg p-3 text-center border border-surface-600/50">
+            <div class="text-sm font-semibold text-white">HIPAA</div>
+            <div class="text-xs text-gray-500">Security Rule</div>
+          </div>
+          <div class="bg-surface-900/50 rounded-lg p-3 text-center border border-surface-600/50">
+            <div class="text-sm font-semibold text-white">NIST</div>
+            <div class="text-xs text-gray-500">800-53 r5</div>
+          </div>
+          <div class="bg-surface-900/50 rounded-lg p-3 text-center border border-surface-600/50">
+            <div class="text-sm font-semibold text-white">ISO 27001</div>
+            <div class="text-xs text-gray-500">2022</div>
+          </div>
+          <div class="bg-surface-900/50 rounded-lg p-3 text-center border border-surface-600/50">
+            <div class="text-sm font-semibold text-white">FedRAMP</div>
+            <div class="text-xs text-gray-500">High</div>
+          </div>
+          <div class="bg-surface-900/50 rounded-lg p-3 text-center border border-surface-600/50">
+            <div class="text-sm font-semibold text-white">GDPR</div>
+            <div class="text-xs text-gray-500">Art. 32</div>
+          </div>
+          <div class="bg-surface-900/50 rounded-lg p-3 text-center border border-surface-600/50">
+            <div class="text-sm font-semibold text-white">CIS</div>
+            <div class="text-xs text-gray-500">Benchmarks</div>
+          </div>
+          <div class="bg-surface-900/50 rounded-lg p-3 text-center border border-surface-600/50">
+            <div class="text-sm font-semibold text-white">CMMC</div>
+            <div class="text-xs text-gray-500">Level 2</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">1</span>
+          <h2 class="text-2xl font-bold text-white">Select Your Frameworks</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Start by enabling the compliance frameworks that apply to your organization. You can activate multiple frameworks simultaneously and the engine will map controls across them.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># config/compliance.yaml</span>
+compliance:
+  enabled: true
+  frameworks:
+    - name: soc2
+      enabled: true
+      trust_service_criteria:
+        - security
+        - availability
+        - confidentiality
+    - name: pci_dss
+      enabled: true
+      version: "4.0"
+      scope:
+        - cardholder_data_environment
+    - name: hipaa
+      enabled: true
+      rules:
+        - security_rule
+        - breach_notification
+  assessment:
+    schedule: "0 2 * * *"       # Daily at 2 AM
+    retention_days: 365
+    evidence_storage: s3</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">2</span>
+          <h2 class="text-2xl font-bold text-white">Map Controls to Infrastructure</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          The compliance engine auto-discovers your infrastructure components and maps them to relevant controls. Review and adjust the mappings to match your environment.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Trigger an infrastructure scan and control mapping</span>
+curl -X POST http://localhost:8000/api/v1/compliance/monitoring/start \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "frameworks": ["soc2", "pci_dss"],
+    "scan_scope": {'{'}
+      "kubernetes_namespaces": ["qbitel-system", "production"],
+      "cloud_accounts": ["aws:123456789012"],
+      "network_segments": ["10.0.0.0/16"]
+    {'}'}
+  {'}'}'
+
+<span class="text-gray-500"># Review the auto-generated control mappings</span>
+curl http://localhost:8000/api/v1/compliance/frameworks | jq '.mappings[:3]'
+
+<span class="text-gray-500"># Example output</span>
+[
+  {'{'}
+    "control_id": "CC6.1",
+    "framework": "soc2",
+    "description": "Logical and physical access controls",
+    "mapped_resources": [
+      "k8s:rbac/qbitel-system",
+      "k8s:networkpolicy/qbitel-system",
+      "pqc:tls/production-primary"
+    ],
+    "status": "passing",
+    "evidence_count": 14
+  {'}'}
+]</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">3</span>
+          <h2 class="text-2xl font-bold text-white">Configure Evidence Collection</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Set up automated evidence collection. The engine pulls data from audit logs, Kubernetes events, PQC certificate status, access control records, and network policy configurations.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Configure data sources for evidence</span>
+curl -X POST http://localhost:8000/api/v1/compliance/monitoring/start \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "sources": [
+      {'{'}
+        "type": "audit_log",
+        "endpoint": "timescaledb://localhost:5432/audit",
+        "retention": "365d"
+      {'}'},
+      {'{'}
+        "type": "kubernetes",
+        "kubeconfig": "/etc/qbitel/kubeconfig",
+        "namespaces": ["qbitel-system"]
+      {'}'},
+      {'{'}
+        "type": "pqc_certificates",
+        "vault_endpoint": "https://vault:8200/v1/pqc"
+      {'}'},
+      {'{'}
+        "type": "cloud_trail",
+        "aws_region": "us-east-1",
+        "trail_name": "qbitel-audit"
+      {'}'}
+    ]
+  {'}'}'</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">4</span>
+          <h2 class="text-2xl font-bold text-white">Generate a Compliance Report</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Trigger an on-demand assessment and generate a comprehensive, audit-ready report. Reports include control status, evidence links, gap analysis, and remediation recommendations.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Generate a SOC 2 compliance report</span>
+curl -X POST http://localhost:8000/api/v1/compliance/reports/generate \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "framework": "soc2",
+    "report_type": "full_assessment",
+    "period": {'{'}
+      "start": "2025-01-01",
+      "end": "2025-06-30"
+    {'}'},
+    "format": "pdf",
+    "include_evidence": true,
+    "include_remediation": true
+  {'}'}'
+
+<span class="text-gray-500"># Check report generation status</span>
+curl http://localhost:8000/api/v1/compliance/monitoring/status
+
+<span class="text-gray-500"># Download the report</span>
+curl -o soc2-report-h1-2025.pdf \
+  http://localhost:8000/api/v1/compliance/reports/rpt_soc2_001/download</code></pre>
+        </div>
+        <div class="card p-4 border-l-4 border-l-quantum-500">
+          <p class="text-sm text-gray-300">
+            <span class="font-semibold text-quantum-400">Report contents:</span> Each report includes an executive summary, per-control assessment with pass/fail status, links to evidence artifacts, a gap analysis section highlighting failing controls, and AI-generated remediation recommendations.
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">5</span>
+          <h2 class="text-2xl font-bold text-white">Set Up Continuous Monitoring</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Enable continuous compliance monitoring to catch control violations in real time. Configure alerts for drift and schedule recurring assessments.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Enable continuous compliance monitoring</span>
+curl -X POST http://localhost:8000/api/v1/compliance/monitoring/start \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "continuous_monitoring": true,
+    "check_interval": "1h",
+    "alerts": {'{'}
+      "channels": ["slack", "pagerduty"],
+      "slack_webhook": "https://hooks.slack.com/...",
+      "severity_threshold": "warning"
+    {'}'},
+    "auto_remediation": {'{'}
+      "enabled": true,
+      "scope": ["network_policy", "rbac", "tls_config"],
+      "require_approval": true
+    {'}'}
+  {'}'}'</code></pre>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex items-center justify-between pt-8 border-t border-surface-600/50">
+        <a href="/tutorials/deploy-kubernetes" class="btn-ghost text-sm">
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+          Previous: Deploy to Kubernetes
+        </a>
+        <a href="/tutorials/legacy-mainframe-modernization" class="btn-secondary text-sm">
+          Next: Mainframe Modernization
+          <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <CTABanner
+    title="Automate Your Compliance Workflow"
+    description="Replace manual evidence gathering with continuous, AI-powered compliance assessment and reporting."
+  />
+</PageLayout>

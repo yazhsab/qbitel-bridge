@@ -1,5 +1,5 @@
 """
-CRONOS AI Dataset Loader
+QBITEL Dataset Loader
 
 Unified interface for loading all ML training datasets.
 """
@@ -11,7 +11,7 @@ import random
 
 
 class DatasetLoader:
-    """Load and iterate over CRONOS AI datasets."""
+    """Load and iterate over QBITEL datasets."""
 
     def __init__(self, base_path: Optional[str] = None):
         if base_path:
@@ -271,7 +271,7 @@ def main():
     stats = loader.get_dataset_stats()
 
     print("=" * 60)
-    print("CRONOS AI Dataset Statistics")
+    print("QBITEL Dataset Statistics")
     print("=" * 60)
 
     print("\n[Protocols]")

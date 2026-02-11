@@ -372,22 +372,22 @@ The engine exposes comprehensive Prometheus metrics:
 
 ```python
 # Discovery metrics
-cronos_discovery_requests_total{protocol_type, status, cache_hit}
-cronos_discovery_duration_seconds{protocol_type, phase}
-cronos_discovery_confidence_score{protocol_type}
+qbitel_discovery_requests_total{protocol_type, status, cache_hit}
+qbitel_discovery_duration_seconds{protocol_type, phase}
+qbitel_discovery_confidence_score{protocol_type}
 
 # Component metrics
-cronos_statistical_analysis_duration_seconds
-cronos_grammar_learning_duration_seconds
-cronos_parser_generation_duration_seconds
+qbitel_statistical_analysis_duration_seconds
+qbitel_grammar_learning_duration_seconds
+qbitel_parser_generation_duration_seconds
 
 # Cache metrics
-cronos_cache_operations_total{operation, cache_type, status}
-cronos_cache_size_bytes{cache_type}
-cronos_cache_hit_rate{cache_type}
+qbitel_cache_operations_total{operation, cache_type, status}
+qbitel_cache_size_bytes{cache_type}
+qbitel_cache_hit_rate{cache_type}
 
 # Error metrics
-cronos_discovery_errors_total{error_type, component}
+qbitel_discovery_errors_total{error_type, component}
 ```
 
 ### Logging
@@ -453,8 +453,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ai_engine/ ./ai_engine/
 
 # Set environment variables
-ENV CRONOS_AI_ENVIRONMENT=production
-ENV CRONOS_AI_REDIS_URL=redis://redis:6379
+ENV QBITEL_AI_ENVIRONMENT=production
+ENV QBITEL_AI_REDIS_URL=redis://redis:6379
 
 # Run
 CMD ["python", "-m", "ai_engine"]
@@ -473,7 +473,7 @@ spec:
     spec:
       containers:
       - name: pcfg-inference
-        image: cronos-ai/pcfg-inference:latest
+        image: qbitel/pcfg-inference:latest
         resources:
           requests:
             memory: "2Gi"
@@ -482,7 +482,7 @@ spec:
             memory: "4Gi"
             cpu: "4"
         env:
-        - name: CRONOS_AI_REDIS_URL
+        - name: QBITEL_AI_REDIS_URL
           value: "redis://redis-service:6379"
         - name: WORKER_THREADS
           value: "8"
@@ -627,13 +627,13 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 
 ## License
 
-Copyright © 2025 CRONOS AI. All rights reserved.
+Copyright © 2025 QBITEL. All rights reserved.
 
 ## Support
 
-- Documentation: https://docs.cronos-ai.com
-- Issues: https://github.com/cronos-ai/issues
-- Email: support@cronos-ai.com
+- Documentation: https://docs.qbitel.com
+- Issues: https://github.com/yazhsab/issues
+- Email: support@qbitel.com
 
 ---
 

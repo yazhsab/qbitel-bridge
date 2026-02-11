@@ -1,8 +1,8 @@
-# CRONOS AI - Local Development & Testing Guide
+# QBITEL - Local Development & Testing Guide
 
 **Version**: 2.1.0
 **Last Updated**: 2024-11-22
-**Purpose**: Complete guide for running CRONOS AI locally for development and testing
+**Purpose**: Complete guide for running QBITEL locally for development and testing
 
 ---
 
@@ -59,8 +59,8 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/qbitel/cronos-ai.git
-cd cronos-ai
+git clone https://github.com/yazhsab/qbitel-bridge.git
+cd qbitel
 
 # Start all services with Docker
 docker-compose -f ops/deploy/docker/docker-compose.yml up -d
@@ -76,8 +76,8 @@ curl http://localhost:8000/health
 
 ```bash
 # Clone and setup
-git clone https://github.com/qbitel/cronos-ai.git
-cd cronos-ai
+git clone https://github.com/yazhsab/qbitel-bridge.git
+cd qbitel
 
 # Create virtual environment
 python3 -m venv venv
@@ -87,7 +87,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 # Set minimal environment variables
-export DATABASE_URL="sqlite:///./cronos_ai_dev.db"
+export DATABASE_URL="sqlite:///./qbitel_dev.db"
 export REDIS_URL="redis://localhost:6379"
 export JWT_SECRET="dev-secret-key-change-in-production"
 export ENCRYPTION_KEY="dev-encryption-key-32chars!"
@@ -106,8 +106,8 @@ curl http://localhost:8000/health
 ### 3.1 Clone Repository
 
 ```bash
-git clone https://github.com/qbitel/cronos-ai.git
-cd cronos-ai
+git clone https://github.com/yazhsab/qbitel-bridge.git
+cd qbitel
 ```
 
 ### 3.2 Create Virtual Environment
@@ -204,16 +204,16 @@ docker-compose down -v
 ```bash
 # Using Docker
 docker run -d \
-  --name cronos-postgres \
-  -e POSTGRES_USER=cronos \
-  -e POSTGRES_PASSWORD=cronos_dev_password \
-  -e POSTGRES_DB=cronos_ai_dev \
+  --name qbitel-postgres \
+  -e POSTGRES_USER=qbitel \
+  -e POSTGRES_PASSWORD=qbitel_dev_password \
+  -e POSTGRES_DB=qbitel_dev \
   -p 5432:5432 \
   postgres:15
 
 # Or using Homebrew (macOS)
 brew services start postgresql@15
-createdb cronos_ai_dev
+createdb qbitel_dev
 ```
 
 ### 5.2 Start Redis
@@ -221,7 +221,7 @@ createdb cronos_ai_dev
 ```bash
 # Using Docker
 docker run -d \
-  --name cronos-redis \
+  --name qbitel-redis \
   -p 6379:6379 \
   redis:7
 
@@ -252,12 +252,12 @@ curl http://localhost:11434/api/tags
 source venv/bin/activate
 
 # Set environment variables
-export CRONOS_ENV=development
+export QBITEL_ENV=development
 export DATABASE_HOST=localhost
 export DATABASE_PORT=5432
-export DATABASE_NAME=cronos_ai_dev
-export DATABASE_USER=cronos
-export DATABASE_PASSWORD=cronos_dev_password
+export DATABASE_NAME=qbitel_dev
+export DATABASE_USER=qbitel
+export DATABASE_PASSWORD=qbitel_dev_password
 export REDIS_HOST=localhost
 export REDIS_PORT=6379
 export JWT_SECRET=development-jwt-secret-key-32ch
@@ -310,7 +310,7 @@ alembic history
 # Using the CLI tool
 python -m ai_engine.scripts.create_admin \
   --username admin \
-  --email admin@cronos-ai.local \
+  --email admin@qbitel.local \
   --password "SecurePassword123!"
 
 # Or via Python shell
@@ -324,7 +324,7 @@ session = db.get_session()
 
 admin = User(
     username="admin",
-    email="admin@cronos-ai.local",
+    email="admin@qbitel.local",
     password_hash=bcrypt.hash("admin123"),
     role="administrator",
     is_active=True
@@ -355,10 +355,10 @@ python -m ai_engine.scripts.seed_data --type threats
 Create a local configuration file:
 
 ```bash
-cp config/cronos_ai.yaml config/cronos_ai.local.yaml
+cp config/qbitel.yaml config/qbitel.local.yaml
 ```
 
-Edit `config/cronos_ai.local.yaml`:
+Edit `config/qbitel.local.yaml`:
 
 ```yaml
 # Local Development Configuration
@@ -376,9 +376,9 @@ server:
 database:
   host: "localhost"
   port: 5432
-  name: "cronos_ai_dev"
-  user: "cronos"
-  password: "cronos_dev_password"
+  name: "qbitel_dev"
+  user: "qbitel"
+  password: "qbitel_dev_password"
   pool_size: 10
   ssl_mode: "disable"
 
@@ -432,18 +432,18 @@ Create a `.env` file in the project root:
 
 ```bash
 cat > .env << 'EOF'
-# CRONOS AI Local Development Environment
+# QBITEL Local Development Environment
 
 # Environment
-CRONOS_ENV=development
+QBITEL_ENV=development
 DEBUG=true
 
 # Database
 DATABASE_HOST=localhost
 DATABASE_PORT=5432
-DATABASE_NAME=cronos_ai_dev
-DATABASE_USER=cronos
-DATABASE_PASSWORD=cronos_dev_password
+DATABASE_NAME=qbitel_dev
+DATABASE_USER=qbitel
+DATABASE_PASSWORD=qbitel_dev_password
 
 # Redis
 REDIS_HOST=localhost
@@ -455,9 +455,9 @@ ENCRYPTION_KEY=development-encryption-key-32c
 API_KEY=dev-api-key-for-testing
 
 # LLM
-CRONOS_LLM_PROVIDER=ollama
-CRONOS_LLM_ENDPOINT=http://localhost:11434
-CRONOS_LLM_MODEL=llama3.2:8b
+QBITEL_LLM_PROVIDER=ollama
+QBITEL_LLM_ENDPOINT=http://localhost:11434
+QBITEL_LLM_MODEL=llama3.2:8b
 
 # Optional: Cloud LLM fallback (add your keys)
 # ANTHROPIC_API_KEY=sk-ant-xxx
@@ -478,10 +478,10 @@ source .env
 
 ```bash
 # Run with custom config
-python -m ai_engine --config config/cronos_ai.local.yaml
+python -m ai_engine --config config/qbitel.local.yaml
 
 # Or set via environment variable
-export CRONOS_CONFIG_FILE=config/cronos_ai.local.yaml
+export QBITEL_CONFIG_FILE=config/qbitel.local.yaml
 python -m ai_engine
 ```
 
@@ -684,10 +684,10 @@ pg_isready -h localhost -p 5432
 docker ps | grep postgres
 
 # View PostgreSQL logs
-docker logs cronos-postgres
+docker logs qbitel-postgres
 
 # Test connection
-psql -h localhost -U cronos -d cronos_ai_dev -c "SELECT 1"
+psql -h localhost -U qbitel -d qbitel_dev -c "SELECT 1"
 ```
 
 #### Redis Connection Failed
@@ -700,7 +700,7 @@ redis-cli ping
 docker ps | grep redis
 
 # View Redis logs
-docker logs cronos-redis
+docker logs qbitel-redis
 ```
 
 #### Module Import Errors
@@ -759,7 +759,7 @@ curl http://localhost:8000/readyz && echo "✓ Readiness OK"
 docker-compose logs -f ai-engine
 
 # If running directly
-tail -f /var/log/cronos-ai/app.log
+tail -f /var/log/qbitel/app.log
 
 # Or check stdout/stderr during development
 ```
@@ -844,8 +844,8 @@ chmod +x scripts/deploy-macos.sh
 
 ```bash
 # Clone, setup, and start everything
-git clone https://github.com/qbitel/cronos-ai.git && \
-cd cronos-ai && \
+git clone https://github.com/yazhsab/qbitel-bridge.git && \
+cd qbitel && \
 chmod +x scripts/deploy-macos.sh && \
 ./scripts/deploy-macos.sh install && \
 ./scripts/deploy-macos.sh setup && \
@@ -971,7 +971,7 @@ Create `.vscode/settings.json`:
 #!/bin/bash
 set -e
 
-echo "Starting CRONOS AI local environment..."
+echo "Starting QBITEL local environment..."
 
 # Start dependencies
 docker-compose -f ops/deploy/docker/docker-compose.yml up -d postgres redis
@@ -1012,5 +1012,5 @@ echo "All checks passed!"
 
 ---
 
-**Document maintained by**: CRONOS AI Engineering Team
-**Questions?** Open an issue at https://github.com/qbitel/cronos-ai/issues
+**Document maintained by**: QBITEL Engineering Team
+**Questions?** Open an issue at https://github.com/yazhsab/qbitel-bridge/issues

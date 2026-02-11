@@ -1,0 +1,112 @@
+{{- if .Values.xdsServer.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "qbitel-bridge.fullname" . }}-xds-server
+  namespace: {{ include "qbitel-bridge.namespace" . }}
+  labels:
+    {{- include "qbitel-bridge.xdsServer.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.xdsServer.autoscaling.enabled }}
+  replicas: {{ .Values.xdsServer.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "qbitel-bridge.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: xds-server
+  template:
+    metadata:
+      labels:
+        {{- include "qbitel-bridge.xdsServer.labels" . | nindent 8 }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.xdsServer.service.metricsPort }}"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: qbitel-xds-server
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: xds-server
+          image: {{ include "qbitel-bridge.xdsServer.image" . }}
+          imagePullPolicy: {{ .Values.xdsServer.image.pullPolicy }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.xdsServer.service.grpcPort }}
+              protocol: TCP
+            - name: metrics
+              containerPort: {{ .Values.xdsServer.service.metricsPort }}
+              protocol: TCP
+          env:
+            - name: XDS_PORT
+              value: "{{ .Values.xdsServer.config.port }}"
+            - name: ENABLE_ADS
+              value: "{{ .Values.xdsServer.config.enableAds }}"
+            - name: CACHE_TTL
+              value: "{{ .Values.xdsServer.config.cacheTtl }}"
+            - name: QUANTUM_ENCRYPTION_ENABLED
+              value: "{{ .Values.xdsServer.config.quantumEncryption.enabled }}"
+            - name: QUANTUM_ALGORITHM
+              value: "{{ .Values.xdsServer.config.quantumEncryption.algorithm }}"
+            - name: QUANTUM_SIGNATURE
+              value: "{{ .Values.xdsServer.config.quantumEncryption.signature }}"
+            - name: METRICS_PORT
+              value: "{{ .Values.xdsServer.config.observability.metricsPort }}"
+            - name: TRACING_ENABLED
+              value: "{{ .Values.xdsServer.config.observability.tracingEnabled }}"
+            - name: LOG_LEVEL
+              value: "{{ .Values.xdsServer.config.observability.logLevel }}"
+          {{- if .Values.security.tls.enabled }}
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /etc/xds-server/tls
+              readOnly: true
+          {{- end }}
+          livenessProbe:
+            grpc:
+              port: {{ .Values.xdsServer.service.grpcPort }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            grpc:
+              port: {{ .Values.xdsServer.service.grpcPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.xdsServer.resources | nindent 12 }}
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      {{- if .Values.security.tls.enabled }}
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: {{ .Values.security.tls.certificates.xdsServer.secretName }}
+      {{- end }}
+{{- end }}

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - Redis Integration
+QBITEL - Redis Integration
 High-performance caching and session management using Redis.
 """
 
@@ -80,7 +80,7 @@ class SerializationMethod:
 
 class RedisIntegration:
     """
-    Production Redis integration for CRONOS AI.
+    Production Redis integration for QBITEL.
     Provides caching, session management, rate limiting, and pub/sub messaging.
     """
 
@@ -117,13 +117,13 @@ class RedisIntegration:
 
         # Key prefixes for different use cases
         self.prefixes = {
-            "cache": "cronos:cache:",
-            "session": "cronos:session:",
-            "rate_limit": "cronos:rate_limit:",
-            "lock": "cronos:lock:",
-            "queue": "cronos:queue:",
-            "pub_sub": "cronos:pubsub:",
-            "metrics": "cronos:metrics:",
+            "cache": "qbitel:cache:",
+            "session": "qbitel:session:",
+            "rate_limit": "qbitel:rate_limit:",
+            "lock": "qbitel:lock:",
+            "queue": "qbitel:queue:",
+            "pub_sub": "qbitel:pubsub:",
+            "metrics": "qbitel:metrics:",
         }
 
         # Default TTLs (in seconds)

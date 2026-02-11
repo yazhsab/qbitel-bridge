@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN groupadd -r cronos && useradd -r -g cronos -m cronos
+RUN groupadd -r qbitel && useradd -r -g qbitel -m qbitel
 
 # Set working directory
 WORKDIR /app
@@ -37,16 +37,16 @@ RUN pip install --upgrade pip && \
 FROM base as production
 
 # Copy application code
-COPY --chown=cronos:cronos ai_engine/ ./ai_engine/
-COPY --chown=cronos:cronos config/ ./config/
-COPY --chown=cronos:cronos docs/ ./docs/
+COPY --chown=qbitel:qbitel ai_engine/ ./ai_engine/
+COPY --chown=qbitel:qbitel config/ ./config/
+COPY --chown=qbitel:qbitel docs/ ./docs/
 
 # Create necessary directories
 RUN mkdir -p /app/logs /app/data /app/cache && \
-    chown -R cronos:cronos /app/logs /app/data /app/cache
+    chown -R qbitel:qbitel /app/logs /app/data /app/cache
 
 # Switch to non-root user
-USER cronos
+USER qbitel
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
@@ -65,9 +65,9 @@ FROM base as development
 RUN pip install pytest pytest-asyncio pytest-benchmark black flake8 mypy
 
 # Copy application code (development mounts will override)
-COPY --chown=cronos:cronos . ./
+COPY --chown=qbitel:qbitel . ./
 
-USER cronos
+USER qbitel
 
 # Development command
 CMD ["python", "-m", "ai_engine.api.rest", "--host", "0.0.0.0", "--port", "8000", "--reload"]
@@ -91,4 +91,4 @@ RUN pip install safety bandit
 RUN safety check --json || true && \
     bandit -r ai_engine/ -f json || true
 
-USER cronos
+USER qbitel

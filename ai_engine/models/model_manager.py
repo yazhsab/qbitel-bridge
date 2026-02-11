@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Model Management System
+QBITEL Engine - Model Management System
 
 This module provides comprehensive model lifecycle management including
 training, versioning, deployment, monitoring, and A/B testing capabilities.
@@ -198,7 +198,7 @@ class ModelRegistry:
             config, "mlflow_tracking_uri", "sqlite:///mlflow.db"
         )
         self.mlflow_experiment_name = getattr(
-            config, "mlflow_experiment_name", "cronos_ai_models"
+            config, "mlflow_experiment_name", "qbitel_models"
         )
 
         # Thread safety

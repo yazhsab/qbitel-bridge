@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Enhanced Dynamic Parser Generator (Production-Ready)
+QBITEL Engine - Enhanced Dynamic Parser Generator (Production-Ready)
 
 This module implements production-grade parser generation with:
 - 3-level optimization (O1, O2, O3)

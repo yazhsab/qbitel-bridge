@@ -2,7 +2,7 @@
 """
 Master Dataset Generator
 
-Generates all datasets required for CRONOS AI ML training:
+Generates all datasets required for QBITEL ML training:
 1. Protocol samples (ISO-8583, Modbus, HL7)
 2. Field detection labeled data
 3. Threat intelligence data
@@ -441,7 +441,7 @@ def main():
     base_dir = Path(__file__).parent.parent
 
     print("=" * 60)
-    print("CRONOS AI Dataset Generator")
+    print("QBITEL Dataset Generator")
     print("=" * 60)
 
     # 1. Generate protocol samples

@@ -1,8 +1,8 @@
-# CRONOS AI Protocol Discovery System
+# QBITEL Bridge System
 
 ## 🚀 **Complete Enterprise-Grade Implementation**
 
-The CRONOS AI Protocol Discovery System is a state-of-the-art, AI-powered solution for automatically learning, classifying, and parsing unknown network protocols in real-time. This system provides 100% production-ready functionality with enterprise-grade reliability, performance, and monitoring.
+The QBITEL Bridge System is a state-of-the-art, AI-powered solution for automatically learning, classifying, and parsing unknown network protocols in real-time. This system provides 100% production-ready functionality with enterprise-grade reliability, performance, and monitoring.
 
 ## 📋 **Table of Contents**
 
@@ -24,7 +24,7 @@ The CRONOS AI Protocol Discovery System is a state-of-the-art, AI-powered soluti
 
 ### **What This System Does**
 
-The CRONOS AI Protocol Discovery System automatically:
+The QBITEL Bridge System automatically:
 
 1. **Analyzes** network traffic to identify statistical patterns and structures
 2. **Learns** protocol grammars using advanced PCFG (Probabilistic Context-Free Grammar) inference
@@ -105,7 +105,7 @@ graph TB
 
 ```bash
 # Clone repository
-git clone https://github.com/cronos-ai/protocol-discovery.git
+git clone https://github.com/yazhsab/protocol-discovery.git
 cd protocol-discovery
 
 # Install Python dependencies
@@ -122,7 +122,7 @@ pytest ai_engine/tests/ -v
 
 ```bash
 # Copy example configuration
-cp config/cronos_ai.yaml config/local.yaml
+cp config/qbitel.yaml config/local.yaml
 
 # Copy environment variables
 cp .env.example .env
@@ -159,8 +159,8 @@ print(f"Discovered {len(result.discovered_protocols)} protocols")
 
 ### **Configuration Files**
 
-- [`config/cronos_ai.yaml`](../config/cronos_ai.yaml) - Development configuration
-- [`config/cronos_ai.production.yaml`](../config/cronos_ai.production.yaml) - Production configuration
+- [`config/qbitel.yaml`](../config/qbitel.yaml) - Development configuration
+- [`config/qbitel.production.yaml`](../config/qbitel.production.yaml) - Production configuration
 - [`.env.example`](../.env.example) - Environment variables template
 
 ### **Environment Variables**
@@ -169,7 +169,7 @@ Key environment variables for deployment:
 
 ```bash
 # Core Settings
-CRONOS_ENVIRONMENT=production
+QBITEL_ENVIRONMENT=production
 DATABASE_PASSWORD=your_secure_password
 REDIS_PASSWORD=your_redis_password
 
@@ -380,30 +380,30 @@ CMD ["python", "-m", "ai_engine"]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cronos-ai-discovery
+  name: qbitel-discovery
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: cronos-ai-discovery
+      app: qbitel-discovery
   template:
     metadata:
       labels:
-        app: cronos-ai-discovery
+        app: qbitel-discovery
     spec:
       containers:
-      - name: cronos-ai
-        image: cronos-ai/protocol-discovery:v1.0.0
+      - name: qbitel
+        image: qbitel/protocol-discovery:v1.0.0
         ports:
         - containerPort: 8080
         - containerPort: 8000
         env:
-        - name: CRONOS_ENVIRONMENT
+        - name: QBITEL_ENVIRONMENT
           value: "production"
         - name: DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-secrets
+              name: qbitel-secrets
               key: database-password
         resources:
           requests:
@@ -526,7 +526,7 @@ export LOG_LEVEL=DEBUG
 export PERFORMANCE_LOGGING=true
 
 # View structured logs
-tail -f /var/log/cronos_ai/app.log | jq '.'
+tail -f /var/log/qbitel/app.log | jq '.'
 
 # Monitor metrics
 curl http://localhost:8000/metrics | grep protocol_discovery
@@ -547,10 +547,10 @@ This project is licensed under the MIT License - see the [LICENSE](../LICENSE) f
 ## 📞 **Support**
 
 - **Documentation**: [docs/](.)
-- **Issues**: [GitHub Issues](https://github.com/cronos-ai/protocol-discovery/issues)
-- **Security**: security@cronos-ai.com
-- **General**: support@cronos-ai.com
+- **Issues**: [GitHub Issues](https://github.com/yazhsab/protocol-discovery/issues)
+- **Security**: security@qbitel.com
+- **General**: support@qbitel.com
 
 ---
 
-**Built with ❤️ by the CRONOS AI Team**
+**Built with ❤️ by the QBITEL Team**

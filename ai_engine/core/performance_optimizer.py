@@ -1,5 +1,5 @@
 """
-Performance optimization module for CRONOS AI Protocol Discovery.
+Performance optimization module for QBITEL Bridge.
 Provides advanced caching, memory management, and computational optimizations.
 """
 

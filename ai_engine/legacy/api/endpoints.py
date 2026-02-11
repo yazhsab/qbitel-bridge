@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Whisperer API Endpoints
+QBITEL Engine - Legacy System Whisperer API Endpoints
 
 FastAPI endpoints for Legacy System Whisperer functionality.
 """
@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 from starlette.status import *
 
 from ...core.config import Config, get_config
-from ...core.exceptions import CronosAIException
+from ...core.exceptions import QbitelAIException
 from ..service import LegacySystemWhispererService
 from ..models import (
     LegacySystemContext,

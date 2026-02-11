@@ -1,5 +1,5 @@
 """
-CRONOS AI - SHAP Explainer
+QBITEL - SHAP Explainer
 
 SHAP (SHapley Additive exPlanations) integration for deep learning models,
 specifically protocol classifiers (CNN, LSTM, ensemble models).

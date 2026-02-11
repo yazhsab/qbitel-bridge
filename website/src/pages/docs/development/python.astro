@@ -1,0 +1,140 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Python Development | QBITEL Bridge Docs" description="Python development guide for the QBITEL Bridge AI Engine: virtual environments, pytest, black, ruff, and code standards.">
+  <h1 class="text-3xl font-bold text-white mb-2">Python Development Guide</h1>
+  <p class="text-gray-400 mb-8">Set up your Python development environment for the AI Engine, including linting, formatting, testing, and IDE configuration.</p>
+
+  <h2 id="setup" class="text-2xl font-bold text-white mt-12 mb-4">Environment Setup</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Create and activate virtual environment</span>
+python3 -m venv venv
+source venv/bin/activate  <span class="text-gray-500"># Windows: venv\Scripts\activate</span>
+
+<span class="text-gray-500"># Install dependencies</span>
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+<span class="text-gray-500"># Install pre-commit hooks</span>
+pre-commit install
+
+<span class="text-gray-500"># Verify installation</span>
+pytest ai_engine/tests/ -v --tb=short</code></pre>
+
+  <h2 id="project-structure" class="text-2xl font-bold text-white mt-12 mb-4">Project Structure</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">ai_engine/
+  core/          <span class="text-gray-500"># Engine core, config, orchestrator</span>
+  agents/        <span class="text-gray-500"># Multi-agent orchestration</span>
+  discovery/     <span class="text-gray-500"># Protocol discovery pipeline</span>
+  detection/     <span class="text-gray-500"># Field detection (BiLSTM-CRF)</span>
+  anomaly/       <span class="text-gray-500"># Anomaly detection ensemble</span>
+  security/      <span class="text-gray-500"># Zero-touch decision engine</span>
+  compliance/    <span class="text-gray-500"># Compliance automation</span>
+  copilot/       <span class="text-gray-500"># Protocol copilot</span>
+  crypto/        <span class="text-gray-500"># PQC implementation</span>
+  llm/           <span class="text-gray-500"># LLM service layer</span>
+  marketplace/   <span class="text-gray-500"># Protocol marketplace</span>
+  legacy/        <span class="text-gray-500"># Legacy System Whisperer</span>
+  cloud_native/  <span class="text-gray-500"># Cloud integrations</span>
+  api/           <span class="text-gray-500"># REST and gRPC APIs</span>
+  models/        <span class="text-gray-500"># ML model management</span>
+  monitoring/    <span class="text-gray-500"># Metrics, logging, tracing</span>
+  tests/         <span class="text-gray-500"># Test suite</span></code></pre>
+
+  <h2 id="running-engine" class="text-2xl font-bold text-white mt-12 mb-4">Running the Engine</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Start the AI Engine</span>
+python -m ai_engine
+
+<span class="text-gray-500"># Start with development mode (hot-reloading)</span>
+python -m ai_engine --development --reload
+
+<span class="text-gray-500"># Start with custom configuration</span>
+python -m ai_engine --config config/qbitel.yaml
+
+<span class="text-gray-500"># Verify the API is running</span>
+curl http://localhost:8000/health</code></pre>
+
+  <h2 id="testing" class="text-2xl font-bold text-white mt-12 mb-4">Testing</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run all tests</span>
+pytest ai_engine/tests/ -v
+
+<span class="text-gray-500"># Run specific test file</span>
+pytest ai_engine/tests/test_api.py -v
+
+<span class="text-gray-500"># Run with coverage</span>
+pytest ai_engine/tests/ --cov=ai_engine --cov-report=html
+
+<span class="text-gray-500"># Run performance benchmarks</span>
+pytest ai_engine/tests/performance/ -v --benchmark-only
+
+<span class="text-gray-500"># Run only unit tests (fast)</span>
+pytest ai_engine/tests/ -v -m "not integration"</code></pre>
+
+  <h2 id="code-quality" class="text-2xl font-bold text-white mt-12 mb-4">Code Quality</h2>
+
+  <h3 id="formatting" class="text-xl font-semibold text-white mt-8 mb-3">Formatting with Black</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Format all Python files</span>
+black ai_engine/
+
+<span class="text-gray-500"># Check formatting without modifying</span>
+black --check ai_engine/</code></pre>
+
+  <h3 id="linting" class="text-xl font-semibold text-white mt-8 mb-3">Linting with Ruff</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run linter</span>
+ruff check ai_engine/
+
+<span class="text-gray-500"># Auto-fix issues</span>
+ruff check --fix ai_engine/</code></pre>
+
+  <h3 id="type-checking" class="text-xl font-semibold text-white mt-8 mb-3">Type Checking with mypy</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run type checker</span>
+mypy ai_engine/ --ignore-missing-imports</code></pre>
+
+  <h3 id="security-scanning" class="text-xl font-semibold text-white mt-8 mb-3">Security Scanning with Bandit</h3>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Run security scanner</span>
+bandit -r ai_engine/ -c .bandit</code></pre>
+
+  <h2 id="ide-setup" class="text-2xl font-bold text-white mt-12 mb-4">IDE Setup</h2>
+
+  <h3 id="vscode" class="text-xl font-semibold text-white mt-8 mb-3">VS Code</h3>
+  <p class="text-gray-300 mb-4">Create <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">.vscode/settings.json</code>:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">{'{'}
+  "python.pythonPath": "${'{'}workspaceFolder{'}'}/venv/bin/python",
+  "python.linting.enabled": true,
+  "python.formatting.provider": "black",
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["ai_engine/tests"],
+  "[python]": {'{'}
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {'{'}
+      "source.organizeImports": true
+    {'}'}
+  {'}'}
+{'}'}</code></pre>
+
+  <h3 id="pycharm" class="text-xl font-semibold text-white mt-8 mb-3">PyCharm</h3>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>Set Python interpreter to <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">venv/bin/python</code></li>
+    <li>Configure pytest as default test runner</li>
+    <li>Enable Black formatter (File Watchers)</li>
+    <li>Enable Ruff linter plugin</li>
+  </ul>
+
+  <h2 id="adding-features" class="text-2xl font-bold text-white mt-12 mb-4">Adding New Features</h2>
+  <ol class="list-decimal list-inside text-gray-300 space-y-2 mb-6">
+    <li>Create a feature branch: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">git checkout -b feature/your-feature-name</code></li>
+    <li>Write tests first (test-driven development)</li>
+    <li>Implement the feature in the appropriate module</li>
+    <li>Run the full test suite: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">pytest ai_engine/tests/ -v</code></li>
+    <li>Run linting and formatting: <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">black ai_engine/ && ruff check ai_engine/</code></li>
+    <li>Submit a pull request with description of changes</li>
+  </ol>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/development/testing" class="text-quantum-400 hover:underline">Testing Guide</a> -- comprehensive testing strategy</li>
+    <li><a href="/docs/architecture/ai-engine" class="text-quantum-400 hover:underline">AI Engine Architecture</a> -- understand the codebase</li>
+    <li><a href="/docs/api/rest-api" class="text-quantum-400 hover:underline">REST API Reference</a> -- API endpoint documentation</li>
+  </ul>
+</DocsLayout>

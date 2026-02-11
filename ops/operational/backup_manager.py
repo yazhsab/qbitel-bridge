@@ -1,5 +1,5 @@
 """
-CRONOS AI - Backup Manager
+QBITEL - Backup Manager
 
 Comprehensive backup and disaster recovery management system with
 encryption, verification, and automated testing.
@@ -100,7 +100,7 @@ class BackupEncryption:
             kdf = PBKDF2(
                 algorithm=hashes.SHA256(),
                 length=32,
-                salt=b"cronos_ai_backup_salt",  # In production, use random salt
+                salt=b"qbitel_backup_salt",  # In production, use random salt
                 iterations=100000,
                 backend=default_backend(),
             )
@@ -545,7 +545,7 @@ async def main():
 
     # Initialize backup manager
     manager = BackupManager(
-        backup_root="/tmp/cronos_backups",
+        backup_root="/tmp/qbitel_backups",
         encryption_key="test_encryption_key_change_in_production",
         retention_days=30,
     )

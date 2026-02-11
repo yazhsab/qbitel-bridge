@@ -43,7 +43,7 @@ data:
       registry:
         external_labels:
           source: tempo
-          cluster: cronos-ai
+          cluster: qbitel
       storage:
         path: /tmp/tempo/generator/wal
         remote_write:

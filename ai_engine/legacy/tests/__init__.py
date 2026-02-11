@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Whisperer Tests
+QBITEL Engine - Legacy System Whisperer Tests
 
 Comprehensive test suite for Legacy System Whisperer feature.
 """

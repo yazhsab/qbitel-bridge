@@ -1,0 +1,157 @@
+{
+  "metadata": {
+    "title": "EDI (X12/EDIFACT) Format Samples",
+    "version": "1.0.0",
+    "description": "Electronic Data Interchange formats with parsing and generation patterns",
+    "standards": ["ANSI X12", "UN/EDIFACT", "HIPAA"],
+    "total_samples": 40
+  },
+  "x12_transactions": [
+    {
+      "id": "X12-810",
+      "name": "Invoice",
+      "description": "Standard invoice transaction set",
+      "sample": "ISA*00*          *00*          *ZZ*SENDER         *ZZ*RECEIVER       *231215*1430*U*00401*000000001*0*P*>~\nGS*IN*SENDER*RECEIVER*20231215*1430*1*X*004010~\nST*810*0001~\nBIG*20231215*INV-001*20231210*PO-12345~\nN1*ST*SHIP TO COMPANY*92*LOCATION001~\nN3*123 MAIN STREET~\nN4*ANYTOWN*CA*90210*US~\nN1*BT*BILL TO COMPANY*92*BILLING001~\nN3*456 OAK AVENUE~\nN4*SOMEWHERE*NY*10001*US~\nIT1*1*100*EA*25.00**UP*012345678901*VN*WIDGET-A~\nTDS*250000~\nCAD*M****FEDEX*GROUND~\nISS*100*EA~\nCTT*1~\nSE*14*0001~\nGE*1*1~\nIEA*1*000000001~",
+      "segments": {
+        "ISA": "Interchange Control Header",
+        "GS": "Functional Group Header",
+        "ST": "Transaction Set Header",
+        "BIG": "Beginning Segment for Invoice",
+        "N1": "Party Identification",
+        "N3": "Address Information",
+        "N4": "Geographic Location",
+        "IT1": "Baseline Item Data",
+        "TDS": "Total Monetary Value Summary",
+        "CAD": "Carrier Detail",
+        "ISS": "Invoice Shipment Summary",
+        "CTT": "Transaction Totals",
+        "SE": "Transaction Set Trailer",
+        "GE": "Functional Group Trailer",
+        "IEA": "Interchange Control Trailer"
+      },
+      "cobol_parser": "       01  EDI-810-RECORD.\n           05  BIG-SEGMENT.\n               10  BIG-DATE           PIC X(8).\n               10  BIG-INVOICE-NUM    PIC X(22).\n               10  BIG-PO-DATE        PIC X(8).\n               10  BIG-PO-NUM         PIC X(22).\n           05  N1-SEGMENTS OCCURS 10 TIMES.\n               10  N1-ENTITY-CODE     PIC XX.\n               10  N1-NAME            PIC X(60).\n               10  N1-ID-QUAL         PIC XX.\n               10  N1-ID              PIC X(80).\n           05  IT1-SEGMENTS OCCURS 100 TIMES.\n               10  IT1-LINE-NUM       PIC 9(6).\n               10  IT1-QTY            PIC 9(10).\n               10  IT1-UNIT           PIC X(2).\n               10  IT1-UNIT-PRICE     PIC 9(10)V99.\n               10  IT1-PRODUCT-ID     PIC X(48).\n           05  TDS-TOTAL-AMT          PIC 9(15)V99.",
+      "java_parser": "import java.util.*;\nimport java.math.BigDecimal;\n\npublic class X12Invoice {\n    private String invoiceNumber;\n    private LocalDate invoiceDate;\n    private String poNumber;\n    private LocalDate poDate;\n    private Party shipTo;\n    private Party billTo;\n    private List<LineItem> lineItems = new ArrayList<>();\n    private BigDecimal totalAmount;\n    \n    public static X12Invoice parse(String x12Content) {\n        X12Invoice invoice = new X12Invoice();\n        String[] segments = x12Content.split(\"~\");\n        \n        for (String segment : segments) {\n            String[] elements = segment.trim().split(\"\\\\*\");\n            String segmentId = elements[0];\n            \n            switch (segmentId) {\n                case \"BIG\" -> {\n                    invoice.setInvoiceDate(parseDate(elements[1]));\n                    invoice.setInvoiceNumber(elements[2]);\n                    invoice.setPoDate(parseDate(elements[3]));\n                    invoice.setPoNumber(elements[4]);\n                }\n                case \"N1\" -> {\n                    Party party = parseN1Segment(elements, segments);\n                    if (\"ST\".equals(elements[1])) {\n                        invoice.setShipTo(party);\n                    } else if (\"BT\".equals(elements[1])) {\n                        invoice.setBillTo(party);\n                    }\n                }\n                case \"IT1\" -> {\n                    invoice.getLineItems().add(parseIT1(elements));\n                }\n                case \"TDS\" -> {\n                    invoice.setTotalAmount(\n                        new BigDecimal(elements[1]).movePointLeft(2));\n                }\n            }\n        }\n        return invoice;\n    }\n    \n    public static class LineItem {\n        private int lineNumber;\n        private int quantity;\n        private String unitOfMeasure;\n        private BigDecimal unitPrice;\n        private String productId;\n        private String vendorPartNumber;\n    }\n}",
+      "python_parser": "from dataclasses import dataclass, field\nfrom decimal import Decimal\nfrom datetime import date\nfrom typing import List, Optional\n\n@dataclass\nclass Party:\n    entity_code: str\n    name: str\n    id_qualifier: str\n    id_value: str\n    address_line: str = ''\n    city: str = ''\n    state: str = ''\n    zip_code: str = ''\n    country: str = ''\n\n@dataclass\nclass LineItem:\n    line_number: int\n    quantity: int\n    unit_of_measure: str\n    unit_price: Decimal\n    product_id: str\n    vendor_part_number: str = ''\n\n@dataclass\nclass X12Invoice:\n    invoice_number: str\n    invoice_date: date\n    po_number: str\n    po_date: date\n    ship_to: Optional[Party] = None\n    bill_to: Optional[Party] = None\n    line_items: List[LineItem] = field(default_factory=list)\n    total_amount: Decimal = Decimal('0')\n    \n    @classmethod\n    def parse(cls, x12_content: str) -> 'X12Invoice':\n        invoice = cls(\n            invoice_number='',\n            invoice_date=date.today(),\n            po_number='',\n            po_date=date.today()\n        )\n        \n        segments = x12_content.split('~')\n        \n        for i, segment in enumerate(segments):\n            elements = segment.strip().split('*')\n            segment_id = elements[0]\n            \n            if segment_id == 'BIG':\n                invoice.invoice_date = cls._parse_date(elements[1])\n                invoice.invoice_number = elements[2]\n                invoice.po_date = cls._parse_date(elements[3])\n                invoice.po_number = elements[4]\n                \n            elif segment_id == 'N1':\n                party = cls._parse_party(segments, i)\n                if elements[1] == 'ST':\n                    invoice.ship_to = party\n                elif elements[1] == 'BT':\n                    invoice.bill_to = party\n                    \n            elif segment_id == 'IT1':\n                invoice.line_items.append(cls._parse_line_item(elements))\n                \n            elif segment_id == 'TDS':\n                invoice.total_amount = Decimal(elements[1]) / 100\n        \n        return invoice\n    \n    @staticmethod\n    def _parse_date(date_str: str) -> date:\n        return date(\n            int(date_str[:4]),\n            int(date_str[4:6]),\n            int(date_str[6:8])\n        )"
+    },
+    {
+      "id": "X12-850",
+      "name": "Purchase Order",
+      "description": "Standard purchase order transaction set",
+      "sample": "ISA*00*          *00*          *ZZ*BUYER          *ZZ*SELLER         *231215*0900*U*00401*000000002*0*P*>~\nGS*PO*BUYER*SELLER*20231215*0900*2*X*004010~\nST*850*0001~\nBEG*00*NE*PO-2023-001**20231215~\nREF*DP*001*DEPARTMENT A~\nREF*IA*ACCT-12345~\nPER*BD*JOHN SMITH*TE*555-1234~\nN1*ST*SHIPPING LOCATION*92*SHIP001~\nN3*789 WAREHOUSE BLVD~\nN4*LOGISTICS*TX*75001*US~\nPO1*001*50*EA*100.00*PE*UP*123456789012*VN*PROD-001~\nPID*F****PRODUCT DESCRIPTION LINE 1~\nPO1*002*25*EA*200.00*PE*UP*234567890123*VN*PROD-002~\nPID*F****PRODUCT DESCRIPTION LINE 2~\nCTT*2*75~\nSE*13*0001~\nGE*1*2~\nIEA*1*000000002~",
+      "segments": {
+        "BEG": "Beginning Segment for Purchase Order",
+        "REF": "Reference Identification",
+        "PER": "Administrative Communications Contact",
+        "PO1": "Baseline Item Data",
+        "PID": "Product/Item Description"
+      },
+      "java_generator": "public class X12PurchaseOrderGenerator {\n    private static final String ELEMENT_SEP = \"*\";\n    private static final String SEGMENT_TERM = \"~\";\n    \n    public String generate(PurchaseOrder po) {\n        StringBuilder sb = new StringBuilder();\n        int segmentCount = 0;\n        \n        // ST - Transaction Set Header\n        sb.append(\"ST*850*0001\").append(SEGMENT_TERM);\n        segmentCount++;\n        \n        // BEG - Beginning Segment\n        sb.append(\"BEG*00*NE*\")\n          .append(po.getPoNumber())\n          .append(\"**\")\n          .append(formatDate(po.getPoDate()))\n          .append(SEGMENT_TERM);\n        segmentCount++;\n        \n        // N1 - Ship To\n        if (po.getShipTo() != null) {\n            sb.append(\"N1*ST*\")\n              .append(po.getShipTo().getName())\n              .append(\"*92*\")\n              .append(po.getShipTo().getId())\n              .append(SEGMENT_TERM);\n            segmentCount++;\n            \n            sb.append(\"N3*\")\n              .append(po.getShipTo().getAddress())\n              .append(SEGMENT_TERM);\n            segmentCount++;\n            \n            sb.append(\"N4*\")\n              .append(po.getShipTo().getCity())\n              .append(\"*\")\n              .append(po.getShipTo().getState())\n              .append(\"*\")\n              .append(po.getShipTo().getZip())\n              .append(\"*US\")\n              .append(SEGMENT_TERM);\n            segmentCount++;\n        }\n        \n        // PO1 - Line Items\n        int lineNum = 1;\n        for (LineItem item : po.getLineItems()) {\n            sb.append(\"PO1*\")\n              .append(String.format(\"%03d\", lineNum++))\n              .append(\"*\")\n              .append(item.getQuantity())\n              .append(\"*\")\n              .append(item.getUnitOfMeasure())\n              .append(\"*\")\n              .append(formatPrice(item.getUnitPrice()))\n              .append(\"*PE*UP*\")\n              .append(item.getUpc())\n              .append(\"*VN*\")\n              .append(item.getVendorNumber())\n              .append(SEGMENT_TERM);\n            segmentCount++;\n            \n            if (item.getDescription() != null) {\n                sb.append(\"PID*F****\")\n                  .append(item.getDescription())\n                  .append(SEGMENT_TERM);\n                segmentCount++;\n            }\n        }\n        \n        // CTT - Transaction Totals\n        sb.append(\"CTT*\")\n          .append(po.getLineItems().size())\n          .append(\"*\")\n          .append(po.getTotalQuantity())\n          .append(SEGMENT_TERM);\n        segmentCount++;\n        \n        // SE - Transaction Set Trailer\n        sb.append(\"SE*\")\n          .append(segmentCount + 1)  // Include SE itself\n          .append(\"*0001\")\n          .append(SEGMENT_TERM);\n        \n        return wrapWithEnvelope(sb.toString());\n    }\n}",
+      "python_generator": "from dataclasses import dataclass\nfrom datetime import date\nfrom decimal import Decimal\nfrom typing import List\n\n@dataclass\nclass PurchaseOrder:\n    po_number: str\n    po_date: date\n    ship_to: 'Party'\n    line_items: List['LineItem']\n\nclass X12Generator:\n    ELEMENT_SEP = '*'\n    SEGMENT_TERM = '~'\n    \n    def generate_850(self, po: PurchaseOrder) -> str:\n        segments = []\n        \n        # ST - Transaction Set Header\n        segments.append('ST*850*0001')\n        \n        # BEG - Beginning Segment\n        segments.append(\n            f'BEG*00*NE*{po.po_number}**{self._format_date(po.po_date)}'\n        )\n        \n        # N1/N3/N4 - Ship To\n        if po.ship_to:\n            segments.append(\n                f'N1*ST*{po.ship_to.name}*92*{po.ship_to.id_value}'\n            )\n            segments.append(f'N3*{po.ship_to.address_line}')\n            segments.append(\n                f'N4*{po.ship_to.city}*{po.ship_to.state}*'\n                f'{po.ship_to.zip_code}*US'\n            )\n        \n        # PO1 - Line Items\n        for i, item in enumerate(po.line_items, 1):\n            segments.append(\n                f'PO1*{i:03d}*{item.quantity}*{item.unit_of_measure}*'\n                f'{self._format_price(item.unit_price)}*PE*UP*'\n                f'{item.upc}*VN*{item.vendor_number}'\n            )\n            if item.description:\n                segments.append(f'PID*F****{item.description}')\n        \n        # CTT - Transaction Totals\n        total_qty = sum(item.quantity for item in po.line_items)\n        segments.append(f'CTT*{len(po.line_items)}*{total_qty}')\n        \n        # SE - Transaction Set Trailer\n        segments.append(f'SE*{len(segments) + 1}*0001')\n        \n        return self._wrap_with_envelope(\n            self.SEGMENT_TERM.join(segments) + self.SEGMENT_TERM\n        )\n    \n    def _format_date(self, d: date) -> str:\n        return d.strftime('%Y%m%d')\n    \n    def _format_price(self, price: Decimal) -> str:\n        return f'{price:.2f}'"
+    },
+    {
+      "id": "X12-837P",
+      "name": "Health Care Claim Professional",
+      "description": "HIPAA professional health care claim",
+      "sample": "ISA*00*          *00*          *ZZ*SUBMITTER      *ZZ*RECEIVER       *231215*1200*^*00501*000000001*0*P*:~\nGS*HC*SUBMITTER*RECEIVER*20231215*1200*1*X*005010X222A1~\nST*837*0001*005010X222A1~\nBHT*0019*00*BATCH001*20231215*1200*CH~\nNM1*41*2*BILLING PROVIDER*****46*1234567890~\nPER*IC*CONTACT NAME*TE*5551234567~\nNM1*40*2*RECEIVER NAME*****46*9876543210~\nHL*1**20*1~\nNM1*85*2*BILLING PROVIDER NAME*****XX*1234567890~\nN3*100 MAIN STREET~\nN4*ANYTOWN*CA*90210~\nREF*EI*123456789~\nHL*2*1*22*0~\nSBR*P*18*******CI~\nNM1*IL*1*DOE*JOHN****MI*ABC123456~\nN3*200 OAK AVENUE~\nN4*SOMEWHERE*NY*10001~\nDMG*D8*19800115*M~\nNM1*PR*2*INSURANCE COMPANY*****PI*INS001~\nCLM*CLAIM001*1500***11:B:1*Y*A*Y*Y~\nHI*ABK:J0690~\nLX*1~\nSV1*HC:99213*150*UN*1***1~\nDTP*472*D8*20231201~\nSE*22*0001~\nGE*1*1~\nIEA*1*000000001~",
+      "hipaa_requirements": {
+        "privacy": "PHI must be encrypted in transit and at rest",
+        "validation": "NPI numbers must be validated",
+        "retention": "Claims data must be retained for 6 years"
+      },
+      "java_model": "import java.time.LocalDate;\nimport java.util.List;\n\npublic class HealthCareClaim837P {\n    // Header\n    private String batchId;\n    private LocalDate creationDate;\n    private String transactionType;\n    \n    // Billing Provider (2010AA)\n    private Provider billingProvider;\n    \n    // Subscriber (2010BA)\n    private Subscriber subscriber;\n    \n    // Patient (2010CA) - if different from subscriber\n    private Patient patient;\n    \n    // Payer (2010BB)\n    private Payer payer;\n    \n    // Claim Information (2300)\n    private List<Claim> claims;\n    \n    public static class Provider {\n        private String npi;  // National Provider Identifier\n        private String name;\n        private String taxId;\n        private Address address;\n        private String taxonomyCode;\n    }\n    \n    public static class Subscriber {\n        private String memberId;\n        private String lastName;\n        private String firstName;\n        private LocalDate dateOfBirth;\n        private String gender;\n        private Address address;\n        private String relationshipCode;\n    }\n    \n    public static class Claim {\n        private String claimId;\n        private BigDecimal totalCharges;\n        private String facilityCode;\n        private String frequencyCode;\n        private List<String> diagnosisCodes;  // ICD-10\n        private List<ServiceLine> serviceLines;\n    }\n    \n    public static class ServiceLine {\n        private int lineNumber;\n        private String procedureCode;  // CPT/HCPCS\n        private List<String> modifiers;\n        private BigDecimal chargeAmount;\n        private int units;\n        private LocalDate serviceDate;\n        private List<Integer> diagnosisPointers;\n    }\n}"
+    },
+    {
+      "id": "X12-997",
+      "name": "Functional Acknowledgment",
+      "description": "Acknowledgment of received transaction",
+      "sample": "ISA*00*          *00*          *ZZ*RECEIVER       *ZZ*SENDER         *231215*1500*U*00401*000000003*0*P*>~\nGS*FA*RECEIVER*SENDER*20231215*1500*3*X*004010~\nST*997*0001~\nAK1*PO*2~\nAK2*850*0001~\nAK5*A~\nAK9*A*1*1*1~\nSE*6*0001~\nGE*1*3~\nIEA*1*000000003~",
+      "acknowledgment_codes": {
+        "AK5": {
+          "A": "Accepted",
+          "E": "Accepted with Errors",
+          "R": "Rejected"
+        },
+        "AK9": {
+          "A": "Accepted",
+          "E": "Accepted with Errors",
+          "P": "Partially Accepted",
+          "R": "Rejected"
+        }
+      }
+    }
+  ],
+  "edifact_messages": [
+    {
+      "id": "EDIFACT-ORDERS",
+      "name": "Purchase Order",
+      "description": "UN/EDIFACT purchase order message",
+      "sample": "UNB+UNOC:3+BUYER:ZZ+SELLER:ZZ+231215:0900+REF001++ORDERS'\\nUNH+1+ORDERS:D:96A:UN'\\nBGM+220+PO-2023-001+9'\\nDTM+137:20231215:102'\\nNAD+BY+BUYER001::92++BUYER COMPANY+123 MAIN ST+ANYTOWN++12345+US'\\nNAD+SU+SELLER001::92++SELLER COMPANY+456 OAK AVE+SOMEWHERE++67890+US'\\nLIN+1++PROD001:VN'\\nQTY+21:100:EA'\\nPRI+AAA:50.00'\\nLIN+2++PROD002:VN'\\nQTY+21:50:EA'\\nPRI+AAA:75.00'\\nUNS+S'\\nCNT+2:2'\\nUNT+14+1'\\nUNZ+1+REF001'",
+      "segments": {
+        "UNB": "Interchange Header",
+        "UNH": "Message Header",
+        "BGM": "Beginning of Message",
+        "DTM": "Date/Time/Period",
+        "NAD": "Name and Address",
+        "LIN": "Line Item",
+        "QTY": "Quantity",
+        "PRI": "Price Details",
+        "UNS": "Section Control",
+        "CNT": "Control Total",
+        "UNT": "Message Trailer",
+        "UNZ": "Interchange Trailer"
+      }
+    },
+    {
+      "id": "EDIFACT-INVOIC",
+      "name": "Invoice",
+      "description": "UN/EDIFACT invoice message",
+      "sample": "UNB+UNOC:3+SELLER:ZZ+BUYER:ZZ+231215:1400+REF002++INVOIC'\\nUNH+1+INVOIC:D:96A:UN'\\nBGM+380+INV-2023-001+9'\\nDTM+137:20231215:102'\\nDTM+131:20231210:102'\\nRFF+ON:PO-2023-001'\\nNAD+SU+SELLER001::92++SELLER COMPANY+456 OAK AVE+SOMEWHERE++67890+US'\\nNAD+BY+BUYER001::92++BUYER COMPANY+123 MAIN ST+ANYTOWN++12345+US'\\nCUX+2:USD:4'\\nLIN+1++PROD001:VN'\\nQTY+47:100:EA'\\nMOA+203:5000.00'\\nPRI+AAA:50.00'\\nTAX+7+VAT+++:::8.25+S'\\nLIN+2++PROD002:VN'\\nQTY+47:50:EA'\\nMOA+203:3750.00'\\nPRI+AAA:75.00'\\nTAX+7+VAT+++:::8.25+S'\\nUNS+S'\\nMOA+79:8750.00'\\nMOA+176:721.88'\\nMOA+86:9471.88'\\nUNT+24+1'\\nUNZ+1+REF002'"
+    }
+  ],
+  "validation_rules": [
+    {
+      "id": "VAL001",
+      "name": "ISA Segment Validation",
+      "rule": "ISA segment must be exactly 106 characters",
+      "cobol_validation": "           IF WS-ISA-LENGTH NOT = 106\n               MOVE 'ISA LENGTH ERROR' TO WS-ERROR-MSG\n               PERFORM ERROR-ROUTINE\n           END-IF.",
+      "java_validation": "public void validateISA(String isaSegment) {\n    if (isaSegment.length() != 106) {\n        throw new EDIValidationException(\n            \"ISA segment must be 106 characters\");\n    }\n    \n    // Validate element separators\n    char elementSep = isaSegment.charAt(3);\n    char componentSep = isaSegment.charAt(104);\n    char segmentTerm = isaSegment.charAt(105);\n    \n    // Validate ISA elements\n    String authInfoQual = isaSegment.substring(0, 2);\n    if (!\"00\".equals(authInfoQual) && !\"03\".equals(authInfoQual)) {\n        throw new EDIValidationException(\n            \"Invalid Authorization Information Qualifier\");\n    }\n}"
+    },
+    {
+      "id": "VAL002",
+      "name": "Control Number Matching",
+      "rule": "IEA control number must match ISA control number",
+      "python_validation": "def validate_control_numbers(edi_content: str) -> bool:\n    segments = edi_content.split('~')\n    \n    isa_segment = next(s for s in segments if s.startswith('ISA'))\n    iea_segment = next(s for s in segments if s.startswith('IEA'))\n    \n    isa_control = isa_segment.split('*')[13]\n    iea_control = iea_segment.split('*')[2]\n    \n    if isa_control != iea_control:\n        raise ValidationError(\n            f'Control number mismatch: ISA={isa_control}, IEA={iea_control}'\n        )\n    \n    return True"
+    }
+  ],
+  "element_data_types": {
+    "AN": "Alphanumeric",
+    "N0": "Numeric with 0 decimal places",
+    "N2": "Numeric with 2 decimal places implied",
+    "R": "Decimal number",
+    "ID": "Identifier from code list",
+    "DT": "Date (CCYYMMDD)",
+    "TM": "Time (HHMM or HHMMSS)"
+  },
+  "common_qualifiers": {
+    "N1_entity_codes": {
+      "ST": "Ship To",
+      "BT": "Bill To",
+      "BY": "Buyer",
+      "SE": "Seller",
+      "SU": "Supplier"
+    },
+    "reference_qualifiers": {
+      "PO": "Purchase Order Number",
+      "IV": "Invoice Number",
+      "BM": "Bill of Lading",
+      "SI": "Shipper's Identifying Number"
+    },
+    "date_qualifiers": {
+      "002": "Delivery Requested",
+      "011": "Shipped",
+      "017": "Estimated Delivery",
+      "037": "Ship Not Before",
+      "038": "Ship Not After"
+    }
+  }
+}

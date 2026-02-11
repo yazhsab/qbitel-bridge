@@ -346,19 +346,19 @@ The system exports comprehensive Prometheus metrics:
 
 ```python
 # SLA violations
-cronos_discovery_sla_violations_total{model_version, sla_threshold_ms}
+qbitel_discovery_sla_violations_total{model_version, sla_threshold_ms}
 
 # Latency distribution
-cronos_discovery_latency_ms{model_version, quality_mode}
+qbitel_discovery_latency_ms{model_version, quality_mode}
 
 # Confidence scores
-cronos_discovery_confidence{model_version}
+qbitel_discovery_confidence{model_version}
 
 # A/B test requests
-cronos_discovery_ab_test_requests_total{variant, model_version}
+qbitel_discovery_ab_test_requests_total{variant, model_version}
 
 # Active model versions
-cronos_discovery_model_version_active{model_version, deployment_type}
+qbitel_discovery_model_version_active{model_version, deployment_type}
 ```
 
 ### Statistics API
@@ -494,7 +494,7 @@ spec:
     spec:
       containers:
       - name: discovery
-        image: cronos-ai/protocol-discovery:latest
+        image: qbitel/protocol-discovery:latest
         resources:
           requests:
             memory: "4Gi"
@@ -570,4 +570,4 @@ pytest ai_engine/tests/test_production_protocol_discovery.py --cov=ai_engine.dis
 
 ## License
 
-Copyright © 2025 CRONOS AI. All rights reserved.
+Copyright © 2025 QBITEL. All rights reserved.

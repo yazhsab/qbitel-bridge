@@ -2,7 +2,7 @@
 
 ## Overview
 
-Agentic AI Security is CRONOS AI's autonomous security operations platform powered by Large Language Models (LLMs). It analyzes security events, makes intelligent decisions, and executes responses with 78% autonomy—reducing human intervention from hours to seconds while maintaining safety constraints and human oversight.
+Agentic AI Security is QBITEL's autonomous security operations platform powered by Large Language Models (LLMs). It analyzes security events, makes intelligent decisions, and executes responses with 78% autonomy—reducing human intervention from hours to seconds while maintaining safety constraints and human oversight.
 
 ---
 
@@ -18,7 +18,7 @@ Security operations centers (SOCs) face critical challenges:
 - **Manual investigation**: Hours spent on routine threat analysis
 - **Inconsistent decisions**: Human judgment varies, especially under pressure
 
-### The CRONOS AI Solution
+### The QBITEL Solution
 
 Agentic AI Security provides:
 - **78% autonomous response**: LLM-powered decisions with <1 second response time
@@ -445,7 +445,7 @@ ollama serve
 curl http://localhost:11434/api/tags
 ```
 
-### CRONOS AI Configuration
+### QBITEL Configuration
 
 ```yaml
 security:
@@ -525,9 +525,9 @@ python -m vllm.entrypoints.openai.api_server \
     --tensor-parallel-size 4 \
     --port 8000
 
-# Configure CRONOS AI
-export CRONOS_LLM_PROVIDER=vllm
-export CRONOS_LLM_ENDPOINT=http://localhost:8000/v1
+# Configure QBITEL
+export QBITEL_LLM_PROVIDER=vllm
+export QBITEL_LLM_ENDPOINT=http://localhost:8000/v1
 ```
 
 ---
@@ -546,7 +546,7 @@ export CRONOS_LLM_ENDPOINT=http://localhost:8000/v1
 
 ### Response Time Comparison
 
-| Metric | Manual SOC | CRONOS AI | Improvement |
+| Metric | Manual SOC | QBITEL | Improvement |
 |--------|-----------|-----------|-------------|
 | **Detection to triage** | 15 min | <1 sec | 900x |
 | **Triage to decision** | 30 min | <1 sec | 1,800x |
@@ -569,45 +569,45 @@ export CRONOS_LLM_ENDPOINT=http://localhost:8000/v1
 
 ```
 # Decision metrics
-cronos_security_decisions_total{decision_type="auto_execute|auto_approve|escalate", threat_level}
-cronos_security_decision_duration_seconds{phase="analysis|decision|execution"}
-cronos_security_decision_confidence{decision_type}
+qbitel_security_decisions_total{decision_type="auto_execute|auto_approve|escalate", threat_level}
+qbitel_security_decision_duration_seconds{phase="analysis|decision|execution"}
+qbitel_security_decision_confidence{decision_type}
 
 # Response metrics
-cronos_security_responses_total{response_type, status="success|failure"}
-cronos_security_response_duration_seconds{response_type}
-cronos_security_rollbacks_total{response_type}
+qbitel_security_responses_total{response_type, status="success|failure"}
+qbitel_security_response_duration_seconds{response_type}
+qbitel_security_rollbacks_total{response_type}
 
 # Autonomy metrics
-cronos_security_auto_executions_per_hour
-cronos_security_human_escalations_per_hour
-cronos_security_autonomy_rate
+qbitel_security_auto_executions_per_hour
+qbitel_security_human_escalations_per_hour
+qbitel_security_autonomy_rate
 
 # LLM metrics
-cronos_security_llm_requests_total{provider, model}
-cronos_security_llm_latency_seconds{provider, model}
-cronos_security_llm_tokens_used{provider, model}
-cronos_security_llm_errors_total{provider, error_type}
+qbitel_security_llm_requests_total{provider, model}
+qbitel_security_llm_latency_seconds{provider, model}
+qbitel_security_llm_tokens_used{provider, model}
+qbitel_security_llm_errors_total{provider, error_type}
 
 # Accuracy metrics
-cronos_security_true_positives_total
-cronos_security_false_positives_total
-cronos_security_accuracy_rate
+qbitel_security_true_positives_total
+qbitel_security_false_positives_total
+qbitel_security_accuracy_rate
 ```
 
 ### Dashboard Queries
 
 ```promql
 # Autonomy rate
-sum(rate(cronos_security_decisions_total{decision_type="auto_execute"}[1h])) /
-sum(rate(cronos_security_decisions_total[1h])) * 100
+sum(rate(qbitel_security_decisions_total{decision_type="auto_execute"}[1h])) /
+sum(rate(qbitel_security_decisions_total[1h])) * 100
 
 # Average decision time
-histogram_quantile(0.95, rate(cronos_security_decision_duration_seconds_bucket[5m]))
+histogram_quantile(0.95, rate(qbitel_security_decision_duration_seconds_bucket[5m]))
 
 # Response success rate
-sum(rate(cronos_security_responses_total{status="success"}[1h])) /
-sum(rate(cronos_security_responses_total[1h])) * 100
+sum(rate(qbitel_security_responses_total{status="success"}[1h])) /
+sum(rate(qbitel_security_responses_total[1h])) * 100
 ```
 
 ---
@@ -629,7 +629,7 @@ event = SecurityEvent(
     }
 )
 
-# CRONOS AI analysis (automatic)
+# QBITEL analysis (automatic)
 analysis = await security.analyze(event)
 # Result: Confidence 0.95, Risk: Medium
 # Decision: Auto-Execute
@@ -655,7 +655,7 @@ event = SecurityEvent(
     }
 )
 
-# CRONOS AI analysis
+# QBITEL analysis
 analysis = await security.analyze(event)
 # Result: Confidence 0.75, Risk: Critical
 # Decision: Escalate (safety system involved)
@@ -682,7 +682,7 @@ event = SecurityEvent(
     }
 )
 
-# CRONOS AI analysis
+# QBITEL analysis
 analysis = await security.analyze(event)
 # Result: Confidence 0.91, Risk: High
 # Decision: Auto-Approve

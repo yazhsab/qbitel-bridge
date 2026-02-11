@@ -1,5 +1,5 @@
 """
-CRONOS AI - Zero-Touch Security Orchestrator Tests
+QBITEL - Zero-Touch Security Orchestrator Tests
 Comprehensive test suite for security automation functionality.
 """
 

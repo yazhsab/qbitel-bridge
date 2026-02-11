@@ -2,7 +2,7 @@
 
 ## Overview
 
-CRONOS AI Engine uses Alembic for database schema migrations, providing a robust and production-ready migration system with version control, rollback capabilities, and comprehensive testing procedures.
+QBITEL Engine uses Alembic for database schema migrations, providing a robust and production-ready migration system with version control, rollback capabilities, and comprehensive testing procedures.
 
 ## Prerequisites
 
@@ -16,11 +16,11 @@ Set the following environment variables before running migrations:
 
 ```bash
 # Database Configuration
-export CRONOS_AI_DB_HOST="localhost"
-export CRONOS_AI_DB_PORT="5432"
-export CRONOS_AI_DB_NAME="cronos_ai"
-export CRONOS_AI_DB_USER="cronos"
-export CRONOS_AI_DB_PASSWORD="<your-secure-password>"
+export QBITEL_AI_DB_HOST="localhost"
+export QBITEL_AI_DB_PORT="5432"
+export QBITEL_AI_DB_NAME="qbitel"
+export QBITEL_AI_DB_USER="qbitel"
+export QBITEL_AI_DB_PASSWORD="<your-secure-password>"
 
 # Optional: Use async mode for migrations
 export ALEMBIC_USE_ASYNC="false"
@@ -117,13 +117,13 @@ cat alembic/versions/<revision_id>_description.py
 
 ```bash
 # Backup current database
-pg_dump -U cronos cronos_ai > backup_before_migration.sql
+pg_dump -U qbitel qbitel > backup_before_migration.sql
 
 # Run migration
 alembic upgrade head
 
 # Verify tables created
-psql -U cronos -d cronos_ai -c "\dt"
+psql -U qbitel -d qbitel -c "\dt"
 
 # Test rollback
 alembic downgrade -1
@@ -143,7 +143,7 @@ from ai_engine.models.database import User, APIKey, AuditLog
 
 async def test_migration():
     engine = create_async_engine(
-        "postgresql+asyncpg://cronos:password@localhost/cronos_ai"
+        "postgresql+asyncpg://qbitel:password@localhost/qbitel"
     )
     
     async_session = sessionmaker(
@@ -228,7 +228,7 @@ time alembic downgrade -1
 ```bash
 # Create timestamped backup
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-pg_dump -U cronos -h prod-db-host cronos_ai > backup_${TIMESTAMP}.sql
+pg_dump -U qbitel -h prod-db-host qbitel > backup_${TIMESTAMP}.sql
 
 # Verify backup
 pg_restore --list backup_${TIMESTAMP}.sql
@@ -238,16 +238,16 @@ pg_restore --list backup_${TIMESTAMP}.sql
 
 ```bash
 # Set application to maintenance mode
-kubectl scale deployment cronos-ai --replicas=0
+kubectl scale deployment qbitel --replicas=0
 ```
 
 3. **Run Migration**
 
 ```bash
 # Set production environment
-export CRONOS_AI_ENVIRONMENT=production
-export CRONOS_AI_DB_HOST="prod-db-host"
-export CRONOS_AI_DB_PASSWORD="<production-password>"
+export QBITEL_AI_ENVIRONMENT=production
+export QBITEL_AI_DB_HOST="prod-db-host"
+export QBITEL_AI_DB_PASSWORD="<production-password>"
 
 # Run migration
 alembic upgrade head
@@ -260,20 +260,20 @@ alembic current
 
 ```bash
 # Check tables
-psql -U cronos -h prod-db-host -d cronos_ai -c "\dt"
+psql -U qbitel -h prod-db-host -d qbitel -c "\dt"
 
 # Check indexes
-psql -U cronos -h prod-db-host -d cronos_ai -c "\di"
+psql -U qbitel -h prod-db-host -d qbitel -c "\di"
 
 # Verify data integrity
-psql -U cronos -h prod-db-host -d cronos_ai -c "SELECT COUNT(*) FROM users;"
+psql -U qbitel -h prod-db-host -d qbitel -c "SELECT COUNT(*) FROM users;"
 ```
 
 5. **Disable Maintenance Mode**
 
 ```bash
 # Restore application
-kubectl scale deployment cronos-ai --replicas=3
+kubectl scale deployment qbitel --replicas=3
 ```
 
 ### Rollback Procedure
@@ -285,10 +285,10 @@ If migration fails:
 alembic downgrade -1
 
 # Restore from backup if needed
-psql -U cronos -h prod-db-host -d cronos_ai < backup_${TIMESTAMP}.sql
+psql -U qbitel -h prod-db-host -d qbitel < backup_${TIMESTAMP}.sql
 
 # Restart application
-kubectl rollout restart deployment cronos-ai
+kubectl rollout restart deployment qbitel
 ```
 
 ## Migration Best Practices
@@ -299,10 +299,10 @@ kubectl rollout restart deployment cronos-ai
 # Automated backup script
 #!/bin/bash
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="/backups/cronos_ai"
+BACKUP_DIR="/backups/qbitel"
 mkdir -p $BACKUP_DIR
 
-pg_dump -U cronos cronos_ai | gzip > $BACKUP_DIR/backup_${TIMESTAMP}.sql.gz
+pg_dump -U qbitel qbitel | gzip > $BACKUP_DIR/backup_${TIMESTAMP}.sql.gz
 
 # Keep last 30 days of backups
 find $BACKUP_DIR -name "backup_*.sql.gz" -mtime +30 -delete
@@ -314,7 +314,7 @@ Always test migrations in a staging environment that mirrors production:
 
 ```bash
 # Copy production data to staging
-pg_dump -U cronos -h prod-db cronos_ai | psql -U cronos -h staging-db cronos_ai
+pg_dump -U qbitel -h prod-db qbitel | psql -U qbitel -h staging-db qbitel
 
 # Test migration in staging
 alembic upgrade head
@@ -368,7 +368,7 @@ time alembic upgrade head 2>&1 | tee migration.log
 
 ```bash
 # Check current schema
-psql -U cronos -d cronos_ai -c "\d"
+psql -U qbitel -d qbitel -c "\d"
 
 # Mark migration as complete without running
 alembic stamp head
@@ -378,10 +378,10 @@ alembic stamp head
 
 ```bash
 # Test database connection
-psql -U cronos -h localhost -d cronos_ai -c "SELECT version();"
+psql -U qbitel -h localhost -d qbitel -c "SELECT version();"
 
 # Check environment variables
-env | grep CRONOS_AI_DB
+env | grep QBITEL_AI_DB
 ```
 
 ### Rollback Fails
@@ -394,7 +394,7 @@ alembic downgrade <revision_id> --sql > rollback.sql
 cat rollback.sql
 
 # Apply manually if needed
-psql -U cronos -d cronos_ai < rollback.sql
+psql -U qbitel -d qbitel < rollback.sql
 ```
 
 ## CI/CD Integration
@@ -427,8 +427,8 @@ jobs:
       
       - name: Run migrations
         env:
-          CRONOS_AI_DB_HOST: ${{ secrets.DB_HOST }}
-          CRONOS_AI_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          QBITEL_AI_DB_HOST: ${{ secrets.DB_HOST }}
+          QBITEL_AI_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           cd ai_engine
           alembic upgrade head
@@ -447,4 +447,4 @@ jobs:
 For migration issues:
 - Check logs: `tail -f alembic.log`
 - Review documentation: `docs/DATABASE_MIGRATIONS.md`
-- Contact: devops@cronos-ai.com
+- Contact: devops@qbitel.com

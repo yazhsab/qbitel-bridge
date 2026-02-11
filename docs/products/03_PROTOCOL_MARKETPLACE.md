@@ -2,7 +2,7 @@
 
 ## Overview
 
-Protocol Marketplace is CRONOS AI's community-driven ecosystem of pre-built protocol definitions, parsers, and integrations. It enables organizations to purchase ready-to-use protocol support instead of building from scratch, while allowing protocol experts to monetize their knowledge.
+Protocol Marketplace is QBITEL's community-driven ecosystem of pre-built protocol definitions, parsers, and integrations. It enables organizations to purchase ready-to-use protocol support instead of building from scratch, while allowing protocol experts to monetize their knowledge.
 
 ---
 
@@ -18,12 +18,12 @@ Organizations face significant barriers to protocol integration:
 - **Quality variance**: DIY solutions lack standardized validation
 - **Slow time-to-market**: Even with AI discovery, validation and hardening take time
 
-### The CRONOS AI Solution
+### The QBITEL Solution
 
 Protocol Marketplace creates a two-sided platform where:
 - **Protocol creators** (domain experts) contribute validated, production-ready protocols
 - **Protocol consumers** (enterprises) purchase pre-built integrations instantly
-- **CRONOS AI** validates, hosts, and secures all marketplace content
+- **QBITEL** validates, hosts, and secures all marketplace content
 
 ---
 
@@ -139,7 +139,7 @@ protocol:
   description: "Complete ISO 8583 implementation for banking transactions"
 
   # Metadata
-  author: "cronos-ai"
+  author: "qbitel"
   license: "commercial"
   pricing:
     base_price: 25000
@@ -231,7 +231,7 @@ Response:
             "description": "Complete ISO 8583 implementation...",
             "author": {
                 "id": "user_abc123",
-                "name": "CRONOS AI",
+                "name": "QBITEL",
                 "verified": true
             },
             "pricing": {
@@ -273,7 +273,7 @@ Response:
     "description": "Complete ISO 8583 implementation for banking transactions including authorization, reversal, and settlement messages.",
     "author": {
         "id": "user_abc123",
-        "name": "CRONOS AI",
+        "name": "QBITEL",
         "verified": true,
         "protocols_published": 25
     },
@@ -316,8 +316,8 @@ Response:
             "changes": ["Added field 127 support", "Performance improvements"]
         }
     ],
-    "documentation_url": "https://docs.cronos-ai.com/protocols/iso8583-banking-v2",
-    "support_url": "https://support.cronos-ai.com/protocols/iso8583-banking-v2"
+    "documentation_url": "https://docs.qbitel.com/protocols/iso8583-banking-v2",
+    "support_url": "https://support.qbitel.com/protocols/iso8583-banking-v2"
 }
 ```
 
@@ -353,9 +353,9 @@ Response:
     "amount": 25000,
     "currency": "USD",
     "status": "completed",
-    "invoice_url": "https://invoices.cronos-ai.com/inv_abc123",
+    "invoice_url": "https://invoices.qbitel.com/inv_abc123",
     "download_url": "/api/v1/marketplace/installations/inst_xyz789/download",
-    "api_key": "cronos_mp_sk_live_xxxxxxxxxxxx",
+    "api_key": "qbitel_mp_sk_live_xxxxxxxxxxxx",
     "expires_at": null,  // Perpetual license
     "created_at": "2025-01-16T10:30:00Z"
 }
@@ -395,7 +395,7 @@ Response:
     "status": "validation_pending",
     "validation_id": "val_abc123",
     "estimated_completion": "2025-01-17T10:30:00Z",
-    "webhook_url": "https://api.cronos-ai.com/webhooks/validation/val_abc123"
+    "webhook_url": "https://api.qbitel.com/webhooks/validation/val_abc123"
 }
 ```
 
@@ -552,7 +552,7 @@ Response:
 | Individual expert | 5-10 | $50K-$200K |
 | Small consulting firm | 20-50 | $200K-$1M |
 | Enterprise contributor | 50-100 | $500K-$2M |
-| CRONOS AI (first-party) | 200+ | $5M+ |
+| QBITEL (first-party) | 200+ | $5M+ |
 
 ---
 
@@ -562,23 +562,23 @@ Response:
 
 ```bash
 # Marketplace Settings
-CRONOS_MARKETPLACE_ENABLED=true
-CRONOS_MARKETPLACE_S3_BUCKET=cronos-marketplace-protocols
-CRONOS_MARKETPLACE_CDN_URL=https://cdn.cronos-ai.com
+QBITEL_MARKETPLACE_ENABLED=true
+QBITEL_MARKETPLACE_S3_BUCKET=qbitel-marketplace-protocols
+QBITEL_MARKETPLACE_CDN_URL=https://cdn.qbitel.com
 
 # Stripe Integration
-CRONOS_STRIPE_API_KEY=sk_live_xxxxx
-CRONOS_STRIPE_WEBHOOK_SECRET=whsec_xxxxx
-CRONOS_PLATFORM_FEE=0.30
+QBITEL_STRIPE_API_KEY=sk_live_xxxxx
+QBITEL_STRIPE_WEBHOOK_SECRET=whsec_xxxxx
+QBITEL_PLATFORM_FEE=0.30
 
 # Validation
-CRONOS_VALIDATION_ENABLED=true
-CRONOS_VALIDATION_TIMEOUT=600
-CRONOS_VALIDATION_SANDBOX=true
+QBITEL_VALIDATION_ENABLED=true
+QBITEL_VALIDATION_TIMEOUT=600
+QBITEL_VALIDATION_SANDBOX=true
 
 # Storage
-CRONOS_PROTOCOL_MAX_SIZE=100MB
-CRONOS_SAMPLE_MAX_SIZE=50MB
+QBITEL_PROTOCOL_MAX_SIZE=100MB
+QBITEL_SAMPLE_MAX_SIZE=50MB
 ```
 
 ### YAML Configuration
@@ -588,8 +588,8 @@ marketplace:
   enabled: true
 
   storage:
-    s3_bucket: cronos-marketplace-protocols
-    cdn_url: https://cdn.cronos-ai.com
+    s3_bucket: qbitel-marketplace-protocols
+    cdn_url: https://cdn.qbitel.com
     max_protocol_size: 104857600  # 100MB
     max_sample_size: 52428800     # 50MB
 
@@ -612,7 +612,7 @@ marketplace:
 
   search:
     provider: elasticsearch
-    index_name: cronos-protocols
+    index_name: qbitel-protocols
     refresh_interval: 5m
 
   categories:
@@ -647,24 +647,24 @@ marketplace:
 
 ```
 # Marketplace operations
-cronos_marketplace_searches_total{category}
-cronos_marketplace_purchases_total{category, license_type}
-cronos_marketplace_revenue_total{currency}
+qbitel_marketplace_searches_total{category}
+qbitel_marketplace_purchases_total{category, license_type}
+qbitel_marketplace_revenue_total{currency}
 
 # Protocol metrics
-cronos_marketplace_protocols_total{category, status}
-cronos_marketplace_installations_total{protocol_id}
-cronos_marketplace_reviews_total{protocol_id, rating}
+qbitel_marketplace_protocols_total{category, status}
+qbitel_marketplace_installations_total{protocol_id}
+qbitel_marketplace_reviews_total{protocol_id, rating}
 
 # Validation metrics
-cronos_marketplace_validations_total{status}
-cronos_marketplace_validation_duration_seconds
-cronos_marketplace_validation_accuracy{protocol_id}
+qbitel_marketplace_validations_total{status}
+qbitel_marketplace_validation_duration_seconds
+qbitel_marketplace_validation_accuracy{protocol_id}
 
 # Creator metrics
-cronos_marketplace_creators_total
-cronos_marketplace_creator_earnings_total{creator_id}
-cronos_marketplace_creator_payout_total{creator_id}
+qbitel_marketplace_creators_total
+qbitel_marketplace_creator_earnings_total{creator_id}
+qbitel_marketplace_creator_payout_total{creator_id}
 ```
 
 ### Health Check
@@ -697,7 +697,7 @@ GET /api/v1/marketplace/health
 ### Use Case 1: Enterprise Purchases ISO 8583
 
 ```python
-from cronos_ai import Marketplace
+from qbitel import Marketplace
 
 marketplace = Marketplace(api_key="your_api_key")
 
@@ -720,7 +720,7 @@ purchase = marketplace.purchase(
 
 # Download and install
 installation = marketplace.download(purchase.installation_id)
-installation.install(target_path="/opt/cronos/protocols")
+installation.install(target_path="/opt/qbitel/protocols")
 
 # Use the protocol
 from iso8583_banking import ISO8583Parser
@@ -731,7 +731,7 @@ message = parser.parse(raw_data)
 ### Use Case 2: Expert Contributes Protocol
 
 ```python
-from cronos_ai import Marketplace
+from qbitel import Marketplace
 
 marketplace = Marketplace(api_key="creator_api_key")
 

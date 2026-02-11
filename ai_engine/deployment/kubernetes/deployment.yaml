@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cronos-ai-engine
-  namespace: cronos-ai
+  name: qbitel-engine
+  namespace: qbitel
   labels:
-    app: cronos-ai-engine
-    app.kubernetes.io/name: cronos-ai-engine
+    app: qbitel-engine
+    app.kubernetes.io/name: qbitel-engine
     app.kubernetes.io/component: ai-engine
     app.kubernetes.io/version: "1.0.0"
-    app.kubernetes.io/part-of: cronos-ai
+    app.kubernetes.io/part-of: qbitel
 spec:
   replicas: 3
   strategy:
@@ -18,12 +18,12 @@ spec:
       maxUnavailable: 1
   selector:
     matchLabels:
-      app: cronos-ai-engine
+      app: qbitel-engine
   template:
     metadata:
       labels:
-        app: cronos-ai-engine
-        app.kubernetes.io/name: cronos-ai-engine
+        app: qbitel-engine
+        app.kubernetes.io/name: qbitel-engine
         app.kubernetes.io/component: ai-engine
         app.kubernetes.io/version: "1.0.0"
       annotations:
@@ -31,7 +31,7 @@ spec:
         prometheus.io/port: "9090"
         prometheus.io/path: "/metrics"
     spec:
-      serviceAccountName: cronos-ai-engine
+      serviceAccountName: qbitel-engine
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -39,7 +39,7 @@ spec:
         fsGroup: 1000
       containers:
       - name: ai-engine
-        image: cronos-ai/ai-engine:1.0.0
+        image: qbitel/ai-engine:1.0.0
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
@@ -57,7 +57,7 @@ spec:
         - name: AI_ENGINE_LOG_LEVEL
           valueFrom:
             configMapKeyRef:
-              name: cronos-ai-config
+              name: qbitel-config
               key: log_level
         - name: AI_ENGINE_DATA_PATH
           value: "/app/data"
@@ -66,7 +66,7 @@ spec:
         - name: MLFLOW_TRACKING_URI
           valueFrom:
             configMapKeyRef:
-              name: cronos-ai-config
+              name: qbitel-config
               key: mlflow_tracking_uri
         - name: PROMETHEUS_METRICS_PORT
           value: "9090"
@@ -134,13 +134,13 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: cronos-ai-config
+          name: qbitel-config
       - name: data
         persistentVolumeClaim:
-          claimName: cronos-ai-data
+          claimName: qbitel-data
       - name: models
         persistentVolumeClaim:
-          claimName: cronos-ai-models
+          claimName: qbitel-models
       - name: logs
         emptyDir: {}
       nodeSelector:
@@ -160,17 +160,17 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - cronos-ai-engine
+                  - qbitel-engine
               topologyKey: kubernetes.io/hostname
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cronos-ai-engine-http
-  namespace: cronos-ai
+  name: qbitel-engine-http
+  namespace: qbitel
   labels:
-    app: cronos-ai-engine
-    app.kubernetes.io/name: cronos-ai-engine
+    app: qbitel-engine
+    app.kubernetes.io/name: qbitel-engine
     app.kubernetes.io/component: ai-engine
     service-type: http-api
 spec:
@@ -181,16 +181,16 @@ spec:
     protocol: TCP
     name: http
   selector:
-    app: cronos-ai-engine
+    app: qbitel-engine
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cronos-ai-engine-grpc
-  namespace: cronos-ai
+  name: qbitel-engine-grpc
+  namespace: qbitel
   labels:
-    app: cronos-ai-engine
-    app.kubernetes.io/name: cronos-ai-engine
+    app: qbitel-engine
+    app.kubernetes.io/name: qbitel-engine
     app.kubernetes.io/component: ai-engine
     service-type: grpc-api
 spec:
@@ -201,16 +201,16 @@ spec:
     protocol: TCP
     name: grpc
   selector:
-    app: cronos-ai-engine
+    app: qbitel-engine
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cronos-ai-engine-metrics
-  namespace: cronos-ai
+  name: qbitel-engine-metrics
+  namespace: qbitel
   labels:
-    app: cronos-ai-engine
-    app.kubernetes.io/name: cronos-ai-engine
+    app: qbitel-engine
+    app.kubernetes.io/name: qbitel-engine
     app.kubernetes.io/component: ai-engine
     service-type: metrics
   annotations:
@@ -225,24 +225,24 @@ spec:
     protocol: TCP
     name: metrics
   selector:
-    app: cronos-ai-engine
+    app: qbitel-engine
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: cronos-ai-engine
-  namespace: cronos-ai
+  name: qbitel-engine
+  namespace: qbitel
   labels:
-    app: cronos-ai-engine
-    app.kubernetes.io/name: cronos-ai-engine
+    app: qbitel-engine
+    app.kubernetes.io/name: qbitel-engine
     app.kubernetes.io/component: ai-engine
 automountServiceAccountToken: false
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: cronos-ai-engine
-  namespace: cronos-ai
+  name: qbitel-engine
+  namespace: qbitel
 rules:
 - apiGroups: [""]
   resources: ["configmaps", "secrets"]
@@ -254,35 +254,35 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: cronos-ai-engine
-  namespace: cronos-ai
+  name: qbitel-engine
+  namespace: qbitel
 subjects:
 - kind: ServiceAccount
-  name: cronos-ai-engine
-  namespace: cronos-ai
+  name: qbitel-engine
+  namespace: qbitel
 roleRef:
   kind: Role
-  name: cronos-ai-engine
+  name: qbitel-engine
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cronos-ai-config
-  namespace: cronos-ai
+  name: qbitel-config
+  namespace: qbitel
   labels:
-    app: cronos-ai-engine
-    app.kubernetes.io/name: cronos-ai-engine
+    app: qbitel-engine
+    app.kubernetes.io/name: qbitel-engine
     app.kubernetes.io/component: ai-engine
 data:
   log_level: "INFO"
-  mlflow_tracking_uri: "http://mlflow-service.cronos-ai.svc.cluster.local:5000"
+  mlflow_tracking_uri: "http://mlflow-service.qbitel.svc.cluster.local:5000"
   metrics_collection_interval: "15"
   health_check_interval: "30"
   enable_tracing: "true"
   enable_observability: "true"
   production.yml: |
-    # CRONOS AI Engine - Production Configuration
+    # QBITEL Engine - Production Configuration
     
     # Server Configuration
     rest_host: "0.0.0.0"
@@ -296,7 +296,7 @@ data:
     log_format: "structured"
     enable_console_logging: true
     enable_file_logging: true
-    log_file: "/app/logs/cronos_ai.log"
+    log_file: "/app/logs/qbitel.log"
     enable_tracing: true
     include_system_info: true
     
@@ -308,8 +308,8 @@ data:
     
     # MLflow Configuration
     mlflow:
-      tracking_uri: "http://mlflow-service.cronos-ai.svc.cluster.local:5000"
-      experiment_name: "cronos_ai_production"
+      tracking_uri: "http://mlflow-service.qbitel.svc.cluster.local:5000"
+      experiment_name: "qbitel_production"
       enable_autolog: true
     
     # Training Configuration
@@ -351,11 +351,11 @@ data:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: cronos-ai-data
-  namespace: cronos-ai
+  name: qbitel-data
+  namespace: qbitel
   labels:
-    app: cronos-ai-engine
-    app.kubernetes.io/name: cronos-ai-engine
+    app: qbitel-engine
+    app.kubernetes.io/name: qbitel-engine
     app.kubernetes.io/component: ai-engine
 spec:
   accessModes:
@@ -368,11 +368,11 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: cronos-ai-models
-  namespace: cronos-ai
+  name: qbitel-models
+  namespace: qbitel
   labels:
-    app: cronos-ai-engine
-    app.kubernetes.io/name: cronos-ai-engine
+    app: qbitel-engine
+    app.kubernetes.io/name: qbitel-engine
     app.kubernetes.io/component: ai-engine
 spec:
   accessModes:

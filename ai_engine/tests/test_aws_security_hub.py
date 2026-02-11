@@ -248,7 +248,7 @@ class TestAWSSecurityHubIntegration:
 
         assert "AWSTemplateFormatVersion" in template
         assert "Resources" in template
-        assert "CronosSecurityHubIntegration" in template["Resources"]
+        assert "QbitelSecurityHubIntegration" in template["Resources"]
 
     @pytest.mark.parametrize("severity,expected_compliance", [
         ("CRITICAL", "FAILED"),

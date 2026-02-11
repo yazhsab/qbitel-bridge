@@ -1,11 +1,12 @@
 """
-CRONOS AI - Stripe Connect Integration for Marketplace
+QBITEL - Stripe Connect Integration for Marketplace
 
 Handles payment processing, revenue sharing, and subscription management
 for the Protocol Marketplace using Stripe Connect.
 """
 
 import logging
+import os
 import stripe
 from typing import Dict, Any, Optional
 from decimal import Decimal
@@ -82,7 +83,7 @@ class StripeConnectManager:
                 },
                 metadata={
                     "user_id": str(user_id),
-                    "platform": "cronos-ai-marketplace",
+                    "platform": "qbitel-marketplace",
                 }
             )
 
@@ -91,8 +92,8 @@ class StripeConnectManager:
             # Create account link for onboarding
             account_link = stripe.AccountLink.create(
                 account=account.id,
-                refresh_url=f"https://marketplace.cronos-ai.com/onboarding/refresh",
-                return_url=f"https://marketplace.cronos-ai.com/onboarding/complete",
+                refresh_url=os.getenv("MARKETPLACE_BASE_URL", "http://localhost:3000") + "/onboarding/refresh",
+                return_url=os.getenv("MARKETPLACE_BASE_URL", "http://localhost:3000") + "/onboarding/complete",
                 type="account_onboarding",
             )
 

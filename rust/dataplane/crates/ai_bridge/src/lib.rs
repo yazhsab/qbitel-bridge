@@ -1,4 +1,4 @@
-//! CRONOS AI Bridge - Integration between Rust dataplane and Python AI engine
+//! QBITEL Bridge Bridge - Integration between Rust dataplane and Python AI engine
 //!
 //! This crate provides a high-performance bridge between the Rust dataplane components
 //! and the Python-based AI engine for protocol discovery and classification.

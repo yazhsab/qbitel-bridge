@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Intelligence Copilot
+QBITEL - Protocol Intelligence Copilot
 Main implementation of the natural language interface for protocol analysis.
 """
 
@@ -13,7 +13,7 @@ from datetime import datetime
 from prometheus_client import Counter, Histogram
 
 from ..core.config import get_config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..llm.unified_llm_service import get_llm_service, LLMRequest
 from ..llm.rag_engine import RAGEngine
 from .context_manager import ConversationContextManager
@@ -27,19 +27,19 @@ from ..discovery.protocol_discovery_orchestrator import ProtocolDiscoveryOrchest
 
 # Metrics
 COPILOT_QUERY_COUNTER = Counter(
-    "cronos_copilot_queries_total", "Total copilot queries", ["query_type", "status"]
+    "qbitel_copilot_queries_total", "Total copilot queries", ["query_type", "status"]
 )
 COPILOT_QUERY_DURATION = Histogram(
-    "cronos_copilot_query_duration_seconds", "Copilot query duration", ["query_type"]
+    "qbitel_copilot_query_duration_seconds", "Copilot query duration", ["query_type"]
 )
 COPILOT_CONFIDENCE_SCORE = Histogram(
-    "cronos_copilot_confidence_score", "Copilot confidence scores"
+    "qbitel_copilot_confidence_score", "Copilot confidence scores"
 )
 
 logger = logging.getLogger(__name__)
 
 
-class CopilotException(CronosAIException):
+class CopilotException(QbitelAIException):
     """Copilot-specific exception."""
 
     pass
@@ -88,7 +88,7 @@ class CopilotResponse:
 
 class ProtocolIntelligenceCopilot:
     """
-    Main Protocol Intelligence Copilot integrating with existing CRONOS AI architecture.
+    Main Protocol Intelligence Copilot integrating with existing QBITEL architecture.
     Provides natural language interface for protocol analysis, field detection, and security assessment.
     """
 
@@ -671,7 +671,7 @@ Security Assessment:
     # Helper methods for data analysis and formatting
 
     async def _analyze_packet_data(self, packet_data: bytes) -> Dict[str, Any]:
-        """Analyze packet data using existing CRONOS AI capabilities."""
+        """Analyze packet data using existing QBITEL capabilities."""
         try:
             from ..discovery.protocol_discovery_orchestrator import DiscoveryRequest
 

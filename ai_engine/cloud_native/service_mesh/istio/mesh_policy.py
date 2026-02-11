@@ -48,12 +48,12 @@ class MeshPolicyManager:
     authentication, authorization, and rate limiting.
     """
 
-    def __init__(self, namespace: str = "cronos-system"):
+    def __init__(self, namespace: str = "qbitel-system"):
         """
         Initialize the Mesh Policy Manager.
 
         Args:
-            namespace: Kubernetes namespace for CRONOS AI
+            namespace: Kubernetes namespace for QBITEL
         """
         self.namespace = namespace
         self._policies: Dict[str, ServicePolicy] = {}
@@ -89,7 +89,7 @@ class MeshPolicyManager:
                 "name": name,
                 "namespace": namespace,
                 "labels": {
-                    "app": "cronos-ai",
+                    "app": "qbitel",
                     "managed-by": "mesh-policy-manager"
                 }
             },
@@ -158,7 +158,7 @@ class MeshPolicyManager:
                 "name": f"{name}-rate-limit",
                 "namespace": namespace,
                 "labels": {
-                    "app": "cronos-ai",
+                    "app": "qbitel",
                     "component": "rate-limiter"
                 }
             },
@@ -267,7 +267,7 @@ class MeshPolicyManager:
                 "name": f"{service.service_name}-authz",
                 "namespace": service.namespace,
                 "labels": {
-                    "app": "cronos-ai",
+                    "app": "qbitel",
                     "service": service.service_name
                 }
             },
@@ -315,7 +315,7 @@ class MeshPolicyManager:
                 "name": name,
                 "namespace": namespace,
                 "labels": {
-                    "app": "cronos-ai",
+                    "app": "qbitel",
                     "component": "jwt-auth"
                 }
             },
@@ -368,7 +368,7 @@ class MeshPolicyManager:
                 "name": name,
                 "namespace": namespace,
                 "labels": {
-                    "app": "cronos-ai",
+                    "app": "qbitel",
                     "component": "egress-policy"
                 }
             },
@@ -419,7 +419,7 @@ class MeshPolicyManager:
                 "name": name,
                 "namespace": namespace,
                 "labels": {
-                    "app": "cronos-ai",
+                    "app": "qbitel",
                     "component": "sidecar-config"
                 }
             },
@@ -470,7 +470,7 @@ class MeshPolicyManager:
                 "name": name,
                 "namespace": namespace,
                 "labels": {
-                    "app": "cronos-ai",
+                    "app": "qbitel",
                     "managed-by": "mesh-policy-manager"
                 }
             },

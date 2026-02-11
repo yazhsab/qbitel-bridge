@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Persistent Error Storage
+QBITEL Engine - Persistent Error Storage
 Provides persistent storage for error records using Redis and PostgreSQL.
 """
 
@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from sqlalchemy.orm import declarative_base
 
 from .error_handling import ErrorRecord, ErrorSeverity, ErrorCategory, RecoveryStrategy
-from .exceptions import CronosAIException
+from .exceptions import QbitelAIException
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class PersistentErrorStorage:
     def __init__(
         self,
         redis_url: str = "redis://localhost:6379/0",
-        postgres_url: str = "postgresql+asyncpg://user:pass@localhost/cronos_ai",
+        postgres_url: str = "postgresql+asyncpg://user:pass@localhost/qbitel",
         redis_ttl: int = 86400,  # 24 hours
         postgres_retention_days: int = 90,
     ):
@@ -102,7 +102,7 @@ class PersistentErrorStorage:
 
         except Exception as e:
             self.logger.error(f"Failed to initialize error storage: {e}")
-            raise CronosAIException(f"Error storage initialization failed: {e}")
+            raise QbitelAIException(f"Error storage initialization failed: {e}")
 
     async def store_error(self, error_record: ErrorRecord) -> bool:
         """
@@ -420,7 +420,7 @@ async def get_error_storage(
         _error_storage = PersistentErrorStorage(
             redis_url=redis_url or "redis://localhost:6379/0",
             postgres_url=postgres_url
-            or "postgresql+asyncpg://user:pass@localhost/cronos_ai",
+            or "postgresql+asyncpg://user:pass@localhost/qbitel",
         )
         await _error_storage.initialize()
 

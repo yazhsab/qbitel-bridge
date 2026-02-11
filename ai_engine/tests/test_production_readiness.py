@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Production Readiness Tests
+QBITEL Engine - Production Readiness Tests
 Comprehensive test suite for production readiness features.
 """
 

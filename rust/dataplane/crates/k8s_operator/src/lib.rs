@@ -1,6 +1,6 @@
-//! CRONOS AI Kubernetes Operator
+//! QBITEL Bridge Kubernetes Operator
 //! 
-//! Enterprise-grade Kubernetes operator for managing CRONOS AI services,
+//! Enterprise-grade Kubernetes operator for managing QBITEL Bridge services,
 //! including dataplane, control plane, AI engine, and service mesh integration.
 
 pub mod crd;
@@ -36,9 +36,9 @@ pub struct OperatorContext {
     pub config: Arc<config::OperatorConfig>,
 }
 
-/// Initialize and run the CRONOS AI operator
+/// Initialize and run the QBITEL Bridge operator
 pub async fn run_operator() -> Result<()> {
-    info!("Starting CRONOS AI Kubernetes Operator");
+    info!("Starting QBITEL Bridge Kubernetes Operator");
 
     // Initialize Kubernetes client
     let client = Client::try_default().await?;
@@ -98,7 +98,7 @@ pub async fn run_operator() -> Result<()> {
 async fn install_crds(client: &Client) -> Result<()> {
     info!("Installing Custom Resource Definitions");
 
-    // Install CRDs for all CRONOS AI resources
+    // Install CRDs for all QBITEL Bridge resources
     let crds = vec![
         DataPlaneService::crd(),
         ControlPlaneService::crd(),

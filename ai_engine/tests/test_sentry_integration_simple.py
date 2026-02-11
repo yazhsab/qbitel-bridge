@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Sentry Integration Simple Tests
+QBITEL Engine - Sentry Integration Simple Tests
 
 Simple test suite for Sentry error tracking and monitoring.
 """
@@ -14,7 +14,7 @@ from ai_engine.core.sentry_integration import (
     SentryErrorTracker,
 )
 from ai_engine.core.error_handling import ErrorRecord, ErrorSeverity
-from ai_engine.core.exceptions import CronosAIException
+from ai_engine.core.exceptions import QbitelAIException
 
 
 class TestSentryErrorTracker:
@@ -69,7 +69,7 @@ class TestSentryErrorTracker:
             os.environ,
             {
                 "SENTRY_DSN": "https://env@sentry.io/789",
-                "CRONOS_AI_VERSION": "2.0.0-env",
+                "QBITEL_AI_VERSION": "2.0.0-env",
             },
         ):
             tracker = SentryErrorTracker()

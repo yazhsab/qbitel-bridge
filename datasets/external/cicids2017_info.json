@@ -20,7 +20,7 @@
     "step1": "Visit https://www.unb.ca/cic/datasets/ids-2017.html",
     "step2": "Download the CSV files (MachineLearningCVE folder)",
     "step3": "Place in datasets/external/cicids2017/",
-    "step4": "Run integrate_cicids.py to convert to CRONOS format"
+    "step4": "Run integrate_cicids.py to convert to QBITEL format"
   },
   "sample_columns": [
     "Flow ID",

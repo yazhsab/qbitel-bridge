@@ -1,0 +1,115 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+
+const tutorials = [
+  {
+    title: 'Discover a Legacy Protocol',
+    description: 'Capture network traffic from a legacy system and use the AI discovery pipeline to reverse-engineer its protocol structure, field boundaries, and state machine.',
+    href: '/tutorials/discover-legacy-protocol',
+    level: 'Beginner',
+    time: '30 min',
+    levelColor: 'bg-green-500/10 text-green-400 border-green-500/20',
+    topics: ['Protocol Discovery', 'Traffic Capture', 'AI Engine'],
+  },
+  {
+    title: 'Enable Quantum-Safe Encryption',
+    description: 'Configure post-quantum cryptography for your existing protocol traffic. Choose algorithm profiles, set up hybrid encryption, and verify quantum resistance.',
+    href: '/tutorials/quantum-safe-encryption',
+    level: 'Intermediate',
+    time: '45 min',
+    levelColor: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    topics: ['PQC', 'ML-KEM', 'Hybrid Encryption'],
+  },
+  {
+    title: 'Build a Protocol Adapter',
+    description: 'Use Translation Studio to transform a discovered protocol into a modern REST or gRPC API, complete with auto-generated SDKs in Python, Go, and TypeScript.',
+    href: '/tutorials/build-protocol-adapter',
+    level: 'Intermediate',
+    time: '1 hour',
+    levelColor: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    topics: ['Translation Studio', 'API Generation', 'SDK'],
+  },
+  {
+    title: 'Deploy to Kubernetes',
+    description: 'Install QBITEL Bridge on a Kubernetes cluster using Helm. Configure resource limits, set up monitoring, and verify all components are healthy.',
+    href: '/tutorials/deploy-kubernetes',
+    level: 'Intermediate',
+    time: '45 min',
+    levelColor: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    topics: ['Kubernetes', 'Helm', 'Deployment'],
+  },
+  {
+    title: 'Automated Compliance Reporting',
+    description: 'Configure the compliance engine for SOC 2, PCI DSS, or HIPAA frameworks. Map controls to your infrastructure and generate audit-ready reports automatically.',
+    href: '/tutorials/compliance-reporting',
+    level: 'Advanced',
+    time: '1 hour',
+    levelColor: 'bg-red-500/10 text-red-400 border-red-500/20',
+    topics: ['Compliance', 'SOC 2', 'Audit Reports'],
+  },
+  {
+    title: 'Legacy Mainframe Modernization',
+    description: 'End-to-end walkthrough: discover COBOL copybook structures, generate modern parsers, wrap them in APIs, and secure everything with post-quantum cryptography.',
+    href: '/tutorials/legacy-mainframe-modernization',
+    level: 'Advanced',
+    time: '2 hours',
+    levelColor: 'bg-red-500/10 text-red-400 border-red-500/20',
+    topics: ['Legacy Whisperer', 'COBOL', 'Modernization'],
+  },
+];
+---
+
+<PageLayout
+  title="Tutorials | QBITEL Bridge"
+  description="Step-by-step tutorials to help you get started with QBITEL Bridge. From protocol discovery to quantum-safe encryption and Kubernetes deployment."
+>
+  <PageHero
+    title="Tutorials"
+    description="Hands-on guides to help you master every aspect of QBITEL Bridge. Follow along step by step, from beginner concepts to advanced production workflows."
+    badge="6 Tutorials"
+  />
+
+  <!-- Filter Legend -->
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap gap-3 mb-12">
+        <span class="text-sm text-gray-400 mr-2 self-center">Difficulty:</span>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">Beginner</span>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">Intermediate</span>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">Advanced</span>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {tutorials.map((tutorial) => (
+          <a href={tutorial.href} class="card p-6 flex flex-col group">
+            <div class="flex items-center justify-between mb-4">
+              <span class={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${tutorial.levelColor}`}>
+                {tutorial.level}
+              </span>
+              <span class="text-sm text-gray-500 flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {tutorial.time}
+              </span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2 group-hover:text-quantum-400 transition-colors">{tutorial.title}</h3>
+            <p class="text-sm text-gray-400 mb-4 flex-grow">{tutorial.description}</p>
+            <div class="flex flex-wrap gap-2">
+              {tutorial.topics.map((topic) => (
+                <span class="text-xs text-gray-500 bg-surface-900 px-2 py-1 rounded">{topic}</span>
+              ))}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CTABanner
+    title="Need Help Getting Started?"
+    description="Join our community on GitHub Discussions or check the documentation for detailed reference material."
+  />
+</PageLayout>

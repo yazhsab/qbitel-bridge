@@ -1,5 +1,5 @@
 """
-CRONOS AI - Marketplace Data Seeding Script
+QBITEL - Marketplace Data Seeding Script
 
 Seeds the marketplace with sample protocols, users, and data for testing and development.
 """
@@ -37,7 +37,7 @@ from ai_engine.models.marketplace import (
 
 def seed_marketplace():
     """Seed marketplace with sample data."""
-    print("🌱 Seeding CRONOS AI Marketplace...")
+    print("🌱 Seeding QBITEL Marketplace...")
 
     # Initialize database manager
     config = get_config()
@@ -101,17 +101,17 @@ def seed_marketplace():
             ),
             MarketplaceUser(
                 user_id=uuid.uuid4(),
-                email="cronos@example.com",
-                username="cronos_official",
-                full_name="CRONOS AI",
+                email="qbitel@example.com",
+                username="qbitel_official",
+                full_name="QBITEL",
                 user_type=UserType.VENDOR,
-                organization="CRONOS AI",
+                organization="QBITEL",
                 is_verified=True,
                 reputation_score=1000,
                 total_contributions=25,
                 total_downloads=5000,
-                bio="Official CRONOS AI protocol repository",
-                website_url="https://cronos-ai.com",
+                bio="Official QBITEL protocol repository",
+                website_url="https://qbitel.com",
             ),
         ]
 
@@ -153,10 +153,10 @@ Comprehensive ISO 8583:1987 implementation for financial transaction processing.
                 protocol_type=ProtocolType.BINARY,
                 industry="finance",
                 spec_format=SpecFormat.YAML,
-                spec_file_url="s3://cronos-marketplace/protocols/iso8583/v2.1.0/spec.yaml",
-                parser_code_url="s3://cronos-marketplace/protocols/iso8583/v2.1.0/parser.py",
-                test_data_url="s3://cronos-marketplace/protocols/iso8583/v2.1.0/test_samples.bin",
-                documentation_url="https://marketplace.cronos-ai.com/protocols/iso8583/docs",
+                spec_file_url="s3://qbitel-marketplace/protocols/iso8583/v2.1.0/spec.yaml",
+                parser_code_url="s3://qbitel-marketplace/protocols/iso8583/v2.1.0/parser.py",
+                test_data_url="s3://qbitel-marketplace/protocols/iso8583/v2.1.0/test_samples.bin",
+                documentation_url="https://marketplace.qbitel.com/protocols/iso8583/docs",
                 author_id=users[0].user_id,
                 author_type=AuthorType.VENDOR,
                 organization="FinTech Labs",
@@ -166,8 +166,8 @@ Comprehensive ISO 8583:1987 implementation for financial transaction processing.
                 certification_status=CertificationStatus.CERTIFIED,
                 certification_date=datetime.utcnow(),
                 status=ProtocolStatus.PUBLISHED,
-                min_cronos_version="1.2.0",
-                supported_cronos_versions=["1.2.x", "1.3.x", "1.4.x"],
+                min_qbitel_version="1.2.0",
+                supported_qbitel_versions=["1.2.x", "1.3.x", "1.4.x"],
                 is_featured=True,
                 is_official=False,
                 average_rating=Decimal("4.7"),
@@ -202,10 +202,10 @@ Full implementation of HL7 v3 Clinical Document Architecture for healthcare data
                 protocol_type=ProtocolType.XML,
                 industry="healthcare",
                 spec_format=SpecFormat.YAML,
-                spec_file_url="s3://cronos-marketplace/protocols/hl7v3/v1.0.0/spec.yaml",
-                parser_code_url="s3://cronos-marketplace/protocols/hl7v3/v1.0.0/parser.py",
-                test_data_url="s3://cronos-marketplace/protocols/hl7v3/v1.0.0/test_samples.xml",
-                documentation_url="https://marketplace.cronos-ai.com/protocols/hl7v3/docs",
+                spec_file_url="s3://qbitel-marketplace/protocols/hl7v3/v1.0.0/spec.yaml",
+                parser_code_url="s3://qbitel-marketplace/protocols/hl7v3/v1.0.0/parser.py",
+                test_data_url="s3://qbitel-marketplace/protocols/hl7v3/v1.0.0/test_samples.xml",
+                documentation_url="https://marketplace.qbitel.com/protocols/hl7v3/docs",
                 author_id=users[1].user_id,
                 author_type=AuthorType.VENDOR,
                 organization="Healthcare Systems Corp",
@@ -215,8 +215,8 @@ Full implementation of HL7 v3 Clinical Document Architecture for healthcare data
                 certification_status=CertificationStatus.CERTIFIED,
                 certification_date=datetime.utcnow(),
                 status=ProtocolStatus.PUBLISHED,
-                min_cronos_version="1.3.0",
-                supported_cronos_versions=["1.3.x", "1.4.x"],
+                min_qbitel_version="1.3.0",
+                supported_qbitel_versions=["1.3.x", "1.4.x"],
                 is_featured=True,
                 is_official=False,
                 average_rating=Decimal("4.5"),
@@ -253,18 +253,18 @@ MQTT v5 protocol implementation with enhanced features for IoT applications.
                 protocol_type=ProtocolType.BINARY,
                 industry="iot",
                 spec_format=SpecFormat.YAML,
-                spec_file_url="s3://cronos-marketplace/protocols/mqtt/v5.0.0/spec.yaml",
-                parser_code_url="s3://cronos-marketplace/protocols/mqtt/v5.0.0/parser.py",
-                test_data_url="s3://cronos-marketplace/protocols/mqtt/v5.0.0/test_samples.bin",
-                documentation_url="https://marketplace.cronos-ai.com/protocols/mqtt/docs",
+                spec_file_url="s3://qbitel-marketplace/protocols/mqtt/v5.0.0/spec.yaml",
+                parser_code_url="s3://qbitel-marketplace/protocols/mqtt/v5.0.0/parser.py",
+                test_data_url="s3://qbitel-marketplace/protocols/mqtt/v5.0.0/test_samples.bin",
+                documentation_url="https://marketplace.qbitel.com/protocols/mqtt/docs",
                 author_id=users[2].user_id,
                 author_type=AuthorType.COMMUNITY,
                 license_type=LicenseType.FREE,
                 certification_status=CertificationStatus.CERTIFIED,
                 certification_date=datetime.utcnow(),
                 status=ProtocolStatus.PUBLISHED,
-                min_cronos_version="1.0.0",
-                supported_cronos_versions=["1.x.x"],
+                min_qbitel_version="1.0.0",
+                supported_qbitel_versions=["1.x.x"],
                 is_featured=False,
                 is_official=False,
                 average_rating=Decimal("4.8"),
@@ -280,7 +280,7 @@ MQTT v5 protocol implementation with enhanced features for IoT applications.
                 short_description="Industrial automation protocol for PLCs and SCADA systems",
                 long_description="""# Modbus TCP/IP
 
-Official CRONOS AI implementation of Modbus TCP/IP for industrial automation.
+Official QBITEL implementation of Modbus TCP/IP for industrial automation.
 
 ## Features
 - Complete Modbus TCP specification
@@ -300,19 +300,19 @@ Official CRONOS AI implementation of Modbus TCP/IP for industrial automation.
                 protocol_type=ProtocolType.BINARY,
                 industry="manufacturing",
                 spec_format=SpecFormat.YAML,
-                spec_file_url="s3://cronos-marketplace/protocols/modbus/v1.5.0/spec.yaml",
-                parser_code_url="s3://cronos-marketplace/protocols/modbus/v1.5.0/parser.py",
-                test_data_url="s3://cronos-marketplace/protocols/modbus/v1.5.0/test_samples.bin",
-                documentation_url="https://marketplace.cronos-ai.com/protocols/modbus/docs",
+                spec_file_url="s3://qbitel-marketplace/protocols/modbus/v1.5.0/spec.yaml",
+                parser_code_url="s3://qbitel-marketplace/protocols/modbus/v1.5.0/parser.py",
+                test_data_url="s3://qbitel-marketplace/protocols/modbus/v1.5.0/test_samples.bin",
+                documentation_url="https://marketplace.qbitel.com/protocols/modbus/docs",
                 author_id=users[3].user_id,
-                author_type=AuthorType.CRONOS,
-                organization="CRONOS AI",
+                author_type=AuthorType.QBITEL,
+                organization="QBITEL",
                 license_type=LicenseType.FREE,
                 certification_status=CertificationStatus.CERTIFIED,
                 certification_date=datetime.utcnow(),
                 status=ProtocolStatus.PUBLISHED,
-                min_cronos_version="1.0.0",
-                supported_cronos_versions=["1.x.x"],
+                min_qbitel_version="1.0.0",
+                supported_qbitel_versions=["1.x.x"],
                 is_featured=True,
                 is_official=True,
                 average_rating=Decimal("4.9"),

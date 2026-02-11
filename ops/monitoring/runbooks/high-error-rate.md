@@ -8,13 +8,13 @@
 
 ```bash
 # Check recent error logs
-docker-compose logs --tail=200 cronos-ai-engine | grep "ERROR\|CRITICAL"
+docker-compose logs --tail=200 qbitel-engine | grep "ERROR\|CRITICAL"
 
 # Check error breakdown by endpoint
 curl http://localhost:9090/metrics | grep http_requests_total | grep status_code=\"5
 
 # Check database connectivity
-docker-compose exec cronos-ai-engine python -c "import psycopg2; psycopg2.connect('dbname=cronos_ai user=cronos_user host=postgres')"
+docker-compose exec qbitel-engine python -c "import psycopg2; psycopg2.connect('dbname=qbitel user=qbitel_user host=postgres')"
 ```
 
 ## Common Causes
@@ -47,13 +47,13 @@ curl http://localhost:9090/api/v1/query?query='rate(http_requests_total{status_c
 2. **Check recent changes**:
 ```bash
 # Rollback if recent deployment
-kubectl rollout undo deployment/cronos-ai-engine -n cronos-ai
+kubectl rollout undo deployment/qbitel-engine -n qbitel
 ```
 
 3. **Scale up resources**:
 ```bash
 # Increase replicas
-kubectl scale deployment/cronos-ai-engine --replicas=5 -n cronos-ai
+kubectl scale deployment/qbitel-engine --replicas=5 -n qbitel
 ```
 
 ## Escalation

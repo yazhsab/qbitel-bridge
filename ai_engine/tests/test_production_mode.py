@@ -1,5 +1,5 @@
 """
-CRONOS AI - Production Mode Detection Tests
+QBITEL - Production Mode Detection Tests
 
 Comprehensive test suite for production mode detection and validation
 across all configuration classes.
@@ -23,10 +23,10 @@ from ai_engine.core.config import (
 class TestProductionModeDetection:
     """Test production mode detection logic."""
 
-    def test_production_mode_detected_from_cronos_ai_environment(self):
-        """Test production mode detection from CRONOS_AI_ENVIRONMENT."""
+    def test_production_mode_detected_from_qbitel_environment(self):
+        """Test production mode detection from QBITEL_AI_ENVIRONMENT."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             config = DatabaseConfig.__new__(DatabaseConfig)
             assert config._is_production_mode() is True
@@ -39,7 +39,7 @@ class TestProductionModeDetection:
 
     def test_production_mode_detected_from_prod_alias(self):
         """Test production mode detection from 'prod' alias."""
-        with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "prod"}, clear=True):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "prod"}, clear=True):
             config = DatabaseConfig.__new__(DatabaseConfig)
             assert config._is_production_mode() is True
 
@@ -47,7 +47,7 @@ class TestProductionModeDetection:
         """Test production mode detection is case-insensitive."""
         for env_value in ["PRODUCTION", "Production", "PROD", "Prod"]:
             with patch.dict(
-                os.environ, {"CRONOS_AI_ENVIRONMENT": env_value}, clear=True
+                os.environ, {"QBITEL_AI_ENVIRONMENT": env_value}, clear=True
             ):
                 config = DatabaseConfig.__new__(DatabaseConfig)
                 assert config._is_production_mode() is True
@@ -61,28 +61,28 @@ class TestProductionModeDetection:
     def test_development_mode_explicit(self):
         """Test development mode when explicitly set."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "development"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
         ):
             config = DatabaseConfig.__new__(DatabaseConfig)
             assert config._is_production_mode() is False
 
     def test_staging_mode_not_production(self):
         """Test staging mode is not treated as production."""
-        with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "staging"}, clear=True):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "staging"}, clear=True):
             config = DatabaseConfig.__new__(DatabaseConfig)
             assert config._is_production_mode() is False
 
     def test_testing_mode_not_production(self):
         """Test testing mode is not treated as production."""
-        with patch.dict(os.environ, {"CRONOS_AI_ENVIRONMENT": "testing"}, clear=True):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "testing"}, clear=True):
             config = DatabaseConfig.__new__(DatabaseConfig)
             assert config._is_production_mode() is False
 
-    def test_cronos_ai_environment_takes_priority(self):
-        """Test CRONOS_AI_ENVIRONMENT takes priority over ENVIRONMENT."""
+    def test_qbitel_environment_takes_priority(self):
+        """Test QBITEL_AI_ENVIRONMENT takes priority over ENVIRONMENT."""
         with patch.dict(
             os.environ,
-            {"CRONOS_AI_ENVIRONMENT": "production", "ENVIRONMENT": "development"},
+            {"QBITEL_AI_ENVIRONMENT": "production", "ENVIRONMENT": "development"},
         ):
             config = DatabaseConfig.__new__(DatabaseConfig)
             assert config._is_production_mode() is True
@@ -94,7 +94,7 @@ class TestProductionDatabaseRequirements:
     def test_production_requires_database_password(self):
         """Test production mode requires database password."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException) as exc_info:
                 DatabaseConfig()
@@ -105,7 +105,7 @@ class TestProductionDatabaseRequirements:
         """Test production mode rejects short database passwords."""
         with patch.dict(
             os.environ,
-            {"CRONOS_AI_ENVIRONMENT": "production", "CRONOS_AI_DB_PASSWORD": "short"},
+            {"QBITEL_AI_ENVIRONMENT": "production", "QBITEL_AI_DB_PASSWORD": "short"},
         ):
             with pytest.raises(ConfigurationException) as exc_info:
                 DatabaseConfig()
@@ -116,8 +116,8 @@ class TestProductionDatabaseRequirements:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "production",
-                "CRONOS_AI_DB_PASSWORD": "password123456789",
+                "QBITEL_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_DB_PASSWORD": "password123456789",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -130,8 +130,8 @@ class TestProductionDatabaseRequirements:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "production",
-                "CRONOS_AI_DB_PASSWORD": strong_password,
+                "QBITEL_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_DB_PASSWORD": strong_password,
             },
         ):
             config = DatabaseConfig()
@@ -140,7 +140,7 @@ class TestProductionDatabaseRequirements:
     def test_development_allows_missing_database_password(self):
         """Test development mode allows missing database password."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "development"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
         ):
             config = DatabaseConfig()
             assert config.password == ""
@@ -150,8 +150,8 @@ class TestProductionDatabaseRequirements:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "development",
-                "CRONOS_AI_DB_PASSWORD": "weak123",
+                "QBITEL_AI_ENVIRONMENT": "development",
+                "QBITEL_AI_DB_PASSWORD": "weak123",
             },
         ):
             # Should not raise, just warn
@@ -165,7 +165,7 @@ class TestProductionRedisRequirements:
     def test_production_requires_redis_password(self):
         """Test production mode requires Redis password."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException) as exc_info:
                 RedisConfig()
@@ -178,8 +178,8 @@ class TestProductionRedisRequirements:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "production",
-                "CRONOS_AI_REDIS_PASSWORD": "short",
+                "QBITEL_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_REDIS_PASSWORD": "short",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -191,8 +191,8 @@ class TestProductionRedisRequirements:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "production",
-                "CRONOS_AI_REDIS_PASSWORD": "redis123456789abc",
+                "QBITEL_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_REDIS_PASSWORD": "redis123456789abc",
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -205,8 +205,8 @@ class TestProductionRedisRequirements:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "production",
-                "CRONOS_AI_REDIS_PASSWORD": strong_password,
+                "QBITEL_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_REDIS_PASSWORD": strong_password,
             },
         ):
             config = RedisConfig()
@@ -215,7 +215,7 @@ class TestProductionRedisRequirements:
     def test_development_allows_missing_redis_password(self):
         """Test development mode allows missing Redis password."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "development"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
         ):
             config = RedisConfig()
             assert config.password is None
@@ -227,7 +227,7 @@ class TestProductionSecurityRequirements:
     def test_production_requires_jwt_secret(self):
         """Test production mode requires JWT secret."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException) as exc_info:
                 SecurityConfig()
@@ -238,7 +238,7 @@ class TestProductionSecurityRequirements:
         jwt_secret = secrets.token_urlsafe(48)
         with patch.dict(
             os.environ,
-            {"CRONOS_AI_ENVIRONMENT": "production", "CRONOS_AI_JWT_SECRET": jwt_secret},
+            {"QBITEL_AI_ENVIRONMENT": "production", "QBITEL_AI_JWT_SECRET": jwt_secret},
             clear=True,
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -253,9 +253,9 @@ class TestProductionSecurityRequirements:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "production",
-                "CRONOS_AI_JWT_SECRET": jwt_secret,
-                "CRONOS_AI_ENCRYPTION_KEY": encryption_key,
+                "QBITEL_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_JWT_SECRET": jwt_secret,
+                "QBITEL_AI_ENCRYPTION_KEY": encryption_key,
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -271,9 +271,9 @@ class TestProductionSecurityRequirements:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "production",
-                "CRONOS_AI_JWT_SECRET": jwt_secret,
-                "CRONOS_AI_ENCRYPTION_KEY": encryption_key,
+                "QBITEL_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_JWT_SECRET": jwt_secret,
+                "QBITEL_AI_ENCRYPTION_KEY": encryption_key,
             },
         ):
             config = SecurityConfig(
@@ -289,9 +289,9 @@ class TestProductionSecurityRequirements:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "production",
-                "CRONOS_AI_JWT_SECRET": "secret123456789012345678901234567890",
-                "CRONOS_AI_ENCRYPTION_KEY": secrets.token_urlsafe(48),
+                "QBITEL_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_JWT_SECRET": "secret123456789012345678901234567890",
+                "QBITEL_AI_ENCRYPTION_KEY": secrets.token_urlsafe(48),
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -303,9 +303,9 @@ class TestProductionSecurityRequirements:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "production",
-                "CRONOS_AI_JWT_SECRET": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                "CRONOS_AI_ENCRYPTION_KEY": secrets.token_urlsafe(48),
+                "QBITEL_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_JWT_SECRET": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "QBITEL_AI_ENCRYPTION_KEY": secrets.token_urlsafe(48),
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -315,7 +315,7 @@ class TestProductionSecurityRequirements:
     def test_development_allows_cors_wildcard(self):
         """Test development mode allows CORS wildcard."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "development"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
         ):
             # Should not raise
             config = SecurityConfig(cors_origins=["*"])
@@ -324,7 +324,7 @@ class TestProductionSecurityRequirements:
     def test_development_allows_missing_secrets(self):
         """Test development mode allows missing secrets with warnings."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "development"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
         ):
             # Should not raise, just warn
             config = SecurityConfig()
@@ -337,7 +337,7 @@ class TestProductionConfigValidation:
     def test_production_config_requires_all_secrets(self):
         """Test production Config requires all secrets."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException):
                 Config.load_from_env()
@@ -352,11 +352,11 @@ class TestProductionConfigValidation:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "production",
-                "CRONOS_AI_DB_PASSWORD": db_password,
-                "CRONOS_AI_REDIS_PASSWORD": redis_password,
-                "CRONOS_AI_JWT_SECRET": jwt_secret,
-                "CRONOS_AI_ENCRYPTION_KEY": encryption_key,
+                "QBITEL_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_DB_PASSWORD": db_password,
+                "QBITEL_AI_REDIS_PASSWORD": redis_password,
+                "QBITEL_AI_JWT_SECRET": jwt_secret,
+                "QBITEL_AI_ENCRYPTION_KEY": encryption_key,
             },
         ):
             # Create config manually to avoid CORS wildcard issue
@@ -378,7 +378,7 @@ class TestProductionConfigValidation:
     def test_development_config_allows_defaults(self):
         """Test development Config allows default values."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "development"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
         ):
             config = Config.load_from_env()
             assert config.environment == Environment.DEVELOPMENT
@@ -390,13 +390,13 @@ class TestProductionErrorMessages:
     def test_database_password_error_is_actionable(self):
         """Test database password error provides clear remediation."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException) as exc_info:
                 DatabaseConfig()
             error_msg = str(exc_info.value)
             assert "REQUIRED" in error_msg
-            assert "CRONOS_AI_DB_PASSWORD" in error_msg
+            assert "QBITEL_AI_DB_PASSWORD" in error_msg
             assert "Generate a secure password" in error_msg
             assert "python -c" in error_msg
             assert "secrets.token_urlsafe" in error_msg
@@ -404,25 +404,25 @@ class TestProductionErrorMessages:
     def test_redis_password_error_is_actionable(self):
         """Test Redis password error provides clear remediation."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException) as exc_info:
                 RedisConfig()
             error_msg = str(exc_info.value)
             assert "REQUIRED" in error_msg
-            assert "CRONOS_AI_REDIS_PASSWORD" in error_msg
+            assert "QBITEL_AI_REDIS_PASSWORD" in error_msg
             assert "CRITICAL security risk" in error_msg
 
     def test_jwt_secret_error_is_actionable(self):
         """Test JWT secret error provides clear remediation."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             with pytest.raises(ConfigurationException) as exc_info:
                 SecurityConfig()
             error_msg = str(exc_info.value)
             assert "REQUIRED" in error_msg
-            assert "CRONOS_AI_JWT_SECRET" in error_msg
+            assert "QBITEL_AI_JWT_SECRET" in error_msg
             assert "Generate a secure JWT secret" in error_msg
 
     def test_cors_wildcard_error_is_actionable(self):
@@ -433,9 +433,9 @@ class TestProductionErrorMessages:
         with patch.dict(
             os.environ,
             {
-                "CRONOS_AI_ENVIRONMENT": "production",
-                "CRONOS_AI_JWT_SECRET": jwt_secret,
-                "CRONOS_AI_ENCRYPTION_KEY": encryption_key,
+                "QBITEL_AI_ENVIRONMENT": "production",
+                "QBITEL_AI_JWT_SECRET": jwt_secret,
+                "QBITEL_AI_ENCRYPTION_KEY": encryption_key,
             },
         ):
             with pytest.raises(ConfigurationException) as exc_info:
@@ -452,7 +452,7 @@ class TestProductionModeConsistency:
     def test_all_configs_use_same_production_detection(self):
         """Test all config classes detect production mode consistently."""
         with patch.dict(
-            os.environ, {"CRONOS_AI_ENVIRONMENT": "production"}, clear=True
+            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
         ):
             db_config = DatabaseConfig.__new__(DatabaseConfig)
             redis_config = RedisConfig.__new__(RedisConfig)
@@ -463,10 +463,10 @@ class TestProductionModeConsistency:
             assert security_config._is_production_mode() is True
 
     def test_all_configs_respect_environment_priority(self):
-        """Test all configs respect CRONOS_AI_ENVIRONMENT priority."""
+        """Test all configs respect QBITEL_AI_ENVIRONMENT priority."""
         with patch.dict(
             os.environ,
-            {"CRONOS_AI_ENVIRONMENT": "production", "ENVIRONMENT": "development"},
+            {"QBITEL_AI_ENVIRONMENT": "production", "ENVIRONMENT": "development"},
         ):
             db_config = DatabaseConfig.__new__(DatabaseConfig)
             redis_config = RedisConfig.__new__(RedisConfig)

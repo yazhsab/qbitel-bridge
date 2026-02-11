@@ -4,7 +4,7 @@ metadata:
   name: observability
   labels:
     app.kubernetes.io/name: observability
-    app.kubernetes.io/part-of: cronos-ai
+    app.kubernetes.io/part-of: qbitel
 ---
 apiVersion: v1
 kind: ResourceQuota

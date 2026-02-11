@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - API Key Management and Rotation
+QBITEL Engine - API Key Management and Rotation
 
 Production-ready API key lifecycle management with automatic expiration,
 rotation, and compliance enforcement.

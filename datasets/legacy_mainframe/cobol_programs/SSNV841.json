@@ -1,0 +1,19 @@
+{
+  "program_id": "SSNV841",
+  "domain": "government",
+  "program_type": "data_validation",
+  "author": "R. WILLIAMS",
+  "lines_of_code": 208,
+  "complexity_level": "simple",
+  "complexity_score": 0.451,
+  "files_used": 1,
+  "verbs_used": 14,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.839386",
+  "hash": "e9e383d2cfe51125a346f7ac8b6726b7"
+}

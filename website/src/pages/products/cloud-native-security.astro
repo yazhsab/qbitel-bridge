@@ -1,0 +1,259 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Cloud-Native Security | QBITEL Bridge"
+  description="Quantum-safe Kubernetes and service mesh protection with Istio/Envoy mTLS, eBPF runtime monitoring, container scanning, and secure Kafka streaming."
+>
+  <PageHero
+    title="Cloud-Native Security"
+    description="Comprehensive cloud-native security with quantum-safe mTLS for Istio/Envoy, eBPF runtime monitoring, container vulnerability scanning, and secure Kafka event streaming."
+    badge="Cloud Infrastructure"
+    gradient="from-indigo-500 to-violet-500"
+  />
+
+  <!-- Key Metrics -->
+  <section class="py-12 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">&lt;1%</div>
+          <div class="text-sm text-gray-400">eBPF CPU Overhead</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">10K+</div>
+          <div class="text-sm text-gray-400">Containers/Node</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">100K</div>
+          <div class="text-sm text-gray-400">Kafka Messages/sec</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">PQC</div>
+          <div class="text-sm text-gray-400">mTLS Encryption</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="section-heading">
+            Securing the <span class="gradient-text">Cloud-Native Stack</span>
+          </h2>
+          <p class="text-gray-400 mb-6 leading-relaxed">
+            Cloud-native architectures create a vastly expanded attack surface. Microservices communicate over networks, containers run ephemeral workloads, and service meshes manage traffic between thousands of services. Traditional security tools cannot keep up.
+          </p>
+          <p class="text-gray-400 leading-relaxed">
+            QBITEL Cloud-Native Security integrates quantum-safe encryption directly into the service mesh, monitors container runtime behavior with near-zero overhead using eBPF, and secures event streaming pipelines with encrypted Kafka producers.
+          </p>
+        </div>
+        <div class="space-y-4">
+          <div class="card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <div>
+                <div class="text-white font-semibold">Kubernetes-Native</div>
+                <div class="text-sm text-gray-400">Custom operators, admission webhooks, and CRDs</div>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/30 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <div class="text-white font-semibold">Service Mesh Integration</div>
+                <div class="text-sm text-gray-400">Istio sidecar injection, Envoy xDS server</div>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </div>
+              <div>
+                <div class="text-white font-semibold">Runtime Observability</div>
+                <div class="text-sm text-gray-400">eBPF-based monitoring with under 1% CPU overhead</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Security <span class="gradient-text">Components</span>
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Quantum-Safe Service Mesh</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Upgrades Istio/Envoy mTLS to use post-quantum certificates. The QKD Certificate Manager handles automatic rotation of PQC certificates across the mesh.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              PQC-TLS for all service-to-service traffic
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Automatic certificate rotation
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Envoy xDS server for dynamic configuration
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">eBPF Runtime Monitoring</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Kernel-level runtime monitoring using eBPF programs for container behavior analysis, syscall auditing, and network flow visibility with under 1% CPU overhead.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Near-zero performance overhead
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Syscall auditing and anomaly detection
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Network flow visibility and policy enforcement
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Container Image Scanning</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Automated vulnerability scanning for container images with admission control webhooks that prevent deployment of vulnerable containers into production.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              CVE database scanning
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Admission webhook enforcement
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Image signing verification (cosign/Notary)
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-green-500/10 border border-green-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Secure Kafka Streaming</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Encrypted event streaming with PQC-secured Kafka producers and consumers. Supports 100K+ messages per second with end-to-end quantum-safe encryption.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              100K+ msg/sec throughput
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              PQC-encrypted message payloads
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Schema registry integration
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cloud Integration -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Multi-Cloud <span class="gradient-text">Integration</span>
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div class="card p-6 text-center">
+          <div class="w-12 h-12 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mx-auto mb-4">
+            <span class="text-orange-400 font-bold text-sm">AWS</span>
+          </div>
+          <h3 class="text-white font-semibold mb-2">AWS Security Hub</h3>
+          <p class="text-xs text-gray-400">GuardDuty findings, Security Hub integration, CloudTrail monitoring, EKS security</p>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mx-auto mb-4">
+            <span class="text-blue-400 font-bold text-sm">AZ</span>
+          </div>
+          <h3 class="text-white font-semibold mb-2">Azure Sentinel</h3>
+          <p class="text-xs text-gray-400">Sentinel integration, Defender for Cloud, Azure AD monitoring, AKS security</p>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="w-12 h-12 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-4">
+            <span class="text-red-400 font-bold text-sm">GCP</span>
+          </div>
+          <h3 class="text-white font-semibold mb-2">GCP Security Command</h3>
+          <p class="text-xs text-gray-400">Security Command Center, Cloud Armor, GKE security, Chronicle SIEM</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTABanner
+    title="Ready to Secure Your Cloud Infrastructure?"
+    description="Deploy quantum-safe security across your Kubernetes clusters and service meshes."
+  />
+</PageLayout>

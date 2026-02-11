@@ -1,0 +1,146 @@
+{
+  "metadata": {
+    "title": "Mainframe Security System Patterns",
+    "version": "1.0.0",
+    "description": "RACF, ACF2, and Top Secret security patterns with modern equivalents",
+    "systems": ["RACF", "ACF2", "Top Secret"],
+    "total_patterns": 35
+  },
+  "racf_patterns": [
+    {
+      "id": "RACF001",
+      "name": "User Definition",
+      "description": "Define a RACF user profile",
+      "racf_command": "ADDUSER JSMITH -\n        NAME('JOHN SMITH') -\n        DFLTGRP(DEVTEAM) -\n        OWNER(SYSADMIN) -\n        PASSWORD(INITIAL1) -\n        OPERATIONS -\n        TSO(ACCTNUM(ACCT001) -\n            PROC(TSOPROC) -\n            SIZE(4096) -\n            MAXSIZE(32768))",
+      "racf_parameters": {
+        "NAME": "User's full name",
+        "DFLTGRP": "Default connect group",
+        "OWNER": "Profile owner",
+        "PASSWORD": "Initial password",
+        "OPERATIONS": "Operations attribute",
+        "TSO": "TSO segment for terminal access"
+      },
+      "modern_equivalent": {
+        "ldap": "dn: uid=jsmith,ou=users,dc=example,dc=com\nobjectClass: inetOrgPerson\nobjectClass: posixAccount\nuid: jsmith\ncn: John Smith\nsn: Smith\ngivenName: John\nmail: jsmith@example.com\ngidNumber: 1001\nuidNumber: 2001\nhomeDirectory: /home/jsmith\nuserPassword: {SSHA}hashed_password",
+        "aws_iam": "{\n    \"Version\": \"2012-10-17\",\n    \"Statement\": [\n        {\n            \"Effect\": \"Allow\",\n            \"Action\": [\n                \"s3:GetObject\",\n                \"s3:PutObject\"\n            ],\n            \"Resource\": \"arn:aws:s3:::bucket/*\"\n        }\n    ]\n}",
+        "keycloak_api": "POST /admin/realms/myrealm/users\n{\n    \"username\": \"jsmith\",\n    \"enabled\": true,\n    \"firstName\": \"John\",\n    \"lastName\": \"Smith\",\n    \"email\": \"jsmith@example.com\",\n    \"groups\": [\"devteam\"],\n    \"credentials\": [{\n        \"type\": \"password\",\n        \"value\": \"initial\",\n        \"temporary\": true\n    }]\n}"
+      }
+    },
+    {
+      "id": "RACF002",
+      "name": "Group Definition",
+      "description": "Define a RACF group profile",
+      "racf_command": "ADDGROUP DEVTEAM -\n         OWNER(SYSADMIN) -\n         SUPGROUP(ITDEPT) -\n         DATA('Development Team')",
+      "modern_equivalent": {
+        "ldap": "dn: cn=devteam,ou=groups,dc=example,dc=com\nobjectClass: groupOfNames\ncn: devteam\ndescription: Development Team\nmember: uid=jsmith,ou=users,dc=example,dc=com",
+        "aws_iam": "aws iam create-group --group-name devteam\n\naws iam attach-group-policy \\\n    --group-name devteam \\\n    --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+      }
+    },
+    {
+      "id": "RACF003",
+      "name": "Dataset Protection",
+      "description": "Protect a dataset with RACF profile",
+      "racf_command": "ADDSD 'PROD.PAYROLL.**' -\n      UACC(NONE) -\n      OWNER(PAYROLL) -\n      DATA('Payroll master files')\n\nPERMIT 'PROD.PAYROLL.**' -\n       ID(PAYTEAM) -\n       ACCESS(UPDATE)\n\nPERMIT 'PROD.PAYROLL.**' -\n       ID(AUDITORS) -\n       ACCESS(READ)",
+      "access_levels": {
+        "NONE": "No access",
+        "EXECUTE": "Execute only (for load modules)",
+        "READ": "Read access",
+        "UPDATE": "Read and write",
+        "CONTROL": "Read, write, delete",
+        "ALTER": "Full control including profile changes"
+      },
+      "modern_equivalent": {
+        "postgresql": "-- Create role for payroll team\nCREATE ROLE payteam;\nCREATE ROLE auditors;\n\n-- Grant permissions\nGRANT SELECT, INSERT, UPDATE ON ALL TABLES\n    IN SCHEMA payroll TO payteam;\n\nGRANT SELECT ON ALL TABLES\n    IN SCHEMA payroll TO auditors;\n\n-- Row-level security\nALTER TABLE payroll.employees ENABLE ROW LEVEL SECURITY;\n\nCREATE POLICY payroll_access ON payroll.employees\n    FOR ALL TO payteam\n    USING (department = current_setting('app.department'));",
+        "s3_bucket_policy": "{\n    \"Version\": \"2012-10-17\",\n    \"Statement\": [\n        {\n            \"Sid\": \"DenyPublicAccess\",\n            \"Effect\": \"Deny\",\n            \"Principal\": \"*\",\n            \"Action\": \"s3:*\",\n            \"Resource\": \"arn:aws:s3:::payroll-bucket/*\",\n            \"Condition\": {\n                \"Bool\": {\"aws:SecureTransport\": \"false\"}\n            }\n        },\n        {\n            \"Sid\": \"AllowPayrollTeam\",\n            \"Effect\": \"Allow\",\n            \"Principal\": {\"AWS\": \"arn:aws:iam::123456789:group/payteam\"},\n            \"Action\": [\"s3:GetObject\", \"s3:PutObject\"],\n            \"Resource\": \"arn:aws:s3:::payroll-bucket/*\"\n        },\n        {\n            \"Sid\": \"AllowAuditorsRead\",\n            \"Effect\": \"Allow\",\n            \"Principal\": {\"AWS\": \"arn:aws:iam::123456789:group/auditors\"},\n            \"Action\": \"s3:GetObject\",\n            \"Resource\": \"arn:aws:s3:::payroll-bucket/*\"\n        }\n    ]\n}"
+      }
+    },
+    {
+      "id": "RACF004",
+      "name": "Program Control",
+      "description": "Control program execution with RACF",
+      "racf_command": "RDEFINE PROGRAM PAYUPD -\n        UACC(NONE) -\n        DATA('Payroll update program')\n\nPERMIT PAYUPD -\n       CLASS(PROGRAM) -\n       ID(PAYTEAM) -\n       ACCESS(READ)\n\nSETROPTS WHEN(PROGRAM) -\n         PROGRAMCONTROL",
+      "modern_equivalent": {
+        "linux_selinux": "# SELinux policy for application\ntype payroll_exec_t;\ntype payroll_t;\n\nallow payroll_t payroll_exec_t:file { execute execute_no_trans };\n\n# Allow only payteam users\nallow payteam_u payroll_t:process transition;",
+        "kubernetes_rbac": "apiVersion: rbac.authorization.k8s.io/v1\nkind: Role\nmetadata:\n  namespace: payroll\n  name: payroll-executor\nrules:\n- apiGroups: [\"\"]\n  resources: [\"pods/exec\"]\n  resourceNames: [\"payroll-app\"]\n  verbs: [\"create\"]\n---\napiVersion: rbac.authorization.k8s.io/v1\nkind: RoleBinding\nmetadata:\n  name: payroll-team-binding\n  namespace: payroll\nsubjects:\n- kind: Group\n  name: payteam\nroleRef:\n  kind: Role\n  name: payroll-executor\n  apiGroup: rbac.authorization.k8s.io"
+      }
+    },
+    {
+      "id": "RACF005",
+      "name": "Audit and Logging",
+      "description": "Configure RACF auditing",
+      "racf_command": "ALTDSD 'PROD.SENSITIVE.**' -\n       AUDIT(SUCCESS(READ) FAILURE(READ UPDATE))\n\nSETROPTS AUDIT(ALWAYS) -\n         LOGOPTIONS(ALWAYS)\n\nALTUSER JSMITH -\n        UAUDIT",
+      "modern_equivalent": {
+        "postgresql": "-- Enable audit logging\nALTER SYSTEM SET log_statement = 'all';\nALTER SYSTEM SET log_connections = on;\nALTER SYSTEM SET log_disconnections = on;\n\n-- Use pgAudit extension\nCREATE EXTENSION pgaudit;\n\nSET pgaudit.log = 'read, write, ddl';\nSET pgaudit.log_relation = on;",
+        "aws_cloudtrail": "{\n    \"Trail\": {\n        \"Name\": \"security-audit-trail\",\n        \"S3BucketName\": \"audit-logs-bucket\",\n        \"IncludeGlobalServiceEvents\": true,\n        \"IsMultiRegionTrail\": true,\n        \"EnableLogFileValidation\": true,\n        \"EventSelectors\": [\n            {\n                \"ReadWriteType\": \"All\",\n                \"IncludeManagementEvents\": true,\n                \"DataResources\": [\n                    {\n                        \"Type\": \"AWS::S3::Object\",\n                        \"Values\": [\"arn:aws:s3:::payroll-bucket/*\"]\n                    }\n                ]\n            }\n        ]\n    }\n}"
+      }
+    },
+    {
+      "id": "RACF006",
+      "name": "Password Rules",
+      "description": "Configure password policies",
+      "racf_command": "SETROPTS PASSWORD -\n         HISTORY(10) -\n         INTERVAL(30) -\n         MINCHANGE(2) -\n         REVOKE(5) -\n         WARNING(7) -\n         RULES(LENGTH(8:16) -\n               CONTENT(ALPHANUM))",
+      "modern_equivalent": {
+        "keycloak": "{\n    \"passwordPolicy\": \"length(8) and maxLength(16) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1) and notUsername and passwordHistory(10)\",\n    \"bruteForceProtected\": true,\n    \"failureFactor\": 5,\n    \"maxDeltaTimeSeconds\": 3600,\n    \"minimumQuickLoginWaitSeconds\": 60,\n    \"waitIncrementSeconds\": 60\n}",
+        "aws_iam": "{\n    \"MinimumPasswordLength\": 8,\n    \"RequireSymbols\": true,\n    \"RequireNumbers\": true,\n    \"RequireUppercaseCharacters\": true,\n    \"RequireLowercaseCharacters\": true,\n    \"AllowUsersToChangePassword\": true,\n    \"MaxPasswordAge\": 30,\n    \"PasswordReusePrevention\": 10,\n    \"HardExpiry\": false\n}"
+      }
+    }
+  ],
+  "acf2_patterns": [
+    {
+      "id": "ACF2001",
+      "name": "ACF2 Logonid Record",
+      "description": "Define user in ACF2",
+      "acf2_command": "INSERT JSMITH -\n       NAME(JOHN SMITH) -\n       GROUP(DEVTEAM) -\n       PASSWORD(INITIAL1) -\n       EXPIRE(30) -\n       MAXDAYS(90) -\n       TSO",
+      "modern_equivalent": "See RACF equivalents - similar IAM/LDAP patterns apply"
+    },
+    {
+      "id": "ACF2002",
+      "name": "ACF2 Resource Rules",
+      "description": "Define resource protection rules",
+      "acf2_command": "$KEY(PROD) TYPE(DSN)\n  PAYROLL.- UID(PAY*) READ(A) WRITE(A)\n  PAYROLL.- UID(AUD*) READ(A) WRITE(-)\n  PAYROLL.- UID(*) READ(-) WRITE(-)",
+      "rule_explanation": {
+        "$KEY": "Resource prefix",
+        "TYPE(DSN)": "Dataset resource type",
+        "UID": "User ID mask",
+        "A": "Allow access",
+        "-": "Deny access"
+      }
+    }
+  ],
+  "top_secret_patterns": [
+    {
+      "id": "TSS001",
+      "name": "Top Secret ACID Definition",
+      "description": "Define user ACID in Top Secret",
+      "tss_command": "TSS CREATE(JSMITH) -\n    NAME('JOHN SMITH') -\n    DEPARTMENT(DEVTEAM) -\n    PASSWORD(INITIAL1,30) -\n    FAC(TSO,BATCH)",
+      "modern_equivalent": "See RACF equivalents - similar patterns apply"
+    }
+  ],
+  "cobol_security_calls": [
+    {
+      "id": "COBOLSEC001",
+      "name": "RACF RACROUTE Call",
+      "description": "COBOL program calling RACF",
+      "cobol": "       WORKING-STORAGE SECTION.\n       01  RACF-WORK-AREA.\n           05  RACF-ALET         PIC S9(8) BINARY VALUE 0.\n           05  RACF-SAFRC        PIC S9(8) BINARY.\n           05  RACF-RACRC        PIC S9(8) BINARY.\n           05  RACF-RACRSN       PIC S9(8) BINARY.\n       \n       01  RESOURCE-NAME         PIC X(44) VALUE 'PROD.PAYROLL.MASTER'.\n       01  RESOURCE-CLASS        PIC X(8) VALUE 'DATASET '.\n       01  ACCESS-INTENT         PIC X(8) VALUE 'READ    '.\n       \n       PROCEDURE DIVISION.\n           CALL 'RACROUTE' USING\n               BY CONTENT 'REQUEST=AUTH'\n               BY REFERENCE RESOURCE-CLASS\n               BY REFERENCE RESOURCE-NAME\n               BY CONTENT ACCESS-INTENT\n               BY REFERENCE RACF-WORK-AREA\n           \n           IF RACF-SAFRC NOT = 0\n               DISPLAY 'ACCESS DENIED'\n               PERFORM ERROR-ROUTINE\n           END-IF.",
+      "java_equivalent": "import org.springframework.security.access.prepost.PreAuthorize;\nimport org.springframework.security.core.Authentication;\n\n@Service\npublic class PayrollService {\n    \n    @PreAuthorize(\"hasRole('PAYROLL_READ') or hasRole('ADMIN')\")\n    public PayrollData readPayroll(String employeeId) {\n        return payrollRepository.findById(employeeId)\n            .orElseThrow(() -> new NotFoundException(\"Not found\"));\n    }\n    \n    // Programmatic authorization check\n    public PayrollData readPayrollWithCheck(\n            String employeeId, \n            Authentication auth) {\n        \n        if (!authorizationService.hasAccess(\n                auth, \"PAYROLL.MASTER\", \"READ\")) {\n            throw new AccessDeniedException(\"Access denied\");\n        }\n        \n        return payrollRepository.findById(employeeId).orElse(null);\n    }\n}",
+      "python_equivalent": "from functools import wraps\nfrom flask import g, abort\nfrom flask_principal import Permission, RoleNeed\n\npayroll_read = Permission(RoleNeed('payroll_read'))\npayroll_write = Permission(RoleNeed('payroll_write'))\n\ndef require_authorization(resource: str, access: str):\n    def decorator(f):\n        @wraps(f)\n        def decorated(*args, **kwargs):\n            if not authorization_service.check_access(\n                g.user, resource, access\n            ):\n                abort(403, 'Access denied')\n            return f(*args, **kwargs)\n        return decorated\n    return decorator\n\n@app.route('/payroll/<employee_id>')\n@require_authorization('PAYROLL.MASTER', 'READ')\ndef get_payroll(employee_id: str):\n    return payroll_service.get(employee_id)"
+    }
+  ],
+  "security_migration_mapping": {
+    "racf_to_iam": {
+      "UACC(NONE)": "Default deny policy",
+      "UACC(READ)": "Default read-only policy",
+      "ACCESS(UPDATE)": "Read-write permission",
+      "ACCESS(ALTER)": "Full control (admin)",
+      "OPERATIONS": "Operations role/admin access",
+      "SPECIAL": "Security admin role"
+    },
+    "concepts": {
+      "RACF_USER": "IAM User / Service Account",
+      "RACF_GROUP": "IAM Group / Role",
+      "DATASET_PROFILE": "S3 Bucket Policy / IAM Policy",
+      "GENERAL_RESOURCE": "Custom IAM Resource",
+      "PERMIT": "IAM Policy Statement"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Anomaly Detection Module
+QBITEL Engine - Anomaly Detection Module
 
 This module provides AI-powered anomaly detection capabilities using
 VAE, LSTM, and ensemble methods for identifying unusual patterns

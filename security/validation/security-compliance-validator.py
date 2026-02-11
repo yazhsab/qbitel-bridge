@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI Security and Compliance Validation Framework
+QBITEL Security and Compliance Validation Framework
 
 Comprehensive validation of enterprise-grade security and compliance features
 for production-ready deployment.
@@ -102,7 +102,7 @@ class SecurityComplianceValidator:
                 "aiengine": "http://localhost:8000",
                 "policy_engine": "http://localhost:8001",
             },
-            "kubernetes": {"namespace": "cronos-ai-prod"},
+            "kubernetes": {"namespace": "qbitel-prod"},
             "security": {
                 "tls_min_version": "1.3",
                 "cipher_suites": [
@@ -231,9 +231,9 @@ class SecurityComplianceValidator:
         try:
             # Check certificate validity periods
             cert_files = [
-                "/etc/ssl/certs/cronos-ai-ca.crt",
-                "/etc/ssl/certs/cronos-ai-server.crt",
-                "/etc/ssl/certs/cronos-ai-client.crt",
+                "/etc/ssl/certs/qbitel-ca.crt",
+                "/etc/ssl/certs/qbitel-server.crt",
+                "/etc/ssl/certs/qbitel-client.crt",
             ]
 
             valid_certs = 0
@@ -314,7 +314,7 @@ class SecurityComplianceValidator:
 
             # Check configuration files for quantum-safe algorithms
             config_files = [
-                "/etc/cronos-ai/security.yaml",
+                "/etc/qbitel/security.yaml",
                 "/etc/ssl/quantum-safe.conf",
             ]
 
@@ -368,9 +368,9 @@ class SecurityComplianceValidator:
             # Test key access controls
 
             key_management_indicators = [
-                "/etc/cronos-ai/keys/",
-                "/var/lib/cronos-ai/vault/",
-                "vault.cronos-ai.com",
+                "/etc/qbitel/keys/",
+                "/var/lib/qbitel/vault/",
+                "vault.qbitel.com",
             ]
 
             secure_storage_found = False
@@ -867,9 +867,9 @@ class SecurityComplianceValidator:
         try:
             # Check for access control indicators
             access_control_files = [
-                "/etc/cronos-ai/access-control.yaml",
+                "/etc/qbitel/access-control.yaml",
                 "/etc/security/access.conf",
-                "/etc/pam.d/cronos-ai",
+                "/etc/pam.d/qbitel",
             ]
 
             access_controls_found = any(Path(f).exists() for f in access_control_files)
@@ -1174,9 +1174,9 @@ class SecurityComplianceValidator:
         try:
             # Check for DPIA documentation and processes
             dpia_files = [
-                "/etc/cronos-ai/gdpr/dpia.pdf",
-                "/etc/cronos-ai/compliance/data-impact-assessment.yaml",
-                "/var/lib/cronos-ai/gdpr/dpia-completed.flag",
+                "/etc/qbitel/gdpr/dpia.pdf",
+                "/etc/qbitel/compliance/data-impact-assessment.yaml",
+                "/var/lib/qbitel/gdpr/dpia-completed.flag",
             ]
 
             dpia_found = any(Path(f).exists() for f in dpia_files)
@@ -1335,8 +1335,8 @@ class SecurityComplianceValidator:
 
             # Check configuration for privacy controls
             privacy_config_files = [
-                "/etc/cronos-ai/privacy.yaml",
-                "/etc/cronos-ai/data-governance.yaml",
+                "/etc/qbitel/privacy.yaml",
+                "/etc/qbitel/data-governance.yaml",
             ]
 
             privacy_controls_found = 0
@@ -1538,7 +1538,7 @@ class SecurityComplianceValidator:
             # Check for audit log files and configuration
             audit_paths = [
                 "/var/log/audit/",
-                "/var/log/cronos-ai/audit/",
+                "/var/log/qbitel/audit/",
                 "/etc/audit/auditd.conf",
             ]
 
@@ -1626,9 +1626,9 @@ class SecurityComplianceValidator:
         try:
             # Check for data governance policies and implementations
             governance_files = [
-                "/etc/cronos-ai/data-governance.yaml",
-                "/etc/cronos-ai/data-classification.yaml",
-                "/etc/cronos-ai/data-retention.yaml",
+                "/etc/qbitel/data-governance.yaml",
+                "/etc/qbitel/data-classification.yaml",
+                "/etc/qbitel/data-retention.yaml",
             ]
 
             governance_files_found = sum(
@@ -1916,8 +1916,8 @@ class SecurityComplianceValidator:
         try:
             # Check for incident response procedures and tools
             incident_response_files = [
-                "/etc/cronos-ai/incident-response.yaml",
-                "/var/lib/cronos-ai/playbooks/",
+                "/etc/qbitel/incident-response.yaml",
+                "/var/lib/qbitel/playbooks/",
                 "/etc/security/incident-response.conf",
             ]
 
@@ -1960,8 +1960,8 @@ class SecurityComplianceValidator:
         try:
             # Check for backup systems
             backup_indicators = [
-                "/var/backups/cronos-ai/",
-                "/etc/cronos-ai/backup.yaml",
+                "/var/backups/qbitel/",
+                "/etc/qbitel/backup.yaml",
                 "restic",
                 "borg",
                 "velero",
@@ -2338,7 +2338,7 @@ class SecurityComplianceValidator:
         compliance_stats = report["compliance_assessment"]["statistics"]
 
         print("\n" + "=" * 80)
-        print("CRONOS AI SECURITY & COMPLIANCE VALIDATION REPORT")
+        print("QBITEL SECURITY & COMPLIANCE VALIDATION REPORT")
         print("=" * 80)
         print(f"Timestamp: {summary['timestamp']}")
         print(f"Overall Security Score: {summary['overall_security_score']}%")
@@ -2380,7 +2380,7 @@ async def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="CRONOS AI Security and Compliance Validator"
+        description="QBITEL Security and Compliance Validator"
     )
     parser.add_argument(
         "--config", default="security-config.yaml", help="Configuration file path"
@@ -2408,7 +2408,7 @@ async def main():
 
     try:
         # Run validation
-        logger.info("Starting CRONOS AI security and compliance validation")
+        logger.info("Starting QBITEL security and compliance validation")
         report = await validator.run_all_validations()
 
         # Save report

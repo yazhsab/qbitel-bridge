@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# CRONOS AI Security and Compliance Validation Runner
+# QBITEL Security and Compliance Validation Runner
 # Enterprise-grade security validation automation script
 
 set -euo pipefail
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VALIDATION_DIR="/var/lib/cronos-ai/security-validation"
-REPORT_DIR="/var/lib/cronos-ai/reports"
-LOG_FILE="/var/log/cronos-ai/security-validation.log"
+VALIDATION_DIR="/var/lib/qbitel/security-validation"
+REPORT_DIR="/var/lib/qbitel/reports"
+LOG_FILE="/var/log/qbitel/security-validation.log"
 CONFIG_FILE="${SCRIPT_DIR}/security-config.yaml"
 PYTHON_VALIDATOR="${SCRIPT_DIR}/security-compliance-validator.py"
 
@@ -56,7 +56,7 @@ print_banner() {
     echo -e "${CYAN}"
     cat << 'EOF'
     ╔═══════════════════════════════════════════════════════════════╗
-    ║                 CRONOS AI SECURITY VALIDATION                ║
+    ║                 QBITEL SECURITY VALIDATION                ║
     ║              Enterprise-Grade Compliance Framework           ║
     ╚═══════════════════════════════════════════════════════════════╝
 EOF
@@ -68,12 +68,12 @@ usage() {
     cat << EOF
 Usage: $0 [OPTIONS]
 
-CRONOS AI Security and Compliance Validation Runner
+QBITEL Security and Compliance Validation Runner
 
 OPTIONS:
     -h, --help              Show this help message
     -c, --config FILE       Specify configuration file (default: security-config.yaml)
-    -o, --output DIR        Specify output directory (default: /var/lib/cronos-ai/reports)
+    -o, --output DIR        Specify output directory (default: /var/lib/qbitel/reports)
     -f, --format FORMAT     Report format (json|html|pdf) (default: json)
     -e, --environment ENV   Target environment (dev|staging|prod) (default: prod)
     -t, --tests TESTS       Comma-separated list of test categories
@@ -92,10 +92,10 @@ EXAMPLES:
     $0 --dry-run -d                            # Perform dry run with debug output
 
 ENVIRONMENT VARIABLES:
-    CRONOS_AI_ENV           Target environment (overrides -e)
-    CRONOS_AI_CONFIG        Configuration file path (overrides -c)
-    CRONOS_AI_LOG_LEVEL     Log level (DEBUG|INFO|WARN|ERROR)
-    CRONOS_AI_REPORT_DIR    Report output directory (overrides -o)
+    QBITEL_AI_ENV           Target environment (overrides -e)
+    QBITEL_AI_CONFIG        Configuration file path (overrides -c)
+    QBITEL_AI_LOG_LEVEL     Log level (DEBUG|INFO|WARN|ERROR)
+    QBITEL_AI_REPORT_DIR    Report output directory (overrides -o)
 
 EOF
 }
@@ -174,9 +174,9 @@ parse_arguments() {
     done
 
     # Override with environment variables if set
-    config_file="${CRONOS_AI_CONFIG:-$config_file}"
-    environment="${CRONOS_AI_ENV:-$environment}"
-    output_dir="${CRONOS_AI_REPORT_DIR:-$output_dir}"
+    config_file="${QBITEL_AI_CONFIG:-$config_file}"
+    environment="${QBITEL_AI_ENV:-$environment}"
+    output_dir="${QBITEL_AI_REPORT_DIR:-$output_dir}"
 
     # Export parsed arguments
     export VALIDATION_CONFIG="$config_file"
@@ -270,7 +270,7 @@ setup_environment() {
 
     # Create timestamp for this run
     export VALIDATION_TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-    export VALIDATION_RUN_ID="cronos-ai-security-validation-${VALIDATION_TIMESTAMP}"
+    export VALIDATION_RUN_ID="qbitel-security-validation-${VALIDATION_TIMESTAMP}"
 
     debug "Validation environment setup:"
     debug "  Run ID: $VALIDATION_RUN_ID"
@@ -433,7 +433,7 @@ generate_system_summary() {
     info "Generating system security summary: $(basename "$output_file")"
 
     cat > "$output_file" << EOF
-CRONOS AI System Security Summary
+QBITEL System Security Summary
 Generated: $(date)
 Hostname: $(hostname)
 Kernel: $(uname -r)
@@ -498,7 +498,7 @@ CERTIFICATE STATUS:
 EOF
 
     # Check SSL certificates
-    local cert_dirs=("/etc/ssl/certs" "/etc/cronos-ai/certs")
+    local cert_dirs=("/etc/ssl/certs" "/etc/qbitel/certs")
     for cert_dir in "${cert_dirs[@]}"; do
         if [[ -d "$cert_dir" ]]; then
             local cert_count=$(find "$cert_dir" -name "*.crt" -o -name "*.pem" | wc -l)
@@ -547,7 +547,7 @@ generate_security_checklist() {
     info "Generating security checklist: $(basename "$output_file")"
 
     cat > "$output_file" << 'EOF'
-# CRONOS AI Security Implementation Checklist
+# QBITEL Security Implementation Checklist
 
 ## Cryptography and Encryption
 - [x] TLS 1.3 implemented for all services
@@ -710,7 +710,7 @@ main() {
     print_banner
     parse_arguments "$@"
     
-    info "Starting CRONOS AI security and compliance validation"
+    info "Starting QBITEL security and compliance validation"
     info "Run ID: $VALIDATION_RUN_ID"
     
     check_prerequisites

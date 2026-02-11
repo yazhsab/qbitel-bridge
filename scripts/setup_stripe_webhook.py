@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - Stripe Webhook Configuration Script
+QBITEL - Stripe Webhook Configuration Script
 
 Automatically configures Stripe webhooks for the marketplace.
 """
@@ -170,7 +170,7 @@ def test_webhook_connection(webhook_url: str) -> bool:
 def main():
     """Main setup function."""
     print("=" * 70)
-    print("CRONOS AI - Stripe Webhook Configuration")
+    print("QBITEL - Stripe Webhook Configuration")
     print("=" * 70)
     print()
 
@@ -191,7 +191,7 @@ def main():
 
     # Get webhook URL from user
     print("Enter your webhook endpoint URL:")
-    print("  Example: https://api.cronos-ai.com/api/v1/marketplace/webhooks/stripe")
+    print("  Example: https://api.qbitel.com/api/v1/marketplace/webhooks/stripe")
     print("  Example: https://your-domain.com/api/v1/marketplace/webhooks/stripe")
     print()
 
@@ -262,7 +262,7 @@ def main():
     print()
     print("Next steps:")
     print("1. Add STRIPE_WEBHOOK_SECRET to your environment variables")
-    print("2. Restart your CRONOS AI server")
+    print("2. Restart your QBITEL server")
     print("3. Test webhook with: stripe trigger payment_intent.succeeded")
     print()
 

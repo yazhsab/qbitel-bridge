@@ -112,7 +112,7 @@ func NewSecurityMonitor(logger *zap.Logger, config *SecurityConfig) *SecurityMon
 		
 		securityEventsTotal: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "qslb_security_events_total",
+				Name: "qbitel_security_events_total",
 				Help: "Total number of security events detected",
 			},
 			[]string{"type", "severity", "source"},
@@ -120,7 +120,7 @@ func NewSecurityMonitor(logger *zap.Logger, config *SecurityConfig) *SecurityMon
 		
 		securityEventsSeverity: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "qslb_security_events_by_severity_total",
+				Name: "qbitel_security_events_by_severity_total",
 				Help: "Total number of security events by severity",
 			},
 			[]string{"severity"},
@@ -128,7 +128,7 @@ func NewSecurityMonitor(logger *zap.Logger, config *SecurityConfig) *SecurityMon
 		
 		remediationSuccess: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "qslb_security_remediation_success_total",
+				Name: "qbitel_security_remediation_success_total",
 				Help: "Total number of successful security remediations",
 			},
 			[]string{"type", "action"},
@@ -382,7 +382,7 @@ func (sm *SecurityMonitor) quarantineMalware(ctx context.Context, event *Securit
 	}
 	
 	// Move file to quarantine directory
-	quarantineDir := "/var/lib/qslb/quarantine"
+	quarantineDir := "/var/lib/qbitel/quarantine"
 	if err := os.MkdirAll(quarantineDir, 0700); err != nil {
 		return fmt.Errorf("failed to create quarantine directory: %w", err)
 	}
@@ -413,7 +413,7 @@ func (sm *SecurityMonitor) sendAlert(event *SecurityEvent) {
 	alertData := map[string]interface{}{
 		"event":     event,
 		"timestamp": time.Now(),
-		"source":    "qslb-security-monitor",
+		"source":    "qbitel-security-monitor",
 	}
 	
 	alertJSON, err := json.Marshal(alertData)

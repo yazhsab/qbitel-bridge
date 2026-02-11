@@ -1,8 +1,8 @@
-# CRONOS AI - Production Mode Detection
+# QBITEL - Production Mode Detection
 
 ## Overview
 
-CRONOS AI implements comprehensive production mode detection to ensure that all security requirements are met before deployment to production environments. This document describes the production mode detection system and its requirements.
+QBITEL implements comprehensive production mode detection to ensure that all security requirements are met before deployment to production environments. This document describes the production mode detection system and its requirements.
 
 ## Table of Contents
 
@@ -22,7 +22,7 @@ CRONOS AI implements comprehensive production mode detection to ensure that all 
 
 Production mode is detected using environment variables in the following priority order:
 
-1. `CRONOS_AI_ENVIRONMENT` (recommended)
+1. `QBITEL_AI_ENVIRONMENT` (recommended)
 2. `ENVIRONMENT` (fallback)
 
 ### Production Mode Values
@@ -36,7 +36,7 @@ The following values (case-insensitive) trigger production mode:
 
 ```bash
 # Set production mode
-export CRONOS_AI_ENVIRONMENT=production
+export QBITEL_AI_ENVIRONMENT=production
 
 # Or using the fallback variable
 export ENVIRONMENT=production
@@ -66,7 +66,7 @@ All of the following secrets are **REQUIRED** in production mode:
 
 #### 1. Database Password
 
-- **Environment Variable**: `CRONOS_AI_DB_PASSWORD` or `DATABASE_PASSWORD`
+- **Environment Variable**: `QBITEL_AI_DB_PASSWORD` or `DATABASE_PASSWORD`
 - **Minimum Length**: 16 characters
 - **Requirements**:
   - No common weak patterns (password, admin, test, etc.)
@@ -81,7 +81,7 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 
 #### 2. Redis Password
 
-- **Environment Variable**: `CRONOS_AI_REDIS_PASSWORD` or `REDIS_PASSWORD`
+- **Environment Variable**: `QBITEL_AI_REDIS_PASSWORD` or `REDIS_PASSWORD`
 - **Minimum Length**: 16 characters
 - **Requirements**: Same as database password
 - **Critical**: Running Redis without authentication in production is a **CRITICAL security risk**
@@ -93,7 +93,7 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 
 #### 3. JWT Secret
 
-- **Environment Variable**: `CRONOS_AI_JWT_SECRET` or `JWT_SECRET`
+- **Environment Variable**: `QBITEL_AI_JWT_SECRET` or `JWT_SECRET`
 - **Minimum Length**: 32 characters
 - **Requirements**:
   - Cryptographically secure random generation
@@ -108,7 +108,7 @@ python -c "import secrets; print(secrets.token_urlsafe(48))"
 
 #### 4. Encryption Key
 
-- **Environment Variable**: `CRONOS_AI_ENCRYPTION_KEY` or `ENCRYPTION_KEY`
+- **Environment Variable**: `QBITEL_AI_ENCRYPTION_KEY` or `ENCRYPTION_KEY`
 - **Minimum Length**: 32 characters
 - **Requirements**:
   - Base64-encoded 256-bit key (when using Fernet)
@@ -138,13 +138,13 @@ security:
 
 #### API Key
 
-- **Environment Variable**: `CRONOS_AI_API_KEY` or `API_KEY`
+- **Environment Variable**: `QBITEL_AI_API_KEY` or `API_KEY`
 - **Minimum Length**: 32 characters
 - **Format**: Should contain both letters and digits
 
 **Generate**:
 ```bash
-python -c "import secrets; print('cronos_' + secrets.token_urlsafe(32))"
+python -c "import secrets; print('qbitel_' + secrets.token_urlsafe(32))"
 ```
 
 ---
@@ -153,7 +153,7 @@ python -c "import secrets; print('cronos_' + secrets.token_urlsafe(32))"
 
 ### Behavior
 
-In development mode (default when `CRONOS_AI_ENVIRONMENT` is not set or set to `development`):
+In development mode (default when `QBITEL_AI_ENVIRONMENT` is not set or set to `development`):
 
 - ⚠️ Missing secrets generate **warnings** (not errors)
 - ⚠️ Weak secrets generate **warnings** (not errors)
@@ -173,10 +173,10 @@ Development mode is appropriate for:
 
 ```bash
 # Explicitly set development mode
-export CRONOS_AI_ENVIRONMENT=development
+export QBITEL_AI_ENVIRONMENT=development
 
 # Or leave unset (defaults to development)
-unset CRONOS_AI_ENVIRONMENT
+unset QBITEL_AI_ENVIRONMENT
 ```
 
 ---
@@ -189,21 +189,21 @@ Set all required environment variables before starting the application:
 
 ```bash
 # Production Mode
-export CRONOS_AI_ENVIRONMENT=production
+export QBITEL_AI_ENVIRONMENT=production
 
 # Required Secrets
-export CRONOS_AI_DB_PASSWORD="<secure-password>"
-export CRONOS_AI_REDIS_PASSWORD="<secure-password>"
-export CRONOS_AI_JWT_SECRET="<secure-secret>"
-export CRONOS_AI_ENCRYPTION_KEY="<secure-key>"
+export QBITEL_AI_DB_PASSWORD="<secure-password>"
+export QBITEL_AI_REDIS_PASSWORD="<secure-password>"
+export QBITEL_AI_JWT_SECRET="<secure-secret>"
+export QBITEL_AI_ENCRYPTION_KEY="<secure-key>"
 
 # Optional but Recommended
-export CRONOS_AI_API_KEY="<secure-api-key>"
+export QBITEL_AI_API_KEY="<secure-api-key>"
 ```
 
 ### Configuration Files
 
-Update your production configuration file (`config/cronos_ai.production.yaml`):
+Update your production configuration file (`config/qbitel.production.yaml`):
 
 ```yaml
 environment: production
@@ -259,7 +259,7 @@ python scripts/check_production_readiness.py
 
 **Output Example**:
 ```
-CRONOS AI - Production Readiness Checker
+QBITEL - Production Readiness Checker
 ======================================================================
 
 ==================================================
@@ -274,10 +274,10 @@ Environment Mode Check
 Required Secrets Check
 ==================================================
 
-✓ Database Password is configured (CRONOS_AI_DB_PASSWORD)
-✓ Redis Password is configured (CRONOS_AI_REDIS_PASSWORD)
-✓ JWT Secret is configured (CRONOS_AI_JWT_SECRET)
-✓ Encryption Key is configured (CRONOS_AI_ENCRYPTION_KEY)
+✓ Database Password is configured (QBITEL_AI_DB_PASSWORD)
+✓ Redis Password is configured (QBITEL_AI_REDIS_PASSWORD)
+✓ JWT Secret is configured (QBITEL_AI_JWT_SECRET)
+✓ Encryption Key is configured (QBITEL_AI_ENCRYPTION_KEY)
 
 ==================================================
 Production Readiness Summary
@@ -327,13 +327,13 @@ Test with production configuration:
 
 ```bash
 # Set production environment
-export CRONOS_AI_ENVIRONMENT=production
+export QBITEL_AI_ENVIRONMENT=production
 
 # Set required secrets
-export CRONOS_AI_DB_PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
-export CRONOS_AI_REDIS_PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
-export CRONOS_AI_JWT_SECRET="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
-export CRONOS_AI_ENCRYPTION_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
+export QBITEL_AI_DB_PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+export QBITEL_AI_REDIS_PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+export QBITEL_AI_JWT_SECRET="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
+export QBITEL_AI_ENCRYPTION_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
 
 # Run tests
 pytest ai_engine/tests/test_env_variable_loading.py -v
@@ -351,13 +351,13 @@ pytest ai_engine/tests/test_env_variable_loading.py -v
 ```
 ConfigurationException: Database password not configured!
 REQUIRED: Set one of the following environment variables:
-  - CRONOS_AI_DB_PASSWORD (recommended)
+  - QBITEL_AI_DB_PASSWORD (recommended)
   - DATABASE_PASSWORD
 ```
 
 **Solution**:
 ```bash
-export CRONOS_AI_DB_PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+export QBITEL_AI_DB_PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 ```
 
 #### 2. Weak Password Detected
@@ -400,7 +400,7 @@ WARNING: Running Redis without authentication in production is a CRITICAL securi
 
 **Solution**:
 ```bash
-export CRONOS_AI_REDIS_PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+export QBITEL_AI_REDIS_PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 ```
 
 ### Debug Mode
@@ -408,7 +408,7 @@ export CRONOS_AI_REDIS_PASSWORD="$(python -c 'import secrets; print(secrets.toke
 Enable debug logging to troubleshoot configuration issues:
 
 ```bash
-export CRONOS_AI_LOG_LEVEL=DEBUG
+export QBITEL_AI_LOG_LEVEL=DEBUG
 python -m ai_engine
 ```
 
@@ -434,11 +434,11 @@ Add to your CI/CD pipeline:
   run: |
     python scripts/check_production_readiness.py
   env:
-    CRONOS_AI_ENVIRONMENT: production
-    CRONOS_AI_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-    CRONOS_AI_REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-    CRONOS_AI_JWT_SECRET: ${{ secrets.JWT_SECRET }}
-    CRONOS_AI_ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+    QBITEL_AI_ENVIRONMENT: production
+    QBITEL_AI_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+    QBITEL_AI_REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+    QBITEL_AI_JWT_SECRET: ${{ secrets.JWT_SECRET }}
+    QBITEL_AI_ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
 ```
 
 ### Docker Deployment
@@ -448,7 +448,7 @@ Add to your CI/CD pipeline:
 FROM python:3.11-slim
 
 # Set production mode
-ENV CRONOS_AI_ENVIRONMENT=production
+ENV QBITEL_AI_ENVIRONMENT=production
 
 # Secrets should be injected at runtime
 # Never bake secrets into the image!
@@ -463,34 +463,34 @@ CMD ["python", "-m", "ai_engine"]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cronos-ai
+  name: qbitel
 spec:
   template:
     spec:
       containers:
-      - name: cronos-ai
+      - name: qbitel
         env:
-        - name: CRONOS_AI_ENVIRONMENT
+        - name: QBITEL_AI_ENVIRONMENT
           value: "production"
-        - name: CRONOS_AI_DB_PASSWORD
+        - name: QBITEL_AI_DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-secrets
+              name: qbitel-secrets
               key: db-password
-        - name: CRONOS_AI_REDIS_PASSWORD
+        - name: QBITEL_AI_REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-secrets
+              name: qbitel-secrets
               key: redis-password
-        - name: CRONOS_AI_JWT_SECRET
+        - name: QBITEL_AI_JWT_SECRET
           valueFrom:
             secretKeyRef:
-              name: cronos-secrets
+              name: qbitel-secrets
               key: jwt-secret
-        - name: CRONOS_AI_ENCRYPTION_KEY
+        - name: QBITEL_AI_ENCRYPTION_KEY
           valueFrom:
             secretKeyRef:
-              name: cronos-secrets
+              name: qbitel-secrets
               key: encryption-key
 ```
 

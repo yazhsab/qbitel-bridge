@@ -163,7 +163,7 @@ def test_structured_formatter_serializes_record():
 
     record = logging.makeLogRecord(
         {
-            "name": "cronos.security",
+            "name": "qbitel.security",
             "level": logging.INFO,
             "log_id": "123",
             "log_type": SecurityLogType.EVENT_DETECTION.value,

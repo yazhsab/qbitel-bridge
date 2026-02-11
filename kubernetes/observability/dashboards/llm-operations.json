@@ -806,7 +806,7 @@
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["cronos-ai", "llm"],
+  "tags": ["qbitel", "llm"],
   "templating": {
     "list": [
       {
@@ -871,8 +871,8 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "CRONOS AI - LLM Operations",
-  "uid": "cronos-ai-llm",
+  "title": "QBITEL - LLM Operations",
+  "uid": "qbitel-llm",
   "version": 1,
   "weekStart": ""
 }

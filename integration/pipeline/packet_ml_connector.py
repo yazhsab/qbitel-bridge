@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - Packet Processing to AI/ML Pipeline Connector
+QBITEL - Packet Processing to AI/ML Pipeline Connector
 Connects packet processing from Rust dataplane to AI/ML analysis pipeline.
 """
 
@@ -570,7 +570,7 @@ class PacketMLConnector:
 
                 # Send to Kafka
                 await self.streaming_service.send_event(
-                    "cronos-ai-packet-processing", stream_event
+                    "qbitel-packet-processing", stream_event
                 )
 
                 self.packets_analyzed += 1
@@ -745,7 +745,7 @@ class PacketMLConnector:
                 )
 
                 await self.streaming_service.send_event(
-                    "cronos-ai-metrics", metrics_event
+                    "qbitel-metrics", metrics_event
                 )
 
                 # Update for next iteration

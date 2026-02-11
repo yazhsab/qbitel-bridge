@@ -1,0 +1,123 @@
+---
+# Production Pod Disruption Budgets for High Availability
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: qbitel-core-pdb
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/name: qbitel-core
+    app.kubernetes.io/component: pdb
+    environment: production
+spec:
+  minAvailable: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qbitel-core
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ai-gateway-pdb
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/name: ai-gateway
+    app.kubernetes.io/component: pdb
+    environment: production
+spec:
+  minAvailable: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-gateway
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: protocol-copilot-pdb
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/name: protocol-copilot
+    app.kubernetes.io/component: pdb
+    environment: production
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: protocol-copilot
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: legacy-whisperer-pdb
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/name: legacy-whisperer
+    app.kubernetes.io/component: pdb
+    environment: production
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: legacy-whisperer
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: vllm-pdb
+  namespace: qbitel-vllm
+  labels:
+    app.kubernetes.io/name: vllm
+    app.kubernetes.io/component: pdb
+    environment: production
+spec:
+  # For GPU workloads, ensure at least one is always available
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vllm
+---
+# PDB for observability stack
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: prometheus-pdb
+  namespace: qbitel-observability
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: pdb
+    environment: production
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: grafana-pdb
+  namespace: qbitel-observability
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: pdb
+    environment: production
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: otel-collector-pdb
+  namespace: qbitel-observability
+  labels:
+    app.kubernetes.io/name: otel-collector
+    app.kubernetes.io/component: pdb
+    environment: production
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: otel-collector

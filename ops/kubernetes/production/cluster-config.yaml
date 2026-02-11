@@ -1,26 +1,26 @@
-# CRONOS AI - Production Kubernetes Cluster Configuration
+# QBITEL - Production Kubernetes Cluster Configuration
 # Complete production-ready Kubernetes deployment
 
 ---
-# Namespace for CRONOS AI
+# Namespace for QBITEL
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cronos-ai
+  name: qbitel
   labels:
-    name: cronos-ai
+    name: qbitel
     environment: production
     security-policy: restricted
   annotations:
-    description: "CRONOS AI Protocol Discovery System - Production Environment"
+    description: "QBITEL Bridge System - Production Environment"
 
 ---
 # Network Policies for Security
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: cronos-ai-network-policy
-  namespace: cronos-ai
+  name: qbitel-network-policy
+  namespace: qbitel
 spec:
   podSelector: {}
   policyTypes:
@@ -30,7 +30,7 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          name: cronos-ai
+          name: qbitel
     - namespaceSelector:
         matchLabels:
           name: istio-system
@@ -56,25 +56,25 @@ spec:
       port: 53   # DNS
 
 ---
-# Service Account for CRONOS AI
+# Service Account for QBITEL
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: cronos-ai-service-account
-  namespace: cronos-ai
+  name: qbitel-service-account
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
   annotations:
-    description: "Service account for CRONOS AI components"
+    description: "Service account for QBITEL components"
 
 ---
 # RBAC - ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: cronos-ai-cluster-role
+  name: qbitel-cluster-role
   labels:
-    app: cronos-ai
+    app: qbitel
 rules:
 - apiGroups: [""]
   resources: ["nodes", "pods", "services", "endpoints"]
@@ -91,16 +91,16 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: cronos-ai-cluster-role-binding
+  name: qbitel-cluster-role-binding
   labels:
-    app: cronos-ai
+    app: qbitel
 subjects:
 - kind: ServiceAccount
-  name: cronos-ai-service-account
-  namespace: cronos-ai
+  name: qbitel-service-account
+  namespace: qbitel
 roleRef:
   kind: ClusterRole
-  name: cronos-ai-cluster-role
+  name: qbitel-cluster-role
   apiGroup: rbac.authorization.k8s.io
 
 ---
@@ -108,13 +108,13 @@ roleRef:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cronos-ai-config
-  namespace: cronos-ai
+  name: qbitel-config
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: config
 data:
-  cronos_ai.yaml: |
+  qbitel.yaml: |
     environment: production
     debug: false
     api_host: "0.0.0.0"
@@ -124,8 +124,8 @@ data:
     database:
       host: "timescaledb-service"
       port: 5432
-      database: "cronos_ai_prod"
-      username: "cronos_prod_user"
+      database: "qbitel_prod"
+      username: "qbitel_prod_user"
       ssl_mode: "require"
       connection_pool_size: 20
       connection_timeout: 30
@@ -141,11 +141,11 @@ data:
     kafka:
       bootstrap_servers: ["kafka-service:9092"]
       security_protocol: "PLAINTEXT"
-      group_id: "cronos-ai"
+      group_id: "qbitel"
       auto_offset_reset: "latest"
     
     ai_engine:
-      model_cache_dir: "/opt/cronos_ai/models"
+      model_cache_dir: "/opt/qbitel/models"
       use_gpu: true
       gpu_memory_limit: 0.9
       batch_size: 64
@@ -195,10 +195,10 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cronos-ai-secrets
-  namespace: cronos-ai
+  name: qbitel-secrets
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: secrets
 type: Opaque
 stringData:
@@ -206,7 +206,7 @@ stringData:
   redis-password: "CHANGE_ME_IN_PRODUCTION"
   jwt-secret: "CHANGE_ME_IN_PRODUCTION"
   encryption-key: "CHANGE_ME_IN_PRODUCTION"
-  kafka-username: "cronos-ai-user"
+  kafka-username: "qbitel-user"
   kafka-password: "CHANGE_ME_IN_PRODUCTION"
   anthropic-api-key: "CHANGE_ME_IN_PRODUCTION"
   openai-api-key: "CHANGE_ME_IN_PRODUCTION"
@@ -218,9 +218,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ai-engine
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: ai-engine
 spec:
   replicas: 3
@@ -231,26 +231,26 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
       component: ai-engine
   template:
     metadata:
       labels:
-        app: cronos-ai
+        app: qbitel
         component: ai-engine
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8000"
         prometheus.io/path: "/metrics"
     spec:
-      serviceAccountName: cronos-ai-service-account
+      serviceAccountName: qbitel-service-account
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
       containers:
       - name: ai-engine
-        image: cronos-ai/ai-engine:latest
+        image: qbitel/ai-engine:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -260,27 +260,27 @@ spec:
         - containerPort: 8000
           name: metrics
         env:
-        - name: CRONOS_ENV
+        - name: QBITEL_ENV
           value: "production"
         - name: DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: database-password
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: redis-password
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: jwt-secret
         - name: ENCRYPTION_KEY
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: encryption-key
         # Compliance Environment Variables
         - name: COMPLIANCE_ENABLED
@@ -288,29 +288,29 @@ spec:
         - name: ANTHROPIC_API_KEY
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: anthropic-api-key
         - name: OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: openai-api-key
         - name: SIEM_API_TOKEN
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: siem-api-token
         volumeMounts:
         - name: config-volume
-          mountPath: /etc/cronos-ai
+          mountPath: /etc/qbitel
         - name: models-volume
-          mountPath: /opt/cronos_ai/models
+          mountPath: /opt/qbitel/models
         - name: tmp-volume
           mountPath: /tmp
         - name: compliance-volume
           mountPath: /app/compliance
         - name: compliance-config-volume
-          mountPath: /etc/cronos-ai/compliance.yaml
+          mountPath: /etc/qbitel/compliance.yaml
           subPath: compliance.yaml
           readOnly: true
         resources:
@@ -347,7 +347,7 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: cronos-ai-config
+          name: qbitel-config
       - name: models-volume
         persistentVolumeClaim:
           claimName: ai-models-pvc
@@ -359,7 +359,7 @@ spec:
           claimName: compliance-data-pvc
       - name: compliance-config-volume
         configMap:
-          name: cronos-ai-compliance-config
+          name: qbitel-compliance-config
       tolerations:
       - key: "node-type"
         operator: "Equal"
@@ -391,9 +391,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: protocol-processor
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: protocol-processor
 spec:
   replicas: 6
@@ -404,25 +404,25 @@ spec:
       maxSurge: 2
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
       component: protocol-processor
   template:
     metadata:
       labels:
-        app: cronos-ai
+        app: qbitel
         component: protocol-processor
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8000"
     spec:
-      serviceAccountName: cronos-ai-service-account
+      serviceAccountName: qbitel-service-account
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
       containers:
       - name: protocol-processor
-        image: cronos-ai/protocol-processor:latest
+        image: qbitel/protocol-processor:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -430,31 +430,31 @@ spec:
         - containerPort: 8000
           name: metrics
         env:
-        - name: CRONOS_ENV
+        - name: QBITEL_ENV
           value: "production"
         - name: DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: database-password
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: redis-password
         - name: KAFKA_USERNAME
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: kafka-username
         - name: KAFKA_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: kafka-password
         volumeMounts:
         - name: config-volume
-          mountPath: /etc/cronos-ai
+          mountPath: /etc/qbitel
         - name: tmp-volume
           mountPath: /tmp
         resources:
@@ -483,7 +483,7 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: cronos-ai-config
+          name: qbitel-config
       - name: tmp-volume
         emptyDir:
           sizeLimit: "500Mi"
@@ -505,9 +505,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: security-analyzer
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: security-analyzer
 spec:
   replicas: 4
@@ -518,25 +518,25 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
       component: security-analyzer
   template:
     metadata:
       labels:
-        app: cronos-ai
+        app: qbitel
         component: security-analyzer
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8000"
     spec:
-      serviceAccountName: cronos-ai-service-account
+      serviceAccountName: qbitel-service-account
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
       containers:
       - name: security-analyzer
-        image: cronos-ai/security-analyzer:latest
+        image: qbitel/security-analyzer:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -544,21 +544,21 @@ spec:
         - containerPort: 8000
           name: metrics
         env:
-        - name: CRONOS_ENV
+        - name: QBITEL_ENV
           value: "production"
         - name: DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: database-password
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: redis-password
         volumeMounts:
         - name: config-volume
-          mountPath: /etc/cronos-ai
+          mountPath: /etc/qbitel
         - name: security-data-volume
           mountPath: /opt/security-data
         resources:
@@ -583,7 +583,7 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: cronos-ai-config
+          name: qbitel-config
       - name: security-data-volume
         persistentVolumeClaim:
           claimName: security-data-pvc
@@ -594,9 +594,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: management-console
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: management-console
 spec:
   replicas: 2
@@ -607,22 +607,22 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
       component: management-console
   template:
     metadata:
       labels:
-        app: cronos-ai
+        app: qbitel
         component: management-console
     spec:
-      serviceAccountName: cronos-ai-service-account
+      serviceAccountName: qbitel-service-account
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
       containers:
       - name: management-console
-        image: cronos-ai/management-console:latest
+        image: qbitel/management-console:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
@@ -635,7 +635,7 @@ spec:
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: jwt-secret
         resources:
           requests:
@@ -663,9 +663,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ai-engine-service
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: ai-engine
   annotations:
     prometheus.io/scrape: "true"
@@ -673,7 +673,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: cronos-ai
+    app: qbitel
     component: ai-engine
   ports:
   - name: http
@@ -695,9 +695,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: protocol-processor-service
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: protocol-processor
   annotations:
     prometheus.io/scrape: "true"
@@ -705,7 +705,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: cronos-ai
+    app: qbitel
     component: protocol-processor
   ports:
   - name: http
@@ -723,9 +723,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: security-analyzer-service
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: security-analyzer
   annotations:
     prometheus.io/scrape: "true"
@@ -733,7 +733,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: cronos-ai
+    app: qbitel
     component: security-analyzer
   ports:
   - name: http
@@ -751,14 +751,14 @@ apiVersion: v1
 kind: Service
 metadata:
   name: management-console-service
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: management-console
 spec:
   type: ClusterIP
   selector:
-    app: cronos-ai
+    app: qbitel
     component: management-console
   ports:
   - name: http
@@ -771,10 +771,10 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: cronos-ai-ingress
-  namespace: cronos-ai
+  name: qbitel-ingress
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
   annotations:
     kubernetes.io/ingress.class: "istio"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
@@ -786,11 +786,11 @@ metadata:
 spec:
   tls:
   - hosts:
-    - cronos-ai.example.com
-    - api.cronos-ai.example.com
-    secretName: cronos-ai-tls-cert
+    - qbitel.example.com
+    - api.qbitel.example.com
+    secretName: qbitel-tls-cert
   rules:
-  - host: cronos-ai.example.com
+  - host: qbitel.example.com
     http:
       paths:
       - path: /
@@ -800,7 +800,7 @@ spec:
             name: management-console-service
             port:
               number: 3000
-  - host: api.cronos-ai.example.com
+  - host: api.qbitel.example.com
     http:
       paths:
       - path: /api/v1
@@ -817,7 +817,7 @@ spec:
             name: ai-engine-service
             port:
               number: 8080
-  - host: compliance.cronos-ai.example.com
+  - host: compliance.qbitel.example.com
     http:
       paths:
       - path: /
@@ -834,9 +834,9 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: ai-engine-hpa
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: ai-engine
 spec:
   scaleTargetRef:
@@ -878,9 +878,9 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: protocol-processor-hpa
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: protocol-processor
 spec:
   scaleTargetRef:
@@ -909,9 +909,9 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ai-models-pvc
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: storage
 spec:
   accessModes:
@@ -927,9 +927,9 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: security-data-pvc
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: storage
 spec:
   accessModes:
@@ -945,9 +945,9 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: compliance-data-pvc
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: compliance-storage
 spec:
   accessModes:
@@ -962,16 +962,16 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cronos-ai-compliance-config
-  namespace: cronos-ai
+  name: qbitel-compliance-config
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: compliance
 data:
   compliance.yaml: |
-    # CRONOS AI Compliance Module Configuration - Production
+    # QBITEL Compliance Module Configuration - Production
     environment: production
-    service_name: cronos-ai-compliance
+    service_name: qbitel-compliance
     version: "1.0.0"
     
     compliance:
@@ -1026,7 +1026,7 @@ data:
     monitoring:
       enabled: true
       metrics_enabled: true
-      prometheus_namespace: "cronos_ai_compliance"
+      prometheus_namespace: "qbitel_compliance"
       alerts:
         enabled: true
         critical_gap_threshold: 10
@@ -1048,15 +1048,15 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: ai-engine-pdb
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: ai-engine
 spec:
   minAvailable: 2
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
       component: ai-engine
 
 ---
@@ -1065,15 +1065,15 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: protocol-processor-pdb
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: protocol-processor
 spec:
   minAvailable: 4
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
       component: protocol-processor
 
 ---
@@ -1081,10 +1081,10 @@ spec:
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: cronos-ai-psp
-  namespace: cronos-ai
+  name: qbitel-psp
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
 spec:
   privileged: false
   allowPrivilegeEscalation: false
@@ -1117,10 +1117,10 @@ spec:
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: cronos-ai-resource-quota
-  namespace: cronos-ai
+  name: qbitel-resource-quota
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
 spec:
   hard:
     requests.cpu: "50"
@@ -1137,10 +1137,10 @@ spec:
 apiVersion: v1
 kind: LimitRange
 metadata:
-  name: cronos-ai-limit-range
-  namespace: cronos-ai
+  name: qbitel-limit-range
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
 spec:
   limits:
   - default:

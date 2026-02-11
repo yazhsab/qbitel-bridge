@@ -1,4 +1,4 @@
-# CRONOS AI - Comprehensive Alerting Rules
+# QBITEL - Comprehensive Alerting Rules
 # Prometheus alerting rules for production monitoring
 
 groups:
@@ -9,9 +9,9 @@ groups:
       - alert: HighErrorRate
         expr: |
           (
-            sum(rate(cronos_ai_http_requests_total{status=~"5.."}[5m]))
+            sum(rate(qbitel_http_requests_total{status=~"5.."}[5m]))
             /
-            sum(rate(cronos_ai_http_requests_total[5m]))
+            sum(rate(qbitel_http_requests_total[5m]))
           ) > 0.01
         for: 5m
         labels:
@@ -21,13 +21,13 @@ groups:
         annotations:
           summary: "High error rate detected"
           description: "Error rate is {{ $value | humanizePercentage }} (threshold: 1%)"
-          runbook_url: "https://runbooks.cronos-ai.com/high-error-rate"
-          dashboard_url: "https://grafana.cronos-ai.com/d/slo-dashboard"
+          runbook_url: "https://runbooks.qbitel.com/high-error-rate"
+          dashboard_url: "https://grafana.qbitel.com/d/slo-dashboard"
 
       - alert: HighLatency
         expr: |
           histogram_quantile(0.95,
-            rate(cronos_ai_http_request_duration_seconds_bucket[5m])
+            rate(qbitel_http_request_duration_seconds_bucket[5m])
           ) > 0.5
         for: 10m
         labels:
@@ -37,10 +37,10 @@ groups:
         annotations:
           summary: "High latency detected"
           description: "P95 latency is {{ $value }}s (threshold: 0.5s)"
-          runbook_url: "https://runbooks.cronos-ai.com/high-latency"
+          runbook_url: "https://runbooks.qbitel.com/high-latency"
 
       - alert: LowThroughput
-        expr: sum(rate(cronos_ai_http_requests_total[5m])) < 100
+        expr: sum(rate(qbitel_http_requests_total[5m])) < 100
         for: 10m
         labels:
           severity: warning
@@ -57,9 +57,9 @@ groups:
       - alert: ErrorBudgetBurnRateCritical
         expr: |
           (
-            sum(rate(cronos_ai_http_requests_total{status=~"5.."}[1h]))
+            sum(rate(qbitel_http_requests_total{status=~"5.."}[1h]))
             /
-            sum(rate(cronos_ai_http_requests_total[1h]))
+            sum(rate(qbitel_http_requests_total[1h]))
           ) / (1 - 0.999) > 14.4
         for: 2m
         labels:
@@ -69,14 +69,14 @@ groups:
         annotations:
           summary: "Critical error budget burn rate"
           description: "Burning error budget 14.4x faster than sustainable rate"
-          runbook_url: "https://runbooks.cronos-ai.com/error-budget-burn"
+          runbook_url: "https://runbooks.qbitel.com/error-budget-burn"
 
       - alert: ErrorBudgetBurnRateHigh
         expr: |
           (
-            sum(rate(cronos_ai_http_requests_total{status=~"5.."}[6h]))
+            sum(rate(qbitel_http_requests_total{status=~"5.."}[6h]))
             /
-            sum(rate(cronos_ai_http_requests_total[6h]))
+            sum(rate(qbitel_http_requests_total[6h]))
           ) / (1 - 0.999) > 6
         for: 15m
         labels:
@@ -90,9 +90,9 @@ groups:
       - alert: ErrorBudgetExhausted
         expr: |
           1 - (
-            sum(rate(cronos_ai_http_requests_total{status=~"2.."}[30d]))
+            sum(rate(qbitel_http_requests_total{status=~"2.."}[30d]))
             /
-            sum(rate(cronos_ai_http_requests_total[30d]))
+            sum(rate(qbitel_http_requests_total[30d]))
           ) < 0.001
         for: 5m
         labels:
@@ -101,14 +101,14 @@ groups:
         annotations:
           summary: "Error budget exhausted"
           description: "30-day error budget has been exhausted"
-          runbook_url: "https://runbooks.cronos-ai.com/error-budget-exhausted"
+          runbook_url: "https://runbooks.qbitel.com/error-budget-exhausted"
 
   # Infrastructure Alerts
   - name: infrastructure_alerts
     interval: 30s
     rules:
       - alert: PodCrashLooping
-        expr: rate(kube_pod_container_status_restarts_total{namespace="cronos-ai"}[15m]) > 0
+        expr: rate(kube_pod_container_status_restarts_total{namespace="qbitel"}[15m]) > 0
         for: 5m
         labels:
           severity: warning
@@ -116,12 +116,12 @@ groups:
         annotations:
           summary: "Pod {{ $labels.pod }} is crash looping"
           description: "Pod has restarted {{ $value }} times in the last 15 minutes"
-          runbook_url: "https://runbooks.cronos-ai.com/pod-crash-loop"
+          runbook_url: "https://runbooks.qbitel.com/pod-crash-loop"
 
       - alert: PodNotReady
         expr: |
           sum by (namespace, pod) (
-            kube_pod_status_phase{namespace="cronos-ai", phase!~"Running|Succeeded"}
+            kube_pod_status_phase{namespace="qbitel", phase!~"Running|Succeeded"}
           ) > 0
         for: 10m
         labels:
@@ -133,9 +133,9 @@ groups:
 
       - alert: HighCPUUsage
         expr: |
-          sum(rate(container_cpu_usage_seconds_total{namespace="cronos-ai"}[5m])) by (pod)
+          sum(rate(container_cpu_usage_seconds_total{namespace="qbitel"}[5m])) by (pod)
           /
-          sum(kube_pod_container_resource_limits{namespace="cronos-ai", resource="cpu"}) by (pod)
+          sum(kube_pod_container_resource_limits{namespace="qbitel", resource="cpu"}) by (pod)
           > 0.8
         for: 10m
         labels:
@@ -147,9 +147,9 @@ groups:
 
       - alert: HighMemoryUsage
         expr: |
-          sum(container_memory_working_set_bytes{namespace="cronos-ai"}) by (pod)
+          sum(container_memory_working_set_bytes{namespace="qbitel"}) by (pod)
           /
-          sum(kube_pod_container_resource_limits{namespace="cronos-ai", resource="memory"}) by (pod)
+          sum(kube_pod_container_resource_limits{namespace="qbitel", resource="memory"}) by (pod)
           > 0.85
         for: 10m
         labels:
@@ -173,7 +173,7 @@ groups:
         annotations:
           summary: "Low disk space on {{ $labels.instance }}"
           description: "Only {{ $value | humanizePercentage }} disk space remaining"
-          runbook_url: "https://runbooks.cronos-ai.com/disk-space-low"
+          runbook_url: "https://runbooks.qbitel.com/disk-space-low"
 
   # Application Alerts
   - name: application_alerts
@@ -181,9 +181,9 @@ groups:
     rules:
       - alert: ProtocolDiscoveryFailureRate
         expr: |
-          sum(rate(cronos_ai_protocol_discovery_failures_total[5m]))
+          sum(rate(qbitel_protocol_discovery_failures_total[5m]))
           /
-          sum(rate(cronos_ai_protocol_discovery_total[5m]))
+          sum(rate(qbitel_protocol_discovery_total[5m]))
           > 0.05
         for: 5m
         labels:
@@ -195,7 +195,7 @@ groups:
           description: "Failure rate is {{ $value | humanizePercentage }}"
 
       - alert: SecurityAnalysisBacklog
-        expr: cronos_ai_security_analysis_queue_size > 1000
+        expr: qbitel_security_analysis_queue_size > 1000
         for: 10m
         labels:
           severity: warning
@@ -208,7 +208,7 @@ groups:
       - alert: MLModelInferenceLatency
         expr: |
           histogram_quantile(0.95,
-            rate(cronos_ai_ml_inference_duration_seconds_bucket[5m])
+            rate(qbitel_ml_inference_duration_seconds_bucket[5m])
           ) > 1.0
         for: 10m
         labels:
@@ -221,9 +221,9 @@ groups:
 
       - alert: ComplianceCheckFailures
         expr: |
-          sum(rate(cronos_ai_compliance_check_failures_total[5m]))
+          sum(rate(qbitel_compliance_check_failures_total[5m]))
           /
-          sum(rate(cronos_ai_compliance_check_total[5m]))
+          sum(rate(qbitel_compliance_check_total[5m]))
           > 0.1
         for: 5m
         labels:
@@ -233,14 +233,14 @@ groups:
         annotations:
           summary: "High compliance check failure rate"
           description: "Failure rate is {{ $value | humanizePercentage }}"
-          runbook_url: "https://runbooks.cronos-ai.com/compliance-failures"
+          runbook_url: "https://runbooks.qbitel.com/compliance-failures"
 
   # Database Alerts
   - name: database_alerts
     interval: 30s
     rules:
       - alert: DatabaseConnectionPoolExhausted
-        expr: cronos_ai_db_connection_pool_active / cronos_ai_db_connection_pool_max > 0.9
+        expr: qbitel_db_connection_pool_active / qbitel_db_connection_pool_max > 0.9
         for: 5m
         labels:
           severity: critical
@@ -248,12 +248,12 @@ groups:
         annotations:
           summary: "Database connection pool nearly exhausted"
           description: "{{ $value | humanizePercentage }} of connections in use"
-          runbook_url: "https://runbooks.cronos-ai.com/db-connection-pool"
+          runbook_url: "https://runbooks.qbitel.com/db-connection-pool"
 
       - alert: DatabaseQueryLatency
         expr: |
           histogram_quantile(0.95,
-            rate(cronos_ai_db_query_duration_seconds_bucket[5m])
+            rate(qbitel_db_query_duration_seconds_bucket[5m])
           ) > 0.5
         for: 10m
         labels:
@@ -264,7 +264,7 @@ groups:
           description: "P95 query latency is {{ $value }}s"
 
       - alert: DatabaseReplicationLag
-        expr: cronos_ai_db_replication_lag_seconds > 30
+        expr: qbitel_db_replication_lag_seconds > 30
         for: 5m
         labels:
           severity: warning
@@ -279,9 +279,9 @@ groups:
     rules:
       - alert: HighAuthenticationFailureRate
         expr: |
-          sum(rate(cronos_ai_auth_failures_total[5m]))
+          sum(rate(qbitel_auth_failures_total[5m]))
           /
-          sum(rate(cronos_ai_auth_attempts_total[5m]))
+          sum(rate(qbitel_auth_attempts_total[5m]))
           > 0.1
         for: 5m
         labels:
@@ -290,10 +290,10 @@ groups:
         annotations:
           summary: "High authentication failure rate"
           description: "Failure rate is {{ $value | humanizePercentage }}"
-          runbook_url: "https://runbooks.cronos-ai.com/auth-failures"
+          runbook_url: "https://runbooks.qbitel.com/auth-failures"
 
       - alert: SuspiciousActivityDetected
-        expr: cronos_ai_security_threats_detected_total > 0
+        expr: qbitel_security_threats_detected_total > 0
         for: 1m
         labels:
           severity: critical
@@ -301,10 +301,10 @@ groups:
         annotations:
           summary: "Security threats detected"
           description: "{{ $value }} threats detected in the last minute"
-          runbook_url: "https://runbooks.cronos-ai.com/security-threats"
+          runbook_url: "https://runbooks.qbitel.com/security-threats"
 
       - alert: CertificateExpiringSoon
-        expr: (cronos_ai_tls_cert_expiry_seconds - time()) / 86400 < 30
+        expr: (qbitel_tls_cert_expiry_seconds - time()) / 86400 < 30
         for: 1h
         labels:
           severity: warning
@@ -312,14 +312,14 @@ groups:
         annotations:
           summary: "TLS certificate expiring soon"
           description: "Certificate {{ $labels.cert_name }} expires in {{ $value }} days"
-          runbook_url: "https://runbooks.cronos-ai.com/cert-renewal"
+          runbook_url: "https://runbooks.qbitel.com/cert-renewal"
 
   # Backup and DR Alerts
   - name: backup_dr_alerts
     interval: 1h
     rules:
       - alert: BackupFailed
-        expr: cronos_ai_backup_last_success_timestamp < (time() - 86400)
+        expr: qbitel_backup_last_success_timestamp < (time() - 86400)
         for: 1h
         labels:
           severity: critical
@@ -327,10 +327,10 @@ groups:
         annotations:
           summary: "Backup has not succeeded in 24 hours"
           description: "Last successful backup was {{ $value | humanizeDuration }} ago"
-          runbook_url: "https://runbooks.cronos-ai.com/backup-failure"
+          runbook_url: "https://runbooks.qbitel.com/backup-failure"
 
       - alert: BackupVerificationFailed
-        expr: cronos_ai_backup_verification_failures_total > 0
+        expr: qbitel_backup_verification_failures_total > 0
         for: 5m
         labels:
           severity: critical
@@ -338,10 +338,10 @@ groups:
         annotations:
           summary: "Backup verification failed"
           description: "{{ $value }} backup verifications have failed"
-          runbook_url: "https://runbooks.cronos-ai.com/backup-verification"
+          runbook_url: "https://runbooks.qbitel.com/backup-verification"
 
       - alert: DRDrillOverdue
-        expr: (time() - cronos_ai_dr_drill_last_run_timestamp) / 86400 > 90
+        expr: (time() - qbitel_dr_drill_last_run_timestamp) / 86400 > 90
         for: 1h
         labels:
           severity: warning
@@ -349,14 +349,14 @@ groups:
         annotations:
           summary: "DR drill overdue"
           description: "Last DR drill was {{ $value }} days ago"
-          runbook_url: "https://runbooks.cronos-ai.com/dr-drill"
+          runbook_url: "https://runbooks.qbitel.com/dr-drill"
 
   # Dependency Alerts
   - name: dependency_alerts
     interval: 30s
     rules:
       - alert: ExternalAPIDown
-        expr: cronos_ai_external_api_up == 0
+        expr: qbitel_external_api_up == 0
         for: 5m
         labels:
           severity: warning
@@ -366,7 +366,7 @@ groups:
           description: "API has been unreachable for 5 minutes"
 
       - alert: MessageQueueBacklog
-        expr: cronos_ai_message_queue_depth > 10000
+        expr: qbitel_message_queue_depth > 10000
         for: 10m
         labels:
           severity: warning
@@ -377,9 +377,9 @@ groups:
 
       - alert: CacheHitRateLow
         expr: |
-          sum(rate(cronos_ai_cache_hits_total[5m]))
+          sum(rate(qbitel_cache_hits_total[5m]))
           /
-          sum(rate(cronos_ai_cache_requests_total[5m]))
+          sum(rate(qbitel_cache_requests_total[5m]))
           < 0.8
         for: 15m
         labels:
@@ -394,7 +394,7 @@ groups:
     interval: 5m
     rules:
       - alert: LowUserActivity
-        expr: sum(rate(cronos_ai_user_requests_total[1h])) < 10
+        expr: sum(rate(qbitel_user_requests_total[1h])) < 10
         for: 30m
         labels:
           severity: warning
@@ -405,9 +405,9 @@ groups:
 
       - alert: HighAbandonmentRate
         expr: |
-          sum(rate(cronos_ai_requests_abandoned_total[5m]))
+          sum(rate(qbitel_requests_abandoned_total[5m]))
           /
-          sum(rate(cronos_ai_requests_total[5m]))
+          sum(rate(qbitel_requests_total[5m]))
           > 0.1
         for: 10m
         labels:

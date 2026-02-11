@@ -21,7 +21,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_BASE_URL || 'https://api.qslb.local',
+        target: process.env.VITE_API_BASE_URL || 'https://api.qbitel.local',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),

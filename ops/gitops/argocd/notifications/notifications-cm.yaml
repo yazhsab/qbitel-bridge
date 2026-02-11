@@ -1,0 +1,164 @@
+---
+# ArgoCD Notifications ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-notifications-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  # Notification services
+  service.slack: |
+    token: $slack-token
+    signingSecret: $slack-signing-secret
+
+  service.webhook.pagerduty: |
+    url: https://events.pagerduty.com/v2/enqueue
+    headers:
+      - name: Content-Type
+        value: application/json
+
+  service.email: |
+    host: smtp.qbitel.com
+    port: 587
+    from: argocd@qbitel.com
+    username: $email-username
+    password: $email-password
+
+  # Notification templates
+  template.app-sync-succeeded: |
+    message: |
+      ✅ *{{.app.metadata.name}}* sync succeeded
+      Environment: {{.app.metadata.labels.environment}}
+      Revision: {{.app.status.sync.revision}}
+      Time: {{.app.status.operationState.finishedAt}}
+    slack:
+      attachments: |
+        [{
+          "color": "#18be52",
+          "title": "{{.app.metadata.name}}",
+          "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "fields": [
+            {"title": "Environment", "value": "{{.app.metadata.labels.environment}}", "short": true},
+            {"title": "Revision", "value": "{{.app.status.sync.revision | trunc 7}}", "short": true},
+            {"title": "Namespace", "value": "{{.app.spec.destination.namespace}}", "short": true},
+            {"title": "Duration", "value": "{{.app.status.operationState.phase}}", "short": true}
+          ]
+        }]
+
+  template.app-sync-failed: |
+    message: |
+      ❌ *{{.app.metadata.name}}* sync failed
+      Environment: {{.app.metadata.labels.environment}}
+      Error: {{.app.status.operationState.message}}
+    slack:
+      attachments: |
+        [{
+          "color": "#e53935",
+          "title": "{{.app.metadata.name}} - Sync Failed",
+          "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "fields": [
+            {"title": "Environment", "value": "{{.app.metadata.labels.environment}}", "short": true},
+            {"title": "Revision", "value": "{{.app.status.sync.revision | trunc 7}}", "short": true},
+            {"title": "Error", "value": "{{.app.status.operationState.message | trunc 200}}", "short": false}
+          ]
+        }]
+
+  template.app-health-degraded: |
+    message: |
+      ⚠️ *{{.app.metadata.name}}* health degraded
+      Status: {{.app.status.health.status}}
+    slack:
+      attachments: |
+        [{
+          "color": "#ff9800",
+          "title": "{{.app.metadata.name}} - Health Degraded",
+          "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "fields": [
+            {"title": "Environment", "value": "{{.app.metadata.labels.environment}}", "short": true},
+            {"title": "Health Status", "value": "{{.app.status.health.status}}", "short": true}
+          ]
+        }]
+
+  template.app-deployed: |
+    message: |
+      🚀 *{{.app.metadata.name}}* deployed to {{.app.metadata.labels.environment}}
+    webhook.pagerduty: |
+      {
+        "routing_key": "$pagerduty-routing-key",
+        "event_action": "resolve",
+        "dedup_key": "{{.app.metadata.name}}-{{.app.metadata.labels.environment}}",
+        "payload": {
+          "summary": "Application {{.app.metadata.name}} deployed successfully",
+          "severity": "info",
+          "source": "ArgoCD",
+          "custom_details": {
+            "application": "{{.app.metadata.name}}",
+            "environment": "{{.app.metadata.labels.environment}}",
+            "revision": "{{.app.status.sync.revision}}"
+          }
+        }
+      }
+
+  template.app-sync-running: |
+    message: |
+      🔄 *{{.app.metadata.name}}* sync in progress
+      Environment: {{.app.metadata.labels.environment}}
+    slack:
+      attachments: |
+        [{
+          "color": "#2196f3",
+          "title": "{{.app.metadata.name}} - Syncing",
+          "title_link": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+          "fields": [
+            {"title": "Environment", "value": "{{.app.metadata.labels.environment}}", "short": true},
+            {"title": "Target Revision", "value": "{{.app.spec.source.targetRevision}}", "short": true}
+          ]
+        }]
+
+  # Notification triggers
+  trigger.on-sync-succeeded: |
+    - when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
+      send: [app-sync-succeeded, app-deployed]
+
+  trigger.on-sync-failed: |
+    - when: app.status.operationState.phase in ['Error', 'Failed']
+      send: [app-sync-failed]
+
+  trigger.on-sync-running: |
+    - when: app.status.operationState.phase in ['Running']
+      send: [app-sync-running]
+      oncePer: app.status.sync.revision
+
+  trigger.on-health-degraded: |
+    - when: app.status.health.status == 'Degraded'
+      send: [app-health-degraded]
+
+  trigger.on-deployed: |
+    - when: app.status.operationState.phase in ['Succeeded']
+      oncePer: app.status.sync.revision
+      send: [app-deployed]
+
+  # Default subscriptions (can be overridden per app via annotations)
+  defaultTriggers: |
+    - on-sync-failed
+
+  # Context for templates
+  context: |
+    argocdUrl: https://argocd.qbitel.com
+---
+# ArgoCD Notifications Secret (placeholder)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argocd-notifications-secret
+  namespace: argocd
+type: Opaque
+stringData:
+  slack-token: "${SLACK_TOKEN}"
+  slack-signing-secret: "${SLACK_SIGNING_SECRET}"
+  email-username: "${EMAIL_USERNAME}"
+  email-password: "${EMAIL_PASSWORD}"
+  pagerduty-routing-key: "${PAGERDUTY_ROUTING_KEY}"

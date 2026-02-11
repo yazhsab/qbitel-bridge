@@ -450,14 +450,14 @@ class AdmissionWebhookServer:
             "apiVersion": "admissionregistration.k8s.io/v1",
             "kind": "ValidatingWebhookConfiguration",
             "metadata": {
-                "name": "cronos-container-security"
+                "name": "qbitel-container-security"
             },
             "webhooks": [{
-                "name": "validate.cronos-ai.io",
+                "name": "validate.qbitel.io",
                 "clientConfig": {
                     "service": {
-                        "name": "cronos-webhook",
-                        "namespace": "cronos-system",
+                        "name": "qbitel-webhook",
+                        "namespace": "qbitel-system",
                         "path": "/validate"
                     }
                 },

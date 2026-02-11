@@ -1,10 +1,10 @@
-# CRONOS AI - Compliance Reporter Configuration
+# QBITEL - Compliance Reporter Configuration
 # Production-ready configuration for autonomous compliance reporting
 
 compliance:
   # Service configuration
   enabled: true
-  service_name: "cronos-ai-compliance-reporter"
+  service_name: "qbitel-compliance-reporter"
   version: "1.0.0"
   
   # Assessment configuration
@@ -171,14 +171,14 @@ compliance:
   # Business configuration
   business:
     organization:
-      name: "CRONOS AI Enterprise"
+      name: "QBITEL Enterprise"
       industry: "Technology"
       regulatory_environment: "Multi-jurisdictional"
       risk_appetite: "Low"
       
     compliance_officer:
       name: "Chief Compliance Officer"
-      email: "cco@cronos.ai"
+      email: "cco@qbitel.ai"
       phone: "+1-555-0100"
       
     regulatory_contacts:

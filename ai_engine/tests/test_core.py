@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Core Component Tests
+QBITEL Engine - Core Component Tests
 
 This module contains unit tests for core AI Engine components.
 """

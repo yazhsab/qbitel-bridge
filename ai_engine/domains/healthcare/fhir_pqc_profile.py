@@ -27,7 +27,7 @@ class FHIRPQCSecurityProfile:
     def get_capability_statement_extension(self) -> Dict[str, Any]:
         """Get FHIR CapabilityStatement extension for PQC support."""
         return {
-            "url": "http://cronos.ai/fhir/StructureDefinition/pqc-security",
+            "url": "http://qbitel.ai/fhir/StructureDefinition/pqc-security",
             "extension": [
                 {
                     "url": "kemAlgorithm",

@@ -58,10 +58,10 @@ pub async fn reconcile(
                 phase: "Ready".to_string(),
                 mesh_version: Some(get_mesh_version(&servicemesh.spec.provider)),
                 connected_services: Some(vec![
-                    "cronos-ai-dataplane".to_string(),
-                    "cronos-ai-controlplane".to_string(),
-                    "cronos-ai-aiengine".to_string(),
-                    "cronos-ai-policy-engine".to_string(),
+                    "qbitel-bridge-dataplane".to_string(),
+                    "qbitel-bridge-controlplane".to_string(),
+                    "qbitel-bridge-aiengine".to_string(),
+                    "qbitel-bridge-policy-engine".to_string(),
                 ]),
                 tls_status: Some(if servicemesh.spec.mtls.as_ref().map(|m| m.enabled).unwrap_or(false) {
                     "STRICT".to_string()
@@ -238,7 +238,7 @@ async fn create_istio_virtual_services(
     client: &Client,
     namespace: &str,
 ) -> Result<(), OperatorError> {
-    // Create VirtualServices for CRONOS AI components
+    // Create VirtualServices for QBITEL Bridge components
     let components = vec![
         ("dataplane", 9090),
         ("controlplane", 8080),
@@ -251,17 +251,17 @@ async fn create_istio_virtual_services(
             "apiVersion": "networking.istio.io/v1beta1",
             "kind": "VirtualService",
             "metadata": {
-                "name": format!("cronos-ai-{}", component),
+                "name": format!("qbitel-bridge-{}", component),
                 "namespace": namespace,
                 "labels": resource_labels("servicemesh", &servicemesh.name_any())
             },
             "spec": {
-                "hosts": [format!("cronos-ai-{}", component)],
+                "hosts": [format!("qbitel-bridge-{}", component)],
                 "http": [{
                     "match": [{"uri": {"prefix": "/"}}],
                     "route": [{
                         "destination": {
-                            "host": format!("cronos-ai-{}", component),
+                            "host": format!("qbitel-bridge-{}", component),
                             "port": {"number": port}
                         }
                     }],
@@ -294,12 +294,12 @@ async fn create_istio_destination_rules(
             "apiVersion": "networking.istio.io/v1beta1",
             "kind": "DestinationRule",
             "metadata": {
-                "name": format!("cronos-ai-{}", component),
+                "name": format!("qbitel-bridge-{}", component),
                 "namespace": namespace,
                 "labels": resource_labels("servicemesh", &servicemesh.name_any())
             },
             "spec": {
-                "host": format!("cronos-ai-{}", component),
+                "host": format!("qbitel-bridge-{}", component),
                 "trafficPolicy": {
                     "loadBalancer": {
                         "simple": "LEAST_CONN"
@@ -339,7 +339,7 @@ async fn create_istio_peer_authentication(
             "apiVersion": "security.istio.io/v1beta1",
             "kind": "PeerAuthentication",
             "metadata": {
-                "name": "cronos-ai-mtls",
+                "name": "qbitel-bridge-mtls",
                 "namespace": namespace,
                 "labels": resource_labels("servicemesh", &servicemesh.name_any())
             },
@@ -438,7 +438,7 @@ async fn create_linkerd_service_profiles(
             "apiVersion": "linkerd.io/v1alpha2",
             "kind": "ServiceProfile",
             "metadata": {
-                "name": format!("cronos-ai-{}", component),
+                "name": format!("qbitel-bridge-{}", component),
                 "namespace": namespace,
                 "labels": resource_labels("servicemesh", &servicemesh.name_any())
             },
@@ -483,17 +483,17 @@ async fn create_linkerd_traffic_splits(
         "apiVersion": "split.smi-spec.io/v1alpha1",
         "kind": "TrafficSplit",
         "metadata": {
-            "name": "cronos-ai-canary",
+            "name": "qbitel-bridge-canary",
             "namespace": namespace,
             "labels": resource_labels("servicemesh", &servicemesh.name_any())
         },
         "spec": {
-            "service": "cronos-ai-aiengine",
+            "service": "qbitel-bridge-aiengine",
             "backends": [{
-                "service": "cronos-ai-aiengine-stable",
+                "service": "qbitel-bridge-aiengine-stable",
                 "weight": 90
             }, {
-                "service": "cronos-ai-aiengine-canary", 
+                "service": "qbitel-bridge-aiengine-canary", 
                 "weight": 10
             }]
         }
@@ -564,10 +564,10 @@ async fn create_consul_service_intentions(
             },
             "spec": {
                 "destination": {
-                    "name": format!("cronos-ai-{}", destination)
+                    "name": format!("qbitel-bridge-{}", destination)
                 },
                 "sources": [{
-                    "name": format!("cronos-ai-{}", source),
+                    "name": format!("qbitel-bridge-{}", source),
                     "action": action
                 }]
             }

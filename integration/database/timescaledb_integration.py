@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - TimescaleDB Integration
+QBITEL - TimescaleDB Integration
 High-performance time-series database integration for metrics, logs, and analysis data.
 """
 
@@ -87,7 +87,7 @@ class ProtocolAnalysisRecord:
 
 class TimescaleDBIntegration:
     """
-    Production TimescaleDB integration for CRONOS AI.
+    Production TimescaleDB integration for QBITEL.
     Handles time-series data storage and retrieval with optimal performance.
     """
 
@@ -184,8 +184,8 @@ class TimescaleDBIntegration:
             db_config = {
                 "host": self.config.get("host", "localhost"),
                 "port": self.config.get("port", 5432),
-                "database": self.config.get("database", "cronos_ai"),
-                "user": self.config.get("username", "cronos_user"),
+                "database": self.config.get("database", "qbitel"),
+                "user": self.config.get("username", "qbitel_user"),
                 "password": self.config.get("password", ""),
                 "ssl": self.config.get("ssl_mode", "prefer"),
                 "min_size": 5,

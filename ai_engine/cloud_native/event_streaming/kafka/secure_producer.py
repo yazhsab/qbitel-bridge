@@ -130,17 +130,17 @@ class SecureKafkaProducer:
                 headers = {}
 
             headers.update({
-                "x-cronos-encrypted": "true",
-                "x-cronos-algorithm": "aes-256-gcm",
-                "x-cronos-nonce": base64.b64encode(nonce).decode(),
-                "x-cronos-tag": base64.b64encode(tag).decode()
+                "x-qbitel-encrypted": "true",
+                "x-qbitel-algorithm": "aes-256-gcm",
+                "x-qbitel-nonce": base64.b64encode(nonce).decode(),
+                "x-qbitel-tag": base64.b64encode(tag).decode()
             })
 
             value = encrypted_value
         else:
             if headers is None:
                 headers = {}
-            headers["x-cronos-encrypted"] = "false"
+            headers["x-qbitel-encrypted"] = "false"
 
         # Convert headers to list of tuples with bytes values
         kafka_headers = [(k, v.encode() if isinstance(v, str) else v) for k, v in headers.items()]
@@ -302,18 +302,18 @@ class SecureKafkaProducer:
     def create_connector_config(self) -> Dict[str, Any]:
         """Create Kafka Connect configuration"""
         return {
-            "name": "cronos-secure-sink",
+            "name": "qbitel-secure-sink",
             "config": {
                 "connector.class": "io.confluent.connect.kafka.KafkaSinkConnector",
                 "topics": self.topic,
                 "bootstrap.servers": self.bootstrap_servers,
                 "key.converter": "org.apache.kafka.connect.storage.StringConverter",
                 "value.converter": "org.apache.kafka.connect.storage.ByteArrayConverter",
-                "transforms": "cronos_encryption",
-                "transforms.cronos_encryption.type": "com.cronos.kafka.QuantumEncryption",
-                "transforms.cronos_encryption.algorithm": "kyber-1024",
+                "transforms": "qbitel_encryption",
+                "transforms.qbitel_encryption.type": "com.qbitel.kafka.QuantumEncryption",
+                "transforms.qbitel_encryption.algorithm": "kyber-1024",
                 "security.protocol": "SSL",
-                "ssl.truststore.location": "/etc/cronos/kafka/truststore.jks",
-                "ssl.keystore.location": "/etc/cronos/kafka/keystore.jks"
+                "ssl.truststore.location": "/etc/qbitel/kafka/truststore.jks",
+                "ssl.keystore.location": "/etc/qbitel/kafka/keystore.jks"
             }
         }

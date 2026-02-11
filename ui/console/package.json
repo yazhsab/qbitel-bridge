@@ -1,7 +1,7 @@
 {
-  "name": "cronosai-admin-console",
+  "name": "qbitelai-admin-console",
   "version": "1.0.0",
-  "description": "CronosAI Admin Console - Enterprise-grade management interface",
+  "description": "QbitelAI Admin Console - Enterprise-grade management interface",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.11.1",

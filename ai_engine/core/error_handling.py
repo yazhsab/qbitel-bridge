@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Comprehensive Error Handling System
+QBITEL Engine - Comprehensive Error Handling System
 
 This module provides enterprise-grade error handling, recovery strategies,
 and structured logging for the protocol discovery system.
@@ -22,7 +22,7 @@ import random
 from collections import Counter
 
 from .exceptions import (
-    CronosAIException,
+    QbitelAIException,
     ProtocolException,
     ModelException,
     InferenceException,
@@ -253,11 +253,11 @@ class CircuitBreaker:
                 self.half_open_calls = 0
                 self.logger.info("Circuit breaker transitioning to HALF_OPEN")
             else:
-                raise CronosAIException("Circuit breaker is OPEN")
+                raise QbitelAIException("Circuit breaker is OPEN")
 
         if self.state == CircuitBreakerState.HALF_OPEN:
             if self.half_open_calls >= self.config.half_open_max_calls:
-                raise CronosAIException("Circuit breaker HALF_OPEN call limit reached")
+                raise QbitelAIException("Circuit breaker HALF_OPEN call limit reached")
 
         try:
             if asyncio.iscoroutinefunction(func):

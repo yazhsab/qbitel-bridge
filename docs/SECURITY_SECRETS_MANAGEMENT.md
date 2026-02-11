@@ -1,8 +1,8 @@
-# CRONOS AI - Secrets Management Guide
+# QBITEL - Secrets Management Guide
 
 ## Overview
 
-This document provides comprehensive guidance on managing secrets and credentials securely in CRONOS AI. Following these practices is **CRITICAL** for production deployments.
+This document provides comprehensive guidance on managing secrets and credentials securely in QBITEL. Following these practices is **CRITICAL** for production deployments.
 
 ## Table of Contents
 
@@ -23,7 +23,7 @@ This document provides comprehensive guidance on managing secrets and credential
 
 ```python
 # WRONG - Hardcoded credentials
-password = "cronos123"
+password = "qbitel123"
 api_key = "sk-1234567890abcdef"
 jwt_secret = "my-secret-key"
 ```
@@ -51,7 +51,7 @@ jwt_secret = os.getenv('JWT_SECRET')
 
 ## Secrets Management Architecture
 
-CRONOS AI provides a unified secrets management interface that supports multiple backends:
+QBITEL provides a unified secrets management interface that supports multiple backends:
 
 ```
 ┌─────────────────────────────────────────┐
@@ -92,17 +92,17 @@ CRONOS AI provides a unified secrets management interface that supports multiple
 
 ```bash
 # Set environment variables
-export CRONOS_AI_DB_PASSWORD="your-secure-password"
-export CRONOS_AI_REDIS_PASSWORD="your-redis-password"
-export CRONOS_AI_JWT_SECRET="your-jwt-secret-min-32-chars"
-export CRONOS_AI_ENCRYPTION_KEY="your-encryption-key-min-32-chars"
-export CRONOS_AI_API_KEY="your-api-key-min-32-chars"
+export QBITEL_AI_DB_PASSWORD="your-secure-password"
+export QBITEL_AI_REDIS_PASSWORD="your-redis-password"
+export QBITEL_AI_JWT_SECRET="your-jwt-secret-min-32-chars"
+export QBITEL_AI_ENCRYPTION_KEY="your-encryption-key-min-32-chars"
+export QBITEL_AI_API_KEY="your-api-key-min-32-chars"
 ```
 
 **Configuration:**
 
 ```yaml
-# config/cronos_ai.production.yaml
+# config/qbitel.production.yaml
 secrets_manager:
   enabled: false  # Use environment variables directly
 ```
@@ -134,21 +134,21 @@ export VAULT_ADDR='http://127.0.0.1:8200'
 export VAULT_TOKEN='your-vault-token'
 
 # Store secrets
-vault kv put secret/cronos-ai/production/database_password value="your-password"
-vault kv put secret/cronos-ai/production/jwt_secret value="your-jwt-secret"
+vault kv put secret/qbitel/production/database_password value="your-password"
+vault kv put secret/qbitel/production/jwt_secret value="your-jwt-secret"
 ```
 
 **Configuration:**
 
 ```yaml
-# config/cronos_ai.production.yaml
+# config/qbitel.production.yaml
 secrets_manager:
   enabled: true
   backend: "vault"
   vault_addr: "${VAULT_ADDR}"
   vault_token: "${VAULT_TOKEN}"
   vault_mount_point: "secret"
-  vault_path: "cronos-ai/production"
+  vault_path: "qbitel/production"
 ```
 
 **Python Usage:**
@@ -193,14 +193,14 @@ aws configure
 
 # Create secret
 aws secretsmanager create-secret \
-    --name cronos-ai/database_password \
+    --name qbitel/database_password \
     --secret-string "your-password"
 ```
 
 **Configuration:**
 
 ```yaml
-# config/cronos_ai.production.yaml
+# config/qbitel.production.yaml
 secrets_manager:
   enabled: true
   backend: "aws_secrets_manager"
@@ -219,7 +219,7 @@ secrets_manager:
         "secretsmanager:GetSecretValue",
         "secretsmanager:DescribeSecret"
       ],
-      "Resource": "arn:aws:secretsmanager:*:*:secret:cronos-ai/*"
+      "Resource": "arn:aws:secretsmanager:*:*:secret:qbitel/*"
     }
   ]
 }
@@ -247,21 +247,21 @@ pip install azure-keyvault-secrets azure-identity
 az login
 
 # Create Key Vault
-az keyvault create --name cronos-ai-vault --resource-group myResourceGroup
+az keyvault create --name qbitel-vault --resource-group myResourceGroup
 
 # Set secret
-az keyvault secret set --vault-name cronos-ai-vault \
+az keyvault secret set --vault-name qbitel-vault \
     --name database-password --value "your-password"
 ```
 
 **Configuration:**
 
 ```yaml
-# config/cronos_ai.production.yaml
+# config/qbitel.production.yaml
 secrets_manager:
   enabled: true
   backend: "azure_key_vault"
-  azure_vault_url: "https://cronos-ai-vault.vault.azure.net/"
+  azure_vault_url: "https://qbitel-vault.vault.azure.net/"
 ```
 
 ---
@@ -272,11 +272,11 @@ secrets_manager:
 
 | Secret | Environment Variable | Min Length | Rotation Interval |
 |--------|---------------------|------------|-------------------|
-| Database Password | `CRONOS_AI_DB_PASSWORD` | 16 chars | 90 days |
-| Redis Password | `CRONOS_AI_REDIS_PASSWORD` | 16 chars | 90 days |
-| JWT Secret | `CRONOS_AI_JWT_SECRET` | 32 chars | 180 days |
-| Encryption Key | `CRONOS_AI_ENCRYPTION_KEY` | 32 chars | 365 days |
-| API Key | `CRONOS_AI_API_KEY` | 32 chars | 90 days |
+| Database Password | `QBITEL_AI_DB_PASSWORD` | 16 chars | 90 days |
+| Redis Password | `QBITEL_AI_REDIS_PASSWORD` | 16 chars | 90 days |
+| JWT Secret | `QBITEL_AI_JWT_SECRET` | 32 chars | 180 days |
+| Encryption Key | `QBITEL_AI_ENCRYPTION_KEY` | 32 chars | 365 days |
+| API Key | `QBITEL_AI_API_KEY` | 32 chars | 90 days |
 
 ### Generating Strong Secrets
 
@@ -297,15 +297,15 @@ Create `.env.production` (NEVER commit this file):
 
 ```bash
 # Database
-CRONOS_AI_DB_PASSWORD="<generate-strong-password>"
+QBITEL_AI_DB_PASSWORD="<generate-strong-password>"
 
 # Redis
-CRONOS_AI_REDIS_PASSWORD="<generate-strong-password>"
+QBITEL_AI_REDIS_PASSWORD="<generate-strong-password>"
 
 # Security
-CRONOS_AI_JWT_SECRET="<generate-jwt-secret-min-32-chars>"
-CRONOS_AI_ENCRYPTION_KEY="<generate-encryption-key-min-32-chars>"
-CRONOS_AI_API_KEY="<generate-api-key-min-32-chars>"
+QBITEL_AI_JWT_SECRET="<generate-jwt-secret-min-32-chars>"
+QBITEL_AI_ENCRYPTION_KEY="<generate-encryption-key-min-32-chars>"
+QBITEL_AI_API_KEY="<generate-api-key-min-32-chars>"
 
 # Vault (if using)
 VAULT_ADDR="https://vault.example.com"
@@ -340,13 +340,13 @@ python scripts/rotate_secrets.py --api-key --backend vault
 NEW_PASSWORD=$(openssl rand -base64 32)
 
 # Update in database
-psql -U postgres -c "ALTER USER cronos_user WITH PASSWORD '$NEW_PASSWORD';"
+psql -U postgres -c "ALTER USER qbitel_user WITH PASSWORD '$NEW_PASSWORD';"
 
 # Update in secrets manager
-vault kv put secret/cronos-ai/production/database_password value="$NEW_PASSWORD"
+vault kv put secret/qbitel/production/database_password value="$NEW_PASSWORD"
 
 # Restart application
-kubectl rollout restart deployment/cronos-ai
+kubectl rollout restart deployment/qbitel
 ```
 
 #### 2. JWT Secret
@@ -356,10 +356,10 @@ kubectl rollout restart deployment/cronos-ai
 NEW_SECRET=$(python -c "import secrets; print(secrets.token_urlsafe(64))")
 
 # Update in secrets manager
-vault kv put secret/cronos-ai/production/jwt_secret value="$NEW_SECRET"
+vault kv put secret/qbitel/production/jwt_secret value="$NEW_SECRET"
 
 # Restart application (invalidates all existing tokens)
-kubectl rollout restart deployment/cronos-ai
+kubectl rollout restart deployment/qbitel
 ```
 
 #### 3. API Key
@@ -369,11 +369,11 @@ kubectl rollout restart deployment/cronos-ai
 NEW_KEY=$(python -c "import secrets; print(secrets.token_urlsafe(32))")
 
 # Update in secrets manager
-vault kv put secret/cronos-ai/production/api_key value="$NEW_KEY"
+vault kv put secret/qbitel/production/api_key value="$NEW_KEY"
 
 # Update client applications
 # Restart application
-kubectl rollout restart deployment/cronos-ai
+kubectl rollout restart deployment/qbitel
 ```
 
 ### Rotation Schedule
@@ -447,7 +447,7 @@ SKIP=detect-secrets git commit
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cronos-ai-secrets
+  name: qbitel-secrets
 type: Opaque
 stringData:
   database-password: "<from-secrets-manager>"
@@ -462,22 +462,22 @@ stringData:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cronos-ai
+  name: qbitel
 spec:
   template:
     spec:
       containers:
-      - name: cronos-ai
+      - name: qbitel
         env:
-        - name: CRONOS_AI_DB_PASSWORD
+        - name: QBITEL_AI_DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: database-password
-        - name: CRONOS_AI_JWT_SECRET
+        - name: QBITEL_AI_JWT_SECRET
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: jwt-secret
 ```
 
@@ -487,8 +487,8 @@ spec:
 # Use environment file
 docker run -d \
   --env-file .env.production \
-  --name cronos-ai \
-  cronos-ai:latest
+  --name qbitel \
+  qbitel:latest
 ```
 
 ---
@@ -499,7 +499,7 @@ docker run -d \
 
 **Solution:**
 ```bash
-export CRONOS_AI_DB_PASSWORD="your-password"
+export QBITEL_AI_DB_PASSWORD="your-password"
 # or
 export DATABASE_PASSWORD="your-password"
 ```
@@ -508,7 +508,7 @@ export DATABASE_PASSWORD="your-password"
 
 **Solution:**
 ```bash
-export CRONOS_AI_JWT_SECRET="your-secret-min-32-chars"
+export QBITEL_AI_JWT_SECRET="your-secret-min-32-chars"
 # or
 export JWT_SECRET="your-secret-min-32-chars"
 ```
@@ -535,7 +535,7 @@ vault login
 aws sts get-caller-identity
 
 # Verify IAM permissions
-aws secretsmanager describe-secret --secret-id cronos-ai/database_password
+aws secretsmanager describe-secret --secret-id qbitel/database_password
 ```
 
 ---
@@ -588,6 +588,6 @@ aws secretsmanager describe-secret --secret-id cronos-ai/database_password
 
 ## Support
 
-For security issues, contact: security@cronos-ai.example.com
+For security issues, contact: security@qbitel.example.com
 
 **DO NOT** post secrets or security issues in public forums or issue trackers.

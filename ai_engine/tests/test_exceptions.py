@@ -6,7 +6,7 @@ Quick coverage wins by testing all exception types.
 import pytest
 
 from ai_engine.core.exceptions import (
-    CronosAIException,
+    QbitelAIException,
     ConfigurationException,
     ModelException,
     ModelVersionException,
@@ -39,26 +39,26 @@ from ai_engine.core.exceptions import (
 )
 
 
-class TestCronosAIException:
-    """Test base CronosAIException."""
+class TestQbitelAIException:
+    """Test base QbitelAIException."""
 
     def test_basic_exception(self):
         """Test basic exception creation."""
-        exc = CronosAIException("Test error")
-        assert str(exc) == "Test error (Code: CRONOS_AI_ERROR)"
+        exc = QbitelAIException("Test error")
+        assert str(exc) == "Test error (Code: QBITEL_AI_ERROR)"
         assert exc.message == "Test error"
-        assert exc.error_code == "CRONOS_AI_ERROR"
+        assert exc.error_code == "QBITEL_AI_ERROR"
         assert exc.context == {}
 
     def test_exception_with_code(self):
         """Test exception with custom error code."""
-        exc = CronosAIException("Test error", error_code="CUSTOM_CODE")
+        exc = QbitelAIException("Test error", error_code="CUSTOM_CODE")
         assert exc.error_code == "CUSTOM_CODE"
 
     def test_exception_with_context(self):
         """Test exception with context data."""
         context = {"key": "value", "count": 42}
-        exc = CronosAIException("Test error", context=context)
+        exc = QbitelAIException("Test error", context=context)
         assert exc.context == context
         assert "Context:" in str(exc)
 
@@ -510,8 +510,8 @@ class TestEnsembleException:
 class TestExceptionInheritance:
     """Test exception inheritance hierarchy."""
 
-    def test_all_inherit_from_cronos_ai_exception(self):
-        """Test that all exceptions inherit from CronosAIException."""
+    def test_all_inherit_from_qbitel_exception(self):
+        """Test that all exceptions inherit from QbitelAIException."""
         exceptions = [
             ConfigurationException,
             ModelException,
@@ -524,14 +524,14 @@ class TestExceptionInheritance:
 
         for exc_class in exceptions:
             exc = exc_class("Test")
-            assert isinstance(exc, CronosAIException)
+            assert isinstance(exc, QbitelAIException)
             assert isinstance(exc, Exception)
 
     def test_observability_exceptions_inherit_correctly(self):
         """Test observability exception hierarchy."""
         exc = MonitoringException("Test")
         assert isinstance(exc, ObservabilityException)
-        assert isinstance(exc, CronosAIException)
+        assert isinstance(exc, QbitelAIException)
 
 
 if __name__ == "__main__":

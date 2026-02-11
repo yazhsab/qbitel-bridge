@@ -1,4 +1,4 @@
-# CRONOS AI - On-Call Playbook
+# QBITEL - On-Call Playbook
 
 ## Table of Contents
 1. [On-Call Overview](#on-call-overview)
@@ -80,17 +80,17 @@
 2. **Check Service Status**
    ```bash
    # Check Kubernetes pods
-   kubectl get pods -n cronos-ai
-   kubectl describe pods -n cronos-ai
+   kubectl get pods -n qbitel
+   kubectl describe pods -n qbitel
    
    # Check service endpoints
-   kubectl get endpoints -n cronos-ai
+   kubectl get endpoints -n qbitel
    ```
 
 3. **Review Recent Changes**
    ```bash
    # Check recent deployments
-   kubectl rollout history deployment/cronos-ai -n cronos-ai
+   kubectl rollout history deployment/qbitel -n qbitel
    
    # Check recent commits
    git log --oneline -10
@@ -99,25 +99,25 @@
 4. **Check Logs**
    ```bash
    # View pod logs
-   kubectl logs -n cronos-ai -l app=cronos-ai --tail=100
+   kubectl logs -n qbitel -l app=qbitel --tail=100
    
    # Check for errors
-   kubectl logs -n cronos-ai -l app=cronos-ai | grep -i error
+   kubectl logs -n qbitel -l app=qbitel | grep -i error
    ```
 
 5. **Rollback if Needed**
    ```bash
    # Rollback to previous version
-   kubectl rollout undo deployment/cronos-ai -n cronos-ai
+   kubectl rollout undo deployment/qbitel -n qbitel
    
    # Monitor rollback
-   kubectl rollout status deployment/cronos-ai -n cronos-ai
+   kubectl rollout status deployment/qbitel -n qbitel
    ```
 
 6. **Verify Recovery**
    ```bash
    # Run health checks
-   curl https://api.cronos-ai.com/health
+   curl https://api.qbitel.com/health
    
    # Check metrics
    python scripts/check_production_readiness.py
@@ -141,7 +141,7 @@
 1. **Check Resource Utilization**
    ```bash
    # CPU and memory usage
-   kubectl top pods -n cronos-ai
+   kubectl top pods -n qbitel
    kubectl top nodes
    ```
 
@@ -154,19 +154,19 @@
 3. **Check Dependencies**
    ```bash
    # Database connectivity
-   kubectl exec -it <pod-name> -n cronos-ai -- psql -h db-host -U user -c "SELECT 1"
+   kubectl exec -it <pod-name> -n qbitel -- psql -h db-host -U user -c "SELECT 1"
    
    # Redis connectivity
-   kubectl exec -it <pod-name> -n cronos-ai -- redis-cli -h redis-host ping
+   kubectl exec -it <pod-name> -n qbitel -- redis-cli -h redis-host ping
    ```
 
 4. **Scale if Needed**
    ```bash
    # Scale up replicas
-   kubectl scale deployment/cronos-ai -n cronos-ai --replicas=5
+   kubectl scale deployment/qbitel -n qbitel --replicas=5
    
    # Verify scaling
-   kubectl get pods -n cronos-ai -w
+   kubectl get pods -n qbitel -w
    ```
 
 ### P3 (Medium) - Minor Issues
@@ -217,17 +217,17 @@ Secondary On-Call:
 Team Lead:
   - Phone: +1-XXX-XXX-XXXX
   - Slack: @team-lead
-  - Email: team-lead@cronos-ai.com
+  - Email: team-lead@qbitel.com
 
 Engineering Manager:
   - Phone: +1-XXX-XXX-XXXX
   - Slack: @eng-manager
-  - Email: eng-manager@cronos-ai.com
+  - Email: eng-manager@qbitel.com
 
 Security Team:
   - Phone: +1-XXX-XXX-XXXX
   - Slack: #security-incidents
-  - Email: security@cronos-ai.com
+  - Email: security@qbitel.com
 ```
 
 ---
@@ -239,10 +239,10 @@ Security Team:
 **Quick Checks:**
 ```bash
 # Check error distribution
-kubectl logs -n cronos-ai -l app=cronos-ai | grep "ERROR" | tail -50
+kubectl logs -n qbitel -l app=qbitel | grep "ERROR" | tail -50
 
 # Check specific error types
-kubectl logs -n cronos-ai -l app=cronos-ai | grep "500" | wc -l
+kubectl logs -n qbitel -l app=qbitel | grep "500" | wc -l
 ```
 
 **Common Causes:**
@@ -262,13 +262,13 @@ kubectl logs -n cronos-ai -l app=cronos-ai | grep "500" | wc -l
 **Investigation:**
 ```bash
 # Check slow queries
-kubectl exec -it <pod-name> -n cronos-ai -- python -c "
+kubectl exec -it <pod-name> -n qbitel -- python -c "
 from ai_engine.monitoring import metrics
 print(metrics.get_slow_queries())
 "
 
 # Check cache hit rate
-curl https://api.cronos-ai.com/metrics | grep cache_hit_rate
+curl https://api.qbitel.com/metrics | grep cache_hit_rate
 ```
 
 **Common Causes:**
@@ -288,13 +288,13 @@ curl https://api.cronos-ai.com/metrics | grep cache_hit_rate
 **Diagnosis:**
 ```bash
 # Get pod status
-kubectl get pods -n cronos-ai
+kubectl get pods -n qbitel
 
 # Check pod events
-kubectl describe pod <pod-name> -n cronos-ai
+kubectl describe pod <pod-name> -n qbitel
 
 # View crash logs
-kubectl logs <pod-name> -n cronos-ai --previous
+kubectl logs <pod-name> -n qbitel --previous
 ```
 
 **Common Causes:**
@@ -314,10 +314,10 @@ kubectl logs <pod-name> -n cronos-ai --previous
 **Quick Fix:**
 ```bash
 # Restart pods to reset connections
-kubectl rollout restart deployment/cronos-ai -n cronos-ai
+kubectl rollout restart deployment/qbitel -n qbitel
 
 # Increase pool size (temporary)
-kubectl set env deployment/cronos-ai -n cronos-ai DB_POOL_SIZE=50
+kubectl set env deployment/qbitel -n qbitel DB_POOL_SIZE=50
 ```
 
 **Long-term Solutions:**
@@ -331,23 +331,23 @@ kubectl set env deployment/cronos-ai -n cronos-ai DB_POOL_SIZE=50
 ## Tools and Resources
 
 ### Monitoring and Observability
-- **Grafana:** https://grafana.cronos-ai.com
+- **Grafana:** https://grafana.qbitel.com
   - SLO Dashboard
   - Infrastructure Dashboard
   - Application Dashboard
-- **Prometheus:** https://prometheus.cronos-ai.com
-- **Kibana:** https://kibana.cronos-ai.com
-- **Jaeger:** https://jaeger.cronos-ai.com
+- **Prometheus:** https://prometheus.qbitel.com
+- **Kibana:** https://kibana.qbitel.com
+- **Jaeger:** https://jaeger.qbitel.com
 
 ### Incident Management
-- **PagerDuty:** https://cronos-ai.pagerduty.com
-- **Jira:** https://cronos-ai.atlassian.net
+- **PagerDuty:** https://qbitel.pagerduty.com
+- **Jira:** https://qbitel.atlassian.net
 - **Slack:** #incidents channel
 
 ### Documentation
-- **Runbooks:** https://runbooks.cronos-ai.com
-- **Architecture Docs:** https://docs.cronos-ai.com/architecture
-- **API Docs:** https://docs.cronos-ai.com/api
+- **Runbooks:** https://runbooks.qbitel.com
+- **Architecture Docs:** https://docs.qbitel.com/architecture
+- **API Docs:** https://docs.qbitel.com/api
 
 ### Useful Commands
 
@@ -356,27 +356,27 @@ kubectl set env deployment/cronos-ai -n cronos-ai DB_POOL_SIZE=50
 ./scripts/check_production_readiness.py
 
 # View recent deployments
-kubectl rollout history deployment/cronos-ai -n cronos-ai
+kubectl rollout history deployment/qbitel -n qbitel
 
 # Get pod logs
-kubectl logs -n cronos-ai -l app=cronos-ai --tail=100 -f
+kubectl logs -n qbitel -l app=qbitel --tail=100 -f
 
 # Execute command in pod
-kubectl exec -it <pod-name> -n cronos-ai -- /bin/bash
+kubectl exec -it <pod-name> -n qbitel -- /bin/bash
 
 # Port forward for debugging
-kubectl port-forward -n cronos-ai <pod-name> 8080:8080
+kubectl port-forward -n qbitel <pod-name> 8080:8080
 
 # Check resource usage
-kubectl top pods -n cronos-ai
+kubectl top pods -n qbitel
 kubectl top nodes
 
 # Describe resources
-kubectl describe pod <pod-name> -n cronos-ai
-kubectl describe service cronos-ai -n cronos-ai
+kubectl describe pod <pod-name> -n qbitel
+kubectl describe service qbitel -n qbitel
 
 # Get events
-kubectl get events -n cronos-ai --sort-by='.lastTimestamp'
+kubectl get events -n qbitel --sort-by='.lastTimestamp'
 ```
 
 ---
@@ -468,8 +468,8 @@ kubectl get events -n cronos-ai --sort-by='.lastTimestamp'
 - **Monitoring:** support@monitoring-vendor.com
 
 ### Management
-- **CTO:** cto@cronos-ai.com
-- **VP Engineering:** vp-eng@cronos-ai.com
+- **CTO:** cto@qbitel.com
+- **VP Engineering:** vp-eng@qbitel.com
 
 ---
 

@@ -1,4 +1,4 @@
-//! End-to-end integration tests for CRONOS AI system
+//! End-to-end integration tests for QBITEL Bridge system
 
 use crate::{TestConfig, TestResults, IntegrationTest, utils};
 use std::time::{Duration, Instant};
@@ -412,11 +412,11 @@ impl E2ETestSuite {
         
         // Verify key metrics are present
         let required_metrics = [
-            "cronos_ai_packets_processed_total",
-            "cronos_ai_packet_processing_duration_seconds",
-            "cronos_ai_dpi_classifications_total",
-            "cronos_ai_memory_usage_bytes",
-            "cronos_ai_cpu_usage_percent"
+            "qbitel_bridge_packets_processed_total",
+            "qbitel_bridge_packet_processing_duration_seconds",
+            "qbitel_bridge_dpi_classifications_total",
+            "qbitel_bridge_memory_usage_bytes",
+            "qbitel_bridge_cpu_usage_percent"
         ];
         
         for metric in &required_metrics {
@@ -621,6 +621,6 @@ mod tests {
     async fn test_e2e_suite_creation() {
         let config = TestConfig::default();
         let suite = E2ETestSuite::new(config);
-        assert_eq!(suite.test_namespace, "cronos-ai-test");
+        assert_eq!(suite.test_namespace, "qbitel-bridge-test");
     }
 }

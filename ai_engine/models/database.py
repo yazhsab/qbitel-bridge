@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Database Models
+QBITEL Engine - Database Models
 
 Production-ready database models for user management, authentication, and audit logging.
 """

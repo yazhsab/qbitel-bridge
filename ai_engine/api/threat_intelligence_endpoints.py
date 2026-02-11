@@ -1,5 +1,5 @@
 """
-CRONOS AI - Threat Intelligence Platform API Endpoints
+QBITEL - Threat Intelligence Platform API Endpoints
 
 REST API endpoints for threat intelligence operations including IOC queries,
 MITRE ATT&CK lookups, threat hunting, and feed management.
@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..security.models import SecurityEvent
 from ..threat_intelligence import (
     ThreatIntelligenceManager,
@@ -223,7 +223,7 @@ async def enrich_security_event(
             processing_time_ms=processing_time,
         )
 
-    except CronosAIException as e:
+    except QbitelAIException as e:
         logger.error(f"TIP enrichment failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -278,7 +278,7 @@ async def query_iocs(
             query_time_ms=query_time,
         )
 
-    except CronosAIException as e:
+    except QbitelAIException as e:
         logger.error(f"IOC query failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -332,7 +332,7 @@ async def query_techniques(
             query_time_ms=query_time,
         )
 
-    except CronosAIException as e:
+    except QbitelAIException as e:
         logger.error(f"Technique query failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -398,7 +398,7 @@ async def execute_threat_hunt(
             execution_time_ms=execution_time,
         )
 
-    except CronosAIException as e:
+    except QbitelAIException as e:
         logger.error(f"Threat hunt execution failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -462,7 +462,7 @@ async def get_feed_status(
             total_indicators=total_indicators,
         )
 
-    except CronosAIException as e:
+    except QbitelAIException as e:
         logger.error(f"Failed to get feed status: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -519,7 +519,7 @@ async def update_feed(
 
     except HTTPException:
         raise
-    except CronosAIException as e:
+    except QbitelAIException as e:
         logger.error(f"Feed update failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -563,7 +563,7 @@ async def get_coverage_report(
             ioc_feed_status=report["ioc_feed_status"],
         )
 
-    except CronosAIException as e:
+    except QbitelAIException as e:
         logger.error(f"Failed to get coverage report: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

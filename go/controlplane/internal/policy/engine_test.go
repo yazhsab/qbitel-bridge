@@ -37,7 +37,7 @@ func TestPolicyEngine_LoadBundle(t *testing.T) {
 		Version: "1.0.0",
 		Policies: map[string]string{
 			"test": `
-				package qslb.test
+				package qbitel.test
 				
 				default allow = false
 				
@@ -94,7 +94,7 @@ func TestPolicyEngine_EvaluatePolicy(t *testing.T) {
 		Version: "1.0.0",
 		Policies: map[string]string{
 			"test": `
-				package qslb.test
+				package qbitel.test
 				
 				default allow = false
 				
@@ -127,7 +127,7 @@ func TestPolicyEngine_EvaluatePolicy(t *testing.T) {
 	}{
 		{
 			name:  "allow GET request",
-			query: "data.qslb.test.allow",
+			query: "data.qbitel.test.allow",
 			input: map[string]interface{}{
 				"method": "GET",
 				"path":   "/api/test",
@@ -136,7 +136,7 @@ func TestPolicyEngine_EvaluatePolicy(t *testing.T) {
 		},
 		{
 			name:  "deny GET request to wrong path",
-			query: "data.qslb.test.allow",
+			query: "data.qbitel.test.allow",
 			input: map[string]interface{}{
 				"method": "GET",
 				"path":   "/api/wrong",
@@ -145,7 +145,7 @@ func TestPolicyEngine_EvaluatePolicy(t *testing.T) {
 		},
 		{
 			name:  "allow POST request for admin",
-			query: "data.qslb.test.allow",
+			query: "data.qbitel.test.allow",
 			input: map[string]interface{}{
 				"method": "POST",
 				"path":   "/api/create",
@@ -157,7 +157,7 @@ func TestPolicyEngine_EvaluatePolicy(t *testing.T) {
 		},
 		{
 			name:  "deny POST request for non-admin",
-			query: "data.qslb.test.allow",
+			query: "data.qbitel.test.allow",
 			input: map[string]interface{}{
 				"method": "POST",
 				"path":   "/api/create",
@@ -195,7 +195,7 @@ func TestPolicyEngine_EvaluatePolicyWithTimeout(t *testing.T) {
 		Version: "1.0.0",
 		Policies: map[string]string{
 			"slow": `
-				package qslb.slow
+				package qbitel.slow
 				
 				default result = false
 				
@@ -219,7 +219,7 @@ func TestPolicyEngine_EvaluatePolicyWithTimeout(t *testing.T) {
 	}
 	
 	// This should complete within timeout for this simple policy
-	result, err := engine.EvaluatePolicy(ctx, "data.qslb.slow.result", input)
+	result, err := engine.EvaluatePolicy(ctx, "data.qbitel.slow.result", input)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 }
@@ -236,7 +236,7 @@ func TestPolicyEngine_RemoveBundle(t *testing.T) {
 		ID:      "test-bundle",
 		Version: "1.0.0",
 		Policies: map[string]string{
-			"test": "package qslb.test\ndefault allow = false",
+			"test": "package qbitel.test\ndefault allow = false",
 		},
 	}
 	
@@ -290,7 +290,7 @@ func TestPolicyEngine_ListBundles(t *testing.T) {
 			ID:      fmt.Sprintf("test-bundle-%d", i),
 			Version: "1.0.0",
 			Policies: map[string]string{
-				"test": "package qslb.test\ndefault allow = false",
+				"test": "package qbitel.test\ndefault allow = false",
 			},
 		}
 		
@@ -337,8 +337,8 @@ func TestPolicyEngine_GetStats(t *testing.T) {
 		ID:      "test-bundle",
 		Version: "1.0.0",
 		Policies: map[string]string{
-			"policy1": "package qslb.policy1\ndefault allow = false",
-			"policy2": "package qslb.policy2\ndefault allow = true",
+			"policy1": "package qbitel.policy1\ndefault allow = false",
+			"policy2": "package qbitel.policy2\ndefault allow = true",
 		},
 	}
 	
@@ -351,9 +351,9 @@ func TestPolicyEngine_GetStats(t *testing.T) {
 	
 	// Perform some evaluations
 	input := map[string]interface{}{"test": true}
-	_, err = engine.EvaluatePolicy(ctx, "data.qslb.policy1.allow", input)
+	_, err = engine.EvaluatePolicy(ctx, "data.qbitel.policy1.allow", input)
 	require.NoError(t, err)
-	_, err = engine.EvaluatePolicy(ctx, "data.qslb.policy2.allow", input)
+	_, err = engine.EvaluatePolicy(ctx, "data.qbitel.policy2.allow", input)
 	require.NoError(t, err)
 	
 	// Get updated stats
@@ -382,7 +382,7 @@ func TestPolicyEngine_ValidateBundle(t *testing.T) {
 				ID:      "valid-bundle",
 				Version: "1.0.0",
 				Policies: map[string]string{
-					"test": "package qslb.test\ndefault allow = false",
+					"test": "package qbitel.test\ndefault allow = false",
 				},
 			},
 			expectError: false,
@@ -392,7 +392,7 @@ func TestPolicyEngine_ValidateBundle(t *testing.T) {
 			bundle: &Bundle{
 				Version: "1.0.0",
 				Policies: map[string]string{
-					"test": "package qslb.test\ndefault allow = false",
+					"test": "package qbitel.test\ndefault allow = false",
 				},
 			},
 			expectError: true,
@@ -403,7 +403,7 @@ func TestPolicyEngine_ValidateBundle(t *testing.T) {
 			bundle: &Bundle{
 				ID: "test-bundle",
 				Policies: map[string]string{
-					"test": "package qslb.test\ndefault allow = false",
+					"test": "package qbitel.test\ndefault allow = false",
 				},
 			},
 			expectError: true,
@@ -461,7 +461,7 @@ func TestPolicyEngine_ConcurrentEvaluations(t *testing.T) {
 		Version: "1.0.0",
 		Policies: map[string]string{
 			"test": `
-				package qslb.test
+				package qbitel.test
 				
 				default allow = false
 				
@@ -493,7 +493,7 @@ func TestPolicyEngine_ConcurrentEvaluations(t *testing.T) {
 					"id": goroutineID*numEvaluations + j,
 				}
 				
-				_, err := engine.EvaluatePolicy(ctx, "data.qslb.test.allow", input)
+				_, err := engine.EvaluatePolicy(ctx, "data.qbitel.test.allow", input)
 				results <- err
 			}
 		}(i)
@@ -524,7 +524,7 @@ func BenchmarkPolicyEngine_EvaluatePolicy(b *testing.B) {
 		Version: "1.0.0",
 		Policies: map[string]string{
 			"test": `
-				package qslb.test
+				package qbitel.test
 				
 				default allow = false
 				
@@ -555,7 +555,7 @@ func BenchmarkPolicyEngine_EvaluatePolicy(b *testing.B) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			_, err := engine.EvaluatePolicy(ctx, "data.qslb.test.allow", input)
+			_, err := engine.EvaluatePolicy(ctx, "data.qbitel.test.allow", input)
 			if err != nil {
 				b.Fatal(err)
 			}

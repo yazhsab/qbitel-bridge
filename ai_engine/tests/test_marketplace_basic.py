@@ -1,5 +1,5 @@
 """
-CRONOS AI - Basic Marketplace Tests
+QBITEL - Basic Marketplace Tests
 
 Unit tests for Protocol Marketplace core functionality without database dependencies.
 """

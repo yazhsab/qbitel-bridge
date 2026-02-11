@@ -1,5 +1,5 @@
 """
-CRONOS AI - Threat Intelligence Platform Integration
+QBITEL - Threat Intelligence Platform Integration
 
 Complete threat intelligence platform with STIX/TAXII support, IOC feed ingestion,
 MITRE ATT&CK mapping, and automated threat hunting.

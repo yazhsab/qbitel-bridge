@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - Service Integration Orchestrator
+QBITEL - Service Integration Orchestrator
 Coordinates communication between AI/ML engine, protocol processing, and security components.
 """
 
@@ -70,7 +70,7 @@ class ComponentHealth:
 
 class ServiceIntegrationOrchestrator:
     """
-    Main orchestrator for integrating all CRONOS AI components.
+    Main orchestrator for integrating all QBITEL components.
     Handles message routing, health monitoring, and component coordination.
     """
 
@@ -185,7 +185,7 @@ class ServiceIntegrationOrchestrator:
 
                 # Initialize consumer
                 self.kafka_consumer = aiokafka.AIOKafkaConsumer(
-                    "cronos-ai-internal",
+                    "qbitel-internal",
                     **kafka_config,
                     group_id=self.config.kafka.group_id,
                     auto_offset_reset=self.config.kafka.auto_offset_reset,
@@ -409,7 +409,7 @@ class ServiceIntegrationOrchestrator:
                 # Publish to Redis if available
                 if self.redis_client:
                     await self.redis_client.setex(
-                        "cronos:orchestrator:metrics",
+                        "qbitel:orchestrator:metrics",
                         60,  # 60 second TTL
                         json.dumps(metrics),
                     )
@@ -417,7 +417,7 @@ class ServiceIntegrationOrchestrator:
                 # Publish to Kafka if available
                 if self.kafka_producer:
                     await self.kafka_producer.send(
-                        "cronos-ai-metrics",
+                        "qbitel-metrics",
                         {"type": "orchestrator_metrics", "data": metrics},
                     )
 
@@ -613,7 +613,7 @@ class ServiceIntegrationOrchestrator:
                     "destination": message.destination,
                 }
                 await self.kafka_producer.send(
-                    f"cronos-ai-{message.destination}", kafka_message
+                    f"qbitel-{message.destination}", kafka_message
                 )
 
     async def _run_protocol_classification(self, input_data):
@@ -679,7 +679,7 @@ class ServiceIntegrationOrchestrator:
 
         if self.redis_client:
             await self.redis_client.setex(
-                "cronos:orchestrator:health",
+                "qbitel:orchestrator:health",
                 60,  # 60 second TTL
                 json.dumps(health_summary, default=str),
             )

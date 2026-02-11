@@ -1,0 +1,151 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Helm Charts | QBITEL Bridge Docs" description="Deploy QBITEL Bridge to Kubernetes with Helm charts for streamlined production deployments.">
+  <h1 class="text-3xl font-bold text-white mb-2">Helm Chart Deployment</h1>
+  <p class="text-gray-400 mb-8">The recommended way to deploy QBITEL Bridge to production Kubernetes clusters using the official Helm chart. The chart includes templates for the AI Engine, xDS Server, and Admission Webhook with deployment, service, configmap, and HPA resources.</p>
+
+  <h2 id="prerequisites" class="text-2xl font-bold text-white mt-12 mb-4">Prerequisites</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Kubernetes</strong> 1.24+ cluster</li>
+    <li><strong class="text-white">Helm</strong> 3.8+ installed</li>
+    <li><strong class="text-white">kubectl</strong> configured with cluster access</li>
+  </ul>
+
+  <h2 id="quick-deploy" class="text-2xl font-bold text-white mt-12 mb-4">Quick Deploy</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">helm install qbitel-bridge ./helm/qbitel-bridge \
+  --namespace qbitel-service-mesh \
+  --create-namespace \
+  --wait</code></pre>
+
+  <h2 id="chart-values" class="text-2xl font-bold text-white mt-12 mb-4">Chart Values Reference</h2>
+  <p class="text-gray-300 mb-4">View all configurable values:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">helm show values ./helm/qbitel-bridge</code></pre>
+
+  <h3 id="key-values" class="text-xl font-semibold text-white mt-8 mb-3">Key Configuration Values</h3>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Value</th>
+        <th class="text-left text-white py-2 pr-4">Default</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">aiEngine.replicaCount</code></td>
+        <td class="text-gray-300 py-2 pr-4">1</td>
+        <td class="text-gray-300 py-2">AI Engine replicas</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">xdsServer.replicaCount</code></td>
+        <td class="text-gray-300 py-2 pr-4">1</td>
+        <td class="text-gray-300 py-2">xDS Server replicas</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">admissionWebhook.replicaCount</code></td>
+        <td class="text-gray-300 py-2 pr-4">1</td>
+        <td class="text-gray-300 py-2">Admission webhook replicas</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">aiEngine.resources.requests.memory</code></td>
+        <td class="text-gray-300 py-2 pr-4">512Mi</td>
+        <td class="text-gray-300 py-2">AI Engine memory request</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">monitoring.enabled</code></td>
+        <td class="text-gray-300 py-2 pr-4">false</td>
+        <td class="text-gray-300 py-2">Deploy monitoring stack</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">pqc.enabled</code></td>
+        <td class="text-gray-300 py-2 pr-4">true</td>
+        <td class="text-gray-300 py-2">Enable PQC-TLS</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="development-deploy" class="text-2xl font-bold text-white mt-12 mb-4">Development Deployment</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">helm install qbitel-bridge ./helm/qbitel-bridge \
+  --namespace qbitel-dev \
+  --create-namespace \
+  --set xdsServer.replicaCount=1 \
+  --set admissionWebhook.replicaCount=1 \
+  --set monitoring.enabled=false</code></pre>
+
+  <h2 id="production-deploy" class="text-2xl font-bold text-white mt-12 mb-4">Production Deployment</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">helm install qbitel-bridge ./helm/qbitel-bridge \
+  --namespace qbitel-service-mesh \
+  --create-namespace \
+  --set aiEngine.replicaCount=3 \
+  --set xdsServer.replicaCount=5 \
+  --set admissionWebhook.replicaCount=5 \
+  --set aiEngine.resources.requests.memory=2Gi \
+  --set monitoring.enabled=true</code></pre>
+
+  <h2 id="custom-values" class="text-2xl font-bold text-white mt-12 mb-4">Custom Values File</h2>
+  <p class="text-gray-300 mb-4">Create a custom values file for your environment:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># my-values.yaml</span>
+aiEngine:
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+
+xdsServer:
+  replicaCount: 3
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"
+
+admissionWebhook:
+  replicaCount: 3
+
+monitoring:
+  enabled: true
+  prometheus:
+    retention: 30d
+  grafana:
+    adminPassword: "your-secure-password"
+
+pqc:
+  enabled: true
+  algorithm: "ML-KEM-1024"</code></pre>
+
+  <p class="text-gray-300 mb-4">Deploy with the custom values file:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">helm install qbitel-bridge ./helm/qbitel-bridge \
+  --namespace qbitel-service-mesh \
+  --create-namespace \
+  -f my-values.yaml</code></pre>
+
+  <h2 id="upgrade" class="text-2xl font-bold text-white mt-12 mb-4">Upgrade and Rollback</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Upgrade with new values</span>
+helm upgrade qbitel-bridge ./helm/qbitel-bridge \
+  --namespace qbitel-service-mesh \
+  -f my-values.yaml
+
+<span class="text-gray-500"># Check release history</span>
+helm history qbitel-bridge -n qbitel-service-mesh
+
+<span class="text-gray-500"># Rollback to previous release</span>
+helm rollback qbitel-bridge 1 -n qbitel-service-mesh</code></pre>
+
+  <h2 id="uninstall" class="text-2xl font-bold text-white mt-12 mb-4">Uninstall</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">helm uninstall qbitel-bridge -n qbitel-service-mesh</code></pre>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> -- verify your deployment is production-ready</li>
+    <li><a href="/docs/deployment/air-gapped" class="text-quantum-400 hover:underline">Air-Gapped Deployment</a> -- deploy without internet access</li>
+    <li><a href="/docs/operations/monitoring" class="text-quantum-400 hover:underline">Monitoring</a> -- configure alerts and dashboards</li>
+  </ul>
+</DocsLayout>

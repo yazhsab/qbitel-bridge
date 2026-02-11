@@ -1,5 +1,5 @@
 """
-CRONOS AI - Explainability Metrics
+QBITEL - Explainability Metrics
 
 Prometheus metrics for monitoring explainability system performance.
 """
@@ -8,90 +8,90 @@ from prometheus_client import Counter, Histogram, Gauge, Info
 
 # Explanation generation metrics
 EXPLANATION_GENERATION_COUNTER = Counter(
-    "cronos_explanations_generated_total",
+    "qbitel_explanations_generated_total",
     "Total number of explanations generated",
     ["model_name", "explanation_method", "status"],
 )
 
 EXPLANATION_GENERATION_DURATION = Histogram(
-    "cronos_explanation_generation_seconds",
+    "qbitel_explanation_generation_seconds",
     "Time taken to generate explanations",
     ["model_name", "explanation_method"],
     buckets=(0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0),
 )
 
 EXPLANATION_CACHE_HITS = Counter(
-    "cronos_explanation_cache_hits_total",
+    "qbitel_explanation_cache_hits_total",
     "Total number of explanation cache hits",
     ["model_name"],
 )
 
 EXPLANATION_CACHE_MISSES = Counter(
-    "cronos_explanation_cache_misses_total",
+    "qbitel_explanation_cache_misses_total",
     "Total number of explanation cache misses",
     ["model_name"],
 )
 
 # Model drift metrics
 MODEL_DRIFT_SCORE = Gauge(
-    "cronos_model_drift_score",
+    "qbitel_model_drift_score",
     "Current drift score for models (0-1, higher = more drift)",
     ["model_name", "model_version"],
 )
 
 MODEL_ACCURACY = Gauge(
-    "cronos_model_accuracy",
+    "qbitel_model_accuracy",
     "Current model accuracy",
     ["model_name", "model_version"],
 )
 
 MODEL_CONFIDENCE_AVG = Gauge(
-    "cronos_model_confidence_average",
+    "qbitel_model_confidence_average",
     "Average model confidence score",
     ["model_name", "model_version"],
 )
 
 DRIFT_ALERTS_TRIGGERED = Counter(
-    "cronos_drift_alerts_triggered_total",
+    "qbitel_drift_alerts_triggered_total",
     "Total number of drift alerts triggered",
     ["model_name", "alert_type"],
 )
 
 # Audit trail metrics
 AUDIT_TRAIL_WRITES = Counter(
-    "cronos_audit_trail_writes_total",
+    "qbitel_audit_trail_writes_total",
     "Total number of audit trail records written",
     ["model_name", "compliance_framework"],
 )
 
 AUDIT_TRAIL_WRITE_ERRORS = Counter(
-    "cronos_audit_trail_write_errors_total",
+    "qbitel_audit_trail_write_errors_total",
     "Total number of audit trail write failures",
     ["error_type"],
 )
 
 AUDIT_TRAIL_WRITE_DURATION = Histogram(
-    "cronos_audit_trail_write_seconds",
+    "qbitel_audit_trail_write_seconds",
     "Time taken to write audit trail records",
     buckets=(0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5),
 )
 
 # Human review metrics
 HUMAN_REVIEWS_TOTAL = Counter(
-    "cronos_human_reviews_total",
+    "qbitel_human_reviews_total",
     "Total number of human reviews",
     ["model_name", "review_outcome"],
 )
 
 HUMAN_OVERRIDE_RATE = Gauge(
-    "cronos_human_override_rate",
+    "qbitel_human_override_rate",
     "Rate of human overrides (rolling 24h)",
     ["model_name"],
 )
 
 # Explainability system info
 EXPLAINABILITY_SYSTEM_INFO = Info(
-    "cronos_explainability_system",
+    "qbitel_explainability_system",
     "Information about the explainability system",
 )
 

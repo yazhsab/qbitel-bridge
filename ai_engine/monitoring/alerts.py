@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Alerting System
+QBITEL Engine - Alerting System
 
 This module provides comprehensive alerting and notification capabilities
 for monitoring AI Engine health, performance, and operational issues.
@@ -218,14 +218,14 @@ class EmailNotificationProvider(NotificationProvider):
         self.username = config.get("username", "")
         self.password = config.get("password", "")
         self.use_tls = config.get("use_tls", True)
-        self.from_email = config.get("from_email", "noreply@cronos-ai.com")
+        self.from_email = config.get("from_email", "noreply@qbitel.com")
         self.to_emails = config.get("to_emails", [])
 
     async def send_notification(self, alert: Alert) -> bool:
         """Send email notification."""
         try:
             message = MIMEMultipart("alternative")
-            message["Subject"] = f"[CRONOS AI] {alert.severity.upper()}: {alert.title}"
+            message["Subject"] = f"[QBITEL] {alert.severity.upper()}: {alert.title}"
             message["From"] = self.from_email
             message["To"] = ", ".join(self.to_emails)
 
@@ -279,7 +279,7 @@ class EmailNotificationProvider(NotificationProvider):
     def _create_text_content(self, alert: Alert) -> str:
         """Create plain text email content."""
         return f"""
-CRONOS AI Alert: {alert.title}
+QBITEL Alert: {alert.title}
 
 Severity: {alert.severity.upper()}
 Status: {alert.status.upper()}
@@ -313,7 +313,7 @@ Alert ID: {alert.alert_id}
 <html>
 <body style="font-family: Arial, sans-serif; margin: 20px;">
     <div style="border-left: 4px solid {color}; padding-left: 20px;">
-        <h2 style="color: {color}; margin-top: 0;">CRONOS AI Alert: {alert.title}</h2>
+        <h2 style="color: {color}; margin-top: 0;">QBITEL Alert: {alert.title}</h2>
         
         <table style="border-collapse: collapse; width: 100%; margin: 20px 0;">
             <tr>
@@ -353,7 +353,7 @@ class SlackNotificationProvider(NotificationProvider):
 
         self.webhook_url = config.get("webhook_url", "")
         self.channel = config.get("channel", "#alerts")
-        self.username = config.get("username", "CRONOS AI")
+        self.username = config.get("username", "QBITEL")
 
     async def send_notification(self, alert: Alert) -> bool:
         """Send Slack notification."""
@@ -427,7 +427,7 @@ class SlackNotificationProvider(NotificationProvider):
             payload = {
                 "channel": self.channel,
                 "username": self.username,
-                "text": "CRONOS AI Alert System Test Message",
+                "text": "QBITEL Alert System Test Message",
             }
 
             response = requests.post(self.webhook_url, json=payload, timeout=10)
@@ -455,7 +455,7 @@ class WebhookNotificationProvider(NotificationProvider):
             payload = {
                 "alert": alert.to_dict(),
                 "timestamp": time.time(),
-                "source": "cronos-ai",
+                "source": "qbitel",
             }
 
             response = requests.post(
@@ -483,7 +483,7 @@ class WebhookNotificationProvider(NotificationProvider):
         try:
             test_payload = {
                 "test": True,
-                "message": "CRONOS AI Alert System Test",
+                "message": "QBITEL Alert System Test",
                 "timestamp": time.time(),
             }
 
@@ -532,7 +532,7 @@ class AlertChannel:
 
 class AlertManager:
     """
-    Central alert management system for CRONOS AI Engine.
+    Central alert management system for QBITEL Engine.
 
     This class manages alert rules, evaluates conditions, sends notifications,
     and tracks alert lifecycle.

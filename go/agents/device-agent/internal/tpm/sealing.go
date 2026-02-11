@@ -678,13 +678,13 @@ func (ts *TPMSealer) GenerateDeviceIdentity(ctx context.Context) (*DeviceIdentit
 	akHash := sha256.Sum256(akPubResp.OutPublic.Buffer)
 
 	// Generate device ID from EK fingerprint
-	deviceID := fmt.Sprintf("qslb-device-%x", ekHash[:8])
+	deviceID := fmt.Sprintf("qbitel-device-%x", ekHash[:8])
 
 	identity := &DeviceIdentity{
 		DeviceID:        deviceID,
 		EKFingerprint:   fmt.Sprintf("%x", ekHash),
 		AKFingerprint:   fmt.Sprintf("%x", akHash),
-		Manufacturer:    "QSLB",
+		Manufacturer:    "QBITEL",
 		Model:           "Enterprise Gateway",
 		FirmwareVersion: "1.0.0",
 		Created:         time.Now(),

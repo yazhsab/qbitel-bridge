@@ -2,7 +2,7 @@
 
 ## Overview
 
-CRONOS AI Engine provides enterprise-grade authentication with support for:
+QBITEL Engine provides enterprise-grade authentication with support for:
 - Database-backed user management
 - OAuth2 integration (Google, GitHub, Azure AD, etc.)
 - SAML 2.0 for enterprise SSO
@@ -41,25 +41,25 @@ CRONOS AI Engine provides enterprise-grade authentication with support for:
 
 ```bash
 # JWT Configuration (REQUIRED)
-export CRONOS_AI_JWT_SECRET="<generate-with: python -c 'import secrets; print(secrets.token_urlsafe(48))'>"
+export QBITEL_AI_JWT_SECRET="<generate-with: python -c 'import secrets; print(secrets.token_urlsafe(48))'>"
 
 # Database Configuration (REQUIRED)
-export CRONOS_AI_DB_HOST="localhost"
-export CRONOS_AI_DB_PORT="5432"
-export CRONOS_AI_DB_NAME="cronos_ai"
-export CRONOS_AI_DB_USER="cronos"
-export CRONOS_AI_DB_PASSWORD="<secure-password>"
+export QBITEL_AI_DB_HOST="localhost"
+export QBITEL_AI_DB_PORT="5432"
+export QBITEL_AI_DB_NAME="qbitel"
+export QBITEL_AI_DB_USER="qbitel"
+export QBITEL_AI_DB_PASSWORD="<secure-password>"
 
 # Redis Configuration (REQUIRED for sessions)
-export CRONOS_AI_REDIS_HOST="localhost"
-export CRONOS_AI_REDIS_PORT="6379"
-export CRONOS_AI_REDIS_PASSWORD="<secure-password>"
+export QBITEL_AI_REDIS_HOST="localhost"
+export QBITEL_AI_REDIS_PORT="6379"
+export QBITEL_AI_REDIS_PASSWORD="<secure-password>"
 
 # Encryption Key (REQUIRED if encryption enabled)
-export CRONOS_AI_ENCRYPTION_KEY="<generate-with: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'>"
+export QBITEL_AI_ENCRYPTION_KEY="<generate-with: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'>"
 
 # API Key (OPTIONAL for API authentication)
-export CRONOS_AI_API_KEY="<generate-with: python -c 'import secrets; print(\"cronos_\" + secrets.token_urlsafe(32))'>"
+export QBITEL_AI_API_KEY="<generate-with: python -c 'import secrets; print(\"qbitel_\" + secrets.token_urlsafe(32))'>"
 ```
 
 ### 2. Initialize Database
@@ -81,7 +81,7 @@ from ai_engine.api.auth_enterprise import EnterpriseAuthenticationService
 
 async def create_admin():
     engine = create_async_engine(
-        "postgresql+asyncpg://cronos:password@localhost/cronos_ai"
+        "postgresql+asyncpg://qbitel:password@localhost/qbitel"
     )
     
     async_session = sessionmaker(
@@ -301,7 +301,7 @@ from cryptography.fernet import Fernet
 
 async def configure_oauth_provider():
     # Encrypt client secret
-    fernet = Fernet(os.getenv('CRONOS_AI_ENCRYPTION_KEY').encode())
+    fernet = Fernet(os.getenv('QBITEL_AI_ENCRYPTION_KEY').encode())
     client_secret_encrypted = fernet.encrypt(
         "your-oauth-client-secret".encode()
     )
@@ -513,5 +513,5 @@ async def migrate_users():
 
 For authentication issues:
 - Documentation: `docs/ENTERPRISE_AUTHENTICATION.md`
-- Security: security@cronos-ai.com
-- Support: support@cronos-ai.com
+- Security: security@qbitel.com
+- Support: support@qbitel.com

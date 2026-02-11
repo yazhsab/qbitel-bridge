@@ -261,7 +261,7 @@ class TestAdmissionWebhookServer:
 
         assert config["apiVersion"] == "admissionregistration.k8s.io/v1"
         assert config["kind"] == "ValidatingWebhookConfiguration"
-        assert config["metadata"]["name"] == "cronos-container-security"
+        assert config["metadata"]["name"] == "qbitel-container-security"
         assert len(config["webhooks"]) > 0
 
     @pytest.mark.asyncio

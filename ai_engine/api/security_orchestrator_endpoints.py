@@ -1,5 +1,5 @@
 """
-CRONOS AI - Zero-Touch Security Orchestrator API Endpoints
+QBITEL - Zero-Touch Security Orchestrator API Endpoints
 RESTful API for security automation and threat management.
 """
 

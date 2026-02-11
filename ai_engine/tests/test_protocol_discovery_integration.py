@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Protocol Discovery Integration Tests
+QBITEL Engine - Protocol Discovery Integration Tests
 
 Comprehensive integration tests for end-to-end protocol discovery workflows,
 including all components working together in production scenarios.

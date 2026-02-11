@@ -45,7 +45,7 @@ class TestMetricConfig:
         assert config.help == "Test metric description"
         assert config.labels == ["label1", "label2"]
         assert config.unit == "seconds"
-        assert config.namespace == "cronos_ai"
+        assert config.namespace == "qbitel"
 
     def test_metric_config_defaults(self):
         """Test metric config default values."""
@@ -54,7 +54,7 @@ class TestMetricConfig:
         assert config.labels == []
         assert config.buckets is None
         assert config.unit == ""
-        assert config.namespace == "cronos_ai"
+        assert config.namespace == "qbitel"
 
     def test_metric_config_with_buckets(self):
         """Test metric config with histogram buckets."""

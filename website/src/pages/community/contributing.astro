@@ -1,0 +1,278 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Contributing | QBITEL Bridge"
+  description="Learn how to contribute to QBITEL Bridge. Development setup, coding standards, pull request process, and component-specific guidelines."
+>
+  <PageHero
+    title="Contributing to QBITEL Bridge"
+    description="Thank you for your interest in contributing. This guide covers everything you need to get started: development setup, coding standards, and the pull request workflow."
+    badge="Open Source"
+  />
+
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+
+      <!-- Code of Conduct -->
+      <div class="card p-6 mb-12 border-l-4 border-l-quantum-500">
+        <h2 class="text-xl font-bold text-white mb-2">Code of Conduct</h2>
+        <p class="text-gray-300">
+          This project adheres to the <a href="/community/code-of-conduct" class="text-quantum-400 hover:underline">Contributor Covenant Code of Conduct</a>. By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+        </p>
+      </div>
+
+      <!-- How to Contribute -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-6">How to Contribute</h2>
+
+        <div class="space-y-8">
+          <!-- Reporting Bugs -->
+          <div>
+            <h3 class="text-xl font-semibold text-white mb-3">Reporting Bugs</h3>
+            <ol class="space-y-2 text-gray-300 list-decimal list-inside">
+              <li>Check the <a href="https://github.com/yazhsab/qbitel-bridge/issues" target="_blank" rel="noopener noreferrer" class="text-quantum-400 hover:underline">existing issues</a> to avoid duplicates</li>
+              <li>Use the bug report template when creating a new issue</li>
+              <li>Include steps to reproduce, expected behavior, and actual behavior</li>
+              <li>Include your environment details (OS, Python/Go/Rust versions, Docker version)</li>
+            </ol>
+          </div>
+
+          <!-- Suggesting Features -->
+          <div>
+            <h3 class="text-xl font-semibold text-white mb-3">Suggesting Features</h3>
+            <ol class="space-y-2 text-gray-300 list-decimal list-inside">
+              <li>Check existing issues and discussions first</li>
+              <li>Use the feature request template</li>
+              <li>Describe the use case, expected behavior, and why it matters</li>
+            </ol>
+          </div>
+
+          <!-- Submitting Pull Requests -->
+          <div>
+            <h3 class="text-xl font-semibold text-white mb-3">Submitting Pull Requests</h3>
+            <ol class="space-y-2 text-gray-300 list-decimal list-inside">
+              <li>Fork the repository and create a feature branch from <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">main</code></li>
+              <li>Follow the coding standards described below</li>
+              <li>Add tests for all new functionality</li>
+              <li>Ensure all tests pass: <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">make test</code></li>
+              <li>Update documentation if your changes affect user-facing behavior</li>
+              <li>Submit the PR using the pull request template</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Development Setup -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-6">Development Setup</h2>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-6">
+          <pre><code><span class="text-gray-500"># Clone your fork</span>
+git clone https://github.com/YOUR_USERNAME/qbitel-bridge.git
+cd qbitel-bridge
+
+<span class="text-gray-500"># Build all components</span>
+make build
+
+<span class="text-gray-500"># Run all tests</span>
+make test</code></pre>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-4">Component-Specific Setup</h3>
+
+        <div class="space-y-4">
+          <!-- Python -->
+          <div class="card p-5">
+            <h4 class="text-white font-semibold mb-3">Python AI Engine</h4>
+            <div class="bg-surface-900 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto">
+              <pre><code>python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt -r ai_engine/requirements.txt
+pytest ai_engine/tests/ -v</code></pre>
+            </div>
+          </div>
+
+          <!-- Rust -->
+          <div class="card p-5">
+            <h4 class="text-white font-semibold mb-3">Rust Data Plane</h4>
+            <div class="bg-surface-900 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto">
+              <pre><code>cd rust/dataplane
+cargo build --locked && cargo test</code></pre>
+            </div>
+          </div>
+
+          <!-- Go -->
+          <div class="card p-5">
+            <h4 class="text-white font-semibold mb-3">Go Services</h4>
+            <div class="bg-surface-900 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto">
+              <pre><code>cd go/controlplane && go test ./...
+cd go/mgmtapi && go test ./...</code></pre>
+            </div>
+          </div>
+
+          <!-- UI -->
+          <div class="card p-5">
+            <h4 class="text-white font-semibold mb-3">UI Console</h4>
+            <div class="bg-surface-900 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto">
+              <pre><code>cd ui/console && npm install && npm test</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coding Standards -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-6">Coding Standards</h2>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="card p-5">
+            <h3 class="text-white font-semibold mb-3">Python</h3>
+            <ul class="space-y-2 text-sm text-gray-400">
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Follow PEP 8 style guidelines</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Use type hints for function signatures</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Maximum line length: 120 characters</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Use <code class="text-quantum-400 bg-surface-900 px-1 rounded">black</code> for formatting, <code class="text-quantum-400 bg-surface-900 px-1 rounded">flake8</code> for linting</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="card p-5">
+            <h3 class="text-white font-semibold mb-3">Rust</h3>
+            <ul class="space-y-2 text-sm text-gray-400">
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Follow standard Rust style (rustfmt)</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Run <code class="text-quantum-400 bg-surface-900 px-1 rounded">cargo clippy</code> with no warnings</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Use <code class="text-quantum-400 bg-surface-900 px-1 rounded">unsafe</code> only when absolutely necessary and documented</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Prefer zero-copy parsing for performance</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="card p-5">
+            <h3 class="text-white font-semibold mb-3">Go</h3>
+            <ul class="space-y-2 text-sm text-gray-400">
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Follow standard Go conventions (gofmt, govet)</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Use <code class="text-quantum-400 bg-surface-900 px-1 rounded">golangci-lint</code> for static analysis</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Handle all errors explicitly</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Write table-driven tests</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="card p-5">
+            <h3 class="text-white font-semibold mb-3">TypeScript (UI)</h3>
+            <ul class="space-y-2 text-sm text-gray-400">
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Use TypeScript strict mode</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Prefer functional components with hooks</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Use Prettier for formatting, ESLint for linting</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-quantum-400 mt-1">--</span>
+                <span>Write tests with Vitest</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Commit Messages -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Commit Message Format</h2>
+        <p class="text-gray-300 mb-4">We use conventional commits. Each commit message should follow this format:</p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code>type(scope): description
+
+[optional body]
+
+[optional footer]</code></pre>
+        </div>
+        <p class="text-gray-400 text-sm mb-4">Types: <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">feat</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">fix</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">docs</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">refactor</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">test</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">chore</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">perf</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">ci</code></p>
+        <p class="text-gray-400 text-sm">Scopes: <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">ai-engine</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">dataplane</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">controlplane</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">mgmtapi</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">ui</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">pqc</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">compliance</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">docs</code></p>
+      </div>
+
+      <!-- PR Review Process -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Pull Request Review Process</h2>
+        <div class="space-y-4">
+          <div class="flex items-start gap-4">
+            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm shrink-0">1</div>
+            <div>
+              <h3 class="text-white font-semibold">Automated Checks</h3>
+              <p class="text-sm text-gray-400">CI runs linting, type checking, unit tests, integration tests, and security scans. All checks must pass before review.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm shrink-0">2</div>
+            <div>
+              <h3 class="text-white font-semibold">Code Review</h3>
+              <p class="text-sm text-gray-400">At least one maintainer will review your code within 48 hours. We may ask for changes or suggest improvements.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm shrink-0">3</div>
+            <div>
+              <h3 class="text-white font-semibold">Merge</h3>
+              <p class="text-sm text-gray-400">Once approved and all checks pass, a maintainer will merge your PR using squash-and-merge.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- License -->
+      <div class="card p-6 mb-12">
+        <h2 class="text-xl font-bold text-white mb-2">License</h2>
+        <p class="text-gray-300">
+          By contributing to QBITEL Bridge, you agree that your contributions will be licensed under the <a href="https://github.com/yazhsab/qbitel-bridge/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="text-quantum-400 hover:underline">Apache License 2.0</a>.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <CTABanner
+    title="Ready to Contribute?"
+    description="Fork the repository, pick an issue labeled 'good first issue', and submit your first pull request."
+  />
+</PageLayout>

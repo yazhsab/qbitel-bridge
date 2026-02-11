@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Predictive Analytics
+QBITEL Engine - Legacy System Predictive Analytics
 
 Advanced predictive analytics for legacy system maintenance and failure prevention.
 Combines time series analysis, machine learning, and LLM-powered insights.
@@ -23,7 +23,7 @@ import torch
 
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..monitoring.metrics import AIEngineMetrics
 
 from .models import (
@@ -169,7 +169,7 @@ class FailurePredictor:
         try:
             # Validate input data
             if not time_series_data:
-                raise CronosAIException("No time series data provided")
+                raise QbitelAIException("No time series data provided")
 
             # Prepare data for analysis
             combined_features = self._prepare_features(time_series_data)
@@ -215,7 +215,7 @@ class FailurePredictor:
 
         except Exception as e:
             self.logger.error(f"Failure prediction failed for system {system_id}: {e}")
-            raise CronosAIException(f"Failure prediction error: {e}")
+            raise QbitelAIException(f"Failure prediction error: {e}")
 
     def _prepare_features(self, time_series_data: List[TimeSeriesData]) -> np.ndarray:
         """Prepare features from time series data."""
@@ -871,7 +871,7 @@ class PerformanceMonitor:
             self.logger.error(
                 f"Performance analysis failed for system {system_id}: {e}"
             )
-            raise CronosAIException(f"Performance analysis error: {e}")
+            raise QbitelAIException(f"Performance analysis error: {e}")
 
     def _get_historical_metrics(
         self, system_id: str, window_hours: int
@@ -1482,7 +1482,7 @@ class MaintenanceScheduler:
 
         except Exception as e:
             self.logger.error(f"Maintenance schedule optimization failed: {e}")
-            raise CronosAIException(f"Schedule optimization error: {e}")
+            raise QbitelAIException(f"Schedule optimization error: {e}")
 
     def _prioritize_maintenance_requests(
         self, requests: List[MaintenanceRecommendation]

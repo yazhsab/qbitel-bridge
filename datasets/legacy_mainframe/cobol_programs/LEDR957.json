@@ -1,0 +1,19 @@
+{
+  "program_id": "LEDR957",
+  "domain": "banking",
+  "program_type": "report_generation",
+  "author": "R. WILLIAMS",
+  "lines_of_code": 250,
+  "complexity_level": "complex",
+  "complexity_score": 0.68,
+  "files_used": 4,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.855664",
+  "hash": "391c157be58c74fcdba6cb252847faf4"
+}

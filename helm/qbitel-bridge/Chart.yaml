@@ -1,0 +1,28 @@
+apiVersion: v2
+name: qbitel-bridge
+description: QBITEL Bridge - Quantum-Safe Legacy Modernization Platform
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - quantum-safe
+  - security
+  - post-quantum-cryptography
+  - legacy-modernization
+  - cobol
+  - mainframe
+  - protocol-discovery
+  - service-mesh
+  - container-security
+maintainers:
+  - name: QBITEL Team
+    email: enterprise@qbitel.com
+home: https://github.com/yazhsab/qbitel-bridge
+sources:
+  - https://github.com/yazhsab/qbitel-bridge
+icon: https://raw.githubusercontent.com/yazhsab/qbitel-bridge/main/website/public/favicon.svg
+annotations:
+  qbitel.com/product: "bridge"
+  qbitel.com/quantum-safe: "true"
+  qbitel.com/nist-level: "5"
+dependencies: []

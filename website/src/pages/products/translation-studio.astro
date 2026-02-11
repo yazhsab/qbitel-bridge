@@ -1,0 +1,259 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Translation Studio | QBITEL Bridge"
+  description="Auto-generate OpenAPI specifications and production-ready SDKs in 6 languages from discovered protocol grammars in under 2 seconds."
+>
+  <PageHero
+    title="Translation Studio"
+    description="Auto-generate APIs and SDKs from discovered protocols. Instantly create OpenAPI 3.0 specifications and production-ready SDKs in Python, TypeScript, Go, Java, Rust, and C# from any protocol grammar."
+    badge="API Generation"
+    gradient="from-purple-500 to-pink-500"
+  />
+
+  <!-- Key Metrics -->
+  <section class="py-12 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">&lt;2s</div>
+          <div class="text-sm text-gray-400">API Generation Time</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">6</div>
+          <div class="text-sm text-gray-400">SDK Languages</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">10K</div>
+          <div class="text-sm text-gray-400">Requests/sec Bridge</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">100%</div>
+          <div class="text-sm text-gray-400">OpenAPI 3.0 Compliant</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="section-heading">
+            The <span class="gradient-text">Integration Gap</span>
+          </h2>
+          <p class="text-gray-400 mb-6 leading-relaxed">
+            Even after understanding a legacy protocol, integrating it with modern systems requires months of manual work. Developers must write custom adapters, maintain protocol-specific code, and handle edge cases for every new integration.
+          </p>
+          <p class="text-gray-400 leading-relaxed">
+            Translation Studio bridges this gap by automatically generating standardized API definitions and client libraries from any discovered protocol grammar, turning weeks of integration work into seconds.
+          </p>
+        </div>
+        <div class="space-y-4">
+          <div class="card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                <span class="text-purple-400 font-bold text-sm">Py</span>
+              </div>
+              <div>
+                <div class="text-white font-semibold">Python SDK</div>
+                <div class="text-sm text-gray-400">Type-hinted, async-ready, Pydantic models</div>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                <span class="text-blue-400 font-bold text-sm">TS</span>
+              </div>
+              <div>
+                <div class="text-white font-semibold">TypeScript SDK</div>
+                <div class="text-sm text-gray-400">Full type definitions, fetch and axios support</div>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
+                <span class="text-cyan-400 font-bold text-sm">Go</span>
+              </div>
+              <div>
+                <div class="text-white font-semibold">Go, Java, Rust, C#</div>
+                <div class="text-sm text-gray-400">Idiomatic code generation for 4 additional languages</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Core <span class="gradient-text">Capabilities</span>
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">OpenAPI 3.0 Generation</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Automatically generates fully compliant OpenAPI 3.0 specifications from discovered protocol grammars, including schemas, endpoints, authentication, and documentation.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Complete schema generation from protocol fields
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              RESTful endpoint mapping from message types
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Interactive Swagger UI documentation
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-pink-500/10 border border-pink-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Multi-Language SDK Generation</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Generates idiomatic, production-ready client libraries in 6 programming languages with full type safety, error handling, and authentication support.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Python, TypeScript, Go, Java, Rust, C#
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Language-idiomatic code patterns
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Built-in retry logic and error handling
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Protocol Bridge</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">A high-performance translation layer that converts between legacy protocol formats and modern REST/gRPC APIs in real-time at 10K+ requests per second.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              10K+ req/sec bridge throughput
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Bidirectional protocol translation
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              API gateway integration ready
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-green-500/10 border border-green-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">PQC-Secured Bridges</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">All protocol bridges can be secured with post-quantum cryptography, ensuring that translated protocol traffic is protected against quantum computing threats.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Kyber-1024 encrypted channels
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Dilithium-5 signed translations
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              End-to-end quantum-safe transport
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          How It <span class="gradient-text">Works</span>
+        </h2>
+      </div>
+
+      <div class="max-w-3xl mx-auto space-y-6">
+        <div class="flex items-start gap-4">
+          <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold text-sm flex-shrink-0 mt-1">1</div>
+          <div>
+            <h3 class="text-white font-semibold mb-1">Protocol Grammar Input</h3>
+            <p class="text-sm text-gray-400">Feed a discovered protocol grammar from AI Protocol Discovery or upload your own grammar definition file.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold text-sm flex-shrink-0 mt-1">2</div>
+          <div>
+            <h3 class="text-white font-semibold mb-1">Schema Extraction</h3>
+            <p class="text-sm text-gray-400">The engine analyzes grammar rules, field types, and message structures to build a complete API schema with request/response models.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold text-sm flex-shrink-0 mt-1">3</div>
+          <div>
+            <h3 class="text-white font-semibold mb-1">OpenAPI + SDK Generation</h3>
+            <p class="text-sm text-gray-400">Generates a complete OpenAPI 3.0 specification and production-ready SDKs in your chosen languages in under 2 seconds.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold text-sm flex-shrink-0 mt-1">4</div>
+          <div>
+            <h3 class="text-white font-semibold mb-1">Bridge Deployment</h3>
+            <p class="text-sm text-gray-400">Deploy the protocol bridge to translate between legacy and modern formats in real-time, with optional PQC encryption.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTABanner
+    title="Ready to Generate Your Protocol APIs?"
+    description="Transform discovered protocol grammars into production-ready APIs and SDKs in seconds."
+  />
+</PageLayout>

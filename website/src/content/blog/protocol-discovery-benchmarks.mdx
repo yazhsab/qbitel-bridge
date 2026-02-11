@@ -1,0 +1,53 @@
+---
+title: "Protocol Discovery Benchmarks: 89%+ Accuracy Across 150+ Protocols"
+description: "A deep dive into the QBITEL Bridge protocol discovery pipeline, our benchmark methodology, and how we achieve reliable classification across more than 150 industrial, financial, and healthcare protocols."
+date: "2025-02-25"
+author: "QBITEL Team"
+tags: ["ai", "benchmarks", "protocol-discovery"]
+---
+
+One of the core technical challenges in legacy modernization is understanding what protocols a system actually speaks. Documentation is often incomplete, outdated, or entirely absent. Engineers resort to packet captures and manual analysis, a process that can take weeks for a single protocol and months for a complex multi-system environment.
+
+QBITEL Bridge's **Autonomous Protocol Discovery** pipeline eliminates this manual effort by applying a five-phase AI analysis to raw network traffic, producing structured protocol grammars and parser code without human intervention.
+
+## The Five-Phase Pipeline
+
+The discovery process is organized into five sequential phases, each building on the output of the previous one:
+
+1. **Capture and Preprocessing** -- raw packet data is ingested from PCAP files, live network taps, or DPDK-accelerated interfaces. Traffic is sessionized, deduplicated, and normalized for downstream analysis.
+
+2. **Statistical Feature Extraction** -- each message is decomposed into byte-level, field-level, and session-level features including entropy distributions, length histograms, delimiter patterns, and timing characteristics.
+
+3. **Unsupervised Clustering** -- messages are grouped into structural families using a combination of hierarchical clustering and DBSCAN. This phase identifies distinct message types without requiring labeled training data.
+
+4. **Grammar Inference** -- for each cluster, a probabilistic context-free grammar (PCFG) is inferred using an enhanced Sequitur-based algorithm. The grammar captures field boundaries, optional elements, and recursive structures.
+
+5. **Classification and Validation** -- inferred grammars are matched against a knowledge base of known protocol specifications. Unknown protocols are flagged for human review, and generated parsers are validated against held-out message samples.
+
+## Benchmark Results
+
+We evaluated the pipeline against a corpus of traffic spanning 150+ protocols from industrial control systems (Modbus, DNP3, OPC UA), financial messaging (FIX, ISO 8583, SWIFT), healthcare (HL7v2, FHIR, DICOM), and general-purpose protocols (HTTP, MQTT, AMQP, gRPC).
+
+| Metric | Result |
+|---|---|
+| Classification accuracy | 89.3% |
+| Field boundary detection F1 | 0.91 |
+| Grammar inference precision | 87.6% |
+| Unknown protocol detection rate | 94.2% |
+| Average time per protocol | 4.7 minutes |
+
+These numbers represent end-to-end performance from raw packet capture to validated parser output. The classification accuracy of 89.3% reflects correct identification of the protocol family and version. Field boundary detection measures how precisely the system identifies individual fields within messages.
+
+## What Makes It Work
+
+Three design decisions contribute most to the pipeline's accuracy:
+
+- **Hybrid classification** -- combining a transformer-based neural classifier with a signature-matching engine allows the system to handle both well-known and novel protocols. The transformer captures structural patterns that signature matching alone would miss, while signatures provide deterministic accuracy for common protocols.
+
+- **Incremental grammar refinement** -- rather than inferring a grammar in a single pass, the system iteratively refines its PCFG by incorporating new message samples. This feedback loop improves precision as more traffic is observed.
+
+- **Domain-specific feature engineering** -- protocol families in different industries exhibit distinct structural characteristics. Industrial protocols tend to have fixed-length fields and predictable byte patterns, while financial protocols use delimited text with complex nesting. The feature extraction phase adapts its strategy based on early classification signals.
+
+## Try It Yourself
+
+The protocol discovery pipeline is fully included in the open-source release. Point it at a PCAP file or a live network interface, and it will produce a structured grammar and working parser code. Detailed instructions are available in the documentation under the Protocol Discovery section.

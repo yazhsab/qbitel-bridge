@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Bridge for Real-time Translation
+QBITEL - Protocol Bridge for Real-time Translation
 Enterprise-grade protocol-to-protocol translation with streaming, caching, and performance optimization.
 """
 
@@ -17,7 +17,7 @@ from concurrent.futures import ThreadPoolExecutor
 import weakref
 
 from ...core.config import Config
-from ...core.exceptions import CronosAIException
+from ...core.exceptions import QbitelAIException
 
 try:  # pragma: no cover - optional dependency during lightweight testing
     from ...llm.unified_llm_service import UnifiedLLMService, LLMRequest, LLMResponse
@@ -51,34 +51,34 @@ import uuid
 
 # Metrics for protocol bridge operations
 BRIDGE_TRANSLATION_COUNTER = Counter(
-    "cronos_bridge_translations_total",
+    "qbitel_bridge_translations_total",
     "Total protocol translations",
     ["source_protocol", "target_protocol", "status"],
 )
 
 BRIDGE_TRANSLATION_DURATION = Histogram(
-    "cronos_bridge_translation_duration_seconds",
+    "qbitel_bridge_translation_duration_seconds",
     "Protocol translation duration",
     ["source_protocol", "target_protocol"],
 )
 
 BRIDGE_ACTIVE_CONNECTIONS = Gauge(
-    "cronos_bridge_active_connections", "Active bridge connections"
+    "qbitel_bridge_active_connections", "Active bridge connections"
 )
 
 BRIDGE_THROUGHPUT = Summary(
-    "cronos_bridge_throughput_messages_per_second",
+    "qbitel_bridge_throughput_messages_per_second",
     "Bridge throughput in messages per second",
 )
 
 BRIDGE_ERROR_RATE = Counter(
-    "cronos_bridge_errors_total", "Bridge translation errors", ["error_type"]
+    "qbitel_bridge_errors_total", "Bridge translation errors", ["error_type"]
 )
 
 logger = logging.getLogger(__name__)
 
 
-class BridgeException(CronosAIException):
+class BridgeException(QbitelAIException):
     """Protocol bridge specific exceptions."""
 
     pass

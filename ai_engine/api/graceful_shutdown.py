@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Graceful Shutdown Manager
+QBITEL Engine - Graceful Shutdown Manager
 
 Tracks in-flight requests and ensures clean shutdown without interrupting active operations.
 """

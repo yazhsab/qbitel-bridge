@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Error Storage Tests
+QBITEL Engine - Error Storage Tests
 
 Comprehensive test suite for persistent error storage functionality.
 """
@@ -94,7 +94,7 @@ class TestPersistentErrorStorage:
         """Create PersistentErrorStorage instance."""
         return PersistentErrorStorage(
             redis_url="redis://localhost:6379/0",
-            postgres_url="postgresql+asyncpg://user:pass@localhost/cronos_ai",
+            postgres_url="postgresql+asyncpg://user:pass@localhost/qbitel",
         )
 
     @pytest.fixture
@@ -124,7 +124,7 @@ class TestPersistentErrorStorage:
         assert error_storage.redis_url == "redis://localhost:6379/0"
         assert (
             error_storage.postgres_url
-            == "postgresql+asyncpg://user:pass@localhost/cronos_ai"
+            == "postgresql+asyncpg://user:pass@localhost/qbitel"
         )
         assert error_storage.redis_ttl == 86400
         assert error_storage.postgres_retention_days == 90

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - gRPC Service
+QBITEL Engine - gRPC Service
 
 This module implements the gRPC service for high-performance AI Engine communication.
 """
@@ -12,7 +12,7 @@ from typing import Dict, Any, Optional
 from concurrent import futures
 import grpc
 
-from ..core.engine import CronosAIEngine
+from ..core.engine import QbitelAIEngine
 from ..core.config import Config
 from ..core.exceptions import AIEngineException
 
@@ -20,7 +20,7 @@ from ..core.exceptions import AIEngineException
 # gRPC service definition (would typically be generated from .proto file)
 class AIEngineGRPCService:
     """
-    gRPC service for CRONOS AI Engine.
+    gRPC service for QBITEL Engine.
 
     This service provides high-performance RPC endpoints for all
     AI Engine functionality with streaming capabilities.
@@ -32,7 +32,7 @@ class AIEngineGRPCService:
         self.logger = logging.getLogger(__name__)
 
         # Initialize AI Engine
-        self.ai_engine: Optional[CronosAIEngine] = None
+        self.ai_engine: Optional[QbitelAIEngine] = None
 
         # gRPC server
         self.server: Optional[grpc.aio.Server] = None
@@ -52,7 +52,7 @@ class AIEngineGRPCService:
         """Initialize the gRPC service."""
         try:
             # Initialize AI Engine
-            self.ai_engine = CronosAIEngine(self.config)
+            self.ai_engine = QbitelAIEngine(self.config)
             await self.ai_engine.initialize()
 
             self.logger.info("gRPC service initialized successfully")
@@ -408,7 +408,7 @@ class AIEngineGRPCService:
                 engine_status = self.ai_engine.get_model_info()
 
             return {
-                "service_name": "CRONOS AI Engine gRPC",
+                "service_name": "QBITEL Engine gRPC",
                 "version": "1.0.0",
                 "uptime_seconds": uptime,
                 "statistics": {
@@ -455,7 +455,7 @@ class AIEngineGRPCService:
             return {
                 "status": status,
                 "timestamp": time.time(),
-                "service": "cronos-ai-grpc",
+                "service": "qbitel-grpc",
             }
 
         except Exception as e:
@@ -463,7 +463,7 @@ class AIEngineGRPCService:
             return {
                 "status": "unhealthy",
                 "timestamp": time.time(),
-                "service": "cronos-ai-grpc",
+                "service": "qbitel-grpc",
                 "error": str(e),
             }
 
@@ -706,7 +706,7 @@ class AIEngineGRPCClient:
         return {
             "status": "healthy",
             "timestamp": time.time(),
-            "service": "cronos-ai-grpc",
+            "service": "qbitel-grpc",
         }
 
     async def discover_protocol(self, data: bytes, **kwargs) -> Dict[str, Any]:

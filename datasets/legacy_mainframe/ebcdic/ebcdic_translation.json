@@ -1,0 +1,226 @@
+{
+  "metadata": {
+    "title": "EBCDIC Translation Tables for Legacy Mainframe Modernization",
+    "version": "1.0.0",
+    "description": "Complete EBCDIC to ASCII/UTF-8 translation tables and binary format specifications",
+    "generated_date": "2024-01-15",
+    "codepage": "IBM-037 (US/Canada)"
+  },
+  "ebcdic_to_ascii": {
+    "description": "EBCDIC code point to ASCII character mapping",
+    "codepage": "IBM-037",
+    "mapping": {
+      "64": " ", "75": ".", "76": "<", "77": "(", "78": "+", "79": "|",
+      "80": "&", "90": "!", "91": "$", "92": "*", "93": ")", "94": ";",
+      "95": "¬", "96": "-", "97": "/", "107": ",", "108": "%", "109": "_",
+      "110": ">", "111": "?", "121": "`", "122": ":", "123": "#", "124": "@",
+      "125": "'", "126": "=", "127": "\"",
+      "129": "a", "130": "b", "131": "c", "132": "d", "133": "e", "134": "f",
+      "135": "g", "136": "h", "137": "i", "145": "j", "146": "k", "147": "l",
+      "148": "m", "149": "n", "150": "o", "151": "p", "152": "q", "153": "r",
+      "162": "s", "163": "t", "164": "u", "165": "v", "166": "w", "167": "x",
+      "168": "y", "169": "z", "192": "{", "193": "A", "194": "B", "195": "C",
+      "196": "D", "197": "E", "198": "F", "199": "G", "200": "H", "201": "I",
+      "208": "}", "209": "J", "210": "K", "211": "L", "212": "M", "213": "N",
+      "214": "O", "215": "P", "216": "Q", "217": "R", "224": "\\", "226": "S",
+      "227": "T", "228": "U", "229": "V", "230": "W", "231": "X", "232": "Y",
+      "233": "Z", "240": "0", "241": "1", "242": "2", "243": "3", "244": "4",
+      "245": "5", "246": "6", "247": "7", "248": "8", "249": "9"
+    }
+  },
+  "ascii_to_ebcdic": {
+    "description": "ASCII character to EBCDIC code point mapping",
+    "mapping": {
+      " ": 64, ".": 75, "<": 76, "(": 77, "+": 78, "|": 79,
+      "&": 80, "!": 90, "$": 91, "*": 92, ")": 93, ";": 94,
+      "-": 96, "/": 97, ",": 107, "%": 108, "_": 109, ">": 110,
+      "?": 111, "`": 121, ":": 122, "#": 123, "@": 124, "'": 125,
+      "=": 126, "\"": 127,
+      "a": 129, "b": 130, "c": 131, "d": 132, "e": 133, "f": 134,
+      "g": 135, "h": 136, "i": 137, "j": 145, "k": 146, "l": 147,
+      "m": 148, "n": 149, "o": 150, "p": 151, "q": 152, "r": 153,
+      "s": 162, "t": 163, "u": 164, "v": 165, "w": 166, "x": 167,
+      "y": 168, "z": 169, "{": 192, "A": 193, "B": 194, "C": 195,
+      "D": 196, "E": 197, "F": 198, "G": 199, "H": 200, "I": 201,
+      "}": 208, "J": 209, "K": 210, "L": 211, "M": 212, "N": 213,
+      "O": 214, "P": 215, "Q": 216, "R": 217, "\\": 224, "S": 226,
+      "T": 227, "U": 228, "V": 229, "W": 230, "X": 231, "Y": 232,
+      "Z": 233, "0": 240, "1": 241, "2": 242, "3": 243, "4": 244,
+      "5": 245, "6": 246, "7": 247, "8": 248, "9": 249
+    }
+  },
+  "packed_decimal_format": {
+    "description": "COMP-3 Packed Decimal format specification",
+    "structure": {
+      "encoding": "Each byte contains two decimal digits (nibbles)",
+      "last_byte": "Low nibble contains sign indicator",
+      "sign_codes": {
+        "C": "Positive (+)",
+        "D": "Negative (-)",
+        "F": "Unsigned (positive)"
+      }
+    },
+    "storage_calculation": {
+      "formula": "bytes = (digits + 1) / 2 rounded up",
+      "examples": [
+        {"pic": "S9(5) COMP-3", "digits": 5, "bytes": 3},
+        {"pic": "S9(7)V99 COMP-3", "digits": 9, "bytes": 5},
+        {"pic": "S9(13)V99 COMP-3", "digits": 15, "bytes": 8}
+      ]
+    },
+    "conversion_examples": [
+      {
+        "value": 12345,
+        "pic": "S9(5) COMP-3",
+        "hex": "12345C",
+        "bytes": "0x12 0x34 0x5C"
+      },
+      {
+        "value": -12345,
+        "pic": "S9(5) COMP-3",
+        "hex": "12345D",
+        "bytes": "0x12 0x34 0x5D"
+      },
+      {
+        "value": 123.45,
+        "pic": "S9(3)V99 COMP-3",
+        "hex": "12345C",
+        "bytes": "0x12 0x34 0x5C"
+      }
+    ]
+  },
+  "binary_format": {
+    "description": "COMP/BINARY format specification",
+    "structure": {
+      "byte_order": "Big-endian (most significant byte first)",
+      "sign": "Two's complement for signed numbers"
+    },
+    "storage_rules": [
+      {"digits": "1-4", "bytes": 2, "range_unsigned": "0 to 65535", "range_signed": "-32768 to 32767"},
+      {"digits": "5-9", "bytes": 4, "range_unsigned": "0 to 4294967295", "range_signed": "-2147483648 to 2147483647"},
+      {"digits": "10-18", "bytes": 8, "range_unsigned": "0 to 18446744073709551615", "range_signed": "-9223372036854775808 to 9223372036854775807"}
+    ],
+    "conversion_examples": [
+      {
+        "value": 12345,
+        "pic": "S9(5) COMP",
+        "bytes": 4,
+        "hex": "00003039"
+      },
+      {
+        "value": -12345,
+        "pic": "S9(5) COMP",
+        "bytes": 4,
+        "hex": "FFFFCFC7"
+      }
+    ]
+  },
+  "zoned_decimal_format": {
+    "description": "Display numeric format specification",
+    "structure": {
+      "encoding": "One byte per digit",
+      "zone_nibble": "High nibble (F for digits, sign for last)",
+      "digit_nibble": "Low nibble contains decimal digit"
+    },
+    "sign_encoding": {
+      "positive_last_byte": "C or F in high nibble",
+      "negative_last_byte": "D in high nibble"
+    },
+    "conversion_examples": [
+      {
+        "value": 12345,
+        "pic": "S9(5)",
+        "hex": "F1F2F3F4C5",
+        "explanation": "F1=1, F2=2, F3=3, F4=4, C5=+5"
+      },
+      {
+        "value": -12345,
+        "pic": "S9(5)",
+        "hex": "F1F2F3F4D5",
+        "explanation": "F1=1, F2=2, F3=3, F4=4, D5=-5"
+      }
+    ]
+  },
+  "date_formats": {
+    "common_formats": [
+      {
+        "name": "ISO Date",
+        "pic": "9(8)",
+        "format": "YYYYMMDD",
+        "example": "20240115"
+      },
+      {
+        "name": "Julian Date",
+        "pic": "9(7)",
+        "format": "YYYYDDD",
+        "example": "2024015"
+      },
+      {
+        "name": "Gregorian Date",
+        "pic": "9(8)",
+        "format": "MMDDYYYY",
+        "example": "01152024"
+      },
+      {
+        "name": "CYMD Date",
+        "pic": "9(7)",
+        "format": "CYYMMDD",
+        "example": "1240115",
+        "note": "C=century (0=19xx, 1=20xx)"
+      }
+    ],
+    "timestamp_format": {
+      "pic": "X(26)",
+      "format": "YYYY-MM-DD-HH.MM.SS.NNNNNN",
+      "example": "2024-01-15-10.30.45.123456"
+    }
+  },
+  "record_formats": {
+    "fixed_length": {
+      "description": "All records have same length",
+      "dcb_params": "RECFM=FB,LRECL=nnn,BLKSIZE=nnn",
+      "characteristics": [
+        "Predictable storage",
+        "Random access possible",
+        "Padding required for short data"
+      ]
+    },
+    "variable_length": {
+      "description": "Records have varying lengths",
+      "dcb_params": "RECFM=VB,LRECL=nnn,BLKSIZE=nnn",
+      "structure": {
+        "rdw": "4-byte Record Descriptor Word",
+        "rdw_format": "LL00 where LL = record length including RDW"
+      },
+      "characteristics": [
+        "Efficient storage",
+        "Sequential access typical",
+        "Length checking required"
+      ]
+    },
+    "undefined": {
+      "description": "No consistent record structure",
+      "dcb_params": "RECFM=U,BLKSIZE=nnn",
+      "use_cases": ["Load modules", "Binary data"]
+    }
+  },
+  "common_codepages": [
+    {"codepage": "IBM-037", "description": "US/Canada EBCDIC", "locale": "en_US"},
+    {"codepage": "IBM-273", "description": "Germany/Austria EBCDIC", "locale": "de_DE"},
+    {"codepage": "IBM-277", "description": "Denmark/Norway EBCDIC", "locale": "da_DK"},
+    {"codepage": "IBM-278", "description": "Finland/Sweden EBCDIC", "locale": "sv_SE"},
+    {"codepage": "IBM-280", "description": "Italy EBCDIC", "locale": "it_IT"},
+    {"codepage": "IBM-284", "description": "Spain/Latin America EBCDIC", "locale": "es_ES"},
+    {"codepage": "IBM-285", "description": "UK EBCDIC", "locale": "en_GB"},
+    {"codepage": "IBM-297", "description": "France EBCDIC", "locale": "fr_FR"},
+    {"codepage": "IBM-500", "description": "International EBCDIC", "locale": "international"},
+    {"codepage": "IBM-1047", "description": "Open Systems EBCDIC", "locale": "C/POSIX"}
+  ],
+  "python_conversion_code": {
+    "description": "Python code for EBCDIC conversions",
+    "packed_decimal_to_int": "def packed_to_int(data: bytes) -> int:\n    result = 0\n    for byte in data[:-1]:\n        result = result * 100 + ((byte >> 4) * 10) + (byte & 0x0F)\n    last = data[-1]\n    result = result * 10 + (last >> 4)\n    sign = last & 0x0F\n    return result if sign in (0x0C, 0x0F) else -result",
+    "int_to_packed_decimal": "def int_to_packed(value: int, digits: int) -> bytes:\n    sign = 0x0C if value >= 0 else 0x0D\n    value = abs(value)\n    result = []\n    result.append((value % 10) << 4 | sign)\n    value //= 10\n    while value > 0 or len(result) < (digits + 1) // 2:\n        high = value % 10; value //= 10\n        low = value % 10; value //= 10\n        result.append(high << 4 | low)\n    return bytes(reversed(result))",
+    "ebcdic_to_ascii": "def ebcdic_to_ascii(data: bytes, codepage='cp037') -> str:\n    return data.decode(codepage)",
+    "ascii_to_ebcdic": "def ascii_to_ebcdic(text: str, codepage='cp037') -> bytes:\n    return text.encode(codepage)"
+  }
+}

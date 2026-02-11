@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Protocol Intelligence Copilot Integration Tests
+QBITEL Engine - Protocol Intelligence Copilot Integration Tests
 Comprehensive test suite for LLM-enhanced protocol discovery and analysis.
 """
 
@@ -554,7 +554,7 @@ class TestSecurityIntegration:
         import os
 
         # Set a valid JWT secret for testing (avoid auto-generation issues)
-        os.environ["CRONOS_AI_JWT_SECRET"] = "Zx9Cv8Bn7Vm6An5Sd4Qf3Wg2Rt1Yh0Uj"
+        os.environ["QBITEL_AI_JWT_SECRET"] = "Zx9Cv8Bn7Vm6An5Sd4Qf3Wg2Rt1Yh0Uj"
 
         with patch("redis.asyncio.Redis") as mock_redis:
             mock_redis_instance = AsyncMock()
@@ -580,7 +580,7 @@ class TestSecurityIntegration:
             assert payload["role"] == "admin"
 
             # Cleanup
-            del os.environ["CRONOS_AI_JWT_SECRET"]
+            del os.environ["QBITEL_AI_JWT_SECRET"]
 
 
 class TestPerformanceAndResilience:

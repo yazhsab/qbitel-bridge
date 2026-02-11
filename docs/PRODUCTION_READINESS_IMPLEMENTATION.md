@@ -1,4 +1,4 @@
-# CRONOS AI - Production Readiness Implementation
+# QBITEL - Production Readiness Implementation
 
 ## Overview
 
@@ -35,7 +35,7 @@ error_tracking:
   persistent_storage_enabled: true
   error_retention_days: 90
   redis_url: "redis://localhost:6379/0"
-  postgres_url: "postgresql+asyncpg://user:pass@localhost/cronos_ai"
+  postgres_url: "postgresql+asyncpg://user:pass@localhost/qbitel"
 ```
 
 **Usage:**
@@ -79,7 +79,7 @@ error_tracking:
 **Environment Variables:**
 ```bash
 export SENTRY_DSN="https://your-sentry-dsn@sentry.io/project"
-export CRONOS_ENVIRONMENT="production"
+export QBITEL_ENVIRONMENT="production"
 ```
 
 ### 3. Enhanced Error Handler
@@ -100,7 +100,7 @@ from ai_engine.core.error_handling import error_handler
 # Initialize integrations
 await error_handler.initialize_integrations(
     redis_url="redis://localhost:6379/0",
-    postgres_url="postgresql+asyncpg://user:pass@localhost/cronos_ai",
+    postgres_url="postgresql+asyncpg://user:pass@localhost/qbitel",
     sentry_dsn="https://your-dsn@sentry.io/project",
     environment="production"
 )
@@ -130,10 +130,10 @@ errors = await error_handler.get_aggregated_errors(
 **Usage:**
 ```bash
 # Validate production config
-python ai_engine/core/config_validator.py config/cronos_ai.production.yaml production
+python ai_engine/core/config_validator.py config/qbitel.production.yaml production
 
 # Validate staging config
-python ai_engine/core/config_validator.py config/cronos_ai.production.yaml staging
+python ai_engine/core/config_validator.py config/qbitel.production.yaml staging
 ```
 
 **Validation Checks:**
@@ -163,7 +163,7 @@ from ai_engine.core.config import Config
 
 # Load with environment override
 config = Config.from_file(
-    "config/cronos_ai.yaml",
+    "config/qbitel.yaml",
     environment_file="config/environments/production.yaml"
 )
 ```
@@ -245,17 +245,17 @@ Cross-Origin-Resource-Policy: same-origin
 
 **Certificates Configured:**
 1. **API Gateway Certificate**
-   - Domain: `api.cronos-ai.example.com`
+   - Domain: `api.qbitel.example.com`
    - Issuer: Let's Encrypt Production
    - Renewal: 15 days before expiry
 
 2. **gRPC Service Certificate**
-   - Domain: `grpc.cronos-ai.example.com`
+   - Domain: `grpc.qbitel.example.com`
    - Issuer: Let's Encrypt Production
    - Supports client authentication
 
 3. **Internal mTLS Certificate**
-   - Domain: `*.cronos-ai-production.svc.cluster.local`
+   - Domain: `*.qbitel-production.svc.cluster.local`
    - Issuer: Self-signed
    - For service-to-service communication
 
@@ -268,8 +268,8 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
 kubectl apply -f ops/deploy/kubernetes/production/tls-config.yaml
 
 # Verify certificates
-kubectl get certificates -n cronos-ai-production
-kubectl describe certificate cronos-ai-api-tls -n cronos-ai-production
+kubectl get certificates -n qbitel-production
+kubectl describe certificate qbitel-api-tls -n qbitel-production
 ```
 
 ### 2. TLS Configuration
@@ -298,7 +298,7 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 **Services:**
 - PostgreSQL (with health checks)
 - Redis (with authentication)
-- CRONOS AI API (with TLS)
+- QBITEL API (with TLS)
 - Nginx (reverse proxy with TLS termination)
 - Prometheus (metrics)
 - Grafana (visualization)
@@ -330,7 +330,7 @@ docker-compose logs -f api
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.0/cert-manager.yaml
 
 # Create namespace
-kubectl create namespace cronos-ai-production
+kubectl create namespace qbitel-production
 ```
 
 **Deploy:**
@@ -342,9 +342,9 @@ kubectl apply -f ops/deploy/kubernetes/production/tls-config.yaml
 kubectl apply -f ops/deploy/kubernetes/production/
 
 # Verify deployment
-kubectl get pods -n cronos-ai-production
-kubectl get certificates -n cronos-ai-production
-kubectl get ingress -n cronos-ai-production
+kubectl get pods -n qbitel-production
+kubectl get certificates -n qbitel-production
+kubectl get ingress -n qbitel-production
 ```
 
 ---
@@ -355,7 +355,7 @@ kubectl get ingress -n cronos-ai-production
 
 ```bash
 # Validate production config
-python ai_engine/core/config_validator.py config/cronos_ai.production.yaml production
+python ai_engine/core/config_validator.py config/qbitel.production.yaml production
 
 # Expected output:
 # ✅ Configuration validation passed!
@@ -380,13 +380,13 @@ done
 
 ```bash
 # Test TLS configuration
-openssl s_client -connect api.cronos-ai.example.com:443 -tls1_3
+openssl s_client -connect api.qbitel.example.com:443 -tls1_3
 
 # Test certificate
-curl -vI https://api.cronos-ai.example.com/health
+curl -vI https://api.qbitel.example.com/health
 
 # Verify HSTS header
-curl -I https://api.cronos-ai.example.com/health | grep Strict-Transport-Security
+curl -I https://api.qbitel.example.com/health | grep Strict-Transport-Security
 ```
 
 ### 4. Error Tracking Test
@@ -422,7 +422,7 @@ assert retrieved is not None
 
 ```bash
 # Test security headers
-curl -I https://api.cronos-ai.example.com/health
+curl -I https://api.qbitel.example.com/health
 
 # Expected headers:
 # X-Content-Type-Options: nosniff
@@ -490,7 +490,7 @@ export API_KEY="your-api-key"
 export SENTRY_DSN="https://your-dsn@sentry.io/project"
 
 # Environment
-export CRONOS_ENVIRONMENT="production"
+export QBITEL_ENVIRONMENT="production"
 ```
 
 ### Optional
@@ -505,8 +505,8 @@ export GRAFANA_PASSWORD="your-grafana-password"
 
 # Database
 export DB_HOST="db.example.com"
-export DB_NAME="cronos_ai_prod"
-export DB_USER="cronos_prod"
+export DB_NAME="qbitel_prod"
+export DB_USER="qbitel_prod"
 
 # Redis
 export REDIS_HOST="redis.example.com"
@@ -518,7 +518,7 @@ export REDIS_HOST="redis.example.com"
 
 ### Pre-Deployment
 
-- [ ] Validate configuration: `python ai_engine/core/config_validator.py config/cronos_ai.production.yaml production`
+- [ ] Validate configuration: `python ai_engine/core/config_validator.py config/qbitel.production.yaml production`
 - [ ] Set all required environment variables
 - [ ] Generate TLS certificates or configure cert-manager
 - [ ] Configure Sentry project
@@ -578,7 +578,7 @@ rate_limiting:
 kubectl logs -n cert-manager deployment/cert-manager
 
 # Force renewal
-kubectl delete certificate cronos-ai-api-tls -n cronos-ai-production
+kubectl delete certificate qbitel-api-tls -n qbitel-production
 kubectl apply -f ops/deploy/kubernetes/production/tls-config.yaml
 ```
 
@@ -592,7 +592,7 @@ kubectl apply -f ops/deploy/kubernetes/production/tls-config.yaml
 redis-cli -h redis.example.com -p 6379 -a your-password ping
 
 # Verify configuration
-kubectl get secret redis-password -n cronos-ai-production
+kubectl get secret redis-password -n qbitel-production
 ```
 
 ### Sentry Integration Issues
@@ -616,12 +616,12 @@ print(f"Sentry initialized: {success}")
 ## Support
 
 For issues or questions:
-- GitHub Issues: https://github.com/cronos-ai/cronos-ai/issues
-- Documentation: https://docs.cronos-ai.example.com
-- Email: support@cronos-ai.example.com
+- GitHub Issues: https://github.com/yazhsab/qbitel-bridge/issues
+- Documentation: https://docs.qbitel.example.com
+- Email: support@qbitel.example.com
 
 ---
 
 ## License
 
-Copyright © 2024 CRONOS AI. All rights reserved.
+Copyright © 2024 QBITEL. All rights reserved.

@@ -1,8 +1,8 @@
-# CRONOS AI - Operational Procedures
+# QBITEL - Operational Procedures
 
 ## Overview
 
-This document provides comprehensive operational procedures for managing CRONOS AI in production environments. It covers deployment, monitoring, incident response, maintenance, and disaster recovery procedures.
+This document provides comprehensive operational procedures for managing QBITEL in production environments. It covers deployment, monitoring, incident response, maintenance, and disaster recovery procedures.
 
 **Version:** 1.0  
 **Last Updated:** 2025-01-02  
@@ -109,17 +109,17 @@ kubectl apply -f ops/deploy/kubernetes/ -n staging
 ./ops/deploy/scripts/deploy-production.sh
 
 # Monitor deployment
-kubectl rollout status deployment/cronos-ai -n production
+kubectl rollout status deployment/qbitel -n production
 ```
 
 #### 3. Post-Deployment Validation
 
 ```bash
 # Verify health
-curl https://api.cronos-ai.com/health
+curl https://api.qbitel.com/health
 
 # Check metrics
-curl https://api.cronos-ai.com/metrics | grep cronos_ai_up
+curl https://api.qbitel.com/metrics | grep qbitel_up
 
 # Run production readiness check
 python scripts/check_production_readiness.py
@@ -132,13 +132,13 @@ watch -n 30 'kubectl get pods -n production'
 
 ```bash
 # Immediate rollback
-kubectl rollout undo deployment/cronos-ai -n production
+kubectl rollout undo deployment/qbitel -n production
 
 # Rollback to specific revision
-kubectl rollout undo deployment/cronos-ai -n production --to-revision=2
+kubectl rollout undo deployment/qbitel -n production --to-revision=2
 
 # Verify rollback
-kubectl rollout status deployment/cronos-ai -n production
+kubectl rollout status deployment/qbitel -n production
 
 # Restore from backup if needed
 python ops/operational/backup_manager.py restore --backup-id <id>
@@ -152,10 +152,10 @@ kubectl apply -f ops/deploy/kubernetes/ -n production-green
 
 # Verify green deployment
 kubectl get pods -n production-green
-curl https://green.cronos-ai.com/health
+curl https://green.qbitel.com/health
 
 # Switch traffic to green
-kubectl patch service cronos-ai -n production \
+kubectl patch service qbitel -n production \
   -p '{"spec":{"selector":{"version":"green"}}}'
 
 # Monitor for issues
@@ -205,25 +205,25 @@ kubectl apply -f ops/deploy/kubernetes/canary-100percent.yaml
 
 ### Dashboard Access
 
-- **SLO Dashboard:** https://grafana.cronos-ai.com/d/slo-dashboard
-- **Infrastructure:** https://grafana.cronos-ai.com/d/infrastructure
-- **Application:** https://grafana.cronos-ai.com/d/application
-- **Security:** https://grafana.cronos-ai.com/d/security
+- **SLO Dashboard:** https://grafana.qbitel.com/d/slo-dashboard
+- **Infrastructure:** https://grafana.qbitel.com/d/infrastructure
+- **Application:** https://grafana.qbitel.com/d/application
+- **Security:** https://grafana.qbitel.com/d/security
 
 ### Log Analysis
 
 ```bash
 # View recent logs
-kubectl logs -n production -l app=cronos-ai --tail=100
+kubectl logs -n production -l app=qbitel --tail=100
 
 # Search for errors
-kubectl logs -n production -l app=cronos-ai | grep ERROR
+kubectl logs -n production -l app=qbitel | grep ERROR
 
 # Follow logs in real-time
-kubectl logs -n production -l app=cronos-ai -f
+kubectl logs -n production -l app=qbitel -f
 
 # Query logs in Kibana
-# Navigate to https://kibana.cronos-ai.com
+# Navigate to https://kibana.qbitel.com
 # Use query: namespace:production AND level:ERROR
 ```
 
@@ -231,7 +231,7 @@ kubectl logs -n production -l app=cronos-ai -f
 
 ```bash
 # Access Jaeger UI
-# https://jaeger.cronos-ai.com
+# https://jaeger.qbitel.com
 
 # Find slow traces
 # Filter by: duration > 1s
@@ -354,7 +354,7 @@ python ops/operational/backup_automation.py run-dr-drill
 
 ```bash
 # Check security alerts
-kubectl logs -n production -l app=cronos-ai | grep SECURITY
+kubectl logs -n production -l app=qbitel | grep SECURITY
 
 # Review audit logs
 python ai_engine/security/audit_logger.py query \
@@ -362,7 +362,7 @@ python ai_engine/security/audit_logger.py query \
   --severity high
 
 # Check for vulnerabilities
-trivy image cronos-ai:latest
+trivy image qbitel:latest
 ```
 
 ### Certificate Management
@@ -372,10 +372,10 @@ trivy image cronos-ai:latest
 kubectl get certificates -n production
 
 # Renew certificate
-certbot renew --cert-name cronos-ai.com
+certbot renew --cert-name qbitel.com
 
 # Update certificate in Kubernetes
-kubectl create secret tls cronos-ai-tls \
+kubectl create secret tls qbitel-tls \
   --cert=cert.pem \
   --key=key.pem \
   -n production --dry-run=client -o yaml | kubectl apply -f -
@@ -400,7 +400,7 @@ kubectl create secret tls cronos-ai-tls \
 ```bash
 # Run load tests
 locust -f tests/load/locustfile.py \
-  --host https://api.cronos-ai.com \
+  --host https://api.qbitel.com \
   --users 100 \
   --spawn-rate 10 \
   --run-time 10m
@@ -411,23 +411,23 @@ kubectl exec -it <pod> -n production -- \
   print(metrics.get_slow_queries())"
 
 # Check cache performance
-curl https://api.cronos-ai.com/metrics | grep cache_hit_rate
+curl https://api.qbitel.com/metrics | grep cache_hit_rate
 ```
 
 ### Scaling Operations
 
 ```bash
 # Manual horizontal scaling
-kubectl scale deployment/cronos-ai -n production --replicas=10
+kubectl scale deployment/qbitel -n production --replicas=10
 
 # Configure HPA
-kubectl autoscale deployment/cronos-ai -n production \
+kubectl autoscale deployment/qbitel -n production \
   --cpu-percent=70 \
   --min=3 \
   --max=20
 
 # Vertical scaling (update resources)
-kubectl set resources deployment/cronos-ai -n production \
+kubectl set resources deployment/qbitel -n production \
   --limits=cpu=2,memory=4Gi \
   --requests=cpu=1,memory=2Gi
 ```
@@ -479,7 +479,7 @@ kubectl exec -it <pod> -n production -- \
 
 # Reindex
 kubectl exec -it <pod> -n production -- \
-  psql -c "REINDEX DATABASE cronos_ai;"
+  psql -c "REINDEX DATABASE qbitel;"
 ```
 
 ---

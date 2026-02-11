@@ -1,0 +1,19 @@
+{
+  "program_id": "NETB875",
+  "domain": "telecommunications",
+  "program_type": "batch_processing",
+  "author": "S. BROWN",
+  "lines_of_code": 231,
+  "complexity_level": "medium",
+  "complexity_score": 0.53,
+  "files_used": 2,
+  "verbs_used": 13,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.903474",
+  "hash": "fed7e685e1505674a82a9e0a219c9198"
+}

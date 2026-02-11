@@ -1,5 +1,5 @@
 """
-CRONOS AI - Compliance Assessment Engine
+QBITEL - Compliance Assessment Engine
 
 Automated compliance assessment with intelligent data collection,
 gap analysis, and risk scoring using LLM-powered analysis.
@@ -19,7 +19,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest, get_llm_service
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..monitoring.enterprise_metrics import get_enterprise_metrics
 from .regulatory_kb import (
     RegulatoryKnowledgeBase,
@@ -35,7 +35,7 @@ from .regulatory_kb import (
 logger = logging.getLogger(__name__)
 
 
-class AssessmentException(CronosAIException):
+class AssessmentException(QbitelAIException):
     """Assessment-specific exception."""
 
     pass
@@ -208,7 +208,7 @@ class SystemStateAnalyzer:
                 },
                 "uptime_hours": (time.time() - psutil.boot_time()) / 3600,
                 "process_count": len(psutil.pids()),
-                "cronos_version": getattr(self.config, "version", "1.0.0"),
+                "qbitel_version": getattr(self.config, "version", "1.0.0"),
                 "environment": getattr(self.config, "environment", "unknown"),
             }
         except Exception as e:
@@ -1193,7 +1193,7 @@ class ComplianceDataCollector:
                 "system_overview": {
                     "hostname": system_snapshot.system_info.get("hostname", ""),
                     "environment": system_snapshot.system_info.get("environment", ""),
-                    "version": system_snapshot.system_info.get("cronos_version", ""),
+                    "version": system_snapshot.system_info.get("qbitel_version", ""),
                     "assessment_timestamp": system_snapshot.timestamp.isoformat(),
                 },
                 "technical_controls": {

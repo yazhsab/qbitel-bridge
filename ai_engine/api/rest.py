@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Enhanced REST API with Protocol Intelligence Copilot
+QBITEL Engine - Enhanced REST API with Protocol Intelligence Copilot
 Extended FastAPI implementation with LLM-enhanced protocol analysis capabilities.
 """
 
@@ -7,6 +7,7 @@ import asyncio
 import base64
 import binascii
 import logging
+import os
 import time
 import uuid
 from typing import Dict, Any, Optional, List
@@ -26,7 +27,7 @@ from pydantic import BaseModel, Field
 import uvicorn
 
 from ..core.config import Config, get_config
-from ..core.engine import CronosAIEngine
+from ..core.engine import QbitelAIEngine
 from ..copilot.protocol_copilot import (
     create_protocol_copilot,
     ProtocolIntelligenceCopilot,
@@ -63,11 +64,17 @@ from .sbom import router as sbom_router
 from .auth import get_current_user, verify_token
 from .middleware import setup_middleware
 from .schemas import *
+from .exception_handlers import register_exception_handlers
+from .zero_touch_endpoints import (
+    router as zero_touch_router,
+    initialize_decision_engine,
+    shutdown_decision_engine,
+)
 
 logger = logging.getLogger(__name__)
 
 # Global instances
-_ai_engine: Optional[CronosAIEngine] = None
+_ai_engine: Optional[QbitelAIEngine] = None
 _protocol_copilot: Optional[ProtocolIntelligenceCopilot] = None
 _metrics_collector: Optional["MetricsCollector"] = None
 
@@ -79,12 +86,12 @@ def create_app(config: Config = None) -> FastAPI:
 
     # Create FastAPI app with comprehensive OpenAPI metadata
     app = FastAPI(
-        title="CRONOS AI Protocol Discovery Engine",
+        title="QBITEL Bridge Engine",
         description="""
-## CRONOS AI - Enterprise Protocol Discovery & Analysis Platform
+## QBITEL - Enterprise Protocol Discovery & Analysis Platform
 
 ### Overview
-CRONOS AI provides AI-powered protocol discovery, field detection, and security analysis
+QBITEL provides AI-powered protocol discovery, field detection, and security analysis
 for legacy and modern network protocols. Our platform enables zero-touch integration
 with unknown protocols through advanced machine learning and LLM-enhanced analysis.
 
@@ -111,20 +118,20 @@ All endpoints (except `/health` and `/docs`) require authentication via:
 - Enterprise: Custom limits available
 
 ### Support
-- Documentation: https://docs.cronos-ai.com
-- API Status: https://status.cronos-ai.com
-- Support: support@cronos-ai.com
+- Documentation: https://github.com/yazhsab/qbitel-bridge/tree/main/docs
+- Repository: https://github.com/yazhsab/qbitel-bridge
+- Support: https://github.com/yazhsab/qbitel-bridge/issues
         """,
         version="2.0.0",
-        terms_of_service="https://cronos-ai.com/terms",
+        terms_of_service="https://github.com/yazhsab/qbitel-bridge/blob/main/LICENSE",
         contact={
-            "name": "CRONOS AI Support",
-            "url": "https://cronos-ai.com/support",
-            "email": "support@cronos-ai.com",
+            "name": "QBITEL Support",
+            "url": "https://github.com/yazhsab/qbitel-bridge",
+            "email": "support@qbitel.com",
         },
         license_info={
-            "name": "Commercial License",
-            "url": "https://cronos-ai.com/license",
+            "name": "Apache-2.0",
+            "url": "https://github.com/yazhsab/qbitel-bridge/blob/main/LICENSE",
         },
         docs_url="/docs",
         redoc_url="/redoc",
@@ -208,6 +215,10 @@ All endpoints (except `/health` and `/docs`) require authentication via:
         f"✅ Input validation middleware initialized (max payload: {max_payload_size} bytes)"
     )
 
+    # Register exception handlers for standardized error responses
+    register_exception_handlers(app)
+    logger.info("✅ Exception handlers registered")
+
     # Include routers
     app.include_router(copilot_router)
     app.include_router(translation_router)
@@ -230,12 +241,16 @@ All endpoints (except `/health` and `/docs`) require authentication via:
     app.include_router(marketplace_router)
     logger.info("✅ Protocol Marketplace API endpoints registered")
 
+    # Zero-Touch Security Decision Engine
+    app.include_router(zero_touch_router)
+    logger.info("✅ Zero-Touch Security Decision Engine API endpoints registered")
+
     # Enhanced API endpoints
     @app.get("/")
     async def root():
         """Root endpoint with copilot information."""
         return {
-            "message": "CRONOS AI Engine with Protocol Intelligence Copilot",
+            "message": "QBITEL Engine with Protocol Intelligence Copilot",
             "version": "2.0.0",
             "features": [
                 "Protocol Discovery and Analysis",
@@ -427,8 +442,11 @@ All endpoints (except `/health` and `/docs`) require authentication via:
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"Enhanced protocol discovery failed: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
+            logger.error(f"Enhanced protocol discovery failed: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500,
+                detail="Internal server error during protocol discovery. Check server logs for details.",
+            )
 
     # LLM-enhanced field detection
     @app.post("/api/v1/detect-fields")
@@ -495,8 +513,11 @@ All endpoints (except `/health` and `/docs`) require authentication via:
             }
 
         except Exception as e:
-            logger.error(f"Enhanced field detection failed: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
+            logger.error(f"Enhanced field detection failed: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500,
+                detail="Internal server error during field detection. Check server logs for details.",
+            )
 
     # Startup and shutdown events
     @app.on_event("startup")
@@ -505,7 +526,7 @@ All endpoints (except `/health` and `/docs`) require authentication via:
         global _ai_engine, _protocol_copilot, _metrics_collector
 
         try:
-            logger.info("Starting CRONOS AI Engine with all services...")
+            logger.info("Starting QBITEL Engine with all services...")
 
             # Initialize encryption system (must be first for database field encryption)
             from ai_engine.security.field_encryption import initialize_encryption
@@ -516,12 +537,12 @@ All endpoints (except `/health` and `/docs`) require authentication via:
             # Initialize database connection pool
             from ai_engine.core.database_manager import initialize_database_manager
 
-            environment = os.getenv("CRONOS_AI_ENVIRONMENT", "production")
+            environment = os.getenv("QBITEL_AI_ENVIRONMENT", "production")
             db_manager = await initialize_database_manager(config.database, environment)
             logger.info("✅ Database connection pool initialized")
 
             # Initialize AI Engine
-            _ai_engine = CronosAIEngine(config)
+            _ai_engine = QbitelAIEngine(config)
             await _ai_engine.initialize()
 
             # Initialize LLM Service and set as global singleton
@@ -542,7 +563,19 @@ All endpoints (except `/health` and `/docs`) require authentication via:
                 config, llm_service, alert_manager, policy_engine
             )
 
-            logger.info("✅ CRONOS AI Engine with all services started successfully")
+            # Initialize Zero-Touch Decision Engine
+            await initialize_decision_engine(config)
+            logger.info("✅ Zero-Touch Decision Engine initialized")
+
+            # Initialize Observability Stack
+            from ai_engine.observability import initialize_observability
+            await initialize_observability(
+                service_name="qbitel",
+                environment=environment,
+            )
+            logger.info("✅ Observability stack initialized")
+
+            logger.info("✅ QBITEL Engine with all services started successfully")
 
         except Exception as e:
             logger.error(f"❌ Failed to start services: {e}")
@@ -554,7 +587,7 @@ All endpoints (except `/health` and `/docs`) require authentication via:
         global _ai_engine, _protocol_copilot, _metrics_collector
 
         try:
-            logger.info("Shutting down CRONOS AI Engine and all services...")
+            logger.info("Shutting down QBITEL Engine and all services...")
 
             # Step 1: Initiate graceful shutdown (wait for in-flight requests)
             try:
@@ -569,6 +602,18 @@ All endpoints (except `/health` and `/docs`) require authentication via:
                 logger.error(f"Error during graceful shutdown: {e}")
 
             # Step 2: Shutdown application services
+            # Shutdown Observability Stack
+            try:
+                from ai_engine.observability import shutdown_observability
+                await shutdown_observability()
+                logger.info("✅ Observability stack shutdown complete")
+            except Exception as e:
+                logger.error(f"Error during observability shutdown: {e}")
+
+            # Shutdown Zero-Touch Decision Engine
+            await shutdown_decision_engine()
+            logger.info("✅ Zero-Touch Decision Engine shutdown complete")
+
             # Shutdown Translation Studio
             await shutdown_translation_studio()
 

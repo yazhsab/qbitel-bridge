@@ -1,0 +1,32 @@
+---
+import { techStack } from '@/data/techStack';
+---
+
+<section class="py-16 lg:py-24 border-t border-surface-600/50">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="section-heading">
+        Built With <span class="gradient-text">Production-Grade Technology</span>
+      </h2>
+      <p class="section-subheading mx-auto">
+        Four languages, best-in-class libraries, and cloud-native infrastructure.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+      {techStack.map((category) => (
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-quantum-400 uppercase tracking-wider mb-3">{category.category}</h3>
+          <ul class="space-y-2">
+            {category.items.map((item) => (
+              <li>
+                <div class="text-sm font-medium text-white">{item.name}</div>
+                <div class="text-xs text-gray-500">{item.description}</div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

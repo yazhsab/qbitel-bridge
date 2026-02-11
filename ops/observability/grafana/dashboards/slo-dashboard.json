@@ -1,7 +1,7 @@
 {
   "dashboard": {
-    "title": "CRONOS AI - SLO Dashboard",
-    "tags": ["cronos-ai", "slo", "sli", "production"],
+    "title": "QBITEL - SLO Dashboard",
+    "tags": ["qbitel", "slo", "sli", "production"],
     "timezone": "UTC",
     "schemaVersion": 38,
     "version": 1,
@@ -18,7 +18,7 @@
         "gridPos": {"h": 4, "w": 24, "x": 0, "y": 0},
         "targets": [
           {
-            "expr": "avg(cronos_ai_slo_compliance_ratio)",
+            "expr": "avg(qbitel_slo_compliance_ratio)",
             "legendFormat": "Overall SLO Compliance"
           }
         ],
@@ -49,7 +49,7 @@
         "gridPos": {"h": 8, "w": 6, "x": 0, "y": 4},
         "targets": [
           {
-            "expr": "sum(rate(cronos_ai_http_requests_total{status=~\"2..\"}[5m])) / sum(rate(cronos_ai_http_requests_total[5m]))",
+            "expr": "sum(rate(qbitel_http_requests_total{status=~\"2..\"}[5m])) / sum(rate(qbitel_http_requests_total[5m]))",
             "legendFormat": "Availability"
           }
         ],
@@ -80,7 +80,7 @@
         "gridPos": {"h": 8, "w": 6, "x": 6, "y": 4},
         "targets": [
           {
-            "expr": "histogram_quantile(0.95, rate(cronos_ai_http_request_duration_seconds_bucket[5m]))",
+            "expr": "histogram_quantile(0.95, rate(qbitel_http_request_duration_seconds_bucket[5m]))",
             "legendFormat": "P95 Latency"
           }
         ],
@@ -111,7 +111,7 @@
         "gridPos": {"h": 8, "w": 6, "x": 12, "y": 4},
         "targets": [
           {
-            "expr": "sum(rate(cronos_ai_http_requests_total{status=~\"5..\"}[5m])) / sum(rate(cronos_ai_http_requests_total[5m]))",
+            "expr": "sum(rate(qbitel_http_requests_total{status=~\"5..\"}[5m])) / sum(rate(qbitel_http_requests_total[5m]))",
             "legendFormat": "Error Rate"
           }
         ],
@@ -142,7 +142,7 @@
         "gridPos": {"h": 8, "w": 6, "x": 18, "y": 4},
         "targets": [
           {
-            "expr": "sum(rate(cronos_ai_http_requests_total[5m]))",
+            "expr": "sum(rate(qbitel_http_requests_total[5m]))",
             "legendFormat": "Requests/sec"
           }
         ],
@@ -173,7 +173,7 @@
         "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
         "targets": [
           {
-            "expr": "1 - (sum(rate(cronos_ai_http_requests_total{status=~\"5..\"}[30d])) / sum(rate(cronos_ai_http_requests_total[30d])))",
+            "expr": "1 - (sum(rate(qbitel_http_requests_total{status=~\"5..\"}[30d])) / sum(rate(qbitel_http_requests_total[30d])))",
             "legendFormat": "Error Budget"
           },
           {
@@ -199,11 +199,11 @@
         "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
         "targets": [
           {
-            "expr": "(sum(rate(cronos_ai_http_requests_total{status=~\"5..\"}[1h])) / sum(rate(cronos_ai_http_requests_total[1h]))) / (1 - 0.999)",
+            "expr": "(sum(rate(qbitel_http_requests_total{status=~\"5..\"}[1h])) / sum(rate(qbitel_http_requests_total[1h]))) / (1 - 0.999)",
             "legendFormat": "1h Burn Rate"
           },
           {
-            "expr": "(sum(rate(cronos_ai_http_requests_total{status=~\"5..\"}[6h])) / sum(rate(cronos_ai_http_requests_total[6h]))) / (1 - 0.999)",
+            "expr": "(sum(rate(qbitel_http_requests_total{status=~\"5..\"}[6h])) / sum(rate(qbitel_http_requests_total[6h]))) / (1 - 0.999)",
             "legendFormat": "6h Burn Rate"
           }
         ],
@@ -232,7 +232,7 @@
         "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
         "targets": [
           {
-            "expr": "sum by (endpoint) (rate(cronos_ai_http_requests_total{status=~\"2..\"}[5m])) / sum by (endpoint) (rate(cronos_ai_http_requests_total[5m]))",
+            "expr": "sum by (endpoint) (rate(qbitel_http_requests_total{status=~\"2..\"}[5m])) / sum by (endpoint) (rate(qbitel_http_requests_total[5m]))",
             "legendFormat": "{{endpoint}}"
           }
         ],
@@ -256,15 +256,15 @@
         "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
         "targets": [
           {
-            "expr": "histogram_quantile(0.50, rate(cronos_ai_http_request_duration_seconds_bucket[5m]))",
+            "expr": "histogram_quantile(0.50, rate(qbitel_http_request_duration_seconds_bucket[5m]))",
             "legendFormat": "P50"
           },
           {
-            "expr": "histogram_quantile(0.95, rate(cronos_ai_http_request_duration_seconds_bucket[5m]))",
+            "expr": "histogram_quantile(0.95, rate(qbitel_http_request_duration_seconds_bucket[5m]))",
             "legendFormat": "P95"
           },
           {
-            "expr": "histogram_quantile(0.99, rate(cronos_ai_http_request_duration_seconds_bucket[5m]))",
+            "expr": "histogram_quantile(0.99, rate(qbitel_http_request_duration_seconds_bucket[5m]))",
             "legendFormat": "P99"
           }
         ],
@@ -285,7 +285,7 @@
         "gridPos": {"h": 8, "w": 24, "x": 0, "y": 28},
         "targets": [
           {
-            "expr": "avg by (service) (cronos_ai_slo_compliance_ratio)",
+            "expr": "avg by (service) (qbitel_slo_compliance_ratio)",
             "format": "table",
             "instant": true
           }
@@ -327,7 +327,7 @@
         "gridPos": {"h": 4, "w": 6, "x": 0, "y": 36},
         "targets": [
           {
-            "expr": "(sum(rate(cronos_ai_http_request_duration_seconds_bucket{le=\"0.5\"}[5m])) + sum(rate(cronos_ai_http_request_duration_seconds_bucket{le=\"2\"}[5m])) / 2) / sum(rate(cronos_ai_http_request_duration_seconds_count[5m]))",
+            "expr": "(sum(rate(qbitel_http_request_duration_seconds_bucket{le=\"0.5\"}[5m])) + sum(rate(qbitel_http_request_duration_seconds_bucket{le=\"2\"}[5m])) / 2) / sum(rate(qbitel_http_request_duration_seconds_count[5m]))",
             "legendFormat": "Apdex"
           }
         ],
@@ -357,7 +357,7 @@
         "gridPos": {"h": 4, "w": 6, "x": 6, "y": 36},
         "targets": [
           {
-            "expr": "avg(cronos_ai_incident_mttr_seconds)",
+            "expr": "avg(qbitel_incident_mttr_seconds)",
             "legendFormat": "MTTR"
           }
         ],
@@ -386,7 +386,7 @@
         "gridPos": {"h": 4, "w": 6, "x": 12, "y": 36},
         "targets": [
           {
-            "expr": "avg(cronos_ai_incident_mtbf_seconds)",
+            "expr": "avg(qbitel_incident_mtbf_seconds)",
             "legendFormat": "MTBF"
           }
         ],
@@ -415,7 +415,7 @@
         "gridPos": {"h": 4, "w": 6, "x": 18, "y": 36},
         "targets": [
           {
-            "expr": "sum(cronos_ai_deployment_failures_total) / sum(cronos_ai_deployments_total)",
+            "expr": "sum(qbitel_deployment_failures_total) / sum(qbitel_deployments_total)",
             "legendFormat": "Failure Rate"
           }
         ],
@@ -444,7 +444,7 @@
           "name": "Deployments",
           "datasource": "Prometheus",
           "enable": true,
-          "expr": "changes(cronos_ai_deployment_info[5m]) > 0",
+          "expr": "changes(qbitel_deployment_info[5m]) > 0",
           "iconColor": "blue",
           "tagKeys": "version"
         },
@@ -452,7 +452,7 @@
           "name": "Incidents",
           "datasource": "Prometheus",
           "enable": true,
-          "expr": "cronos_ai_incident_active == 1",
+          "expr": "qbitel_incident_active == 1",
           "iconColor": "red",
           "tagKeys": "severity"
         }
@@ -464,7 +464,7 @@
           "name": "environment",
           "type": "query",
           "datasource": "Prometheus",
-          "query": "label_values(cronos_ai_http_requests_total, environment)",
+          "query": "label_values(qbitel_http_requests_total, environment)",
           "multi": false,
           "includeAll": false
         },
@@ -472,7 +472,7 @@
           "name": "service",
           "type": "query",
           "datasource": "Prometheus",
-          "query": "label_values(cronos_ai_http_requests_total, service)",
+          "query": "label_values(qbitel_http_requests_total, service)",
           "multi": true,
           "includeAll": true
         }

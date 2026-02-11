@@ -1,0 +1,110 @@
+---
+# Base Kustomization for QBITEL
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: qbitel-base
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+# Common labels applied to all resources
+commonLabels:
+  app.kubernetes.io/part-of: qbitel
+  app.kubernetes.io/managed-by: argocd
+
+# Common annotations
+commonAnnotations:
+  qbitel.io/version: "1.0.0"
+
+# Namespace configuration
+namespace: qbitel
+
+# Resources included in base
+resources:
+  # Namespaces
+  - namespaces/qbitel.yaml
+  - namespaces/qbitel-vllm.yaml
+  - namespaces/qbitel-observability.yaml
+
+  # RBAC
+  - rbac/service-accounts.yaml
+  - rbac/roles.yaml
+  - rbac/role-bindings.yaml
+
+  # ConfigMaps
+  - configmaps/global-config.yaml
+
+  # Network Policies
+  - network-policies/default-deny.yaml
+  - network-policies/allow-internal.yaml
+  - network-policies/allow-monitoring.yaml
+
+  # Pod Security
+  - security/pod-security-standards.yaml
+
+# Config Map Generator
+configMapGenerator:
+  - name: qbitel-config
+    literals:
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=base
+      - OTEL_SERVICE_NAME=qbitel
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+
+# Secret Generator (reference external secrets)
+secretGenerator:
+  - name: qbitel-secrets
+    type: Opaque
+    envs:
+      - secrets.env
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    app.kubernetes.io/name: qbitel
+
+# Image transformations (can be overridden in overlays)
+images:
+  - name: qbitel/core
+    newName: ghcr.io/qbitel/qbitel-core
+    newTag: latest
+  - name: qbitel/ai-gateway
+    newName: ghcr.io/qbitel/ai-gateway
+    newTag: latest
+  - name: qbitel/protocol-copilot
+    newName: ghcr.io/qbitel/protocol-copilot
+    newTag: latest
+
+# Patches applied to all resources
+patches:
+  # Add resource limits to all containers
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+    target:
+      kind: Deployment
+
+# Replacements for dynamic values
+replacements:
+  - source:
+      kind: ConfigMap
+      name: qbitel-config
+      fieldPath: data.ENVIRONMENT
+    targets:
+      - select:
+          kind: Deployment
+        fieldPaths:
+          - spec.template.spec.containers.[name=*].env.[name=ENVIRONMENT].value
+
+# Components that can be optionally included
+components:
+  - components/monitoring
+  - components/tracing

@@ -1,0 +1,19 @@
+{
+  "program_id": "PRDB932",
+  "domain": "manufacturing",
+  "program_type": "batch_processing",
+  "author": "C. MILLER",
+  "lines_of_code": 231,
+  "complexity_level": "medium",
+  "complexity_score": 0.53,
+  "files_used": 2,
+  "verbs_used": 13,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.868631",
+  "hash": "2c1fe1c783a4e635372ebfa36d3a7c31"
+}

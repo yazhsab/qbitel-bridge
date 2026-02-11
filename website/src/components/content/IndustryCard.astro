@@ -1,0 +1,32 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  protocols: string[];
+  href: string;
+  icon: string;
+  color: string;
+}
+
+const { title, description, protocols, href, icon, color } = Astro.props;
+---
+
+<a href={href} class="card p-6 group block">
+  <div class="flex items-center gap-3 mb-3">
+    <div class={`w-10 h-10 rounded-lg bg-gradient-to-br ${color} bg-opacity-10 flex items-center justify-center`}>
+      <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d={icon} />
+      </svg>
+    </div>
+    <h3 class="text-lg font-semibold text-white group-hover:text-quantum-400 transition-colors">{title}</h3>
+  </div>
+  <p class="text-sm text-gray-400 mb-3 leading-relaxed">{description}</p>
+  <div class="flex flex-wrap gap-1.5">
+    {protocols.slice(0, 4).map((protocol) => (
+      <span class="text-[10px] px-2 py-0.5 rounded bg-surface-700 text-gray-400 font-mono">{protocol}</span>
+    ))}
+    {protocols.length > 4 && (
+      <span class="text-[10px] px-2 py-0.5 rounded bg-surface-700 text-gray-500">+{protocols.length - 4}</span>
+    )}
+  </div>
+</a>

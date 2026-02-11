@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - Security Components Data Flow Integration
+QBITEL - Security Components Data Flow Integration
 Integrates security components with the main data processing pipeline.
 """
 

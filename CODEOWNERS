@@ -1,6 +1,44 @@
-* @security-lead @chief-architect @sre-lead
-/rust/ @dataplane-lead
-/go/ @platform-lead
-/ui/ @frontend-lead
-/ops/ @devops-lead
-/docs/ @pm-lead
+# QBITEL Bridge - Code Owners
+#
+# These owners will be automatically requested for review when
+# someone opens a pull request that modifies code they own.
+#
+# Add additional maintainers as the community grows.
+# See CONTRIBUTING.md for how to become a maintainer.
+#
+# Format: <pattern> <owner1> <owner2> ...
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+* @prabakarankannan
+
+# Rust data plane
+/rust/ @prabakarankannan
+
+# Go services
+/go/ @prabakarankannan
+
+# Python AI engine
+/ai_engine/ @prabakarankannan
+
+# UI console
+/ui/ @prabakarankannan
+
+# Operations and deployment
+/ops/ @prabakarankannan
+/helm/ @prabakarankannan
+/docker/ @prabakarankannan
+/kubernetes/ @prabakarankannan
+
+# Documentation
+/docs/ @prabakarankannan
+
+# CI/CD
+/.github/ @prabakarankannan
+
+# Security-sensitive files
+/security/ @prabakarankannan
+/ai_engine/crypto/ @prabakarankannan
+/ai_engine/security/ @prabakarankannan
+/rust/dataplane/crates/pqc_tls/ @prabakarankannan
+SECURITY.md @prabakarankannan

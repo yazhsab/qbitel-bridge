@@ -1,5 +1,5 @@
 """
-CRONOS AI - Agent Communication Protocol (ACP)
+QBITEL - Agent Communication Protocol (ACP)
 
 Provides direct agent-to-agent communication with:
 - Point-to-point messaging
@@ -26,17 +26,17 @@ if TYPE_CHECKING:
 
 # Prometheus metrics
 ACP_MESSAGES_SENT = Counter(
-    "cronos_acp_messages_sent_total",
+    "qbitel_acp_messages_sent_total",
     "Total messages sent via ACP",
     ["message_type", "sender_type"],
 )
 ACP_MESSAGES_RECEIVED = Counter(
-    "cronos_acp_messages_received_total",
+    "qbitel_acp_messages_received_total",
     "Total messages received via ACP",
     ["message_type", "receiver_type"],
 )
 ACP_MESSAGE_LATENCY = Histogram(
-    "cronos_acp_message_latency_seconds",
+    "qbitel_acp_message_latency_seconds",
     "Message delivery latency",
     ["message_type"],
 )

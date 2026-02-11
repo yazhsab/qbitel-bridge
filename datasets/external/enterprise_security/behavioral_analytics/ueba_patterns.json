@@ -1,5 +1,5 @@
 {
-  "source": "CRONOS AI UEBA Patterns",
+  "source": "QBITEL UEBA Patterns",
   "user_baselines": [
     {
       "metric": "login_times",

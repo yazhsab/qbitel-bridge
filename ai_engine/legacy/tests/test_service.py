@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any
 
 from ...core.config import Config
-from ...core.exceptions import CronosAIException
+from ...core.exceptions import QbitelAIException
 from ...llm.unified_llm_service import UnifiedLLMService
 from ...monitoring.metrics import AIEngineMetrics
 
@@ -165,7 +165,7 @@ class TestLegacySystemWhispererService:
             system_type=SystemType.MAINFRAME,
         )
 
-        with pytest.raises(CronosAIException, match="Invalid system context"):
+        with pytest.raises(QbitelAIException, match="Invalid system context"):
             await initialized_service.register_legacy_system(invalid_context)
 
     @pytest.mark.unit
@@ -173,7 +173,7 @@ class TestLegacySystemWhispererService:
         self, initialized_service, sample_system_metrics
     ):
         """Test health analysis for unregistered system."""
-        with pytest.raises(CronosAIException, match="System .* not registered"):
+        with pytest.raises(QbitelAIException, match="System .* not registered"):
             await initialized_service.analyze_system_health(
                 "unregistered_system", sample_system_metrics
             )
@@ -324,7 +324,7 @@ class TestLegacySystemWhispererService:
     @pytest.mark.unit
     def test_get_system_dashboard_unregistered(self, initialized_service):
         """Test dashboard for unregistered system raises exception."""
-        with pytest.raises(CronosAIException, match="System .* not registered"):
+        with pytest.raises(QbitelAIException, match="System .* not registered"):
             initialized_service.get_system_dashboard("unregistered_system")
 
     @pytest.mark.unit
@@ -569,7 +569,7 @@ class TestLegacySystemWhispererService:
             service, "_initialize_components", side_effect=Exception("Init failed")
         ):
             with pytest.raises(
-                CronosAIException, match="Service initialization failed"
+                QbitelAIException, match="Service initialization failed"
             ):
                 await service.initialize(mock_llm_service)
 

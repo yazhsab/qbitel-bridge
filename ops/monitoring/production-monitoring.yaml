@@ -1,4 +1,4 @@
-# CRONOS AI - Production Monitoring Stack
+# QBITEL - Production Monitoring Stack
 # Comprehensive observability with Prometheus, Grafana, Jaeger, and custom dashboards
 
 ---
@@ -6,9 +6,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cronos-ai-monitoring
+  name: qbitel-monitoring
   labels:
-    name: cronos-ai-monitoring
+    name: qbitel-monitoring
     environment: production
 
 ---
@@ -17,18 +17,18 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-config
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
 data:
   prometheus.yml: |
     global:
       scrape_interval: 15s
       evaluation_interval: 15s
       external_labels:
-        cluster: 'cronos-ai-production'
+        cluster: 'qbitel-production'
         environment: 'production'
     
     rule_files:
-      - "cronos_ai_rules.yml"
+      - "qbitel_rules.yml"
       - "kubernetes_rules.yml"
       - "istio_rules.yml"
     
@@ -37,12 +37,12 @@ data:
         static_configs:
           - targets: ['localhost:9090']
       
-      - job_name: 'cronos-ai-services'
+      - job_name: 'qbitel-services'
         kubernetes_sd_configs:
           - role: endpoints
             namespaces:
               names:
-                - cronos-ai
+                - qbitel
         relabel_configs:
           - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
             action: keep
@@ -83,7 +83,7 @@ data:
           - role: pod
             namespaces:
               names:
-                - cronos-ai
+                - qbitel
         relabel_configs:
           - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
             action: keep
@@ -119,103 +119,103 @@ data:
       
       - job_name: 'jaeger'
         static_configs:
-          - targets: ['jaeger-query.cronos-ai-monitoring:16686']
+          - targets: ['jaeger-query.qbitel-monitoring:16686']
     
     alerting:
       alertmanagers:
         - static_configs:
             - targets:
-              - alertmanager.cronos-ai-monitoring:9093
+              - alertmanager.qbitel-monitoring:9093
   
-  cronos_ai_rules.yml: |
+  qbitel_rules.yml: |
     groups:
-      - name: cronos_ai.rules
+      - name: qbitel.rules
         rules:
-          - alert: CronosAIHighCPUUsage
-            expr: (rate(container_cpu_usage_seconds_total{namespace="cronos-ai"}[5m])) > 0.8
+          - alert: QbitelAIHighCPUUsage
+            expr: (rate(container_cpu_usage_seconds_total{namespace="qbitel"}[5m])) > 0.8
             for: 2m
             labels:
               severity: warning
               component: "{{ $labels.container }}"
             annotations:
-              summary: "CRONOS AI component {{ $labels.container }} high CPU usage"
+              summary: "QBITEL component {{ $labels.container }} high CPU usage"
               description: "CPU usage is above 80% for {{ $labels.container }} for more than 2 minutes"
           
-          - alert: CronosAIHighMemoryUsage
-            expr: (container_memory_usage_bytes{namespace="cronos-ai"} / container_spec_memory_limit_bytes{namespace="cronos-ai"}) > 0.85
+          - alert: QbitelAIHighMemoryUsage
+            expr: (container_memory_usage_bytes{namespace="qbitel"} / container_spec_memory_limit_bytes{namespace="qbitel"}) > 0.85
             for: 2m
             labels:
               severity: warning
               component: "{{ $labels.container }}"
             annotations:
-              summary: "CRONOS AI component {{ $labels.container }} high memory usage"
+              summary: "QBITEL component {{ $labels.container }} high memory usage"
               description: "Memory usage is above 85% for {{ $labels.container }} for more than 2 minutes"
           
-          - alert: CronosAIServiceDown
-            expr: up{job="cronos-ai-services"} == 0
+          - alert: QbitelAIServiceDown
+            expr: up{job="qbitel-services"} == 0
             for: 1m
             labels:
               severity: critical
               component: "{{ $labels.kubernetes_name }}"
             annotations:
-              summary: "CRONOS AI service {{ $labels.kubernetes_name }} is down"
+              summary: "QBITEL service {{ $labels.kubernetes_name }} is down"
               description: "Service {{ $labels.kubernetes_name }} has been down for more than 1 minute"
           
-          - alert: CronosAIHighErrorRate
-            expr: (rate(http_requests_total{namespace="cronos-ai",status=~"5.."}[5m]) / rate(http_requests_total{namespace="cronos-ai"}[5m])) > 0.05
+          - alert: QbitelAIHighErrorRate
+            expr: (rate(http_requests_total{namespace="qbitel",status=~"5.."}[5m]) / rate(http_requests_total{namespace="qbitel"}[5m])) > 0.05
             for: 2m
             labels:
               severity: warning
               component: "{{ $labels.service }}"
             annotations:
-              summary: "CRONOS AI high error rate for {{ $labels.service }}"
+              summary: "QBITEL high error rate for {{ $labels.service }}"
               description: "Error rate is above 5% for {{ $labels.service }} for more than 2 minutes"
           
-          - alert: CronosAISlowResponseTime
-            expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{namespace="cronos-ai"}[5m])) > 2
+          - alert: QbitelAISlowResponseTime
+            expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{namespace="qbitel"}[5m])) > 2
             for: 3m
             labels:
               severity: warning
               component: "{{ $labels.service }}"
             annotations:
-              summary: "CRONOS AI slow response time for {{ $labels.service }}"
+              summary: "QBITEL slow response time for {{ $labels.service }}"
               description: "95th percentile response time is above 2s for {{ $labels.service }}"
           
-          - alert: CronosAIKafkaLag
-            expr: kafka_consumer_lag_sum{namespace="cronos-ai"} > 10000
+          - alert: QbitelAIKafkaLag
+            expr: kafka_consumer_lag_sum{namespace="qbitel"} > 10000
             for: 5m
             labels:
               severity: warning
               component: "kafka"
             annotations:
-              summary: "CRONOS AI Kafka consumer lag is high"
+              summary: "QBITEL Kafka consumer lag is high"
               description: "Kafka consumer lag is above 10,000 messages"
           
-          - alert: CronosAIDatabaseConnections
-            expr: pg_stat_activity_count{namespace="cronos-ai"} > 80
+          - alert: QbitelAIDatabaseConnections
+            expr: pg_stat_activity_count{namespace="qbitel"} > 80
             for: 2m
             labels:
               severity: warning
               component: "database"
             annotations:
-              summary: "CRONOS AI database connection count is high"
+              summary: "QBITEL database connection count is high"
               description: "Database connection count is above 80"
           
-          - alert: CronosAIRedisMemoryUsage
-            expr: (redis_memory_used_bytes{namespace="cronos-ai"} / redis_memory_max_bytes{namespace="cronos-ai"}) > 0.9
+          - alert: QbitelAIRedisMemoryUsage
+            expr: (redis_memory_used_bytes{namespace="qbitel"} / redis_memory_max_bytes{namespace="qbitel"}) > 0.9
             for: 5m
             labels:
               severity: critical
               component: "redis"
             annotations:
-              summary: "CRONOS AI Redis memory usage is critical"
+              summary: "QBITEL Redis memory usage is critical"
               description: "Redis memory usage is above 90%"
 
       # Compliance Module Alerts
-      - name: cronos_ai_compliance.rules
+      - name: qbitel_compliance.rules
         rules:
           - alert: ComplianceAssessmentFailed
-            expr: increase(cronos_ai_compliance_assessments_failed_total[10m]) > 0
+            expr: increase(qbitel_compliance_assessments_failed_total[10m]) > 0
             for: 1m
             labels:
               severity: critical
@@ -226,7 +226,7 @@ data:
               description: "Failed compliance assessment detected for framework {{ $labels.framework }}"
           
           - alert: ComplianceScoreBelow80
-            expr: cronos_ai_compliance_score < 80
+            expr: qbitel_compliance_score < 80
             for: 5m
             labels:
               severity: warning
@@ -237,7 +237,7 @@ data:
               description: "Compliance score is {{ $value }}% for framework {{ $labels.framework }}, below the 80% threshold"
           
           - alert: ComplianceScoreBelow60
-            expr: cronos_ai_compliance_score < 60
+            expr: qbitel_compliance_score < 60
             for: 2m
             labels:
               severity: critical
@@ -248,7 +248,7 @@ data:
               description: "Compliance score is {{ $value }}% for framework {{ $labels.framework }}, critically below 60% threshold"
           
           - alert: ComplianceCriticalGapDetected
-            expr: increase(cronos_ai_compliance_critical_gaps_total[5m]) > 0
+            expr: increase(qbitel_compliance_critical_gaps_total[5m]) > 0
             for: 1m
             labels:
               severity: critical
@@ -259,7 +259,7 @@ data:
               description: "{{ $value }} critical compliance gaps detected for framework {{ $labels.framework }}"
           
           - alert: ComplianceReportGenerationFailed
-            expr: increase(cronos_ai_compliance_report_generation_failures_total[5m]) > 0
+            expr: increase(qbitel_compliance_report_generation_failures_total[5m]) > 0
             for: 1m
             labels:
               severity: warning
@@ -270,7 +270,7 @@ data:
               description: "Failed to generate {{ $labels.report_type }} compliance report"
           
           - alert: ComplianceAuditTrailIntegrityFailure
-            expr: increase(cronos_ai_compliance_audit_integrity_failures_total[5m]) > 0
+            expr: increase(qbitel_compliance_audit_integrity_failures_total[5m]) > 0
             for: 1m
             labels:
               severity: critical
@@ -280,7 +280,7 @@ data:
               description: "Blockchain integrity verification failed for compliance audit trail"
           
           - alert: ComplianceLLMServiceDown
-            expr: cronos_ai_compliance_llm_service_up == 0
+            expr: qbitel_compliance_llm_service_up == 0
             for: 2m
             labels:
               severity: critical
@@ -291,7 +291,7 @@ data:
               description: "LLM service {{ $labels.provider }} for compliance module is unavailable"
           
           - alert: ComplianceLLMHighLatency
-            expr: histogram_quantile(0.95, rate(cronos_ai_compliance_llm_request_duration_seconds_bucket[5m])) > 30
+            expr: histogram_quantile(0.95, rate(qbitel_compliance_llm_request_duration_seconds_bucket[5m])) > 30
             for: 3m
             labels:
               severity: warning
@@ -302,7 +302,7 @@ data:
               description: "95th percentile latency is {{ $value }}s for LLM provider {{ $labels.provider }}"
           
           - alert: ComplianceDataIntegrationFailure
-            expr: increase(cronos_ai_compliance_data_integration_failures_total[10m]) > 0
+            expr: increase(qbitel_compliance_data_integration_failures_total[10m]) > 0
             for: 2m
             labels:
               severity: warning
@@ -313,7 +313,7 @@ data:
               description: "Failed to integrate compliance data from {{ $labels.integration_type }}"
           
           - alert: ComplianceAssessmentLongRunning
-            expr: (time() - cronos_ai_compliance_assessment_start_time) > 1800  # 30 minutes
+            expr: (time() - qbitel_compliance_assessment_start_time) > 1800  # 30 minutes
             for: 1m
             labels:
               severity: warning
@@ -329,7 +329,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
   labels:
     app: prometheus
 spec:
@@ -410,7 +410,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: grafana-config
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
 data:
   grafana.ini: |
     [analytics]
@@ -430,11 +430,11 @@ data:
     provisioning = /etc/grafana/provisioning
     
     [server]
-    root_url = https://monitoring.cronos-ai.example.com
+    root_url = https://monitoring.qbitel.example.com
     
     [database]
     type = postgres
-    host = postgres-service.cronos-ai-monitoring:5432
+    host = postgres-service.qbitel-monitoring:5432
     name = grafana
     user = grafana
     password = ${GRAFANA_DB_PASSWORD}
@@ -451,9 +451,9 @@ data:
     client_id = ${OAUTH_CLIENT_ID}
     client_secret = ${OAUTH_CLIENT_SECRET}
     scopes = openid profile email
-    auth_url = https://auth.cronos-ai.example.com/oauth/authorize
-    token_url = https://auth.cronos-ai.example.com/oauth/token
-    api_url = https://auth.cronos-ai.example.com/oauth/userinfo
+    auth_url = https://auth.qbitel.example.com/oauth/authorize
+    token_url = https://auth.qbitel.example.com/oauth/token
+    api_url = https://auth.qbitel.example.com/oauth/userinfo
     
   datasources.yaml: |
     apiVersion: 1
@@ -476,8 +476,8 @@ data:
         editable: true
       - name: TimescaleDB
         type: postgres
-        url: timescaledb-service.cronos-ai:5432
-        database: cronos_ai_prod
+        url: timescaledb-service.qbitel:5432
+        database: qbitel_prod
         user: ${TIMESCALE_USER}
         password: ${TIMESCALE_PASSWORD}
         sslmode: require
@@ -486,9 +486,9 @@ data:
   dashboards.yaml: |
     apiVersion: 1
     providers:
-      - name: 'cronos-ai-dashboards'
+      - name: 'qbitel-dashboards'
         orgId: 1
-        folder: 'CRONOS AI'
+        folder: 'QBITEL'
         type: file
         disableDeletion: false
         updateIntervalSeconds: 10
@@ -497,19 +497,19 @@ data:
           path: /var/lib/grafana/dashboards
 
 ---
-# CRONOS AI System Overview Dashboard
+# QBITEL System Overview Dashboard
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cronos-ai-system-dashboard
-  namespace: cronos-ai-monitoring
+  name: qbitel-system-dashboard
+  namespace: qbitel-monitoring
 data:
-  cronos-ai-system.json: |
+  qbitel-system.json: |
     {
       "dashboard": {
         "id": null,
-        "title": "CRONOS AI - System Overview",
-        "tags": ["cronos-ai", "system"],
+        "title": "QBITEL - System Overview",
+        "tags": ["qbitel", "system"],
         "timezone": "UTC",
         "panels": [
           {
@@ -518,7 +518,7 @@ data:
             "type": "stat",
             "targets": [
               {
-                "expr": "sum(up{job=\"cronos-ai-services\"})",
+                "expr": "sum(up{job=\"qbitel-services\"})",
                 "legendFormat": "Services Up"
               }
             ],
@@ -544,7 +544,7 @@ data:
             "type": "graph",
             "targets": [
               {
-                "expr": "sum(rate(http_requests_total{namespace=\"cronos-ai\"}[5m]))",
+                "expr": "sum(rate(http_requests_total{namespace=\"qbitel\"}[5m]))",
                 "legendFormat": "Requests/sec"
               }
             ],
@@ -556,7 +556,7 @@ data:
             "type": "graph",
             "targets": [
               {
-                "expr": "sum(rate(http_requests_total{namespace=\"cronos-ai\",status=~\"5..\"}[5m])) / sum(rate(http_requests_total{namespace=\"cronos-ai\"}[5m]))",
+                "expr": "sum(rate(http_requests_total{namespace=\"qbitel\",status=~\"5..\"}[5m])) / sum(rate(http_requests_total{namespace=\"qbitel\"}[5m]))",
                 "legendFormat": "Error Rate %"
               }
             ],
@@ -571,7 +571,7 @@ data:
             "type": "graph",
             "targets": [
               {
-                "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"cronos-ai\"}[5m])) by (container)",
+                "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"qbitel\"}[5m])) by (container)",
                 "legendFormat": "{{ container }}"
               }
             ],
@@ -583,7 +583,7 @@ data:
             "type": "graph",
             "targets": [
               {
-                "expr": "sum(container_memory_usage_bytes{namespace=\"cronos-ai\"}) by (container)",
+                "expr": "sum(container_memory_usage_bytes{namespace=\"qbitel\"}) by (container)",
                 "legendFormat": "{{ container }}"
               }
             ],
@@ -642,7 +642,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
   labels:
     app: grafana
 spec:
@@ -715,7 +715,7 @@ spec:
           claimName: grafana-pvc
       - name: grafana-dashboards
         configMap:
-          name: cronos-ai-system-dashboard
+          name: qbitel-system-dashboard
 
 ---
 # AlertManager Configuration
@@ -723,13 +723,13 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: alertmanager-config
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
 data:
   alertmanager.yml: |
     global:
-      smtp_smarthost: 'smtp.cronos-ai.example.com:587'
-      smtp_from: 'alerts@cronos-ai.example.com'
-      smtp_auth_username: 'alerts@cronos-ai.example.com'
+      smtp_smarthost: 'smtp.qbitel.example.com:587'
+      smtp_from: 'alerts@qbitel.example.com'
+      smtp_auth_username: 'alerts@qbitel.example.com'
       smtp_auth_password: '${SMTP_PASSWORD}'
       slack_api_url: '${SLACK_WEBHOOK_URL}'
     
@@ -738,7 +738,7 @@ data:
       group_wait: 10s
       group_interval: 10s
       repeat_interval: 12h
-      receiver: 'cronos-ai-alerts'
+      receiver: 'qbitel-alerts'
       routes:
       - match:
           severity: critical
@@ -751,10 +751,10 @@ data:
         receiver: 'kafka-alerts'
     
     receivers:
-    - name: 'cronos-ai-alerts'
+    - name: 'qbitel-alerts'
       email_configs:
-      - to: 'ops@cronos-ai.example.com'
-        subject: 'CRONOS AI Alert: {{ .GroupLabels.alertname }}'
+      - to: 'ops@qbitel.example.com'
+        subject: 'QBITEL Alert: {{ .GroupLabels.alertname }}'
         body: |
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
@@ -763,8 +763,8 @@ data:
           Severity: {{ .Labels.severity }}
           {{ end }}
       slack_configs:
-      - channel: '#cronos-ai-alerts'
-        title: 'CRONOS AI Alert'
+      - channel: '#qbitel-alerts'
+        title: 'QBITEL Alert'
         text: |
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
@@ -775,11 +775,11 @@ data:
     
     - name: 'critical-alerts'
       email_configs:
-      - to: 'oncall@cronos-ai.example.com'
-        subject: 'CRITICAL: CRONOS AI Alert'
+      - to: 'oncall@qbitel.example.com'
+        subject: 'CRITICAL: QBITEL Alert'
       slack_configs:
-      - channel: '#cronos-ai-critical'
-        title: '🚨 CRITICAL CRONOS AI Alert'
+      - channel: '#qbitel-critical'
+        title: '🚨 CRITICAL QBITEL Alert'
         text: |
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
@@ -788,17 +788,17 @@ data:
           {{ end }}
       pagerduty_configs:
       - routing_key: '${PAGERDUTY_INTEGRATION_KEY}'
-        description: 'CRONOS AI Critical Alert: {{ .GroupLabels.alertname }}'
+        description: 'QBITEL Critical Alert: {{ .GroupLabels.alertname }}'
     
     - name: 'database-alerts'
       email_configs:
-      - to: 'database-team@cronos-ai.example.com'
-        subject: 'CRONOS AI Database Alert'
+      - to: 'database-team@qbitel.example.com'
+        subject: 'QBITEL Database Alert'
     
     - name: 'kafka-alerts'
       email_configs:
-      - to: 'platform-team@cronos-ai.example.com'
-        subject: 'CRONOS AI Kafka Alert'
+      - to: 'platform-team@qbitel.example.com'
+        subject: 'QBITEL Kafka Alert'
 
 ---
 # Jaeger All-in-One for Distributed Tracing
@@ -806,7 +806,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: jaeger
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
   labels:
     app: jaeger
 spec:
@@ -854,7 +854,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: loki-config
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
 data:
   loki.yaml: |
     auth_enabled: false
@@ -919,19 +919,19 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cronos-ai-metrics-exporter
-  namespace: cronos-ai-monitoring
+  name: qbitel-metrics-exporter
+  namespace: qbitel-monitoring
   labels:
-    app: cronos-ai-metrics-exporter
+    app: qbitel-metrics-exporter
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: cronos-ai-metrics-exporter
+      app: qbitel-metrics-exporter
   template:
     metadata:
       labels:
-        app: cronos-ai-metrics-exporter
+        app: qbitel-metrics-exporter
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
@@ -939,7 +939,7 @@ spec:
     spec:
       containers:
       - name: metrics-exporter
-        image: cronos-ai/metrics-exporter:latest
+        image: qbitel/metrics-exporter:latest
         ports:
         - containerPort: 8080
           name: metrics
@@ -947,12 +947,12 @@ spec:
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: database-url
         - name: REDIS_URL
           valueFrom:
             secretKeyRef:
-              name: cronos-ai-secrets
+              name: qbitel-secrets
               key: redis-url
         - name: KAFKA_BROKERS
           value: "kafka-service:9092"
@@ -982,7 +982,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prometheus-service
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
   labels:
     app: prometheus
 spec:
@@ -999,7 +999,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: grafana-service
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
   labels:
     app: grafana
 spec:
@@ -1016,7 +1016,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: jaeger-query-service
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
   labels:
     app: jaeger
 spec:
@@ -1034,7 +1034,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: prometheus-pvc
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
 spec:
   accessModes:
   - ReadWriteOnce
@@ -1048,7 +1048,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: grafana-pvc
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
 spec:
   accessModes:
   - ReadWriteOnce
@@ -1063,7 +1063,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: prometheus
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -1099,7 +1099,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: prometheus
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
 
 ---
 # Secrets for monitoring stack
@@ -1107,7 +1107,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: grafana-secrets
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
 type: Opaque
 stringData:
   admin-password: "CHANGE_ME_IN_PRODUCTION"
@@ -1119,7 +1119,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: alertmanager-secrets
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
 type: Opaque
 stringData:
   smtp-password: "CHANGE_ME_IN_PRODUCTION"
@@ -1132,22 +1132,22 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: monitoring-ingress
-  namespace: cronos-ai-monitoring
+  namespace: qbitel-monitoring
   annotations:
     kubernetes.io/ingress.class: "istio"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: monitoring-auth
-    nginx.ingress.kubernetes.io/auth-realm: 'CRONOS AI Monitoring - Authentication Required'
+    nginx.ingress.kubernetes.io/auth-realm: 'QBITEL Monitoring - Authentication Required'
 spec:
   tls:
   - hosts:
-    - monitoring.cronos-ai.example.com
-    - metrics.cronos-ai.example.com
-    - tracing.cronos-ai.example.com
+    - monitoring.qbitel.example.com
+    - metrics.qbitel.example.com
+    - tracing.qbitel.example.com
     secretName: monitoring-tls-cert
   rules:
-  - host: monitoring.cronos-ai.example.com
+  - host: monitoring.qbitel.example.com
     http:
       paths:
       - path: /
@@ -1157,7 +1157,7 @@ spec:
             name: grafana-service
             port:
               number: 3000
-  - host: metrics.cronos-ai.example.com
+  - host: metrics.qbitel.example.com
     http:
       paths:
       - path: /
@@ -1167,7 +1167,7 @@ spec:
             name: prometheus-service
             port:
               number: 9090
-  - host: tracing.cronos-ai.example.com
+  - host: tracing.qbitel.example.com
     http:
       paths:
       - path: /

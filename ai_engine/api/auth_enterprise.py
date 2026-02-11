@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Enterprise Authentication
+QBITEL Engine - Enterprise Authentication
 
 Production-ready authentication with OAuth2, SAML, MFA, and comprehensive security features.
 """
@@ -73,7 +73,7 @@ class EnterpriseAuthenticationService:
         if not secret or len(secret) < 32:
             raise ValueError(
                 "JWT secret not configured or too short. "
-                "Set CRONOS_AI_JWT_SECRET environment variable with at least 32 characters."
+                "Set QBITEL_AI_JWT_SECRET environment variable with at least 32 characters."
             )
         return secret
 
@@ -163,7 +163,7 @@ class EnterpriseAuthenticationService:
     def generate_totp_qr_code(self, username: str, secret: str) -> str:
         """Generate QR code for TOTP setup."""
         totp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
-            name=username, issuer_name="CRONOS AI"
+            name=username, issuer_name="QBITEL"
         )
 
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
@@ -257,7 +257,7 @@ class EnterpriseAuthenticationService:
             (api_key, key_hash)
         """
         # Generate key with prefix
-        key = f"cronos_{secrets.token_urlsafe(32)}"
+        key = f"qbitel_{secrets.token_urlsafe(32)}"
         key_hash = hashlib.sha256(key.encode()).hexdigest()
         return key, key_hash
 

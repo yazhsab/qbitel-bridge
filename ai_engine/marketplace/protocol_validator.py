@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Validation Pipeline
+QBITEL - Protocol Validation Pipeline
 
 Automated validation pipeline for marketplace protocol submissions including
 syntax validation, parser testing, security scanning, and performance benchmarking.

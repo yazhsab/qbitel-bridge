@@ -1,5 +1,5 @@
 {
-  "source": "CRONOS AI Identity Threat Patterns",
+  "source": "QBITEL Identity Threat Patterns",
   "attack_patterns": [
     {
       "type": "credential_stuffing",

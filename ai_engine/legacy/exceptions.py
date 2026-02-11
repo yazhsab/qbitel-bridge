@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Whisperer Exceptions
+QBITEL Engine - Legacy System Whisperer Exceptions
 
 Comprehensive exception handling for Legacy System Whisperer feature.
 Provides structured error handling with proper categorization and context.
@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 
 
 class ErrorSeverity(Enum):
@@ -57,7 +57,7 @@ class ErrorContext:
     recovery_suggestions: Optional[List[str]] = None
 
 
-class LegacySystemWhispererException(CronosAIException):
+class LegacySystemWhispererException(QbitelAIException):
     """Base exception for Legacy System Whisperer feature."""
 
     def __init__(

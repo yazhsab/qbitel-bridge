@@ -17,7 +17,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// ChaosEngine implements chaos engineering experiments for CronosAI
+// ChaosEngine implements chaos engineering experiments for QbitelAI
 type ChaosEngine struct {
 	logger *zap.Logger
 	
@@ -219,7 +219,7 @@ func (ce *ChaosEngine) initializeMetrics() {
 	ce.metrics = &ChaosMetrics{
 		ExperimentsTotal: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "cronosai_chaos_experiments_total",
+				Name: "qbitel_chaos_experiments_total",
 				Help: "Total number of chaos experiments executed",
 			},
 			[]string{"type", "category", "severity", "status"},
@@ -227,7 +227,7 @@ func (ce *ChaosEngine) initializeMetrics() {
 		
 		ExperimentDuration: promauto.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name:    "cronosai_chaos_experiment_duration_seconds",
+				Name:    "qbitel_chaos_experiment_duration_seconds",
 				Help:    "Duration of chaos experiments in seconds",
 				Buckets: prometheus.ExponentialBuckets(1, 2, 10),
 			},
@@ -236,7 +236,7 @@ func (ce *ChaosEngine) initializeMetrics() {
 		
 		ExperimentSuccess: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "cronosai_chaos_experiment_success_total",
+				Name: "qbitel_chaos_experiment_success_total",
 				Help: "Total number of successful chaos experiments",
 			},
 			[]string{"type", "category"},
@@ -244,7 +244,7 @@ func (ce *ChaosEngine) initializeMetrics() {
 		
 		SafetyViolations: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "cronosai_chaos_safety_violations_total",
+				Name: "qbitel_chaos_safety_violations_total",
 				Help: "Total number of safety violations during chaos experiments",
 			},
 			[]string{"experiment_id", "violation_type"},
@@ -252,7 +252,7 @@ func (ce *ChaosEngine) initializeMetrics() {
 		
 		RecoveryTime: promauto.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name:    "cronosai_chaos_recovery_time_seconds",
+				Name:    "qbitel_chaos_recovery_time_seconds",
 				Help:    "Time taken for system recovery after chaos experiments",
 				Buckets: prometheus.ExponentialBuckets(1, 2, 10),
 			},
@@ -261,7 +261,7 @@ func (ce *ChaosEngine) initializeMetrics() {
 		
 		SystemResilience: promauto.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Name: "cronosai_system_resilience_score",
+				Name: "qbitel_system_resilience_score",
 				Help: "System resilience score based on chaos experiments",
 			},
 			[]string{"component", "metric"},

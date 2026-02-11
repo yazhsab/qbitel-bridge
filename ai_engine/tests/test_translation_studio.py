@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Translation Studio Tests
+QBITEL - Protocol Translation Studio Tests
 Comprehensive test suite for protocol translation functionality.
 """
 

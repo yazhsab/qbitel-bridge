@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: cronos-security-orchestrator
-  namespace: cronos-security
+  name: qbitel-security-orchestrator
+  namespace: qbitel-security
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/name: qbitel-security-orchestrator
     app.kubernetes.io/component: security
   annotations:
     prometheus.io/scrape: "true"
@@ -26,17 +26,17 @@ spec:
     targetPort: 9090
     protocol: TCP
   selector:
-    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/name: qbitel-security-orchestrator
     app.kubernetes.io/component: security
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cronos-security-orchestrator-headless
-  namespace: cronos-security
+  name: qbitel-security-orchestrator-headless
+  namespace: qbitel-security
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/name: qbitel-security-orchestrator
     app.kubernetes.io/component: security
 spec:
   type: ClusterIP
@@ -55,5 +55,5 @@ spec:
     targetPort: 9090
     protocol: TCP
   selector:
-    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/name: qbitel-security-orchestrator
     app.kubernetes.io/component: security

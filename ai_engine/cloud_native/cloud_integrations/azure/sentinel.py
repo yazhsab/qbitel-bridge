@@ -1,7 +1,7 @@
 """
 Azure Sentinel Integration
 
-Integrates CRONOS AI security events with Azure Sentinel for SIEM
+Integrates QBITEL security events with Azure Sentinel for SIEM
 and security orchestration.
 """
 
@@ -42,7 +42,7 @@ class AzureSentinelIntegration:
             "Severity": severity,
             "Description": description,
             "ResourceId": resource_id,
-            "Provider": "CRONOS AI",
+            "Provider": "QBITEL",
             "Category": "Quantum Security"
         }
 
@@ -57,11 +57,11 @@ class AzureSentinelIntegration:
             "resources": [{
                 "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
                 "apiVersion": "2021-03-01-preview",
-                "name": "cronos-ai-connector",
+                "name": "qbitel-connector",
                 "properties": {
                     "connectorUiConfig": {
-                        "title": "CRONOS AI Quantum Security",
-                        "publisher": "CRONOS AI",
+                        "title": "QBITEL Quantum Security",
+                        "publisher": "QBITEL",
                         "descriptionMarkdown": "Quantum-safe security monitoring"
                     }
                 }

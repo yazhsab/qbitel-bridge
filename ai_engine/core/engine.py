@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Main Engine Orchestrator
+QBITEL Engine - Main Engine Orchestrator
 
 This module provides the main AI Engine class that orchestrates all AI components
 including protocol discovery, field detection, and anomaly detection.
@@ -18,7 +18,7 @@ from prometheus_client import Counter, Histogram, Gauge
 
 from .config import Config, get_config
 from .exceptions import (
-    CronosAIException,
+    QbitelAIException,
     ModelException,
     InferenceException,
     ConfigurationException,
@@ -41,13 +41,13 @@ if TYPE_CHECKING:  # pragma: no cover - for type checkers only
 
 # Prometheus metrics
 INFERENCE_COUNTER = Counter(
-    "cronos_ai_inference_total", "Total inference requests", ["component", "status"]
+    "qbitel_inference_total", "Total inference requests", ["component", "status"]
 )
 INFERENCE_DURATION = Histogram(
-    "cronos_ai_inference_duration_seconds", "Inference duration", ["component"]
+    "qbitel_inference_duration_seconds", "Inference duration", ["component"]
 )
-MODEL_ACCURACY = Gauge("cronos_ai_model_accuracy", "Model accuracy", ["model_name"])
-ACTIVE_MODELS = Gauge("cronos_ai_active_models", "Number of active models")
+MODEL_ACCURACY = Gauge("qbitel_model_accuracy", "Model accuracy", ["model_name"])
+ACTIVE_MODELS = Gauge("qbitel_active_models", "Number of active models")
 
 
 class AIEngine:
@@ -171,7 +171,7 @@ class AIEngine:
                 result.processing_time_ms = (time.time() - start_time) * 1000.0
 
 
-class CronosAIEngine:
+class QbitelAIEngine:
     """
     Main AI Engine that orchestrates all machine learning components.
 
@@ -238,7 +238,7 @@ class CronosAIEngine:
 
         except Exception as e:
             self.logger.error(f"Failed to initialize AI Engine: {e}")
-            raise CronosAIException(f"Engine initialization failed: {e}")
+            raise QbitelAIException(f"Engine initialization failed: {e}")
 
     async def shutdown(self) -> None:
         """Shutdown the AI Engine and cleanup resources."""
@@ -263,7 +263,7 @@ class CronosAIEngine:
 
         except Exception as e:
             self.logger.error(f"Error during AI Engine shutdown: {e}")
-            raise CronosAIException(f"Engine shutdown failed: {e}")
+            raise QbitelAIException(f"Engine shutdown failed: {e}")
 
     async def discover_protocol(
         self, packet_data: bytes, metadata: Optional[Dict[str, Any]] = None
@@ -279,7 +279,7 @@ class CronosAIEngine:
             Protocol discovery results including type, confidence, and structure
         """
         if not self._initialized:
-            raise CronosAIException("AI Engine not initialized")
+            raise QbitelAIException("AI Engine not initialized")
 
         start_time = time.time()
 
@@ -333,7 +333,7 @@ class CronosAIEngine:
             List of detected fields with boundaries and types
         """
         if not self._initialized:
-            raise CronosAIException("AI Engine not initialized")
+            raise QbitelAIException("AI Engine not initialized")
 
         start_time = time.time()
 
@@ -381,7 +381,7 @@ class CronosAIEngine:
             Anomaly detection results with scores and explanations
         """
         if not self._initialized:
-            raise CronosAIException("AI Engine not initialized")
+            raise QbitelAIException("AI Engine not initialized")
 
         start_time = time.time()
 
@@ -434,7 +434,7 @@ class CronosAIEngine:
             List of processing results
         """
         if not self._initialized:
-            raise CronosAIException("AI Engine not initialized")
+            raise QbitelAIException("AI Engine not initialized")
 
         self.logger.info(
             f"Processing batch of {len(batch_data)} items with operation: {operation}"
@@ -531,7 +531,7 @@ class CronosAIEngine:
         # Initialize thread pool executor
         self._executor = ThreadPoolExecutor(
             max_workers=self.config.inference.num_workers,
-            thread_name_prefix="cronos-ai-",
+            thread_name_prefix="qbitel-",
         )
 
         # Initialize model registry
@@ -622,20 +622,46 @@ class CronosAIEngine:
         return await self._anomaly_detector.detect(features, context)
 
     def _sync_discover_protocol(self, data: bytes) -> Dict[str, Any]:
-        """Synchronous wrapper for protocol discovery."""
-        return asyncio.run(self.discover_protocol(data))
+        """Synchronous wrapper for protocol discovery (thread-safe)."""
+        try:
+            loop = asyncio.get_running_loop()
+            # Already in an event loop — use concurrent.futures to bridge
+            import concurrent.futures
+            future = asyncio.run_coroutine_threadsafe(
+                self.discover_protocol(data), loop
+            )
+            return future.result(timeout=30)
+        except RuntimeError:
+            # No event loop running — safe to create a new one
+            return asyncio.run(self.discover_protocol(data))
 
     def _sync_detect_fields(self, data: bytes) -> List[Dict[str, Any]]:
-        """Synchronous wrapper for field detection."""
-        return asyncio.run(self.detect_fields(data))
+        """Synchronous wrapper for field detection (thread-safe)."""
+        try:
+            loop = asyncio.get_running_loop()
+            import concurrent.futures
+            future = asyncio.run_coroutine_threadsafe(
+                self.detect_fields(data), loop
+            )
+            return future.result(timeout=30)
+        except RuntimeError:
+            return asyncio.run(self.detect_fields(data))
 
     def _sync_detect_anomaly(self, data: bytes) -> Dict[str, Any]:
-        """Synchronous wrapper for anomaly detection."""
-        return asyncio.run(self.detect_anomaly(data))
+        """Synchronous wrapper for anomaly detection (thread-safe)."""
+        try:
+            loop = asyncio.get_running_loop()
+            import concurrent.futures
+            future = asyncio.run_coroutine_threadsafe(
+                self.detect_anomaly(data), loop
+            )
+            return future.result(timeout=30)
+        except RuntimeError:
+            return asyncio.run(self.detect_anomaly(data))
 
     def _setup_logging(self) -> logging.Logger:
         """Setup structured logging."""
-        logger = logging.getLogger("cronos.ai.engine")
+        logger = logging.getLogger("qbitel.ai.engine")
         logger.setLevel(getattr(logging, self.config.log_level.value))
 
         if not logger.handlers:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - Dependency Verification Script
+QBITEL - Dependency Verification Script
 Checks all runtime dependencies and provides installation guidance.
 """
 
@@ -15,7 +15,7 @@ from ai_engine.core.dependency_manager import check_dependencies
 
 def main():
     """Main entry point for dependency checking."""
-    print("Checking CRONOS AI dependencies...\n")
+    print("Checking QBITEL dependencies...\n")
 
     is_valid = check_dependencies()
 
@@ -24,7 +24,7 @@ def main():
         sys.exit(0)
     else:
         print("\n✗ Some required dependencies are missing or have issues.")
-        print("Please install missing dependencies before running CRONOS AI.")
+        print("Please install missing dependencies before running QBITEL.")
         sys.exit(1)
 
 

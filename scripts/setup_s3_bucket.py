@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - S3 Bucket Setup Script
+QBITEL - S3 Bucket Setup Script
 
 Creates and configures the S3 bucket for marketplace protocol storage.
 """
@@ -141,7 +141,7 @@ def configure_bucket_cors(bucket_name: str, allowed_origins: list[str] | None = 
 
     SECURITY: Uses environment variable for allowed origins in production.
     Set CORS_ALLOWED_ORIGINS environment variable with comma-separated list of domains.
-    Example: CORS_ALLOWED_ORIGINS=https://cronos.example.com,https://admin.example.com
+    Example: CORS_ALLOWED_ORIGINS=https://qbitel.example.com,https://admin.example.com
 
     Args:
         bucket_name: Name of the S3 bucket
@@ -168,7 +168,7 @@ def configure_bucket_cors(bucket_name: str, allowed_origins: list[str] | None = 
             else:
                 # SECURITY: Default to restrictive origin instead of wildcard
                 # In development, set CORS_ALLOWED_ORIGINS=http://localhost:3000
-                allowed_origins = ['https://cronos.example.com']
+                allowed_origins = ['https://qbitel.example.com']
                 logger.warning("⚠️  CORS_ALLOWED_ORIGINS not set - using restrictive default")
                 logger.warning("    Set CORS_ALLOWED_ORIGINS env var for your domains")
 
@@ -371,7 +371,7 @@ def verify_bucket_access(bucket_name: str) -> bool:
         s3_client.put_object(
             Bucket=bucket_name,
             Key=test_key,
-            Body=b'CRONOS AI S3 access test'
+            Body=b'QBITEL S3 access test'
         )
 
         # Test read
@@ -392,7 +392,7 @@ def verify_bucket_access(bucket_name: str) -> bool:
 def main():
     """Main setup function."""
     print("=" * 70)
-    print("CRONOS AI - S3 Bucket Setup for Protocol Marketplace")
+    print("QBITEL - S3 Bucket Setup for Protocol Marketplace")
     print("=" * 70)
     print()
 

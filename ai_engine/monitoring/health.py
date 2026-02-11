@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Health Monitoring
+QBITEL Engine - Health Monitoring
 
 This module provides comprehensive health checking and system monitoring
 for all AI Engine components and dependencies.
@@ -173,10 +173,11 @@ class HealthChecker:
                     message=f"Health check timed out after {self.timeout}s",
                 )
             except Exception as e:
+                self.logger.error(f"Health check failed for {name}: {e}")
                 component_health[name] = ComponentHealth(
                     name=name,
                     status=HealthStatus.UNHEALTHY,
-                    message=f"Health check failed: {e}",
+                    message=f"Health check failed: {type(e).__name__}",
                 )
 
         # Collect system metrics
@@ -341,7 +342,7 @@ class HealthChecker:
             return ComponentHealth(
                 name=component_name,
                 status=HealthStatus.UNHEALTHY,
-                message=f"Health check exception: {e}",
+                message=f"Health check exception: {type(e).__name__}",
                 check_duration_ms=duration_ms,
                 last_check_time=time.time(),
             )
@@ -407,10 +408,11 @@ class HealthChecker:
                 )
 
             except Exception as e:
+                self.logger.error(f"Failed to check system resources: {e}")
                 return ComponentHealth(
                     name="system_resources",
                     status=HealthStatus.UNHEALTHY,
-                    message=f"Failed to check system resources: {e}",
+                    message=f"System resource check failed: {type(e).__name__}",
                 )
 
         async def check_gpu_availability() -> ComponentHealth:
@@ -465,7 +467,8 @@ class HealthChecker:
                             )
 
                     except Exception as e:
-                        messages.append(f"Error checking GPU {i}: {e}")
+                        self.logger.warning(f"Error checking GPU {i}: {e}")
+                        messages.append(f"Error checking GPU {i}: {type(e).__name__}")
                         if status == HealthStatus.HEALTHY:
                             status = HealthStatus.DEGRADED
 
@@ -480,42 +483,129 @@ class HealthChecker:
                 )
 
             except Exception as e:
+                self.logger.error(f"Failed to check GPU: {e}")
                 return ComponentHealth(
                     name="gpu",
                     status=HealthStatus.UNHEALTHY,
-                    message=f"Failed to check GPU: {e}",
+                    message=f"GPU check failed: {type(e).__name__}",
                 )
 
         async def check_ai_engine() -> ComponentHealth:
             """Check AI Engine health."""
-            # This would be implemented to check the actual AI Engine
-            # For now, return a basic health check
-            return ComponentHealth(
-                name="ai_engine",
-                status=HealthStatus.HEALTHY,
-                message="AI Engine operational",
-                details={"initialized": True},
-            )
+            try:
+                from ..core.engine import QbitelAIEngine
+                from ..api.rest import _ai_engine
+                if _ai_engine is None:
+                    return ComponentHealth(
+                        name="ai_engine",
+                        status=HealthStatus.DEGRADED,
+                        message="AI Engine not yet initialized",
+                        details={"initialized": False},
+                    )
+                status_info = await _ai_engine.get_model_info() if hasattr(_ai_engine, 'get_model_info') else {}
+                return ComponentHealth(
+                    name="ai_engine",
+                    status=HealthStatus.HEALTHY,
+                    message="AI Engine operational",
+                    details={
+                        "initialized": True,
+                        "models_loaded": len(status_info.get("loaded_models", [])),
+                    },
+                )
+            except ImportError:
+                return ComponentHealth(
+                    name="ai_engine",
+                    status=HealthStatus.UNKNOWN,
+                    message="AI Engine module not available",
+                    details={"initialized": False},
+                )
+            except Exception as e:
+                self.logger.warning(f"AI Engine health check failed: {e}")
+                return ComponentHealth(
+                    name="ai_engine",
+                    status=HealthStatus.DEGRADED,
+                    message=f"AI Engine check failed: {type(e).__name__}",
+                    details={"initialized": False},
+                )
 
         async def check_model_registry() -> ComponentHealth:
             """Check model registry health."""
-            # This would check the actual model registry
-            return ComponentHealth(
-                name="model_registry",
-                status=HealthStatus.HEALTHY,
-                message="Model registry operational",
-                details={"models_loaded": True},
-            )
+            try:
+                from ..models.model_manager import get_model_manager
+                manager = get_model_manager()
+                if manager is None:
+                    return ComponentHealth(
+                        name="model_registry",
+                        status=HealthStatus.DEGRADED,
+                        message="Model manager not initialized",
+                        details={"models_loaded": False},
+                    )
+                is_ready = hasattr(manager, 'is_ready') and manager.is_ready()
+                return ComponentHealth(
+                    name="model_registry",
+                    status=HealthStatus.HEALTHY if is_ready else HealthStatus.DEGRADED,
+                    message="Model registry operational" if is_ready else "Models not yet loaded",
+                    details={"models_loaded": is_ready},
+                )
+            except ImportError:
+                return ComponentHealth(
+                    name="model_registry",
+                    status=HealthStatus.UNKNOWN,
+                    message="Model manager module not available",
+                    details={"models_loaded": False},
+                )
+            except Exception as e:
+                self.logger.warning(f"Model registry health check failed: {e}")
+                return ComponentHealth(
+                    name="model_registry",
+                    status=HealthStatus.DEGRADED,
+                    message=f"Model registry check failed: {type(e).__name__}",
+                    details={"models_loaded": False},
+                )
 
         async def check_external_dependencies() -> ComponentHealth:
             """Check external service dependencies."""
-            # This would check external services like MLflow, databases, etc.
-            return ComponentHealth(
-                name="external_dependencies",
-                status=HealthStatus.HEALTHY,
-                message="External dependencies operational",
-                details={"services_reachable": True},
-            )
+            try:
+                import os
+                issues = []
+                details = {}
+
+                # Check database connectivity
+                db_url = os.getenv("DATABASE_URL", "")
+                details["database_configured"] = bool(db_url)
+                if not db_url:
+                    issues.append("DATABASE_URL not configured")
+
+                # Check Redis connectivity
+                redis_url = os.getenv("REDIS_URL", os.getenv("QBITEL_REDIS_URL", ""))
+                details["redis_configured"] = bool(redis_url)
+
+                # Check LLM endpoint
+                llm_endpoint = os.getenv("LLM_ENDPOINT", "")
+                details["llm_configured"] = bool(llm_endpoint)
+
+                if issues:
+                    return ComponentHealth(
+                        name="external_dependencies",
+                        status=HealthStatus.DEGRADED,
+                        message="; ".join(issues),
+                        details=details,
+                    )
+
+                return ComponentHealth(
+                    name="external_dependencies",
+                    status=HealthStatus.HEALTHY,
+                    message="External dependencies configured",
+                    details=details,
+                )
+            except Exception as e:
+                self.logger.warning(f"External dependencies check failed: {e}")
+                return ComponentHealth(
+                    name="external_dependencies",
+                    status=HealthStatus.DEGRADED,
+                    message=f"Dependency check failed: {type(e).__name__}",
+                    details={},
+                )
 
         # Register all default checkers
         self.register_health_checker("system_resources", check_system_resources)

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Base Integration Connector
+QBITEL Engine - Base Integration Connector
 
 Abstract base classes and common functionality for external system integrations.
 """
@@ -84,7 +84,7 @@ class BaseIntegrationConnector(ABC):
 
     def __init__(self, config: IntegrationConfig):
         self.config = config
-        self.logger = get_security_logger(f"cronos.security.integration.{config.name}")
+        self.logger = get_security_logger(f"qbitel.security.integration.{config.name}")
         self.security_config = get_security_config()
 
         # Connection state
@@ -569,7 +569,7 @@ class HTTPIntegrationConnector(BaseIntegrationConnector):
         # Prepare headers
         request_headers = self.auth_headers.copy()
         request_headers["Content-Type"] = "application/json"
-        request_headers["User-Agent"] = "CRONOS-AI-Security-Orchestrator/1.0"
+        request_headers["User-Agent"] = "QBITEL-Security-Orchestrator/1.0"
 
         if headers:
             request_headers.update(headers)

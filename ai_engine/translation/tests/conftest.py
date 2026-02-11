@@ -1,5 +1,5 @@
 """
-CRONOS AI - Translation Studio Test Configuration
+QBITEL - Translation Studio Test Configuration
 Enterprise-grade test fixtures and configuration for translation studio tests.
 """
 

@@ -1,13 +1,14 @@
-# CRONOS AI Engine
+# QBITEL Bridge - AI Engine
 
 ## Enterprise-Grade Protocol Discovery, Field Detection, and Anomaly Detection
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Docker](https://img.shields.io/badge/docker-enabled-blue.svg)](https://docker.com)
 [![Kubernetes](https://img.shields.io/badge/kubernetes-ready-blue.svg)](https://kubernetes.io)
+[![QBITEL Bridge](https://img.shields.io/badge/QBITEL-Bridge-purple.svg)](https://qbitel.com/bridge)
 
-The CRONOS AI Engine is a production-ready, enterprise-grade artificial intelligence system designed for automated protocol discovery, intelligent field detection, and real-time anomaly detection in network protocols and data streams.
+The QBITEL Bridge AI Engine is a production-ready, enterprise-grade artificial intelligence system designed for automated protocol discovery, intelligent field detection, and real-time anomaly detection in network protocols and data streams. This is the core AI component of [QBITEL Bridge](https://qbitel.com/bridge).
 
 ## 🚀 Features
 
@@ -59,7 +60,7 @@ The CRONOS AI Engine is a production-ready, enterprise-grade artificial intellig
 
 ```bash
 # Clone the repository
-git clone https://github.com/cronos-ai/ai-engine.git
+git clone https://github.com/yazhsab/ai-engine.git
 cd ai-engine
 
 # Create virtual environment
@@ -80,7 +81,7 @@ python -m ai_engine.tests setup_test_environment
 
 ```bash
 # Build the Docker image
-docker build -f deployment/docker/Dockerfile -t cronos-ai/ai-engine:latest .
+docker build -f deployment/docker/Dockerfile -t qbitel/ai-engine:latest .
 
 # Run with Docker Compose (recommended for development)
 cd deployment/docker
@@ -182,7 +183,7 @@ curl -X POST http://localhost:8000/detection/anomalies \
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        CRONOS AI Engine                         │
+│                        QBITEL Engine                         │
 ├─────────────────────────────────────────────────────────────────┤
 │  APIs (REST/gRPC)     │  Core Engine    │  Monitoring/Observ.  │
 │  ┌─────────────────┐  │  ┌─────────────┐ │  ┌─────────────────┐  │
@@ -320,7 +321,7 @@ batch_size: 32
 # MLflow Configuration
 mlflow:
   tracking_uri: "http://mlflow:5000"
-  experiment_name: "cronos_ai_production"
+  experiment_name: "qbitel_production"
 
 # Monitoring Configuration
 metrics_port: 9090
@@ -360,7 +361,7 @@ docker-compose up -d
 
 # Check status
 docker-compose ps
-docker-compose logs cronos-ai-engine
+docker-compose logs qbitel-engine
 ```
 
 ### Kubernetes Deployment
@@ -371,11 +372,11 @@ kubectl apply -f deployment/kubernetes/namespace.yaml
 kubectl apply -f deployment/kubernetes/deployment.yaml
 
 # Check deployment status
-kubectl get pods -n cronos-ai
-kubectl get services -n cronos-ai
+kubectl get pods -n qbitel
+kubectl get services -n qbitel
 
 # Access logs
-kubectl logs -n cronos-ai deployment/cronos-ai-engine -f
+kubectl logs -n qbitel deployment/qbitel-engine -f
 ```
 
 ### Production Considerations
@@ -409,12 +410,12 @@ The AI Engine exposes Prometheus metrics:
 curl http://localhost:9090/metrics
 
 # Key metrics include:
-# - cronos_ai_protocol_discovery_requests_total
-# - cronos_ai_field_detection_duration_seconds
-# - cronos_ai_anomaly_detection_requests_total
-# - cronos_ai_model_inference_duration_seconds
-# - cronos_ai_system_cpu_percent
-# - cronos_ai_system_memory_percent
+# - qbitel_protocol_discovery_requests_total
+# - qbitel_field_detection_duration_seconds
+# - qbitel_anomaly_detection_requests_total
+# - qbitel_model_inference_duration_seconds
+# - qbitel_system_cpu_percent
+# - qbitel_system_memory_percent
 ```
 
 ### Dashboards
@@ -425,7 +426,7 @@ Grafana dashboards are included for monitoring:
 - AI-specific metrics (model performance, accuracy)
 - Business metrics (protocols discovered, anomalies detected)
 
-Access Grafana at `http://localhost:3000` (admin/cronos-ai-admin)
+Access Grafana at `http://localhost:3000` (admin/qbitel-admin)
 
 ### Health Monitoring
 
@@ -576,7 +577,7 @@ Typical performance characteristics:
 2. **High Memory Usage**
    ```bash
    # Monitor memory usage
-   kubectl top pods -n cronos-ai
+   kubectl top pods -n qbitel
    
    # Adjust batch size in configuration
    batch_size: 16  # Reduce from default 32
@@ -595,7 +596,7 @@ Typical performance characteristics:
 
 ```bash
 # View application logs
-kubectl logs -n cronos-ai deployment/cronos-ai-engine -f
+kubectl logs -n qbitel deployment/qbitel-engine -f
 
 # Enable debug logging
 export AI_ENGINE_LOG_LEVEL=DEBUG
@@ -610,10 +611,10 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](../LIC
 
 ## 🤝 Support
 
-- **Documentation**: [docs.cronos-ai.com](https://docs.cronos-ai.com)
-- **Issues**: [GitHub Issues](https://github.com/cronos-ai/ai-engine/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/cronos-ai/ai-engine/discussions)
-- **Enterprise Support**: [enterprise@cronos-ai.com](mailto:enterprise@cronos-ai.com)
+- **Documentation**: [docs.qbitel.com](https://docs.qbitel.com)
+- **Issues**: [GitHub Issues](https://github.com/yazhsab/ai-engine/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yazhsab/ai-engine/discussions)
+- **Enterprise Support**: [enterprise@qbitel.com](mailto:enterprise@qbitel.com)
 
 ## 🎯 Roadmap
 
@@ -628,6 +629,6 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](../LIC
 
 ---
 
-**Built with ❤️ by the CRONOS AI Team**
+**Part of [QBITEL Bridge](https://qbitel.com/bridge)** - Quantum-Safe Legacy Modernization Platform
 
-For more information, visit [cronos-ai.com](https://cronos-ai.com)
+**Built with ❤️ by the [QBITEL](https://qbitel.com) Team**

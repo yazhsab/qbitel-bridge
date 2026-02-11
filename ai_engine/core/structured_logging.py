@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Structured Logging System
+QBITEL Engine - Structured Logging System
 
 This module provides enterprise-grade structured logging with correlation IDs,
 performance metrics, security logging, and integration with monitoring systems.
@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
-from .exceptions import CronosAIException
+from .exceptions import QbitelAIException
 
 
 class LogLevel(Enum):
@@ -604,13 +604,13 @@ DEFAULT_LOGGING_CONFIG = {
             "class": "logging.handlers.RotatingFileHandler",
             "level": "DEBUG",
             "formatter": "structured",
-            "filename": "cronos_ai.log",
+            "filename": "qbitel.log",
             "maxBytes": 10485760,  # 10MB
             "backupCount": 5,
         },
     },
     "loggers": {
-        "cronos.ai": {
+        "qbitel.ai": {
             "level": "DEBUG",
             "handlers": ["console", "file"],
             "propagate": False,

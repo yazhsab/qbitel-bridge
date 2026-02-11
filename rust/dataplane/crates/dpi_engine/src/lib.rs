@@ -1,4 +1,4 @@
-//! CRONOS AI Deep Packet Inspection Engine
+//! QBITEL Bridge Deep Packet Inspection Engine
 //!
 //! This module provides enterprise-grade deep packet inspection (DPI) with
 //! machine learning-based classification for comprehensive network traffic analysis.
@@ -517,20 +517,21 @@ impl DpiEngine {
                 
                 // Clean up old cache entries if cache is full
                 if classification_cache.len() > cache_size {
+                    // Collect entries sorted by packet ID (ascending = oldest first)
+                    let mut entries: Vec<u64> = classification_cache
+                        .iter()
+                        .map(|entry| *entry.key())
+                        .collect();
+                    entries.sort_unstable();
+
+                    // Remove oldest entries (lowest packet IDs)
                     let entries_to_remove = classification_cache.len() - cache_size + 100;
-                    let mut removed = 0;
-                    
-                    // Remove oldest entries (simplified LRU)
-                    classification_cache.retain(|_, _| {
-                        if removed < entries_to_remove {
-                            removed += 1;
-                            false
-                        } else {
-                            true
-                        }
-                    });
-                    
-                    debug!("Cleaned up {} cache entries", removed);
+                    let to_remove = entries_to_remove.min(entries.len());
+                    for &key in &entries[..to_remove] {
+                        classification_cache.remove(&key);
+                    }
+
+                    debug!("Evicted {} oldest cache entries", to_remove);
                 }
             }
             
@@ -551,10 +552,96 @@ impl DpiEngine {
     }
     
     /// Analyze packet with protocol-specific logic
-    async fn analyze_protocol(&self, _packet_data: &PacketData) -> Result<Option<ProtocolSignature>> {
-        // This would perform protocol-specific analysis
-        // For now, return None
-        Ok(None)
+    async fn analyze_protocol(&self, packet_data: &PacketData) -> Result<Option<ProtocolSignature>> {
+        // Determine candidate protocol from well-known ports
+        let candidate = match packet_data.dst_port {
+            80 | 8080 | 8443 => Some(ProtocolType::HTTP),
+            443 => Some(ProtocolType::HTTPS),
+            22 => Some(ProtocolType::SSH),
+            53 => Some(ProtocolType::DNS),
+            25 | 587 | 465 => Some(ProtocolType::SMTP),
+            21 => Some(ProtocolType::FTP),
+            23 => Some(ProtocolType::Telnet),
+            110 | 995 => Some(ProtocolType::POP3),
+            143 | 993 => Some(ProtocolType::IMAP),
+            67 | 68 => Some(ProtocolType::DHCP),
+            161 | 162 => Some(ProtocolType::SNMP),
+            5060 | 5061 => Some(ProtocolType::SIP),
+            _ => None,
+        };
+
+        if let Some(proto) = candidate {
+            if let Some(analyzer) = self.protocol_analyzers.get(&proto) {
+                match analyzer.analyze(packet_data).await {
+                    Ok(sig) => return Ok(Some(sig)),
+                    Err(e) => {
+                        debug!("Protocol analyzer failed for {:?}: {}", proto, e);
+                        // Fall through to payload heuristics below
+                    }
+                }
+            }
+        }
+
+        // Payload-based heuristic fallback when no registered analyzer matched
+        let payload = if packet_data.payload_offset < packet_data.data.len() {
+            &packet_data.data[packet_data.payload_offset..]
+        } else {
+            return Ok(None);
+        };
+
+        if payload.is_empty() {
+            return Ok(None);
+        }
+
+        // Simple heuristic signatures for common protocols
+        let detected = if payload.len() >= 4 && (
+            payload.starts_with(b"GET ") ||
+            payload.starts_with(b"POST") ||
+            payload.starts_with(b"PUT ") ||
+            payload.starts_with(b"HEAD") ||
+            payload.starts_with(b"HTTP")
+        ) {
+            Some(ProtocolSignature {
+                protocol: ProtocolType::HTTP,
+                confidence: 0.85,
+                matched_bytes: payload.len().min(64),
+                description: "HTTP method/response detected in payload".to_string(),
+            })
+        } else if payload.len() >= 3 && payload[0] == 0x16 && payload[1] == 0x03 {
+            // TLS record: ContentType=Handshake(0x16), Version=0x03xx
+            Some(ProtocolSignature {
+                protocol: ProtocolType::HTTPS,
+                confidence: 0.90,
+                matched_bytes: 5,
+                description: "TLS handshake record detected".to_string(),
+            })
+        } else if payload.len() >= 4 && payload.starts_with(b"SSH-") {
+            Some(ProtocolSignature {
+                protocol: ProtocolType::SSH,
+                confidence: 0.95,
+                matched_bytes: 4,
+                description: "SSH version string detected".to_string(),
+            })
+        } else if payload.len() >= 12 {
+            // DNS: flags at offset 2-3, question count at 4-5
+            let flags = u16::from_be_bytes([payload[2], payload[3]]);
+            let qr = (flags >> 15) & 1;
+            let opcode = (flags >> 11) & 0xF;
+            if opcode <= 2 && (packet_data.dst_port == 53 || packet_data.src_port == 53) {
+                Some(ProtocolSignature {
+                    protocol: ProtocolType::DNS,
+                    confidence: 0.80,
+                    matched_bytes: 12,
+                    description: format!("DNS {} detected", if qr == 0 { "query" } else { "response" }),
+                })
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        Ok(detected)
     }
     
     /// Update processing statistics

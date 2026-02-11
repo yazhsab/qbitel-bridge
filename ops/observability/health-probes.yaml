@@ -1,4 +1,4 @@
-# CRONOS AI - Health Probe Configurations
+# QBITEL - Health Probe Configurations
 # Kubernetes liveness, readiness, and startup probes
 
 ---
@@ -6,7 +6,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: health-probe-config
-  namespace: cronos-ai
+  namespace: qbitel
 data:
   # Liveness probe configuration
   liveness-config.yaml: |
@@ -31,7 +31,7 @@ data:
         command:
           - /bin/sh
           - -c
-          - "pgrep -f cronos-ai || exit 1"
+          - "pgrep -f qbitel || exit 1"
         initial_delay_seconds: 30
         period_seconds: 10
         timeout_seconds: 5
@@ -106,9 +106,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: health-check-service
-  namespace: cronos-ai
+  namespace: qbitel
   labels:
-    app: cronos-ai
+    app: qbitel
     component: health
 spec:
   type: ClusterIP
@@ -118,28 +118,28 @@ spec:
       targetPort: 8080
       protocol: TCP
   selector:
-    app: cronos-ai
+    app: qbitel
 
 ---
 # Health Check Deployment with Probes
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cronos-ai-with-probes
-  namespace: cronos-ai
+  name: qbitel-with-probes
+  namespace: qbitel
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
   template:
     metadata:
       labels:
-        app: cronos-ai
+        app: qbitel
     spec:
       containers:
-      - name: cronos-ai
-        image: cronos-ai:latest
+      - name: qbitel
+        image: qbitel:latest
         ports:
         - containerPort: 8080
           name: http
@@ -199,12 +199,12 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: cronos-ai-health-monitor
-  namespace: cronos-ai
+  name: qbitel-health-monitor
+  namespace: qbitel
 spec:
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
   endpoints:
   - port: health
     path: /metrics
@@ -216,15 +216,15 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: cronos-ai-health-alerts
-  namespace: cronos-ai
+  name: qbitel-health-alerts
+  namespace: qbitel
 spec:
   groups:
   - name: health_checks
     interval: 30s
     rules:
     - alert: HealthCheckFailing
-      expr: up{job="cronos-ai"} == 0
+      expr: up{job="qbitel"} == 0
       for: 2m
       labels:
         severity: critical
@@ -234,7 +234,7 @@ spec:
         description: "Health check has been failing for more than 2 minutes"
     
     - alert: ReadinessCheckFailing
-      expr: cronos_ai_readiness_check{status="fail"} > 0
+      expr: qbitel_readiness_check{status="fail"} > 0
       for: 5m
       labels:
         severity: warning
@@ -244,7 +244,7 @@ spec:
         description: "Readiness check {{ $labels.check_name }} has been failing"
     
     - alert: HighHealthCheckLatency
-      expr: cronos_ai_health_check_duration_seconds > 1
+      expr: qbitel_health_check_duration_seconds > 1
       for: 5m
       labels:
         severity: warning
@@ -254,7 +254,7 @@ spec:
         description: "Health check latency is above 1 second"
     
     - alert: FrequentRestarts
-      expr: rate(kube_pod_container_status_restarts_total{namespace="cronos-ai"}[15m]) > 0.1
+      expr: rate(kube_pod_container_status_restarts_total{namespace="qbitel"}[15m]) > 0.1
       for: 5m
       labels:
         severity: warning
@@ -268,13 +268,13 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: cronos-ai-pdb
-  namespace: cronos-ai
+  name: qbitel-pdb
+  namespace: qbitel
 spec:
   minAvailable: 2
   selector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
 
 ---
 # NetworkPolicy for Health Checks
@@ -282,11 +282,11 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-health-checks
-  namespace: cronos-ai
+  namespace: qbitel
 spec:
   podSelector:
     matchLabels:
-      app: cronos-ai
+      app: qbitel
   policyTypes:
   - Ingress
   ingress:

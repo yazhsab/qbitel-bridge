@@ -1,5 +1,5 @@
 """
-CRONOS AI - Intelligent Model Routing and Cost Optimization
+QBITEL - Intelligent Model Routing and Cost Optimization
 Smart routing between LLM models based on complexity, cost, and quality requirements.
 
 Features:

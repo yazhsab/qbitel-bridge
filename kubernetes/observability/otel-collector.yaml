@@ -18,7 +18,7 @@ data:
       prometheus:
         config:
           scrape_configs:
-            - job_name: 'cronos-ai'
+            - job_name: 'qbitel'
               scrape_interval: 15s
               kubernetes_sd_configs:
                 - role: pod

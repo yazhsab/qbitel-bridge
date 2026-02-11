@@ -1,5 +1,5 @@
 """
-CRONOS AI - Planning/Supervisor Agent (Meta-Agent)
+QBITEL - Planning/Supervisor Agent (Meta-Agent)
 
 The Planning Agent is a meta-agent responsible for:
 - Decomposing complex tasks into sub-tasks

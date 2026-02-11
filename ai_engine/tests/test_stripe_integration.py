@@ -1,5 +1,5 @@
 """
-CRONOS AI - Stripe Integration Tests
+QBITEL - Stripe Integration Tests
 
 Tests for Stripe Connect payment processing, revenue sharing, and webhooks.
 """

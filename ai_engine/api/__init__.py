@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - API Module
+QBITEL Engine - API Module
 
 This module provides REST and gRPC API interfaces for the AI Engine.
 """

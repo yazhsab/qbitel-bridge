@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Decision Support
+QBITEL Engine - Legacy System Decision Support
 
 Intelligent decision support system for legacy system management.
 Provides recommendations, impact assessment, and action planning
@@ -19,7 +19,7 @@ import json
 
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..monitoring.metrics import AIEngineMetrics
 
 from .models import (
@@ -495,7 +495,7 @@ class RecommendationEngine:
 
         except Exception as e:
             self.logger.error(f"Failed to generate recommendations: {e}")
-            raise CronosAIException(f"Recommendation generation failed: {e}")
+            raise QbitelAIException(f"Recommendation generation failed: {e}")
 
     def _prepare_analysis_context(
         self,
@@ -1718,7 +1718,7 @@ class ImpactAssessor:
 
         except Exception as e:
             self.logger.error(f"Business impact assessment failed: {e}")
-            raise CronosAIException(f"Impact assessment error: {e}")
+            raise QbitelAIException(f"Impact assessment error: {e}")
 
     async def _assess_dimension_impact(
         self,

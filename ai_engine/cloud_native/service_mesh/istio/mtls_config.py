@@ -41,14 +41,14 @@ class MutualTLSConfigurator:
     def __init__(
         self,
         default_mode: MTLSMode = MTLSMode.STRICT,
-        namespace: str = "cronos-system"
+        namespace: str = "qbitel-system"
     ):
         """
         Initialize the Mutual TLS Configurator.
 
         Args:
             default_mode: Default mTLS enforcement mode
-            namespace: Kubernetes namespace for CRONOS AI
+            namespace: Kubernetes namespace for QBITEL
         """
         self.default_mode = default_mode
         self.namespace = namespace
@@ -82,12 +82,12 @@ class MutualTLSConfigurator:
                 "name": name,
                 "namespace": namespace,
                 "labels": {
-                    "app": "cronos-ai",
+                    "app": "qbitel",
                     "component": "mtls-config"
                 },
                 "annotations": {
-                    "cronos.ai/quantum-enabled": "true",
-                    "cronos.ai/mtls-mode": mtls_mode.value
+                    "qbitel.ai/quantum-enabled": "true",
+                    "qbitel.ai/mtls-mode": mtls_mode.value
                 }
             },
             "spec": {
@@ -134,11 +134,11 @@ class MutualTLSConfigurator:
                 "name": name,
                 "namespace": namespace,
                 "labels": {
-                    "app": "cronos-ai",
+                    "app": "qbitel",
                     "component": "traffic-policy"
                 },
                 "annotations": {
-                    "cronos.ai/quantum-tls": str(enable_quantum_tls).lower()
+                    "qbitel.ai/quantum-tls": str(enable_quantum_tls).lower()
                 }
             },
             "spec": {
@@ -242,7 +242,7 @@ class MutualTLSConfigurator:
                 "name": name,
                 "namespace": namespace,
                 "labels": {
-                    "app": "cronos-ai",
+                    "app": "qbitel",
                     "component": "authz-policy"
                 }
             },
@@ -431,7 +431,7 @@ class MutualTLSConfigurator:
 
 
 def create_istio_mtls_config_map(
-    namespace: str = "cronos-system"
+    namespace: str = "qbitel-system"
 ) -> Dict[str, Any]:
     """
     Create ConfigMap with Istio mTLS configuration.
@@ -446,10 +446,10 @@ def create_istio_mtls_config_map(
         "apiVersion": "v1",
         "kind": "ConfigMap",
         "metadata": {
-            "name": "cronos-mtls-config",
+            "name": "qbitel-mtls-config",
             "namespace": namespace,
             "labels": {
-                "app": "cronos-ai",
+                "app": "qbitel",
                 "component": "mtls-config"
             }
         },

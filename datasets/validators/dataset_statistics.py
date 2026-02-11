@@ -1,5 +1,5 @@
 """
-CRONOS AI Dataset Statistics
+QBITEL Dataset Statistics
 
 Comprehensive statistics and analysis for ML training datasets.
 """
@@ -24,7 +24,7 @@ class DatasetStats:
 
 
 class DatasetStatistics:
-    """Generate comprehensive statistics for CRONOS AI datasets."""
+    """Generate comprehensive statistics for QBITEL datasets."""
 
     def __init__(self, base_path: Optional[str] = None):
         if base_path:
@@ -327,7 +327,7 @@ class DatasetStatistics:
         lines = []
 
         lines.append("=" * 70)
-        lines.append("CRONOS AI Dataset Statistics Report")
+        lines.append("QBITEL Dataset Statistics Report")
         lines.append("=" * 70)
 
         total_samples = 0

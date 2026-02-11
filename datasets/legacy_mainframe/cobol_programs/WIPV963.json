@@ -1,0 +1,19 @@
+{
+  "program_id": "WIPV963",
+  "domain": "manufacturing",
+  "program_type": "data_validation",
+  "author": "P. WILSON",
+  "lines_of_code": 279,
+  "complexity_level": "complex",
+  "complexity_score": 0.733,
+  "files_used": 4,
+  "verbs_used": 14,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.898890",
+  "hash": "b393b86d56519910c5321c8070edb05d"
+}

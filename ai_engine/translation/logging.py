@@ -1,5 +1,5 @@
 """
-CRONOS AI - Translation Studio Logging Infrastructure
+QBITEL - Translation Studio Logging Infrastructure
 Enterprise-grade structured logging for protocol translation, API generation, and SDK creation.
 """
 
@@ -29,25 +29,25 @@ from .exceptions import (
 
 # Prometheus metrics for logging
 LOG_MESSAGES_COUNTER = Counter(
-    "cronos_translation_log_messages_total",
+    "qbitel_translation_log_messages_total",
     "Total log messages by level and component",
     ["level", "component", "operation"],
 )
 
 ERROR_COUNTER = Counter(
-    "cronos_translation_errors_total",
+    "qbitel_translation_errors_total",
     "Total errors by category and severity",
     ["category", "severity", "component"],
 )
 
 OPERATION_DURATION = Histogram(
-    "cronos_translation_operation_duration_seconds",
+    "qbitel_translation_operation_duration_seconds",
     "Duration of translation operations",
     ["component", "operation"],
 )
 
 ACTIVE_OPERATIONS = Gauge(
-    "cronos_translation_active_operations",
+    "qbitel_translation_active_operations",
     "Number of active operations",
     ["component", "operation"],
 )

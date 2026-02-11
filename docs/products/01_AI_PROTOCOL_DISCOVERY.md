@@ -2,7 +2,7 @@
 
 ## Overview
 
-AI Protocol Discovery is CRONOS AI's flagship product that uses machine learning and artificial intelligence to automatically learn, analyze, and understand undocumented legacy protocols. It eliminates the need for manual reverse engineering, reducing protocol integration time from 6-12 months to 2-4 hours.
+AI Protocol Discovery is QBITEL's flagship product that uses machine learning and artificial intelligence to automatically learn, analyze, and understand undocumented legacy protocols. It eliminates the need for manual reverse engineering, reducing protocol integration time from 6-12 months to 2-4 hours.
 
 ---
 
@@ -17,7 +17,7 @@ Organizations worldwide struggle with:
 - **Manual reverse engineering**: Costs $500K-$2M per protocol, takes 6-12 months
 - **Integration bottlenecks**: Digital transformation blocked by protocol barriers
 
-### The CRONOS AI Solution
+### The QBITEL Solution
 
 AI Protocol Discovery uses a 5-phase pipeline combining statistical analysis, machine learning classification, grammar learning, and automatic parser generation to understand any protocol in hours instead of months.
 
@@ -296,24 +296,24 @@ X-API-Key: your_api_key
 
 ```bash
 # Core Settings
-CRONOS_DISCOVERY_ENABLED=true
-CRONOS_DISCOVERY_CACHE_SIZE=10000
-CRONOS_DISCOVERY_CACHE_TTL=3600
+QBITEL_DISCOVERY_ENABLED=true
+QBITEL_DISCOVERY_CACHE_SIZE=10000
+QBITEL_DISCOVERY_CACHE_TTL=3600
 
 # ML Model Settings
-CRONOS_ML_MODEL_PATH=/models/protocol_classifier
-CRONOS_ML_CONFIDENCE_THRESHOLD=0.7
-CRONOS_ML_BATCH_SIZE=32
+QBITEL_ML_MODEL_PATH=/models/protocol_classifier
+QBITEL_ML_CONFIDENCE_THRESHOLD=0.7
+QBITEL_ML_BATCH_SIZE=32
 
 # PCFG Settings
-CRONOS_PCFG_MAX_DEPTH=10
-CRONOS_PCFG_MIN_RULE_FREQUENCY=2
-CRONOS_PCFG_EM_MAX_ITERATIONS=50
-CRONOS_PCFG_CONVERGENCE_THRESHOLD=0.000001
+QBITEL_PCFG_MAX_DEPTH=10
+QBITEL_PCFG_MIN_RULE_FREQUENCY=2
+QBITEL_PCFG_EM_MAX_ITERATIONS=50
+QBITEL_PCFG_CONVERGENCE_THRESHOLD=0.000001
 
 # Performance
-CRONOS_DISCOVERY_MAX_CONCURRENT=10
-CRONOS_DISCOVERY_TIMEOUT=300
+QBITEL_DISCOVERY_MAX_CONCURRENT=10
+QBITEL_DISCOVERY_TIMEOUT=300
 ```
 
 ### YAML Configuration
@@ -366,12 +366,12 @@ ai_engine:
 ### Python SDK
 
 ```python
-from cronos_ai import ProtocolDiscovery
+from qbitel import ProtocolDiscovery
 
 # Initialize client
 discovery = ProtocolDiscovery(
     api_key="your_api_key",
-    endpoint="https://api.cronos-ai.com"
+    endpoint="https://api.qbitel.com"
 )
 
 # Load protocol samples
@@ -400,11 +400,11 @@ for message in live_traffic:
 ### TypeScript SDK
 
 ```typescript
-import { ProtocolDiscovery } from '@cronos-ai/sdk';
+import { ProtocolDiscovery } from '@qbitel/sdk';
 
 const discovery = new ProtocolDiscovery({
   apiKey: 'your_api_key',
-  endpoint: 'https://api.cronos-ai.com'
+  endpoint: 'https://api.qbitel.com'
 });
 
 // Discover protocol
@@ -430,7 +430,7 @@ for (const message of liveTraffic) {
 ### cURL Example
 
 ```bash
-curl -X POST https://api.cronos-ai.com/api/v1/discovery/analyze \
+curl -X POST https://api.qbitel.com/api/v1/discovery/analyze \
   -H "Content-Type: application/json" \
   -H "X-API-Key: your_api_key" \
   -d '{
@@ -460,7 +460,7 @@ spec:
     spec:
       containers:
       - name: discovery
-        image: cronos-ai/protocol-discovery:latest
+        image: qbitel/protocol-discovery:latest
         resources:
           requests:
             memory: "4Gi"
@@ -469,7 +469,7 @@ spec:
             memory: "8Gi"
             cpu: "4"
         env:
-        - name: CRONOS_DISCOVERY_ENABLED
+        - name: QBITEL_DISCOVERY_ENABLED
           value: "true"
 ```
 
@@ -478,12 +478,12 @@ spec:
 ```bash
 # On-premise with Ollama LLM
 docker run -d \
-  --name cronos-discovery \
-  -e CRONOS_LLM_PROVIDER=ollama \
-  -e CRONOS_LLM_ENDPOINT=http://ollama:11434 \
-  -e CRONOS_AIRGAPPED_MODE=true \
+  --name qbitel-discovery \
+  -e QBITEL_LLM_PROVIDER=ollama \
+  -e QBITEL_LLM_ENDPOINT=http://ollama:11434 \
+  -e QBITEL_AIRGAPPED_MODE=true \
   -v /data/models:/models \
-  cronos-ai/protocol-discovery:latest
+  qbitel/protocol-discovery:latest
 ```
 
 ---
@@ -494,19 +494,19 @@ docker run -d \
 
 ```
 # Discovery operations
-cronos_discovery_requests_total{status="success|failure"}
-cronos_discovery_duration_seconds{phase="statistical|classification|grammar|parser"}
-cronos_discovery_confidence_score{protocol="iso8583|swift|..."}
+qbitel_discovery_requests_total{status="success|failure"}
+qbitel_discovery_duration_seconds{phase="statistical|classification|grammar|parser"}
+qbitel_discovery_confidence_score{protocol="iso8583|swift|..."}
 
 # Model performance
-cronos_ml_classification_accuracy
-cronos_ml_inference_latency_seconds
-cronos_ml_model_version
+qbitel_ml_classification_accuracy
+qbitel_ml_inference_latency_seconds
+qbitel_ml_model_version
 
 # Cache performance
-cronos_discovery_cache_hits_total
-cronos_discovery_cache_misses_total
-cronos_discovery_cache_size
+qbitel_discovery_cache_hits_total
+qbitel_discovery_cache_misses_total
+qbitel_discovery_cache_size
 ```
 
 ### Health Check
@@ -555,9 +555,9 @@ GET /health/discovery
 
 ---
 
-## Comparison: Traditional vs. CRONOS AI
+## Comparison: Traditional vs. QBITEL
 
-| Aspect | Traditional Reverse Engineering | CRONOS AI Protocol Discovery |
+| Aspect | Traditional Reverse Engineering | QBITEL Bridge |
 |--------|--------------------------------|------------------------------|
 | **Time** | 6-12 months | 2-4 hours |
 | **Cost** | $500K-$2M | ~$50K |

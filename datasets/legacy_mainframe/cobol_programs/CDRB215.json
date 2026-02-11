@@ -1,0 +1,19 @@
+{
+  "program_id": "CDRB215",
+  "domain": "telecommunications",
+  "program_type": "batch_processing",
+  "author": "S. BROWN",
+  "lines_of_code": 208,
+  "complexity_level": "simple",
+  "complexity_score": 0.436,
+  "files_used": 1,
+  "verbs_used": 13,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.934507",
+  "hash": "4c399874e7a41dbdc92dfda3766c9ecf"
+}

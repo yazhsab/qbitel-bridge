@@ -955,7 +955,7 @@
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["cronos-ai", "security", "threat"],
+  "tags": ["qbitel", "security", "threat"],
   "templating": {
     "list": []
   },
@@ -965,8 +965,8 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "CRONOS AI - Threat Detection",
-  "uid": "cronos-ai-threat",
+  "title": "QBITEL - Threat Detection",
+  "uid": "qbitel-threat",
   "version": 1,
   "weekStart": ""
 }

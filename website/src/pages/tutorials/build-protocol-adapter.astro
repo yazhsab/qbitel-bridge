@@ -1,0 +1,212 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Build a Protocol Adapter | Tutorials | QBITEL Bridge"
+  description="Use Translation Studio to transform a discovered protocol into a modern REST or gRPC API with auto-generated SDKs."
+>
+  <PageHero
+    title="Build a Protocol Adapter"
+    description="Use Translation Studio to transform a discovered legacy protocol into a modern REST or gRPC API, complete with auto-generated SDKs in Python, Go, and TypeScript."
+    badge="Intermediate -- 1 hour"
+    gradient="from-yellow-500 to-amber-400"
+  />
+
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+
+      <!-- Prerequisites -->
+      <div class="card p-6 mb-12">
+        <h2 class="text-xl font-bold text-white mb-4">Prerequisites</h2>
+        <ul class="space-y-2 text-gray-300">
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>A discovered protocol specification (see <a href="/tutorials/discover-legacy-protocol" class="text-quantum-400 hover:underline">Discover a Legacy Protocol</a>)</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>QBITEL Bridge AI engine running with Translation Studio enabled</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Node.js 20+ or Python 3.11+ (for testing the generated SDK)</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">1</span>
+          <h2 class="text-2xl font-bold text-white">Select the Protocol Specification</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Start by listing your discovered protocol specifications and selecting the one you want to translate into a modern API.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># List all discovered protocol specs</span>
+curl http://localhost:8000/api/v1/marketplace/protocols/search | jq '.protocols[] | {'{'}id, name, confidence{'}'}'
+
+<span class="text-gray-500"># Output</span>
+{'{'} "id": "proto_leg9100", "name": "LEGACY-9100", "confidence": 0.94 {'}'}
+{'{'} "id": "proto_scada01", "name": "SCADA-MODBUS-EXT", "confidence": 0.89 {'}'}
+{'{'} "id": "proto_fin3270", "name": "FIN-3270-CUSTOM", "confidence": 0.91 {'}'}</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">2</span>
+          <h2 class="text-2xl font-bold text-white">Configure Translation Settings</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Tell Translation Studio what kind of API to generate. You can choose REST (OpenAPI 3.1), gRPC (Protocol Buffers), or both. Configure naming conventions, authentication requirements, and rate limiting.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Create a translation job</span>
+curl -X POST http://localhost:8000/api/v1/translation/translate \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "protocol_id": "proto_leg9100",
+    "output_formats": ["openapi", "grpc"],
+    "options": {'{'}
+      "api_prefix": "/api/v1/legacy9100",
+      "naming_convention": "snake_case",
+      "authentication": "bearer_token",
+      "rate_limiting": {'{'}
+        "requests_per_minute": 1000
+      {'}'},
+      "generate_sdks": ["python", "go", "typescript"],
+      "include_tests": true,
+      "include_docs": true
+    {'}'}
+  {'}'}'</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">3</span>
+          <h2 class="text-2xl font-bold text-white">Review the Generated API</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Translation Studio maps each discovered message type to REST endpoints. It infers request/response schemas from field layouts and creates proper HTTP methods based on the protocol state machine.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Download the generated OpenAPI spec</span>
+curl http://localhost:8000/api/v1/translation/protocols \
+  -o legacy9100-openapi.yaml
+
+<span class="text-gray-500"># Generated endpoints (example)</span>
+<span class="text-gray-500"># POST /api/v1/legacy9100/sessions      -> HANDSHAKE_INIT</span>
+<span class="text-gray-500"># GET  /api/v1/legacy9100/sessions/{'{'}id{'}'}  -> STATUS_QUERY</span>
+<span class="text-gray-500"># POST /api/v1/legacy9100/data           -> DATA_TRANSFER</span>
+<span class="text-gray-500"># DELETE /api/v1/legacy9100/sessions/{'{'}id{'}'} -> DISCONNECT</span></code></pre>
+        </div>
+        <div class="card p-4 border-l-4 border-l-quantum-500 mb-4">
+          <p class="text-sm text-gray-300">
+            <span class="font-semibold text-quantum-400">How it works:</span> The Protocol Bridge sits between your modern API consumers and the legacy system. Incoming REST/gRPC calls are translated back into the original protocol wire format in real time by the Rust data plane.
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">4</span>
+          <h2 class="text-2xl font-bold text-white">Use the Generated SDK</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Download and install the auto-generated SDK for your preferred language. Each SDK includes typed models, error handling, retry logic, and full documentation.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Download the Python SDK</span>
+curl http://localhost:8000/api/v1/translation/statistics \
+  -o legacy9100-sdk-python.tar.gz
+tar xzf legacy9100-sdk-python.tar.gz
+pip install ./legacy9100-sdk-python</code></pre>
+        </div>
+        <p class="text-gray-300 mb-4">Then use the SDK in your application code:</p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Python example</span>
+from legacy9100_sdk import Legacy9100Client
+
+client = Legacy9100Client(
+    base_url="http://localhost:8000",
+    api_key="your-api-key"
+)
+
+<span class="text-gray-500"># Create a session (sends HANDSHAKE_INIT to the legacy system)</span>
+session = client.sessions.create(
+    version=2,
+    timeout_seconds=30
+)
+
+<span class="text-gray-500"># Transfer data (sends DATA_TRANSFER message)</span>
+response = client.data.send(
+    session_id=session.id,
+    payload=b"transaction-record-001"
+)
+
+print(f"Transfer status: {'{'}response.status{'}'}")
+print(f"Bytes transferred: {'{'}response.bytes_sent{'}'}")
+
+<span class="text-gray-500"># Close the session</span>
+client.sessions.delete(session.id)</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">5</span>
+          <h2 class="text-2xl font-bold text-white">Deploy the Protocol Bridge</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Deploy the protocol bridge as a sidecar or standalone service. It handles the real-time translation between your modern API and the legacy wire protocol.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Deploy the bridge for the translated protocol</span>
+curl -X POST http://localhost:8000/api/v1/translation/translate \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "translation_id": "tr_abc123",
+    "mode": "bridge",
+    "listen_port": 8090,
+    "upstream_host": "10.0.1.50",
+    "upstream_port": 9100,
+    "health_check_interval": "10s"
+  {'}'}'</code></pre>
+        </div>
+        <div class="card p-4 border-l-4 border-l-yellow-500">
+          <p class="text-sm text-gray-300">
+            <span class="font-semibold text-yellow-400">Production tip:</span> In Kubernetes, deploy the protocol bridge as a sidecar container alongside your application pod. See the <a href="/tutorials/deploy-kubernetes" class="text-quantum-400 hover:underline">Deploy to Kubernetes</a> tutorial for details.
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex items-center justify-between pt-8 border-t border-surface-600/50">
+        <a href="/tutorials/quantum-safe-encryption" class="btn-ghost text-sm">
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+          Previous: Quantum-Safe Encryption
+        </a>
+        <a href="/tutorials/deploy-kubernetes" class="btn-secondary text-sm">
+          Next: Deploy to Kubernetes
+          <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <CTABanner
+    title="Turn Any Legacy Protocol into a Modern API"
+    description="Translation Studio generates production-ready APIs and SDKs from discovered protocol specifications."
+  />
+</PageLayout>

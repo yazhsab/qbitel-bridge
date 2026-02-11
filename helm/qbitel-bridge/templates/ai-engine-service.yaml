@@ -1,0 +1,31 @@
+{{- if .Values.aiEngine.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "qbitel-bridge.fullname" . }}-ai-engine
+  namespace: {{ include "qbitel-bridge.namespace" . }}
+  labels:
+    {{- include "qbitel-bridge.aiEngine.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.aiEngine.service.type }}
+  ports:
+    - name: rest
+      port: {{ .Values.aiEngine.service.restPort }}
+      targetPort: rest
+      protocol: TCP
+    - name: grpc
+      port: {{ .Values.aiEngine.service.grpcPort }}
+      targetPort: grpc
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.aiEngine.service.metricsPort }}
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    {{- include "qbitel-bridge.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: ai-engine
+{{- end }}

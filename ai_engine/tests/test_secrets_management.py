@@ -43,18 +43,18 @@ class TestSecretsManager:
         del os.environ["TEST_SECRET"]
 
     def test_get_secret_with_prefix(self):
-        """Test getting secret with CRONOS_AI_ prefix."""
+        """Test getting secret with QBITEL_AI_ prefix."""
         config = {"backend": "environment"}
         manager = SecretsManager(config)
 
         # Set environment variable with prefix
-        os.environ["CRONOS_AI_DB_PASSWORD"] = "secure_password"
+        os.environ["QBITEL_AI_DB_PASSWORD"] = "secure_password"
 
         value = manager.get_secret("db_password")
         assert value == "secure_password"
 
         # Cleanup
-        del os.environ["CRONOS_AI_DB_PASSWORD"]
+        del os.environ["QBITEL_AI_DB_PASSWORD"]
 
     def test_get_secret_default_value(self):
         """Test getting secret with default value."""
@@ -167,18 +167,18 @@ class TestDatabaseConfig:
 
     def test_password_from_environment(self):
         """Test loading password from environment."""
-        os.environ["CRONOS_AI_DB_PASSWORD"] = "env_password"
+        os.environ["QBITEL_AI_DB_PASSWORD"] = "env_password"
 
         config = DatabaseConfig()
         assert config.password == "env_password"
 
         # Cleanup
-        del os.environ["CRONOS_AI_DB_PASSWORD"]
+        del os.environ["QBITEL_AI_DB_PASSWORD"]
 
     def test_password_warning_when_empty(self, caplog):
         """Test warning when password is not set."""
         # Ensure no password in environment
-        for key in ["CRONOS_AI_DB_PASSWORD", "DATABASE_PASSWORD"]:
+        for key in ["QBITEL_AI_DB_PASSWORD", "DATABASE_PASSWORD"]:
             os.environ.pop(key, None)
 
         config = DatabaseConfig()
@@ -207,13 +207,13 @@ class TestRedisConfig:
 
     def test_password_from_environment(self):
         """Test loading password from environment."""
-        os.environ["CRONOS_AI_REDIS_PASSWORD"] = "redis_password"
+        os.environ["QBITEL_AI_REDIS_PASSWORD"] = "redis_password"
 
         config = RedisConfig()
         assert config.password == "redis_password"
 
         # Cleanup
-        del os.environ["CRONOS_AI_REDIS_PASSWORD"]
+        del os.environ["QBITEL_AI_REDIS_PASSWORD"]
 
     def test_redis_url_without_password(self):
         """Test Redis URL without password."""
@@ -239,25 +239,25 @@ class TestSecurityConfig:
         """Test loading JWT secret from environment."""
         # Use a strong value without weak patterns (no 'secret', 'key', 'password', etc.)
         strong_jwt = "XyZ9mN4pQrS7tUvWaB2cDeF6gHiJ8kLmNoP"
-        os.environ["CRONOS_AI_JWT_SECRET"] = strong_jwt
+        os.environ["QBITEL_AI_JWT_SECRET"] = strong_jwt
 
         config = SecurityConfig()
         assert config.jwt_secret == strong_jwt
 
         # Cleanup
-        del os.environ["CRONOS_AI_JWT_SECRET"]
+        del os.environ["QBITEL_AI_JWT_SECRET"]
 
     def test_encryption_key_from_environment(self):
         """Test loading encryption key from environment."""
         # Use a strong value without weak patterns (no 'secret', 'key', 'password', etc.)
         strong_enc = "Ab1Cd2Ef3Gh4Ij5Kl6Mn7Op8Qr9St0Uv1Wx2Yz"
-        os.environ["CRONOS_AI_ENCRYPTION_KEY"] = strong_enc
+        os.environ["QBITEL_AI_ENCRYPTION_KEY"] = strong_enc
 
         config = SecurityConfig()
         assert config.encryption_key == strong_enc
 
         # Cleanup
-        del os.environ["CRONOS_AI_ENCRYPTION_KEY"]
+        del os.environ["QBITEL_AI_ENCRYPTION_KEY"]
 
     def test_jwt_secret_validation(self):
         """Test JWT secret length validation."""
@@ -324,7 +324,7 @@ class TestSecretValidation:
         assert (
             db_config.password == ""
             or db_config.password is None
-            or os.getenv("CRONOS_AI_DB_PASSWORD")
+            or os.getenv("QBITEL_AI_DB_PASSWORD")
             or os.getenv("DATABASE_PASSWORD")
         ), "DatabaseConfig has hardcoded password"
 
@@ -334,13 +334,13 @@ class TestSecretValidation:
 
         # JWT secret should be empty or from environment
         if config.jwt_secret:
-            assert os.getenv("CRONOS_AI_JWT_SECRET") or os.getenv(
+            assert os.getenv("QBITEL_AI_JWT_SECRET") or os.getenv(
                 "JWT_SECRET"
             ), "SecurityConfig has hardcoded JWT secret"
 
         # Encryption key should be empty or from environment
         if config.encryption_key:
-            assert os.getenv("CRONOS_AI_ENCRYPTION_KEY") or os.getenv(
+            assert os.getenv("QBITEL_AI_ENCRYPTION_KEY") or os.getenv(
                 "ENCRYPTION_KEY"
             ), "SecurityConfig has hardcoded encryption key"
 
@@ -360,7 +360,7 @@ class TestProductionSafety:
         """Test production configuration validation."""
         # This would test the actual production config file
         # to ensure no hardcoded credentials
-        production_config_path = Path("config/cronos_ai.production.yaml")
+        production_config_path = Path("config/qbitel.production.yaml")
 
         if production_config_path.exists():
             import yaml

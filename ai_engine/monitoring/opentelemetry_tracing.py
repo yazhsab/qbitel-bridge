@@ -1,5 +1,5 @@
 """
-CRONOS AI - OpenTelemetry Distributed Tracing
+QBITEL - OpenTelemetry Distributed Tracing
 Complete distributed tracing implementation with Jaeger backend.
 """
 
@@ -30,9 +30,9 @@ class TracingConfig:
 
     def __init__(self):
         # Service information
-        self.service_name = os.getenv("OTEL_SERVICE_NAME", "cronos-ai-engine")
-        self.service_version = os.getenv("CRONOS_VERSION", "1.0.0")
-        self.environment = os.getenv("CRONOS_ENVIRONMENT", "development")
+        self.service_name = os.getenv("OTEL_SERVICE_NAME", "qbitel-engine")
+        self.service_version = os.getenv("QBITEL_VERSION", "1.0.0")
+        self.environment = os.getenv("QBITEL_ENVIRONMENT", "development")
 
         # Tracing configuration
         self.enabled = os.getenv("OTEL_TRACING_ENABLED", "true").lower() == "true"
@@ -55,7 +55,7 @@ class TracingConfig:
         # Additional attributes
         self.resource_attributes = {
             "deployment.environment": self.environment,
-            "service.namespace": "cronos-ai",
+            "service.namespace": "qbitel",
         }
 
 
@@ -481,7 +481,7 @@ def get_tracing_health() -> Dict[str, Any]:
         return {"status": "error", "error": str(e), "enabled": False}
 
 
-# Example usage for specific CRONOS AI operations
+# Example usage for specific QBITEL operations
 
 
 @trace_function("protocol_discovery", {"component": "ai_engine"})

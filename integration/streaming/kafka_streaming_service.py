@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - Kafka Streaming Infrastructure
+QBITEL - Kafka Streaming Infrastructure
 Production-ready Kafka streaming service for real-time data processing.
 """
 
@@ -87,7 +87,7 @@ class StreamMetrics:
 
 class KafkaStreamingService:
     """
-    Production Kafka streaming service for CRONOS AI.
+    Production Kafka streaming service for QBITEL.
     Handles real-time data streaming between components.
     """
 
@@ -281,7 +281,7 @@ class KafkaStreamingService:
             topics_to_create = []
             for topic_name, topic_config in self.topics.items():
                 new_topic = NewTopic(
-                    name=f"cronos-ai-{topic_name}",
+                    name=f"qbitel-{topic_name}",
                     num_partitions=topic_config["partitions"],
                     replication_factor=topic_config["replication_factor"],
                     topic_configs=topic_config["config"],
@@ -313,7 +313,7 @@ class KafkaStreamingService:
             stream_event_schema = {
                 "type": "record",
                 "name": "StreamEvent",
-                "namespace": "cronos.ai.streaming",
+                "namespace": "qbitel.ai.streaming",
                 "fields": [
                     {"name": "event_id", "type": "string"},
                     {"name": "event_type", "type": "string"},
@@ -365,31 +365,31 @@ class KafkaStreamingService:
             # Packet processing topology
             self.stream_processors["packet-processing"] = StreamTopology(
                 name="packet-processing",
-                input_topics=["cronos-ai-packet-processing"],
-                output_topics=["cronos-ai-ai-analysis"],
+                input_topics=["qbitel-packet-processing"],
+                output_topics=["qbitel-ai-analysis"],
                 processing_function=self._process_packet_stream,
                 parallelism=4,
-                error_topic="cronos-ai-deadletter",
+                error_topic="qbitel-deadletter",
             )
 
             # AI analysis topology
             self.stream_processors["ai-analysis"] = StreamTopology(
                 name="ai-analysis",
-                input_topics=["cronos-ai-ai-analysis"],
-                output_topics=["cronos-ai-security-events"],
+                input_topics=["qbitel-ai-analysis"],
+                output_topics=["qbitel-security-events"],
                 processing_function=self._process_ai_analysis_stream,
                 parallelism=2,
-                error_topic="cronos-ai-deadletter",
+                error_topic="qbitel-deadletter",
             )
 
             # Security events topology
             self.stream_processors["security-events"] = StreamTopology(
                 name="security-events",
-                input_topics=["cronos-ai-security-events"],
-                output_topics=["cronos-ai-threat-intel", "cronos-ai-audit-logs"],
+                input_topics=["qbitel-security-events"],
+                output_topics=["qbitel-threat-intel", "qbitel-audit-logs"],
                 processing_function=self._process_security_events_stream,
                 parallelism=2,
-                error_topic="cronos-ai-deadletter",
+                error_topic="qbitel-deadletter",
             )
 
             logger.info(f"Initialized {len(self.stream_processors)} stream processors")
@@ -644,37 +644,37 @@ class KafkaStreamingService:
     # Message handlers
     async def _handle_packet_captured(self, event: StreamEvent):
         """Handle packet captured events"""
-        await self.send_event("cronos-ai-packet-processing", event)
+        await self.send_event("qbitel-packet-processing", event)
 
     async def _handle_protocol_discovered(self, event: StreamEvent):
         """Handle protocol discovery events"""
-        await self.send_event("cronos-ai-ai-analysis", event)
+        await self.send_event("qbitel-ai-analysis", event)
 
     async def _handle_ai_analysis(self, event: StreamEvent):
         """Handle AI analysis events"""
-        await self.send_event("cronos-ai-ai-analysis", event)
+        await self.send_event("qbitel-ai-analysis", event)
 
     async def _handle_security_event(self, event: StreamEvent):
         """Handle security events"""
-        await self.send_event("cronos-ai-security-events", event)
+        await self.send_event("qbitel-security-events", event)
 
     async def _handle_threat_detected(self, event: StreamEvent):
         """Handle threat detection events"""
-        await self.send_event("cronos-ai-threat-intel", event)
+        await self.send_event("qbitel-threat-intel", event)
 
     async def _handle_performance_metric(self, event: StreamEvent):
         """Handle performance metric events"""
-        await self.send_event("cronos-ai-metrics", event)
+        await self.send_event("qbitel-metrics", event)
 
     async def _handle_audit_log(self, event: StreamEvent):
         """Handle audit log events"""
-        await self.send_event("cronos-ai-audit-logs", event)
+        await self.send_event("qbitel-audit-logs", event)
 
     async def _handle_system_alert(self, event: StreamEvent):
         """Handle system alert events"""
         # Send to multiple topics for high-priority alerts
-        await self.send_event("cronos-ai-security-events", event)
-        await self.send_event("cronos-ai-audit-logs", event)
+        await self.send_event("qbitel-security-events", event)
+        await self.send_event("qbitel-audit-logs", event)
 
     # Utility methods
     def _serialize_message(self, message: Any) -> bytes:
@@ -825,7 +825,7 @@ class KafkaStreamingService:
                     },
                 )
 
-                await self.send_event("cronos-ai-metrics", metrics_event)
+                await self.send_event("qbitel-metrics", metrics_event)
 
             except Exception as e:
                 logger.error(f"Error collecting streaming metrics: {e}")

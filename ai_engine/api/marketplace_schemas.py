@@ -1,5 +1,5 @@
 """
-CRONOS AI - Marketplace API Schemas
+QBITEL - Marketplace API Schemas
 
 Pydantic models for marketplace API request/response validation.
 """
@@ -89,7 +89,7 @@ class ProtocolSearchRequest(BaseModel):
     page: int = Field(1, ge=1, description="Page number")
     limit: int = Field(20, ge=1, le=100, description="Results per page")
     is_featured: Optional[bool] = Field(None, description="Filter featured protocols only")
-    is_official: Optional[bool] = Field(None, description="Filter official CRONOS protocols only")
+    is_official: Optional[bool] = Field(None, description="Filter official QBITEL protocols only")
     tags: Optional[List[str]] = Field(None, description="Filter by tags")
 
 
@@ -117,7 +117,7 @@ class ProtocolSubmitRequest(BaseModel):
     price_model: Optional[PriceModelEnum] = Field(None, description="Pricing model (required if not free)")
     base_price: Optional[Decimal] = Field(None, ge=0, description="Base price (required if not free)")
 
-    min_cronos_version: str = Field(..., description="Minimum compatible CRONOS AI version")
+    min_qbitel_version: str = Field(..., description="Minimum compatible QBITEL version")
     dependencies: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Dependencies on other protocols or libraries")
 
     @validator("base_price")
@@ -196,8 +196,8 @@ class QualityMetrics(BaseModel):
 
 class CompatibilityInfo(BaseModel):
     """Compatibility information."""
-    min_cronos_version: str
-    supported_cronos_versions: List[str]
+    min_qbitel_version: str
+    supported_qbitel_versions: List[str]
     dependencies: Dict[str, Any]
 
     class Config:

@@ -1,4 +1,4 @@
-package qslb.policy
+package qbitel.policy
 
 default allow = false
 

@@ -1,5 +1,5 @@
 """
-CRONOS AI - Decision Audit Logger
+QBITEL - Decision Audit Logger
 
 Immutable audit trail logging for AI decisions with explanations.
 Meets regulatory requirements for EU AI Act, FDA 21 CFR Part 11, SOC2.
@@ -20,12 +20,12 @@ from sqlalchemy import select, and_, or_
 from .base import ExplanationResult
 from .database import AIDecisionAudit, ModelDriftMetric
 from .metrics import record_audit_trail_write
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 
 logger = logging.getLogger(__name__)
 
 
-class AuditLoggerException(CronosAIException):
+class AuditLoggerException(QbitelAIException):
     """Exception raised by audit logger."""
 
     pass

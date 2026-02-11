@@ -1,1 +1,1 @@
-"""Tests for the CRONOS AI Multi-Agent Orchestration Framework."""
+"""Tests for the QBITEL Multi-Agent Orchestration Framework."""

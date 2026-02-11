@@ -1,0 +1,205 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Discover a Legacy Protocol | Tutorials | QBITEL Bridge"
+  description="Learn how to capture network traffic from a legacy system and reverse-engineer its protocol using QBITEL Bridge's AI discovery pipeline."
+>
+  <PageHero
+    title="Discover a Legacy Protocol"
+    description="Capture network traffic from any legacy system and use the AI discovery pipeline to reverse-engineer its protocol structure, field boundaries, and state machine."
+    badge="Beginner -- 30 min"
+    gradient="from-green-500 to-emerald-400"
+  />
+
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+
+      <!-- Prerequisites -->
+      <div class="card p-6 mb-12">
+        <h2 class="text-xl font-bold text-white mb-4">Prerequisites</h2>
+        <ul class="space-y-2 text-gray-300">
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Docker and Docker Compose installed on your machine</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>Python 3.11 or later (for the CLI)</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            <span>A legacy system or service producing network traffic (or use our sample PCAP files)</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">1</span>
+          <h2 class="text-2xl font-bold text-white">Install QBITEL Bridge</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Start by cloning the repository and launching the platform with Docker Compose. This brings up the AI engine, the data plane, and the management API.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Clone the repository</span>
+git clone https://github.com/yazhsab/qbitel-bridge.git
+cd qbitel-bridge
+
+<span class="text-gray-500"># Start all services</span>
+docker compose -f ai_engine/deployment/docker/docker-compose.yml up -d
+
+<span class="text-gray-500"># Verify all containers are running</span>
+docker compose ps</code></pre>
+        </div>
+        <p class="text-gray-400 text-sm">
+          You should see the <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">ai-engine</code>, <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">dataplane</code>, and <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">timescaledb</code> containers in a healthy state.
+        </p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">2</span>
+          <h2 class="text-2xl font-bold text-white">Capture Network Traffic</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Point the data plane at your legacy system's network interface. The Rust-based capture engine processes packets at wire speed using DPDK-accelerated I/O.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Option A: Live capture from an interface</span>
+curl -X POST http://localhost:8000/api/v1/capture/start \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "interface": "eth0",
+    "filter": "host 10.0.1.50 and port 9100",
+    "duration_seconds": 300
+  {'}'}'
+
+<span class="text-gray-500"># Option B: Import an existing PCAP file</span>
+curl -X POST http://localhost:8000/api/v1/capture/import \
+  -F "file=@/path/to/legacy_traffic.pcap"</code></pre>
+        </div>
+        <div class="card p-4 border-l-4 border-l-yellow-500">
+          <p class="text-sm text-gray-300">
+            <span class="font-semibold text-yellow-400">Tip:</span> For best results, capture at least 5 minutes of traffic that includes multiple message types. The discovery engine needs variety to identify patterns, field boundaries, and state transitions.
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">3</span>
+          <h2 class="text-2xl font-bold text-white">Run the Discovery Pipeline</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Trigger the AI-powered protocol discovery pipeline. This runs a multi-stage analysis: statistical pattern extraction, probabilistic context-free grammar inference, neural field detection, and state machine reconstruction.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Start protocol discovery on the captured session</span>
+curl -X POST http://localhost:8000/api/v1/discover \
+  -H "Content-Type: application/json" \
+  -d '{'{'}
+    "packet_data": ["<base64-encoded-packets>"],
+    "metadata": {'{'}
+      "source": "pcap_import",
+      "capture_id": "cap_abc123",
+      "confidence_threshold": 0.75
+    {'}'}
+  {'}'}'</code></pre>
+        </div>
+        <p class="text-gray-400 text-sm mb-4">
+          The pipeline typically completes in 30-120 seconds depending on the volume of captured traffic. You can monitor progress in real time:
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto">
+          <pre><code><span class="text-gray-500"># Check discovery status</span>
+curl http://localhost:8000/health</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">4</span>
+          <h2 class="text-2xl font-bold text-white">View Results</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Once the pipeline finishes, you get a full protocol specification including identified message types, field layouts with inferred data types, and the protocol state machine.
+        </p>
+        <div class="bg-surface-800 rounded-lg p-4 font-mono text-sm text-gray-300 overflow-x-auto mb-4">
+          <pre><code><span class="text-gray-500"># Retrieve the discovered protocol specification</span>
+curl http://localhost:8000/api/v1/discover | jq
+
+<span class="text-gray-500"># Example output (abbreviated)</span>
+{'{'}
+  "protocol_name": "LEGACY-9100",
+  "confidence": 0.94,
+  "message_types": [
+    {'{'}
+      "name": "HANDSHAKE_INIT",
+      "fields": [
+        {'{'} "name": "magic", "type": "uint32", "offset": 0, "value": "0x4C454731" {'}'},
+        {'{'} "name": "version", "type": "uint16", "offset": 4 {'}'},
+        {'{'} "name": "session_id", "type": "bytes", "offset": 6, "length": 16 {'}'},
+        {'{'} "name": "payload_length", "type": "uint32", "offset": 22 {'}'}
+      ]
+    {'}'},
+    {'{'}
+      "name": "DATA_TRANSFER",
+      "fields": [ "..." ]
+    {'}'}
+  ],
+  "state_machine": {'{'}
+    "initial_state": "IDLE",
+    "transitions": [
+      {'{'} "from": "IDLE", "to": "HANDSHAKING", "trigger": "HANDSHAKE_INIT" {'}'},
+      {'{'} "from": "HANDSHAKING", "to": "ACTIVE", "trigger": "HANDSHAKE_ACK" {'}'},
+      {'{'} "from": "ACTIVE", "to": "IDLE", "trigger": "DISCONNECT" {'}'}
+    ]
+  {'}'}
+{'}'}</code></pre>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-quantum-500/20 text-quantum-400 font-bold text-sm">5</span>
+          <h2 class="text-2xl font-bold text-white">Explore in the Console</h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Open the QBITEL Console at <code class="text-quantum-400 bg-surface-800 px-1.5 py-0.5 rounded">http://localhost:3000</code> to see a visual representation of the discovered protocol. The console provides an interactive state machine diagram, a field-level message inspector, and an AI copilot that can explain what each message type does.
+        </p>
+        <div class="card p-4 border-l-4 border-l-quantum-500">
+          <p class="text-sm text-gray-300">
+            <span class="font-semibold text-quantum-400">What's next?</span> Now that you have a protocol specification, you can generate a modern API adapter using <a href="/tutorials/build-protocol-adapter" class="text-quantum-400 hover:underline">Translation Studio</a>, or secure it with <a href="/tutorials/quantum-safe-encryption" class="text-quantum-400 hover:underline">post-quantum encryption</a>.
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex items-center justify-between pt-8 border-t border-surface-600/50">
+        <a href="/tutorials" class="btn-ghost text-sm">
+          <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+          All Tutorials
+        </a>
+        <a href="/tutorials/quantum-safe-encryption" class="btn-secondary text-sm">
+          Next: Quantum-Safe Encryption
+          <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <CTABanner
+    title="Ready to Discover Your Own Protocols?"
+    description="Install QBITEL Bridge and start reverse-engineering legacy protocols in minutes."
+  />
+</PageLayout>

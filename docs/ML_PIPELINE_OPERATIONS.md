@@ -1,6 +1,6 @@
 # ML/Data Pipeline Operations Guide
 
-This document provides comprehensive procedures for retraining and rollback operations for the CRONOS AI ML/data pipelines, specifically for the Field Detector and Translation Studio components.
+This document provides comprehensive procedures for retraining and rollback operations for the QBITEL ML/data pipelines, specifically for the Field Detector and Translation Studio components.
 
 ## Table of Contents
 
@@ -15,7 +15,7 @@ This document provides comprehensive procedures for retraining and rollback oper
 
 ## Overview
 
-The CRONOS AI system includes two primary ML/data pipelines:
+The QBITEL system includes two primary ML/data pipelines:
 
 1. **Field Detector**: BiLSTM-CRF model for automatic field boundary detection in protocol messages
 2. **Translation Studio**: LLM-powered protocol translation with rule generation and optimization

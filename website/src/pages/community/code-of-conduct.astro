@@ -1,0 +1,177 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Code of Conduct | QBITEL Bridge"
+  description="Contributor Covenant Code of Conduct for the QBITEL Bridge open-source community."
+>
+  <PageHero
+    title="Code of Conduct"
+    description="We are committed to providing a welcoming, inclusive, and harassment-free community for everyone. This code of conduct outlines our expectations and enforcement guidelines."
+    badge="Contributor Covenant v2.1"
+  />
+
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+
+      <!-- Our Pledge -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Our Pledge</h2>
+        <p class="text-gray-300 leading-relaxed">
+          We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, caste, color, religion, or sexual identity and orientation.
+        </p>
+        <p class="text-gray-300 leading-relaxed mt-4">
+          We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
+        </p>
+      </div>
+
+      <!-- Our Standards -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Our Standards</h2>
+
+        <div class="card p-6 mb-6">
+          <h3 class="text-lg font-semibold text-green-400 mb-4">Positive Behavior</h3>
+          <ul class="space-y-3 text-gray-300">
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              <span>Demonstrating empathy and kindness toward other people</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              <span>Being respectful of differing opinions, viewpoints, and experiences</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              <span>Giving and gracefully accepting constructive feedback</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              <span>Accepting responsibility and apologizing to those affected by our mistakes, and learning from the experience</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+              <span>Focusing on what is best not just for us as individuals, but for the overall community</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <h3 class="text-lg font-semibold text-red-400 mb-4">Unacceptable Behavior</h3>
+          <ul class="space-y-3 text-gray-300">
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              <span>The use of sexualized language or imagery, and sexual attention or advances of any kind</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              <span>Trolling, insulting or derogatory comments, and personal or political attacks</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              <span>Public or private harassment</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              <span>Publishing others' private information, such as a physical or email address, without their explicit permission</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              <span>Other conduct which could reasonably be considered inappropriate in a professional setting</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Enforcement Responsibilities -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Enforcement Responsibilities</h2>
+        <p class="text-gray-300 leading-relaxed">
+          Community leaders are responsible for clarifying and enforcing our standards of acceptable behavior and will take appropriate and fair corrective action in response to any behavior that they deem inappropriate, threatening, offensive, or harmful.
+        </p>
+        <p class="text-gray-300 leading-relaxed mt-4">
+          Community leaders have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, and will communicate reasons for moderation decisions when appropriate.
+        </p>
+      </div>
+
+      <!-- Scope -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Scope</h2>
+        <p class="text-gray-300 leading-relaxed">
+          This Code of Conduct applies within all community spaces, and also applies when an individual is officially representing the community in public spaces. Examples of representing our community include using an official email address, posting via an official social media account, or acting as an appointed representative at an online or offline event.
+        </p>
+      </div>
+
+      <!-- Enforcement -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Enforcement</h2>
+        <p class="text-gray-300 leading-relaxed mb-4">
+          Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at <a href="mailto:conduct@qbitel.com" class="text-quantum-400 hover:underline">conduct@qbitel.com</a>. All complaints will be reviewed and investigated promptly and fairly.
+        </p>
+        <p class="text-gray-300 leading-relaxed">
+          All community leaders are obligated to respect the privacy and security of the reporter of any incident.
+        </p>
+      </div>
+
+      <!-- Enforcement Guidelines -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-6">Enforcement Guidelines</h2>
+        <p class="text-gray-300 mb-6">Community leaders will follow these Community Impact Guidelines in determining the consequences for any action they deem in violation of this Code of Conduct:</p>
+
+        <div class="space-y-6">
+          <div class="card p-6">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">Level 1</span>
+              <h3 class="text-lg font-semibold text-white">Correction</h3>
+            </div>
+            <p class="text-sm text-gray-400 mb-2"><span class="text-white font-medium">Community Impact:</span> Use of inappropriate language or other behavior deemed unprofessional or unwelcome.</p>
+            <p class="text-sm text-gray-400"><span class="text-white font-medium">Consequence:</span> A private, written warning from community leaders, providing clarity around the nature of the violation and an explanation of why the behavior was inappropriate. A public apology may be requested.</p>
+          </div>
+
+          <div class="card p-6">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">Level 2</span>
+              <h3 class="text-lg font-semibold text-white">Warning</h3>
+            </div>
+            <p class="text-sm text-gray-400 mb-2"><span class="text-white font-medium">Community Impact:</span> A violation through a single incident or series of actions.</p>
+            <p class="text-sm text-gray-400"><span class="text-white font-medium">Consequence:</span> A warning with consequences for continued behavior. No interaction with the people involved for a specified period of time, including avoiding interactions in community spaces and external channels. Violating these terms may lead to a temporary or permanent ban.</p>
+          </div>
+
+          <div class="card p-6">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">Level 3</span>
+              <h3 class="text-lg font-semibold text-white">Temporary Ban</h3>
+            </div>
+            <p class="text-sm text-gray-400 mb-2"><span class="text-white font-medium">Community Impact:</span> A serious violation of community standards, including sustained inappropriate behavior.</p>
+            <p class="text-sm text-gray-400"><span class="text-white font-medium">Consequence:</span> A temporary ban from any sort of interaction or public communication with the community for a specified period. Violating these terms may lead to a permanent ban.</p>
+          </div>
+
+          <div class="card p-6">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">Level 4</span>
+              <h3 class="text-lg font-semibold text-white">Permanent Ban</h3>
+            </div>
+            <p class="text-sm text-gray-400 mb-2"><span class="text-white font-medium">Community Impact:</span> Demonstrating a pattern of violation, including sustained inappropriate behavior, harassment, or aggression toward individuals or groups.</p>
+            <p class="text-sm text-gray-400"><span class="text-white font-medium">Consequence:</span> A permanent ban from any sort of public interaction within the community.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attribution -->
+      <div class="card p-6">
+        <h2 class="text-xl font-bold text-white mb-2">Attribution</h2>
+        <p class="text-gray-400 text-sm">
+          This Code of Conduct is adapted from the <a href="https://www.contributor-covenant.org" target="_blank" rel="noopener noreferrer" class="text-quantum-400 hover:underline">Contributor Covenant</a>, version 2.1. Community Impact Guidelines were inspired by <a href="https://github.com/mozilla/diversity" target="_blank" rel="noopener noreferrer" class="text-quantum-400 hover:underline">Mozilla's code of conduct enforcement ladder</a>.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <CTABanner
+    title="Join Our Community"
+    description="We welcome contributors of all backgrounds and experience levels. Check the contributing guide to get started."
+  />
+</PageLayout>

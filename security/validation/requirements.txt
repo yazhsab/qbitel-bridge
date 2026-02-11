@@ -1,4 +1,4 @@
-# CRONOS AI Security and Compliance Validation Framework Requirements
+# QBITEL Security and Compliance Validation Framework Requirements
 
 # Core dependencies
 asyncio-throttle==1.0.2

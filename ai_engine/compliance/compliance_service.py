@@ -1,5 +1,5 @@
 """
-CRONOS AI - Compliance Service
+QBITEL - Compliance Service
 
 Main compliance service that orchestrates all compliance operations
 and integrates with existing infrastructure systems.
@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from contextlib import asynccontextmanager
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..llm.unified_llm_service import UnifiedLLMService, get_llm_service
 from ..monitoring.enterprise_metrics import get_enterprise_metrics
 from .regulatory_kb import RegulatoryKnowledgeBase, ComplianceAssessment
@@ -27,7 +27,7 @@ from .prompt_templates import CompliancePromptManager
 logger = logging.getLogger(__name__)
 
 
-class ComplianceException(CronosAIException):
+class ComplianceException(QbitelAIException):
     """Compliance service specific exception."""
 
     pass
@@ -113,7 +113,7 @@ class ComplianceService:
                 self.logger.warning("Compliance service already running")
                 return
 
-            self.logger.info("Starting CRONOS AI Compliance Service...")
+            self.logger.info("Starting QBITEL Compliance Service...")
 
             # Initialize core components
             await self._initialize_components()

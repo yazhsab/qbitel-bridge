@@ -1,5 +1,5 @@
 """
-CRONOS AI - S3 File Manager for Marketplace
+QBITEL - S3 File Manager for Marketplace
 
 Handles protocol file uploads, storage, and downloads using AWS S3.
 """
@@ -165,7 +165,7 @@ class S3FileManager:
         """
         if not self.s3_client:
             logger.warning("S3 client not available, returning mock URL")
-            return f"https://mock-download.cronos-ai.com/{s3_key}"
+            return f"http://localhost:8000/api/v1/marketplace/mock-download/{s3_key}"
 
         try:
             url = self.s3_client.generate_presigned_url(
@@ -379,8 +379,8 @@ class S3FileManager:
         return {
             "success": True,
             "s3_key": mock_key,
-            "public_url": f"https://mock-s3.cronos-ai.com/{mock_key}",
-            "cdn_url": f"https://mock-cdn.cronos-ai.com/{mock_key}",
+            "public_url": f"http://localhost:8000/api/v1/marketplace/mock/{mock_key}",
+            "cdn_url": f"http://localhost:8000/api/v1/marketplace/mock/{mock_key}",
             "file_size": 0,
             "file_hash": "mock_hash",
             "content_type": "application/octet-stream",

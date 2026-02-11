@@ -1,0 +1,127 @@
+---
+# Development Environment Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: qbitel-dev
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+# Inherit from base
+resources:
+  - ../base
+
+# Environment-specific namespace
+namespace: qbitel-dev
+
+# Development-specific labels
+commonLabels:
+  environment: development
+  app.kubernetes.io/instance: qbitel-dev
+
+# Development annotations
+commonAnnotations:
+  qbitel.io/environment: "development"
+  qbitel.io/auto-deploy: "true"
+
+# ConfigMap overrides for development
+configMapGenerator:
+  - name: qbitel-config
+    behavior: merge
+    literals:
+      - LOG_LEVEL=DEBUG
+      - ENVIRONMENT=development
+      - FEATURE_FLAGS_ENABLED=true
+      - HOT_RELOAD=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.qbitel-observability-dev:4317
+      - JAEGER_ENDPOINT=http://jaeger.qbitel-observability-dev:14268/api/traces
+      - CACHE_TTL=60
+      - AI_GATEWAY_MOCK_MODE=false
+      - VLLM_MODEL_CACHE_SIZE=2GB
+
+# Development secrets (external secrets operator will populate)
+secretGenerator:
+  - name: qbitel-secrets
+    behavior: merge
+    type: Opaque
+    literals:
+      - DATABASE_URL=postgresql://qbitel:dev-password@postgres-dev:5432/qbitel_dev
+      - REDIS_URL=redis://redis-dev:6379/0
+
+# Development-specific images (use latest tags)
+images:
+  - name: qbitel/core
+    newName: ghcr.io/qbitel/qbitel-core
+    newTag: develop
+  - name: qbitel/ai-gateway
+    newName: ghcr.io/qbitel/ai-gateway
+    newTag: develop
+  - name: qbitel/protocol-copilot
+    newName: ghcr.io/qbitel/protocol-copilot
+    newTag: develop
+  - name: qbitel/legacy-whisperer
+    newName: ghcr.io/qbitel/legacy-whisperer
+    newTag: develop
+  - name: qbitel/vllm
+    newName: ghcr.io/qbitel/vllm-server
+    newTag: develop
+
+# Development resource patches (reduced resources)
+patches:
+  # Reduce replica counts for development
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+    target:
+      kind: Deployment
+
+  # Development resource limits (smaller)
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+    target:
+      kind: Deployment
+      labelSelector: "tier!=gpu"
+
+  # Enable debug mode in all containers
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: DEBUG
+          value: "true"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: PYTHONDONTWRITEBYTECODE
+          value: "1"
+    target:
+      kind: Deployment
+
+  # Disable PodDisruptionBudget in dev
+  - patch: |-
+      - op: replace
+        path: /spec/minAvailable
+        value: 0
+    target:
+      kind: PodDisruptionBudget
+
+# Development-specific components
+components:
+  - ../../components/dev-tools
+  - ../../components/mock-services
+
+# Generators options
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    environment: development

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Database Field Encryption
+QBITEL Engine - Database Field Encryption
 
 Production-ready column-level encryption for sensitive database fields.
 Uses AES-256-GCM for authenticated encryption with Fernet (symmetric encryption).
@@ -111,7 +111,7 @@ class EncryptionKeyManager:
         )
 
         # In production, this should be a hard error
-        environment = os.getenv("CRONOS_AI_ENVIRONMENT", "development")
+        environment = os.getenv("QBITEL_AI_ENVIRONMENT", "development")
         if environment == "production":
             raise EncryptionError(error_msg)
         else:
@@ -142,7 +142,7 @@ class EncryptionKeyManager:
 
         # Use a static salt (in production, consider using a configurable salt)
         # The salt doesn't need to be secret, but should be consistent
-        salt = b"cronos_ai_encryption_salt_v1"
+        salt = b"qbitel_encryption_salt_v1"
 
         # Derive 32 bytes (256 bits) for Fernet
         kdf = PBKDF2HMAC(

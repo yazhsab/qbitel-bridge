@@ -1,5 +1,5 @@
 """
-CRONOS AI - GDPR Compliance Implementation
+QBITEL - GDPR Compliance Implementation
 Production-ready GDPR compliance verification and enforcement.
 """
 
@@ -11,13 +11,13 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from .audit_trail import AuditTrailManager, EventType, EventSeverity
 
 logger = logging.getLogger(__name__)
 
 
-class GDPRException(CronosAIException):
+class GDPRException(QbitelAIException):
     """GDPR compliance exception."""
 
     pass
@@ -117,8 +117,8 @@ class GDPRComplianceManager:
         self.subject_requests: Dict[str, DataSubjectRequest] = {}
 
         # Configuration
-        self.data_controller = getattr(config, "data_controller_name", "CRONOS AI")
-        self.dpo_contact = getattr(config, "dpo_contact", "dpo@cronos-ai.com")
+        self.data_controller = getattr(config, "data_controller_name", "QBITEL")
+        self.dpo_contact = getattr(config, "dpo_contact", "dpo@qbitel.com")
         self.breach_notification_hours = 72  # Article 33
 
         self.logger.info("GDPRComplianceManager initialized")

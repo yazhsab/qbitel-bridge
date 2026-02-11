@@ -1,5 +1,5 @@
 """
-Tests for CRONOS AI Engine gRPC Service
+Tests for QBITEL Engine gRPC Service
 """
 
 import pytest
@@ -121,7 +121,7 @@ class TestAIEngineGRPCService:
         """Test successful service initialization."""
         service = AIEngineGRPCService(mock_config)
 
-        with patch("ai_engine.api.grpc.CronosAIEngine", return_value=mock_ai_engine):
+        with patch("ai_engine.api.grpc.QbitelAIEngine", return_value=mock_ai_engine):
             await service.initialize()
 
         assert service.ai_engine is not None
@@ -132,7 +132,7 @@ class TestAIEngineGRPCService:
         service = AIEngineGRPCService(mock_config)
 
         with patch(
-            "ai_engine.api.grpc.CronosAIEngine", side_effect=Exception("Init failed")
+            "ai_engine.api.grpc.QbitelAIEngine", side_effect=Exception("Init failed")
         ):
             with pytest.raises(Exception, match="Init failed"):
                 await service.initialize()
@@ -296,7 +296,7 @@ class TestAIEngineGRPCService:
         request = Mock()
         response = await service.GetServiceStatus(request, mock_grpc_context)
 
-        assert response["service_name"] == "CRONOS AI Engine gRPC"
+        assert response["service_name"] == "QBITEL Engine gRPC"
         assert response["version"] == "1.0.0"
         assert "uptime_seconds" in response
         assert response["statistics"]["total_requests"] == 12
@@ -314,7 +314,7 @@ class TestAIEngineGRPCService:
         response = await service.HealthCheck(request, mock_grpc_context)
 
         assert response["status"] == "healthy"
-        assert response["service"] == "cronos-ai-grpc"
+        assert response["service"] == "qbitel-grpc"
 
     @pytest.mark.asyncio
     async def test_health_check_unhealthy(self, mock_config, mock_grpc_context):
@@ -546,7 +546,7 @@ class TestAIEngineGRPCClient:
         result = await client.health_check()
 
         assert result["status"] == "healthy"
-        assert result["service"] == "cronos-ai-grpc"
+        assert result["service"] == "qbitel-grpc"
         assert isinstance(result, dict)
         assert "timestamp" in result or "status" in result  # Ensure key fields present
 

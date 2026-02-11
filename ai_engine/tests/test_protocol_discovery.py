@@ -1,5 +1,5 @@
 """
-Comprehensive test suite for CRONOS AI Protocol Discovery System.
+Comprehensive test suite for QBITEL Bridge System.
 Tests all core components with unit, integration, and performance testing.
 """
 

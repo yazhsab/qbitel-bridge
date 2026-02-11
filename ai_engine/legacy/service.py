@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Whisperer Service
+QBITEL Engine - Legacy System Whisperer Service
 
 Main service integration for the Legacy System Whisperer feature.
 Orchestrates all components and provides unified API for legacy system management.
@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..llm.unified_llm_service import UnifiedLLMService
 from ..monitoring.metrics import AIEngineMetrics
 
@@ -139,7 +139,7 @@ class LegacySystemWhispererService:
 
         except Exception as e:
             self.logger.error(f"Failed to initialize service: {e}")
-            raise CronosAIException(f"Service initialization failed: {e}")
+            raise QbitelAIException(f"Service initialization failed: {e}")
 
     async def _initialize_components(self) -> None:
         """Initialize all service components."""
@@ -194,7 +194,7 @@ class LegacySystemWhispererService:
 
             # Validate system context
             if not system_id or not system_context.system_name:
-                raise CronosAIException(
+                raise QbitelAIException(
                     "Invalid system context: missing required fields"
                 )
 
@@ -232,7 +232,7 @@ class LegacySystemWhispererService:
             self.logger.error(
                 f"Failed to register system {system_context.system_id}: {e}"
             )
-            raise CronosAIException(f"System registration failed: {e}")
+            raise QbitelAIException(f"System registration failed: {e}")
 
     async def _setup_system_monitoring(
         self, system_context: LegacySystemContext
@@ -269,7 +269,7 @@ class LegacySystemWhispererService:
 
         try:
             if system_id not in self.registered_systems:
-                raise CronosAIException(f"System {system_id} not registered")
+                raise QbitelAIException(f"System {system_id} not registered")
 
             system_context = self.registered_systems[system_id]
             analysis_results = {}
@@ -346,7 +346,7 @@ class LegacySystemWhispererService:
             self._update_service_metrics(
                 "health_analysis", time.time() - start_time, False
             )
-            raise CronosAIException(f"Health analysis failed: {e}")
+            raise QbitelAIException(f"Health analysis failed: {e}")
 
     async def _generate_health_recommendations(
         self, system_context: LegacySystemContext, analysis_results: Dict[str, Any]
@@ -442,7 +442,7 @@ class LegacySystemWhispererService:
 
         try:
             if not self.knowledge_capture:
-                raise CronosAIException("Knowledge capture system not initialized")
+                raise QbitelAIException("Knowledge capture system not initialized")
 
             # Start knowledge session
             session_id = await self.knowledge_capture.start_expert_session(
@@ -474,7 +474,7 @@ class LegacySystemWhispererService:
         except Exception as e:
             self.logger.error(f"Knowledge capture failed: {e}")
             self._update_service_metrics("knowledge_capture", 0, False)
-            raise CronosAIException(f"Knowledge capture failed: {e}")
+            raise QbitelAIException(f"Knowledge capture failed: {e}")
 
     async def schedule_maintenance(
         self,
@@ -496,7 +496,7 @@ class LegacySystemWhispererService:
 
         try:
             if not self.maintenance_scheduler:
-                raise CronosAIException("Maintenance scheduler not initialized")
+                raise QbitelAIException("Maintenance scheduler not initialized")
 
             # Optimize maintenance schedule
             schedule_result = (
@@ -520,7 +520,7 @@ class LegacySystemWhispererService:
 
         except Exception as e:
             self.logger.error(f"Maintenance scheduling failed: {e}")
-            raise CronosAIException(f"Maintenance scheduling failed: {e}")
+            raise QbitelAIException(f"Maintenance scheduling failed: {e}")
 
     async def create_decision_support(
         self,
@@ -546,10 +546,10 @@ class LegacySystemWhispererService:
 
         try:
             if not self.recommendation_engine:
-                raise CronosAIException("Recommendation engine not initialized")
+                raise QbitelAIException("Recommendation engine not initialized")
 
             if system_id not in self.registered_systems:
-                raise CronosAIException(f"System {system_id} not registered")
+                raise QbitelAIException(f"System {system_id} not registered")
 
             system_context = self.registered_systems[system_id]
 
@@ -585,13 +585,13 @@ class LegacySystemWhispererService:
 
         except Exception as e:
             self.logger.error(f"Decision support creation failed: {e}")
-            raise CronosAIException(f"Decision support failed: {e}")
+            raise QbitelAIException(f"Decision support failed: {e}")
 
     def get_system_dashboard(self, system_id: str) -> Dict[str, Any]:
         """Get comprehensive dashboard for a system."""
 
         if system_id not in self.registered_systems:
-            raise CronosAIException(f"System {system_id} not registered")
+            raise QbitelAIException(f"System {system_id} not registered")
 
         system_context = self.registered_systems[system_id]
 

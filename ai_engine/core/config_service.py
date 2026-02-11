@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Centralized Configuration Service
+QBITEL Engine - Centralized Configuration Service
 
 This module provides enterprise-grade configuration management with
 dynamic configuration updates, environment-specific settings, versioning,
@@ -544,7 +544,7 @@ class EtcdConfigurationStore(ConfigurationStore):
             user=config.get("user"),
             password=config.get("password"),
         )
-        self.prefix = config.get("prefix", "/cronos-ai/config/")
+        self.prefix = config.get("prefix", "/qbitel/config/")
 
     def _get_key(self, key: str, environment: ConfigEnvironment) -> str:
         """Get etcd key with prefix."""
@@ -1176,7 +1176,7 @@ def watch_config(key_pattern: str, callback: Callable[[str, Any, Any], None]):
 class EnvironmentConfigLoader:
     """Environment variable configuration loader."""
 
-    def __init__(self, prefix: str = "CRONOS_AI_"):
+    def __init__(self, prefix: str = "QBITEL_AI_"):
         self.prefix = prefix
 
     def load(self) -> Dict[str, Any]:

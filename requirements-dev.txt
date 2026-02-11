@@ -1,4 +1,4 @@
-# CRONOS AI - Development Dependencies
+# QBITEL - Development Dependencies
 # Additional packages needed for development, testing, and code quality
 # Install with: pip install -r requirements.txt -r requirements-dev.txt
 

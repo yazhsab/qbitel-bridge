@@ -1,5 +1,5 @@
 """
-CRONOS AI - Enterprise Secrets Management
+QBITEL - Enterprise Secrets Management
 Provides secure secrets management with support for multiple backends.
 """
 
@@ -226,15 +226,15 @@ class SecretsManager:
         if value:
             return value
 
-        # Try with CRONOS_AI_ prefix
-        value = os.getenv(f"CRONOS_AI_{key.upper()}")
+        # Try with QBITEL_AI_ prefix
+        value = os.getenv(f"QBITEL_AI_{key.upper()}")
         return value
 
     def _get_from_vault(self, key: str) -> Optional[str]:
         """Get secret from HashiCorp Vault."""
         try:
             mount_point = self.config.get("vault_mount_point", "secret")
-            path = self.config.get("vault_path", "cronos-ai")
+            path = self.config.get("vault_path", "qbitel")
 
             secret_path = f"{path}/{key}"
             response = self.vault_client.secrets.kv.v2.read_secret_version(
@@ -250,7 +250,7 @@ class SecretsManager:
     def _get_from_aws(self, key: str) -> Optional[str]:
         """Get secret from AWS Secrets Manager."""
         try:
-            secret_name = f"cronos-ai/{key}"
+            secret_name = f"qbitel/{key}"
             response = self.aws_client.get_secret_value(SecretId=secret_name)
 
             if "SecretString" in response:
@@ -338,7 +338,7 @@ class SecretsManager:
     def _set_in_vault(self, key: str, value: str):
         """Set secret in HashiCorp Vault."""
         mount_point = self.config.get("vault_mount_point", "secret")
-        path = self.config.get("vault_path", "cronos-ai")
+        path = self.config.get("vault_path", "qbitel")
 
         secret_path = f"{path}/{key}"
         self.vault_client.secrets.kv.v2.create_or_update_secret(
@@ -347,7 +347,7 @@ class SecretsManager:
 
     def _set_in_aws(self, key: str, value: str):
         """Set secret in AWS Secrets Manager."""
-        secret_name = f"cronos-ai/{key}"
+        secret_name = f"qbitel/{key}"
 
         try:
             self.aws_client.update_secret(SecretId=secret_name, SecretString=value)
@@ -411,7 +411,7 @@ class SecretsManager:
     def _delete_from_vault(self, key: str):
         """Delete secret from Vault."""
         mount_point = self.config.get("vault_mount_point", "secret")
-        path = self.config.get("vault_path", "cronos-ai")
+        path = self.config.get("vault_path", "qbitel")
         secret_path = f"{path}/{key}"
 
         self.vault_client.secrets.kv.v2.delete_metadata_and_all_versions(
@@ -420,7 +420,7 @@ class SecretsManager:
 
     def _delete_from_aws(self, key: str):
         """Delete secret from AWS."""
-        secret_name = f"cronos-ai/{key}"
+        secret_name = f"qbitel/{key}"
         self.aws_client.delete_secret(
             SecretId=secret_name, ForceDeleteWithoutRecovery=True
         )

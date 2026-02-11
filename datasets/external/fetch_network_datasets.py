@@ -36,7 +36,7 @@ class NetworkDatasetFetcher:
         print(f"  Fetching: {url}")
         req = urllib.request.Request(
             url,
-            headers={"User-Agent": "CRONOS-AI-Dataset-Fetcher/1.0"}
+            headers={"User-Agent": "QBITEL-Dataset-Fetcher/1.0"}
         )
         try:
             with urllib.request.urlopen(req, context=self.ssl_context, timeout=timeout) as response:
@@ -257,7 +257,7 @@ class NetworkDatasetFetcher:
                 "step1": "Visit https://www.unb.ca/cic/datasets/ids-2017.html",
                 "step2": "Download the CSV files (MachineLearningCVE folder)",
                 "step3": "Place in datasets/external/cicids2017/",
-                "step4": "Run integrate_cicids.py to convert to CRONOS format"
+                "step4": "Run integrate_cicids.py to convert to QBITEL format"
             },
             "sample_columns": [
                 "Flow ID", "Source IP", "Source Port", "Destination IP",
@@ -278,7 +278,7 @@ class NetworkDatasetFetcher:
     def fetch_all(self) -> Dict:
         """Fetch all available network datasets."""
         print("=" * 60)
-        print("CRONOS AI - Network Dataset Fetcher")
+        print("QBITEL - Network Dataset Fetcher")
         print("=" * 60)
 
         results = {}

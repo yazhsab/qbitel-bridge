@@ -1,0 +1,257 @@
+---
+# Production Horizontal Pod Autoscalers
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: qbitel-core-hpa
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/name: qbitel-core
+    app.kubernetes.io/component: autoscaler
+    environment: production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: qbitel-core
+  minReplicas: 5
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 65
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75
+    # Custom metrics from Prometheus
+    - type: External
+      external:
+        metric:
+          name: http_requests_per_second
+          selector:
+            matchLabels:
+              service: qbitel-core
+        target:
+          type: AverageValue
+          averageValue: "500"
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600
+      policies:
+        - type: Percent
+          value: 10
+          periodSeconds: 120
+        - type: Pods
+          value: 2
+          periodSeconds: 120
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 4
+          periodSeconds: 30
+      selectPolicy: Max
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ai-gateway-hpa
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/name: ai-gateway
+    app.kubernetes.io/component: autoscaler
+    environment: production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ai-gateway
+  minReplicas: 5
+  maxReplicas: 30
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 70
+    # LLM-specific metrics
+    - type: External
+      external:
+        metric:
+          name: llm_queue_depth
+          selector:
+            matchLabels:
+              service: ai-gateway
+        target:
+          type: AverageValue
+          averageValue: "10"
+    - type: External
+      external:
+        metric:
+          name: llm_request_latency_p99
+          selector:
+            matchLabels:
+              service: ai-gateway
+        target:
+          type: Value
+          value: "5000"  # 5 seconds
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600
+      policies:
+        - type: Percent
+          value: 15
+          periodSeconds: 120
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Percent
+          value: 200
+          periodSeconds: 15
+        - type: Pods
+          value: 5
+          periodSeconds: 30
+      selectPolicy: Max
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: protocol-copilot-hpa
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/name: protocol-copilot
+    app.kubernetes.io/component: autoscaler
+    environment: production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: protocol-copilot
+  minReplicas: 3
+  maxReplicas: 12
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: External
+      external:
+        metric:
+          name: protocol_analysis_queue_depth
+          selector:
+            matchLabels:
+              service: protocol-copilot
+        target:
+          type: AverageValue
+          averageValue: "5"
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 300
+    scaleUp:
+      stabilizationWindowSeconds: 120
+      policies:
+        - type: Pods
+          value: 3
+          periodSeconds: 60
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: legacy-whisperer-hpa
+  namespace: qbitel
+  labels:
+    app.kubernetes.io/name: legacy-whisperer
+    app.kubernetes.io/component: autoscaler
+    environment: production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: legacy-whisperer
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 900
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 300
+    scaleUp:
+      stabilizationWindowSeconds: 180
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 120
+---
+# Vertical Pod Autoscaler for vLLM (GPU workloads)
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: vllm-vpa
+  namespace: qbitel-vllm
+  labels:
+    app.kubernetes.io/name: vllm
+    app.kubernetes.io/component: autoscaler
+    environment: production
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: vllm-server
+  updatePolicy:
+    updateMode: "Off"  # Recommendations only for GPU workloads
+  resourcePolicy:
+    containerPolicies:
+      - containerName: vllm
+        minAllowed:
+          cpu: "4"
+          memory: "16Gi"
+        maxAllowed:
+          cpu: "32"
+          memory: "128Gi"
+        controlledResources: ["cpu", "memory"]
+        controlledValues: RequestsAndLimits

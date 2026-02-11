@@ -1,5 +1,5 @@
 """
-CRONOS AI - Sentry APM Integration
+QBITEL - Sentry APM Integration
 Production-ready error tracking and performance monitoring with Sentry.
 """
 
@@ -24,8 +24,8 @@ class SentryConfig:
     def __init__(self):
         # Core configuration
         self.dsn = os.getenv("SENTRY_DSN", "")
-        self.environment = os.getenv("CRONOS_ENVIRONMENT", "development")
-        self.release = os.getenv("CRONOS_VERSION", "1.0.0")
+        self.environment = os.getenv("QBITEL_ENVIRONMENT", "development")
+        self.release = os.getenv("QBITEL_VERSION", "1.0.0")
 
         # Performance monitoring
         self.traces_sample_rate = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1"))
@@ -39,7 +39,7 @@ class SentryConfig:
 
         # Custom tags
         self.tags = {
-            "app": "cronos-ai",
+            "app": "qbitel",
             "component": "ai-engine",
         }
 

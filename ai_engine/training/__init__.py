@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Model Training Infrastructure
+QBITEL Engine - Model Training Infrastructure
 
 This module provides comprehensive model training infrastructure including
 MLflow integration, distributed training, and automated hyperparameter tuning.

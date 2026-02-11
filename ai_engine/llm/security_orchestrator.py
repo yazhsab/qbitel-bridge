@@ -1,5 +1,5 @@
 """
-CRONOS AI - Zero-Touch Security Orchestrator
+QBITEL - Zero-Touch Security Orchestrator
 LLM-powered automated security threat detection, response, and policy generation.
 
 This module provides comprehensive security automation capabilities including:
@@ -24,7 +24,7 @@ import uuid
 from prometheus_client import Counter, Histogram, Gauge
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException, SecurityException
+from ..core.exceptions import QbitelAIException, SecurityException
 from ..monitoring.metrics import MetricsCollector
 from ..monitoring.alerts import AlertManager, Alert, AlertSeverity, AlertStatus
 from ..policy.policy_engine import PolicyEngine, Policy, PolicyType, PolicySeverity
@@ -32,22 +32,22 @@ from .unified_llm_service import UnifiedLLMService, LLMRequest, LLMResponse
 
 # Prometheus metrics
 SECURITY_EVENTS_COUNTER = Counter(
-    "cronos_security_events_total",
+    "qbitel_security_events_total",
     "Total security events processed",
     ["event_type", "severity", "status"],
 )
 THREAT_DETECTION_DURATION = Histogram(
-    "cronos_threat_detection_duration_seconds",
+    "qbitel_threat_detection_duration_seconds",
     "Threat detection processing time",
     ["threat_type"],
 )
 AUTOMATED_RESPONSES = Counter(
-    "cronos_automated_responses_total",
+    "qbitel_automated_responses_total",
     "Total automated security responses",
     ["response_type", "status"],
 )
 ACTIVE_THREATS = Gauge(
-    "cronos_active_threats", "Number of active security threats", ["severity"]
+    "qbitel_active_threats", "Number of active security threats", ["severity"]
 )
 
 logger = logging.getLogger(__name__)

@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Translation Studio
+QBITEL - Protocol Translation Studio
 LLM-powered protocol translation with automatic rule generation and optimization.
 
 This module provides comprehensive protocol translation capabilities including:
@@ -36,37 +36,37 @@ import operator
 from prometheus_client import Counter, Histogram, Gauge, Summary
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..monitoring.metrics import MetricsCollector
 from .unified_llm_service import UnifiedLLMService, LLMRequest, LLMResponse
 
 # Prometheus metrics
 TRANSLATION_REQUESTS = Counter(
-    "cronos_translation_requests_total",
+    "qbitel_translation_requests_total",
     "Total protocol translation requests",
     ["source_protocol", "target_protocol", "status"],
 )
 TRANSLATION_DURATION = Histogram(
-    "cronos_translation_duration_seconds",
+    "qbitel_translation_duration_seconds",
     "Protocol translation processing time",
     ["source_protocol", "target_protocol"],
     buckets=[0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1],
 )
 TRANSLATION_ACCURACY = Gauge(
-    "cronos_translation_accuracy",
+    "qbitel_translation_accuracy",
     "Translation accuracy percentage",
     ["source_protocol", "target_protocol"],
 )
 TRANSLATION_THROUGHPUT = Summary(
-    "cronos_translation_throughput_per_second",
+    "qbitel_translation_throughput_per_second",
     "Translation throughput",
     ["source_protocol", "target_protocol"],
 )
 RULE_GENERATION_DURATION = Histogram(
-    "cronos_rule_generation_duration_seconds", "Rule generation processing time"
+    "qbitel_rule_generation_duration_seconds", "Rule generation processing time"
 )
 OPTIMIZATION_IMPROVEMENTS = Counter(
-    "cronos_optimization_improvements_total",
+    "qbitel_optimization_improvements_total",
     "Total optimization improvements applied",
     ["optimization_type"],
 )
@@ -74,7 +74,7 @@ OPTIMIZATION_IMPROVEMENTS = Counter(
 logger = logging.getLogger(__name__)
 
 
-class TranslationException(CronosAIException):
+class TranslationException(QbitelAIException):
     """Protocol translation specific exception."""
 
     pass

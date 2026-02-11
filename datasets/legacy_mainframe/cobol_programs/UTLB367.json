@@ -1,0 +1,19 @@
+{
+  "program_id": "UTLB367",
+  "domain": "utilities",
+  "program_type": "batch_processing",
+  "author": "T. DAVIS",
+  "lines_of_code": 275,
+  "complexity_level": "complex",
+  "complexity_score": 0.715,
+  "files_used": 4,
+  "verbs_used": 13,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.907929",
+  "hash": "c2bb9e85d89d75777d63e98e036623bf"
+}

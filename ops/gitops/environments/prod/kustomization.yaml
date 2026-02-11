@@ -1,0 +1,262 @@
+---
+# Production Environment Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: qbitel-prod
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+# Inherit from base
+resources:
+  - ../base
+  # Production-specific resources
+  - ingress.yaml
+  - hpa.yaml
+  - pdb.yaml
+  - network-policies.yaml
+  - resource-quotas.yaml
+
+# Production namespace
+namespace: qbitel
+
+# Production-specific labels
+commonLabels:
+  environment: production
+  app.kubernetes.io/instance: qbitel-prod
+  criticality: high
+
+# Production annotations
+commonAnnotations:
+  qbitel.io/environment: "production"
+  qbitel.io/auto-deploy: "false"
+  qbitel.io/approval-required: "true"
+  qbitel.io/change-ticket-required: "true"
+  qbitel.io/sla: "99.9"
+
+# ConfigMap overrides for production
+configMapGenerator:
+  - name: qbitel-config
+    behavior: merge
+    literals:
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=production
+      - FEATURE_FLAGS_ENABLED=true
+      - HOT_RELOAD=false
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.qbitel-observability:4317
+      - JAEGER_ENDPOINT=http://jaeger.qbitel-observability:14268/api/traces
+      - CACHE_TTL=3600
+      - AI_GATEWAY_MOCK_MODE=false
+      - VLLM_MODEL_CACHE_SIZE=32GB
+      - RATE_LIMIT_ENABLED=true
+      - RATE_LIMIT_RPS=1000
+      - CIRCUIT_BREAKER_ENABLED=true
+      - CIRCUIT_BREAKER_THRESHOLD=50
+      - CIRCUIT_BREAKER_TIMEOUT=30
+      - AUDIT_LOG_ENABLED=true
+      - AUDIT_LOG_RETENTION_DAYS=365
+      - ENCRYPTION_AT_REST=true
+      - TLS_MIN_VERSION=1.3
+
+# Production secrets (sealed secrets / external secrets)
+secretGenerator:
+  - name: qbitel-secrets
+    behavior: merge
+    type: Opaque
+    envs:
+      - secrets.env.prod
+
+# Production images (use specific semantic versions)
+images:
+  - name: qbitel/core
+    newName: ghcr.io/qbitel/qbitel-core
+    newTag: v1.0.0
+  - name: qbitel/ai-gateway
+    newName: ghcr.io/qbitel/ai-gateway
+    newTag: v1.0.0
+  - name: qbitel/protocol-copilot
+    newName: ghcr.io/qbitel/protocol-copilot
+    newTag: v1.0.0
+  - name: qbitel/legacy-whisperer
+    newName: ghcr.io/qbitel/legacy-whisperer
+    newTag: v1.0.0
+  - name: qbitel/vllm
+    newName: ghcr.io/qbitel/vllm-server
+    newTag: v1.0.0
+
+# Production resource patches
+patches:
+  # Production replica counts (high availability)
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+    target:
+      kind: Deployment
+      labelSelector: "tier=frontend"
+
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 5
+    target:
+      kind: Deployment
+      labelSelector: "tier=backend"
+
+  # Production resource limits
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+    target:
+      kind: Deployment
+      labelSelector: "tier=backend"
+
+  # Frontend resources
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+    target:
+      kind: Deployment
+      labelSelector: "tier=frontend"
+
+  # GPU workloads for production
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            memory: "16Gi"
+            cpu: "8"
+            nvidia.com/gpu: "2"
+          limits:
+            memory: "32Gi"
+            cpu: "16"
+            nvidia.com/gpu: "2"
+    target:
+      kind: Deployment
+      labelSelector: "tier=gpu"
+
+  # Production health probes (more aggressive)
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe
+        value:
+          httpGet:
+            path: /health/live
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 3
+          timeoutSeconds: 5
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe
+        value:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+          timeoutSeconds: 3
+      - op: add
+        path: /spec/template/spec/containers/0/startupProbe
+        value:
+          httpGet:
+            path: /health/startup
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 30
+          timeoutSeconds: 5
+    target:
+      kind: Deployment
+
+  # Pod anti-affinity for high availability
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/affinity
+        value:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                          - qbitel-core
+                  topologyKey: kubernetes.io/hostname
+              - weight: 50
+                podAffinityTerm:
+                  labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                          - qbitel-core
+                  topologyKey: topology.kubernetes.io/zone
+    target:
+      kind: Deployment
+      name: qbitel-core
+
+  # Security context for production
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/securityContext
+        value:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+          seccompProfile:
+            type: RuntimeDefault
+      - op: add
+        path: /spec/template/spec/containers/0/securityContext
+        value:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+    target:
+      kind: Deployment
+
+  # Service account annotations for workload identity
+  - patch: |-
+      - op: add
+        path: /metadata/annotations/iam.gke.io~1gcp-service-account
+        value: qbitel@project-id.iam.gserviceaccount.com
+    target:
+      kind: ServiceAccount
+      name: qbitel
+
+# Production components
+components:
+  - ../../components/monitoring
+  - ../../components/tracing
+  - ../../components/ingress
+  - ../../components/security
+  - ../../components/backup
+
+# Generator options
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    environment: production
+    managed-by: argocd

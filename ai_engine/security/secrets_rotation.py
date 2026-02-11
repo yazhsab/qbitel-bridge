@@ -1,5 +1,5 @@
 """
-CRONOS AI - Automated Secrets Rotation System
+QBITEL - Automated Secrets Rotation System
 Production-ready secrets rotation with support for multiple backends.
 """
 
@@ -110,7 +110,7 @@ class SecretGenerator:
         return base64.b64encode(key_bytes).decode("utf-8")
 
     @staticmethod
-    def generate_api_key(prefix: str = "cronos", length: int = 32) -> str:
+    def generate_api_key(prefix: str = "qbitel", length: int = 32) -> str:
         """Generate an API key with prefix."""
         random_part = secrets.token_urlsafe(length)
         return f"{prefix}_{random_part}"
@@ -281,7 +281,7 @@ class SecretsRotationManager:
         elif secret_type == SecretType.ENCRYPTION_KEY:
             return generator.generate_encryption_key(length=32)
         elif secret_type == SecretType.API_KEY:
-            return generator.generate_api_key(prefix="cronos")
+            return generator.generate_api_key(prefix="qbitel")
         else:
             return generator.generate_password(length=32)
 
@@ -322,7 +322,7 @@ class SecretsRotationManager:
             vault_addr = self.backend_config.get("vault_addr")
             vault_token = self.backend_config.get("vault_token")
             mount_point = self.backend_config.get("mount_point", "secret")
-            path = self.backend_config.get("path", "cronos-ai/production")
+            path = self.backend_config.get("path", "qbitel/production")
 
             client = hvac.Client(url=vault_addr, token=vault_token)
 
@@ -348,7 +348,7 @@ class SecretsRotationManager:
             import boto3
 
             region = self.backend_config.get("region", "us-east-1")
-            secret_name = f"cronos-ai/production/{secret_type.value}"
+            secret_name = f"qbitel/production/{secret_type.value}"
 
             client = boto3.client("secretsmanager", region_name=region)
 
@@ -368,7 +368,7 @@ class SecretsRotationManager:
                         {"value": secret_value, "version": version}
                     ),
                     Tags=[
-                        {"Key": "Application", "Value": "CRONOS-AI"},
+                        {"Key": "Application", "Value": "QBITEL"},
                         {"Key": "Environment", "Value": "production"},
                     ],
                 )
@@ -393,7 +393,7 @@ class SecretsRotationManager:
             credential = DefaultAzureCredential()
             client = SecretClient(vault_url=vault_url, credential=credential)
 
-            secret_name = f"cronos-ai-{secret_type.value.replace('_', '-')}"
+            secret_name = f"qbitel-{secret_type.value.replace('_', '-')}"
             secret = client.set_secret(secret_name, secret_value)
 
             self.logger.info(f"Wrote secret to Azure Key Vault: {secret_name}")
@@ -413,7 +413,7 @@ class SecretsRotationManager:
             project_id = self.backend_config.get("project_id")
             client = secretmanager.SecretManagerServiceClient()
 
-            secret_id = f"cronos-ai-{secret_type.value.replace('_', '-')}"
+            secret_id = f"qbitel-{secret_type.value.replace('_', '-')}"
             parent = f"projects/{project_id}"
             secret_path = f"{parent}/secrets/{secret_id}"
 
@@ -461,7 +461,7 @@ class SecretsRotationManager:
 
             v1 = client.CoreV1Api()
             namespace = self.backend_config.get("namespace", "default")
-            secret_name = f"cronos-ai-{secret_type.value.replace('_', '-')}"
+            secret_name = f"qbitel-{secret_type.value.replace('_', '-')}"
 
             # Encode secret value
             encoded_value = base64.b64encode(secret_value.encode()).decode()
@@ -470,7 +470,7 @@ class SecretsRotationManager:
                 metadata=client.V1ObjectMeta(
                     name=secret_name,
                     labels={
-                        "app": "cronos-ai",
+                        "app": "qbitel",
                         "version": version,
                         "managed-by": "secrets-rotation",
                     },
@@ -496,20 +496,127 @@ class SecretsRotationManager:
     async def _update_applications(
         self, secret_type: SecretType, new_secret: str, new_version: str
     ):
-        """Update running applications with new secret."""
+        """Update running applications with the new secret.
+
+        Supports three deployment strategies:
+        1. Kubernetes — patches the K8s Secret and triggers a rolling restart
+        2. Database/Redis — executes ALTER USER / CONFIG SET for direct rotation
+        3. Environment — updates the in-process environment variable
+        """
+        import os
+
         self.logger.info(
             f"Updating applications with new {secret_type} version {new_version}"
         )
 
-        # Implementation depends on deployment strategy:
-        # - Kubernetes: Update secret and trigger rolling restart
-        # - Docker: Update environment and restart containers
-        # - Bare metal: Update config files and reload services
+        # 1. Direct service credential rotation (database / redis)
+        if secret_type == SecretType.DATABASE_PASSWORD:
+            await self._rotate_database_password(new_secret)
+        elif secret_type == SecretType.REDIS_PASSWORD:
+            await self._rotate_redis_password(new_secret)
 
-        # For now, log that manual restart may be needed
-        self.logger.warning(
-            f"Manual application restart may be required to use new {secret_type}"
-        )
+        # 2. Kubernetes rolling restart when deployed to K8s
+        if self.backend == SecretBackend.KUBERNETES:
+            await self._trigger_kubernetes_rollout(secret_type, new_version)
+
+        # 3. Always update the current process environment so the app
+        # picks up the new value on next connection/reconnect.
+        env_key_map = {
+            SecretType.DATABASE_PASSWORD: "DATABASE_PASSWORD",
+            SecretType.REDIS_PASSWORD: "REDIS_PASSWORD",
+            SecretType.JWT_SECRET: "JWT_SECRET_KEY",
+            SecretType.ENCRYPTION_KEY: "ENCRYPTION_KEY",
+            SecretType.API_KEY: "QBITEL_API_KEY",
+        }
+        env_key = env_key_map.get(secret_type)
+        if env_key:
+            os.environ[env_key] = new_secret
+            self.logger.info(f"Updated environment variable {env_key}")
+
+    async def _rotate_database_password(self, new_password: str):
+        """Rotate the database user password via ALTER USER."""
+        try:
+            import asyncpg
+            import os
+
+            db_url = os.getenv("DATABASE_URL", "")
+            if not db_url:
+                self.logger.warning("DATABASE_URL not set, skipping DB password rotation")
+                return
+
+            conn = await asyncpg.connect(db_url)
+            try:
+                db_user = os.getenv("DATABASE_USER", "qbitel")
+                await conn.execute(
+                    f"ALTER USER {db_user} WITH PASSWORD $1", new_password
+                )
+                self.logger.info(f"Database password rotated for user {db_user}")
+            finally:
+                await conn.close()
+        except ImportError:
+            self.logger.warning("asyncpg not installed, skipping DB password rotation")
+        except Exception as e:
+            self.logger.error(f"Failed to rotate database password: {e}")
+            raise
+
+    async def _rotate_redis_password(self, new_password: str):
+        """Rotate Redis password via CONFIG SET requirepass."""
+        try:
+            import redis.asyncio as aioredis
+            import os
+
+            redis_url = os.getenv("REDIS_URL", os.getenv("QBITEL_REDIS_URL", ""))
+            if not redis_url:
+                self.logger.warning("REDIS_URL not set, skipping Redis password rotation")
+                return
+
+            client = aioredis.from_url(redis_url, socket_connect_timeout=5)
+            try:
+                await client.config_set("requirepass", new_password)
+                await client.auth(new_password)
+                self.logger.info("Redis password rotated successfully")
+            finally:
+                await client.aclose()
+        except ImportError:
+            self.logger.warning("redis package not installed, skipping Redis password rotation")
+        except Exception as e:
+            self.logger.error(f"Failed to rotate Redis password: {e}")
+            raise
+
+    async def _trigger_kubernetes_rollout(self, secret_type: SecretType, new_version: str):
+        """Trigger a Kubernetes rolling restart so pods pick up new secrets."""
+        try:
+            from kubernetes import client, config as k8s_config
+
+            try:
+                k8s_config.load_incluster_config()
+            except Exception:
+                k8s_config.load_kube_config()
+
+            apps_v1 = client.AppsV1Api()
+            namespace = self.backend_config.get("namespace", "default")
+            deployment_name = self.backend_config.get("deployment", "qbitel-engine")
+
+            patch = {
+                "spec": {
+                    "template": {
+                        "metadata": {
+                            "annotations": {
+                                "qbitel.ai/secret-rotated": f"{secret_type.value}={new_version}",
+                                "qbitel.ai/restart-timestamp": datetime.now().isoformat(),
+                            }
+                        }
+                    }
+                }
+            }
+            apps_v1.patch_namespaced_deployment(deployment_name, namespace, patch)
+            self.logger.info(
+                f"Triggered rolling restart for {deployment_name} in {namespace}"
+            )
+        except ImportError:
+            self.logger.warning("kubernetes package not installed, skipping rollout restart")
+        except Exception as e:
+            self.logger.error(f"Failed to trigger Kubernetes rollout: {e}")
 
     async def _is_rotation_required(self, secret_type: SecretType) -> bool:
         """Check if rotation is required for a secret."""

@@ -1,0 +1,137 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Kubernetes Deployment | QBITEL Bridge Docs" description="Manual Kubernetes deployment guide for QBITEL Bridge with fine-grained control over all components.">
+  <h1 class="text-3xl font-bold text-white mb-2">Kubernetes Deployment</h1>
+  <p class="text-gray-400 mb-8">Deploy QBITEL Bridge to Kubernetes with manual manifests for fine-grained control over each component.</p>
+
+  <h2 id="prerequisites" class="text-2xl font-bold text-white mt-12 mb-4">Prerequisites</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Kubernetes</strong> 1.24+ cluster</li>
+    <li><strong class="text-white">kubectl</strong> configured with cluster access</li>
+    <li><strong class="text-white">Container images</strong> built and pushed to a registry</li>
+  </ul>
+
+  <h2 id="create-namespaces" class="text-2xl font-bold text-white mt-12 mb-4">Create Namespaces</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Create required namespaces</span>
+kubectl create namespace qbitel-service-mesh
+kubectl create namespace qbitel-container-security
+kubectl create namespace qbitel-monitoring
+
+<span class="text-gray-500"># Or apply from manifests</span>
+kubectl apply -f kubernetes/service-mesh/namespace.yaml
+kubectl apply -f kubernetes/observability/namespace.yaml</code></pre>
+
+  <h2 id="service-mesh" class="text-2xl font-bold text-white mt-12 mb-4">Service Mesh Deployment</h2>
+  <p class="text-gray-300 mb-4">Deploy the xDS Server and Istio integration for service mesh management:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Apply RBAC configuration</span>
+kubectl apply -f kubernetes/service-mesh/rbac.yaml
+
+<span class="text-gray-500"># Deploy xDS Server</span>
+kubectl apply -f kubernetes/service-mesh/xds-server-deployment.yaml
+
+<span class="text-gray-500"># Verify deployment</span>
+kubectl get pods -n qbitel-service-mesh
+kubectl logs -n qbitel-service-mesh deployment/xds-server -f</code></pre>
+
+  <h2 id="container-security" class="text-2xl font-bold text-white mt-12 mb-4">Container Security</h2>
+  <p class="text-gray-300 mb-4">Deploy the admission webhook for pod security validation:</p>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Generate TLS certificates for the webhook</span>
+./scripts/generate-webhook-certs.sh
+
+<span class="text-gray-500"># Deploy admission webhook</span>
+kubectl apply -f kubernetes/container-security/admission-webhook-deployment.yaml
+
+<span class="text-gray-500"># Verify webhook registration</span>
+kubectl get validatingwebhookconfigurations
+
+<span class="text-gray-500"># Enable webhook for a namespace</span>
+kubectl label namespace your-namespace qbitel.ai/webhook=enabled</code></pre>
+
+  <h2 id="ai-engine" class="text-2xl font-bold text-white mt-12 mb-4">AI Engine Deployment</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Deploy the AI Engine</span>
+kubectl apply -f ai_engine/deployment/kubernetes/deployment.yaml
+
+<span class="text-gray-500"># Verify the engine is running</span>
+kubectl get pods -n qbitel-service-mesh -l app=qbitel-engine
+
+<span class="text-gray-500"># Port-forward for local access</span>
+kubectl port-forward -n qbitel-service-mesh svc/qbitel-engine 8000:8000</code></pre>
+
+  <h2 id="observability" class="text-2xl font-bold text-white mt-12 mb-4">Observability Stack</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Deploy the observability stack</span>
+kubectl apply -k kubernetes/observability/
+
+<span class="text-gray-500"># This deploys:</span>
+<span class="text-gray-500"># - Prometheus for metrics collection</span>
+<span class="text-gray-500"># - Grafana with pre-configured dashboards</span>
+<span class="text-gray-500"># - OpenTelemetry Collector</span>
+<span class="text-gray-500"># - Tempo for distributed tracing</span>
+
+<span class="text-gray-500"># Access Grafana</span>
+kubectl port-forward -n qbitel-monitoring svc/grafana 3000:3000</code></pre>
+
+  <h2 id="verify-deployment" class="text-2xl font-bold text-white mt-12 mb-4">Verify Deployment</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Check all pods</span>
+kubectl get pods -n qbitel-service-mesh
+
+<span class="text-gray-500"># Expected output:</span>
+<span class="text-gray-500"># NAME                                    READY   STATUS    RESTARTS</span>
+<span class="text-gray-500"># qbitel-xds-server-xxx                   1/1     Running   0</span>
+<span class="text-gray-500"># qbitel-admission-webhook-xxx            1/1     Running   0</span>
+<span class="text-gray-500"># qbitel-engine-xxx                       1/1     Running   0</span>
+
+<span class="text-gray-500"># Test xDS Server health</span>
+kubectl exec -n qbitel-service-mesh deployment/qbitel-xds-server -- \
+  curl -f http://localhost:8081/healthz
+
+<span class="text-gray-500"># Test AI Engine health</span>
+kubectl exec -n qbitel-service-mesh deployment/qbitel-engine -- \
+  curl -f http://localhost:8000/health</code></pre>
+
+  <h2 id="network-requirements" class="text-2xl font-bold text-white mt-12 mb-4">Network Requirements</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Port</th>
+        <th class="text-left text-white py-2 pr-4">Protocol</th>
+        <th class="text-left text-white py-2">Service</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">8000</td>
+        <td class="text-gray-300 py-2 pr-4">TCP</td>
+        <td class="text-gray-300 py-2">REST API</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">50051</td>
+        <td class="text-gray-300 py-2 pr-4">TCP</td>
+        <td class="text-gray-300 py-2">gRPC API</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">9090</td>
+        <td class="text-gray-300 py-2 pr-4">TCP</td>
+        <td class="text-gray-300 py-2">Prometheus metrics</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">3000</td>
+        <td class="text-gray-300 py-2 pr-4">TCP</td>
+        <td class="text-gray-300 py-2">Grafana dashboards</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">8081</td>
+        <td class="text-gray-300 py-2 pr-4">TCP</td>
+        <td class="text-gray-300 py-2">xDS Server health</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/deployment/helm" class="text-quantum-400 hover:underline">Helm Charts</a> -- simplified deployment with Helm</li>
+    <li><a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> -- security hardening and scaling</li>
+    <li><a href="/docs/operations/monitoring" class="text-quantum-400 hover:underline">Monitoring</a> -- configure alerts and dashboards</li>
+  </ul>
+</DocsLayout>

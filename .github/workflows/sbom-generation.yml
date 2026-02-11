@@ -14,7 +14,7 @@ on:
 env:
   SBOM_OUTPUT_DIR: ./sbom-artifacts
   REGISTRY: ghcr.io
-  IMAGE_NAME: cronos-ai
+  IMAGE_NAME: qbitel
 
 jobs:
   generate-sbom:
@@ -71,13 +71,13 @@ jobs:
         run: |
           syft packages dir:./ai_engine \
             -o spdx-json \
-            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-ai-engine-spdx.json
+            --file ${{ env.SBOM_OUTPUT_DIR }}/qbitel-engine-spdx.json
 
       - name: Generate Python AI Engine SBOM (CycloneDX)
         run: |
           syft packages dir:./ai_engine \
             -o cyclonedx-json \
-            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-ai-engine-cyclonedx.json
+            --file ${{ env.SBOM_OUTPUT_DIR }}/qbitel-engine-cyclonedx.json
 
       # ============================================
       # Generate SBOMs for Rust Data Plane
@@ -86,13 +86,13 @@ jobs:
         run: |
           syft packages dir:./rust/dataplane \
             -o spdx-json \
-            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-dataplane-spdx.json
+            --file ${{ env.SBOM_OUTPUT_DIR }}/qbitel-dataplane-spdx.json
 
       - name: Generate Rust Data Plane SBOM (CycloneDX)
         run: |
           syft packages dir:./rust/dataplane \
             -o cyclonedx-json \
-            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-dataplane-cyclonedx.json
+            --file ${{ env.SBOM_OUTPUT_DIR }}/qbitel-dataplane-cyclonedx.json
 
       # ============================================
       # Generate SBOMs for Go Services
@@ -102,14 +102,14 @@ jobs:
         run: |
           syft packages dir:./go/controlplane \
             -o spdx-json \
-            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-controlplane-spdx.json
+            --file ${{ env.SBOM_OUTPUT_DIR }}/qbitel-controlplane-spdx.json
 
       - name: Generate Go Management API SBOM (CycloneDX)
         if: hashFiles('go/mgmtapi/go.mod') != ''
         run: |
           syft packages dir:./go/mgmtapi \
             -o cyclonedx-json \
-            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-mgmtapi-cyclonedx.json
+            --file ${{ env.SBOM_OUTPUT_DIR }}/qbitel-mgmtapi-cyclonedx.json
 
       # ============================================
       # Generate SBOMs for UI Console
@@ -119,14 +119,14 @@ jobs:
         run: |
           syft packages dir:./ui/console \
             -o spdx-json \
-            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-console-spdx.json
+            --file ${{ env.SBOM_OUTPUT_DIR }}/qbitel-console-spdx.json
 
       - name: Generate UI Console SBOM (CycloneDX)
         if: hashFiles('ui/console/package.json') != ''
         run: |
           syft packages dir:./ui/console \
             -o cyclonedx-json \
-            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-console-cyclonedx.json
+            --file ${{ env.SBOM_OUTPUT_DIR }}/qbitel-console-cyclonedx.json
 
       # ============================================
       # Generate Unified Platform SBOM
@@ -135,13 +135,13 @@ jobs:
         run: |
           syft packages dir:. \
             -o spdx-json \
-            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-ai-platform-spdx.json
+            --file ${{ env.SBOM_OUTPUT_DIR }}/qbitel-platform-spdx.json
 
       - name: Generate Unified Platform SBOM (CycloneDX)
         run: |
           syft packages dir:. \
             -o cyclonedx-json \
-            --file ${{ env.SBOM_OUTPUT_DIR }}/cronos-ai-platform-cyclonedx.json
+            --file ${{ env.SBOM_OUTPUT_DIR }}/qbitel-platform-cyclonedx.json
 
       # ============================================
       # Vulnerability Scanning with Grype
@@ -262,7 +262,7 @@ jobs:
       - name: Upload SBOM artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cronos-ai-sbom-${{ github.sha }}
+          name: qbitel-sbom-${{ github.sha }}
           path: ${{ env.SBOM_OUTPUT_DIR }}
           retention-days: 90
 
@@ -362,7 +362,7 @@ jobs:
       - name: Download SBOM artifacts
         uses: actions/download-artifact@v4
         with:
-          name: cronos-ai-sbom-${{ github.sha }}
+          name: qbitel-sbom-${{ github.sha }}
           path: ./sbom-artifacts
 
       - name: Upload to Dependency-Track

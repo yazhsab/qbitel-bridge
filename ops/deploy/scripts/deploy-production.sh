@@ -1,5 +1,5 @@
 #!/bin/bash
-# CRONOS AI - Production Deployment Script
+# QBITEL - Production Deployment Script
 # Complete automation for production deployment
 
 set -euo pipefail
@@ -7,10 +7,10 @@ set -euo pipefail
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-HELM_CHART_PATH="${PROJECT_ROOT}/ops/deploy/helm/cronos-ai"
-NAMESPACE="cronos-ai"
-MONITORING_NAMESPACE="cronos-ai-monitoring"
-RELEASE_NAME="cronos-ai"
+HELM_CHART_PATH="${PROJECT_ROOT}/ops/deploy/helm/qbitel"
+NAMESPACE="qbitel"
+MONITORING_NAMESPACE="qbitel-monitoring"
+RELEASE_NAME="qbitel"
 
 # Colors for output
 RED='\033[0;31m'
@@ -128,8 +128,8 @@ setup_secrets() {
         log_info "Creating placeholder secrets..."
         
         # Create placeholder secrets (MUST be updated with real values)
-        kubectl create secret generic cronos-ai-secrets \
-            --from-literal=database-url="postgresql://cronos_ai:CHANGE_ME@postgresql:5432/cronos_ai_prod" \
+        kubectl create secret generic qbitel-secrets \
+            --from-literal=database-url="postgresql://qbitel:CHANGE_ME@postgresql:5432/qbitel_prod" \
             --from-literal=redis-password="CHANGE_ME" \
             --from-literal=jwt-secret="CHANGE_ME" \
             --from-literal=oauth-client-id="CHANGE_ME" \
@@ -138,7 +138,7 @@ setup_secrets() {
             --namespace $NAMESPACE \
             --dry-run=client -o yaml | kubectl apply -f -
         
-        kubectl create secret generic cronos-ai-grafana-secret \
+        kubectl create secret generic qbitel-grafana-secret \
             --from-literal=admin-user="admin" \
             --from-literal=admin-password="CHANGE_ME" \
             --namespace $MONITORING_NAMESPACE \
@@ -164,7 +164,7 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: admin@cronos-ai.example.com
+    email: admin@qbitel.example.com
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
@@ -284,7 +284,7 @@ run_integration_tests() {
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cronos-ai-integration-tests
+  name: qbitel-integration-tests
   namespace: $NAMESPACE
 spec:
   template:
@@ -297,7 +297,7 @@ spec:
           - -c
           - |
             pip install asyncio aiohttp asyncpg redis kafka-python pytest kubernetes prometheus-client
-            python /tests/production-integration-tests.py --config /config/cronos_ai.production.yaml
+            python /tests/production-integration-tests.py --config /config/qbitel.production.yaml
         volumeMounts:
         - name: test-scripts
           mountPath: /tests
@@ -309,20 +309,20 @@ spec:
           name: integration-test-scripts
       - name: config
         configMap:
-          name: cronos-ai-config
+          name: qbitel-config
       restartPolicy: Never
   backoffLimit: 1
   ttlSecondsAfterFinished: 3600
 EOF
     
     # Wait for test completion
-    kubectl wait --for=condition=complete --timeout=1800s job/cronos-ai-integration-tests -n $NAMESPACE || {
+    kubectl wait --for=condition=complete --timeout=1800s job/qbitel-integration-tests -n $NAMESPACE || {
         log_warning "Integration tests failed or timed out"
-        kubectl logs job/cronos-ai-integration-tests -n $NAMESPACE || true
+        kubectl logs job/qbitel-integration-tests -n $NAMESPACE || true
     }
     
     # Clean up test job
-    kubectl delete job cronos-ai-integration-tests -n $NAMESPACE || true
+    kubectl delete job qbitel-integration-tests -n $NAMESPACE || true
     
     log_success "Integration tests completed"
 }
@@ -422,8 +422,8 @@ show_status() {
 }
 
 # Main deployment function
-deploy_cronos_ai() {
-    log_info "Starting CRONOS AI production deployment..."
+deploy_qbitel() {
+    log_info "Starting QBITEL production deployment..."
     
     # Pre-deployment steps
     check_prerequisites
@@ -436,7 +436,7 @@ deploy_cronos_ai() {
     deploy_monitoring
     
     # Main application deployment
-    log_info "Deploying CRONOS AI application..."
+    log_info "Deploying QBITEL application..."
     helm upgrade --install $RELEASE_NAME $HELM_CHART_PATH \
         --namespace $NAMESPACE \
         --values "${HELM_CHART_PATH}/values.yaml" \
@@ -456,12 +456,12 @@ deploy_cronos_ai() {
     
     show_status
     
-    log_success "CRONOS AI production deployment completed successfully!"
+    log_success "QBITEL production deployment completed successfully!"
     log_info "Access URLs:"
-    log_info "  - Console: https://console.cronos-ai.example.com"
-    log_info "  - API: https://api.cronos-ai.example.com"
-    log_info "  - Monitoring: https://monitoring.cronos-ai.example.com"
-    log_info "  - AI API: https://ai-api.cronos-ai.example.com"
+    log_info "  - Console: https://console.qbitel.example.com"
+    log_info "  - API: https://api.qbitel.example.com"
+    log_info "  - Monitoring: https://monitoring.qbitel.example.com"
+    log_info "  - AI API: https://ai-api.qbitel.example.com"
 }
 
 # Parse command line arguments
@@ -469,7 +469,7 @@ COMMAND=${1:-deploy}
 
 case $COMMAND in
     "deploy")
-        deploy_cronos_ai
+        deploy_qbitel
         ;;
     "rollback")
         rollback_deployment
@@ -490,7 +490,7 @@ case $COMMAND in
         echo "Usage: $0 [deploy|rollback|status|health|validate|test]"
         echo ""
         echo "Commands:"
-        echo "  deploy    - Deploy CRONOS AI to production"
+        echo "  deploy    - Deploy QBITEL to production"
         echo "  rollback  - Rollback to previous version"
         echo "  status    - Show deployment status"
         echo "  health    - Perform health checks"

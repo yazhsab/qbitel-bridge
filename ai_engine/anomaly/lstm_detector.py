@@ -1,4 +1,4 @@
-"""CRONOS AI Engine - LSTM Anomaly Detector (stub).
+"""QBITEL Engine - LSTM Anomaly Detector (stub).
 
 This lightweight implementation captures temporal dynamics using a simple
 statistical surrogate so tests have a deterministic interface to exercise.

@@ -1,5 +1,5 @@
 """
-CRONOS AI - Comprehensive Load Testing Suite
+QBITEL - Comprehensive Load Testing Suite
 
 Production-grade load tests to validate performance, scalability, and reliability
 under various load conditions.
@@ -489,7 +489,7 @@ async def scalability_test():
 async def main():
     """Run all load tests."""
     print(f"\n{'#'*80}")
-    print("CRONOS AI - Comprehensive Load Testing Suite")
+    print("QBITEL - Comprehensive Load Testing Suite")
     print(f"{'#'*80}\n")
 
     all_results = {}

@@ -168,7 +168,7 @@ const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
     <Box sx={{ width: 250 }}>
       <Toolbar>
         <Typography variant="h6" noWrap component="div">
-          CronosAI Console
+          QbitelAI Console
         </Typography>
         {isMobile && (
           <IconButton
@@ -272,7 +272,7 @@ const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
             </IconButton>
             
             <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-              CronosAI
+              QbitelAI
             </Typography>
 
             <IconButton

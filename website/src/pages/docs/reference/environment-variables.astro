@@ -1,0 +1,335 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Environment Variables | QBITEL Bridge Docs" description="Complete reference of all environment variables for configuring QBITEL Bridge components.">
+  <h1 class="text-3xl font-bold text-white mb-2">Environment Variables Reference</h1>
+  <p class="text-gray-400 mb-8">Complete reference of all environment variables used to configure QBITEL Bridge. Variables are grouped by component and function.</p>
+
+  <h2 id="core" class="text-2xl font-bold text-white mt-12 mb-4">Core Configuration</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Variable</th>
+        <th class="text-left text-white py-2 pr-4">Default</th>
+        <th class="text-left text-white py-2 pr-4">Required</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_ENVIRONMENT</code></td>
+        <td class="text-gray-300 py-2 pr-4">development</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Environment name (fallback: ENVIRONMENT)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_LOG_LEVEL</code></td>
+        <td class="text-gray-300 py-2 pr-4">INFO</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Logging level (DEBUG, INFO, WARNING, ERROR)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_DB_HOST</code></td>
+        <td class="text-gray-300 py-2 pr-4">localhost</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Database host (fallback: DATABASE_HOST)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_DB_PORT</code></td>
+        <td class="text-gray-300 py-2 pr-4">5432</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Database port (fallback: DATABASE_PORT)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_DB_PASSWORD</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">Production</td>
+        <td class="text-gray-300 py-2">Database password (fallback: DATABASE_PASSWORD)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_REDIS_PASSWORD</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Redis password</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="security" class="text-2xl font-bold text-white mt-12 mb-4">Security &amp; Authentication</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Variable</th>
+        <th class="text-left text-white py-2 pr-4">Default</th>
+        <th class="text-left text-white py-2 pr-4">Required</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_JWT_SECRET</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">Yes</td>
+        <td class="text-gray-300 py-2">JWT signing secret (fallback: JWT_SECRET)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_ENCRYPTION_KEY</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Encryption key for field-level encryption</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_API_KEY</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">API key for authentication (fallback: API_KEY)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">MARKETPLACE_ENABLED</code></td>
+        <td class="text-gray-300 py-2 pr-4">false</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Enable the protocol marketplace feature</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="llm" class="text-2xl font-bold text-white mt-12 mb-4">LLM Provider</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Variable</th>
+        <th class="text-left text-white py-2 pr-4">Default</th>
+        <th class="text-left text-white py-2 pr-4">Required</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_LLM_PROVIDER</code></td>
+        <td class="text-gray-300 py-2 pr-4">ollama</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">LLM provider: ollama, vllm, localai</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">OLLAMA_URL</code></td>
+        <td class="text-gray-300 py-2 pr-4">http://localhost:11434</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Ollama endpoint URL</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_LLM_MODEL</code></td>
+        <td class="text-gray-300 py-2 pr-4">llama3.2:8b</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Default LLM model name</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_LLM_ENDPOINT</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Custom LLM endpoint URL</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_AIRGAPPED_MODE</code></td>
+        <td class="text-gray-300 py-2 pr-4">false</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Enable air-gapped mode (no external API calls)</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">QBITEL_DISABLE_CLOUD_LLMS</code></td>
+        <td class="text-gray-300 py-2 pr-4">false</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Disable all cloud LLM providers</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="security" class="text-2xl font-bold text-white mt-12 mb-4">Security</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Variable</th>
+        <th class="text-left text-white py-2 pr-4">Default</th>
+        <th class="text-left text-white py-2 pr-4">Required</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">OLLAMA_URL</code></td>
+        <td class="text-gray-300 py-2 pr-4">http://localhost:11434</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Ollama LLM endpoint URL</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">JWT_ALGORITHM</code></td>
+        <td class="text-gray-300 py-2 pr-4">HS256</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">JWT signing algorithm</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">JWT_EXPIRATION</code></td>
+        <td class="text-gray-300 py-2 pr-4">3600</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">JWT token expiration in seconds</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">API_KEY_ENABLED</code></td>
+        <td class="text-gray-300 py-2 pr-4">true</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Enable API key authentication</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">MTLS_ENABLED</code></td>
+        <td class="text-gray-300 py-2 pr-4">false</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Enable mutual TLS authentication</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">MTLS_CA_CERT</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">If mTLS</td>
+        <td class="text-gray-300 py-2">Path to CA certificate for mTLS</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">PQC_ENABLED</code></td>
+        <td class="text-gray-300 py-2 pr-4">true</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Enable post-quantum cryptography</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">VAULT_ADDR</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">HashiCorp Vault server address</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">VAULT_TOKEN</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Vault authentication token</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="observability" class="text-2xl font-bold text-white mt-12 mb-4">Observability</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Variable</th>
+        <th class="text-left text-white py-2 pr-4">Default</th>
+        <th class="text-left text-white py-2 pr-4">Required</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">OTEL_EXPORTER_ENDPOINT</code></td>
+        <td class="text-gray-300 py-2 pr-4">http://localhost:4317</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">OpenTelemetry Collector gRPC endpoint</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">OTEL_SERVICE_NAME</code></td>
+        <td class="text-gray-300 py-2 pr-4">qbitel-ai-engine</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Service name for telemetry</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">SENTRY_DSN</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Sentry DSN for error tracking</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">PROMETHEUS_PORT</code></td>
+        <td class="text-gray-300 py-2 pr-4">9091</td>
+        <td class="text-gray-300 py-2 pr-4">No</td>
+        <td class="text-gray-300 py-2">Prometheus metrics port</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="marketplace" class="text-2xl font-bold text-white mt-12 mb-4">Marketplace</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Variable</th>
+        <th class="text-left text-white py-2 pr-4">Default</th>
+        <th class="text-left text-white py-2 pr-4">Required</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">STRIPE_API_KEY</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">If marketplace</td>
+        <td class="text-gray-300 py-2">Stripe API key for marketplace payments</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">AWS_S3_BUCKET</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">If marketplace</td>
+        <td class="text-gray-300 py-2">S3 bucket for protocol artifact storage</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">AWS_ACCESS_KEY_ID</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">If AWS</td>
+        <td class="text-gray-300 py-2">AWS access key for S3 and cloud integrations</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">AWS_SECRET_ACCESS_KEY</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2 pr-4">If AWS</td>
+        <td class="text-gray-300 py-2">AWS secret key for S3 and cloud integrations</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="ui-console" class="text-2xl font-bold text-white mt-12 mb-4">UI Console (Vite)</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Variable</th>
+        <th class="text-left text-white py-2 pr-4">Default</th>
+        <th class="text-left text-white py-2">Description</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">VITE_API_BASE_URL</code></td>
+        <td class="text-gray-300 py-2 pr-4">http://localhost:8000</td>
+        <td class="text-gray-300 py-2">Backend API URL</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">VITE_OIDC_AUTHORITY</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2">OIDC provider URL</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">VITE_OIDC_CLIENT_ID</code></td>
+        <td class="text-gray-300 py-2 pr-4">--</td>
+        <td class="text-gray-300 py-2">OIDC client identifier</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">VITE_ENABLE_MARKETPLACE</code></td>
+        <td class="text-gray-300 py-2 pr-4">true</td>
+        <td class="text-gray-300 py-2">Enable protocol marketplace UI</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4"><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">VITE_ENABLE_MONITORING</code></td>
+        <td class="text-gray-300 py-2 pr-4">true</td>
+        <td class="text-gray-300 py-2">Enable monitoring dashboards in UI</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="see-also" class="text-2xl font-bold text-white mt-12 mb-4">See Also</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/getting-started/configuration" class="text-quantum-400 hover:underline">Configuration Guide</a> -- YAML configuration and precedence</li>
+    <li><a href="/docs/deployment/air-gapped" class="text-quantum-400 hover:underline">Air-Gapped Deployment</a> -- air-gapped-specific variables</li>
+    <li><a href="/docs/api/authentication" class="text-quantum-400 hover:underline">Authentication</a> -- security variable details</li>
+  </ul>
+</DocsLayout>

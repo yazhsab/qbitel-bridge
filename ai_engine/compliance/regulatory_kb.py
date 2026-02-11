@@ -1,5 +1,5 @@
 """
-CRONOS AI - Regulatory Knowledge Base
+QBITEL - Regulatory Knowledge Base
 
 Comprehensive regulatory framework knowledge for enterprise compliance reporting.
 Supports PCI-DSS 4.0, Basel III, HIPAA, NERC CIP, and FDA medical device regulations.
@@ -17,12 +17,12 @@ from datetime import datetime, timedelta
 
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest, get_llm_service
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 
 logger = logging.getLogger(__name__)
 
 
-class ComplianceException(CronosAIException):
+class ComplianceException(QbitelAIException):
     """Compliance-specific exception."""
 
     pass

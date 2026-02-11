@@ -1,5 +1,5 @@
 """
-CRONOS AI - Application Performance Monitoring (APM) Integration
+QBITEL - Application Performance Monitoring (APM) Integration
 Production-ready APM with New Relic, Datadog, and Elastic APM support.
 """
 
@@ -85,7 +85,7 @@ class ElasticAPMIntegration:
             config, "elastic_apm_server_url", "http://localhost:8200"
         )
         self.apm_secret_token = getattr(config, "elastic_apm_secret_token", None)
-        self.service_name = getattr(config, "service_name", "cronos-ai")
+        self.service_name = getattr(config, "service_name", "qbitel")
         self.environment = getattr(config.environment, "value", "development")
 
         # Session and batching
@@ -251,7 +251,7 @@ class DatadogAPMIntegration:
             config, "datadog_agent_url", "http://localhost:8126"
         )
         self.dd_api_key = getattr(config, "datadog_api_key", None)
-        self.service_name = getattr(config, "service_name", "cronos-ai")
+        self.service_name = getattr(config, "service_name", "qbitel")
         self.environment = getattr(config.environment, "value", "development")
 
         # Session and batching

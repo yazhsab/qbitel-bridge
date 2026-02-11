@@ -1,4 +1,4 @@
-# CRONOS AI - Core Runtime Dependencies
+# QBITEL - Core Runtime Dependencies
 # Pinned versions for reproducible builds and air-gapped deployments
 # Last updated: 2025-12-05
 # Updated for 2024-2025 AI/ML trends
@@ -80,13 +80,15 @@ sqlalchemy==2.0.23
 alembic==1.13.0
 asyncpg==0.29.0
 redis==5.0.1
-aioredis==2.0.1
+# aioredis is deprecated and merged into redis>=4.2.0 (use redis.asyncio instead)
+# WARNING: etcd3 is unmaintained (last release 2019). Consider replacing with
+# direct gRPC calls to etcd or removing if unused. Pinned for compatibility.
 etcd3==0.12.0
 
 # ============================================================================
 # Security & Authentication
 # ============================================================================
-cryptography==41.0.7
+cryptography==44.0.0
 pyjwt==2.8.0
 passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.3.0
@@ -101,7 +103,7 @@ pycryptodomex==3.23.0
 # Network & Communication
 # ============================================================================
 httpx==0.25.2
-aiohttp==3.9.1
+aiohttp==3.11.11
 websockets==12.0
 python-socketio==5.10.0
 grpcio==1.60.0
@@ -131,7 +133,7 @@ uvloop==0.19.0; sys_platform != "win32"
 # ============================================================================
 # Production Server
 # ============================================================================
-gunicorn==21.2.0
+gunicorn==23.0.0
 
 # ============================================================================
 # AI Explainability

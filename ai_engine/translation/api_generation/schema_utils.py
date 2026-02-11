@@ -215,7 +215,7 @@ def generate_graphql_assets(
 def generate_grpc_assets(protocol_schema: ProtocolSchema) -> Dict[str, Any]:
     """Create protobuf service definition for a protocol schema."""
     type_name = _to_pascal_case(protocol_schema.name)
-    package_name = f"cronos.{_sanitize_proto_identifier(protocol_schema.name.lower())}"
+    package_name = f"qbitel.{_sanitize_proto_identifier(protocol_schema.name.lower())}"
     service_name = f"{type_name}Service"
 
     imports: List[str] = []

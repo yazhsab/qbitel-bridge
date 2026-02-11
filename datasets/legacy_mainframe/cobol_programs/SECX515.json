@@ -1,0 +1,19 @@
+{
+  "program_id": "SECX515",
+  "domain": "finance",
+  "program_type": "archival",
+  "author": "J. SMITH",
+  "lines_of_code": 246,
+  "complexity_level": "complex",
+  "complexity_score": 0.677,
+  "files_used": 4,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.811159",
+  "hash": "b3cec71be0ea54e26484ec280ed4f820"
+}

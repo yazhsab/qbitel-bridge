@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Network Security Integration Connectors
+QBITEL Engine - Network Security Integration Connectors
 
 Specialized connectors for network security systems like Firewalls and IDS/IPS.
 """
@@ -23,7 +23,7 @@ class NetworkSecurityConnector(BaseIntegrationConnector, ABC):
     def __init__(self, config):
         super().__init__(config)
         self.logger = get_security_logger(
-            "cronos.security.integrations.network_security"
+            "qbitel.security.integrations.network_security"
         )
 
     @abstractmethod
@@ -350,7 +350,7 @@ class FirewallConnector(NetworkSecurityConnector):
         """Block IP on Palo Alto firewall."""
 
         # Create dynamic address object
-        address_name = f"CRONOS_BLOCKED_{ip_address.replace('.', '_')}"
+        address_name = f"QBITEL_BLOCKED_{ip_address.replace('.', '_')}"
 
         # Step 1: Create address object
         create_url = f"{self.config.endpoint}/api/"
@@ -358,7 +358,7 @@ class FirewallConnector(NetworkSecurityConnector):
             "type": "config",
             "action": "set",
             "xpath": f"/config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/address/entry[@name='{address_name}']",
-            "element": f"<ip-netmask>{ip_address}</ip-netmask><description>Blocked by CRONOS AI - {datetime.utcnow().isoformat()}</description>",
+            "element": f"<ip-netmask>{ip_address}</ip-netmask><description>Blocked by QBITEL - {datetime.utcnow().isoformat()}</description>",
             "key": self.api_key,
         }
 
@@ -486,7 +486,7 @@ class FirewallConnector(NetworkSecurityConnector):
 
         ban_data = {
             "ip": ip_address,
-            "comment": f"Blocked by CRONOS AI - {datetime.utcnow().isoformat()}",
+            "comment": f"Blocked by QBITEL - {datetime.utcnow().isoformat()}",
         }
 
         try:
@@ -597,7 +597,7 @@ class FirewallConnector(NetworkSecurityConnector):
     async def _palo_alto_unblock_ip(self, ip_address: str) -> IntegrationResult:
         """Unblock IP on Palo Alto firewall."""
 
-        address_name = f"CRONOS_BLOCKED_{ip_address.replace('.', '_')}"
+        address_name = f"QBITEL_BLOCKED_{ip_address.replace('.', '_')}"
 
         # Delete address object
         delete_url = f"{self.config.endpoint}/api/"
@@ -719,7 +719,7 @@ class FirewallConnector(NetworkSecurityConnector):
 
         # This would be implemented based on the specific firewall type
         rule_name = rule_config.get(
-            "name", f"CRONOS_RULE_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+            "name", f"QBITEL_RULE_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
         )
 
         return IntegrationResult(
@@ -993,7 +993,7 @@ class IDSConnector(NetworkSecurityConnector):
 
         return {
             "success": True,
-            "rule_id": f"CRONOS_{ioc_type.upper()}_{hash(ioc_value) % 100000}",
+            "rule_id": f"QBITEL_{ioc_type.upper()}_{hash(ioc_value) % 100000}",
             "ioc_value": ioc_value,
             "ioc_type": ioc_type,
         }
@@ -1046,7 +1046,7 @@ class IDSConnector(NetworkSecurityConnector):
         """Create IDS detection rule."""
 
         rule_name = rule_config.get(
-            "name", f"CRONOS_IDS_RULE_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+            "name", f"QBITEL_IDS_RULE_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
         )
 
         return IntegrationResult(

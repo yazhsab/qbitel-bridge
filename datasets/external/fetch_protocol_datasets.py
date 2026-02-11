@@ -1,7 +1,7 @@
 """
-Fetch Protocol-Specific Datasets for CRONOS AI
+Fetch Protocol-Specific Datasets for QBITEL
 
-This script fetches real-world protocol data relevant to CRONOS AI's
+This script fetches real-world protocol data relevant to QBITEL's
 ML components:
 
 1. BiLSTM-CRF Field Detection: Needs labeled protocol messages
@@ -30,7 +30,7 @@ import struct
 
 
 class ProtocolDatasetFetcher:
-    """Fetch real protocol datasets for CRONOS AI training."""
+    """Fetch real protocol datasets for QBITEL training."""
 
     # Real protocol dataset sources
     PROTOCOL_SOURCES = {
@@ -136,7 +136,7 @@ class ProtocolDatasetFetcher:
         print(f"    Fetching: {url}")
         req = urllib.request.Request(
             url,
-            headers={"User-Agent": "CRONOS-AI-Dataset-Fetcher/1.0"}
+            headers={"User-Agent": "QBITEL-Dataset-Fetcher/1.0"}
         )
         try:
             with urllib.request.urlopen(req, context=self.ssl_context, timeout=timeout) as response:
@@ -268,13 +268,13 @@ class ProtocolDatasetFetcher:
 
     def generate_protocol_relevance_report(self) -> Dict:
         """
-        Generate a report on dataset relevance for CRONOS AI ML components.
+        Generate a report on dataset relevance for QBITEL ML components.
         """
         print("\n[3] Generating Protocol Dataset Relevance Report...")
 
         report = {
             "generated_at": datetime.now().isoformat(),
-            "cronos_ml_components": {
+            "qbitel_ml_components": {
                 "bilstm_crf_field_detection": {
                     "purpose": "Automatic field boundary detection in protocol messages",
                     "data_requirements": [
@@ -392,7 +392,7 @@ class ProtocolDatasetFetcher:
     def fetch_all(self) -> Dict:
         """Fetch all available protocol datasets."""
         print("=" * 60)
-        print("CRONOS AI - Protocol Dataset Fetcher")
+        print("QBITEL - Protocol Dataset Fetcher")
         print("=" * 60)
 
         results = {}

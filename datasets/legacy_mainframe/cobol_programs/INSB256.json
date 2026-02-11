@@ -1,0 +1,19 @@
+{
+  "program_id": "INSB256",
+  "domain": "insurance",
+  "program_type": "batch_processing",
+  "author": "R. WILLIAMS",
+  "lines_of_code": 235,
+  "complexity_level": "medium",
+  "complexity_score": 0.533,
+  "files_used": 2,
+  "verbs_used": 13,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.801870",
+  "hash": "2c6e3af8182ccdd001d4be1c26869a66"
+}

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - Production Integration Testing Framework
+QBITEL - Production Integration Testing Framework
 Comprehensive end-to-end testing for all production components
 """
 
@@ -66,7 +66,7 @@ class HealthCheck:
 class ProductionIntegrationTester:
     """Comprehensive production integration testing framework"""
 
-    def __init__(self, config_file: str = "config/cronos_ai.production.yaml"):
+    def __init__(self, config_file: str = "config/qbitel.production.yaml"):
         self.config_file = config_file
         self.config = self._load_config()
         self.test_results: List[TestResult] = []
@@ -85,7 +85,7 @@ class ProductionIntegrationTester:
             "kafka": os.getenv("KAFKA_BROKERS", "kafka-service:9092"),
             "redis": os.getenv("REDIS_URL", "redis://redis-service:6379"),
             "timescaledb": os.getenv(
-                "TIMESCALE_URL", "postgresql://timescaledb-service:5432/cronos_ai_prod"
+                "TIMESCALE_URL", "postgresql://timescaledb-service:5432/qbitel_prod"
             ),
         }
 
@@ -232,7 +232,7 @@ class ProductionIntegrationTester:
         start_time = time.time()
         try:
             v1 = client.CoreV1Api(self.k8s_client)
-            pods = v1.list_namespaced_pod(namespace="cronos-ai")
+            pods = v1.list_namespaced_pod(namespace="qbitel")
 
             running_pods = [p for p in pods.items if p.status.phase == "Running"]
             failed_pods = [p for p in pods.items if p.status.phase == "Failed"]
@@ -261,7 +261,7 @@ class ProductionIntegrationTester:
         # Test services
         start_time = time.time()
         try:
-            services = v1.list_namespaced_service(namespace="cronos-ai")
+            services = v1.list_namespaced_service(namespace="qbitel")
             duration = time.time() - start_time
 
             details = {"service_count": len(services.items)}
@@ -277,7 +277,7 @@ class ProductionIntegrationTester:
         start_time = time.time()
         try:
             apps_v1 = client.AppsV1Api(self.k8s_client)
-            deployments = apps_v1.list_namespaced_deployment(namespace="cronos-ai")
+            deployments = apps_v1.list_namespaced_deployment(namespace="qbitel")
 
             unhealthy_deployments = []
             for deployment in deployments.items:
@@ -886,7 +886,7 @@ class ProductionIntegrationTester:
         summary = report["summary"]
 
         print("\n" + "=" * 80)
-        print("CRONOS AI - INTEGRATION TEST RESULTS")
+        print("QBITEL - INTEGRATION TEST RESULTS")
         print("=" * 80)
 
         print(f"Total Tests:     {summary['total_tests']}")
@@ -914,10 +914,10 @@ def main():
     """Main test execution function"""
     import argparse
 
-    parser = argparse.ArgumentParser(description="CRONOS AI Integration Test Suite")
+    parser = argparse.ArgumentParser(description="QBITEL Integration Test Suite")
     parser.add_argument(
         "--config",
-        default="config/cronos_ai.production.yaml",
+        default="config/qbitel.production.yaml",
         help="Configuration file path",
     )
     parser.add_argument(

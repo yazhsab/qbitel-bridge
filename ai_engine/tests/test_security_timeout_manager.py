@@ -39,7 +39,7 @@ class _DummyLogger:
 def stub_security_logger(monkeypatch) -> Dict[str, _DummyLogger]:
     loggers: Dict[str, _DummyLogger] = {}
 
-    def _get_logger(name: str = "cronos.security") -> _DummyLogger:
+    def _get_logger(name: str = "qbitel.security") -> _DummyLogger:
         if name not in loggers:
             loggers[name] = _DummyLogger(name)
         return loggers[name]
@@ -210,7 +210,7 @@ async def test_timeout_manager_execute_with_unknown_policy_falls_back(
     result = await manager.execute_with_policy("nonexistent", quick)
 
     assert result.success is True
-    manager_logger = stub_security_logger["cronos.security.resilience.timeout_manager"]
+    manager_logger = stub_security_logger["qbitel.security.resilience.timeout_manager"]
     assert any(
         "Using default timeout policy" in event["message"]
         for event in manager_logger.events
@@ -270,7 +270,7 @@ async def test_timeout_context_logs_timeout_event(stub_security_logger):
     with pytest.raises(asyncio.TimeoutError):
         await slow_operation()
 
-    context_logger = stub_security_logger["cronos.security.resilience.timeout_context"]
+    context_logger = stub_security_logger["qbitel.security.resilience.timeout_context"]
     assert any(
         event["log_type"] == SecurityLogType.PERFORMANCE_METRIC
         and "slow-op" in event["message"]

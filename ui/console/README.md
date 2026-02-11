@@ -1,10 +1,10 @@
-# QSLB Admin Console
+# QBITEL Admin Console
 
-Enterprise-grade management interface for the Quantum-Safe Load Balancer (QSLB) system.
+Enterprise-grade management interface for the Quantum-Safe Legacy Modernization Platform (QBITEL) system.
 
 ## Overview
 
-The QSLB Admin Console is a React-based web application that provides comprehensive management capabilities for the QSLB infrastructure. It features device lifecycle management, policy administration, compliance monitoring, security oversight, and system configuration.
+The QBITEL Admin Console is a React-based web application that provides comprehensive management capabilities for the QBITEL infrastructure. It features device lifecycle management, policy administration, compliance monitoring, security oversight, and system configuration.
 
 ## Features
 
@@ -36,7 +36,7 @@ The QSLB Admin Console is a React-based web application that provides comprehens
 
 ### ⚙️ System Administration
 - **User Management**: User accounts, roles, and permissions
-- **System Configuration**: QSLB system settings and parameters
+- **System Configuration**: QBITEL system settings and parameters
 - **Integration Management**: External system integrations and APIs
 - **Backup & Recovery**: System backup and disaster recovery
 
@@ -62,7 +62,7 @@ The QSLB Admin Console is a React-based web application that provides comprehens
 1. **Clone the repository**:
    ```bash
    git clone <repository-url>
-   cd qslb/ui/console
+   cd qbitel/ui/console
    ```
 
 2. **Install dependencies**:
@@ -92,9 +92,9 @@ The QSLB Admin Console is a React-based web application that provides comprehens
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `VITE_API_BASE_URL` | QSLB API base URL | `https://api.qslb.local` |
-| `VITE_OIDC_AUTHORITY` | OIDC provider URL | `https://auth.qslb.local` |
-| `VITE_OIDC_CLIENT_ID` | OIDC client identifier | `qslb-console` |
+| `VITE_API_BASE_URL` | QBITEL API base URL | `https://api.qbitel.local` |
+| `VITE_OIDC_AUTHORITY` | OIDC provider URL | `https://auth.qbitel.local` |
+| `VITE_OIDC_CLIENT_ID` | OIDC client identifier | `qbitel-console` |
 | `VITE_ENABLE_MFA` | Enable multi-factor authentication | `true` |
 | `VITE_SESSION_TIMEOUT` | Session timeout in milliseconds | `28800000` (8 hours) |
 | `VITE_AUDIT_ENABLED` | Enable audit logging | `true` |
@@ -104,8 +104,8 @@ The QSLB Admin Console is a React-based web application that provides comprehens
 The console requires an OIDC provider configured with:
 - **Client Type**: Public (SPA)
 - **Grant Types**: Authorization Code with PKCE
-- **Redirect URIs**: `https://console.qslb.local/auth/callback`
-- **Post Logout URIs**: `https://console.qslb.local/`
+- **Redirect URIs**: `https://console.qbitel.local/auth/callback`
+- **Post Logout URIs**: `https://console.qbitel.local/`
 - **Scopes**: `openid profile email roles permissions organization`
 
 ## Development
@@ -207,7 +207,7 @@ CMD ["nginx", "-g", "daemon off;"]
 
 ## API Integration
 
-The console integrates with the QSLB Management API:
+The console integrates with the QBITEL Management API:
 
 - **Base URL**: Configured via `VITE_API_BASE_URL`
 - **Authentication**: Bearer token from OIDC provider
@@ -265,11 +265,11 @@ Enable debug logging by setting `VITE_DEBUG_LOGGING=true` in your environment.
 
 ## License
 
-This project is part of the QSLB system and follows the same licensing terms.
+This project is part of the QBITEL system and follows the same licensing terms.
 
 ## Support
 
 For support and questions:
-- **Documentation**: https://docs.qslb.local
-- **Support Email**: support@qslb.local
+- **Documentation**: https://docs.qbitel.local
+- **Support Email**: support@qbitel.local
 - **Issue Tracker**: Internal issue tracking system

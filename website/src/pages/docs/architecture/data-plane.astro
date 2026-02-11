@@ -1,0 +1,127 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Rust Data Plane | QBITEL Bridge Docs" description="Architecture of the Rust data plane: wire-speed packet processing, PQC-TLS, DPDK, and deep packet inspection.">
+  <h1 class="text-3xl font-bold text-white mb-2">Rust Data Plane</h1>
+  <p class="text-gray-400 mb-8">The high-performance data plane handles wire-speed packet processing, PQC-TLS termination, and deep packet inspection using Rust.</p>
+
+  <h2 id="overview" class="text-2xl font-bold text-white mt-12 mb-4">Overview</h2>
+  <p class="text-gray-300 mb-4">The Rust data plane is the performance-critical path in QBITEL Bridge. It captures network traffic at wire speed, terminates PQC-TLS connections, performs deep packet inspection, and forwards processed data to the AI Engine for analysis.</p>
+
+  <h2 id="crate-structure" class="text-2xl font-bold text-white mt-12 mb-4">Crate Structure</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300">rust/dataplane/
+  crates/
+    pqc_tls/          <span class="text-gray-500"># Post-quantum TLS implementation</span>
+    dpdk_engine/      <span class="text-gray-500"># DPDK packet capture and forwarding</span>
+    dpi_engine/       <span class="text-gray-500"># Deep packet inspection engine</span>
+    io_engine/        <span class="text-gray-500"># I/O engine with HA clustering</span>
+    ai_bridge/        <span class="text-gray-500"># Bridge to Python AI Engine</span>
+    k8s_operator/     <span class="text-gray-500"># Kubernetes custom operator</span>
+  bin/
+    qbitel-bridge/    <span class="text-gray-500"># Main binary entrypoint</span></code></pre>
+
+  <h2 id="pqc-tls" class="text-2xl font-bold text-white mt-12 mb-4">PQC-TLS Implementation</h2>
+  <p class="text-gray-300 mb-4">The <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">pqc_tls</code> crate implements quantum-safe TLS using the Open Quantum Safe (liboqs) library. Supported algorithms:</p>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Algorithm</th>
+        <th class="text-left text-white py-2 pr-4">Type</th>
+        <th class="text-left text-white py-2">Use Case</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">ML-KEM-1024 (Kyber)</td>
+        <td class="text-gray-300 py-2 pr-4">Key Encapsulation</td>
+        <td class="text-gray-300 py-2">TLS key exchange</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">ML-DSA-87 (Dilithium)</td>
+        <td class="text-gray-300 py-2 pr-4">Digital Signature</td>
+        <td class="text-gray-300 py-2">Certificate signing</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Falcon-1024</td>
+        <td class="text-gray-300 py-2 pr-4">Digital Signature</td>
+        <td class="text-gray-300 py-2">Compact signatures</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">SLH-DSA (SPHINCS+)</td>
+        <td class="text-gray-300 py-2 pr-4">Hash-based Signature</td>
+        <td class="text-gray-300 py-2">Stateless signing</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="dpdk-engine" class="text-2xl font-bold text-white mt-12 mb-4">DPDK Engine</h2>
+  <p class="text-gray-300 mb-4">The DPDK engine provides kernel-bypass packet processing for maximum throughput:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Zero-copy packet processing</strong> -- direct NIC access without kernel overhead</li>
+    <li><strong class="text-white">Multi-queue RSS</strong> -- receive-side scaling across CPU cores</li>
+    <li><strong class="text-white">Configurable pipelines</strong> -- pluggable packet processing stages</li>
+    <li><strong class="text-white">100K+ messages/second</strong> -- sustained throughput under load</li>
+  </ul>
+
+  <h2 id="dpi-engine" class="text-2xl font-bold text-white mt-12 mb-4">Deep Packet Inspection</h2>
+  <p class="text-gray-300 mb-4">The DPI engine inspects packet payloads for protocol identification, threat signatures, and data classification:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>Protocol signature matching against known protocol fingerprints</li>
+    <li>Stateful flow tracking for connection reassembly</li>
+    <li>Content classification for data loss prevention</li>
+    <li>Integration with AI Engine for unknown protocol discovery</li>
+  </ul>
+
+  <h2 id="ai-bridge" class="text-2xl font-bold text-white mt-12 mb-4">AI Bridge</h2>
+  <p class="text-gray-300 mb-4">The <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ai_bridge</code> crate provides the interface between the Rust data plane and the Python AI Engine:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>Serializes captured packets into AI Engine-compatible format</li>
+    <li>Manages connection pooling to the Python gRPC service</li>
+    <li>Handles backpressure when the AI Engine is under load</li>
+    <li>Provides fallback classification when the AI Engine is unavailable</li>
+  </ul>
+
+  <h2 id="k8s-operator" class="text-2xl font-bold text-white mt-12 mb-4">Kubernetes Operator</h2>
+  <p class="text-gray-300 mb-4">The <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">k8s_operator</code> crate implements a custom Kubernetes operator for managing data plane resources:</p>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li><strong class="text-white">Custom Resource Definitions</strong> -- define data plane configurations as Kubernetes resources</li>
+    <li><strong class="text-white">Controller</strong> -- reconciliation loop for control plane, policy, and service mesh resources</li>
+    <li><strong class="text-white">Metrics</strong> -- exports Prometheus metrics for operator health</li>
+  </ul>
+
+  <h2 id="performance" class="text-2xl font-bold text-white mt-12 mb-4">Performance Characteristics</h2>
+  <table class="w-full mb-6">
+    <thead>
+      <tr class="border-b border-surface-600">
+        <th class="text-left text-white py-2 pr-4">Metric</th>
+        <th class="text-left text-white py-2">Target</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-surface-600">
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">PQC-TLS handshake latency</td>
+        <td class="text-gray-300 py-2">&lt; 1ms</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Packet processing throughput</td>
+        <td class="text-gray-300 py-2">100K+ msg/s</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">DPI classification latency</td>
+        <td class="text-gray-300 py-2">&lt; 50 microseconds</td>
+      </tr>
+      <tr>
+        <td class="text-gray-300 py-2 pr-4">Memory footprint</td>
+        <td class="text-gray-300 py-2">&lt; 256 MB baseline</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2">
+    <li><a href="/docs/security/pqc-algorithms" class="text-quantum-400 hover:underline">PQC Algorithms</a> -- detailed algorithm specifications</li>
+    <li><a href="/docs/development/rust" class="text-quantum-400 hover:underline">Rust Development Guide</a> -- contribute to the data plane</li>
+    <li><a href="/docs/architecture/control-plane" class="text-quantum-400 hover:underline">Go Control Plane</a> -- service orchestration layer</li>
+  </ul>
+</DocsLayout>

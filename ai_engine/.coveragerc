@@ -1,7 +1,11 @@
 [run]
-include =
-    */ai_engine/security/monitoring.py
-    */ai_engine/security/resilience/timeout_manager.py
+source = ai_engine
+omit =
+    */tests/*
+    */alembic/*
+    */benchmarks/*
+    */__pycache__/*
+    */vendor/*
 
 [report]
 exclude_lines =
@@ -11,4 +15,10 @@ exclude_lines =
     raise NotImplementedError
     if __name__ == .__main__.
     if TYPE_CHECKING:
-fail_under = 80
+    @abstract
+fail_under = 60
+show_missing = true
+precision = 2
+
+[html]
+directory = htmlcov

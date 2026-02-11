@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Protocol Intelligence Copilot Monitoring
+QBITEL Engine - Protocol Intelligence Copilot Monitoring
 Advanced monitoring and observability for LLM-enhanced protocol analysis.
 """
 
@@ -146,14 +146,14 @@ class CopilotMonitoringService:
 
         # Core copilot metrics
         self.copilot_queries_total = Counter(
-            "cronos_copilot_queries_total",
+            "qbitel_copilot_queries_total",
             "Total copilot queries processed",
             ["query_type", "user_id", "status"],
             registry=self.registry,
         )
 
         self.copilot_query_duration = Histogram(
-            "cronos_copilot_query_duration_seconds",
+            "qbitel_copilot_query_duration_seconds",
             "Copilot query processing time",
             ["query_type", "llm_provider"],
             buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0],
@@ -161,7 +161,7 @@ class CopilotMonitoringService:
         )
 
         self.copilot_confidence_score = Histogram(
-            "cronos_copilot_confidence_score",
+            "qbitel_copilot_confidence_score",
             "Confidence scores of copilot responses",
             ["query_type"],
             buckets=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
@@ -170,14 +170,14 @@ class CopilotMonitoringService:
 
         # LLM provider metrics
         self.llm_requests_total = Counter(
-            "cronos_llm_requests_total",
+            "qbitel_llm_requests_total",
             "Total LLM provider requests",
             ["provider", "model", "status"],
             registry=self.registry,
         )
 
         self.llm_request_duration = Histogram(
-            "cronos_llm_request_duration_seconds",
+            "qbitel_llm_request_duration_seconds",
             "LLM provider request duration",
             ["provider", "model"],
             buckets=[0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0],
@@ -185,7 +185,7 @@ class CopilotMonitoringService:
         )
 
         self.llm_tokens_used = Counter(
-            "cronos_llm_tokens_used_total",
+            "qbitel_llm_tokens_used_total",
             "Total tokens used by LLM providers",
             ["provider", "model", "token_type"],
             registry=self.registry,
@@ -193,14 +193,14 @@ class CopilotMonitoringService:
 
         # RAG engine metrics
         self.rag_searches_total = Counter(
-            "cronos_rag_searches_total",
+            "qbitel_rag_searches_total",
             "Total RAG searches performed",
             ["collection", "status"],
             registry=self.registry,
         )
 
         self.rag_search_duration = Histogram(
-            "cronos_rag_search_duration_seconds",
+            "qbitel_rag_search_duration_seconds",
             "RAG search processing time",
             ["collection"],
             buckets=[0.01, 0.05, 0.1, 0.5, 1.0, 2.0],
@@ -209,33 +209,33 @@ class CopilotMonitoringService:
 
         # System metrics
         self.active_sessions = Gauge(
-            "cronos_copilot_active_sessions",
+            "qbitel_copilot_active_sessions",
             "Number of active copilot sessions",
             registry=self.registry,
         )
 
         self.memory_usage_bytes = Gauge(
-            "cronos_copilot_memory_usage_bytes",
+            "qbitel_copilot_memory_usage_bytes",
             "Memory usage of copilot service",
             registry=self.registry,
         )
 
         self.cpu_usage_percent = Gauge(
-            "cronos_copilot_cpu_usage_percent",
+            "qbitel_copilot_cpu_usage_percent",
             "CPU usage percentage of copilot service",
             registry=self.registry,
         )
 
         # Enhanced protocol discovery metrics
         self.enhanced_discoveries_total = Counter(
-            "cronos_enhanced_discoveries_total",
+            "qbitel_enhanced_discoveries_total",
             "Total enhanced protocol discoveries",
             ["protocol_type", "llm_enhanced", "status"],
             registry=self.registry,
         )
 
         self.llm_analysis_duration = Histogram(
-            "cronos_llm_analysis_duration_seconds",
+            "qbitel_llm_analysis_duration_seconds",
             "Duration of LLM analysis phases",
             ["analysis_type", "protocol_type"],
             buckets=[0.5, 1.0, 2.0, 5.0, 10.0, 30.0],
@@ -244,14 +244,14 @@ class CopilotMonitoringService:
 
         # Cache metrics
         self.cache_operations_total = Counter(
-            "cronos_copilot_cache_operations_total",
+            "qbitel_copilot_cache_operations_total",
             "Total cache operations",
             ["operation", "cache_type", "status"],
             registry=self.registry,
         )
 
         self.cache_hit_rate = Gauge(
-            "cronos_copilot_cache_hit_rate",
+            "qbitel_copilot_cache_hit_rate",
             "Cache hit rate percentage",
             ["cache_type"],
             registry=self.registry,

@@ -1,5 +1,5 @@
 """
-CRONOS AI - Enhanced LLM Copilot Test Suite
+QBITEL - Enhanced LLM Copilot Test Suite
 
 Comprehensive tests for enhanced copilot capabilities including predictive
 threat modeling, playbook generation, fuzzing, and code generation.

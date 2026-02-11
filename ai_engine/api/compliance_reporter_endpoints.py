@@ -1,5 +1,5 @@
 """
-CRONOS AI - Autonomous Compliance Reporter API Endpoints
+QBITEL - Autonomous Compliance Reporter API Endpoints
 
 RESTful API endpoints for compliance reporting, monitoring, and audit evidence generation.
 """

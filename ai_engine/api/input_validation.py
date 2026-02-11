@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Input Validation Framework
+QBITEL Engine - Input Validation Framework
 
 Production-grade input validation with payload size limits, sanitization,
 and protection against common attacks.

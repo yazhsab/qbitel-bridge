@@ -1,0 +1,19 @@
+{
+  "program_id": "POLC240",
+  "domain": "insurance",
+  "program_type": "calculation_engine",
+  "author": "J. SMITH",
+  "lines_of_code": 215,
+  "complexity_level": "medium",
+  "complexity_score": 0.502,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.842225",
+  "hash": "81f6020774607bad3d13cd2e4a3d07db"
+}

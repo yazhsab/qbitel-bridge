@@ -1,0 +1,19 @@
+{
+  "program_id": "SECV189",
+  "domain": "finance",
+  "program_type": "data_validation",
+  "author": "J. SMITH",
+  "lines_of_code": 231,
+  "complexity_level": "medium",
+  "complexity_score": 0.545,
+  "files_used": 2,
+  "verbs_used": 14,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.949020",
+  "hash": "bf0c9d5903444b82040cecac2efb6ec3"
+}

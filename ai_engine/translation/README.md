@@ -1,8 +1,8 @@
-# CRONOS AI - Protocol Translation Studio
+# QBITEL - Protocol Translation Studio
 
 ## Overview
 
-The Protocol Translation Studio is an enterprise-grade AI-powered system that provides automatic protocol discovery, API generation, multi-language SDK creation, and real-time protocol translation capabilities. It extends the CRONOS AI platform with advanced protocol analysis and code generation features.
+The Protocol Translation Studio is an enterprise-grade AI-powered system that provides automatic protocol discovery, API generation, multi-language SDK creation, and real-time protocol translation capabilities. It extends the QBITEL platform with advanced protocol analysis and code generation features.
 
 ## 🚀 Key Features
 
@@ -62,7 +62,7 @@ ai_engine/translation/
 
 ### Prerequisites
 - Python 3.8+
-- CRONOS AI platform
+- QBITEL platform
 - ChromaDB (for RAG functionality)
 - Redis (for caching)
 - Prometheus (for monitoring)
@@ -76,7 +76,7 @@ pip install -r requirements-copilot.txt
 
 2. **Configure Environment**
 ```bash
-export CRONOS_AI_CONFIG_PATH="/path/to/config.yaml"
+export QBITEL_AI_CONFIG_PATH="/path/to/config.yaml"
 export TRANSLATION_STUDIO_ENABLED=true
 ```
 
@@ -253,7 +253,7 @@ The Translation Studio provides a comprehensive REST API:
 
 ```bash
 # Core Configuration
-CRONOS_AI_CONFIG_PATH="/path/to/config.yaml"
+QBITEL_AI_CONFIG_PATH="/path/to/config.yaml"
 TRANSLATION_STUDIO_ENABLED=true
 TRANSLATION_LOG_LEVEL=INFO
 
@@ -367,25 +367,25 @@ security:
 The Translation Studio exposes comprehensive Prometheus metrics:
 
 #### Request Metrics
-- `cronos_translation_requests_total` - Total requests by component and status
-- `cronos_translation_request_duration_seconds` - Request processing time
+- `qbitel_translation_requests_total` - Total requests by component and status
+- `qbitel_translation_request_duration_seconds` - Request processing time
 
 #### Protocol Discovery Metrics
-- `cronos_translation_protocol_discoveries_total` - Total protocol discoveries
-- `cronos_translation_protocol_discovery_confidence` - Discovery confidence scores
+- `qbitel_translation_protocol_discoveries_total` - Total protocol discoveries
+- `qbitel_translation_protocol_discovery_confidence` - Discovery confidence scores
 
 #### API Generation Metrics
-- `cronos_translation_api_generations_total` - Total API specifications generated
-- `cronos_translation_api_generation_duration_seconds` - API generation time
+- `qbitel_translation_api_generations_total` - Total API specifications generated
+- `qbitel_translation_api_generation_duration_seconds` - API generation time
 
 #### Code Generation Metrics
-- `cronos_translation_sdk_generations_total` - Total SDKs generated
-- `cronos_translation_code_generation_duration_seconds` - Code generation time
+- `qbitel_translation_sdk_generations_total` - Total SDKs generated
+- `qbitel_translation_code_generation_duration_seconds` - Code generation time
 
 #### System Metrics
-- `cronos_translation_cpu_usage_percent` - CPU usage
-- `cronos_translation_memory_usage_bytes` - Memory usage
-- `cronos_translation_service_health` - Service health status
+- `qbitel_translation_cpu_usage_percent` - CPU usage
+- `qbitel_translation_memory_usage_bytes` - Memory usage
+- `qbitel_translation_service_health` - Service health status
 
 ### Health Checks
 
@@ -516,7 +516,7 @@ spec:
     spec:
       containers:
       - name: translation-studio
-        image: cronos-ai/translation-studio:latest
+        image: qbitel/translation-studio:latest
         ports:
         - containerPort: 8000
         - containerPort: 9090
@@ -577,8 +577,8 @@ python -m pytest ai_engine/translation/tests/ --cov=ai_engine.translation
 
 1. **Clone Repository**
 ```bash
-git clone https://github.com/cronos-ai/cronos-ai
-cd cronos-ai
+git clone https://github.com/yazhsab/qbitel-bridge
+cd qbitel
 ```
 
 2. **Setup Development Environment**
@@ -631,7 +631,7 @@ python -m pytest ai_engine/translation/tests/
 #### 1. Protocol Discovery Fails
 ```bash
 # Check logs
-tail -f /var/log/cronos-ai/translation.log
+tail -f /var/log/qbitel/translation.log
 
 # Verify LLM connectivity
 curl -X POST http://localhost:8000/api/v1/translation/status
@@ -659,15 +659,15 @@ curl http://localhost:9090/metrics | grep memory
 
 # Adjust batch sizes in config
 # Restart services to clear memory
-systemctl restart cronos-ai-translation
+systemctl restart qbitel-translation
 ```
 
 ### Support Channels
 
-- **Documentation**: [CRONOS AI Docs](https://docs.cronos-ai.com)
-- **GitHub Issues**: [Report Issues](https://github.com/cronos-ai/cronos-ai/issues)
-- **Community Forum**: [Discussions](https://github.com/cronos-ai/cronos-ai/discussions)
-- **Enterprise Support**: Contact support@cronos-ai.com
+- **Documentation**: [QBITEL Docs](https://docs.qbitel.com)
+- **GitHub Issues**: [Report Issues](https://github.com/yazhsab/qbitel-bridge/issues)
+- **Community Forum**: [Discussions](https://github.com/yazhsab/qbitel-bridge/discussions)
+- **Enterprise Support**: Contact support@qbitel.com
 
 ## 📄 License
 
@@ -687,4 +687,4 @@ This project is licensed under the MIT License - see the [LICENSE](../../../LICE
 
 **Version**: 1.0.0  
 **Last Updated**: 2024-01-20  
-**Maintainers**: CRONOS AI Team
+**Maintainers**: QBITEL Team

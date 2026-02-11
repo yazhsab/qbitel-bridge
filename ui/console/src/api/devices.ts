@@ -19,7 +19,7 @@ import {
 } from '../types/device';
 
 // Base API configuration
-const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'https://api.qslb.local';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'https://api.qbitel.local';
 const API_VERSION = 'v1';
 
 interface ApiError {

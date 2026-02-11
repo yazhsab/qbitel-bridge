@@ -1,5 +1,5 @@
 """
-CRONOS AI - Marketplace Deployment Verification Script
+QBITEL - Marketplace Deployment Verification Script
 
 Verifies that all marketplace components are properly installed and configured.
 """
@@ -205,7 +205,7 @@ def verify_documentation():
 def main():
     """Run all verification checks."""
     print("="*60)
-    print("  CRONOS AI - Marketplace Deployment Verification")
+    print("  QBITEL - Marketplace Deployment Verification")
     print("="*60)
 
     results = {}

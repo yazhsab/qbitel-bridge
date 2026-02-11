@@ -61,7 +61,7 @@ const ProductionIntegrationExample: React.FC = () => {
   const mockUser = {
     profile: {
       name: 'Test User',
-      email: 'test@cronosai.local',
+      email: 'test@qbitelai.local',
     },
   };
 
@@ -285,11 +285,11 @@ const ProductionIntegrationExample: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h3" component="h1" gutterBottom>
-        CronosAI Dashboard - Production Integration
+        QbitelAI Dashboard - Production Integration
       </Typography>
       
       <Alert severity="info" sx={{ mb: 3 }}>
-        This is a comprehensive integration example demonstrating the production-ready CronosAI dashboard 
+        This is a comprehensive integration example demonstrating the production-ready QbitelAI dashboard 
         with all advanced features including real-time data streaming, AI model monitoring, threat intelligence, 
         and responsive design.
       </Alert>

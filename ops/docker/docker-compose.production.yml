@@ -1,0 +1,413 @@
+# ============================================================================
+# QBITEL Legacy System Whisperer - Production Docker Compose
+# ============================================================================
+#
+# USAGE:
+#   1. Generate secrets: cd ops/secrets && python generate_secrets.py
+#   2. Copy .env.production to this directory
+#   3. Run: docker-compose -f docker-compose.production.yml up -d
+#
+# SECURITY:
+#   - All passwords loaded from environment variables
+#   - No hardcoded credentials
+#   - TLS enabled for all services
+#   - Network isolation enforced
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # ==========================================================================
+  # PostgreSQL/TimescaleDB - Time-series database
+  # ==========================================================================
+  postgres:
+    image: timescale/timescaledb:latest-pg14
+    container_name: qbitel-postgres-prod
+    environment:
+      POSTGRES_DB: ${QBITEL_AI_DB_NAME:-qbitel}
+      POSTGRES_USER: ${QBITEL_AI_DB_USER:-qbitel}
+      POSTGRES_PASSWORD: ${QBITEL_AI_DB_PASSWORD:?Database password required}
+      TIMESCALEDB_TELEMETRY: 'off'
+      # Performance tuning for production
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts/init-db.sql:/docker-entrypoint-initdb.d/01-init-db.sql:ro
+      - ./init-scripts/init-timescale.sql:/docker-entrypoint-initdb.d/02-init-timescale.sql:ro
+    ports:
+      - "127.0.0.1:5432:5432"  # Only bind to localhost
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${QBITEL_AI_DB_USER:-qbitel} -d ${QBITEL_AI_DB_NAME:-qbitel}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - qbitel-internal
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2'
+        reservations:
+          memory: 2G
+          cpus: '1'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+  # ==========================================================================
+  # Redis - Caching and session storage
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: qbitel-redis-prod
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${QBITEL_AI_REDIS_PASSWORD:?Redis password required}
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --tcp-backlog 511
+      --timeout 0
+      --tcp-keepalive 300
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"  # Only bind to localhost
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${QBITEL_AI_REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - qbitel-internal
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  # ==========================================================================
+  # Prometheus - Metrics collection
+  # ==========================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: qbitel-prometheus-prod
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.retention.size=10GB'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    volumes:
+      - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"  # Only bind to localhost
+    networks:
+      - qbitel-internal
+      - qbitel-monitoring
+    restart: unless-stopped
+    depends_on:
+      legacy-whisperer:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  # ==========================================================================
+  # Grafana - Visualization and dashboards
+  # ==========================================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: qbitel-grafana-prod
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:?Grafana admin password required}
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+      GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-http://localhost:3000}
+      GF_SECURITY_COOKIE_SECURE: 'true'
+      GF_SECURITY_STRICT_TRANSPORT_SECURITY: 'true'
+      GF_SECURITY_X_CONTENT_TYPE_OPTIONS: 'true'
+      GF_SECURITY_X_XSS_PROTECTION: 'true'
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ../monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - "127.0.0.1:3000:3000"  # Only bind to localhost
+    networks:
+      - qbitel-internal
+      - qbitel-monitoring
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  # ==========================================================================
+  # Jaeger - Distributed tracing
+  # ==========================================================================
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: qbitel-jaeger-prod
+    environment:
+      COLLECTOR_OTLP_ENABLED: 'true'
+      SPAN_STORAGE_TYPE: badger
+      BADGER_EPHEMERAL: 'false'
+      BADGER_DIRECTORY_VALUE: /badger/data
+      BADGER_DIRECTORY_KEY: /badger/key
+    volumes:
+      - jaeger_data:/badger
+    ports:
+      - "127.0.0.1:16686:16686"  # Jaeger UI
+      - "127.0.0.1:14268:14268"  # Jaeger collector HTTP
+      - "127.0.0.1:14250:14250"  # Jaeger collector gRPC
+    networks:
+      - qbitel-internal
+      - qbitel-monitoring
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  # ==========================================================================
+  # Legacy System Whisperer - Main application
+  # ==========================================================================
+  legacy-whisperer:
+    build:
+      context: ../../
+      dockerfile: ai_engine/legacy/docker/Dockerfile
+      target: production
+    container_name: qbitel-legacy-whisperer-prod
+    environment:
+      # Environment
+      QBITEL_AI_ENVIRONMENT: production
+      QBITEL_AI_DEBUG: 'false'
+      QBITEL_AI_LOG_LEVEL: ${QBITEL_AI_LOG_LEVEL:-INFO}
+
+      # Database
+      QBITEL_AI_DB_HOST: postgres
+      QBITEL_AI_DB_PORT: 5432
+      QBITEL_AI_DB_NAME: ${QBITEL_AI_DB_NAME:-qbitel}
+      QBITEL_AI_DB_USER: ${QBITEL_AI_DB_USER:-qbitel}
+      QBITEL_AI_DB_PASSWORD: ${QBITEL_AI_DB_PASSWORD:?Database password required}
+      QBITEL_AI_DB_POOL_SIZE: ${QBITEL_AI_DB_POOL_SIZE:-10}
+      QBITEL_AI_DB_MAX_OVERFLOW: ${QBITEL_AI_DB_MAX_OVERFLOW:-20}
+
+      # Redis
+      QBITEL_AI_REDIS_HOST: redis
+      QBITEL_AI_REDIS_PORT: 6379
+      QBITEL_AI_REDIS_PASSWORD: ${QBITEL_AI_REDIS_PASSWORD:?Redis password required}
+
+      # Security
+      QBITEL_AI_JWT_SECRET: ${QBITEL_AI_JWT_SECRET:?JWT secret required}
+      QBITEL_AI_ENCRYPTION_KEY: ${QBITEL_AI_ENCRYPTION_KEY:?Encryption key required}
+      QBITEL_AI_API_KEY: ${QBITEL_AI_API_KEY:?API key required}
+      QBITEL_AI_ENCRYPT_SENSITIVE_DATA: 'true'
+
+      # LLM Configuration
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      QBITEL_AI_LLM_PRIMARY_PROVIDER: ${QBITEL_AI_LLM_PRIMARY_PROVIDER:-anthropic}
+
+      # Monitoring
+      QBITEL_AI_MONITORING_ENABLED: 'true'
+      QBITEL_AI_METRICS_PORT: 8080
+      JAEGER_AGENT_HOST: jaeger
+      JAEGER_AGENT_PORT: 6831
+
+      # Legacy Whisperer
+      QBITEL_AI_LEGACY_ENABLED: 'true'
+      QBITEL_AI_LEGACY_MAX_SYSTEMS: ${QBITEL_AI_LEGACY_MAX_SYSTEMS:-5000}
+      QBITEL_AI_LEGACY_ANOMALY_THRESHOLD: ${QBITEL_AI_LEGACY_ANOMALY_THRESHOLD:-0.98}
+
+    volumes:
+      - legacy_logs:/app/logs
+      - legacy_data:/app/data
+    ports:
+      - "8000:8000"   # Main API (expose for load balancer)
+      - "127.0.0.1:8080:8080"  # Metrics (internal only)
+    networks:
+      - qbitel-internal
+      - qbitel-monitoring
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/legacy-system-whisperer/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: '4'
+        reservations:
+          memory: 2G
+          cpus: '1'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+
+  # ==========================================================================
+  # Nginx - Reverse proxy with TLS
+  # ==========================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: qbitel-nginx-prod
+    volumes:
+      - ./nginx/nginx.production.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - qbitel-internal
+      - qbitel-external
+    restart: unless-stopped
+    depends_on:
+      legacy-whisperer:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # ==========================================================================
+  # Database Backup Service
+  # ==========================================================================
+  db-backup:
+    image: postgres:14-alpine
+    container_name: qbitel-backup-prod
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: ${QBITEL_AI_DB_USER:-qbitel}
+      PGPASSWORD: ${QBITEL_AI_DB_PASSWORD:?Database password required}
+      PGDATABASE: ${QBITEL_AI_DB_NAME:-qbitel}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      BACKUP_S3_BUCKET: ${BACKUP_S3_BUCKET:-}
+    volumes:
+      - ./backup-scripts:/scripts:ro
+      - backup_data:/backups
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Backup service started"
+        while true; do
+          echo "Running backup at $$(date)"
+          pg_dump -Fc > /backups/qbitel_$$(date +%Y%m%d_%H%M%S).dump
+          # Cleanup old backups
+          find /backups -name "*.dump" -mtime +$${BACKUP_RETENTION_DAYS} -delete
+          # Sleep 24 hours
+          sleep 86400
+        done
+    networks:
+      - qbitel-internal
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+
+# ==========================================================================
+# Volumes
+# ==========================================================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  jaeger_data:
+    driver: local
+  legacy_logs:
+    driver: local
+  legacy_data:
+    driver: local
+  nginx_logs:
+    driver: local
+  backup_data:
+    driver: local
+
+# ==========================================================================
+# Networks
+# ==========================================================================
+networks:
+  qbitel-internal:
+    driver: bridge
+    internal: true  # No external access
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+  qbitel-monitoring:
+    driver: bridge
+    internal: true
+
+  qbitel-external:
+    driver: bridge
+    # Only nginx connects to external network

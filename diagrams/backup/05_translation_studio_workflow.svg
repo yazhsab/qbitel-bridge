@@ -199,8 +199,8 @@
     <text x="720" y="1148" class="feature">❌ No real-time translation</text>
   </g>
 
-  <g id="cronos">
-    <text x="1310" y="1105" class="label" text-anchor="middle" style="fill: #059669;">CRONOS AI Translation Studio</text>
+  <g id="qbitel">
+    <text x="1310" y="1105" class="label" text-anchor="middle" style="fill: #059669;">QBITEL Bridge Translation Studio</text>
     <text x="1050" y="1130" class="feature" style="font-weight: bold; fill: #10b981;">⏱ Time: 20-30 minutes</text>
     <text x="1050" y="1148" class="feature" style="font-weight: bold; fill: #10b981;">💰 Cost: $100K (one-time)</text>
     <text x="1310" y="1130" class="feature" style="font-weight: bold; fill: #10b981;">🤖 Fully automated</text>
@@ -211,6 +211,6 @@
 
   <!-- Footer -->
   <text x="900" y="1190" class="subtitle" text-anchor="middle" style="font-size: 11px;">
-    © 2025 CRONOS AI - Translation Studio: 99.9% Faster Protocol Integration
+    © 2025 QBITEL Bridge - Translation Studio: 99.9% Faster Protocol Integration
   </text>
 </svg>

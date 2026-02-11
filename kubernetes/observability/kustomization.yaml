@@ -13,11 +13,11 @@ resources:
   - otel-collector.yaml
 
 commonLabels:
-  app.kubernetes.io/part-of: cronos-ai
+  app.kubernetes.io/part-of: qbitel
   app.kubernetes.io/managed-by: kustomize
 
 configMapGenerator:
-  - name: cronos-ai-dashboards
+  - name: qbitel-dashboards
     files:
       - dashboards/overview.json
       - dashboards/llm-operations.json

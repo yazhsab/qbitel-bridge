@@ -1,5 +1,5 @@
 ---
-# CRONOS AI - Explainability Alert Rules
+# QBITEL - Explainability Alert Rules
 # Prometheus alerting rules for AI explainability system
 
 groups:
@@ -10,8 +10,8 @@ groups:
       - alert: HighExplanationFailureRate
         expr: |
           (
-            rate(cronos_explanations_generated_total{status="failure"}[5m]) /
-            rate(cronos_explanations_generated_total[5m])
+            rate(qbitel_explanations_generated_total{status="failure"}[5m]) /
+            rate(qbitel_explanations_generated_total[5m])
           ) > 0.05
         for: 5m
         labels:
@@ -28,8 +28,8 @@ groups:
       - alert: CriticalExplanationFailureRate
         expr: |
           (
-            rate(cronos_explanations_generated_total{status="failure"}[5m]) /
-            rate(cronos_explanations_generated_total[5m])
+            rate(qbitel_explanations_generated_total{status="failure"}[5m]) /
+            rate(qbitel_explanations_generated_total[5m])
           ) > 0.20
         for: 2m
         labels:
@@ -45,7 +45,7 @@ groups:
       - alert: SlowExplanationGeneration
         expr: |
           histogram_quantile(0.95,
-            rate(cronos_explanation_generation_seconds_bucket[5m])
+            rate(qbitel_explanation_generation_seconds_bucket[5m])
           ) > 0.05
         for: 10m
         labels:
@@ -59,7 +59,7 @@ groups:
 
       # Model drift detected
       - alert: ModelDriftDetected
-        expr: cronos_model_drift_score > 0.05
+        expr: qbitel_model_drift_score > 0.05
         for: 5m
         labels:
           severity: warning
@@ -69,11 +69,11 @@ groups:
           description: |
             Model {{ $labels.model_name }} (v{{ $labels.model_version }})
             has drift score {{ $value }}, exceeding threshold of 0.05.
-            Current accuracy: {{ with query (printf "cronos_model_accuracy{model_name='%s'}" $labels.model_name) }}{{ . | first | value }}{{ end }}
+            Current accuracy: {{ with query (printf "qbitel_model_accuracy{model_name='%s'}" $labels.model_name) }}{{ . | first | value }}{{ end }}
 
       # Critical model drift
       - alert: CriticalModelDrift
-        expr: cronos_model_drift_score > 0.15
+        expr: qbitel_model_drift_score > 0.15
         for: 2m
         labels:
           severity: critical
@@ -87,7 +87,7 @@ groups:
 
       # Model accuracy degradation
       - alert: ModelAccuracyDegradation
-        expr: cronos_model_accuracy < 0.90
+        expr: qbitel_model_accuracy < 0.90
         for: 10m
         labels:
           severity: warning
@@ -96,11 +96,11 @@ groups:
           summary: "Model accuracy below 90%"
           description: |
             Model {{ $labels.model_name }} accuracy has dropped to {{ $value | humanizePercentage }}.
-            Expected: >90%. Current drift score: {{ with query (printf "cronos_model_drift_score{model_name='%s'}" $labels.model_name) }}{{ . | first | value }}{{ end }}
+            Expected: >90%. Current drift score: {{ with query (printf "qbitel_model_drift_score{model_name='%s'}" $labels.model_name) }}{{ . | first | value }}{{ end }}
 
       # Low model confidence
       - alert: LowAverageModelConfidence
-        expr: cronos_model_confidence_average < 0.70
+        expr: qbitel_model_confidence_average < 0.70
         for: 15m
         labels:
           severity: warning
@@ -113,7 +113,7 @@ groups:
 
       # Audit trail write failures
       - alert: AuditTrailWriteFailures
-        expr: rate(cronos_audit_trail_write_errors_total[5m]) > 0
+        expr: rate(qbitel_audit_trail_write_errors_total[5m]) > 0
         for: 2m
         labels:
           severity: critical
@@ -129,7 +129,7 @@ groups:
       - alert: HighAuditTrailWriteLatency
         expr: |
           histogram_quantile(0.95,
-            rate(cronos_audit_trail_write_seconds_bucket[5m])
+            rate(qbitel_audit_trail_write_seconds_bucket[5m])
           ) > 0.01
         for: 10m
         labels:
@@ -143,7 +143,7 @@ groups:
 
       # High human override rate
       - alert: HighHumanOverrideRate
-        expr: cronos_human_override_rate > 0.10
+        expr: qbitel_human_override_rate > 0.10
         for: 30m
         labels:
           severity: warning
@@ -158,8 +158,8 @@ groups:
       - alert: ExplainabilitySystemDown
         expr: |
           (
-            absent(cronos_explanations_generated_total) or
-            rate(cronos_explanations_generated_total[1h]) == 0
+            absent(qbitel_explanations_generated_total) or
+            rate(qbitel_explanations_generated_total[1h]) == 0
           )
         for: 1h
         labels:
@@ -175,8 +175,8 @@ groups:
       - alert: LowExplanationCacheHitRate
         expr: |
           (
-            rate(cronos_explanation_cache_hits_total[10m]) /
-            (rate(cronos_explanation_cache_hits_total[10m]) + rate(cronos_explanation_cache_misses_total[10m]))
+            rate(qbitel_explanation_cache_hits_total[10m]) /
+            (rate(qbitel_explanation_cache_hits_total[10m]) + rate(qbitel_explanation_cache_misses_total[10m]))
           ) < 0.30
         for: 30m
         labels:
@@ -195,8 +195,8 @@ groups:
       - alert: MissingAuditTrailForCriticalDecisions
         expr: |
           (
-            rate(cronos_explanations_generated_total{model_name=~"security.*"}[1h]) -
-            rate(cronos_audit_trail_writes_total{model_name=~"security.*"}[1h])
+            rate(qbitel_explanations_generated_total{model_name=~"security.*"}[1h]) -
+            rate(qbitel_audit_trail_writes_total{model_name=~"security.*"}[1h])
           ) > 0
         for: 5m
         labels:
@@ -211,7 +211,7 @@ groups:
 
       # Drift monitoring not running
       - alert: DriftMonitoringNotRunning
-        expr: absent_over_time(cronos_model_drift_score[2h])
+        expr: absent_over_time(qbitel_model_drift_score[2h])
         for: 2h
         labels:
           severity: warning

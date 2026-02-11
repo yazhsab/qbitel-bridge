@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Communication System Integration Connectors
+QBITEL Engine - Communication System Integration Connectors
 
 Specialized connectors for communication systems like Slack and Email.
 """
@@ -25,7 +25,7 @@ class CommunicationConnector(BaseIntegrationConnector, ABC):
 
     def __init__(self, config):
         super().__init__(config)
-        self.logger = get_security_logger("cronos.security.integrations.communication")
+        self.logger = get_security_logger("qbitel.security.integrations.communication")
 
     @abstractmethod
     async def send_alert(
@@ -135,7 +135,7 @@ class SlackConnector(CommunicationConnector):
             # Test using webhook (send a test message)
             try:
                 test_payload = {
-                    "text": "CRONOS AI Security Orchestrator - Connection Test",
+                    "text": "QBITEL Security Orchestrator - Connection Test",
                     "channel": self.default_channel,
                 }
 
@@ -251,7 +251,7 @@ class SlackConnector(CommunicationConnector):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f":warning: *CRONOS AI Security Alert*\n\n{message}",
+                        "text": f":warning: *QBITEL Security Alert*\n\n{message}",
                     },
                 },
                 {
@@ -896,7 +896,7 @@ class EmailConnector(CommunicationConnector):
 
         try:
             # Create email for security event
-            subject = f"CRONOS AI Security Alert: {security_event.event_type.value} ({security_event.threat_level.value.upper()})"
+            subject = f"QBITEL Security Alert: {security_event.event_type.value} ({security_event.threat_level.value.upper()})"
             body = self._create_security_event_email(security_event)
 
             # Get recipients based on severity
@@ -924,7 +924,7 @@ class EmailConnector(CommunicationConnector):
 
         try:
             # Create email for threat analysis
-            subject = f"CRONOS AI Threat Analysis: {threat_analysis.threat_category.value} ({threat_analysis.threat_level.value.upper()})"
+            subject = f"QBITEL Threat Analysis: {threat_analysis.threat_category.value} ({threat_analysis.threat_level.value.upper()})"
             body = self._create_threat_analysis_email(threat_analysis)
 
             # Send to security team
@@ -952,7 +952,7 @@ class EmailConnector(CommunicationConnector):
 
         try:
             # Create email for response execution
-            subject = f"CRONOS AI Automated Response: {automated_response.status.value.title()} - {automated_response.response_id}"
+            subject = f"QBITEL Automated Response: {automated_response.status.value.title()} - {automated_response.response_id}"
             body = self._create_response_execution_email(automated_response)
 
             # Send to operations team
@@ -979,7 +979,7 @@ class EmailConnector(CommunicationConnector):
         """Send an alert email."""
 
         try:
-            subject = f"CRONOS AI Security Alert - {severity.upper()}"
+            subject = f"QBITEL Security Alert - {severity.upper()}"
 
             # Create HTML email body
             body = f"""
@@ -994,7 +994,7 @@ class EmailConnector(CommunicationConnector):
             </head>
             <body>
                 <div class="header">
-                    <h2>🚨 CRONOS AI Security Alert</h2>
+                    <h2>🚨 QBITEL Security Alert</h2>
                 </div>
                 <div class="content">
                     <h3>Alert Details</h3>
@@ -1004,7 +1004,7 @@ class EmailConnector(CommunicationConnector):
                     <p><strong>Time:</strong> {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</p>
                 </div>
                 <div class="footer">
-                    <p>This alert was generated automatically by the CRONOS AI Security Orchestrator.</p>
+                    <p>This alert was generated automatically by the QBITEL Security Orchestrator.</p>
                 </div>
             </body>
             </html>
@@ -1033,7 +1033,7 @@ class EmailConnector(CommunicationConnector):
         """Send a notification email."""
 
         try:
-            subject = f"CRONOS AI Notification: {title}"
+            subject = f"QBITEL Notification: {title}"
 
             # Create HTML email body
             body = f"""
@@ -1048,7 +1048,7 @@ class EmailConnector(CommunicationConnector):
             </head>
             <body>
                 <div class="header">
-                    <h2>📋 CRONOS AI Notification</h2>
+                    <h2>📋 QBITEL Notification</h2>
                 </div>
                 <div class="content">
                     <h3>{title}</h3>
@@ -1056,7 +1056,7 @@ class EmailConnector(CommunicationConnector):
                     <p><strong>Time:</strong> {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</p>
                 </div>
                 <div class="footer">
-                    <p>This notification was generated by the CRONOS AI Security Orchestrator.</p>
+                    <p>This notification was generated by the QBITEL Security Orchestrator.</p>
                 </div>
             </body>
             </html>
@@ -1215,7 +1215,7 @@ class EmailConnector(CommunicationConnector):
         </head>
         <body>
             <div class="header">
-                <h2>🚨 CRONOS AI Security Event Detected</h2>
+                <h2>🚨 QBITEL Security Event Detected</h2>
             </div>
             <div class="content">
                 <div class="section">
@@ -1246,7 +1246,7 @@ class EmailConnector(CommunicationConnector):
                 </div>
             </div>
             <div class="footer">
-                <p>This alert was generated automatically by the CRONOS AI Security Orchestrator.</p>
+                <p>This alert was generated automatically by the QBITEL Security Orchestrator.</p>
                 <p>For more information, please check your security dashboard or contact the security team.</p>
             </div>
         </body>
@@ -1292,7 +1292,7 @@ class EmailConnector(CommunicationConnector):
         </head>
         <body>
             <div class="header">
-                <h2>🔍 CRONOS AI Threat Analysis Complete</h2>
+                <h2>🔍 QBITEL Threat Analysis Complete</h2>
             </div>
             <div class="content">
                 <div class="section">
@@ -1335,7 +1335,7 @@ class EmailConnector(CommunicationConnector):
                 </div>
             </div>
             <div class="footer">
-                <p>This threat analysis was generated by the CRONOS AI Security Orchestrator.</p>
+                <p>This threat analysis was generated by the QBITEL Security Orchestrator.</p>
                 <p>Please review the recommendations and take appropriate action as needed.</p>
             </div>
         </body>
@@ -1405,7 +1405,7 @@ class EmailConnector(CommunicationConnector):
         </head>
         <body>
             <div class="header">
-                <h2>⚡ CRONOS AI Automated Response {automated_response.status.value.title()}</h2>
+                <h2>⚡ QBITEL Automated Response {automated_response.status.value.title()}</h2>
             </div>
             <div class="content">
                 <div class="section">
@@ -1434,7 +1434,7 @@ class EmailConnector(CommunicationConnector):
                 </div>
             </div>
             <div class="footer">
-                <p>This response was executed automatically by the CRONOS AI Security Orchestrator.</p>
+                <p>This response was executed automatically by the QBITEL Security Orchestrator.</p>
                 <p>Please review the actions taken and verify the system status.</p>
             </div>
         </body>

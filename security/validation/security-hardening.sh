@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# CRONOS AI Security Hardening Script
+# QBITEL Security Hardening Script
 # Automated security hardening for production deployment
 
 set -euo pipefail
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LOG_FILE="/var/log/cronos-ai/security-hardening.log"
-CONFIG_DIR="/etc/cronos-ai/security"
-BACKUP_DIR="/var/backups/cronos-ai/security"
+LOG_FILE="/var/log/qbitel/security-hardening.log"
+CONFIG_DIR="/etc/qbitel/security"
+BACKUP_DIR="/var/backups/qbitel/security"
 
 # Color codes for output
 RED='\033[0;31m'
@@ -55,14 +55,14 @@ setup_directories() {
     
     mkdir -p "$CONFIG_DIR"
     mkdir -p "$BACKUP_DIR"
-    mkdir -p "/var/log/cronos-ai"
-    mkdir -p "/etc/cronos-ai/certs"
-    mkdir -p "/etc/cronos-ai/keys"
+    mkdir -p "/var/log/qbitel"
+    mkdir -p "/etc/qbitel/certs"
+    mkdir -p "/etc/qbitel/keys"
     
     # Set proper permissions
     chmod 755 "$CONFIG_DIR"
-    chmod 700 "/etc/cronos-ai/keys"
-    chmod 755 "/etc/cronos-ai/certs"
+    chmod 700 "/etc/qbitel/keys"
+    chmod 755 "/etc/qbitel/certs"
     
     success "Directories created successfully"
 }
@@ -74,8 +74,8 @@ harden_kernel() {
     # Backup original sysctl configuration
     cp /etc/sysctl.conf "$BACKUP_DIR/sysctl.conf.backup.$(date +%s)"
     
-    cat > /etc/sysctl.d/99-cronos-ai-security.conf << 'EOF'
-# CRONOS AI Security Hardening - Kernel Parameters
+    cat > /etc/sysctl.d/99-qbitel-security.conf << 'EOF'
+# QBITEL Security Hardening - Kernel Parameters
 
 # Network Security
 net.ipv4.ip_forward=0
@@ -121,7 +121,7 @@ kernel.ctrl-alt-del=0
 EOF
 
     # Apply sysctl settings
-    sysctl -p /etc/sysctl.d/99-cronos-ai-security.conf
+    sysctl -p /etc/sysctl.d/99-qbitel-security.conf
     
     success "Kernel hardening applied successfully"
 }
@@ -161,7 +161,7 @@ configure_firewall() {
     # Allow SSH (restrict to specific networks if needed)
     iptables -A INPUT -p tcp --dport 22 -m state --state NEW -j ACCEPT
     
-    # Allow CRONOS AI services
+    # Allow QBITEL services
     iptables -A INPUT -p tcp --dport 8000 -j ACCEPT  # AI Engine
     iptables -A INPUT -p tcp --dport 8080 -j ACCEPT  # Control Plane
     iptables -A INPUT -p tcp --dport 9090 -j ACCEPT  # Data Plane
@@ -185,7 +185,7 @@ configure_firewall() {
     iptables -A INPUT -p tcp --dport 22 -m recent --update --seconds 60 --hitcount 4 --name SSH -j DROP
     
     # Log dropped packets
-    iptables -A INPUT -j LOG --log-prefix "CRONOS-AI-DROP: " --log-level 4
+    iptables -A INPUT -j LOG --log-prefix "QBITEL-DROP: " --log-level 4
     
     # Save rules
     iptables-save > /etc/iptables/rules.v4
@@ -201,8 +201,8 @@ harden_ssh() {
     cp /etc/ssh/sshd_config "$BACKUP_DIR/sshd_config.backup.$(date +%s)"
     
     # Create hardened SSH configuration
-    cat > /etc/ssh/sshd_config.d/99-cronos-ai-hardening.conf << 'EOF'
-# CRONOS AI SSH Security Hardening
+    cat > /etc/ssh/sshd_config.d/99-qbitel-hardening.conf << 'EOF'
+# QBITEL SSH Security Hardening
 
 # Protocol and Encryption
 Protocol 2
@@ -244,7 +244,7 @@ EOF
     # Create security banner
     cat > /etc/issue.net << 'EOF'
 ***************************************************************************
-                        CRONOS AI SECURE SYSTEM
+                        QBITEL SECURE SYSTEM
 ***************************************************************************
 WARNING: This system is for authorized users only. All activities on this
 system are monitored and recorded. Unauthorized access is prohibited and
@@ -273,7 +273,7 @@ configure_audit() {
     
     # Configure auditd
     cat > /etc/audit/auditd.conf << 'EOF'
-# CRONOS AI Audit Configuration
+# QBITEL Audit Configuration
 
 log_file = /var/log/audit/audit.log
 log_format = RAW
@@ -302,8 +302,8 @@ krb5_principal = auditd
 EOF
 
     # Configure audit rules
-    cat > /etc/audit/rules.d/99-cronos-ai-security.rules << 'EOF'
-# CRONOS AI Security Audit Rules
+    cat > /etc/audit/rules.d/99-qbitel-security.rules << 'EOF'
+# QBITEL Security Audit Rules
 
 # Delete all previous rules
 -D
@@ -321,7 +321,7 @@ EOF
 -w /etc/sudoers -p wa -k identity
 
 # Monitor system configuration changes
--w /etc/cronos-ai/ -p wa -k cronos-config
+-w /etc/qbitel/ -p wa -k qbitel-config
 -w /etc/ssl/ -p wa -k ssl-config
 -w /etc/ssh/sshd_config -p wa -k ssh-config
 
@@ -365,8 +365,8 @@ configure_fail2ban() {
         apt-get install -y fail2ban
     fi
     
-    # Create fail2ban configuration for CRONOS AI
-    cat > /etc/fail2ban/jail.d/cronos-ai.conf << 'EOF'
+    # Create fail2ban configuration for QBITEL
+    cat > /etc/fail2ban/jail.d/qbitel.conf << 'EOF'
 [DEFAULT]
 bantime = 3600
 findtime = 600
@@ -386,11 +386,11 @@ logpath = /var/log/auth.log
 maxretry = 3
 bantime = 1800
 
-[cronos-ai-auth]
+[qbitel-auth]
 enabled = true
 port = 8000,8080,9090,8001,8002
-filter = cronos-ai-auth
-logpath = /var/log/cronos-ai/auth.log
+filter = qbitel-auth
+logpath = /var/log/qbitel/auth.log
 maxretry = 5
 bantime = 3600
 
@@ -403,8 +403,8 @@ maxretry = 3
 bantime = 600
 EOF
 
-    # Create custom filter for CRONOS AI authentication
-    cat > /etc/fail2ban/filter.d/cronos-ai-auth.conf << 'EOF'
+    # Create custom filter for QBITEL authentication
+    cat > /etc/fail2ban/filter.d/qbitel-auth.conf << 'EOF'
 [Definition]
 failregex = ^.*Authentication failed for .* from <HOST>.*$
             ^.*Invalid login attempt from <HOST>.*$
@@ -423,22 +423,22 @@ EOF
 configure_logging() {
     info "Configuring secure logging and retention..."
     
-    # Create CRONOS AI log rotation configuration
-    cat > /etc/logrotate.d/cronos-ai << 'EOF'
-/var/log/cronos-ai/*.log {
+    # Create QBITEL log rotation configuration
+    cat > /etc/logrotate.d/qbitel << 'EOF'
+/var/log/qbitel/*.log {
     daily
     rotate 2555
     compress
     delaycompress
     missingok
     notifempty
-    create 0640 cronos-ai cronos-ai
+    create 0640 qbitel qbitel
     postrotate
         systemctl reload rsyslog > /dev/null 2>&1 || true
     endscript
 }
 
-/var/log/cronos-ai/audit/*.log {
+/var/log/qbitel/audit/*.log {
     daily
     rotate 2555
     compress
@@ -449,7 +449,7 @@ configure_logging() {
     copytruncate
 }
 
-/var/log/cronos-ai/security/*.log {
+/var/log/qbitel/security/*.log {
     daily
     rotate 365
     compress
@@ -459,28 +459,28 @@ configure_logging() {
     create 0600 root root
     sharedscripts
     postrotate
-        systemctl reload cronos-ai-security-monitor > /dev/null 2>&1 || true
+        systemctl reload qbitel-security-monitor > /dev/null 2>&1 || true
     endscript
 }
 EOF
 
-    # Configure rsyslog for CRONOS AI
-    cat > /etc/rsyslog.d/99-cronos-ai.conf << 'EOF'
-# CRONOS AI Logging Configuration
+    # Configure rsyslog for QBITEL
+    cat > /etc/rsyslog.d/99-qbitel.conf << 'EOF'
+# QBITEL Logging Configuration
 
 # Create separate log files for different components
-:programname, isequal, "cronos-dataplane"    /var/log/cronos-ai/dataplane.log
-:programname, isequal, "cronos-controlplane" /var/log/cronos-ai/controlplane.log
-:programname, isequal, "cronos-aiengine"     /var/log/cronos-ai/aiengine.log
-:programname, isequal, "cronos-policy"       /var/log/cronos-ai/policy.log
-:programname, isequal, "cronos-mgmtapi"      /var/log/cronos-ai/mgmtapi.log
+:programname, isequal, "qbitel-dataplane"    /var/log/qbitel/dataplane.log
+:programname, isequal, "qbitel-controlplane" /var/log/qbitel/controlplane.log
+:programname, isequal, "qbitelengine"     /var/log/qbitel/aiengine.log
+:programname, isequal, "qbitel-policy"       /var/log/qbitel/policy.log
+:programname, isequal, "qbitel-mgmtapi"      /var/log/qbitel/mgmtapi.log
 
 # Security events
-:msg, contains, "CRONOS-AI-SECURITY"         /var/log/cronos-ai/security.log
-:msg, contains, "Authentication"             /var/log/cronos-ai/auth.log
-:msg, contains, "CRONOS-AI-DROP"             /var/log/cronos-ai/firewall.log
+:msg, contains, "QBITEL-SECURITY"         /var/log/qbitel/security.log
+:msg, contains, "Authentication"             /var/log/qbitel/auth.log
+:msg, contains, "QBITEL-DROP"             /var/log/qbitel/firewall.log
 
-# Stop processing after writing to CRONOS AI logs
+# Stop processing after writing to QBITEL logs
 & stop
 EOF
 
@@ -495,16 +495,16 @@ secure_permissions() {
     info "Securing file and directory permissions..."
     
     # System directories
-    chmod 755 /etc/cronos-ai
-    chmod 700 /etc/cronos-ai/keys
-    chmod 755 /etc/cronos-ai/certs
-    chmod 644 /etc/cronos-ai/*.yaml 2>/dev/null || true
+    chmod 755 /etc/qbitel
+    chmod 700 /etc/qbitel/keys
+    chmod 755 /etc/qbitel/certs
+    chmod 644 /etc/qbitel/*.yaml 2>/dev/null || true
     
     # Log directories
-    mkdir -p /var/log/cronos-ai/{security,audit,auth}
-    chown -R root:adm /var/log/cronos-ai
-    chmod -R 640 /var/log/cronos-ai/*.log 2>/dev/null || true
-    chmod 600 /var/log/cronos-ai/security/*.log 2>/dev/null || true
+    mkdir -p /var/log/qbitel/{security,audit,auth}
+    chown -R root:adm /var/log/qbitel
+    chmod -R 640 /var/log/qbitel/*.log 2>/dev/null || true
+    chmod 600 /var/log/qbitel/security/*.log 2>/dev/null || true
     
     # Certificate directories
     if [ -d "/etc/ssl/certs" ]; then
@@ -576,13 +576,13 @@ create_monitoring_service() {
     info "Creating security monitoring service..."
     
     # Create monitoring script
-    cat > /usr/local/bin/cronos-ai-security-monitor << 'EOF'
+    cat > /usr/local/bin/qbitel-security-monitor << 'EOF'
 #!/bin/bash
 
-# CRONOS AI Security Monitoring Script
+# QBITEL Security Monitoring Script
 
-LOG_FILE="/var/log/cronos-ai/security-monitor.log"
-ALERT_FILE="/var/log/cronos-ai/security-alerts.log"
+LOG_FILE="/var/log/qbitel/security-monitor.log"
+ALERT_FILE="/var/log/qbitel/security-alerts.log"
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_FILE"
@@ -590,7 +590,7 @@ log() {
 
 alert() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] ALERT: $*" >> "$ALERT_FILE"
-    logger -p user.crit "CRONOS-AI-SECURITY: $*"
+    logger -p user.crit "QBITEL-SECURITY: $*"
 }
 
 # Check for failed login attempts
@@ -657,27 +657,27 @@ check_network
 log "Security monitoring completed"
 EOF
 
-    chmod +x /usr/local/bin/cronos-ai-security-monitor
+    chmod +x /usr/local/bin/qbitel-security-monitor
     
     # Create systemd service
-    cat > /etc/systemd/system/cronos-ai-security-monitor.service << 'EOF'
+    cat > /etc/systemd/system/qbitel-security-monitor.service << 'EOF'
 [Unit]
-Description=CRONOS AI Security Monitor
+Description=QBITEL Security Monitor
 After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/cronos-ai-security-monitor
+ExecStart=/usr/local/bin/qbitel-security-monitor
 User=root
 StandardOutput=journal
 StandardError=journal
 EOF
 
     # Create systemd timer
-    cat > /etc/systemd/system/cronos-ai-security-monitor.timer << 'EOF'
+    cat > /etc/systemd/system/qbitel-security-monitor.timer << 'EOF'
 [Unit]
-Description=Run CRONOS AI Security Monitor every 5 minutes
-Requires=cronos-ai-security-monitor.service
+Description=Run QBITEL Security Monitor every 5 minutes
+Requires=qbitel-security-monitor.service
 
 [Timer]
 OnCalendar=*:0/5
@@ -689,8 +689,8 @@ EOF
 
     # Enable and start the timer
     systemctl daemon-reload
-    systemctl enable cronos-ai-security-monitor.timer
-    systemctl start cronos-ai-security-monitor.timer
+    systemctl enable qbitel-security-monitor.timer
+    systemctl start qbitel-security-monitor.timer
     
     success "Security monitoring service created and started successfully"
 }
@@ -699,10 +699,10 @@ EOF
 generate_security_report() {
     info "Generating security hardening report..."
     
-    local report_file="/var/log/cronos-ai/security-hardening-report-$(date +%Y%m%d-%H%M%S).txt"
+    local report_file="/var/log/qbitel/security-hardening-report-$(date +%Y%m%d-%H%M%S).txt"
     
     cat > "$report_file" << EOF
-CRONOS AI Security Hardening Report
+QBITEL Security Hardening Report
 Generated: $(date)
 Hostname: $(hostname)
 Kernel Version: $(uname -r)
@@ -738,7 +738,7 @@ HARDENING MEASURES APPLIED:
 
 5. Intrusion Prevention:
    - Fail2ban configured and enabled
-   - Custom filters for CRONOS AI services
+   - Custom filters for QBITEL services
    - Ban policies configured
 
 6. Logging and Monitoring:
@@ -767,7 +767,7 @@ Check firewall status: iptables -L -n
 Check SSH configuration: sshd -T
 Check audit status: systemctl status auditd
 Check fail2ban status: fail2ban-client status
-Check security monitoring: systemctl status cronos-ai-security-monitor.timer
+Check security monitoring: systemctl status qbitel-security-monitor.timer
 Run security scan: lynis audit system
 
 ============================================
@@ -788,7 +788,7 @@ EOF
 
 # Main execution
 main() {
-    info "Starting CRONOS AI security hardening..."
+    info "Starting QBITEL security hardening..."
     
     check_root
     setup_directories
@@ -803,9 +803,9 @@ main() {
     create_monitoring_service
     generate_security_report
     
-    success "CRONOS AI security hardening completed successfully!"
+    success "QBITEL security hardening completed successfully!"
     info "Please reboot the system to ensure all changes take effect."
-    info "Review the security report in /var/log/cronos-ai/ for additional recommendations."
+    info "Review the security report in /var/log/qbitel/ for additional recommendations."
 }
 
 # Execute main function

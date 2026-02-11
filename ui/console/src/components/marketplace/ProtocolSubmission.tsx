@@ -74,7 +74,7 @@ const ProtocolSubmission: React.FC<ProtocolSubmissionProps> = ({ apiClient }) =>
       license_type: 'free',
       price_model: undefined,
       base_price: undefined,
-      min_cronos_version: '1.0.0',
+      min_qbitel_version: '1.0.0',
     },
     files: {},
     validationErrors: {},
@@ -156,7 +156,7 @@ const ProtocolSubmission: React.FC<ProtocolSubmissionProps> = ({ apiClient }) =>
       case 1: // Technical Details
         if (!state.formData.version) errors.version = 'Version is required';
         if (!state.formData.protocol_type) errors.protocol_type = 'Protocol type is required';
-        if (!state.formData.min_cronos_version) errors.min_cronos_version = 'Min CRONOS version is required';
+        if (!state.formData.min_qbitel_version) errors.min_qbitel_version = 'Min QBITEL version is required';
         break;
 
       case 2: // Upload Files
@@ -368,11 +368,11 @@ const ProtocolSubmission: React.FC<ProtocolSubmissionProps> = ({ apiClient }) =>
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Min CRONOS Version"
-                  value={state.formData.min_cronos_version}
-                  onChange={(e) => handleInputChange('min_cronos_version', e.target.value)}
-                  error={!!state.validationErrors.min_cronos_version}
-                  helperText={state.validationErrors.min_cronos_version}
+                  label="Min QBITEL Version"
+                  value={state.formData.min_qbitel_version}
+                  onChange={(e) => handleInputChange('min_qbitel_version', e.target.value)}
+                  error={!!state.validationErrors.min_qbitel_version}
+                  helperText={state.validationErrors.min_qbitel_version}
                 />
               </Grid>
             </Grid>
@@ -626,7 +626,7 @@ const ProtocolSubmission: React.FC<ProtocolSubmissionProps> = ({ apiClient }) =>
         Submit Protocol
       </Typography>
       <Typography variant="body1" color="text.secondary" paragraph>
-        Share your protocol with the CRONOS AI community
+        Share your protocol with the QBITEL community
       </Typography>
 
       <Paper sx={{ p: 3, mt: 3 }}>

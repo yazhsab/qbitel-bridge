@@ -1,0 +1,19 @@
+{
+  "program_id": "MEDI479",
+  "domain": "healthcare",
+  "program_type": "interface_program",
+  "author": "C. MILLER",
+  "lines_of_code": 248,
+  "complexity_level": "complex",
+  "complexity_score": 0.678,
+  "files_used": 4,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.829854",
+  "hash": "355ef8a473cd52f4a9a58387d7dca686"
+}

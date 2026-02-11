@@ -1,0 +1,36 @@
+---
+title: "Why Quantum-Safe Matters for Legacy Systems"
+description: "Legacy systems are the most vulnerable to harvest-now-decrypt-later attacks. Here is why post-quantum cryptography must be applied at the infrastructure boundary, not deferred until legacy rewrites are complete."
+date: "2025-02-20"
+author: "QBITEL Team"
+tags: ["pqc", "security", "legacy"]
+---
+
+The quantum computing threat is not hypothetical. Nation-state actors and sophisticated adversaries are already executing **harvest-now, decrypt-later** campaigns, capturing encrypted traffic today with the intention of decrypting it once cryptographically relevant quantum computers become available. For organizations running legacy infrastructure, the risk is compounded by the fact that these older systems often rely on cryptographic primitives that are already weakened by classical attacks, let alone quantum ones.
+
+## The Harvest-Now Problem
+
+Every byte of encrypted data that traverses an insufficiently protected legacy protocol is being stored by adversaries who are patient enough to wait for quantum decryption. Financial transactions, patient health records, government communications, and industrial control signals all become retroactively exposed. The data has a long shelf life; the encryption protecting it does not.
+
+This is not a future problem. It is a data collection operation happening right now, and the window for mitigation is closing.
+
+## Why Legacy Systems Are Especially Vulnerable
+
+Most legacy systems were designed in an era when 1024-bit RSA was considered unbreakable. Many still use DES, 3DES, or early TLS versions with known weaknesses. Upgrading the cryptography inside these systems is often impossible because the source code is unavailable, the original vendors no longer exist, or the regulatory certification process would take years.
+
+Even when upgrades are technically feasible, the risk of destabilizing a production system that processes billions of dollars in daily transactions makes direct modification unacceptable to most enterprises.
+
+## NIST Level 5 at the Boundary
+
+QBITEL Bridge addresses this by applying **NIST Level 5 post-quantum cryptography at the bridge layer**, wrapping legacy traffic in ML-KEM-1024 key encapsulation and ML-DSA-87 digital signatures without requiring any changes to the legacy endpoints themselves.
+
+This approach has several advantages:
+
+- **No legacy code changes** -- the bridge operates as a transparent proxy, encrypting and authenticating traffic at the network boundary.
+- **Domain-specific PQC profiles** -- healthcare environments can apply FHIR-aware encryption policies, while banking systems can enforce PCI-DSS-compliant key management.
+- **Crypto agility** -- when NIST standards evolve or new algorithms are approved, the bridge layer can be updated independently of the legacy systems it protects.
+- **Hybrid mode** -- classical and post-quantum algorithms can run in parallel during transition periods, ensuring backward compatibility with systems that have not yet adopted PQC.
+
+## Act Before the Window Closes
+
+The migration to post-quantum cryptography is not optional; it is a matter of when, not if. For organizations with significant legacy infrastructure, the bridge-layer approach offers a path to quantum safety that does not require the impossible task of rewriting every legacy system simultaneously. The time to protect your data is before it is harvested, not after quantum computers arrive.

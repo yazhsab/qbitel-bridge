@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Protocol Discovery Orchestrator
+QBITEL Engine - Protocol Discovery Orchestrator
 
 This module orchestrates the entire protocol discovery pipeline, coordinating
 statistical analysis, grammar learning, parser generation, classification,
@@ -11,7 +11,7 @@ import logging
 import time
 from collections import defaultdict, Counter
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple, Any, Union, AsyncIterator
+from typing import Callable, Dict, List, Optional, Set, Tuple, Any, Union, AsyncIterator
 from enum import Enum
 import json
 import pickle
@@ -21,6 +21,12 @@ from prometheus_client import Counter as PrometheusCounter, Histogram, Gauge
 
 from ..core.config import Config
 from ..core.exceptions import ProtocolException, ModelException
+from ..core.circuit_breakers import (
+    circuit_breakers,
+    with_circuit_breaker,
+    CircuitOpenError,
+    CircuitBreakerConfig,
+)
 from .statistical_analyzer import StatisticalAnalyzer, StructuralFeatures
 from .grammar_learner import GrammarLearner, Grammar
 from .parser_generator import ParserGenerator, GeneratedParser, ParseResult
@@ -42,15 +48,44 @@ class DiscoveryMode(Enum):
 
 
 class DiscoveryPhase(Enum):
-    """Phases of protocol discovery process."""
+    """
+    Phases of protocol discovery process.
 
-    INITIALIZATION = "initialization"
-    STATISTICAL_ANALYSIS = "statistical_analysis"
-    CLASSIFICATION = "classification"
+    Simplified 5-phase pipeline:
+    1. FEATURE_EXTRACTION: Statistical analysis + Protocol classification
+    2. GRAMMAR_LEARNING: PCFG inference + BiLSTM-CRF field detection
+    3. ARTIFACT_GENERATION: Parser generation + Validation
+    4. COMPLETION: Result compilation and caching
+
+    Note: Initialization is implicit (not a discovery phase).
+    """
+
+    # Phase 1: Combined statistical analysis + classification
+    FEATURE_EXTRACTION = "feature_extraction"
+
+    # Phase 2: Grammar and structure learning
     GRAMMAR_LEARNING = "grammar_learning"
-    PARSER_GENERATION = "parser_generation"
-    VALIDATION = "validation"
+
+    # Phase 3: Combined parser generation + validation
+    ARTIFACT_GENERATION = "artifact_generation"
+
+    # Phase 4: Finalization
     COMPLETION = "completion"
+
+    # Legacy aliases for backward compatibility
+    @classmethod
+    def _missing_(cls, value):
+        """Handle legacy phase names for backward compatibility."""
+        legacy_mappings = {
+            "initialization": cls.FEATURE_EXTRACTION,
+            "statistical_analysis": cls.FEATURE_EXTRACTION,
+            "classification": cls.FEATURE_EXTRACTION,
+            "parser_generation": cls.ARTIFACT_GENERATION,
+            "validation": cls.ARTIFACT_GENERATION,
+        }
+        if value in legacy_mappings:
+            return legacy_mappings[value]
+        return None
 
 
 @dataclass
@@ -102,6 +137,59 @@ class DiscoveryResult:
 
 
 @dataclass
+class PartialDiscoveryResult:
+    """
+    Returned when discovery pipeline fails mid-way.
+
+    Contains all data discovered before the failure, allowing
+    clients to use partial results or retry from a checkpoint.
+    """
+
+    completed_phases: List[DiscoveryPhase]
+    failed_phase: DiscoveryPhase
+    partial_data: Dict[str, Any]  # Whatever we learned before failure
+    error_message: str
+    error_type: str
+    processing_time: float = 0.0
+    is_retryable: bool = True
+    retry_after_seconds: Optional[float] = None  # Suggested retry time
+
+    @property
+    def has_statistical_analysis(self) -> bool:
+        """Check if statistical analysis was completed."""
+        return "statistical_analysis" in self.partial_data
+
+    @property
+    def has_classification(self) -> bool:
+        """Check if classification was completed."""
+        return "classification" in self.partial_data
+
+    @property
+    def has_grammar(self) -> bool:
+        """Check if grammar learning was completed."""
+        return "grammar" in self.partial_data
+
+    def to_discovery_result(self) -> DiscoveryResult:
+        """Convert partial result to full DiscoveryResult with available data."""
+        return DiscoveryResult(
+            protocol_type=self.partial_data.get("protocol_type", "unknown"),
+            confidence=self.partial_data.get("confidence", 0.0),
+            grammar=self.partial_data.get("grammar"),
+            parser=self.partial_data.get("parser"),
+            validation_result=self.partial_data.get("validation_result"),
+            statistical_analysis=self.partial_data.get("statistical_analysis"),
+            classification_details=self.partial_data.get("classification"),
+            processing_time=self.processing_time,
+            phases_completed=self.completed_phases,
+            metadata={
+                "partial_result": True,
+                "failed_phase": self.failed_phase.value,
+                "error": self.error_message,
+            },
+        )
+
+
+@dataclass
 class ProtocolProfile:
     """Profile of a discovered protocol."""
 
@@ -119,15 +207,15 @@ class ProtocolProfile:
 
 # Prometheus metrics
 DISCOVERY_COUNTER = PrometheusCounter(
-    "cronos_protocol_discovery_total",
+    "qbitel_protocol_discovery_total",
     "Total protocol discoveries",
     ["protocol", "status"],
 )
 DISCOVERY_DURATION = Histogram(
-    "cronos_protocol_discovery_duration_seconds", "Discovery duration", ["phase"]
+    "qbitel_protocol_discovery_duration_seconds", "Discovery duration", ["phase"]
 )
-ACTIVE_PROTOCOLS = Gauge("cronos_active_protocols", "Number of active protocols")
-CACHE_HIT_RATE = Gauge("cronos_discovery_cache_hit_rate", "Cache hit rate")
+ACTIVE_PROTOCOLS = Gauge("qbitel_active_protocols", "Number of active protocols")
+CACHE_HIT_RATE = Gauge("qbitel_discovery_cache_hit_rate", "Cache hit rate")
 
 
 class ProtocolDiscoveryOrchestrator:
@@ -269,12 +357,31 @@ class ProtocolDiscoveryOrchestrator:
         async with self.semaphore:  # Limit concurrent discoveries
             return await self._execute_discovery(request)
 
-    async def _execute_discovery(self, request: DiscoveryRequest) -> DiscoveryResult:
-        """Execute the complete discovery pipeline."""
+    async def _execute_discovery(
+        self, request: DiscoveryRequest
+    ) -> Union[DiscoveryResult, PartialDiscoveryResult]:
+        """
+        Execute the complete discovery pipeline with circuit breaker protection.
+
+        Returns partial results if the pipeline fails mid-way, allowing clients
+        to use whatever data was discovered before the failure.
+        """
         start_time = time.time()
-        phases_completed = []
+        phases_completed: List[DiscoveryPhase] = []
+        partial_data: Dict[str, Any] = {}
+        current_phase = DiscoveryPhase.FEATURE_EXTRACTION
+
+        # Get the discovery circuit breaker
+        discovery_breaker = circuit_breakers.get("discovery")
 
         try:
+            # Check if circuit is open
+            if discovery_breaker and discovery_breaker.is_open:
+                raise CircuitOpenError(
+                    "discovery",
+                    discovery_breaker.config.recovery_timeout,
+                )
+
             # Update metrics
             self.discovery_stats["total_discoveries"] += 1
 
@@ -287,7 +394,7 @@ class ProtocolDiscoveryOrchestrator:
                     / self.discovery_stats["total_discoveries"]
                 )
                 cached_result = self.discovery_cache[cache_key]
-                self.logger.debug(f"Cache hit for discovery request")
+                self.logger.debug("Cache hit for discovery request")
                 return cached_result
 
             self.discovery_stats["cache_misses"] += 1
@@ -304,35 +411,31 @@ class ProtocolDiscoveryOrchestrator:
                 },
             )
 
-            # Phase 1: Statistical Analysis
+            # =================================================================
+            # Phase 1: Feature Extraction (Statistical Analysis + Classification)
+            # =================================================================
+            current_phase = DiscoveryPhase.FEATURE_EXTRACTION
             phase_start = time.time()
-            phases_completed.append(DiscoveryPhase.STATISTICAL_ANALYSIS)
 
-            self.logger.debug("Starting statistical analysis phase")
-            statistical_result = await self.statistical_analyzer.analyze_messages(
-                request.messages
+            self.logger.debug("Starting feature extraction phase")
+
+            # Step 1a: Statistical Analysis
+            statistical_result = await self._execute_with_circuit_breaker(
+                self.statistical_analyzer.analyze_messages,
+                request.messages,
             )
             result.statistical_analysis = statistical_result
+            partial_data["statistical_analysis"] = statistical_result
 
-            phase_time = time.time() - phase_start
-            self.discovery_stats["phase_timings"]["statistical_analysis"].append(
-                phase_time
-            )
-            DISCOVERY_DURATION.labels(phase="statistical_analysis").observe(phase_time)
-
-            # Phase 2: Protocol Classification
-            phase_start = time.time()
-            phases_completed.append(DiscoveryPhase.CLASSIFICATION)
-
+            # Step 1b: Protocol Classification
             if not request.known_protocol:
-                self.logger.debug("Starting protocol classification phase")
-
-                # Use first message for classification (can be improved)
                 if request.messages and self.protocol_classifier.is_trained:
-                    classification_result = await self.protocol_classifier.classify(
-                        request.messages[0]
+                    classification_result = await self._execute_with_circuit_breaker(
+                        self.protocol_classifier.classify,
+                        request.messages[0],
                     )
                     result.classification_details = classification_result
+                    partial_data["classification"] = classification_result
 
                     if classification_result.confidence >= request.confidence_threshold:
                         result.protocol_type = classification_result.protocol_type
@@ -345,19 +448,26 @@ class ProtocolDiscoveryOrchestrator:
                     result.confidence = 0.0
             else:
                 result.protocol_type = request.known_protocol
-                result.confidence = 1.0  # Known protocol has full confidence
+                result.confidence = 1.0
+
+            partial_data["protocol_type"] = result.protocol_type
+            partial_data["confidence"] = result.confidence
+            phases_completed.append(DiscoveryPhase.FEATURE_EXTRACTION)
 
             phase_time = time.time() - phase_start
-            self.discovery_stats["phase_timings"]["classification"].append(phase_time)
-            DISCOVERY_DURATION.labels(phase="classification").observe(phase_time)
+            self.discovery_stats["phase_timings"]["feature_extraction"].append(phase_time)
+            DISCOVERY_DURATION.labels(phase="feature_extraction").observe(phase_time)
 
-            # Phase 3: Grammar Learning (if training mode or unknown protocol)
+            # =================================================================
+            # Phase 2: Grammar Learning (if training mode or unknown protocol)
+            # =================================================================
             if request.training_mode or result.protocol_type == "unknown":
+                current_phase = DiscoveryPhase.GRAMMAR_LEARNING
                 phase_start = time.time()
-                phases_completed.append(DiscoveryPhase.GRAMMAR_LEARNING)
 
                 self.logger.debug("Starting grammar learning phase")
-                learned_grammar = await self.grammar_learner.learn_grammar(
+                learned_grammar = await self._execute_with_circuit_breaker(
+                    self.grammar_learner.learn_grammar,
                     request.messages,
                     protocol_hint=(
                         result.protocol_type
@@ -366,6 +476,7 @@ class ProtocolDiscoveryOrchestrator:
                     ),
                 )
                 result.grammar = learned_grammar
+                partial_data["grammar"] = learned_grammar
 
                 # Update protocol type if it was unknown
                 if result.protocol_type == "unknown":
@@ -373,71 +484,76 @@ class ProtocolDiscoveryOrchestrator:
                         learned_grammar
                     )
                     result.protocol_type = inferred_protocol
-                    result.confidence = 0.6  # Medium confidence for inferred protocols
+                    result.confidence = 0.6
+                    partial_data["protocol_type"] = inferred_protocol
+                    partial_data["confidence"] = 0.6
+
+                phases_completed.append(DiscoveryPhase.GRAMMAR_LEARNING)
 
                 phase_time = time.time() - phase_start
-                self.discovery_stats["phase_timings"]["grammar_learning"].append(
-                    phase_time
-                )
+                self.discovery_stats["phase_timings"]["grammar_learning"].append(phase_time)
                 DISCOVERY_DURATION.labels(phase="grammar_learning").observe(phase_time)
 
-            # Phase 4: Parser Generation
-            if request.generate_parser and result.grammar:
+            # =================================================================
+            # Phase 3: Artifact Generation (Parser Generation + Validation)
+            # =================================================================
+            if (request.generate_parser and result.grammar) or (
+                request.validate_results and request.messages
+            ):
+                current_phase = DiscoveryPhase.ARTIFACT_GENERATION
                 phase_start = time.time()
-                phases_completed.append(DiscoveryPhase.PARSER_GENERATION)
 
-                self.logger.debug("Starting parser generation phase")
-                generated_parser = await self.parser_generator.generate_parser(
-                    result.grammar,
-                    parser_id=f"{result.protocol_type}_{int(time.time())}",
-                    protocol_name=result.protocol_type,
-                )
-                result.parser = generated_parser
+                self.logger.debug("Starting artifact generation phase")
+
+                # Step 3a: Parser Generation
+                if request.generate_parser and result.grammar:
+                    generated_parser = await self._execute_with_circuit_breaker(
+                        self.parser_generator.generate_parser,
+                        result.grammar,
+                        parser_id=f"{result.protocol_type}_{int(time.time())}",
+                        protocol_name=result.protocol_type,
+                    )
+                    result.parser = generated_parser
+                    partial_data["parser"] = generated_parser
+
+                # Step 3b: Validation
+                if request.validate_results and request.messages:
+                    if result.parser:
+                        self.message_validator.register_parser(
+                            result.protocol_type, result.parser
+                        )
+
+                    if result.grammar:
+                        self.message_validator.register_grammar(
+                            result.protocol_type, result.grammar
+                        )
+
+                    validation_result = await self._execute_with_circuit_breaker(
+                        self.message_validator.validate,
+                        request.messages[0],
+                        protocol_type=result.protocol_type,
+                        validation_level=ValidationLevel.STANDARD,
+                    )
+                    result.validation_result = validation_result
+                    partial_data["validation_result"] = validation_result
+
+                    if validation_result.is_valid:
+                        result.confidence = min(1.0, result.confidence + 0.1)
+                    else:
+                        result.confidence = max(0.0, result.confidence - 0.2)
+                    partial_data["confidence"] = result.confidence
+
+                phases_completed.append(DiscoveryPhase.ARTIFACT_GENERATION)
 
                 phase_time = time.time() - phase_start
-                self.discovery_stats["phase_timings"]["parser_generation"].append(
+                self.discovery_stats["phase_timings"]["artifact_generation"].append(
                     phase_time
                 )
-                DISCOVERY_DURATION.labels(phase="parser_generation").observe(phase_time)
+                DISCOVERY_DURATION.labels(phase="artifact_generation").observe(phase_time)
 
-            # Phase 5: Validation
-            if request.validate_results and request.messages:
-                phase_start = time.time()
-                phases_completed.append(DiscoveryPhase.VALIDATION)
-
-                self.logger.debug("Starting validation phase")
-
-                # Register parser if available
-                if result.parser:
-                    self.message_validator.register_parser(
-                        result.protocol_type, result.parser
-                    )
-
-                # Register grammar if available
-                if result.grammar:
-                    self.message_validator.register_grammar(
-                        result.protocol_type, result.grammar
-                    )
-
-                # Validate first message as a sample
-                validation_result = await self.message_validator.validate(
-                    request.messages[0],
-                    protocol_type=result.protocol_type,
-                    validation_level=ValidationLevel.STANDARD,
-                )
-                result.validation_result = validation_result
-
-                # Adjust confidence based on validation
-                if validation_result.is_valid:
-                    result.confidence = min(1.0, result.confidence + 0.1)
-                else:
-                    result.confidence = max(0.0, result.confidence - 0.2)
-
-                phase_time = time.time() - phase_start
-                self.discovery_stats["phase_timings"]["validation"].append(phase_time)
-                DISCOVERY_DURATION.labels(phase="validation").observe(phase_time)
-
-            # Phase 6: Completion and Caching
+            # =================================================================
+            # Phase 4: Completion and Caching
+            # =================================================================
             phases_completed.append(DiscoveryPhase.COMPLETION)
 
             result.phases_completed = phases_completed
@@ -469,19 +585,70 @@ class ProtocolDiscoveryOrchestrator:
                 f"(confidence: {result.confidence:.2f}, time: {result.processing_time:.2f}s)"
             )
 
+            # Record success with circuit breaker
+            if discovery_breaker:
+                await discovery_breaker._on_success()
+
             return result
 
+        except CircuitOpenError as e:
+            # Circuit is open, return immediately with suggested retry time
+            self.logger.warning(f"Discovery circuit open: {e}")
+            DISCOVERY_COUNTER.labels(protocol="unknown", status="circuit_open").inc()
+
+            return PartialDiscoveryResult(
+                completed_phases=phases_completed,
+                failed_phase=current_phase,
+                partial_data=partial_data,
+                error_message=str(e),
+                error_type="CircuitOpenError",
+                processing_time=time.time() - start_time,
+                is_retryable=True,
+                retry_after_seconds=e.time_until_retry,
+            )
+
         except Exception as e:
-            self.logger.error(f"Protocol discovery failed: {e}")
+            self.logger.error(f"Protocol discovery failed at {current_phase.value}: {e}")
             DISCOVERY_COUNTER.labels(protocol="unknown", status="error").inc()
 
-            return DiscoveryResult(
-                protocol_type="unknown",
-                confidence=0.0,
+            # Record failure with circuit breaker
+            if discovery_breaker:
+                await discovery_breaker._on_failure(e)
+
+            # Return partial results
+            return PartialDiscoveryResult(
+                completed_phases=phases_completed,
+                failed_phase=current_phase,
+                partial_data=partial_data,
+                error_message=str(e),
+                error_type=type(e).__name__,
                 processing_time=time.time() - start_time,
-                phases_completed=phases_completed,
-                metadata={"error": str(e)},
+                is_retryable=self._is_retryable_error(e),
+                retry_after_seconds=60.0 if self._is_retryable_error(e) else None,
             )
+
+    async def _execute_with_circuit_breaker(
+        self, func: Callable, *args, **kwargs
+    ) -> Any:
+        """Execute a function with circuit breaker protection."""
+        discovery_breaker = circuit_breakers.get("discovery")
+        if discovery_breaker:
+            return await discovery_breaker.call(func, *args, **kwargs)
+        else:
+            # No circuit breaker, execute directly
+            if asyncio.iscoroutinefunction(func):
+                return await func(*args, **kwargs)
+            return func(*args, **kwargs)
+
+    def _is_retryable_error(self, error: Exception) -> bool:
+        """Determine if an error is retryable."""
+        # Network/timeout errors are retryable
+        retryable_types = (
+            TimeoutError,
+            ConnectionError,
+            OSError,
+        )
+        return isinstance(error, retryable_types)
 
     async def _infer_protocol_from_grammar(self, grammar: Grammar) -> str:
         """Infer protocol type from learned grammar characteristics."""

@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Intelligence Copilot API Endpoints
+QBITEL - Protocol Intelligence Copilot API Endpoints
 FastAPI endpoints for the Protocol Intelligence Copilot feature.
 """
 
@@ -27,20 +27,20 @@ from ..copilot.protocol_copilot import (
     CopilotResponse,
 )
 from ..core.config import get_config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from .auth import verify_token, get_current_user
 
 # Metrics
 COPILOT_API_REQUESTS = Counter(
-    "cronos_copilot_api_requests_total",
+    "qbitel_copilot_api_requests_total",
     "Total copilot API requests",
     ["endpoint", "status"],
 )
 COPILOT_API_DURATION = Histogram(
-    "cronos_copilot_api_duration_seconds", "Copilot API request duration", ["endpoint"]
+    "qbitel_copilot_api_duration_seconds", "Copilot API request duration", ["endpoint"]
 )
 WEBSOCKET_CONNECTIONS = Counter(
-    "cronos_copilot_websocket_connections_total", "Total WebSocket connections"
+    "qbitel_copilot_websocket_connections_total", "Total WebSocket connections"
 )
 
 logger = logging.getLogger(__name__)
@@ -210,7 +210,7 @@ async def process_copilot_query(
             metadata=response.metadata or {},
         )
 
-    except CronosAIException as e:
+    except QbitelAIException as e:
         COPILOT_API_REQUESTS.labels(endpoint="query", status="error").inc()
         logger.error(f"Copilot processing error: {e}")
         raise HTTPException(status_code=400, detail=str(e))

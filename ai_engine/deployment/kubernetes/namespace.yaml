@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cronos-ai
+  name: qbitel
   labels:
-    name: cronos-ai
-    app.kubernetes.io/name: cronos-ai
+    name: qbitel
+    app.kubernetes.io/name: qbitel
     app.kubernetes.io/component: ai-engine
     app.kubernetes.io/version: "1.0.0"
   annotations:
-    description: "CRONOS AI Engine - Enterprise Protocol Discovery and Analysis Platform"
+    description: "QBITEL Engine - Enterprise Protocol Discovery and Analysis Platform"

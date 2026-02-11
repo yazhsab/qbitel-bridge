@@ -502,12 +502,12 @@ Returns Prometheus-formatted metrics for monitoring and alerting.
 
 ```python
 import asyncio
-from cronos_ai_sdk import CronosAIClient, CopilotQuery
+from qbitel_sdk import QbitelAIClient, CopilotQuery
 
 async def main():
     # Initialize client
-    client = CronosAIClient(
-        api_url="https://api.cronos-ai.com",
+    client = QbitelAIClient(
+        api_url="https://api.qbitel.com",
         auth_token="your-jwt-token"
     )
     
@@ -539,10 +539,10 @@ if __name__ == "__main__":
 ### JavaScript SDK
 
 ```javascript
-import { CronosAIClient } from '@cronos-ai/sdk';
+import { QbitelAIClient } from '@qbitel/sdk';
 
-const client = new CronosAIClient({
-  apiUrl: 'https://api.cronos-ai.com',
+const client = new QbitelAIClient({
+  apiUrl: 'https://api.qbitel.com',
   authToken: 'your-jwt-token'
 });
 
@@ -580,12 +580,12 @@ ws.send({
 
 ```bash
 # Login
-curl -X POST https://api.cronos-ai.com/api/v1/auth/login \
+curl -X POST https://api.qbitel.com/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"admin123"}'
 
 # Copilot query
-curl -X POST https://api.cronos-ai.com/api/v1/copilot/query \
+curl -X POST https://api.qbitel.com/api/v1/copilot/query \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -595,7 +595,7 @@ curl -X POST https://api.cronos-ai.com/api/v1/copilot/query \
   }'
 
 # Enhanced protocol discovery
-curl -X POST https://api.cronos-ai.com/api/v1/discover/enhanced \
+curl -X POST https://api.qbitel.com/api/v1/discover/enhanced \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -640,10 +640,10 @@ curl -X POST https://api.cronos-ai.com/api/v1/discover/enhanced \
 
 ## Support and Resources
 
-- **Documentation**: https://docs.cronos-ai.com
-- **API Reference**: https://api.cronos-ai.com/docs
-- **Support Portal**: https://support.cronos-ai.com
-- **GitHub Repository**: https://github.com/cronos-ai/cronos-ai-engine
+- **Documentation**: https://docs.qbitel.com
+- **API Reference**: https://api.qbitel.com/docs
+- **Support Portal**: https://support.qbitel.com
+- **GitHub Repository**: https://github.com/yazhsab/qbitel-engine
 
 ## Changelog
 

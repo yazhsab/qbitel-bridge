@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# CRONOS AI - Local Development Startup Script
+# QBITEL - Local Development Startup Script
 # Usage: ./scripts/start-local.sh [--docker|--native] [--skip-deps]
 #
 set -e
@@ -51,7 +51,7 @@ done
 cd "$PROJECT_ROOT"
 
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}  CRONOS AI - Local Development Setup${NC}"
+echo -e "${GREEN}  QBITEL - Local Development Setup${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 echo -e "Mode: ${YELLOW}$MODE${NC}"
@@ -150,20 +150,20 @@ else
         echo -e "${YELLOW}Starting dependencies...${NC}"
 
         # Start PostgreSQL with Docker
-        if ! docker ps | grep -q cronos-postgres; then
+        if ! docker ps | grep -q qbitel-postgres; then
             docker run -d \
-                --name cronos-postgres \
-                -e POSTGRES_USER=cronos \
-                -e POSTGRES_PASSWORD=cronos_dev_password \
-                -e POSTGRES_DB=cronos_ai_dev \
+                --name qbitel-postgres \
+                -e POSTGRES_USER=qbitel \
+                -e POSTGRES_PASSWORD=qbitel_dev_password \
+                -e POSTGRES_DB=qbitel_dev \
                 -p 5432:5432 \
                 postgres:15 2>/dev/null || true
         fi
 
         # Start Redis with Docker
-        if ! docker ps | grep -q cronos-redis; then
+        if ! docker ps | grep -q qbitel-redis; then
             docker run -d \
-                --name cronos-redis \
+                --name qbitel-redis \
                 -p 6379:6379 \
                 redis:7 2>/dev/null || true
         fi
@@ -173,12 +173,12 @@ else
     fi
 
     # Set environment variables
-    export CRONOS_ENV=development
+    export QBITEL_ENV=development
     export DATABASE_HOST=localhost
     export DATABASE_PORT=5432
-    export DATABASE_NAME=cronos_ai_dev
-    export DATABASE_USER=cronos
-    export DATABASE_PASSWORD=cronos_dev_password
+    export DATABASE_NAME=qbitel_dev
+    export DATABASE_USER=qbitel
+    export DATABASE_PASSWORD=qbitel_dev_password
     export REDIS_HOST=localhost
     export REDIS_PORT=6379
     export JWT_SECRET=development-jwt-secret-key-32ch
@@ -188,8 +188,8 @@ else
 
     # Check if Ollama is running
     if curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
-        export CRONOS_LLM_PROVIDER=ollama
-        export CRONOS_LLM_ENDPOINT=http://localhost:11434
+        export QBITEL_LLM_PROVIDER=ollama
+        export QBITEL_LLM_ENDPOINT=http://localhost:11434
         echo -e "${GREEN}Ollama detected - using local LLM${NC}"
     else
         echo -e "${YELLOW}Ollama not running - LLM features may be limited${NC}"
@@ -203,7 +203,7 @@ else
     cd ..
 
     echo ""
-    echo -e "${GREEN}Starting CRONOS AI Engine...${NC}"
+    echo -e "${GREEN}Starting QBITEL Engine...${NC}"
     echo ""
     echo "Access points:"
     echo "  - API:        http://localhost:8000"

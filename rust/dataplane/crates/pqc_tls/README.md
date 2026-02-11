@@ -273,7 +273,7 @@ Built-in support for:
 ### Building from Source
 
 ```bash
-git clone https://github.com/your-org/cronos-ai.git
+git clone https://github.com/your-org/qbitel.git
 cd rust/dataplane/crates/pqc_tls
 cargo build --release --all-features
 ```

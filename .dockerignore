@@ -1,0 +1,75 @@
+# Git
+.git
+.github
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+docs/
+diagrams/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Rust
+target/
+
+# Go
+dist/
+
+# Node
+node_modules/
+.npm/
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test and CI
+tests/
+.pre-commit-config.yaml
+.editorconfig
+.bandit
+Makefile
+
+# Security - never include
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Samples and demos
+samples/
+demos/
+
+# Logs
+*.log
+logs/

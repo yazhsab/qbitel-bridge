@@ -499,7 +499,7 @@ export const blueGreyTheme = createEnterpriseTheme('blue-grey');
 export const enterpriseTheme = createEnterpriseTheme('enterprise');
 
 // Theme preference storage
-export const THEME_STORAGE_KEY = 'cronos-ai-theme';
+export const THEME_STORAGE_KEY = 'qbitel-theme';
 
 export function saveThemePreference(variant: ThemeVariant): void {
   localStorage.setItem(THEME_STORAGE_KEY, variant);

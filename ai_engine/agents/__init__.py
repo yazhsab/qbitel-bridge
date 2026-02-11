@@ -1,5 +1,5 @@
 """
-CRONOS AI - Multi-Agent Orchestration Framework
+QBITEL - Multi-Agent Orchestration Framework
 
 This module provides a comprehensive multi-agent orchestration system with:
 - Planning/Supervisor Agent for task decomposition and coordination

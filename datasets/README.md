@@ -1,6 +1,6 @@
-# CRONOS AI Datasets
+# QBITEL Datasets
 
-This directory contains training, validation, and test datasets for CRONOS AI's ML components.
+This directory contains training, validation, and test datasets for QBITEL's ML components.
 
 ## Directory Structure
 
@@ -53,7 +53,7 @@ datasets/
 ## Usage
 
 ```python
-from cronos_ai.datasets import DatasetLoader
+from qbitel.datasets import DatasetLoader
 
 # Load protocol samples
 loader = DatasetLoader()

@@ -1,5 +1,5 @@
 """
-Comprehensive tests for the CRONOS AI Multi-Agent Orchestration Framework.
+Comprehensive tests for the QBITEL Multi-Agent Orchestration Framework.
 
 Tests cover:
 - Base Agent functionality

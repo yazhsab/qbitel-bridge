@@ -1,0 +1,266 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Enterprise IAM Monitoring | QBITEL Bridge"
+  description="Identity and access management intelligence with behavioral analytics, privilege escalation detection, session monitoring, and multi-cloud IAM integration."
+>
+  <PageHero
+    title="Enterprise IAM Monitoring"
+    description="Monitor and secure identity infrastructure with behavioral analytics, privilege escalation detection, session management, and multi-cloud IAM integration across AWS, Azure, and GCP."
+    badge="Identity Security"
+    gradient="from-sky-500 to-blue-500"
+  />
+
+  <!-- Key Metrics -->
+  <section class="py-12 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">UEBA</div>
+          <div class="text-sm text-gray-400">Behavioral Analytics</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">3</div>
+          <div class="text-sm text-gray-400">Cloud Providers</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">Real-Time</div>
+          <div class="text-sm text-gray-400">Session Monitoring</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">ML</div>
+          <div class="text-sm text-gray-400">Anomaly Detection</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="section-heading">
+            Identity Is the <span class="gradient-text">New Perimeter</span>
+          </h2>
+          <p class="text-gray-400 mb-6 leading-relaxed">
+            With the shift to cloud and remote work, identity has become the primary attack surface. Over 80% of breaches involve compromised credentials, and privilege escalation is the most common technique used by advanced persistent threats to move laterally within organizations.
+          </p>
+          <p class="text-gray-400 leading-relaxed">
+            QBITEL IAM Monitoring uses machine learning to establish behavioral baselines for every user and service account, detecting anomalous access patterns, privilege escalation attempts, and compromised sessions in real-time across all cloud environments.
+          </p>
+        </div>
+        <div class="space-y-4">
+          <div class="card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </div>
+              <div>
+                <div class="text-white font-semibold">80% of Breaches</div>
+                <div class="text-sm text-gray-400">Involve compromised credentials</div>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <div>
+                <div class="text-white font-semibold">Privilege Escalation</div>
+                <div class="text-sm text-gray-400">Most common lateral movement technique</div>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                </svg>
+              </div>
+              <div>
+                <div class="text-white font-semibold">Multi-Cloud Sprawl</div>
+                <div class="text-sm text-gray-400">Identities fragmented across AWS, Azure, GCP</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          IAM Security <span class="gradient-text">Capabilities</span>
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Behavioral Analytics (UEBA)</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">User and Entity Behavior Analytics builds ML-powered baselines for every identity, detecting anomalous access patterns, unusual login locations, and abnormal resource usage.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Per-user behavioral baselines
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Anomalous access pattern detection
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Risk scoring for every authentication event
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Privilege Escalation Detection</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Detects unauthorized privilege changes, role modifications, and permission escalation attempts across IAM policies, service accounts, and federated identities.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              IAM policy change monitoring
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Service account abuse detection
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Cross-account privilege analysis
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-green-500/10 border border-green-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Session Monitoring</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Real-time monitoring of active sessions across all applications and cloud services. Detect session hijacking, token theft, and concurrent session anomalies.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Session hijacking detection
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Token theft and replay detection
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Impossible travel detection
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Multi-Cloud IAM</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Unified view of identity and access across AWS IAM, Azure AD, and GCP IAM. Correlate access patterns and detect cross-cloud lateral movement attempts.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              AWS IAM, Azure AD, GCP IAM
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Cross-cloud identity correlation
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Unified permission inventory
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Detection <span class="gradient-text">Pipeline</span>
+        </h2>
+      </div>
+
+      <div class="max-w-3xl mx-auto space-y-6">
+        <div class="flex items-start gap-4">
+          <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 text-white font-bold text-sm flex-shrink-0 mt-1">1</div>
+          <div>
+            <h3 class="text-white font-semibold mb-1">Identity Data Collection</h3>
+            <p class="text-sm text-gray-400">Ingest authentication logs, IAM policy changes, session events, and access logs from all cloud providers and identity providers.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 text-white font-bold text-sm flex-shrink-0 mt-1">2</div>
+          <div>
+            <h3 class="text-white font-semibold mb-1">Behavioral Baseline</h3>
+            <p class="text-sm text-gray-400">ML models build per-user and per-entity behavioral baselines covering access patterns, timing, locations, and resource usage.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 text-white font-bold text-sm flex-shrink-0 mt-1">3</div>
+          <div>
+            <h3 class="text-white font-semibold mb-1">Anomaly Detection</h3>
+            <p class="text-sm text-gray-400">Real-time comparison against baselines detects anomalous behavior, privilege escalation, credential abuse, and session manipulation.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 text-white font-bold text-sm flex-shrink-0 mt-1">4</div>
+          <div>
+            <h3 class="text-white font-semibold mb-1">Response and Remediation</h3>
+            <p class="text-sm text-gray-400">Automated response actions including session termination, permission revocation, MFA step-up, and integration with Zero-Touch Security for autonomous incident handling.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTABanner
+    title="Ready to Secure Your Identities?"
+    description="Deploy behavioral analytics and privilege monitoring across your entire identity infrastructure."
+  />
+</PageLayout>

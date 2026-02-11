@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// MicroSegmentationEngine implements network micro-segmentation for QSLB
+// MicroSegmentationEngine implements network micro-segmentation for QBITEL
 type MicroSegmentationEngine struct {
 	logger *zap.Logger
 	
@@ -193,7 +193,7 @@ func NewMicroSegmentationEngine(logger *zap.Logger, config *SegmentationConfig) 
 		
 		policyViolations: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "qslb_network_policy_violations_total",
+				Name: "qbitel_network_policy_violations_total",
 				Help: "Total number of network policy violations",
 			},
 			[]string{"policy_id", "rule_id", "source_segment", "dest_segment"},
@@ -201,7 +201,7 @@ func NewMicroSegmentationEngine(logger *zap.Logger, config *SegmentationConfig) 
 		
 		trafficBlocked: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "qslb_network_traffic_blocked_total",
+				Name: "qbitel_network_traffic_blocked_total",
 				Help: "Total amount of blocked network traffic",
 			},
 			[]string{"source_segment", "dest_segment", "protocol"},
@@ -209,7 +209,7 @@ func NewMicroSegmentationEngine(logger *zap.Logger, config *SegmentationConfig) 
 		
 		segmentationActive: promauto.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Name: "qslb_network_segmentation_active",
+				Name: "qbitel_network_segmentation_active",
 				Help: "Network segmentation status",
 			},
 			[]string{"segment_id", "segment_type"},

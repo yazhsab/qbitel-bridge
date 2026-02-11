@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# CRONOS AI - Upload SBOM to Dependency-Track
+# QBITEL - Upload SBOM to Dependency-Track
 # Automates SBOM upload for continuous vulnerability monitoring
 #
 # Usage: ./upload_sbom_to_dependency_track.sh [VERSION]
@@ -10,7 +10,7 @@
 set -euo pipefail
 
 # Configuration
-DEPENDENCY_TRACK_URL="${DEPENDENCY_TRACK_URL:-https://dependency-track.cronos-ai.internal}"
+DEPENDENCY_TRACK_URL="${DEPENDENCY_TRACK_URL:-https://dependency-track.qbitel.internal}"
 API_KEY="${DEPENDENCY_TRACK_API_KEY:-}"
 PROJECT_VERSION="${1:-latest}"
 SBOM_DIR="${SBOM_DIR:-./sbom-artifacts}"
@@ -83,7 +83,7 @@ for sbom in "$SBOM_DIR"/*-cyclonedx.json; do
                 \"version\": \"$PROJECT_VERSION\",
                 \"classifier\": \"APPLICATION\",
                 \"active\": true,
-                \"tags\": [{\"name\": \"cronos-ai\"}]
+                \"tags\": [{\"name\": \"qbitel\"}]
             }" \
             2>/dev/null | jq -r '.uuid // empty' || echo "")
 

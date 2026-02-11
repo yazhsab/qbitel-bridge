@@ -1,0 +1,19 @@
+{
+  "program_id": "BILV982",
+  "domain": "utilities",
+  "program_type": "data_validation",
+  "author": "M. JOHNSON",
+  "lines_of_code": 281,
+  "complexity_level": "complex",
+  "complexity_score": 0.735,
+  "files_used": 4,
+  "verbs_used": 14,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.879903",
+  "hash": "5be4c8bb38f4d136e086ff43104722da"
+}

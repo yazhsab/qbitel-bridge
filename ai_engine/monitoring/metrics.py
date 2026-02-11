@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Metrics Collection
+QBITEL Engine - Metrics Collection
 
 This module provides comprehensive metrics collection and monitoring
 for the AI Engine using Prometheus and custom metrics.
@@ -59,12 +59,12 @@ class MetricConfig:
     labels: List[str] = field(default_factory=list)
     buckets: Optional[List[float]] = None  # For histograms
     unit: str = ""
-    namespace: str = "cronos_ai"
+    namespace: str = "qbitel"
 
 
 class MetricsCollector:
     """
-    Base metrics collector for CRONOS AI Engine.
+    Base metrics collector for QBITEL Engine.
 
     This class provides a foundation for collecting and managing
     various metrics throughout the AI Engine lifecycle.

@@ -1,0 +1,19 @@
+{
+  "program_id": "BNKI799",
+  "domain": "banking",
+  "program_type": "interface_program",
+  "author": "C. MILLER",
+  "lines_of_code": 172,
+  "complexity_level": "simple",
+  "complexity_score": 0.393,
+  "files_used": 1,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.897520",
+  "hash": "2b933603e7402aba331a3c823f392a6e"
+}

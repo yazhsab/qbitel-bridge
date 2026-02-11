@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Integration Manager
+QBITEL Engine - Integration Manager
 
 Centralized management of all external system integrations for the
 Zero-Touch Security Orchestrator.
@@ -67,7 +67,7 @@ class IntegrationManager:
 
     def __init__(self):
         self.config = get_security_config()
-        self.logger = get_security_logger("cronos.security.integrations")
+        self.logger = get_security_logger("qbitel.security.integrations")
 
         # Integration registry
         self.integrations: Dict[str, IntegrationRegistration] = {}

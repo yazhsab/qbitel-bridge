@@ -351,7 +351,7 @@ func (irs *IncidentResponseSystem) initializeMetrics() {
 	irs.metrics = &IncidentMetrics{
 		IncidentsTotal: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "cronosai_incidents_total",
+				Name: "qbitel_incidents_total",
 				Help: "Total number of incidents",
 			},
 			[]string{"severity", "category", "status"},
@@ -359,7 +359,7 @@ func (irs *IncidentResponseSystem) initializeMetrics() {
 		
 		IncidentDuration: promauto.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name:    "cronosai_incident_duration_seconds",
+				Name:    "qbitel_incident_duration_seconds",
 				Help:    "Duration of incidents in seconds",
 				Buckets: prometheus.ExponentialBuckets(60, 2, 15),
 			},
@@ -368,7 +368,7 @@ func (irs *IncidentResponseSystem) initializeMetrics() {
 		
 		ResponseTime: promauto.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name:    "cronosai_incident_response_time_seconds",
+				Name:    "qbitel_incident_response_time_seconds",
 				Help:    "Time to respond to incidents in seconds",
 				Buckets: prometheus.ExponentialBuckets(1, 2, 12),
 			},
@@ -377,7 +377,7 @@ func (irs *IncidentResponseSystem) initializeMetrics() {
 		
 		EscalationRate: promauto.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Name: "cronosai_incident_escalation_rate",
+				Name: "qbitel_incident_escalation_rate",
 				Help: "Rate of incident escalations",
 			},
 			[]string{"severity", "team"},
@@ -385,7 +385,7 @@ func (irs *IncidentResponseSystem) initializeMetrics() {
 		
 		MTTR: promauto.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Name: "cronosai_incident_mttr_seconds",
+				Name: "qbitel_incident_mttr_seconds",
 				Help: "Mean Time To Resolution for incidents",
 			},
 			[]string{"severity", "category"},
@@ -393,7 +393,7 @@ func (irs *IncidentResponseSystem) initializeMetrics() {
 		
 		MTTD: promauto.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Name: "cronosai_incident_mttd_seconds",
+				Name: "qbitel_incident_mttd_seconds",
 				Help: "Mean Time To Detection for incidents",
 			},
 			[]string{"category"},

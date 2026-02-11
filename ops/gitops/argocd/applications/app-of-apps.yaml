@@ -1,0 +1,83 @@
+---
+# QBITEL App of Apps
+# Master application that manages all other applications
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qbitel-apps
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qbitel-apps
+    app.kubernetes.io/part-of: qbitel-gitops
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: qbitel
+
+  source:
+    repoURL: https://github.com/yazhsab/qbitel.git
+    targetRevision: HEAD
+    path: ops/gitops/argocd/applications
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=false
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # Ignore differences in specific fields
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+      jsonPointers:
+        - /spec/minReplicas
+        - /spec/maxReplicas
+---
+# Infrastructure Applications
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qbitel-infrastructure
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qbitel-infrastructure
+    app.kubernetes.io/component: infrastructure
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: qbitel
+
+  source:
+    repoURL: https://github.com/yazhsab/qbitel.git
+    targetRevision: HEAD
+    path: ops/gitops/environments/base/infrastructure
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qbitel-infrastructure
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

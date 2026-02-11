@@ -37,13 +37,13 @@ export interface ProductionConfig {
 
 const production: ProductionConfig = {
   api: {
-    baseUrl: process.env.REACT_APP_API_BASE_URL || 'https://api.cronosai.local',
+    baseUrl: process.env.REACT_APP_API_BASE_URL || 'https://api.qbitelai.local',
     timeout: 30000,
     retryAttempts: 3,
     retryDelay: 1000,
   },
   websocket: {
-    url: process.env.REACT_APP_WS_URL || 'wss://api.cronosai.local/ws',
+    url: process.env.REACT_APP_WS_URL || 'wss://api.qbitelai.local/ws',
     reconnectAttempts: 5,
     reconnectDelay: 1000,
     heartbeatInterval: 30000,

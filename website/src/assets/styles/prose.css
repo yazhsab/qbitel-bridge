@@ -1,0 +1,124 @@
+.prose-quantum {
+  /* Prose content styling for dark quantum theme */
+}
+
+.prose-quantum h2 {
+  color: white;
+  font-weight: 700;
+  font-size: 1.5em;
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+}
+
+.prose-quantum h3 {
+  color: white;
+  font-weight: 600;
+  font-size: 1.25em;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose-quantum p {
+  color: #d1d5db;
+  line-height: 1.75;
+  margin-bottom: 1.25em;
+}
+
+.prose-quantum a {
+  color: #60a5fa;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose-quantum a:hover {
+  color: #93c5fd;
+}
+
+.prose-quantum strong {
+  color: white;
+  font-weight: 600;
+}
+
+.prose-quantum code {
+  background: #1f2937;
+  padding: 0.125em 0.375em;
+  border-radius: 0.25em;
+  font-size: 0.875em;
+  color: #60a5fa;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.prose-quantum pre {
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 0.75em;
+  padding: 1em;
+  overflow-x: auto;
+  margin-bottom: 1.5em;
+}
+
+.prose-quantum pre code {
+  background: none;
+  padding: 0;
+  color: #e5e7eb;
+  font-size: 0.875em;
+}
+
+.prose-quantum ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  margin-bottom: 1.25em;
+}
+
+.prose-quantum ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin-bottom: 1.25em;
+}
+
+.prose-quantum li {
+  color: #d1d5db;
+  margin-top: 0.5em;
+  line-height: 1.75;
+}
+
+.prose-quantum blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1em;
+  margin-left: 0;
+  margin-bottom: 1.25em;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.prose-quantum table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5em;
+}
+
+.prose-quantum th {
+  text-align: left;
+  padding: 0.75em;
+  border-bottom: 2px solid #374151;
+  color: white;
+  font-weight: 600;
+}
+
+.prose-quantum td {
+  padding: 0.75em;
+  border-bottom: 1px solid #1f2937;
+  color: #d1d5db;
+}
+
+.prose-quantum img {
+  border-radius: 0.5em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.prose-quantum hr {
+  border-color: #374151;
+  margin-top: 2em;
+  margin-bottom: 2em;
+}

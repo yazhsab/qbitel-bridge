@@ -1,5 +1,5 @@
 """
-CRONOS AI - Ecosystem Integrations
+QBITEL - Ecosystem Integrations
 
 External system integrations for PQC deployment:
 - Cloud HSM: AWS CloudHSM, Azure Key Vault, GCP Cloud HSM

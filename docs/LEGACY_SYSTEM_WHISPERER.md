@@ -282,9 +282,9 @@ curl -X POST http://localhost:8000/api/v1/legacy-whisperer/explain-behavior \
 
 ```bash
 # LLM Configuration
-CRONOS_AI_LLM_PROVIDER=openai
-CRONOS_AI_LLM_MODEL=gpt-4
-CRONOS_AI_LLM_API_KEY=your_api_key
+QBITEL_AI_LLM_PROVIDER=openai
+QBITEL_AI_LLM_MODEL=gpt-4
+QBITEL_AI_LLM_API_KEY=your_api_key
 
 # Legacy Whisperer Settings
 LEGACY_WHISPERER_MIN_SAMPLES=10
@@ -346,15 +346,15 @@ legacy_whisperer:
 
 ```
 # Analysis operations
-cronos_legacy_analysis_total{analysis_type, status}
-cronos_legacy_analysis_duration_seconds{analysis_type}
-cronos_legacy_confidence_score
+qbitel_legacy_analysis_total{analysis_type, status}
+qbitel_legacy_analysis_duration_seconds{analysis_type}
+qbitel_legacy_confidence_score
 
 # Adapter generation
-cronos_legacy_adapter_generation_total{source_protocol, target_protocol, status}
+qbitel_legacy_adapter_generation_total{source_protocol, target_protocol, status}
 
 # Cache statistics
-cronos_legacy_cache_size{cache_type}
+qbitel_legacy_cache_size{cache_type}
 ```
 
 ### Health Check
@@ -424,9 +424,9 @@ curl http://localhost:8000/api/v1/legacy-whisperer/statistics
 - Enable HTTPS/TLS
 - Monitor for abuse
 
-## Integration with CRONOS AI
+## Integration with QBITEL
 
-The Legacy System Whisperer integrates seamlessly with other CRONOS AI components:
+The Legacy System Whisperer integrates seamlessly with other QBITEL components:
 
 - **Protocol Discovery**: Uses discovered protocols as input
 - **LLM Service**: Leverages unified LLM service
@@ -465,4 +465,4 @@ For issues, questions, or contributions:
 
 ## License
 
-Copyright © 2024 CRONOS AI. All rights reserved.
+Copyright © 2024 QBITEL. All rights reserved.

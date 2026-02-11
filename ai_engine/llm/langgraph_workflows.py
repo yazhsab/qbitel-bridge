@@ -1,9 +1,9 @@
 """
-CRONOS AI - LangGraph Workflow Orchestration
+QBITEL - LangGraph Workflow Orchestration
 State machine-based agent workflows with checkpointing and human-in-the-loop support.
 
 This module provides:
-- Pre-built workflow templates for common CRONOS AI tasks
+- Pre-built workflow templates for common QBITEL tasks
 - State management with persistence
 - Human-in-the-loop patterns
 - Workflow visualization support
@@ -50,17 +50,17 @@ logger = logging.getLogger(__name__)
 
 # Metrics
 WORKFLOW_EXECUTION_COUNTER = Counter(
-    "cronos_workflow_executions_total",
+    "qbitel_workflow_executions_total",
     "Total workflow executions",
     ["workflow_type", "status"]
 )
 WORKFLOW_DURATION = Histogram(
-    "cronos_workflow_duration_seconds",
+    "qbitel_workflow_duration_seconds",
     "Workflow execution duration",
     ["workflow_type"]
 )
 WORKFLOW_STEP_COUNTER = Counter(
-    "cronos_workflow_steps_total",
+    "qbitel_workflow_steps_total",
     "Total workflow steps executed",
     ["workflow_type", "step_name"]
 )

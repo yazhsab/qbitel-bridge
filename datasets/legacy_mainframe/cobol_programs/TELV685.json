@@ -1,0 +1,19 @@
+{
+  "program_id": "TELV685",
+  "domain": "telecommunications",
+  "program_type": "data_validation",
+  "author": "T. DAVIS",
+  "lines_of_code": 206,
+  "complexity_level": "simple",
+  "complexity_score": 0.45,
+  "files_used": 1,
+  "verbs_used": 14,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.887315",
+  "hash": "5d77e6c84eeeb609991f14b97c5bbc5f"
+}

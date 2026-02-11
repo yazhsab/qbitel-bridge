@@ -1,0 +1,23 @@
+{{- if .Values.aiEngine.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "qbitel-bridge.fullname" . }}-config
+  namespace: {{ include "qbitel-bridge.namespace" . }}
+  labels:
+    {{- include "qbitel-bridge.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  LOG_LEVEL: {{ .Values.aiEngine.config.logLevel | quote }}
+  WORKERS: {{ .Values.aiEngine.config.workers | quote }}
+  DEVICE: {{ .Values.aiEngine.config.device | quote }}
+  ENABLE_OBSERVABILITY: {{ .Values.aiEngine.config.enableObservability | quote }}
+  AI_ENGINE_REST_PORT: {{ .Values.aiEngine.service.restPort | quote }}
+  AI_ENGINE_GRPC_PORT: {{ .Values.aiEngine.service.grpcPort | quote }}
+  AI_ENGINE_METRICS_PORT: {{ .Values.aiEngine.service.metricsPort | quote }}
+  XDS_SERVER_GRPC_PORT: {{ .Values.xdsServer.service.grpcPort | quote }}
+  XDS_SERVER_METRICS_PORT: {{ .Values.xdsServer.service.metricsPort | quote }}
+{{- end }}

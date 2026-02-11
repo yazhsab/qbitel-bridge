@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Model Registry
+QBITEL Engine - Model Registry
 
 This module implements a comprehensive model registry system for versioning,
 storage, and management of AI models with MLflow integration.
@@ -758,9 +758,33 @@ class ModelRegistry:
         self, model_name: str, version: str
     ) -> ModelVersion:
         """Get model version from MLflow."""
-        # Implementation would fetch from MLflow
-        # For now, return placeholder
-        raise NotImplementedError("MLflow model version retrieval not implemented")
+        try:
+            import mlflow
+            from mlflow.tracking import MlflowClient
+
+            client = MlflowClient()
+
+            # Get model version from MLflow registry
+            mv = client.get_model_version(model_name, version)
+
+            return ModelVersion(
+                version=mv.version,
+                artifact_uri=mv.source,
+                status=ModelVersionStatus.PRODUCTION if mv.current_stage == "Production" else ModelVersionStatus.STAGED,
+                metadata=ModelMetadata(
+                    name=model_name,
+                    description=mv.description or "",
+                    created_at=mv.creation_timestamp / 1000 if mv.creation_timestamp else None,
+                    updated_at=mv.last_updated_timestamp / 1000 if mv.last_updated_timestamp else None,
+                    tags=mv.tags or {},
+                ),
+            )
+        except ImportError:
+            self.logger.warning("MLflow not installed, falling back to local registry")
+            return await self._get_model_version_local(model_name, version)
+        except Exception as e:
+            self.logger.error(f"Error fetching model from MLflow: {e}")
+            raise ModelRegistryException(f"Failed to get model from MLflow: {e}")
 
     async def _get_model_version_local(
         self, model_name: str, version: Optional[str]
@@ -798,5 +822,40 @@ class ModelRegistry:
 
     async def _load_model_from_s3(self, s3_uri: str) -> torch.nn.Module:
         """Load model from S3."""
-        # Implementation would download from S3 and load
-        raise NotImplementedError("S3 model loading not implemented")
+        import tempfile
+        import os
+
+        try:
+            import boto3
+            from botocore.exceptions import ClientError
+
+            # Parse S3 URI
+            if not s3_uri.startswith("s3://"):
+                raise ValueError(f"Invalid S3 URI: {s3_uri}")
+
+            parts = s3_uri[5:].split("/", 1)
+            bucket = parts[0]
+            key = parts[1] if len(parts) > 1 else ""
+
+            # Create S3 client
+            s3 = boto3.client("s3")
+
+            # Download to temp file
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pt") as tmp:
+                s3.download_fileobj(bucket, key, tmp)
+                tmp_path = tmp.name
+
+            try:
+                # Load model
+                model = torch.load(tmp_path)
+                return model
+            finally:
+                # Cleanup temp file
+                os.unlink(tmp_path)
+
+        except ImportError:
+            self.logger.warning("boto3 not installed, cannot load from S3")
+            raise ModelRegistryException("boto3 required for S3 model loading")
+        except ClientError as e:
+            self.logger.error(f"S3 error loading model: {e}")
+            raise ModelRegistryException(f"Failed to load model from S3: {e}")

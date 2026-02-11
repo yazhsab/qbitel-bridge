@@ -1,0 +1,19 @@
+{
+  "program_id": "MEDI592",
+  "domain": "healthcare",
+  "program_type": "interface_program",
+  "author": "S. BROWN",
+  "lines_of_code": 250,
+  "complexity_level": "complex",
+  "complexity_score": 0.68,
+  "files_used": 4,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.805553",
+  "hash": "69d38ce9d9f22b11b6638baf79fb30cd"
+}

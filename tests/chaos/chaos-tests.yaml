@@ -1,4 +1,4 @@
-# CRONOS AI - Chaos Engineering Tests
+# QBITEL - Chaos Engineering Tests
 # 
 # Chaos Mesh experiments to test system resilience and fault tolerance.
 
@@ -6,17 +6,17 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: PodChaos
 metadata:
-  name: cronos-ai-pod-failure
-  namespace: cronos-ai
+  name: qbitel-pod-failure
+  namespace: qbitel
 spec:
   action: pod-failure
   mode: one
   duration: "30s"
   selector:
     namespaces:
-      - cronos-ai
+      - qbitel
     labelSelectors:
-      app: cronos-ai-engine
+      app: qbitel-engine
   scheduler:
     cron: "@every 1h"
 
@@ -24,16 +24,16 @@ spec:
 apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
-  name: cronos-ai-network-delay
-  namespace: cronos-ai
+  name: qbitel-network-delay
+  namespace: qbitel
 spec:
   action: delay
   mode: one
   selector:
     namespaces:
-      - cronos-ai
+      - qbitel
     labelSelectors:
-      app: cronos-ai-engine
+      app: qbitel-engine
   delay:
     latency: "100ms"
     correlation: "25"
@@ -46,16 +46,16 @@ spec:
 apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
-  name: cronos-ai-network-partition
-  namespace: cronos-ai
+  name: qbitel-network-partition
+  namespace: qbitel
 spec:
   action: partition
   mode: one
   selector:
     namespaces:
-      - cronos-ai
+      - qbitel
     labelSelectors:
-      app: cronos-ai-engine
+      app: qbitel-engine
   direction: both
   duration: "1m"
   scheduler:
@@ -65,15 +65,15 @@ spec:
 apiVersion: chaos-mesh.org/v1alpha1
 kind: StressChaos
 metadata:
-  name: cronos-ai-cpu-stress
-  namespace: cronos-ai
+  name: qbitel-cpu-stress
+  namespace: qbitel
 spec:
   mode: one
   selector:
     namespaces:
-      - cronos-ai
+      - qbitel
     labelSelectors:
-      app: cronos-ai-engine
+      app: qbitel-engine
   stressors:
     cpu:
       workers: 2
@@ -86,15 +86,15 @@ spec:
 apiVersion: chaos-mesh.org/v1alpha1
 kind: StressChaos
 metadata:
-  name: cronos-ai-memory-stress
-  namespace: cronos-ai
+  name: qbitel-memory-stress
+  namespace: qbitel
 spec:
   mode: one
   selector:
     namespaces:
-      - cronos-ai
+      - qbitel
     labelSelectors:
-      app: cronos-ai-engine
+      app: qbitel-engine
   stressors:
     memory:
       workers: 1
@@ -107,16 +107,16 @@ spec:
 apiVersion: chaos-mesh.org/v1alpha1
 kind: IOChaos
 metadata:
-  name: cronos-ai-io-delay
-  namespace: cronos-ai
+  name: qbitel-io-delay
+  namespace: qbitel
 spec:
   action: latency
   mode: one
   selector:
     namespaces:
-      - cronos-ai
+      - qbitel
     labelSelectors:
-      app: cronos-ai-engine
+      app: qbitel-engine
   volumePath: /data
   path: "/**/*"
   delay: "100ms"
@@ -129,17 +129,17 @@ spec:
 apiVersion: chaos-mesh.org/v1alpha1
 kind: PodChaos
 metadata:
-  name: cronos-ai-pod-kill
-  namespace: cronos-ai
+  name: qbitel-pod-kill
+  namespace: qbitel
 spec:
   action: pod-kill
   mode: fixed
   value: "1"
   selector:
     namespaces:
-      - cronos-ai
+      - qbitel
     labelSelectors:
-      app: cronos-ai-engine
+      app: qbitel-engine
   scheduler:
     cron: "@every 12h"
 
@@ -147,16 +147,16 @@ spec:
 apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
-  name: cronos-ai-packet-loss
-  namespace: cronos-ai
+  name: qbitel-packet-loss
+  namespace: qbitel
 spec:
   action: loss
   mode: one
   selector:
     namespaces:
-      - cronos-ai
+      - qbitel
     labelSelectors:
-      app: cronos-ai-engine
+      app: qbitel-engine
   loss:
     loss: "10"
     correlation: "25"
@@ -169,8 +169,8 @@ spec:
 apiVersion: chaos-mesh.org/v1alpha1
 kind: Workflow
 metadata:
-  name: cronos-ai-chaos-workflow
-  namespace: cronos-ai
+  name: qbitel-chaos-workflow
+  namespace: qbitel
 spec:
   entry: entry
   templates:
@@ -191,9 +191,9 @@ spec:
         mode: one
         selector:
           namespaces:
-            - cronos-ai
+            - qbitel
           labelSelectors:
-            app: cronos-ai-engine
+            app: qbitel-engine
         delay:
           latency: "200ms"
         duration: "3m"
@@ -205,9 +205,9 @@ spec:
         mode: one
         selector:
           namespaces:
-            - cronos-ai
+            - qbitel
           labelSelectors:
-            app: cronos-ai-engine
+            app: qbitel-engine
         stressors:
           cpu:
             workers: 2
@@ -221,9 +221,9 @@ spec:
         mode: one
         selector:
           namespaces:
-            - cronos-ai
+            - qbitel
           labelSelectors:
-            app: cronos-ai-engine
+            app: qbitel-engine
         stressors:
           memory:
             workers: 1
@@ -238,7 +238,7 @@ spec:
         mode: one
         selector:
           namespaces:
-            - cronos-ai
+            - qbitel
           labelSelectors:
-            app: cronos-ai-engine
+            app: qbitel-engine
         duration: "2m"

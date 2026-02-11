@@ -1,0 +1,79 @@
+---
+# QBITEL vLLM Model Serving Application
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qbitel-vllm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qbitel-vllm
+    app.kubernetes.io/component: model-serving
+    environment: production
+  annotations:
+    notifications.argoproj.io/subscribe.on-health-degraded.slack: qbitel-ml-ops
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: qbitel
+
+  source:
+    repoURL: https://github.com/yazhsab/qbitel.git
+    targetRevision: main
+    path: ops/deploy/kubernetes/vllm
+    kustomize:
+      images:
+        - name: vllm/vllm-openai
+          newTag: v0.6.0
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qbitel-vllm
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
+
+  # GPU resources can take time to provision
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+---
+# vLLM Model Cache PVC
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qbitel-vllm-storage
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: qbitel-vllm-storage
+    app.kubernetes.io/component: storage
+spec:
+  project: qbitel
+
+  source:
+    repoURL: https://github.com/yazhsab/qbitel.git
+    targetRevision: main
+    path: ops/gitops/environments/base/vllm-storage
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qbitel-vllm
+
+  syncPolicy:
+    automated:
+      prune: false  # Don't prune PVCs
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,6 +1,6 @@
-# CRONOS AI Zero-Touch Security Orchestrator - Kubernetes Deployment
+# QBITEL Zero-Touch Security Orchestrator - Kubernetes Deployment
 
-This directory contains production-ready Kubernetes manifests for deploying the CRONOS AI Zero-Touch Security Orchestrator.
+This directory contains production-ready Kubernetes manifests for deploying the QBITEL Zero-Touch Security Orchestrator.
 
 ## Overview
 
@@ -10,7 +10,7 @@ The Zero-Touch Security Orchestrator provides autonomous security response capab
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    cronos-security Namespace                     │
+│                    qbitel-security Namespace                     │
 ├─────────────────────────────────────────────────────────────────┤
 │  ┌─────────────────────────┐  ┌────────────────────────────────┐ │
 │  │   Security Orchestrator │  │        ConfigMaps              │ │
@@ -50,26 +50,26 @@ The Zero-Touch Security Orchestrator provides autonomous security response capab
 2. **Create secrets:**
    ```bash
    # Database credentials
-   kubectl create secret generic cronos-db-credentials \
-     --namespace=cronos-security \
-     --from-literal=username=cronos_user \
+   kubectl create secret generic qbitel-db-credentials \
+     --namespace=qbitel-security \
+     --from-literal=username=qbitel_user \
      --from-literal=password=your_secure_password \
-     --from-literal=database-url=postgresql://cronos_user:your_secure_password@postgres:5432/cronos_security
+     --from-literal=database-url=postgresql://qbitel_user:your_secure_password@postgres:5432/qbitel_security
 
    # Redis credentials
-   kubectl create secret generic cronos-redis-credentials \
-     --namespace=cronos-security \
+   kubectl create secret generic qbitel-redis-credentials \
+     --namespace=qbitel-security \
      --from-literal=url=redis://redis:6379/0
 
    # LLM API keys
-   kubectl create secret generic cronos-llm-credentials \
-     --namespace=cronos-security \
+   kubectl create secret generic qbitel-llm-credentials \
+     --namespace=qbitel-security \
      --from-literal=openai-api-key=your_openai_key \
      --from-literal=anthropic-api-key=your_anthropic_key
 
    # Integration credentials
-   kubectl create secret generic cronos-integration-credentials \
-     --namespace=cronos-security \
+   kubectl create secret generic qbitel-integration-credentials \
+     --namespace=qbitel-security \
      --from-literal=siem-endpoint=https://your-siem.com \
      --from-literal=siem-token=your_siem_token \
      --from-literal=servicenow-endpoint=https://your-servicenow.com \
@@ -102,9 +102,9 @@ The Zero-Touch Security Orchestrator provides autonomous security response capab
 
 6. **Verify deployment:**
    ```bash
-   kubectl get pods -n cronos-security
-   kubectl get services -n cronos-security
-   kubectl logs -f deployment/cronos-security-orchestrator -n cronos-security
+   kubectl get pods -n qbitel-security
+   kubectl get services -n qbitel-security
+   kubectl logs -f deployment/qbitel-security-orchestrator -n qbitel-security
    ```
 
 ## Configuration
@@ -132,7 +132,7 @@ The deployment uses the following environment variables:
 
 ### ConfigMap Configuration
 
-The main configuration is provided through the `cronos-security-config` ConfigMap. Key sections:
+The main configuration is provided through the `qbitel-security-config` ConfigMap. Key sections:
 
 - **Security Settings**: FIPS mode, compliance settings, security levels
 - **Zero-Touch Configuration**: Autonomous mode, confidence thresholds, LLM settings
@@ -204,14 +204,14 @@ Predefined alerts for:
 
 1. **Pods not starting:**
    ```bash
-   kubectl describe pod <pod-name> -n cronos-security
-   kubectl logs <pod-name> -n cronos-security
+   kubectl describe pod <pod-name> -n qbitel-security
+   kubectl logs <pod-name> -n qbitel-security
    ```
 
 2. **Database connection issues:**
    ```bash
    # Check database connectivity
-   kubectl exec -it <pod-name> -n cronos-security -- python -c "
+   kubectl exec -it <pod-name> -n qbitel-security -- python -c "
    import psycopg2
    import os
    conn = psycopg2.connect(os.environ['DATABASE_URL'])
@@ -222,7 +222,7 @@ Predefined alerts for:
 3. **Redis connection issues:**
    ```bash
    # Check Redis connectivity
-   kubectl exec -it <pod-name> -n cronos-security -- redis-cli -u "${REDIS_URL}" ping
+   kubectl exec -it <pod-name> -n qbitel-security -- redis-cli -u "${REDIS_URL}" ping
    ```
 
 4. **Integration failures:**
@@ -244,7 +244,7 @@ Logs are structured JSON format with the following fields:
 
 Example log query:
 ```bash
-kubectl logs -f deployment/cronos-security-orchestrator -n cronos-security | jq '.level, .component, .message'
+kubectl logs -f deployment/qbitel-security-orchestrator -n qbitel-security | jq '.level, .component, .message'
 ```
 
 ### Performance Monitoring
@@ -252,13 +252,13 @@ kubectl logs -f deployment/cronos-security-orchestrator -n cronos-security | jq 
 Monitor key metrics:
 ```bash
 # Request rate
-curl http://<service-ip>:9090/metrics | grep cronos_security_requests_total
+curl http://<service-ip>:9090/metrics | grep qbitel_security_requests_total
 
 # Error rate
-curl http://<service-ip>:9090/metrics | grep cronos_security_errors_total
+curl http://<service-ip>:9090/metrics | grep qbitel_security_errors_total
 
 # Response time
-curl http://<service-ip>:9090/metrics | grep cronos_security_request_duration_seconds
+curl http://<service-ip>:9090/metrics | grep qbitel_security_request_duration_seconds
 ```
 
 ## Deployment Variants
@@ -287,16 +287,16 @@ curl http://<service-ip>:9090/metrics | grep cronos_security_request_duration_se
 ### Database Backup
 ```bash
 # Create database backup
-kubectl exec -it postgres-pod -- pg_dump cronos_security > backup.sql
+kubectl exec -it postgres-pod -- pg_dump qbitel_security > backup.sql
 
 # Restore from backup
-kubectl exec -i postgres-pod -- psql cronos_security < backup.sql
+kubectl exec -i postgres-pod -- psql qbitel_security < backup.sql
 ```
 
 ### Configuration Backup
 ```bash
 # Backup all configurations
-kubectl get configmap,secret -n cronos-security -o yaml > cronos-security-backup.yaml
+kubectl get configmap,secret -n qbitel-security -o yaml > qbitel-security-backup.yaml
 ```
 
 ## Updates and Rollbacks
@@ -304,21 +304,21 @@ kubectl get configmap,secret -n cronos-security -o yaml > cronos-security-backup
 ### Rolling Updates
 ```bash
 # Update deployment
-kubectl set image deployment/cronos-security-orchestrator \
-  cronos-security-orchestrator=cronos/security-orchestrator:v2.0.0 \
-  -n cronos-security
+kubectl set image deployment/qbitel-security-orchestrator \
+  qbitel-security-orchestrator=qbitel/security-orchestrator:v2.0.0 \
+  -n qbitel-security
 
 # Check rollout status
-kubectl rollout status deployment/cronos-security-orchestrator -n cronos-security
+kubectl rollout status deployment/qbitel-security-orchestrator -n qbitel-security
 ```
 
 ### Rollbacks
 ```bash
 # Rollback to previous version
-kubectl rollout undo deployment/cronos-security-orchestrator -n cronos-security
+kubectl rollout undo deployment/qbitel-security-orchestrator -n qbitel-security
 
 # Rollback to specific revision
-kubectl rollout undo deployment/cronos-security-orchestrator --to-revision=1 -n cronos-security
+kubectl rollout undo deployment/qbitel-security-orchestrator --to-revision=1 -n qbitel-security
 ```
 
 ## Support and Maintenance
@@ -350,4 +350,4 @@ Regular security updates should include:
 - Security configuration reviews
 - Penetration testing
 
-For support, contact the CRONOS AI Security team or refer to the main documentation.
+For support, contact the QBITEL Security team or refer to the main documentation.

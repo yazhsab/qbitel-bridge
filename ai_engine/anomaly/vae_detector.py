@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - VAE Anomaly Detector
+QBITEL Engine - VAE Anomaly Detector
 
 This module implements a Variational Autoencoder (VAE) based anomaly detection
 system for identifying unusual patterns in protocol communications.

@@ -1,5 +1,5 @@
 """
-CRONOS AI - Marketplace Protocol Knowledge Base Integration
+QBITEL - Marketplace Protocol Knowledge Base Integration
 
 Integration layer for importing marketplace protocols into the Protocol Knowledge Base
 and Translation Studio for immediate use.

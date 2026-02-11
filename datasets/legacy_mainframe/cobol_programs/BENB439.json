@@ -1,0 +1,19 @@
+{
+  "program_id": "BENB439",
+  "domain": "government",
+  "program_type": "batch_processing",
+  "author": "S. BROWN",
+  "lines_of_code": 233,
+  "complexity_level": "medium",
+  "complexity_score": 0.531,
+  "files_used": 2,
+  "verbs_used": 13,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.898607",
+  "hash": "a788c2585dfe436003d671fa125f5d22"
+}

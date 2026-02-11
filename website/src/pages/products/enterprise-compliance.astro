@@ -1,0 +1,250 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Enterprise Compliance | QBITEL Bridge"
+  description="Automated continuous compliance for 9 regulatory frameworks with 80-90% automation rate and audit-ready reports in under 10 minutes."
+>
+  <PageHero
+    title="Enterprise Compliance"
+    description="Continuous compliance monitoring with automated evidence collection for SOC 2, GDPR, HIPAA, PCI-DSS, ISO 27001, NIST CSF, NERC CIP, FedRAMP, and CMMC. Generate audit-ready reports in under 10 minutes."
+    badge="Automated Compliance"
+    gradient="from-emerald-500 to-teal-500"
+  />
+
+  <!-- Key Metrics -->
+  <section class="py-12 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">9</div>
+          <div class="text-sm text-gray-400">Regulatory Frameworks</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">80-90%</div>
+          <div class="text-sm text-gray-400">Automation Rate</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">&lt;10 min</div>
+          <div class="text-sm text-gray-400">Report Generation</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-3xl font-bold gradient-text mb-1">24/7</div>
+          <div class="text-sm text-gray-400">Continuous Monitoring</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="section-heading">
+            The <span class="gradient-text">Compliance Burden</span>
+          </h2>
+          <p class="text-gray-400 mb-6 leading-relaxed">
+            Enterprise compliance is expensive, manual, and error-prone. Organizations spend an average of $3.5M annually on compliance programs, with teams manually collecting evidence, mapping controls, and generating reports. Audits disrupt operations for weeks.
+          </p>
+          <p class="text-gray-400 leading-relaxed">
+            QBITEL Enterprise Compliance automates 80-90% of compliance activities, continuously monitors controls, automatically collects evidence, and generates audit-ready reports in minutes instead of weeks.
+          </p>
+        </div>
+        <div class="space-y-3">
+          <div class="card p-4 flex items-center gap-3">
+            <div class="badge text-emerald-400 border-emerald-500/20 bg-emerald-500/10">SOC 2</div>
+            <div class="text-sm text-gray-400">Trust service criteria monitoring</div>
+          </div>
+          <div class="card p-4 flex items-center gap-3">
+            <div class="badge text-blue-400 border-blue-500/20 bg-blue-500/10">GDPR</div>
+            <div class="text-sm text-gray-400">Data protection and privacy rights</div>
+          </div>
+          <div class="card p-4 flex items-center gap-3">
+            <div class="badge text-red-400 border-red-500/20 bg-red-500/10">HIPAA</div>
+            <div class="text-sm text-gray-400">Healthcare data security rules</div>
+          </div>
+          <div class="card p-4 flex items-center gap-3">
+            <div class="badge text-yellow-400 border-yellow-500/20 bg-yellow-500/10">PCI-DSS</div>
+            <div class="text-sm text-gray-400">Payment card industry standards</div>
+          </div>
+          <div class="card p-4 flex items-center gap-3">
+            <div class="badge text-purple-400 border-purple-500/20 bg-purple-500/10">ISO 27001</div>
+            <div class="text-sm text-gray-400">Information security management</div>
+          </div>
+          <div class="card p-4 flex items-center gap-3">
+            <div class="badge text-cyan-400 border-cyan-500/20 bg-cyan-500/10">+4 More</div>
+            <div class="text-sm text-gray-400">NIST CSF, NERC CIP, FedRAMP, CMMC</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Compliance <span class="gradient-text">Automation</span>
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Continuous Control Monitoring</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Automated assessment engine continuously evaluates security controls against framework requirements, detecting drift and non-compliance in real-time.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Real-time compliance status tracking
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Automated drift detection and alerting
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Cross-framework control mapping
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-teal-500/10 border border-teal-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Automated Evidence Collection</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Automatically gathers compliance evidence from infrastructure, applications, logs, and configurations. Maintains a complete audit trail with immutable storage.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Immutable audit trail storage
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Evidence-to-control mapping
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Data retention policy enforcement
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-green-500/10 border border-green-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Report Generation</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Generate audit-ready compliance reports in under 10 minutes. Includes executive summaries, detailed control assessments, evidence listings, and remediation guidance.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              PDF, JSON, and CSV export formats
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Executive and technical views
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Scheduled and on-demand generation
+            </li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">GDPR Data Rights</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">Full GDPR compliance automation including data subject access requests, right to erasure, consent management, breach notification workflows, and data processing records.</p>
+          <ul class="space-y-2">
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              DSAR processing automation
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Consent management workflows
+            </li>
+            <li class="flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4 text-neon-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              72-hour breach notification tracking
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical Details -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Compliance <span class="gradient-text">Workflow</span>
+        </h2>
+      </div>
+
+      <div class="max-w-3xl mx-auto space-y-6">
+        <div class="flex items-start gap-4">
+          <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-bold text-sm flex-shrink-0 mt-1">1</div>
+          <div>
+            <h3 class="text-white font-semibold mb-1">Framework Selection</h3>
+            <p class="text-sm text-gray-400">Choose one or more compliance frameworks. The engine loads the corresponding control catalog, assessment criteria, and evidence requirements.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-bold text-sm flex-shrink-0 mt-1">2</div>
+          <div>
+            <h3 class="text-white font-semibold mb-1">Data Source Integration</h3>
+            <p class="text-sm text-gray-400">Connect infrastructure, cloud accounts, identity providers, and application logs as evidence sources for automated collection.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-bold text-sm flex-shrink-0 mt-1">3</div>
+          <div>
+            <h3 class="text-white font-semibold mb-1">Continuous Assessment</h3>
+            <p class="text-sm text-gray-400">The assessment engine continuously evaluates controls, collects evidence, and tracks compliance posture in real-time across all selected frameworks.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-bold text-sm flex-shrink-0 mt-1">4</div>
+          <div>
+            <h3 class="text-white font-semibold mb-1">Report and Remediate</h3>
+            <p class="text-sm text-gray-400">Generate audit-ready reports on demand, receive alerts on compliance drift, and follow automated remediation guidance to resolve issues.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTABanner
+    title="Ready to Automate Compliance?"
+    description="Replace manual compliance work with continuous, automated monitoring across 9 regulatory frameworks."
+  />
+</PageLayout>

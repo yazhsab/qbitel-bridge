@@ -1,0 +1,19 @@
+{
+  "program_id": "TRKA804",
+  "domain": "transportation",
+  "program_type": "audit_trail",
+  "author": "S. BROWN",
+  "lines_of_code": 173,
+  "complexity_level": "simple",
+  "complexity_score": 0.393,
+  "files_used": 1,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.875656",
+  "hash": "b0eacaa6e0d7fe49f73d70c1c9cd2a9e"
+}

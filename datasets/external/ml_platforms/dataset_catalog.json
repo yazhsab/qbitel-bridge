@@ -145,7 +145,7 @@
       "usage": "fetcher.fetch_uci_dataset('kdd99')"
     }
   },
-  "recommended_for_cronos": {
+  "recommended_for_qbitel": {
     "protocol_analysis": [
       "Wireshark sample captures (manual)",
       "PCAP datasets from Netresec"

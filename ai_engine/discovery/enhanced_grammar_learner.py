@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Enhanced Grammar Learner with Advanced ML
+QBITEL Engine - Enhanced Grammar Learner with Advanced ML
 
 This module implements production-grade advanced grammar learning with:
 - Transformer-based deep learning integration
@@ -10,7 +10,7 @@ This module implements production-grade advanced grammar learning with:
 - 98%+ accuracy on known protocols, 85%+ on unknown protocols
 - 10x sample efficiency improvement
 
-Author: CRONOS AI Team
+Author: QBITEL Team
 Version: 2.0.0
 """
 

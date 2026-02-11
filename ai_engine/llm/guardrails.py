@@ -1,5 +1,5 @@
 """
-CRONOS AI - LLM Guardrails and Output Validation
+QBITEL - LLM Guardrails and Output Validation
 Safety checks, content filtering, and output validation for LLM responses.
 
 Features:

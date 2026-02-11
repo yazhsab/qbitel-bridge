@@ -1,0 +1,19 @@
+{
+  "program_id": "CLMO927",
+  "domain": "insurance",
+  "program_type": "online_transaction",
+  "author": "C. MILLER",
+  "lines_of_code": 198,
+  "complexity_level": "medium",
+  "complexity_score": 0.488,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.896982",
+  "hash": "034777d50a1075bced44e39b1066ddfd"
+}

@@ -1,6 +1,6 @@
-# CRONOS AI - Protocol Marketplace Module
+# QBITEL - Protocol Marketplace Module
 
-Transform CRONOS AI from a product into an ecosystem through community-driven protocol contributions.
+Transform QBITEL from a product into an ecosystem through community-driven protocol contributions.
 
 ---
 
@@ -112,8 +112,8 @@ await deployer.deploy_protocol(
 MARKETPLACE_ENABLED=true
 
 # Storage
-MARKETPLACE_S3_BUCKET=cronos-marketplace-protocols
-MARKETPLACE_CDN_URL=https://cdn.cronos-ai.com
+MARKETPLACE_S3_BUCKET=qbitel-marketplace-protocols
+MARKETPLACE_CDN_URL=https://cdn.qbitel.com
 
 # Payments
 STRIPE_API_KEY=sk_test_xxxxx
@@ -287,7 +287,7 @@ protocol_data = {
     "spec_format": "yaml",
     "spec_file": base64.b64encode(spec_content),
     "license_type": "free",
-    "min_cronos_version": "1.0.0"
+    "min_qbitel_version": "1.0.0"
 }
 
 response = httpx.post(
@@ -395,16 +395,16 @@ print(f"Overall status: {overall}")
 
 ## 📞 Support
 
-- **Documentation:** https://docs.cronos-ai.com/marketplace
-- **Issues:** https://github.com/cronos-ai/issues
-- **Discussions:** https://github.com/cronos-ai/discussions
-- **Email:** marketplace@cronos-ai.com
+- **Documentation:** https://docs.qbitel.com/marketplace
+- **Issues:** https://github.com/yazhsab/issues
+- **Discussions:** https://github.com/yazhsab/discussions
+- **Email:** marketplace@qbitel.com
 
 ---
 
 ## 📝 License
 
-Part of CRONOS AI Engine - See main LICENSE file for details.
+Part of QBITEL Engine - See main LICENSE file for details.
 
 ---
 

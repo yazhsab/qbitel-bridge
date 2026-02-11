@@ -337,7 +337,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY ai_engine/ ./ai_engine/
-ENV CRONOS_AI_ENVIRONMENT=production
+ENV QBITEL_AI_ENVIRONMENT=production
 CMD ["python", "-m", "ai_engine"]
 ```
 
@@ -354,7 +354,7 @@ spec:
     spec:
       containers:
       - name: pcfg-inference
-        image: cronos-ai/pcfg-inference:latest
+        image: qbitel/pcfg-inference:latest
         resources:
           requests:
             memory: "2Gi"

@@ -1,0 +1,19 @@
+{
+  "program_id": "RTEO841",
+  "domain": "transportation",
+  "program_type": "online_transaction",
+  "author": "D. JONES",
+  "lines_of_code": 200,
+  "complexity_level": "medium",
+  "complexity_score": 0.49,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.949889",
+  "hash": "7bcedc920a1e7a4638a5874a53c80432"
+}

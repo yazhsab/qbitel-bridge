@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - Safe Database Migration Tool
+QBITEL - Safe Database Migration Tool
 
 Production-safe database migration with automatic backup, validation,
 and rollback capabilities.
@@ -364,9 +364,9 @@ def main():
 
     parser.add_argument(
         "--environment",
-        default=os.getenv("CRONOS_AI_ENVIRONMENT", "development"),
+        default=os.getenv("QBITEL_AI_ENVIRONMENT", "development"),
         choices=["development", "staging", "production"],
-        help="Environment (default: from CRONOS_AI_ENVIRONMENT)",
+        help="Environment (default: from QBITEL_AI_ENVIRONMENT)",
     )
 
     parser.add_argument(

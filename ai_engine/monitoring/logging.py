@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Structured Logging
+QBITEL Engine - Structured Logging
 
 This module provides structured logging capabilities with distributed
 tracing, contextual information, and comprehensive log management.
@@ -578,12 +578,12 @@ def setup_logging(config: Config) -> None:
 
     # Main logger configuration
     main_config = LoggerConfig(
-        name="cronos_ai",
+        name="qbitel",
         level=LogLevel(getattr(config, "log_level", "INFO").upper()),
         format_type=LogFormat(getattr(config, "log_format", "structured")),
         enable_console=getattr(config, "enable_console_logging", True),
         enable_file=getattr(config, "enable_file_logging", True),
-        log_file=getattr(config, "log_file", "cronos_ai.log"),
+        log_file=getattr(config, "log_file", "qbitel.log"),
         include_trace_info=getattr(config, "enable_tracing", True),
         include_system_info=getattr(config, "include_system_info", True),
     )
@@ -592,18 +592,18 @@ def setup_logging(config: Config) -> None:
     main_logger = StructuredLogger(main_config)
 
     with _registry_lock:
-        _logger_registry["cronos_ai"] = main_logger
+        _logger_registry["qbitel"] = main_logger
 
     # Create component-specific loggers
     components = [
-        "cronos_ai.engine",
-        "cronos_ai.discovery",
-        "cronos_ai.detection",
-        "cronos_ai.anomaly",
-        "cronos_ai.training",
-        "cronos_ai.models",
-        "cronos_ai.api",
-        "cronos_ai.monitoring",
+        "qbitel.engine",
+        "qbitel.discovery",
+        "qbitel.detection",
+        "qbitel.anomaly",
+        "qbitel.training",
+        "qbitel.models",
+        "qbitel.api",
+        "qbitel.monitoring",
     ]
 
     for component in components:
@@ -624,7 +624,7 @@ def setup_logging(config: Config) -> None:
             _logger_registry[component] = component_logger
 
 
-def get_logger(name: str = "cronos_ai") -> StructuredLogger:
+def get_logger(name: str = "qbitel") -> StructuredLogger:
     """Get a logger instance by name."""
     with _registry_lock:
         if name not in _logger_registry:

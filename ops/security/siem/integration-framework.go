@@ -506,12 +506,12 @@ func (sif *SIEMIntegrationFramework) meetsMinSeverity(eventSeverity, minSeverity
 // enrichEvent adds additional metadata to events
 func (sif *SIEMIntegrationFramework) enrichEvent(event *SecurityEvent) {
 	// Add processing metadata
-	event.ProcessedBy = "qslb-siem-framework"
+	event.ProcessedBy = "qbitel-siem-framework"
 	event.ProcessedAt = time.Now()
 	
 	// Add correlation ID if not present
 	if event.CorrelationID == "" {
-		event.CorrelationID = fmt.Sprintf("qslb-%d", time.Now().UnixNano())
+		event.CorrelationID = fmt.Sprintf("qbitel-%d", time.Now().UnixNano())
 	}
 	
 	// Add timezone if not present

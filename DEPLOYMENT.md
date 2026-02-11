@@ -1,6 +1,6 @@
-# CRONOS AI - Deployment Guide
+# QBITEL Bridge - Deployment Guide
 
-This guide provides comprehensive instructions for deploying CRONOS AI in development, staging, and production environments.
+This guide provides comprehensive instructions for deploying QBITEL Bridge in development, staging, and production environments.
 
 ## Table of Contents
 
@@ -36,15 +36,19 @@ This guide provides comprehensive instructions for deploying CRONOS AI in develo
 ```bash
 # Required
 - Python 3.9+
+- Rust 1.70+ (with cargo)
+- Go 1.21+
+- Node.js 18+ (with npm)
 - Docker 20.10+
 - Docker Compose 2.0+
 - Kubernetes 1.24+ (for production)
 - kubectl 1.24+
+- Helm 3.8+ (for Helm-based deployment)
 - git
 
 # Optional
-- Helm 3.0+ (for Helm-based deployment)
 - NVIDIA Docker (for GPU support)
+- Ollama (for on-premise LLM inference)
 ```
 
 ### Network Requirements
@@ -59,39 +63,77 @@ This guide provides comprehensive instructions for deploying CRONOS AI in develo
 
 ## Deployment Options
 
-CRONOS AI supports multiple deployment models:
+QBITEL Bridge supports multiple deployment models:
 
-1. **Local Development** - Python virtual environment
+1. **Local Development** - Build from source (Python + Rust + Go)
 2. **Docker Compose** - Multi-container development
-3. **Kubernetes** - Production cloud-native deployment
-4. **Hybrid** - Mix of local and containerized components
+3. **Kubernetes (Helm)** - Production cloud-native deployment
+4. **Air-Gapped** - Fully offline with on-premise LLM
 
 ## Local Development
 
-### Quick Start
+### Quick Start (All Components)
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/qbitel/cronos-ai.git
-cd cronos-ai
+git clone https://github.com/yazhsab/qbitel-bridge.git
+cd qbitel-bridge
 
-# 2. Create Python virtual environment
+# 2. Build everything
+make build
+
+# 3. Run all tests
+make test
+```
+
+### Python AI Engine
+
+```bash
+# Create Python virtual environment
 python3.9 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# 3. Install dependencies
+# Install dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
 pip install -r ai_engine/requirements.txt
 
-# 4. Run tests to validate installation
+# Run tests
 pytest ai_engine/tests/ -v --tb=short
 
-# 5. Start the AI Engine
+# Start the AI Engine
 python -m ai_engine
 
-# 6. Verify the API is running
+# Verify the API is running
 curl http://localhost:8000/health
+```
+
+### Rust Data Plane
+
+```bash
+cd rust/dataplane
+cargo build --locked
+cargo test
+```
+
+### Go Control Plane
+
+```bash
+# Build all Go services
+cd go/controlplane && go build -trimpath -o ../../dist/controlplane ./cmd/controlplane
+cd go/mgmtapi && go build -trimpath -o ../../dist/mgmtapi ./cmd/mgmtapi
+
+# Run control plane
+./dist/controlplane
+```
+
+### UI Console
+
+```bash
+cd ui/console
+npm install
+npm run dev
+# Available at http://localhost:3000
 ```
 
 ### Configuration
@@ -128,13 +170,13 @@ python -m ai_engine --development --reload
 
 ```bash
 # Build xDS Server
-docker build -f docker/xds-server/Dockerfile -t cronos-ai/xds-server:latest .
+docker build -f docker/xds-server/Dockerfile -t qbitel/xds-server:latest .
 
 # Build Admission Webhook
-docker build -f docker/admission-webhook/Dockerfile -t cronos-ai/admission-webhook:latest .
+docker build -f docker/admission-webhook/Dockerfile -t qbitel/admission-webhook:latest .
 
 # Build Kafka Producer
-docker build -f docker/kafka-producer/Dockerfile -t cronos-ai/kafka-producer:latest .
+docker build -f docker/kafka-producer/Dockerfile -t qbitel/kafka-producer:latest .
 ```
 
 ### Docker Compose Deployment
@@ -148,7 +190,7 @@ cd docker
 docker-compose up -d
 
 # View logs
-docker-compose logs -f cronos-ai-engine
+docker-compose logs -f qbitel-engine
 
 # Check service status
 docker-compose ps
@@ -161,7 +203,7 @@ docker-compose down
 
 ```yaml
 services:
-  - cronos-ai-engine: AI Engine (REST + gRPC)
+  - qbitel-engine: AI Engine (REST + gRPC)
   - mlflow: Model registry and tracking
   - prometheus: Metrics collection
   - grafana: Dashboards and visualization
@@ -174,10 +216,86 @@ services:
 - **AI Engine API**: http://localhost:8000
 - **API Docs**: http://localhost:8000/docs
 - **MLflow**: http://localhost:5000
-- **Grafana**: http://localhost:3000 (admin/cronos-ai-admin)
+- **Grafana**: http://localhost:3000 (admin/qbitel-admin)
 - **Prometheus**: http://localhost:9090
 
-## Kubernetes Deployment
+## Helm Deployment (Recommended for Production)
+
+The recommended way to deploy QBITEL Bridge to Kubernetes is via Helm chart.
+
+### Quick Deploy
+
+```bash
+helm install qbitel-bridge ./helm/qbitel-bridge \
+  --namespace qbitel-bridge \
+  --create-namespace \
+  --wait
+```
+
+### Production Deploy
+
+```bash
+helm install qbitel-bridge ./helm/qbitel-bridge \
+  --namespace qbitel-bridge \
+  --create-namespace \
+  --set xdsServer.replicaCount=5 \
+  --set admissionWebhook.replicaCount=5 \
+  --set xdsServer.resources.requests.memory=1Gi \
+  --set monitoring.enabled=true
+```
+
+### Custom Values
+
+```bash
+# See all configurable values
+helm show values ./helm/qbitel-bridge
+
+# Deploy with custom values file
+helm install qbitel-bridge ./helm/qbitel-bridge \
+  --namespace qbitel-bridge \
+  --create-namespace \
+  -f my-values.yaml
+```
+
+See [helm/qbitel-bridge/README.md](helm/qbitel-bridge/README.md) for full Helm chart documentation.
+
+## Air-Gapped Deployment
+
+For environments with no internet connectivity:
+
+```bash
+# 1. On a connected machine: pull models and images
+ollama pull llama3.2:8b
+ollama pull llama3.2:70b
+docker save qbitel/controlplane:latest > controlplane.tar
+docker save qbitel/mgmtapi:latest > mgmtapi.tar
+
+# 2. Transfer to air-gapped environment (USB, secure transfer)
+
+# 3. On the air-gapped machine: load images
+docker load < controlplane.tar
+docker load < mgmtapi.tar
+
+# 4. Configure for air-gapped mode
+export QBITEL_LLM_PROVIDER=ollama
+export QBITEL_LLM_ENDPOINT=http://localhost:11434
+export QBITEL_AIRGAPPED_MODE=true
+export QBITEL_DISABLE_CLOUD_LLMS=true
+
+# 5. Deploy
+python -m ai_engine --airgapped
+```
+
+Air-gapped features:
+- All LLM inference runs locally (Ollama)
+- No internet connectivity required after initial setup
+- All data stays within your infrastructure
+- No API keys or cloud accounts needed
+- Compliant with strictest data residency regulations
+
+## Kubernetes Deployment (Manual)
+
+For fine-grained control over individual components:
 
 ### Prerequisites
 
@@ -187,9 +305,9 @@ kubectl cluster-info
 kubectl get nodes
 
 # Create namespaces
-kubectl create namespace cronos-service-mesh
-kubectl create namespace cronos-container-security
-kubectl create namespace cronos-monitoring
+kubectl create namespace qbitel-service-mesh
+kubectl create namespace qbitel-container-security
+kubectl create namespace qbitel-monitoring
 ```
 
 ### Service Mesh Deployment
@@ -205,11 +323,11 @@ kubectl apply -f kubernetes/service-mesh/rbac.yaml
 kubectl apply -f kubernetes/service-mesh/xds-server-deployment.yaml
 
 # 3. Verify deployment
-kubectl get pods -n cronos-service-mesh
-kubectl logs -n cronos-service-mesh deployment/xds-server -f
+kubectl get pods -n qbitel-service-mesh
+kubectl logs -n qbitel-service-mesh deployment/xds-server -f
 
 # 4. Check service
-kubectl get svc -n cronos-service-mesh
+kubectl get svc -n qbitel-service-mesh
 ```
 
 ### Container Security Deployment
@@ -224,7 +342,7 @@ Deploy admission webhook and security components:
 kubectl apply -f kubernetes/container-security/admission-webhook-deployment.yaml
 
 # 3. Verify webhook is running
-kubectl get pods -n cronos-container-security
+kubectl get pods -n qbitel-container-security
 kubectl get validatingwebhookconfigurations
 
 # 4. Test webhook (try deploying a test pod)
@@ -242,7 +360,7 @@ kubectl apply -f kubernetes/monitoring/prometheus-deployment.yaml
 kubectl apply -f kubernetes/monitoring/grafana-deployment.yaml
 
 # Access Grafana
-kubectl port-forward -n cronos-monitoring svc/grafana 3000:3000
+kubectl port-forward -n qbitel-monitoring svc/grafana 3000:3000
 
 # Import dashboards from kubernetes/monitoring/dashboards/
 ```
@@ -251,18 +369,18 @@ kubectl port-forward -n cronos-monitoring svc/grafana 3000:3000
 
 ```bash
 # Check all pods
-kubectl get pods --all-namespaces | grep cronos
+kubectl get pods --all-namespaces | grep qbitel
 
 # Check services
-kubectl get svc --all-namespaces | grep cronos
+kubectl get svc --all-namespaces | grep qbitel
 
 # Check resource usage
-kubectl top pods -n cronos-service-mesh
-kubectl top pods -n cronos-container-security
+kubectl top pods -n qbitel-service-mesh
+kubectl top pods -n qbitel-container-security
 
 # View logs
-kubectl logs -n cronos-service-mesh deployment/xds-server --tail=100
-kubectl logs -n cronos-container-security deployment/admission-webhook --tail=100
+kubectl logs -n qbitel-service-mesh deployment/xds-server --tail=100
+kubectl logs -n qbitel-container-security deployment/admission-webhook --tail=100
 ```
 
 ## Production Configuration
@@ -278,8 +396,8 @@ export AI_ENGINE_TIMEOUT=300
 
 # Security
 export API_KEY_SECRET=<secure-random-string>
-export TLS_CERT_PATH=/etc/cronos/certs/tls.crt
-export TLS_KEY_PATH=/etc/cronos/certs/tls.key
+export TLS_CERT_PATH=/etc/qbitel/certs/tls.crt
+export TLS_KEY_PATH=/etc/qbitel/certs/tls.key
 
 # MLflow
 export MLFLOW_TRACKING_URI=https://mlflow.production.example.com
@@ -313,14 +431,14 @@ Enable Horizontal Pod Autoscaler:
 ```bash
 # HPA for xDS Server
 kubectl autoscale deployment xds-server \
-  -n cronos-service-mesh \
+  -n qbitel-service-mesh \
   --cpu-percent=70 \
   --min=3 \
   --max=10
 
 # HPA for Admission Webhook
 kubectl autoscale deployment admission-webhook \
-  -n cronos-container-security \
+  -n qbitel-container-security \
   --cpu-percent=70 \
   --min=3 \
   --max=10
@@ -338,8 +456,8 @@ Configure persistent volumes for data and models:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: cronos-models-pvc
-  namespace: cronos-service-mesh
+  name: qbitel-models-pvc
+  namespace: qbitel-service-mesh
 spec:
   accessModes:
     - ReadWriteOnce
@@ -359,7 +477,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: xds-server-pdb
-  namespace: cronos-service-mesh
+  namespace: qbitel-service-mesh
 spec:
   minAvailable: 2
   selector:
@@ -371,18 +489,18 @@ spec:
 
 ### Prometheus Metrics
 
-Key metrics exposed by CRONOS AI:
+Key metrics exposed by QBITEL:
 
 ```bash
 # Check metrics endpoint
 curl http://localhost:9090/metrics
 
 # Key metrics:
-# - cronos_ai_requests_total
-# - cronos_ai_request_duration_seconds
-# - cronos_ai_protocol_discovery_accuracy
-# - cronos_ai_anomaly_detection_alerts
-# - cronos_ai_encryption_operations_total
+# - qbitel_requests_total
+# - qbitel_request_duration_seconds
+# - qbitel_protocol_discovery_accuracy
+# - qbitel_anomaly_detection_alerts
+# - qbitel_encryption_operations_total
 ```
 
 ### Grafana Dashboards
@@ -391,10 +509,10 @@ Import pre-built dashboards:
 
 ```bash
 # Located in: kubernetes/monitoring/dashboards/
-# - cronos-ai-overview.json
-# - cronos-ai-security.json
-# - cronos-ai-performance.json
-# - cronos-ai-kubernetes.json
+# - qbitel-overview.json
+# - qbitel-security.json
+# - qbitel-performance.json
+# - qbitel-kubernetes.json
 ```
 
 ### Logging
@@ -448,7 +566,7 @@ Generate certificates:
 openssl req -x509 -newkey rsa:4096 \
   -keyout key.pem -out cert.pem \
   -days 365 -nodes \
-  -subj "/CN=cronos-ai.local"
+  -subj "/CN=qbitel.local"
 
 # For production, use cert-manager or your PKI
 ```
@@ -460,8 +578,8 @@ Configure TLS in deployment:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cronos-tls
-  namespace: cronos-service-mesh
+  name: qbitel-tls
+  namespace: qbitel-service-mesh
 type: kubernetes.io/tls
 data:
   tls.crt: <base64-encoded-cert>
@@ -483,8 +601,8 @@ Restrict pod-to-pod communication:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: cronos-network-policy
-  namespace: cronos-service-mesh
+  name: qbitel-network-policy
+  namespace: qbitel-service-mesh
 spec:
   podSelector:
     matchLabels:
@@ -508,13 +626,13 @@ Use Kubernetes secrets or external secret managers:
 
 ```bash
 # Create secret for API keys
-kubectl create secret generic cronos-api-keys \
-  -n cronos-service-mesh \
+kubectl create secret generic qbitel-api-keys \
+  -n qbitel-service-mesh \
   --from-literal=api-key=<your-secure-api-key>
 
 # Use AWS Secrets Manager (example)
 kubectl create secret generic aws-secrets \
-  -n cronos-service-mesh \
+  -n qbitel-service-mesh \
   --from-literal=aws-access-key-id=<id> \
   --from-literal=aws-secret-access-key=<key>
 ```
@@ -527,10 +645,10 @@ kubectl create secret generic aws-secrets \
 
 ```bash
 # Check pod status
-kubectl describe pod <pod-name> -n cronos-service-mesh
+kubectl describe pod <pod-name> -n qbitel-service-mesh
 
 # Check logs
-kubectl logs <pod-name> -n cronos-service-mesh
+kubectl logs <pod-name> -n qbitel-service-mesh
 
 # Common causes:
 # - Image pull errors: Check imagePullSecrets
@@ -542,11 +660,11 @@ kubectl logs <pod-name> -n cronos-service-mesh
 
 ```bash
 # Check resource usage
-kubectl top pod <pod-name> -n cronos-service-mesh
+kubectl top pod <pod-name> -n qbitel-service-mesh
 
 # Reduce batch size in configuration
 # Edit ConfigMap:
-kubectl edit configmap cronos-config -n cronos-service-mesh
+kubectl edit configmap qbitel-config -n qbitel-service-mesh
 
 # Set: batch_size: 16 (reduce from 32)
 ```
@@ -555,23 +673,23 @@ kubectl edit configmap cronos-config -n cronos-service-mesh
 
 ```bash
 # Check xDS server logs
-kubectl logs deployment/xds-server -n cronos-service-mesh | grep -i error
+kubectl logs deployment/xds-server -n qbitel-service-mesh | grep -i error
 
 # Verify gRPC port is accessible
-kubectl get svc xds-server -n cronos-service-mesh
+kubectl get svc xds-server -n qbitel-service-mesh
 
 # Test connection
-grpcurl -plaintext xds-server.cronos-service-mesh:50051 list
+grpcurl -plaintext xds-server.qbitel-service-mesh:50051 list
 ```
 
 #### 4. Admission Webhook Blocking Pods
 
 ```bash
 # Check webhook logs
-kubectl logs deployment/admission-webhook -n cronos-container-security
+kubectl logs deployment/admission-webhook -n qbitel-container-security
 
 # Temporarily disable webhook for debugging
-kubectl delete validatingwebhookconfigurations cronos-admission-webhook
+kubectl delete validatingwebhookconfigurations qbitel-admission-webhook
 
 # Re-enable after fixing
 kubectl apply -f kubernetes/container-security/admission-webhook-deployment.yaml
@@ -590,7 +708,7 @@ apt-get install -y bpfcc-tools linux-headers-$(uname -r)
 ls /sys/kernel/debug/tracing/
 
 # Run with elevated privileges
-kubectl patch daemonset ebpf-monitor -n cronos-container-security \
+kubectl patch daemonset ebpf-monitor -n qbitel-container-security \
   -p '{"spec":{"template":{"spec":{"hostPID":true,"hostNetwork":true}}}}'
 ```
 
@@ -618,19 +736,19 @@ export KAFKA_COMPRESSION_TYPE=snappy
 
 ```bash
 # Enable debug logging
-kubectl set env deployment/xds-server -n cronos-service-mesh LOG_LEVEL=DEBUG
+kubectl set env deployment/xds-server -n qbitel-service-mesh LOG_LEVEL=DEBUG
 
 # Port-forward for local access
-kubectl port-forward -n cronos-service-mesh svc/xds-server 50051:50051
+kubectl port-forward -n qbitel-service-mesh svc/xds-server 50051:50051
 
 # Execute commands in pod
-kubectl exec -it <pod-name> -n cronos-service-mesh -- /bin/bash
+kubectl exec -it <pod-name> -n qbitel-service-mesh -- /bin/bash
 
 # Copy files from pod
-kubectl cp cronos-service-mesh/<pod-name>:/app/logs ./logs
+kubectl cp qbitel-service-mesh/<pod-name>:/app/logs ./logs
 
 # Watch pod events
-kubectl get events -n cronos-service-mesh --watch
+kubectl get events -n qbitel-service-mesh --watch
 ```
 
 ## Backup and Recovery
@@ -639,15 +757,15 @@ kubectl get events -n cronos-service-mesh --watch
 
 ```bash
 # 1. Backup Kubernetes resources
-kubectl get all -n cronos-service-mesh -o yaml > backup-service-mesh.yaml
-kubectl get all -n cronos-container-security -o yaml > backup-container-security.yaml
+kubectl get all -n qbitel-service-mesh -o yaml > backup-service-mesh.yaml
+kubectl get all -n qbitel-container-security -o yaml > backup-container-security.yaml
 
 # 2. Backup ConfigMaps and Secrets
-kubectl get configmaps -n cronos-service-mesh -o yaml > backup-configmaps.yaml
-kubectl get secrets -n cronos-service-mesh -o yaml > backup-secrets.yaml
+kubectl get configmaps -n qbitel-service-mesh -o yaml > backup-configmaps.yaml
+kubectl get secrets -n qbitel-service-mesh -o yaml > backup-secrets.yaml
 
 # 3. Backup persistent volumes
-kubectl get pvc -n cronos-service-mesh -o yaml > backup-pvc.yaml
+kubectl get pvc -n qbitel-service-mesh -o yaml > backup-pvc.yaml
 
 # 4. Backup MLflow models (if using S3/object storage)
 # Configure periodic snapshots via cloud provider
@@ -665,28 +783,28 @@ kubectl apply -f backup-configmaps.yaml
 kubectl apply -f backup-secrets.yaml
 
 # 3. Verify restoration
-kubectl get pods --all-namespaces | grep cronos
+kubectl get pods --all-namespaces | grep qbitel
 ```
 
 ## Upgrade Procedures
 
 ```bash
 # 1. Backup current deployment
-kubectl get all -n cronos-service-mesh -o yaml > pre-upgrade-backup.yaml
+kubectl get all -n qbitel-service-mesh -o yaml > pre-upgrade-backup.yaml
 
 # 2. Update Docker images
 kubectl set image deployment/xds-server \
-  -n cronos-service-mesh \
-  xds-server=cronos-ai/xds-server:v2.0.0
+  -n qbitel-service-mesh \
+  xds-server=qbitel/xds-server:v2.0.0
 
 # 3. Monitor rollout
-kubectl rollout status deployment/xds-server -n cronos-service-mesh
+kubectl rollout status deployment/xds-server -n qbitel-service-mesh
 
 # 4. Rollback if needed
-kubectl rollout undo deployment/xds-server -n cronos-service-mesh
+kubectl rollout undo deployment/xds-server -n qbitel-service-mesh
 
 # 5. Verify functionality
-kubectl exec -it <pod-name> -n cronos-service-mesh -- python -c "import ai_engine; print(ai_engine.__version__)"
+kubectl exec -it <pod-name> -n qbitel-service-mesh -- python -c "import ai_engine; print(ai_engine.__version__)"
 ```
 
 ## Support
@@ -694,11 +812,11 @@ kubectl exec -it <pod-name> -n cronos-service-mesh -- python -c "import ai_engin
 For deployment issues:
 - Check logs: `kubectl logs <pod-name>`
 - Review events: `kubectl get events`
-- GitHub Issues: https://github.com/qbitel/cronos-ai/issues
+- GitHub Issues: https://github.com/yazhsab/qbitel-bridge/issues
 - Enterprise Support: enterprise@qbitel.com
 
 ---
 
-**Last Updated**: 2025-01-16
-**Version**: 1.0
+**Last Updated**: 2025-02-08
+**Version**: 2.0
 **Status**: Production Deployment Guide

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Timeout Manager Implementation
+QBITEL Engine - Timeout Manager Implementation
 
 Enterprise-grade timeout management with configurable policies,
 adaptive timeouts, and graceful handling for the Zero-Touch Security Orchestrator.
@@ -124,7 +124,7 @@ class TimeoutPolicy:
     def __init__(self, config: TimeoutConfig):
         self.config = config
         self.logger = get_security_logger(
-            f"cronos.security.resilience.timeout.{config.name}"
+            f"qbitel.security.resilience.timeout.{config.name}"
         )
 
         # History tracking
@@ -413,7 +413,7 @@ async def timeout_context(timeout: float, name: str = "operation"):
         name: Operation name for logging
     """
 
-    logger = get_security_logger("cronos.security.resilience.timeout_context")
+    logger = get_security_logger("qbitel.security.resilience.timeout_context")
     start_time = time.time()
 
     try:
@@ -448,7 +448,7 @@ class TimeoutManager:
 
     def __init__(self):
         self.policies: Dict[str, TimeoutPolicy] = {}
-        self.logger = get_security_logger("cronos.security.resilience.timeout_manager")
+        self.logger = get_security_logger("qbitel.security.resilience.timeout_manager")
 
         # Default policies
         self._create_default_policies()
@@ -668,7 +668,7 @@ class TimeoutContext:
             if exc_type == asyncio.TimeoutError:
                 # Log timeout
                 logger = get_security_logger(
-                    "cronos.security.resilience.timeout_context"
+                    "qbitel.security.resilience.timeout_context"
                 )
                 logger.log_security_event(
                     SecurityLogType.PERFORMANCE_METRIC,

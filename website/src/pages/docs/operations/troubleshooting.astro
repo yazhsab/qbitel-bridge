@@ -1,0 +1,146 @@
+---
+import DocsLayout from '@/layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Troubleshooting | QBITEL Bridge Docs" description="Troubleshooting guide for QBITEL Bridge: common issues, diagnostic commands, log analysis, and resolution steps.">
+  <h1 class="text-3xl font-bold text-white mb-2">Troubleshooting</h1>
+  <p class="text-gray-400 mb-8">Common issues, diagnostic commands, and resolution steps for QBITEL Bridge deployments.</p>
+
+  <h2 id="diagnostic-commands" class="text-2xl font-bold text-white mt-12 mb-4">Diagnostic Commands</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Check pod status</span>
+kubectl get pods -n qbitel-service-mesh
+
+<span class="text-gray-500"># View pod logs</span>
+kubectl logs -n qbitel-service-mesh deployment/qbitel-engine -f
+
+<span class="text-gray-500"># Describe a failing pod</span>
+kubectl describe pod -n qbitel-service-mesh &lt;pod-name&gt;
+
+<span class="text-gray-500"># Check service endpoints</span>
+kubectl get svc -n qbitel-service-mesh
+
+<span class="text-gray-500"># Health check</span>
+curl http://localhost:8000/health
+
+<span class="text-gray-500"># Check Kubernetes events</span>
+kubectl get events -n qbitel-service-mesh --sort-by='.lastTimestamp'</code></pre>
+
+  <h2 id="common-issues" class="text-2xl font-bold text-white mt-12 mb-4">Common Issues</h2>
+
+  <h3 id="engine-not-starting" class="text-xl font-semibold text-white mt-8 mb-3">AI Engine Not Starting</h3>
+  <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50 mb-6">
+    <p class="text-gray-300 mb-2"><strong class="text-white">Symptoms:</strong> Pod in CrashLoopBackOff or container exits immediately.</p>
+    <p class="text-gray-300 mb-2"><strong class="text-white">Common Causes:</strong></p>
+    <ul class="list-disc list-inside text-gray-300 space-y-1 text-sm mb-2">
+      <li>Missing or invalid <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">DATABASE_URL</code> environment variable</li>
+      <li>Database not reachable from the pod</li>
+      <li>Insufficient memory (requires 2 GB+ for ML models)</li>
+      <li>Missing Python dependencies</li>
+    </ul>
+    <p class="text-gray-300 mb-2"><strong class="text-white">Resolution:</strong></p>
+    <pre class="bg-surface-900 rounded p-3 font-mono text-sm overflow-x-auto"><code class="text-gray-300"><span class="text-gray-500"># Check pod logs for the error</span>
+kubectl logs -n qbitel-service-mesh deployment/qbitel-engine --previous
+
+<span class="text-gray-500"># Verify database connectivity</span>
+kubectl exec -n qbitel-service-mesh deployment/qbitel-engine -- \
+  python -c "import sqlalchemy; print('DB OK')"
+
+<span class="text-gray-500"># Check memory limits</span>
+kubectl describe pod -n qbitel-service-mesh &lt;pod-name&gt; | grep -A5 "Limits"</code></pre>
+  </div>
+
+  <h3 id="llm-unavailable" class="text-xl font-semibold text-white mt-8 mb-3">LLM Provider Unavailable</h3>
+  <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50 mb-6">
+    <p class="text-gray-300 mb-2"><strong class="text-white">Symptoms:</strong> Copilot and zero-touch features return errors; health check shows "llm: unavailable".</p>
+    <p class="text-gray-300 mb-2"><strong class="text-white">Common Causes:</strong></p>
+    <ul class="list-disc list-inside text-gray-300 space-y-1 text-sm mb-2">
+      <li>Ollama service not running</li>
+      <li>Incorrect <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">OLLAMA_URL</code> configuration</li>
+      <li>Model not downloaded</li>
+    </ul>
+    <p class="text-gray-300 mb-2"><strong class="text-white">Resolution:</strong></p>
+    <pre class="bg-surface-900 rounded p-3 font-mono text-sm overflow-x-auto"><code class="text-gray-300"><span class="text-gray-500"># Verify Ollama is running</span>
+curl http://localhost:11434/api/tags
+
+<span class="text-gray-500"># Pull the required model</span>
+ollama pull llama3.2:8b
+
+<span class="text-gray-500"># Verify the model is available</span>
+ollama list</code></pre>
+  </div>
+
+  <h3 id="discovery-failures" class="text-xl font-semibold text-white mt-8 mb-3">Protocol Discovery Failures</h3>
+  <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50 mb-6">
+    <p class="text-gray-300 mb-2"><strong class="text-white">Symptoms:</strong> Discovery requests return low confidence or no results.</p>
+    <p class="text-gray-300 mb-2"><strong class="text-white">Common Causes:</strong></p>
+    <ul class="list-disc list-inside text-gray-300 space-y-1 text-sm mb-2">
+      <li>Insufficient traffic samples (need 10+ messages for reliable discovery)</li>
+      <li>Traffic data not properly base64-encoded</li>
+      <li>Confidence threshold set too high</li>
+    </ul>
+    <p class="text-gray-300 mb-2"><strong class="text-white">Resolution:</strong></p>
+    <pre class="bg-surface-900 rounded p-3 font-mono text-sm overflow-x-auto"><code class="text-gray-300"><span class="text-gray-500"># Lower the confidence threshold</span>
+curl -X POST http://localhost:8000/api/v1/discover \
+  -H "Content-Type: application/json" \
+  -d '{'{'}"packet_data": "...", "metadata": {'{'}"confidence_threshold": 0.5{'}'}{'}'}'
+
+<span class="text-gray-500"># Verify base64 encoding</span>
+echo -n "your data" | base64 | base64 -d</code></pre>
+  </div>
+
+  <h3 id="tls-errors" class="text-xl font-semibold text-white mt-8 mb-3">TLS/mTLS Connection Errors</h3>
+  <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50 mb-6">
+    <p class="text-gray-300 mb-2"><strong class="text-white">Symptoms:</strong> "certificate verify failed" or "handshake failure" errors.</p>
+    <p class="text-gray-300 mb-2"><strong class="text-white">Resolution:</strong></p>
+    <pre class="bg-surface-900 rounded p-3 font-mono text-sm overflow-x-auto"><code class="text-gray-300"><span class="text-gray-500"># Check certificate expiration</span>
+openssl x509 -in /path/to/cert.pem -noout -dates
+
+<span class="text-gray-500"># Verify CA chain</span>
+openssl verify -CAfile ca.pem server-cert.pem
+
+<span class="text-gray-500"># Regenerate certificates</span>
+./scripts/generate-webhook-certs.sh</code></pre>
+  </div>
+
+  <h3 id="webhook-rejection" class="text-xl font-semibold text-white mt-8 mb-3">Admission Webhook Rejecting Deployments</h3>
+  <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50 mb-6">
+    <p class="text-gray-300 mb-2"><strong class="text-white">Symptoms:</strong> Kubernetes deployments fail with policy violation messages.</p>
+    <p class="text-gray-300 mb-2"><strong class="text-white">Resolution:</strong></p>
+    <pre class="bg-surface-900 rounded p-3 font-mono text-sm overflow-x-auto"><code class="text-gray-300"><span class="text-gray-500"># Check webhook logs for rejection reason</span>
+kubectl logs -n qbitel-container-security deployment/admission-webhook
+
+<span class="text-gray-500"># Temporarily bypass webhook for debugging</span>
+kubectl label namespace your-namespace qbitel.ai/webhook-
+
+<span class="text-gray-500"># Ensure pods have security contexts and resource limits</span></code></pre>
+  </div>
+
+  <h3 id="high-memory" class="text-xl font-semibold text-white mt-8 mb-3">High Memory Usage</h3>
+  <div class="bg-surface-800 rounded-lg p-5 border border-surface-600/50 mb-6">
+    <p class="text-gray-300 mb-2"><strong class="text-white">Symptoms:</strong> OOMKilled pods or degraded performance.</p>
+    <p class="text-gray-300 mb-2"><strong class="text-white">Resolution:</strong></p>
+    <ul class="list-disc list-inside text-gray-300 space-y-1 text-sm">
+      <li>Increase memory limits in deployment manifests or Helm values</li>
+      <li>Use <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">DEVICE=cpu</code> if GPU is not needed</li>
+      <li>Use a smaller LLM model (e.g., <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">llama3.2:8b</code> instead of <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">70b</code>)</li>
+      <li>Check for memory leaks in custom protocol parsers</li>
+    </ul>
+  </div>
+
+  <h2 id="log-analysis" class="text-2xl font-bold text-white mt-12 mb-4">Log Analysis</h2>
+  <pre class="bg-surface-800 rounded-lg p-4 font-mono text-sm overflow-x-auto mb-6"><code class="text-gray-300"><span class="text-gray-500"># Filter logs by level</span>
+kubectl logs deployment/qbitel-engine -n qbitel-service-mesh | \
+  python -c "import sys,json; [print(json.loads(l)['message']) for l in sys.stdin if json.loads(l).get('level')=='ERROR']"
+
+<span class="text-gray-500"># Search for specific error patterns</span>
+kubectl logs deployment/qbitel-engine -n qbitel-service-mesh --since=1h | \
+  grep -i "error\|exception\|failed"</code></pre>
+
+  <h2 id="support" class="text-2xl font-bold text-white mt-12 mb-4">Getting Support</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>Check the <a href="/docs/operations/monitoring" class="text-quantum-400 hover:underline">Monitoring</a> dashboards for anomalies</li>
+    <li>Review the <a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> for missing configurations</li>
+    <li>Consult runbooks in <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ops/monitoring/runbooks/</code></li>
+    <li>File an issue on the GitHub repository with logs and configuration details</li>
+  </ul>
+</DocsLayout>

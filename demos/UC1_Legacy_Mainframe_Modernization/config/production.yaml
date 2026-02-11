@@ -1,0 +1,201 @@
+# QBITEL - UC1 Legacy Mainframe Modernization
+# Production Configuration
+
+# Service Configuration
+service:
+  name: "uc1-legacy-modernization"
+  version: "1.0.0"
+  environment: "production"
+  debug: false
+
+# Server Configuration
+server:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  timeout: 120
+  keepalive: 5
+
+# Authentication
+auth:
+  enabled: true
+  method: "api_key"  # api_key, jwt, none
+  rate_limit_requests: 100
+  rate_limit_window_seconds: 60
+  jwt_expiry_hours: 24
+
+# Database Configuration
+database:
+  driver: "postgresql"  # sqlite, postgresql
+  host: "${DB_HOST:localhost}"
+  port: 5432
+  name: "qbitel_uc1"
+  username: "${DB_USER:qbitel}"
+  password: "${DB_PASSWORD}"
+  pool_size: 10
+  max_overflow: 20
+  echo: false
+
+# LLM Configuration
+llm:
+  primary_provider: "anthropic"  # openai, anthropic, ollama
+  fallback_providers:
+    - "openai"
+    - "ollama"
+
+  # Request settings
+  max_tokens: 4000
+  temperature: 0.1
+  timeout_seconds: 60
+  max_retries: 3
+  retry_delay_seconds: 2
+
+  # Rate limiting
+  requests_per_minute: 100
+  requests_per_hour: 1000
+
+  # Caching
+  response_caching: true
+  cache_ttl_hours: 6
+
+  # Provider-specific settings
+  openai:
+    model: "gpt-4o"
+    api_key: "${OPENAI_API_KEY}"
+
+  anthropic:
+    model: "claude-sonnet-4-5-20250929"
+    api_key: "${ANTHROPIC_API_KEY}"
+
+  ollama:
+    model: "llama3.2"
+    base_url: "http://localhost:11434"
+
+# Legacy System Whisperer Configuration
+legacy_whisperer:
+  enabled: true
+
+  # Anomaly detection
+  anomaly_detection:
+    anomaly_threshold: 0.98
+    critical_anomaly_threshold: 0.99
+    llm_analysis_enabled: true
+    detection_interval_seconds: 300
+    enable_real_time_alerts: true
+
+  # Predictive analytics
+  predictive_analytics:
+    failure_prediction_enabled: true
+    min_historical_data_days: 90
+    prediction_confidence_threshold: 0.85
+
+  # Knowledge capture
+  knowledge_capture:
+    llm_processing_enabled: true
+    peer_review_required: true
+    audit_trail_enabled: true
+    knowledge_retention_days: 1825  # 5 years
+
+  # Decision support
+  decision_support:
+    multi_llm_consensus: true
+    detailed_timelines: true
+    max_recommendations: 10
+
+  # System limits
+  max_registered_systems: 5000
+  max_concurrent_analyses: 50
+  memory_limit_mb: 8192
+
+# Monitoring Configuration
+monitoring:
+  enabled: true
+
+  # Prometheus metrics
+  prometheus:
+    enabled: true
+    port: 9090
+    path: "/metrics"
+
+  # Health checks
+  health_check:
+    enabled: true
+    interval_seconds: 30
+
+  # Logging
+  logging:
+    level: "INFO"
+    format: "json"  # json, text
+    structured: true
+    rotation: true
+    max_size_mb: 100
+    retention_days: 30
+
+  # Tracing
+  tracing:
+    enabled: true
+    sample_rate: 0.1
+    export_endpoint: "${JAEGER_ENDPOINT:http://localhost:14268/api/traces}"
+
+# Security Configuration
+security:
+  encrypt_sensitive_data: true
+  encryption_algorithm: "AES-256-GCM"
+  key_rotation_days: 90
+
+  tls:
+    enabled: true
+    cert_file: "${TLS_CERT_FILE}"
+    key_file: "${TLS_KEY_FILE}"
+
+  cors:
+    allowed_origins:
+      - "http://localhost:3000"
+      - "http://localhost:8080"
+    allow_credentials: true
+    max_age: 600
+
+# COBOL Analysis Configuration
+cobol_analysis:
+  max_source_size_kb: 1024
+  analysis_depths:
+    - basic
+    - standard
+    - deep
+  default_depth: "standard"
+  timeout_seconds: 120
+
+# Protocol Analysis Configuration
+protocol_analysis:
+  min_samples: 10
+  max_samples: 1000
+  confidence_threshold: 0.85
+  timeout_seconds: 300
+
+# Code Generation Configuration
+code_generation:
+  supported_languages:
+    - python
+    - java
+    - go
+    - rust
+    - typescript
+  supported_protocols:
+    - REST
+    - gRPC
+    - GraphQL
+    - WebSocket
+  include_tests: true
+  include_documentation: true
+
+# Cache Configuration
+cache:
+  enabled: true
+  backend: "redis"  # memory, redis
+  redis:
+    host: "${REDIS_HOST:localhost}"
+    port: 6379
+    db: 0
+    password: "${REDIS_PASSWORD}"
+  ttl_seconds: 3600
+  max_size_mb: 1000

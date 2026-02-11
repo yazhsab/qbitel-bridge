@@ -433,7 +433,7 @@ func (bm *BundleManager) loadFromFilesystem(bundleID string) ([]byte, error) {
 		ID:      bundleID,
 		Version: "1.0.0",
 		Policies: map[string]string{
-			"default": "package qslb.default\n\ndefault allow = false\n\nallow {\n    input.method == \"GET\"\n}",
+			"default": "package qbitel.default\n\ndefault allow = false\n\nallow {\n    input.method == \"GET\"\n}",
 		},
 		Data: map[string]interface{}{
 			"config": map[string]interface{}{
@@ -465,7 +465,7 @@ func (bm *BundleManager) loadFromS3(ctx context.Context, bundleID string) ([]byt
 		ID:      bundleID,
 		Version: "1.0.0",
 		Policies: map[string]string{
-			"s3-policy": fmt.Sprintf("package qslb.s3\n\ndefault allow = false\n\nallow {\n    input.bundle_id == \"%s\"\n}", bundleID),
+			"s3-policy": fmt.Sprintf("package qbitel.s3\n\ndefault allow = false\n\nallow {\n    input.bundle_id == \"%s\"\n}", bundleID),
 		},
 		Data: map[string]interface{}{
 			"s3_config": map[string]interface{}{
@@ -510,7 +510,7 @@ func (bm *BundleManager) loadFromGCS(ctx context.Context, bundleID string) ([]by
 		ID:      bundleID,
 		Version: "1.0.0",
 		Policies: map[string]string{
-			"gcs-policy": fmt.Sprintf("package qslb.gcs\n\ndefault allow = false\n\nallow {\n    input.bundle_id == \"%s\"\n}", bundleID),
+			"gcs-policy": fmt.Sprintf("package qbitel.gcs\n\ndefault allow = false\n\nallow {\n    input.bundle_id == \"%s\"\n}", bundleID),
 		},
 		Data: map[string]interface{}{
 			"gcs_config": map[string]interface{}{
@@ -556,7 +556,7 @@ func (bm *BundleManager) loadFromOCI(ctx context.Context, bundleID string) ([]by
 		ID:      bundleID,
 		Version: "1.0.0",
 		Policies: map[string]string{
-			"oci-policy": fmt.Sprintf("package qslb.oci\n\ndefault allow = false\n\nallow {\n    input.bundle_id == \"%s\"\n}", bundleID),
+			"oci-policy": fmt.Sprintf("package qbitel.oci\n\ndefault allow = false\n\nallow {\n    input.bundle_id == \"%s\"\n}", bundleID),
 		},
 		Data: map[string]interface{}{
 			"oci_config": map[string]interface{}{
@@ -586,42 +586,42 @@ func (bm *BundleManager) loadFromOCI(ctx context.Context, bundleID string) ([]by
 // Helper methods for cloud storage backends
 
 func (bm *BundleManager) getS3Bucket() string {
-	if bucket := os.Getenv("QSLB_S3_BUCKET"); bucket != "" {
+	if bucket := os.Getenv("QBITEL_S3_BUCKET"); bucket != "" {
 		return bucket
 	}
-	return "qslb-policy-bundles" // Default bucket name
+	return "qbitel-policy-bundles" // Default bucket name
 }
 
 func (bm *BundleManager) getS3Region() string {
-	if region := os.Getenv("QSLB_S3_REGION"); region != "" {
+	if region := os.Getenv("QBITEL_S3_REGION"); region != "" {
 		return region
 	}
 	return "us-east-1" // Default region
 }
 
 func (bm *BundleManager) getGCSBucket() string {
-	if bucket := os.Getenv("QSLB_GCS_BUCKET"); bucket != "" {
+	if bucket := os.Getenv("QBITEL_GCS_BUCKET"); bucket != "" {
 		return bucket
 	}
-	return "qslb-policy-bundles" // Default bucket name
+	return "qbitel-policy-bundles" // Default bucket name
 }
 
 func (bm *BundleManager) getGCSProject() string {
-	if project := os.Getenv("QSLB_GCS_PROJECT"); project != "" {
+	if project := os.Getenv("QBITEL_GCS_PROJECT"); project != "" {
 		return project
 	}
-	return "qslb-project" // Default project
+	return "qbitel-project" // Default project
 }
 
 func (bm *BundleManager) getOCIRegistry() string {
-	if registry := os.Getenv("QSLB_OCI_REGISTRY"); registry != "" {
+	if registry := os.Getenv("QBITEL_OCI_REGISTRY"); registry != "" {
 		return registry
 	}
-	return "registry.qslb.local" // Default registry
+	return "registry.qbitel.local" // Default registry
 }
 
 func (bm *BundleManager) getOCIRepository() string {
-	if repo := os.Getenv("QSLB_OCI_REPOSITORY"); repo != "" {
+	if repo := os.Getenv("QBITEL_OCI_REPOSITORY"); repo != "" {
 		return repo
 	}
 	return "policy-bundles" // Default repository

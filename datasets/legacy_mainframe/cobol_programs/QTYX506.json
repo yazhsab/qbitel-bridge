@@ -1,0 +1,19 @@
+{
+  "program_id": "QTYX506",
+  "domain": "manufacturing",
+  "program_type": "archival",
+  "author": "S. BROWN",
+  "lines_of_code": 196,
+  "complexity_level": "medium",
+  "complexity_score": 0.487,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.815885",
+  "hash": "eaea5259e24ee6bb069576b9a304ca7b"
+}

@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Legacy System Whisperer Authentication & Authorization
+QBITEL Engine - Legacy System Whisperer Authentication & Authorization
 
 Authentication and authorization for Legacy System Whisperer API endpoints.
 """
@@ -230,25 +230,25 @@ class LegacySystemAuth:
             "admin": User(
                 user_id="usr_001",
                 username="admin",
-                email="admin@cronos-ai.com",
+                email="admin@qbitel.com",
                 roles=[UserRole.SUPER_ADMIN],
             ),
             "analyst": User(
                 user_id="usr_002",
                 username="analyst",
-                email="analyst@cronos-ai.com",
+                email="analyst@qbitel.com",
                 roles=[UserRole.ANALYST],
             ),
             "operator": User(
                 user_id="usr_003",
                 username="operator",
-                email="operator@cronos-ai.com",
+                email="operator@qbitel.com",
                 roles=[UserRole.OPERATOR],
             ),
             "viewer": User(
                 user_id="usr_004",
                 username="viewer",
-                email="viewer@cronos-ai.com",
+                email="viewer@qbitel.com",
                 roles=[UserRole.VIEWER],
             ),
         }

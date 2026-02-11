@@ -1,0 +1,19 @@
+{
+  "program_id": "TRXV483",
+  "domain": "banking",
+  "program_type": "data_validation",
+  "author": "C. MILLER",
+  "lines_of_code": 235,
+  "complexity_level": "medium",
+  "complexity_score": 0.548,
+  "files_used": 2,
+  "verbs_used": 14,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": true,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.826152",
+  "hash": "043ca12211821f2e74e590fbeac9ac3f"
+}

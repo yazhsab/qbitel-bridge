@@ -259,14 +259,14 @@ class TestE2EServiceMeshIntegration:
         # Step 2: Generate certificates for services
         service_a_cert = cert_manager.generate_certificate(
             "service-a",
-            "cronos-service-mesh",
-            ["service-a.cronos-service-mesh.svc.cluster.local"]
+            "qbitel-service-mesh",
+            ["service-a.qbitel-service-mesh.svc.cluster.local"]
         )
 
         service_b_cert = cert_manager.generate_certificate(
             "service-b",
-            "cronos-service-mesh",
-            ["service-b.cronos-service-mesh.svc.cluster.local"]
+            "qbitel-service-mesh",
+            ["service-b.qbitel-service-mesh.svc.cluster.local"]
         )
 
         # Verify certificates are generated

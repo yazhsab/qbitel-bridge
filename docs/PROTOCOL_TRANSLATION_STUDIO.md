@@ -121,12 +121,12 @@ export OPENAI_API_KEY="your-openai-key"
 export ANTHROPIC_API_KEY="your-anthropic-key"
 
 # Database
-export CRONOS_AI_DB_PASSWORD="your-secure-password"
-export CRONOS_AI_DB_HOST="localhost"
+export QBITEL_AI_DB_PASSWORD="your-secure-password"
+export QBITEL_AI_DB_HOST="localhost"
 
 # Redis Cache
-export CRONOS_AI_REDIS_PASSWORD="your-redis-password"
-export CRONOS_AI_REDIS_HOST="localhost"
+export QBITEL_AI_REDIS_PASSWORD="your-redis-password"
+export QBITEL_AI_REDIS_HOST="localhost"
 ```
 
 ## Usage
@@ -262,7 +262,7 @@ curl -X POST http://localhost:8000/api/v1/translation/protocols/register \
 
 ```bash
 # Build image
-docker build -t cronos-ai/translation-studio:1.0.0 .
+docker build -t qbitel/translation-studio:1.0.0 .
 
 # Run container
 docker run -d \
@@ -271,7 +271,7 @@ docker run -d \
   -p 9090:9090 \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
   -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
-  cronos-ai/translation-studio:1.0.0
+  qbitel/translation-studio:1.0.0
 ```
 
 ### Kubernetes
@@ -281,15 +281,15 @@ docker run -d \
 kubectl apply -f ops/deploy/kubernetes/translation-studio/
 
 # Check status
-kubectl get pods -n cronos-translation-studio
+kubectl get pods -n qbitel-translation-studio
 
 # View logs
-kubectl logs -f deployment/translation-studio -n cronos-translation-studio
+kubectl logs -f deployment/translation-studio -n qbitel-translation-studio
 
 # Scale deployment
 kubectl scale deployment translation-studio \
   --replicas=5 \
-  -n cronos-translation-studio
+  -n qbitel-translation-studio
 ```
 
 ### Helm Chart
@@ -297,7 +297,7 @@ kubectl scale deployment translation-studio \
 ```bash
 # Install with Helm
 helm install translation-studio ./charts/translation-studio \
-  --namespace cronos-translation-studio \
+  --namespace qbitel-translation-studio \
   --create-namespace \
   --set replicaCount=3 \
   --set image.tag=1.0.0
@@ -376,18 +376,18 @@ Error Rate: 0.1%
 
 ```promql
 # Translation throughput
-rate(cronos_translation_requests_total[5m])
+rate(qbitel_translation_requests_total[5m])
 
 # Average latency
-rate(cronos_translation_duration_seconds_sum[5m]) /
-rate(cronos_translation_duration_seconds_count[5m])
+rate(qbitel_translation_duration_seconds_sum[5m]) /
+rate(qbitel_translation_duration_seconds_count[5m])
 
 # Translation accuracy
-cronos_translation_accuracy
+qbitel_translation_accuracy
 
 # Error rate
-rate(cronos_translation_requests_total{status="error"}[5m]) /
-rate(cronos_translation_requests_total[5m])
+rate(qbitel_translation_requests_total{status="error"}[5m]) /
+rate(qbitel_translation_requests_total[5m])
 ```
 
 ### Grafana Dashboard
@@ -416,7 +416,7 @@ groups:
   - alert: HighTranslationLatency
     expr: |
       histogram_quantile(0.95,
-        rate(cronos_translation_duration_seconds_bucket[5m])
+        rate(qbitel_translation_duration_seconds_bucket[5m])
       ) > 0.001
     for: 5m
     labels:
@@ -425,7 +425,7 @@ groups:
       summary: "High translation latency detected"
   
   - alert: LowTranslationAccuracy
-    expr: cronos_translation_accuracy < 0.99
+    expr: qbitel_translation_accuracy < 0.99
     for: 10m
     labels:
       severity: critical
@@ -538,13 +538,13 @@ studio.metrics_collector.collection_enabled = True
 - FAQ: `/docs/faq/translation-studio`
 
 ### Community
-- GitHub Issues: https://github.com/cronos-ai/issues
+- GitHub Issues: https://github.com/yazhsab/issues
 - Slack Channel: #translation-studio
-- Email: support@cronos-ai.com
+- Email: support@qbitel.com
 
 ## License
 
-Copyright © 2025 CRONOS AI. All rights reserved.
+Copyright © 2025 QBITEL. All rights reserved.
 
 ---
 

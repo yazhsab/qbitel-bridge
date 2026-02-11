@@ -1,13 +1,13 @@
-# CronosAI Performance Testing and Optimization Configuration
+# QbitelAI Performance Testing and Optimization Configuration
 # Comprehensive performance testing scenarios and optimization settings
 
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cronosai-performance-optimization
-  namespace: cronosai-system
+  name: qbitelai-performance-optimization
+  namespace: qbitelai-system
   labels:
-    app: cronosai
+    app: qbitelai
     component: performance
     testing: optimization
 data:
@@ -17,7 +17,7 @@ data:
       # Basic performance baseline
       baseline_performance:
         name: "Baseline Performance Test"
-        description: "Establish performance baseline for CronosAI system"
+        description: "Establish performance baseline for QbitelAI system"
         duration: "10m"
         ramp_up_time: "2m"
         ramp_down_time: "1m"
@@ -260,8 +260,8 @@ data:
           interface: "eth0"
           
         target_services:
-          - "cronosai-controlplane"
-          - "cronosai-mgmtapi"
+          - "qbitelai-controlplane"
+          - "qbitelai-mgmtapi"
           
         safety_checks:
           - name: "service_health"
@@ -308,7 +308,7 @@ data:
           cpu_percent: 80
           
         target_services:
-          - "cronosai-dataplane"
+          - "qbitelai-dataplane"
           
         success_criteria:
           - name: "response_time_degradation"
@@ -344,7 +344,7 @@ data:
         duration: "2m"
         
         parameters:
-          service_name: "cronosai-controlplane"
+          service_name: "qbitelai-controlplane"
           
         success_criteria:
           - name: "service_recovery_time"
@@ -361,7 +361,7 @@ data:
         duration: "1m"
         
         parameters:
-          container_name: "cronosai-mgmtapi"
+          container_name: "qbitelai-mgmtapi"
           
         success_criteria:
           - name: "container_restart_time"
@@ -576,19 +576,19 @@ data:
         retention_period: "30d"
         
         custom_metrics:
-          - name: "cronosai_device_operations_duration"
+          - name: "qbitelai_device_operations_duration"
             type: "histogram"
             labels: ["operation", "device_type"]
             
-          - name: "cronosai_policy_evaluation_duration"
+          - name: "qbitelai_policy_evaluation_duration"
             type: "histogram"
             labels: ["policy_type", "result"]
             
-          - name: "cronosai_compliance_check_duration"
+          - name: "qbitelai_compliance_check_duration"
             type: "histogram"
             labels: ["check_type", "status"]
             
-          - name: "cronosai_attestation_verification_duration"
+          - name: "qbitelai_attestation_verification_duration"
             type: "histogram"
             labels: ["attestation_type", "result"]
             
@@ -596,19 +596,19 @@ data:
       alerts:
         performance_alerts:
           - name: "HighResponseTime"
-            condition: "cronosai_http_request_duration_seconds{quantile=\"0.95\"} > 2"
+            condition: "qbitelai_http_request_duration_seconds{quantile=\"0.95\"} > 2"
             duration: "5m"
             severity: "warning"
             description: "95th percentile response time is above 2 seconds"
             
           - name: "LowThroughput"
-            condition: "rate(cronosai_http_requests_total[5m]) < 100"
+            condition: "rate(qbitelai_http_requests_total[5m]) < 100"
             duration: "5m"
             severity: "warning"
             description: "Request throughput is below 100 RPS"
             
           - name: "HighErrorRate"
-            condition: "rate(cronosai_http_requests_total{status=~\"5..\"}[5m]) / rate(cronosai_http_requests_total[5m]) > 0.01"
+            condition: "rate(qbitelai_http_requests_total{status=~\"5..\"}[5m]) / rate(qbitelai_http_requests_total[5m]) > 0.01"
             duration: "2m"
             severity: "critical"
             description: "Error rate is above 1%"
@@ -627,13 +627,13 @@ data:
             
         chaos_alerts:
           - name: "ChaosExperimentFailed"
-            condition: "cronosai_chaos_experiment_success == 0"
+            condition: "qbitelai_chaos_experiment_success == 0"
             duration: "0s"
             severity: "warning"
             description: "Chaos experiment failed"
             
           - name: "SafetyViolation"
-            condition: "increase(cronosai_chaos_safety_violations_total[5m]) > 0"
+            condition: "increase(qbitelai_chaos_safety_violations_total[5m]) > 0"
             duration: "0s"
             severity: "critical"
             description: "Safety violation detected during chaos experiment"
@@ -645,23 +645,23 @@ data:
             - title: "Request Rate"
               type: "graph"
               targets:
-                - expr: "rate(cronosai_http_requests_total[5m])"
+                - expr: "rate(qbitelai_http_requests_total[5m])"
                   legend: "{{method}} {{endpoint}}"
                   
             - title: "Response Time"
               type: "graph"
               targets:
-                - expr: "cronosai_http_request_duration_seconds{quantile=\"0.50\"}"
+                - expr: "qbitelai_http_request_duration_seconds{quantile=\"0.50\"}"
                   legend: "P50"
-                - expr: "cronosai_http_request_duration_seconds{quantile=\"0.95\"}"
+                - expr: "qbitelai_http_request_duration_seconds{quantile=\"0.95\"}"
                   legend: "P95"
-                - expr: "cronosai_http_request_duration_seconds{quantile=\"0.99\"}"
+                - expr: "qbitelai_http_request_duration_seconds{quantile=\"0.99\"}"
                   legend: "P99"
                   
             - title: "Error Rate"
               type: "stat"
               targets:
-                - expr: "rate(cronosai_http_requests_total{status=~\"5..\"}[5m]) / rate(cronosai_http_requests_total[5m]) * 100"
+                - expr: "rate(qbitelai_http_requests_total{status=~\"5..\"}[5m]) / rate(qbitelai_http_requests_total[5m]) * 100"
                   legend: "Error Rate %"
                   
             - title: "Resource Usage"
@@ -677,19 +677,19 @@ data:
             - title: "Experiment Status"
               type: "stat"
               targets:
-                - expr: "cronosai_chaos_experiments_total"
+                - expr: "qbitelai_chaos_experiments_total"
                   legend: "{{status}}"
                   
             - title: "Recovery Time"
               type: "histogram"
               targets:
-                - expr: "cronosai_chaos_recovery_time_seconds"
+                - expr: "qbitelai_chaos_recovery_time_seconds"
                   legend: "Recovery Time"
                   
             - title: "System Resilience Score"
               type: "gauge"
               targets:
-                - expr: "cronosai_system_resilience_score"
+                - expr: "qbitelai_system_resilience_score"
                   legend: "{{component}}"
 
   test-execution-schedule.yaml: |

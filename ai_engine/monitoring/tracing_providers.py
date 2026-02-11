@@ -1,5 +1,5 @@
 """
-CRONOS AI - Distributed Tracing Providers
+QBITEL - Distributed Tracing Providers
 Production-ready Jaeger and Zipkin integration for distributed tracing.
 """
 
@@ -26,7 +26,7 @@ class JaegerConfig:
     agent_host: str = "localhost"
     agent_port: int = 6831
     collector_endpoint: Optional[str] = None
-    service_name: str = "cronos-ai"
+    service_name: str = "qbitel"
     sampling_rate: float = 1.0
     max_tag_value_length: int = 1024
     max_packet_size: int = 65000
@@ -37,7 +37,7 @@ class ZipkinConfig:
     """Zipkin configuration."""
 
     endpoint: str = "http://localhost:9411"
-    service_name: str = "cronos-ai"
+    service_name: str = "qbitel"
     sampling_rate: float = 1.0
     max_tag_value_length: int = 1024
 
@@ -61,7 +61,7 @@ class JaegerTracingProvider(TracingProvider):
             collector_endpoint=getattr(
                 config.monitoring, "jaeger_collector_endpoint", None
             ),
-            service_name=getattr(config.monitoring, "service_name", "cronos-ai"),
+            service_name=getattr(config.monitoring, "service_name", "qbitel"),
             sampling_rate=getattr(config, "tracing_sampling_rate", 1.0),
         )
 
@@ -223,7 +223,7 @@ class ZipkinTracingProvider(TracingProvider):
             endpoint=getattr(
                 config.monitoring, "zipkin_endpoint", "http://localhost:9411"
             ),
-            service_name=getattr(config.monitoring, "service_name", "cronos-ai"),
+            service_name=getattr(config.monitoring, "service_name", "qbitel"),
             sampling_rate=getattr(config, "tracing_sampling_rate", 1.0),
         )
 

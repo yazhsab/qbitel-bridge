@@ -1,16 +1,16 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: cronos-security-orchestrator-hpa
-  namespace: cronos-security
+  name: qbitel-security-orchestrator-hpa
+  namespace: qbitel-security
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/name: qbitel-security-orchestrator
     app.kubernetes.io/component: security
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: cronos-security-orchestrator
+    name: qbitel-security-orchestrator
   minReplicas: 2
   maxReplicas: 10
   metrics:
@@ -29,7 +29,7 @@ spec:
   - type: Pods
     pods:
       metric:
-        name: cronos_security_requests_per_second
+        name: qbitel_security_requests_per_second
       target:
         type: AverageValue
         averageValue: "100"
@@ -59,14 +59,14 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: cronos-security-orchestrator-pdb
-  namespace: cronos-security
+  name: qbitel-security-orchestrator-pdb
+  namespace: qbitel-security
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/name: qbitel-security-orchestrator
     app.kubernetes.io/component: security
 spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: cronos-security-orchestrator
+      app.kubernetes.io/name: qbitel-security-orchestrator
       app.kubernetes.io/component: security

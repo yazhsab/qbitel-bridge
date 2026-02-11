@@ -610,7 +610,7 @@ fn create_controlplane_container(controlplane: &ControlPlaneService, is_stateful
     if is_stateful {
         volume_mounts.push(k8s_openapi::api::core::v1::VolumeMount {
             name: "data".to_string(),
-            mount_path: "/var/lib/cronos-ai".to_string(),
+            mount_path: "/var/lib/qbitel-bridge".to_string(),
             read_only: Some(false),
             ..Default::default()
         });

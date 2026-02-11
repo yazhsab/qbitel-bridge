@@ -1,4 +1,4 @@
-name: CRONOS AI - CI/CD Pipeline
+name: QBITEL - CI/CD Pipeline
 
 on:
   push:
@@ -41,17 +41,17 @@ jobs:
 
       - name: Run type checking (mypy)
         run: |
-          mypy ai_engine/ --ignore-missing-imports || true
+          mypy ai_engine/ --ignore-missing-imports
 
       - name: Run security scan (bandit)
         run: |
-          bandit -r ai_engine/ -f json -o bandit-report.json || true
-          bandit -r ai_engine/ -ll || true
+          bandit -r ai_engine/ -f json -o bandit-report.json
+          bandit -r ai_engine/ -ll
 
       - name: Run dependency vulnerability scan
         run: |
           pip install safety
-          safety check --json || true
+          safety check --json
 
       - name: Upload security reports
         uses: actions/upload-artifact@v4
@@ -86,15 +86,25 @@ jobs:
           pip install pytest pytest-cov pytest-asyncio pytest-mock
           pip install -e .
 
-      - name: Run unit tests
+      - name: Run unit tests with coverage enforcement
         run: |
           pytest ai_engine/tests/ \
             --cov=ai_engine \
             --cov-report=xml \
             --cov-report=html \
             --cov-report=term \
+            --cov-fail-under=80 \
             --junitxml=junit.xml \
             -v
+        env:
+          COVERAGE_THRESHOLD: 80
+
+      - name: Check coverage threshold
+        run: |
+          coverage report --fail-under=80 || {
+            echo "::error::Code coverage is below 80%. Please add more tests."
+            exit 1
+          }
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -336,7 +346,7 @@ jobs:
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
     environment:
       name: staging
-      url: https://staging.cronos-ai.example.com
+      url: https://staging.qbitel.example.com
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -352,7 +362,7 @@ jobs:
       - name: Deploy to staging
         run: |
           kubectl apply -f ops/deploy/kubernetes/ -n staging
-          kubectl rollout status deployment/cronos-ai -n staging --timeout=5m
+          kubectl rollout status deployment/qbitel -n staging --timeout=5m
 
       - name: Run smoke tests
         run: |
@@ -372,7 +382,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment:
       name: production
-      url: https://cronos-ai.example.com
+      url: https://qbitel.example.com
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -394,7 +404,7 @@ jobs:
         run: |
           # Blue-Green deployment strategy
           kubectl apply -f ops/deploy/kubernetes/ -n production-green
-          kubectl rollout status deployment/cronos-ai -n production-green --timeout=10m
+          kubectl rollout status deployment/qbitel -n production-green --timeout=10m
 
       - name: Run health checks
         run: |
@@ -404,7 +414,7 @@ jobs:
       - name: Switch traffic to green
         run: |
           # Update service to point to green deployment
-          kubectl patch service cronos-ai -n production -p '{"spec":{"selector":{"version":"green"}}}'
+          kubectl patch service qbitel -n production -p '{"spec":{"selector":{"version":"green"}}}'
 
       - name: Monitor deployment
         run: |
@@ -416,7 +426,7 @@ jobs:
         if: failure()
         run: |
           # Rollback to blue deployment
-          kubectl patch service cronos-ai -n production -p '{"spec":{"selector":{"version":"blue"}}}'
+          kubectl patch service qbitel -n production -p '{"spec":{"selector":{"version":"blue"}}}'
           kubectl delete -f ops/deploy/kubernetes/ -n production-green
 
       - name: Cleanup old deployment

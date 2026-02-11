@@ -1,4 +1,4 @@
-name: CRONOS AI Production CI/CD Pipeline
+name: QBITEL Production CI/CD Pipeline
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: cronos-ai
+  IMAGE_NAME: qbitel
   KUBECONFIG_FILE: ${{ secrets.KUBECONFIG }}
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -287,7 +287,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: test_password
           POSTGRES_USER: test_user
-          POSTGRES_DB: test_cronos_ai
+          POSTGRES_DB: test_qbitel
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -331,7 +331,7 @@ jobs:
       
       - name: Set up test environment
         run: |
-          export DATABASE_URL=postgresql://test_user:test_password@localhost:5432/test_cronos_ai
+          export DATABASE_URL=postgresql://test_user:test_password@localhost:5432/test_qbitel
           export REDIS_URL=redis://localhost:6379/0
           export KAFKA_BOOTSTRAP_SERVERS=localhost:9092
       
@@ -340,7 +340,7 @@ jobs:
           cd tests/integration
           python -m pytest test_*.py -v --timeout=300 --maxfail=3
         env:
-          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_cronos_ai
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_qbitel
           REDIS_URL: redis://localhost:6379/0
           KAFKA_BOOTSTRAP_SERVERS: localhost:9092
       
@@ -389,7 +389,7 @@ jobs:
     timeout-minutes: 20
     environment:
       name: staging
-      url: https://staging.cronos-ai.example.com
+      url: https://staging.qbitel.example.com
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -413,21 +413,21 @@ jobs:
         run: |
           export KUBECONFIG=kubeconfig
           export IMAGE_TAG=${{ github.sha }}
-          envsubst < ops/kubernetes/staging/values.yaml | helm upgrade --install cronos-ai-staging ./ops/helm/cronos-ai -f - --namespace cronos-ai-staging --create-namespace
+          envsubst < ops/kubernetes/staging/values.yaml | helm upgrade --install qbitel-staging ./ops/helm/qbitel -f - --namespace qbitel-staging --create-namespace
       
       - name: Verify deployment
         run: |
           export KUBECONFIG=kubeconfig
-          kubectl rollout status deployment/ai-engine -n cronos-ai-staging --timeout=600s
-          kubectl rollout status deployment/protocol-processor -n cronos-ai-staging --timeout=600s
-          kubectl rollout status deployment/security-analyzer -n cronos-ai-staging --timeout=600s
+          kubectl rollout status deployment/ai-engine -n qbitel-staging --timeout=600s
+          kubectl rollout status deployment/protocol-processor -n qbitel-staging --timeout=600s
+          kubectl rollout status deployment/security-analyzer -n qbitel-staging --timeout=600s
       
       - name: Run smoke tests
         run: |
           cd tests/smoke
           python -m pytest test_staging.py -v
         env:
-          STAGING_URL: https://staging.cronos-ai.example.com
+          STAGING_URL: https://staging.qbitel.example.com
 
   deploy-production:
     name: Deploy to Production
@@ -437,7 +437,7 @@ jobs:
     timeout-minutes: 30
     environment:
       name: production
-      url: https://cronos-ai.example.com
+      url: https://qbitel.example.com
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -460,34 +460,34 @@ jobs:
       - name: Pre-deployment backup
         run: |
           export KUBECONFIG=kubeconfig
-          kubectl create backup cronos-ai-backup-$(date +%Y%m%d-%H%M%S) --namespace cronos-ai
+          kubectl create backup qbitel-backup-$(date +%Y%m%d-%H%M%S) --namespace qbitel
       
       - name: Deploy to production
         run: |
           export KUBECONFIG=kubeconfig
           export IMAGE_TAG=${{ github.ref_name }}
-          envsubst < ops/kubernetes/production/values.yaml | helm upgrade --install cronos-ai ./ops/helm/cronos-ai -f - --namespace cronos-ai --create-namespace --wait --timeout=600s
+          envsubst < ops/kubernetes/production/values.yaml | helm upgrade --install qbitel ./ops/helm/qbitel -f - --namespace qbitel --create-namespace --wait --timeout=600s
       
       - name: Verify production deployment
         run: |
           export KUBECONFIG=kubeconfig
-          kubectl rollout status deployment/ai-engine -n cronos-ai --timeout=900s
-          kubectl rollout status deployment/protocol-processor -n cronos-ai --timeout=900s
-          kubectl rollout status deployment/security-analyzer -n cronos-ai --timeout=900s
-          kubectl rollout status deployment/management-console -n cronos-ai --timeout=300s
+          kubectl rollout status deployment/ai-engine -n qbitel --timeout=900s
+          kubectl rollout status deployment/protocol-processor -n qbitel --timeout=900s
+          kubectl rollout status deployment/security-analyzer -n qbitel --timeout=900s
+          kubectl rollout status deployment/management-console -n qbitel --timeout=300s
       
       - name: Run production health checks
         run: |
           cd tests/health
           python -m pytest test_production.py -v --timeout=120
         env:
-          PRODUCTION_URL: https://cronos-ai.example.com
+          PRODUCTION_URL: https://qbitel.example.com
       
       - name: Notify deployment success
         uses: 8398a7/action-slack@v3
         with:
           status: success
-          text: "🚀 CRONOS AI Production Deployment Successful! Version: ${{ github.ref_name }}"
+          text: "🚀 QBITEL Production Deployment Successful! Version: ${{ github.ref_name }}"
           webhook_url: ${{ env.SLACK_WEBHOOK }}
 
   rollback:
@@ -505,13 +505,13 @@ jobs:
       - name: Rollback deployment
         run: |
           export KUBECONFIG=kubeconfig
-          helm rollback cronos-ai --namespace cronos-ai
+          helm rollback qbitel --namespace qbitel
       
       - name: Notify rollback
         uses: 8398a7/action-slack@v3
         with:
           status: failure
-          text: "⚠️ CRONOS AI Production Deployment Failed - Rollback Initiated"
+          text: "⚠️ QBITEL Production Deployment Failed - Rollback Initiated"
           webhook_url: ${{ env.SLACK_WEBHOOK }}
 
   security-compliance:

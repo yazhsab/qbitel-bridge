@@ -1,0 +1,103 @@
+{{- if .Values.admissionWebhook.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "qbitel-bridge.fullname" . }}-admission-webhook
+  namespace: {{ include "qbitel-bridge.namespace" . }}
+  labels:
+    {{- include "qbitel-bridge.admissionWebhook.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.admissionWebhook.autoscaling.enabled }}
+  replicas: {{ .Values.admissionWebhook.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "qbitel-bridge.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: admission-webhook
+  template:
+    metadata:
+      labels:
+        {{- include "qbitel-bridge.admissionWebhook.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: qbitel-admission-webhook
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: admission-webhook
+          image: {{ include "qbitel-bridge.admissionWebhook.image" . }}
+          imagePullPolicy: {{ .Values.admissionWebhook.image.pullPolicy }}
+          ports:
+            - name: https
+              containerPort: {{ .Values.admissionWebhook.config.port }}
+              protocol: TCP
+          env:
+            - name: WEBHOOK_PORT
+              value: "{{ .Values.admissionWebhook.config.port }}"
+            - name: REQUIRE_IMAGE_SIGNATURE
+              value: "{{ .Values.admissionWebhook.config.requireImageSignature }}"
+            - name: REQUIRE_QUANTUM_SAFE
+              value: "{{ .Values.admissionWebhook.config.requireQuantumSafe }}"
+            - name: MAX_CRITICAL_VULNERABILITIES
+              value: "{{ .Values.admissionWebhook.config.maxCriticalVulnerabilities }}"
+            - name: MAX_HIGH_VULNERABILITIES
+              value: "{{ .Values.admissionWebhook.config.maxHighVulnerabilities }}"
+            - name: DISALLOW_PRIVILEGED
+              value: "{{ .Values.admissionWebhook.config.disallowPrivileged }}"
+            - name: DISALLOW_HOST_NETWORK
+              value: "{{ .Values.admissionWebhook.config.disallowHostNetwork }}"
+            - name: DISALLOW_HOST_PID
+              value: "{{ .Values.admissionWebhook.config.disallowHostPid }}"
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /etc/webhook/tls
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.admissionWebhook.resources | nindent 12 }}
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: {{ .Values.security.tls.certificates.admissionWebhook.secretName }}
+{{- end }}

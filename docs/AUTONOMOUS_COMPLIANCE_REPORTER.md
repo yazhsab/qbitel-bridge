@@ -323,24 +323,24 @@ GET /api/v1/compliance/performance/metrics
 
 ```bash
 # LLM Service Configuration
-export CRONOS_AI_OPENAI_API_KEY="your-openai-key"
-export CRONOS_AI_ANTHROPIC_API_KEY="your-anthropic-key"
+export QBITEL_AI_OPENAI_API_KEY="your-openai-key"
+export QBITEL_AI_ANTHROPIC_API_KEY="your-anthropic-key"
 
 # Database Configuration
-export CRONOS_AI_DB_PASSWORD="your-secure-password"
+export QBITEL_AI_DB_PASSWORD="your-secure-password"
 
 # Redis Configuration
-export CRONOS_AI_REDIS_PASSWORD="your-redis-password"
+export QBITEL_AI_REDIS_PASSWORD="your-redis-password"
 
 # Security Configuration
-export CRONOS_AI_JWT_SECRET="your-jwt-secret"
-export CRONOS_AI_ENCRYPTION_KEY="your-encryption-key"
+export QBITEL_AI_JWT_SECRET="your-jwt-secret"
+export QBITEL_AI_ENCRYPTION_KEY="your-encryption-key"
 
 # Compliance Configuration
-export CRONOS_AI_COMPLIANCE_ENABLED=true
-export CRONOS_AI_COMPLIANCE_ASSESSMENT_INTERVAL_HOURS=24
-export CRONOS_AI_COMPLIANCE_AUDIT_TRAIL_ENABLED=true
-export CRONOS_AI_COMPLIANCE_BLOCKCHAIN_ENABLED=true
+export QBITEL_AI_COMPLIANCE_ENABLED=true
+export QBITEL_AI_COMPLIANCE_ASSESSMENT_INTERVAL_HOURS=24
+export QBITEL_AI_COMPLIANCE_AUDIT_TRAIL_ENABLED=true
+export QBITEL_AI_COMPLIANCE_BLOCKCHAIN_ENABLED=true
 ```
 
 ### Python Configuration
@@ -538,10 +538,10 @@ logging.getLogger("ai_engine.compliance").setLevel(logging.DEBUG)
 ## Support
 
 For issues or questions:
-- GitHub Issues: https://github.com/cronos-ai/issues
-- Documentation: https://docs.cronos-ai.com
-- Email: support@cronos-ai.com
+- GitHub Issues: https://github.com/yazhsab/issues
+- Documentation: https://docs.qbitel.com
+- Email: support@qbitel.com
 
 ## License
 
-Copyright © 2024 CRONOS AI. All rights reserved.
+Copyright © 2024 QBITEL. All rights reserved.

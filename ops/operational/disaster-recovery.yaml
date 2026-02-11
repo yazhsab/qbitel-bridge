@@ -1,13 +1,13 @@
-# QSLB Disaster Recovery and Business Continuity Plan
+# QBITEL Disaster Recovery and Business Continuity Plan
 # Comprehensive disaster recovery procedures and automation
 
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: qslb-disaster-recovery
-  namespace: qslb-system
+  name: qbitel-disaster-recovery
+  namespace: qbitel-system
   labels:
-    app: qslb
+    app: qbitel
     component: operational
     disaster-recovery: plan
 data:
@@ -242,14 +242,14 @@ data:
         secondary:
           type: "cloud_storage"
           provider: "aws_s3"
-          bucket: "qslb-backups-secondary"
+          bucket: "qbitel-backups-secondary"
           region: "us-west-2"
           encryption: "SSE-KMS"
           
         offsite:
           type: "cloud_storage"
           provider: "azure_blob"
-          container: "qslb-backups-offsite"
+          container: "qbitel-backups-offsite"
           region: "eastus"
           encryption: "customer_managed"
           
@@ -278,12 +278,12 @@ data:
         # Configuration backups
         configurations:
           - name: "system_config"
-            path: "/etc/qslb"
+            path: "/etc/qbitel"
             type: "tar_gz"
             encryption: true
             
           - name: "certificates"
-            path: "/etc/ssl/qslb"
+            path: "/etc/ssl/qbitel"
             type: "tar_gz"
             encryption: true
             
@@ -295,12 +295,12 @@ data:
         # Application data
         application_data:
           - name: "device_certificates"
-            path: "/var/lib/qslb/certificates"
+            path: "/var/lib/qbitel/certificates"
             type: "tar_gz"
             encryption: true
             
           - name: "policy_cache"
-            path: "/var/lib/qslb/cache"
+            path: "/var/lib/qbitel/cache"
             type: "tar_gz"
             encryption: true
             
@@ -310,53 +310,53 @@ data:
         database_restore:
           - step: 1
             action: "Stop application services"
-            command: "systemctl stop qslb-*"
+            command: "systemctl stop qbitel-*"
             
           - step: 2
             action: "Create restore point"
-            command: "pg_dump -h localhost -U qslb_user -d qslb_db > /tmp/pre_restore_backup.sql"
+            command: "pg_dump -h localhost -U qbitel_user -d qbitel_db > /tmp/pre_restore_backup.sql"
             
           - step: 3
             action: "Drop existing database"
-            command: "dropdb -h localhost -U postgres qslb_db"
+            command: "dropdb -h localhost -U postgres qbitel_db"
             
           - step: 4
             action: "Create new database"
-            command: "createdb -h localhost -U postgres qslb_db"
+            command: "createdb -h localhost -U postgres qbitel_db"
             
           - step: 5
             action: "Restore from backup"
-            command: "pg_restore -h localhost -U postgres -d qslb_db /backup/qslb_db_backup.sql"
+            command: "pg_restore -h localhost -U postgres -d qbitel_db /backup/qbitel_db_backup.sql"
             
           - step: 6
             action: "Verify data integrity"
-            command: "psql -h localhost -U qslb_user -d qslb_db -c 'SELECT COUNT(*) FROM devices;'"
+            command: "psql -h localhost -U qbitel_user -d qbitel_db -c 'SELECT COUNT(*) FROM devices;'"
             
           - step: 7
             action: "Start application services"
-            command: "systemctl start qslb-*"
+            command: "systemctl start qbitel-*"
             
         # Configuration restore
         configuration_restore:
           - step: 1
             action: "Backup current configuration"
-            command: "tar -czf /tmp/current_config_backup.tar.gz /etc/qslb"
+            command: "tar -czf /tmp/current_config_backup.tar.gz /etc/qbitel"
             
           - step: 2
             action: "Extract backup configuration"
-            command: "tar -xzf /backup/qslb_config_backup.tar.gz -C /"
+            command: "tar -xzf /backup/qbitel_config_backup.tar.gz -C /"
             
           - step: 3
             action: "Set correct permissions"
-            command: "chown -R qslb:qslb /etc/qslb && chmod -R 640 /etc/qslb"
+            command: "chown -R qbitel:qbitel /etc/qbitel && chmod -R 640 /etc/qbitel"
             
           - step: 4
             action: "Validate configuration"
-            command: "qslb-cli config validate"
+            command: "qbitel-cli config validate"
             
           - step: 5
             action: "Restart services"
-            command: "systemctl restart qslb-*"
+            command: "systemctl restart qbitel-*"
             
       # Backup verification
       backup_verification:
@@ -498,17 +498,17 @@ data:
               failure_threshold: 3
               
             restart_policies:
-              - service: "qslb-controlplane"
+              - service: "qbitel-controlplane"
                 restart_delay: "10s"
                 max_restarts: 5
                 backoff_multiplier: 2
                 
-              - service: "qslb-dataplane"
+              - service: "qbitel-dataplane"
                 restart_delay: "5s"
                 max_restarts: 10
                 backoff_multiplier: 1.5
                 
-              - service: "qslb-mgmtapi"
+              - service: "qbitel-mgmtapi"
                 restart_delay: "15s"
                 max_restarts: 3
                 backoff_multiplier: 2
@@ -578,7 +578,7 @@ data:
         # Communication templates
         communication_templates:
           incident_notification:
-            subject: "QSLB Service Incident - {{severity}} - {{title}}"
+            subject: "QBITEL Service Incident - {{severity}} - {{title}}"
             body: |
               We are currently experiencing a {{severity}} incident affecting {{affected_services}}.
               
@@ -593,7 +593,7 @@ data:
               For real-time updates, please visit our status page: {{status_page_url}}
               
           resolution_notification:
-            subject: "QSLB Service Incident Resolved - {{title}}"
+            subject: "QBITEL Service Incident Resolved - {{title}}"
             body: |
               The incident affecting {{affected_services}} has been resolved.
               
@@ -657,8 +657,8 @@ data:
             # Database failover script
             set -e
             
-            PRIMARY_DB="primary-db.qslb.local"
-            SECONDARY_DB="secondary-db.qslb.local"
+            PRIMARY_DB="primary-db.qbitel.local"
+            SECONDARY_DB="secondary-db.qbitel.local"
             
             echo "Starting database failover..."
             
@@ -674,10 +674,10 @@ data:
                     --change-batch file://dns-failover.json
                 
                 # Update application configuration
-                sed -i "s/$PRIMARY_DB/$SECONDARY_DB/g" /etc/qslb/database.conf
+                sed -i "s/$PRIMARY_DB/$SECONDARY_DB/g" /etc/qbitel/database.conf
                 
                 # Restart application services
-                systemctl restart qslb-*
+                systemctl restart qbitel-*
                 
                 echo "Database failover completed"
             else
@@ -720,14 +720,14 @@ data:
             mkdir -p $BACKUP_DIR
             
             # Create database backup
-            pg_dump -h localhost -U qslb_user qslb_db | gzip > $BACKUP_DIR/qslb_db.sql.gz
+            pg_dump -h localhost -U qbitel_user qbitel_db | gzip > $BACKUP_DIR/qbitel_db.sql.gz
             
             # Verify backup
-            if [ -f "$BACKUP_DIR/qslb_db.sql.gz" ]; then
+            if [ -f "$BACKUP_DIR/qbitel_db.sql.gz" ]; then
                 echo "Database backup created successfully"
                 
                 # Upload to cloud storage
-                aws s3 cp $BACKUP_DIR/qslb_db.sql.gz s3://qslb-backups/database/
+                aws s3 cp $BACKUP_DIR/qbitel_db.sql.gz s3://qbitel-backups/database/
                 
                 # Clean up old backups
                 find /backup -type d -mtime +30 -exec rm -rf {} \;
@@ -746,11 +746,11 @@ data:
             mkdir -p $BACKUP_DIR
             
             # Backup configuration files
-            tar -czf $BACKUP_DIR/qslb_config.tar.gz /etc/qslb
-            tar -czf $BACKUP_DIR/ssl_certificates.tar.gz /etc/ssl/qslb
+            tar -czf $BACKUP_DIR/qbitel_config.tar.gz /etc/qbitel
+            tar -czf $BACKUP_DIR/ssl_certificates.tar.gz /etc/ssl/qbitel
             
             # Upload to cloud storage
-            aws s3 sync $BACKUP_DIR s3://qslb-backups/config/
+            aws s3 sync $BACKUP_DIR s3://qbitel-backups/config/
             
             echo "Configuration backup completed"
             
@@ -772,19 +772,19 @@ data:
             echo "Starting database recovery from $BACKUP_FILE"
             
             # Stop application services
-            systemctl stop qslb-*
+            systemctl stop qbitel-*
             
             # Drop existing database
-            sudo -u postgres dropdb qslb_db
+            sudo -u postgres dropdb qbitel_db
             
             # Create new database
-            sudo -u postgres createdb qslb_db
+            sudo -u postgres createdb qbitel_db
             
             # Restore from backup
-            gunzip -c $BACKUP_FILE | sudo -u postgres psql qslb_db
+            gunzip -c $BACKUP_FILE | sudo -u postgres psql qbitel_db
             
             # Start application services
-            systemctl start qslb-*
+            systemctl start qbitel-*
             
             echo "Database recovery completed"
             
@@ -837,7 +837,7 @@ data:
             fi
             
             # Check service status
-            for service in qslb-controlplane qslb-dataplane qslb-mgmtapi; do
+            for service in qbitel-controlplane qbitel-dataplane qbitel-mgmtapi; do
                 if systemctl is-active --quiet $service; then
                     echo "✓ $service is running"
                 else

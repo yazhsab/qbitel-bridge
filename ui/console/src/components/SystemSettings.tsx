@@ -16,7 +16,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ apiClient }) => {
         <CardContent>
           <Typography variant="body1">
             System configuration and settings interface will be implemented here.
-            This will include QSLB system configuration, user management, and administrative settings.
+            This will include QBITEL system configuration, user management, and administrative settings.
           </Typography>
         </CardContent>
       </Card>

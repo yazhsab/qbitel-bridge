@@ -1,0 +1,19 @@
+{
+  "program_id": "ORDI509",
+  "domain": "retail",
+  "program_type": "interface_program",
+  "author": "S. BROWN",
+  "lines_of_code": 196,
+  "complexity_level": "medium",
+  "complexity_score": 0.487,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": false,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.812314",
+  "hash": "2ebdf0b07a56839b6f18bc4c381abfe6"
+}

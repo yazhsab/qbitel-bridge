@@ -1,5 +1,5 @@
 """
-CRONOS AI - LLM Module
+QBITEL - LLM Module
 Unified LLM services and advanced AI capabilities.
 
 Updated for 2024-2025 with:

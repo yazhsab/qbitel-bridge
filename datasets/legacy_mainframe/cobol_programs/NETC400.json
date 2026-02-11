@@ -1,0 +1,19 @@
+{
+  "program_id": "NETC400",
+  "domain": "telecommunications",
+  "program_type": "calculation_engine",
+  "author": "S. BROWN",
+  "lines_of_code": 259,
+  "complexity_level": "complex",
+  "complexity_score": 0.687,
+  "files_used": 4,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.914060",
+  "hash": "1729f92341b3cae74c70c8fe1041f3ee"
+}

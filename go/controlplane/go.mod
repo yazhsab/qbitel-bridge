@@ -1,4 +1,4 @@
-module github.com/qslb/go/controlplane
+module github.com/yazhsab/qbitel-bridge/go/controlplane
 
 go 1.22
 

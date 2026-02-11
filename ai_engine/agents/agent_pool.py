@@ -1,5 +1,5 @@
 """
-CRONOS AI - Dynamic Agent Pool Manager
+QBITEL - Dynamic Agent Pool Manager
 
 Provides dynamic agent lifecycle management with:
 - On-demand agent spawning
@@ -36,17 +36,17 @@ if TYPE_CHECKING:
 
 # Prometheus metrics
 POOL_AGENTS_TOTAL = Gauge(
-    "cronos_pool_agents_total",
+    "qbitel_pool_agents_total",
     "Total agents in pool",
     ["agent_type", "status"],
 )
 POOL_SCALING_EVENTS = Counter(
-    "cronos_pool_scaling_events_total",
+    "qbitel_pool_scaling_events_total",
     "Total scaling events",
     ["agent_type", "direction"],
 )
 POOL_TASK_QUEUE = Gauge(
-    "cronos_pool_task_queue_size",
+    "qbitel_pool_task_queue_size",
     "Size of pool task queue",
     ["agent_type"],
 )

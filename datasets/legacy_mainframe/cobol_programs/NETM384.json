@@ -1,0 +1,19 @@
+{
+  "program_id": "NETM384",
+  "domain": "telecommunications",
+  "program_type": "file_maintenance",
+  "author": "J. SMITH",
+  "lines_of_code": 198,
+  "complexity_level": "medium",
+  "complexity_score": 0.488,
+  "files_used": 2,
+  "verbs_used": 12,
+  "has_indexed_files": true,
+  "has_packed_decimal": true,
+  "has_binary_fields": true,
+  "has_perform_loops": true,
+  "has_evaluate": false,
+  "has_call_statements": false,
+  "generated_date": "2026-01-10T09:18:36.908503",
+  "hash": "90a97c610fb106f4bc75629813f82619"
+}

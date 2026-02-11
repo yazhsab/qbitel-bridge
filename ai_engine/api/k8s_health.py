@@ -1,10 +1,11 @@
 """
-CRONOS AI - Kubernetes Health Check Endpoints
+QBITEL - Kubernetes Health Check Endpoints
 
 Kubernetes-compatible health check endpoints for liveness, readiness, and startup probes.
 """
 
 import asyncio
+import os
 import time
 import logging
 from typing import Dict, Any, Optional
@@ -482,74 +483,154 @@ class KubernetesHealthProbes:
         )
 
     def _register_dependency_checkers(self):
-        """Register dependency health checkers."""
+        """Register dependency health checkers with real connectivity tests."""
 
         async def check_database():
-            """Check database connectivity."""
+            """Check database connectivity via actual SQL query."""
+            start = time.time()
             try:
-                # This would check actual database connection
-                # For now, return mock status
+                from ..core.database_manager import get_database_manager
+                db_manager = get_database_manager()
+                if db_manager is None:
+                    return {
+                        "status": "warn",
+                        "message": "Database manager not initialized",
+                        "critical": True,
+                    }
+                # Execute a real connectivity check
+                async with db_manager.get_session() as session:
+                    from sqlalchemy import text
+                    result = await session.execute(text("SELECT 1"))
+                    result.scalar()
+                elapsed = (time.time() - start) * 1000
                 return {
                     "status": "pass",
                     "message": "Database connection healthy",
                     "critical": True,
-                    "response_time_ms": 5.0,
+                    "response_time_ms": round(elapsed, 2),
                 }
             except Exception as e:
+                elapsed = (time.time() - start) * 1000
+                self.logger.warning(f"Database health check failed: {e}")
                 return {
                     "status": "fail",
-                    "message": f"Database connection failed: {e}",
+                    "message": f"Database connection failed: {type(e).__name__}",
                     "critical": True,
+                    "response_time_ms": round(elapsed, 2),
                 }
 
         async def check_redis():
-            """Check Redis connectivity."""
+            """Check Redis connectivity via actual PING."""
+            start = time.time()
             try:
-                # This would check actual Redis connection
-                return {
-                    "status": "pass",
-                    "message": "Redis connection healthy",
-                    "critical": False,
-                    "response_time_ms": 2.0,
-                }
+                import redis.asyncio as aioredis
+                import os
+                redis_url = os.getenv("REDIS_URL", os.getenv("QBITEL_REDIS_URL", ""))
+                if not redis_url:
+                    return {
+                        "status": "warn",
+                        "message": "Redis URL not configured",
+                        "critical": False,
+                    }
+                client = aioredis.from_url(redis_url, socket_connect_timeout=3)
+                try:
+                    pong = await asyncio.wait_for(client.ping(), timeout=3.0)
+                    elapsed = (time.time() - start) * 1000
+                    return {
+                        "status": "pass" if pong else "fail",
+                        "message": "Redis connection healthy",
+                        "critical": False,
+                        "response_time_ms": round(elapsed, 2),
+                    }
+                finally:
+                    await client.aclose()
             except Exception as e:
+                elapsed = (time.time() - start) * 1000
+                self.logger.warning(f"Redis health check failed: {e}")
                 return {
                     "status": "fail",
-                    "message": f"Redis connection failed: {e}",
+                    "message": f"Redis connection failed: {type(e).__name__}",
                     "critical": False,
+                    "response_time_ms": round(elapsed, 2),
                 }
 
         async def check_model_registry():
-            """Check model registry availability."""
+            """Check model registry availability by verifying models are loaded."""
             try:
-                # This would check actual model registry
+                from ..models.model_manager import get_model_manager
+                manager = get_model_manager()
+                if manager is None:
+                    return {
+                        "status": "warn",
+                        "message": "Model manager not initialized",
+                        "critical": True,
+                        "models_loaded": False,
+                    }
+                models_loaded = hasattr(manager, 'is_ready') and manager.is_ready()
                 return {
-                    "status": "pass",
-                    "message": "Model registry available",
+                    "status": "pass" if models_loaded else "warn",
+                    "message": "Model registry available" if models_loaded else "Models not yet loaded",
                     "critical": True,
-                    "models_loaded": True,
+                    "models_loaded": models_loaded,
+                }
+            except ImportError:
+                return {
+                    "status": "warn",
+                    "message": "Model manager module not available",
+                    "critical": True,
+                    "models_loaded": False,
                 }
             except Exception as e:
+                self.logger.warning(f"Model registry health check failed: {e}")
                 return {
                     "status": "fail",
-                    "message": f"Model registry unavailable: {e}",
+                    "message": f"Model registry unavailable: {type(e).__name__}",
                     "critical": True,
                 }
 
         async def check_external_services():
-            """Check external service dependencies."""
+            """Check external service dependencies (LLM providers, etc.)."""
+            start = time.time()
             try:
-                # This would check external services
+                import httpx
+                llm_endpoint = os.getenv("LLM_ENDPOINT", "")
+                if not llm_endpoint:
+                    return {
+                        "status": "warn",
+                        "message": "LLM endpoint not configured",
+                        "critical": False,
+                    }
+                async with httpx.AsyncClient(timeout=3.0) as client:
+                    resp = await client.get(f"{llm_endpoint.rstrip('/')}/health")
+                    elapsed = (time.time() - start) * 1000
+                    if resp.status_code == 200:
+                        return {
+                            "status": "pass",
+                            "message": "External services reachable",
+                            "critical": False,
+                            "response_time_ms": round(elapsed, 2),
+                        }
+                    else:
+                        return {
+                            "status": "warn",
+                            "message": f"LLM endpoint returned HTTP {resp.status_code}",
+                            "critical": False,
+                            "response_time_ms": round(elapsed, 2),
+                        }
+            except ImportError:
                 return {
-                    "status": "pass",
-                    "message": "External services reachable",
+                    "status": "warn",
+                    "message": "httpx not installed, skipping external service check",
                     "critical": False,
                 }
             except Exception as e:
+                elapsed = (time.time() - start) * 1000
+                self.logger.warning(f"External services health check failed: {e}")
                 return {
-                    "status": "warn",
-                    "message": f"Some external services unreachable: {e}",
+                    "status": "fail",
+                    "message": f"External services unreachable: {type(e).__name__}",
                     "critical": False,
+                    "response_time_ms": round(elapsed, 2),
                 }
 
         # Register all dependency checkers

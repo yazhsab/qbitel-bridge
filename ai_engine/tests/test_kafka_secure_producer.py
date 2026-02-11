@@ -136,7 +136,7 @@ class TestSecureKafkaProducer:
         # Verify headers indicate no encryption
         call_args = mock_kafka_producer.send.call_args
         headers = dict(call_args[1]['headers'])
-        assert b"false" in headers[b"x-cronos-encrypted"]
+        assert b"false" in headers[b"x-qbitel-encrypted"]
 
     def test_send_with_encryption_headers(self, producer, mock_kafka_producer):
         """Test that encryption headers are added"""
@@ -160,10 +160,10 @@ class TestSecureKafkaProducer:
         call_args = mock_kafka_producer.send.call_args
         headers = dict(call_args[1]['headers'])
 
-        assert b"true" in headers.get(b"x-cronos-encrypted", b"")
-        assert b"aes-256-gcm" in headers.get(b"x-cronos-algorithm", b"")
-        assert b"x-cronos-nonce" in headers
-        assert b"x-cronos-tag" in headers
+        assert b"true" in headers.get(b"x-qbitel-encrypted", b"")
+        assert b"aes-256-gcm" in headers.get(b"x-qbitel-algorithm", b"")
+        assert b"x-qbitel-nonce" in headers
+        assert b"x-qbitel-tag" in headers
         assert b"custom" in headers
 
     def test_send_with_key_and_partition(self, producer, mock_kafka_producer):
@@ -328,7 +328,7 @@ class TestSecureKafkaProducer:
         """Test Kafka Connect configuration generation"""
         config = producer.create_connector_config()
 
-        assert config["name"] == "cronos-secure-sink"
+        assert config["name"] == "qbitel-secure-sink"
         assert "config" in config
         assert config["config"]["topics"] == "test-topic"
         assert config["config"]["bootstrap.servers"] == "localhost:9092"

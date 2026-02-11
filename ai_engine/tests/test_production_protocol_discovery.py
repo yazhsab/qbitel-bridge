@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Production Protocol Discovery Tests
+QBITEL Engine - Production Protocol Discovery Tests
 
 Integration tests for production protocol discovery system.
 """

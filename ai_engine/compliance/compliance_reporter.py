@@ -1,5 +1,5 @@
 """
-CRONOS AI - Autonomous Compliance Reporter
+QBITEL - Autonomous Compliance Reporter
 
 LLM-powered compliance automation with continuous monitoring, automated reporting,
 and audit evidence generation. Achieves 95%+ compliance accuracy with <10 minute
@@ -31,7 +31,7 @@ import numpy as np
 
 from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest, get_llm_service
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..monitoring.enterprise_metrics import get_enterprise_metrics
 from .regulatory_kb import (
     RegulatoryKnowledgeBase,
@@ -58,7 +58,7 @@ from .prompt_templates import CompliancePromptManager
 logger = logging.getLogger(__name__)
 
 
-class ComplianceReporterException(CronosAIException):
+class ComplianceReporterException(QbitelAIException):
     """Compliance reporter specific exception."""
 
     pass

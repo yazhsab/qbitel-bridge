@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Configuration Management
+QBITEL Engine - Configuration Management
 
 This module provides comprehensive configuration management for the AI Engine,
 supporting multiple environments and configuration sources.
@@ -43,8 +43,8 @@ class DatabaseConfig:
 
     host: str = "localhost"
     port: int = 5432
-    database: str = "cronos_ai"
-    username: str = "cronos"
+    database: str = "qbitel"
+    username: str = "qbitel"
     password: str = ""  # MUST be set via environment variable or secrets manager
     pool_size: int = 10
     max_overflow: int = 20
@@ -74,7 +74,7 @@ class DatabaseConfig:
         if not self.password:
             # Try environment variables in priority order
             self.password = (
-                os.getenv("CRONOS_AI_DB_PASSWORD")
+                os.getenv("QBITEL_AI_DB_PASSWORD")
                 or os.getenv("DATABASE_PASSWORD")
                 or ""
             )
@@ -83,7 +83,7 @@ class DatabaseConfig:
                 error_msg = (
                     "Database password not configured!\n"
                     "REQUIRED: Set one of the following environment variables:\n"
-                    "  - CRONOS_AI_DB_PASSWORD (recommended)\n"
+                    "  - QBITEL_AI_DB_PASSWORD (recommended)\n"
                     "  - DATABASE_PASSWORD\n\n"
                     "Security Requirements:\n"
                     f"  - Minimum length: {self.MIN_PASSWORD_LENGTH} characters\n"
@@ -106,7 +106,7 @@ class DatabaseConfig:
     def _is_production_mode(self) -> bool:
         """Check if running in production mode."""
         env = os.getenv(
-            "CRONOS_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
+            "QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
         ).lower()
         return env in ("production", "prod")
 
@@ -147,7 +147,7 @@ class DatabaseConfig:
                 "  1. Generate a strong password:\n"
                 '     python -c "import secrets; print(secrets.token_urlsafe(32))"\n'
                 "  2. Set the environment variable:\n"
-                "     export CRONOS_AI_DB_PASSWORD='<generated_password>'\n"
+                "     export QBITEL_AI_DB_PASSWORD='<generated_password>'\n"
                 "  3. Store securely in your secrets manager"
             )
 
@@ -184,7 +184,7 @@ class DatabaseConfig:
         """Get database URL."""
         if not self.password:
             raise ConfigurationException(
-                "Database password not configured. Set CRONOS_AI_DB_PASSWORD environment variable."
+                "Database password not configured. Set QBITEL_AI_DB_PASSWORD environment variable."
             )
         return f"postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
@@ -222,7 +222,7 @@ class RedisConfig:
         """Load password from environment with comprehensive validation."""
         if not self.password:
             # Try environment variables in priority order
-            self.password = os.getenv("CRONOS_AI_REDIS_PASSWORD") or os.getenv(
+            self.password = os.getenv("QBITEL_AI_REDIS_PASSWORD") or os.getenv(
                 "REDIS_PASSWORD"
             )
 
@@ -231,7 +231,7 @@ class RedisConfig:
                 error_msg = (
                     "Redis password not configured in PRODUCTION mode!\n"
                     "REQUIRED: Set one of the following environment variables:\n"
-                    "  - CRONOS_AI_REDIS_PASSWORD (recommended)\n"
+                    "  - QBITEL_AI_REDIS_PASSWORD (recommended)\n"
                     "  - REDIS_PASSWORD\n\n"
                     "Security Requirements:\n"
                     f"  - Minimum length: {self.MIN_PASSWORD_LENGTH} characters\n"
@@ -245,7 +245,7 @@ class RedisConfig:
             elif not self.password:
                 logger.warning(
                     "Redis password not set. This is acceptable for development but "
-                    "REQUIRED for production. Set CRONOS_AI_REDIS_PASSWORD environment variable."
+                    "REQUIRED for production. Set QBITEL_AI_REDIS_PASSWORD environment variable."
                 )
 
         # Validate password if set
@@ -255,7 +255,7 @@ class RedisConfig:
     def _is_production_mode(self) -> bool:
         """Check if running in production mode."""
         env = os.getenv(
-            "CRONOS_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
+            "QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
         ).lower()
         return env in ("production", "prod")
 
@@ -286,7 +286,7 @@ class RedisConfig:
                 "  1. Generate a strong password:\n"
                 '     python -c "import secrets; print(secrets.token_urlsafe(32))"\n'
                 "  2. Set the environment variable:\n"
-                "     export CRONOS_AI_REDIS_PASSWORD='<generated_password>'\n"
+                "     export QBITEL_AI_REDIS_PASSWORD='<generated_password>'\n"
                 "  3. Update Redis configuration to require authentication:\n"
                 "     requirepass <generated_password>"
             )
@@ -327,7 +327,7 @@ class MLflowConfig:
 
     tracking_uri: str = "http://localhost:5000"
     artifact_location: Optional[str] = None
-    experiment_name: str = "cronos-ai-experiments"
+    experiment_name: str = "qbitel-experiments"
     registry_uri: Optional[str] = None
     default_artifact_root: Optional[str] = None
     backend_store_uri: Optional[str] = None
@@ -415,7 +415,7 @@ class MonitoringConfig:
     # Jaeger tracing
     jaeger_agent_host: str = "localhost"
     jaeger_agent_port: int = 6831
-    service_name: str = "cronos-ai-engine"
+    service_name: str = "qbitel-engine"
 
     # Performance monitoring
     collect_model_metrics: bool = True
@@ -440,8 +440,8 @@ class MarketplaceConfig:
     validation_enabled: bool = True
 
     # Storage configuration
-    s3_bucket: str = field(default_factory=lambda: os.getenv("MARKETPLACE_S3_BUCKET", "cronos-marketplace-protocols"))
-    cdn_url: str = field(default_factory=lambda: os.getenv("MARKETPLACE_CDN_URL", "https://cdn.cronos-ai.com"))
+    s3_bucket: str = field(default_factory=lambda: os.getenv("MARKETPLACE_S3_BUCKET", "qbitel-marketplace-protocols"))
+    cdn_url: str = field(default_factory=lambda: os.getenv("MARKETPLACE_CDN_URL", ""))
 
     # Payment processing (Stripe)
     stripe_api_key: Optional[str] = field(default_factory=lambda: os.getenv("STRIPE_API_KEY"))
@@ -518,7 +518,7 @@ class SecurityConfig:
 
         # Load JWT secret
         if not self.jwt_secret:
-            self.jwt_secret = os.getenv("CRONOS_AI_JWT_SECRET") or os.getenv(
+            self.jwt_secret = os.getenv("QBITEL_AI_JWT_SECRET") or os.getenv(
                 "JWT_SECRET"
             )
 
@@ -526,7 +526,7 @@ class SecurityConfig:
                 error_msg = (
                     "JWT secret not configured!\n"
                     "REQUIRED: Configure in secrets manager (Vault/AWS/Azure) or set environment variable:\n"
-                    "  - CRONOS_AI_JWT_SECRET (recommended)\n"
+                    "  - QBITEL_AI_JWT_SECRET (recommended)\n"
                     "  - JWT_SECRET\n\n"
                     "Security Requirements:\n"
                     f"  - Minimum length: {self.MIN_SECRET_LENGTH} characters\n"
@@ -544,7 +544,7 @@ class SecurityConfig:
 
         # Load encryption key
         if not self.encryption_key:
-            self.encryption_key = os.getenv("CRONOS_AI_ENCRYPTION_KEY") or os.getenv(
+            self.encryption_key = os.getenv("QBITEL_AI_ENCRYPTION_KEY") or os.getenv(
                 "ENCRYPTION_KEY"
             )
 
@@ -552,7 +552,7 @@ class SecurityConfig:
                 error_msg = (
                     "Encryption key not configured but encryption is enabled!\n"
                     "REQUIRED: Configure in secrets manager (Vault/AWS/Azure) or set environment variable:\n"
-                    "  - CRONOS_AI_ENCRYPTION_KEY (recommended)\n"
+                    "  - QBITEL_AI_ENCRYPTION_KEY (recommended)\n"
                     "  - ENCRYPTION_KEY\n\n"
                     "Security Requirements:\n"
                     f"  - Minimum length: {self.MIN_SECRET_LENGTH} characters\n"
@@ -570,11 +570,11 @@ class SecurityConfig:
 
         # Load API key
         if not self.api_key:
-            self.api_key = os.getenv("CRONOS_AI_API_KEY") or os.getenv("API_KEY")
+            self.api_key = os.getenv("QBITEL_AI_API_KEY") or os.getenv("API_KEY")
 
             if not self.api_key and self._is_production_mode():
                 logger.warning(
-                    "API key not configured. Set CRONOS_AI_API_KEY environment variable "
+                    "API key not configured. Set QBITEL_AI_API_KEY environment variable "
                     "or configure in secrets manager for API authentication."
                 )
 
@@ -636,7 +636,7 @@ class SecurityConfig:
     def _is_production_mode(self) -> bool:
         """Check if running in production mode."""
         env = os.getenv(
-            "CRONOS_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
+            "QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
         ).lower()
         return env in ("production", "prod")
 
@@ -677,7 +677,7 @@ class SecurityConfig:
                 "  1. Generate a cryptographically secure secret:\n"
                 '     python -c "import secrets; print(secrets.token_urlsafe(48))"\n'
                 "  2. Set the appropriate environment variable:\n"
-                f"     export CRONOS_AI_{secret_name.upper().replace(' ', '_')}='<generated_secret>'\n"
+                f"     export QBITEL_AI_{secret_name.upper().replace(' ', '_')}='<generated_secret>'\n"
                 "  3. Store securely in your secrets manager\n"
                 "  4. Never commit secrets to version control"
             )
@@ -718,9 +718,9 @@ class SecurityConfig:
                 + "\n".join(f"  - {error}" for error in errors)
                 + "\n\nRemediation:\n"
                 "  1. Generate a secure API key:\n"
-                "     python -c \"import secrets; print('cronos_' + secrets.token_urlsafe(32))\"\n"
+                "     python -c \"import secrets; print('qbitel_' + secrets.token_urlsafe(32))\"\n"
                 "  2. Set the environment variable:\n"
-                "     export CRONOS_AI_API_KEY='<generated_key>'\n"
+                "     export QBITEL_AI_API_KEY='<generated_key>'\n"
                 "  3. Implement API key rotation policy\n"
                 "  4. Monitor API key usage for anomalies"
             )
@@ -797,7 +797,7 @@ class Config:
     environment: Environment = Environment.DEVELOPMENT
     debug: bool = False
     log_level: LogLevel = LogLevel.INFO
-    service_name: str = "cronos-ai-engine"
+    service_name: str = "qbitel-engine"
     version: str = "1.0.0"
     device: str = "cpu"
     batch_size: int = 32
@@ -885,7 +885,7 @@ class Config:
             raise ConfigurationException(f"Error loading configuration file: {e}")
 
     @classmethod
-    def load_from_env(cls, prefix: str = "CRONOS_AI_") -> "Config":
+    def load_from_env(cls, prefix: str = "QBITEL_AI_") -> "Config":
         """Load configuration from environment variables."""
         config = cls()
 

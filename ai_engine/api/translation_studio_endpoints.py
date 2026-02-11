@@ -1,5 +1,5 @@
 """
-CRONOS AI - Protocol Translation Studio API Endpoints
+QBITEL - Protocol Translation Studio API Endpoints
 FastAPI endpoints for protocol translation services.
 """
 

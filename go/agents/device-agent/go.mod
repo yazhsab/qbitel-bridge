@@ -1,4 +1,4 @@
-module qslb/device-agent
+module github.com/yazhsab/qbitel-bridge/go/agents/device-agent
 
 go 1.22
 

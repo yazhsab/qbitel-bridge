@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Ensemble Models
+QBITEL Engine - Ensemble Models
 
 This module implements ensemble methods for combining multiple AI models
 to improve prediction accuracy and robustness.

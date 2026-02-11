@@ -1,5 +1,5 @@
 """
-CRONOS AI - Unified LLM Service
+QBITEL - Unified LLM Service
 Enterprise-grade LLM integration with multiple providers and fallback mechanisms.
 
 Updated for 2024-2025 AI/ML trends:
@@ -36,8 +36,23 @@ try:  # Optional dependency - Ollama SDK
 except ImportError:  # pragma: no cover - environment dependent
     ollama = None  # type: ignore[assignment]
 
+# vLLM Provider (for high-performance local/cluster deployments)
+try:
+    from .vllm_provider import (
+        VLLMProvider,
+        VLLMProviderConfig,
+        VLLMRequest,
+        VLLMResponse,
+        VLLMModelConfig,
+        VLLM_MODELS,
+    )
+    vllm_available = True
+except ImportError:
+    vllm_available = False
+    VLLMProvider = None  # type: ignore[assignment]
+
 from ..core.config import Config
-from ..core.exceptions import CronosAIException, LLMException
+from ..core.exceptions import QbitelAIException, LLMException
 from ..monitoring.metrics import MetricsCollector
 
 
@@ -154,20 +169,20 @@ class ToolResult:
 
 # Prometheus metrics for LLM operations
 LLM_REQUEST_COUNTER = Counter(
-    "cronos_llm_requests_total",
+    "qbitel_llm_requests_total",
     "Total LLM requests",
     ["provider", "feature_domain", "status"],
 )
 LLM_REQUEST_DURATION = Histogram(
-    "cronos_llm_request_duration_seconds",
+    "qbitel_llm_request_duration_seconds",
     "LLM request duration",
     ["provider", "feature_domain"],
 )
 LLM_TOKEN_USAGE = Counter(
-    "cronos_llm_tokens_total", "Total tokens used", ["provider", "type"]
+    "qbitel_llm_tokens_total", "Total tokens used", ["provider", "type"]
 )
 LLM_ACTIVE_CONNECTIONS = Gauge(
-    "cronos_llm_active_connections", "Active LLM connections", ["provider"]
+    "qbitel_llm_active_connections", "Active LLM connections", ["provider"]
 )
 
 logger = logging.getLogger(__name__)
@@ -179,6 +194,7 @@ class LLMProvider(Enum):
     OPENAI_GPT4 = "openai_gpt4"
     ANTHROPIC_CLAUDE = "anthropic_claude"
     OLLAMA_LOCAL = "ollama_local"
+    VLLM = "vllm"  # High-performance vLLM provider
 
 
 class ResponseFormat(Enum):
@@ -237,7 +253,7 @@ class LLMResponse:
 class UnifiedLLMService:
     """
     Unified LLM service supporting multiple providers with intelligent fallback.
-    Integrates seamlessly with existing CRONOS AI architecture.
+    Integrates seamlessly with existing QBITEL architecture.
     """
 
     def __init__(self, config: Config):
@@ -257,6 +273,7 @@ class UnifiedLLMService:
         self.openai_client: Optional[Any] = None
         self.anthropic_client: Optional[Any] = None
         self.ollama_client: Optional[Any] = None
+        self.vllm_provider: Optional[Any] = None  # vLLM high-performance provider
         self._initialized: bool = False
 
         # Provider health tracking
@@ -264,6 +281,7 @@ class UnifiedLLMService:
             LLMProvider.OPENAI_GPT4: True,
             LLMProvider.ANTHROPIC_CLAUDE: True,
             LLMProvider.OLLAMA_LOCAL: True,
+            LLMProvider.VLLM: True,
         }
 
         # Background task management
@@ -387,6 +405,32 @@ class UnifiedLLMService:
                 self.logger.info("Ollama SDK not installed; local provider disabled")
                 self.provider_health[LLMProvider.OLLAMA_LOCAL] = False
 
+            # Initialize vLLM (high-performance provider)
+            vllm_enabled = getattr(self.config, "vllm_enabled", False)
+            if vllm_available and VLLMProvider and vllm_enabled:
+                try:
+                    vllm_config = VLLMProviderConfig(
+                        default_endpoint=getattr(
+                            self.config, "vllm_endpoint", "http://localhost:8000"
+                        ),
+                        default_model=getattr(
+                            self.config, "vllm_default_model", "llama-3.2-8b"
+                        ),
+                    )
+                    self.vllm_provider = VLLMProvider(vllm_config)
+                    await self.vllm_provider.initialize()
+                    await self._test_provider(LLMProvider.VLLM)
+                    self.logger.info("vLLM provider initialized successfully")
+                except Exception as e:
+                    self.logger.warning(f"vLLM initialization failed: {e}")
+                    self.provider_health[LLMProvider.VLLM] = False
+            else:
+                if not vllm_available:
+                    self.logger.info("vLLM provider not available")
+                elif not vllm_enabled:
+                    self.logger.info("vLLM provider disabled in configuration")
+                self.provider_health[LLMProvider.VLLM] = False
+
             # Start health monitoring with lifecycle management
             self._health_monitor_task = asyncio.create_task(self._health_monitor())
 
@@ -483,6 +527,10 @@ class UnifiedLLMService:
             if not self.ollama_client:
                 raise LLMException("Ollama client not initialized or configured")
             response = await self._generate_ollama(request, messages, start_time)
+        elif provider == LLMProvider.VLLM:
+            if not self.vllm_provider:
+                raise LLMException("vLLM provider not initialized or configured")
+            response = await self._generate_vllm(request, messages, start_time)
         else:
             raise LLMException(f"Unsupported provider: {provider}")
 
@@ -822,6 +870,77 @@ class UnifiedLLMService:
             validated_model=validated_model,
         )
 
+    async def _generate_vllm(
+        self, request: LLMRequest, messages: List[Dict], start_time: float
+    ) -> LLMResponse:
+        """
+        Execute request using vLLM for high-performance inference.
+
+        vLLM provides:
+        - PagedAttention for 24x better throughput
+        - Continuous batching for efficiency
+        - OpenAI-compatible API
+        """
+        # Determine model - use override or infer from domain
+        model_alias = request.model_override or "default"
+
+        # Map request to domain-specific models
+        domain_model_map = {
+            "translation_studio": "code",  # Use code-optimized model
+            "legacy_whisperer": "default",
+            "protocol_copilot": "powerful",
+            "security_orchestrator": "powerful",
+        }
+
+        if not request.model_override and request.feature_domain in domain_model_map:
+            model_alias = domain_model_map[request.feature_domain]
+
+        # Build vLLM request
+        vllm_request = VLLMRequest(
+            prompt=request.prompt,
+            model=model_alias,
+            max_tokens=request.max_tokens,
+            temperature=request.temperature,
+            messages=[
+                {"role": msg["role"], "content": msg["content"]}
+                for msg in messages
+            ],
+            system_prompt=messages[0]["content"] if messages and messages[0]["role"] == "system" else None,
+        )
+
+        # Execute request
+        vllm_response = await self.vllm_provider.complete(vllm_request)
+
+        # Parse JSON response if JSON mode was used
+        parsed_response = None
+        validated_model = None
+        if request.response_format in (ResponseFormat.JSON, ResponseFormat.JSON_SCHEMA):
+            try:
+                parsed_response = json.loads(vllm_response.content) if vllm_response.content else None
+                if parsed_response and request.response_model:
+                    validated_model = request.response_model.model_validate(parsed_response)
+            except (json.JSONDecodeError, Exception) as e:
+                self.logger.warning(f"Failed to parse vLLM JSON response: {e}")
+
+        return LLMResponse(
+            content=vllm_response.content,
+            provider=LLMProvider.VLLM.value,
+            tokens_used=vllm_response.total_tokens,
+            processing_time=vllm_response.latency_ms / 1000.0,
+            confidence=0.9,  # High confidence for vLLM with large models
+            metadata={
+                "model": vllm_response.model,
+                "request_id": vllm_response.request_id,
+                "tokens_per_second": vllm_response.tokens_per_second,
+                "prompt_tokens": vllm_response.prompt_tokens,
+                "completion_tokens": vllm_response.completion_tokens,
+                "finish_reason": vllm_response.finish_reason,
+                "vllm_provider": True,
+            },
+            parsed_response=parsed_response,
+            validated_model=validated_model,
+        )
+
     def _format_context(self, context: Dict[str, Any]) -> str:
         """Format context for LLM consumption."""
         formatted_parts = []
@@ -1077,6 +1196,11 @@ class UnifiedLLMService:
             self.provider_health[provider] = False
             return False
 
+        if provider == LLMProvider.VLLM and not self.vllm_provider:
+            self.logger.debug("Skipping vLLM health check; provider unavailable")
+            self.provider_health[provider] = False
+            return False
+
         try:
             test_request = LLMRequest(
                 prompt="Hello, please respond with 'OK' if you're working.",
@@ -1177,6 +1301,10 @@ class UnifiedLLMService:
 
         if self.anthropic_client:
             await self.anthropic_client.close()
+
+        if self.vllm_provider:
+            await self.vllm_provider.shutdown()
+            self.vllm_provider = None
 
         # Shutdown executor
         self.executor.shutdown(wait=True)
@@ -1383,7 +1511,7 @@ class UnifiedLLMService:
 
 
 # =============================================================================
-# Pre-built Tool Definitions for CRONOS AI
+# Pre-built Tool Definitions for QBITEL
 # =============================================================================
 
 # Protocol Analysis Tools

@@ -1,0 +1,172 @@
+{
+  "metadata": {
+    "title": "DFSORT/SYNCSORT Control Card Samples",
+    "version": "1.0.0",
+    "description": "Sort utility control cards with modern equivalents",
+    "total_samples": 60
+  },
+  "sort_samples": [
+    {
+      "id": "SORT001",
+      "name": "Simple Sort",
+      "description": "Basic ascending sort on a key field",
+      "jcl": "//SORTJOB  JOB (ACCT),'SORT JOB',CLASS=A\n//STEP1    EXEC PGM=SORT\n//SYSOUT   DD  SYSOUT=*\n//SORTIN   DD  DSN=PROD.INPUT.FILE,DISP=SHR\n//SORTOUT  DD  DSN=PROD.OUTPUT.FILE,\n//             DISP=(NEW,CATLG,DELETE),\n//             SPACE=(CYL,(10,5),RLSE)\n//SYSIN    DD  *\n  SORT FIELDS=(1,10,CH,A)\n/*",
+      "modern_python": "import pandas as pd\n\ndf = pd.read_fwf('input.dat', colspecs=[(0, 10), (10, 50)])\ndf_sorted = df.sort_values(by=df.columns[0], ascending=True)\ndf_sorted.to_csv('output.dat', index=False)",
+      "modern_spark": "val df = spark.read.text(\"input.dat\")\nval sorted = df.orderBy(col(\"value\").substr(1, 10).asc)\nsorted.write.text(\"output.dat\")",
+      "modern_sql": "SELECT * FROM input_table ORDER BY key_field ASC"
+    },
+    {
+      "id": "SORT002",
+      "name": "Multi-Key Sort",
+      "description": "Sort on multiple keys with different orders",
+      "sort_control": "  SORT FIELDS=(1,5,CH,A,6,8,PD,D,14,2,CH,A)",
+      "explanation": {
+        "field1": "Positions 1-5, Character, Ascending",
+        "field2": "Positions 6-13, Packed Decimal, Descending",
+        "field3": "Positions 14-15, Character, Ascending"
+      },
+      "modern_python": "df_sorted = df.sort_values(\n    by=['key1', 'key2', 'key3'],\n    ascending=[True, False, True]\n)",
+      "modern_spark": "val sorted = df.orderBy(\n    col(\"key1\").asc,\n    col(\"key2\").desc,\n    col(\"key3\").asc\n)"
+    },
+    {
+      "id": "SORT003",
+      "name": "Sort with INCLUDE",
+      "description": "Filter records during sort",
+      "sort_control": "  SORT FIELDS=(1,10,CH,A)\n  INCLUDE COND=(15,2,CH,EQ,C'CA',OR,15,2,CH,EQ,C'NY')",
+      "explanation": "Only include records where positions 15-16 equal 'CA' or 'NY'",
+      "modern_python": "df_filtered = df[df['state'].isin(['CA', 'NY'])]\ndf_sorted = df_filtered.sort_values(by='key')",
+      "modern_spark": "val filtered = df.filter(col(\"state\").isin(\"CA\", \"NY\"))\nval sorted = filtered.orderBy(col(\"key\").asc)",
+      "modern_sql": "SELECT * FROM input_table \nWHERE state IN ('CA', 'NY')\nORDER BY key_field"
+    },
+    {
+      "id": "SORT004",
+      "name": "Sort with OMIT",
+      "description": "Exclude records during sort",
+      "sort_control": "  SORT FIELDS=(1,10,CH,A)\n  OMIT COND=(50,1,CH,EQ,C'D')",
+      "explanation": "Exclude records where position 50 equals 'D' (deleted)",
+      "modern_python": "df_filtered = df[df['status'] != 'D']\ndf_sorted = df_filtered.sort_values(by='key')"
+    },
+    {
+      "id": "SORT005",
+      "name": "Sort with SUM",
+      "description": "Summarize duplicate keys",
+      "sort_control": "  SORT FIELDS=(1,10,CH,A)\n  SUM FIELDS=(20,8,PD,30,8,PD)",
+      "explanation": "For duplicate keys, sum positions 20-27 and 30-37 (packed decimal)",
+      "modern_python": "df_grouped = df.groupby('key').agg({\n    'amount1': 'sum',\n    'amount2': 'sum'\n}).reset_index()",
+      "modern_sql": "SELECT key_field, SUM(amount1), SUM(amount2)\nFROM input_table\nGROUP BY key_field\nORDER BY key_field"
+    },
+    {
+      "id": "SORT006",
+      "name": "Copy with Reformatting",
+      "description": "Copy and reformat records",
+      "sort_control": "  OPTION COPY\n  OUTREC FIELDS=(1,10,21,30,51,20)",
+      "explanation": "Copy records, output only positions 1-10, 21-50, and 51-70",
+      "modern_python": "df_out = df[['field1', 'field3', 'field5']]\ndf_out.to_csv('output.dat', index=False)",
+      "modern_spark": "val output = df.select(\"field1\", \"field3\", \"field5\")\noutput.write.text(\"output.dat\")"
+    },
+    {
+      "id": "SORT007",
+      "name": "OUTREC with Literals",
+      "description": "Add literal values to output",
+      "sort_control": "  SORT FIELDS=(1,10,CH,A)\n  OUTREC FIELDS=(1,10,C'|',11,30,C'|',41,8,ZD,EDIT=(TTTTTTTT.TT))",
+      "explanation": "Add pipe delimiters and format numeric field",
+      "modern_python": "df['formatted'] = df['key'].astype(str) + '|' + \\\n                  df['name'] + '|' + \\\n                  df['amount'].apply(lambda x: f'{x:,.2f}')"
+    },
+    {
+      "id": "SORT008",
+      "name": "Merge Files",
+      "description": "Merge pre-sorted files",
+      "jcl": "//MERGE    EXEC PGM=SORT\n//SORTIN01 DD  DSN=PROD.FILE1,DISP=SHR\n//SORTIN02 DD  DSN=PROD.FILE2,DISP=SHR\n//SORTIN03 DD  DSN=PROD.FILE3,DISP=SHR\n//SORTOUT  DD  DSN=PROD.MERGED,DISP=(NEW,CATLG)\n//SYSIN    DD  *\n  MERGE FIELDS=(1,10,CH,A)\n/*",
+      "modern_python": "import heapq\n\ndef merge_sorted_files(files):\n    iters = [iter(open(f)) for f in files]\n    for line in heapq.merge(*iters, key=lambda x: x[:10]):\n        yield line",
+      "modern_spark": "val df1 = spark.read.text(\"file1.dat\")\nval df2 = spark.read.text(\"file2.dat\")\nval merged = df1.union(df2).orderBy(col(\"key\"))"
+    },
+    {
+      "id": "SORT009",
+      "name": "ICETOOL STATS",
+      "description": "Generate statistics report",
+      "sort_control": "//TOOLIN   DD  *\n  STATS FROM(INPUT) ON(20,8,PD) TITLE('AMOUNT STATISTICS')\n/*",
+      "explanation": "Calculate min, max, avg, count, sum for amount field",
+      "modern_python": "stats = {\n    'count': df['amount'].count(),\n    'sum': df['amount'].sum(),\n    'min': df['amount'].min(),\n    'max': df['amount'].max(),\n    'avg': df['amount'].mean()\n}",
+      "modern_sql": "SELECT COUNT(*), SUM(amount), MIN(amount), MAX(amount), AVG(amount)\nFROM input_table"
+    },
+    {
+      "id": "SORT010",
+      "name": "ICETOOL OCCUR",
+      "description": "Count occurrences by key",
+      "sort_control": "//TOOLIN   DD  *\n  OCCUR FROM(INPUT) LIST(OUTPUT) ON(15,2,CH) TITLE('STATE COUNTS')\n/*",
+      "modern_python": "df['state'].value_counts().reset_index()",
+      "modern_sql": "SELECT state, COUNT(*) FROM input_table GROUP BY state ORDER BY COUNT(*) DESC"
+    },
+    {
+      "id": "SORT011",
+      "name": "JOINKEYS",
+      "description": "Join two files on key",
+      "sort_control": "  JOINKEYS FILE=F1,FIELDS=(1,10,A)\n  JOINKEYS FILE=F2,FIELDS=(1,10,A)\n  JOIN UNPAIRED,F1,F2\n  REFORMAT FIELDS=(F1:1,80,F2:11,50)",
+      "explanation": "Join F1 and F2 on 10-byte key, keep unmatched records from both",
+      "modern_python": "merged = pd.merge(df1, df2, on='key', how='outer')",
+      "modern_spark": "val joined = df1.join(df2, Seq(\"key\"), \"full_outer\")",
+      "modern_sql": "SELECT * FROM file1 f1\nFULL OUTER JOIN file2 f2 ON f1.key = f2.key"
+    },
+    {
+      "id": "SORT012",
+      "name": "Conditional Processing",
+      "description": "Complex conditional reformatting",
+      "sort_control": "  SORT FIELDS=(1,10,CH,A)\n  OUTREC IFTHEN=(WHEN=(20,1,CH,EQ,C'A'),\n                 OVERLAY=(50:C'ACTIVE')),\n         IFTHEN=(WHEN=(20,1,CH,EQ,C'I'),\n                 OVERLAY=(50:C'INACTIVE')),\n         IFTHEN=(WHEN=NONE,\n                 OVERLAY=(50:C'UNKNOWN'))",
+      "modern_python": "def map_status(status):\n    mapping = {'A': 'ACTIVE', 'I': 'INACTIVE'}\n    return mapping.get(status, 'UNKNOWN')\n\ndf['status_desc'] = df['status'].apply(map_status)",
+      "modern_sql": "SELECT *,\n  CASE status\n    WHEN 'A' THEN 'ACTIVE'\n    WHEN 'I' THEN 'INACTIVE'\n    ELSE 'UNKNOWN'\n  END AS status_desc\nFROM input_table"
+    },
+    {
+      "id": "SORT013",
+      "name": "Date Conversion",
+      "description": "Convert date formats",
+      "sort_control": "  OPTION COPY\n  OUTREC FIELDS=(1,10,\n                 11,8,Y4T,TOGREG=Y4T(-),\n                 30:20,8)",
+      "explanation": "Convert YYYYMMDD to YYYY-MM-DD format",
+      "modern_python": "from datetime import datetime\ndf['date_formatted'] = pd.to_datetime(df['date'], format='%Y%m%d').dt.strftime('%Y-%m-%d')"
+    },
+    {
+      "id": "SORT014",
+      "name": "Sequence Number Generation",
+      "description": "Add sequence numbers to output",
+      "sort_control": "  SORT FIELDS=(1,10,CH,A)\n  OUTREC FIELDS=(SEQNUM,8,ZD,1,80)",
+      "modern_python": "df['seq_num'] = range(1, len(df) + 1)",
+      "modern_spark": "import org.apache.spark.sql.functions._\nval withSeq = df.withColumn(\"seq_num\", monotonically_increasing_id())"
+    },
+    {
+      "id": "SORT015",
+      "name": "Split Output",
+      "description": "Split output to multiple files",
+      "sort_control": "  SORT FIELDS=(1,10,CH,A)\n  OUTFIL FILES=01,INCLUDE=(15,2,CH,EQ,C'CA'),\n         OUTREC=(1,80)\n  OUTFIL FILES=02,INCLUDE=(15,2,CH,EQ,C'NY'),\n         OUTREC=(1,80)\n  OUTFIL FILES=03,SAVE",
+      "explanation": "Split to CA file, NY file, and all others file",
+      "modern_python": "ca_df = df[df['state'] == 'CA']\nny_df = df[df['state'] == 'NY']\nother_df = df[~df['state'].isin(['CA', 'NY'])]\n\nca_df.to_csv('output_ca.dat')\nny_df.to_csv('output_ny.dat')\nother_df.to_csv('output_other.dat')"
+    }
+  ],
+  "data_types": {
+    "CH": {"name": "Character", "description": "EBCDIC character string"},
+    "ZD": {"name": "Zoned Decimal", "description": "One byte per digit, sign in last byte"},
+    "PD": {"name": "Packed Decimal", "description": "Two digits per byte, sign in last nibble"},
+    "BI": {"name": "Binary", "description": "Unsigned binary integer"},
+    "FI": {"name": "Fixed-point", "description": "Signed binary integer"},
+    "FL": {"name": "Floating-point", "description": "Floating-point number"},
+    "AC": {"name": "ASCII Character", "description": "ASCII character string"},
+    "AQ": {"name": "Alternate Sequence", "description": "User-defined collating sequence"}
+  },
+  "operators": {
+    "EQ": "Equal to",
+    "NE": "Not equal to",
+    "GT": "Greater than",
+    "GE": "Greater than or equal to",
+    "LT": "Less than",
+    "LE": "Less than or equal to",
+    "AND": "Logical AND",
+    "OR": "Logical OR",
+    "NOT": "Logical NOT"
+  },
+  "edit_masks": {
+    "ITT...T": "Insert commas for thousands",
+    "TT.TT": "Insert decimal point",
+    "SI...": "Signed with minus for negative",
+    "MI...": "Minus sign follows negative numbers",
+    "CR...": "CR follows negative numbers",
+    "DB...": "DB follows negative numbers"
+  }
+}

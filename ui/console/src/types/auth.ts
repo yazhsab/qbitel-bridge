@@ -273,13 +273,13 @@ export type AuthEventHandler<T extends AuthEventType> = (data: AuthEventMap[T]) 
 
 // Constants
 export const AUTH_STORAGE_KEYS = {
-  USER: 'qslb_auth_user',
-  ACCESS_TOKEN: 'qslb_auth_access_token',
-  REFRESH_TOKEN: 'qslb_auth_refresh_token',
-  ID_TOKEN: 'qslb_auth_id_token',
-  SESSION_STATE: 'qslb_auth_session_state',
-  LAST_ACTIVITY: 'qslb_auth_last_activity',
-  MFA_VERIFIED: 'qslb_auth_mfa_verified',
+  USER: 'qbitel_auth_user',
+  ACCESS_TOKEN: 'qbitel_auth_access_token',
+  REFRESH_TOKEN: 'qbitel_auth_refresh_token',
+  ID_TOKEN: 'qbitel_auth_id_token',
+  SESSION_STATE: 'qbitel_auth_session_state',
+  LAST_ACTIVITY: 'qbitel_auth_last_activity',
+  MFA_VERIFIED: 'qbitel_auth_mfa_verified',
 } as const;
 
 export const DEFAULT_SCOPES = [
@@ -288,10 +288,10 @@ export const DEFAULT_SCOPES = [
   'email',
   'roles',
   'groups',
-  'qslb:admin',
-  'qslb:device:manage',
-  'qslb:policy:manage',
-  'qslb:audit:read',
+  'qbitel:admin',
+  'qbitel:device:manage',
+  'qbitel:policy:manage',
+  'qbitel:audit:read',
 ] as const;
 
 export const SESSION_TIMEOUT_WARNING = 5 * 60 * 1000; // 5 minutes before timeout

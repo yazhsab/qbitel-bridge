@@ -1,4 +1,4 @@
-# CRONOS AI - Production Deployment Checklist
+# QBITEL - Production Deployment Checklist
 
 **Version**: 2.1.0
 **Last Updated**: 2024-11-22
@@ -16,7 +16,7 @@
 - [ ] All TODO items resolved or tracked
 
 ### 1.2 Configuration
-- [ ] Production configuration file reviewed (`config/cronos_ai.production.yaml`)
+- [ ] Production configuration file reviewed (`config/qbitel.production.yaml`)
 - [ ] All secrets stored in secrets manager (not in code/config)
 - [ ] Environment variables documented
 - [ ] TLS certificates valid and not expiring within 30 days
@@ -81,7 +81,7 @@
 
 ### 4.1 Cluster Setup
 - [ ] Kubernetes 1.24+ cluster ready
-- [ ] Namespaces created (`cronos-ai`, `cronos-service-mesh`)
+- [ ] Namespaces created (`qbitel`, `qbitel-service-mesh`)
 - [ ] Resource quotas applied
 - [ ] Network policies configured
 - [ ] Pod security policies/standards applied
@@ -140,7 +140,7 @@
 # Database (REQUIRED)
 DATABASE_HOST=<postgres-host>
 DATABASE_PORT=5432
-DATABASE_NAME=cronos_ai_prod
+DATABASE_NAME=qbitel_prod
 DATABASE_USER=<db-user>
 DATABASE_PASSWORD=<from-secrets-manager>
 
@@ -155,13 +155,13 @@ ENCRYPTION_KEY=<32-char-aes-key>
 
 # TLS (REQUIRED for production)
 TLS_ENABLED=true
-TLS_CERT_FILE=/etc/cronos-ai/certs/server.crt
-TLS_KEY_FILE=/etc/cronos-ai/certs/server.key
+TLS_CERT_FILE=/etc/qbitel/certs/server.crt
+TLS_KEY_FILE=/etc/qbitel/certs/server.key
 
 # LLM Configuration
-CRONOS_LLM_PROVIDER=ollama  # or anthropic, openai
-CRONOS_LLM_ENDPOINT=http://ollama:11434
-CRONOS_AIRGAPPED_MODE=false
+QBITEL_LLM_PROVIDER=ollama  # or anthropic, openai
+QBITEL_LLM_ENDPOINT=http://ollama:11434
+QBITEL_AIRGAPPED_MODE=false
 
 # Monitoring (RECOMMENDED)
 SENTRY_DSN=<sentry-dsn>
@@ -182,7 +182,7 @@ STRIPE_API_KEY=<stripe-key>
 STRIPE_WEBHOOK_SECRET=<webhook-secret>
 AWS_ACCESS_KEY_ID=<aws-key>
 AWS_SECRET_ACCESS_KEY=<aws-secret>
-S3_BUCKET=cronos-ai-marketplace
+S3_BUCKET=qbitel-marketplace
 ```
 
 ### 6.2 Health Check Endpoints
@@ -224,19 +224,19 @@ curl http://localhost:8000/health
 ### 7.3 Kubernetes Deployment
 ```bash
 # Create namespace
-kubectl create namespace cronos-ai
+kubectl create namespace qbitel
 
 # Apply secrets (from sealed-secrets or external-secrets)
 kubectl apply -f kubernetes/secrets/
 
 # Deploy via Helm
-helm install cronos-ai ./helm/cronos-ai \
-  --namespace cronos-ai \
-  --values ./helm/cronos-ai/values-production.yaml
+helm install qbitel ./helm/qbitel \
+  --namespace qbitel \
+  --values ./helm/qbitel/values-production.yaml
 
 # Verify deployment
-kubectl get pods -n cronos-ai
-kubectl get svc -n cronos-ai
+kubectl get pods -n qbitel
+kubectl get svc -n qbitel
 ```
 
 ### 7.4 Post-Deployment Verification
@@ -249,10 +249,10 @@ curl -k https://<service-url>/api/v1/copilot/ \
   -H "Authorization: Bearer <token>"
 
 # Check logs
-kubectl logs -n cronos-ai -l app=cronos-ai --tail=100
+kubectl logs -n qbitel -l app=qbitel --tail=100
 
 # Check metrics
-curl http://<service-url>:9090/metrics | grep cronos_ai
+curl http://<service-url>:9090/metrics | grep qbitel
 ```
 
 ---
@@ -262,13 +262,13 @@ curl http://<service-url>:9090/metrics | grep cronos_ai
 ### 8.1 Helm Rollback
 ```bash
 # List releases
-helm history cronos-ai -n cronos-ai
+helm history qbitel -n qbitel
 
 # Rollback to previous
-helm rollback cronos-ai -n cronos-ai
+helm rollback qbitel -n qbitel
 
 # Rollback to specific revision
-helm rollback cronos-ai <revision> -n cronos-ai
+helm rollback qbitel <revision> -n qbitel
 ```
 
 ### 8.2 Database Rollback
@@ -371,5 +371,5 @@ database:
 
 ---
 
-**Document maintained by**: CRONOS AI Engineering Team
+**Document maintained by**: QBITEL Engineering Team
 **Review frequency**: Before each production deployment

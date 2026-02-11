@@ -188,7 +188,7 @@ class TestMainModuleActual:
                             mock_logging.assert_called_once()
                             # In development mode, should have file handler
                             mock_file_handler.assert_called_once_with(
-                                "cronos_ai_engine.log"
+                                "qbitel_engine.log"
                             )
 
     def test_main_function_production_logging(self):
@@ -230,7 +230,7 @@ class TestMainModuleActual:
 
                         # Check that version info was logged
                         mock_logger.info.assert_any_call("Version: 1.0.0")
-                        mock_logger.info.assert_any_call("Starting CRONOS AI Engine...")
+                        mock_logger.info.assert_any_call("Starting QBITEL Engine...")
 
     def test_main_function_python_version_logging(self):
         """Test that Python version is logged."""

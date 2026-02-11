@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cronos-security-config
-  namespace: cronos-security
+  name: qbitel-security-config
+  namespace: qbitel-security
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/name: qbitel-security-orchestrator
     app.kubernetes.io/component: security
 data:
   enterprise-security-config.yaml: |
-    # CRONOS AI Engine - Zero-Touch Security Orchestrator Configuration
+    # QBITEL Engine - Zero-Touch Security Orchestrator Configuration
     # Production-Ready Kubernetes Configuration
     
     security:
@@ -85,7 +85,7 @@ data:
         timeout_seconds: 30
         retry_attempts: 3
         custom_config:
-          index: "cronos-security"
+          index: "qbitel-security"
           auto_create_alerts: true
           alert_severity_mapping:
             critical: "critical"
@@ -112,7 +112,7 @@ data:
           endpoint: "https://slack.com/api"
           timeout_seconds: 15
           custom_config:
-            default_channel: "#cronos-security-alerts"
+            default_channel: "#qbitel-security-alerts"
             critical_mentions:
               - "@security-team"
               - "@incident-response"
@@ -225,8 +225,8 @@ data:
       # Prometheus Configuration
       prometheus:
         enabled: true
-        namespace: "cronos_security"
-        job_name: "cronos-security-orchestrator"
+        namespace: "qbitel_security"
+        job_name: "qbitel-security-orchestrator"
         scrape_interval: "15s"
         
       # Health Endpoints
@@ -309,11 +309,11 @@ data:
         zero_touch_integrations:
           enhanced_siem:
             custom_config:
-              index: "cronos-security-staging"
+              index: "qbitel-security-staging"
           communications:
             slack:
               custom_config:
-                default_channel: "#cronos-security-staging"
+                default_channel: "#qbitel-security-staging"
       
       development:
         logging:
@@ -333,17 +333,17 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cronos-security-scripts
-  namespace: cronos-security
+  name: qbitel-security-scripts
+  namespace: qbitel-security
   labels:
-    app.kubernetes.io/name: cronos-security-orchestrator
+    app.kubernetes.io/name: qbitel-security-orchestrator
     app.kubernetes.io/component: security
 data:
   entrypoint.sh: |
     #!/bin/bash
     set -e
     
-    echo "Starting CRONOS AI Security Orchestrator..."
+    echo "Starting QBITEL Security Orchestrator..."
     echo "Pod: ${POD_NAME}"
     echo "Namespace: ${POD_NAMESPACE}"
     echo "IP: ${POD_IP}"
@@ -384,7 +384,7 @@ data:
   healthcheck.py: |
     #!/usr/bin/env python3
     """
-    Health check script for CRONOS AI Security Orchestrator
+    Health check script for QBITEL Security Orchestrator
     """
     import sys
     import requests

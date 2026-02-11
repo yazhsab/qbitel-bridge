@@ -1,5 +1,5 @@
 """
-CRONOS AI Engine - Security Orchestrator Service
+QBITEL Engine - Security Orchestrator Service
 
 Main service orchestrating zero-touch security operations with enterprise-grade reliability.
 """
@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 from contextlib import asynccontextmanager
 
 from ..core.config import Config
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 from ..monitoring.metrics import MetricsCollector
 from .models import (
     SecurityEvent,
@@ -55,39 +55,39 @@ def _get_metric(metric_cls, name: str, *args, **kwargs):
 # Prometheus metrics
 SECURITY_EVENTS_COUNTER = _get_metric(
     Counter,
-    "cronos_security_events_total",
+    "qbitel_security_events_total",
     "Total security events processed",
     ["event_type", "severity"],
 )
 RESPONSE_TIME_HISTOGRAM = _get_metric(
     Histogram,
-    "cronos_security_response_time_seconds",
+    "qbitel_security_response_time_seconds",
     "Security response time",
     ["response_type"],
 )
 ACTIVE_INCIDENTS_GAUGE = _get_metric(
-    Gauge, "cronos_security_active_incidents", "Number of active security incidents"
+    Gauge, "qbitel_security_active_incidents", "Number of active security incidents"
 )
 AUTONOMOUS_DECISIONS_COUNTER = _get_metric(
     Counter,
-    "cronos_security_autonomous_decisions_total",
+    "qbitel_security_autonomous_decisions_total",
     "Autonomous decisions made",
     ["decision_outcome"],
 )
 HUMAN_ESCALATIONS_COUNTER = _get_metric(
     Counter,
-    "cronos_security_human_escalations_total",
+    "qbitel_security_human_escalations_total",
     "Human escalations",
     ["escalation_reason"],
 )
 SYSTEM_QUARANTINES_GAUGE = _get_metric(
     Gauge,
-    "cronos_security_active_quarantines",
+    "qbitel_security_active_quarantines",
     "Number of systems currently quarantined",
 )
 MTTR_SUMMARY = _get_metric(
     Summary,
-    "cronos_security_mean_time_to_response_seconds",
+    "qbitel_security_mean_time_to_response_seconds",
     "Mean time to response for security incidents",
 )
 

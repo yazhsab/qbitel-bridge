@@ -1,5 +1,5 @@
 """
-CRONOS AI - Legacy System Whisperer API Endpoints
+QBITEL Bridge - Legacy System Whisperer API Endpoints
 FastAPI endpoints for legacy protocol analysis and modernization.
 """
 
@@ -17,7 +17,7 @@ from .legacy_whisperer import (
     AdapterLanguage,
     create_legacy_whisperer,
 )
-from ..core.exceptions import CronosAIException
+from ..core.exceptions import QbitelAIException
 
 logger = logging.getLogger(__name__)
 
@@ -185,7 +185,7 @@ async def reverse_engineer_protocol(
             spec_id=spec.spec_id,
         )
 
-    except CronosAIException as e:
+    except QbitelAIException as e:
         logger.error(f"Reverse engineering failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -261,7 +261,7 @@ async def generate_adapter_code(
 
     except HTTPException:
         raise
-    except CronosAIException as e:
+    except QbitelAIException as e:
         logger.error(f"Adapter generation failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -313,7 +313,7 @@ async def explain_legacy_behavior(
             confidence=explanation.confidence,
         )
 
-    except CronosAIException as e:
+    except QbitelAIException as e:
         logger.error(f"Behavior explanation failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

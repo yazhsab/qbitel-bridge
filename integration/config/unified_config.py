@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRONOS AI - Unified Configuration Management System
+QBITEL - Unified Configuration Management System
 Production-ready configuration management for all system components.
 """
 
@@ -71,7 +71,7 @@ class KafkaConfig:
     sasl_password: str = ""
     ssl_ca_location: str = ""
     auto_offset_reset: str = "latest"
-    group_id: str = "cronos-ai"
+    group_id: str = "qbitel"
 
 
 @dataclass
@@ -118,8 +118,8 @@ class MonitoringConfig:
 
 
 @dataclass
-class CronosAIConfig:
-    """Main CRONOS AI configuration"""
+class QbitelAIConfig:
+    """Main QBITEL configuration"""
 
     environment: str
     debug: bool = False
@@ -136,7 +136,7 @@ class CronosAIConfig:
 
 class ConfigurationManager:
     """
-    Unified configuration management system for CRONOS AI.
+    Unified configuration management system for QBITEL.
     Supports multiple backends and real-time configuration updates.
     """
 
@@ -169,13 +169,13 @@ class ConfigurationManager:
 
     def _get_default_config_path(self) -> str:
         """Get default configuration path based on environment"""
-        env = os.getenv("CRONOS_ENV", "development")
+        env = os.getenv("QBITEL_ENV", "development")
         base_path = Path(__file__).parent.parent.parent / "config"
 
         if env == "production":
-            return str(base_path / "cronos_ai.production.yaml")
+            return str(base_path / "qbitel.production.yaml")
         else:
-            return str(base_path / "cronos_ai.yaml")
+            return str(base_path / "qbitel.yaml")
 
     def _init_backend(self):
         """Initialize configuration backend"""
@@ -198,7 +198,7 @@ class ConfigurationManager:
             self.backend = ConfigBackend.LOCAL_FILE
 
     @lru_cache(maxsize=1)
-    def load_config(self, force_reload: bool = False) -> CronosAIConfig:
+    def load_config(self, force_reload: bool = False) -> QbitelAIConfig:
         """Load configuration from backend"""
         cache_key = "main_config"
 
@@ -250,13 +250,13 @@ class ConfigurationManager:
     def _load_from_consul(self) -> Dict[str, Any]:
         """Load configuration from Consul"""
         try:
-            index, data = self._consul_client.kv.get("cronos-ai/config", recurse=True)
+            index, data = self._consul_client.kv.get("qbitel/config", recurse=True)
             if not data:
                 return {}
 
             config = {}
             for item in data:
-                key = item["Key"].replace("cronos-ai/config/", "")
+                key = item["Key"].replace("qbitel/config/", "")
                 try:
                     config[key] = json.loads(item["Value"].decode("utf-8"))
                 except:
@@ -271,8 +271,8 @@ class ConfigurationManager:
         """Load configuration from etcd"""
         try:
             config = {}
-            for value, metadata in self._etcd_client.get_prefix("/cronos-ai/config/"):
-                key = metadata.key.decode("utf-8").replace("/cronos-ai/config/", "")
+            for value, metadata in self._etcd_client.get_prefix("/qbitel/config/"):
+                key = metadata.key.decode("utf-8").replace("/qbitel/config/", "")
                 try:
                     config[key] = json.loads(value.decode("utf-8"))
                 except:
@@ -283,7 +283,7 @@ class ConfigurationManager:
             logger.error(f"Error loading from etcd: {e}")
             return {}
 
-    def _parse_config(self, config_data: Dict[str, Any]) -> CronosAIConfig:
+    def _parse_config(self, config_data: Dict[str, Any]) -> QbitelAIConfig:
         """Parse configuration data into structured format"""
         # Apply environment variable overrides
         config_data = self._apply_env_overrides(config_data)
@@ -320,7 +320,7 @@ class ConfigurationManager:
             monitoring_config = MonitoringConfig(**mon_data)
 
         # Create main config
-        main_config = CronosAIConfig(
+        main_config = QbitelAIConfig(
             environment=config_data.get("environment", "development"),
             debug=config_data.get("debug", False),
             api_host=config_data.get("api_host", "0.0.0.0"),
@@ -397,9 +397,9 @@ class ConfigurationManager:
             return
 
         config_key = (
-            f"cronos-ai/config/{service}/{key}"
+            f"qbitel/config/{service}/{key}"
             if service
-            else f"cronos-ai/config/{key}"
+            else f"qbitel/config/{key}"
         )
 
         try:
@@ -435,7 +435,7 @@ class ConfigurationManager:
             while True:
                 try:
                     index, data = self._consul_client.kv.get(
-                        "cronos-ai/config", recurse=True, index=index, wait="10s"
+                        "qbitel/config", recurse=True, index=index, wait="10s"
                     )
                     if data:
                         # Clear cache and notify callback
@@ -455,7 +455,7 @@ class ConfigurationManager:
         def watch_loop():
             try:
                 events_iterator, cancel = self._etcd_client.watch_prefix(
-                    "/cronos-ai/config/"
+                    "/qbitel/config/"
                 )
                 for event in events_iterator:
                     # Clear cache and notify callback
@@ -531,7 +531,7 @@ def get_config_manager(**kwargs) -> ConfigurationManager:
     return _config_manager
 
 
-def get_config() -> CronosAIConfig:
+def get_config() -> QbitelAIConfig:
     """Get current configuration"""
     return get_config_manager().load_config()
 

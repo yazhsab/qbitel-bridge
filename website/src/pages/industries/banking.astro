@@ -1,0 +1,245 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+---
+
+<PageLayout
+  title="Banking & Financial Services | QBITEL Bridge"
+  description="Quantum-safe protection for financial infrastructure. Protect mainframe transaction systems, discover undocumented payment protocols, and ensure PCI-DSS/BASEL-III compliance."
+>
+  <PageHero
+    title="Banking & Financial Services"
+    description="Quantum-safe protection for financial infrastructure. Discover undocumented payment protocols and secure mainframe transaction systems without code changes."
+    badge="Financial Services"
+    gradient="from-blue-500 to-indigo-500"
+  />
+
+  <!-- Challenge Section -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          The <span class="gradient-text">Challenge</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Financial institutions run critical infrastructure on systems built decades ago, facing converging threats from quantum computing, regulatory pressure, and modernization deadlock.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="card p-6">
+          <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Quantum Risk</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            "Harvest now, decrypt later" attacks already target SWIFT messages, wire transfers, and stored financial data. Every transaction recorded today is at risk.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Regulatory Pressure</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            PCI-DSS 4.0, DORA, and Basel III/IV demand continuous compliance and crypto agility readiness. Annual audits are no longer sufficient.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Modernization Deadlock</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Replacing core banking systems takes 5-10 years with catastrophic failure risk. Legacy mainframes process trillions daily but cannot be easily secured.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Supported Protocols -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Supported <span class="gradient-text">Protocols</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          AI-powered discovery and protection for every financial communication protocol, from legacy mainframe formats to modern payment standards.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-1">Payments</h3>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">ISO 8583</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">ISO 20022</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">ACH/NACHA</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">Fedwire</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">FedNow</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">SEPA</span>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-1">Messaging</h3>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">SWIFT MT/MX</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">MT103</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">MT202</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">MT940</span>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-1">Trading</h3>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">FIX 4.2/4.4/5.0</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">FpML</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">EMV</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">3D Secure</span>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <h3 class="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-1">Legacy</h3>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">COBOL Copybooks</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">CICS/BMS</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">DB2/IMS</span>
+            <span class="text-xs px-3 py-1 rounded-full bg-surface-700 text-gray-300 font-mono">MQ Series</span>
+          </div>
+        </div>
+
+        <div class="card p-5 md:col-span-2 lg:col-span-2">
+          <h3 class="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-1">AI Discovery</h3>
+          <p class="text-sm text-gray-400 mt-3">
+            Undocumented and proprietary protocols are discovered automatically from network traffic in 2-4 hours, compared to 6-12 months of manual reverse engineering.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QBITEL Solutions -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          QBITEL <span class="gradient-text">Solutions</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          End-to-end quantum-safe protection for the financial backbone, from protocol discovery to autonomous threat response.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 bg-opacity-10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">AI Protocol Discovery</h3>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Learns undocumented financial protocols directly from network traffic. Discovers ISO 8583 message flows, SWIFT formats, and legacy COBOL copybook structures without documentation.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 bg-opacity-10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">Post-Quantum Cryptography</h3>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            NIST Level 5 encryption wraps every transaction. Kyber-1024 key encapsulation and Dilithium-5 signatures with HSM integration. 10,000+ TPS at under 50ms latency.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 bg-opacity-10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">Zero-Touch Security</h3>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Autonomous threat response handles 78% of security decisions. Brute-force attacks blocked in under 1 second, anomalous SWIFT messages flagged in under 5 seconds, certificates auto-renewed.
+          </p>
+        </div>
+
+        <div class="card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 bg-opacity-10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-white">Cloud Migration Security</h3>
+          </div>
+          <p class="text-sm text-gray-400 leading-relaxed">
+            Quantum-safe encryption for the mainframe-to-cloud journey. IBM z/OS to AWS/Azure/GCP migration, SWIFT MT to ISO 20022 translation, and active-active disaster recovery.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compliance -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          <span class="gradient-text">Compliance</span> Automation
+        </h2>
+        <p class="section-subheading mx-auto">
+          Continuous compliance evidence generation for financial regulatory frameworks. Shift from annual audits to always-on assurance.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card p-5 text-center">
+          <span class="text-2xl font-bold text-blue-400">PCI-DSS 4.0</span>
+          <p class="text-xs text-gray-400 mt-2">Payment card industry data security standard with crypto agility requirements</p>
+        </div>
+        <div class="card p-5 text-center">
+          <span class="text-2xl font-bold text-blue-400">BASEL III/IV</span>
+          <p class="text-xs text-gray-400 mt-2">Operational risk and resilience frameworks for banking institutions</p>
+        </div>
+        <div class="card p-5 text-center">
+          <span class="text-2xl font-bold text-blue-400">DORA</span>
+          <p class="text-xs text-gray-400 mt-2">EU Digital Operational Resilience Act for financial entities</p>
+        </div>
+        <div class="card p-5 text-center">
+          <span class="text-2xl font-bold text-blue-400">SOX</span>
+          <p class="text-xs text-gray-400 mt-2">Sarbanes-Oxley compliance with full audit trail generation</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <CTABanner
+    title="Secure Your Financial Infrastructure"
+    description="Deploy quantum-safe protection for mainframe transaction systems in hours, not months. No code changes required."
+  />
+</PageLayout>
