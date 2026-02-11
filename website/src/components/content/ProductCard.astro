@@ -1,4 +1,6 @@
 ---
+import { url } from '@/utils/url';
+
 interface Props {
   title: string;
   tagline: string;
@@ -12,7 +14,7 @@ interface Props {
 const { title, tagline, description, href, color, features, metrics } = Astro.props;
 ---
 
-<a href={href} class="card p-6 group block">
+<a href={url(href)} class="card p-6 group block">
   <div class={`inline-flex px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${color} text-white mb-3`}>
     {tagline}
   </div>

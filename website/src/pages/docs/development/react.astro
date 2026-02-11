@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="React/TypeScript Development | QBITEL Bridge Docs" description="React and TypeScript development guide for the QBITEL Bridge UI Console: Vite, ESLint, Vitest, and component development.">
@@ -122,8 +123,8 @@ npx tsc --noEmit</code></pre>
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/architecture/ui-console" class="text-quantum-400 hover:underline">UI Console Architecture</a> -- understand the component architecture</li>
-    <li><a href="/docs/api/authentication" class="text-quantum-400 hover:underline">Authentication</a> -- configure OIDC and SSO</li>
-    <li><a href="/docs/development/testing" class="text-quantum-400 hover:underline">Testing Guide</a> -- testing strategies and tools</li>
+    <li><a href={url('/docs/architecture/ui-console')} class="text-quantum-400 hover:underline">UI Console Architecture</a> -- understand the component architecture</li>
+    <li><a href={url('/docs/api/authentication')} class="text-quantum-400 hover:underline">Authentication</a> -- configure OIDC and SSO</li>
+    <li><a href={url('/docs/development/testing')} class="text-quantum-400 hover:underline">Testing Guide</a> -- testing strategies and tools</li>
   </ul>
 </DocsLayout>

@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Python Development | QBITEL Bridge Docs" description="Python development guide for the QBITEL Bridge AI Engine: virtual environments, pytest, black, ruff, and code standards.">
@@ -133,8 +134,8 @@ bandit -r ai_engine/ -c .bandit</code></pre>
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/development/testing" class="text-quantum-400 hover:underline">Testing Guide</a> -- comprehensive testing strategy</li>
-    <li><a href="/docs/architecture/ai-engine" class="text-quantum-400 hover:underline">AI Engine Architecture</a> -- understand the codebase</li>
-    <li><a href="/docs/api/rest-api" class="text-quantum-400 hover:underline">REST API Reference</a> -- API endpoint documentation</li>
+    <li><a href={url('/docs/development/testing')} class="text-quantum-400 hover:underline">Testing Guide</a> -- comprehensive testing strategy</li>
+    <li><a href={url('/docs/architecture/ai-engine')} class="text-quantum-400 hover:underline">AI Engine Architecture</a> -- understand the codebase</li>
+    <li><a href={url('/docs/api/rest-api')} class="text-quantum-400 hover:underline">REST API Reference</a> -- API endpoint documentation</li>
   </ul>
 </DocsLayout>

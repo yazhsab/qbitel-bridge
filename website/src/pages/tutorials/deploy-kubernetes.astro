@@ -2,6 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PageHero from '@/components/hero/PageHero.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
+import { url } from '@/utils/url';
 ---
 
 <PageLayout
@@ -231,18 +232,18 @@ kubectl port-forward -n qbitel-system svc/qbitel-grafana 3001:3000 &
         </div>
         <div class="card p-4 border-l-4 border-l-quantum-500">
           <p class="text-sm text-gray-300">
-            <span class="font-semibold text-quantum-400">What's next?</span> With QBITEL Bridge running on Kubernetes, you can scale the AI engine horizontally, enable auto-scaling with HPA, and integrate with your service mesh. Check the <a href="/docs/deployment" class="text-quantum-400 hover:underline">deployment docs</a> for advanced configuration.
+            <span class="font-semibold text-quantum-400">What's next?</span> With QBITEL Bridge running on Kubernetes, you can scale the AI engine horizontally, enable auto-scaling with HPA, and integrate with your service mesh. Check the <a href={url('/docs/deployment')} class="text-quantum-400 hover:underline">deployment docs</a> for advanced configuration.
           </p>
         </div>
       </div>
 
       <!-- Navigation -->
       <div class="flex items-center justify-between pt-8 border-t border-surface-600/50">
-        <a href="/tutorials/build-protocol-adapter" class="btn-ghost text-sm">
+        <a href={url('/tutorials/build-protocol-adapter')} class="btn-ghost text-sm">
           <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
           Previous: Build a Protocol Adapter
         </a>
-        <a href="/tutorials/compliance-reporting" class="btn-secondary text-sm">
+        <a href={url('/tutorials/compliance-reporting')} class="btn-secondary text-sm">
           Next: Compliance Reporting
           <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
         </a>

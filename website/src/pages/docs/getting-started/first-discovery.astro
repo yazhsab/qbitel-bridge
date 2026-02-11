@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="First Discovery | QBITEL Bridge Docs" description="Tutorial: make your first protocol discovery request with QBITEL Bridge.">
@@ -11,7 +12,7 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
 
   <h2 id="prerequisites" class="text-2xl font-bold text-white mt-12 mb-4">Prerequisites</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
-    <li>QBITEL Bridge running locally (see <a href="/docs/getting-started/quickstart" class="text-quantum-400 hover:underline">Quick Start</a>)</li>
+    <li>QBITEL Bridge running locally (see <a href={url('/docs/getting-started/quickstart')} class="text-quantum-400 hover:underline">Quick Start</a>)</li>
     <li>API accessible at <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">http://localhost:8000</code></li>
     <li><code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">curl</code> or any HTTP client installed</li>
   </ul>
@@ -120,8 +121,8 @@ echo -n "GET /api/users HTTP/1.1\r\nHost: api.example.com\r\n\r\n" | base64
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/api/rest-api" class="text-quantum-400 hover:underline">REST API Reference</a> -- explore all available endpoints</li>
-    <li><a href="/docs/architecture/ai-engine" class="text-quantum-400 hover:underline">AI Engine Architecture</a> -- learn how the discovery pipeline is built</li>
-    <li><a href="/docs/security/pqc-algorithms" class="text-quantum-400 hover:underline">PQC Algorithms</a> -- understand quantum-safe encryption of discovered protocols</li>
+    <li><a href={url('/docs/api/rest-api')} class="text-quantum-400 hover:underline">REST API Reference</a> -- explore all available endpoints</li>
+    <li><a href={url('/docs/architecture/ai-engine')} class="text-quantum-400 hover:underline">AI Engine Architecture</a> -- learn how the discovery pipeline is built</li>
+    <li><a href={url('/docs/security/pqc-algorithms')} class="text-quantum-400 hover:underline">PQC Algorithms</a> -- understand quantum-safe encryption of discovered protocols</li>
   </ul>
 </DocsLayout>

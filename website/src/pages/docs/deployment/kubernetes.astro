@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Kubernetes Deployment | QBITEL Bridge Docs" description="Manual Kubernetes deployment guide for QBITEL Bridge with fine-grained control over all components.">
@@ -130,8 +131,8 @@ kubectl exec -n qbitel-service-mesh deployment/qbitel-engine -- \
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/deployment/helm" class="text-quantum-400 hover:underline">Helm Charts</a> -- simplified deployment with Helm</li>
-    <li><a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> -- security hardening and scaling</li>
-    <li><a href="/docs/operations/monitoring" class="text-quantum-400 hover:underline">Monitoring</a> -- configure alerts and dashboards</li>
+    <li><a href={url('/docs/deployment/helm')} class="text-quantum-400 hover:underline">Helm Charts</a> -- simplified deployment with Helm</li>
+    <li><a href={url('/docs/deployment/production')} class="text-quantum-400 hover:underline">Production Checklist</a> -- security hardening and scaling</li>
+    <li><a href={url('/docs/operations/monitoring')} class="text-quantum-400 hover:underline">Monitoring</a> -- configure alerts and dashboards</li>
   </ul>
 </DocsLayout>

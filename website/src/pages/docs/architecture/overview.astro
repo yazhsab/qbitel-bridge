@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="System Overview | QBITEL Bridge Docs" description="High-level architecture overview of the QBITEL Bridge distributed, cloud-native security platform.">
@@ -120,9 +121,9 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/architecture/ai-engine" class="text-quantum-400 hover:underline">AI Engine</a> -- deep dive into the Python AI/ML layer</li>
-    <li><a href="/docs/architecture/data-plane" class="text-quantum-400 hover:underline">Rust Data Plane</a> -- wire-speed processing and PQC-TLS</li>
-    <li><a href="/docs/architecture/control-plane" class="text-quantum-400 hover:underline">Go Control Plane</a> -- policy enforcement and service orchestration</li>
-    <li><a href="/docs/architecture/ui-console" class="text-quantum-400 hover:underline">UI Console</a> -- React admin dashboard</li>
+    <li><a href={url('/docs/architecture/ai-engine')} class="text-quantum-400 hover:underline">AI Engine</a> -- deep dive into the Python AI/ML layer</li>
+    <li><a href={url('/docs/architecture/data-plane')} class="text-quantum-400 hover:underline">Rust Data Plane</a> -- wire-speed processing and PQC-TLS</li>
+    <li><a href={url('/docs/architecture/control-plane')} class="text-quantum-400 hover:underline">Go Control Plane</a> -- policy enforcement and service orchestration</li>
+    <li><a href={url('/docs/architecture/ui-console')} class="text-quantum-400 hover:underline">UI Console</a> -- React admin dashboard</li>
   </ul>
 </DocsLayout>

@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Testing Guide | QBITEL Bridge Docs" description="Comprehensive testing guide for QBITEL Bridge: unit tests, integration tests, end-to-end tests, and performance benchmarks.">
@@ -144,8 +145,8 @@ kubectl apply -f tests/chaos/chaos-experiments.yaml</code></pre>
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> -- verify performance targets</li>
-    <li><a href="/docs/operations/monitoring" class="text-quantum-400 hover:underline">Monitoring</a> -- set up test result dashboards</li>
-    <li><a href="/docs/security/compliance-frameworks" class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- compliance testing requirements</li>
+    <li><a href={url('/docs/deployment/production')} class="text-quantum-400 hover:underline">Production Checklist</a> -- verify performance targets</li>
+    <li><a href={url('/docs/operations/monitoring')} class="text-quantum-400 hover:underline">Monitoring</a> -- set up test result dashboards</li>
+    <li><a href={url('/docs/security/compliance-frameworks')} class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- compliance testing requirements</li>
   </ul>
 </DocsLayout>

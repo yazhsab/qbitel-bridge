@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Quick Start | QBITEL Bridge Docs" description="Get QBITEL Bridge up and running in 10 minutes with Helm or Docker Compose.">
@@ -132,9 +133,9 @@ curl http://localhost:8000/health</code></pre>
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/getting-started/installation" class="text-quantum-400 hover:underline">Full Installation Guide</a> -- install all components from source</li>
-    <li><a href="/docs/getting-started/configuration" class="text-quantum-400 hover:underline">Configuration Reference</a> -- customize environment variables and settings</li>
-    <li><a href="/docs/getting-started/first-discovery" class="text-quantum-400 hover:underline">First Discovery Tutorial</a> -- walk through a complete protocol discovery</li>
-    <li><a href="/docs/architecture/overview" class="text-quantum-400 hover:underline">Architecture Overview</a> -- understand how QBITEL Bridge works</li>
+    <li><a href={url('/docs/getting-started/installation')} class="text-quantum-400 hover:underline">Full Installation Guide</a> -- install all components from source</li>
+    <li><a href={url('/docs/getting-started/configuration')} class="text-quantum-400 hover:underline">Configuration Reference</a> -- customize environment variables and settings</li>
+    <li><a href={url('/docs/getting-started/first-discovery')} class="text-quantum-400 hover:underline">First Discovery Tutorial</a> -- walk through a complete protocol discovery</li>
+    <li><a href={url('/docs/architecture/overview')} class="text-quantum-400 hover:underline">Architecture Overview</a> -- understand how QBITEL Bridge works</li>
   </ul>
 </DocsLayout>

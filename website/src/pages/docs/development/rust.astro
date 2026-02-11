@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Rust Development | QBITEL Bridge Docs" description="Rust development guide for the QBITEL Bridge data plane: cargo, clippy, rustfmt, and PQC-TLS crate development.">
@@ -116,8 +117,8 @@ cargo outdated</code></pre>
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/architecture/data-plane" class="text-quantum-400 hover:underline">Data Plane Architecture</a> -- understand the crate design</li>
-    <li><a href="/docs/security/pqc-algorithms" class="text-quantum-400 hover:underline">PQC Algorithms</a> -- algorithm specifications</li>
-    <li><a href="/docs/development/testing" class="text-quantum-400 hover:underline">Testing Guide</a> -- integration and performance testing</li>
+    <li><a href={url('/docs/architecture/data-plane')} class="text-quantum-400 hover:underline">Data Plane Architecture</a> -- understand the crate design</li>
+    <li><a href={url('/docs/security/pqc-algorithms')} class="text-quantum-400 hover:underline">PQC Algorithms</a> -- algorithm specifications</li>
+    <li><a href={url('/docs/development/testing')} class="text-quantum-400 hover:underline">Testing Guide</a> -- integration and performance testing</li>
   </ul>
 </DocsLayout>

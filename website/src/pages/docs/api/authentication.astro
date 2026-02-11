@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Authentication | QBITEL Bridge Docs" description="Authentication guide for QBITEL Bridge: JWT tokens, API keys, mutual TLS, and enterprise SSO integration.">
@@ -181,8 +182,8 @@ VITE_OIDC_SCOPE=openid profile email</code></pre>
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/security/zero-trust" class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- identity-based security model</li>
-    <li><a href="/docs/api/rest-api" class="text-quantum-400 hover:underline">REST API Reference</a> -- endpoints requiring authentication</li>
-    <li><a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> -- security hardening steps</li>
+    <li><a href={url('/docs/security/zero-trust')} class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- identity-based security model</li>
+    <li><a href={url('/docs/api/rest-api')} class="text-quantum-400 hover:underline">REST API Reference</a> -- endpoints requiring authentication</li>
+    <li><a href={url('/docs/deployment/production')} class="text-quantum-400 hover:underline">Production Checklist</a> -- security hardening steps</li>
   </ul>
 </DocsLayout>

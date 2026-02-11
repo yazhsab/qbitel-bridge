@@ -1,6 +1,7 @@
 ---
 import FeatureCard from './FeatureCard.astro';
 import { coreFeatures } from '@/data/features';
+import { url } from '@/utils/url';
 ---
 
 <section class="py-16 lg:py-24">
@@ -27,7 +28,7 @@ import { coreFeatures } from '@/data/features';
     </div>
 
     <div class="text-center mt-8">
-      <a href="/products" class="btn-secondary">
+      <a href={url('/products')} class="btn-secondary">
         View All Products
         <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

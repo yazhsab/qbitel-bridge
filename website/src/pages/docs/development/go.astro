@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Go Development | QBITEL Bridge Docs" description="Go development guide for the QBITEL Bridge control plane and management API: go test, golangci-lint, and project structure.">
@@ -117,8 +118,8 @@ export VAULT_TOKEN=dev-root-token</code></pre>
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/architecture/control-plane" class="text-quantum-400 hover:underline">Control Plane Architecture</a> -- understand the system design</li>
-    <li><a href="/docs/api/grpc-api" class="text-quantum-400 hover:underline">gRPC API Reference</a> -- service definitions and protobuf schemas</li>
-    <li><a href="/docs/security/zero-trust" class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- policy enforcement design</li>
+    <li><a href={url('/docs/architecture/control-plane')} class="text-quantum-400 hover:underline">Control Plane Architecture</a> -- understand the system design</li>
+    <li><a href={url('/docs/api/grpc-api')} class="text-quantum-400 hover:underline">gRPC API Reference</a> -- service definitions and protobuf schemas</li>
+    <li><a href={url('/docs/security/zero-trust')} class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- policy enforcement design</li>
   </ul>
 </DocsLayout>

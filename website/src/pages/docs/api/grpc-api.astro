@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="gRPC API | QBITEL Bridge Docs" description="gRPC API reference for QBITEL Bridge: high-performance streaming services for real-time protocol analysis and control plane communication.">
@@ -122,8 +123,8 @@ channel = grpc.secure_channel('qbitel-engine:50051', creds)</code></pre>
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/api/rest-api" class="text-quantum-400 hover:underline">REST API Reference</a> -- FastAPI endpoints</li>
-    <li><a href="/docs/api/authentication" class="text-quantum-400 hover:underline">Authentication</a> -- mTLS and token configuration</li>
-    <li><a href="/docs/architecture/control-plane" class="text-quantum-400 hover:underline">Control Plane Architecture</a> -- gRPC service design</li>
+    <li><a href={url('/docs/api/rest-api')} class="text-quantum-400 hover:underline">REST API Reference</a> -- FastAPI endpoints</li>
+    <li><a href={url('/docs/api/authentication')} class="text-quantum-400 hover:underline">Authentication</a> -- mTLS and token configuration</li>
+    <li><a href={url('/docs/architecture/control-plane')} class="text-quantum-400 hover:underline">Control Plane Architecture</a> -- gRPC service design</li>
   </ul>
 </DocsLayout>

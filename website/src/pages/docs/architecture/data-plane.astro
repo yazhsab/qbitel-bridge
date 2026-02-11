@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Rust Data Plane | QBITEL Bridge Docs" description="Architecture of the Rust data plane: wire-speed packet processing, PQC-TLS, DPDK, and deep packet inspection.">
@@ -120,8 +121,8 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/security/pqc-algorithms" class="text-quantum-400 hover:underline">PQC Algorithms</a> -- detailed algorithm specifications</li>
-    <li><a href="/docs/development/rust" class="text-quantum-400 hover:underline">Rust Development Guide</a> -- contribute to the data plane</li>
-    <li><a href="/docs/architecture/control-plane" class="text-quantum-400 hover:underline">Go Control Plane</a> -- service orchestration layer</li>
+    <li><a href={url('/docs/security/pqc-algorithms')} class="text-quantum-400 hover:underline">PQC Algorithms</a> -- detailed algorithm specifications</li>
+    <li><a href={url('/docs/development/rust')} class="text-quantum-400 hover:underline">Rust Development Guide</a> -- contribute to the data plane</li>
+    <li><a href={url('/docs/architecture/control-plane')} class="text-quantum-400 hover:underline">Go Control Plane</a> -- service orchestration layer</li>
   </ul>
 </DocsLayout>

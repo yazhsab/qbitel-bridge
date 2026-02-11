@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Installation | QBITEL Bridge Docs" description="Full installation guide for all QBITEL Bridge components: Python AI Engine, Rust Data Plane, Go Control Plane, and React UI Console.">
@@ -165,8 +166,8 @@ cd ui/console && npm test               <span class="text-gray-500"># React</spa
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/getting-started/configuration" class="text-quantum-400 hover:underline">Configuration Reference</a> -- set up environment variables and YAML config</li>
-    <li><a href="/docs/getting-started/first-discovery" class="text-quantum-400 hover:underline">First Discovery Tutorial</a> -- make your first protocol discovery request</li>
-    <li><a href="/docs/development/python" class="text-quantum-400 hover:underline">Python Development Guide</a> -- IDE setup, linting, and code style</li>
+    <li><a href={url('/docs/getting-started/configuration')} class="text-quantum-400 hover:underline">Configuration Reference</a> -- set up environment variables and YAML config</li>
+    <li><a href={url('/docs/getting-started/first-discovery')} class="text-quantum-400 hover:underline">First Discovery Tutorial</a> -- make your first protocol discovery request</li>
+    <li><a href={url('/docs/development/python')} class="text-quantum-400 hover:underline">Python Development Guide</a> -- IDE setup, linting, and code style</li>
   </ul>
 </DocsLayout>

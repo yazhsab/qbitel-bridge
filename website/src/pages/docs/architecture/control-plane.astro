@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Go Control Plane | QBITEL Bridge Docs" description="Architecture of the Go control plane: service orchestration, OPA policy engine, gRPC, and device management.">
@@ -113,8 +114,8 @@ has_resource_limits {'{'}
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/development/go" class="text-quantum-400 hover:underline">Go Development Guide</a> -- contribute to the control plane</li>
-    <li><a href="/docs/api/grpc-api" class="text-quantum-400 hover:underline">gRPC API Reference</a> -- full service definitions</li>
-    <li><a href="/docs/security/zero-trust" class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- policy enforcement details</li>
+    <li><a href={url('/docs/development/go')} class="text-quantum-400 hover:underline">Go Development Guide</a> -- contribute to the control plane</li>
+    <li><a href={url('/docs/api/grpc-api')} class="text-quantum-400 hover:underline">gRPC API Reference</a> -- full service definitions</li>
+    <li><a href={url('/docs/security/zero-trust')} class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- policy enforcement details</li>
   </ul>
 </DocsLayout>

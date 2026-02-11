@@ -4,6 +4,7 @@ import PageHero from '@/components/hero/PageHero.astro';
 import ProductCard from '@/components/content/ProductCard.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
 import { products } from '@/data/products';
+import { url } from '@/utils/url';
 ---
 
 <PageLayout
@@ -85,15 +86,15 @@ import { products } from '@/data/products';
             <h3 class="text-lg font-bold text-white">Discovery Layer</h3>
           </div>
           <div class="grid md:grid-cols-3 gap-3">
-            <a href="/products/protocol-discovery" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-blue-500/50 transition-colors">
+            <a href={url('/products/protocol-discovery')} class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-blue-500/50 transition-colors">
               <div class="text-sm font-semibold text-white">AI Protocol Discovery</div>
               <div class="text-xs text-gray-500">Reverse-engineer protocols</div>
             </a>
-            <a href="/products/translation-studio" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-purple-500/50 transition-colors">
+            <a href={url('/products/translation-studio')} class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-purple-500/50 transition-colors">
               <div class="text-sm font-semibold text-white">Translation Studio</div>
               <div class="text-xs text-gray-500">Generate APIs and SDKs</div>
             </a>
-            <a href="/products/protocol-marketplace" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-green-500/50 transition-colors">
+            <a href={url('/products/protocol-marketplace')} class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-green-500/50 transition-colors">
               <div class="text-sm font-semibold text-white">Protocol Marketplace</div>
               <div class="text-xs text-gray-500">Share and monetize parsers</div>
             </a>
@@ -107,19 +108,19 @@ import { products } from '@/data/products';
             <h3 class="text-lg font-bold text-white">Security Layer</h3>
           </div>
           <div class="grid md:grid-cols-4 gap-3">
-            <a href="/products/zero-touch-security" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-red-500/50 transition-colors">
+            <a href={url('/products/zero-touch-security')} class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-red-500/50 transition-colors">
               <div class="text-sm font-semibold text-white">Zero-Touch Security</div>
               <div class="text-xs text-gray-500">Autonomous SOC</div>
             </a>
-            <a href="/products/post-quantum-crypto" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-cyan-500/50 transition-colors">
+            <a href={url('/products/post-quantum-crypto')} class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-cyan-500/50 transition-colors">
               <div class="text-sm font-semibold text-white">Post-Quantum Crypto</div>
               <div class="text-xs text-gray-500">Quantum-safe encryption</div>
             </a>
-            <a href="/products/threat-intelligence" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-rose-500/50 transition-colors">
+            <a href={url('/products/threat-intelligence')} class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-rose-500/50 transition-colors">
               <div class="text-sm font-semibold text-white">Threat Intelligence</div>
               <div class="text-xs text-gray-500">Threat detection and hunting</div>
             </a>
-            <a href="/products/iam-monitoring" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-sky-500/50 transition-colors">
+            <a href={url('/products/iam-monitoring')} class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-sky-500/50 transition-colors">
               <div class="text-sm font-semibold text-white">IAM Monitoring</div>
               <div class="text-xs text-gray-500">Identity intelligence</div>
             </a>
@@ -133,15 +134,15 @@ import { products } from '@/data/products';
             <h3 class="text-lg font-bold text-white">Operations Layer</h3>
           </div>
           <div class="grid md:grid-cols-3 gap-3">
-            <a href="/products/cloud-native-security" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-indigo-500/50 transition-colors">
+            <a href={url('/products/cloud-native-security')} class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-indigo-500/50 transition-colors">
               <div class="text-sm font-semibold text-white">Cloud-Native Security</div>
               <div class="text-xs text-gray-500">K8s and service mesh</div>
             </a>
-            <a href="/products/enterprise-compliance" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-emerald-500/50 transition-colors">
+            <a href={url('/products/enterprise-compliance')} class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-emerald-500/50 transition-colors">
               <div class="text-sm font-semibold text-white">Enterprise Compliance</div>
               <div class="text-xs text-gray-500">9-framework automation</div>
             </a>
-            <a href="/products/legacy-whisperer" class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-amber-500/50 transition-colors">
+            <a href={url('/products/legacy-whisperer')} class="p-3 rounded-lg bg-surface-900/50 border border-surface-600/50 hover:border-amber-500/50 transition-colors">
               <div class="text-sm font-semibold text-white">Legacy Whisperer</div>
               <div class="text-xs text-gray-500">Mainframe modernization</div>
             </a>

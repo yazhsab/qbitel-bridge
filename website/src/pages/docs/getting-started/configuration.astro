@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Configuration | QBITEL Bridge Docs" description="Complete configuration reference for QBITEL Bridge environment variables, YAML settings, and service endpoints.">
@@ -224,8 +225,8 @@ python -m ai_engine --config config/qbitel.production.yaml</code></pre>
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/reference/environment-variables" class="text-quantum-400 hover:underline">Full Environment Variables Reference</a> -- complete list of all variables</li>
-    <li><a href="/docs/deployment/docker" class="text-quantum-400 hover:underline">Docker Compose Deployment</a> -- configure services in Docker</li>
-    <li><a href="/docs/security/zero-trust" class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- security configuration details</li>
+    <li><a href={url('/docs/reference/environment-variables')} class="text-quantum-400 hover:underline">Full Environment Variables Reference</a> -- complete list of all variables</li>
+    <li><a href={url('/docs/deployment/docker')} class="text-quantum-400 hover:underline">Docker Compose Deployment</a> -- configure services in Docker</li>
+    <li><a href={url('/docs/security/zero-trust')} class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- security configuration details</li>
   </ul>
 </DocsLayout>

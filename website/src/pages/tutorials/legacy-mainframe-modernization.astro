@@ -2,6 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PageHero from '@/components/hero/PageHero.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
+import { url } from '@/utils/url';
 ---
 
 <PageLayout
@@ -48,7 +49,7 @@ import CTABanner from '@/components/cta/CTABanner.astro';
         <ul class="space-y-2 text-gray-300">
           <li class="flex items-start gap-2">
             <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-            <span>QBITEL Bridge running with all components (see <a href="/tutorials/deploy-kubernetes" class="text-quantum-400 hover:underline">Deploy to Kubernetes</a>)</span>
+            <span>QBITEL Bridge running with all components (see <a href={url('/tutorials/deploy-kubernetes')} class="text-quantum-400 hover:underline">Deploy to Kubernetes</a>)</span>
           </li>
           <li class="flex items-start gap-2">
             <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
@@ -331,11 +332,11 @@ curl -X POST http://localhost:8091/api/v1/mainframe/customers \
 
       <!-- Navigation -->
       <div class="flex items-center justify-between pt-8 border-t border-surface-600/50">
-        <a href="/tutorials/compliance-reporting" class="btn-ghost text-sm">
+        <a href={url('/tutorials/compliance-reporting')} class="btn-ghost text-sm">
           <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
           Previous: Compliance Reporting
         </a>
-        <a href="/tutorials" class="btn-secondary text-sm">
+        <a href={url('/tutorials')} class="btn-secondary text-sm">
           All Tutorials
           <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
         </a>

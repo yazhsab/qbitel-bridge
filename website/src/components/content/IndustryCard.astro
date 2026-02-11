@@ -1,4 +1,6 @@
 ---
+import { url } from '@/utils/url';
+
 interface Props {
   title: string;
   description: string;
@@ -11,7 +13,7 @@ interface Props {
 const { title, description, protocols, href, icon, color } = Astro.props;
 ---
 
-<a href={href} class="card p-6 group block">
+<a href={url(href)} class="card p-6 group block">
   <div class="flex items-center gap-3 mb-3">
     <div class={`w-10 h-10 rounded-lg bg-gradient-to-br ${color} bg-opacity-10 flex items-center justify-center`}>
       <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">

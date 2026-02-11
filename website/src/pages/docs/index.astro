@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Documentation | QBITEL Bridge Docs" description="Comprehensive documentation for QBITEL Bridge - the quantum-safe protocol intelligence platform.">
@@ -9,19 +10,19 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
   <h2 id="getting-started" class="text-2xl font-bold text-white mt-12 mb-4">Getting Started</h2>
   <p class="text-gray-300 mb-4">New to QBITEL Bridge? Start here to get up and running in minutes.</p>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-    <a href="/docs/getting-started/quickstart" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/getting-started/quickstart')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Quick Start</h3>
       <p class="text-gray-400 text-sm">Deploy QBITEL Bridge in 10 minutes with Helm or Docker Compose.</p>
     </a>
-    <a href="/docs/getting-started/installation" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/getting-started/installation')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Installation</h3>
       <p class="text-gray-400 text-sm">Full installation guide for all components: Python, Rust, Go, and Node.js.</p>
     </a>
-    <a href="/docs/getting-started/configuration" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/getting-started/configuration')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Configuration</h3>
       <p class="text-gray-400 text-sm">Configure environment variables, YAML settings, and service endpoints.</p>
     </a>
-    <a href="/docs/getting-started/first-discovery" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/getting-started/first-discovery')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">First Discovery</h3>
       <p class="text-gray-400 text-sm">Tutorial: make your first protocol discovery request.</p>
     </a>
@@ -30,23 +31,23 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
   <h2 id="architecture" class="text-2xl font-bold text-white mt-12 mb-4">Architecture</h2>
   <p class="text-gray-300 mb-4">Understand the four-layer polyglot architecture powering QBITEL Bridge.</p>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-    <a href="/docs/architecture/overview" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/architecture/overview')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">System Overview</h3>
       <p class="text-gray-400 text-sm">High-level architecture of the distributed, cloud-native platform.</p>
     </a>
-    <a href="/docs/architecture/ai-engine" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/architecture/ai-engine')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">AI Engine</h3>
       <p class="text-gray-400 text-sm">Python AI Engine: PyTorch, FastAPI, multi-agent orchestration.</p>
     </a>
-    <a href="/docs/architecture/data-plane" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/architecture/data-plane')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Rust Data Plane</h3>
       <p class="text-gray-400 text-sm">Wire-speed packet processing with PQC-TLS and DPDK.</p>
     </a>
-    <a href="/docs/architecture/control-plane" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/architecture/control-plane')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Go Control Plane</h3>
       <p class="text-gray-400 text-sm">Service orchestration with OPA policy engine and gRPC.</p>
     </a>
-    <a href="/docs/architecture/ui-console" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/architecture/ui-console')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">UI Console</h3>
       <p class="text-gray-400 text-sm">React admin console with real-time dashboards.</p>
     </a>
@@ -55,23 +56,23 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
   <h2 id="deployment" class="text-2xl font-bold text-white mt-12 mb-4">Deployment</h2>
   <p class="text-gray-300 mb-4">Deploy QBITEL Bridge to any environment, from local development to air-gapped production.</p>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-    <a href="/docs/deployment/docker" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/deployment/docker')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Docker Compose</h3>
       <p class="text-gray-400 text-sm">Multi-container local development with Docker Compose.</p>
     </a>
-    <a href="/docs/deployment/kubernetes" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/deployment/kubernetes')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Kubernetes</h3>
       <p class="text-gray-400 text-sm">Manual Kubernetes deployment with fine-grained control.</p>
     </a>
-    <a href="/docs/deployment/helm" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/deployment/helm')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Helm Charts</h3>
       <p class="text-gray-400 text-sm">One-command production deployment with Helm.</p>
     </a>
-    <a href="/docs/deployment/air-gapped" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/deployment/air-gapped')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Air-Gapped</h3>
       <p class="text-gray-400 text-sm">Fully offline deployment with on-premise LLM inference.</p>
     </a>
-    <a href="/docs/deployment/production" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/deployment/production')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Production Checklist</h3>
       <p class="text-gray-400 text-sm">Security hardening, TLS, monitoring, and backup procedures.</p>
     </a>
@@ -80,23 +81,23 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
   <h2 id="development" class="text-2xl font-bold text-white mt-12 mb-4">Development</h2>
   <p class="text-gray-300 mb-4">Guides for contributing to each component of the QBITEL Bridge platform.</p>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-    <a href="/docs/development/python" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/development/python')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Python</h3>
       <p class="text-gray-400 text-sm">AI Engine development with pytest, black, and ruff.</p>
     </a>
-    <a href="/docs/development/rust" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/development/rust')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Rust</h3>
       <p class="text-gray-400 text-sm">Data plane development with cargo, clippy, and rustfmt.</p>
     </a>
-    <a href="/docs/development/go" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/development/go')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Go</h3>
       <p class="text-gray-400 text-sm">Control plane and management API with go test and golangci-lint.</p>
     </a>
-    <a href="/docs/development/react" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/development/react')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">React/TypeScript</h3>
       <p class="text-gray-400 text-sm">UI console development with Vite, ESLint, and Vitest.</p>
     </a>
-    <a href="/docs/development/testing" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/development/testing')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Testing</h3>
       <p class="text-gray-400 text-sm">Comprehensive testing strategy: unit, integration, e2e, and performance.</p>
     </a>
@@ -105,15 +106,15 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
   <h2 id="api-reference" class="text-2xl font-bold text-white mt-12 mb-4">API Reference</h2>
   <p class="text-gray-300 mb-4">Complete API documentation for REST, gRPC, and authentication.</p>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-    <a href="/docs/api/rest-api" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/api/rest-api')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">REST API</h3>
       <p class="text-gray-400 text-sm">FastAPI-powered REST endpoints for discovery, compliance, and more.</p>
     </a>
-    <a href="/docs/api/grpc-api" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/api/grpc-api')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">gRPC API</h3>
       <p class="text-gray-400 text-sm">High-performance gRPC services for real-time communication.</p>
     </a>
-    <a href="/docs/api/authentication" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/api/authentication')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Authentication</h3>
       <p class="text-gray-400 text-sm">JWT tokens, API keys, mTLS, and enterprise SSO integration.</p>
     </a>
@@ -122,15 +123,15 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
   <h2 id="security" class="text-2xl font-bold text-white mt-12 mb-4">Security</h2>
   <p class="text-gray-300 mb-4">Post-quantum cryptography, zero-trust architecture, and compliance automation.</p>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-    <a href="/docs/security/pqc-algorithms" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/security/pqc-algorithms')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">PQC Algorithms</h3>
       <p class="text-gray-400 text-sm">ML-KEM, ML-DSA, Falcon, and SLH-DSA implementations.</p>
     </a>
-    <a href="/docs/security/zero-trust" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/security/zero-trust')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Zero-Trust Architecture</h3>
       <p class="text-gray-400 text-sm">Never trust, always verify: identity-based microsegmentation.</p>
     </a>
-    <a href="/docs/security/compliance-frameworks" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/security/compliance-frameworks')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Compliance Frameworks</h3>
       <p class="text-gray-400 text-sm">Automated compliance for SOC 2, GDPR, HIPAA, PCI DSS, and more.</p>
     </a>
@@ -139,11 +140,11 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
   <h2 id="operations" class="text-2xl font-bold text-white mt-12 mb-4">Operations</h2>
   <p class="text-gray-300 mb-4">Monitoring, observability, and troubleshooting for production environments.</p>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-    <a href="/docs/operations/monitoring" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/operations/monitoring')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Monitoring</h3>
       <p class="text-gray-400 text-sm">Prometheus, Grafana, OpenTelemetry, and alerting configuration.</p>
     </a>
-    <a href="/docs/operations/troubleshooting" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/operations/troubleshooting')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Troubleshooting</h3>
       <p class="text-gray-400 text-sm">Common issues, diagnostic commands, and resolution steps.</p>
     </a>
@@ -152,11 +153,11 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
   <h2 id="reference" class="text-2xl font-bold text-white mt-12 mb-4">Reference</h2>
   <p class="text-gray-300 mb-4">Technical reference material and project changelog.</p>
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-    <a href="/docs/reference/environment-variables" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/reference/environment-variables')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Environment Variables</h3>
       <p class="text-gray-400 text-sm">Complete reference of all configuration environment variables.</p>
     </a>
-    <a href="/docs/reference/changelog" class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
+    <a href={url('/docs/reference/changelog')} class="block p-4 bg-surface-800 rounded-lg border border-surface-600/50 hover:border-quantum-500/50 transition-colors">
       <h3 class="text-white font-semibold mb-1">Changelog</h3>
       <p class="text-gray-400 text-sm">Version history and release notes.</p>
     </a>

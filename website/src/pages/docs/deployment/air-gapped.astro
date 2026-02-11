@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Air-Gapped Deployment | QBITEL Bridge Docs" description="Deploy QBITEL Bridge in fully offline, air-gapped environments with on-premise LLM inference via Ollama.">
@@ -118,8 +119,8 @@ curl -X POST http://localhost:8000/api/v1/discover \
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> -- security hardening for production environments</li>
-    <li><a href="/docs/security/compliance-frameworks" class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- meet data residency requirements</li>
-    <li><a href="/docs/operations/troubleshooting" class="text-quantum-400 hover:underline">Troubleshooting</a> -- diagnose air-gapped deployment issues</li>
+    <li><a href={url('/docs/deployment/production')} class="text-quantum-400 hover:underline">Production Checklist</a> -- security hardening for production environments</li>
+    <li><a href={url('/docs/security/compliance-frameworks')} class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- meet data residency requirements</li>
+    <li><a href={url('/docs/operations/troubleshooting')} class="text-quantum-400 hover:underline">Troubleshooting</a> -- diagnose air-gapped deployment issues</li>
   </ul>
 </DocsLayout>

@@ -2,6 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PageHero from '@/components/hero/PageHero.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
+import { url } from '@/utils/url';
 ---
 
 <PageLayout
@@ -24,7 +25,7 @@ import CTABanner from '@/components/cta/CTABanner.astro';
         <ul class="space-y-2 text-gray-300">
           <li class="flex items-start gap-2">
             <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-            <span>QBITEL Bridge running (see <a href="/tutorials/discover-legacy-protocol" class="text-quantum-400 hover:underline">Discover a Legacy Protocol</a>)</span>
+            <span>QBITEL Bridge running (see <a href={url('/tutorials/discover-legacy-protocol')} class="text-quantum-400 hover:underline">Discover a Legacy Protocol</a>)</span>
           </li>
           <li class="flex items-start gap-2">
             <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
@@ -208,18 +209,18 @@ curl -s http://localhost:9091/api/v1/query?query=qbitel_pqc_connections_total</c
         </div>
         <div class="card p-4 border-l-4 border-l-quantum-500">
           <p class="text-sm text-gray-300">
-            <span class="font-semibold text-quantum-400">What's next?</span> Once PQC is active, enable automatic key rotation in production. You can also combine PQC with the <a href="/tutorials/compliance-reporting" class="text-quantum-400 hover:underline">compliance engine</a> to generate evidence for NIST and FedRAMP audits.
+            <span class="font-semibold text-quantum-400">What's next?</span> Once PQC is active, enable automatic key rotation in production. You can also combine PQC with the <a href={url('/tutorials/compliance-reporting')} class="text-quantum-400 hover:underline">compliance engine</a> to generate evidence for NIST and FedRAMP audits.
           </p>
         </div>
       </div>
 
       <!-- Navigation -->
       <div class="flex items-center justify-between pt-8 border-t border-surface-600/50">
-        <a href="/tutorials/discover-legacy-protocol" class="btn-ghost text-sm">
+        <a href={url('/tutorials/discover-legacy-protocol')} class="btn-ghost text-sm">
           <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
           Previous: Discover a Protocol
         </a>
-        <a href="/tutorials/build-protocol-adapter" class="btn-secondary text-sm">
+        <a href={url('/tutorials/build-protocol-adapter')} class="btn-secondary text-sm">
           Next: Build a Protocol Adapter
           <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
         </a>

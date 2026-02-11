@@ -2,6 +2,7 @@
 import BlogLayout from '@/layouts/BlogLayout.astro';
 import '@/assets/styles/prose.css';
 import { getCollection } from 'astro:content';
+import { url } from '@/utils/url';
 import type { CollectionEntry } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -34,7 +35,7 @@ const { Content } = await post.render();
         <span class="badge">{tag}</span>
       ))}
     </div>
-    <a href="/blog" class="text-quantum-400 hover:text-quantum-300 transition-colors text-sm font-medium">
+    <a href={url('/blog')} class="text-quantum-400 hover:text-quantum-300 transition-colors text-sm font-medium">
       &larr; Back to all posts
     </a>
   </footer>

@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="REST API | QBITEL Bridge Docs" description="Complete REST API reference for QBITEL Bridge: protocol discovery, classification, copilot, compliance, and threat intelligence endpoints.">
@@ -159,8 +160,8 @@ X-RateLimit-Reset: 1700000000</code></pre>
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/api/grpc-api" class="text-quantum-400 hover:underline">gRPC API Reference</a> -- high-performance gRPC services</li>
-    <li><a href="/docs/api/authentication" class="text-quantum-400 hover:underline">Authentication</a> -- JWT, API keys, and mTLS configuration</li>
-    <li><a href="/docs/getting-started/first-discovery" class="text-quantum-400 hover:underline">First Discovery Tutorial</a> -- hands-on API walkthrough</li>
+    <li><a href={url('/docs/api/grpc-api')} class="text-quantum-400 hover:underline">gRPC API Reference</a> -- high-performance gRPC services</li>
+    <li><a href={url('/docs/api/authentication')} class="text-quantum-400 hover:underline">Authentication</a> -- JWT, API keys, and mTLS configuration</li>
+    <li><a href={url('/docs/getting-started/first-discovery')} class="text-quantum-400 hover:underline">First Discovery Tutorial</a> -- hands-on API walkthrough</li>
   </ul>
 </DocsLayout>

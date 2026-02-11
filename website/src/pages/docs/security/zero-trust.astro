@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Zero-Trust Architecture | QBITEL Bridge Docs" description="Zero-trust security architecture in QBITEL Bridge: identity-based access, microsegmentation, mTLS, and continuous verification.">
@@ -128,8 +129,8 @@ spec:
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/security/pqc-algorithms" class="text-quantum-400 hover:underline">PQC Algorithms</a> -- quantum-safe encryption details</li>
-    <li><a href="/docs/api/authentication" class="text-quantum-400 hover:underline">Authentication</a> -- configure identity mechanisms</li>
-    <li><a href="/docs/security/compliance-frameworks" class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- regulatory compliance</li>
+    <li><a href={url('/docs/security/pqc-algorithms')} class="text-quantum-400 hover:underline">PQC Algorithms</a> -- quantum-safe encryption details</li>
+    <li><a href={url('/docs/api/authentication')} class="text-quantum-400 hover:underline">Authentication</a> -- configure identity mechanisms</li>
+    <li><a href={url('/docs/security/compliance-frameworks')} class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- regulatory compliance</li>
   </ul>
 </DocsLayout>

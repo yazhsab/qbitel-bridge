@@ -1,5 +1,6 @@
 ---
 import { footerNavigation } from '@/data/navigation';
+import { url } from '@/utils/url';
 ---
 
 <footer class="border-t border-surface-600/50 bg-surface-950">
@@ -9,7 +10,7 @@ import { footerNavigation } from '@/data/navigation';
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
         <!-- Brand -->
         <div class="col-span-2 md:col-span-4 lg:col-span-1 mb-4 lg:mb-0">
-          <a href="/" class="flex items-center gap-2 mb-4">
+          <a href={url('/')} class="flex items-center gap-2 mb-4">
             <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-quantum-500 to-neon-cyan text-white font-bold text-sm">
               Q
             </div>
@@ -36,7 +37,7 @@ import { footerNavigation } from '@/data/navigation';
           <ul class="space-y-2">
             {footerNavigation.products.map((item) => (
               <li>
-                <a href={item.href} class="text-sm text-gray-400 hover:text-quantum-400 transition-colors">{item.label}</a>
+                <a href={url(item.href)} class="text-sm text-gray-400 hover:text-quantum-400 transition-colors">{item.label}</a>
               </li>
             ))}
           </ul>
@@ -48,7 +49,7 @@ import { footerNavigation } from '@/data/navigation';
           <ul class="space-y-2">
             {footerNavigation.resources.map((item) => (
               <li>
-                <a href={item.href} class="text-sm text-gray-400 hover:text-quantum-400 transition-colors">{item.label}</a>
+                <a href={url(item.href)} class="text-sm text-gray-400 hover:text-quantum-400 transition-colors">{item.label}</a>
               </li>
             ))}
           </ul>
@@ -60,7 +61,7 @@ import { footerNavigation } from '@/data/navigation';
           <ul class="space-y-2">
             {footerNavigation.community.map((item) => (
               <li>
-                <a href={item.href} class="text-sm text-gray-400 hover:text-quantum-400 transition-colors" {...(item.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{item.label}</a>
+                <a href={item.href.startsWith('http') ? item.href : url(item.href)} class="text-sm text-gray-400 hover:text-quantum-400 transition-colors" {...(item.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{item.label}</a>
               </li>
             ))}
           </ul>
@@ -72,7 +73,7 @@ import { footerNavigation } from '@/data/navigation';
           <ul class="space-y-2">
             {footerNavigation.company.map((item) => (
               <li>
-                <a href={item.href} class="text-sm text-gray-400 hover:text-quantum-400 transition-colors" {...(item.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{item.label}</a>
+                <a href={item.href.startsWith('http') ? item.href : url(item.href)} class="text-sm text-gray-400 hover:text-quantum-400 transition-colors" {...(item.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{item.label}</a>
               </li>
             ))}
           </ul>

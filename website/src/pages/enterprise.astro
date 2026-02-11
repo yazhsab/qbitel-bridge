@@ -2,6 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PageHero from '@/components/hero/PageHero.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
+import { url } from '@/utils/url';
 ---
 
 <PageLayout
@@ -193,7 +194,7 @@ import CTABanner from '@/components/cta/CTABanner.astro';
               <span class="text-gray-500">No SLA guarantees</span>
             </li>
           </ul>
-          <a href="/docs/getting-started/quickstart" class="btn-secondary w-full text-sm">Get Started</a>
+          <a href={url('/docs/getting-started/quickstart')} class="btn-secondary w-full text-sm">Get Started</a>
         </div>
 
         <!-- Professional -->
@@ -336,7 +337,7 @@ import CTABanner from '@/components/cta/CTABanner.astro';
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
         </a>
-        <a href="/docs/getting-started/quickstart" class="btn-secondary text-base">
+        <a href={url('/docs/getting-started/quickstart')} class="btn-secondary text-base">
           Try It Free First
         </a>
       </div>

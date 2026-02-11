@@ -2,6 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PageHero from '@/components/hero/PageHero.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
+import { url } from '@/utils/url';
 ---
 
 <PageLayout
@@ -24,7 +25,7 @@ import CTABanner from '@/components/cta/CTABanner.astro';
         <ul class="space-y-2 text-gray-300">
           <li class="flex items-start gap-2">
             <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-            <span>A discovered protocol specification (see <a href="/tutorials/discover-legacy-protocol" class="text-quantum-400 hover:underline">Discover a Legacy Protocol</a>)</span>
+            <span>A discovered protocol specification (see <a href={url('/tutorials/discover-legacy-protocol')} class="text-quantum-400 hover:underline">Discover a Legacy Protocol</a>)</span>
           </li>
           <li class="flex items-start gap-2">
             <svg class="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
@@ -185,18 +186,18 @@ curl -X POST http://localhost:8000/api/v1/translation/translate \
         </div>
         <div class="card p-4 border-l-4 border-l-yellow-500">
           <p class="text-sm text-gray-300">
-            <span class="font-semibold text-yellow-400">Production tip:</span> In Kubernetes, deploy the protocol bridge as a sidecar container alongside your application pod. See the <a href="/tutorials/deploy-kubernetes" class="text-quantum-400 hover:underline">Deploy to Kubernetes</a> tutorial for details.
+            <span class="font-semibold text-yellow-400">Production tip:</span> In Kubernetes, deploy the protocol bridge as a sidecar container alongside your application pod. See the <a href={url('/tutorials/deploy-kubernetes')} class="text-quantum-400 hover:underline">Deploy to Kubernetes</a> tutorial for details.
           </p>
         </div>
       </div>
 
       <!-- Navigation -->
       <div class="flex items-center justify-between pt-8 border-t border-surface-600/50">
-        <a href="/tutorials/quantum-safe-encryption" class="btn-ghost text-sm">
+        <a href={url('/tutorials/quantum-safe-encryption')} class="btn-ghost text-sm">
           <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
           Previous: Quantum-Safe Encryption
         </a>
-        <a href="/tutorials/deploy-kubernetes" class="btn-secondary text-sm">
+        <a href={url('/tutorials/deploy-kubernetes')} class="btn-secondary text-sm">
           Next: Deploy to Kubernetes
           <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
         </a>

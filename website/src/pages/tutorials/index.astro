@@ -2,6 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PageHero from '@/components/hero/PageHero.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
+import { url } from '@/utils/url';
 
 const tutorials = [
   {
@@ -83,7 +84,7 @@ const tutorials = [
 
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tutorials.map((tutorial) => (
-          <a href={tutorial.href} class="card p-6 flex flex-col group">
+          <a href={url(tutorial.href)} class="card p-6 flex flex-col group">
             <div class="flex items-center justify-between mb-4">
               <span class={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${tutorial.levelColor}`}>
                 {tutorial.level}

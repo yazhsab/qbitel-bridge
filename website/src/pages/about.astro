@@ -2,6 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PageHero from '@/components/hero/PageHero.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
+import { url } from '@/utils/url';
 ---
 
 <PageLayout
@@ -173,7 +174,7 @@ import CTABanner from '@/components/cta/CTABanner.astro';
           We believe that the best security tools are the ones engineers actually want to use. That means clean APIs, comprehensive documentation, sensible defaults, and a developer experience that respects your time.
         </p>
         <div class="flex flex-wrap justify-center gap-4">
-          <a href="/community" class="btn-primary">
+          <a href={url('/community')} class="btn-primary">
             Join the Community
             <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

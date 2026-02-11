@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Environment Variables | QBITEL Bridge Docs" description="Complete reference of all environment variables for configuring QBITEL Bridge components.">
@@ -328,8 +329,8 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
 
   <h2 id="see-also" class="text-2xl font-bold text-white mt-12 mb-4">See Also</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/getting-started/configuration" class="text-quantum-400 hover:underline">Configuration Guide</a> -- YAML configuration and precedence</li>
-    <li><a href="/docs/deployment/air-gapped" class="text-quantum-400 hover:underline">Air-Gapped Deployment</a> -- air-gapped-specific variables</li>
-    <li><a href="/docs/api/authentication" class="text-quantum-400 hover:underline">Authentication</a> -- security variable details</li>
+    <li><a href={url('/docs/getting-started/configuration')} class="text-quantum-400 hover:underline">Configuration Guide</a> -- YAML configuration and precedence</li>
+    <li><a href={url('/docs/deployment/air-gapped')} class="text-quantum-400 hover:underline">Air-Gapped Deployment</a> -- air-gapped-specific variables</li>
+    <li><a href={url('/docs/api/authentication')} class="text-quantum-400 hover:underline">Authentication</a> -- security variable details</li>
   </ul>
 </DocsLayout>

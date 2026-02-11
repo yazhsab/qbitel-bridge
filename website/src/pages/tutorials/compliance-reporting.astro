@@ -2,6 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PageHero from '@/components/hero/PageHero.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
+import { url } from '@/utils/url';
 ---
 
 <PageLayout
@@ -270,11 +271,11 @@ curl -X POST http://localhost:8000/api/v1/compliance/monitoring/start \
 
       <!-- Navigation -->
       <div class="flex items-center justify-between pt-8 border-t border-surface-600/50">
-        <a href="/tutorials/deploy-kubernetes" class="btn-ghost text-sm">
+        <a href={url('/tutorials/deploy-kubernetes')} class="btn-ghost text-sm">
           <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
           Previous: Deploy to Kubernetes
         </a>
-        <a href="/tutorials/legacy-mainframe-modernization" class="btn-secondary text-sm">
+        <a href={url('/tutorials/legacy-mainframe-modernization')} class="btn-secondary text-sm">
           Next: Mainframe Modernization
           <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
         </a>

@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Production Checklist | QBITEL Bridge Docs" description="Production deployment checklist for QBITEL Bridge: security hardening, TLS, monitoring, backups, and scaling.">
@@ -123,8 +124,8 @@ python tests/load/comprehensive_load_test.py</code></pre>
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/operations/monitoring" class="text-quantum-400 hover:underline">Monitoring Guide</a> -- detailed monitoring and alerting setup</li>
-    <li><a href="/docs/security/compliance-frameworks" class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- detailed compliance documentation</li>
-    <li><a href="/docs/operations/troubleshooting" class="text-quantum-400 hover:underline">Troubleshooting</a> -- diagnose and resolve production issues</li>
+    <li><a href={url('/docs/operations/monitoring')} class="text-quantum-400 hover:underline">Monitoring Guide</a> -- detailed monitoring and alerting setup</li>
+    <li><a href={url('/docs/security/compliance-frameworks')} class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- detailed compliance documentation</li>
+    <li><a href={url('/docs/operations/troubleshooting')} class="text-quantum-400 hover:underline">Troubleshooting</a> -- diagnose and resolve production issues</li>
   </ul>
 </DocsLayout>

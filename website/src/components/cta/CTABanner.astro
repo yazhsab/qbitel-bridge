@@ -1,4 +1,6 @@
 ---
+import { url } from '@/utils/url';
+
 interface Props {
   title?: string;
   description?: string;
@@ -20,7 +22,7 @@ const {
     <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">{title}</h2>
     <p class="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">{description}</p>
     <div class="flex flex-wrap justify-center gap-4">
-      <a href="/docs/getting-started/quickstart" class="btn-primary text-base">
+      <a href={url('/docs/getting-started/quickstart')} class="btn-primary text-base">
         Quick Start Guide
         <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -32,7 +34,7 @@ const {
         </svg>
         Star on GitHub
       </a>
-      <a href="/enterprise" class="btn-secondary text-base">
+      <a href={url('/enterprise')} class="btn-secondary text-base">
         Enterprise Support
       </a>
     </div>

@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Troubleshooting | QBITEL Bridge Docs" description="Troubleshooting guide for QBITEL Bridge: common issues, diagnostic commands, log analysis, and resolution steps.">
@@ -138,8 +139,8 @@ kubectl logs deployment/qbitel-engine -n qbitel-service-mesh --since=1h | \
 
   <h2 id="support" class="text-2xl font-bold text-white mt-12 mb-4">Getting Support</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
-    <li>Check the <a href="/docs/operations/monitoring" class="text-quantum-400 hover:underline">Monitoring</a> dashboards for anomalies</li>
-    <li>Review the <a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> for missing configurations</li>
+    <li>Check the <a href={url('/docs/operations/monitoring')} class="text-quantum-400 hover:underline">Monitoring</a> dashboards for anomalies</li>
+    <li>Review the <a href={url('/docs/deployment/production')} class="text-quantum-400 hover:underline">Production Checklist</a> for missing configurations</li>
     <li>Consult runbooks in <code class="bg-surface-700 px-1.5 py-0.5 rounded text-quantum-400 font-mono text-sm">ops/monitoring/runbooks/</code></li>
     <li>File an issue on the GitHub repository with logs and configuration details</li>
   </ul>

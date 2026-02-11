@@ -2,6 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PageHero from '@/components/hero/PageHero.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
+import { url } from '@/utils/url';
 ---
 
 <PageLayout
@@ -178,18 +179,18 @@ curl http://localhost:8000/api/v1/discover | jq
         </p>
         <div class="card p-4 border-l-4 border-l-quantum-500">
           <p class="text-sm text-gray-300">
-            <span class="font-semibold text-quantum-400">What's next?</span> Now that you have a protocol specification, you can generate a modern API adapter using <a href="/tutorials/build-protocol-adapter" class="text-quantum-400 hover:underline">Translation Studio</a>, or secure it with <a href="/tutorials/quantum-safe-encryption" class="text-quantum-400 hover:underline">post-quantum encryption</a>.
+            <span class="font-semibold text-quantum-400">What's next?</span> Now that you have a protocol specification, you can generate a modern API adapter using <a href={url('/tutorials/build-protocol-adapter')} class="text-quantum-400 hover:underline">Translation Studio</a>, or secure it with <a href={url('/tutorials/quantum-safe-encryption')} class="text-quantum-400 hover:underline">post-quantum encryption</a>.
           </p>
         </div>
       </div>
 
       <!-- Navigation -->
       <div class="flex items-center justify-between pt-8 border-t border-surface-600/50">
-        <a href="/tutorials" class="btn-ghost text-sm">
+        <a href={url('/tutorials')} class="btn-ghost text-sm">
           <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
           All Tutorials
         </a>
-        <a href="/tutorials/quantum-safe-encryption" class="btn-secondary text-sm">
+        <a href={url('/tutorials/quantum-safe-encryption')} class="btn-secondary text-sm">
           Next: Quantum-Safe Encryption
           <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
         </a>

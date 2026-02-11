@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="Monitoring & Observability | QBITEL Bridge Docs" description="Monitoring and observability guide for QBITEL Bridge: Prometheus, Grafana, OpenTelemetry, distributed tracing, and alerting.">
@@ -198,8 +199,8 @@ export OTEL_TRACES_SAMPLER_ARG=0.1  <span class="text-gray-500"># 10% sampling r
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/operations/troubleshooting" class="text-quantum-400 hover:underline">Troubleshooting</a> -- use monitoring data to diagnose issues</li>
-    <li><a href="/docs/deployment/production" class="text-quantum-400 hover:underline">Production Checklist</a> -- monitoring setup verification</li>
-    <li><a href="/docs/security/compliance-frameworks" class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- compliance monitoring dashboards</li>
+    <li><a href={url('/docs/operations/troubleshooting')} class="text-quantum-400 hover:underline">Troubleshooting</a> -- use monitoring data to diagnose issues</li>
+    <li><a href={url('/docs/deployment/production')} class="text-quantum-400 hover:underline">Production Checklist</a> -- monitoring setup verification</li>
+    <li><a href={url('/docs/security/compliance-frameworks')} class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- compliance monitoring dashboards</li>
   </ul>
 </DocsLayout>

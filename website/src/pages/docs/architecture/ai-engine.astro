@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="AI Engine | QBITEL Bridge Docs" description="Deep dive into the Python AI Engine: PyTorch, FastAPI, multi-agent orchestration, and protocol discovery pipeline.">
@@ -137,8 +138,8 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/api/rest-api" class="text-quantum-400 hover:underline">REST API Reference</a> -- explore the AI Engine's API endpoints</li>
-    <li><a href="/docs/development/python" class="text-quantum-400 hover:underline">Python Development Guide</a> -- contribute to the AI Engine</li>
-    <li><a href="/docs/architecture/data-plane" class="text-quantum-400 hover:underline">Rust Data Plane</a> -- understand the data pipeline</li>
+    <li><a href={url('/docs/api/rest-api')} class="text-quantum-400 hover:underline">REST API Reference</a> -- explore the AI Engine's API endpoints</li>
+    <li><a href={url('/docs/development/python')} class="text-quantum-400 hover:underline">Python Development Guide</a> -- contribute to the AI Engine</li>
+    <li><a href={url('/docs/architecture/data-plane')} class="text-quantum-400 hover:underline">Rust Data Plane</a> -- understand the data pipeline</li>
   </ul>
 </DocsLayout>

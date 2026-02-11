@@ -1,5 +1,6 @@
 ---
 import { mainNavigation } from '@/data/navigation';
+import { url } from '@/utils/url';
 
 const currentPath = Astro.url.pathname;
 ---
@@ -8,7 +9,7 @@ const currentPath = Astro.url.pathname;
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <nav class="flex h-16 items-center justify-between" aria-label="Main navigation">
       <!-- Logo -->
-      <a href="/" class="flex items-center gap-2 group" aria-label="QBITEL Bridge Home">
+      <a href={url('/')} class="flex items-center gap-2 group" aria-label="QBITEL Bridge Home">
         <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-quantum-500 to-neon-cyan text-white font-bold text-sm">
           Q
         </div>
@@ -22,7 +23,7 @@ const currentPath = Astro.url.pathname;
         {mainNavigation.map((item) => (
           <div class="relative group">
             <a
-              href={item.href}
+              href={url(item.href)}
               class={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                 currentPath.startsWith(item.href) && item.href !== '/'
                   ? 'text-quantum-400'
@@ -43,7 +44,7 @@ const currentPath = Astro.url.pathname;
                   <div class="grid gap-1">
                     {item.children.map((child) => (
                       <a
-                        href={child.href}
+                        href={url(child.href)}
                         class="flex items-start gap-3 p-2 rounded-lg hover:bg-surface-700/50 transition-colors group/item"
                       >
                         <div class="flex-1">
@@ -100,7 +101,7 @@ const currentPath = Astro.url.pathname;
       {mainNavigation.map((item) => (
         <div>
           <a
-            href={item.href}
+            href={url(item.href)}
             class={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               currentPath.startsWith(item.href) && item.href !== '/'
                 ? 'text-quantum-400 bg-quantum-500/10'
@@ -113,7 +114,7 @@ const currentPath = Astro.url.pathname;
             <div class="ml-4 mt-1 space-y-1">
               {item.children.slice(0, 6).map((child) => (
                 <a
-                  href={child.href}
+                  href={url(child.href)}
                   class="block px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white hover:bg-surface-700 transition-colors"
                 >
                   {child.label}

@@ -9,6 +9,7 @@ import CTABanner from '@/components/cta/CTABanner.astro';
 import { howItWorks } from '@/data/features';
 import { industries } from '@/data/industries';
 import { performanceStats } from '@/data/stats';
+import { url } from '@/utils/url';
 ---
 
 <LandingLayout
@@ -208,7 +209,7 @@ import { performanceStats } from '@/data/stats';
       </div>
 
       <div class="text-center mt-8">
-        <a href="/docs/architecture/overview" class="btn-secondary">
+        <a href={url('/docs/architecture/overview')} class="btn-secondary">
           Explore Architecture
           <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -306,7 +307,7 @@ import { performanceStats } from '@/data/stats';
             </svg>
             View on GitHub
           </a>
-          <a href="/enterprise" class="btn-secondary text-sm">
+          <a href={url('/enterprise')} class="btn-secondary text-sm">
             Enterprise Support
           </a>
         </div>

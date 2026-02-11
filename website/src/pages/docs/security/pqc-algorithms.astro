@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '@/layouts/DocsLayout.astro';
+import { url } from '@/utils/url';
 ---
 
 <DocsLayout title="PQC Algorithms | QBITEL Bridge Docs" description="Post-quantum cryptography algorithms in QBITEL Bridge: ML-KEM (Kyber), ML-DSA (Dilithium), Falcon, and SLH-DSA (SPHINCS+).">
@@ -197,8 +198,8 @@ import DocsLayout from '@/layouts/DocsLayout.astro';
 
   <h2 id="next-steps" class="text-2xl font-bold text-white mt-12 mb-4">Next Steps</h2>
   <ul class="list-disc list-inside text-gray-300 space-y-2">
-    <li><a href="/docs/architecture/data-plane" class="text-quantum-400 hover:underline">Rust Data Plane</a> -- PQC-TLS implementation details</li>
-    <li><a href="/docs/security/zero-trust" class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- PQC in the trust model</li>
-    <li><a href="/docs/security/compliance-frameworks" class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- PQC regulatory requirements</li>
+    <li><a href={url('/docs/architecture/data-plane')} class="text-quantum-400 hover:underline">Rust Data Plane</a> -- PQC-TLS implementation details</li>
+    <li><a href={url('/docs/security/zero-trust')} class="text-quantum-400 hover:underline">Zero-Trust Architecture</a> -- PQC in the trust model</li>
+    <li><a href={url('/docs/security/compliance-frameworks')} class="text-quantum-400 hover:underline">Compliance Frameworks</a> -- PQC regulatory requirements</li>
   </ul>
 </DocsLayout>
