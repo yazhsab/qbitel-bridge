@@ -27,7 +27,16 @@
       "Bash(if [ -e \"$f\" ])",
       "Bash(then echo \"OK: $f\")",
       "Bash(else echo \"MISSING: $f\")",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(git pull:*)",
+      "Bash(git push:*)",
+      "Bash(gh run list:*)",
+      "Bash(while read id)",
+      "Bash(do gh run cancel \"$id\" --repo yazhsab/qbitel-bridge)",
+      "Bash(gh workflow run:*)",
+      "Bash(gh pr list:*)",
+      "Bash(git add:*)",
+      "Bash(open:*)"
     ]
   }
 }

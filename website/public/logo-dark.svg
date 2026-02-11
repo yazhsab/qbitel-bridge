@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 160" fill="none">
+  <defs>
+    <linearGradient id="quantumGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="50%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#00f5ff"/>
+    </linearGradient>
+    <linearGradient id="shieldGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="bridgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="50%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#00f5ff"/>
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f1422"/>
+      <stop offset="100%" stop-color="#060a14"/>
+    </linearGradient>
+    <filter id="quantumGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#00f5ff" flood-opacity="0.4"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="aiGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feFlood flood-color="#a855f7" flood-opacity="0.35"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="textGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#00f5ff" flood-opacity="0.12"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background card -->
+  <rect width="560" height="160" rx="16" fill="url(#bgGrad)"/>
+  <rect x="0.5" y="0.5" width="559" height="159" rx="15.5" fill="none" stroke="url(#quantumGrad)" stroke-width="0.5" opacity="0.15"/>
+
+  <!-- ===== ICON MARK (centered vertically at y=80) ===== -->
+
+  <!-- SHIELD -->
+  <path d="M60 16 L100 28 L100 65 Q100 88 60 104 Q20 88 20 65 L20 28 Z"
+        fill="none" stroke="url(#shieldGrad)" stroke-width="2" opacity="0.6"/>
+  <path d="M60 19 L96 30 L96 63 Q96 84 60 99 Q24 84 24 63 L24 30 Z"
+        fill="url(#shieldGrad)" opacity="0.04"/>
+
+  <!-- QUANTUM ATOM orbits -->
+  <ellipse cx="60" cy="56" rx="25" ry="10" fill="none" stroke="url(#quantumGrad)" stroke-width="1.1" opacity="0.45"/>
+  <ellipse cx="60" cy="56" rx="25" ry="10" fill="none" stroke="url(#quantumGrad)" stroke-width="1.1" opacity="0.45" transform="rotate(60 60 56)"/>
+  <ellipse cx="60" cy="56" rx="25" ry="10" fill="none" stroke="url(#quantumGrad)" stroke-width="1.1" opacity="0.45" transform="rotate(-60 60 56)"/>
+
+  <!-- Nucleus -->
+  <circle cx="60" cy="56" r="4.5" fill="url(#quantumGrad)" filter="url(#quantumGlow)"/>
+  <circle cx="60" cy="56" r="2" fill="white" opacity="0.85"/>
+
+  <!-- Electrons -->
+  <circle cx="85" cy="56" r="2.5" fill="#00f5ff" filter="url(#quantumGlow)" opacity="0.9"/>
+  <circle cx="47" cy="35" r="2.5" fill="#3b82f6" filter="url(#quantumGlow)" opacity="0.9"/>
+  <circle cx="47" cy="77" r="2.5" fill="#06b6d4" filter="url(#quantumGlow)" opacity="0.9"/>
+
+  <!-- AI NEURAL NETWORK -->
+  <circle cx="42" cy="46" r="1.5" fill="#a855f7" opacity="0.75"/>
+  <circle cx="78" cy="46" r="1.5" fill="#a855f7" opacity="0.75"/>
+  <circle cx="50" cy="33" r="1.5" fill="#a855f7" opacity="0.75"/>
+  <circle cx="70" cy="33" r="1.5" fill="#a855f7" opacity="0.75"/>
+  <circle cx="60" cy="26" r="2" fill="#a855f7" filter="url(#aiGlow)"/>
+  <!-- Neural connections -->
+  <line x1="42" y1="46" x2="50" y2="33" stroke="#a855f7" stroke-width="0.6" opacity="0.4"/>
+  <line x1="78" y1="46" x2="70" y2="33" stroke="#a855f7" stroke-width="0.6" opacity="0.4"/>
+  <line x1="50" y1="33" x2="60" y2="26" stroke="#a855f7" stroke-width="0.6" opacity="0.4"/>
+  <line x1="70" y1="33" x2="60" y2="26" stroke="#a855f7" stroke-width="0.6" opacity="0.4"/>
+  <line x1="50" y1="33" x2="70" y2="33" stroke="#a855f7" stroke-width="0.4" opacity="0.3"/>
+  <line x1="42" y1="46" x2="60" y2="56" stroke="#a855f7" stroke-width="0.4" opacity="0.2"/>
+  <line x1="78" y1="46" x2="60" y2="56" stroke="#a855f7" stroke-width="0.4" opacity="0.2"/>
+
+  <!-- BRIDGE -->
+  <path d="M35 85 C43 70, 77 70, 85 85" stroke="url(#bridgeGrad)" stroke-width="2.2" fill="none" stroke-linecap="round" filter="url(#quantumGlow)"/>
+  <line x1="44" y1="80" x2="44" y2="91" stroke="url(#quantumGrad)" stroke-width="1.2" opacity="0.45" stroke-linecap="round"/>
+  <line x1="76" y1="80" x2="76" y2="91" stroke="url(#quantumGrad)" stroke-width="1.2" opacity="0.45" stroke-linecap="round"/>
+  <line x1="37" y1="91" x2="83" y2="91" stroke="url(#bridgeGrad)" stroke-width="1.2" opacity="0.35" stroke-linecap="round"/>
+  <!-- Data flow -->
+  <circle cx="51" cy="75" r="1.4" fill="#00f5ff" opacity="0.65"/>
+  <circle cx="60" cy="72.5" r="1.7" fill="white" opacity="0.5"/>
+  <circle cx="69" cy="75" r="1.4" fill="#a855f7" opacity="0.65"/>
+
+  <!-- ===== WORDMARK ===== -->
+
+  <!-- "QBITEL" -->
+  <text x="130" y="68" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="800" font-size="42" letter-spacing="3" fill="white" filter="url(#textGlow)">
+    QBITEL
+  </text>
+
+  <!-- "Bridge" in gradient -->
+  <text x="335" y="68" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="600" font-size="42" letter-spacing="1.5" fill="url(#quantumGrad)">
+    Bridge
+  </text>
+
+  <!-- Tagline with color-coded keywords -->
+  <text x="130" y="95" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="500" font-size="12" letter-spacing="3">
+    <tspan fill="#a855f7">AI-POWERED</tspan>
+    <tspan fill="#4b5563"> · </tspan>
+    <tspan fill="#00f5ff">QUANTUM-SAFE</tspan>
+    <tspan fill="#4b5563"> · </tspan>
+    <tspan fill="#3b82f6">PROTOCOL INTELLIGENCE</tspan>
+  </text>
+
+  <!-- Accent line -->
+  <line x1="130" y1="108" x2="330" y2="108" stroke="url(#bridgeGrad)" stroke-width="0.8" opacity="0.25"/>
+
+  <!-- Badges row -->
+  <!-- v1.0 badge -->
+  <rect x="130" y="116" width="52" height="20" rx="10" fill="none" stroke="url(#quantumGrad)" stroke-width="0.7" opacity="0.35"/>
+  <text x="156" y="130" font-family="JetBrains Mono, monospace" font-weight="500" font-size="9" fill="url(#quantumGrad)" text-anchor="middle" opacity="0.6">v1.0</text>
+
+  <!-- Open Source badge -->
+  <rect x="192" y="116" width="82" height="20" rx="10" fill="none" stroke="#22c55e" stroke-width="0.7" opacity="0.3"/>
+  <text x="233" y="130" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="9" fill="#22c55e" text-anchor="middle" opacity="0.55">Open Source</text>
+
+  <!-- NIST Level 5 badge -->
+  <rect x="284" y="116" width="82" height="20" rx="10" fill="none" stroke="#00f5ff" stroke-width="0.7" opacity="0.3"/>
+  <text x="325" y="130" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="9" fill="#00f5ff" text-anchor="middle" opacity="0.55">NIST Level 5</text>
+</svg>

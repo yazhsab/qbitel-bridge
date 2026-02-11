@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" fill="none">
+  <defs>
+    <!-- Quantum blue to cyan gradient -->
+    <linearGradient id="quantumGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="40%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#00f5ff"/>
+    </linearGradient>
+    <!-- AI purple gradient -->
+    <linearGradient id="aiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <!-- Shield gradient -->
+    <linearGradient id="shieldGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <!-- Bridge gradient -->
+    <linearGradient id="bridgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="50%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#00f5ff"/>
+    </linearGradient>
+    <!-- Glow effects -->
+    <filter id="quantumGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feFlood flood-color="#00f5ff" flood-opacity="0.4"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="aiGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feFlood flood-color="#a855f7" flood-opacity="0.35"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- ===== ICON: Shield + Quantum Atom + AI Brain + Bridge ===== -->
+
+  <!-- SHIELD outline (security/protection) -->
+  <path d="M50 8 L85 20 L85 55 Q85 80 50 98 Q15 80 15 55 L15 20 Z"
+        fill="none" stroke="url(#shieldGrad)" stroke-width="2.2" opacity="0.7"/>
+  <path d="M50 12 L81 23 L81 54 Q81 76 50 93 Q19 76 19 54 L19 23 Z"
+        fill="url(#shieldGrad)" opacity="0.06"/>
+
+  <!-- QUANTUM ATOM orbits (3 elliptical orbits) -->
+  <!-- Orbit 1 — horizontal -->
+  <ellipse cx="50" cy="48" rx="22" ry="9" fill="none" stroke="url(#quantumGrad)" stroke-width="1.2" opacity="0.5"/>
+  <!-- Orbit 2 — tilted 60° -->
+  <ellipse cx="50" cy="48" rx="22" ry="9" fill="none" stroke="url(#quantumGrad)" stroke-width="1.2" opacity="0.5" transform="rotate(60 50 48)"/>
+  <!-- Orbit 3 — tilted -60° -->
+  <ellipse cx="50" cy="48" rx="22" ry="9" fill="none" stroke="url(#quantumGrad)" stroke-width="1.2" opacity="0.5" transform="rotate(-60 50 48)"/>
+
+  <!-- Quantum nucleus (core dot) -->
+  <circle cx="50" cy="48" r="4" fill="url(#quantumGrad)" filter="url(#quantumGlow)"/>
+  <circle cx="50" cy="48" r="2" fill="white" opacity="0.8"/>
+
+  <!-- Electron particles on orbits -->
+  <circle cx="72" cy="48" r="2.5" fill="#00f5ff" filter="url(#quantumGlow)"/>
+  <circle cx="39" cy="30" r="2.5" fill="#3b82f6" filter="url(#quantumGlow)"/>
+  <circle cx="39" cy="66" r="2.5" fill="#06b6d4" filter="url(#quantumGlow)"/>
+
+  <!-- AI NEURAL NODES (brain network pattern in top half of shield) -->
+  <!-- Node cluster — represents AI/ML intelligence -->
+  <circle cx="35" cy="38" r="1.5" fill="#a855f7" opacity="0.8"/>
+  <circle cx="65" cy="38" r="1.5" fill="#a855f7" opacity="0.8"/>
+  <circle cx="42" cy="28" r="1.5" fill="#a855f7" opacity="0.8"/>
+  <circle cx="58" cy="28" r="1.5" fill="#a855f7" opacity="0.8"/>
+  <circle cx="50" cy="22" r="1.8" fill="#a855f7" filter="url(#aiGlow)"/>
+  <!-- Neural connections -->
+  <line x1="35" y1="38" x2="42" y2="28" stroke="#a855f7" stroke-width="0.7" opacity="0.4"/>
+  <line x1="65" y1="38" x2="58" y2="28" stroke="#a855f7" stroke-width="0.7" opacity="0.4"/>
+  <line x1="42" y1="28" x2="50" y2="22" stroke="#a855f7" stroke-width="0.7" opacity="0.4"/>
+  <line x1="58" y1="28" x2="50" y2="22" stroke="#a855f7" stroke-width="0.7" opacity="0.4"/>
+  <line x1="42" y1="28" x2="58" y2="28" stroke="#a855f7" stroke-width="0.5" opacity="0.3"/>
+  <line x1="35" y1="38" x2="50" y2="48" stroke="#a855f7" stroke-width="0.5" opacity="0.25"/>
+  <line x1="65" y1="38" x2="50" y2="48" stroke="#a855f7" stroke-width="0.5" opacity="0.25"/>
+
+  <!-- BRIDGE element at the bottom of shield -->
+  <path d="M28 72 C35 60, 65 60, 72 72" stroke="url(#bridgeGrad)" stroke-width="2.2" fill="none" stroke-linecap="round" filter="url(#quantumGlow)"/>
+  <!-- Bridge pillars -->
+  <line x1="36" y1="68" x2="36" y2="78" stroke="url(#quantumGrad)" stroke-width="1.2" opacity="0.5" stroke-linecap="round"/>
+  <line x1="64" y1="68" x2="64" y2="78" stroke="url(#quantumGrad)" stroke-width="1.2" opacity="0.5" stroke-linecap="round"/>
+  <!-- Bridge road -->
+  <line x1="30" y1="78" x2="70" y2="78" stroke="url(#bridgeGrad)" stroke-width="1.2" opacity="0.4" stroke-linecap="round"/>
+  <!-- Data flow dots on bridge -->
+  <circle cx="42" cy="63.5" r="1.3" fill="#00f5ff" opacity="0.7"/>
+  <circle cx="50" cy="61" r="1.6" fill="white" opacity="0.6"/>
+  <circle cx="58" cy="63.5" r="1.3" fill="#a855f7" opacity="0.7"/>
+
+
+  <!-- ===== WORDMARK ===== -->
+
+  <!-- "QBITEL" -->
+  <text x="115" y="55" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="800" font-size="38" letter-spacing="2" fill="white">
+    QBITEL
+  </text>
+
+  <!-- "Bridge" in gradient -->
+  <text x="285" y="55" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="600" font-size="38" letter-spacing="1" fill="url(#quantumGrad)">
+    Bridge
+  </text>
+
+  <!-- Tagline with highlighted keywords -->
+  <text x="115" y="80" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="500" font-size="11" letter-spacing="2.5">
+    <tspan fill="#a855f7">AI-POWERED</tspan>
+    <tspan fill="#4b5563"> · </tspan>
+    <tspan fill="#00f5ff">QUANTUM-SAFE</tspan>
+    <tspan fill="#4b5563"> · </tspan>
+    <tspan fill="#3b82f6">PROTOCOL INTELLIGENCE</tspan>
+  </text>
+
+  <!-- Small accent line under tagline -->
+  <line x1="115" y1="90" x2="280" y2="90" stroke="url(#bridgeGrad)" stroke-width="0.8" opacity="0.3"/>
+</svg>

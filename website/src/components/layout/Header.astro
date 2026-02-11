@@ -9,10 +9,8 @@ const currentPath = Astro.url.pathname;
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <nav class="flex h-16 items-center justify-between" aria-label="Main navigation">
       <!-- Logo -->
-      <a href={url('/')} class="flex items-center gap-2 group" aria-label="QBITEL Bridge Home">
-        <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-quantum-500 to-neon-cyan text-white font-bold text-sm">
-          Q
-        </div>
+      <a href={url('/')} class="flex items-center gap-2.5 group" aria-label="QBITEL Bridge Home">
+        <img src={url('/logo.png')} alt="QBITEL Bridge" class="h-9 w-auto" />
         <span class="text-lg font-bold text-white group-hover:text-quantum-400 transition-colors">
           QBITEL <span class="text-quantum-400">Bridge</span>
         </span>
