@@ -5,19 +5,26 @@ export interface Stat {
 }
 
 export const heroStats: Stat[] = [
-  { value: '89%+', label: 'Discovery Accuracy', description: 'Protocol classification with CNN + BiLSTM' },
-  { value: 'Level 5', label: 'NIST PQC', description: '256-bit quantum security (ML-KEM, ML-DSA)' },
-  { value: '78%', label: 'Autonomous Response', description: 'Zero-touch security decisions' },
-  { value: '<1ms', label: 'Encryption Latency', description: 'Hybrid PQC + classical overhead' },
-  { value: '9', label: 'Compliance Frameworks', description: 'SOC2, GDPR, HIPAA, PCI-DSS, and more' },
-  { value: '100K+', label: 'msg/sec Throughput', description: 'Kafka event streaming with AES-256-GCM' },
+  { value: '89%+', label: 'Discovery Accuracy', description: 'CNN + BiLSTM + Transformer ensemble' },
+  { value: 'Level 5', label: 'NIST PQC', description: '256-bit quantum-safe (ML-KEM, ML-DSA)' },
+  { value: '78%', label: 'Autonomous Response', description: 'Zero-touch security decisions via LLM' },
+  { value: '<1ms', label: 'Encryption Overhead', description: 'Hybrid PQC + classical processing' },
+  { value: '9', label: 'Compliance Frameworks', description: 'SOC2, GDPR, HIPAA, PCI-DSS & more' },
+  { value: '100K+', label: 'Events/sec', description: 'Encrypted Kafka streaming (AES-256-GCM)' },
 ];
 
 export const performanceStats: Stat[] = [
-  { value: '2-4 hrs', label: 'Discovery Time', description: 'vs 6-12 months manual reverse engineering' },
-  { value: '50K+', label: 'msg/sec Parsing', description: 'Generated parser throughput' },
-  { value: '<1s', label: 'Decision Time', description: '900x faster than manual SOC response' },
-  { value: '10K+', label: 'Containers', description: 'eBPF monitoring with <1% CPU overhead' },
-  { value: '150ms', label: 'P95 Latency', description: 'Protocol discovery request latency' },
+  { value: '2-4 hrs', label: 'Protocol Discovery', description: 'vs 6-12 months manual reverse engineering' },
+  { value: '50K+', label: 'msg/sec Parsing', description: 'Auto-generated parser throughput' },
+  { value: '<1s', label: 'Threat Response', description: '900x faster than manual SOC triage' },
+  { value: '10K+', label: 'Containers/Node', description: 'eBPF monitoring with <1% CPU overhead' },
+  { value: '150ms', label: 'P95 Latency', description: 'End-to-end protocol discovery request' },
   { value: '6', label: 'SDK Languages', description: 'Python, TypeScript, Go, Java, Rust, C#' },
+];
+
+export const enterpriseStats: Stat[] = [
+  { value: '$2-10M', label: 'Traditional Cost', description: 'Manual protocol reverse engineering' },
+  { value: '$200K', label: 'With QBitel', description: 'AI-automated protocol discovery' },
+  { value: '95%', label: 'Cost Reduction', description: 'On protocol discovery projects' },
+  { value: '24/7', label: 'Autonomous Ops', description: 'Zero-touch security with audit trails' },
 ];
