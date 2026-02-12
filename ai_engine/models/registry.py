@@ -37,6 +37,14 @@ class ModelStatus(str, Enum):
     FAILED = "failed"
 
 
+class ModelVersionStatus(str, Enum):
+    """Model version status enumeration."""
+
+    STAGED = "staged"
+    PRODUCTION = "production"
+    ARCHIVED = "archived"
+
+
 class ModelType(str, Enum):
     """Model type enumeration."""
 
