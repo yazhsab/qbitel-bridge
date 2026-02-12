@@ -5,8 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 
 export default defineConfig({
-  site: 'https://yazhsab.github.io',
-  base: '/qbitel-bridge',
+  site: 'https://bridge.qbitel.com',
   output: 'static',
   integrations: [
     tailwind(),

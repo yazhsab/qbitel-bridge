@@ -36,7 +36,8 @@
       "Bash(gh workflow run:*)",
       "Bash(gh pr list:*)",
       "Bash(git add:*)",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(cat:*)"
     ]
   }
 }
