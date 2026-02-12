@@ -151,9 +151,11 @@ jobs:
           for sbom in ${{ env.SBOM_OUTPUT_DIR }}/*-spdx.json; do
             component=$(basename "$sbom" | sed 's/-spdx.json//')
             grype sbom:"$sbom" \
+              --add-cpes-if-none \
               -o json \
               --file "${{ env.SBOM_OUTPUT_DIR }}/${component}-vulnerabilities.json"
             grype sbom:"$sbom" \
+              --add-cpes-if-none \
               -o sarif \
               --file "${{ env.SBOM_OUTPUT_DIR }}/${component}-vulnerabilities.sarif"
           done
@@ -169,6 +171,7 @@ jobs:
       - name: Upload engine vulnerability SARIF
         uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('./sbom-artifacts/qbitel-engine-vulnerabilities.sarif') != ''
+        continue-on-error: true
         with:
           sarif_file: ${{ env.SBOM_OUTPUT_DIR }}/qbitel-engine-vulnerabilities.sarif
           category: sbom-vuln-engine
@@ -176,6 +179,7 @@ jobs:
       - name: Upload dataplane vulnerability SARIF
         uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('./sbom-artifacts/qbitel-dataplane-vulnerabilities.sarif') != ''
+        continue-on-error: true
         with:
           sarif_file: ${{ env.SBOM_OUTPUT_DIR }}/qbitel-dataplane-vulnerabilities.sarif
           category: sbom-vuln-dataplane
@@ -183,6 +187,7 @@ jobs:
       - name: Upload controlplane vulnerability SARIF
         uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('./sbom-artifacts/qbitel-controlplane-vulnerabilities.sarif') != ''
+        continue-on-error: true
         with:
           sarif_file: ${{ env.SBOM_OUTPUT_DIR }}/qbitel-controlplane-vulnerabilities.sarif
           category: sbom-vuln-controlplane
@@ -190,6 +195,7 @@ jobs:
       - name: Upload console vulnerability SARIF
         uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('./sbom-artifacts/qbitel-console-vulnerabilities.sarif') != ''
+        continue-on-error: true
         with:
           sarif_file: ${{ env.SBOM_OUTPUT_DIR }}/qbitel-console-vulnerabilities.sarif
           category: sbom-vuln-console
@@ -197,6 +203,7 @@ jobs:
       - name: Upload platform vulnerability SARIF
         uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('./sbom-artifacts/qbitel-platform-vulnerabilities.sarif') != ''
+        continue-on-error: true
         with:
           sarif_file: ${{ env.SBOM_OUTPUT_DIR }}/qbitel-platform-vulnerabilities.sarif
           category: sbom-vuln-platform
