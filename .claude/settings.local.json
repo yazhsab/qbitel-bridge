@@ -37,7 +37,15 @@
       "Bash(gh pr list:*)",
       "Bash(git add:*)",
       "Bash(open:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(dig:*)",
+      "Bash(nslookup:*)",
+      "Bash(gh api:*)",
+      "Bash(sudo tee:*)",
+      "Bash(gh run view:*)",
+      "Bash(pip install:*)",
+      "Bash(pip3 install:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

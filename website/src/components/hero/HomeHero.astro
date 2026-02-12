@@ -47,30 +47,34 @@ import { url } from '@/utils/url';
       </div>
 
       <div class="hidden lg:block relative animate-slide-up" style="animation-delay: 0.4s;">
-        <div class="relative h-[430px] rounded-3xl border border-surface-600/60 bg-surface-900/70 overflow-hidden shadow-2xl shadow-black/40">
+        <div class="hero-canvas relative h-[430px] rounded-3xl border border-surface-600/60 bg-surface-900/70 overflow-hidden shadow-2xl shadow-black/40">
           <div class="absolute inset-0 bg-grid-pattern bg-grid opacity-30" />
+          <div class="hero-aura absolute inset-0" />
 
-          <div class="absolute left-[-8%] top-[35%] text-[11px] font-mono text-neon-copper/80 leading-4 tracking-[0.2em] rotate-[-10deg]">
-            0110110101100110011010010110111001100101<br />
-            0011010001100010011001010111001001100100<br />
-            1100100011000010111001101101000010101110
+          <div class="binary-stream absolute left-[-11%] top-[36%] text-[11px] font-mono text-neon-copper/85 leading-4 tracking-[0.2em] rotate-[-10deg] whitespace-nowrap">
+            01101101011001100110100101101110011001010011010001100010011001010111001001100100
+          </div>
+          <div class="binary-stream delay absolute left-[-13%] top-[42%] text-[11px] font-mono text-neon-copper/70 leading-4 tracking-[0.2em] rotate-[-10deg] whitespace-nowrap">
+            11001000110000101110011011010000101011100110110101100110011010010110111001100101
           </div>
 
-          <div class="absolute left-[31%] top-[20%] w-28 h-48 border border-neon-cyan/70 rotate-[18deg] bg-gradient-to-b from-neon-cyan/10 to-transparent shadow-[0_0_28px_rgba(79,216,255,0.25)]" />
+          <div class="prism absolute left-[31%] top-[20%] w-28 h-48 border border-neon-cyan/70 rotate-[18deg] bg-gradient-to-b from-neon-cyan/10 to-transparent shadow-[0_0_30px_rgba(79,216,255,0.25)]" />
 
-          <div class="absolute left-[42%] top-[47%] h-px w-[26%] bg-gradient-to-r from-neon-copper/80 to-neon-cyan/80" />
-          <div class="absolute left-[42%] top-[42%] h-px w-[26%] bg-gradient-to-r from-neon-copper/50 to-neon-cyan/70" />
-          <div class="absolute left-[42%] top-[52%] h-px w-[26%] bg-gradient-to-r from-neon-copper/50 to-neon-cyan/70" />
+          <div class="beam absolute left-[42%] top-[42%] h-px w-[26%] bg-gradient-to-r from-neon-copper/45 to-neon-cyan/70" />
+          <div class="beam delay absolute left-[42%] top-[47%] h-px w-[26%] bg-gradient-to-r from-neon-copper/80 to-neon-cyan/80" />
+          <div class="beam delay-2 absolute left-[42%] top-[52%] h-px w-[26%] bg-gradient-to-r from-neon-copper/45 to-neon-cyan/70" />
+          <div class="signal-dot absolute left-[57%] top-[46.4%] h-2 w-2 rounded-full bg-neon-cyan shadow-[0_0_12px_rgba(79,216,255,0.8)]" />
 
-          <div class="absolute right-[8%] top-[14%] w-56 h-56 rounded-full border border-neon-cyan/60">
+          <div class="sphere absolute right-[8%] top-[14%] w-56 h-56 rounded-full border border-neon-cyan/60">
             <div class="absolute inset-3 rounded-full border border-neon-cyan/40" />
             <div class="absolute inset-0 rounded-full" style="background-image: linear-gradient(to right, rgba(79,216,255,.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(79,216,255,.4) 1px, transparent 1px); background-size: 32px 32px; mask-image: radial-gradient(circle at center, black 68%, transparent 100%);" />
-            <div class="absolute inset-0 rounded-full border-t border-l border-neon-cyan/60 rotate-12" />
-            <div class="absolute inset-0 rounded-full border-b border-r border-neon-cyan/60 -rotate-12" />
+            <div class="orbit absolute inset-0 rounded-full border-t border-l border-neon-cyan/70" />
+            <div class="orbit delay absolute inset-0 rounded-full border-b border-r border-neon-cyan/50" />
+            <div class="scanline absolute left-[8%] right-[8%] h-px bg-neon-cyan/70" />
           </div>
 
-          <div class="absolute bottom-5 left-5 right-5 rounded-xl border border-surface-600/60 bg-surface-800/80 p-3 font-mono text-xs text-slate-300">
-            <div class="text-neon-green">session: legacy-modernization</div>
+          <div class="absolute bottom-5 left-5 right-5 rounded-xl border border-surface-600/60 bg-surface-800/85 p-3 font-mono text-xs text-slate-300">
+            <div class="text-neon-green">session: legacy-modernization<span class="cursor">_</span></div>
             <div class="mt-1">protocols.discovered = 47</div>
             <div>pqc.profile = ML-KEM-1024 + ML-DSA-87</div>
             <div>response.mode = autonomous</div>
@@ -80,3 +84,117 @@ import { url } from '@/utils/url';
     </div>
   </div>
 </section>
+
+<style>
+  .hero-canvas {
+    isolation: isolate;
+  }
+
+  .hero-aura {
+    background:
+      radial-gradient(circle at 68% 34%, rgba(79, 216, 255, 0.16), transparent 42%),
+      radial-gradient(circle at 35% 54%, rgba(195, 135, 83, 0.14), transparent 38%);
+    animation: heroPulse 7s ease-in-out infinite;
+  }
+
+  .binary-stream {
+    animation: streamFlow 9s linear infinite;
+  }
+
+  .binary-stream.delay {
+    animation-delay: -3s;
+  }
+
+  .prism {
+    transform-origin: center;
+    animation: prismFloat 6s ease-in-out infinite;
+  }
+
+  .beam {
+    animation: beamPulse 2.5s ease-in-out infinite;
+  }
+
+  .beam.delay {
+    animation-delay: .5s;
+  }
+
+  .beam.delay-2 {
+    animation-delay: 1s;
+  }
+
+  .signal-dot {
+    animation: dotTravel 2.8s ease-in-out infinite;
+  }
+
+  .orbit {
+    animation: orbitSpin 16s linear infinite;
+  }
+
+  .orbit.delay {
+    animation-delay: -8s;
+  }
+
+  .scanline {
+    animation: scanSweep 3.2s ease-in-out infinite;
+  }
+
+  .cursor {
+    animation: cursorBlink 1s steps(1) infinite;
+  }
+
+  @keyframes heroPulse {
+    0%, 100% { opacity: .9; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.02); }
+  }
+
+  @keyframes streamFlow {
+    0% { transform: translateX(-4%) rotate(-10deg); opacity: .2; }
+    20% { opacity: .85; }
+    80% { opacity: .85; }
+    100% { transform: translateX(12%) rotate(-10deg); opacity: .2; }
+  }
+
+  @keyframes prismFloat {
+    0%, 100% { transform: translateY(0) rotate(18deg); }
+    50% { transform: translateY(-8px) rotate(22deg); }
+  }
+
+  @keyframes beamPulse {
+    0%, 100% { opacity: .45; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes dotTravel {
+    0%, 10% { transform: translateX(-20px); opacity: 0; }
+    30%, 70% { opacity: 1; }
+    90%, 100% { transform: translateX(90px); opacity: 0; }
+  }
+
+  @keyframes orbitSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes scanSweep {
+    0%, 100% { top: 18%; opacity: .25; }
+    50% { top: 74%; opacity: .9; }
+  }
+
+  @keyframes cursorBlink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-aura,
+    .binary-stream,
+    .prism,
+    .beam,
+    .signal-dot,
+    .orbit,
+    .scanline,
+    .cursor {
+      animation: none !important;
+    }
+  }
+</style>
