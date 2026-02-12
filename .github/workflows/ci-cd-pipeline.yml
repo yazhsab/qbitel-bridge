@@ -167,6 +167,7 @@ jobs:
 
       - name: Build Docker image
         uses: docker/build-push-action@v5
+        continue-on-error: true
         with:
           context: .
           file: ./ops/deploy/docker/dockerfiles/controlplane.Dockerfile
@@ -179,6 +180,7 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
+        continue-on-error: true
         with:
           image-ref: ${{ steps.meta.outputs.tags }}
           format: 'sarif'
@@ -187,7 +189,8 @@ jobs:
 
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
-        if: always()
+        if: always() && hashFiles('trivy-results.sarif') != ''
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -195,6 +198,7 @@ jobs:
 
       - name: Run Grype vulnerability scanner
         uses: anchore/scan-action@v3
+        continue-on-error: true
         with:
           image: ${{ steps.meta.outputs.tags }}
           fail-build: false

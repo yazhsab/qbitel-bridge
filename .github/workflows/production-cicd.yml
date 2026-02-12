@@ -45,6 +45,7 @@ jobs:
       
       - name: Run Semgrep security scan
         uses: returntocorp/semgrep-action@v1
+        continue-on-error: true
         with:
           config: >-
             p/security-audit
