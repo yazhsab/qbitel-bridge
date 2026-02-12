@@ -46,7 +46,6 @@ from ai_engine.domains.banking.security.hsm.hsm_provider import (
     VerificationResult,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -175,9 +174,7 @@ class CircuitBreaker:
         self.last_state_change = datetime.utcnow()
         self.success_count = 0
 
-        logger.info(
-            f"Circuit breaker {self.provider_name}: {old_state.value} -> {new_state.value}"
-        )
+        logger.info(f"Circuit breaker {self.provider_name}: {old_state.value} -> {new_state.value}")
 
 
 class PooledHSMSession:

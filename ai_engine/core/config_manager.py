@@ -220,15 +220,11 @@ class SecurityConfig:
         # Generate secrets if not provided
         if self.jwt_enabled and not self.jwt_secret:
             self.jwt_secret = secrets.token_urlsafe(32)
-            logger.warning(
-                "Generated JWT secret - ensure this is persisted in production"
-            )
+            logger.warning("Generated JWT secret - ensure this is persisted in production")
 
         if not self.encryption_key:
             self.encryption_key = secrets.token_urlsafe(32)
-            logger.warning(
-                "Generated encryption key - ensure this is persisted in production"
-            )
+            logger.warning("Generated encryption key - ensure this is persisted in production")
 
 
 @dataclass
@@ -332,9 +328,7 @@ class ConfigManager:
             # Notify watchers
             self._notify_watchers()
 
-            logger.info(
-                f"Configuration loaded for environment: {self._config.environment.value}"
-            )
+            logger.info(f"Configuration loaded for environment: {self._config.environment.value}")
             return self._config
 
     def _auto_load_config(self) -> MainConfig:
@@ -379,16 +373,12 @@ class ConfigManager:
                 elif config_path.suffix.lower() == ".json":
                     data = json.load(f)
                 else:
-                    raise ConfigLoadError(
-                        f"Unsupported configuration file format: {config_path.suffix}"
-                    )
+                    raise ConfigLoadError(f"Unsupported configuration file format: {config_path.suffix}")
 
             return self._load_from_dict(data or {})
 
         except Exception as e:
-            raise ConfigLoadError(
-                f"Error loading configuration from {config_file}: {e}"
-            )
+            raise ConfigLoadError(f"Error loading configuration from {config_file}: {e}")
 
     def _load_from_dict(self, config_dict: Dict[str, Any]) -> MainConfig:
         """Load configuration from dictionary."""
@@ -494,9 +484,7 @@ class ConfigManager:
                     logger.debug(f"Applied environment override: {env_var}={value}")
 
                 except (ValueError, AttributeError) as e:
-                    logger.warning(
-                        f"Could not apply environment override {env_var}={value}: {e}"
-                    )
+                    logger.warning(f"Could not apply environment override {env_var}={value}: {e}")
 
     def _validate_config(self):
         """Validate configuration."""
@@ -506,27 +494,18 @@ class ConfigManager:
         # Validate required fields
         if self._config.environment == Environment.PRODUCTION:
             # Production-specific validations
-            if (
-                not self._config.security.api_key_enabled
-                and not self._config.security.jwt_enabled
-            ):
-                raise ConfigValidationError(
-                    "Authentication must be enabled in production"
-                )
+            if not self._config.security.api_key_enabled and not self._config.security.jwt_enabled:
+                raise ConfigValidationError("Authentication must be enabled in production")
 
             if self._config.debug:
-                logger.warning(
-                    "Debug mode enabled in production - this is not recommended"
-                )
+                logger.warning("Debug mode enabled in production - this is not recommended")
 
         # Validate port ranges
         if not (1 <= self._config.api_port <= 65535):
             raise ConfigValidationError(f"Invalid API port: {self._config.api_port}")
 
         if not (1 <= self._config.database.port <= 65535):
-            raise ConfigValidationError(
-                f"Invalid database port: {self._config.database.port}"
-            )
+            raise ConfigValidationError(f"Invalid database port: {self._config.database.port}")
 
         # Validate directories
         try:
@@ -689,9 +668,7 @@ def config_section(section_name: str):
             config = get_config()
             section_config = getattr(config, section_name, None)
             if section_config is None:
-                raise ConfigValidationError(
-                    f"Configuration section '{section_name}' not found"
-                )
+                raise ConfigValidationError(f"Configuration section '{section_name}' not found")
             return func(section_config, *args, **kwargs)
 
         return wrapper
@@ -727,7 +704,5 @@ if __name__ == "__main__":
 
     print(f"Loaded configuration for environment: {config.environment.value}")
     print(f"API will run on {config.api_host}:{config.api_port}")
-    print(
-        f"Database: {config.database.host}:{config.database.port}/{config.database.database}"
-    )
+    print(f"Database: {config.database.host}:{config.database.port}/{config.database.database}")
     print(f"AI Engine GPU: {config.ai_engine.use_gpu}")

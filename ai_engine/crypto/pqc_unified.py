@@ -69,9 +69,14 @@ class PQCAlgorithm(Enum):
     def is_kem(self) -> bool:
         """Check if this is a Key Encapsulation Mechanism."""
         return self in {
-            PQCAlgorithm.MLKEM_512, PQCAlgorithm.MLKEM_768, PQCAlgorithm.MLKEM_1024,
-            PQCAlgorithm.KYBER_512, PQCAlgorithm.KYBER_768, PQCAlgorithm.KYBER_1024,
-            PQCAlgorithm.X25519_MLKEM_768, PQCAlgorithm.P384_MLKEM_1024,
+            PQCAlgorithm.MLKEM_512,
+            PQCAlgorithm.MLKEM_768,
+            PQCAlgorithm.MLKEM_1024,
+            PQCAlgorithm.KYBER_512,
+            PQCAlgorithm.KYBER_768,
+            PQCAlgorithm.KYBER_1024,
+            PQCAlgorithm.X25519_MLKEM_768,
+            PQCAlgorithm.P384_MLKEM_1024,
         }
 
     @property
@@ -252,24 +257,16 @@ class EncapsulationResult:
 
 
 # Prometheus metrics
-PQC_OPERATIONS = Counter(
-    'pqc_operations_total',
-    'Total PQC operations',
-    ['operation', 'algorithm', 'domain']
-)
+PQC_OPERATIONS = Counter("pqc_operations_total", "Total PQC operations", ["operation", "algorithm", "domain"])
 
 PQC_LATENCY = Histogram(
-    'pqc_operation_latency_seconds',
-    'PQC operation latency',
-    ['operation', 'algorithm', 'domain'],
-    buckets=[0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0]
+    "pqc_operation_latency_seconds",
+    "PQC operation latency",
+    ["operation", "algorithm", "domain"],
+    buckets=[0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0],
 )
 
-PQC_KEY_SIZE = Gauge(
-    'pqc_key_size_bytes',
-    'PQC key sizes',
-    ['key_type', 'algorithm']
-)
+PQC_KEY_SIZE = Gauge("pqc_key_size_bytes", "PQC key sizes", ["key_type", "algorithm"])
 
 
 class PQCEngine:
@@ -375,27 +372,18 @@ class PQCEngine:
                     metadata={
                         "domain": self.domain.value,
                         "hybrid": self.hybrid_mode,
-                    }
+                    },
                 )
             else:
                 # Fallback: generate placeholder for testing
                 keypair = await self._generate_kem_keypair_fallback()
 
             latency = time.time() - start
-            PQC_OPERATIONS.labels(
-                operation="keygen_kem",
-                algorithm=self.kem_algorithm.value,
-                domain=self.domain.value
-            ).inc()
-            PQC_LATENCY.labels(
-                operation="keygen_kem",
-                algorithm=self.kem_algorithm.value,
-                domain=self.domain.value
-            ).observe(latency)
-            PQC_KEY_SIZE.labels(
-                key_type="public",
-                algorithm=self.kem_algorithm.value
-            ).set(keypair.public_key_size)
+            PQC_OPERATIONS.labels(operation="keygen_kem", algorithm=self.kem_algorithm.value, domain=self.domain.value).inc()
+            PQC_LATENCY.labels(operation="keygen_kem", algorithm=self.kem_algorithm.value, domain=self.domain.value).observe(
+                latency
+            )
+            PQC_KEY_SIZE.labels(key_type="public", algorithm=self.kem_algorithm.value).set(keypair.public_key_size)
 
             logger.debug(
                 f"Generated KEM keypair: {self.kem_algorithm.value}, "
@@ -423,20 +411,16 @@ class PQCEngine:
                 pk = kem.generate_keypair()
                 sk = kem.export_secret_key()
 
-                return KeyPair(
-                    algorithm=self.kem_algorithm,
-                    public_key=pk,
-                    private_key=sk,
-                    metadata={"provider": "liboqs"}
-                )
+                return KeyPair(algorithm=self.kem_algorithm, public_key=pk, private_key=sk, metadata={"provider": "liboqs"})
         except ImportError:
             # Ultimate fallback for testing
             import secrets
+
             return KeyPair(
                 algorithm=self.kem_algorithm,
                 public_key=secrets.token_bytes(1184),  # ML-KEM-768 size
                 private_key=secrets.token_bytes(2400),
-                metadata={"provider": "test_fallback"}
+                metadata={"provider": "test_fallback"},
             )
 
     async def encapsulate(self, public_key: bytes) -> EncapsulationResult:
@@ -464,16 +448,10 @@ class PQCEngine:
                 result = await self._encapsulate_fallback(public_key)
 
             latency = time.time() - start
-            PQC_OPERATIONS.labels(
-                operation="encapsulate",
-                algorithm=self.kem_algorithm.value,
-                domain=self.domain.value
-            ).inc()
-            PQC_LATENCY.labels(
-                operation="encapsulate",
-                algorithm=self.kem_algorithm.value,
-                domain=self.domain.value
-            ).observe(latency)
+            PQC_OPERATIONS.labels(operation="encapsulate", algorithm=self.kem_algorithm.value, domain=self.domain.value).inc()
+            PQC_LATENCY.labels(operation="encapsulate", algorithm=self.kem_algorithm.value, domain=self.domain.value).observe(
+                latency
+            )
 
             return result
 
@@ -502,6 +480,7 @@ class PQCEngine:
                 )
         except ImportError:
             import secrets
+
             return EncapsulationResult(
                 algorithm=self.kem_algorithm,
                 ciphertext=secrets.token_bytes(1088),
@@ -532,16 +511,10 @@ class PQCEngine:
                 shared_secret = await self._decapsulate_fallback(ciphertext, private_key)
 
             latency = time.time() - start
-            PQC_OPERATIONS.labels(
-                operation="decapsulate",
-                algorithm=self.kem_algorithm.value,
-                domain=self.domain.value
-            ).inc()
-            PQC_LATENCY.labels(
-                operation="decapsulate",
-                algorithm=self.kem_algorithm.value,
-                domain=self.domain.value
-            ).observe(latency)
+            PQC_OPERATIONS.labels(operation="decapsulate", algorithm=self.kem_algorithm.value, domain=self.domain.value).inc()
+            PQC_LATENCY.labels(operation="decapsulate", algorithm=self.kem_algorithm.value, domain=self.domain.value).observe(
+                latency
+            )
 
             return bytes(shared_secret)
 
@@ -568,6 +541,7 @@ class PQCEngine:
                 return kem.decap_secret(ciphertext)
         except ImportError:
             import secrets
+
             return secrets.token_bytes(32)
 
     async def generate_signature_keypair(self) -> KeyPair:
@@ -589,21 +563,17 @@ class PQCEngine:
                     private_key=bytes(sk),
                     metadata={
                         "domain": self.domain.value,
-                    }
+                    },
                 )
             else:
                 keypair = await self._generate_sig_keypair_fallback()
 
             latency = time.time() - start
             PQC_OPERATIONS.labels(
-                operation="keygen_sig",
-                algorithm=self.signature_algorithm.value,
-                domain=self.domain.value
+                operation="keygen_sig", algorithm=self.signature_algorithm.value, domain=self.domain.value
             ).inc()
             PQC_LATENCY.labels(
-                operation="keygen_sig",
-                algorithm=self.signature_algorithm.value,
-                domain=self.domain.value
+                operation="keygen_sig", algorithm=self.signature_algorithm.value, domain=self.domain.value
             ).observe(latency)
 
             return keypair
@@ -630,18 +600,16 @@ class PQCEngine:
                 sk = sig.export_secret_key()
 
                 return KeyPair(
-                    algorithm=self.signature_algorithm,
-                    public_key=pk,
-                    private_key=sk,
-                    metadata={"provider": "liboqs"}
+                    algorithm=self.signature_algorithm, public_key=pk, private_key=sk, metadata={"provider": "liboqs"}
                 )
         except ImportError:
             import secrets
+
             return KeyPair(
                 algorithm=self.signature_algorithm,
                 public_key=secrets.token_bytes(1952),  # Dilithium3 size
                 private_key=secrets.token_bytes(4000),
-                metadata={"provider": "test_fallback"}
+                metadata={"provider": "test_fallback"},
             )
 
     async def sign(self, message: bytes, private_key: bytes) -> Signature:
@@ -680,20 +648,12 @@ class PQCEngine:
             # Check if we exceeded domain constraints
             max_sig_size = self.constraints.get("max_signature_bytes", float("inf"))
             if signature.size > max_sig_size:
-                logger.warning(
-                    f"Signature size {signature.size} exceeds domain limit {max_sig_size}"
-                )
+                logger.warning(f"Signature size {signature.size} exceeds domain limit {max_sig_size}")
 
-            PQC_OPERATIONS.labels(
-                operation="sign",
-                algorithm=self.signature_algorithm.value,
-                domain=self.domain.value
-            ).inc()
-            PQC_LATENCY.labels(
-                operation="sign",
-                algorithm=self.signature_algorithm.value,
-                domain=self.domain.value
-            ).observe(latency)
+            PQC_OPERATIONS.labels(operation="sign", algorithm=self.signature_algorithm.value, domain=self.domain.value).inc()
+            PQC_LATENCY.labels(operation="sign", algorithm=self.signature_algorithm.value, domain=self.domain.value).observe(
+                latency
+            )
 
             return signature
 
@@ -718,6 +678,7 @@ class PQCEngine:
                 return sig.sign(message)
         except ImportError:
             import secrets
+
             return secrets.token_bytes(3293)  # Dilithium3 size
 
     async def verify(
@@ -746,16 +707,10 @@ class PQCEngine:
                 valid = await self._verify_fallback(message, signature, public_key)
 
             latency = time.time() - start
-            PQC_OPERATIONS.labels(
-                operation="verify",
-                algorithm=self.signature_algorithm.value,
-                domain=self.domain.value
-            ).inc()
-            PQC_LATENCY.labels(
-                operation="verify",
-                algorithm=self.signature_algorithm.value,
-                domain=self.domain.value
-            ).observe(latency)
+            PQC_OPERATIONS.labels(operation="verify", algorithm=self.signature_algorithm.value, domain=self.domain.value).inc()
+            PQC_LATENCY.labels(operation="verify", algorithm=self.signature_algorithm.value, domain=self.domain.value).observe(
+                latency
+            )
 
             return valid
 

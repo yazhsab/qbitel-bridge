@@ -112,6 +112,7 @@ class SwiftBasicHeader(SwiftBlock):
 
 class MessageDirection(Enum):
     """Message direction indicator."""
+
     INPUT = "I"  # Message sent to SWIFT
     OUTPUT = "O"  # Message received from SWIFT
 
@@ -155,9 +156,7 @@ class SwiftApplicationHeader(SwiftBlock):
         if not content:
             return header
 
-        header.direction = (
-            MessageDirection.INPUT if content[0] == "I" else MessageDirection.OUTPUT
-        )
+        header.direction = MessageDirection.INPUT if content[0] == "I" else MessageDirection.OUTPUT
 
         if header.direction == MessageDirection.INPUT:
             # Input format: I103BANKBEBBXXXXN
@@ -334,9 +333,7 @@ class SwiftTextBlock(SwiftBlock):
                     else:
                         base_tag = current_tag
                         qualifier = ""
-                    text_block.fields.append(
-                        SwiftField(tag=base_tag, value=value, qualifier=qualifier)
-                    )
+                    text_block.fields.append(SwiftField(tag=base_tag, value=value, qualifier=qualifier))
 
                 # Parse new field
                 colon_pos = line.find(":", 1)
@@ -358,9 +355,7 @@ class SwiftTextBlock(SwiftBlock):
             else:
                 base_tag = current_tag
                 qualifier = ""
-            text_block.fields.append(
-                SwiftField(tag=base_tag, value=value, qualifier=qualifier)
-            )
+            text_block.fields.append(SwiftField(tag=base_tag, value=value, qualifier=qualifier))
 
         return text_block
 
@@ -434,9 +429,7 @@ class SwiftMessage:
     """
 
     basic_header: SwiftBasicHeader = field(default_factory=SwiftBasicHeader)
-    application_header: SwiftApplicationHeader = field(
-        default_factory=SwiftApplicationHeader
-    )
+    application_header: SwiftApplicationHeader = field(default_factory=SwiftApplicationHeader)
     user_header: Optional[SwiftUserHeader] = None
     text_block: SwiftTextBlock = field(default_factory=SwiftTextBlock)
     trailer: Optional[SwiftTrailerBlock] = None

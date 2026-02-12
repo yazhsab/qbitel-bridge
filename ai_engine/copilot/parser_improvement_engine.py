@@ -141,26 +141,16 @@ class ParserImprovementEngine:
             quality_metrics = self._analyze_code_quality(parser_code)
 
             # Generate improvements using LLM
-            improvements = await self._generate_improvements(
-                parser_code, errors, error_categories, quality_metrics
-            )
+            improvements = await self._generate_improvements(parser_code, errors, error_categories, quality_metrics)
 
             # Calculate overall health
-            overall_health = self._calculate_health_score(
-                errors, quality_metrics, improvements
-            )
+            overall_health = self._calculate_health_score(errors, quality_metrics, improvements)
 
             # Generate summary
-            summary = await self._generate_recommendations_summary(
-                improvements, overall_health, quality_metrics
-            )
+            summary = await self._generate_recommendations_summary(improvements, overall_health, quality_metrics)
 
             return ParserAnalysis(
-                parser_id=(
-                    parser_metadata.get("parser_id", "unknown")
-                    if parser_metadata
-                    else "unknown"
-                ),
+                parser_id=(parser_metadata.get("parser_id", "unknown") if parser_metadata else "unknown"),
                 analysis_timestamp=datetime.now(),
                 errors=errors,
                 improvements=improvements,
@@ -215,16 +205,12 @@ class ParserImprovementEngine:
             self.logger.error(f"Failed to suggest improvements: {e}")
             return []
 
-    def _classify_errors(
-        self, errors: List[ParserError]
-    ) -> Dict[str, List[ParserError]]:
+    def _classify_errors(self, errors: List[ParserError]) -> Dict[str, List[ParserError]]:
         """Classify errors by type."""
         categories = defaultdict(list)
 
         for error in errors:
-            error_type = error.error_type or self._detect_error_type(
-                error.error_message
-            )
+            error_type = error.error_type or self._detect_error_type(error.error_message)
             categories[error_type].append(error)
 
         return dict(categories)
@@ -268,9 +254,7 @@ class ParserImprovementEngine:
                 current_nesting = max(0, current_nesting - 1)
 
         # Complexity score (0-1, lower is better)
-        metrics["complexity"] = min(
-            1.0, (max_nesting * 0.2 + nested_blocks / max(total_lines, 1))
-        )
+        metrics["complexity"] = min(1.0, (max_nesting * 0.2 + nested_blocks / max(total_lines, 1)))
 
         # Maintainability (0-1, higher is better)
         comment_lines = sum(1 for line in lines if line.strip().startswith("#"))
@@ -278,23 +262,15 @@ class ParserImprovementEngine:
         function_count = parser_code.count("def ")
         class_count = parser_code.count("class ")
 
-        documentation_ratio = (comment_lines + docstring_lines * 3) / max(
-            total_lines, 1
-        )
-        structure_score = min(
-            1.0, (function_count + class_count * 2) / max(total_lines / 20, 1)
-        )
+        documentation_ratio = (comment_lines + docstring_lines * 3) / max(total_lines, 1)
+        structure_score = min(1.0, (function_count + class_count * 2) / max(total_lines / 20, 1))
 
-        metrics["maintainability"] = min(
-            1.0, (documentation_ratio * 0.4 + structure_score * 0.6)
-        )
+        metrics["maintainability"] = min(1.0, (documentation_ratio * 0.4 + structure_score * 0.6))
 
         # Performance indicators (0-1, higher is better)
         # Look for performance anti-patterns
         performance_issues = 0
-        performance_issues += (
-            parser_code.count("for ") * parser_code.count("for ") * 0.1
-        )  # Nested loops
+        performance_issues += parser_code.count("for ") * parser_code.count("for ") * 0.1  # Nested loops
         performance_issues += parser_code.count("while True:") * 0.2  # Infinite loops
         performance_issues += parser_code.count("sleep(") * 0.1  # Blocking calls
 
@@ -325,9 +301,7 @@ class ParserImprovementEngine:
             )
 
             # Build context for LLM
-            context_str = self._build_improvement_context(
-                parser_code, errors, error_categories, quality_metrics, rag_context
-            )
+            context_str = self._build_improvement_context(parser_code, errors, error_categories, quality_metrics, rag_context)
 
             # Request LLM analysis
             llm_request = LLMRequest(
@@ -371,9 +345,7 @@ class ParserImprovementEngine:
             improvements = self._parse_llm_improvements(llm_response.content, errors)
 
             # Add rule-based improvements
-            rule_based = self._generate_rule_based_improvements(
-                error_categories, quality_metrics
-            )
+            rule_based = self._generate_rule_based_improvements(error_categories, quality_metrics)
             improvements.extend(rule_based)
 
             # Sort by priority
@@ -385,9 +357,7 @@ class ParserImprovementEngine:
         except Exception as e:
             self.logger.error(f"Failed to generate improvements: {e}")
             # Return rule-based improvements as fallback
-            return self._generate_rule_based_improvements(
-                error_categories, quality_metrics
-            )
+            return self._generate_rule_based_improvements(error_categories, quality_metrics)
 
     def _build_improvement_context(
         self,
@@ -403,9 +373,7 @@ class ParserImprovementEngine:
         # Parser code snippet
         code_lines = parser_code.split("\n")
         if len(code_lines) > 50:
-            context_parts.append(
-                f"Parser Code (first 30 lines, last 20 lines):\n```python\n"
-            )
+            context_parts.append(f"Parser Code (first 30 lines, last 20 lines):\n```python\n")
             context_parts.append("\n".join(code_lines[:30]))
             context_parts.append("\n...\n")
             context_parts.append("\n".join(code_lines[-20:]))
@@ -423,13 +391,9 @@ class ParserImprovementEngine:
         # Quality metrics
         context_parts.append(f"\nQuality Metrics:")
         context_parts.append(f"  - Complexity: {quality_metrics['complexity']:.2f}")
-        context_parts.append(
-            f"  - Maintainability: {quality_metrics['maintainability']:.2f}"
-        )
+        context_parts.append(f"  - Maintainability: {quality_metrics['maintainability']:.2f}")
         context_parts.append(f"  - Performance: {quality_metrics['performance']:.2f}")
-        context_parts.append(
-            f"  - Documentation: {quality_metrics['documentation']:.2f}"
-        )
+        context_parts.append(f"  - Documentation: {quality_metrics['documentation']:.2f}")
 
         # RAG context
         if rag_context and rag_context.documents:
@@ -439,9 +403,7 @@ class ParserImprovementEngine:
 
         return "\n".join(context_parts)
 
-    def _parse_llm_improvements(
-        self, llm_response: str, errors: List[ParserError]
-    ) -> List[ParserImprovement]:
+    def _parse_llm_improvements(self, llm_response: str, errors: List[ParserError]) -> List[ParserImprovement]:
         """Parse LLM response into structured improvements."""
         improvements = []
 
@@ -462,9 +424,7 @@ class ParserImprovementEngine:
 
         return improvements
 
-    def _parse_improvement_section(
-        self, section: str, errors: List[ParserError]
-    ) -> Optional[ParserImprovement]:
+    def _parse_improvement_section(self, section: str, errors: List[ParserError]) -> Optional[ParserImprovement]:
         """Parse a single improvement section."""
         try:
             lines = section.strip().split("\n")
@@ -487,9 +447,7 @@ class ParserImprovementEngine:
                 line = line.strip()
 
                 if line.startswith("IMPROVEMENT:"):
-                    improvement_data["improvement_type"] = (
-                        line.split(":", 1)[1].strip().lower()
-                    )
+                    improvement_data["improvement_type"] = line.split(":", 1)[1].strip().lower()
                 elif line.startswith("TITLE:"):
                     improvement_data["title"] = line.split(":", 1)[1].strip()
                 elif line.startswith("PRIORITY:"):
@@ -524,10 +482,7 @@ class ParserImprovementEngine:
 
             # Match related errors
             for error in errors:
-                if any(
-                    keyword in error.error_message.lower()
-                    for keyword in improvement_data["improvement_type"].split()
-                ):
+                if any(keyword in error.error_message.lower() for keyword in improvement_data["improvement_type"].split()):
                     improvement_data["related_errors"].append(error.error_message)
 
             return ParserImprovement(**improvement_data)
@@ -568,10 +523,7 @@ except Exception as e:
                         "Implement proper logging for debugging",
                         "Add fallback mechanisms for recoverable errors",
                     ],
-                    related_errors=[
-                        e.error_message
-                        for e in error_categories.get("syntax_error", [])[:3]
-                    ],
+                    related_errors=[e.error_message for e in error_categories.get("syntax_error", [])[:3]],
                     confidence=0.9,
                 )
             )
@@ -688,10 +640,7 @@ def parse_messages_stream(messages):
                         "Provide clear error messages for validation failures",
                         "Log validation failures for monitoring",
                     ],
-                    related_errors=[
-                        e.error_message
-                        for e in error_categories.get("validation_error", [])[:3]
-                    ],
+                    related_errors=[e.error_message for e in error_categories.get("validation_error", [])[:3]],
                     confidence=0.9,
                 )
             )
@@ -714,9 +663,7 @@ def parse_messages_stream(messages):
         quality_score = sum(quality_metrics.values()) / len(quality_metrics)
         improvement_score = max(0, 1.0 - (critical_improvements * 0.15))
 
-        overall_score = (
-            error_score * 0.4 + quality_score * 0.4 + improvement_score * 0.2
-        )
+        overall_score = error_score * 0.4 + quality_score * 0.4 + improvement_score * 0.2
 
         if overall_score >= 0.9:
             return "excellent"
@@ -754,14 +701,10 @@ def parse_messages_stream(messages):
 
             # Add top 3 improvements
             for i, improvement in enumerate(improvements[:3], 1):
-                summary_parts.append(
-                    f"  {i}. {improvement.title} ({improvement.priority} priority)"
-                )
+                summary_parts.append(f"  {i}. {improvement.title} ({improvement.priority} priority)")
 
             return "\n".join(summary_parts)
 
         except Exception as e:
             self.logger.error(f"Failed to generate summary: {e}")
-            return (
-                f"Parser health: {health}. {len(improvements)} improvements suggested."
-            )
+            return f"Parser health: {health}. {len(improvements)} improvements suggested."

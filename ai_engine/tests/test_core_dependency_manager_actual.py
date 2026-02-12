@@ -102,9 +102,7 @@ class TestDependencyManager:
             mock_import.side_effect = ImportError("No module named 'nonexistent'")
 
             # Create a test dependency info
-            test_info = DependencyInfo(
-                name="Test Package", package="nonexistent", required=False
-            )
+            test_info = DependencyInfo(name="Test Package", package="nonexistent", required=False)
 
             result = dependency_manager._check_dependency(test_info)
 
@@ -168,9 +166,7 @@ class TestDependencyManager:
     def test_required_dependencies(self, dependency_manager):
         """Test that some dependencies are marked as required."""
         # Check that some dependencies are required
-        required_deps = [
-            dep for dep in dependency_manager.LLM_DEPENDENCIES.values() if dep.required
-        ]
+        required_deps = [dep for dep in dependency_manager.LLM_DEPENDENCIES.values() if dep.required]
 
         # There should be some required dependencies
         assert len(required_deps) >= 0  # Some may be required, some may not
@@ -178,11 +174,7 @@ class TestDependencyManager:
     def test_optional_dependencies(self, dependency_manager):
         """Test that some dependencies are marked as optional."""
         # Check that some dependencies are optional
-        optional_deps = [
-            dep
-            for dep in dependency_manager.LLM_DEPENDENCIES.values()
-            if not dep.required
-        ]
+        optional_deps = [dep for dep in dependency_manager.LLM_DEPENDENCIES.values() if not dep.required]
 
         # There should be some optional dependencies
         assert len(optional_deps) >= 0  # Some may be optional, some may not

@@ -1,6 +1,7 @@
 """
 Unit tests for Quantum Key Distribution Certificate Manager.
 """
+
 import pytest
 import base64
 import json
@@ -14,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from cloud_native.service_mesh.istio.qkd_certificate_manager import (
     CertificateAlgorithm,
     CertificateMetadata,
-    QuantumCertificateManager
+    QuantumCertificateManager,
 )
 
 
@@ -46,7 +47,7 @@ class TestCertificateMetadata:
             not_before=now,
             not_after=expiry,
             key_algorithm=CertificateAlgorithm.KYBER_1024,
-            signature_algorithm=CertificateAlgorithm.DILITHIUM_5
+            signature_algorithm=CertificateAlgorithm.DILITHIUM_5,
         )
 
         assert metadata.subject == "CN=test-service"
@@ -65,7 +66,7 @@ class TestQuantumCertificateManager:
             signature_algorithm=CertificateAlgorithm.DILITHIUM_5,
             cert_validity_days=365,
             rotation_threshold_days=30,
-            auto_rotation=True
+            auto_rotation=True,
         )
 
     def test_manager_initialization(self, cert_manager):
@@ -78,10 +79,7 @@ class TestQuantumCertificateManager:
 
     def test_generate_root_ca(self, cert_manager):
         """Test root CA generation"""
-        root_ca = cert_manager.generate_root_ca(
-            subject="CN=Qbitel Root CA,O=Qbitel AI",
-            validity_years=10
-        )
+        root_ca = cert_manager.generate_root_ca(subject="CN=Qbitel Root CA,O=Qbitel AI", validity_years=10)
 
         assert "certificate" in root_ca
         assert "public_key" in root_ca
@@ -102,10 +100,7 @@ class TestQuantumCertificateManager:
     def test_generate_service_certificate(self, cert_manager):
         """Test service certificate generation"""
         # Generate root CA first
-        root_ca = cert_manager.generate_root_ca(
-            subject="CN=Root CA",
-            validity_years=10
-        )
+        root_ca = cert_manager.generate_root_ca(subject="CN=Root CA", validity_years=10)
 
         # Generate service certificate
         service_cert = cert_manager.generate_service_certificate(
@@ -113,7 +108,7 @@ class TestQuantumCertificateManager:
             namespace="default",
             ca_cert=root_ca["certificate"],
             ca_signature_private_key=root_ca["signature_private_key"],
-            sans=["test-service.default.svc.cluster.local"]
+            sans=["test-service.default.svc.cluster.local"],
         )
 
         assert "certificate" in service_cert
@@ -132,13 +127,11 @@ class TestQuantumCertificateManager:
             service_name="test-service",
             namespace="default",
             ca_cert=root_ca["certificate"],
-            ca_signature_private_key=root_ca["signature_private_key"]
+            ca_signature_private_key=root_ca["signature_private_key"],
         )
 
         secret = cert_manager.create_kubernetes_secret(
-            cert_data=service_cert,
-            secret_name="test-service-cert",
-            namespace="default"
+            cert_data=service_cert, secret_name="test-service-cert", namespace="default"
         )
 
         assert secret["apiVersion"] == "v1"
@@ -165,7 +158,7 @@ class TestQuantumCertificateManager:
             service_name="test-service",
             namespace="default",
             ca_cert=root_ca["certificate"],
-            ca_signature_private_key=root_ca["signature_private_key"]
+            ca_signature_private_key=root_ca["signature_private_key"],
         )
 
         # New certificate should not need rotation
@@ -174,9 +167,7 @@ class TestQuantumCertificateManager:
 
         # Test with expired certificate
         expired_metadata = service_cert["metadata"].copy()
-        expired_metadata["not_after"] = (
-            datetime.utcnow() - timedelta(days=1)
-        ).isoformat()
+        expired_metadata["not_after"] = (datetime.utcnow() - timedelta(days=1)).isoformat()
 
         expired_cert = service_cert.copy()
         expired_cert["metadata"] = expired_metadata
@@ -193,20 +184,18 @@ class TestQuantumCertificateManager:
             service_name="test-service",
             namespace="default",
             ca_cert=root_ca["certificate"],
-            ca_signature_private_key=root_ca["signature_private_key"]
+            ca_signature_private_key=root_ca["signature_private_key"],
         )
 
         # Store in cache
-        cert_manager._certificate_cache = {
-            ("test-service", "default"): original_cert
-        }
+        cert_manager._certificate_cache = {("test-service", "default"): original_cert}
 
         # Rotate certificate
         new_cert = cert_manager.rotate_certificate(
             service_name="test-service",
             namespace="default",
             ca_cert=root_ca["certificate"],
-            ca_signature_private_key=root_ca["signature_private_key"]
+            ca_signature_private_key=root_ca["signature_private_key"],
         )
 
         # Verify new certificate is different
@@ -233,17 +222,10 @@ class TestQuantumCertificateManager:
 
     def test_different_key_algorithms(self):
         """Test different key algorithms"""
-        algorithms = [
-            CertificateAlgorithm.KYBER_512,
-            CertificateAlgorithm.KYBER_768,
-            CertificateAlgorithm.KYBER_1024
-        ]
+        algorithms = [CertificateAlgorithm.KYBER_512, CertificateAlgorithm.KYBER_768, CertificateAlgorithm.KYBER_1024]
 
         for algo in algorithms:
-            manager = QuantumCertificateManager(
-                key_algorithm=algo,
-                signature_algorithm=CertificateAlgorithm.DILITHIUM_3
-            )
+            manager = QuantumCertificateManager(key_algorithm=algo, signature_algorithm=CertificateAlgorithm.DILITHIUM_3)
 
             root_ca = manager.generate_root_ca("CN=Test CA", 5)
             assert root_ca is not None
@@ -258,7 +240,7 @@ class TestQuantumCertificateManager:
             service_name="cached-service",
             namespace="default",
             ca_cert=root_ca["certificate"],
-            ca_signature_private_key=root_ca["signature_private_key"]
+            ca_signature_private_key=root_ca["signature_private_key"],
         )
 
         # Retrieve from cache
@@ -271,10 +253,7 @@ class TestQuantumCertificateManager:
 
     def test_auto_rotation(self):
         """Test auto-rotation feature"""
-        manager = QuantumCertificateManager(
-            auto_rotation=True,
-            rotation_threshold_days=30
-        )
+        manager = QuantumCertificateManager(auto_rotation=True, rotation_threshold_days=30)
         assert manager.auto_rotation is True
 
         manager_no_rotation = QuantumCertificateManager(auto_rotation=False)

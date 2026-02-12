@@ -107,14 +107,8 @@ class EnsembleModel(BaseModel):
         }
 
         # Async execution
-        self.max_workers = (
-            config.training.max_workers
-            if hasattr(config.training, "max_workers")
-            else 4
-        )
-        self.executor = concurrent.futures.ThreadPoolExecutor(
-            max_workers=self.max_workers
-        )
+        self.max_workers = config.training.max_workers if hasattr(config.training, "max_workers") else 4
+        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers)
 
         self.logger.info(f"EnsembleModel initialized with method: {ensemble_method}")
 
@@ -135,9 +129,7 @@ class EnsembleModel(BaseModel):
             performance_score: Performance score for weight calculation
         """
         if member_name in self.members:
-            raise EnsembleException(
-                f"Member '{member_name}' already exists in ensemble"
-            )
+            raise EnsembleException(f"Member '{member_name}' already exists in ensemble")
 
         member = EnsembleMember(
             model=member_model,
@@ -184,9 +176,7 @@ class EnsembleModel(BaseModel):
 
     def get_active_members(self) -> Dict[str, EnsembleMember]:
         """Get all active ensemble members."""
-        return {
-            name: member for name, member in self.members.items() if member.is_active
-        }
+        return {name: member for name, member in self.members.items() if member.is_active}
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass through ensemble (not typically used directly)."""
@@ -209,14 +199,10 @@ class EnsembleModel(BaseModel):
                 raise EnsembleException("No active ensemble members available")
 
             # Get predictions from all active members
-            individual_results = self._get_individual_predictions(
-                active_members, input_data
-            )
+            individual_results = self._get_individual_predictions(active_members, input_data)
 
             # Combine predictions based on ensemble method
-            ensemble_result = self._combine_predictions(
-                individual_results, active_members
-            )
+            ensemble_result = self._combine_predictions(individual_results, active_members)
 
             # Calculate processing time
             processing_time_ms = (time.time() - start_time) * 1000
@@ -247,9 +233,7 @@ class EnsembleModel(BaseModel):
 
         except Exception as e:
             self.logger.error(f"Ensemble prediction failed: {e}")
-            self.update_inference_metrics(
-                (time.time() - start_time) * 1000, success=False
-            )
+            self.update_inference_metrics((time.time() - start_time) * 1000, success=False)
             raise EnsembleException(f"Prediction failed: {e}")
 
     def predict_async(self, input_data: ModelInput) -> torch.futures.Future:
@@ -310,9 +294,7 @@ class EnsembleModel(BaseModel):
         the predictions from the base models.
         """
         if self.ensemble_method != EnsembleMethod.STACKING:
-            raise EnsembleException(
-                "Meta-learner training only available for stacking ensemble"
-            )
+            raise EnsembleException("Meta-learner training only available for stacking ensemble")
 
         self.logger.info("Training meta-learner for stacking ensemble")
 
@@ -368,16 +350,12 @@ class EnsembleModel(BaseModel):
             training_history["val_loss"].append(val_loss)
 
             if epoch % 10 == 0:
-                self.logger.info(
-                    f"Epoch {epoch}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}"
-                )
+                self.logger.info(f"Epoch {epoch}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}")
 
         self.logger.info("Meta-learner training completed")
         return training_history
 
-    def update_adaptive_weights(
-        self, validation_data: List[Tuple[ModelInput, torch.Tensor]]
-    ) -> Dict[str, float]:
+    def update_adaptive_weights(self, validation_data: List[Tuple[ModelInput, torch.Tensor]]) -> Dict[str, float]:
         """
         Update member weights based on recent performance.
 
@@ -415,9 +393,7 @@ class EnsembleModel(BaseModel):
 
                 # Calculate accuracy (simple metric, can be enhanced)
                 if predictions.shape == targets.shape:
-                    score = accuracy_score(
-                        targets.flatten(), predictions.flatten() > 0.5
-                    )
+                    score = accuracy_score(targets.flatten(), predictions.flatten() > 0.5)
                     member_scores[name] = score
                     member.performance_score = score
 
@@ -450,9 +426,7 @@ class EnsembleModel(BaseModel):
 
         return {
             "ensemble_method": self.ensemble_method.value,
-            "voting_type": (
-                self.voting_type.value if hasattr(self, "voting_type") else None
-            ),
+            "voting_type": (self.voting_type.value if hasattr(self, "voting_type") else None),
             "total_members": len(self.members),
             "active_members": len(active_members),
             "member_details": {
@@ -507,9 +481,7 @@ class EnsembleModel(BaseModel):
     ) -> EnsembleResult:
         """Combine individual predictions based on ensemble method."""
         if not individual_results:
-            raise EnsembleException(
-                "No individual predictions available for combination"
-            )
+            raise EnsembleException("No individual predictions available for combination")
 
         # Extract predictions and confidences
         predictions = {}
@@ -518,11 +490,7 @@ class EnsembleModel(BaseModel):
 
         for name, result in individual_results.items():
             predictions[name] = result.predictions
-            confidences[name] = (
-                result.confidence
-                if result.confidence is not None
-                else torch.ones_like(result.predictions)
-            )
+            confidences[name] = result.confidence if result.confidence is not None else torch.ones_like(result.predictions)
             weights[name] = active_members[name].weight
 
         # Combine based on method
@@ -554,9 +522,7 @@ class EnsembleModel(BaseModel):
             uncertainty_score=uncertainty_score,
         )
 
-    def _voting_combine(
-        self, predictions: Dict[str, torch.Tensor], weights: Dict[str, float]
-    ) -> torch.Tensor:
+    def _voting_combine(self, predictions: Dict[str, torch.Tensor], weights: Dict[str, float]) -> torch.Tensor:
         """Combine predictions using voting."""
         if self.voting_type == VotingType.HARD:
             # Hard voting - use predicted classes
@@ -586,9 +552,7 @@ class EnsembleModel(BaseModel):
         pred_stack = torch.stack(list(predictions.values()))
         return torch.mean(pred_stack, dim=0)
 
-    def _weighted_average_combine(
-        self, predictions: Dict[str, torch.Tensor], weights: Dict[str, float]
-    ) -> torch.Tensor:
+    def _weighted_average_combine(self, predictions: Dict[str, torch.Tensor], weights: Dict[str, float]) -> torch.Tensor:
         """Combine predictions using weighted averaging."""
         weighted_preds = []
         for name, pred in predictions.items():
@@ -636,9 +600,7 @@ class EnsembleModel(BaseModel):
             for j in range(i + 1, len(pred_list)):
                 # Calculate agreement (can be enhanced based on prediction type)
                 agreement = torch.mean((pred_list[i] - pred_list[j]) ** 2).item()
-                pairwise_agreements.append(
-                    1.0 / (1.0 + agreement)
-                )  # Convert to agreement score
+                pairwise_agreements.append(1.0 / (1.0 + agreement))  # Convert to agreement score
 
         return float(np.mean(pairwise_agreements)) if pairwise_agreements else 0.0
 
@@ -651,9 +613,7 @@ class EnsembleModel(BaseModel):
         variance = torch.var(pred_stack, dim=0)
         return float(torch.mean(variance).item())
 
-    def _calculate_ensemble_confidence(
-        self, ensemble_result: EnsembleResult
-    ) -> torch.Tensor:
+    def _calculate_ensemble_confidence(self, ensemble_result: EnsembleResult) -> torch.Tensor:
         """Calculate ensemble confidence score."""
         # Use inverse of uncertainty as confidence
         uncertainty = ensemble_result.uncertainty_score or 0.0
@@ -665,9 +625,7 @@ class EnsembleModel(BaseModel):
 
         return torch.full_like(ensemble_result.final_prediction, final_confidence)
 
-    def _generate_meta_features(
-        self, data: List[Tuple[ModelInput, torch.Tensor]]
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def _generate_meta_features(self, data: List[Tuple[ModelInput, torch.Tensor]]) -> Tuple[torch.Tensor, torch.Tensor]:
         """Generate features for meta-learner training."""
         features_list = []
         targets_list = []
@@ -701,10 +659,7 @@ class EnsembleModel(BaseModel):
         if ensemble_result.consensus_score and ensemble_result.consensus_score > 0.8:
             self.ensemble_metrics["consensus_predictions"] += 1
 
-        if (
-            ensemble_result.uncertainty_score
-            and ensemble_result.uncertainty_score > 0.5
-        ):
+        if ensemble_result.uncertainty_score and ensemble_result.uncertainty_score > 0.5:
             self.ensemble_metrics["high_uncertainty_predictions"] += 1
 
         # Update running average of agreement score

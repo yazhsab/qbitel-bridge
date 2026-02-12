@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 class CertificateAlgorithm(Enum):
     """Supported quantum-safe algorithms"""
+
     KYBER_512 = "kyber-512"
     KYBER_768 = "kyber-768"
     KYBER_1024 = "kyber-1024"
@@ -34,6 +35,7 @@ class CertificateAlgorithm(Enum):
 @dataclass
 class CertificateMetadata:
     """Metadata for quantum-safe certificates"""
+
     service_name: str
     namespace: str
     valid_from: datetime.datetime
@@ -60,7 +62,7 @@ class QuantumCertificateManager:
         signature_algorithm: CertificateAlgorithm = CertificateAlgorithm.DILITHIUM_5,
         cert_validity_days: int = 90,
         rotation_threshold_days: int = 30,
-        auto_rotation: bool = True
+        auto_rotation: bool = True,
     ):
         """
         Initialize the Quantum Certificate Manager.
@@ -83,7 +85,7 @@ class QuantumCertificateManager:
         self._signature_algorithms = {
             CertificateAlgorithm.DILITHIUM_2: Dilithium2,
             CertificateAlgorithm.DILITHIUM_3: Dilithium3,
-            CertificateAlgorithm.DILITHIUM_5: Dilithium5
+            CertificateAlgorithm.DILITHIUM_5: Dilithium5,
         }
 
         logger.info(
@@ -92,11 +94,7 @@ class QuantumCertificateManager:
             f"sig_algo={signature_algorithm.value}"
         )
 
-    def generate_root_ca(
-        self,
-        subject: str = "CN=QBITEL Root CA,O=QBITEL,C=US",
-        validity_years: int = 10
-    ) -> Dict[str, Any]:
+    def generate_root_ca(self, subject: str = "CN=QBITEL Root CA,O=QBITEL,C=US", validity_years: int = 10) -> Dict[str, Any]:
         """
         Generate quantum-safe root CA certificate.
 
@@ -130,26 +128,15 @@ class QuantumCertificateManager:
             "subject": subject,
             "notBefore": valid_from.isoformat(),
             "notAfter": valid_until.isoformat(),
-            "publicKey": {
-                "algorithm": self.key_algorithm.value,
-                "keyData": base64.b64encode(kem_public_key).decode()
-            },
+            "publicKey": {"algorithm": self.key_algorithm.value, "keyData": base64.b64encode(kem_public_key).decode()},
             "signaturePublicKey": {
                 "algorithm": self.signature_algorithm.value,
-                "keyData": base64.b64encode(sig_public_key).decode()
+                "keyData": base64.b64encode(sig_public_key).decode(),
             },
             "extensions": {
-                "basicConstraints": {
-                    "critical": True,
-                    "ca": True,
-                    "pathLenConstraint": None
-                },
-                "keyUsage": {
-                    "critical": True,
-                    "keyCertSign": True,
-                    "crlSign": True
-                }
-            }
+                "basicConstraints": {"critical": True, "ca": True, "pathLenConstraint": None},
+                "keyUsage": {"critical": True, "keyCertSign": True, "crlSign": True},
+            },
         }
 
         # Sign certificate with Dilithium (self-signed for root CA)
@@ -157,21 +144,18 @@ class QuantumCertificateManager:
 
         certificate = {
             "certificate": cert_data,
-            "signature": {
-                "algorithm": self.signature_algorithm.value,
-                "value": base64.b64encode(signature).decode()
-            }
+            "signature": {"algorithm": self.signature_algorithm.value, "value": base64.b64encode(signature).decode()},
         }
 
         # Create PEM-encoded certificate and keys
         pem_cert = self._encode_pem(certificate, "QUANTUM CERTIFICATE")
         pem_kem_key = self._encode_pem(
             {"algorithm": self.key_algorithm.value, "key": base64.b64encode(kem_private_key).decode()},
-            "QUANTUM KEM PRIVATE KEY"
+            "QUANTUM KEM PRIVATE KEY",
         )
         pem_sig_key = self._encode_pem(
             {"algorithm": self.signature_algorithm.value, "key": base64.b64encode(sig_private_key).decode()},
-            "QUANTUM SIGNATURE PRIVATE KEY"
+            "QUANTUM SIGNATURE PRIVATE KEY",
         )
 
         result = {
@@ -191,8 +175,8 @@ class QuantumCertificateManager:
                 subject=subject,
                 issuer=subject,
                 serial_number=serial_number,
-                fingerprint=self._calculate_fingerprint(certificate)
-            ).__dict__
+                fingerprint=self._calculate_fingerprint(certificate),
+            ).__dict__,
         }
 
         logger.info(
@@ -207,7 +191,7 @@ class QuantumCertificateManager:
         namespace: str,
         ca_cert: Dict[str, Any],
         ca_signature_private_key: str,
-        sans: Optional[List[str]] = None
+        sans: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Generate quantum-safe certificate for a service in the mesh.
@@ -244,7 +228,7 @@ class QuantumCertificateManager:
                 f"{service_name}.{namespace}.svc.cluster.local",
                 f"{service_name}.{namespace}.svc",
                 f"{service_name}.{namespace}",
-                service_name
+                service_name,
             ]
 
         # Create certificate structure
@@ -255,32 +239,17 @@ class QuantumCertificateManager:
             "subject": subject,
             "notBefore": valid_from.isoformat(),
             "notAfter": valid_until.isoformat(),
-            "publicKey": {
-                "algorithm": self.key_algorithm.value,
-                "keyData": base64.b64encode(kem_public_key).decode()
-            },
+            "publicKey": {"algorithm": self.key_algorithm.value, "keyData": base64.b64encode(kem_public_key).decode()},
             "signaturePublicKey": {
                 "algorithm": self.signature_algorithm.value,
-                "keyData": base64.b64encode(sig_public_key).decode()
+                "keyData": base64.b64encode(sig_public_key).decode(),
             },
             "extensions": {
-                "basicConstraints": {
-                    "critical": True,
-                    "ca": False
-                },
-                "keyUsage": {
-                    "critical": True,
-                    "digitalSignature": True,
-                    "keyEncipherment": True
-                },
-                "extendedKeyUsage": {
-                    "serverAuth": True,
-                    "clientAuth": True
-                },
-                "subjectAltName": {
-                    "dnsNames": sans
-                }
-            }
+                "basicConstraints": {"critical": True, "ca": False},
+                "keyUsage": {"critical": True, "digitalSignature": True, "keyEncipherment": True},
+                "extendedKeyUsage": {"serverAuth": True, "clientAuth": True},
+                "subjectAltName": {"dnsNames": sans},
+            },
         }
 
         # Sign certificate with CA Dilithium private key
@@ -290,21 +259,18 @@ class QuantumCertificateManager:
 
         certificate = {
             "certificate": cert_data,
-            "signature": {
-                "algorithm": self.signature_algorithm.value,
-                "value": base64.b64encode(signature).decode()
-            }
+            "signature": {"algorithm": self.signature_algorithm.value, "value": base64.b64encode(signature).decode()},
         }
 
         # Create PEM-encoded certificate and keys
         pem_cert = self._encode_pem(certificate, "QUANTUM CERTIFICATE")
         pem_kem_key = self._encode_pem(
             {"algorithm": self.key_algorithm.value, "key": base64.b64encode(kem_private_key).decode()},
-            "QUANTUM KEM PRIVATE KEY"
+            "QUANTUM KEM PRIVATE KEY",
         )
         pem_sig_key = self._encode_pem(
             {"algorithm": self.signature_algorithm.value, "key": base64.b64encode(sig_private_key).decode()},
-            "QUANTUM SIGNATURE PRIVATE KEY"
+            "QUANTUM SIGNATURE PRIVATE KEY",
         )
 
         result = {
@@ -324,8 +290,8 @@ class QuantumCertificateManager:
                 subject=subject,
                 issuer=ca_cert["certificate"]["subject"],
                 serial_number=serial_number,
-                fingerprint=self._calculate_fingerprint(certificate)
-            ).__dict__
+                fingerprint=self._calculate_fingerprint(certificate),
+            ).__dict__,
         }
 
         # Cache certificate
@@ -338,12 +304,7 @@ class QuantumCertificateManager:
         )
         return result
 
-    def create_kubernetes_secret(
-        self,
-        cert_data: Dict[str, Any],
-        secret_name: str,
-        namespace: str
-    ) -> Dict[str, Any]:
+    def create_kubernetes_secret(self, cert_data: Dict[str, Any], secret_name: str, namespace: str) -> Dict[str, Any]:
         """
         Create Kubernetes Secret manifest for certificate storage.
 
@@ -361,23 +322,20 @@ class QuantumCertificateManager:
             "metadata": {
                 "name": secret_name,
                 "namespace": namespace,
-                "labels": {
-                    "app": "qbitel",
-                    "component": "quantum-certs"
-                },
+                "labels": {"app": "qbitel", "component": "quantum-certs"},
                 "annotations": {
                     "qbitel.ai/cert-serial": cert_data["metadata"]["serial_number"],
                     "qbitel.ai/valid-until": cert_data["metadata"]["valid_until"],
                     "qbitel.ai/key-algorithm": cert_data["metadata"]["key_algorithm"],
-                    "qbitel.ai/signature-algorithm": cert_data["metadata"]["signature_algorithm"]
-                }
+                    "qbitel.ai/signature-algorithm": cert_data["metadata"]["signature_algorithm"],
+                },
             },
             "type": "kubernetes.io/tls",
             "data": {
                 "tls.crt": base64.b64encode(cert_data["certificate_pem"].encode()).decode(),
                 "tls.key": base64.b64encode(cert_data["private_key_pem"].encode()).decode(),
-                "ca.crt": base64.b64encode(cert_data["ca_certificate_pem"].encode()).decode()
-            }
+                "ca.crt": base64.b64encode(cert_data["ca_certificate_pem"].encode()).decode(),
+            },
         }
 
         return secret
@@ -398,18 +356,12 @@ class QuantumCertificateManager:
         days_until_expiry = (valid_until - datetime.datetime.utcnow()).days
 
         if days_until_expiry <= self.rotation_threshold_days:
-            logger.warning(
-                f"Certificate rotation needed: "
-                f"{days_until_expiry} days until expiry"
-            )
+            logger.warning(f"Certificate rotation needed: " f"{days_until_expiry} days until expiry")
             return True
 
         return False
 
-    def _generate_key_pair(
-        self,
-        algorithm: CertificateAlgorithm
-    ) -> Tuple[bytes, bytes]:
+    def _generate_key_pair(self, algorithm: CertificateAlgorithm) -> Tuple[bytes, bytes]:
         """
         Generate quantum-safe key pair using real Kyber implementation.
 
@@ -443,10 +395,7 @@ class QuantumCertificateManager:
 
         return private_key, public_key
 
-    def _generate_signature_key_pair(
-        self,
-        algorithm: CertificateAlgorithm
-    ) -> Tuple[bytes, bytes]:
+    def _generate_signature_key_pair(self, algorithm: CertificateAlgorithm) -> Tuple[bytes, bytes]:
         """
         Generate quantum-safe signature key pair using real Dilithium implementation.
 
@@ -478,10 +427,7 @@ class QuantumCertificateManager:
         return private_key, public_key
 
     def _sign_certificate(
-        self,
-        cert_data: Dict[str, Any],
-        private_key: bytes,
-        algorithm: Optional[CertificateAlgorithm] = None
+        self, cert_data: Dict[str, Any], private_key: bytes, algorithm: Optional[CertificateAlgorithm] = None
     ) -> bytes:
         """
         Sign certificate using quantum-safe Dilithium signature algorithm.
@@ -499,7 +445,7 @@ class QuantumCertificateManager:
 
         # Serialize certificate data canonically
         cert_json = json.dumps(cert_data, sort_keys=True)
-        message = cert_json.encode('utf-8')
+        message = cert_json.encode("utf-8")
 
         # Get the Dilithium implementation
         dilithium_impl = self._signature_algorithms.get(algorithm, Dilithium5)
@@ -508,18 +454,13 @@ class QuantumCertificateManager:
         signature = dilithium_impl.sign(private_key, message)
 
         logger.info(
-            f"Signed certificate with {algorithm.value}: "
-            f"message={len(message)} bytes, signature={len(signature)} bytes"
+            f"Signed certificate with {algorithm.value}: " f"message={len(message)} bytes, signature={len(signature)} bytes"
         )
 
         return signature
 
     def _verify_certificate_signature(
-        self,
-        cert_data: Dict[str, Any],
-        signature: bytes,
-        public_key: bytes,
-        algorithm: Optional[CertificateAlgorithm] = None
+        self, cert_data: Dict[str, Any], signature: bytes, public_key: bytes, algorithm: Optional[CertificateAlgorithm] = None
     ) -> bool:
         """
         Verify certificate signature using Dilithium.
@@ -538,7 +479,7 @@ class QuantumCertificateManager:
 
         # Serialize certificate data canonically (same as signing)
         cert_json = json.dumps(cert_data, sort_keys=True)
-        message = cert_json.encode('utf-8')
+        message = cert_json.encode("utf-8")
 
         # Get the Dilithium implementation
         dilithium_impl = self._signature_algorithms.get(algorithm, Dilithium5)
@@ -555,6 +496,7 @@ class QuantumCertificateManager:
     def _generate_serial_number(self) -> str:
         """Generate unique serial number for certificate"""
         import secrets
+
         return secrets.token_hex(16)
 
     def _calculate_fingerprint(self, certificate: Dict[str, Any]) -> str:
@@ -578,7 +520,7 @@ class QuantumCertificateManager:
         b64_data = base64.b64encode(json_data.encode()).decode()
 
         # Format as PEM with 64-character lines
-        lines = [b64_data[i:i+64] for i in range(0, len(b64_data), 64)]
+        lines = [b64_data[i : i + 64] for i in range(0, len(b64_data), 64)]
 
         pem = f"-----BEGIN {label}-----\n"
         pem += "\n".join(lines)
@@ -597,12 +539,12 @@ class QuantumCertificateManager:
             Decoded data dictionary
         """
         # Extract base64 data between BEGIN and END markers
-        lines = pem_data.strip().split('\n')
-        b64_lines = [line for line in lines if not line.startswith('-----')]
-        b64_data = ''.join(b64_lines)
+        lines = pem_data.strip().split("\n")
+        b64_lines = [line for line in lines if not line.startswith("-----")]
+        b64_data = "".join(b64_lines)
 
         # Decode base64 and parse JSON
-        json_data = base64.b64decode(b64_data).decode('utf-8')
+        json_data = base64.b64decode(b64_data).decode("utf-8")
         return json.loads(json_data)
 
     def get_certificate(self, service_name: str, namespace: str) -> Optional[Dict[str, Any]]:
@@ -620,11 +562,7 @@ class QuantumCertificateManager:
         return self._certificate_cache.get(cache_key)
 
     def rotate_certificate(
-        self,
-        service_name: str,
-        namespace: str,
-        ca_cert: Dict[str, Any],
-        ca_signature_private_key: str
+        self, service_name: str, namespace: str, ca_cert: Dict[str, Any], ca_signature_private_key: str
     ) -> Dict[str, Any]:
         """
         Rotate an existing service certificate.
@@ -642,10 +580,7 @@ class QuantumCertificateManager:
 
         # Generate new certificate
         new_cert = self.generate_service_certificate(
-            service_name=service_name,
-            namespace=namespace,
-            ca_cert=ca_cert,
-            ca_signature_private_key=ca_signature_private_key
+            service_name=service_name, namespace=namespace, ca_cert=ca_cert, ca_signature_private_key=ca_signature_private_key
         )
 
         return new_cert

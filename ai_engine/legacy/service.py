@@ -108,9 +108,7 @@ class LegacySystemWhispererService:
 
         self.logger.info("LegacySystemWhispererService created")
 
-    async def initialize(
-        self, llm_service: UnifiedLLMService, metrics: Optional[AIEngineMetrics] = None
-    ) -> None:
+    async def initialize(self, llm_service: UnifiedLLMService, metrics: Optional[AIEngineMetrics] = None) -> None:
         """Initialize the Legacy System Whisperer service."""
 
         if self.is_initialized:
@@ -194,9 +192,7 @@ class LegacySystemWhispererService:
 
             # Validate system context
             if not system_id or not system_context.system_name:
-                raise QbitelAIException(
-                    "Invalid system context: missing required fields"
-                )
+                raise QbitelAIException("Invalid system context: missing required fields")
 
             # Register system
             self.registered_systems[system_id] = system_context
@@ -229,14 +225,10 @@ class LegacySystemWhispererService:
             return registration_info
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to register system {system_context.system_id}: {e}"
-            )
+            self.logger.error(f"Failed to register system {system_context.system_id}: {e}")
             raise QbitelAIException(f"System registration failed: {e}")
 
-    async def _setup_system_monitoring(
-        self, system_context: LegacySystemContext
-    ) -> None:
+    async def _setup_system_monitoring(self, system_context: LegacySystemContext) -> None:
         """Setup monitoring for a registered system."""
 
         system_id = system_context.system_id
@@ -276,11 +268,7 @@ class LegacySystemWhispererService:
 
             # Performance analysis
             if self.performance_monitor:
-                performance_analysis = (
-                    await self.performance_monitor.analyze_performance(
-                        system_id, current_metrics
-                    )
-                )
+                performance_analysis = await self.performance_monitor.analyze_performance(system_id, current_metrics)
                 analysis_results["performance"] = performance_analysis
 
             # Anomaly detection
@@ -295,27 +283,21 @@ class LegacySystemWhispererService:
                     "transaction_rate": current_metrics.transaction_rate,
                 }
 
-                failure_prediction = (
-                    await self.enhanced_detector.predict_system_failure(
-                        system_data, system_context, prediction_horizon.value
-                    )
+                failure_prediction = await self.enhanced_detector.predict_system_failure(
+                    system_data, system_context, prediction_horizon.value
                 )
                 analysis_results["failure_prediction"] = failure_prediction
 
             # Failure probability analysis
             if self.failure_predictor and time_series_data:
-                failure_analysis = (
-                    await self.failure_predictor.predict_failure_probability(
-                        system_id, time_series_data, system_context, prediction_horizon
-                    )
+                failure_analysis = await self.failure_predictor.predict_failure_probability(
+                    system_id, time_series_data, system_context, prediction_horizon
                 )
                 analysis_results["failure_analysis"] = failure_analysis
 
             # Generate recommendations based on analysis
             if self.recommendation_engine and any(analysis_results.values()):
-                recommendations = await self._generate_health_recommendations(
-                    system_context, analysis_results
-                )
+                recommendations = await self._generate_health_recommendations(system_context, analysis_results)
                 analysis_results["recommendations"] = recommendations
 
             # Calculate overall health score
@@ -331,21 +313,13 @@ class LegacySystemWhispererService:
                 "overall_health_score": health_score,
                 "analysis_results": analysis_results,
                 "processing_time_seconds": processing_time,
-                "recommendations_count": len(
-                    analysis_results.get("recommendations", {}).get(
-                        "recommended_actions", []
-                    )
-                ),
-                "next_analysis_recommended": (
-                    datetime.now() + timedelta(hours=24)
-                ).isoformat(),
+                "recommendations_count": len(analysis_results.get("recommendations", {}).get("recommended_actions", [])),
+                "next_analysis_recommended": (datetime.now() + timedelta(hours=24)).isoformat(),
             }
 
         except Exception as e:
             self.logger.error(f"System health analysis failed for {system_id}: {e}")
-            self._update_service_metrics(
-                "health_analysis", time.time() - start_time, False
-            )
+            self._update_service_metrics("health_analysis", time.time() - start_time, False)
             raise QbitelAIException(f"Health analysis failed: {e}")
 
     async def _generate_health_recommendations(
@@ -375,9 +349,7 @@ class LegacySystemWhispererService:
 
         return recommendations
 
-    def _calculate_overall_health_score(
-        self, analysis_results: Dict[str, Any]
-    ) -> float:
+    def _calculate_overall_health_score(self, analysis_results: Dict[str, Any]) -> float:
         """Calculate overall system health score (0-100)."""
 
         scores = []
@@ -391,20 +363,14 @@ class LegacySystemWhispererService:
 
         # Failure prediction score (inverted - lower failure probability = higher health)
         if "failure_prediction" in analysis_results:
-            failure_prob = analysis_results["failure_prediction"].get(
-                "failure_probability", 0.5
-            )
+            failure_prob = analysis_results["failure_prediction"].get("failure_probability", 0.5)
             failure_score = (1.0 - failure_prob) * 100
             scores.append(failure_score)
             weights.append(0.4)
 
         # Anomaly score (inverted - lower anomaly = higher health)
         if "failure_analysis" in analysis_results:
-            anomaly_score = (
-                analysis_results["failure_analysis"]
-                .get("anomaly_analysis", {})
-                .get("anomaly_score", 0.5)
-            )
+            anomaly_score = analysis_results["failure_analysis"].get("anomaly_analysis", {}).get("anomaly_score", 0.5)
             health_score = (1.0 - min(anomaly_score, 1.0)) * 100
             scores.append(health_score)
             weights.append(0.2)
@@ -499,12 +465,10 @@ class LegacySystemWhispererService:
                 raise QbitelAIException("Maintenance scheduler not initialized")
 
             # Optimize maintenance schedule
-            schedule_result = (
-                await self.maintenance_scheduler.optimize_maintenance_schedule(
-                    maintenance_requests=maintenance_requests,
-                    resource_constraints=resource_constraints,
-                    business_constraints=business_constraints,
-                )
+            schedule_result = await self.maintenance_scheduler.optimize_maintenance_schedule(
+                maintenance_requests=maintenance_requests,
+                resource_constraints=resource_constraints,
+                business_constraints=business_constraints,
             )
 
             # Add scheduled items to scheduler
@@ -512,9 +476,7 @@ class LegacySystemWhispererService:
                 self.maintenance_scheduler.add_scheduled_maintenance(scheduled_item)
 
             # Update service metrics
-            self.service_metrics["maintenance_scheduled"] += len(
-                schedule_result.get("optimized_schedule", [])
-            )
+            self.service_metrics["maintenance_scheduled"] += len(schedule_result.get("optimized_schedule", []))
 
             return schedule_result
 
@@ -565,9 +527,7 @@ class LegacySystemWhispererService:
             )
 
             # Generate recommendations
-            recommendations = await self.recommendation_engine.generate_recommendations(
-                decision_context=decision_context
-            )
+            recommendations = await self.recommendation_engine.generate_recommendations(decision_context=decision_context)
 
             # Assess business impact
             if self.impact_assessor:
@@ -625,17 +585,13 @@ class LegacySystemWhispererService:
 
         # Add performance monitor summary if available
         if self.performance_monitor:
-            perf_summary = self.performance_monitor.get_system_performance_summary(
-                system_id
-            )
+            perf_summary = self.performance_monitor.get_system_performance_summary(system_id)
             dashboard["performance_summary"] = perf_summary
 
         # Add maintenance scheduler summary if available
         if self.maintenance_scheduler:
             maint_stats = self.maintenance_scheduler.get_scheduling_statistics()
-            dashboard["maintenance_stats"] = maint_stats.get("by_system", {}).get(
-                system_id, {}
-            )
+            dashboard["maintenance_stats"] = maint_stats.get("by_system", {}).get(system_id, {})
 
         return dashboard
 
@@ -663,15 +619,8 @@ class LegacySystemWhispererService:
             "service_metrics": self.service_metrics.copy(),
             "system_registry": {
                 "registered_systems": len(self.registered_systems),
-                "monitored_systems": sum(
-                    1 for enabled in self.active_monitoring.values() if enabled
-                ),
-                "system_types": list(
-                    set(
-                        sys.system_type.value
-                        for sys in self.registered_systems.values()
-                    )
-                ),
+                "monitored_systems": sum(1 for enabled in self.active_monitoring.values() if enabled),
+                "system_types": list(set(sys.system_type.value for sys in self.registered_systems.values())),
             },
             "component_status": {
                 "enhanced_detector": self.enhanced_detector is not None,
@@ -683,11 +632,7 @@ class LegacySystemWhispererService:
                 "impact_assessor": self.impact_assessor is not None,
                 "action_planner": self.action_planner is not None,
             },
-            "uptime": (
-                (datetime.now() - self.start_time).total_seconds()
-                if self.start_time
-                else 0
-            ),
+            "uptime": ((datetime.now() - self.start_time).total_seconds() if self.start_time else 0),
             "last_updated": datetime.now().isoformat(),
         }
 
@@ -709,37 +654,19 @@ class LegacySystemWhispererService:
         try:
             # Check component health
             components_status = {
-                "enhanced_detector": (
-                    "healthy" if self.enhanced_detector else "not_initialized"
-                ),
-                "knowledge_capture": (
-                    "healthy" if self.knowledge_capture else "not_initialized"
-                ),
-                "failure_predictor": (
-                    "healthy" if self.failure_predictor else "not_initialized"
-                ),
-                "performance_monitor": (
-                    "healthy" if self.performance_monitor else "not_initialized"
-                ),
-                "maintenance_scheduler": (
-                    "healthy" if self.maintenance_scheduler else "not_initialized"
-                ),
-                "recommendation_engine": (
-                    "healthy" if self.recommendation_engine else "not_initialized"
-                ),
-                "impact_assessor": (
-                    "healthy" if self.impact_assessor else "not_initialized"
-                ),
-                "action_planner": (
-                    "healthy" if self.action_planner else "not_initialized"
-                ),
+                "enhanced_detector": ("healthy" if self.enhanced_detector else "not_initialized"),
+                "knowledge_capture": ("healthy" if self.knowledge_capture else "not_initialized"),
+                "failure_predictor": ("healthy" if self.failure_predictor else "not_initialized"),
+                "performance_monitor": ("healthy" if self.performance_monitor else "not_initialized"),
+                "maintenance_scheduler": ("healthy" if self.maintenance_scheduler else "not_initialized"),
+                "recommendation_engine": ("healthy" if self.recommendation_engine else "not_initialized"),
+                "impact_assessor": ("healthy" if self.impact_assessor else "not_initialized"),
+                "action_planner": ("healthy" if self.action_planner else "not_initialized"),
                 "llm_service": "healthy" if self.llm_service else "not_available",
             }
 
             # Calculate overall status
-            healthy_components = sum(
-                1 for status in components_status.values() if status == "healthy"
-            )
+            healthy_components = sum(1 for status in components_status.values() if status == "healthy")
             total_components = len(components_status)
             health_ratio = healthy_components / total_components
 
@@ -802,9 +729,7 @@ class LegacySystemWhispererService:
                 self.logger.error(f"Metrics collection error: {e}")
                 await asyncio.sleep(60)
 
-    def _update_service_metrics(
-        self, operation: str, processing_time: float, success: bool
-    ) -> None:
+    def _update_service_metrics(self, operation: str, processing_time: float, success: bool) -> None:
         """Update service performance metrics."""
 
         self.service_metrics["requests_processed"] += 1
@@ -817,9 +742,7 @@ class LegacySystemWhispererService:
         total_requests = self.service_metrics["requests_processed"]
 
         if total_requests > 1:
-            new_avg = (
-                (current_avg * (total_requests - 1)) + processing_time
-            ) / total_requests
+            new_avg = ((current_avg * (total_requests - 1)) + processing_time) / total_requests
             self.service_metrics["average_response_time"] = new_avg
         else:
             self.service_metrics["average_response_time"] = processing_time

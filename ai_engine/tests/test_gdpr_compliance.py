@@ -173,9 +173,7 @@ class TestGDPRComplianceManager:
     @pytest.mark.asyncio
     async def test_submit_access_request(self, gdpr_manager):
         """Test submitting right to access request."""
-        request_id = await gdpr_manager.submit_subject_request(
-            subject_id="user_005", right=DataSubjectRight.ACCESS
-        )
+        request_id = await gdpr_manager.submit_subject_request(subject_id="user_005", right=DataSubjectRight.ACCESS)
 
         assert request_id is not None
         assert request_id in gdpr_manager.subject_requests
@@ -185,9 +183,7 @@ class TestGDPRComplianceManager:
     @pytest.mark.asyncio
     async def test_submit_erasure_request(self, gdpr_manager):
         """Test submitting right to erasure request."""
-        request_id = await gdpr_manager.submit_subject_request(
-            subject_id="user_006", right=DataSubjectRight.ERASURE
-        )
+        request_id = await gdpr_manager.submit_subject_request(subject_id="user_006", right=DataSubjectRight.ERASURE)
 
         assert request_id in gdpr_manager.subject_requests
         request = gdpr_manager.subject_requests[request_id]
@@ -196,13 +192,9 @@ class TestGDPRComplianceManager:
     @pytest.mark.asyncio
     async def test_process_access_request(self, gdpr_manager):
         """Test processing right to access request."""
-        request_id = await gdpr_manager.submit_subject_request(
-            subject_id="user_007", right=DataSubjectRight.ACCESS
-        )
+        request_id = await gdpr_manager.submit_subject_request(subject_id="user_007", right=DataSubjectRight.ACCESS)
 
-        with patch.object(
-            gdpr_manager, "_gather_subject_data", new_callable=AsyncMock
-        ) as mock_gather:
+        with patch.object(gdpr_manager, "_gather_subject_data", new_callable=AsyncMock) as mock_gather:
             mock_gather.return_value = {"name": "John Doe", "email": "john@example.com"}
 
             response = await gdpr_manager.process_access_request(request_id)
@@ -214,13 +206,9 @@ class TestGDPRComplianceManager:
     @pytest.mark.asyncio
     async def test_process_erasure_request(self, gdpr_manager):
         """Test processing right to erasure request."""
-        request_id = await gdpr_manager.submit_subject_request(
-            subject_id="user_008", right=DataSubjectRight.ERASURE
-        )
+        request_id = await gdpr_manager.submit_subject_request(subject_id="user_008", right=DataSubjectRight.ERASURE)
 
-        with patch.object(
-            gdpr_manager, "_delete_subject_data", new_callable=AsyncMock
-        ) as mock_delete:
+        with patch.object(gdpr_manager, "_delete_subject_data", new_callable=AsyncMock) as mock_delete:
             mock_delete.return_value = True
 
             result = await gdpr_manager.process_erasure_request(request_id)
@@ -231,13 +219,9 @@ class TestGDPRComplianceManager:
     @pytest.mark.asyncio
     async def test_export_personal_data(self, gdpr_manager):
         """Test exporting personal data (portability)."""
-        request_id = await gdpr_manager.submit_subject_request(
-            subject_id="user_009", right=DataSubjectRight.PORTABILITY
-        )
+        request_id = await gdpr_manager.submit_subject_request(subject_id="user_009", right=DataSubjectRight.PORTABILITY)
 
-        with patch.object(
-            gdpr_manager, "_export_data_portable_format", new_callable=AsyncMock
-        ) as mock_export:
+        with patch.object(gdpr_manager, "_export_data_portable_format", new_callable=AsyncMock) as mock_export:
             mock_export.return_value = {"format": "JSON", "data": {}}
 
             export_data = await gdpr_manager.export_subject_data(request_id)
@@ -279,9 +263,7 @@ class TestGDPRComplianceManager:
             breach_type="Data leak", affected_subjects=["user_012"], severity="critical"
         )
 
-        with patch.object(
-            gdpr_manager, "_notify_authority_impl", new_callable=AsyncMock
-        ) as mock_notify:
+        with patch.object(gdpr_manager, "_notify_authority_impl", new_callable=AsyncMock) as mock_notify:
             mock_notify.return_value = True
 
             result = await gdpr_manager.notify_supervisory_authority(breach_id)
@@ -298,9 +280,7 @@ class TestGDPRComplianceManager:
             severity="high",
         )
 
-        with patch.object(
-            gdpr_manager, "_notify_subjects_impl", new_callable=AsyncMock
-        ) as mock_notify:
+        with patch.object(gdpr_manager, "_notify_subjects_impl", new_callable=AsyncMock) as mock_notify:
             mock_notify.return_value = 2
 
             notified_count = await gdpr_manager.notify_affected_subjects(breach_id)
@@ -356,9 +336,7 @@ class TestGDPRComplianceManager:
     @pytest.mark.asyncio
     async def test_request_fulfillment_deadline(self, gdpr_manager):
         """Test that requests track 30-day deadline."""
-        request_id = await gdpr_manager.submit_subject_request(
-            subject_id="user_018", right=DataSubjectRight.ACCESS
-        )
+        request_id = await gdpr_manager.submit_subject_request(subject_id="user_018", right=DataSubjectRight.ACCESS)
 
         request = gdpr_manager.subject_requests[request_id]
         deadline = request.requested_at + timedelta(days=30)

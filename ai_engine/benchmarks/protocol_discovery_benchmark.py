@@ -183,9 +183,7 @@ class ProtocolDiscoveryBenchmark:
             self.logger.error(f"Failed to load test data: {e}")
             raise
 
-    def generate_synthetic_data(
-        self, num_samples: int = 1000, protocols: Optional[List[str]] = None
-    ) -> None:
+    def generate_synthetic_data(self, num_samples: int = 1000, protocols: Optional[List[str]] = None) -> None:
         """Generate synthetic test data."""
         if protocols is None:
             protocols = ["HTTP", "DNS", "TLS", "SSH", "FTP"]
@@ -232,9 +230,7 @@ class ProtocolDiscoveryBenchmark:
 
             start_time = time.time()
             try:
-                await self.discovery_system.discover_with_sla(
-                    request, sla_ms=config.sla_threshold_ms
-                )
+                await self.discovery_system.discover_with_sla(request, sla_ms=config.sla_threshold_ms)
                 latency_ms = (time.time() - start_time) * 1000
                 latencies.append(latency_ms)
 
@@ -273,17 +269,13 @@ class ProtocolDiscoveryBenchmark:
 
         return result
 
-    async def run_throughput_benchmark(
-        self, config: BenchmarkConfig
-    ) -> BenchmarkResult:
+    async def run_throughput_benchmark(self, config: BenchmarkConfig) -> BenchmarkResult:
         """
         Run throughput benchmark.
 
         Measures requests per second under concurrent load.
         """
-        self.logger.info(
-            f"Starting throughput benchmark with {config.concurrent_requests} concurrent requests"
-        )
+        self.logger.info(f"Starting throughput benchmark with {config.concurrent_requests} concurrent requests")
 
         if not self.test_data:
             self.generate_synthetic_data(config.num_requests)
@@ -315,10 +307,7 @@ class ProtocolDiscoveryBenchmark:
 
         # Execute batches concurrently
         for batch in batches:
-            tasks = [
-                self.discovery_system.discover_with_sla(req, config.sla_threshold_ms)
-                for req in batch
-            ]
+            tasks = [self.discovery_system.discover_with_sla(req, config.sla_threshold_ms) for req in batch]
 
             results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -351,9 +340,7 @@ class ProtocolDiscoveryBenchmark:
         )
 
         self.results.append(result)
-        self.logger.info(
-            f"Throughput benchmark completed: {throughput_metrics.requests_per_second:.2f} req/s"
-        )
+        self.logger.info(f"Throughput benchmark completed: {throughput_metrics.requests_per_second:.2f} req/s")
 
         return result
 
@@ -371,9 +358,7 @@ class ProtocolDiscoveryBenchmark:
         predictions = []
         ground_truth = []
 
-        for i, (packet_data, expected_protocol) in enumerate(
-            self.test_data[: config.num_requests]
-        ):
+        for i, (packet_data, expected_protocol) in enumerate(self.test_data[: config.num_requests]):
             request = DiscoveryRequest(
                 request_id=f"accuracy_bench_{i}",
                 packet_data=packet_data,
@@ -381,9 +366,7 @@ class ProtocolDiscoveryBenchmark:
             )
 
             try:
-                result = await self.discovery_system.discover_with_sla(
-                    request, sla_ms=config.sla_threshold_ms
-                )
+                result = await self.discovery_system.discover_with_sla(request, sla_ms=config.sla_threshold_ms)
                 predictions.append(result.protocol_type)
                 ground_truth.append(expected_protocol)
 
@@ -396,9 +379,7 @@ class ProtocolDiscoveryBenchmark:
 
         # Calculate per-class metrics (simplified)
         unique_protocols = set(ground_truth)
-        confusion_matrix = {
-            protocol: {p: 0 for p in unique_protocols} for protocol in unique_protocols
-        }
+        confusion_matrix = {protocol: {p: 0 for p in unique_protocols} for protocol in unique_protocols}
 
         for pred, true in zip(predictions, ground_truth):
             if pred in confusion_matrix[true]:
@@ -410,16 +391,8 @@ class ProtocolDiscoveryBenchmark:
 
         for protocol in unique_protocols:
             tp = confusion_matrix[protocol].get(protocol, 0)
-            fp = sum(
-                confusion_matrix[p].get(protocol, 0)
-                for p in unique_protocols
-                if p != protocol
-            )
-            fn = sum(
-                confusion_matrix[protocol].get(p, 0)
-                for p in unique_protocols
-                if p != protocol
-            )
+            fp = sum(confusion_matrix[p].get(protocol, 0) for p in unique_protocols if p != protocol)
+            fn = sum(confusion_matrix[protocol].get(p, 0) for p in unique_protocols if p != protocol)
 
             precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
             recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
@@ -429,11 +402,7 @@ class ProtocolDiscoveryBenchmark:
 
         avg_precision = statistics.mean(precision_scores) if precision_scores else 0.0
         avg_recall = statistics.mean(recall_scores) if recall_scores else 0.0
-        f1 = (
-            2 * (avg_precision * avg_recall) / (avg_precision + avg_recall)
-            if (avg_precision + avg_recall) > 0
-            else 0.0
-        )
+        f1 = 2 * (avg_precision * avg_recall) / (avg_precision + avg_recall) if (avg_precision + avg_recall) > 0 else 0.0
 
         accuracy_metrics = AccuracyMetrics(
             total_samples=len(predictions),
@@ -456,23 +425,17 @@ class ProtocolDiscoveryBenchmark:
         )
 
         self.results.append(result)
-        self.logger.info(
-            f"Accuracy benchmark completed: accuracy={accuracy:.2%}, F1={f1:.2%}"
-        )
+        self.logger.info(f"Accuracy benchmark completed: accuracy={accuracy:.2%}, F1={f1:.2%}")
 
         return result
 
-    async def run_sla_compliance_benchmark(
-        self, config: BenchmarkConfig
-    ) -> BenchmarkResult:
+    async def run_sla_compliance_benchmark(self, config: BenchmarkConfig) -> BenchmarkResult:
         """
         Run SLA compliance benchmark.
 
         Tests system's ability to meet SLA guarantees under load.
         """
-        self.logger.info(
-            f"Starting SLA compliance benchmark (threshold: {config.sla_threshold_ms}ms)"
-        )
+        self.logger.info(f"Starting SLA compliance benchmark (threshold: {config.sla_threshold_ms}ms)")
 
         if not self.test_data:
             self.generate_synthetic_data(config.num_requests)
@@ -490,9 +453,7 @@ class ProtocolDiscoveryBenchmark:
             )
 
             try:
-                result = await self.discovery_system.discover_with_sla(
-                    request, sla_ms=config.sla_threshold_ms
-                )
+                result = await self.discovery_system.discover_with_sla(request, sla_ms=config.sla_threshold_ms)
 
                 if result.sla_met:
                     sla_met_count += 1
@@ -517,15 +478,11 @@ class ProtocolDiscoveryBenchmark:
         )
 
         self.results.append(result)
-        self.logger.info(
-            f"SLA compliance benchmark completed: {compliance_rate:.2%} compliance rate"
-        )
+        self.logger.info(f"SLA compliance benchmark completed: {compliance_rate:.2%} compliance rate")
 
         return result
 
-    async def run_resource_usage_benchmark(
-        self, config: BenchmarkConfig
-    ) -> BenchmarkResult:
+    async def run_resource_usage_benchmark(self, config: BenchmarkConfig) -> BenchmarkResult:
         """
         Run resource usage benchmark.
 
@@ -550,9 +507,7 @@ class ProtocolDiscoveryBenchmark:
             )
 
             try:
-                await self.discovery_system.discover_with_sla(
-                    request, sla_ms=config.sla_threshold_ms
-                )
+                await self.discovery_system.discover_with_sla(request, sla_ms=config.sla_threshold_ms)
             except Exception as e:
                 self.logger.warning(f"Request failed: {e}")
 
@@ -581,9 +536,7 @@ class ProtocolDiscoveryBenchmark:
 
         Tests system behavior under various load conditions.
         """
-        self.logger.info(
-            f"Starting stress test with {config.load_pattern.value} load pattern"
-        )
+        self.logger.info(f"Starting stress test with {config.load_pattern.value} load pattern")
 
         if not self.test_data:
             self.generate_synthetic_data(config.num_requests * 2)
@@ -606,11 +559,7 @@ class ProtocolDiscoveryBenchmark:
                     quality_mode=config.quality_mode,
                 )
 
-                tasks.append(
-                    self.discovery_system.discover_with_sla(
-                        request, config.sla_threshold_ms
-                    )
-                )
+                tasks.append(self.discovery_system.discover_with_sla(request, config.sla_threshold_ms))
 
             batch_results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -655,15 +604,11 @@ class ProtocolDiscoveryBenchmark:
         )
 
         self.results.append(result)
-        self.logger.info(
-            f"Stress test completed: {len(results_data)} requests processed"
-        )
+        self.logger.info(f"Stress test completed: {len(results_data)} requests processed")
 
         return result
 
-    async def run_full_benchmark_suite(
-        self, base_config: BenchmarkConfig
-    ) -> List[BenchmarkResult]:
+    async def run_full_benchmark_suite(self, base_config: BenchmarkConfig) -> List[BenchmarkResult]:
         """Run complete benchmark suite."""
         self.logger.info("Starting full benchmark suite")
 
@@ -754,9 +699,7 @@ class ProtocolDiscoveryBenchmark:
                 )
 
             if result.sla_compliance_rate is not None:
-                report_lines.append(
-                    f"  SLA Compliance:  {result.sla_compliance_rate:.2%}"
-                )
+                report_lines.append(f"  SLA Compliance:  {result.sla_compliance_rate:.2%}")
 
             if result.resource_metrics:
                 m = result.resource_metrics
@@ -768,9 +711,7 @@ class ProtocolDiscoveryBenchmark:
                 )
 
                 if m.gpu_memory_mb_mean:
-                    report_lines.append(
-                        f"  GPU Memory:      {m.gpu_memory_mb_mean:.1f} MB"
-                    )
+                    report_lines.append(f"  GPU Memory:      {m.gpu_memory_mb_mean:.1f} MB")
 
         report_lines.append("\n" + "=" * 80)
 
@@ -785,18 +726,14 @@ class ProtocolDiscoveryBenchmark:
 
         for i in range(num_requests):
             packet_data, _ = self.test_data[i % len(self.test_data)]
-            request = DiscoveryRequest(
-                request_id=f"warmup_{i}", packet_data=packet_data
-            )
+            request = DiscoveryRequest(request_id=f"warmup_{i}", packet_data=packet_data)
 
             try:
                 await self.discovery_system.discover_with_sla(request, sla_ms=1000)
             except:
                 pass
 
-    def _generate_load_pattern(
-        self, config: BenchmarkConfig
-    ) -> List[Tuple[float, int]]:
+    def _generate_load_pattern(self, config: BenchmarkConfig) -> List[Tuple[float, int]]:
         """Generate load pattern for stress testing."""
         schedule = []
         duration = config.duration_seconds
@@ -825,9 +762,7 @@ class ProtocolDiscoveryBenchmark:
         elif config.load_pattern == LoadPattern.WAVE:
             # Sinusoidal wave pattern
             for t in range(duration):
-                load = int(
-                    max_load * (0.5 + 0.5 * np.sin(2 * np.pi * t / (duration / 3)))
-                )
+                load = int(max_load * (0.5 + 0.5 * np.sin(2 * np.pi * t / (duration / 3))))
                 schedule.append((t, max(1, load)))
 
         return schedule
@@ -879,35 +814,13 @@ class ResourceMonitor:
             self._monitor_task.cancel()
 
         return ResourceMetrics(
-            cpu_percent_mean=(
-                statistics.mean(self.metrics["cpu_percent"])
-                if self.metrics["cpu_percent"]
-                else 0.0
-            ),
-            cpu_percent_max=(
-                max(self.metrics["cpu_percent"]) if self.metrics["cpu_percent"] else 0.0
-            ),
-            memory_mb_mean=(
-                statistics.mean(self.metrics["memory_mb"])
-                if self.metrics["memory_mb"]
-                else 0.0
-            ),
-            memory_mb_max=(
-                max(self.metrics["memory_mb"]) if self.metrics["memory_mb"] else 0.0
-            ),
-            gpu_memory_mb_mean=(
-                statistics.mean(self.metrics["gpu_memory_mb"])
-                if self.metrics["gpu_memory_mb"]
-                else None
-            ),
-            gpu_memory_mb_max=(
-                max(self.metrics["gpu_memory_mb"])
-                if self.metrics["gpu_memory_mb"]
-                else None
-            ),
+            cpu_percent_mean=(statistics.mean(self.metrics["cpu_percent"]) if self.metrics["cpu_percent"] else 0.0),
+            cpu_percent_max=(max(self.metrics["cpu_percent"]) if self.metrics["cpu_percent"] else 0.0),
+            memory_mb_mean=(statistics.mean(self.metrics["memory_mb"]) if self.metrics["memory_mb"] else 0.0),
+            memory_mb_max=(max(self.metrics["memory_mb"]) if self.metrics["memory_mb"] else 0.0),
+            gpu_memory_mb_mean=(statistics.mean(self.metrics["gpu_memory_mb"]) if self.metrics["gpu_memory_mb"] else None),
+            gpu_memory_mb_max=(max(self.metrics["gpu_memory_mb"]) if self.metrics["gpu_memory_mb"] else None),
             gpu_utilization_mean=(
-                statistics.mean(self.metrics["gpu_utilization"])
-                if self.metrics["gpu_utilization"]
-                else None
+                statistics.mean(self.metrics["gpu_utilization"]) if self.metrics["gpu_utilization"] else None
             ),
         )

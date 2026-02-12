@@ -116,9 +116,7 @@ class TestMainEntryPoint:
 
         # Verify file handler was added in development mode
         root_logger = logging.getLogger()
-        file_handlers = [
-            h for h in root_logger.handlers if isinstance(h, logging.FileHandler)
-        ]
+        file_handlers = [h for h in root_logger.handlers if isinstance(h, logging.FileHandler)]
         assert len(file_handlers) > 0
 
     @patch("ai_engine.__main__.Config")
@@ -128,9 +126,7 @@ class TestMainEntryPoint:
         mock_config_instance = Mock()
         mock_config.return_value = mock_config_instance
 
-        with patch(
-            "ai_engine.__main__.run_production_server", side_effect=KeyboardInterrupt
-        ):
+        with patch("ai_engine.__main__.run_production_server", side_effect=KeyboardInterrupt):
             with pytest.raises(SystemExit) as exc_info:
                 main()
 
@@ -415,9 +411,7 @@ class TestLoggingConfiguration:
             main()
 
         root_logger = logging.getLogger()
-        stream_handlers = [
-            h for h in root_logger.handlers if isinstance(h, logging.StreamHandler)
-        ]
+        stream_handlers = [h for h in root_logger.handlers if isinstance(h, logging.StreamHandler)]
         assert len(stream_handlers) > 0
 
 

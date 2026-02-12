@@ -37,15 +37,15 @@ class ACHEntry:
 
     # Required fields
     transaction_code: TransactionCode
-    routing_number: str           # 9 digits with check digit
-    account_number: str           # Up to 17 chars
-    amount: Decimal               # In dollars
-    individual_name: str          # Up to 22 chars
+    routing_number: str  # 9 digits with check digit
+    account_number: str  # Up to 17 chars
+    amount: Decimal  # In dollars
+    individual_name: str  # Up to 22 chars
 
     # Optional fields
-    individual_id: str = ""       # Up to 15 chars
+    individual_id: str = ""  # Up to 15 chars
     discretionary_data: str = ""  # 2 chars
-    addenda_text: str = ""        # Up to 80 chars per addenda
+    addenda_text: str = ""  # Up to 80 chars per addenda
 
 
 @dataclass
@@ -53,17 +53,17 @@ class ACHBatch:
     """Simplified batch data for building ACH files."""
 
     # Required fields
-    company_name: str             # Up to 16 chars
-    company_id: str               # 10 chars (1 + 9 digit tax ID)
-    originating_dfi: str          # 8 chars (first 8 of routing)
+    company_name: str  # Up to 16 chars
+    company_id: str  # 10 chars (1 + 9 digit tax ID)
+    originating_dfi: str  # 8 chars (first 8 of routing)
     entries: List[ACHEntry]
 
     # Optional fields
     sec_code: SECCode = SECCode.PPD
-    entry_description: str = "PAYMENT"    # Up to 10 chars
+    entry_description: str = "PAYMENT"  # Up to 10 chars
     effective_date: Optional[date] = None
-    company_discretionary: str = ""       # Up to 20 chars
-    descriptive_date: str = ""            # 6 chars
+    company_discretionary: str = ""  # Up to 20 chars
+    descriptive_date: str = ""  # 6 chars
 
 
 class NACHABuilder:
@@ -270,6 +270,7 @@ class NACHABuilder:
         content = self.build()
 
         from ai_engine.domains.banking.protocols.payments.domestic.ach.nacha_parser import NACHAParser
+
         parser = NACHAParser()
         return parser.parse(content)
 
@@ -283,19 +284,19 @@ class NACHABuilder:
         now = datetime.now()
 
         record = (
-            "1"                                          # Record Type (1)
-            "01"                                         # Priority Code (2)
-            f"{self.immediate_destination:10}"           # Immediate Destination (10)
-            f"{self.immediate_origin:10}"                # Immediate Origin (10)
-            f"{now.strftime('%y%m%d')}"                  # File Creation Date (6)
-            f"{now.strftime('%H%M')}"                    # File Creation Time (4)
-            f"{self._file_id_modifier}"                  # File ID Modifier (1)
-            "094"                                        # Record Size (3)
-            "10"                                         # Blocking Factor (2)
-            "1"                                          # Format Code (1)
-            f"{self.destination_name:23}"                # Destination Name (23)
-            f"{self.origin_name:23}"                     # Origin Name (23)
-            f"{'':8}"                                    # Reference Code (8)
+            "1"  # Record Type (1)
+            "01"  # Priority Code (2)
+            f"{self.immediate_destination:10}"  # Immediate Destination (10)
+            f"{self.immediate_origin:10}"  # Immediate Origin (10)
+            f"{now.strftime('%y%m%d')}"  # File Creation Date (6)
+            f"{now.strftime('%H%M')}"  # File Creation Time (4)
+            f"{self._file_id_modifier}"  # File ID Modifier (1)
+            "094"  # Record Size (3)
+            "10"  # Blocking Factor (2)
+            "1"  # Format Code (1)
+            f"{self.destination_name:23}"  # Destination Name (23)
+            f"{self.origin_name:23}"  # Origin Name (23)
+            f"{'':8}"  # Reference Code (8)
         )
 
         return record[:RECORD_LENGTH]
@@ -310,19 +311,19 @@ class NACHABuilder:
         effective = batch.effective_date or date.today()
 
         record = (
-            "5"                                          # Record Type (1)
-            f"{scc.code}"                                # Service Class Code (3)
-            f"{batch.company_name:16}"                   # Company Name (16)
-            f"{batch.company_discretionary:20}"          # Company Discretionary Data (20)
-            f"{batch.company_id:10}"                     # Company Identification (10)
-            f"{batch.sec_code.code}"                     # Standard Entry Class (3)
-            f"{batch.entry_description:10}"              # Company Entry Description (10)
-            f"{batch.descriptive_date:6}"                # Company Descriptive Date (6)
-            f"{effective.strftime('%y%m%d')}"            # Effective Entry Date (6)
-            f"{'':3}"                                    # Settlement Date (3) - ACH operator
-            "1"                                          # Originator Status Code (1)
-            f"{batch.originating_dfi:8}"                 # Originating DFI (8)
-            f"{batch_number:07d}"                        # Batch Number (7)
+            "5"  # Record Type (1)
+            f"{scc.code}"  # Service Class Code (3)
+            f"{batch.company_name:16}"  # Company Name (16)
+            f"{batch.company_discretionary:20}"  # Company Discretionary Data (20)
+            f"{batch.company_id:10}"  # Company Identification (10)
+            f"{batch.sec_code.code}"  # Standard Entry Class (3)
+            f"{batch.entry_description:10}"  # Company Entry Description (10)
+            f"{batch.descriptive_date:6}"  # Company Descriptive Date (6)
+            f"{effective.strftime('%y%m%d')}"  # Effective Entry Date (6)
+            f"{'':3}"  # Settlement Date (3) - ACH operator
+            "1"  # Originator Status Code (1)
+            f"{batch.originating_dfi:8}"  # Originating DFI (8)
+            f"{batch_number:07d}"  # Batch Number (7)
         )
 
         return record[:RECORD_LENGTH]
@@ -342,17 +343,17 @@ class NACHABuilder:
         amount_cents = int(entry.amount * 100)
 
         record = (
-            "6"                                          # Record Type (1)
-            f"{entry.transaction_code.code}"             # Transaction Code (2)
-            f"{routing_8:8}"                             # Receiving DFI (8)
-            f"{check_digit}"                             # Check Digit (1)
-            f"{entry.account_number:17}"                 # DFI Account Number (17)
-            f"{amount_cents:010d}"                       # Amount (10)
-            f"{entry.individual_id:15}"                  # Individual Identification (15)
-            f"{entry.individual_name:22}"                # Individual Name (22)
-            f"{entry.discretionary_data:2}"              # Discretionary Data (2)
-            f"{'1' if has_addenda else '0'}"             # Addenda Record Indicator (1)
-            f"{trace_number:15}"                         # Trace Number (15)
+            "6"  # Record Type (1)
+            f"{entry.transaction_code.code}"  # Transaction Code (2)
+            f"{routing_8:8}"  # Receiving DFI (8)
+            f"{check_digit}"  # Check Digit (1)
+            f"{entry.account_number:17}"  # DFI Account Number (17)
+            f"{amount_cents:010d}"  # Amount (10)
+            f"{entry.individual_id:15}"  # Individual Identification (15)
+            f"{entry.individual_name:22}"  # Individual Name (22)
+            f"{entry.discretionary_data:2}"  # Discretionary Data (2)
+            f"{'1' if has_addenda else '0'}"  # Addenda Record Indicator (1)
+            f"{trace_number:15}"  # Trace Number (15)
         )
 
         return record[:RECORD_LENGTH]
@@ -365,11 +366,11 @@ class NACHABuilder:
     ) -> str:
         """Build Addenda Record (Type 7)."""
         record = (
-            "7"                                          # Record Type (1)
-            "05"                                         # Addenda Type Code (2)
-            f"{payment_info:80}"                         # Payment Related Information (80)
-            f"{sequence:04d}"                            # Addenda Sequence Number (4)
-            f"{entry_sequence:07d}"                      # Entry Detail Sequence Number (7)
+            "7"  # Record Type (1)
+            "05"  # Addenda Type Code (2)
+            f"{payment_info:80}"  # Payment Related Information (80)
+            f"{sequence:04d}"  # Addenda Sequence Number (4)
+            f"{entry_sequence:07d}"  # Entry Detail Sequence Number (7)
         )
 
         return record[:RECORD_LENGTH]
@@ -394,17 +395,17 @@ class NACHABuilder:
         credit_cents = int(total_credit * 100)
 
         record = (
-            "8"                                          # Record Type (1)
-            f"{scc.code}"                                # Service Class Code (3)
-            f"{entry_count:06d}"                         # Entry/Addenda Count (6)
-            f"{hash_10}"                                 # Entry Hash (10)
-            f"{debit_cents:012d}"                        # Total Debit Amount (12)
-            f"{credit_cents:012d}"                       # Total Credit Amount (12)
-            f"{company_id:10}"                           # Company Identification (10)
-            f"{'':19}"                                   # Message Authentication Code (19)
-            f"{'':6}"                                    # Reserved (6)
-            f"{originating_dfi:8}"                       # Originating DFI (8)
-            f"{batch_number:07d}"                        # Batch Number (7)
+            "8"  # Record Type (1)
+            f"{scc.code}"  # Service Class Code (3)
+            f"{entry_count:06d}"  # Entry/Addenda Count (6)
+            f"{hash_10}"  # Entry Hash (10)
+            f"{debit_cents:012d}"  # Total Debit Amount (12)
+            f"{credit_cents:012d}"  # Total Credit Amount (12)
+            f"{company_id:10}"  # Company Identification (10)
+            f"{'':19}"  # Message Authentication Code (19)
+            f"{'':6}"  # Reserved (6)
+            f"{originating_dfi:8}"  # Originating DFI (8)
+            f"{batch_number:07d}"  # Batch Number (7)
         )
 
         return record[:RECORD_LENGTH]
@@ -427,14 +428,14 @@ class NACHABuilder:
         credit_cents = int(total_credit * 100)
 
         record = (
-            "9"                                          # Record Type (1)
-            f"{batch_count:06d}"                         # Batch Count (6)
-            f"{block_count:06d}"                         # Block Count (6)
-            f"{entry_count:08d}"                         # Entry/Addenda Count (8)
-            f"{hash_10}"                                 # Entry Hash (10)
-            f"{debit_cents:012d}"                        # Total Debit Amount (12)
-            f"{credit_cents:012d}"                       # Total Credit Amount (12)
-            f"{'':39}"                                   # Reserved (39)
+            "9"  # Record Type (1)
+            f"{batch_count:06d}"  # Batch Count (6)
+            f"{block_count:06d}"  # Block Count (6)
+            f"{entry_count:08d}"  # Entry/Addenda Count (8)
+            f"{hash_10}"  # Entry Hash (10)
+            f"{debit_cents:012d}"  # Total Debit Amount (12)
+            f"{credit_cents:012d}"  # Total Credit Amount (12)
+            f"{'':39}"  # Reserved (39)
         )
 
         return record[:RECORD_LENGTH]
@@ -484,16 +485,22 @@ def create_payroll_file(
 
     entries = []
     for emp in employees:
-        tc = TransactionCode.CHECKING_CREDIT if emp.get("account_type", "checking") == "checking" else TransactionCode.SAVINGS_CREDIT
+        tc = (
+            TransactionCode.CHECKING_CREDIT
+            if emp.get("account_type", "checking") == "checking"
+            else TransactionCode.SAVINGS_CREDIT
+        )
 
-        entries.append(ACHEntry(
-            transaction_code=tc,
-            routing_number=emp["routing_number"],
-            account_number=emp["account_number"],
-            amount=Decimal(str(emp["amount"])),
-            individual_name=emp["name"],
-            individual_id=emp.get("employee_id", ""),
-        ))
+        entries.append(
+            ACHEntry(
+                transaction_code=tc,
+                routing_number=emp["routing_number"],
+                account_number=emp["account_number"],
+                amount=Decimal(str(emp["amount"])),
+                individual_name=emp["name"],
+                individual_id=emp.get("employee_id", ""),
+            )
+        )
 
     batch = ACHBatch(
         company_name=company_name,

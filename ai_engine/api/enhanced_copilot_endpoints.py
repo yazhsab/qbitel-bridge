@@ -39,7 +39,6 @@ from ..security.models import SecurityEvent
 from ..core.config import Config
 from ..api.auth import get_current_user
 
-
 logger = logging.getLogger(__name__)
 
 # Router
@@ -52,16 +51,10 @@ router = APIRouter(prefix="/api/v1/copilot", tags=["Enhanced LLM Copilot"])
 class ThreatScenarioRequest(BaseModel):
     """Request to model a threat scenario."""
 
-    scenario_type: str = Field(
-        ..., description="Type of scenario (port_change, protocol_change, etc.)"
-    )
+    scenario_type: str = Field(..., description="Type of scenario (port_change, protocol_change, etc.)")
     description: str = Field(..., description="Description of the proposed change")
-    proposed_change: Dict[str, Any] = Field(
-        ..., description="Details of the proposed change"
-    )
-    context: Optional[Dict[str, Any]] = Field(
-        None, description="Current system context"
-    )
+    proposed_change: Dict[str, Any] = Field(..., description="Details of the proposed change")
+    context: Optional[Dict[str, Any]] = Field(None, description="Current system context")
 
     @validator("scenario_type")
     def validate_scenario_type(cls, v):
@@ -105,12 +98,8 @@ class FuzzingRequest(BaseModel):
 
     protocol_name: str = Field(..., description="Name of the protocol to fuzz")
     protocol_spec: Dict[str, Any] = Field(..., description="Protocol specification")
-    max_test_cases: int = Field(
-        1000, ge=100, le=10000, description="Maximum test cases"
-    )
-    duration_minutes: int = Field(
-        60, ge=1, le=480, description="Maximum duration in minutes"
-    )
+    max_test_cases: int = Field(1000, ge=100, le=10000, description="Maximum test cases")
+    duration_minutes: int = Field(60, ge=1, le=480, description="Maximum duration in minutes")
 
 
 class FuzzingResponse(BaseModel):
@@ -248,21 +237,15 @@ async def generate_incident_playbook(
     - Contact information
     """
     try:
-        logger.info(
-            f"Playbook generation request by user {current_user.get('username') if current_user else 'anonymous'}"
-        )
+        logger.info(f"Playbook generation request by user {current_user.get('username') if current_user else 'anonymous'}")
 
         # Convert incident dict to SecurityEvent
         # For simplicity, create a basic SecurityEvent from the dict
         from ..security.models import SecurityEventType, ThreatLevel
 
         incident = SecurityEvent(
-            event_id=request.incident.get(
-                "event_id", f"event_{int(datetime.utcnow().timestamp())}"
-            ),
-            event_type=SecurityEventType(
-                request.incident.get("event_type", "suspicious_activity")
-            ),
+            event_id=request.incident.get("event_id", f"event_{int(datetime.utcnow().timestamp())}"),
+            event_type=SecurityEventType(request.incident.get("event_type", "suspicious_activity")),
             timestamp=datetime.utcnow(),
             source_ip=request.incident.get("source_ip", "unknown"),
             destination_ip=request.incident.get("destination_ip", "unknown"),
@@ -288,9 +271,7 @@ async def generate_incident_playbook(
 
     except Exception as e:
         logger.error(f"Playbook generation failed: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail=f"Playbook generation failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Playbook generation failed: {str(e)}")
 
 
 @router.post("/fuzz-protocol", response_model=FuzzingResponse)

@@ -53,13 +53,9 @@ API_SPEC_GENERATION_DURATION = Histogram(
     ["style"],
 )
 
-OPENAPI_VALIDATION_COUNTER = Counter(
-    "qbitel_openapi_validation_total", "OpenAPI specification validations", ["status"]
-)
+OPENAPI_VALIDATION_COUNTER = Counter("qbitel_openapi_validation_total", "OpenAPI specification validations", ["status"])
 
-ENDPOINT_GENERATION_GAUGE = Gauge(
-    "qbitel_generated_endpoints_total", "Total generated API endpoints"
-)
+ENDPOINT_GENERATION_GAUGE = Gauge("qbitel_generated_endpoints_total", "Total generated API endpoints")
 
 logger = logging.getLogger(__name__)
 
@@ -150,9 +146,7 @@ class APIGenerator:
 
         self.logger.info("API Generator initialized")
 
-    async def generate_api_specification(
-        self, context: APIGenerationContext
-    ) -> APISpecification:
+    async def generate_api_specification(self, context: APIGenerationContext) -> APISpecification:
         """
         Generate comprehensive API specification from protocol schema.
 
@@ -165,9 +159,7 @@ class APIGenerator:
         start_time = time.time()
 
         try:
-            self.logger.info(
-                f"Generating {context.target_style.value} API for protocol: {context.protocol_schema.name}"
-            )
+            self.logger.info(f"Generating {context.target_style.value} API for protocol: {context.protocol_schema.name}")
 
             # Check cache first
             cache_key = self._generate_cache_key(context)
@@ -246,9 +238,7 @@ class APIGenerator:
             if context.enable_validation:
                 validation_result = await self._validate_openapi_spec(api_spec)
                 if validation_result["errors"]:
-                    self.logger.warning(
-                        f"API validation issues: {validation_result['errors']}"
-                    )
+                    self.logger.warning(f"API validation issues: {validation_result['errors']}")
 
             # Cache the result
             self.api_cache[cache_key] = api_spec
@@ -263,9 +253,7 @@ class APIGenerator:
                 status="success",
             ).inc()
 
-            API_SPEC_GENERATION_DURATION.labels(
-                style=context.target_style.value
-            ).observe(generation_time)
+            API_SPEC_GENERATION_DURATION.labels(style=context.target_style.value).observe(generation_time)
 
             ENDPOINT_GENERATION_GAUGE.set(len(api_spec.endpoints))
 
@@ -287,9 +275,7 @@ class APIGenerator:
 
             raise APIGenerationException(f"API generation failed: {e}")
 
-    async def _generate_rest_endpoints(
-        self, api_spec: APISpecification, context: APIGenerationContext
-    ) -> None:
+    async def _generate_rest_endpoints(self, api_spec: APISpecification, context: APIGenerationContext) -> None:
         """Generate comprehensive REST API endpoints."""
         protocol_schema = context.protocol_schema
         resource_name = protocol_schema.name.lower().replace("_", "-")
@@ -304,26 +290,18 @@ class APIGenerator:
         await self._generate_crud_endpoints(api_spec, context, resource_name, base_path)
 
         # Generate protocol-specific endpoints
-        await self._generate_protocol_endpoints(
-            api_spec, context, resource_name, base_path
-        )
+        await self._generate_protocol_endpoints(api_spec, context, resource_name, base_path)
 
         # Generate utility endpoints
-        await self._generate_utility_endpoints(
-            api_spec, context, resource_name, base_path
-        )
+        await self._generate_utility_endpoints(api_spec, context, resource_name, base_path)
 
         # Generate batch endpoints if enabled
         if context.enable_batch_operations:
-            await self._generate_batch_endpoints(
-                api_spec, context, resource_name, base_path
-            )
+            await self._generate_batch_endpoints(api_spec, context, resource_name, base_path)
 
         # Generate async endpoints if enabled
         if self.enable_async_operations:
-            await self._generate_async_processing_endpoints(
-                api_spec, context, resource_name, base_path
-            )
+            await self._generate_async_processing_endpoints(api_spec, context, resource_name, base_path)
 
     async def _generate_crud_endpoints(
         self,
@@ -373,9 +351,7 @@ class APIGenerator:
                     "multipart/form-data": {
                         "schema": {
                             "type": "object",
-                            "properties": {
-                                "file": {"type": "string", "format": "binary"}
-                            },
+                            "properties": {"file": {"type": "string", "format": "binary"}},
                         }
                     },
                 },
@@ -384,36 +360,20 @@ class APIGenerator:
                 "201": {
                     "description": "Message processed successfully",
                     "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": f"#/components/schemas/{protocol_name}ProcessedMessage"
-                            }
-                        }
+                        "application/json": {"schema": {"$ref": f"#/components/schemas/{protocol_name}ProcessedMessage"}}
                     },
                 },
                 "400": {
                     "description": "Invalid message format",
-                    "content": {
-                        "application/json": {
-                            "schema": {"$ref": "#/components/schemas/Error"}
-                        }
-                    },
+                    "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}},
                 },
                 "422": {
                     "description": "Message validation failed",
-                    "content": {
-                        "application/json": {
-                            "schema": {"$ref": "#/components/schemas/ValidationError"}
-                        }
-                    },
+                    "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ValidationError"}}},
                 },
             },
             tags=[protocol_name, "processing"],
-            security=(
-                [{"bearerAuth": []}]
-                if context.security_level != SecurityLevel.PUBLIC
-                else []
-            ),
+            security=([{"bearerAuth": []}] if context.security_level != SecurityLevel.PUBLIC else []),
         )
         api_spec.add_endpoint(create_endpoint)
 
@@ -449,28 +409,16 @@ class APIGenerator:
                 "200": {
                     "description": "Message details retrieved",
                     "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": f"#/components/schemas/{protocol_name}ProcessedMessage"
-                            }
-                        }
+                        "application/json": {"schema": {"$ref": f"#/components/schemas/{protocol_name}ProcessedMessage"}}
                     },
                 },
                 "404": {
                     "description": "Message not found",
-                    "content": {
-                        "application/json": {
-                            "schema": {"$ref": "#/components/schemas/Error"}
-                        }
-                    },
+                    "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}},
                 },
             },
             tags=[protocol_name, "retrieval"],
-            security=(
-                [{"bearerAuth": []}]
-                if context.security_level != SecurityLevel.PUBLIC
-                else []
-            ),
+            security=([{"bearerAuth": []}] if context.security_level != SecurityLevel.PUBLIC else []),
         )
         api_spec.add_endpoint(read_endpoint)
 
@@ -534,13 +482,9 @@ class APIGenerator:
                                 "properties": {
                                     "data": {
                                         "type": "array",
-                                        "items": {
-                                            "$ref": f"#/components/schemas/{protocol_name}ProcessedMessage"
-                                        },
+                                        "items": {"$ref": f"#/components/schemas/{protocol_name}ProcessedMessage"},
                                     },
-                                    "pagination": {
-                                        "$ref": "#/components/schemas/PaginationInfo"
-                                    },
+                                    "pagination": {"$ref": "#/components/schemas/PaginationInfo"},
                                     "filters_applied": {"type": "object"},
                                 },
                             }
@@ -549,11 +493,7 @@ class APIGenerator:
                 }
             },
             tags=[protocol_name, "listing"],
-            security=(
-                [{"bearerAuth": []}]
-                if context.security_level != SecurityLevel.PUBLIC
-                else []
-            ),
+            security=([{"bearerAuth": []}] if context.security_level != SecurityLevel.PUBLIC else []),
         )
         api_spec.add_endpoint(list_endpoint)
 
@@ -581,19 +521,11 @@ class APIGenerator:
                     "204": {"description": "Message deleted successfully"},
                     "404": {
                         "description": "Message not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {"$ref": "#/components/schemas/Error"}
-                            }
-                        },
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}},
                     },
                     "403": {
                         "description": "Insufficient permissions",
-                        "content": {
-                            "application/json": {
-                                "schema": {"$ref": "#/components/schemas/Error"}
-                            }
-                        },
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}},
                     },
                 },
                 tags=[protocol_name, "management"],
@@ -640,11 +572,7 @@ class APIGenerator:
             responses={
                 "200": {
                     "description": "Validation result",
-                    "content": {
-                        "application/json": {
-                            "schema": {"$ref": "#/components/schemas/ValidationResult"}
-                        }
-                    },
+                    "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ValidationResult"}}},
                 }
             },
             tags=[protocol_name, "validation"],
@@ -668,9 +596,7 @@ class APIGenerator:
                                     "type": "string",
                                     "description": "Template to use for generation",
                                 },
-                                "fields": {
-                                    "$ref": f"#/components/schemas/{protocol_name}Fields"
-                                },
+                                "fields": {"$ref": f"#/components/schemas/{protocol_name}Fields"},
                                 "options": {
                                     "type": "object",
                                     "properties": {
@@ -702,9 +628,7 @@ class APIGenerator:
                                     "message": {"type": "string"},
                                     "format": {"type": "string"},
                                     "metadata": {"type": "object"},
-                                    "validation_result": {
-                                        "$ref": "#/components/schemas/ValidationResult"
-                                    },
+                                    "validation_result": {"$ref": "#/components/schemas/ValidationResult"},
                                 },
                             }
                         }
@@ -743,11 +667,7 @@ class APIGenerator:
                 "200": {
                     "description": "Protocol schema",
                     "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": f"#/components/schemas/{protocol_name}Schema"
-                            }
-                        },
+                        "application/json": {"schema": {"$ref": f"#/components/schemas/{protocol_name}Schema"}},
                         "application/yaml": {"schema": {"type": "string"}},
                     },
                 }
@@ -787,13 +707,7 @@ class APIGenerator:
             responses={
                 "200": {
                     "description": "Processing statistics",
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ProcessingStatistics"
-                            }
-                        }
-                    },
+                    "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ProcessingStatistics"}}},
                 }
             },
             tags=[protocol_name, "monitoring"],
@@ -809,19 +723,11 @@ class APIGenerator:
             responses={
                 "200": {
                     "description": "Service is healthy",
-                    "content": {
-                        "application/json": {
-                            "schema": {"$ref": "#/components/schemas/HealthStatus"}
-                        }
-                    },
+                    "content": {"application/json": {"schema": {"$ref": "#/components/schemas/HealthStatus"}}},
                 },
                 "503": {
                     "description": "Service is unhealthy",
-                    "content": {
-                        "application/json": {
-                            "schema": {"$ref": "#/components/schemas/HealthStatus"}
-                        }
-                    },
+                    "content": {"application/json": {"schema": {"$ref": "#/components/schemas/HealthStatus"}}},
                 },
             },
             tags=["health", "monitoring"],
@@ -919,11 +825,7 @@ class APIGenerator:
                 }
             },
             tags=[protocol_name, "batch"],
-            security=(
-                [{"bearerAuth": []}]
-                if context.security_level != SecurityLevel.PUBLIC
-                else []
-            ),
+            security=([{"bearerAuth": []}] if context.security_level != SecurityLevel.PUBLIC else []),
         )
         api_spec.add_endpoint(batch_process_endpoint)
 
@@ -985,11 +887,7 @@ class APIGenerator:
                 }
             },
             tags=[protocol_name, "async"],
-            security=(
-                [{"bearerAuth": []}]
-                if context.security_level != SecurityLevel.PUBLIC
-                else []
-            ),
+            security=([{"bearerAuth": []}] if context.security_level != SecurityLevel.PUBLIC else []),
         )
         api_spec.add_endpoint(async_submit_endpoint)
 
@@ -1010,20 +908,14 @@ class APIGenerator:
             responses={
                 "200": {
                     "description": "Job status",
-                    "content": {
-                        "application/json": {
-                            "schema": {"$ref": "#/components/schemas/AsyncJobStatus"}
-                        }
-                    },
+                    "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AsyncJobStatus"}}},
                 }
             },
             tags=[protocol_name, "async"],
         )
         api_spec.add_endpoint(async_status_endpoint)
 
-    async def _generate_graphql_schema(
-        self, api_spec: APISpecification, context: APIGenerationContext
-    ) -> None:
+    async def _generate_graphql_schema(self, api_spec: APISpecification, context: APIGenerationContext) -> None:
         """Generate GraphQL schema and resolvers."""
         graphql_assets = generate_graphql_assets(
             context.protocol_schema,
@@ -1094,9 +986,7 @@ class APIGenerator:
         }
         api_spec.extensions.setdefault("graphql", graphql_assets)
 
-    async def _generate_grpc_service(
-        self, api_spec: APISpecification, context: APIGenerationContext
-    ) -> None:
+    async def _generate_grpc_service(self, api_spec: APISpecification, context: APIGenerationContext) -> None:
         """Generate gRPC service definition."""
         grpc_assets = generate_grpc_assets(context.protocol_schema)
         api_spec.schemas[f"{context.protocol_schema.name}GrpcDescriptor"] = {
@@ -1106,9 +996,7 @@ class APIGenerator:
         }
         api_spec.extensions.setdefault("grpc", grpc_assets)
 
-    async def _generate_websocket_endpoints(
-        self, api_spec: APISpecification, context: APIGenerationContext
-    ) -> None:
+    async def _generate_websocket_endpoints(self, api_spec: APISpecification, context: APIGenerationContext) -> None:
         """Generate WebSocket endpoints for real-time communication."""
         protocol_name = context.protocol_schema.name
 
@@ -1140,18 +1028,14 @@ class APIGenerator:
         )
         api_spec.add_endpoint(ws_endpoint)
 
-    async def _generate_async_endpoints(
-        self, api_spec: APISpecification, context: APIGenerationContext
-    ) -> None:
+    async def _generate_async_endpoints(self, api_spec: APISpecification, context: APIGenerationContext) -> None:
         """Generate async/event-driven endpoints."""
         # Generate webhook endpoints for async notifications
         await self._generate_webhook_endpoints(api_spec, context)
         # Generate event subscription endpoints
         await self._generate_event_endpoints(api_spec, context)
 
-    async def _generate_webhook_endpoints(
-        self, api_spec: APISpecification, context: APIGenerationContext
-    ) -> None:
+    async def _generate_webhook_endpoints(self, api_spec: APISpecification, context: APIGenerationContext) -> None:
         """Generate webhook endpoints for notifications."""
         protocol_name = context.protocol_schema.name
 
@@ -1208,9 +1092,7 @@ class APIGenerator:
         )
         api_spec.add_endpoint(webhook_register_endpoint)
 
-    async def _generate_event_endpoints(
-        self, api_spec: APISpecification, context: APIGenerationContext
-    ) -> None:
+    async def _generate_event_endpoints(self, api_spec: APISpecification, context: APIGenerationContext) -> None:
         """Generate event subscription endpoints."""
         # Server-Sent Events endpoint
         sse_endpoint = APIEndpoint(
@@ -1236,9 +1118,7 @@ class APIGenerator:
         )
         api_spec.add_endpoint(sse_endpoint)
 
-    def _add_security_schemes(
-        self, api_spec: APISpecification, security_level: SecurityLevel
-    ) -> None:
+    def _add_security_schemes(self, api_spec: APISpecification, security_level: SecurityLevel) -> None:
         """Add comprehensive security schemes based on security level."""
         if security_level == SecurityLevel.PUBLIC:
             return
@@ -1282,9 +1162,7 @@ class APIGenerator:
                             },
                             "clientCredentials": {
                                 "tokenUrl": "https://auth.example.com/oauth/token",
-                                "scopes": {
-                                    "protocol:service": "Service-to-service access"
-                                },
+                                "scopes": {"protocol:service": "Service-to-service access"},
                             },
                         },
                     }
@@ -1299,9 +1177,7 @@ class APIGenerator:
 
         api_spec.security_schemes.update(base_schemes)
 
-    def _add_protocol_schemas(
-        self, api_spec: APISpecification, protocol_schema: ProtocolSchema
-    ) -> None:
+    def _add_protocol_schemas(self, api_spec: APISpecification, protocol_schema: ProtocolSchema) -> None:
         """Add protocol-specific schemas to OpenAPI components."""
         schema_name = protocol_schema.name
 
@@ -1341,9 +1217,7 @@ class APIGenerator:
                                 },
                             },
                         },
-                        "validation_result": {
-                            "$ref": "#/components/schemas/ValidationResult"
-                        },
+                        "validation_result": {"$ref": "#/components/schemas/ValidationResult"},
                     },
                     "required": ["id", "fields", "metadata"],
                 },
@@ -1520,9 +1394,7 @@ class APIGenerator:
         elif field.field_type == "timestamp":
             schema.update({"type": "string", "format": "date-time"})
         elif field.field_type == "address":
-            schema.update(
-                {"type": "string", "pattern": r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$"}
-            )
+            schema.update({"type": "string", "pattern": r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$"})
         else:
             schema["type"] = "string"
 
@@ -1586,9 +1458,7 @@ class APIGenerator:
         monitoring capabilities for production deployments.
         """.strip()
 
-    async def _enhance_with_llm(
-        self, api_spec: APISpecification, context: APIGenerationContext
-    ) -> None:
+    async def _enhance_with_llm(self, api_spec: APISpecification, context: APIGenerationContext) -> None:
         """Enhance API specification with LLM-generated improvements."""
         if not self.llm_service:
             return
@@ -1597,18 +1467,14 @@ class APIGenerator:
             # Enhance endpoint descriptions
             for endpoint in api_spec.endpoints:
                 if len(endpoint.description) < 100:  # Enhance short descriptions
-                    enhanced_desc = await self._enhance_endpoint_description(
-                        endpoint, context
-                    )
+                    enhanced_desc = await self._enhance_endpoint_description(endpoint, context)
                     if enhanced_desc:
                         endpoint.description = enhanced_desc
 
         except Exception as e:
             self.logger.warning(f"LLM enhancement failed: {e}")
 
-    async def _enhance_endpoint_description(
-        self, endpoint: APIEndpoint, context: APIGenerationContext
-    ) -> Optional[str]:
+    async def _enhance_endpoint_description(self, endpoint: APIEndpoint, context: APIGenerationContext) -> Optional[str]:
         """Enhance individual endpoint description with LLM."""
         try:
             prompt = f"""
@@ -1642,9 +1508,7 @@ class APIGenerator:
         except Exception:
             return None
 
-    async def _add_comprehensive_examples(
-        self, api_spec: APISpecification, context: APIGenerationContext
-    ) -> None:
+    async def _add_comprehensive_examples(self, api_spec: APISpecification, context: APIGenerationContext) -> None:
         """Add comprehensive examples to API specification."""
         examples = generate_examples(context.protocol_schema)
         if not examples:
@@ -1673,9 +1537,7 @@ class APIGenerator:
 
         api_spec.extensions.setdefault("examples", examples)
 
-    async def _validate_openapi_spec(
-        self, api_spec: APISpecification
-    ) -> Dict[str, Any]:
+    async def _validate_openapi_spec(self, api_spec: APISpecification) -> Dict[str, Any]:
         """Validate generated OpenAPI specification."""
         validation_result = {"valid": True, "errors": [], "warnings": []}
 
@@ -1686,9 +1548,7 @@ class APIGenerator:
             required_fields = ["openapi", "info", "paths"]
             for field in required_fields:
                 if field not in openapi_dict:
-                    validation_result["errors"].append(
-                        f"Missing required field: {field}"
-                    )
+                    validation_result["errors"].append(f"Missing required field: {field}")
                     validation_result["valid"] = False
 
             # Validate info section
@@ -1729,9 +1589,7 @@ class APIGenerator:
         key_str = json.dumps(key_data, sort_keys=True)
         return hashlib.sha256(key_str.encode()).hexdigest()[:16]
 
-    def _update_generation_metrics(
-        self, api_spec: APISpecification, generation_time: float
-    ) -> None:
+    def _update_generation_metrics(self, api_spec: APISpecification, generation_time: float) -> None:
         """Update generation metrics."""
         self.generation_metrics["total_generated"] += 1
         self.generation_metrics["successful_generations"] += 1
@@ -1848,9 +1706,7 @@ class APIGenerator:
             **self.generation_metrics,
             "cached_specifications": len(self.api_cache),
             "supported_styles": [style.value for style in APIStyle],
-            "endpoint_templates": sum(
-                len(templates) for templates in self.endpoint_templates.values()
-            ),
+            "endpoint_templates": sum(len(templates) for templates in self.endpoint_templates.values()),
         }
 
     async def clear_cache(self) -> int:

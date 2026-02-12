@@ -108,9 +108,7 @@ class TestAnomalyDetectionConfig:
             critical_anomaly_threshold=0.90,  # Lower than anomaly threshold
         )
 
-        with pytest.raises(
-            ConfigurationException, match="Critical anomaly threshold must be higher"
-        ):
+        with pytest.raises(ConfigurationException, match="Critical anomaly threshold must be higher"):
             config.validate()
 
     @pytest.mark.unit
@@ -118,9 +116,7 @@ class TestAnomalyDetectionConfig:
         """Test validation with negative latent dimension."""
         config = AnomalyDetectionConfig(vae_latent_dim=-10)
 
-        with pytest.raises(
-            ConfigurationException, match="VAE latent dimension must be positive"
-        ):
+        with pytest.raises(ConfigurationException, match="VAE latent dimension must be positive"):
             config.validate()
 
     @pytest.mark.unit
@@ -128,9 +124,7 @@ class TestAnomalyDetectionConfig:
         """Test validation with negative sequence length."""
         config = AnomalyDetectionConfig(sequence_length=-5)
 
-        with pytest.raises(
-            ConfigurationException, match="Sequence length must be positive"
-        ):
+        with pytest.raises(ConfigurationException, match="Sequence length must be positive"):
             config.validate()
 
 
@@ -180,9 +174,7 @@ class TestPredictiveAnalyticsConfig:
     @pytest.mark.unit
     def test_predictive_config_validation_invalid_confidence_threshold(self):
         """Test validation with invalid confidence threshold."""
-        config = PredictiveAnalyticsConfig(
-            prediction_confidence_threshold=1.5
-        )  # Over 1.0
+        config = PredictiveAnalyticsConfig(prediction_confidence_threshold=1.5)  # Over 1.0
 
         with pytest.raises(
             ConfigurationException,
@@ -240,9 +232,7 @@ class TestKnowledgeCaptureConfig:
         """Test validation with negative session timeout."""
         config = KnowledgeCaptureConfig(session_timeout_minutes=-30)
 
-        with pytest.raises(
-            ConfigurationException, match="Session timeout must be positive"
-        ):
+        with pytest.raises(ConfigurationException, match="Session timeout must be positive"):
             config.validate()
 
     @pytest.mark.unit
@@ -294,9 +284,7 @@ class TestDecisionSupportConfig:
         """Test validation with negative max recommendations."""
         config = DecisionSupportConfig(max_recommendations=-5)
 
-        with pytest.raises(
-            ConfigurationException, match="Maximum recommendations must be positive"
-        ):
+        with pytest.raises(ConfigurationException, match="Maximum recommendations must be positive"):
             config.validate()
 
     @pytest.mark.unit
@@ -333,9 +321,7 @@ class TestLLMIntegrationConfig:
     @pytest.mark.unit
     def test_llm_config_validation_success(self):
         """Test successful LLM config validation."""
-        config = LLMIntegrationConfig(
-            max_tokens=2000, temperature=0.2, timeout_seconds=15, requests_per_minute=50
-        )
+        config = LLMIntegrationConfig(max_tokens=2000, temperature=0.2, timeout_seconds=15, requests_per_minute=50)
 
         # Should not raise exception
         config.validate()
@@ -353,9 +339,7 @@ class TestLLMIntegrationConfig:
         """Test validation with invalid temperature."""
         config = LLMIntegrationConfig(temperature=2.5)  # Over 2.0
 
-        with pytest.raises(
-            ConfigurationException, match="Temperature must be between 0.0 and 2.0"
-        ):
+        with pytest.raises(ConfigurationException, match="Temperature must be between 0.0 and 2.0"):
             config.validate()
 
 
@@ -383,9 +367,7 @@ class TestLegacySystemWhispererConfig:
     @pytest.mark.unit
     def test_main_config_validation_success(self):
         """Test successful main config validation."""
-        config = LegacySystemWhispererConfig(
-            max_registered_systems=500, max_concurrent_analyses=10, memory_limit_mb=1024
-        )
+        config = LegacySystemWhispererConfig(max_registered_systems=500, max_concurrent_analyses=10, memory_limit_mb=1024)
 
         # Should not raise exception
         config.validate()
@@ -395,9 +377,7 @@ class TestLegacySystemWhispererConfig:
         """Test validation with negative max systems."""
         config = LegacySystemWhispererConfig(max_registered_systems=-10)
 
-        with pytest.raises(
-            ConfigurationException, match="Maximum registered systems must be positive"
-        ):
+        with pytest.raises(ConfigurationException, match="Maximum registered systems must be positive"):
             config.validate()
 
     @pytest.mark.unit
@@ -405,9 +385,7 @@ class TestLegacySystemWhispererConfig:
         """Test validation with insufficient memory limit."""
         config = LegacySystemWhispererConfig(memory_limit_mb=256)  # Below 512 MB
 
-        with pytest.raises(
-            ConfigurationException, match="Memory limit must be at least 512 MB"
-        ):
+        with pytest.raises(ConfigurationException, match="Memory limit must be at least 512 MB"):
             config.validate()
 
     @pytest.mark.unit
@@ -504,9 +482,7 @@ class TestConfigFileLoading:
     @pytest.mark.unit
     def test_load_config_from_missing_file(self):
         """Test loading config from missing file raises exception."""
-        with pytest.raises(
-            ConfigurationException, match="Legacy configuration file not found"
-        ):
+        with pytest.raises(ConfigurationException, match="Legacy configuration file not found"):
             load_legacy_config_from_file("/nonexistent/config.yaml")
 
     @pytest.mark.unit
@@ -629,9 +605,7 @@ class TestConfigFactories:
 
         # Should now have legacy config
         assert hasattr(extended_config, "legacy_system_whisperer")
-        assert isinstance(
-            extended_config.legacy_system_whisperer, LegacySystemWhispererConfig
-        )
+        assert isinstance(extended_config.legacy_system_whisperer, LegacySystemWhispererConfig)
 
     @pytest.mark.unit
     def test_validate_legacy_config_success(self):
@@ -658,9 +632,7 @@ class TestConfigIntegration:
     def test_full_config_lifecycle(self):
         """Test complete configuration lifecycle."""
         # 1. Create config
-        config = LegacySystemWhispererConfig(
-            service_name="integration-test", max_registered_systems=50
-        )
+        config = LegacySystemWhispererConfig(service_name="integration-test", max_registered_systems=50)
 
         # 2. Validate config
         config.validate()
@@ -761,9 +733,7 @@ class TestConfigPerformance:
         # Create 100 configurations
         configs = []
         for i in range(100):
-            config = LegacySystemWhispererConfig(
-                service_name=f"perf_test_{i}", max_registered_systems=100 + i
-            )
+            config = LegacySystemWhispererConfig(service_name=f"perf_test_{i}", max_registered_systems=100 + i)
             configs.append(config)
 
         creation_time = time.time() - start_time
@@ -823,18 +793,10 @@ def cleanup_test_config_file(file_path: str):
     Path(file_path).unlink(missing_ok=True)
 
 
-def assert_config_equals(
-    config1: LegacySystemWhispererConfig, config2: LegacySystemWhispererConfig
-):
+def assert_config_equals(config1: LegacySystemWhispererConfig, config2: LegacySystemWhispererConfig):
     """Assert that two configurations are equal."""
     assert config1.enabled == config2.enabled
     assert config1.service_name == config2.service_name
     assert config1.max_registered_systems == config2.max_registered_systems
-    assert (
-        config1.anomaly_detection.anomaly_threshold
-        == config2.anomaly_detection.anomaly_threshold
-    )
-    assert (
-        config1.llm_integration.primary_provider
-        == config2.llm_integration.primary_provider
-    )
+    assert config1.anomaly_detection.anomaly_threshold == config2.anomaly_detection.anomaly_threshold
+    assert config1.llm_integration.primary_provider == config2.llm_integration.primary_provider

@@ -136,9 +136,7 @@ class SecretsRotationManager:
 
     async def initialize(self):
         """Initialize the secrets rotation manager."""
-        self.logger.info(
-            f"Initializing secrets rotation manager with backend: {self.backend}"
-        )
+        self.logger.info(f"Initializing secrets rotation manager with backend: {self.backend}")
 
         # Load existing secret metadata
         await self._load_secret_metadata()
@@ -159,9 +157,7 @@ class SecretsRotationManager:
 
         self.logger.info("Secrets rotation manager shutdown complete")
 
-    async def rotate_secret(
-        self, secret_type: SecretType, force: bool = False
-    ) -> Dict[str, Any]:
+    async def rotate_secret(self, secret_type: SecretType, force: bool = False) -> Dict[str, Any]:
         """
         Rotate a specific secret.
 
@@ -215,26 +211,19 @@ class SecretsRotationManager:
                 secret_type=secret_type,
                 version=new_version,
                 created_at=datetime.now(),
-                expires_at=datetime.now()
-                + timedelta(days=(policy.rotation_interval_days if policy else 90)),
+                expires_at=datetime.now() + timedelta(days=(policy.rotation_interval_days if policy else 90)),
                 rotated_at=datetime.now(),
-                rotation_count=(
-                    current_metadata.rotation_count + 1 if current_metadata else 1
-                ),
+                rotation_count=(current_metadata.rotation_count + 1 if current_metadata else 1),
             )
             self.secret_metadata[secret_type.value] = new_metadata
 
             # Keep old secret valid during grace period
             if policy and policy.grace_period_days > 0:
-                await self._schedule_secret_deprecation(
-                    secret_type, old_version, policy.grace_period_days
-                )
+                await self._schedule_secret_deprecation(secret_type, old_version, policy.grace_period_days)
 
             # Send notifications
             if policy and policy.notification_channels:
-                await self._send_rotation_notifications(
-                    secret_type, new_version, policy.notification_channels
-                )
+                await self._send_rotation_notifications(secret_type, new_version, policy.notification_channels)
 
             # Record rotation in history
             rotation_record = {
@@ -246,9 +235,7 @@ class SecretsRotationManager:
             }
             self.rotation_history.append(rotation_record)
 
-            self.logger.info(
-                f"Successfully rotated secret {secret_type}: {old_version} -> {new_version}"
-            )
+            self.logger.info(f"Successfully rotated secret {secret_type}: {old_version} -> {new_version}")
 
             return {
                 "status": "success",
@@ -259,9 +246,7 @@ class SecretsRotationManager:
             }
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to rotate secret {secret_type}: {e}", exc_info=True
-            )
+            self.logger.error(f"Failed to rotate secret {secret_type}: {e}", exc_info=True)
             return {
                 "status": "failed",
                 "secret_type": secret_type.value,
@@ -285,36 +270,24 @@ class SecretsRotationManager:
         else:
             return generator.generate_password(length=32)
 
-    async def _write_secret_to_backend(
-        self, secret_type: SecretType, secret_value: str
-    ) -> str:
+    async def _write_secret_to_backend(self, secret_type: SecretType, secret_value: str) -> str:
         """Write secret to the configured backend."""
         version = f"v{int(time.time())}"
 
         if self.backend == SecretBackend.VAULT:
             return await self._write_to_vault(secret_type, secret_value, version)
         elif self.backend == SecretBackend.AWS_SECRETS_MANAGER:
-            return await self._write_to_aws_secrets_manager(
-                secret_type, secret_value, version
-            )
+            return await self._write_to_aws_secrets_manager(secret_type, secret_value, version)
         elif self.backend == SecretBackend.AZURE_KEY_VAULT:
-            return await self._write_to_azure_key_vault(
-                secret_type, secret_value, version
-            )
+            return await self._write_to_azure_key_vault(secret_type, secret_value, version)
         elif self.backend == SecretBackend.GCP_SECRET_MANAGER:
-            return await self._write_to_gcp_secret_manager(
-                secret_type, secret_value, version
-            )
+            return await self._write_to_gcp_secret_manager(secret_type, secret_value, version)
         elif self.backend == SecretBackend.KUBERNETES:
-            return await self._write_to_kubernetes_secret(
-                secret_type, secret_value, version
-            )
+            return await self._write_to_kubernetes_secret(secret_type, secret_value, version)
         else:
             raise ValueError(f"Unsupported backend: {self.backend}")
 
-    async def _write_to_vault(
-        self, secret_type: SecretType, secret_value: str, version: str
-    ) -> str:
+    async def _write_to_vault(self, secret_type: SecretType, secret_value: str, version: str) -> str:
         """Write secret to HashiCorp Vault."""
         try:
             import hvac
@@ -340,9 +313,7 @@ class SecretsRotationManager:
             self.logger.error(f"Failed to write to Vault: {e}")
             raise
 
-    async def _write_to_aws_secrets_manager(
-        self, secret_type: SecretType, secret_value: str, version: str
-    ) -> str:
+    async def _write_to_aws_secrets_manager(self, secret_type: SecretType, secret_value: str, version: str) -> str:
         """Write secret to AWS Secrets Manager."""
         try:
             import boto3
@@ -356,17 +327,13 @@ class SecretsRotationManager:
                 # Try to update existing secret
                 response = client.update_secret(
                     SecretId=secret_name,
-                    SecretString=json.dumps(
-                        {"value": secret_value, "version": version}
-                    ),
+                    SecretString=json.dumps({"value": secret_value, "version": version}),
                 )
             except client.exceptions.ResourceNotFoundException:
                 # Create new secret
                 response = client.create_secret(
                     Name=secret_name,
-                    SecretString=json.dumps(
-                        {"value": secret_value, "version": version}
-                    ),
+                    SecretString=json.dumps({"value": secret_value, "version": version}),
                     Tags=[
                         {"Key": "Application", "Value": "QBITEL"},
                         {"Key": "Environment", "Value": "production"},
@@ -381,9 +348,7 @@ class SecretsRotationManager:
             self.logger.error(f"Failed to write to AWS Secrets Manager: {e}")
             raise
 
-    async def _write_to_azure_key_vault(
-        self, secret_type: SecretType, secret_value: str, version: str
-    ) -> str:
+    async def _write_to_azure_key_vault(self, secret_type: SecretType, secret_value: str, version: str) -> str:
         """Write secret to Azure Key Vault."""
         try:
             from azure.keyvault.secrets import SecretClient
@@ -403,9 +368,7 @@ class SecretsRotationManager:
             self.logger.error(f"Failed to write to Azure Key Vault: {e}")
             raise
 
-    async def _write_to_gcp_secret_manager(
-        self, secret_type: SecretType, secret_value: str, version: str
-    ) -> str:
+    async def _write_to_gcp_secret_manager(self, secret_type: SecretType, secret_value: str, version: str) -> str:
         """Write secret to GCP Secret Manager."""
         try:
             from google.cloud import secretmanager
@@ -445,9 +408,7 @@ class SecretsRotationManager:
             self.logger.error(f"Failed to write to GCP Secret Manager: {e}")
             raise
 
-    async def _write_to_kubernetes_secret(
-        self, secret_type: SecretType, secret_value: str, version: str
-    ) -> str:
+    async def _write_to_kubernetes_secret(self, secret_type: SecretType, secret_value: str, version: str) -> str:
         """Write secret to Kubernetes Secret."""
         try:
             import base64
@@ -493,9 +454,7 @@ class SecretsRotationManager:
             self.logger.error(f"Failed to write to Kubernetes Secret: {e}")
             raise
 
-    async def _update_applications(
-        self, secret_type: SecretType, new_secret: str, new_version: str
-    ):
+    async def _update_applications(self, secret_type: SecretType, new_secret: str, new_version: str):
         """Update running applications with the new secret.
 
         Supports three deployment strategies:
@@ -505,9 +464,7 @@ class SecretsRotationManager:
         """
         import os
 
-        self.logger.info(
-            f"Updating applications with new {secret_type} version {new_version}"
-        )
+        self.logger.info(f"Updating applications with new {secret_type} version {new_version}")
 
         # 1. Direct service credential rotation (database / redis)
         if secret_type == SecretType.DATABASE_PASSWORD:
@@ -547,9 +504,7 @@ class SecretsRotationManager:
             conn = await asyncpg.connect(db_url)
             try:
                 db_user = os.getenv("DATABASE_USER", "qbitel")
-                await conn.execute(
-                    f"ALTER USER {db_user} WITH PASSWORD $1", new_password
-                )
+                await conn.execute(f"ALTER USER {db_user} WITH PASSWORD $1", new_password)
                 self.logger.info(f"Database password rotated for user {db_user}")
             finally:
                 await conn.close()
@@ -610,9 +565,7 @@ class SecretsRotationManager:
                 }
             }
             apps_v1.patch_namespaced_deployment(deployment_name, namespace, patch)
-            self.logger.info(
-                f"Triggered rolling restart for {deployment_name} in {namespace}"
-            )
+            self.logger.info(f"Triggered rolling restart for {deployment_name} in {namespace}")
         except ImportError:
             self.logger.warning("kubernetes package not installed, skipping rollout restart")
         except Exception as e:
@@ -643,14 +596,10 @@ class SecretsRotationManager:
         """Schedule automatic secret rotations."""
         for secret_type, policy in self.policies.items():
             if policy.auto_rotate:
-                task = asyncio.create_task(
-                    self._auto_rotation_loop(secret_type, policy)
-                )
+                task = asyncio.create_task(self._auto_rotation_loop(secret_type, policy))
                 self._rotation_tasks[secret_type.value] = task
 
-    async def _auto_rotation_loop(
-        self, secret_type: SecretType, policy: SecretRotationPolicy
-    ):
+    async def _auto_rotation_loop(self, secret_type: SecretType, policy: SecretRotationPolicy):
         """Automatic rotation loop for a secret."""
         while not self._shutdown:
             try:
@@ -667,13 +616,9 @@ class SecretsRotationManager:
                 self.logger.error(f"Error in auto-rotation loop for {secret_type}: {e}")
                 await asyncio.sleep(3600)  # Retry in 1 hour
 
-    async def _schedule_secret_deprecation(
-        self, secret_type: SecretType, old_version: str, grace_period_days: int
-    ):
+    async def _schedule_secret_deprecation(self, secret_type: SecretType, old_version: str, grace_period_days: int):
         """Schedule deprecation of old secret after grace period."""
-        self.logger.info(
-            f"Old {secret_type} version {old_version} will be deprecated in {grace_period_days} days"
-        )
+        self.logger.info(f"Old {secret_type} version {old_version} will be deprecated in {grace_period_days} days")
         # Implementation would delete old secret after grace period
 
     async def _request_rotation_approval(self, secret_type: SecretType) -> bool:
@@ -683,9 +628,7 @@ class SecretsRotationManager:
         self.logger.info(f"Rotation approval requested for {secret_type}")
         return True
 
-    async def _send_rotation_notifications(
-        self, secret_type: SecretType, new_version: str, channels: List[str]
-    ):
+    async def _send_rotation_notifications(self, secret_type: SecretType, new_version: str, channels: List[str]):
         """Send notifications about secret rotation."""
         message = f"Secret {secret_type} rotated to version {new_version}"
         self.logger.info(f"Sending rotation notifications: {message}")

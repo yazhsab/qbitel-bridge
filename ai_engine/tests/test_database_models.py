@@ -250,9 +250,7 @@ class TestAPIKeyModel:
 
     def test_api_key_defaults(self, db_session, test_user):
         """Test API key default values."""
-        api_key = APIKey(
-            key_hash="hash", key_prefix="key_", name="Default Key", user_id=test_user.id
-        )
+        api_key = APIKey(key_hash="hash", key_prefix="key_", name="Default Key", user_id=test_user.id)
 
         db_session.add(api_key)
         db_session.commit()
@@ -429,9 +427,7 @@ class TestModelConstraints:
 
     def test_user_unique_username(self, db_session):
         """Test username must be unique."""
-        user1 = User(
-            username="uniqueuser", email="user1@example.com", full_name="User 1"
-        )
+        user1 = User(username="uniqueuser", email="user1@example.com", full_name="User 1")
         db_session.add(user1)
         db_session.commit()
 

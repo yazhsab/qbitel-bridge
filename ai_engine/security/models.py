@@ -316,12 +316,8 @@ class AutomatedResponse:
 
     # Actions
     actions: List[ResponseAction] = field(default_factory=list)
-    parallel_actions: List[List[str]] = field(
-        default_factory=list
-    )  # action_ids that can run in parallel
-    sequential_actions: List[str] = field(
-        default_factory=list
-    )  # action_ids that must run sequentially
+    parallel_actions: List[List[str]] = field(default_factory=list)  # action_ids that can run in parallel
+    sequential_actions: List[str] = field(default_factory=list)  # action_ids that must run sequentially
 
     # Timing constraints
     execution_window: Optional[Tuple[datetime, datetime]] = None
@@ -345,9 +341,7 @@ class AutomatedResponse:
     compliance_considerations: List[str] = field(default_factory=list)
 
     # Execution tracking
-    status: str = (
-        "pending"  # pending, approved, executing, completed, failed, cancelled
-    )
+    status: str = "pending"  # pending, approved, executing, completed, failed, cancelled
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     success_rate: float = 0.0
@@ -571,9 +565,7 @@ def validate_confidence_score(score: float) -> bool:
     return 0.0 <= score <= 1.0
 
 
-def calculate_risk_score(
-    threat_level: ThreatLevel, system_criticality: SystemCriticality, confidence: float
-) -> float:
+def calculate_risk_score(threat_level: ThreatLevel, system_criticality: SystemCriticality, confidence: float) -> float:
     """Calculate overall risk score."""
     threat_weights = {
         ThreatLevel.CRITICAL: 1.0,
@@ -591,9 +583,7 @@ def calculate_risk_score(
         SystemCriticality.LOW_PRIORITY: 0.2,
     }
 
-    base_risk = threat_weights.get(threat_level, 0.5) * criticality_weights.get(
-        system_criticality, 0.5
-    )
+    base_risk = threat_weights.get(threat_level, 0.5) * criticality_weights.get(system_criticality, 0.5)
     confidence_adjusted_risk = base_risk * confidence
 
     return min(1.0, confidence_adjusted_risk)

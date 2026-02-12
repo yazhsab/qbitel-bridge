@@ -2,6 +2,7 @@
 Integration tests for Container Security Pipeline.
 Tests the flow from image scanning to admission control to runtime monitoring.
 """
+
 import pytest
 import asyncio
 import sys
@@ -13,7 +14,7 @@ from cloud_native.container_security.image_scanning.vulnerability_scanner import
 from cloud_native.container_security.admission_control.webhook_server import (
     AdmissionWebhookServer,
     SecurityPolicy,
-    AdmissionAction
+    AdmissionAction,
 )
 from cloud_native.container_security.signing.dilithium_signer import DilithiumSigner
 from cloud_native.container_security.runtime_protection.ebpf_monitor import eBPFMonitor, EventType
@@ -36,6 +37,7 @@ class TestContainerSecurityPipeline:
         keypair = signer.generate_keypair()
 
         import hashlib
+
         image_digest = hashlib.sha256(image.encode()).hexdigest()
         signature = signer.sign_image(image_digest, keypair["private_key"])
 
@@ -43,18 +45,12 @@ class TestContainerSecurityPipeline:
         webhook = AdmissionWebhookServer(port=8443, tls_cert_path="/tmp/tls.crt", tls_key_path="/tmp/tls.key")
 
         policy = SecurityPolicy(
-            name="production",
-            allowed_registries=["docker.io"],
-            require_signature=True,
-            scan_for_quantum_vulnerabilities=True
+            name="production", allowed_registries=["docker.io"], require_signature=True, scan_for_quantum_vulnerabilities=True
         )
 
         webhook.add_policy(policy)
 
-        pod = {
-            "metadata": {"name": "test-pod"},
-            "spec": {"containers": [{"name": "app", "image": "docker.io/myapp:v1.0"}]}
-        }
+        pod = {"metadata": {"name": "test-pod"}, "spec": {"containers": [{"name": "app", "image": "docker.io/myapp:v1.0"}]}}
 
         admission_result = webhook.validate_pod(pod, "production")
 
@@ -72,15 +68,13 @@ class TestContainerSecurityPipeline:
         keypair = signer.generate_keypair()
 
         import hashlib
+
         image_digest = hashlib.sha256(b"test-image").hexdigest()
 
         # Sign
         signature = signer.sign_image(image_digest, keypair["private_key"])
 
         # Verify
-        is_valid = signer.verify_signature(
-            image_digest, signature["signature"],
-            keypair["public_key"], signature["payload"]
-        )
+        is_valid = signer.verify_signature(image_digest, signature["signature"], keypair["public_key"], signature["payload"])
 
         assert is_valid is True

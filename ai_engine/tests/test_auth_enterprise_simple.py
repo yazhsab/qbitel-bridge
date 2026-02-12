@@ -73,9 +73,7 @@ class TestEnterpriseAuthenticationService:
             patch("ai_engine.api.auth_enterprise.get_config", return_value=mock_config),
             patch("ai_engine.api.auth_enterprise.get_audit_logger"),
         ):
-            with pytest.raises(
-                ValueError, match="JWT secret not configured or too short"
-            ):
+            with pytest.raises(ValueError, match="JWT secret not configured or too short"):
                 EnterpriseAuthenticationService(mock_config)
 
     def test_hash_password(self, auth_service):

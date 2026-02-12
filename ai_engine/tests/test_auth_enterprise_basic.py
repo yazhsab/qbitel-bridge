@@ -16,9 +16,7 @@ class TestEnterpriseAuthenticationServiceBasic:
         with patch("ai_engine.api.auth_enterprise.get_config") as mock_config:
             mock_config.return_value = Mock()
             mock_config.return_value.security = Mock()
-            mock_config.return_value.security.jwt_secret = (
-                "test_secret_key_that_is_long_enough_for_jwt"
-            )
+            mock_config.return_value.security.jwt_secret = "test_secret_key_that_is_long_enough_for_jwt"
 
             with patch("ai_engine.api.auth_enterprise.get_audit_logger") as mock_audit:
                 mock_audit.return_value = Mock()
@@ -44,9 +42,7 @@ class TestEnterpriseAuthenticationServiceBasic:
             mock_config.return_value.security.jwt_secret = "short"
 
             with patch("ai_engine.api.auth_enterprise.get_audit_logger"):
-                with pytest.raises(
-                    ValueError, match="JWT secret not configured or too short"
-                ):
+                with pytest.raises(ValueError, match="JWT secret not configured or too short"):
                     EnterpriseAuthenticationService()
 
     def test_validate_password_strength_too_short(self, auth_service):

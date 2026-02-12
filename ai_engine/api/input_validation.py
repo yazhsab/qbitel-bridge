@@ -98,14 +98,10 @@ class InputValidator:
     def __init__(self):
         """Initialize input validator."""
         # Compile regex patterns for performance
-        self.sql_patterns = [
-            re.compile(p, re.IGNORECASE) for p in self.SQL_INJECTION_PATTERNS
-        ]
+        self.sql_patterns = [re.compile(p, re.IGNORECASE) for p in self.SQL_INJECTION_PATTERNS]
         self.xss_patterns = [re.compile(p, re.IGNORECASE) for p in self.XSS_PATTERNS]
         self.cmd_patterns = [re.compile(p) for p in self.COMMAND_INJECTION_PATTERNS]
-        self.path_patterns = [
-            re.compile(p, re.IGNORECASE) for p in self.PATH_TRAVERSAL_PATTERNS
-        ]
+        self.path_patterns = [re.compile(p, re.IGNORECASE) for p in self.PATH_TRAVERSAL_PATTERNS]
 
     def validate_payload_size(
         self,
@@ -145,9 +141,7 @@ class InputValidator:
             limit = self.MAX_PAYLOAD_SIZES["default"]
 
         if size > limit:
-            raise ValidationError(
-                f"Payload too large: {size} bytes (max: {limit} bytes)"
-            )
+            raise ValidationError(f"Payload too large: {size} bytes (max: {limit} bytes)")
 
         return True
 
@@ -195,9 +189,7 @@ class InputValidator:
         """
         for pattern in self.cmd_patterns:
             if pattern.search(value):
-                logger.warning(
-                    f"Potential command injection detected: {pattern.pattern}"
-                )
+                logger.warning(f"Potential command injection detected: {pattern.pattern}")
                 return True
         return False
 
@@ -217,9 +209,7 @@ class InputValidator:
                 return True
         return False
 
-    def sanitize_string(
-        self, value: str, max_length: Optional[int] = None, allow_html: bool = False
-    ) -> str:
+    def sanitize_string(self, value: str, max_length: Optional[int] = None, allow_html: bool = False) -> str:
         """
         Sanitize string input.
 
@@ -239,15 +229,11 @@ class InputValidator:
 
         # Check length
         if max_length and len(value) > max_length:
-            raise ValidationError(
-                f"String too long: {len(value)} chars (max: {max_length})"
-            )
+            raise ValidationError(f"String too long: {len(value)} chars (max: {max_length})")
 
         # Check for SQL injection
         if self.check_sql_injection(value):
-            VALIDATION_ERRORS.labels(
-                error_type="sql_injection", endpoint="unknown"
-            ).inc()
+            VALIDATION_ERRORS.labels(error_type="sql_injection", endpoint="unknown").inc()
             raise ValidationError("Potential SQL injection detected")
 
         # Check for XSS (unless HTML is explicitly allowed)
@@ -257,22 +243,16 @@ class InputValidator:
 
         # Check for command injection
         if self.check_command_injection(value):
-            VALIDATION_ERRORS.labels(
-                error_type="command_injection", endpoint="unknown"
-            ).inc()
+            VALIDATION_ERRORS.labels(error_type="command_injection", endpoint="unknown").inc()
             raise ValidationError("Potential command injection detected")
 
         # Check for path traversal
         if self.check_path_traversal(value):
-            VALIDATION_ERRORS.labels(
-                error_type="path_traversal", endpoint="unknown"
-            ).inc()
+            VALIDATION_ERRORS.labels(error_type="path_traversal", endpoint="unknown").inc()
             raise ValidationError("Potential path traversal detected")
 
         # Basic sanitization (strip control characters)
-        sanitized = "".join(
-            char for char in value if ord(char) >= 32 or char in "\n\r\t"
-        )
+        sanitized = "".join(char for char in value if ord(char) >= 32 or char in "\n\r\t")
 
         return sanitized
 
@@ -301,8 +281,7 @@ class InputValidator:
                 # Type validation
                 if field_type and not isinstance(value, field_type):
                     raise ValidationError(
-                        f"Invalid type for {field}: expected {field_type.__name__}, "
-                        f"got {type(value).__name__}"
+                        f"Invalid type for {field}: expected {field_type.__name__}, " f"got {type(value).__name__}"
                     )
 
                 # String validation
@@ -315,21 +294,15 @@ class InputValidator:
                     min_val = constraints.get("min")
                     max_val = constraints.get("max")
                     if min_val is not None and value < min_val:
-                        raise ValidationError(
-                            f"{field} below minimum: {value} < {min_val}"
-                        )
+                        raise ValidationError(f"{field} below minimum: {value} < {min_val}")
                     if max_val is not None and value > max_val:
-                        raise ValidationError(
-                            f"{field} above maximum: {value} > {max_val}"
-                        )
+                        raise ValidationError(f"{field} above maximum: {value} > {max_val}")
 
                 # List validation
                 if isinstance(value, list):
                     max_items = constraints.get("max_items")
                     if max_items and len(value) > max_items:
-                        raise ValidationError(
-                            f"{field} has too many items: {len(value)} > {max_items}"
-                        )
+                        raise ValidationError(f"{field} has too many items: {len(value)} > {max_items}")
 
         return True
 
@@ -363,19 +336,12 @@ class PayloadSizeLimitMiddleware(BaseHTTPMiddleware):
                 size = int(content_length)
 
                 # Record payload size
-                PAYLOAD_SIZE.labels(
-                    method=request.method, endpoint=request.url.path
-                ).observe(size)
+                PAYLOAD_SIZE.labels(method=request.method, endpoint=request.url.path).observe(size)
 
                 # Check size
                 if size > self.max_size:
-                    logger.warning(
-                        f"Payload too large: {size} bytes from {request.client.host} "
-                        f"to {request.url.path}"
-                    )
-                    VALIDATION_ERRORS.labels(
-                        error_type="payload_too_large", endpoint=request.url.path
-                    ).inc()
+                    logger.warning(f"Payload too large: {size} bytes from {request.client.host} " f"to {request.url.path}")
+                    VALIDATION_ERRORS.labels(error_type="payload_too_large", endpoint=request.url.path).inc()
 
                     return JSONResponse(
                         status_code=413,
@@ -422,13 +388,8 @@ class ContentTypeValidationMiddleware(BaseHTTPMiddleware):
 
                 # Check if content-type is allowed
                 if not any(ct in content_type for ct in allowed):
-                    logger.warning(
-                        f"Invalid Content-Type: {content_type} for {request.method} "
-                        f"{request.url.path}"
-                    )
-                    VALIDATION_ERRORS.labels(
-                        error_type="invalid_content_type", endpoint=request.url.path
-                    ).inc()
+                    logger.warning(f"Invalid Content-Type: {content_type} for {request.method} " f"{request.url.path}")
+                    VALIDATION_ERRORS.labels(error_type="invalid_content_type", endpoint=request.url.path).inc()
 
                     return JSONResponse(
                         status_code=415,

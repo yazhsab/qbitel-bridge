@@ -50,6 +50,7 @@ except ModuleNotFoundError:  # pragma: no cover
 # Embedding Model Configuration - 2024-2025 Best Models
 # =============================================================================
 
+
 class EmbeddingModelConfig:
     """Centralized configuration for embedding models."""
 
@@ -84,6 +85,7 @@ class RerankerModelConfig:
 
 class SearchMode(Enum):
     """Search modes for RAG queries."""
+
     VECTOR_ONLY = "vector"  # Pure semantic search
     BM25_ONLY = "bm25"  # Pure keyword search
     HYBRID = "hybrid"  # Combined BM25 + vector
@@ -203,9 +205,7 @@ class _InMemoryChromaCollection:
         ids: Optional[List[str]] = None,
     ) -> None:
         if embeddings is None:
-            raise ValueError(
-                "Embeddings are required when using the in-memory Chroma fallback"
-            )
+            raise ValueError("Embeddings are required when using the in-memory Chroma fallback")
 
         metadatas = metadatas or [{} for _ in documents]
         ids = ids or [str(uuid.uuid4()) for _ in documents]
@@ -238,9 +238,7 @@ class _InMemoryChromaCollection:
         query_vector = np.array(query_embeddings[0], dtype=float)
 
         ranked: List[Tuple[str, str, Dict[str, Any], float]] = []
-        for doc_id, doc, meta, emb in zip(
-            self._ids, self._documents, self._metadatas, self._embeddings
-        ):
+        for doc_id, doc, meta, emb in zip(self._ids, self._documents, self._metadatas, self._embeddings):
             emb_vector = np.array(emb, dtype=float)
             similarity = self._cosine_similarity(query_vector, emb_vector)
             ranked.append((doc_id, doc, meta, similarity))
@@ -259,9 +257,7 @@ class _InMemoryChromaCollection:
         }
 
         if "embeddings" in include:
-            embed_map = {
-                doc_id: emb for doc_id, emb in zip(self._ids, self._embeddings)
-            }
+            embed_map = {doc_id: emb for doc_id, emb in zip(self._ids, self._embeddings)}
             result["embeddings"] = [[embed_map[doc_id] for doc_id in ids]]
 
         return result
@@ -290,9 +286,7 @@ class _InMemoryChromaClient:
         self._collections[name] = collection
         return collection
 
-    def get_or_create_collection(
-        self, name: str, metadata: Optional[Dict[str, Any]] = None
-    ):
+    def get_or_create_collection(self, name: str, metadata: Optional[Dict[str, Any]] = None):
         return self._collections.get(name) or self.create_collection(name, metadata)
 
     def delete_collection(self, name: str) -> None:
@@ -328,12 +322,8 @@ else:
     _HAS_CHROMADB = True
 
 # Metrics
-RAG_QUERY_COUNTER = Counter(
-    "qbitel_rag_queries_total", "Total RAG queries", ["query_type"]
-)
-RAG_QUERY_DURATION = Histogram(
-    "qbitel_rag_query_duration_seconds", "RAG query duration"
-)
+RAG_QUERY_COUNTER = Counter("qbitel_rag_queries_total", "Total RAG queries", ["query_type"])
+RAG_QUERY_DURATION = Histogram("qbitel_rag_query_duration_seconds", "RAG query duration")
 RAG_SIMILARITY_SCORE = Histogram("qbitel_rag_similarity_score", "RAG similarity scores")
 
 logger = logging.getLogger(__name__)
@@ -395,10 +385,7 @@ class RAGEngine:
         self._chroma_path = self.config.get("chroma_db_path", "./data/chroma_db")
 
         # Initialize embedding model - use better default (BGE)
-        embedding_model_name = self.config.get(
-            "embedding_model",
-            EmbeddingModelConfig.DEFAULT  # BGE-base by default
-        )
+        embedding_model_name = self.config.get("embedding_model", EmbeddingModelConfig.DEFAULT)  # BGE-base by default
         self.embedding_model = SentenceTransformer(embedding_model_name)
         self.embedding_model_name = embedding_model_name
 
@@ -406,10 +393,7 @@ class RAGEngine:
         self.reranker = None
         self.reranker_enabled = self.config.get("enable_reranker", True)
         if self.reranker_enabled:
-            reranker_model_name = self.config.get(
-                "reranker_model",
-                RerankerModelConfig.DEFAULT
-            )
+            reranker_model_name = self.config.get("reranker_model", RerankerModelConfig.DEFAULT)
             try:
                 self.reranker = CrossEncoder(reranker_model_name)
                 self.logger.info(f"Reranker initialized: {reranker_model_name}")
@@ -423,9 +407,7 @@ class RAGEngine:
         self.bm25_doc_ids: Dict[str, List[str]] = {}
 
         # Default search configuration
-        self.default_search_mode = SearchMode(
-            self.config.get("search_mode", SearchMode.HYBRID.value)
-        )
+        self.default_search_mode = SearchMode(self.config.get("search_mode", SearchMode.HYBRID.value))
         self.default_bm25_weight = self.config.get("bm25_weight", 0.3)
         self.default_vector_weight = self.config.get("vector_weight", 0.7)
         self.rerank_top_k = self.config.get("rerank_top_k", 20)  # Candidates for reranking
@@ -451,7 +433,7 @@ class RAGEngine:
     def _tokenize(self, text: str) -> List[str]:
         """Simple tokenizer for BM25."""
         # Lowercase and split on non-alphanumeric characters
-        tokens = re.findall(r'\b\w+\b', text.lower())
+        tokens = re.findall(r"\b\w+\b", text.lower())
         return tokens
 
     def _build_bm25_index(self, collection_name: str, documents: List[str], doc_ids: List[str]) -> None:
@@ -522,9 +504,7 @@ class RAGEngine:
                         exc,
                     )
 
-        self.logger.warning(
-            "chromadb dependency not available; using in-memory vector store fallback"
-        )
+        self.logger.warning("chromadb dependency not available; using in-memory vector store fallback")
         return _InMemoryChromaClient()
 
     def _get_or_create_collection(self, name: str):
@@ -543,9 +523,7 @@ class RAGEngine:
         metadata = {"hnsw:space": "cosine"}
 
         if hasattr(self.client, "get_or_create_collection"):
-            collection = self.client.get_or_create_collection(
-                name=name, metadata=metadata
-            )
+            collection = self.client.get_or_create_collection(name=name, metadata=metadata)
             self.collections[name] = collection
             return collection
 
@@ -554,13 +532,9 @@ class RAGEngine:
             self.collections[name] = collection
             return collection
 
-        raise AttributeError(
-            "Configured Chroma client does not expose a collection creation API"
-        )
+        raise AttributeError("Configured Chroma client does not expose a collection creation API")
 
-    async def add_documents(
-        self, collection_name: str, documents: List[Union[RAGDocument, Dict[str, Any]]]
-    ) -> bool:
+    async def add_documents(self, collection_name: str, documents: List[Union[RAGDocument, Dict[str, Any]]]) -> bool:
         """Add documents to a specific collection."""
         if self.client is None:
             raise RuntimeError("RAGEngine must be initialized before adding documents")
@@ -576,9 +550,7 @@ class RAGEngine:
                 normalized_docs.append(doc)
             elif isinstance(doc, dict):
                 if "content" not in doc:
-                    raise ValueError(
-                        "Document dictionaries must include a 'content' field"
-                    )
+                    raise ValueError("Document dictionaries must include a 'content' field")
                 normalized_docs.append(
                     RAGDocument(
                         id=str(doc.get("id") or uuid.uuid4()),
@@ -589,9 +561,7 @@ class RAGEngine:
                     )
                 )
             else:
-                raise TypeError(
-                    "Documents must be RAGDocument instances or dictionary representations"
-                )
+                raise TypeError("Documents must be RAGDocument instances or dictionary representations")
 
         if not normalized_docs:
             self.logger.debug(
@@ -601,9 +571,7 @@ class RAGEngine:
             return False
 
         texts = [doc.content for doc in normalized_docs]
-        embeddings = [
-            list(embedding) for embedding in self.embedding_model.encode(texts)
-        ]
+        embeddings = [list(embedding) for embedding in self.embedding_model.encode(texts)]
 
         for doc, embedding in zip(normalized_docs, embeddings):
             doc.embedding = embedding
@@ -611,9 +579,7 @@ class RAGEngine:
         ids = [doc.id for doc in normalized_docs]
         metadatas = [doc.metadata for doc in normalized_docs]
 
-        collection.add(
-            documents=texts, embeddings=embeddings, metadatas=metadatas, ids=ids
-        )
+        collection.add(documents=texts, embeddings=embeddings, metadatas=metadatas, ids=ids)
 
         # Update BM25 index for hybrid search
         for doc, doc_id in zip(normalized_docs, ids):
@@ -670,9 +636,7 @@ class RAGEngine:
             query_embedding = self.embedding_model.encode([query])[0].tolist()
 
             # Search in specified collection or all collections
-            collections_to_search = (
-                [collection_name] if collection_name else self.collection_names
-            )
+            collections_to_search = [collection_name] if collection_name else self.collection_names
 
             all_documents = []
             all_scores = []
@@ -772,8 +736,8 @@ class RAGEngine:
 
                         # Calculate hybrid score
                         combined_results[doc_id]["final_score"] = (
-                            vector_weight * combined_results[doc_id]["vector_score"] +
-                            bm25_weight * combined_results[doc_id]["bm25_score"]
+                            vector_weight * combined_results[doc_id]["vector_score"]
+                            + bm25_weight * combined_results[doc_id]["bm25_score"]
                         )
 
                 # Apply reranking if enabled
@@ -818,9 +782,7 @@ class RAGEngine:
 
             # Sort by final score
             if all_documents:
-                sorted_pairs = sorted(
-                    zip(all_documents, all_scores), key=lambda x: x[1], reverse=True
-                )
+                sorted_pairs = sorted(zip(all_documents, all_scores), key=lambda x: x[1], reverse=True)
                 all_documents, all_scores = zip(*sorted_pairs)
                 all_documents = list(all_documents)[:n_results]
                 all_scores = list(all_scores)[:n_results]
@@ -892,9 +854,7 @@ class RAGEngine:
 
         return simplified
 
-    async def enhance_query_context(
-        self, query: str, existing_context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+    async def enhance_query_context(self, query: str, existing_context: Dict[str, Any] = None) -> Dict[str, Any]:
         """
         Enhance query with relevant context from knowledge base.
 
@@ -940,9 +900,7 @@ class RAGEngine:
                         "metadata": doc.metadata,
                         "similarity": score,
                     }
-                    for doc, score in zip(
-                        protocol_results.documents, protocol_results.similarity_scores
-                    )
+                    for doc, score in zip(protocol_results.documents, protocol_results.similarity_scores)
                 ],
                 "compliance_context": [
                     {
@@ -961,16 +919,12 @@ class RAGEngine:
                         "metadata": doc.metadata,
                         "similarity": score,
                     }
-                    for doc, score in zip(
-                        security_results.documents, security_results.similarity_scores
-                    )
+                    for doc, score in zip(security_results.documents, security_results.similarity_scores)
                 ],
                 "rag_metadata": {
                     "query_processed_at": datetime.now().isoformat(),
                     "total_results": (
-                        protocol_results.total_results
-                        + compliance_results.total_results
-                        + security_results.total_results
+                        protocol_results.total_results + compliance_results.total_results + security_results.total_results
                     ),
                     "avg_similarity": (
                         np.mean(
@@ -1072,9 +1026,7 @@ class RAGEngine:
                         "metadata": doc.metadata,
                         "similarity": score,
                     }
-                    for doc, score in zip(
-                        api_results.documents, api_results.similarity_scores
-                    )
+                    for doc, score in zip(api_results.documents, api_results.similarity_scores)
                 ],
                 "code_generation_templates": [
                     {
@@ -1082,9 +1034,7 @@ class RAGEngine:
                         "metadata": doc.metadata,
                         "similarity": score,
                     }
-                    for doc, score in zip(
-                        code_results.documents, code_results.similarity_scores
-                    )
+                    for doc, score in zip(code_results.documents, code_results.similarity_scores)
                 ],
                 "best_practices": [
                     {
@@ -1092,9 +1042,7 @@ class RAGEngine:
                         "metadata": doc.metadata,
                         "similarity": score,
                     }
-                    for doc, score in zip(
-                        practices_results.documents, practices_results.similarity_scores
-                    )
+                    for doc, score in zip(practices_results.documents, practices_results.similarity_scores)
                 ],
                 "translation_metadata": {
                     "source_protocol": source_protocol,
@@ -1129,13 +1077,9 @@ class RAGEngine:
         query = f"{protocol_name} protocol patterns {pattern_type}"
 
         if pattern_type == "translation":
-            return await self.query_similar(
-                query, "protocol_translation_patterns", n_results, 0.5
-            )
+            return await self.query_similar(query, "protocol_translation_patterns", n_results, 0.5)
         elif pattern_type == "api":
-            return await self.query_similar(
-                query, "api_design_patterns", n_results, 0.5
-            )
+            return await self.query_similar(query, "api_design_patterns", n_results, 0.5)
         elif pattern_type == "security":
             return await self.query_similar(query, "security_patterns", n_results, 0.5)
         else:
@@ -1152,17 +1096,13 @@ class RAGEngine:
 
             for collection in collections:
                 if collection in self.collections:
-                    result = await self.query_similar(
-                        query, collection, max(1, n_results // len(collections)), 0.5
-                    )
+                    result = await self.query_similar(query, collection, max(1, n_results // len(collections)), 0.5)
                     all_results.extend(result.documents)
                     all_scores.extend(result.similarity_scores)
 
             # Sort and limit results
             if all_results:
-                sorted_pairs = sorted(
-                    zip(all_results, all_scores), key=lambda x: x[1], reverse=True
-                )
+                sorted_pairs = sorted(zip(all_results, all_scores), key=lambda x: x[1], reverse=True)
                 all_results, all_scores = zip(*sorted_pairs)
                 all_results = list(all_results)[:n_results]
                 all_scores = list(all_scores)[:n_results]
@@ -1198,9 +1138,7 @@ class RAGEngine:
             similarity_threshold=0.4,
         )
 
-    async def get_translation_best_practices(
-        self, context: str = "general", n_results: int = 5
-    ) -> RAGQueryResult:
+    async def get_translation_best_practices(self, context: str = "general", n_results: int = 5) -> RAGQueryResult:
         """
         Get translation best practices for specific context.
 
@@ -1640,9 +1578,7 @@ class RAGEngine:
 
             await self.add_documents("translation_best_practices", best_practices_docs)
 
-            self.logger.info(
-                "Initial knowledge base with translation extensions loaded successfully"
-            )
+            self.logger.info("Initial knowledge base with translation extensions loaded successfully")
 
         except Exception as e:
             self.logger.error(f"Failed to load initial knowledge base: {e}")

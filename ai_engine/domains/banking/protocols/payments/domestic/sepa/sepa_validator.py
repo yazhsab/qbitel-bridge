@@ -103,9 +103,7 @@ class SEPAValidator(BaseValidator):
 
         return result
 
-    def _validate_credit_transfer(
-        self, msg: SEPACreditTransfer, result: ValidationResult
-    ) -> None:
+    def _validate_credit_transfer(self, msg: SEPACreditTransfer, result: ValidationResult) -> None:
         """Validate SEPA Credit Transfer."""
         # Message ID
         if not msg.message_id:
@@ -189,9 +187,7 @@ class SEPAValidator(BaseValidator):
                         field="remittance_info/unstructured",
                     )
 
-    def _validate_direct_debit(
-        self, msg: SEPADirectDebit, result: ValidationResult
-    ) -> None:
+    def _validate_direct_debit(self, msg: SEPADirectDebit, result: ValidationResult) -> None:
         """Validate SEPA Direct Debit."""
         # Message ID
         if not msg.message_id:
@@ -295,9 +291,7 @@ class SEPAValidator(BaseValidator):
                     field="amount",
                 )
 
-    def _validate_party(
-        self, party, field_prefix: str, result: ValidationResult
-    ) -> None:
+    def _validate_party(self, party, field_prefix: str, result: ValidationResult) -> None:
         """Validate party (debtor/creditor) information."""
         # Name
         if not party.name:
@@ -349,9 +343,7 @@ class SEPAValidator(BaseValidator):
                     field=f"{field_prefix}/agent/bic",
                 )
 
-    def _validate_mandate(
-        self, msg: SEPADirectDebit, result: ValidationResult
-    ) -> None:
+    def _validate_mandate(self, msg: SEPADirectDebit, result: ValidationResult) -> None:
         """Validate direct debit mandate."""
         if not msg.mandate:
             result.add_error(
@@ -391,12 +383,14 @@ class SEPAValidator(BaseValidator):
 
         # Amendment validation
         if msg.mandate.amendment_indicator:
-            has_amendment_detail = any([
-                msg.mandate.original_mandate_id,
-                msg.mandate.original_creditor_scheme_id,
-                msg.mandate.original_debtor_account,
-                msg.mandate.original_debtor_agent,
-            ])
+            has_amendment_detail = any(
+                [
+                    msg.mandate.original_mandate_id,
+                    msg.mandate.original_creditor_scheme_id,
+                    msg.mandate.original_debtor_account,
+                    msg.mandate.original_debtor_agent,
+                ]
+            )
             if not has_amendment_detail:
                 result.add_error(
                     "SEPA_MISSING_AMENDMENT_DETAIL",
@@ -404,9 +398,7 @@ class SEPAValidator(BaseValidator):
                     field="mandate/amendment_indicator",
                 )
 
-    def _validate_collection_date(
-        self, msg: SEPADirectDebit, result: ValidationResult
-    ) -> None:
+    def _validate_collection_date(self, msg: SEPADirectDebit, result: ValidationResult) -> None:
         """Validate direct debit collection date."""
         if not msg.requested_collection_date:
             result.add_warning(
@@ -450,9 +442,7 @@ class SEPAValidator(BaseValidator):
                 min_days=min_days,
             )
 
-    def _validate_instant_payment(
-        self, msg: SEPACreditTransfer, result: ValidationResult
-    ) -> None:
+    def _validate_instant_payment(self, msg: SEPACreditTransfer, result: ValidationResult) -> None:
         """Validate SCT Inst specific requirements."""
         # BIC is required for instant payments
         if msg.debtor and msg.debtor.agent:

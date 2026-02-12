@@ -32,9 +32,14 @@ class TestBankingSubdomain:
     def test_all_subdomains_defined(self):
         """Verify all expected subdomains are defined."""
         expected = [
-            "CARD_PAYMENTS", "WIRE_TRANSFERS", "DOMESTIC_CLEARING",
-            "REAL_TIME_PAYMENTS", "TRADING", "CORRESPONDENT_BANKING",
-            "TREASURY", "CORE_BANKING",
+            "CARD_PAYMENTS",
+            "WIRE_TRANSFERS",
+            "DOMESTIC_CLEARING",
+            "REAL_TIME_PAYMENTS",
+            "TRADING",
+            "CORRESPONDENT_BANKING",
+            "TREASURY",
+            "CORE_BANKING",
         ]
         for subdomain in expected:
             assert hasattr(BankingSubdomain, subdomain)
@@ -70,9 +75,7 @@ class TestBankingSecurityConstraints:
 
     def test_compliance_frameworks_list(self):
         """Test compliance frameworks as a list."""
-        constraints = BankingSecurityConstraints(
-            compliance_frameworks=["PCI-DSS 4.0", "DORA", "NIST PQC"]
-        )
+        constraints = BankingSecurityConstraints(compliance_frameworks=["PCI-DSS 4.0", "DORA", "NIST PQC"])
         assert "PCI-DSS 4.0" in constraints.compliance_frameworks
         assert "DORA" in constraints.compliance_frameworks
 

@@ -102,9 +102,7 @@ class ThreeDSValidator(BaseValidator):
 
         return result
 
-    def _validate_auth_request(
-        self, req: ThreeDSAuthRequest, result: ValidationResult
-    ) -> None:
+    def _validate_auth_request(self, req: ThreeDSAuthRequest, result: ValidationResult) -> None:
         """Validate authentication request."""
         # Transaction IDs
         if not req.threeds_server_trans_id:
@@ -251,9 +249,7 @@ class ThreeDSValidator(BaseValidator):
                 field="notificationURL",
             )
 
-    def _validate_browser_info(
-        self, browser: Optional[BrowserInfo], result: ValidationResult
-    ) -> None:
+    def _validate_browser_info(self, browser: Optional[BrowserInfo], result: ValidationResult) -> None:
         """Validate browser information."""
         if not browser:
             result.add_error(
@@ -291,9 +287,7 @@ class ThreeDSValidator(BaseValidator):
                 field="browserScreenWidth",
             )
 
-    def _validate_auth_response(
-        self, res: ThreeDSAuthResponse, result: ValidationResult
-    ) -> None:
+    def _validate_auth_response(self, res: ThreeDSAuthResponse, result: ValidationResult) -> None:
         """Validate authentication response."""
         # Transaction IDs
         if not res.threeds_server_trans_id:
@@ -364,9 +358,7 @@ class ThreeDSValidator(BaseValidator):
                     field="eci",
                 )
 
-    def _validate_challenge_request(
-        self, req: ThreeDSChallengeRequest, result: ValidationResult
-    ) -> None:
+    def _validate_challenge_request(self, req: ThreeDSChallengeRequest, result: ValidationResult) -> None:
         """Validate challenge request."""
         if not req.threeds_server_trans_id:
             result.add_error(
@@ -389,9 +381,7 @@ class ThreeDSValidator(BaseValidator):
                 field="challengeWindowSize",
             )
 
-    def _validate_challenge_response(
-        self, res: ThreeDSChallengeResponse, result: ValidationResult
-    ) -> None:
+    def _validate_challenge_response(self, res: ThreeDSChallengeResponse, result: ValidationResult) -> None:
         """Validate challenge response."""
         if not res.threeds_server_trans_id:
             result.add_error(
@@ -430,9 +420,7 @@ class ThreeDSValidator(BaseValidator):
                     field="authenticationValue",
                 )
 
-    def _validate_result(
-        self, result_obj: ThreeDSResult, result: ValidationResult
-    ) -> None:
+    def _validate_result(self, result_obj: ThreeDSResult, result: ValidationResult) -> None:
         """Validate complete 3DS result."""
         # Transaction IDs
         if not result_obj.threeds_server_trans_id:

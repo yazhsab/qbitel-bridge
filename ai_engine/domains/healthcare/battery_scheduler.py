@@ -18,11 +18,11 @@ logger = logging.getLogger(__name__)
 class PowerProfile(Enum):
     """Device power profiles."""
 
-    CRITICAL = auto()    # <10% battery, defer all non-essential crypto
-    LOW = auto()         # 10-25% battery, minimize operations
-    NORMAL = auto()      # 25-75% battery, standard operations
-    HIGH = auto()        # >75% battery, can perform expensive operations
-    CHARGING = auto()    # Device is charging (if applicable)
+    CRITICAL = auto()  # <10% battery, defer all non-essential crypto
+    LOW = auto()  # 10-25% battery, minimize operations
+    NORMAL = auto()  # 25-75% battery, standard operations
+    HIGH = auto()  # >75% battery, can perform expensive operations
+    CHARGING = auto()  # Device is charging (if applicable)
 
 
 @dataclass
@@ -125,8 +125,7 @@ class BatteryAwareCryptoScheduler:
         self._pending_operations.sort(key=lambda x: x.priority)
 
         logger.debug(
-            f"Queued operation {operation.operation_id} "
-            f"(power={operation.estimated_power_mw}mW, budget={budget}mW)"
+            f"Queued operation {operation.operation_id} " f"(power={operation.estimated_power_mw}mW, budget={budget}mW)"
         )
 
         return False
@@ -173,10 +172,8 @@ class BatteryAwareCryptoScheduler:
             "power_budget_mw": self._power_budgets[self._power_profile],
             "queued_operations": len(self._pending_operations),
             "oldest_operation_age": (
-                time.time() - min(
-                    (op.deadline or time.time() for op in self._pending_operations),
-                    default=time.time()
-                )
-                if self._pending_operations else 0
+                time.time() - min((op.deadline or time.time() for op in self._pending_operations), default=time.time())
+                if self._pending_operations
+                else 0
             ),
         }

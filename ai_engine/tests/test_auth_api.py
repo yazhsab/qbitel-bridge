@@ -87,9 +87,7 @@ class TestJWTTokens:
         assert len(token) > 50
 
         # Verify token structure
-        decoded = jwt.decode(
-            token, auth_service.secret_key, algorithms=[auth_service.algorithm]
-        )
+        decoded = jwt.decode(token, auth_service.secret_key, algorithms=[auth_service.algorithm])
         assert decoded["sub"] == "user123"
         assert decoded["role"] == "admin"
         assert decoded["type"] == "access"
@@ -102,9 +100,7 @@ class TestJWTTokens:
 
         assert isinstance(token, str)
 
-        decoded = jwt.decode(
-            token, auth_service.secret_key, algorithms=[auth_service.algorithm]
-        )
+        decoded = jwt.decode(token, auth_service.secret_key, algorithms=[auth_service.algorithm])
         assert decoded["sub"] == "user456"
         assert decoded["type"] == "refresh"
 
@@ -344,9 +340,7 @@ class TestAuthenticationService:
             with patch("ai_engine.api.auth.get_audit_logger"):
                 with patch("redis.asyncio.Redis") as mock_redis_class:
                     mock_redis = AsyncMock()
-                    mock_redis.ping = AsyncMock(
-                        side_effect=Exception("Connection failed")
-                    )
+                    mock_redis.ping = AsyncMock(side_effect=Exception("Connection failed"))
                     mock_redis_class.return_value = mock_redis
 
                     service = AuthenticationService(config)
@@ -364,9 +358,7 @@ class TestSecretKeyLoading:
         mock_secrets_mgr = Mock()
         mock_secrets_mgr.get_secret = Mock(return_value="secret_from_manager_32!!")
 
-        with patch(
-            "ai_engine.api.auth.get_secrets_manager", return_value=mock_secrets_mgr
-        ):
+        with patch("ai_engine.api.auth.get_secrets_manager", return_value=mock_secrets_mgr):
             with patch("ai_engine.api.auth.get_audit_logger"):
                 config = Config()
                 service = AuthenticationService(config)
@@ -407,9 +399,7 @@ class TestSecretKeyLoading:
         with patch("ai_engine.api.auth.get_secrets_manager") as mock_sm:
             mock_sm.return_value.get_secret = Mock(return_value=None)
             with patch("ai_engine.api.auth.get_audit_logger"):
-                with pytest.raises(
-                    AuthenticationError, match="not configured in production"
-                ):
+                with pytest.raises(AuthenticationError, match="not configured in production"):
                     AuthenticationService(config)
 
 
@@ -437,9 +427,7 @@ class TestTokenDataEncoding:
 
         token = auth_service.create_access_token(data)
 
-        decoded = jwt.decode(
-            token, auth_service.secret_key, algorithms=[auth_service.algorithm]
-        )
+        decoded = jwt.decode(token, auth_service.secret_key, algorithms=[auth_service.algorithm])
 
         assert decoded["sub"] == "user123"
         assert decoded["roles"] == ["admin", "user"]
@@ -450,9 +438,7 @@ class TestTokenDataEncoding:
         data = {"sub": "user_minimal"}
         token = auth_service.create_access_token(data)
 
-        decoded = jwt.decode(
-            token, auth_service.secret_key, algorithms=[auth_service.algorithm]
-        )
+        decoded = jwt.decode(token, auth_service.secret_key, algorithms=[auth_service.algorithm])
 
         assert decoded["sub"] == "user_minimal"
 

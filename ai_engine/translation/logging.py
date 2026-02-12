@@ -240,11 +240,7 @@ class TranslationStudioLogger:
                 ERROR_COUNTER.labels(
                     category=exception.category.value,
                     severity=exception.severity.value,
-                    component=(
-                        context.component.value
-                        if context and context.component
-                        else "unknown"
-                    ),
+                    component=(context.component.value if context and context.component else "unknown"),
                 ).inc()
 
         # Add extra fields
@@ -328,9 +324,7 @@ class TranslationStudioLogger:
             self.active_operations[operation_id] = context
 
         # Update metrics
-        ACTIVE_OPERATIONS.labels(
-            component=component.value, operation=operation.value
-        ).inc()
+        ACTIVE_OPERATIONS.labels(component=component.value, operation=operation.value).inc()
 
         self.info(
             f"Operation started: {operation.value}",
@@ -361,13 +355,11 @@ class TranslationStudioLogger:
 
         # Update metrics
         if context.component and context.operation:
-            ACTIVE_OPERATIONS.labels(
-                component=context.component.value, operation=context.operation.value
-            ).dec()
+            ACTIVE_OPERATIONS.labels(component=context.component.value, operation=context.operation.value).dec()
 
-            OPERATION_DURATION.labels(
-                component=context.component.value, operation=context.operation.value
-            ).observe(context.duration)
+            OPERATION_DURATION.labels(component=context.component.value, operation=context.operation.value).observe(
+                context.duration
+            )
 
         # Log completion
         status = "completed successfully" if success else "failed"
@@ -418,15 +410,11 @@ class TranslationStudioLogger:
 
         # Log at appropriate level based on severity
         if severity in [ErrorSeverity.HIGH, ErrorSeverity.CRITICAL]:
-            self.critical(
-                f"SECURITY EVENT: {description}", context=context, **log_entry
-            )
+            self.critical(f"SECURITY EVENT: {description}", context=context, **log_entry)
         elif severity == ErrorSeverity.MEDIUM:
             self.error(f"Security event: {description}", context=context, **log_entry)
         else:
-            self.warning(
-                f"Security notice: {description}", context=context, **log_entry
-            )
+            self.warning(f"Security notice: {description}", context=context, **log_entry)
 
     def log_api_request(
         self,
@@ -531,18 +519,14 @@ def log_operation(
     def decorator(func):
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
-            logger_instance = get_logger(
-                logger_name or f"{component.value}.{operation.value}"
-            )
+            logger_instance = get_logger(logger_name or f"{component.value}.{operation.value}")
 
             # Extract context from kwargs if available
             context = kwargs.pop("log_context", None) or LogContext()
             context.component = component
             context.operation = operation
 
-            operation_id = logger_instance.log_operation_start(
-                operation, component, context
-            )
+            operation_id = logger_instance.log_operation_start(operation, component, context)
 
             try:
                 # Log arguments if requested
@@ -551,9 +535,7 @@ def log_operation(
                         f"Function arguments for {func.__name__}",
                         context=context,
                         function_args={
-                            "args": [
-                                str(arg)[:100] for arg in args
-                            ],  # Truncate long args
+                            "args": [str(arg)[:100] for arg in args],  # Truncate long args
                             "kwargs": {k: str(v)[:100] for k, v in kwargs.items()},
                         },
                     )
@@ -574,25 +556,19 @@ def log_operation(
 
             except Exception as e:
                 logger_instance.log_operation_end(operation_id, False)
-                logger_instance.error(
-                    f"Operation failed: {func.__name__}", context=context, exception=e
-                )
+                logger_instance.error(f"Operation failed: {func.__name__}", context=context, exception=e)
                 raise
 
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
-            logger_instance = get_logger(
-                logger_name or f"{component.value}.{operation.value}"
-            )
+            logger_instance = get_logger(logger_name or f"{component.value}.{operation.value}")
 
             # Extract context from kwargs if available
             context = kwargs.pop("log_context", None) or LogContext()
             context.component = component
             context.operation = operation
 
-            operation_id = logger_instance.log_operation_start(
-                operation, component, context
-            )
+            operation_id = logger_instance.log_operation_start(operation, component, context)
 
             try:
                 # Log arguments if requested
@@ -622,9 +598,7 @@ def log_operation(
 
             except Exception as e:
                 logger_instance.log_operation_end(operation_id, False)
-                logger_instance.error(
-                    f"Operation failed: {func.__name__}", context=context, exception=e
-                )
+                logger_instance.error(f"Operation failed: {func.__name__}", context=context, exception=e)
                 raise
 
         # Return appropriate wrapper based on function type
@@ -638,9 +612,7 @@ def log_operation(
     return decorator
 
 
-def log_exceptions(
-    component: LogComponent, logger_name: str = None, re_raise: bool = True
-):
+def log_exceptions(component: LogComponent, logger_name: str = None, re_raise: bool = True):
     """Decorator to automatically log exceptions."""
 
     def decorator(func):
@@ -652,9 +624,7 @@ def log_exceptions(
                 return await func(*args, **kwargs)
             except Exception as e:
                 context = kwargs.get("log_context") or LogContext(component=component)
-                logger_instance.error(
-                    f"Exception in {func.__name__}", context=context, exception=e
-                )
+                logger_instance.error(f"Exception in {func.__name__}", context=context, exception=e)
                 if re_raise:
                     raise
 
@@ -666,9 +636,7 @@ def log_exceptions(
                 return func(*args, **kwargs)
             except Exception as e:
                 context = kwargs.get("log_context") or LogContext(component=component)
-                logger_instance.error(
-                    f"Exception in {func.__name__}", context=context, exception=e
-                )
+                logger_instance.error(f"Exception in {func.__name__}", context=context, exception=e)
                 if re_raise:
                     raise
 

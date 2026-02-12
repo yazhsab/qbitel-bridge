@@ -36,18 +36,14 @@ class TracingConfig:
 
         # Tracing configuration
         self.enabled = os.getenv("OTEL_TRACING_ENABLED", "true").lower() == "true"
-        self.exporter_type = os.getenv(
-            "OTEL_EXPORTER_TYPE", "jaeger"
-        )  # jaeger, otlp, console
+        self.exporter_type = os.getenv("OTEL_EXPORTER_TYPE", "jaeger")  # jaeger, otlp, console
 
         # Jaeger configuration
         self.jaeger_host = os.getenv("OTEL_JAEGER_HOST", "localhost")
         self.jaeger_port = int(os.getenv("OTEL_JAEGER_PORT", "6831"))
 
         # OTLP configuration
-        self.otlp_endpoint = os.getenv(
-            "OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317"
-        )
+        self.otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317")
 
         # Sampling
         self.sample_rate = float(os.getenv("OTEL_TRACE_SAMPLE_RATE", "1.0"))
@@ -96,14 +92,10 @@ def initialize_tracing(config: Optional[TracingConfig] = None, app=None) -> bool
                 agent_host_name=config.jaeger_host,
                 agent_port=config.jaeger_port,
             )
-            logger.info(
-                f"Using Jaeger exporter: {config.jaeger_host}:{config.jaeger_port}"
-            )
+            logger.info(f"Using Jaeger exporter: {config.jaeger_host}:{config.jaeger_port}")
 
         elif config.exporter_type == "otlp":
-            exporter = OTLPSpanExporter(
-                endpoint=config.otlp_endpoint, insecure=True  # Use TLS in production
-            )
+            exporter = OTLPSpanExporter(endpoint=config.otlp_endpoint, insecure=True)  # Use TLS in production
             logger.info(f"Using OTLP exporter: {config.otlp_endpoint}")
 
         elif config.exporter_type == "console":
@@ -202,9 +194,7 @@ def get_tracer(name: str = __name__) -> trace.Tracer:
     return trace.get_tracer(name)
 
 
-def trace_function(
-    span_name: Optional[str] = None, attributes: Optional[Dict[str, Any]] = None
-):
+def trace_function(span_name: Optional[str] = None, attributes: Optional[Dict[str, Any]] = None):
     """
     Decorator to trace a function with a custom span.
 
@@ -332,9 +322,7 @@ class TracedOperation:
             pass
     """
 
-    def __init__(
-        self, operation_name: str, attributes: Optional[Dict[str, Any]] = None
-    ):
+    def __init__(self, operation_name: str, attributes: Optional[Dict[str, Any]] = None):
         self.operation_name = operation_name
         self.attributes = attributes or {}
         self.span = None

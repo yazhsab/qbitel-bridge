@@ -24,9 +24,7 @@ class TestIsolationForestSettings:
         """Test custom settings."""
         from ai_engine.anomaly.isolation_forest import IsolationForestSettings
 
-        settings = IsolationForestSettings(
-            contamination=0.1, window_size=256, version="2.0.0"
-        )
+        settings = IsolationForestSettings(contamination=0.1, window_size=256, version="2.0.0")
 
         assert settings.contamination == 0.1
         assert settings.window_size == 256

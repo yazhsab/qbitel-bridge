@@ -192,6 +192,7 @@ class KeyDerivation:
 
         # Triple DES encrypt for left half
         from ai_engine.domains.banking.security.hsm.soft_hsm import CRYPTO_AVAILABLE
+
         if CRYPTO_AVAILABLE:
             from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
             from cryptography.hazmat.backends import default_backend
@@ -274,6 +275,7 @@ class KeyDerivation:
     def _derive_with_3des(self, key: bytes, data: bytes) -> bytes:
         """Derive key using 3DES encryption."""
         from ai_engine.domains.banking.security.hsm.soft_hsm import CRYPTO_AVAILABLE
+
         if CRYPTO_AVAILABLE:
             from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
             from cryptography.hazmat.backends import default_backend

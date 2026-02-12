@@ -52,11 +52,7 @@ class StripeConnectManager:
         self.logger = logging.getLogger(__name__)
 
     async def create_connected_account(
-        self,
-        user_id: UUID,
-        email: str,
-        country: str = "US",
-        business_type: str = "individual"
+        self, user_id: UUID, email: str, country: str = "US", business_type: str = "individual"
     ) -> Dict[str, Any]:
         """
         Create a Stripe Connect account for a protocol creator.
@@ -84,7 +80,7 @@ class StripeConnectManager:
                 metadata={
                     "user_id": str(user_id),
                     "platform": "qbitel-marketplace",
-                }
+                },
             )
 
             self.logger.info(f"Created Stripe Connect account for user {user_id}: {account.id}")
@@ -133,9 +129,7 @@ class StripeConnectManager:
 
         try:
             # Get protocol and creator info
-            protocol = session.query(MarketplaceProtocol).filter(
-                MarketplaceProtocol.protocol_id == protocol_id
-            ).first()
+            protocol = session.query(MarketplaceProtocol).filter(MarketplaceProtocol.protocol_id == protocol_id).first()
 
             if not protocol:
                 raise ValueError(f"Protocol {protocol_id} not found")
@@ -165,11 +159,12 @@ class StripeConnectManager:
                     "customer_id": str(customer_id),
                     "protocol_name": protocol.protocol_name,
                     "transaction_type": "one_time_purchase",
-                }
+                },
             )
 
             # Create transaction record
             from uuid import uuid4
+
             transaction = MarketplaceTransaction(
                 transaction_id=uuid4(),
                 protocol_id=protocol_id,
@@ -233,9 +228,7 @@ class StripeConnectManager:
 
         try:
             # Get protocol
-            protocol = session.query(MarketplaceProtocol).filter(
-                MarketplaceProtocol.protocol_id == protocol_id
-            ).first()
+            protocol = session.query(MarketplaceProtocol).filter(MarketplaceProtocol.protocol_id == protocol_id).first()
 
             if not protocol:
                 raise ValueError(f"Protocol {protocol_id} not found")
@@ -254,17 +247,23 @@ class StripeConnectManager:
             # Create subscription
             subscription = stripe.Subscription.create(
                 customer=customer["id"],
-                items=[{"price": price_id}] if price_id else [{
-                    "price_data": {
-                        "currency": "usd",
-                        "product_data": {
-                            "name": protocol.display_name,
-                            "description": protocol.short_description,
-                        },
-                        "unit_amount": int(protocol.base_price * 100),
-                        "recurring": {"interval": "month"},
-                    }
-                }],
+                items=(
+                    [{"price": price_id}]
+                    if price_id
+                    else [
+                        {
+                            "price_data": {
+                                "currency": "usd",
+                                "product_data": {
+                                    "name": protocol.display_name,
+                                    "description": protocol.short_description,
+                                },
+                                "unit_amount": int(protocol.base_price * 100),
+                                "recurring": {"interval": "month"},
+                            }
+                        }
+                    ]
+                ),
                 application_fee_percent=platform_fee_percent,
                 transfer_data={
                     "destination": creator.stripe_account_id,
@@ -273,11 +272,12 @@ class StripeConnectManager:
                     "protocol_id": str(protocol_id),
                     "customer_id": str(customer_id),
                     "protocol_name": protocol.protocol_name,
-                }
+                },
             )
 
             # Create transaction record
             from uuid import uuid4
+
             transaction = MarketplaceTransaction(
                 transaction_id=uuid4(),
                 protocol_id=protocol_id,
@@ -309,11 +309,7 @@ class StripeConnectManager:
         finally:
             session.close()
 
-    async def cancel_subscription(
-        self,
-        subscription_id: str,
-        at_period_end: bool = True
-    ) -> Dict[str, Any]:
+    async def cancel_subscription(self, subscription_id: str, at_period_end: bool = True) -> Dict[str, Any]:
         """
         Cancel a subscription.
 
@@ -326,10 +322,7 @@ class StripeConnectManager:
         """
         try:
             if at_period_end:
-                subscription = stripe.Subscription.modify(
-                    subscription_id,
-                    cancel_at_period_end=True
-                )
+                subscription = stripe.Subscription.modify(subscription_id, cancel_at_period_end=True)
             else:
                 subscription = stripe.Subscription.delete(subscription_id)
 
@@ -346,11 +339,7 @@ class StripeConnectManager:
             self.logger.error(f"Subscription cancellation failed: {e}")
             raise
 
-    async def handle_webhook(
-        self,
-        payload: bytes,
-        signature: str
-    ) -> Dict[str, Any]:
+    async def handle_webhook(self, payload: bytes, signature: str) -> Dict[str, Any]:
         """
         Handle Stripe webhook events.
 
@@ -364,9 +353,7 @@ class StripeConnectManager:
         webhook_secret = self.config.marketplace.stripe_webhook_secret
 
         try:
-            event = stripe.Webhook.construct_event(
-                payload, signature, webhook_secret
-            )
+            event = stripe.Webhook.construct_event(payload, signature, webhook_secret)
 
             # Handle different event types
             event_type = event["type"]
@@ -391,11 +378,7 @@ class StripeConnectManager:
             self.logger.error(f"Webhook handling failed: {e}")
             raise
 
-    async def _get_or_create_stripe_customer(
-        self,
-        customer_id: UUID,
-        payment_method_id: str
-    ) -> Dict[str, Any]:
+    async def _get_or_create_stripe_customer(self, customer_id: UUID, payment_method_id: str) -> Dict[str, Any]:
         """Get existing Stripe customer or create new one."""
         db_manager = get_database_manager()
         session = db_manager.get_session()
@@ -403,9 +386,10 @@ class StripeConnectManager:
         try:
             # Check if user has Stripe customer ID
             from ..models.database import User
+
             user = session.query(User).filter(User.id == customer_id).first()
 
-            if user and hasattr(user, 'stripe_customer_id') and user.stripe_customer_id:
+            if user and hasattr(user, "stripe_customer_id") and user.stripe_customer_id:
                 return {"id": user.stripe_customer_id}
 
             # Create new Stripe customer
@@ -417,7 +401,7 @@ class StripeConnectManager:
                 },
                 metadata={
                     "user_id": str(customer_id),
-                }
+                },
             )
 
             # Save customer ID

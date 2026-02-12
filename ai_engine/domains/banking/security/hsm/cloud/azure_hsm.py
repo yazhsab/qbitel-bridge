@@ -44,7 +44,6 @@ from ai_engine.domains.banking.security.hsm.hsm_provider import (
     KEMEncapsulationResult,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -217,9 +216,7 @@ class AzureDedicatedHSMProvider(HSMProvider):
                 try:
                     from azure.identity import ManagedIdentityCredential
 
-                    self._credential = ManagedIdentityCredential(
-                        client_id=self._azure_config.client_id
-                    )
+                    self._credential = ManagedIdentityCredential(client_id=self._azure_config.client_id)
                 except ImportError:
                     logger.warning("azure-identity not available, using simulated auth")
                     self._credential = SimulatedAzureCredential()
@@ -246,9 +243,7 @@ class AzureDedicatedHSMProvider(HSMProvider):
         """Connect to Luna HSM via PKCS#11."""
         try:
             # In production, this would use the Luna PKCS#11 library
-            logger.debug(
-                f"Connecting to Luna HSM: {self._azure_config.dedicated_hsm_host}"
-            )
+            logger.debug(f"Connecting to Luna HSM: {self._azure_config.dedicated_hsm_host}")
 
             # Simulated Luna connection
             self._luna_session = SimulatedLunaSession()
@@ -669,9 +664,7 @@ class AzureManagedHSMProvider(HSMProvider):
 
         with self._lock:
             try:
-                logger.info(
-                    f"Connecting to Azure Managed HSM: {self._azure_config.vault_url}"
-                )
+                logger.info(f"Connecting to Azure Managed HSM: {self._azure_config.vault_url}")
 
                 # Authenticate
                 self._authenticate()

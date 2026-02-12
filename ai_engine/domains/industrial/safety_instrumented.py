@@ -31,41 +31,31 @@ logger = logging.getLogger(__name__)
 
 # Metrics
 SIS_AUTH_OPS = Counter(
-    'sis_authentication_operations_total',
-    'Total SIS authentication operations',
-    ['sil_level', 'operation']
+    "sis_authentication_operations_total", "Total SIS authentication operations", ["sil_level", "operation"]
 )
 
-SIS_SAFETY_EVENTS = Counter(
-    'sis_safety_events_total',
-    'Safety-related events',
-    ['event_type', 'sil_level']
-)
+SIS_SAFETY_EVENTS = Counter("sis_safety_events_total", "Safety-related events", ["event_type", "sil_level"])
 
-SIS_AUDIT_ENTRIES = Counter(
-    'sis_audit_entries_total',
-    'Total audit log entries',
-    ['action']
-)
+SIS_AUDIT_ENTRIES = Counter("sis_audit_entries_total", "Total audit log entries", ["action"])
 
 
 class SILLevel(Enum):
     """Safety Integrity Levels per IEC 61508."""
 
-    SIL1 = 1    # 10^-2 to 10^-1 PFD
-    SIL2 = 2    # 10^-3 to 10^-2 PFD
-    SIL3 = 3    # 10^-4 to 10^-3 PFD
-    SIL4 = 4    # 10^-5 to 10^-4 PFD
+    SIL1 = 1  # 10^-2 to 10^-1 PFD
+    SIL2 = 2  # 10^-3 to 10^-2 PFD
+    SIL3 = 3  # 10^-4 to 10^-3 PFD
+    SIL4 = 4  # 10^-5 to 10^-4 PFD
 
 
 class SafetyFunctionState(Enum):
     """Safety function operating states."""
 
-    NORMAL = auto()         # Normal operation
-    DEMAND = auto()         # Safety function activated
-    FAULT = auto()          # Detected fault
-    MAINTENANCE = auto()    # Under maintenance
-    BYPASS = auto()         # Temporarily bypassed
+    NORMAL = auto()  # Normal operation
+    DEMAND = auto()  # Safety function activated
+    FAULT = auto()  # Detected fault
+    MAINTENANCE = auto()  # Under maintenance
+    BYPASS = auto()  # Temporarily bypassed
 
 
 class SecurityAction(Enum):
@@ -128,10 +118,10 @@ class SISKeySet:
         if self.valid_until == 0.0:
             # SIL-dependent key lifetime
             lifetimes = {
-                SILLevel.SIL1: 86400,    # 24 hours
-                SILLevel.SIL2: 28800,    # 8 hours
-                SILLevel.SIL3: 3600,     # 1 hour
-                SILLevel.SIL4: 1800,     # 30 minutes
+                SILLevel.SIL1: 86400,  # 24 hours
+                SILLevel.SIL2: 28800,  # 8 hours
+                SILLevel.SIL3: 3600,  # 1 hour
+                SILLevel.SIL4: 1800,  # 30 minutes
             }
             self.valid_until = self.created_at + lifetimes[self.sil_level]
 
@@ -204,13 +194,9 @@ class SafetyKeyManager:
             master_key = secrets.token_bytes(32)
 
         # Derive function-specific keys
-        auth_key = hashlib.sha256(
-            master_key + b"authentication" + function.function_id.encode()
-        ).digest()
+        auth_key = hashlib.sha256(master_key + b"authentication" + function.function_id.encode()).digest()
 
-        cmd_key = hashlib.sha256(
-            master_key + b"command" + function.function_id.encode()
-        ).digest()
+        cmd_key = hashlib.sha256(master_key + b"command" + function.function_id.encode()).digest()
 
         # Get previous rotation count
         old_set = self._key_sets.get(function.function_id)
@@ -228,8 +214,7 @@ class SafetyKeyManager:
         self._key_sets[function.function_id] = key_set
 
         logger.info(
-            f"Generated key set for {function.function_id}: "
-            f"SIL{function.sil_level.value}, rotation={rotation_count}"
+            f"Generated key set for {function.function_id}: " f"SIL{function.sil_level.value}, rotation={rotation_count}"
         )
 
         return key_set
@@ -315,31 +300,24 @@ class SISMessageAuthenticator:
 
         # Generate command ID
         command_id = secrets.token_bytes(8)
-        timestamp = int(time.time() * 1000).to_bytes(8, 'big')
+        timestamp = int(time.time() * 1000).to_bytes(8, "big")
 
         # Build authenticated command
         auth_data = (
-            key_set.key_id +
-            command_id +
-            timestamp +
-            sequence.to_bytes(4, 'big') +
-            operator_id.encode() +
-            b'\x00' +  # Null terminator for operator_id
-            command
+            key_set.key_id
+            + command_id
+            + timestamp
+            + sequence.to_bytes(4, "big")
+            + operator_id.encode()
+            + b"\x00"  # Null terminator for operator_id
+            + command
         )
 
-        mac = hmac.new(
-            key_set.command_key,
-            auth_data,
-            hashlib.sha256
-        ).digest()
+        mac = hmac.new(key_set.command_key, auth_data, hashlib.sha256).digest()
 
         authenticated = auth_data + mac
 
-        SIS_AUTH_OPS.labels(
-            sil_level=f"SIL{key_set.sil_level.value}",
-            operation="authenticate_command"
-        ).inc()
+        SIS_AUTH_OPS.labels(sil_level=f"SIL{key_set.sil_level.value}", operation="authenticate_command").inc()
 
         return authenticated, command_id
 
@@ -373,16 +351,16 @@ class SISMessageAuthenticator:
         sequence = authenticated_command[24:28]
 
         # Find operator_id (null-terminated)
-        null_pos = authenticated_command.find(b'\x00', 28)
+        null_pos = authenticated_command.find(b"\x00", 28)
         if null_pos < 0:
             return None
 
         operator_id = authenticated_command[28:null_pos].decode()
-        command = authenticated_command[null_pos+1:-32]
+        command = authenticated_command[null_pos + 1 : -32]
         mac = authenticated_command[-32:]
 
         # Verify timestamp (stricter for SIS - 30 second window)
-        cmd_time = int.from_bytes(timestamp, 'big')
+        cmd_time = int.from_bytes(timestamp, "big")
         current_time = int(time.time() * 1000)
         if abs(current_time - cmd_time) > 30000:
             logger.warning("Command timestamp outside acceptable window")
@@ -390,20 +368,13 @@ class SISMessageAuthenticator:
 
         # Verify MAC
         auth_data = authenticated_command[:-32]
-        expected_mac = hmac.new(
-            key_set.command_key,
-            auth_data,
-            hashlib.sha256
-        ).digest()
+        expected_mac = hmac.new(key_set.command_key, auth_data, hashlib.sha256).digest()
 
         if not secrets.compare_digest(mac, expected_mac):
             logger.warning("Command MAC verification failed")
             return None
 
-        SIS_AUTH_OPS.labels(
-            sil_level=f"SIL{key_set.sil_level.value}",
-            operation="verify_command"
-        ).inc()
+        SIS_AUTH_OPS.labels(sil_level=f"SIL{key_set.sil_level.value}", operation="verify_command").inc()
 
         return command, operator_id, command_id
 
@@ -463,13 +434,13 @@ class SISAuditLogger:
 
         # Build entry data for signing
         entry_data = (
-            entry_id +
-            function_id.encode() +
-            action.value.encode() +
-            operator_id.encode() +
-            str(timestamp).encode() +
-            str(details).encode() +
-            self._chain_hash
+            entry_id
+            + function_id.encode()
+            + action.value.encode()
+            + operator_id.encode()
+            + str(timestamp).encode()
+            + str(details).encode()
+            + self._chain_hash
         )
 
         # Sign entry
@@ -490,17 +461,13 @@ class SISAuditLogger:
         )
 
         # Update chain hash
-        self._chain_hash = hashlib.sha256(
-            self._chain_hash + entry_id + signature
-        ).digest()
+        self._chain_hash = hashlib.sha256(self._chain_hash + entry_id + signature).digest()
 
         self._entries.append(entry)
 
         SIS_AUDIT_ENTRIES.labels(action=action.value).inc()
 
-        logger.debug(
-            f"Audit entry: {action.value} on {function_id} by {operator_id}"
-        )
+        logger.debug(f"Audit entry: {action.value} on {function_id} by {operator_id}")
 
         return entry
 
@@ -510,9 +477,7 @@ class SISAuditLogger:
             return hashlib.sha256(data).digest()
 
         try:
-            from ai_engine.crypto.dilithium import (
-                DilithiumEngine, DilithiumSecurityLevel, DilithiumPrivateKey
-            )
+            from ai_engine.crypto.dilithium import DilithiumEngine, DilithiumSecurityLevel, DilithiumPrivateKey
 
             engine = DilithiumEngine(DilithiumSecurityLevel.LEVEL5)
             sk = DilithiumPrivateKey(DilithiumSecurityLevel.LEVEL5, self._signing_key)
@@ -534,9 +499,7 @@ class SISAuditLogger:
 
         for i, entry in enumerate(self._entries):
             # Verify chain continuity
-            expected_chain = hashlib.sha256(
-                chain_hash + entry.entry_id + entry.signature
-            ).digest()
+            expected_chain = hashlib.sha256(chain_hash + entry.entry_id + entry.signature).digest()
 
             if i < len(self._entries) - 1:
                 # Not the last entry - verify chain continues correctly
@@ -556,11 +519,7 @@ class SISAuditLogger:
         since: Optional[float] = None,
     ) -> List[AuditLogEntry]:
         """Get audit entries for specific function."""
-        return [
-            e for e in self._entries
-            if e.function_id == function_id and
-            (since is None or e.timestamp >= since)
-        ]
+        return [e for e in self._entries if e.function_id == function_id and (since is None or e.timestamp >= since)]
 
 
 class SISSecurityManager:
@@ -626,9 +585,7 @@ class SISSecurityManager:
             raise PermissionError(f"Bypass not allowed for {function_id}")
 
         if duration_seconds > function.max_bypass_duration:
-            raise ValueError(
-                f"Requested duration exceeds maximum: {function.max_bypass_duration}s"
-            )
+            raise ValueError(f"Requested duration exceeds maximum: {function.max_bypass_duration}s")
 
         request = BypassRequest(
             request_id=secrets.token_bytes(16),
@@ -651,10 +608,7 @@ class SISSecurityManager:
             },
         )
 
-        SIS_SAFETY_EVENTS.labels(
-            event_type="bypass_request",
-            sil_level=f"SIL{function.sil_level.value}"
-        ).inc()
+        SIS_SAFETY_EVENTS.labels(event_type="bypass_request", sil_level=f"SIL{function.sil_level.value}").inc()
 
         return request
 
@@ -679,9 +633,7 @@ class SISSecurityManager:
         # Dual approval check for high SIL
         if function.requires_dual_approval or function.sil_level in (SILLevel.SIL3, SILLevel.SIL4):
             if approver_id == request.requested_by:
-                raise PermissionError(
-                    "Dual approval required: approver must differ from requester"
-                )
+                raise PermissionError("Dual approval required: approver must differ from requester")
 
         request.approved = True
         request.approved_by = approver_id
@@ -701,15 +653,9 @@ class SISSecurityManager:
             },
         )
 
-        SIS_SAFETY_EVENTS.labels(
-            event_type="bypass_approved",
-            sil_level=f"SIL{function.sil_level.value}"
-        ).inc()
+        SIS_SAFETY_EVENTS.labels(event_type="bypass_approved", sil_level=f"SIL{function.sil_level.value}").inc()
 
-        logger.warning(
-            f"Bypass approved: {request.function_id} by {approver_id} "
-            f"(requested by {request.requested_by})"
-        )
+        logger.warning(f"Bypass approved: {request.function_id} by {approver_id} " f"(requested by {request.requested_by})")
 
         return True
 

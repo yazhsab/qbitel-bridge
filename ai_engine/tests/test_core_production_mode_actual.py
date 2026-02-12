@@ -247,36 +247,26 @@ class TestProductionValidator:
             return True
 
         with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}):
-            result = validator.validate_production_environment(
-                custom_checks=[custom_check]
-            )
+            result = validator.validate_production_environment(custom_checks=[custom_check])
             # Should still be False because required env vars are missing
             assert result is False
 
-    def test_validate_production_environment_with_failing_custom_checks(
-        self, validator
-    ):
+    def test_validate_production_environment_with_failing_custom_checks(self, validator):
         """Test validating production environment with failing custom checks."""
 
         def custom_check():
             return False
 
         with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}):
-            result = validator.validate_production_environment(
-                custom_checks=[custom_check]
-            )
+            result = validator.validate_production_environment(custom_checks=[custom_check])
             assert result is False
 
-    def test_validate_production_environment_with_exception_in_custom_check(
-        self, validator
-    ):
+    def test_validate_production_environment_with_exception_in_custom_check(self, validator):
         """Test validating production environment with exception in custom check."""
 
         def custom_check():
             raise Exception("Custom check failed")
 
         with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}):
-            result = validator.validate_production_environment(
-                custom_checks=[custom_check]
-            )
+            result = validator.validate_production_environment(custom_checks=[custom_check])
             assert result is False

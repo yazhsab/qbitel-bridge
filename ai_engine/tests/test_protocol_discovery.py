@@ -178,9 +178,7 @@ class TestGrammarLearner:
         initial_grammar = await learner.learn_pcfg(sample_patterns)
 
         # Refine with EM
-        refined_grammar = await learner.refine_with_em(
-            initial_grammar, sample_patterns, max_iterations=5
-        )
+        refined_grammar = await learner.refine_with_em(initial_grammar, sample_patterns, max_iterations=5)
 
         assert isinstance(refined_grammar, Grammar)
         assert len(refined_grammar.rules) >= len(initial_grammar.rules)
@@ -429,8 +427,7 @@ class TestMessageValidator:
             ValidationRule(
                 name="content_length",
                 rule_type="custom",
-                custom_validator=lambda msg: b"Content-Length:" in msg
-                or len(msg) < 100,
+                custom_validator=lambda msg: b"Content-Length:" in msg or len(msg) < 100,
                 required=False,
             ),
         ]
@@ -532,9 +529,7 @@ class TestProtocolDiscoveryOrchestrator:
         ]
 
     @pytest.mark.asyncio
-    async def test_discover_protocol_full_pipeline(
-        self, orchestrator, sample_traffic_data
-    ):
+    async def test_discover_protocol_full_pipeline(self, orchestrator, sample_traffic_data):
         """Test full protocol discovery pipeline."""
         result = await orchestrator.discover_protocol(sample_traffic_data)
 
@@ -577,9 +572,7 @@ class TestProtocolDiscoveryOrchestrator:
 
         # Provide feedback (simulate correct classification)
         for protocol in result1.discovered_protocols:
-            await orchestrator.provide_feedback(
-                protocol.name, True, sample_traffic_data[:3]
-            )
+            await orchestrator.provide_feedback(protocol.name, True, sample_traffic_data[:3])
 
         # Second discovery should have improved confidence
         result2 = await orchestrator.discover_protocol(sample_traffic_data)
@@ -611,9 +604,7 @@ class TestErrorHandling:
         # Simulate failures
         for i in range(3):
             with pytest.raises(Exception):
-                await circuit_breaker.call(
-                    lambda: 1 / 0
-                )  # Will raise ZeroDivisionError
+                await circuit_breaker.call(lambda: 1 / 0)  # Will raise ZeroDivisionError
 
         # Should be open now
         assert circuit_breaker.state == CircuitBreakerState.OPEN
@@ -768,17 +759,13 @@ class TestIntegration:
 
         # Should identify at least HTTP and custom protocols
         protocol_names = [p.name for p in result.discovered_protocols]
-        assert any(
-            "http" in name.lower() or "web" in name.lower() for name in protocol_names
-        )
+        assert any("http" in name.lower() or "web" in name.lower() for name in protocol_names)
 
         # Test each discovered protocol's parser
         for protocol in result.discovered_protocols:
             if protocol.parser:
                 # Test parsing with relevant messages
-                relevant_messages = [
-                    msg for msg in mixed_traffic if protocol.confidence > 0.5
-                ]
+                relevant_messages = [msg for msg in mixed_traffic if protocol.confidence > 0.5]
                 if relevant_messages:
                     parse_result = await protocol.parser.parse(relevant_messages[0])
                     # Parser should at least attempt to parse
@@ -794,13 +781,9 @@ class TestIntegration:
         stress_traffic = []
         for i in range(100):
             if i % 3 == 0:
-                stress_traffic.append(
-                    f"GET /page{i} HTTP/1.1\r\nHost: test{i}.com\r\n\r\n".encode()
-                )
+                stress_traffic.append(f"GET /page{i} HTTP/1.1\r\nHost: test{i}.com\r\n\r\n".encode())
             elif i % 3 == 1:
-                stress_traffic.append(
-                    f"CMD:DATA{i}|SIZE:{len(str(i))}|PAYLOAD:test{i}".encode()
-                )
+                stress_traffic.append(f"CMD:DATA{i}|SIZE:{len(str(i))}|PAYLOAD:test{i}".encode())
             else:
                 stress_traffic.append(os.urandom(50))  # Random binary data
 
@@ -830,9 +813,7 @@ class TestIntegration:
         ]
 
         # Run concurrent discoveries
-        tasks = [
-            orchestrator.discover_protocol(traffic) for traffic in traffic_patterns
-        ]
+        tasks = [orchestrator.discover_protocol(traffic) for traffic in traffic_patterns]
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -857,9 +838,7 @@ class TestPerformance:
         test_messages = []
         for i in range(1000):
             if i % 2 == 0:
-                test_messages.append(
-                    f"GET /test{i} HTTP/1.1\r\nHost: test.com\r\n\r\n".encode()
-                )
+                test_messages.append(f"GET /test{i} HTTP/1.1\r\nHost: test.com\r\n\r\n".encode())
             else:
                 test_messages.append(f"CMD:TEST{i}|DATA:payload{i}".encode())
 
@@ -898,9 +877,7 @@ class TestPerformance:
         # Memory usage should be reasonable (< 500MB peak)
         assert peak < 500 * 1024 * 1024
 
-        print(
-            f"Memory usage - Current: {current / 1024 / 1024:.2f} MB, Peak: {peak / 1024 / 1024:.2f} MB"
-        )
+        print(f"Memory usage - Current: {current / 1024 / 1024:.2f} MB, Peak: {peak / 1024 / 1024:.2f} MB")
 
 
 # Test configuration and fixtures

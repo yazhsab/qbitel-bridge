@@ -25,26 +25,26 @@ logger = logging.getLogger(__name__)
 
 # Metrics
 COMPRESSION_RATIO = Histogram(
-    'aviation_signature_compression_ratio',
-    'Signature compression ratio achieved',
-    buckets=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    "aviation_signature_compression_ratio",
+    "Signature compression ratio achieved",
+    buckets=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
 )
 
 COMPRESSED_SIZE = Histogram(
-    'aviation_compressed_signature_bytes',
-    'Compressed signature size',
-    buckets=[50, 100, 150, 200, 300, 400, 500, 600, 800, 1000]
+    "aviation_compressed_signature_bytes",
+    "Compressed signature size",
+    buckets=[50, 100, 150, 200, 300, 400, 500, 600, 800, 1000],
 )
 
 
 class CompressionStrategy(Enum):
     """Compression strategies for different scenarios."""
 
-    NONE = auto()              # No compression (testing)
-    ZSTD_DICTIONARY = auto()   # Zstandard with trained dictionary
-    DELTA_ENCODING = auto()    # Delta from previous signature
-    AGGREGATION = auto()       # Aggregate multiple signatures
-    SELECTIVE = auto()         # Sign only critical fields
+    NONE = auto()  # No compression (testing)
+    ZSTD_DICTIONARY = auto()  # Zstandard with trained dictionary
+    DELTA_ENCODING = auto()  # Delta from previous signature
+    AGGREGATION = auto()  # Aggregate multiple signatures
+    SELECTIVE = auto()  # Sign only critical fields
 
 
 @dataclass
@@ -104,8 +104,7 @@ class DictionaryManager:
             self._dictionaries[message_type] = dictionary.as_bytes()
 
             logger.info(
-                f"Trained dictionary for {message_type}: "
-                f"{len(samples)} samples, {len(dictionary.as_bytes())} bytes"
+                f"Trained dictionary for {message_type}: " f"{len(samples)} samples, {len(dictionary.as_bytes())} bytes"
             )
 
             return dictionary.as_bytes()
@@ -210,8 +209,7 @@ class SignatureCompressor:
         COMPRESSED_SIZE.observe(result.compressed_size)
 
         logger.debug(
-            f"Compressed signature: {original_size} -> {result.compressed_size} bytes "
-            f"({result.compression_ratio:.1%})"
+            f"Compressed signature: {original_size} -> {result.compressed_size} bytes " f"({result.compression_ratio:.1%})"
         )
 
         return result
@@ -241,6 +239,7 @@ class SignatureCompressor:
             # Fall back to lz4
             try:
                 import lz4.frame
+
                 compressed = lz4.frame.compress(signature)
                 return compressed, {"fallback": "lz4"}
             except ImportError:
@@ -278,6 +277,7 @@ class SignatureCompressor:
                 # High similarity - delta is beneficial
                 try:
                     import zstandard as zstd
+
                     compressed_delta = zstd.ZstdCompressor(level=19).compress(delta)
                 except ImportError:
                     compressed_delta = delta
@@ -329,6 +329,7 @@ class SignatureCompressor:
         # Compress the combined data
         try:
             import zstandard as zstd
+
             compressed = zstd.ZstdCompressor(level=19).compress(hashes + sigs)
         except ImportError:
             compressed = hashes + sigs
@@ -364,6 +365,7 @@ class SignatureCompressor:
             except ImportError:
                 try:
                     import lz4.frame
+
                     return lz4.frame.decompress(compressed.compressed_data)
                 except ImportError:
                     return compressed.compressed_data

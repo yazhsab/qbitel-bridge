@@ -37,16 +37,10 @@ class ComplianceReportRequest(BaseModel):
     """Request model for compliance report generation."""
 
     protocol: str = Field(..., description="Protocol or system being assessed")
-    standard: str = Field(
-        ..., description="Compliance standard (GDPR, SOC2, HIPAA, PCI-DSS)"
-    )
-    evidence: Dict[str, Any] = Field(
-        default_factory=dict, description="Evidence data for assessment"
-    )
+    standard: str = Field(..., description="Compliance standard (GDPR, SOC2, HIPAA, PCI-DSS)")
+    evidence: Dict[str, Any] = Field(default_factory=dict, description="Evidence data for assessment")
     report_type: str = Field(default="detailed_technical", description="Type of report")
-    format: str = Field(
-        default="pdf", description="Output format (pdf, json, html, excel)"
-    )
+    format: str = Field(default="pdf", description="Output format (pdf, json, html, excel)")
 
 
 class ComplianceReportResponse(BaseModel):
@@ -70,12 +64,8 @@ class MonitoringConfigRequest(BaseModel):
 
     enabled: bool = True
     frequency: str = Field(default="hourly", description="Monitoring frequency")
-    frameworks: List[str] = Field(
-        default_factory=list, description="Frameworks to monitor"
-    )
-    protocols: List[str] = Field(
-        default_factory=list, description="Protocols to monitor"
-    )
+    frameworks: List[str] = Field(default_factory=list, description="Frameworks to monitor")
+    protocols: List[str] = Field(default_factory=list, description="Protocols to monitor")
     auto_remediation: bool = False
     alert_thresholds: Dict[str, float] = Field(default_factory=dict)
 
@@ -85,9 +75,7 @@ class AuditRequestModel(BaseModel):
 
     auditor: str = Field(..., description="Auditor name or ID")
     framework: str = Field(..., description="Compliance framework")
-    requirements: List[str] = Field(
-        default_factory=list, description="Specific requirements"
-    )
+    requirements: List[str] = Field(default_factory=list, description="Specific requirements")
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     evidence_types: List[str] = Field(default_factory=list)
@@ -125,9 +113,7 @@ class ComplianceAlertResponse(BaseModel):
 
 
 @router.post("/reports/generate", response_model=ComplianceReportResponse)
-async def generate_compliance_report(
-    request: ComplianceReportRequest, background_tasks: BackgroundTasks
-):
+async def generate_compliance_report(request: ComplianceReportRequest, background_tasks: BackgroundTasks):
     """
     Generate comprehensive compliance report.
 
@@ -137,9 +123,7 @@ async def generate_compliance_report(
     - Audit pass rate: 98%+
     """
     try:
-        logger.info(
-            f"Generating {request.standard} compliance report for {request.protocol}"
-        )
+        logger.info(f"Generating {request.standard} compliance report for {request.protocol}")
 
         # Get compliance reporter instance
         reporter = await get_compliance_reporter()
@@ -182,9 +166,7 @@ async def generate_compliance_report(
 
     except Exception as e:
         logger.error(f"Report generation failed: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Report generation failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
 
 
 @router.get("/reports/{report_id}/download")
@@ -204,9 +186,7 @@ async def download_compliance_report(report_id: str):
 
 
 @router.post("/monitoring/start")
-async def start_continuous_monitoring(
-    config: MonitoringConfigRequest, background_tasks: BackgroundTasks
-):
+async def start_continuous_monitoring(config: MonitoringConfigRequest, background_tasks: BackgroundTasks):
     """
     Start continuous compliance monitoring.
 
@@ -217,9 +197,7 @@ async def start_continuous_monitoring(
     - Predictive compliance issues
     """
     try:
-        logger.info(
-            f"Starting continuous monitoring for {len(config.frameworks)} frameworks"
-        )
+        logger.info(f"Starting continuous monitoring for {len(config.frameworks)} frameworks")
 
         # Get compliance reporter
         reporter = await get_compliance_reporter()
@@ -348,15 +326,9 @@ async def generate_audit_evidence(request: AuditRequestModel):
 
         # Parse dates
         start_date = (
-            datetime.fromisoformat(request.start_date)
-            if request.start_date
-            else datetime.utcnow() - timedelta(days=30)
+            datetime.fromisoformat(request.start_date) if request.start_date else datetime.utcnow() - timedelta(days=30)
         )
-        end_date = (
-            datetime.fromisoformat(request.end_date)
-            if request.end_date
-            else datetime.utcnow()
-        )
+        end_date = datetime.fromisoformat(request.end_date) if request.end_date else datetime.utcnow()
 
         # Create audit request
         audit_request = AuditRequest(

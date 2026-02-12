@@ -32,9 +32,7 @@ def _get_config_value(section, attr, default=None):
 
 
 # Prometheus metrics
-REQUEST_COUNT = Counter(
-    "http_requests_total", "Total HTTP requests", ["method", "endpoint", "status_code"]
-)
+REQUEST_COUNT = Counter("http_requests_total", "Total HTTP requests", ["method", "endpoint", "status_code"])
 
 REQUEST_DURATION = Histogram(
     "http_request_duration_seconds",
@@ -44,13 +42,9 @@ REQUEST_DURATION = Histogram(
 
 ACTIVE_CONNECTIONS = Gauge("active_connections", "Number of active connections")
 
-COPILOT_QUERIES = Counter(
-    "copilot_queries_total", "Total copilot queries", ["user_id", "query_type"]
-)
+COPILOT_QUERIES = Counter("copilot_queries_total", "Total copilot queries", ["user_id", "query_type"])
 
-LLM_REQUESTS = Counter(
-    "llm_requests_total", "Total LLM requests", ["provider", "status"]
-)
+LLM_REQUESTS = Counter("llm_requests_total", "Total LLM requests", ["provider", "status"])
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
@@ -90,9 +84,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             status_code=response.status_code,
         ).inc()
 
-        REQUEST_DURATION.labels(
-            method=request.method, endpoint=request.url.path
-        ).observe(duration)
+        REQUEST_DURATION.labels(method=request.method, endpoint=request.url.path).observe(duration)
 
         # Log response
         logger.info(
@@ -139,9 +131,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
         # HSTS (HTTP Strict Transport Security)
         if self.enable_hsts:
-            response.headers["Strict-Transport-Security"] = (
-                "max-age=31536000; includeSubDomains; preload"
-            )
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
 
         # Content Security Policy
         if self.enable_csp:
@@ -182,10 +172,7 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
 
         # Clean old entries
         cutoff_time = current_time - 60  # 1 minute ago
-        self.client_requests = {
-            ip: [t for t in times if t > cutoff_time]
-            for ip, times in self.client_requests.items()
-        }
+        self.client_requests = {ip: [t for t in times if t > cutoff_time] for ip, times in self.client_requests.items()}
 
         # Check rate limit
         client_times = self.client_requests.get(client_ip, [])
@@ -256,16 +243,12 @@ def setup_middleware(app: FastAPI, config: Config):
 
     # Security headers
     enable_hsts = _get_config_value(config.security, "tls_enabled", False)
-    app.add_middleware(
-        SecurityHeadersMiddleware, enable_hsts=enable_hsts, enable_csp=True
-    )
+    app.add_middleware(SecurityHeadersMiddleware, enable_hsts=enable_hsts, enable_csp=True)
 
     # Rate limiting - ALWAYS ENABLED for production security
     rate_limit_config = getattr(config, "rate_limiting", {})
     if isinstance(rate_limit_config, dict):
-        rate_limit_enabled = rate_limit_config.get(
-            "enabled", True
-        )  # Default to enabled
+        rate_limit_enabled = rate_limit_config.get("enabled", True)  # Default to enabled
         default_limit = rate_limit_config.get("default_limit", 100)
         per_user_limit = rate_limit_config.get("per_user_limit", 1000)
         burst_limit = rate_limit_config.get("burst_limit", 200)
@@ -309,36 +292,24 @@ def setup_middleware(app: FastAPI, config: Config):
             loop = asyncio.new_event_loop()
             try:
                 asyncio.set_event_loop(loop)
-                rate_limiter = loop.run_until_complete(
-                    get_rate_limiter(redis_url, rl_config)
-                )
+                rate_limiter = loop.run_until_complete(get_rate_limiter(redis_url, rl_config))
             finally:
                 asyncio.set_event_loop(None)
                 loop.close()
 
-            app.add_middleware(
-                AdvancedRateLimitMiddleware, rate_limiter=rate_limiter, config=rl_config
-            )
-            logger.info(
-                f"✅ Advanced Redis-backed rate limiting enabled (limit: {default_limit}/min, burst: {burst_limit})"
-            )
+            app.add_middleware(AdvancedRateLimitMiddleware, rate_limiter=rate_limiter, config=rl_config)
+            logger.info(f"✅ Advanced Redis-backed rate limiting enabled (limit: {default_limit}/min, burst: {burst_limit})")
         except Exception as e:
-            logger.warning(
-                f"Failed to setup advanced rate limiting: {e}, falling back to simple rate limiting"
-            )
+            logger.warning(f"Failed to setup advanced rate limiting: {e}, falling back to simple rate limiting")
             # Fall back to simple in-memory rate limiting
             app.add_middleware(
                 RateLimitingMiddleware,
                 requests_per_minute=default_limit,
             )
-            logger.info(
-                f"⚠️  Simple in-memory rate limiting enabled (limit: {default_limit}/min)"
-            )
+            logger.info(f"⚠️  Simple in-memory rate limiting enabled (limit: {default_limit}/min)")
     else:
         # Even if disabled in config, use basic rate limiting for security
-        logger.warning(
-            "⚠️  Rate limiting disabled in config - using conservative defaults for security"
-        )
+        logger.warning("⚠️  Rate limiting disabled in config - using conservative defaults for security")
         app.add_middleware(
             RateLimitingMiddleware,
             requests_per_minute=60,  # Conservative default
@@ -349,9 +320,7 @@ def setup_middleware(app: FastAPI, config: Config):
 
     # Trusted hosts
     if _get_config_value(config.security, "trusted_hosts"):
-        app.add_middleware(
-            TrustedHostMiddleware, allowed_hosts=config.security.trusted_hosts
-        )
+        app.add_middleware(TrustedHostMiddleware, allowed_hosts=config.security.trusted_hosts)
 
     # CORS (if configured)
     cors_config = config.__dict__.get("cors", {})

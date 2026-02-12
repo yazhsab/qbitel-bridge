@@ -212,8 +212,7 @@ class TimescaleDBIntegration:
                 await conn.execute("CREATE EXTENSION IF NOT EXISTS timescaledb")
 
                 # Create metrics table
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE TABLE IF NOT EXISTS metrics (
                         timestamp TIMESTAMPTZ NOT NULL,
                         metric_name VARCHAR(255) NOT NULL,
@@ -223,12 +222,10 @@ class TimescaleDBIntegration:
                         metadata JSONB,
                         PRIMARY KEY (timestamp, metric_name, source_component)
                     )
-                """
-                )
+                """)
 
                 # Create logs table
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE TABLE IF NOT EXISTS logs (
                         timestamp TIMESTAMPTZ NOT NULL,
                         level VARCHAR(20) NOT NULL,
@@ -238,12 +235,10 @@ class TimescaleDBIntegration:
                         metadata JSONB,
                         PRIMARY KEY (timestamp, component)
                     )
-                """
-                )
+                """)
 
                 # Create security events table
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE TABLE IF NOT EXISTS security_events (
                         timestamp TIMESTAMPTZ NOT NULL,
                         event_type VARCHAR(100) NOT NULL,
@@ -255,12 +250,10 @@ class TimescaleDBIntegration:
                         correlation_id VARCHAR(50),
                         PRIMARY KEY (timestamp, source_ip, dest_ip)
                     )
-                """
-                )
+                """)
 
                 # Create protocol analysis table
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE TABLE IF NOT EXISTS protocol_analysis (
                         timestamp TIMESTAMPTZ NOT NULL,
                         session_id VARCHAR(100) NOT NULL,
@@ -271,8 +264,7 @@ class TimescaleDBIntegration:
                         correlation_id VARCHAR(50),
                         PRIMARY KEY (timestamp, session_id)
                     )
-                """
-                )
+                """)
 
                 logger.info("Database schema initialized")
 
@@ -298,15 +290,13 @@ class TimescaleDBIntegration:
 
                     if not exists:
                         # Create hypertable
-                        await conn.execute(
-                            f"""
+                        await conn.execute(f"""
                             SELECT create_hypertable(
                                 '{table_name}', 
                                 '{config["time_column"]}',
                                 chunk_time_interval => INTERVAL '{config["chunk_time_interval"]}'
                             )
-                        """
-                        )
+                        """)
                         logger.info(f"Created hypertable: {table_name}")
 
                     # Enable compression if not already enabled
@@ -321,24 +311,20 @@ class TimescaleDBIntegration:
                     )
 
                     if not compression_enabled:
-                        await conn.execute(
-                            f"""
+                        await conn.execute(f"""
                             ALTER TABLE {table_name} SET (
                                 timescaledb.compress,
                                 timescaledb.compress_segmentby = 'source_component'
                             )
-                        """
-                        )
+                        """)
 
                         # Add compression policy
-                        await conn.execute(
-                            f"""
+                        await conn.execute(f"""
                             SELECT add_compression_policy(
                                 '{table_name}', 
                                 INTERVAL '{config["compression_after"]}'
                             )
-                        """
-                        )
+                        """)
                         logger.info(f"Enabled compression for: {table_name}")
 
         except Exception as e:
@@ -350,78 +336,58 @@ class TimescaleDBIntegration:
         try:
             async with self.pool.acquire() as conn:
                 # Metrics indexes
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE INDEX IF NOT EXISTS idx_metrics_metric_name_time 
                     ON metrics (metric_name, timestamp DESC)
-                """
-                )
+                """)
 
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE INDEX IF NOT EXISTS idx_metrics_labels 
                     ON metrics USING GIN (labels)
-                """
-                )
+                """)
 
                 # Logs indexes
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE INDEX IF NOT EXISTS idx_logs_component_time 
                     ON logs (component, timestamp DESC)
-                """
-                )
+                """)
 
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE INDEX IF NOT EXISTS idx_logs_level 
                     ON logs (level, timestamp DESC)
-                """
-                )
+                """)
 
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE INDEX IF NOT EXISTS idx_logs_correlation_id 
                     ON logs (correlation_id) WHERE correlation_id IS NOT NULL
-                """
-                )
+                """)
 
                 # Security events indexes
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE INDEX IF NOT EXISTS idx_security_events_type_time 
                     ON security_events (event_type, timestamp DESC)
-                """
-                )
+                """)
 
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE INDEX IF NOT EXISTS idx_security_events_severity 
                     ON security_events (severity, timestamp DESC)
-                """
-                )
+                """)
 
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE INDEX IF NOT EXISTS idx_security_events_source_ip 
                     ON security_events (source_ip, timestamp DESC)
-                """
-                )
+                """)
 
                 # Protocol analysis indexes
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE INDEX IF NOT EXISTS idx_protocol_analysis_protocol 
                     ON protocol_analysis (protocol, timestamp DESC)
-                """
-                )
+                """)
 
-                await conn.execute(
-                    """
+                await conn.execute("""
                     CREATE INDEX IF NOT EXISTS idx_protocol_analysis_session 
                     ON protocol_analysis (session_id, timestamp DESC)
-                """
-                )
+                """)
 
                 logger.info("Database indexes created")
 
@@ -447,17 +413,13 @@ class TimescaleDBIntegration:
                     )
 
                     if not policy_exists:
-                        await conn.execute(
-                            f"""
+                        await conn.execute(f"""
                             SELECT add_retention_policy(
                                 '{table_name}', 
                                 INTERVAL '{config["retention_policy"]}'
                             )
-                        """
-                        )
-                        logger.info(
-                            f"Added retention policy for {table_name}: {config['retention_policy']}"
-                        )
+                        """)
+                        logger.info(f"Added retention policy for {table_name}: {config['retention_policy']}")
 
         except Exception as e:
             logger.error(f"Failed to setup retention policies: {e}")
@@ -881,9 +843,7 @@ class TimescaleDBIntegration:
             logger.error(f"Error querying security events: {e}")
             return []
 
-    async def get_protocol_analysis_stats(
-        self, start_time: datetime, end_time: datetime
-    ) -> Dict[str, Any]:
+    async def get_protocol_analysis_stats(self, start_time: datetime, end_time: datetime) -> Dict[str, Any]:
         """Get protocol analysis statistics"""
         try:
             async with self.pool.acquire() as conn:
@@ -979,16 +939,12 @@ class TimescaleDBIntegration:
                         "logs": logs_count,
                         "security_events": security_count,
                         "protocol_analysis": protocol_count,
-                        "total": metrics_count
-                        + logs_count
-                        + security_count
-                        + protocol_count,
+                        "total": metrics_count + logs_count + security_count + protocol_count,
                     },
                     "integration_stats": {
                         "records_inserted": self.records_inserted,
                         "query_count": self.query_count,
-                        "error_rate": self.insert_errors
-                        / max(self.batch_insert_count, 1),
+                        "error_rate": self.insert_errors / max(self.batch_insert_count, 1),
                     },
                 }
 

@@ -75,6 +75,7 @@ CACHE_COST_SAVINGS = Counter(
 # Data Classes
 # =============================================================================
 
+
 @dataclass
 class CacheConfig:
     """Configuration for semantic cache."""
@@ -93,23 +94,27 @@ class CacheConfig:
     redis_prefix: str = "qbitel:ai_gateway:cache:"
 
     # Domain-specific TTLs
-    domain_ttls: Dict[str, int] = field(default_factory=lambda: {
-        "protocol_copilot": 7200,      # 2 hours - stable knowledge
-        "security_orchestrator": 1800,  # 30 min - security changes faster
-        "legacy_whisperer": 86400,      # 24 hours - legacy rarely changes
-        "compliance_reporter": 3600,    # 1 hour
-        "translation_studio": 7200,     # 2 hours
-    })
+    domain_ttls: Dict[str, int] = field(
+        default_factory=lambda: {
+            "protocol_copilot": 7200,  # 2 hours - stable knowledge
+            "security_orchestrator": 1800,  # 30 min - security changes faster
+            "legacy_whisperer": 86400,  # 24 hours - legacy rarely changes
+            "compliance_reporter": 3600,  # 1 hour
+            "translation_studio": 7200,  # 2 hours
+        }
+    )
 
     # Cost estimation (per 1K tokens)
-    cost_per_1k_tokens: Dict[str, float] = field(default_factory=lambda: {
-        "gpt-4o": 0.005,
-        "gpt-4o-mini": 0.00015,
-        "claude-sonnet-4-5": 0.003,
-        "claude-opus-4-5": 0.015,
-        "claude-3-5-haiku": 0.00025,
-        "llama3.2": 0.0,  # Local
-    })
+    cost_per_1k_tokens: Dict[str, float] = field(
+        default_factory=lambda: {
+            "gpt-4o": 0.005,
+            "gpt-4o-mini": 0.00015,
+            "claude-sonnet-4-5": 0.003,
+            "claude-opus-4-5": 0.015,
+            "claude-3-5-haiku": 0.00025,
+            "llama3.2": 0.0,  # Local
+        }
+    )
 
 
 @dataclass
@@ -177,6 +182,7 @@ class CacheStats:
 # Embedding Manager
 # =============================================================================
 
+
 class EmbeddingManager:
     """Manages embeddings for semantic similarity."""
 
@@ -198,9 +204,7 @@ class EmbeddingManager:
                 try:
                     # Load in thread pool to avoid blocking
                     loop = asyncio.get_event_loop()
-                    self._model = await loop.run_in_executor(
-                        None, SentenceTransformer, self.model_name
-                    )
+                    self._model = await loop.run_in_executor(None, SentenceTransformer, self.model_name)
                     logger.info(f"Loaded embedding model: {self.model_name}")
                 except Exception as e:
                     logger.warning(f"Failed to load embedding model: {e}")
@@ -214,9 +218,7 @@ class EmbeddingManager:
 
         if self._model is not None:
             loop = asyncio.get_event_loop()
-            embedding = await loop.run_in_executor(
-                None, lambda: self._model.encode(text, normalize_embeddings=True)
-            )
+            embedding = await loop.run_in_executor(None, lambda: self._model.encode(text, normalize_embeddings=True))
             return embedding.tolist()
         else:
             # Fallback: Use hash-based pseudo-embedding
@@ -228,9 +230,7 @@ class EmbeddingManager:
 
         if self._model is not None:
             loop = asyncio.get_event_loop()
-            embeddings = await loop.run_in_executor(
-                None, lambda: self._model.encode(texts, normalize_embeddings=True)
-            )
+            embeddings = await loop.run_in_executor(None, lambda: self._model.encode(texts, normalize_embeddings=True))
             return embeddings.tolist()
         else:
             return [self._hash_embedding(t) for t in texts]
@@ -259,6 +259,7 @@ class EmbeddingManager:
 # =============================================================================
 # Semantic Cache
 # =============================================================================
+
 
 class SemanticCache:
     """
@@ -344,9 +345,7 @@ class SemanticCache:
             query_embedding = await self.embedding_manager.embed(prompt)
 
             # Search memory cache first
-            best_match = await self._search_memory_cache(
-                query_embedding, domain, system_prompt
-            )
+            best_match = await self._search_memory_cache(query_embedding, domain, system_prompt)
 
             if best_match:
                 CACHE_HITS.labels(domain=domain, cache_type="memory").inc()
@@ -355,9 +354,7 @@ class SemanticCache:
 
             # Search Redis cache if available
             if self._redis:
-                redis_match = await self._search_redis_cache(
-                    query_embedding, domain, system_prompt
-                )
+                redis_match = await self._search_redis_cache(query_embedding, domain, system_prompt)
                 if redis_match:
                     # Promote to memory cache
                     await self._add_to_memory_cache(redis_match)
@@ -450,10 +447,7 @@ class SemanticCache:
                 del self._memory_cache[key]
 
             # Remove from embeddings list
-            self._memory_embeddings = [
-                (k, e) for k, e in self._memory_embeddings
-                if k not in keys_to_remove
-            ]
+            self._memory_embeddings = [(k, e) for k, e in self._memory_embeddings if k not in keys_to_remove]
 
             # Invalidate in Redis
             if self._redis and domain:
@@ -466,9 +460,7 @@ class SemanticCache:
     def get_stats(self) -> CacheStats:
         """Get cache statistics."""
         total_requests = self._stats.total_hits + self._stats.total_misses
-        self._stats.hit_rate = (
-            self._stats.total_hits / total_requests if total_requests > 0 else 0.0
-        )
+        self._stats.hit_rate = self._stats.total_hits / total_requests if total_requests > 0 else 0.0
         self._stats.memory_entries = len(self._memory_cache)
         self._stats.total_entries = self._stats.memory_entries + self._stats.redis_entries
 
@@ -476,9 +468,7 @@ class SemanticCache:
         self._stats.entries_by_domain = {}
         for entry in self._memory_cache.values():
             domain = entry.domain
-            self._stats.entries_by_domain[domain] = (
-                self._stats.entries_by_domain.get(domain, 0) + 1
-            )
+            self._stats.entries_by_domain[domain] = self._stats.entries_by_domain.get(domain, 0) + 1
 
         return self._stats
 
@@ -511,9 +501,7 @@ class SemanticCache:
                     continue
 
                 # Calculate similarity
-                similarity = self.embedding_manager.cosine_similarity(
-                    query_embedding, entry_embedding
-                )
+                similarity = self.embedding_manager.cosine_similarity(query_embedding, entry_embedding)
 
                 if similarity > best_similarity:
                     best_similarity = similarity
@@ -530,8 +518,7 @@ class SemanticCache:
             self._stats.total_cost_savings += best_entry.estimated_cost
 
             logger.debug(
-                f"Cache hit: similarity={best_similarity:.3f}, "
-                f"domain={domain}, savings=${best_entry.estimated_cost:.4f}"
+                f"Cache hit: similarity={best_similarity:.3f}, " f"domain={domain}, savings=${best_entry.estimated_cost:.4f}"
             )
 
             return best_entry
@@ -567,9 +554,7 @@ class SemanticCache:
                     continue
 
                 # Calculate similarity
-                similarity = self.embedding_manager.cosine_similarity(
-                    query_embedding, entry.embedding
-                )
+                similarity = self.embedding_manager.cosine_similarity(query_embedding, entry.embedding)
 
                 if similarity > best_similarity:
                     best_similarity = similarity
@@ -597,10 +582,7 @@ class SemanticCache:
             # Check if we need to evict
             if len(self._memory_cache) >= self.config.max_memory_entries:
                 # Remove oldest/least used entries
-                sorted_entries = sorted(
-                    self._memory_cache.items(),
-                    key=lambda x: (x[1].hit_count, x[1].last_hit_at or 0)
-                )
+                sorted_entries = sorted(self._memory_cache.items(), key=lambda x: (x[1].hit_count, x[1].last_hit_at or 0))
                 # Remove 10% of entries
                 to_remove = max(1, len(sorted_entries) // 10)
                 for key, _ in sorted_entries[:to_remove]:
@@ -608,10 +590,7 @@ class SemanticCache:
 
                 # Update embeddings list
                 remaining_keys = set(self._memory_cache.keys())
-                self._memory_embeddings = [
-                    (k, e) for k, e in self._memory_embeddings
-                    if k in remaining_keys
-                ]
+                self._memory_embeddings = [(k, e) for k, e in self._memory_embeddings if k in remaining_keys]
 
             # Add new entry
             self._memory_cache[entry.cache_key] = entry
@@ -647,18 +626,12 @@ class SemanticCache:
     async def _cleanup_expired(self):
         """Remove expired entries from memory cache."""
         async with self._lock:
-            expired_keys = [
-                key for key, entry in self._memory_cache.items()
-                if entry.is_expired()
-            ]
+            expired_keys = [key for key, entry in self._memory_cache.items() if entry.is_expired()]
 
             for key in expired_keys:
                 del self._memory_cache[key]
 
-            self._memory_embeddings = [
-                (k, e) for k, e in self._memory_embeddings
-                if k not in expired_keys
-            ]
+            self._memory_embeddings = [(k, e) for k, e in self._memory_embeddings if k not in expired_keys]
 
             if expired_keys:
                 logger.debug(f"Cleaned up {len(expired_keys)} expired cache entries")

@@ -199,9 +199,7 @@ class DataFlowAnalyzer:
         else:
             return ModernizationRisk.LOW
 
-    def select_best_approach(
-        self, approaches: List[Dict[str, Any]], risks: List[Dict[str, Any]]
-    ) -> Optional[str]:
+    def select_best_approach(self, approaches: List[Dict[str, Any]], risks: List[Dict[str, Any]]) -> Optional[str]:
         """
         Select the best modernization approach based on analysis.
 

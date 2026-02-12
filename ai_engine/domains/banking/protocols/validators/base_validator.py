@@ -242,9 +242,9 @@ def validate_routing_number(routing_number: str) -> Optional[str]:
     # ABA checksum: 3(d1 + d4 + d7) + 7(d2 + d5 + d8) + 1(d3 + d6 + d9) mod 10 = 0
     digits = [int(d) for d in routing_number]
     checksum = (
-        3 * (digits[0] + digits[3] + digits[6]) +
-        7 * (digits[1] + digits[4] + digits[7]) +
-        1 * (digits[2] + digits[5] + digits[8])
+        3 * (digits[0] + digits[3] + digits[6])
+        + 7 * (digits[1] + digits[4] + digits[7])
+        + 1 * (digits[2] + digits[5] + digits[8])
     )
 
     if checksum % 10 != 0:
@@ -285,7 +285,7 @@ def validate_iban(iban: str) -> Optional[str]:
         if char.isdigit():
             numeric += char
         else:
-            numeric += str(ord(char) - ord('A') + 10)
+            numeric += str(ord(char) - ord("A") + 10)
 
     # Check if mod 97 = 1
     if int(numeric) % 97 != 1:
@@ -346,10 +346,38 @@ def validate_currency_code(currency: str) -> Optional[str]:
 
     # Common valid currency codes (not exhaustive)
     valid_currencies = {
-        "USD", "EUR", "GBP", "JPY", "CHF", "CAD", "AUD", "NZD",
-        "CNY", "HKD", "SGD", "INR", "KRW", "MXN", "BRL", "RUB",
-        "ZAR", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "TRY",
-        "THB", "MYR", "PHP", "IDR", "TWD", "AED", "SAR", "ILS",
+        "USD",
+        "EUR",
+        "GBP",
+        "JPY",
+        "CHF",
+        "CAD",
+        "AUD",
+        "NZD",
+        "CNY",
+        "HKD",
+        "SGD",
+        "INR",
+        "KRW",
+        "MXN",
+        "BRL",
+        "RUB",
+        "ZAR",
+        "SEK",
+        "NOK",
+        "DKK",
+        "PLN",
+        "CZK",
+        "HUF",
+        "TRY",
+        "THB",
+        "MYR",
+        "PHP",
+        "IDR",
+        "TWD",
+        "AED",
+        "SAR",
+        "ILS",
     }
 
     # Allow any 3-letter code but warn if not in common list

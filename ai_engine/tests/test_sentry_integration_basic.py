@@ -24,9 +24,7 @@ class TestSentryErrorTracker:
 
     def test_initialization_with_dsn(self):
         """Test initialization with DSN."""
-        tracker = SentryErrorTracker(
-            dsn="https://test@sentry.io/123", environment="test", release="1.0.0"
-        )
+        tracker = SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", release="1.0.0")
 
         assert tracker.dsn == "https://test@sentry.io/123"
         assert tracker.environment == "test"
@@ -60,9 +58,7 @@ class TestSentryErrorTracker:
     def test_initialize_success(self):
         """Test successful initialization."""
         with patch("ai_engine.core.sentry_integration.sentry_sdk") as mock_sdk:
-            tracker = SentryErrorTracker(
-                dsn="https://test@sentry.io/123", environment="test", release="1.0.0"
-            )
+            tracker = SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", release="1.0.0")
 
             result = tracker.initialize()
 
@@ -85,9 +81,7 @@ class TestSentryErrorTracker:
             "ai_engine.core.sentry_integration.sentry_sdk.init",
             side_effect=Exception("Init failed"),
         ):
-            tracker = SentryErrorTracker(
-                dsn="https://test@sentry.io/123", environment="test", release="1.0.0"
-            )
+            tracker = SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", release="1.0.0")
 
             result = tracker.initialize()
 
@@ -106,9 +100,7 @@ class TestSentryErrorTracker:
     def test_capture_exception_initialized(self):
         """Test capturing exceptions when initialized."""
         with patch("ai_engine.core.sentry_integration.sentry_sdk") as mock_sdk:
-            tracker = SentryErrorTracker(
-                dsn="https://test@sentry.io/123", environment="test", release="1.0.0"
-            )
+            tracker = SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", release="1.0.0")
             tracker.initialized = True
 
             exception = ValueError("Test error")
@@ -120,9 +112,7 @@ class TestSentryErrorTracker:
     def test_capture_exception_with_context(self):
         """Test capturing exceptions with context."""
         with patch("ai_engine.core.sentry_integration.sentry_sdk") as mock_sdk:
-            tracker = SentryErrorTracker(
-                dsn="https://test@sentry.io/123", environment="test", release="1.0.0"
-            )
+            tracker = SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", release="1.0.0")
             tracker.initialized = True
 
             exception = ValueError("Test error")
@@ -144,16 +134,12 @@ class TestSentryErrorTracker:
     def test_add_breadcrumb_initialized(self):
         """Test adding breadcrumbs when initialized."""
         with patch("ai_engine.core.sentry_integration.sentry_sdk") as mock_sdk:
-            tracker = SentryErrorTracker(
-                dsn="https://test@sentry.io/123", environment="test", release="1.0.0"
-            )
+            tracker = SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", release="1.0.0")
             tracker.initialized = True
 
             tracker.add_breadcrumb("Test breadcrumb", category="test")
 
-            mock_sdk.add_breadcrumb.assert_called_once_with(
-                message="Test breadcrumb", category="test", level="info", data={}
-            )
+            mock_sdk.add_breadcrumb.assert_called_once_with(message="Test breadcrumb", category="test", level="info", data={})
 
     def test_set_user_not_initialized(self):
         """Test setting user when not initialized."""
@@ -165,16 +151,12 @@ class TestSentryErrorTracker:
     def test_set_user_initialized(self):
         """Test setting user when initialized."""
         with patch("ai_engine.core.sentry_integration.sentry_sdk") as mock_sdk:
-            tracker = SentryErrorTracker(
-                dsn="https://test@sentry.io/123", environment="test", release="1.0.0"
-            )
+            tracker = SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", release="1.0.0")
             tracker.initialized = True
 
             tracker.set_user(user_id="123", username="testuser")
 
-            mock_sdk.set_user.assert_called_once_with(
-                {"id": "123", "username": "testuser", "email": None, "ip_address": None}
-            )
+            mock_sdk.set_user.assert_called_once_with({"id": "123", "username": "testuser", "email": None, "ip_address": None})
 
     def test_set_tag_not_initialized(self):
         """Test setting tag when not initialized."""
@@ -186,9 +168,7 @@ class TestSentryErrorTracker:
     def test_set_tag_initialized(self):
         """Test setting tag when initialized."""
         with patch("ai_engine.core.sentry_integration.sentry_sdk") as mock_sdk:
-            tracker = SentryErrorTracker(
-                dsn="https://test@sentry.io/123", environment="test", release="1.0.0"
-            )
+            tracker = SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", release="1.0.0")
             tracker.initialized = True
 
             tracker.set_tag("test_tag", "test_value")
@@ -205,9 +185,7 @@ class TestSentryErrorTracker:
     def test_set_context_initialized(self):
         """Test setting context when initialized."""
         with patch("ai_engine.core.sentry_integration.sentry_sdk") as mock_sdk:
-            tracker = SentryErrorTracker(
-                dsn="https://test@sentry.io/123", environment="test", release="1.0.0"
-            )
+            tracker = SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", release="1.0.0")
             tracker.initialized = True
 
             context = {"test": "value"}
@@ -225,9 +203,7 @@ class TestSentryErrorTracker:
     def test_flush_initialized(self):
         """Test flushing when initialized."""
         with patch("ai_engine.core.sentry_integration.sentry_sdk") as mock_sdk:
-            tracker = SentryErrorTracker(
-                dsn="https://test@sentry.io/123", environment="test", release="1.0.0"
-            )
+            tracker = SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", release="1.0.0")
             tracker.initialized = True
 
             tracker.flush(timeout=5.0)
@@ -244,9 +220,7 @@ class TestSentryErrorTracker:
     def test_close_initialized(self):
         """Test closing when initialized."""
         with patch("ai_engine.core.sentry_integration.sentry_sdk") as mock_sdk:
-            tracker = SentryErrorTracker(
-                dsn="https://test@sentry.io/123", environment="test", release="1.0.0"
-            )
+            tracker = SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", release="1.0.0")
             tracker.initialized = True
 
             tracker.close()
@@ -280,9 +254,7 @@ class TestSentryErrorTracker:
 
     def test_custom_configuration(self):
         """Test custom configuration values."""
-        tracker = SentryErrorTracker(
-            traces_sample_rate=0.5, profiles_sample_rate=0.2, enable_tracing=False
-        )
+        tracker = SentryErrorTracker(traces_sample_rate=0.5, profiles_sample_rate=0.2, enable_tracing=False)
 
         assert tracker.traces_sample_rate == 0.5
         assert tracker.profiles_sample_rate == 0.2
@@ -304,9 +276,7 @@ class TestGetSentryTracker:
         """Test that get_sentry_tracker returns existing instance."""
         existing_tracker = SentryErrorTracker()
 
-        with patch(
-            "ai_engine.core.sentry_integration._sentry_tracker", existing_tracker
-        ):
+        with patch("ai_engine.core.sentry_integration._sentry_tracker", existing_tracker):
             tracker = get_sentry_tracker()
 
             assert tracker is existing_tracker
@@ -317,9 +287,7 @@ class TestInitializeSentry:
 
     def test_initialize_sentry(self):
         """Test initialize_sentry function."""
-        with patch(
-            "ai_engine.core.sentry_integration.get_sentry_tracker"
-        ) as mock_get_tracker:
+        with patch("ai_engine.core.sentry_integration.get_sentry_tracker") as mock_get_tracker:
             mock_tracker = Mock()
             mock_tracker.initialized = True
             mock_get_tracker.return_value = mock_tracker

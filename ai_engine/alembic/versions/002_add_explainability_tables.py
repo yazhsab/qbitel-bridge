@@ -70,9 +70,7 @@ def upgrade():
         # Metadata
         sa.Column("metadata", postgresql.JSONB),
         # Constraints
-        sa.CheckConstraint(
-            "confidence_score >= 0 AND confidence_score <= 1", name="valid_confidence"
-        ),
+        sa.CheckConstraint("confidence_score >= 0 AND confidence_score <= 1", name="valid_confidence"),
     )
 
     # Create indexes for ai_decision_audit
@@ -82,13 +80,9 @@ def upgrade():
     op.create_index("idx_model_name", "ai_decision_audit", ["model_name"])
     op.create_index("idx_explanation_id", "ai_decision_audit", ["explanation_id"])
     op.create_index("idx_user_id", "ai_decision_audit", ["user_id"])
-    op.create_index(
-        "idx_compliance_framework", "ai_decision_audit", ["compliance_framework"]
-    )
+    op.create_index("idx_compliance_framework", "ai_decision_audit", ["compliance_framework"])
     op.create_index("idx_human_reviewed", "ai_decision_audit", ["human_reviewed"])
-    op.create_index(
-        "idx_model_timestamp", "ai_decision_audit", ["model_name", "timestamp"]
-    )
+    op.create_index("idx_model_timestamp", "ai_decision_audit", ["model_name", "timestamp"])
     op.create_index(
         "idx_compliance_timestamp",
         "ai_decision_audit",
@@ -99,9 +93,7 @@ def upgrade():
         "ai_decision_audit",
         ["human_reviewed", "timestamp"],
     )
-    op.create_index(
-        "idx_confidence_range", "ai_decision_audit", ["confidence_score", "timestamp"]
-    )
+    op.create_index("idx_confidence_range", "ai_decision_audit", ["confidence_score", "timestamp"])
 
     # Create model_drift_metrics table
     op.create_table(

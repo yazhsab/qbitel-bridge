@@ -16,7 +16,6 @@ from typing import Any, Callable, Dict, List, Optional
 import uuid
 import threading
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -346,10 +345,7 @@ class KeyLifecycleManager:
     ) -> List[KeyMetadata]:
         """Get keys expiring within specified days."""
         cutoff = datetime.utcnow() + timedelta(days=days)
-        return [
-            k for k in self._keys.values()
-            if k.expires_at and k.expires_at < cutoff and k.state == KeyState.ACTIVE
-        ]
+        return [k for k in self._keys.values() if k.expires_at and k.expires_at < cutoff and k.state == KeyState.ACTIVE]
 
     def start_rotation_scheduler(self, check_interval_seconds: int = 3600) -> None:
         """Start background rotation scheduler."""
@@ -459,9 +455,6 @@ class KeyLifecycleManager:
         events = self._rotation_events
 
         if key_id:
-            events = [
-                e for e in events
-                if e.old_key_id == key_id or e.new_key_id == key_id
-            ]
+            events = [e for e in events if e.old_key_id == key_id or e.new_key_id == key_id]
 
         return events[-limit:]

@@ -34,18 +34,11 @@ class DilithiumSigner:
         self.key_size = key_size
 
         # Map security levels to implementations
-        self._dilithium_implementations = {
-            2: Dilithium2,
-            3: Dilithium3,
-            5: Dilithium5
-        }
+        self._dilithium_implementations = {2: Dilithium2, 3: Dilithium3, 5: Dilithium5}
 
         self._dilithium = self._dilithium_implementations.get(key_size, Dilithium5)
 
-        logger.info(
-            f"Initialized DilithiumSigner with real Dilithium-{key_size} "
-            f"post-quantum cryptography"
-        )
+        logger.info(f"Initialized DilithiumSigner with real Dilithium-{key_size} " f"post-quantum cryptography")
 
     def generate_keypair(self) -> Dict[str, str]:
         """
@@ -60,26 +53,17 @@ class DilithiumSigner:
         public_key, private_key = self._dilithium.keygen()
 
         logger.info(
-            f"Generated Dilithium-{self.key_size} keypair: "
-            f"pk={len(public_key)} bytes, sk={len(private_key)} bytes"
+            f"Generated Dilithium-{self.key_size} keypair: " f"pk={len(public_key)} bytes, sk={len(private_key)} bytes"
         )
 
         return {
             "private_key": base64.b64encode(private_key).decode(),
             "public_key": base64.b64encode(public_key).decode(),
             "algorithm": f"dilithium-{self.key_size}",
-            "key_sizes": {
-                "public_key_bytes": len(public_key),
-                "private_key_bytes": len(private_key)
-            }
+            "key_sizes": {"public_key_bytes": len(public_key), "private_key_bytes": len(private_key)},
         }
 
-    def sign_image(
-        self,
-        image_digest: str,
-        private_key: str,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    def sign_image(self, image_digest: str, private_key: str, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Sign a container image using real Dilithium post-quantum signatures.
 
@@ -97,11 +81,11 @@ class DilithiumSigner:
             "image_digest": image_digest,
             "timestamp": timestamp,
             "metadata": metadata or {},
-            "algorithm": f"dilithium-{self.key_size}"
+            "algorithm": f"dilithium-{self.key_size}",
         }
 
         # Serialize payload for signing
-        payload_bytes = json.dumps(payload, sort_keys=True).encode('utf-8')
+        payload_bytes = json.dumps(payload, sort_keys=True).encode("utf-8")
 
         # Decode the private key
         private_key_bytes = base64.b64decode(private_key)
@@ -118,15 +102,11 @@ class DilithiumSigner:
             "signature": base64.b64encode(signature).decode(),
             "algorithm": f"dilithium-{self.key_size}",
             "payload": payload,
-            "signature_size_bytes": len(signature)
+            "signature_size_bytes": len(signature),
         }
 
     def verify_signature(
-        self,
-        image_digest: str,
-        signature: str,
-        public_key: str,
-        payload: Optional[Dict[str, Any]] = None
+        self, image_digest: str, signature: str, public_key: str, payload: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
         Verify image signature using real Dilithium post-quantum verification.
@@ -151,7 +131,7 @@ class DilithiumSigner:
                 return False
 
             # Serialize the payload exactly as it was when signed
-            payload_bytes = json.dumps(payload, sort_keys=True).encode('utf-8')
+            payload_bytes = json.dumps(payload, sort_keys=True).encode("utf-8")
 
             # Decode signature and public key
             signature_bytes = base64.b64decode(signature)
@@ -160,9 +140,7 @@ class DilithiumSigner:
             # Verify with real Dilithium implementation
             is_valid = self._dilithium.verify(public_key_bytes, payload_bytes, signature_bytes)
 
-            logger.info(
-                f"Signature verification result for {image_digest[:16]}...: {is_valid}"
-            )
+            logger.info(f"Signature verification result for {image_digest[:16]}...: {is_valid}")
 
             return is_valid
 

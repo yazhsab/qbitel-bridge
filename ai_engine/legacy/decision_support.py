@@ -414,14 +414,10 @@ class RecommendationEngine:
             # Generate LLM-powered recommendations
             llm_recommendations = {}
             if self.llm_service:
-                llm_recommendations = await self._generate_llm_recommendations(
-                    decision_context, analysis_context
-                )
+                llm_recommendations = await self._generate_llm_recommendations(decision_context, analysis_context)
 
             # Apply rule-based logic for specific scenarios
-            rule_based_recommendations = self._apply_rule_based_recommendations(
-                decision_context, analysis_context
-            )
+            rule_based_recommendations = self._apply_rule_based_recommendations(decision_context, analysis_context)
 
             # Combine and prioritize recommendations
             combined_recommendations = self._combine_recommendations(
@@ -434,19 +430,13 @@ class RecommendationEngine:
             )
 
             # Create implementation roadmap
-            roadmap = self._create_implementation_roadmap(
-                action_recommendations, decision_context
-            )
+            roadmap = self._create_implementation_roadmap(action_recommendations, decision_context)
 
             # Calculate costs and timeline
-            total_cost, timeline = self._calculate_implementation_metrics(
-                action_recommendations, roadmap
-            )
+            total_cost, timeline = self._calculate_implementation_metrics(action_recommendations, roadmap)
 
             # Generate alternatives
-            alternatives = await self._generate_alternatives(
-                decision_context, analysis_context, action_recommendations
-            )
+            alternatives = await self._generate_alternatives(decision_context, analysis_context, action_recommendations)
 
             # Create decision recommendation
             decision_recommendation = DecisionRecommendation(
@@ -487,9 +477,7 @@ class RecommendationEngine:
             # Store decision for learning
             self.decision_history.append(decision_recommendation)
 
-            self.logger.info(
-                f"Generated recommendations for decision {decision_context.decision_id}"
-            )
+            self.logger.info(f"Generated recommendations for decision {decision_context.decision_id}")
 
             return decision_recommendation
 
@@ -553,21 +541,13 @@ class RecommendationEngine:
                 decision_category=decision_context.decision_category.value,
                 system_name=system_name,
                 system_type=system_type,
-                current_situation=json.dumps(
-                    decision_context.current_situation, indent=2
-                ),
+                current_situation=json.dumps(decision_context.current_situation, indent=2),
                 constraints=json.dumps(decision_context.constraints, indent=2),
                 objectives=", ".join(decision_context.objectives),
                 risk_tolerance=decision_context.risk_tolerance,
-                system_analysis=json.dumps(
-                    analysis_context.get("system_analysis", {}), indent=2
-                ),
-                historical_context=json.dumps(
-                    analysis_context.get("historical_context", {}), indent=2
-                ),
-                expert_knowledge=json.dumps(
-                    analysis_context.get("expert_knowledge", []), indent=2
-                ),
+                system_analysis=json.dumps(analysis_context.get("system_analysis", {}), indent=2),
+                historical_context=json.dumps(analysis_context.get("historical_context", {}), indent=2),
+                expert_knowledge=json.dumps(analysis_context.get("expert_knowledge", []), indent=2),
             )
 
             llm_request = LLMRequest(
@@ -618,9 +598,7 @@ class RecommendationEngine:
                 current_section = "medium_term_strategies"
             elif "long-term planning" in line.lower():
                 current_section = "long_term_planning"
-            elif current_section and (
-                line.startswith("-") or line.startswith("•") or line.startswith("*")
-            ):
+            elif current_section and (line.startswith("-") or line.startswith("•") or line.startswith("*")):
                 # Extract recommendation item
                 item = line.lstrip("-•* ").strip()
                 if item and current_section in recommendations:
@@ -675,13 +653,8 @@ class RecommendationEngine:
 
         # Maintenance rules
         system_age_years = 0
-        if (
-            decision_context.system_context
-            and decision_context.system_context.installation_date
-        ):
-            system_age_years = (
-                datetime.now() - decision_context.system_context.installation_date
-            ).days / 365.25
+        if decision_context.system_context and decision_context.system_context.installation_date:
+            system_age_years = (datetime.now() - decision_context.system_context.installation_date).days / 365.25
 
         if system_age_years > 10:
             recommendations["maintenance_recommendations"].append(
@@ -694,10 +667,7 @@ class RecommendationEngine:
             )
 
         # Risk-based rules
-        if (
-            decision_context.risk_tolerance == "low"
-            and current_situation.get("failure_probability", 0) > 0.3
-        ):
+        if decision_context.risk_tolerance == "low" and current_situation.get("failure_probability", 0) > 0.3:
             recommendations["risk_mitigation"].append(
                 {
                     "type": "failure_risk",
@@ -732,9 +702,7 @@ class RecommendationEngine:
                             "content": item,
                             "source": "llm",
                             "category": category,
-                            "confidence": llm_recommendations.get(
-                                "llm_confidence", 0.7
-                            ),
+                            "confidence": llm_recommendations.get("llm_confidence", 0.7),
                         }
                     )
 
@@ -759,9 +727,7 @@ class RecommendationEngine:
             confidence = rec.get("confidence", 0.5)
             return priority_weight * confidence
 
-        combined["prioritized_recommendations"].sort(
-            key=recommendation_score, reverse=True
-        )
+        combined["prioritized_recommendations"].sort(key=recommendation_score, reverse=True)
 
         return combined
 
@@ -775,9 +741,7 @@ class RecommendationEngine:
 
         action_recommendations = []
 
-        for i, rec in enumerate(
-            combined_recommendations["prioritized_recommendations"][:10]
-        ):  # Top 10
+        for i, rec in enumerate(combined_recommendations["prioritized_recommendations"][:10]):  # Top 10
             # Determine action type
             action_type = self._determine_action_type(rec, decision_context)
 
@@ -802,20 +766,14 @@ class RecommendationEngine:
                 priority=self._convert_priority(content.get("priority", "medium")),
                 estimated_effort=self._estimate_effort(content, action_type),
                 estimated_duration=self._estimate_duration(content, action_type),
-                estimated_cost=self._estimate_cost(
-                    content, action_type, decision_context
-                ),
+                estimated_cost=self._estimate_cost(content, action_type, decision_context),
                 required_skills=self._determine_required_skills(content, action_type),
                 prerequisites=self._determine_prerequisites(content, action_type),
-                expected_outcomes=self._determine_expected_outcomes(
-                    content, action_type
-                ),
+                expected_outcomes=self._determine_expected_outcomes(content, action_type),
                 success_criteria=self._determine_success_criteria(content, action_type),
                 risks=self._identify_risks(content, action_type),
                 mitigation_steps=self._generate_mitigation_steps(content, action_type),
-                implementation_steps=self._generate_implementation_steps(
-                    content, action_type
-                ),
+                implementation_steps=self._generate_implementation_steps(content, action_type),
                 monitoring_plan=self._generate_monitoring_plan(content, action_type),
                 rollback_plan=self._generate_rollback_plan(content, action_type),
                 decision_context=decision_context,
@@ -826,9 +784,7 @@ class RecommendationEngine:
 
         return action_recommendations
 
-    def _determine_action_type(
-        self, recommendation: Dict[str, Any], decision_context: DecisionContext
-    ) -> ActionType:
+    def _determine_action_type(self, recommendation: Dict[str, Any], decision_context: DecisionContext) -> ActionType:
         """Determine the type of action based on recommendation content."""
 
         content = recommendation.get("content", {})
@@ -897,9 +853,7 @@ class RecommendationEngine:
 
         return duration_map.get(action_type, "1-2 weeks")
 
-    def _estimate_cost(
-        self, content: Any, action_type: ActionType, decision_context: DecisionContext
-    ) -> Optional[float]:
+    def _estimate_cost(self, content: Any, action_type: ActionType, decision_context: DecisionContext) -> Optional[float]:
         """Estimate cost for an action."""
 
         # Base costs by action type (in USD)
@@ -925,9 +879,7 @@ class RecommendationEngine:
 
         return base_cost
 
-    def _determine_required_skills(
-        self, content: Any, action_type: ActionType
-    ) -> List[str]:
+    def _determine_required_skills(self, content: Any, action_type: ActionType) -> List[str]:
         """Determine required skills for an action."""
 
         skill_map = {
@@ -952,9 +904,7 @@ class RecommendationEngine:
 
         return skill_map.get(action_type, ["domain_expertise"])
 
-    def _determine_prerequisites(
-        self, content: Any, action_type: ActionType
-    ) -> List[str]:
+    def _determine_prerequisites(self, content: Any, action_type: ActionType) -> List[str]:
         """Determine prerequisites for an action."""
 
         prereq_map = {
@@ -988,9 +938,7 @@ class RecommendationEngine:
 
         return prereq_map.get(action_type, ["stakeholder_approval"])
 
-    def _determine_expected_outcomes(
-        self, content: Any, action_type: ActionType
-    ) -> List[str]:
+    def _determine_expected_outcomes(self, content: Any, action_type: ActionType) -> List[str]:
         """Determine expected outcomes for an action."""
 
         outcome_map = {
@@ -1024,9 +972,7 @@ class RecommendationEngine:
 
         return outcome_map.get(action_type, ["improved_system_performance"])
 
-    def _determine_success_criteria(
-        self, content: Any, action_type: ActionType
-    ) -> List[str]:
+    def _determine_success_criteria(self, content: Any, action_type: ActionType) -> List[str]:
         """Determine success criteria for an action."""
 
         criteria_map = {
@@ -1088,9 +1034,7 @@ class RecommendationEngine:
 
         return risk_map.get(action_type, ["implementation_delays"])
 
-    def _generate_mitigation_steps(
-        self, content: Any, action_type: ActionType
-    ) -> List[str]:
+    def _generate_mitigation_steps(self, content: Any, action_type: ActionType) -> List[str]:
         """Generate risk mitigation steps."""
 
         mitigation_map = {
@@ -1125,13 +1069,9 @@ class RecommendationEngine:
             ],
         }
 
-        return mitigation_map.get(
-            action_type, ["thorough_planning", "stakeholder_communication"]
-        )
+        return mitigation_map.get(action_type, ["thorough_planning", "stakeholder_communication"])
 
-    def _generate_implementation_steps(
-        self, content: Any, action_type: ActionType
-    ) -> List[Dict[str, Any]]:
+    def _generate_implementation_steps(self, content: Any, action_type: ActionType) -> List[Dict[str, Any]]:
         """Generate implementation steps for an action."""
 
         # Generic implementation steps based on action type
@@ -1188,15 +1128,11 @@ class RecommendationEngine:
             ],
         )
 
-    def _generate_monitoring_plan(
-        self, content: Any, action_type: ActionType
-    ) -> Dict[str, Any]:
+    def _generate_monitoring_plan(self, content: Any, action_type: ActionType) -> Dict[str, Any]:
         """Generate monitoring plan for an action."""
 
         return {
-            "monitoring_frequency": (
-                "daily" if action_type == ActionType.IMMEDIATE_ACTION else "weekly"
-            ),
+            "monitoring_frequency": ("daily" if action_type == ActionType.IMMEDIATE_ACTION else "weekly"),
             "key_metrics": [
                 "system_availability",
                 "performance_metrics",
@@ -1207,9 +1143,7 @@ class RecommendationEngine:
                 "response_time": 5000,
                 "error_rate": 0.05,
             },
-            "review_schedule": (
-                "weekly" if action_type == ActionType.IMMEDIATE_ACTION else "monthly"
-            ),
+            "review_schedule": ("weekly" if action_type == ActionType.IMMEDIATE_ACTION else "monthly"),
             "escalation_criteria": [
                 "sla_breach",
                 "performance_degradation",
@@ -1217,9 +1151,7 @@ class RecommendationEngine:
             ],
         }
 
-    def _generate_rollback_plan(
-        self, content: Any, action_type: ActionType
-    ) -> Optional[str]:
+    def _generate_rollback_plan(self, content: Any, action_type: ActionType) -> Optional[str]:
         """Generate rollback plan for an action."""
 
         if action_type in [
@@ -1283,15 +1215,11 @@ class RecommendationEngine:
         """Identify critical path through action dependencies."""
         # Simplified critical path identification
         critical_actions = [
-            action.recommendation_id
-            for action in actions
-            if action.priority in [SeverityLevel.CRITICAL, SeverityLevel.HIGH]
+            action.recommendation_id for action in actions if action.priority in [SeverityLevel.CRITICAL, SeverityLevel.HIGH]
         ]
         return critical_actions[:5]  # Top 5 critical actions
 
-    def _identify_resource_peaks(
-        self, actions: List[ActionRecommendation]
-    ) -> Dict[str, Any]:
+    def _identify_resource_peaks(self, actions: List[ActionRecommendation]) -> Dict[str, Any]:
         """Identify periods of high resource demand."""
         # Simplified resource peak analysis
         return {
@@ -1398,13 +1326,9 @@ class RecommendationEngine:
         )
 
         # Priority-based rationale
-        critical_actions = sum(
-            1 for a in actions if a.priority == SeverityLevel.CRITICAL
-        )
+        critical_actions = sum(1 for a in actions if a.priority == SeverityLevel.CRITICAL)
         if critical_actions > 0:
-            rationale_parts.append(
-                f"The plan includes {critical_actions} critical actions that require immediate attention."
-            )
+            rationale_parts.append(f"The plan includes {critical_actions} critical actions that require immediate attention.")
 
         # Risk-based rationale
         rationale_parts.append(
@@ -1439,9 +1363,7 @@ class RecommendationEngine:
         # Expert knowledge factor
         expert_knowledge = analysis_context.get("expert_knowledge", [])
         if expert_knowledge:
-            avg_expert_confidence = np.mean(
-                [k.get("confidence", 0.5) for k in expert_knowledge]
-            )
+            avg_expert_confidence = np.mean([k.get("confidence", 0.5) for k in expert_knowledge])
             confidence_factors.append(avg_expert_confidence)
 
         return np.mean(confidence_factors) if confidence_factors else 0.5
@@ -1470,24 +1392,16 @@ class RecommendationEngine:
 
         cutoff_date = datetime.now() - timedelta(days=days_back)
 
-        filtered_history = [
-            decision
-            for decision in self.decision_history
-            if decision.created_at >= cutoff_date
-        ]
+        filtered_history = [decision for decision in self.decision_history if decision.created_at >= cutoff_date]
 
         if decision_category:
             filtered_history = [
-                decision
-                for decision in filtered_history
-                if decision.decision_context.decision_category == decision_category
+                decision for decision in filtered_history if decision.decision_context.decision_category == decision_category
             ]
 
         return sorted(filtered_history, key=lambda d: d.created_at, reverse=True)
 
-    def update_success_metrics(
-        self, decision_id: str, success_score: float, outcomes: Dict[str, Any]
-    ) -> None:
+    def update_success_metrics(self, decision_id: str, success_score: float, outcomes: Dict[str, Any]) -> None:
         """Update success metrics for a decision."""
 
         self.success_metrics[decision_id] = {
@@ -1496,9 +1410,7 @@ class RecommendationEngine:
             "updated_at": datetime.now().isoformat(),
         }
 
-        self.logger.info(
-            f"Updated success metrics for decision {decision_id}: {success_score}"
-        )
+        self.logger.info(f"Updated success metrics for decision {decision_id}: {success_score}")
 
     def get_recommendation_effectiveness(self) -> Dict[str, Any]:
         """Get overall recommendation effectiveness metrics."""
@@ -1506,16 +1418,13 @@ class RecommendationEngine:
         if not self.success_metrics:
             return {"message": "No success metrics available"}
 
-        success_scores = [
-            metrics["success_score"] for metrics in self.success_metrics.values()
-        ]
+        success_scores = [metrics["success_score"] for metrics in self.success_metrics.values()]
 
         return {
             "total_decisions": len(self.decision_history),
             "decisions_with_metrics": len(self.success_metrics),
             "average_success_score": np.mean(success_scores),
-            "success_rate": sum(1 for score in success_scores if score > 0.7)
-            / len(success_scores),
+            "success_rate": sum(1 for score in success_scores if score > 0.7) / len(success_scores),
             "improvement_trend": self._calculate_improvement_trend(),
             "top_performing_categories": self._identify_top_performing_categories(),
         }
@@ -1532,9 +1441,7 @@ class RecommendationEngine:
 
         for decision in recent_decisions:
             if decision.decision_id in self.success_metrics:
-                recent_scores.append(
-                    self.success_metrics[decision.decision_id]["success_score"]
-                )
+                recent_scores.append(self.success_metrics[decision.decision_id]["success_score"])
 
         if len(recent_scores) < 5:
             return "insufficient_data"
@@ -1682,19 +1589,13 @@ class ImpactAssessor:
             qualitative_impacts = self._extract_qualitative_impacts(impact_dimensions)
 
             # Generate mitigation strategies
-            mitigation_strategies = await self._generate_mitigation_strategies(
-                impact_dimensions, decision_context
-            )
+            mitigation_strategies = await self._generate_mitigation_strategies(impact_dimensions, decision_context)
 
             # Define success metrics
-            success_metrics = self._define_success_metrics(
-                decision_context, action_recommendations, impact_dimensions
-            )
+            success_metrics = self._define_success_metrics(decision_context, action_recommendations, impact_dimensions)
 
             # Calculate assessment confidence
-            confidence = self._calculate_assessment_confidence(
-                impact_dimensions, decision_context
-            )
+            confidence = self._calculate_assessment_confidence(impact_dimensions, decision_context)
 
             assessment = BusinessImpactAssessment(
                 assessment_id=str(uuid.uuid4()),
@@ -1710,9 +1611,7 @@ class ImpactAssessor:
                 assessment_confidence=confidence,
             )
 
-            self.logger.info(
-                f"Completed business impact assessment {assessment.assessment_id}"
-            )
+            self.logger.info(f"Completed business impact assessment {assessment.assessment_id}")
 
             return assessment
 
@@ -1740,25 +1639,15 @@ class ImpactAssessor:
         }
 
         if dimension == ImpactDimension.FINANCIAL:
-            dimension_impact = await self._assess_financial_impact(
-                decision_context, actions, system_context
-            )
+            dimension_impact = await self._assess_financial_impact(decision_context, actions, system_context)
         elif dimension == ImpactDimension.OPERATIONAL:
-            dimension_impact = await self._assess_operational_impact(
-                decision_context, actions, system_context
-            )
+            dimension_impact = await self._assess_operational_impact(decision_context, actions, system_context)
         elif dimension == ImpactDimension.REGULATORY:
-            dimension_impact = await self._assess_regulatory_impact(
-                decision_context, actions, system_context
-            )
+            dimension_impact = await self._assess_regulatory_impact(decision_context, actions, system_context)
         elif dimension == ImpactDimension.SECURITY:
-            dimension_impact = await self._assess_security_impact(
-                decision_context, actions, system_context
-            )
+            dimension_impact = await self._assess_security_impact(decision_context, actions, system_context)
         elif dimension == ImpactDimension.STRATEGIC:
-            dimension_impact = await self._assess_strategic_impact(
-                decision_context, actions, system_context
-            )
+            dimension_impact = await self._assess_strategic_impact(decision_context, actions, system_context)
         else:
             # Generic assessment for other dimensions
             dimension_impact["impact_score"] = 5.0  # Neutral
@@ -1775,9 +1664,7 @@ class ImpactAssessor:
         """Assess financial impact."""
 
         # Calculate direct costs
-        total_implementation_cost = sum(
-            action.estimated_cost or 0 for action in actions
-        )
+        total_implementation_cost = sum(action.estimated_cost or 0 for action in actions)
 
         # Estimate cost savings (simplified model)
         annual_maintenance_cost = 100000  # Base estimate
@@ -1797,19 +1684,11 @@ class ImpactAssessor:
 
         # Calculate ROI
         net_benefit = estimated_savings - total_implementation_cost
-        roi = (
-            (net_benefit / total_implementation_cost)
-            if total_implementation_cost > 0
-            else 0
-        )
+        roi = (net_benefit / total_implementation_cost) if total_implementation_cost > 0 else 0
 
         # Risk-adjusted calculations
-        failure_probability = decision_context.current_situation.get(
-            "failure_probability", 0.1
-        )
-        avoided_failure_cost = (
-            annual_maintenance_cost * 3 * failure_probability
-        )  # 3x cost if failure
+        failure_probability = decision_context.current_situation.get("failure_probability", 0.1)
+        avoided_failure_cost = annual_maintenance_cost * 3 * failure_probability  # 3x cost if failure
 
         # Calculate impact score (-10 to +10)
         if roi > 0.5:  # 50%+ ROI
@@ -1833,9 +1712,7 @@ class ImpactAssessor:
                 "estimated_annual_savings": estimated_savings,
                 "roi": roi,
                 "payback_period_months": (
-                    (total_implementation_cost / (estimated_savings / 12))
-                    if estimated_savings > 0
-                    else float("inf")
+                    (total_implementation_cost / (estimated_savings / 12)) if estimated_savings > 0 else float("inf")
                 ),
                 "avoided_failure_cost": avoided_failure_cost,
             },
@@ -1864,30 +1741,22 @@ class ImpactAssessor:
                 availability_improvement += 1  # 1% improvement
 
         # Current operational metrics (assumed baseline)
-        current_availability = decision_context.current_situation.get(
-            "availability", 95.0
-        )
-        current_performance = decision_context.current_situation.get(
-            "performance_score", 80.0
-        )
+        current_availability = decision_context.current_situation.get("availability", 95.0)
+        current_performance = decision_context.current_situation.get("performance_score", 80.0)
 
         # Calculate new metrics
         new_availability = min(current_availability + availability_improvement, 99.9)
         new_performance = min(current_performance + performance_improvement, 100.0)
 
         # Calculate impact score
-        availability_impact = (
-            new_availability - current_availability
-        ) / 5.0  # Normalize
+        availability_impact = (new_availability - current_availability) / 5.0  # Normalize
         performance_impact = (new_performance - current_performance) / 20.0  # Normalize
 
         impact_score = min(availability_impact + performance_impact, 10.0)
 
         return {"dimension": "operational", "impact_score": impact_score}
 
-    async def _create_contingency_plans(
-        self, risks: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    async def _create_contingency_plans(self, risks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Create contingency plans for identified risks."""
 
         contingencies = []
@@ -1924,9 +1793,7 @@ class ImpactAssessor:
 
         return contingencies
 
-    def _define_risk_escalation_triggers(
-        self, action: ActionRecommendation
-    ) -> List[str]:
+    def _define_risk_escalation_triggers(self, action: ActionRecommendation) -> List[str]:
         """Define triggers for risk escalation."""
 
         return [
@@ -1937,28 +1804,18 @@ class ImpactAssessor:
             "compliance_violation_risk",
         ]
 
-    def _create_communication_plan(
-        self, action: ActionRecommendation, decision_context: DecisionContext
-    ) -> Dict[str, Any]:
+    def _create_communication_plan(self, action: ActionRecommendation, decision_context: DecisionContext) -> Dict[str, Any]:
         """Create communication plan for action implementation."""
 
-        stakeholders = list(
-            set(decision_context.stakeholders + ["project_team", "end_users"])
-        )
+        stakeholders = list(set(decision_context.stakeholders + ["project_team", "end_users"]))
 
         return {
             "stakeholder_matrix": {
                 stakeholder: {
-                    "role": (
-                        "participant" if stakeholder in ["project_team"] else "informed"
-                    ),
-                    "communication_frequency": self._determine_communication_frequency(
-                        stakeholder, action
-                    ),
+                    "role": ("participant" if stakeholder in ["project_team"] else "informed"),
+                    "communication_frequency": self._determine_communication_frequency(stakeholder, action),
                     "preferred_channels": ["email", "meetings", "dashboard"],
-                    "key_messages": self._generate_stakeholder_messages(
-                        stakeholder, action
-                    ),
+                    "key_messages": self._generate_stakeholder_messages(stakeholder, action),
                 }
                 for stakeholder in stakeholders
             },
@@ -1969,17 +1826,13 @@ class ImpactAssessor:
                 "timeline": "within_2_hours",
             },
             "status_reporting": {
-                "frequency": (
-                    "weekly" if action.priority != SeverityLevel.CRITICAL else "daily"
-                ),
+                "frequency": ("weekly" if action.priority != SeverityLevel.CRITICAL else "daily"),
                 "format": "dashboard_and_email",
                 "metrics": ["progress_percentage", "risks_status", "budget_status"],
             },
         }
 
-    def _determine_communication_frequency(
-        self, stakeholder: str, action: ActionRecommendation
-    ) -> str:
+    def _determine_communication_frequency(self, stakeholder: str, action: ActionRecommendation) -> str:
         """Determine communication frequency for stakeholder."""
 
         if stakeholder in ["project_team", "operations_team"]:
@@ -1989,9 +1842,7 @@ class ImpactAssessor:
         else:
             return "milestone_based"
 
-    def _generate_stakeholder_messages(
-        self, stakeholder: str, action: ActionRecommendation
-    ) -> List[str]:
+    def _generate_stakeholder_messages(self, stakeholder: str, action: ActionRecommendation) -> List[str]:
         """Generate key messages for stakeholder."""
 
         if stakeholder == "end_users":
@@ -2013,9 +1864,7 @@ class ImpactAssessor:
                 "Issue escalation if needed",
             ]
 
-    def _create_communication_schedule(
-        self, action: ActionRecommendation
-    ) -> List[Dict[str, str]]:
+    def _create_communication_schedule(self, action: ActionRecommendation) -> List[Dict[str, str]]:
         """Create detailed communication schedule."""
 
         return [
@@ -2027,9 +1876,7 @@ class ImpactAssessor:
             },
             {
                 "event": "progress_updates",
-                "timing": (
-                    "weekly" if action.priority != SeverityLevel.CRITICAL else "daily"
-                ),
+                "timing": ("weekly" if action.priority != SeverityLevel.CRITICAL else "daily"),
                 "audience": "core_team",
                 "format": "status_report",
             },
@@ -2065,8 +1912,7 @@ class ImpactAssessor:
                 "test_types": self._identify_test_types(action),
                 "test_environments": ["development", "staging", "production"],
                 "test_data_requirements": self._identify_test_data_needs(action),
-                "automated_testing": action.action_type
-                in [ActionType.MONITORING_ADJUSTMENT, ActionType.PROCESS_IMPROVEMENT],
+                "automated_testing": action.action_type in [ActionType.MONITORING_ADJUSTMENT, ActionType.PROCESS_IMPROVEMENT],
             },
             "quality_gates": self._define_quality_gates(action),
             "defect_management": {
@@ -2081,9 +1927,7 @@ class ImpactAssessor:
             },
         }
 
-    def _determine_testing_requirements(
-        self, action: ActionRecommendation
-    ) -> List[str]:
+    def _determine_testing_requirements(self, action: ActionRecommendation) -> List[str]:
         """Determine testing requirements based on action type."""
 
         if action.action_type == ActionType.IMMEDIATE_ACTION:
@@ -2121,9 +1965,7 @@ class ImpactAssessor:
         else:
             return ["sample_data", "test_scenarios"]
 
-    def _define_quality_gates(
-        self, action: ActionRecommendation
-    ) -> List[Dict[str, str]]:
+    def _define_quality_gates(self, action: ActionRecommendation) -> List[Dict[str, str]]:
         """Define quality gates for the implementation."""
 
         return [
@@ -2149,9 +1991,7 @@ class ImpactAssessor:
             },
         ]
 
-    def _generate_detailed_success_metrics(
-        self, action: ActionRecommendation
-    ) -> Dict[str, Any]:
+    def _generate_detailed_success_metrics(self, action: ActionRecommendation) -> Dict[str, Any]:
         """Generate detailed success metrics and KPIs."""
 
         return {
@@ -2192,9 +2032,7 @@ class ImpactAssessor:
             },
         }
 
-    def _generate_business_impact_metrics(
-        self, action: ActionRecommendation
-    ) -> Dict[str, Any]:
+    def _generate_business_impact_metrics(self, action: ActionRecommendation) -> Dict[str, Any]:
         """Generate business impact metrics specific to action type."""
 
         if action.action_type == ActionType.SCHEDULED_MAINTENANCE:
@@ -2232,9 +2070,7 @@ class ImpactAssessor:
                 }
             }
 
-    def _create_approval_workflow(
-        self, action: ActionRecommendation, template: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _create_approval_workflow(self, action: ActionRecommendation, template: Dict[str, Any]) -> Dict[str, Any]:
         """Create approval workflow for action implementation."""
 
         required_approvals = template.get("required_approvals", ["manager"])
@@ -2260,9 +2096,7 @@ class ImpactAssessor:
             "approval_timeout": "5_business_days",
         }
 
-    def _get_approval_criteria(
-        self, approver_role: str, action: ActionRecommendation
-    ) -> List[str]:
+    def _get_approval_criteria(self, approver_role: str, action: ActionRecommendation) -> List[str]:
         """Get approval criteria for specific approver role."""
 
         criteria_map = {
@@ -2313,9 +2147,7 @@ class ImpactAssessor:
 
         return conditions
 
-    def _identify_dependencies(
-        self, action: ActionRecommendation
-    ) -> List[Dict[str, Any]]:
+    def _identify_dependencies(self, action: ActionRecommendation) -> List[Dict[str, Any]]:
         """Identify dependencies for action implementation."""
 
         dependencies = []
@@ -2408,8 +2240,7 @@ class ImpactAssessor:
             "technical_contingencies": {
                 "implementation_failure": {
                     "trigger": "critical_implementation_error",
-                    "response_plan": action.rollback_plan
-                    or "Execute rollback procedures",
+                    "response_plan": action.rollback_plan or "Execute rollback procedures",
                     "recovery_time": "4_hours",
                     "responsible_team": "technical_team",
                 },
@@ -2450,9 +2281,7 @@ class ImpactAssessor:
             },
         }
 
-    def _create_progress_tracking_plan(
-        self, action: ActionRecommendation
-    ) -> Dict[str, Any]:
+    def _create_progress_tracking_plan(self, action: ActionRecommendation) -> Dict[str, Any]:
         """Create progress tracking and monitoring plan."""
 
         return {
@@ -2482,9 +2311,7 @@ class ImpactAssessor:
             },
         }
 
-    def _define_review_checkpoints(
-        self, timeline: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _define_review_checkpoints(self, timeline: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Define review checkpoints throughout implementation."""
 
         checkpoints = []
@@ -2538,9 +2365,7 @@ class ImpactAssessor:
 
         return checkpoints
 
-    def _create_escalation_procedures(
-        self, action: ActionRecommendation
-    ) -> Dict[str, Any]:
+    def _create_escalation_procedures(self, action: ActionRecommendation) -> Dict[str, Any]:
         """Create escalation procedures for issues."""
 
         return {
@@ -2579,9 +2404,7 @@ class ImpactAssessor:
             },
         }
 
-    def _identify_required_documentation(
-        self, action: ActionRecommendation
-    ) -> List[Dict[str, str]]:
+    def _identify_required_documentation(self, action: ActionRecommendation) -> List[Dict[str, str]]:
         """Identify required documentation for action implementation."""
 
         base_docs = [
@@ -2635,9 +2458,7 @@ class ImpactAssessor:
 
         return base_docs
 
-    def _identify_compliance_requirements(
-        self, action: ActionRecommendation
-    ) -> List[Dict[str, str]]:
+    def _identify_compliance_requirements(self, action: ActionRecommendation) -> List[Dict[str, str]]:
         """Identify compliance requirements for action implementation."""
 
         requirements = []
@@ -2672,9 +2493,7 @@ class ImpactAssessor:
             )
 
         if action.estimated_cost and action.estimated_cost > 25000:
-            requirements.append(
-                {"requirement": "financial_approval", "framework": "financial_controls"}
-            )
+            requirements.append({"requirement": "financial_approval", "framework": "financial_controls"})
 
         return requirements
 
@@ -2698,9 +2517,7 @@ class ImpactAssessor:
             )
 
         if action.estimated_cost and action.estimated_cost > 15000:
-            assumptions.append(
-                "Budget approval will be maintained throughout implementation"
-            )
+            assumptions.append("Budget approval will be maintained throughout implementation")
 
         return assumptions
 
@@ -2709,9 +2526,7 @@ class ImpactAssessor:
         """Get available planning templates."""
         return self.planning_templates.copy()
 
-    def update_planning_template(
-        self, action_type: ActionType, template_updates: Dict[str, Any]
-    ) -> None:
+    def update_planning_template(self, action_type: ActionType, template_updates: Dict[str, Any]) -> None:
         """Update planning template for an action type."""
         if action_type in self.planning_templates:
             self.planning_templates[action_type].update(template_updates)

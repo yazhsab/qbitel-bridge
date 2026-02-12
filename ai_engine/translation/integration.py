@@ -50,9 +50,7 @@ class IntegratedDiscoveryRequest(BaseDiscoveryRequest):
 
     # Translation Studio specific fields
     target_api_style: APIStyle = APIStyle.REST
-    target_languages: List[CodeLanguage] = field(
-        default_factory=lambda: [CodeLanguage.PYTHON]
-    )
+    target_languages: List[CodeLanguage] = field(default_factory=lambda: [CodeLanguage.PYTHON])
     security_level: SecurityLevel = SecurityLevel.AUTHENTICATED
     generate_api_specification: bool = True
     generate_sdks: bool = True
@@ -109,9 +107,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
         self.rag_engine = rag_engine
 
         # Translation Studio orchestrator (will be initialized lazily)
-        self.translation_orchestrator: Optional[
-            EnhancedProtocolDiscoveryOrchestrator
-        ] = None
+        self.translation_orchestrator: Optional[EnhancedProtocolDiscoveryOrchestrator] = None
 
         # Translation Studio components (will be initialized lazily)
         self.api_generator: Optional[APIGenerator] = None
@@ -121,9 +117,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
         # Configuration flags
         self.translation_enabled = config.get("translation", {}).get("enabled", True)
         self.backward_compatible = True
-        self.integration_mode = config.get("translation", {}).get(
-            "integration_mode", "enhanced"
-        )
+        self.integration_mode = config.get("translation", {}).get("integration_mode", "enhanced")
 
         # Integration state
         self.is_initialized = False
@@ -165,9 +159,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
             self.logger.error(f"Failed to initialize integrated orchestrator: {e}")
             raise ProtocolDiscoveryException(
                 f"Integrated orchestrator initialization failed: {e}",
-                context=create_error_context(
-                    component="integration", operation="initialization"
-                ),
+                context=create_error_context(component="integration", operation="initialization"),
             )
 
     async def _initialize_translation_components(self) -> None:
@@ -184,29 +176,21 @@ class IntegratedProtocolDiscoveryOrchestrator:
             await self.translation_orchestrator.initialize()
 
             # Initialize API generator
-            self.api_generator = APIGenerator(
-                config=self.config, llm_service=self.llm_service
-            )
+            self.api_generator = APIGenerator(config=self.config, llm_service=self.llm_service)
             await self.api_generator.initialize()
 
             # Initialize code generator
-            self.code_generator = MultiLanguageCodeGenerator(
-                config=self.config, llm_service=self.llm_service
-            )
+            self.code_generator = MultiLanguageCodeGenerator(config=self.config, llm_service=self.llm_service)
             await self.code_generator.initialize()
 
             # Initialize protocol bridge
-            self.protocol_bridge = ProtocolBridge(
-                config=self.config, llm_service=self.llm_service
-            )
+            self.protocol_bridge = ProtocolBridge(config=self.config, llm_service=self.llm_service)
             await self.protocol_bridge.initialize()
 
             self.logger.info("Translation Studio components initialized successfully")
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to initialize Translation Studio components: {e}"
-            )
+            self.logger.error(f"Failed to initialize Translation Studio components: {e}")
             raise
 
     async def discover_protocol(
@@ -231,42 +215,31 @@ class IntegratedProtocolDiscoveryOrchestrator:
         use_enhanced = (
             isinstance(request, IntegratedDiscoveryRequest)
             and self._components_initialized
-            and (
-                request.generate_api_specification
-                or request.generate_sdks
-                or request.enable_semantic_analysis
-            )
+            and (request.generate_api_specification or request.generate_sdks or request.enable_semantic_analysis)
         )
 
         if use_enhanced:
-            self.logger.info(
-                "Using enhanced discovery with Translation Studio capabilities"
-            )
+            self.logger.info("Using enhanced discovery with Translation Studio capabilities")
             return await self._enhanced_discovery(request, context)
         else:
             self.logger.info("Using base protocol discovery")
             return await self._base_discovery(request, context)
 
     @monitor_operation("integration", "base_discovery")
-    async def _base_discovery(
-        self, request: BaseDiscoveryRequest, context
-    ) -> BaseDiscoveryResult:
+    async def _base_discovery(self, request: BaseDiscoveryRequest, context) -> BaseDiscoveryResult:
         """Perform base protocol discovery."""
         try:
             result = await self.base_orchestrator.discover_protocol(request)
 
             self.logger.info(
-                f"Base discovery completed: {result.protocol_type} "
-                f"(confidence: {result.confidence:.2f})",
+                f"Base discovery completed: {result.protocol_type} " f"(confidence: {result.confidence:.2f})",
                 context=context,
             )
 
             return result
 
         except Exception as e:
-            self.logger.error(
-                f"Base discovery failed: {e}", context=context, exception=e
-            )
+            self.logger.error(f"Base discovery failed: {e}", context=context, exception=e)
             raise ProtocolDiscoveryException(
                 f"Base discovery failed: {e}",
                 context=create_error_context(
@@ -278,9 +251,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
             )
 
     @monitor_operation("integration", "enhanced_discovery")
-    async def _enhanced_discovery(
-        self, request: IntegratedDiscoveryRequest, context
-    ) -> IntegratedDiscoveryResult:
+    async def _enhanced_discovery(self, request: IntegratedDiscoveryRequest, context) -> IntegratedDiscoveryResult:
         """Perform enhanced discovery with Translation Studio capabilities."""
         start_time = time.time()
 
@@ -315,17 +286,13 @@ class IntegratedProtocolDiscoveryOrchestrator:
 
             # Step 3: Add Translation Studio enhancements if confidence is sufficient
             if base_result.confidence >= request.confidence_threshold:
-                await self._add_translation_enhancements(
-                    request, integrated_result, context
-                )
+                await self._add_translation_enhancements(request, integrated_result, context)
             else:
                 self.logger.warning(
                     f"Skipping Translation Studio enhancements due to low confidence: {base_result.confidence:.2f}",
                     context=context,
                 )
-                integrated_result.recommendations.append(
-                    "Consider providing more sample messages to improve confidence"
-                )
+                integrated_result.recommendations.append("Consider providing more sample messages to improve confidence")
 
             integrated_result.processing_time = time.time() - start_time
 
@@ -340,9 +307,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
             return integrated_result
 
         except Exception as e:
-            self.logger.error(
-                f"Enhanced discovery failed: {e}", context=context, exception=e
-            )
+            self.logger.error(f"Enhanced discovery failed: {e}", context=context, exception=e)
             raise ProtocolDiscoveryException(
                 f"Enhanced discovery failed: {e}",
                 context=create_error_context(
@@ -367,55 +332,35 @@ class IntegratedProtocolDiscoveryOrchestrator:
 
             # Semantic analysis with LLM
             if request.enable_semantic_analysis and self.llm_service:
-                result.semantic_analysis = await self._perform_semantic_analysis(
-                    request.messages, protocol_schema, context
-                )
+                result.semantic_analysis = await self._perform_semantic_analysis(request.messages, protocol_schema, context)
                 result.phases_completed.append("semantic_analysis")
 
             # API specification generation
             if request.generate_api_specification and self.api_generator:
-                result.api_specification = await self._generate_api_specification(
-                    protocol_schema, request, context
-                )
+                result.api_specification = await self._generate_api_specification(protocol_schema, request, context)
                 result.phases_completed.append("api_generation")
 
             # SDK generation
-            if (
-                request.generate_sdks
-                and result.api_specification
-                and self.code_generator
-            ):
-                result.generated_sdks = await self._generate_sdks(
-                    result.api_specification, request, context
-                )
+            if request.generate_sdks and result.api_specification and self.code_generator:
+                result.generated_sdks = await self._generate_sdks(result.api_specification, request, context)
                 result.phases_completed.append("sdk_generation")
 
             # Generate recommendations
-            result.recommendations = await self._generate_recommendations(
-                result, request, context
-            )
+            result.recommendations = await self._generate_recommendations(result, request, context)
 
             # Generate natural language summary
             if self.llm_service:
-                result.natural_language_summary = await self._generate_summary(
-                    result, context
-                )
+                result.natural_language_summary = await self._generate_summary(result, context)
 
             # Add translation capabilities
             result.translation_capabilities = self._get_translation_capabilities(result)
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to add translation enhancements: {e}", context=context
-            )
+            self.logger.error(f"Failed to add translation enhancements: {e}", context=context)
             # Don't fail the entire discovery - just add error to recommendations
-            result.recommendations.append(
-                f"Translation Studio enhancements failed: {str(e)[:100]}..."
-            )
+            result.recommendations.append(f"Translation Studio enhancements failed: {str(e)[:100]}...")
 
-    async def _create_protocol_schema(
-        self, result: IntegratedDiscoveryResult
-    ) -> ProtocolSchema:
+    async def _create_protocol_schema(self, result: IntegratedDiscoveryResult) -> ProtocolSchema:
         """Create protocol schema from discovery results."""
         fields = []
 
@@ -447,9 +392,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
 
         # Ensure at least one field
         if not fields:
-            fields = [
-                {"name": "data", "type": "binary", "description": "Protocol data"}
-            ]
+            fields = [{"name": "data", "type": "binary", "description": "Protocol data"}]
 
         return ProtocolSchema(
             name=result.protocol_type,
@@ -470,12 +413,10 @@ class IntegratedProtocolDiscoveryOrchestrator:
         """Perform LLM-powered semantic analysis."""
         try:
             # Use translation orchestrator for semantic analysis
-            semantic_result = (
-                await self.translation_orchestrator.analyze_semantic_fields(
-                    messages=messages,
-                    protocol_schema=protocol_schema,
-                    context=context.metadata if context else {},
-                )
+            semantic_result = await self.translation_orchestrator.analyze_semantic_fields(
+                messages=messages,
+                protocol_schema=protocol_schema,
+                context=context.metadata if context else {},
             )
 
             return semantic_result
@@ -503,9 +444,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
                 include_documentation=request.generate_documentation,
             )
 
-            api_spec = await self.api_generator.generate_api_specification(
-                generation_context
-            )
+            api_spec = await self.api_generator.generate_api_specification(generation_context)
 
             # Record metrics
             monitor = get_monitor()
@@ -520,9 +459,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
             return api_spec
 
         except Exception as e:
-            self.logger.error(
-                f"API specification generation failed: {e}", context=context
-            )
+            self.logger.error(f"API specification generation failed: {e}", context=context)
             return None
 
     async def _generate_sdks(
@@ -537,8 +474,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
         for language in request.target_languages:
             try:
                 package_name = (
-                    request.package_name
-                    or f"{api_specification.title.lower().replace(' ', '-')}-{language.value}-sdk"
+                    request.package_name or f"{api_specification.title.lower().replace(' ', '-')}-{language.value}-sdk"
                 )
 
                 sdk = await self.code_generator.generate_sdk(
@@ -556,17 +492,12 @@ class IntegratedProtocolDiscoveryOrchestrator:
                 monitor.record_code_generation(
                     language=language.value,
                     duration=0.0,  # Would be measured in actual implementation
-                    lines_generated=sum(
-                        len(content.split("\n"))
-                        for content in sdk.source_files.values()
-                    ),
+                    lines_generated=sum(len(content.split("\n")) for content in sdk.source_files.values()),
                     success=True,
                 )
 
             except Exception as e:
-                self.logger.error(
-                    f"SDK generation failed for {language.value}: {e}", context=context
-                )
+                self.logger.error(f"SDK generation failed for {language.value}: {e}", context=context)
                 continue
 
         return generated_sdks
@@ -582,45 +513,31 @@ class IntegratedProtocolDiscoveryOrchestrator:
 
         # Confidence-based recommendations
         if result.confidence < 0.8:
-            recommendations.append(
-                "Consider providing more sample messages to improve confidence"
-            )
+            recommendations.append("Consider providing more sample messages to improve confidence")
 
         if result.confidence < 0.6:
-            recommendations.append(
-                "Protocol detection confidence is low - manual verification recommended"
-            )
+            recommendations.append("Protocol detection confidence is low - manual verification recommended")
 
         # API-related recommendations
         if result.api_specification:
             if len(result.api_specification.endpoints) > 20:
-                recommendations.append(
-                    "Consider implementing pagination for APIs with many endpoints"
-                )
+                recommendations.append("Consider implementing pagination for APIs with many endpoints")
 
             if request.security_level == SecurityLevel.PUBLIC:
-                recommendations.append(
-                    "Consider adding authentication for production APIs"
-                )
+                recommendations.append("Consider adding authentication for production APIs")
 
         # SDK-related recommendations
         if result.generated_sdks:
             if len(result.generated_sdks) > 3:
-                recommendations.append(
-                    "Consider creating SDK documentation portal for multiple languages"
-                )
+                recommendations.append("Consider creating SDK documentation portal for multiple languages")
 
         # Performance recommendations
         if result.processing_time > 5.0:
-            recommendations.append(
-                "Consider enabling caching to improve discovery performance"
-            )
+            recommendations.append("Consider enabling caching to improve discovery performance")
 
         return recommendations
 
-    async def _generate_summary(
-        self, result: IntegratedDiscoveryResult, context
-    ) -> Optional[str]:
+    async def _generate_summary(self, result: IntegratedDiscoveryResult, context) -> Optional[str]:
         """Generate natural language summary of discovery results."""
         try:
             if not self.llm_service:
@@ -651,9 +568,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
             self.logger.error(f"Summary generation failed: {e}", context=context)
             return None
 
-    def _get_translation_capabilities(
-        self, result: IntegratedDiscoveryResult
-    ) -> List[str]:
+    def _get_translation_capabilities(self, result: IntegratedDiscoveryResult) -> List[str]:
         """Get list of available translation capabilities."""
         capabilities = []
 
@@ -667,9 +582,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
             capabilities.append("Grammar-based validation")
 
         if result.api_specification:
-            capabilities.append(
-                f"API generation: {result.api_specification.style.value}"
-            )
+            capabilities.append(f"API generation: {result.api_specification.style.value}")
 
         if result.generated_sdks:
             languages = [lang.value for lang in result.generated_sdks.keys()]
@@ -716,9 +629,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
         }
 
         if self.translation_orchestrator:
-            translation_stats = (
-                await self.translation_orchestrator.get_api_generation_metrics()
-            )
+            translation_stats = await self.translation_orchestrator.get_api_generation_metrics()
             base_stats["translation_studio"] = translation_stats
 
         return base_stats
@@ -748,9 +659,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
                         # Simple health check
                         health["translation_studio"]["components"][name] = "healthy"
                     except Exception as e:
-                        health["translation_studio"]["components"][
-                            name
-                        ] = f"unhealthy: {e}"
+                        health["translation_studio"]["components"][name] = f"unhealthy: {e}"
 
         return health
 
@@ -780,9 +689,7 @@ class IntegratedProtocolDiscoveryOrchestrator:
         self.is_initialized = False
         self._components_initialized = False
 
-        self.logger.info(
-            "Integrated Protocol Discovery Orchestrator shutdown completed"
-        )
+        self.logger.info("Integrated Protocol Discovery Orchestrator shutdown completed")
 
 
 # Convenience functions for easy integration
@@ -796,9 +703,7 @@ async def create_integrated_orchestrator(
 ) -> IntegratedProtocolDiscoveryOrchestrator:
     """Create and optionally initialize an integrated orchestrator."""
 
-    orchestrator = IntegratedProtocolDiscoveryOrchestrator(
-        config=config, llm_service=llm_service, rag_engine=rag_engine
-    )
+    orchestrator = IntegratedProtocolDiscoveryOrchestrator(config=config, llm_service=llm_service, rag_engine=rag_engine)
 
     if auto_initialize:
         await orchestrator.initialize()

@@ -9,16 +9,9 @@ from typing import Tuple
 import secrets
 
 # Import all quantum crypto components
-from ai_engine.cloud_native.service_mesh.istio.qkd_certificate_manager import (
-    QuantumCertificateManager,
-    CertificateAlgorithm
-)
-from ai_engine.cloud_native.service_mesh.envoy.traffic_encryption import (
-    TrafficEncryptionManager
-)
-from ai_engine.cloud_native.container_security.signing.dilithium_signer import (
-    DilithiumSigner
-)
+from ai_engine.cloud_native.service_mesh.istio.qkd_certificate_manager import QuantumCertificateManager, CertificateAlgorithm
+from ai_engine.cloud_native.service_mesh.envoy.traffic_encryption import TrafficEncryptionManager
+from ai_engine.cloud_native.container_security.signing.dilithium_signer import DilithiumSigner
 
 
 @pytest.mark.integration
@@ -258,15 +251,11 @@ class TestE2EServiceMeshIntegration:
 
         # Step 2: Generate certificates for services
         service_a_cert = cert_manager.generate_certificate(
-            "service-a",
-            "qbitel-service-mesh",
-            ["service-a.qbitel-service-mesh.svc.cluster.local"]
+            "service-a", "qbitel-service-mesh", ["service-a.qbitel-service-mesh.svc.cluster.local"]
         )
 
         service_b_cert = cert_manager.generate_certificate(
-            "service-b",
-            "qbitel-service-mesh",
-            ["service-b.qbitel-service-mesh.svc.cluster.local"]
+            "service-b", "qbitel-service-mesh", ["service-b.qbitel-service-mesh.svc.cluster.local"]
         )
 
         # Verify certificates are generated

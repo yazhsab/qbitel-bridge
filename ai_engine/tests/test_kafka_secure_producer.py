@@ -9,16 +9,20 @@ import base64
 # Mock kafka module before importing SecureKafkaProducer
 import sys
 from unittest.mock import MagicMock
+
 kafka_mock = MagicMock()
-sys.modules['kafka'] = kafka_mock
-sys.modules['kafka.errors'] = kafka_mock.errors
+sys.modules["kafka"] = kafka_mock
+sys.modules["kafka.errors"] = kafka_mock.errors
+
 
 # Now we can safely define these as they'll be used in the tests
 class KafkaError(Exception):
     pass
 
+
 class KafkaTimeoutError(Exception):
     pass
+
 
 kafka_mock.errors.KafkaError = KafkaError
 kafka_mock.errors.KafkaTimeoutError = KafkaTimeoutError
@@ -32,7 +36,7 @@ class TestSecureKafkaProducer:
     @pytest.fixture
     def mock_kafka_producer(self):
         """Mock KafkaProducer"""
-        with patch('ai_engine.cloud_native.event_streaming.kafka.secure_producer.KafkaProducer') as mock:
+        with patch("ai_engine.cloud_native.event_streaming.kafka.secure_producer.KafkaProducer") as mock:
             producer_instance = MagicMock()
             mock.return_value = producer_instance
             yield producer_instance
@@ -40,20 +44,12 @@ class TestSecureKafkaProducer:
     @pytest.fixture
     def producer(self, mock_kafka_producer):
         """Create a SecureKafkaProducer instance"""
-        return SecureKafkaProducer(
-            bootstrap_servers="localhost:9092",
-            topic="test-topic",
-            enable_quantum_encryption=True
-        )
+        return SecureKafkaProducer(bootstrap_servers="localhost:9092", topic="test-topic", enable_quantum_encryption=True)
 
     @pytest.fixture
     def producer_no_encryption(self, mock_kafka_producer):
         """Create a SecureKafkaProducer without encryption"""
-        return SecureKafkaProducer(
-            bootstrap_servers="localhost:9092",
-            topic="test-topic",
-            enable_quantum_encryption=False
-        )
+        return SecureKafkaProducer(bootstrap_servers="localhost:9092", topic="test-topic", enable_quantum_encryption=False)
 
     def test_initialization(self, producer, mock_kafka_producer):
         """Test producer initialization"""
@@ -67,16 +63,9 @@ class TestSecureKafkaProducer:
 
     def test_initialization_with_custom_config(self, mock_kafka_producer):
         """Test initialization with custom Kafka config"""
-        custom_config = {
-            'acks': 1,
-            'compression_type': 'gzip'
-        }
+        custom_config = {"acks": 1, "compression_type": "gzip"}
 
-        producer = SecureKafkaProducer(
-            bootstrap_servers="localhost:9092",
-            topic="test-topic",
-            kafka_config=custom_config
-        )
+        producer = SecureKafkaProducer(bootstrap_servers="localhost:9092", topic="test-topic", kafka_config=custom_config)
 
         # Verify KafkaProducer was called with merged config
         call_args = mock_kafka_producer.call_args
@@ -135,7 +124,7 @@ class TestSecureKafkaProducer:
 
         # Verify headers indicate no encryption
         call_args = mock_kafka_producer.send.call_args
-        headers = dict(call_args[1]['headers'])
+        headers = dict(call_args[1]["headers"])
         assert b"false" in headers[b"x-qbitel-encrypted"]
 
     def test_send_with_encryption_headers(self, producer, mock_kafka_producer):
@@ -158,7 +147,7 @@ class TestSecureKafkaProducer:
 
         # Verify encryption headers were added
         call_args = mock_kafka_producer.send.call_args
-        headers = dict(call_args[1]['headers'])
+        headers = dict(call_args[1]["headers"])
 
         assert b"true" in headers.get(b"x-qbitel-encrypted", b"")
         assert b"aes-256-gcm" in headers.get(b"x-qbitel-algorithm", b"")
@@ -181,11 +170,7 @@ class TestSecureKafkaProducer:
         mock_kafka_producer.send.return_value = future
 
         # Send message
-        result = producer.send(
-            value=b"Test message",
-            key=b"test-key",
-            partition=5
-        )
+        result = producer.send(value=b"Test message", key=b"test-key", partition=5)
 
         # Verify
         assert result["partition"] == 5
@@ -217,7 +202,7 @@ class TestSecureKafkaProducer:
         mock_kafka_producer.send.side_effect = [future_fail, future_fail, future_success]
 
         # Send message - should succeed after retries
-        with patch('time.sleep'):  # Speed up test
+        with patch("time.sleep"):  # Speed up test
             result = producer.send(b"Test message")
 
         assert result["success"] is True
@@ -232,7 +217,7 @@ class TestSecureKafkaProducer:
         mock_kafka_producer.send.return_value = future
 
         # Should raise after max retries
-        with patch('time.sleep'):
+        with patch("time.sleep"):
             with pytest.raises(KafkaTimeoutError):
                 producer.send(b"Test message")
 
@@ -247,7 +232,7 @@ class TestSecureKafkaProducer:
         mock_kafka_producer.send.return_value = future
 
         # Should raise after retries
-        with patch('time.sleep'):
+        with patch("time.sleep"):
             with pytest.raises(KafkaError):
                 producer.send(b"Test message")
 
@@ -269,7 +254,7 @@ class TestSecureKafkaProducer:
 
     def test_encrypt_message_with_cryptography_library(self, producer):
         """Test encryption using cryptography library"""
-        with patch('ai_engine.cloud_native.event_streaming.kafka.secure_producer.AESGCM') as mock_aesgcm:
+        with patch("ai_engine.cloud_native.event_streaming.kafka.secure_producer.AESGCM") as mock_aesgcm:
             # Setup mock
             mock_cipher = MagicMock()
             mock_cipher.encrypt.return_value = b"encrypted_data_with_tag" + b"\x00" * 16
@@ -335,14 +320,11 @@ class TestSecureKafkaProducer:
 
     def test_multiple_servers(self, mock_kafka_producer):
         """Test initialization with multiple bootstrap servers"""
-        producer = SecureKafkaProducer(
-            bootstrap_servers="server1:9092,server2:9092,server3:9092",
-            topic="test-topic"
-        )
+        producer = SecureKafkaProducer(bootstrap_servers="server1:9092,server2:9092,server3:9092", topic="test-topic")
 
         # Verify servers were parsed correctly
         call_args = mock_kafka_producer.call_args[1]
-        assert call_args['bootstrap_servers'] == ['server1:9092', 'server2:9092', 'server3:9092']
+        assert call_args["bootstrap_servers"] == ["server1:9092", "server2:9092", "server3:9092"]
 
     def test_encryption_consistency(self, producer):
         """Test that encryption produces consistent format"""

@@ -18,15 +18,9 @@ from ..discovery.protocol_discovery_orchestrator import ProtocolDiscoveryOrchest
 from prometheus_client import Counter, Histogram
 
 # Metrics
-KB_DOCUMENT_COUNTER = Counter(
-    "qbitel_kb_documents_total", "Total knowledge base documents", ["collection"]
-)
-KB_QUERY_COUNTER = Counter(
-    "qbitel_kb_queries_total", "Total knowledge base queries", ["type"]
-)
-KB_UPDATE_DURATION = Histogram(
-    "qbitel_kb_update_duration_seconds", "Knowledge base update duration"
-)
+KB_DOCUMENT_COUNTER = Counter("qbitel_kb_documents_total", "Total knowledge base documents", ["collection"])
+KB_QUERY_COUNTER = Counter("qbitel_kb_queries_total", "Total knowledge base queries", ["type"])
+KB_UPDATE_DURATION = Histogram("qbitel_kb_update_duration_seconds", "Knowledge base update duration")
 
 logger = logging.getLogger(__name__)
 
@@ -289,9 +283,7 @@ class ProtocolKnowledgeBase:
             }
 
             for doc in documents:
-                collection = collection_mapping.get(
-                    doc.metadata["category"], "protocol_knowledge"
-                )
+                collection = collection_mapping.get(doc.metadata["category"], "protocol_knowledge")
                 await self.rag_engine.add_documents(collection, [doc])
                 KB_DOCUMENT_COUNTER.labels(collection=collection).inc()
 
@@ -330,9 +322,7 @@ class ProtocolKnowledgeBase:
 
             for protocol_name, profile in protocol_profiles.items():
                 # Create knowledge from discovery profile
-                knowledge = await self._create_knowledge_from_profile(
-                    protocol_name, profile, discovery_results
-                )
+                knowledge = await self._create_knowledge_from_profile(protocol_name, profile, discovery_results)
 
                 if knowledge:
                     await self.add_protocol_knowledge(knowledge)
@@ -377,25 +367,16 @@ class ProtocolKnowledgeBase:
                 content = result["content"].lower()
 
                 if "description:" in content:
-                    description_start = content.find("description:") + len(
-                        "description:"
-                    )
+                    description_start = content.find("description:") + len("description:")
                     description_end = content.find("\n\n", description_start)
                     if description_end == -1:
                         description_end = description_start + 200
-                    summary["description"] = content[
-                        description_start:description_end
-                    ].strip()
+                    summary["description"] = content[description_start:description_end].strip()
 
                 if "security" in content:
-                    if any(
-                        word in content
-                        for word in ["high risk", "vulnerable", "insecure"]
-                    ):
+                    if any(word in content for word in ["high risk", "vulnerable", "insecure"]):
                         summary["security_level"] = "high_risk"
-                    elif any(
-                        word in content for word in ["secure", "encrypted", "safe"]
-                    ):
+                    elif any(word in content for word in ["secure", "encrypted", "safe"]):
                         summary["security_level"] = "secure"
                     else:
                         summary["security_level"] = "moderate"
@@ -406,9 +387,7 @@ class ProtocolKnowledgeBase:
                     field_matches = content.count("field")
                     summary["field_count"] = max(summary["field_count"], field_matches)
 
-            summary["knowledge_confidence"] = (
-                total_confidence / len(results) if results else 0.0
-            )
+            summary["knowledge_confidence"] = total_confidence / len(results) if results else 0.0
 
             return summary
 
@@ -426,17 +405,14 @@ class ProtocolKnowledgeBase:
                     "timestamp": datetime.now().isoformat(),
                     "format": format,
                     "total_collections": len(stats),
-                    "total_documents": sum(
-                        stat.get("document_count", 0) for stat in stats.values()
-                    ),
+                    "total_documents": sum(stat.get("document_count", 0) for stat in stats.values()),
                 },
                 "collection_stats": stats,
                 "knowledge_categories": self.knowledge_categories,
                 "interaction_stats": {
                     "total_interactions": len(self.interaction_history),
                     "avg_confidence": (
-                        sum(i.confidence for i in self.interaction_history)
-                        / len(self.interaction_history)
+                        sum(i.confidence for i in self.interaction_history) / len(self.interaction_history)
                         if self.interaction_history
                         else 0.0
                     ),
@@ -704,9 +680,7 @@ class ProtocolKnowledgeBase:
         except Exception as e:
             self.logger.error(f"Failed to load expert knowledge: {e}")
 
-    async def _extract_knowledge_from_interaction(
-        self, interaction: InteractionRecord
-    ) -> None:
+    async def _extract_knowledge_from_interaction(self, interaction: InteractionRecord) -> None:
         """Extract learnable knowledge from user interaction."""
         try:
             # Simple knowledge extraction based on query patterns
@@ -757,9 +731,7 @@ class ProtocolKnowledgeBase:
                 # Store in appropriate collection
                 await self.rag_engine.add_documents("protocol_knowledge", [doc])
 
-                self.logger.debug(
-                    f"Learned from interaction: {interaction.query[:50]}..."
-                )
+                self.logger.debug(f"Learned from interaction: {interaction.query[:50]}...")
 
         except Exception as e:
             self.logger.error(f"Failed to extract knowledge from interaction: {e}")
@@ -775,9 +747,7 @@ class ProtocolKnowledgeBase:
             protocol_mentions = {}
 
             for interaction in recent_interactions:
-                query_types[interaction.query_type] = (
-                    query_types.get(interaction.query_type, 0) + 1
-                )
+                query_types[interaction.query_type] = query_types.get(interaction.query_type, 0) + 1
 
                 if interaction.protocol_context:
                     protocol_mentions[interaction.protocol_context] = (
@@ -813,13 +783,9 @@ class ProtocolKnowledgeBase:
             await self.rag_engine.add_documents("protocol_knowledge", [doc])
 
             # Clear processed interactions to prevent memory buildup
-            self.interaction_history = self.interaction_history[
-                self.learning_batch_size :
-            ]
+            self.interaction_history = self.interaction_history[self.learning_batch_size :]
 
-            self.logger.info(
-                f"Processed learning batch of {len(recent_interactions)} interactions"
-            )
+            self.logger.info(f"Processed learning batch of {len(recent_interactions)} interactions")
 
         except Exception as e:
             self.logger.error(f"Failed to process learning batch: {e}")
@@ -838,9 +804,7 @@ class ProtocolKnowledgeBase:
             # Technical details from grammar
             technical_details = {
                 "grammar_rules": profile.get("grammar", {}).get("rules_count", 0),
-                "symbols_identified": profile.get("grammar", {}).get(
-                    "symbols_count", 0
-                ),
+                "symbols_identified": profile.get("grammar", {}).get("symbols_count", 0),
                 "parser_available": profile.get("parser") is not None,
                 "discovery_confidence": profile.get("average_confidence", 0.0),
             }

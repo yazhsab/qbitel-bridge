@@ -36,6 +36,7 @@ from .database import Base
 # Enumerations
 class ProtocolCategory(str, PyEnum):
     """Protocol category enumeration."""
+
     FINANCE = "finance"
     HEALTHCARE = "healthcare"
     IOT = "iot"
@@ -48,6 +49,7 @@ class ProtocolCategory(str, PyEnum):
 
 class ProtocolType(str, PyEnum):
     """Protocol type enumeration."""
+
     BINARY = "binary"
     TEXT = "text"
     XML = "xml"
@@ -58,6 +60,7 @@ class ProtocolType(str, PyEnum):
 
 class SpecFormat(str, PyEnum):
     """Specification format enumeration."""
+
     YAML = "yaml"
     JSON = "json"
     PROTOBUF = "protobuf"
@@ -66,6 +69,7 @@ class SpecFormat(str, PyEnum):
 
 class AuthorType(str, PyEnum):
     """Author type enumeration."""
+
     COMMUNITY = "community"
     VENDOR = "vendor"
     QBITEL = "qbitel"
@@ -74,6 +78,7 @@ class AuthorType(str, PyEnum):
 
 class LicenseType(str, PyEnum):
     """License type enumeration."""
+
     FREE = "free"
     PAID = "paid"
     ENTERPRISE = "enterprise"
@@ -82,6 +87,7 @@ class LicenseType(str, PyEnum):
 
 class PriceModel(str, PyEnum):
     """Price model enumeration."""
+
     ONE_TIME = "one_time"
     SUBSCRIPTION = "subscription"
     USAGE_BASED = "usage_based"
@@ -90,6 +96,7 @@ class PriceModel(str, PyEnum):
 
 class CertificationStatus(str, PyEnum):
     """Certification status enumeration."""
+
     PENDING = "pending"
     IN_REVIEW = "in_review"
     CERTIFIED = "certified"
@@ -99,6 +106,7 @@ class CertificationStatus(str, PyEnum):
 
 class ProtocolStatus(str, PyEnum):
     """Protocol status enumeration."""
+
     DRAFT = "draft"
     PENDING_VALIDATION = "pending_validation"
     PUBLISHED = "published"
@@ -108,6 +116,7 @@ class ProtocolStatus(str, PyEnum):
 
 class UserType(str, PyEnum):
     """Marketplace user type enumeration."""
+
     INDIVIDUAL = "individual"
     VENDOR = "vendor"
     ENTERPRISE = "enterprise"
@@ -115,6 +124,7 @@ class UserType(str, PyEnum):
 
 class InstallationStatus(str, PyEnum):
     """Installation status enumeration."""
+
     ACTIVE = "active"
     SUSPENDED = "suspended"
     EXPIRED = "expired"
@@ -123,6 +133,7 @@ class InstallationStatus(str, PyEnum):
 
 class ReviewStatus(str, PyEnum):
     """Review status enumeration."""
+
     PENDING = "pending"
     PUBLISHED = "published"
     HIDDEN = "hidden"
@@ -137,6 +148,7 @@ class MarketplaceProtocol(Base):
     Stores comprehensive protocol metadata including technical specifications,
     licensing, quality metrics, and compatibility information.
     """
+
     __tablename__ = "marketplace_protocols"
 
     # Primary key
@@ -217,7 +229,7 @@ class MarketplaceProtocol(Base):
     __table_args__ = (
         CheckConstraint(
             "(license_type = 'free' AND base_price IS NULL) OR (license_type != 'free' AND base_price > 0)",
-            name="valid_price_constraint"
+            name="valid_price_constraint",
         ),
         Index("idx_marketplace_protocols_search", "protocol_name", "display_name", postgresql_using="gin"),
     )
@@ -233,6 +245,7 @@ class MarketplaceUser(Base):
     Represents protocol creators, vendors, and contributors with reputation
     tracking and payment information.
     """
+
     __tablename__ = "marketplace_users"
 
     # Primary key
@@ -295,6 +308,7 @@ class MarketplaceInstallation(Base):
     Tracks installed protocols for customers including license information,
     usage statistics, and status.
     """
+
     __tablename__ = "marketplace_installations"
 
     # Primary key
@@ -353,6 +367,7 @@ class MarketplaceReview(Base):
     Customer reviews and ratings for marketplace protocols with verification
     and moderation support.
     """
+
     __tablename__ = "marketplace_reviews"
 
     # Primary key
@@ -408,6 +423,7 @@ class MarketplaceTransaction(Base):
     Tracks all financial transactions including purchases, subscriptions,
     and revenue sharing.
     """
+
     __tablename__ = "marketplace_transactions"
 
     # Primary key
@@ -462,6 +478,7 @@ class MarketplaceValidation(Base):
 
     Stores automated and manual validation results for submitted protocols.
     """
+
     __tablename__ = "marketplace_validations"
 
     # Primary key

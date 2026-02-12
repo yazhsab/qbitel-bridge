@@ -82,8 +82,7 @@ class GracefulShutdownManager:
         self._lock = asyncio.Lock()
 
         logger.info(
-            f"GracefulShutdownManager initialized "
-            f"(timeout={shutdown_timeout}s, warn={max_request_duration_warn}s)"
+            f"GracefulShutdownManager initialized " f"(timeout={shutdown_timeout}s, warn={max_request_duration_warn}s)"
         )
 
     @property
@@ -130,9 +129,7 @@ class GracefulShutdownManager:
         """
         # Check if shutting down
         if self._is_shutting_down:
-            raise RuntimeError(
-                "System is shutting down. New requests are not accepted."
-            )
+            raise RuntimeError("System is shutting down. New requests are not accepted.")
 
         # Register request
         request_info = RequestInfo(
@@ -149,9 +146,7 @@ class GracefulShutdownManager:
         # Update metrics
         ACTIVE_REQUESTS.labels(method=method, endpoint=path).inc()
 
-        logger.debug(
-            f"Request started: {request_id} [{method} {path}] from {client_ip}"
-        )
+        logger.debug(f"Request started: {request_id} [{method} {path}] from {client_ip}")
 
         try:
             yield request_info
@@ -167,15 +162,9 @@ class GracefulShutdownManager:
             # Log duration
             duration = request_info.duration
             if duration > self.max_request_duration_warn:
-                logger.warning(
-                    f"Long request: {request_id} [{method} {path}] "
-                    f"took {duration:.2f}s"
-                )
+                logger.warning(f"Long request: {request_id} [{method} {path}] " f"took {duration:.2f}s")
             else:
-                logger.debug(
-                    f"Request completed: {request_id} [{method} {path}] "
-                    f"in {duration:.2f}s"
-                )
+                logger.debug(f"Request completed: {request_id} [{method} {path}] " f"in {duration:.2f}s")
 
     async def initiate_shutdown(self) -> None:
         """
@@ -207,10 +196,7 @@ class GracefulShutdownManager:
             SHUTDOWN_DURATION.observe(time.time() - shutdown_start)
             return
 
-        logger.info(
-            f"⏳ Waiting for {active_count} active request(s) to complete "
-            f"(timeout: {self.shutdown_timeout}s)..."
-        )
+        logger.info(f"⏳ Waiting for {active_count} active request(s) to complete " f"(timeout: {self.shutdown_timeout}s)...")
 
         # Wait for requests to complete
         await self._wait_for_requests_to_complete()
@@ -221,13 +207,10 @@ class GracefulShutdownManager:
         # Log final status
         remaining = self.active_request_count
         if remaining == 0:
-            logger.info(
-                f"✅ All requests completed. " f"Shutdown took {shutdown_duration:.2f}s"
-            )
+            logger.info(f"✅ All requests completed. " f"Shutdown took {shutdown_duration:.2f}s")
         else:
             logger.warning(
-                f"⚠️  {remaining} request(s) did not complete within timeout. "
-                f"Shutdown took {shutdown_duration:.2f}s"
+                f"⚠️  {remaining} request(s) did not complete within timeout. " f"Shutdown took {shutdown_duration:.2f}s"
             )
             INTERRUPTED_REQUESTS.inc(remaining)
 
@@ -253,17 +236,13 @@ class GracefulShutdownManager:
             # Check timeout
             remaining_time = end_time - time.time()
             if remaining_time <= 0:
-                logger.warning(
-                    f"Shutdown timeout reached. "
-                    f"{self.active_request_count} request(s) still active."
-                )
+                logger.warning(f"Shutdown timeout reached. " f"{self.active_request_count} request(s) still active.")
                 break
 
             # Log progress every 5 seconds
             if int(remaining_time) % 5 == 0:
                 logger.info(
-                    f"⏳ Still waiting for {self.active_request_count} request(s). "
-                    f"Timeout in {remaining_time:.0f}s..."
+                    f"⏳ Still waiting for {self.active_request_count} request(s). " f"Timeout in {remaining_time:.0f}s..."
                 )
 
             # Wait a bit before checking again
@@ -321,8 +300,7 @@ def get_shutdown_manager() -> GracefulShutdownManager:
     global _shutdown_manager
     if _shutdown_manager is None:
         raise RuntimeError(
-            "GracefulShutdownManager not initialized. "
-            "Call initialize_shutdown_manager() during app startup."
+            "GracefulShutdownManager not initialized. " "Call initialize_shutdown_manager() during app startup."
         )
     return _shutdown_manager
 

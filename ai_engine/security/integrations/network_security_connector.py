@@ -22,14 +22,10 @@ class NetworkSecurityConnector(BaseIntegrationConnector, ABC):
 
     def __init__(self, config):
         super().__init__(config)
-        self.logger = get_security_logger(
-            "qbitel.security.integrations.network_security"
-        )
+        self.logger = get_security_logger("qbitel.security.integrations.network_security")
 
     @abstractmethod
-    async def block_ip(
-        self, ip_address: str, duration_minutes: int = None
-    ) -> IntegrationResult:
+    async def block_ip(self, ip_address: str, duration_minutes: int = None) -> IntegrationResult:
         """Block an IP address."""
         pass
 
@@ -39,9 +35,7 @@ class NetworkSecurityConnector(BaseIntegrationConnector, ABC):
         pass
 
     @abstractmethod
-    async def create_firewall_rule(
-        self, rule_config: Dict[str, Any]
-    ) -> IntegrationResult:
+    async def create_firewall_rule(self, rule_config: Dict[str, Any]) -> IntegrationResult:
         """Create a new firewall rule."""
         pass
 
@@ -136,9 +130,7 @@ class FirewallConnector(NetworkSecurityConnector):
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    test_url, params=params, timeout=aiohttp.ClientTimeout(total=10)
-                ) as response:
+                async with session.get(test_url, params=params, timeout=aiohttp.ClientTimeout(total=10)) as response:
                     if response.status == 200:
                         content = await response.text()
                         # Parse XML response
@@ -164,9 +156,7 @@ class FirewallConnector(NetworkSecurityConnector):
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    login_url, json=credentials, timeout=aiohttp.ClientTimeout(total=10)
-                ) as response:
+                async with session.post(login_url, json=credentials, timeout=aiohttp.ClientTimeout(total=10)) as response:
                     if response.status == 200:
                         data = await response.json()
                         return "sid" in data
@@ -183,9 +173,7 @@ class FirewallConnector(NetworkSecurityConnector):
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    test_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)
-                ) as response:
+                async with session.get(test_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as response:
                     if response.status == 200:
                         data = await response.json()
                         return data.get("status") == "success"
@@ -199,17 +187,13 @@ class FirewallConnector(NetworkSecurityConnector):
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    self.config.endpoint, timeout=aiohttp.ClientTimeout(total=10)
-                ) as response:
+                async with session.get(self.config.endpoint, timeout=aiohttp.ClientTimeout(total=10)) as response:
                     return response.status < 500
 
         except Exception:
             return False
 
-    async def send_security_event(
-        self, security_event: SecurityEvent
-    ) -> IntegrationResult:
+    async def send_security_event(self, security_event: SecurityEvent) -> IntegrationResult:
         """Send security event to firewall for processing."""
 
         try:
@@ -221,9 +205,7 @@ class FirewallConnector(NetworkSecurityConnector):
                 # Automatically block suspicious IP
                 block_result = await self.block_ip(
                     security_event.source_ip,
-                    duration_minutes=self.config.custom_config.get(
-                        "auto_block_duration", 60
-                    ),
+                    duration_minutes=self.config.custom_config.get("auto_block_duration", 60),
                 )
 
                 if block_result.success:
@@ -248,9 +230,7 @@ class FirewallConnector(NetworkSecurityConnector):
                 error_code="FIREWALL_PROCESS_ERROR",
             )
 
-    async def send_threat_analysis(
-        self, threat_analysis: ThreatAnalysis
-    ) -> IntegrationResult:
+    async def send_threat_analysis(self, threat_analysis: ThreatAnalysis) -> IntegrationResult:
         """Send threat analysis to firewall."""
 
         try:
@@ -277,9 +257,7 @@ class FirewallConnector(NetworkSecurityConnector):
                 error_code="FIREWALL_THREAT_PROCESS_ERROR",
             )
 
-    async def send_response_execution(
-        self, automated_response: AutomatedResponse
-    ) -> IntegrationResult:
+    async def send_response_execution(self, automated_response: AutomatedResponse) -> IntegrationResult:
         """Send automated response execution to firewall."""
 
         try:
@@ -330,9 +308,7 @@ class FirewallConnector(NetworkSecurityConnector):
                 error_code="FIREWALL_RESPONSE_ERROR",
             )
 
-    async def block_ip(
-        self, ip_address: str, duration_minutes: int = None
-    ) -> IntegrationResult:
+    async def block_ip(self, ip_address: str, duration_minutes: int = None) -> IntegrationResult:
         """Block an IP address on the firewall."""
 
         if self.firewall_type == "palo_alto":
@@ -344,9 +320,7 @@ class FirewallConnector(NetworkSecurityConnector):
         else:
             return await self._generic_block_ip(ip_address, duration_minutes)
 
-    async def _palo_alto_block_ip(
-        self, ip_address: str, duration_minutes: int = None
-    ) -> IntegrationResult:
+    async def _palo_alto_block_ip(self, ip_address: str, duration_minutes: int = None) -> IntegrationResult:
         """Block IP on Palo Alto firewall."""
 
         # Create dynamic address object
@@ -385,11 +359,7 @@ class FirewallConnector(NetworkSecurityConnector):
                             if commit_result:
                                 # Schedule unblock if duration specified
                                 if duration_minutes:
-                                    asyncio.create_task(
-                                        self._schedule_unblock(
-                                            ip_address, duration_minutes * 60
-                                        )
-                                    )
+                                    asyncio.create_task(self._schedule_unblock(ip_address, duration_minutes * 60))
 
                                 return IntegrationResult(
                                     success=True,
@@ -454,9 +424,7 @@ class FirewallConnector(NetworkSecurityConnector):
         except Exception:
             return False
 
-    async def _checkpoint_block_ip(
-        self, ip_address: str, duration_minutes: int = None
-    ) -> IntegrationResult:
+    async def _checkpoint_block_ip(self, ip_address: str, duration_minutes: int = None) -> IntegrationResult:
         """Block IP on Check Point firewall."""
 
         # Check Point implementation would involve:
@@ -472,9 +440,7 @@ class FirewallConnector(NetworkSecurityConnector):
             response_data={"ip_address": ip_address, "method": "checkpoint"},
         )
 
-    async def _fortinet_block_ip(
-        self, ip_address: str, duration_minutes: int = None
-    ) -> IntegrationResult:
+    async def _fortinet_block_ip(self, ip_address: str, duration_minutes: int = None) -> IntegrationResult:
         """Block IP on Fortinet FortiGate."""
 
         # Create banned IP entry
@@ -504,11 +470,7 @@ class FirewallConnector(NetworkSecurityConnector):
                         if response_data.get("status") == "success":
                             # Schedule unblock if duration specified
                             if duration_minutes:
-                                asyncio.create_task(
-                                    self._schedule_unblock(
-                                        ip_address, duration_minutes * 60
-                                    )
-                                )
+                                asyncio.create_task(self._schedule_unblock(ip_address, duration_minutes * 60))
 
                             return IntegrationResult(
                                 success=True,
@@ -539,9 +501,7 @@ class FirewallConnector(NetworkSecurityConnector):
                 error_code="FORTINET_BLOCK_ERROR",
             )
 
-    async def _generic_block_ip(
-        self, ip_address: str, duration_minutes: int = None
-    ) -> IntegrationResult:
+    async def _generic_block_ip(self, ip_address: str, duration_minutes: int = None) -> IntegrationResult:
         """Generic IP blocking implementation."""
 
         # This would be implemented based on the specific firewall's API
@@ -712,15 +672,11 @@ class FirewallConnector(NetworkSecurityConnector):
             response_data={"ip_address": ip_address},
         )
 
-    async def create_firewall_rule(
-        self, rule_config: Dict[str, Any]
-    ) -> IntegrationResult:
+    async def create_firewall_rule(self, rule_config: Dict[str, Any]) -> IntegrationResult:
         """Create a new firewall rule."""
 
         # This would be implemented based on the specific firewall type
-        rule_name = rule_config.get(
-            "name", f"QBITEL_RULE_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
-        )
+        rule_name = rule_config.get("name", f"QBITEL_RULE_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}")
 
         return IntegrationResult(
             success=True,
@@ -842,17 +798,13 @@ class IDSConnector(NetworkSecurityConnector):
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    test_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)
-                ) as response:
+                async with session.get(test_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as response:
                     return response.status == 200
 
         except Exception:
             return False
 
-    async def send_security_event(
-        self, security_event: SecurityEvent
-    ) -> IntegrationResult:
+    async def send_security_event(self, security_event: SecurityEvent) -> IntegrationResult:
         """Send security event to IDS for correlation."""
 
         try:
@@ -879,9 +831,7 @@ class IDSConnector(NetworkSecurityConnector):
                 error_code="IDS_SEND_ERROR",
             )
 
-    async def send_threat_analysis(
-        self, threat_analysis: ThreatAnalysis
-    ) -> IntegrationResult:
+    async def send_threat_analysis(self, threat_analysis: ThreatAnalysis) -> IntegrationResult:
         """Send threat analysis to IDS."""
 
         try:
@@ -908,9 +858,7 @@ class IDSConnector(NetworkSecurityConnector):
                 error_code="IDS_THREAT_PROCESS_ERROR",
             )
 
-    async def send_response_execution(
-        self, automated_response: AutomatedResponse
-    ) -> IntegrationResult:
+    async def send_response_execution(self, automated_response: AutomatedResponse) -> IntegrationResult:
         """Send automated response execution to IDS."""
 
         try:
@@ -923,9 +871,7 @@ class IDSConnector(NetworkSecurityConnector):
                     "action_type": action.action_type.value,
                     "target_system": action.target_system,
                     "status": action.status.value,
-                    "executed_at": (
-                        action.executed_at.isoformat() if action.executed_at else None
-                    ),
+                    "executed_at": (action.executed_at.isoformat() if action.executed_at else None),
                 }
 
                 log_result = await self._log_action_in_ids(log_entry)
@@ -1011,9 +957,7 @@ class IDSConnector(NetworkSecurityConnector):
         }
 
     # Implement abstract methods from NetworkSecurityConnector
-    async def block_ip(
-        self, ip_address: str, duration_minutes: int = None
-    ) -> IntegrationResult:
+    async def block_ip(self, ip_address: str, duration_minutes: int = None) -> IntegrationResult:
         """Block IP in IDS (create detection rule)."""
 
         rule_result = await self._create_ids_rule(ip_address, "ip")
@@ -1040,14 +984,10 @@ class IDSConnector(NetworkSecurityConnector):
             response_data={"ip_address": ip_address},
         )
 
-    async def create_firewall_rule(
-        self, rule_config: Dict[str, Any]
-    ) -> IntegrationResult:
+    async def create_firewall_rule(self, rule_config: Dict[str, Any]) -> IntegrationResult:
         """Create IDS detection rule."""
 
-        rule_name = rule_config.get(
-            "name", f"QBITEL_IDS_RULE_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
-        )
+        rule_name = rule_config.get("name", f"QBITEL_IDS_RULE_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}")
 
         return IntegrationResult(
             success=True,

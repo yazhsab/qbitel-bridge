@@ -19,6 +19,7 @@ from ai_engine.domains.banking.security.pin_security.pin_block import (
 
 class PINTranslatorError(Exception):
     """Exception for PIN translation errors."""
+
     pass
 
 

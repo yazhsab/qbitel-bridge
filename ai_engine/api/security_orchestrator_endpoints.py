@@ -50,28 +50,18 @@ class SecurityEventRequest(BaseModel):
     description: str = Field(..., description="Event description")
     indicators: List[str] = Field(default_factory=list, description="Threat indicators")
     raw_data: Dict[str, Any] = Field(default_factory=dict, description="Raw event data")
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class SecurityPolicyRequest(BaseModel):
     """Security policy generation request."""
 
-    framework: str = Field(
-        ..., description="Security framework (NIST, ISO27001, CIS, etc.)"
-    )
+    framework: str = Field(..., description="Security framework (NIST, ISO27001, CIS, etc.)")
     controls: List[str] = Field(..., description="Security controls to implement")
     risk_level: str = Field(..., description="Risk level (low, medium, high, critical)")
-    compliance_requirements: List[str] = Field(
-        ..., description="Compliance requirements"
-    )
-    business_context: Dict[str, Any] = Field(
-        default_factory=dict, description="Business context"
-    )
-    constraints: Dict[str, Any] = Field(
-        default_factory=dict, description="Implementation constraints"
-    )
+    compliance_requirements: List[str] = Field(..., description="Compliance requirements")
+    business_context: Dict[str, Any] = Field(default_factory=dict, description="Business context")
+    constraints: Dict[str, Any] = Field(default_factory=dict, description="Implementation constraints")
 
 
 class ThreatIntelligenceRequest(BaseModel):
@@ -79,19 +69,11 @@ class ThreatIntelligenceRequest(BaseModel):
 
     source: str = Field(..., description="Intelligence source")
     threat_indicators: List[str] = Field(..., description="Threat indicators")
-    threat_actors: List[str] = Field(
-        default_factory=list, description="Known threat actors"
-    )
-    attack_patterns: List[str] = Field(
-        default_factory=list, description="Attack patterns"
-    )
-    vulnerabilities: List[str] = Field(
-        default_factory=list, description="Vulnerabilities"
-    )
+    threat_actors: List[str] = Field(default_factory=list, description="Known threat actors")
+    attack_patterns: List[str] = Field(default_factory=list, description="Attack patterns")
+    vulnerabilities: List[str] = Field(default_factory=list, description="Vulnerabilities")
     confidence: float = Field(0.7, ge=0.0, le=1.0, description="Confidence level")
-    raw_data: Dict[str, Any] = Field(
-        default_factory=dict, description="Raw intelligence data"
-    )
+    raw_data: Dict[str, Any] = Field(default_factory=dict, description="Raw intelligence data")
 
 
 class SecurityResponseModel(BaseModel):
@@ -214,9 +196,7 @@ async def detect_and_respond(
         )
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid request: {str(e)}"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid request: {str(e)}")
     except SecurityException as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -282,9 +262,7 @@ async def generate_security_policies(
         ]
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid request: {str(e)}"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid request: {str(e)}")
     except SecurityException as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -353,9 +331,7 @@ async def analyze_threat_intelligence(
         )
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid request: {str(e)}"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid request: {str(e)}")
     except SecurityException as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -498,9 +474,7 @@ async def get_incident(
             "status": incident.status.value,
             "created_at": incident.created_at.isoformat(),
             "updated_at": incident.updated_at.isoformat(),
-            "resolved_at": (
-                incident.resolved_at.isoformat() if incident.resolved_at else None
-            ),
+            "resolved_at": (incident.resolved_at.isoformat() if incident.resolved_at else None),
             "assigned_to": incident.assigned_to,
             "events": [
                 {

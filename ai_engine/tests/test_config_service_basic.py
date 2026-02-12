@@ -17,9 +17,7 @@ class TestConfigurationService:
 
     def test_initialization(self):
         """Test ConfigurationService initialization."""
-        service = ConfigurationService(
-            etcd_host="localhost", etcd_port=2379, namespace="test"
-        )
+        service = ConfigurationService(etcd_host="localhost", etcd_port=2379, namespace="test")
 
         assert service.etcd_host == "localhost"
         assert service.etcd_port == 2379

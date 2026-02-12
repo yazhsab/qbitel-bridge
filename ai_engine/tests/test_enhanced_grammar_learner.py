@@ -86,9 +86,7 @@ class TestTransformerModel:
 
     def test_transformer_encoder_initialization(self):
         """Test transformer encoder initialization."""
-        model = TransformerGrammarEncoder(
-            vocab_size=256, d_model=512, nhead=8, num_layers=6
-        )
+        model = TransformerGrammarEncoder(vocab_size=256, d_model=512, nhead=8, num_layers=6)
 
         assert model.d_model == 512
         assert model.embedding.num_embeddings == 256
@@ -135,9 +133,7 @@ class TestTransformerLearning:
     @pytest.mark.asyncio
     async def test_learn_with_transformer(self, enhanced_learner, sample_messages):
         """Test transformer-based learning."""
-        grammar = await enhanced_learner.learn_with_transformer(
-            sample_messages, protocol_hint="test_protocol"
-        )
+        grammar = await enhanced_learner.learn_with_transformer(sample_messages, protocol_hint="test_protocol")
 
         assert isinstance(grammar, Grammar)
         assert len(grammar.rules) > 0
@@ -145,13 +141,9 @@ class TestTransformerLearning:
         assert grammar.metadata.get("enhanced_with_transformer") is True
 
     @pytest.mark.asyncio
-    async def test_transformer_learning_with_http(
-        self, enhanced_learner, http_messages
-    ):
+    async def test_transformer_learning_with_http(self, enhanced_learner, http_messages):
         """Test transformer learning on HTTP messages."""
-        grammar = await enhanced_learner.learn_with_transformer(
-            http_messages, protocol_hint="HTTP"
-        )
+        grammar = await enhanced_learner.learn_with_transformer(http_messages, protocol_hint="HTTP")
 
         assert isinstance(grammar, Grammar)
         assert len(grammar.rules) > 0
@@ -161,9 +153,7 @@ class TestTransformerLearning:
         assert any("TEXT" in name or "FIELD" in name for name in symbol_names)
 
     @pytest.mark.asyncio
-    async def test_transformer_learning_performance(
-        self, enhanced_learner, sample_messages
-    ):
+    async def test_transformer_learning_performance(self, enhanced_learner, sample_messages):
         """Test transformer learning performance."""
         import time
 
@@ -185,9 +175,7 @@ class TestHierarchicalGrammar:
     @pytest.mark.asyncio
     async def test_learn_hierarchical_grammar(self, enhanced_learner, sample_messages):
         """Test hierarchical grammar learning."""
-        hierarchical_grammar = await enhanced_learner.learn_hierarchical_grammar(
-            sample_messages
-        )
+        hierarchical_grammar = await enhanced_learner.learn_hierarchical_grammar(sample_messages)
 
         assert isinstance(hierarchical_grammar, HierarchicalGrammar)
         assert len(hierarchical_grammar.layers) > 0
@@ -197,9 +185,7 @@ class TestHierarchicalGrammar:
     @pytest.mark.asyncio
     async def test_hierarchical_grammar_layers(self, enhanced_learner, sample_messages):
         """Test hierarchical grammar layer detection."""
-        hierarchical_grammar = await enhanced_learner.learn_hierarchical_grammar(
-            sample_messages
-        )
+        hierarchical_grammar = await enhanced_learner.learn_hierarchical_grammar(sample_messages)
 
         # Check layer structure
         for layer_name in hierarchical_grammar.layer_order:
@@ -208,13 +194,9 @@ class TestHierarchicalGrammar:
             assert isinstance(layer_grammar, Grammar)
 
     @pytest.mark.asyncio
-    async def test_hierarchical_grammar_serialization(
-        self, enhanced_learner, sample_messages
-    ):
+    async def test_hierarchical_grammar_serialization(self, enhanced_learner, sample_messages):
         """Test hierarchical grammar serialization."""
-        hierarchical_grammar = await enhanced_learner.learn_hierarchical_grammar(
-            sample_messages
-        )
+        hierarchical_grammar = await enhanced_learner.learn_hierarchical_grammar(sample_messages)
 
         # Convert to dict
         grammar_dict = hierarchical_grammar.to_dict()
@@ -229,19 +211,13 @@ class TestActiveLearning:
     """Test active learning framework."""
 
     @pytest.mark.asyncio
-    async def test_active_learning_query_creation(
-        self, enhanced_learner, sample_messages
-    ):
+    async def test_active_learning_query_creation(self, enhanced_learner, sample_messages):
         """Test active learning query creation."""
         # Learn initial grammar
-        initial_grammar = await enhanced_learner.learn_with_transformer(
-            sample_messages[:2]
-        )
+        initial_grammar = await enhanced_learner.learn_with_transformer(sample_messages[:2])
 
         # Create query
-        query = await enhanced_learner._select_uncertain_sample(
-            sample_messages[2:], initial_grammar
-        )
+        query = await enhanced_learner._select_uncertain_sample(sample_messages[2:], initial_grammar)
 
         assert isinstance(query, ActiveLearningQuery)
         assert query.query_id is not None
@@ -269,9 +245,7 @@ class TestActiveLearning:
             assert metrics["average_sample_efficiency"] >= 1.0
 
     @pytest.mark.asyncio
-    async def test_active_learning_sample_efficiency(
-        self, enhanced_learner, sample_messages
-    ):
+    async def test_active_learning_sample_efficiency(self, enhanced_learner, sample_messages):
         """Test active learning achieves 10x sample efficiency."""
 
         def oracle(query: ActiveLearningQuery) -> Dict[str, Any]:
@@ -326,31 +300,23 @@ class TestGrammarVisualization:
     """Test grammar visualization tools."""
 
     @pytest.mark.asyncio
-    async def test_visualize_grammar_json(
-        self, enhanced_learner, sample_messages, tmp_path
-    ):
+    async def test_visualize_grammar_json(self, enhanced_learner, sample_messages, tmp_path):
         """Test JSON grammar visualization."""
         grammar = await enhanced_learner.learn_with_transformer(sample_messages)
 
         output_path = tmp_path / "grammar_viz"
-        result_path = await enhanced_learner.visualize_grammar(
-            grammar, str(output_path), format="json"
-        )
+        result_path = await enhanced_learner.visualize_grammar(grammar, str(output_path), format="json")
 
         assert Path(result_path).exists()
         assert result_path.endswith(".json")
 
     @pytest.mark.asyncio
-    async def test_visualize_grammar_html(
-        self, enhanced_learner, sample_messages, tmp_path
-    ):
+    async def test_visualize_grammar_html(self, enhanced_learner, sample_messages, tmp_path):
         """Test HTML grammar visualization."""
         grammar = await enhanced_learner.learn_with_transformer(sample_messages)
 
         output_path = tmp_path / "grammar_viz"
-        result_path = await enhanced_learner.visualize_grammar(
-            grammar, str(output_path), format="html"
-        )
+        result_path = await enhanced_learner.visualize_grammar(grammar, str(output_path), format="html")
 
         assert Path(result_path).exists()
         assert result_path.endswith(".html")
@@ -362,18 +328,12 @@ class TestGrammarVisualization:
             assert "Grammar Visualization" in content
 
     @pytest.mark.asyncio
-    async def test_visualize_hierarchical_grammar(
-        self, enhanced_learner, sample_messages, tmp_path
-    ):
+    async def test_visualize_hierarchical_grammar(self, enhanced_learner, sample_messages, tmp_path):
         """Test hierarchical grammar visualization."""
-        hierarchical_grammar = await enhanced_learner.learn_hierarchical_grammar(
-            sample_messages
-        )
+        hierarchical_grammar = await enhanced_learner.learn_hierarchical_grammar(sample_messages)
 
         output_path = tmp_path / "hierarchical_viz"
-        result_path = await enhanced_learner.visualize_grammar(
-            hierarchical_grammar, str(output_path), format="json"
-        )
+        result_path = await enhanced_learner.visualize_grammar(hierarchical_grammar, str(output_path), format="json")
 
         assert Path(result_path).exists()
 
@@ -413,9 +373,7 @@ class TestGrammarEvaluation:
         train_messages = extended_http[:train_size]
         test_messages = extended_http[train_size:]
 
-        grammar = await enhanced_learner.learn_with_transformer(
-            train_messages, protocol_hint="HTTP"
-        )
+        grammar = await enhanced_learner.learn_with_transformer(train_messages, protocol_hint="HTTP")
 
         metrics = await enhanced_learner.evaluate_grammar(grammar, test_messages)
 
@@ -503,9 +461,7 @@ class TestModelPersistence:
     """Test model saving and loading."""
 
     @pytest.mark.asyncio
-    async def test_save_and_load_model(
-        self, enhanced_learner, sample_messages, tmp_path
-    ):
+    async def test_save_and_load_model(self, enhanced_learner, sample_messages, tmp_path):
         """Test model persistence."""
         # Train model
         await enhanced_learner.learn_with_transformer(sample_messages)
@@ -524,9 +480,7 @@ class TestModelPersistence:
         original_metrics = enhanced_learner.get_metrics_summary()
         loaded_metrics = new_learner.get_metrics_summary()
 
-        assert (
-            original_metrics["total_evaluations"] == loaded_metrics["total_evaluations"]
-        )
+        assert original_metrics["total_evaluations"] == loaded_metrics["total_evaluations"]
 
 
 class TestPerformanceMetrics:
@@ -573,9 +527,7 @@ class TestIntegration:
     async def test_end_to_end_workflow(self, enhanced_learner, http_messages):
         """Test complete end-to-end workflow."""
         # 1. Learn grammar with transformer
-        grammar = await enhanced_learner.learn_with_transformer(
-            http_messages, protocol_hint="HTTP"
-        )
+        grammar = await enhanced_learner.learn_with_transformer(http_messages, protocol_hint="HTTP")
 
         assert isinstance(grammar, Grammar)
 
@@ -588,9 +540,7 @@ class TestIntegration:
         import tempfile
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            viz_path = await enhanced_learner.visualize_grammar(
-                grammar, f"{tmpdir}/grammar", format="json"
-            )
+            viz_path = await enhanced_learner.visualize_grammar(grammar, f"{tmpdir}/grammar", format="json")
             assert Path(viz_path).exists()
 
         # 4. Get metrics summary
@@ -601,9 +551,7 @@ class TestIntegration:
     async def test_production_readiness(self, enhanced_learner, http_messages):
         """Test production readiness criteria."""
         # Learn grammar
-        grammar = await enhanced_learner.learn_with_transformer(
-            http_messages * 10, protocol_hint="HTTP"  # 50 messages
-        )
+        grammar = await enhanced_learner.learn_with_transformer(http_messages * 10, protocol_hint="HTTP")  # 50 messages
 
         # Evaluate
         metrics = await enhanced_learner.evaluate_grammar(grammar, http_messages)

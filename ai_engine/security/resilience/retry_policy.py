@@ -152,9 +152,7 @@ class RetryPolicy:
         max_total_time: Optional[float] = None,
         retryable_exceptions: Optional[List[Type[Exception]]] = None,
         non_retryable_exceptions: Optional[List[Type[Exception]]] = None,
-        failure_classifier: Optional[
-            Callable[[Exception], FailureClassification]
-        ] = None,
+        failure_classifier: Optional[Callable[[Exception], FailureClassification]] = None,
     ):
         self.max_attempts = max_attempts
         self.base_delay = base_delay
@@ -177,24 +175,17 @@ class RetryPolicy:
         self.logger = get_security_logger("qbitel.security.resilience.retry_policy")
         self._stats = RetryStats()
 
-    def _default_failure_classifier(
-        self, exception: Exception
-    ) -> FailureClassification:
+    def _default_failure_classifier(self, exception: Exception) -> FailureClassification:
         """Default failure classification logic."""
 
         exception_type = type(exception)
 
         # Check explicit non-retryable exceptions
-        if any(
-            isinstance(exception, exc_type)
-            for exc_type in self.non_retryable_exceptions
-        ):
+        if any(isinstance(exception, exc_type) for exc_type in self.non_retryable_exceptions):
             return FailureClassification.PERMANENT
 
         # Check explicit retryable exceptions
-        if any(
-            isinstance(exception, exc_type) for exc_type in self.retryable_exceptions
-        ):
+        if any(isinstance(exception, exc_type) for exc_type in self.retryable_exceptions):
             return FailureClassification.TRANSIENT
 
         # Classify based on exception type and message
@@ -211,9 +202,7 @@ class RetryPolicy:
         else:
             return FailureClassification.UNKNOWN
 
-    def should_retry(
-        self, attempt: int, exception: Exception, total_time: float
-    ) -> bool:
+    def should_retry(self, attempt: int, exception: Exception, total_time: float) -> bool:
         """Determine if we should retry based on the failure."""
 
         # Check attempt limit
@@ -281,8 +270,7 @@ class RetryPolicy:
                 attempt = RetryAttempt(
                     attempt_number=attempt_number,
                     delay=0.0 if attempt_number == 1 else attempts[-1].delay,
-                    duration=time.time()
-                    - (start_time + sum(a.delay for a in attempts)),
+                    duration=time.time() - (start_time + sum(a.delay for a in attempts)),
                 )
                 attempts.append(attempt)
                 self._stats.update(attempt, success=True)
@@ -295,11 +283,7 @@ class RetryPolicy:
                         metadata={
                             "attempts": attempt_number,
                             "total_time": time.time() - start_time,
-                            "function": (
-                                func.__name__
-                                if hasattr(func, "__name__")
-                                else str(func)
-                            ),
+                            "function": (func.__name__ if hasattr(func, "__name__") else str(func)),
                         },
                     )
 
@@ -315,8 +299,7 @@ class RetryPolicy:
                         attempt_number=attempt_number,
                         delay=0.0,
                         exception=e,
-                        duration=time.time()
-                        - (start_time + sum(a.delay for a in attempts)),
+                        duration=time.time() - (start_time + sum(a.delay for a in attempts)),
                     )
                     attempts.append(attempt)
                     self._stats.update(attempt, success=False)
@@ -333,11 +316,7 @@ class RetryPolicy:
                             "failure_classification": failure_classification.value,
                             "exception_type": type(e).__name__,
                             "exception_message": str(e),
-                            "function": (
-                                func.__name__
-                                if hasattr(func, "__name__")
-                                else str(func)
-                            ),
+                            "function": (func.__name__ if hasattr(func, "__name__") else str(func)),
                         },
                         error_code="RETRY_EXHAUSTED",
                     )
@@ -346,9 +325,7 @@ class RetryPolicy:
 
                 # Calculate delay for next attempt
                 if attempt_number < self.max_attempts:
-                    delay = self.backoff_strategy.calculate_delay(
-                        attempt_number, self.base_delay
-                    )
+                    delay = self.backoff_strategy.calculate_delay(attempt_number, self.base_delay)
 
                     # Adjust delay based on failure classification
                     failure_classification = self.failure_classifier(e)
@@ -363,8 +340,7 @@ class RetryPolicy:
                         attempt_number=attempt_number,
                         delay=delay,
                         exception=e,
-                        duration=time.time()
-                        - (start_time + sum(a.delay for a in attempts)),
+                        duration=time.time() - (start_time + sum(a.delay for a in attempts)),
                     )
                     attempts.append(attempt)
                     self._stats.update(attempt, success=False)
@@ -378,11 +354,7 @@ class RetryPolicy:
                             "delay": delay,
                             "failure_classification": failure_classification.value,
                             "exception_type": type(e).__name__,
-                            "function": (
-                                func.__name__
-                                if hasattr(func, "__name__")
-                                else str(func)
-                            ),
+                            "function": (func.__name__ if hasattr(func, "__name__") else str(func)),
                         },
                     )
 
@@ -395,8 +367,7 @@ class RetryPolicy:
                         attempt_number=attempt_number,
                         delay=0.0,
                         exception=e,
-                        duration=time.time()
-                        - (start_time + sum(a.delay for a in attempts)),
+                        duration=time.time() - (start_time + sum(a.delay for a in attempts)),
                     )
                     attempts.append(attempt)
                     self._stats.update(attempt, success=False)
@@ -462,11 +433,7 @@ class RetryManager:
             metadata={
                 "max_attempts": max_attempts,
                 "base_delay": base_delay,
-                "backoff_strategy": (
-                    type(backoff_strategy).__name__
-                    if backoff_strategy
-                    else "ExponentialBackoff"
-                ),
+                "backoff_strategy": (type(backoff_strategy).__name__ if backoff_strategy else "ExponentialBackoff"),
             },
         )
 
@@ -478,9 +445,7 @@ class RetryManager:
 
     def get_all_stats(self) -> Dict[str, Dict[str, Any]]:
         """Get statistics for all retry policies."""
-        return {
-            name: policy.get_stats() for name, policy in self.retry_policies.items()
-        }
+        return {name: policy.get_stats() for name, policy in self.retry_policies.items()}
 
     def reset_all_stats(self):
         """Reset statistics for all retry policies."""
@@ -532,9 +497,7 @@ class CommonRetryPolicies:
         return RetryPolicy(
             max_attempts=4,
             base_delay=1.0,
-            backoff_strategy=ExponentialBackoff(
-                multiplier=2.0, max_delay=60.0, jitter=True, jitter_factor=0.1
-            ),
+            backoff_strategy=ExponentialBackoff(multiplier=2.0, max_delay=60.0, jitter=True, jitter_factor=0.1),
             retryable_exceptions=[
                 ConnectionError,
                 TimeoutError,

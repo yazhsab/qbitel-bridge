@@ -81,11 +81,7 @@ class ComplianceAssessment:
     recommendations: List["ComplianceRecommendation"]
     risk_score: float
     next_assessment_due: datetime
-    assessment_id: str = field(
-        default_factory=lambda: hashlib.md5(
-            str(datetime.utcnow()).encode()
-        ).hexdigest()[:12]
-    )
+    assessment_id: str = field(default_factory=lambda: hashlib.md5(str(datetime.utcnow()).encode()).hexdigest()[:12])
 
 
 @dataclass
@@ -143,9 +139,7 @@ class ComplianceFramework(ABC):
         """Get all requirements for a specific section."""
         return [req for req in self.requirements.values() if req.section == section]
 
-    def get_requirements_by_severity(
-        self, severity: RequirementSeverity
-    ) -> List[ComplianceRequirement]:
+    def get_requirements_by_severity(self, severity: RequirementSeverity) -> List[ComplianceRequirement]:
         """Get requirements by severity level."""
         return [req for req in self.requirements.values() if req.severity == severity]
 
@@ -751,9 +745,7 @@ class RegulatoryKnowledgeBase:
             len(self.frameworks),
         )
 
-    async def assess_compliance(
-        self, system_data: Dict[str, Any], framework: str
-    ) -> ComplianceAssessment:
+    async def assess_compliance(self, system_data: Dict[str, Any], framework: str) -> ComplianceAssessment:
         """
         Assess system compliance against specified regulatory framework.
 
@@ -772,23 +764,15 @@ class RegulatoryKnowledgeBase:
             self.logger.info(f"Starting compliance assessment for {framework}")
 
             # Collect relevant compliance data
-            compliance_data = await self._collect_compliance_data(
-                system_data, framework_instance.requirements
-            )
+            compliance_data = await self._collect_compliance_data(system_data, framework_instance.requirements)
 
             # LLM-powered gap analysis
-            gap_analysis = await self._perform_llm_gap_analysis(
-                compliance_data, framework_instance, framework
-            )
+            gap_analysis = await self._perform_llm_gap_analysis(compliance_data, framework_instance, framework)
 
             # Calculate compliance metrics
-            assessment = await self._calculate_compliance_metrics(
-                gap_analysis, framework_instance, framework
-            )
+            assessment = await self._calculate_compliance_metrics(gap_analysis, framework_instance, framework)
 
-            self.logger.info(
-                f"Compliance assessment completed for {framework}: {assessment.overall_compliance_score:.2f}%"
-            )
+            self.logger.info(f"Compliance assessment completed for {framework}: {assessment.overall_compliance_score:.2f}%")
             return assessment
 
         except Exception as e:
@@ -813,9 +797,7 @@ class RegulatoryKnowledgeBase:
             "physical_security": system_data.get("physical", {}),
             "incident_response": system_data.get("incidents", {}),
             "requirements_count": len(requirements),
-            "framework_sections": list(
-                set(req.section for req in requirements.values())
-            ),
+            "framework_sections": list(set(req.section for req in requirements.values())),
         }
 
         return compliance_data
@@ -829,9 +811,7 @@ class RegulatoryKnowledgeBase:
         """Use LLM to perform intelligent gap analysis."""
         try:
             # Create comprehensive prompt for gap analysis
-            prompt = self._create_gap_analysis_prompt(
-                compliance_data, framework_instance, framework
-            )
+            prompt = self._create_gap_analysis_prompt(compliance_data, framework_instance, framework)
 
             # Request LLM analysis
             llm_request = LLMRequest(
@@ -970,9 +950,7 @@ Focus on practical, actionable insights for enterprise-grade compliance improvem
                     "impact_assessment": "Unknown impact - manual review required",
                     "remediation_effort": "medium",
                 }
-                for req in list(framework_instance.requirements.values())[
-                    :5
-                ]  # Limit to first 5
+                for req in list(framework_instance.requirements.values())[:5]  # Limit to first 5
             ],
             "recommendations": [
                 {
@@ -1038,9 +1016,7 @@ Focus on practical, actionable insights for enterprise-grade compliance improvem
             overall_compliance_score=gap_analysis.get("compliance_score", 0.0),
             compliant_requirements=gap_analysis.get("compliant_count", 0),
             non_compliant_requirements=gap_analysis.get("non_compliant_count", 0),
-            partially_compliant_requirements=gap_analysis.get(
-                "partially_compliant_count", 0
-            ),
+            partially_compliant_requirements=gap_analysis.get("partially_compliant_count", 0),
             not_assessed_requirements=0,
             gaps=gaps,
             recommendations=recommendations,
@@ -1074,16 +1050,8 @@ Focus on practical, actionable insights for enterprise-grade compliance improvem
             "version": framework_instance.version,
             "total_requirements": len(framework_instance.requirements),
             "sections": list(framework_instance.sections.keys()),
-            "critical_requirements": len(
-                framework_instance.get_requirements_by_severity(
-                    RequirementSeverity.CRITICAL
-                )
-            ),
-            "high_requirements": len(
-                framework_instance.get_requirements_by_severity(
-                    RequirementSeverity.HIGH
-                )
-            ),
+            "critical_requirements": len(framework_instance.get_requirements_by_severity(RequirementSeverity.CRITICAL)),
+            "high_requirements": len(framework_instance.get_requirements_by_severity(RequirementSeverity.HIGH)),
             "applicable_to": metadata["applicable_to"],
             "last_updated": metadata["last_updated"],
             "next_review": metadata["next_review"],

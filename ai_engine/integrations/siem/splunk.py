@@ -575,11 +575,7 @@ class SplunkConnector(BaseSIEMConnector):
         """Parse Splunk result into SIEMEvent."""
         try:
             timestamp_str = result.get("_time", "")
-            timestamp = (
-                datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
-                if timestamp_str
-                else datetime.utcnow()
-            )
+            timestamp = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00")) if timestamp_str else datetime.utcnow()
 
             return SIEMEvent(
                 event_type=result.get("event_type", "unknown"),

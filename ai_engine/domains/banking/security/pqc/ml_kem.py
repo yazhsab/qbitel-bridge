@@ -24,6 +24,7 @@ import struct
 # Try to import liboqs for production use
 try:
     import oqs
+
     OQS_AVAILABLE = True
 except ImportError:
     OQS_AVAILABLE = False
@@ -32,7 +33,7 @@ except ImportError:
 class MLKEMSecurityLevel(Enum):
     """ML-KEM security levels."""
 
-    LEVEL_1 = ("ML-KEM-512", 512, 800, 768, 32)    # (name, n, pk_size, sk_size, ss_size)
+    LEVEL_1 = ("ML-KEM-512", 512, 800, 768, 32)  # (name, n, pk_size, sk_size, ss_size)
     LEVEL_3 = ("ML-KEM-768", 768, 1184, 1152, 32)
     LEVEL_5 = ("ML-KEM-1024", 1024, 1568, 1536, 32)
 
@@ -53,10 +54,7 @@ class MLKEMPublicKey:
 
     def __post_init__(self):
         if len(self.key_bytes) != self.level.public_key_size:
-            raise ValueError(
-                f"Invalid public key size: expected {self.level.public_key_size}, "
-                f"got {len(self.key_bytes)}"
-            )
+            raise ValueError(f"Invalid public key size: expected {self.level.public_key_size}, " f"got {len(self.key_bytes)}")
 
     def to_bytes(self) -> bytes:
         """Serialize public key."""
@@ -84,8 +82,7 @@ class MLKEMPrivateKey:
         expected_size = self.level.secret_key_size + self.level.public_key_size + 64
         if len(self.key_bytes) < self.level.secret_key_size:
             raise ValueError(
-                f"Invalid private key size: expected >= {self.level.secret_key_size}, "
-                f"got {len(self.key_bytes)}"
+                f"Invalid private key size: expected >= {self.level.secret_key_size}, " f"got {len(self.key_bytes)}"
             )
 
     def to_bytes(self) -> bytes:
@@ -172,11 +169,7 @@ class MLKEMBase(ABC):
         else:
             return self._encapsulate_fallback(public_key)
 
-    def decapsulate(
-        self,
-        ciphertext: bytes,
-        private_key: MLKEMPrivateKey
-    ) -> bytes:
+    def decapsulate(self, ciphertext: bytes, private_key: MLKEMPrivateKey) -> bytes:
         """
         Decapsulate to recover the shared secret.
 
@@ -189,10 +182,7 @@ class MLKEMBase(ABC):
         """
         if self._oqs_kem:
             # Need to set the secret key first
-            kem = oqs.KeyEncapsulation(
-                self._oqs_kem.alg_name,
-                secret_key=private_key.to_bytes()
-            )
+            kem = oqs.KeyEncapsulation(self._oqs_kem.alg_name, secret_key=private_key.to_bytes())
             return kem.decap_secret(ciphertext)
         else:
             return self._decapsulate_fallback(ciphertext, private_key)
@@ -242,11 +232,7 @@ class MLKEMBase(ABC):
 
         return MLKEMEncapsulation(ciphertext=ciphertext, shared_secret=shared_secret)
 
-    def _decapsulate_fallback(
-        self,
-        ciphertext: bytes,
-        private_key: MLKEMPrivateKey
-    ) -> bytes:
+    def _decapsulate_fallback(self, ciphertext: bytes, private_key: MLKEMPrivateKey) -> bytes:
         """
         Fallback decapsulation.
 

@@ -42,9 +42,7 @@ QUARANTINE_COUNTER = Counter(
     "Quarantine operations",
     ["system_type", "status"],
 )
-QUARANTINE_DURATION = Histogram(
-    "qbitel_security_quarantine_duration_seconds", "Quarantine operation duration"
-)
+QUARANTINE_DURATION = Histogram("qbitel_security_quarantine_duration_seconds", "Quarantine operation duration")
 LEGACY_RESPONSE_COUNTER = Counter(
     "qbitel_security_legacy_responses_total",
     "Legacy responses executed",
@@ -55,9 +53,7 @@ SAFETY_VIOLATIONS = Counter(
     "Safety constraint violations",
     ["constraint_type"],
 )
-DEPENDENCY_CHECKS = Summary(
-    "qbitel_security_dependency_check_duration_seconds", "Dependency check duration"
-)
+DEPENDENCY_CHECKS = Summary("qbitel_security_dependency_check_duration_seconds", "Dependency check duration")
 
 logger = logging.getLogger(__name__)
 
@@ -105,9 +101,7 @@ class LegacySystemCapability:
         # Dependency-based constraints
         if self.system.dependent_systems:
             self.constraints["check_dependencies"] = True
-            self.risk_factors.append(
-                f"Has {len(self.system.dependent_systems)} dependent systems"
-            )
+            self.risk_factors.append(f"Has {len(self.system.dependent_systems)} dependent systems")
 
     def _add_hl7_capabilities(self):
         """Add HL7-specific capabilities and constraints."""
@@ -121,9 +115,7 @@ class LegacySystemCapability:
 
         self.constraints["hl7_aware"] = True
         self.constraints["preserve_message_integrity"] = True
-        self.safety_requirements.extend(
-            ["Maintain patient data integrity", "Preserve clinical workflow continuity"]
-        )
+        self.safety_requirements.extend(["Maintain patient data integrity", "Preserve clinical workflow continuity"])
         self.risk_factors.append("Patient safety impact")
 
     def _add_iso8583_capabilities(self):
@@ -138,16 +130,12 @@ class LegacySystemCapability:
 
         self.constraints["iso8583_aware"] = True
         self.constraints["transaction_integrity"] = True
-        self.safety_requirements.extend(
-            ["Maintain transaction consistency", "Preserve financial data integrity"]
-        )
+        self.safety_requirements.extend(["Maintain transaction consistency", "Preserve financial data integrity"])
         self.risk_factors.append("Financial transaction impact")
 
     def _add_modbus_capabilities(self):
         """Add Modbus-specific capabilities and constraints."""
-        self.supported_actions.update(
-            {ResponseType.VIRTUAL_PATCH, ResponseType.ENABLE_MONITORING}
-        )
+        self.supported_actions.update({ResponseType.VIRTUAL_PATCH, ResponseType.ENABLE_MONITORING})
 
         # Modbus systems are often very sensitive to network changes
         self.constraints["modbus_sensitive"] = True
@@ -158,21 +146,15 @@ class LegacySystemCapability:
                 "Maintain operational technology continuity",
             ]
         )
-        self.risk_factors.extend(
-            ["Industrial process impact", "Potential safety hazards"]
-        )
+        self.risk_factors.extend(["Industrial process impact", "Potential safety hazards"])
 
     def _add_tn3270e_capabilities(self):
         """Add TN3270E-specific capabilities and constraints."""
-        self.supported_actions.update(
-            {ResponseType.VIRTUAL_PATCH, ResponseType.NETWORK_SEGMENTATION}
-        )
+        self.supported_actions.update({ResponseType.VIRTUAL_PATCH, ResponseType.NETWORK_SEGMENTATION})
 
         self.constraints["mainframe_aware"] = True
         self.constraints["session_preservation"] = True
-        self.safety_requirements.extend(
-            ["Preserve user sessions", "Maintain mainframe connectivity"]
-        )
+        self.safety_requirements.extend(["Preserve user sessions", "Maintain mainframe connectivity"])
         self.risk_factors.append("Mainframe access disruption")
 
 
@@ -206,9 +188,7 @@ class DependencyAnalyzer:
 
         return critical_paths
 
-    def _trace_dependencies(
-        self, system_id: str, visited: Optional[Set[str]] = None
-    ) -> List[str]:
+    def _trace_dependencies(self, system_id: str, visited: Optional[Set[str]] = None) -> List[str]:
         """Trace dependency chain for a system."""
         if visited is None:
             visited = set()
@@ -266,10 +246,7 @@ class DependencyAnalyzer:
                 "cascade_effects": cascade_effects,
                 "risk_score": risk_score,
                 "impacted_systems": list(impacted_systems),
-                "critical_path_affected": any(
-                    any(sys in target_systems for sys in path)
-                    for path in self.critical_paths
-                ),
+                "critical_path_affected": any(any(sys in target_systems for sys in path) for path in self.critical_paths),
             }
 
 
@@ -336,9 +313,7 @@ class SafetyValidator:
 
         # Check system-specific constraints
         for action in response.actions:
-            action_violations = self._validate_action(
-                action, systems, dependency_analyzer
-            )
+            action_violations = self._validate_action(action, systems, dependency_analyzer)
             violations.extend(action_violations)
 
         # Check dependency impact
@@ -374,14 +349,10 @@ class SafetyValidator:
 
             # Check protocol constraints
             for protocol in system.protocol_types:
-                constraints = self.safety_rules["protocol_constraints"].get(
-                    protocol, {}
-                )
+                constraints = self.safety_rules["protocol_constraints"].get(protocol, {})
 
                 if action.action_type in constraints.get("prohibited_actions", []):
-                    violations.append(
-                        f"Action {action.action_type.value} prohibited for {protocol.value} protocol"
-                    )
+                    violations.append(f"Action {action.action_type.value} prohibited for {protocol.value} protocol")
 
                 if "max_response_time" in constraints:
                     if action.timeout_seconds * 1000 > constraints["max_response_time"]:
@@ -391,9 +362,7 @@ class SafetyValidator:
                         )
 
             # Check downtime constraints
-            max_downtime = self.safety_rules["max_downtime_tolerance"].get(
-                system.criticality, 3600
-            )
+            max_downtime = self.safety_rules["max_downtime_tolerance"].get(system.criticality, 3600)
             if action.estimated_downtime and action.estimated_downtime > max_downtime:
                 violations.append(
                     f"Estimated downtime {action.estimated_downtime}s exceeds limit "
@@ -420,9 +389,7 @@ class LegacyAwareResponseManager:
         self.metrics_collector: Optional[MetricsCollector] = None
 
         # Execution infrastructure
-        self.executor = ThreadPoolExecutor(
-            max_workers=4, thread_name_prefix="legacy-response-"
-        )
+        self.executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="legacy-response-")
 
         # Response tracking
         self.active_responses: Dict[str, Dict[str, Any]] = {}
@@ -446,10 +413,7 @@ class LegacyAwareResponseManager:
 
             # Initialize LLM service
             self.llm_service = get_llm_service()
-            if (
-                not hasattr(self.llm_service, "_initialized")
-                or not self.llm_service._initialized
-            ):
+            if not hasattr(self.llm_service, "_initialized") or not self.llm_service._initialized:
                 await self.llm_service.initialize()
 
             # Initialize safety validator
@@ -492,9 +456,7 @@ class LegacyAwareResponseManager:
         response_id = response.response_id
 
         try:
-            self.logger.info(
-                f"Executing response {response_id} with {len(response.actions)} actions"
-            )
+            self.logger.info(f"Executing response {response_id} with {len(response.actions)} actions")
 
             # Step 1: Analyze system capabilities
             capabilities = self._analyze_system_capabilities(legacy_systems)
@@ -503,20 +465,14 @@ class LegacyAwareResponseManager:
             dependency_analyzer = DependencyAnalyzer(legacy_systems)
 
             # Step 3: Validate response safety
-            is_safe, violations = self.safety_validator.validate_response_plan(
-                response, legacy_systems, dependency_analyzer
-            )
+            is_safe, violations = self.safety_validator.validate_response_plan(response, legacy_systems, dependency_analyzer)
 
             if not is_safe:
-                self.logger.warning(
-                    f"Safety violations detected for response {response_id}: {violations}"
-                )
+                self.logger.warning(f"Safety violations detected for response {response_id}: {violations}")
                 if not response.requires_human_approval:
                     # Force human approval for unsafe responses
                     response.requires_human_approval = True
-                    return await self._create_safety_violation_result(
-                        response_id, violations
-                    )
+                    return await self._create_safety_violation_result(response_id, violations)
 
             # Step 4: Check approval status
             if response.requires_human_approval and not response.approved_by:
@@ -579,36 +535,24 @@ class LegacyAwareResponseManager:
         start_time = time.time()
 
         try:
-            self.logger.info(
-                f"Quarantining legacy system {system.system_name} ({system.system_id})"
-            )
+            self.logger.info(f"Quarantining legacy system {system.system_name} ({system.system_id})")
 
             # Step 1: Analyze system dependencies
             dependencies = await self._analyze_dependencies([system])
 
             # Step 2: Create LLM-powered quarantine plan
-            quarantine_plan = await self._create_quarantine_plan(
-                system, dependencies, threat_level
-            )
+            quarantine_plan = await self._create_quarantine_plan(system, dependencies, threat_level)
 
             # Step 3: Validate quarantine safety
-            safety_check = await self._validate_quarantine_safety(
-                system, quarantine_plan, dependencies
-            )
+            safety_check = await self._validate_quarantine_safety(system, quarantine_plan, dependencies)
 
             if not safety_check["is_safe"]:
-                self.logger.warning(
-                    f"Quarantine safety check failed: {safety_check['issues']}"
-                )
+                self.logger.warning(f"Quarantine safety check failed: {safety_check['issues']}")
                 # Create partial quarantine plan
-                quarantine_plan = await self._create_safe_quarantine_plan(
-                    system, safety_check
-                )
+                quarantine_plan = await self._create_safe_quarantine_plan(system, safety_check)
 
             # Step 4: Execute quarantine with monitoring
-            quarantine_result = await self._execute_safe_quarantine(
-                system, quarantine_plan
-            )
+            quarantine_result = await self._execute_safe_quarantine(system, quarantine_plan)
 
             # Update metrics
             execution_time = time.time() - start_time
@@ -629,9 +573,7 @@ class LegacyAwareResponseManager:
             return quarantine_result
 
         except Exception as e:
-            QUARANTINE_COUNTER.labels(
-                system_type=system.system_type, status="error"
-            ).inc()
+            QUARANTINE_COUNTER.labels(system_type=system.system_type, status="error").inc()
             self.logger.error(f"Quarantine failed for system {system.system_id}: {e}")
 
             # Create failed quarantine result
@@ -671,15 +613,11 @@ class LegacyAwareResponseManager:
             return True
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to release quarantine for system {system_id}: {e}"
-            )
+            self.logger.error(f"Failed to release quarantine for system {system_id}: {e}")
             quarantine.error_message = f"Release failed: {e}"
             return False
 
-    def _analyze_system_capabilities(
-        self, legacy_systems: List[LegacySystem]
-    ) -> Dict[str, LegacySystemCapability]:
+    def _analyze_system_capabilities(self, legacy_systems: List[LegacySystem]) -> Dict[str, LegacySystemCapability]:
         """Analyze capabilities of all legacy systems."""
 
         capabilities = {}
@@ -712,9 +650,7 @@ class LegacyAwareResponseManager:
         # Execute actions sequentially for safety
         for action in sorted_actions:
             try:
-                action_result = await self._execute_single_action(
-                    action, capabilities, dependency_analyzer, security_context
-                )
+                action_result = await self._execute_single_action(action, capabilities, dependency_analyzer, security_context)
 
                 results["action_results"].append(action_result)
 
@@ -728,28 +664,17 @@ class LegacyAwareResponseManager:
                 # Update metrics
                 for system_id in action.target_systems:
                     system = next(
-                        (
-                            s
-                            for cap in capabilities.values()
-                            for s in [cap.system]
-                            if s.system_id == system_id
-                        ),
+                        (s for cap in capabilities.values() for s in [cap.system] if s.system_id == system_id),
                         None,
                     )
                     if system:
-                        protocols = [p.value for p in system.protocol_types] or [
-                            "unknown"
-                        ]
+                        protocols = [p.value for p in system.protocol_types] or ["unknown"]
                         for protocol in protocols:
-                            LEGACY_RESPONSE_COUNTER.labels(
-                                protocol=protocol, action=action.action_type.value
-                            ).inc()
+                            LEGACY_RESPONSE_COUNTER.labels(protocol=protocol, action=action.action_type.value).inc()
 
                 # Stop execution if critical action fails
                 if not action_result["success"] and action.priority == 1:
-                    self.logger.warning(
-                        f"Critical action failed, stopping execution: {action.action_type}"
-                    )
+                    self.logger.warning(f"Critical action failed, stopping execution: {action.action_type}")
                     break
 
                 # Add delay between actions for safety
@@ -769,9 +694,7 @@ class LegacyAwareResponseManager:
                 results["failed_actions"] += 1
 
         # Calculate overall success
-        results["overall_success"] = (
-            results["successful_actions"] > 0 and results["failed_actions"] == 0
-        )
+        results["overall_success"] = results["successful_actions"] > 0 and results["failed_actions"] == 0
 
         results["execution_summary"] = (
             f"Executed {results['successful_actions'] + results['failed_actions']} actions: "
@@ -805,56 +728,39 @@ class LegacyAwareResponseManager:
             # Check if action is supported by target systems
             for system_id in action.target_systems:
                 capability = capabilities.get(system_id)
-                if (
-                    not capability
-                    or action.action_type not in capability.supported_actions
-                ):
+                if not capability or action.action_type not in capability.supported_actions:
                     result["skipped"] = True
                     result["error"] = f"Action not supported by system {system_id}"
                     return result
 
             # Execute action based on type
             if action.action_type == ResponseType.ALERT_SECURITY_TEAM:
-                result["details"] = await self._execute_alert_action(
-                    action, security_context
-                )
+                result["details"] = await self._execute_alert_action(action, security_context)
                 result["success"] = True
 
             elif action.action_type == ResponseType.ENABLE_MONITORING:
-                result["details"] = await self._execute_monitoring_action(
-                    action, capabilities
-                )
+                result["details"] = await self._execute_monitoring_action(action, capabilities)
                 result["success"] = True
 
             elif action.action_type == ResponseType.BLOCK_IP:
-                result["details"] = await self._execute_block_ip_action(
-                    action, capabilities
-                )
+                result["details"] = await self._execute_block_ip_action(action, capabilities)
                 result["success"] = result["details"].get("blocks_applied", 0) > 0
 
             elif action.action_type == ResponseType.QUARANTINE:
-                result["details"] = await self._execute_quarantine_action(
-                    action, capabilities
-                )
+                result["details"] = await self._execute_quarantine_action(action, capabilities)
                 result["success"] = result["details"].get("systems_quarantined", 0) > 0
 
             elif action.action_type == ResponseType.VIRTUAL_PATCH:
-                result["details"] = await self._execute_virtual_patch_action(
-                    action, capabilities
-                )
+                result["details"] = await self._execute_virtual_patch_action(action, capabilities)
                 result["success"] = result["details"].get("patches_applied", 0) > 0
 
             elif action.action_type == ResponseType.NETWORK_SEGMENTATION:
-                result["details"] = await self._execute_segmentation_action(
-                    action, capabilities
-                )
+                result["details"] = await self._execute_segmentation_action(action, capabilities)
                 result["success"] = result["details"].get("segments_created", 0) > 0
 
             else:
                 result["skipped"] = True
-                result["error"] = (
-                    f"Action type {action.action_type.value} not implemented"
-                )
+                result["error"] = f"Action type {action.action_type.value} not implemented"
 
         except Exception as e:
             result["error"] = str(e)
@@ -874,11 +780,7 @@ class LegacyAwareResponseManager:
             "alert_sent": True,
             "recipients": ["security_team"],
             "channels": ["email", "slack", "siem"],
-            "urgency": (
-                "high"
-                if action.risk_level in {ThreatLevel.CRITICAL, ThreatLevel.HIGH}
-                else "medium"
-            ),
+            "urgency": ("high" if action.risk_level in {ThreatLevel.CRITICAL, ThreatLevel.HIGH} else "medium"),
         }
 
         # In real implementation, this would integrate with alerting systems
@@ -906,9 +808,7 @@ class LegacyAwareResponseManager:
                 for protocol in capability.system.protocol_types:
                     monitoring_details[f"{protocol.value}_monitoring"] = True
 
-        self.logger.info(
-            f"Enhanced monitoring enabled for {len(action.target_systems)} systems"
-        )
+        self.logger.info(f"Enhanced monitoring enabled for {len(action.target_systems)} systems")
 
         return monitoring_details
 
@@ -943,9 +843,7 @@ class LegacyAwareResponseManager:
 
         quarantine_details = {
             "systems_quarantined": 0,
-            "isolation_method": action.parameters.get(
-                "isolation_type", "network_segmentation"
-            ),
+            "isolation_method": action.parameters.get("isolation_type", "network_segmentation"),
             "quarantine_results": [],
         }
 
@@ -954,9 +852,7 @@ class LegacyAwareResponseManager:
             if capability:
                 try:
                     # Create quarantine for individual system
-                    quarantine_result = await self.quarantine_legacy_system(
-                        capability.system, action.risk_level
-                    )
+                    quarantine_result = await self.quarantine_legacy_system(capability.system, action.risk_level)
 
                     quarantine_details["quarantine_results"].append(
                         {
@@ -994,17 +890,13 @@ class LegacyAwareResponseManager:
             if capability:
                 # Generate protocol-specific virtual patches
                 for protocol in capability.system.protocol_types:
-                    patch_rule = await self._generate_virtual_patch_rule(
-                        protocol, capability.system
-                    )
+                    patch_rule = await self._generate_virtual_patch_rule(protocol, capability.system)
                     patch_details["patch_rules"].append(patch_rule)
                     patch_details["systems_protected"].append(system_id)
 
                 patch_details["patches_applied"] += 1
 
-        self.logger.info(
-            f"Virtual patches applied to {patch_details['patches_applied']} systems"
-        )
+        self.logger.info(f"Virtual patches applied to {patch_details['patches_applied']} systems")
 
         return patch_details
 
@@ -1037,9 +929,7 @@ class LegacyAwareResponseManager:
 
         return segmentation_details
 
-    async def _analyze_dependencies(
-        self, systems: List[LegacySystem]
-    ) -> Dict[str, Any]:
+    async def _analyze_dependencies(self, systems: List[LegacySystem]) -> Dict[str, Any]:
         """Analyze system dependencies for quarantine planning."""
 
         dependencies = {
@@ -1202,34 +1092,22 @@ Provide the plan in JSON format with isolation_method, duration, safety_checks, 
                 "system_shutdown",
             ]:
                 safety_check["is_safe"] = False
-                safety_check["issues"].append(
-                    "Mission-critical system cannot be completely isolated"
-                )
+                safety_check["issues"].append("Mission-critical system cannot be completely isolated")
 
         # Check dependencies
         if not dependencies.get("safe_to_isolate", True):
             safety_check["is_safe"] = False
-            safety_check["issues"].append(
-                "System has critical dependencies that would be affected"
-            )
+            safety_check["issues"].append("System has critical dependencies that would be affected")
 
         # Check protocol constraints
         for protocol in system.protocol_types:
-            if protocol == ProtocolType.MODBUS and "isolation" in plan.get(
-                "isolation_method", ""
-            ):
-                safety_check["issues"].append(
-                    "MODBUS isolation may cause industrial safety issues"
-                )
-                safety_check["recommendations"].append(
-                    "Use monitoring and virtual patching instead"
-                )
+            if protocol == ProtocolType.MODBUS and "isolation" in plan.get("isolation_method", ""):
+                safety_check["issues"].append("MODBUS isolation may cause industrial safety issues")
+                safety_check["recommendations"].append("Use monitoring and virtual patching instead")
 
         return safety_check
 
-    async def _create_safe_quarantine_plan(
-        self, system: LegacySystem, safety_check: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def _create_safe_quarantine_plan(self, system: LegacySystem, safety_check: Dict[str, Any]) -> Dict[str, Any]:
         """Create a safer quarantine plan based on safety check results."""
 
         safe_plan = {
@@ -1251,9 +1129,7 @@ Provide the plan in JSON format with isolation_method, duration, safety_checks, 
 
         return safe_plan
 
-    async def _execute_safe_quarantine(
-        self, system: LegacySystem, plan: Dict[str, Any]
-    ) -> QuarantineResult:
+    async def _execute_safe_quarantine(self, system: LegacySystem, plan: Dict[str, Any]) -> QuarantineResult:
         """Execute quarantine plan safely."""
 
         quarantine_result = QuarantineResult(
@@ -1289,75 +1165,55 @@ Provide the plan in JSON format with isolation_method, duration, safety_checks, 
 
         return quarantine_result
 
-    async def _execute_vlan_isolation(
-        self, system: LegacySystem, quarantine_result: QuarantineResult
-    ):
+    async def _execute_vlan_isolation(self, system: LegacySystem, quarantine_result: QuarantineResult):
         """Execute VLAN-based isolation."""
         # In real implementation, this would configure network switches
         quarantine_result.affected_interfaces = ["eth0"]
         quarantine_result.isolation_method = "vlan_isolation"
         self.logger.info(f"VLAN isolation executed for system {system.system_id}")
 
-    async def _execute_firewall_isolation(
-        self, system: LegacySystem, quarantine_result: QuarantineResult
-    ):
+    async def _execute_firewall_isolation(self, system: LegacySystem, quarantine_result: QuarantineResult):
         """Execute firewall-based isolation."""
         # In real implementation, this would configure firewall rules
         quarantine_result.isolation_method = "firewall_rules"
         self.logger.info(f"Firewall isolation executed for system {system.system_id}")
 
-    async def _execute_network_segmentation(
-        self, system: LegacySystem, quarantine_result: QuarantineResult
-    ):
+    async def _execute_network_segmentation(self, system: LegacySystem, quarantine_result: QuarantineResult):
         """Execute network segmentation."""
         # In real implementation, this would create network segments
         quarantine_result.isolation_method = "network_segmentation"
         self.logger.info(f"Network segmentation executed for system {system.system_id}")
 
-    async def _execute_enhanced_monitoring(
-        self, system: LegacySystem, quarantine_result: QuarantineResult
-    ):
+    async def _execute_enhanced_monitoring(self, system: LegacySystem, quarantine_result: QuarantineResult):
         """Execute enhanced monitoring instead of isolation."""
         quarantine_result.isolation_method = "enhanced_monitoring"
         quarantine_result.monitoring_enabled = True
         self.logger.info(f"Enhanced monitoring enabled for system {system.system_id}")
 
-    async def _execute_monitoring_quarantine(
-        self, system: LegacySystem, quarantine_result: QuarantineResult
-    ):
+    async def _execute_monitoring_quarantine(self, system: LegacySystem, quarantine_result: QuarantineResult):
         """Execute monitoring-only quarantine."""
         quarantine_result.isolation_method = "monitoring_only"
         quarantine_result.monitoring_enabled = True
-        self.logger.info(
-            f"Monitoring quarantine executed for system {system.system_id}"
-        )
+        self.logger.info(f"Monitoring quarantine executed for system {system.system_id}")
 
     # Release methods for different isolation types
-    async def _release_vlan_isolation(
-        self, system_id: str, quarantine: QuarantineResult
-    ):
+    async def _release_vlan_isolation(self, system_id: str, quarantine: QuarantineResult):
         """Release VLAN isolation."""
         # Restore original VLAN configuration
         self.logger.info(f"Released VLAN isolation for system {system_id}")
 
-    async def _release_firewall_isolation(
-        self, system_id: str, quarantine: QuarantineResult
-    ):
+    async def _release_firewall_isolation(self, system_id: str, quarantine: QuarantineResult):
         """Release firewall isolation."""
         # Remove firewall rules
         self.logger.info(f"Released firewall isolation for system {system_id}")
 
-    async def _release_network_segmentation(
-        self, system_id: str, quarantine: QuarantineResult
-    ):
+    async def _release_network_segmentation(self, system_id: str, quarantine: QuarantineResult):
         """Release network segmentation."""
         # Remove network segmentation
         self.logger.info(f"Released network segmentation for system {system_id}")
 
     # Helper methods
-    async def _generate_virtual_patch_rule(
-        self, protocol: ProtocolType, system: LegacySystem
-    ) -> Dict[str, Any]:
+    async def _generate_virtual_patch_rule(self, protocol: ProtocolType, system: LegacySystem) -> Dict[str, Any]:
         """Generate virtual patch rule for specific protocol."""
 
         rule = {
@@ -1402,9 +1258,7 @@ Provide the plan in JSON format with isolation_method, duration, safety_checks, 
             SystemCriticality.MISSION_CRITICAL,
             SystemCriticality.BUSINESS_CRITICAL,
         }:
-            segment_config["allowed_traffic"].extend(
-                ["management", "monitoring", "backup"]
-            )
+            segment_config["allowed_traffic"].extend(["management", "monitoring", "backup"])
             segment_config["isolation_level"] = "partial"
         else:
             segment_config["isolation_level"] = "strict"
@@ -1412,9 +1266,7 @@ Provide the plan in JSON format with isolation_method, duration, safety_checks, 
         return segment_config
 
     # Safety and result creation methods
-    async def _create_safety_violation_result(
-        self, response_id: str, violations: List[str]
-    ) -> Dict[str, Any]:
+    async def _create_safety_violation_result(self, response_id: str, violations: List[str]) -> Dict[str, Any]:
         """Create result for safety violation case."""
         return {
             "status": "blocked_by_safety",
@@ -1435,11 +1287,7 @@ Provide the plan in JSON format with isolation_method, duration, safety_checks, 
 
     def get_active_quarantines(self) -> Dict[str, QuarantineResult]:
         """Get all active quarantine operations."""
-        return {
-            qid: quarantine
-            for qid, quarantine in self.quarantine_registry.items()
-            if quarantine.status == "active"
-        }
+        return {qid: quarantine for qid, quarantine in self.quarantine_registry.items() if quarantine.status == "active"}
 
     def get_response_status(self, response_id: str) -> Optional[Dict[str, Any]]:
         """Get status of a response execution."""
@@ -1448,9 +1296,7 @@ Provide the plan in JSON format with isolation_method, duration, safety_checks, 
     async def get_response_metrics(self) -> Dict[str, Any]:
         """Get response execution metrics."""
         active_quarantines = len(self.get_active_quarantines())
-        active_responses = len(
-            [r for r in self.active_responses.values() if r["status"] == "executing"]
-        )
+        active_responses = len([r for r in self.active_responses.values() if r["status"] == "executing"])
 
         return {
             "active_quarantines": active_quarantines,

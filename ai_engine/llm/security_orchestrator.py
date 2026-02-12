@@ -46,9 +46,7 @@ AUTOMATED_RESPONSES = Counter(
     "Total automated security responses",
     ["response_type", "status"],
 )
-ACTIVE_THREATS = Gauge(
-    "qbitel_active_threats", "Number of active security threats", ["severity"]
-)
+ACTIVE_THREATS = Gauge("qbitel_active_threats", "Number of active security threats", ["severity"])
 
 logger = logging.getLogger(__name__)
 
@@ -270,9 +268,7 @@ class ZeroTouchSecurityOrchestrator:
 
         self.logger.info("Zero-Touch Security Orchestrator initialized")
 
-    async def detect_and_respond(
-        self, security_event: SecurityEvent
-    ) -> SecurityResponse:
+    async def detect_and_respond(self, security_event: SecurityEvent) -> SecurityResponse:
         """
         Detect threats and respond automatically.
 
@@ -297,14 +293,10 @@ class ZeroTouchSecurityOrchestrator:
             threat_analysis = await self._analyze_threat(security_event)
 
             # Step 2: Determine threat level and required response
-            response_actions = await self._determine_response_actions(
-                security_event, threat_analysis
-            )
+            response_actions = await self._determine_response_actions(security_event, threat_analysis)
 
             # Step 3: Execute automated response
-            response = await self._execute_response(
-                security_event, threat_analysis, response_actions, response_id
-            )
+            response = await self._execute_response(security_event, threat_analysis, response_actions, response_id)
 
             # Step 4: Create or update incident
             await self._manage_incident(security_event, threat_analysis, response)
@@ -325,9 +317,7 @@ class ZeroTouchSecurityOrchestrator:
             self.stats["automated_responses"] += 1
 
             execution_time = time.time() - start_time
-            THREAT_DETECTION_DURATION.labels(
-                threat_type=security_event.event_type.value
-            ).observe(execution_time)
+            THREAT_DETECTION_DURATION.labels(threat_type=security_event.event_type.value).observe(execution_time)
 
             SECURITY_EVENTS_COUNTER.labels(
                 event_type=security_event.event_type.value,
@@ -335,9 +325,7 @@ class ZeroTouchSecurityOrchestrator:
                 status="completed",
             ).inc()
 
-            self.logger.info(
-                f"Security response completed: {response_id} in {execution_time:.2f}s"
-            )
+            self.logger.info(f"Security response completed: {response_id} in {execution_time:.2f}s")
 
             return response
 
@@ -367,9 +355,7 @@ class ZeroTouchSecurityOrchestrator:
         if cache_key in self.threat_intelligence_cache:
             cached_analysis, timestamp = self.threat_intelligence_cache[cache_key]
             if datetime.utcnow() - timestamp < self.cache_ttl:
-                self.logger.debug(
-                    f"Using cached threat analysis for {security_event.event_id}"
-                )
+                self.logger.debug(f"Using cached threat analysis for {security_event.event_id}")
                 return cached_analysis
 
         # Prepare context for LLM
@@ -452,9 +438,7 @@ Format your response as JSON with the following structure:
         # Create threat analysis
         threat_analysis = ThreatAnalysis(
             threat_id=str(uuid.uuid4()),
-            threat_type=ThreatType(
-                analysis_data.get("threat_type", security_event.event_type.value)
-            ),
+            threat_type=ThreatType(analysis_data.get("threat_type", security_event.event_type.value)),
             severity=security_event.severity,
             confidence=analysis_data.get("confidence", 0.7),
             risk_score=analysis_data.get("risk_score", 50),
@@ -493,9 +477,7 @@ Format your response as JSON with the following structure:
                 ]
             )
         elif threat_analysis.severity == ThreatSeverity.HIGH:
-            actions.extend(
-                [ResponseAction.BLOCK, ResponseAction.ALERT, ResponseAction.INVESTIGATE]
-            )
+            actions.extend([ResponseAction.BLOCK, ResponseAction.ALERT, ResponseAction.INVESTIGATE])
         elif threat_analysis.severity == ThreatSeverity.MEDIUM:
             actions.extend([ResponseAction.MONITOR, ResponseAction.ALERT])
         else:
@@ -544,12 +526,8 @@ Format your response as JSON with the following structure:
                     if security_event.source_ip:
                         await self._block_ip(security_event.source_ip)
                         blocked_ips.append(security_event.source_ip)
-                        execution_details.append(
-                            f"Blocked IP: {security_event.source_ip}"
-                        )
-                        AUTOMATED_RESPONSES.labels(
-                            response_type="block_ip", status="success"
-                        ).inc()
+                        execution_details.append(f"Blocked IP: {security_event.source_ip}")
+                        AUTOMATED_RESPONSES.labels(response_type="block_ip", status="success").inc()
 
                 elif action == ResponseAction.ISOLATE:
                     # Isolate affected systems
@@ -557,53 +535,39 @@ Format your response as JSON with the following structure:
                         await self._isolate_system(asset)
                         isolated_systems.append(asset)
                         execution_details.append(f"Isolated system: {asset}")
-                        AUTOMATED_RESPONSES.labels(
-                            response_type="isolate_system", status="success"
-                        ).inc()
+                        AUTOMATED_RESPONSES.labels(response_type="isolate_system", status="success").inc()
 
                 elif action == ResponseAction.ALERT:
                     # Generate security alert
                     alert_id = await self._create_alert(security_event, threat_analysis)
                     alerts_generated.append(alert_id)
                     execution_details.append(f"Generated alert: {alert_id}")
-                    AUTOMATED_RESPONSES.labels(
-                        response_type="generate_alert", status="success"
-                    ).inc()
+                    AUTOMATED_RESPONSES.labels(response_type="generate_alert", status="success").inc()
 
                 elif action == ResponseAction.QUARANTINE:
                     # Quarantine malicious files/processes
                     execution_details.append("Quarantine action executed")
-                    AUTOMATED_RESPONSES.labels(
-                        response_type="quarantine", status="success"
-                    ).inc()
+                    AUTOMATED_RESPONSES.labels(response_type="quarantine", status="success").inc()
 
                 elif action == ResponseAction.MONITOR:
                     # Enhanced monitoring
                     execution_details.append("Enhanced monitoring activated")
-                    AUTOMATED_RESPONSES.labels(
-                        response_type="monitor", status="success"
-                    ).inc()
+                    AUTOMATED_RESPONSES.labels(response_type="monitor", status="success").inc()
 
                 elif action == ResponseAction.INVESTIGATE:
                     # Trigger investigation workflow
                     execution_details.append("Investigation workflow triggered")
-                    AUTOMATED_RESPONSES.labels(
-                        response_type="investigate", status="success"
-                    ).inc()
+                    AUTOMATED_RESPONSES.labels(response_type="investigate", status="success").inc()
 
                 elif action == ResponseAction.ESCALATE:
                     # Escalate to security team
                     execution_details.append("Escalated to security team")
-                    AUTOMATED_RESPONSES.labels(
-                        response_type="escalate", status="success"
-                    ).inc()
+                    AUTOMATED_RESPONSES.labels(response_type="escalate", status="success").inc()
 
             except Exception as e:
                 self.logger.error(f"Failed to execute action {action}: {e}")
                 execution_details.append(f"Failed: {action.value} - {str(e)}")
-                AUTOMATED_RESPONSES.labels(
-                    response_type=action.value, status="error"
-                ).inc()
+                AUTOMATED_RESPONSES.labels(response_type=action.value, status="error").inc()
 
         execution_time = time.time() - start_time
 
@@ -624,9 +588,7 @@ Format your response as JSON with the following structure:
             },
         )
 
-    async def generate_security_policies(
-        self, requirements: SecurityRequirements
-    ) -> List[SecurityPolicy]:
+    async def generate_security_policies(self, requirements: SecurityRequirements) -> List[SecurityPolicy]:
         """
         Generate security policies automatically based on requirements.
 
@@ -637,9 +599,7 @@ Format your response as JSON with the following structure:
             List of generated security policies
         """
         try:
-            self.logger.info(
-                f"Generating security policies for {requirements.framework}"
-            )
+            self.logger.info(f"Generating security policies for {requirements.framework}")
 
             # Prepare context for LLM
             context = {
@@ -696,9 +656,7 @@ Format as JSON array of policies."""
                     policies_data = [policies_data]
             except json.JSONDecodeError:
                 # Fallback: create basic policy structure
-                self.logger.warning(
-                    "Failed to parse LLM response, creating basic policies"
-                )
+                self.logger.warning("Failed to parse LLM response, creating basic policies")
                 policies_data = self._create_fallback_policies(requirements)
 
             # Create SecurityPolicy objects
@@ -725,9 +683,7 @@ Format as JSON array of policies."""
             validated_policies = await self._validate_policies(policies, requirements)
 
             # Create implementation guide
-            implementation_guide = await self._create_implementation_guide(
-                validated_policies, requirements
-            )
+            implementation_guide = await self._create_implementation_guide(validated_policies, requirements)
 
             # Update statistics
             self.stats["policies_generated"] += len(validated_policies)
@@ -740,9 +696,7 @@ Format as JSON array of policies."""
             self.logger.error(f"Policy generation failed: {e}")
             raise SecurityException(f"Failed to generate security policies: {e}")
 
-    async def threat_intelligence_analysis(
-        self, threat_data: ThreatData
-    ) -> ThreatAnalysis:
+    async def threat_intelligence_analysis(self, threat_data: ThreatData) -> ThreatAnalysis:
         """
         Analyze threat intelligence data.
 
@@ -837,9 +791,7 @@ Format response as JSON with actionable recommendations."""
                 risk_score=analysis_data.get("risk_score", 50),
                 attack_vector=analysis_data.get("attack_vector", "Unknown"),
                 affected_assets=analysis_data.get("affected_assets", []),
-                indicators_of_compromise=analysis_data.get(
-                    "indicators_of_compromise", []
-                ),
+                indicators_of_compromise=analysis_data.get("indicators_of_compromise", []),
                 analysis_summary=analysis_data.get("analysis_summary", ""),
                 recommended_actions=analysis_data.get("recommended_actions", []),
                 mitigation_strategies=analysis_data.get("mitigation_strategies", []),
@@ -852,9 +804,7 @@ Format response as JSON with actionable recommendations."""
                 },
             )
 
-            self.logger.info(
-                f"Threat intelligence analysis completed: {threat_analysis.threat_id}"
-            )
+            self.logger.info(f"Threat intelligence analysis completed: {threat_analysis.threat_id}")
 
             return threat_analysis
 
@@ -874,11 +824,7 @@ Format response as JSON with actionable recommendations."""
 
             # Gather security metrics
             active_threats_count = len(
-                [
-                    i
-                    for i in self.active_incidents.values()
-                    if i.status not in [IncidentStatus.RESOLVED, IncidentStatus.CLOSED]
-                ]
+                [i for i in self.active_incidents.values() if i.status not in [IncidentStatus.RESOLVED, IncidentStatus.CLOSED]]
             )
 
             # Calculate threat severity distribution
@@ -897,9 +843,7 @@ Format response as JSON with actionable recommendations."""
             total_detections = self.stats["threats_detected"]
             false_positives = self.stats["false_positives"]
             detection_accuracy = (
-                ((total_detections - false_positives) / total_detections * 100)
-                if total_detections > 0
-                else 0.0
+                ((total_detections - false_positives) / total_detections * 100) if total_detections > 0 else 0.0
             )
 
             # Update Prometheus metrics
@@ -920,11 +864,7 @@ Format response as JSON with actionable recommendations."""
                     "incidents_resolved": self.stats["incidents_resolved"],
                     "detection_accuracy": round(detection_accuracy, 2),
                     "false_positive_rate": round(
-                        (
-                            (false_positives / total_detections * 100)
-                            if total_detections > 0
-                            else 0.0
-                        ),
+                        ((false_positives / total_detections * 100) if total_detections > 0 else 0.0),
                         2,
                     ),
                 },
@@ -969,34 +909,20 @@ Format response as JSON with actionable recommendations."""
         recommendations = []
 
         # Analyze active incidents
-        critical_incidents = [
-            i
-            for i in self.active_incidents.values()
-            if i.severity == ThreatSeverity.CRITICAL
-        ]
+        critical_incidents = [i for i in self.active_incidents.values() if i.severity == ThreatSeverity.CRITICAL]
 
         if critical_incidents:
-            recommendations.append(
-                f"Address {len(critical_incidents)} critical security incidents immediately"
-            )
+            recommendations.append(f"Address {len(critical_incidents)} critical security incidents immediately")
 
         # Check detection accuracy
         if self.stats["detection_accuracy"] < 90:
-            recommendations.append(
-                "Review and tune threat detection rules to improve accuracy"
-            )
+            recommendations.append("Review and tune threat detection rules to improve accuracy")
 
         # Check response effectiveness
         if self.stats["automated_responses"] > 0:
-            success_rate = (
-                self.stats["incidents_resolved"]
-                / self.stats["automated_responses"]
-                * 100
-            )
+            success_rate = self.stats["incidents_resolved"] / self.stats["automated_responses"] * 100
             if success_rate < 80:
-                recommendations.append(
-                    "Review automated response playbooks for effectiveness"
-                )
+                recommendations.append("Review automated response playbooks for effectiveness")
 
         return recommendations
 
@@ -1041,9 +967,7 @@ Format response as JSON with actionable recommendations."""
             )
             self.active_incidents[incident_id] = incident
 
-    async def _generate_security_alert(
-        self, security_event: SecurityEvent, threat_analysis: ThreatAnalysis
-    ) -> None:
+    async def _generate_security_alert(self, security_event: SecurityEvent, threat_analysis: ThreatAnalysis) -> None:
         """Generate security alert through alert manager."""
         if not self.alert_manager:
             return
@@ -1118,9 +1042,7 @@ Format response as JSON with actionable recommendations."""
         # Integration with network isolation systems
         # This would call actual network management APIs in production
 
-    async def _create_alert(
-        self, security_event: SecurityEvent, threat_analysis: ThreatAnalysis
-    ) -> str:
+    async def _create_alert(self, security_event: SecurityEvent, threat_analysis: ThreatAnalysis) -> str:
         """Create security alert."""
         alert_id = str(uuid.uuid4())
         await self._generate_security_alert(security_event, threat_analysis)
@@ -1209,9 +1131,7 @@ Format response as JSON with actionable recommendations."""
 
         return validated
 
-    async def _create_implementation_guide(
-        self, policies: List[SecurityPolicy], requirements: SecurityRequirements
-    ) -> str:
+    async def _create_implementation_guide(self, policies: List[SecurityPolicy], requirements: SecurityRequirements) -> str:
         """Create implementation guide for generated policies."""
         guide = f"""
 # Security Policy Implementation Guide
@@ -1235,9 +1155,7 @@ Total Policies: {len(policies)}
 
         return guide
 
-    def _create_fallback_policies(
-        self, requirements: SecurityRequirements
-    ) -> List[Dict[str, Any]]:
+    def _create_fallback_policies(self, requirements: SecurityRequirements) -> List[Dict[str, Any]]:
         """Create fallback policies when LLM parsing fails."""
         return [
             {
@@ -1280,9 +1198,7 @@ async def initialize_security_orchestrator(
     """Initialize global security orchestrator."""
     global _security_orchestrator
 
-    _security_orchestrator = ZeroTouchSecurityOrchestrator(
-        config, llm_service, alert_manager, policy_engine
-    )
+    _security_orchestrator = ZeroTouchSecurityOrchestrator(config, llm_service, alert_manager, policy_engine)
 
     return _security_orchestrator
 

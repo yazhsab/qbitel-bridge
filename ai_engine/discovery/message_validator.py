@@ -68,30 +68,19 @@ class ValidationResult:
 
     @property
     def has_errors(self) -> bool:
-        return any(
-            issue.severity in [ValidationSeverity.ERROR, ValidationSeverity.CRITICAL]
-            for issue in self.issues
-        )
+        return any(issue.severity in [ValidationSeverity.ERROR, ValidationSeverity.CRITICAL] for issue in self.issues)
 
     @property
     def has_warnings(self) -> bool:
-        return any(
-            issue.severity == ValidationSeverity.WARNING for issue in self.issues
-        )
+        return any(issue.severity == ValidationSeverity.WARNING for issue in self.issues)
 
     @property
     def error_count(self) -> int:
-        return sum(
-            1
-            for issue in self.issues
-            if issue.severity in [ValidationSeverity.ERROR, ValidationSeverity.CRITICAL]
-        )
+        return sum(1 for issue in self.issues if issue.severity in [ValidationSeverity.ERROR, ValidationSeverity.CRITICAL])
 
     @property
     def warning_count(self) -> int:
-        return sum(
-            1 for issue in self.issues if issue.severity == ValidationSeverity.WARNING
-        )
+        return sum(1 for issue in self.issues if issue.severity == ValidationSeverity.WARNING)
 
 
 @dataclass
@@ -100,9 +89,7 @@ class ValidationRule:
 
     name: str
     description: str = ""
-    validator_func: Optional[
-        Callable[[bytes, Dict[str, Any]], List[ValidationIssue]]
-    ] = None
+    validator_func: Optional[Callable[[bytes, Dict[str, Any]], List[ValidationIssue]]] = None
     severity: ValidationSeverity = ValidationSeverity.ERROR
     enabled: bool = True
     protocol_specific: Optional[str] = None
@@ -172,9 +159,7 @@ class MessageValidator:
         self.max_message_size = 10 * 1024 * 1024  # 10MB
         self.validation_timeout = 30.0  # seconds
         self.use_parallel_validation = True
-        self.max_workers = (
-            config.inference.num_workers if hasattr(config, "inference") else 4
-        )
+        self.max_workers = config.inference.num_workers if hasattr(config, "inference") else 4
         self.executor = ThreadPoolExecutor(max_workers=self.max_workers)
 
         # Validation rules registry
@@ -320,9 +305,7 @@ class MessageValidator:
         start_time = time.time()
         validation_level = validation_level or self.default_validation_level
 
-        self.logger.debug(
-            f"Validating message of {len(message)} bytes, protocol: {protocol_type}"
-        )
+        self.logger.debug(f"Validating message of {len(message)} bytes, protocol: {protocol_type}")
 
         try:
             # Update statistics
@@ -347,9 +330,7 @@ class MessageValidator:
                 )
 
             # Collect all applicable validation rules
-            applicable_rules = await self._get_applicable_rules(
-                protocol_type, validation_level, custom_rules
-            )
+            applicable_rules = await self._get_applicable_rules(protocol_type, validation_level, custom_rules)
 
             # Execute validation rules
             all_issues = []
@@ -357,12 +338,7 @@ class MessageValidator:
             if self.use_parallel_validation and len(applicable_rules) > 5:
                 # Parallel validation for many rules
                 issues_lists = await asyncio.gather(
-                    *[
-                        self._execute_rule_async(
-                            rule, message, {"protocol_type": protocol_type}
-                        )
-                        for rule in applicable_rules
-                    ],
+                    *[self._execute_rule_async(rule, message, {"protocol_type": protocol_type}) for rule in applicable_rules],
                     return_exceptions=True,
                 )
 
@@ -382,9 +358,7 @@ class MessageValidator:
                 # Sequential validation
                 for rule in applicable_rules:
                     try:
-                        issues = await self._execute_rule_async(
-                            rule, message, {"protocol_type": protocol_type}
-                        )
+                        issues = await self._execute_rule_async(rule, message, {"protocol_type": protocol_type})
                         all_issues.extend(issues)
                     except Exception as e:
                         self.logger.error(f"Validation rule {rule.name} failed: {e}")
@@ -398,9 +372,7 @@ class MessageValidator:
 
             # Grammar-based validation if available
             if protocol_type and protocol_type in self.grammars:
-                grammar_issues = await self._validate_against_grammar(
-                    message, protocol_type
-                )
+                grammar_issues = await self._validate_against_grammar(message, protocol_type)
                 all_issues.extend(grammar_issues)
 
             # Parser-based validation if available
@@ -410,14 +382,10 @@ class MessageValidator:
 
             # Calculate overall validity and confidence
             is_valid = not any(
-                issue.severity
-                in [ValidationSeverity.ERROR, ValidationSeverity.CRITICAL]
-                for issue in all_issues
+                issue.severity in [ValidationSeverity.ERROR, ValidationSeverity.CRITICAL] for issue in all_issues
             )
 
-            confidence = await self._calculate_validation_confidence(
-                all_issues, validation_level
-            )
+            confidence = await self._calculate_validation_confidence(all_issues, validation_level)
 
             # Update statistics
             if is_valid:
@@ -426,14 +394,11 @@ class MessageValidator:
                 self.validation_stats["failed_validations"] += 1
 
             for issue in all_issues:
-                self.validation_stats["issue_counts_by_severity"][
-                    issue.severity.value
-                ] += 1
+                self.validation_stats["issue_counts_by_severity"][issue.severity.value] += 1
 
             validation_time = time.time() - start_time
             self.validation_stats["average_validation_time"] = (
-                self.validation_stats["average_validation_time"]
-                * (self.validation_stats["total_validations"] - 1)
+                self.validation_stats["average_validation_time"] * (self.validation_stats["total_validations"] - 1)
                 + validation_time
             ) / self.validation_stats["total_validations"]
 
@@ -490,14 +455,10 @@ class MessageValidator:
         # Filter by validation level
         if validation_level == ValidationLevel.BASIC:
             applicable_rules = [
-                r
-                for r in applicable_rules
-                if r.severity in [ValidationSeverity.ERROR, ValidationSeverity.CRITICAL]
+                r for r in applicable_rules if r.severity in [ValidationSeverity.ERROR, ValidationSeverity.CRITICAL]
             ]
         elif validation_level == ValidationLevel.STANDARD:
-            applicable_rules = [
-                r for r in applicable_rules if r.severity != ValidationSeverity.INFO
-            ]
+            applicable_rules = [r for r in applicable_rules if r.severity != ValidationSeverity.INFO]
         # STRICT and ENTERPRISE levels include all rules
 
         return applicable_rules
@@ -507,9 +468,7 @@ class MessageValidator:
     ) -> List[ValidationIssue]:
         """Execute a validation rule asynchronously."""
         loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(
-            self.executor, rule.validator_func, message, context
-        )
+        return await loop.run_in_executor(self.executor, rule.validator_func, message, context)
 
     async def _calculate_validation_confidence(
         self, issues: List[ValidationIssue], validation_level: ValidationLevel
@@ -544,9 +503,7 @@ class MessageValidator:
 
     # Built-in validation rule implementations
 
-    def _validate_not_empty(
-        self, message: bytes, context: Dict[str, Any]
-    ) -> List[ValidationIssue]:
+    def _validate_not_empty(self, message: bytes, context: Dict[str, Any]) -> List[ValidationIssue]:
         """Validate message is not empty."""
         if len(message) == 0:
             return [
@@ -558,9 +515,7 @@ class MessageValidator:
             ]
         return []
 
-    def _validate_size_limit(
-        self, message: bytes, context: Dict[str, Any]
-    ) -> List[ValidationIssue]:
+    def _validate_size_limit(self, message: bytes, context: Dict[str, Any]) -> List[ValidationIssue]:
         """Validate message size is reasonable."""
         issues = []
 
@@ -590,9 +545,7 @@ class MessageValidator:
 
         return issues
 
-    def _validate_encoding_consistency(
-        self, message: bytes, context: Dict[str, Any]
-    ) -> List[ValidationIssue]:
+    def _validate_encoding_consistency(self, message: bytes, context: Dict[str, Any]) -> List[ValidationIssue]:
         """Validate encoding consistency."""
         issues = []
 
@@ -617,9 +570,7 @@ class MessageValidator:
 
         return issues
 
-    def _validate_http_headers(
-        self, message: bytes, context: Dict[str, Any]
-    ) -> List[ValidationIssue]:
+    def _validate_http_headers(self, message: bytes, context: Dict[str, Any]) -> List[ValidationIssue]:
         """Validate HTTP headers format."""
         issues = []
 
@@ -628,15 +579,12 @@ class MessageValidator:
 
             # Look for HTTP header patterns
             if "HTTP/" in text or any(
-                text.startswith(method)
-                for method in ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"]
+                text.startswith(method) for method in ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"]
             ):
                 lines = text.split("\n")
 
                 # Validate header format
-                for i, line in enumerate(
-                    lines[1:], 1
-                ):  # Skip first line (request/status line)
+                for i, line in enumerate(lines[1:], 1):  # Skip first line (request/status line)
                     if line.strip() == "":
                         break  # End of headers
 
@@ -657,9 +605,7 @@ class MessageValidator:
 
         return issues
 
-    def _validate_json_syntax(
-        self, message: bytes, context: Dict[str, Any]
-    ) -> List[ValidationIssue]:
+    def _validate_json_syntax(self, message: bytes, context: Dict[str, Any]) -> List[ValidationIssue]:
         """Validate JSON syntax."""
         issues = []
 
@@ -688,9 +634,7 @@ class MessageValidator:
 
         return issues
 
-    def _validate_xml_syntax(
-        self, message: bytes, context: Dict[str, Any]
-    ) -> List[ValidationIssue]:
+    def _validate_xml_syntax(self, message: bytes, context: Dict[str, Any]) -> List[ValidationIssue]:
         """Validate XML syntax."""
         issues = []
 
@@ -718,9 +662,7 @@ class MessageValidator:
 
         return issues
 
-    def _validate_no_unexpected_nulls(
-        self, message: bytes, context: Dict[str, Any]
-    ) -> List[ValidationIssue]:
+    def _validate_no_unexpected_nulls(self, message: bytes, context: Dict[str, Any]) -> List[ValidationIssue]:
         """Validate no unexpected null bytes."""
         issues = []
 
@@ -730,9 +672,7 @@ class MessageValidator:
             null_positions = [i for i, b in enumerate(message) if b == 0]
 
             # Heuristic: nulls at the end are often legitimate
-            unexpected_nulls = [
-                pos for pos in null_positions if pos < len(message) - null_count
-            ]
+            unexpected_nulls = [pos for pos in null_positions if pos < len(message) - null_count]
 
             if unexpected_nulls:
                 issues.append(
@@ -740,18 +680,14 @@ class MessageValidator:
                         severity=ValidationSeverity.WARNING,
                         code="unexpected_null_bytes",
                         message=f"Found {len(unexpected_nulls)} unexpected null bytes",
-                        metadata={
-                            "positions": unexpected_nulls[:10]
-                        },  # Limit to first 10
+                        metadata={"positions": unexpected_nulls[:10]},  # Limit to first 10
                         suggestion="Verify null bytes are intentional",
                     )
                 )
 
         return issues
 
-    def _validate_control_characters(
-        self, message: bytes, context: Dict[str, Any]
-    ) -> List[ValidationIssue]:
+    def _validate_control_characters(self, message: bytes, context: Dict[str, Any]) -> List[ValidationIssue]:
         """Validate control characters usage."""
         issues = []
 
@@ -774,9 +710,7 @@ class MessageValidator:
 
         return issues
 
-    def _validate_checksums(
-        self, message: bytes, context: Dict[str, Any]
-    ) -> List[ValidationIssue]:
+    def _validate_checksums(self, message: bytes, context: Dict[str, Any]) -> List[ValidationIssue]:
         """Validate checksums if present."""
         issues = []
 
@@ -807,9 +741,7 @@ class MessageValidator:
 
         return issues
 
-    def _validate_length_fields(
-        self, message: bytes, context: Dict[str, Any]
-    ) -> List[ValidationIssue]:
+    def _validate_length_fields(self, message: bytes, context: Dict[str, Any]) -> List[ValidationIssue]:
         """Validate length field consistency."""
         issues = []
 
@@ -843,9 +775,7 @@ class MessageValidator:
             if length_be32 + 4 == len(message):
                 # Length field matches - good
                 pass
-            elif (
-                length_be32 + 4 > len(message) and length_be32 < 10000
-            ):  # Reasonable size
+            elif length_be32 + 4 > len(message) and length_be32 < 10000:  # Reasonable size
                 issues.append(
                     ValidationIssue(
                         severity=ValidationSeverity.ERROR,
@@ -861,9 +791,7 @@ class MessageValidator:
 
         return issues
 
-    async def _validate_against_grammar(
-        self, message: bytes, protocol_type: str
-    ) -> List[ValidationIssue]:
+    async def _validate_against_grammar(self, message: bytes, protocol_type: str) -> List[ValidationIssue]:
         """Validate message against learned grammar."""
         issues = []
 
@@ -896,9 +824,7 @@ class MessageValidator:
 
         return issues
 
-    async def _validate_with_parser(
-        self, message: bytes, protocol_type: str
-    ) -> List[ValidationIssue]:
+    async def _validate_with_parser(self, message: bytes, protocol_type: str) -> List[ValidationIssue]:
         """Validate message using generated parser."""
         issues = []
 
@@ -961,9 +887,7 @@ class MessageValidator:
             # Remove from protocol-specific rules
             if rule.protocol_specific and rule.protocol_specific in self.protocol_rules:
                 self.protocol_rules[rule.protocol_specific] = [
-                    r
-                    for r in self.protocol_rules[rule.protocol_specific]
-                    if r.name != rule_name
+                    r for r in self.protocol_rules[rule.protocol_specific] if r.name != rule_name
                 ]
 
             self.logger.debug(f"Removed validation rule: {rule_name}")
@@ -995,16 +919,13 @@ class MessageValidator:
         self.grammars[protocol_type] = grammar
         self.logger.info(f"Registered grammar for protocol: {protocol_type}")
 
-    def get_validation_rules(
-        self, protocol_type: Optional[str] = None
-    ) -> List[ValidationRule]:
+    def get_validation_rules(self, protocol_type: Optional[str] = None) -> List[ValidationRule]:
         """Get list of validation rules."""
         if protocol_type:
             return [
                 rule
                 for rule in self.validation_rules.values()
-                if rule.protocol_specific is None
-                or rule.protocol_specific == protocol_type
+                if rule.protocol_specific is None or rule.protocol_specific == protocol_type
             ]
         else:
             return list(self.validation_rules.values())
@@ -1021,10 +942,7 @@ class MessageValidator:
         """Validate multiple messages in parallel."""
         self.logger.info(f"Bulk validating {len(messages)} messages")
 
-        validation_tasks = [
-            self.validate(message, protocol_type, validation_level)
-            for message, protocol_type in messages
-        ]
+        validation_tasks = [self.validate(message, protocol_type, validation_level) for message, protocol_type in messages]
 
         results = await asyncio.gather(*validation_tasks, return_exceptions=True)
 

@@ -1,6 +1,7 @@
 """
 Unit tests for AWS Security Hub Integration.
 """
+
 import pytest
 import json
 from unittest.mock import Mock, patch, MagicMock
@@ -11,10 +12,7 @@ from datetime import datetime
 # Add ai_engine to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from cloud_native.cloud_integrations.aws.security_hub import (
-    AWSSecurityHubIntegration,
-    FindingImportError
-)
+from cloud_native.cloud_integrations.aws.security_hub import AWSSecurityHubIntegration, FindingImportError
 
 
 class TestAWSSecurityHubIntegration:
@@ -23,12 +21,8 @@ class TestAWSSecurityHubIntegration:
     @pytest.fixture
     def security_hub(self):
         """Create Security Hub integration instance"""
-        with patch('boto3.client'):
-            return AWSSecurityHubIntegration(
-                region="us-east-1",
-                account_id="123456789012",
-                max_retries=3
-            )
+        with patch("boto3.client"):
+            return AWSSecurityHubIntegration(region="us-east-1", account_id="123456789012", max_retries=3)
 
     def test_initialization(self, security_hub):
         """Test initialization"""
@@ -36,7 +30,7 @@ class TestAWSSecurityHubIntegration:
         assert security_hub.account_id == "123456789012"
         assert security_hub.max_retries == 3
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_get_client(self, mock_boto_client):
         """Test boto3 client creation"""
         mock_client = MagicMock()
@@ -48,14 +42,11 @@ class TestAWSSecurityHubIntegration:
         assert client is not None
         mock_boto_client.assert_called()
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_publish_finding(self, mock_boto_client):
         """Test publishing single finding"""
         mock_client = MagicMock()
-        mock_client.batch_import_findings.return_value = {
-            "FailedCount": 0,
-            "SuccessCount": 1
-        }
+        mock_client.batch_import_findings.return_value = {"FailedCount": 0, "SuccessCount": 1}
         mock_boto_client.return_value = mock_client
 
         hub = AWSSecurityHubIntegration(region="us-east-1", account_id="123456789012")
@@ -66,20 +57,17 @@ class TestAWSSecurityHubIntegration:
             severity=70,
             resource_id="arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890abcdef0",
             finding_type="Software and Configuration Checks/Vulnerabilities/CVE",
-            resource_type="AwsEc2Instance"
+            resource_type="AwsEc2Instance",
         )
 
         assert result is True
         mock_client.batch_import_findings.assert_called_once()
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_batch_publish_findings(self, mock_boto_client):
         """Test batch publishing findings"""
         mock_client = MagicMock()
-        mock_client.batch_import_findings.return_value = {
-            "FailedCount": 0,
-            "SuccessCount": 3
-        }
+        mock_client.batch_import_findings.return_value = {"FailedCount": 0, "SuccessCount": 3}
         mock_boto_client.return_value = mock_client
 
         hub = AWSSecurityHubIntegration(region="us-east-1", account_id="123456789012")
@@ -91,7 +79,7 @@ class TestAWSSecurityHubIntegration:
                 "severity": 50,
                 "resource_id": "arn:aws:s3:::my-bucket",
                 "finding_type": "Sensitive Data Identifications",
-                "resource_type": "AwsS3Bucket"
+                "resource_type": "AwsS3Bucket",
             },
             {
                 "title": "Finding 2",
@@ -99,8 +87,8 @@ class TestAWSSecurityHubIntegration:
                 "severity": 80,
                 "resource_id": "arn:aws:ec2:us-east-1:123456789012:instance/i-test",
                 "finding_type": "TTPs/Initial Access",
-                "resource_type": "AwsEc2Instance"
-            }
+                "resource_type": "AwsEc2Instance",
+            },
         ]
 
         result = hub.batch_publish_findings(findings)
@@ -108,7 +96,7 @@ class TestAWSSecurityHubIntegration:
         assert result["SuccessCount"] == 3
         assert result["FailedCount"] == 0
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_publish_finding_failure(self, mock_boto_client):
         """Test handling of finding publication failure"""
         mock_client = MagicMock()
@@ -124,10 +112,10 @@ class TestAWSSecurityHubIntegration:
                 severity=50,
                 resource_id="arn:aws:test",
                 finding_type="Test",
-                resource_type="Other"
+                resource_type="Other",
             )
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_retry_logic(self, mock_boto_client):
         """Test retry logic on transient failures"""
         mock_client = MagicMock()
@@ -135,24 +123,16 @@ class TestAWSSecurityHubIntegration:
         mock_client.batch_import_findings.side_effect = [
             Exception("Throttling"),
             Exception("Throttling"),
-            {"FailedCount": 0, "SuccessCount": 1}
+            {"FailedCount": 0, "SuccessCount": 1},
         ]
         mock_boto_client.return_value = mock_client
 
-        hub = AWSSecurityHubIntegration(
-            region="us-east-1",
-            account_id="123456789012",
-            max_retries=3
-        )
+        hub = AWSSecurityHubIntegration(region="us-east-1", account_id="123456789012", max_retries=3)
 
         # Should succeed after retries
         try:
             result = hub.publish_finding(
-                title="Test",
-                description="Test",
-                severity=50,
-                resource_id="arn:aws:test",
-                finding_type="Test"
+                title="Test", description="Test", severity=50, resource_id="arn:aws:test", finding_type="Test"
             )
             # If retry logic works, it should eventually succeed
             assert result is True or result is False
@@ -173,7 +153,7 @@ class TestAWSSecurityHubIntegration:
         resources = template["Resources"]
         assert any("SecurityHub" in key for key in resources.keys())
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_close_connection(self, mock_boto_client):
         """Test closing client connection"""
         mock_client = MagicMock()
@@ -185,14 +165,11 @@ class TestAWSSecurityHubIntegration:
         # Verify cleanup
         assert True
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_batch_size_limit(self, mock_boto_client):
         """Test batch size limit enforcement (max 100)"""
         mock_client = MagicMock()
-        mock_client.batch_import_findings.return_value = {
-            "FailedCount": 0,
-            "SuccessCount": 100
-        }
+        mock_client.batch_import_findings.return_value = {"FailedCount": 0, "SuccessCount": 100}
         mock_boto_client.return_value = mock_client
 
         hub = AWSSecurityHubIntegration(region="us-east-1", account_id="123456789012")
@@ -204,7 +181,7 @@ class TestAWSSecurityHubIntegration:
                 "description": f"Description {i}",
                 "severity": 50,
                 "resource_id": f"arn:aws:test:resource-{i}",
-                "finding_type": "Test"
+                "finding_type": "Test",
             }
             for i in range(150)
         ]
@@ -214,14 +191,11 @@ class TestAWSSecurityHubIntegration:
         # Should handle batching internally
         assert result is not None
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_severity_normalization(self, mock_boto_client):
         """Test severity value normalization"""
         mock_client = MagicMock()
-        mock_client.batch_import_findings.return_value = {
-            "FailedCount": 0,
-            "SuccessCount": 1
-        }
+        mock_client.batch_import_findings.return_value = {"FailedCount": 0, "SuccessCount": 1}
         mock_boto_client.return_value = mock_client
 
         hub = AWSSecurityHubIntegration(region="us-east-1", account_id="123456789012")
@@ -231,22 +205,15 @@ class TestAWSSecurityHubIntegration:
 
         for sev in severities:
             result = hub.publish_finding(
-                title="Test",
-                description="Test",
-                severity=sev,
-                resource_id="arn:aws:test",
-                finding_type="Test"
+                title="Test", description="Test", severity=sev, resource_id="arn:aws:test", finding_type="Test"
             )
             assert isinstance(result, bool)
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_quantum_vulnerability_finding(self, mock_boto_client):
         """Test publishing quantum vulnerability finding"""
         mock_client = MagicMock()
-        mock_client.batch_import_findings.return_value = {
-            "FailedCount": 0,
-            "SuccessCount": 1
-        }
+        mock_client.batch_import_findings.return_value = {"FailedCount": 0, "SuccessCount": 1}
         mock_boto_client.return_value = mock_client
 
         hub = AWSSecurityHubIntegration(region="us-east-1", account_id="123456789012")
@@ -257,7 +224,7 @@ class TestAWSSecurityHubIntegration:
             severity=80,
             resource_id="arn:aws:ecs:us-east-1:123456789012:task/my-task",
             finding_type="Software and Configuration Checks/Vulnerabilities",
-            resource_type="AwsEcsTask"
+            resource_type="AwsEcsTask",
         )
 
         assert isinstance(result, bool)

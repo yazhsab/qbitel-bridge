@@ -263,9 +263,7 @@ class TestControlRetrieval:
 
     def test_get_controls_by_criteria_availability(self, soc2_manager):
         """Test getting controls by availability criteria."""
-        controls = soc2_manager.get_controls_by_criteria(
-            TrustServiceCriteria.AVAILABILITY
-        )
+        controls = soc2_manager.get_controls_by_criteria(TrustServiceCriteria.AVAILABILITY)
 
         assert len(controls) == 3  # A1.1, A1.2, A1.3
         assert all(c.criteria == TrustServiceCriteria.AVAILABILITY for c in controls)
@@ -468,19 +466,13 @@ class TestControlEvidence:
         """Test security controls have appropriate evidence."""
         control = soc2_manager.controls["CC6.1"]
 
-        assert any(
-            "IAM" in evidence or "MFA" in evidence or "access" in evidence.lower()
-            for evidence in control.evidence
-        )
+        assert any("IAM" in evidence or "MFA" in evidence or "access" in evidence.lower() for evidence in control.evidence)
 
     def test_availability_control_evidence(self, soc2_manager):
         """Test availability controls have appropriate evidence."""
         control = soc2_manager.controls["A1.2"]
 
-        assert any(
-            "backup" in evidence.lower() or "recovery" in evidence.lower()
-            for evidence in control.evidence
-        )
+        assert any("backup" in evidence.lower() or "recovery" in evidence.lower() for evidence in control.evidence)
 
 
 class TestEdgeCases:

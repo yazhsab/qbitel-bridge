@@ -1,6 +1,7 @@
 """
 Integration tests for Cloud Platform Integrations.
 """
+
 import pytest
 from unittest.mock import patch, MagicMock
 import sys
@@ -16,7 +17,7 @@ from cloud_native.cloud_integrations.gcp.security_command_center import GCPSecur
 class TestCloudIntegrations:
     """Test multi-cloud security integrations"""
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_multi_cloud_finding_publication(self, mock_boto):
         """Test publishing findings to multiple cloud platforms"""
         mock_client = MagicMock()
@@ -30,7 +31,7 @@ class TestCloudIntegrations:
             description="RSA-2048 detected",
             severity=80,
             resource_id="arn:aws:ecs:us-east-1:123456789012:task/my-task",
-            finding_type="Software and Configuration Checks/Vulnerabilities"
+            finding_type="Software and Configuration Checks/Vulnerabilities",
         )
 
         # Azure Sentinel
@@ -39,7 +40,7 @@ class TestCloudIntegrations:
             event_type="QuantumVulnerability",
             severity="High",
             description="RSA-2048 detected",
-            resource_id="/subscriptions/xxx/providers/Microsoft.ContainerService/managedClusters/aks1"
+            resource_id="/subscriptions/xxx/providers/Microsoft.ContainerService/managedClusters/aks1",
         )
 
         # GCP SCC
@@ -48,7 +49,7 @@ class TestCloudIntegrations:
             finding_id="quantum-001",
             category="QUANTUM_VULNERABILITY",
             severity="HIGH",
-            resource_name="//container.googleapis.com/projects/my-project/clusters/prod"
+            resource_name="//container.googleapis.com/projects/my-project/clusters/prod",
         )
 
         assert isinstance(aws_result, bool)

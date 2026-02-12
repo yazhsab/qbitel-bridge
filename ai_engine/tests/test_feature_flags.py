@@ -261,6 +261,7 @@ class TestFeatureGuardDecorator:
 
     def test_feature_guard_enabled(self):
         """Test feature guard allows call when feature is enabled."""
+
         @feature_guard("protocol_discovery")
         def my_function():
             return "success"
@@ -270,6 +271,7 @@ class TestFeatureGuardDecorator:
 
     def test_feature_guard_disabled(self):
         """Test feature guard blocks call when feature is disabled."""
+
         @feature_guard("marketplace")
         def my_function():
             return "success"
@@ -282,6 +284,7 @@ class TestFeatureGuardDecorator:
 
     def test_feature_guard_preserves_metadata(self):
         """Test that feature guard preserves function name and docstring."""
+
         @feature_guard("protocol_discovery")
         def documented_function():
             """This is a documented function."""
@@ -359,6 +362,7 @@ class TestFeatureDependencies:
 
         # Monkey-patch for testing
         from ai_engine.core import feature_flags as ff_module
+
         original = ff_module.FEATURE_DEFINITIONS.copy()
 
         try:

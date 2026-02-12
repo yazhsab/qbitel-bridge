@@ -701,54 +701,40 @@ class MT202Builder:
         self, bic: Optional[str] = None, name: str = "", account: Optional[str] = None
     ) -> "MT202Builder":
         """Set ordering institution (field 52)."""
-        self._message.ordering_institution = MT202Agent(
-            bic=bic, name=name, account=account
-        )
+        self._message.ordering_institution = MT202Agent(bic=bic, name=name, account=account)
         return self
 
     def set_senders_correspondent(
         self, bic: Optional[str] = None, location: str = "", account: Optional[str] = None
     ) -> "MT202Builder":
         """Set sender's correspondent (field 53)."""
-        self._message.senders_correspondent = MT202Agent(
-            bic=bic, location=location, account=account
-        )
+        self._message.senders_correspondent = MT202Agent(bic=bic, location=location, account=account)
         return self
 
     def set_receivers_correspondent(
         self, bic: Optional[str] = None, location: str = "", account: Optional[str] = None
     ) -> "MT202Builder":
         """Set receiver's correspondent (field 54)."""
-        self._message.receivers_correspondent = MT202Agent(
-            bic=bic, location=location, account=account
-        )
+        self._message.receivers_correspondent = MT202Agent(bic=bic, location=location, account=account)
         return self
 
-    def set_intermediary(
-        self, bic: Optional[str] = None, name: str = "", account: Optional[str] = None
-    ) -> "MT202Builder":
+    def set_intermediary(self, bic: Optional[str] = None, name: str = "", account: Optional[str] = None) -> "MT202Builder":
         """Set intermediary (field 56)."""
-        self._message.intermediary = MT202Agent(
-            bic=bic, name=name, account=account
-        )
+        self._message.intermediary = MT202Agent(bic=bic, name=name, account=account)
         return self
 
     def set_account_with_institution(
         self, bic: Optional[str] = None, name: str = "", account: Optional[str] = None
     ) -> "MT202Builder":
         """Set account with institution (field 57)."""
-        self._message.account_with_institution = MT202Agent(
-            bic=bic, name=name, account=account
-        )
+        self._message.account_with_institution = MT202Agent(bic=bic, name=name, account=account)
         return self
 
     def set_beneficiary_institution(
         self, bic: Optional[str] = None, name: str = "", account: Optional[str] = None
     ) -> "MT202Builder":
         """Set beneficiary institution (field 58)."""
-        self._message.beneficiary_institution = MT202Agent(
-            bic=bic, name=name, account=account
-        )
+        self._message.beneficiary_institution = MT202Agent(bic=bic, name=name, account=account)
         self._message.beneficiary_option = "A" if bic else "D"
         return self
 

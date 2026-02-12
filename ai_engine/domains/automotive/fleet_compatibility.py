@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 class CompatibilityProfile(Enum):
     """Vehicle compatibility profiles."""
 
-    LEGACY_ONLY = auto()      # Pre-2025: ECDSA only
-    HYBRID = auto()           # 2025-2030: Supports both
-    PQC_PREFERRED = auto()    # 2030-2035: PQC preferred
-    PQC_ONLY = auto()         # Post-2035: PQC only
+    LEGACY_ONLY = auto()  # Pre-2025: ECDSA only
+    HYBRID = auto()  # 2025-2030: Supports both
+    PQC_PREFERRED = auto()  # 2030-2035: PQC preferred
+    PQC_ONLY = auto()  # Post-2035: PQC only
 
 
 @dataclass

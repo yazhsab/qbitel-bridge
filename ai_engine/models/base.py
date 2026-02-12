@@ -207,9 +207,7 @@ class BaseModel(nn.Module, abc.ABC):
         self.training_metrics = {}
         self.logger.info("Model metrics reset")
 
-    def update_inference_metrics(
-        self, processing_time_ms: float, success: bool = True
-    ) -> None:
+    def update_inference_metrics(self, processing_time_ms: float, success: bool = True) -> None:
         """Update inference performance metrics."""
         self.inference_metrics["total_inferences"] += 1
         self.inference_metrics["total_time_ms"] += processing_time_ms
@@ -222,9 +220,7 @@ class BaseModel(nn.Module, abc.ABC):
         else:
             self.inference_metrics["errors"] += 1
 
-    def validate_tensor_shape(
-        self, tensor: torch.Tensor, expected_shape: Tuple[int, ...]
-    ) -> bool:
+    def validate_tensor_shape(self, tensor: torch.Tensor, expected_shape: Tuple[int, ...]) -> bool:
         """Validate tensor shape against expected shape."""
         if len(tensor.shape) != len(expected_shape):
             return False
@@ -245,26 +241,20 @@ class BaseModel(nn.Module, abc.ABC):
 
         return tensor
 
-    def postprocess_output(
-        self, raw_output: torch.Tensor, input_metadata: Optional[Dict[str, Any]] = None
-    ) -> ModelOutput:
+    def postprocess_output(self, raw_output: torch.Tensor, input_metadata: Optional[Dict[str, Any]] = None) -> ModelOutput:
         """Postprocess model output."""
         return ModelOutput(
             predictions=raw_output,
             metadata={"model_name": self.model_name, "model_version": self.version},
         )
 
-    def save_checkpoint(
-        self, filepath: str, include_optimizer: bool = False, **kwargs
-    ) -> None:
+    def save_checkpoint(self, filepath: str, include_optimizer: bool = False, **kwargs) -> None:
         """Save model checkpoint."""
         checkpoint = {
             "model_name": self.model_name,
             "version": self.version,
             "state_dict": self.state_dict(),
-            "model_config": (
-                self.config.__dict__ if hasattr(self.config, "__dict__") else {}
-            ),
+            "model_config": (self.config.__dict__ if hasattr(self.config, "__dict__") else {}),
             "model_parameters": self.model_parameters,
             "created_at": self.created_at,
             "last_updated": self.last_updated,
@@ -288,9 +278,7 @@ class BaseModel(nn.Module, abc.ABC):
         self.model_parameters = checkpoint.get("model_parameters", {})
         self.created_at = checkpoint.get("created_at", time.time())
         self.last_updated = checkpoint.get("last_updated", time.time())
-        self.inference_metrics = checkpoint.get(
-            "inference_metrics", self.inference_metrics
-        )
+        self.inference_metrics = checkpoint.get("inference_metrics", self.inference_metrics)
         self.training_metrics = checkpoint.get("training_metrics", {})
 
         self.set_state(ModelState.LOADED)
@@ -348,20 +336,15 @@ class BaseModel(nn.Module, abc.ABC):
         if self.device.type == "cuda":
             memory_info.update(
                 {
-                    "gpu_allocated_mb": torch.cuda.memory_allocated(self.device)
-                    / (1024 * 1024),
-                    "gpu_cached_mb": torch.cuda.memory_reserved(self.device)
-                    / (1024 * 1024),
-                    "gpu_max_allocated_mb": torch.cuda.max_memory_allocated(self.device)
-                    / (1024 * 1024),
+                    "gpu_allocated_mb": torch.cuda.memory_allocated(self.device) / (1024 * 1024),
+                    "gpu_cached_mb": torch.cuda.memory_reserved(self.device) / (1024 * 1024),
+                    "gpu_max_allocated_mb": torch.cuda.max_memory_allocated(self.device) / (1024 * 1024),
                 }
             )
 
         return memory_info
 
-    def benchmark_inference(
-        self, input_data: ModelInput, num_runs: int = 100
-    ) -> Dict[str, float]:
+    def benchmark_inference(self, input_data: ModelInput, num_runs: int = 100) -> Dict[str, float]:
         """Benchmark model inference performance."""
         self.eval()
         times = []

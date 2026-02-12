@@ -368,49 +368,31 @@ class MT103Message:
         # Field 55: Third Reimbursement Institution (optional)
         if self.third_reimbursement_institution:
             if self.third_reimbursement_institution.bic:
-                text_block.add_field(
-                    "55", self.third_reimbursement_institution.to_a_format(), "A"
-                )
+                text_block.add_field("55", self.third_reimbursement_institution.to_a_format(), "A")
             elif self.third_reimbursement_institution.location:
-                text_block.add_field(
-                    "55", self.third_reimbursement_institution.location, "B"
-                )
+                text_block.add_field("55", self.third_reimbursement_institution.location, "B")
             else:
-                text_block.add_field(
-                    "55", self.third_reimbursement_institution.to_d_format(), "D"
-                )
+                text_block.add_field("55", self.third_reimbursement_institution.to_d_format(), "D")
 
         # Field 56: Intermediary Institution (optional)
         if self.intermediary_institution:
             if self.intermediary_institution.bic:
-                text_block.add_field(
-                    "56", self.intermediary_institution.to_a_format(), "A"
-                )
+                text_block.add_field("56", self.intermediary_institution.to_a_format(), "A")
             elif self.intermediary_institution.account:
-                text_block.add_field(
-                    "56", f"/{self.intermediary_institution.account}", "C"
-                )
+                text_block.add_field("56", f"/{self.intermediary_institution.account}", "C")
             else:
-                text_block.add_field(
-                    "56", self.intermediary_institution.to_d_format(), "D"
-                )
+                text_block.add_field("56", self.intermediary_institution.to_d_format(), "D")
 
         # Field 57: Account With Institution (optional)
         if self.account_with_institution:
             if self.account_with_institution.bic:
-                text_block.add_field(
-                    "57", self.account_with_institution.to_a_format(), "A"
-                )
+                text_block.add_field("57", self.account_with_institution.to_a_format(), "A")
             elif self.account_with_institution.location:
                 text_block.add_field("57", self.account_with_institution.location, "B")
             elif self.account_with_institution.account:
-                text_block.add_field(
-                    "57", f"/{self.account_with_institution.account}", "C"
-                )
+                text_block.add_field("57", f"/{self.account_with_institution.account}", "C")
             else:
-                text_block.add_field(
-                    "57", self.account_with_institution.to_d_format(), "D"
-                )
+                text_block.add_field("57", self.account_with_institution.to_d_format(), "D")
 
         # Field 59: Beneficiary Customer
         if self.beneficiary_option == "A" and self.beneficiary.bic:
@@ -803,27 +785,21 @@ class MT103Builder:
         self, bic: Optional[str] = None, name: str = "", account: Optional[str] = None
     ) -> "MT103Builder":
         """Set ordering institution (field 52)."""
-        self._message.ordering_institution = MT103Agent(
-            bic=bic, name=name, account=account
-        )
+        self._message.ordering_institution = MT103Agent(bic=bic, name=name, account=account)
         return self
 
     def set_account_with_institution(
         self, bic: Optional[str] = None, name: str = "", account: Optional[str] = None
     ) -> "MT103Builder":
         """Set account with institution (field 57)."""
-        self._message.account_with_institution = MT103Agent(
-            bic=bic, name=name, account=account
-        )
+        self._message.account_with_institution = MT103Agent(bic=bic, name=name, account=account)
         return self
 
     def set_intermediary_institution(
         self, bic: Optional[str] = None, name: str = "", account: Optional[str] = None
     ) -> "MT103Builder":
         """Set intermediary institution (field 56)."""
-        self._message.intermediary_institution = MT103Agent(
-            bic=bic, name=name, account=account
-        )
+        self._message.intermediary_institution = MT103Agent(bic=bic, name=name, account=account)
         return self
 
     def set_charges(

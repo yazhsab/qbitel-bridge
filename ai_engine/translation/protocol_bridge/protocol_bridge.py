@@ -62,18 +62,14 @@ BRIDGE_TRANSLATION_DURATION = Histogram(
     ["source_protocol", "target_protocol"],
 )
 
-BRIDGE_ACTIVE_CONNECTIONS = Gauge(
-    "qbitel_bridge_active_connections", "Active bridge connections"
-)
+BRIDGE_ACTIVE_CONNECTIONS = Gauge("qbitel_bridge_active_connections", "Active bridge connections")
 
 BRIDGE_THROUGHPUT = Summary(
     "qbitel_bridge_throughput_messages_per_second",
     "Bridge throughput in messages per second",
 )
 
-BRIDGE_ERROR_RATE = Counter(
-    "qbitel_bridge_errors_total", "Bridge translation errors", ["error_type"]
-)
+BRIDGE_ERROR_RATE = Counter("qbitel_bridge_errors_total", "Bridge translation errors", ["error_type"])
 
 logger = logging.getLogger(__name__)
 
@@ -183,18 +179,14 @@ class DirectFieldTranslator(BaseProtocolTranslator):
 
         return mappings
 
-    def _calculate_field_similarity(
-        self, source_field: ProtocolField, target_field: ProtocolField
-    ) -> float:
+    def _calculate_field_similarity(self, source_field: ProtocolField, target_field: ProtocolField) -> float:
         """Calculate similarity score between two fields."""
         score = 0.0
 
         # Type similarity
         if source_field.field_type == target_field.field_type:
             score += 0.4
-        elif self._are_compatible_types(
-            source_field.field_type, target_field.field_type
-        ):
+        elif self._are_compatible_types(source_field.field_type, target_field.field_type):
             score += 0.2
 
         # Length similarity
@@ -209,9 +201,7 @@ class DirectFieldTranslator(BaseProtocolTranslator):
                 score += 0.3
 
         # Name similarity
-        name_similarity = self._calculate_string_similarity(
-            source_field.name, target_field.name
-        )
+        name_similarity = self._calculate_string_similarity(source_field.name, target_field.name)
         score += name_similarity * 0.1
 
         return min(1.0, score)
@@ -257,16 +247,12 @@ class DirectFieldTranslator(BaseProtocolTranslator):
             for source_name, source_value in source_fields.items():
                 if source_name in self.field_mappings:
                     target_name = self.field_mappings[source_name]
-                    transformed_value = await self._transform_field_value(
-                        source_value, source_name, target_name, context
-                    )
+                    transformed_value = await self._transform_field_value(source_value, source_name, target_name, context)
                     target_fields[target_name] = transformed_value
 
             # Apply custom translation rules
             if context.custom_rules:
-                target_fields = await self._apply_custom_rules(
-                    source_fields, target_fields, context.custom_rules
-                )
+                target_fields = await self._apply_custom_rules(source_fields, target_fields, context.custom_rules)
 
             # Generate target protocol data
             translated_data = await self._generate_target_data(target_fields)
@@ -275,9 +261,7 @@ class DirectFieldTranslator(BaseProtocolTranslator):
                 source_protocol=context.source_protocol,
                 target_protocol=context.target_protocol,
                 translated_data=translated_data,
-                confidence=self._calculate_translation_confidence(
-                    source_fields, target_fields
-                ),
+                confidence=self._calculate_translation_confidence(source_fields, target_fields),
                 processing_time=time.time() - start_time,
                 translation_mode=TranslationMode.DIRECT,
                 metadata={
@@ -331,12 +315,8 @@ class DirectFieldTranslator(BaseProtocolTranslator):
     ) -> Any:
         """Transform field value during translation."""
         # Apply basic transformations based on field types
-        source_field = next(
-            (f for f in self.source_schema.fields if f.name == source_name), None
-        )
-        target_field = next(
-            (f for f in self.target_schema.fields if f.name == target_name), None
-        )
+        source_field = next((f for f in self.source_schema.fields if f.name == source_name), None)
+        target_field = next((f for f in self.target_schema.fields if f.name == target_name), None)
 
         if not source_field or not target_field:
             return value
@@ -347,13 +327,9 @@ class DirectFieldTranslator(BaseProtocolTranslator):
                 return int(value) if isinstance(value, str) else value
             except (ValueError, TypeError):
                 return 0
-        elif (
-            source_field.field_type == "integer" and target_field.field_type == "string"
-        ):
+        elif source_field.field_type == "integer" and target_field.field_type == "string":
             return str(value)
-        elif (
-            source_field.field_type == "binary" and target_field.field_type == "string"
-        ):
+        elif source_field.field_type == "binary" and target_field.field_type == "string":
             return value.hex() if isinstance(value, bytes) else str(value)
 
         return value
@@ -373,36 +349,26 @@ class DirectFieldTranslator(BaseProtocolTranslator):
         for rule in sorted_rules:
             try:
                 # Check conditions
-                if rule.conditions and not self._evaluate_conditions(
-                    rule.conditions, source_fields
-                ):
+                if rule.conditions and not self._evaluate_conditions(rule.conditions, source_fields):
                     continue
 
                 # Apply transformation
                 if rule.transformation:
                     source_value = source_fields.get(rule.source_field)
                     if source_value is not None:
-                        transformed_value = await self._apply_transformation(
-                            source_value, rule.transformation
-                        )
+                        transformed_value = await self._apply_transformation(source_value, rule.transformation)
                         result_fields[rule.target_field] = transformed_value
                 else:
                     # Direct mapping
                     if rule.source_field in source_fields:
-                        result_fields[rule.target_field] = source_fields[
-                            rule.source_field
-                        ]
+                        result_fields[rule.target_field] = source_fields[rule.source_field]
 
             except Exception as e:
-                self.logger.warning(
-                    f"Custom rule application failed: {rule.source_field} -> {rule.target_field}: {e}"
-                )
+                self.logger.warning(f"Custom rule application failed: {rule.source_field} -> {rule.target_field}: {e}")
 
         return result_fields
 
-    def _evaluate_conditions(
-        self, conditions: List[str], fields: Dict[str, Any]
-    ) -> bool:
+    def _evaluate_conditions(self, conditions: List[str], fields: Dict[str, Any]) -> bool:
         """Evaluate conditional rules."""
         # Simplified condition evaluation
         for condition in conditions:
@@ -421,10 +387,7 @@ class DirectFieldTranslator(BaseProtocolTranslator):
                     threshold = float(threshold.strip())
 
                     field_value = fields.get(field_name, 0)
-                    if not (
-                        isinstance(field_value, (int, float))
-                        and field_value > threshold
-                    ):
+                    if not (isinstance(field_value, (int, float)) and field_value > threshold):
                         return False
             except Exception as e:
                 self.logger.warning(f"Condition evaluation failed: {condition}: {e}")
@@ -498,9 +461,7 @@ class DirectFieldTranslator(BaseProtocolTranslator):
         else:
             return b"\x00" * field.length
 
-    def _calculate_translation_confidence(
-        self, source_fields: Dict[str, Any], target_fields: Dict[str, Any]
-    ) -> float:
+    def _calculate_translation_confidence(self, source_fields: Dict[str, Any], target_fields: Dict[str, Any]) -> float:
         """Calculate confidence score for translation."""
         if not source_fields:
             return 0.0
@@ -524,16 +485,10 @@ class DirectFieldTranslator(BaseProtocolTranslator):
                     None,
                 )
 
-                if (
-                    source_field
-                    and target_field
-                    and source_field.field_type == target_field.field_type
-                ):
+                if source_field and target_field and source_field.field_type == target_field.field_type:
                     exact_matches += 1
 
-        type_confidence = (
-            exact_matches / len(self.field_mappings) if self.field_mappings else 0
-        )
+        type_confidence = exact_matches / len(self.field_mappings) if self.field_mappings else 0
 
         return min(1.0, (base_confidence * 0.7) + (type_confidence * 0.3))
 
@@ -574,14 +529,10 @@ class SemanticProtocolTranslator(BaseProtocolTranslator):
             semantic_analysis = await self._analyze_source_semantics(context)
 
             # Generate target protocol mapping
-            translation_mapping = await self._generate_translation_mapping(
-                context, semantic_analysis
-            )
+            translation_mapping = await self._generate_translation_mapping(context, semantic_analysis)
 
             # Apply semantic transformations
-            translated_data = await self._apply_semantic_translation(
-                context, translation_mapping
-            )
+            translated_data = await self._apply_semantic_translation(context, translation_mapping)
 
             return TranslationResult(
                 source_protocol=context.source_protocol,
@@ -601,9 +552,7 @@ class SemanticProtocolTranslator(BaseProtocolTranslator):
             self.logger.error(f"Semantic translation failed: {e}")
             raise BridgeException(f"Semantic translation failed: {e}")
 
-    async def _analyze_source_semantics(
-        self, context: TranslationContext
-    ) -> Dict[str, Any]:
+    async def _analyze_source_semantics(self, context: TranslationContext) -> Dict[str, Any]:
         """Analyze source protocol data semantics using LLM."""
         prompt = f"""
         Analyze the semantic structure of this {context.source_protocol} protocol data:
@@ -680,9 +629,7 @@ class SemanticProtocolTranslator(BaseProtocolTranslator):
         except json.JSONDecodeError:
             return {"mappings": [], "confidence": 0.4, "method": "fallback"}
 
-    async def _apply_semantic_translation(
-        self, context: TranslationContext, translation_mapping: Dict[str, Any]
-    ) -> bytes:
+    async def _apply_semantic_translation(self, context: TranslationContext, translation_mapping: Dict[str, Any]) -> bytes:
         """Apply semantic translation based on LLM mapping."""
         # Simplified implementation - would use actual semantic transformations
         # For now, return modified source data
@@ -790,17 +737,13 @@ class ProtocolBridge:
             asyncio.create_task(self._metrics_collection_task())
             asyncio.create_task(self._connection_monitoring_task())
 
-            self.logger.info(
-                f"Protocol Bridge initialized with {len(self.translators)} translators"
-            )
+            self.logger.info(f"Protocol Bridge initialized with {len(self.translators)} translators")
 
         except Exception as e:
             self.logger.error(f"Bridge initialization failed: {e}")
             raise BridgeException(f"Bridge initialization failed: {e}")
 
-    async def translate_protocol(
-        self, context: TranslationContext
-    ) -> TranslationResult:
+    async def translate_protocol(self, context: TranslationContext) -> TranslationResult:
         """
         Translate protocol data with intelligent routing and optimization.
 
@@ -814,9 +757,7 @@ class ProtocolBridge:
 
         async with self.translation_semaphore:
             try:
-                self.logger.debug(
-                    f"Starting translation: {context.source_protocol} -> {context.target_protocol}"
-                )
+                self.logger.debug(f"Starting translation: {context.source_protocol} -> {context.target_protocol}")
 
                 # Check cache first
                 if self.enable_caching:
@@ -856,8 +797,7 @@ class ProtocolBridge:
                 ).observe(result.processing_time)
 
                 self.logger.debug(
-                    f"Translation completed: confidence={result.confidence:.2f}, "
-                    f"time={result.processing_time:.3f}s"
+                    f"Translation completed: confidence={result.confidence:.2f}, " f"time={result.processing_time:.3f}s"
                 )
 
                 return result
@@ -966,14 +906,9 @@ class ProtocolBridge:
 
             BRIDGE_ACTIVE_CONNECTIONS.set(len(self.active_connections))
 
-            self.logger.info(
-                f"Connection closed: {connection_id}, "
-                f"processed {connection.message_count} messages"
-            )
+            self.logger.info(f"Connection closed: {connection_id}, " f"processed {connection.message_count} messages")
 
-    async def batch_translate(
-        self, batch_context: List[TranslationContext]
-    ) -> List[TranslationResult]:
+    async def batch_translate(self, batch_context: List[TranslationContext]) -> List[TranslationResult]:
         """
         Perform batch protocol translation with optimizations.
 
@@ -1016,9 +951,7 @@ class ProtocolBridge:
         self.logger.info(f"Batch translation completed: {len(all_results)} results")
         return all_results
 
-    async def _process_protocol_group(
-        self, contexts: List[TranslationContext]
-    ) -> List[TranslationResult]:
+    async def _process_protocol_group(self, contexts: List[TranslationContext]) -> List[TranslationResult]:
         """Process a group of contexts with the same protocol pair."""
         results = []
 
@@ -1051,9 +984,7 @@ class ProtocolBridge:
 
         return results
 
-    async def _select_translator(
-        self, context: TranslationContext
-    ) -> BaseProtocolTranslator:
+    async def _select_translator(self, context: TranslationContext) -> BaseProtocolTranslator:
         """Select appropriate translator for the context."""
         protocol_pair = (context.source_protocol, context.target_protocol)
 
@@ -1067,27 +998,18 @@ class ProtocolBridge:
             return self.translators[semantic_key]
 
         # Create ad-hoc translator if schemas are available
-        if (
-            context.source_protocol in self.protocol_schemas
-            and context.target_protocol in self.protocol_schemas
-        ):
+        if context.source_protocol in self.protocol_schemas and context.target_protocol in self.protocol_schemas:
 
             source_schema = self.protocol_schemas[context.source_protocol]
             target_schema = self.protocol_schemas[context.target_protocol]
 
-            translator = DirectFieldTranslator(
-                self.config, source_schema, target_schema
-            )
+            translator = DirectFieldTranslator(self.config, source_schema, target_schema)
             self.translators[protocol_pair] = translator
             return translator
 
-        raise BridgeException(
-            f"No translator available for {context.source_protocol} -> {context.target_protocol}"
-        )
+        raise BridgeException(f"No translator available for {context.source_protocol} -> {context.target_protocol}")
 
-    async def _check_translation_cache(
-        self, context: TranslationContext
-    ) -> Optional[TranslationResult]:
+    async def _check_translation_cache(self, context: TranslationContext) -> Optional[TranslationResult]:
         """Check if translation result is cached."""
         cache_key = self._generate_cache_key(context)
 
@@ -1095,9 +1017,7 @@ class ProtocolBridge:
             cached_result = self.translation_cache[cache_key]
 
             # Check if cache entry is still valid
-            cache_age = (
-                datetime.now(timezone.utc) - cached_result.timestamp
-            ).total_seconds()
+            cache_age = (datetime.now(timezone.utc) - cached_result.timestamp).total_seconds()
             if cache_age < self.cache_ttl:
                 self._update_cache_hit_rate(True)
                 return cached_result
@@ -1108,15 +1028,11 @@ class ProtocolBridge:
         self._update_cache_hit_rate(False)
         return None
 
-    async def _cache_translation_result(
-        self, context: TranslationContext, result: TranslationResult
-    ) -> None:
+    async def _cache_translation_result(self, context: TranslationContext, result: TranslationResult) -> None:
         """Cache translation result for future use."""
         if len(self.translation_cache) >= self.max_cache_size:
             # Remove oldest entries
-            sorted_entries = sorted(
-                self.translation_cache.items(), key=lambda x: x[1].timestamp
-            )
+            sorted_entries = sorted(self.translation_cache.items(), key=lambda x: x[1].timestamp)
 
             # Remove oldest 10% of entries
             remove_count = max(1, len(sorted_entries) // 10)
@@ -1152,18 +1068,14 @@ class ProtocolBridge:
 
         # Initialize semantic translator if LLM service is available
         if self.llm_service:
-            semantic_translator = SemanticProtocolTranslator(
-                self.config, self.llm_service
-            )
+            semantic_translator = SemanticProtocolTranslator(self.config, self.llm_service)
             self.translators[("*", "*")] = semantic_translator
             self.logger.info("Semantic translator initialized")
 
         # Additional direct translators would be initialized here
         # based on available protocol schemas
 
-    def _update_translation_metrics(
-        self, success: bool, processing_time: float
-    ) -> None:
+    def _update_translation_metrics(self, success: bool, processing_time: float) -> None:
         """Update translation metrics."""
         self.bridge_metrics["total_translations"] += 1
 
@@ -1207,9 +1119,7 @@ class ProtocolBridge:
                     del self.translation_cache[key]
 
                 if expired_keys:
-                    self.logger.debug(
-                        f"Cleaned up {len(expired_keys)} expired cache entries"
-                    )
+                    self.logger.debug(f"Cleaned up {len(expired_keys)} expired cache entries")
 
             except Exception as e:
                 self.logger.error(f"Cache cleanup error: {e}")
@@ -1233,9 +1143,7 @@ class ProtocolBridge:
                         active_count += 1
 
                 if active_count > 0:
-                    self.bridge_metrics["throughput_mbps"] = (
-                        total_throughput / active_count
-                    )
+                    self.bridge_metrics["throughput_mbps"] = total_throughput / active_count
 
                 # Update Prometheus metrics
                 BRIDGE_THROUGHPUT.observe(self.bridge_metrics["throughput_mbps"])
@@ -1253,9 +1161,7 @@ class ProtocolBridge:
                 idle_connections = []
 
                 for conn_id, connection in self.active_connections.items():
-                    idle_time = (
-                        current_time - connection.last_activity
-                    ).total_seconds()
+                    idle_time = (current_time - connection.last_activity).total_seconds()
                     if idle_time > 600:  # 10 minutes idle
                         idle_connections.append(conn_id)
 
@@ -1306,11 +1212,7 @@ class ProtocolBridge:
         self.logger.info(f"Protocol schema registered: {schema.name}")
 
         # Invalidate related cache entries
-        keys_to_remove = [
-            key
-            for key in self.translation_cache.keys()
-            if schema.name in key  # Simplified check
-        ]
+        keys_to_remove = [key for key in self.translation_cache.keys() if schema.name in key]  # Simplified check
         for key in keys_to_remove:
             del self.translation_cache[key]
 

@@ -29,53 +29,42 @@ from prometheus_client import Counter, Gauge, Histogram
 logger = logging.getLogger(__name__)
 
 # Metrics
-PLC_AUTH_OPS = Counter(
-    'plc_authentication_operations_total',
-    'Total PLC authentication operations',
-    ['vendor', 'operation']
-)
+PLC_AUTH_OPS = Counter("plc_authentication_operations_total", "Total PLC authentication operations", ["vendor", "operation"])
 
-PLC_FIRMWARE_VALIDATIONS = Counter(
-    'plc_firmware_validations_total',
-    'Total firmware validations',
-    ['result']
-)
+PLC_FIRMWARE_VALIDATIONS = Counter("plc_firmware_validations_total", "Total firmware validations", ["result"])
 
-PLC_ACTIVE_SESSIONS = Gauge(
-    'plc_active_authenticated_sessions',
-    'Number of active authenticated PLC sessions'
-)
+PLC_ACTIVE_SESSIONS = Gauge("plc_active_authenticated_sessions", "Number of active authenticated PLC sessions")
 
 
 class PLCVendor(Enum):
     """PLC vendors with distinct protocol requirements."""
 
-    SIEMENS = "siemens"             # S7 protocol
+    SIEMENS = "siemens"  # S7 protocol
     ALLEN_BRADLEY = "allen-bradley"  # EtherNet/IP, CIP
-    MITSUBISHI = "mitsubishi"       # MELSEC
-    SCHNEIDER = "schneider"         # Modbus, Unity
-    ABB = "abb"                     # ABB protocols
-    GENERIC = "generic"             # Generic Modbus/OPC-UA
+    MITSUBISHI = "mitsubishi"  # MELSEC
+    SCHNEIDER = "schneider"  # Modbus, Unity
+    ABB = "abb"  # ABB protocols
+    GENERIC = "generic"  # Generic Modbus/OPC-UA
 
 
 class PLCSecurityMode(Enum):
     """PLC security operating modes."""
 
-    DISABLED = auto()       # No security (legacy mode)
-    MONITORING = auto()     # Passive monitoring only
+    DISABLED = auto()  # No security (legacy mode)
+    MONITORING = auto()  # Passive monitoring only
     AUTHENTICATION = auto()  # Active authentication
-    FULL = auto()           # Full security with encryption
+    FULL = auto()  # Full security with encryption
 
 
 class PLCCapability(Enum):
     """PLC security capabilities."""
 
-    BASIC_AUTH = auto()         # Username/password
-    CERTIFICATE = auto()        # X.509 certificates
-    SECURE_BOOT = auto()        # Secure boot chain
-    FIRMWARE_SIGN = auto()      # Signed firmware updates
-    PQC_CAPABLE = auto()        # Post-quantum support
-    HSM_SUPPORT = auto()        # Hardware security module
+    BASIC_AUTH = auto()  # Username/password
+    CERTIFICATE = auto()  # X.509 certificates
+    SECURE_BOOT = auto()  # Secure boot chain
+    FIRMWARE_SIGN = auto()  # Signed firmware updates
+    PQC_CAPABLE = auto()  # Post-quantum support
+    HSM_SUPPORT = auto()  # Hardware security module
 
 
 @dataclass
@@ -122,10 +111,7 @@ class PLCSecurityContext:
     def is_valid(self) -> bool:
         """Check session validity."""
         age = time.time() - self.created_at
-        return (
-            age < self.max_age_seconds and
-            self.authenticated_commands < self.max_commands
-        )
+        return age < self.max_age_seconds and self.authenticated_commands < self.max_commands
 
 
 @dataclass
@@ -212,9 +198,7 @@ class PLCKeyManager:
         if not master_key:
             raise ValueError(f"Unknown PLC: {plc_id}")
 
-        return hashlib.sha256(
-            master_key + session_id + purpose.encode()
-        ).digest()
+        return hashlib.sha256(master_key + session_id + purpose.encode()).digest()
 
     async def generate_signing_keypair(
         self,
@@ -293,10 +277,7 @@ class FirmwareValidator:
                 return False, f"Version {manifest.version} not approved"
 
         PLC_FIRMWARE_VALIDATIONS.labels(result="valid").inc()
-        logger.info(
-            f"Firmware validated: {manifest.vendor.value}/{manifest.model} "
-            f"v{manifest.version}"
-        )
+        logger.info(f"Firmware validated: {manifest.vendor.value}/{manifest.model} " f"v{manifest.version}")
 
         return True, "Firmware valid"
 
@@ -309,16 +290,15 @@ class FirmwareValidator:
 
         # Build signed data
         signed_data = (
-            manifest.version.encode() +
-            manifest.model.encode() +
-            manifest.size_bytes.to_bytes(8, 'big') +
-            manifest.sha256_hash
+            manifest.version.encode() + manifest.model.encode() + manifest.size_bytes.to_bytes(8, "big") + manifest.sha256_hash
         )
 
         try:
             from ai_engine.crypto.dilithium import (
-                DilithiumEngine, DilithiumSecurityLevel,
-                DilithiumPublicKey, DilithiumSignature
+                DilithiumEngine,
+                DilithiumSecurityLevel,
+                DilithiumPublicKey,
+                DilithiumSignature,
             )
 
             engine = DilithiumEngine(DilithiumSecurityLevel.LEVEL3)
@@ -343,16 +323,11 @@ class FirmwareValidator:
         _, private_key = keys
 
         signed_data = (
-            manifest.version.encode() +
-            manifest.model.encode() +
-            manifest.size_bytes.to_bytes(8, 'big') +
-            manifest.sha256_hash
+            manifest.version.encode() + manifest.model.encode() + manifest.size_bytes.to_bytes(8, "big") + manifest.sha256_hash
         )
 
         try:
-            from ai_engine.crypto.dilithium import (
-                DilithiumEngine, DilithiumSecurityLevel, DilithiumPrivateKey
-            )
+            from ai_engine.crypto.dilithium import DilithiumEngine, DilithiumSecurityLevel, DilithiumPrivateKey
 
             engine = DilithiumEngine(DilithiumSecurityLevel.LEVEL3)
             sk = DilithiumPrivateKey(DilithiumSecurityLevel.LEVEL3, private_key)
@@ -413,10 +388,7 @@ class PLCAuthenticator:
 
         self._plc_profiles[profile.device_id] = profile
 
-        PLC_AUTH_OPS.labels(
-            vendor=profile.vendor.value,
-            operation="register"
-        ).inc()
+        PLC_AUTH_OPS.labels(vendor=profile.vendor.value, operation="register").inc()
 
         logger.info(f"Registered PLC: {profile.device_id} ({profile.vendor.value})")
         return master_key
@@ -461,10 +433,7 @@ class PLCAuthenticator:
         self._contexts[session_id.hex()] = context
         PLC_ACTIVE_SESSIONS.set(len(self._contexts))
 
-        PLC_AUTH_OPS.labels(
-            vendor=profile.vendor.value,
-            operation="establish_session"
-        ).inc()
+        PLC_AUTH_OPS.labels(vendor=profile.vendor.value, operation="establish_session").inc()
 
         logger.info(f"Session established: {client_id} -> {plc_id}")
         return context
@@ -486,20 +455,13 @@ class PLCAuthenticator:
         context.last_activity = time.time()
 
         # Build authenticated command
-        timestamp = int(time.time() * 1000).to_bytes(8, 'big')
-        sequence = context.authenticated_commands.to_bytes(4, 'big')
+        timestamp = int(time.time() * 1000).to_bytes(8, "big")
+        sequence = context.authenticated_commands.to_bytes(4, "big")
 
         mac_input = context.session_id + timestamp + sequence + command
-        mac = hmac.new(
-            context.authentication_key,
-            mac_input,
-            hashlib.sha256
-        ).digest()[:16]
+        mac = hmac.new(context.authentication_key, mac_input, hashlib.sha256).digest()[:16]
 
-        PLC_AUTH_OPS.labels(
-            vendor=context.vendor.value,
-            operation="authenticate_command"
-        ).inc()
+        PLC_AUTH_OPS.labels(vendor=context.vendor.value, operation="authenticate_command").inc()
 
         return timestamp + sequence + command + mac
 
@@ -522,7 +484,7 @@ class PLCAuthenticator:
         mac = authenticated_command[-16:]
 
         # Verify timestamp freshness (5 minute window)
-        cmd_time = int.from_bytes(timestamp, 'big')
+        cmd_time = int.from_bytes(timestamp, "big")
         current_time = int(time.time() * 1000)
 
         if abs(current_time - cmd_time) > 300000:
@@ -531,11 +493,7 @@ class PLCAuthenticator:
 
         # Verify MAC
         mac_input = context.session_id + timestamp + sequence + command
-        expected_mac = hmac.new(
-            context.authentication_key,
-            mac_input,
-            hashlib.sha256
-        ).digest()[:16]
+        expected_mac = hmac.new(context.authentication_key, mac_input, hashlib.sha256).digest()[:16]
 
         if not secrets.compare_digest(mac, expected_mac):
             logger.warning("Command MAC verification failed")
@@ -561,17 +519,9 @@ class PLCAuthenticator:
 
         # Verify signature if present
         if block.signature:
-            signed_data = (
-                block.block_type.encode() +
-                block.block_number.to_bytes(4, 'big') +
-                block.content_hash
-            )
+            signed_data = block.block_type.encode() + block.block_number.to_bytes(4, "big") + block.content_hash
 
-            expected_sig = hmac.new(
-                context.program_validation_key,
-                signed_data,
-                hashlib.sha256
-            ).digest()
+            expected_sig = hmac.new(context.program_validation_key, signed_data, hashlib.sha256).digest()
 
             if not secrets.compare_digest(block.signature, expected_sig):
                 return False, "Invalid block signature"
@@ -584,10 +534,7 @@ class PLCAuthenticator:
 
     async def cleanup_expired_sessions(self) -> int:
         """Remove expired sessions."""
-        expired = [
-            sid for sid, ctx in self._contexts.items()
-            if not ctx.is_valid()
-        ]
+        expired = [sid for sid, ctx in self._contexts.items() if not ctx.is_valid()]
 
         for sid in expired:
             del self._contexts[sid]

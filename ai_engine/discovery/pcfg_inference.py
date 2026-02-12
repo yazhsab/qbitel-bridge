@@ -67,9 +67,7 @@ class Grammar:
 
     def calculate_grammar_complexity(self) -> float:
         """Calculate the complexity of the grammar."""
-        return len(self.rules) + len(self.non_terminals) * math.log(
-            len(self.terminals) + 1
-        )
+        return len(self.rules) + len(self.non_terminals) * math.log(len(self.terminals) + 1)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert grammar to dictionary representation."""
@@ -144,17 +142,13 @@ class PCFGInference:
             terminals, non_terminals = self._identify_symbols(patterns)
 
             # Step 4: Generate initial production rules
-            initial_rules = self._generate_initial_rules(
-                patterns, terminals, non_terminals
-            )
+            initial_rules = self._generate_initial_rules(patterns, terminals, non_terminals)
 
             # Step 5: Refine grammar using EM algorithm
             refined_rules = await self._refine_grammar_em(initial_rules, tokens)
 
             # Step 6: Build final grammar
-            grammar = Grammar(
-                rules=refined_rules, terminals=terminals, non_terminals=non_terminals
-            )
+            grammar = Grammar(rules=refined_rules, terminals=terminals, non_terminals=non_terminals)
 
             self.logger.info(
                 f"PCFG inference completed: {len(refined_rules)} rules, "
@@ -198,9 +192,7 @@ class PCFGInference:
             pattern_tokens = self._identify_repeating_patterns(byte_tokens)
 
             # Combine strategies
-            tokens = self._merge_tokenization_strategies(
-                byte_tokens, delimiter_tokens, pattern_tokens
-            )
+            tokens = self._merge_tokenization_strategies(byte_tokens, delimiter_tokens, pattern_tokens)
 
             tokenized_messages.append(tokens)
 
@@ -313,9 +305,7 @@ class PCFGInference:
         probabilities = [count / total for count in counts.values()]
         return entropy(probabilities, base=2)
 
-    def _extract_frequent_patterns(
-        self, tokenized_messages: List[List[str]]
-    ) -> Dict[str, Any]:
+    def _extract_frequent_patterns(self, tokenized_messages: List[List[str]]) -> Dict[str, Any]:
         """Extract frequent patterns from tokenized messages."""
         self.logger.debug("Extracting frequent patterns")
 
@@ -344,20 +334,14 @@ class PCFGInference:
                 patterns["trigrams"][trigram] += 1
 
         # Extract common subsequences using suffix array approach
-        patterns["common_subsequences"] = self._find_common_subsequences(
-            tokenized_messages
-        )
+        patterns["common_subsequences"] = self._find_common_subsequences(tokenized_messages)
 
         # Extract structural patterns
-        patterns["structural_patterns"] = self._extract_structural_patterns(
-            tokenized_messages
-        )
+        patterns["structural_patterns"] = self._extract_structural_patterns(tokenized_messages)
 
         return patterns
 
-    def _find_common_subsequences(
-        self, tokenized_messages: List[List[str]]
-    ) -> Dict[Tuple[str, ...], int]:
+    def _find_common_subsequences(self, tokenized_messages: List[List[str]]) -> Dict[Tuple[str, ...], int]:
         """Find common subsequences across messages."""
         subsequence_counts = Counter()
 
@@ -370,16 +354,12 @@ class PCFGInference:
 
         # Filter by minimum frequency
         common_subsequences = {
-            subseq: count
-            for subseq, count in subsequence_counts.items()
-            if count >= self.min_pattern_frequency
+            subseq: count for subseq, count in subsequence_counts.items() if count >= self.min_pattern_frequency
         }
 
         return common_subsequences
 
-    def _extract_structural_patterns(
-        self, tokenized_messages: List[List[str]]
-    ) -> List[Dict[str, Any]]:
+    def _extract_structural_patterns(self, tokenized_messages: List[List[str]]) -> List[Dict[str, Any]]:
         """Extract structural patterns like headers, bodies, footers."""
         structural_patterns = []
 
@@ -406,9 +386,7 @@ class PCFGInference:
             # Find longest common prefix
             prefix_len = 0
             for i in range(min(len(msg) for msg in tokenized_messages)):
-                if all(
-                    msg[i] == tokenized_messages[0][i] for msg in tokenized_messages[1:]
-                ):
+                if all(msg[i] == tokenized_messages[0][i] for msg in tokenized_messages[1:]):
                     prefix_len += 1
                 else:
                     break
@@ -427,10 +405,7 @@ class PCFGInference:
             suffix_len = 0
             min_len = min(len(msg) for msg in tokenized_messages)
             for i in range(1, min_len + 1):
-                if all(
-                    msg[-i] == tokenized_messages[0][-i]
-                    for msg in tokenized_messages[1:]
-                ):
+                if all(msg[-i] == tokenized_messages[0][-i] for msg in tokenized_messages[1:]):
                     suffix_len += 1
                 else:
                     break
@@ -486,9 +461,7 @@ class PCFGInference:
         non_terminals.add("<MESSAGE>")
         non_terminals.add("<BODY>")
 
-        self.logger.debug(
-            f"Identified {len(terminals)} terminals and {len(non_terminals)} non-terminals"
-        )
+        self.logger.debug(f"Identified {len(terminals)} terminals and {len(non_terminals)} non-terminals")
 
         return terminals, non_terminals
 
@@ -511,12 +484,8 @@ class PCFGInference:
         )
 
         # Structural rules
-        has_header = any(
-            p["type"] == "common_prefix" for p in patterns["structural_patterns"]
-        )
-        has_footer = any(
-            p["type"] == "common_suffix" for p in patterns["structural_patterns"]
-        )
+        has_header = any(p["type"] == "common_prefix" for p in patterns["structural_patterns"])
+        has_footer = any(p["type"] == "common_suffix" for p in patterns["structural_patterns"])
 
         if has_header and has_footer:
             rules.append(
@@ -616,9 +585,7 @@ class PCFGInference:
             self.logger.debug(f"EM iteration {iteration + 1}/{self.max_iterations}")
 
             # E-step: Calculate expected counts
-            expected_counts = self._calculate_expected_counts(
-                current_rules, tokenized_messages
-            )
+            expected_counts = self._calculate_expected_counts(current_rules, tokenized_messages)
 
             # M-step: Update rule probabilities
             new_rules = self._update_rule_probabilities(current_rules, expected_counts)
@@ -632,18 +599,14 @@ class PCFGInference:
 
         # Filter low-probability rules
         filtered_rules = [
-            rule
-            for rule in current_rules
-            if rule.probability > 0.001 or rule.frequency > self.min_pattern_frequency
+            rule for rule in current_rules if rule.probability > 0.001 or rule.frequency > self.min_pattern_frequency
         ]
 
         self.logger.debug(f"Refined to {len(filtered_rules)} production rules")
 
         return filtered_rules
 
-    def _calculate_expected_counts(
-        self, rules: List[ProductionRule], tokenized_messages: List[List[str]]
-    ) -> Dict[str, float]:
+    def _calculate_expected_counts(self, rules: List[ProductionRule], tokenized_messages: List[List[str]]) -> Dict[str, float]:
         """Calculate expected counts for each rule (E-step)."""
         expected_counts = defaultdict(float)
 
@@ -663,9 +626,7 @@ class PCFGInference:
 
         return expected_counts
 
-    def _count_subsequence_occurrences(
-        self, tokens: List[str], pattern: List[str]
-    ) -> int:
+    def _count_subsequence_occurrences(self, tokens: List[str], pattern: List[str]) -> int:
         """Count occurrences of a pattern in a token sequence."""
         count = 0
         for i in range(len(tokens) - len(pattern) + 1):
@@ -708,9 +669,7 @@ class PCFGInference:
 
         return updated_rules
 
-    def _has_converged(
-        self, old_rules: List[ProductionRule], new_rules: List[ProductionRule]
-    ) -> bool:
+    def _has_converged(self, old_rules: List[ProductionRule], new_rules: List[ProductionRule]) -> bool:
         """Check if EM algorithm has converged."""
         if len(old_rules) != len(new_rules):
             return False

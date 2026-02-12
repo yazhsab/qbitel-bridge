@@ -104,9 +104,7 @@ class TestLegacySystemWhispererService:
         assert service.service_metrics["requests_processed"] == 0
 
     @pytest.mark.unit
-    async def test_service_initialization(
-        self, service, mock_llm_service, mock_metrics
-    ):
+    async def test_service_initialization(self, service, mock_llm_service, mock_metrics):
         """Test service initialization."""
         await service.initialize(mock_llm_service, mock_metrics)
 
@@ -124,9 +122,7 @@ class TestLegacySystemWhispererService:
         assert service.action_planner is not None
 
     @pytest.mark.unit
-    async def test_double_initialization_warning(
-        self, service, mock_llm_service, mock_metrics, caplog
-    ):
+    async def test_double_initialization_warning(self, service, mock_llm_service, mock_metrics, caplog):
         """Test that double initialization shows warning."""
         await service.initialize(mock_llm_service, mock_metrics)
         await service.initialize(mock_llm_service, mock_metrics)
@@ -134,13 +130,9 @@ class TestLegacySystemWhispererService:
         assert "Service already initialized" in caplog.text
 
     @pytest.mark.unit
-    async def test_register_legacy_system_success(
-        self, initialized_service, sample_system_context
-    ):
+    async def test_register_legacy_system_success(self, initialized_service, sample_system_context):
         """Test successful system registration."""
-        result = await initialized_service.register_legacy_system(
-            sample_system_context, enable_monitoring=True
-        )
+        result = await initialized_service.register_legacy_system(sample_system_context, enable_monitoring=True)
 
         assert result["system_id"] == sample_system_context.system_id
         assert result["system_name"] == sample_system_context.system_name
@@ -151,10 +143,7 @@ class TestLegacySystemWhispererService:
 
         # Check system was registered
         assert sample_system_context.system_id in initialized_service.registered_systems
-        assert (
-            initialized_service.active_monitoring[sample_system_context.system_id]
-            is True
-        )
+        assert initialized_service.active_monitoring[sample_system_context.system_id] is True
 
     @pytest.mark.unit
     async def test_register_system_invalid_context(self, initialized_service):
@@ -169,19 +158,13 @@ class TestLegacySystemWhispererService:
             await initialized_service.register_legacy_system(invalid_context)
 
     @pytest.mark.unit
-    async def test_analyze_system_health_unregistered(
-        self, initialized_service, sample_system_metrics
-    ):
+    async def test_analyze_system_health_unregistered(self, initialized_service, sample_system_metrics):
         """Test health analysis for unregistered system."""
         with pytest.raises(QbitelAIException, match="System .* not registered"):
-            await initialized_service.analyze_system_health(
-                "unregistered_system", sample_system_metrics
-            )
+            await initialized_service.analyze_system_health("unregistered_system", sample_system_metrics)
 
     @pytest.mark.unit
-    async def test_analyze_system_health_success(
-        self, initialized_service, sample_system_context, sample_system_metrics
-    ):
+    async def test_analyze_system_health_success(self, initialized_service, sample_system_context, sample_system_metrics):
         """Test successful system health analysis."""
         # Register system first
         await initialized_service.register_legacy_system(sample_system_context)
@@ -190,19 +173,13 @@ class TestLegacySystemWhispererService:
         mock_prediction = Mock()
         mock_prediction.failure_probability = 0.15
         mock_prediction.confidence = 0.85
-        initialized_service.enhanced_detector.predict_system_failure = AsyncMock(
-            return_value=mock_prediction
-        )
+        initialized_service.enhanced_detector.predict_system_failure = AsyncMock(return_value=mock_prediction)
 
         # Mock performance monitor
         mock_performance = {"performance_score": 78.5, "status": "good"}
-        initialized_service.performance_monitor.analyze_performance = AsyncMock(
-            return_value=mock_performance
-        )
+        initialized_service.performance_monitor.analyze_performance = AsyncMock(return_value=mock_performance)
 
-        result = await initialized_service.analyze_system_health(
-            sample_system_context.system_id, sample_system_metrics
-        )
+        result = await initialized_service.analyze_system_health(sample_system_context.system_id, sample_system_metrics)
 
         assert result["system_id"] == sample_system_context.system_id
         assert "analysis_timestamp" in result
@@ -219,15 +196,9 @@ class TestLegacySystemWhispererService:
         mock_capture_result = {"status": "success", "items_captured": 3}
         mock_session_result = {"total_knowledge": 15, "quality_score": 0.92}
 
-        initialized_service.knowledge_capture.start_expert_session = AsyncMock(
-            return_value=mock_session_id
-        )
-        initialized_service.knowledge_capture.capture_expert_input = AsyncMock(
-            return_value=mock_capture_result
-        )
-        initialized_service.knowledge_capture.finalize_session = AsyncMock(
-            return_value=mock_session_result
-        )
+        initialized_service.knowledge_capture.start_expert_session = AsyncMock(return_value=mock_session_id)
+        initialized_service.knowledge_capture.capture_expert_input = AsyncMock(return_value=mock_capture_result)
+        initialized_service.knowledge_capture.finalize_session = AsyncMock(return_value=mock_session_result)
 
         result = await initialized_service.capture_expert_knowledge(
             expert_id="expert_001",
@@ -273,9 +244,7 @@ class TestLegacySystemWhispererService:
             "conflicts_resolved": 2,
         }
 
-        initialized_service.maintenance_scheduler.optimize_maintenance_schedule = (
-            AsyncMock(return_value=mock_schedule_result)
-        )
+        initialized_service.maintenance_scheduler.optimize_maintenance_schedule = AsyncMock(return_value=mock_schedule_result)
         initialized_service.maintenance_scheduler.add_scheduled_maintenance = Mock()
 
         result = await initialized_service.schedule_maintenance(maintenance_requests)
@@ -284,9 +253,7 @@ class TestLegacySystemWhispererService:
         assert initialized_service.service_metrics["maintenance_scheduled"] == 1
 
     @pytest.mark.unit
-    async def test_create_decision_support_success(
-        self, initialized_service, sample_system_context
-    ):
+    async def test_create_decision_support_success(self, initialized_service, sample_system_context):
         """Test successful decision support creation."""
         from ..decision_support import DecisionCategory
 
@@ -300,15 +267,11 @@ class TestLegacySystemWhispererService:
             {"action": "schedule_maintenance", "priority": "medium"},
         ]
 
-        initialized_service.recommendation_engine.generate_recommendations = AsyncMock(
-            return_value=mock_recommendations
-        )
+        initialized_service.recommendation_engine.generate_recommendations = AsyncMock(return_value=mock_recommendations)
 
         # Mock impact assessor
         mock_impact = {"financial_impact": 50000, "risk_level": "medium"}
-        initialized_service.impact_assessor.assess_business_impact = AsyncMock(
-            return_value=mock_impact
-        )
+        initialized_service.impact_assessor.assess_business_impact = AsyncMock(return_value=mock_impact)
 
         result = await initialized_service.create_decision_support(
             decision_category=DecisionCategory.MAINTENANCE_PLANNING,
@@ -328,9 +291,7 @@ class TestLegacySystemWhispererService:
             initialized_service.get_system_dashboard("unregistered_system")
 
     @pytest.mark.unit
-    async def test_get_system_dashboard_success(
-        self, initialized_service, sample_system_context
-    ):
+    async def test_get_system_dashboard_success(self, initialized_service, sample_system_context):
         """Test successful system dashboard retrieval."""
         # Register system first
         await initialized_service.register_legacy_system(sample_system_context)
@@ -344,18 +305,11 @@ class TestLegacySystemWhispererService:
             }
         )
 
-        dashboard = initialized_service.get_system_dashboard(
-            sample_system_context.system_id
-        )
+        dashboard = initialized_service.get_system_dashboard(sample_system_context.system_id)
 
         assert dashboard["system_info"]["system_id"] == sample_system_context.system_id
-        assert (
-            dashboard["system_info"]["system_name"] == sample_system_context.system_name
-        )
-        assert (
-            dashboard["system_info"]["system_type"]
-            == sample_system_context.system_type.value
-        )
+        assert dashboard["system_info"]["system_name"] == sample_system_context.system_name
+        assert dashboard["system_info"]["system_type"] == sample_system_context.system_type.value
         assert "current_status" in dashboard
         assert "health_score" in dashboard
         assert "pattern_count" in dashboard
@@ -392,19 +346,13 @@ class TestLegacySystemWhispererService:
         """Test successful service shutdown."""
         # Register a system first
         await initialized_service.register_legacy_system(sample_system_context)
-        assert (
-            initialized_service.active_monitoring[sample_system_context.system_id]
-            is True
-        )
+        assert initialized_service.active_monitoring[sample_system_context.system_id] is True
 
         # Shutdown service
         await initialized_service.shutdown()
 
         assert not initialized_service.is_initialized
-        assert (
-            initialized_service.active_monitoring[sample_system_context.system_id]
-            is False
-        )
+        assert initialized_service.active_monitoring[sample_system_context.system_id] is False
 
     @pytest.mark.unit
     def test_calculate_overall_health_score_no_data(self, initialized_service):
@@ -435,10 +383,7 @@ class TestLegacySystemWhispererService:
 
         initialized_service._update_service_metrics("test_operation", 0.5, True)
 
-        assert (
-            initialized_service.service_metrics["requests_processed"]
-            == initial_requests + 1
-        )
+        assert initialized_service.service_metrics["requests_processed"] == initial_requests + 1
         assert initialized_service.service_metrics["average_response_time"] == 0.5
         assert initialized_service.service_metrics["error_rate"] == 0.0
 
@@ -449,52 +394,32 @@ class TestLegacySystemWhispererService:
 
         initialized_service._update_service_metrics("test_operation", 1.0, False)
 
-        assert (
-            initialized_service.service_metrics["requests_processed"]
-            == initial_requests + 1
-        )
-        assert (
-            initialized_service.service_metrics["error_rate"] == 1.0
-        )  # 100% error rate for single failure
+        assert initialized_service.service_metrics["requests_processed"] == initial_requests + 1
+        assert initialized_service.service_metrics["error_rate"] == 1.0  # 100% error rate for single failure
 
     @pytest.mark.integration
-    async def test_end_to_end_system_lifecycle(
-        self, initialized_service, sample_system_context, sample_system_metrics
-    ):
+    async def test_end_to_end_system_lifecycle(self, initialized_service, sample_system_context, sample_system_metrics):
         """Test complete system lifecycle from registration to analysis."""
         # 1. Register system
-        registration_result = await initialized_service.register_legacy_system(
-            sample_system_context, enable_monitoring=True
-        )
-        assert (
-            registration_result["status"] == "success"
-            or "registration_time" in registration_result
-        )
+        registration_result = await initialized_service.register_legacy_system(sample_system_context, enable_monitoring=True)
+        assert registration_result["status"] == "success" or "registration_time" in registration_result
 
         # 2. Mock dependencies for health analysis
         mock_prediction = Mock()
         mock_prediction.failure_probability = 0.1
         mock_prediction.confidence = 0.9
-        initialized_service.enhanced_detector.predict_system_failure = AsyncMock(
-            return_value=mock_prediction
-        )
+        initialized_service.enhanced_detector.predict_system_failure = AsyncMock(return_value=mock_prediction)
 
         mock_performance = {"performance_score": 85.0, "status": "good"}
-        initialized_service.performance_monitor.analyze_performance = AsyncMock(
-            return_value=mock_performance
-        )
+        initialized_service.performance_monitor.analyze_performance = AsyncMock(return_value=mock_performance)
 
         # 3. Analyze system health
-        health_result = await initialized_service.analyze_system_health(
-            sample_system_context.system_id, sample_system_metrics
-        )
+        health_result = await initialized_service.analyze_system_health(sample_system_context.system_id, sample_system_metrics)
         assert health_result["system_id"] == sample_system_context.system_id
         assert health_result["overall_health_score"] > 0
 
         # 4. Get dashboard
-        dashboard = initialized_service.get_system_dashboard(
-            sample_system_context.system_id
-        )
+        dashboard = initialized_service.get_system_dashboard(sample_system_context.system_id)
         assert dashboard["system_info"]["system_id"] == sample_system_context.system_id
 
         # 5. Check service metrics
@@ -516,10 +441,7 @@ class TestLegacySystemWhispererService:
             systems.append(system)
 
         # Register systems concurrently
-        tasks = [
-            initialized_service.register_legacy_system(system, enable_monitoring=False)
-            for system in systems
-        ]
+        tasks = [initialized_service.register_legacy_system(system, enable_monitoring=False) for system in systems]
 
         results = await asyncio.gather(*tasks)
 
@@ -560,17 +482,11 @@ class TestLegacySystemWhispererService:
         assert dashboard2["system_info"]["system_type"] == "scada"
 
     @pytest.mark.unit
-    async def test_error_handling_initialization_failure(
-        self, service, mock_llm_service
-    ):
+    async def test_error_handling_initialization_failure(self, service, mock_llm_service):
         """Test error handling during initialization failure."""
         # Mock component initialization failure
-        with patch.object(
-            service, "_initialize_components", side_effect=Exception("Init failed")
-        ):
-            with pytest.raises(
-                QbitelAIException, match="Service initialization failed"
-            ):
+        with patch.object(service, "_initialize_components", side_effect=Exception("Init failed")):
+            with pytest.raises(QbitelAIException, match="Service initialization failed"):
                 await service.initialize(mock_llm_service)
 
         assert not service.is_initialized

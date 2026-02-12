@@ -1,6 +1,7 @@
 """
 Unit tests for Dilithium Post-Quantum Image Signer.
 """
+
 import pytest
 import base64
 import hashlib
@@ -10,9 +11,7 @@ from pathlib import Path
 # Add ai_engine to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from cloud_native.container_security.signing.dilithium_signer import (
-    DilithiumSigner
-)
+from cloud_native.container_security.signing.dilithium_signer import DilithiumSigner
 
 
 class TestDilithiumSigner:
@@ -61,7 +60,7 @@ class TestDilithiumSigner:
         signature_data = signer.sign_image(
             image_digest=image_digest,
             private_key=keypair["private_key"],
-            metadata={"image": "test:v1", "timestamp": "2024-01-01"}
+            metadata={"image": "test:v1", "timestamp": "2024-01-01"},
         )
 
         assert "signature" in signature_data
@@ -82,9 +81,7 @@ class TestDilithiumSigner:
         # Create and sign image
         image_digest = hashlib.sha256(b"test-image-content").hexdigest()
         signature_data = signer.sign_image(
-            image_digest=image_digest,
-            private_key=keypair["private_key"],
-            metadata={"image": "test:v1"}
+            image_digest=image_digest, private_key=keypair["private_key"], metadata={"image": "test:v1"}
         )
 
         # Verify signature
@@ -92,7 +89,7 @@ class TestDilithiumSigner:
             image_digest=image_digest,
             signature=signature_data["signature"],
             public_key=keypair["public_key"],
-            payload=signature_data["payload"]
+            payload=signature_data["payload"],
         )
 
         assert is_valid is True
@@ -104,10 +101,7 @@ class TestDilithiumSigner:
 
         # Create image and sign
         image_digest = hashlib.sha256(b"test-image").hexdigest()
-        signature_data = signer.sign_image(
-            image_digest=image_digest,
-            private_key=keypair["private_key"]
-        )
+        signature_data = signer.sign_image(image_digest=image_digest, private_key=keypair["private_key"])
 
         # Tamper with signature
         tampered_signature = signature_data["signature"][:-10] + "tampered=="
@@ -117,7 +111,7 @@ class TestDilithiumSigner:
             image_digest=image_digest,
             signature=tampered_signature,
             public_key=keypair["public_key"],
-            payload=signature_data["payload"]
+            payload=signature_data["payload"],
         )
 
         assert is_valid is False
@@ -130,17 +124,14 @@ class TestDilithiumSigner:
 
         # Sign with keypair1
         image_digest = hashlib.sha256(b"test-image").hexdigest()
-        signature_data = signer.sign_image(
-            image_digest=image_digest,
-            private_key=keypair1["private_key"]
-        )
+        signature_data = signer.sign_image(image_digest=image_digest, private_key=keypair1["private_key"])
 
         # Try to verify with keypair2's public key
         is_valid = signer.verify_signature(
             image_digest=image_digest,
             signature=signature_data["signature"],
             public_key=keypair2["public_key"],
-            payload=signature_data["payload"]
+            payload=signature_data["payload"],
         )
 
         assert is_valid is False
@@ -168,14 +159,10 @@ class TestDilithiumSigner:
             "image": "myapp:v1.2.3",
             "registry": "gcr.io",
             "timestamp": "2024-01-01T00:00:00Z",
-            "builder": "CI/CD Pipeline"
+            "builder": "CI/CD Pipeline",
         }
 
-        signature_data = signer.sign_image(
-            image_digest=image_digest,
-            private_key=keypair["private_key"],
-            metadata=metadata
-        )
+        signature_data = signer.sign_image(image_digest=image_digest, private_key=keypair["private_key"], metadata=metadata)
 
         # Check metadata in payload
         payload = signature_data["payload"]
@@ -211,14 +198,10 @@ class TestDilithiumSigner:
         # Create large metadata
         metadata = {
             "layers": ["sha256:" + hashlib.sha256(str(i).encode()).hexdigest() for i in range(100)],
-            "annotations": {f"key{i}": f"value{i}" for i in range(50)}
+            "annotations": {f"key{i}": f"value{i}" for i in range(50)},
         }
 
-        signature_data = signer.sign_image(
-            image_digest=image_digest,
-            private_key=keypair["private_key"],
-            metadata=metadata
-        )
+        signature_data = signer.sign_image(image_digest=image_digest, private_key=keypair["private_key"], metadata=metadata)
 
         assert "signature" in signature_data
 
@@ -227,7 +210,7 @@ class TestDilithiumSigner:
             image_digest=image_digest,
             signature=signature_data["signature"],
             public_key=keypair["public_key"],
-            payload=signature_data["payload"]
+            payload=signature_data["payload"],
         )
 
         assert is_valid is True
@@ -237,11 +220,7 @@ class TestDilithiumSigner:
         keypair = signer.generate_keypair()
         image_digest = hashlib.sha256(b"test").hexdigest()
 
-        signature_data = signer.sign_image(
-            image_digest=image_digest,
-            private_key=keypair["private_key"],
-            metadata={}
-        )
+        signature_data = signer.sign_image(image_digest=image_digest, private_key=keypair["private_key"], metadata={})
 
         assert "signature" in signature_data
 
@@ -250,7 +229,7 @@ class TestDilithiumSigner:
             image_digest=image_digest,
             signature=signature_data["signature"],
             public_key=keypair["public_key"],
-            payload=signature_data["payload"]
+            payload=signature_data["payload"],
         )
 
         assert is_valid is True

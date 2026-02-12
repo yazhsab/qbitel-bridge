@@ -43,9 +43,7 @@ class ConfigValidator:
         self.logger = logging.getLogger(__name__)
         self.issues: List[ValidationIssue] = []
 
-    def validate_config(
-        self, config: Dict[str, Any]
-    ) -> Tuple[bool, List[ValidationIssue]]:
+    def validate_config(self, config: Dict[str, Any]) -> Tuple[bool, List[ValidationIssue]]:
         """
         Validate entire configuration.
 
@@ -67,9 +65,7 @@ class ConfigValidator:
         self._validate_tls(config)
 
         # Check if any errors exist
-        has_errors = any(
-            issue.severity == ValidationSeverity.ERROR for issue in self.issues
-        )
+        has_errors = any(issue.severity == ValidationSeverity.ERROR for issue in self.issues)
         is_valid = not has_errors
 
         return is_valid, self.issues
@@ -454,10 +450,7 @@ class ConfigValidator:
                 self._check_hardcoded_secrets(value, current_path)
             elif isinstance(value, str):
                 # Check if field name suggests it's sensitive
-                is_sensitive = any(
-                    re.search(pattern, key, re.IGNORECASE)
-                    for pattern in sensitive_patterns
-                )
+                is_sensitive = any(re.search(pattern, key, re.IGNORECASE) for pattern in sensitive_patterns)
 
                 if is_sensitive and value and not value.startswith("${"):
                     # Value is not empty and not an environment variable reference

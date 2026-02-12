@@ -43,9 +43,7 @@ class TestAuthenticationService:
         """Create mock configuration."""
         config = Mock()
         config.security = Mock()
-        config.security.jwt_secret = (
-            "test_secret_key_with_minimum_32_characters_required"
-        )
+        config.security.jwt_secret = "test_secret_key_with_minimum_32_characters_required"
         config.environment = Mock()
         config.environment.value = "development"
         config.redis = Mock()
@@ -71,9 +69,7 @@ class TestAuthenticationService:
         with patch("ai_engine.api.auth.get_config") as mock_get_config:
             mock_config = Mock()
             mock_config.security = Mock()
-            mock_config.security.jwt_secret = (
-                "test_secret_key_with_minimum_32_characters_required"
-            )
+            mock_config.security.jwt_secret = "test_secret_key_with_minimum_32_characters_required"
             mock_get_config.return_value = mock_config
             service = AuthenticationService()
             assert service.config is not None
@@ -90,9 +86,7 @@ class TestAuthenticationService:
     def test_load_secret_key_from_config(self, mock_config):
         """Test loading JWT secret from config."""
         service = AuthenticationService(mock_config)
-        assert (
-            service.secret_key == "test_secret_key_with_minimum_32_characters_required"
-        )
+        assert service.secret_key == "test_secret_key_with_minimum_32_characters_required"
 
     def test_load_secret_key_production_error(self, mock_config):
         """Test JWT secret error in production."""
@@ -102,9 +96,7 @@ class TestAuthenticationService:
             mock_mgr = Mock()
             mock_mgr.get_secret.return_value = None
             mock_secrets.return_value = mock_mgr
-            with pytest.raises(
-                AuthenticationError, match="JWT secret not configured in production"
-            ):
+            with pytest.raises(AuthenticationError, match="JWT secret not configured in production"):
                 AuthenticationService(mock_config)
 
     def test_load_secret_key_generated_development(self, mock_config):
@@ -130,9 +122,7 @@ class TestAuthenticationService:
     @pytest.mark.asyncio
     async def test_initialize_redis_unavailable(self, auth_service):
         """Test initialization with Redis unavailable."""
-        with patch(
-            "ai_engine.api.auth.redis.Redis", side_effect=Exception("Connection failed")
-        ):
+        with patch("ai_engine.api.auth.redis.Redis", side_effect=Exception("Connection failed")):
             await auth_service.initialize()
             assert auth_service.redis_client is None
 
@@ -180,9 +170,7 @@ class TestAuthenticationService:
     @pytest.mark.asyncio
     async def test_verify_token_expired(self, auth_service):
         """Test token verification with expired token."""
-        with patch(
-            "ai_engine.api.auth.jwt.decode", side_effect=Exception("Token expired")
-        ):
+        with patch("ai_engine.api.auth.jwt.decode", side_effect=Exception("Token expired")):
             with pytest.raises(AuthenticationError):
                 await auth_service.verify_token("expired_token")
 
@@ -379,9 +367,7 @@ class TestAuthFunctions:
         """Test initializing auth from secrets manager."""
         with patch("ai_engine.api.auth.get_secrets_manager") as mock_secrets:
             mock_mgr = Mock()
-            mock_mgr.get_secret.return_value = (
-                "api_key_from_vault_with_32_chars_minimum"
-            )
+            mock_mgr.get_secret.return_value = "api_key_from_vault_with_32_chars_minimum"
             mock_secrets.return_value = mock_mgr
 
             result = initialize_auth()
@@ -389,9 +375,7 @@ class TestAuthFunctions:
 
     def test_initialize_auth_from_env(self):
         """Test initializing auth from environment."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_API_KEY": "test_api_key_with_32_characters_min"}
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_API_KEY": "test_api_key_with_32_characters_min"}):
             with patch("ai_engine.api.auth.get_secrets_manager") as mock_secrets:
                 mock_mgr = Mock()
                 mock_mgr.get_secret.return_value = None
@@ -439,9 +423,7 @@ class TestAuthFunctions:
     def test_get_api_key_not_initialized(self):
         """Test getting API key when not initialized."""
         with patch("ai_engine.api.auth._api_key", None):
-            with patch(
-                "ai_engine.api.auth.initialize_auth", return_value="initialized_key"
-            ):
+            with patch("ai_engine.api.auth.initialize_auth", return_value="initialized_key"):
                 result = get_api_key()
                 assert result == "initialized_key"
 

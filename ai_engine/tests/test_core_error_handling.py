@@ -186,9 +186,7 @@ class TestErrorHandler:
             recovery_strategy=RecoveryStrategy.RECONNECT,
         )
 
-        with patch.object(
-            error_handler.recovery_manager, "attempt_recovery"
-        ) as mock_recovery:
+        with patch.object(error_handler.recovery_manager, "attempt_recovery") as mock_recovery:
             mock_recovery.return_value = True
 
             result = error_handler._attempt_recovery(error, context)
@@ -207,9 +205,7 @@ class TestErrorHandler:
             recovery_strategy=RecoveryStrategy.RECONNECT,
         )
 
-        with patch.object(
-            error_handler.recovery_manager, "attempt_recovery"
-        ) as mock_recovery:
+        with patch.object(error_handler.recovery_manager, "attempt_recovery") as mock_recovery:
             mock_recovery.return_value = False
 
             result = error_handler._attempt_recovery(error, context)
@@ -273,15 +269,10 @@ class TestErrorRecoveryManager:
         def mock_recovery(error, context):
             return True
 
-        recovery_manager.register_recovery_strategy(
-            ErrorCategory.CONNECTION, RecoveryStrategy.RECONNECT, mock_recovery
-        )
+        recovery_manager.register_recovery_strategy(ErrorCategory.CONNECTION, RecoveryStrategy.RECONNECT, mock_recovery)
 
         assert ErrorCategory.CONNECTION in recovery_manager.recovery_strategies
-        assert (
-            RecoveryStrategy.RECONNECT
-            in recovery_manager.recovery_strategies[ErrorCategory.CONNECTION]
-        )
+        assert RecoveryStrategy.RECONNECT in recovery_manager.recovery_strategies[ErrorCategory.CONNECTION]
 
     def test_attempt_recovery_success(self, recovery_manager):
         """Test successful recovery attempt."""
@@ -289,9 +280,7 @@ class TestErrorRecoveryManager:
         def mock_recovery(error, context):
             return True
 
-        recovery_manager.register_recovery_strategy(
-            ErrorCategory.CONNECTION, RecoveryStrategy.RECONNECT, mock_recovery
-        )
+        recovery_manager.register_recovery_strategy(ErrorCategory.CONNECTION, RecoveryStrategy.RECONNECT, mock_recovery)
 
         error = ConnectionError("Connection failed")
         context = ErrorContext(
@@ -314,9 +303,7 @@ class TestErrorRecoveryManager:
         def mock_recovery(error, context):
             return False
 
-        recovery_manager.register_recovery_strategy(
-            ErrorCategory.CONNECTION, RecoveryStrategy.RECONNECT, mock_recovery
-        )
+        recovery_manager.register_recovery_strategy(ErrorCategory.CONNECTION, RecoveryStrategy.RECONNECT, mock_recovery)
 
         error = ConnectionError("Connection failed")
         context = ErrorContext(
@@ -497,9 +484,7 @@ class TestErrorMetrics:
 
     def test_reset_metrics(self, error_metrics):
         """Test resetting metrics."""
-        error_metrics.record_error(
-            "ValueError", "test_component", "medium", "validation"
-        )
+        error_metrics.record_error("ValueError", "test_component", "medium", "validation")
 
         assert len(error_metrics.error_counts) > 0
 
@@ -512,9 +497,7 @@ class TestErrorMetrics:
         """Test calculating error rate."""
         # Record errors over time
         for _ in range(10):
-            error_metrics.record_error(
-                "ValueError", "test_component", "medium", "validation"
-            )
+            error_metrics.record_error("ValueError", "test_component", "medium", "validation")
 
         rate = error_metrics.calculate_error_rate("ValueError", "test_component")
 
@@ -528,9 +511,7 @@ class TestCircuitBreaker:
     @pytest.fixture
     def circuit_breaker(self):
         """Create CircuitBreaker instance."""
-        return CircuitBreaker(
-            failure_threshold=5, timeout=60.0, expected_exception=ConnectionError
-        )
+        return CircuitBreaker(failure_threshold=5, timeout=60.0, expected_exception=ConnectionError)
 
     def test_initialization(self, circuit_breaker):
         """Test CircuitBreaker initialization."""
@@ -644,9 +625,7 @@ class TestRetryManager:
     @pytest.fixture
     def retry_manager(self):
         """Create RetryManager instance."""
-        return RetryManager(
-            max_retries=3, base_delay=1.0, max_delay=10.0, exponential_base=2.0
-        )
+        return RetryManager(max_retries=3, base_delay=1.0, max_delay=10.0, exponential_base=2.0)
 
     def test_initialization(self, retry_manager):
         """Test RetryManager initialization."""

@@ -10,19 +10,10 @@ import asyncio
 from typing import List, Dict
 import statistics
 
-from ai_engine.cloud_native.service_mesh.istio.qkd_certificate_manager import (
-    QuantumCertificateManager,
-    CertificateAlgorithm
-)
-from ai_engine.cloud_native.service_mesh.envoy.traffic_encryption import (
-    TrafficEncryptionManager
-)
-from ai_engine.cloud_native.container_security.signing.dilithium_signer import (
-    DilithiumSigner
-)
-from ai_engine.cloud_native.event_streaming.kafka.secure_producer import (
-    SecureKafkaProducer
-)
+from ai_engine.cloud_native.service_mesh.istio.qkd_certificate_manager import QuantumCertificateManager, CertificateAlgorithm
+from ai_engine.cloud_native.service_mesh.envoy.traffic_encryption import TrafficEncryptionManager
+from ai_engine.cloud_native.container_security.signing.dilithium_signer import DilithiumSigner
+from ai_engine.cloud_native.event_streaming.kafka.secure_producer import SecureKafkaProducer
 
 
 @pytest.mark.performance
@@ -34,10 +25,7 @@ class TestCryptographyPerformance:
         """Benchmark Kyber-1024 key pair generation"""
         cert_manager = QuantumCertificateManager()
 
-        result = benchmark(
-            cert_manager._generate_key_pair,
-            CertificateAlgorithm.KYBER_1024
-        )
+        result = benchmark(cert_manager._generate_key_pair, CertificateAlgorithm.KYBER_1024)
 
         # Verify result
         private_key, public_key = result
@@ -46,16 +34,13 @@ class TestCryptographyPerformance:
 
         # Performance expectations: < 10ms on modern hardware
         stats = benchmark.stats
-        assert stats['mean'] < 0.01, "Key generation should be < 10ms"
+        assert stats["mean"] < 0.01, "Key generation should be < 10ms"
 
     def test_kyber_768_key_generation_performance(self, benchmark):
         """Benchmark Kyber-768 key pair generation"""
         cert_manager = QuantumCertificateManager()
 
-        result = benchmark(
-            cert_manager._generate_key_pair,
-            CertificateAlgorithm.KYBER_768
-        )
+        result = benchmark(cert_manager._generate_key_pair, CertificateAlgorithm.KYBER_768)
 
         private_key, public_key = result
         assert len(private_key) == 2400
@@ -95,7 +80,7 @@ class TestCryptographyPerformance:
 
         # Performance expectation: < 1ms for 1KB
         stats = benchmark.stats
-        assert stats['mean'] < 0.001, "AES-GCM encryption should be < 1ms for 1KB"
+        assert stats["mean"] < 0.001, "AES-GCM encryption should be < 1ms for 1KB"
 
     def test_aes_256_gcm_decryption_performance(self, benchmark):
         """Benchmark AES-256-GCM decryption (1KB blocks)"""
@@ -104,10 +89,7 @@ class TestCryptographyPerformance:
         data = secrets.token_bytes(1024)
         ciphertext, tag, nonce = encryption_manager._encrypt_data(data, key)
 
-        result = benchmark(
-            encryption_manager._decrypt_data,
-            ciphertext, tag, nonce, key
-        )
+        result = benchmark(encryption_manager._decrypt_data, ciphertext, tag, nonce, key)
 
         assert result == data
 
@@ -124,7 +106,7 @@ class TestCryptographyPerformance:
 
         # Performance expectation: < 100ms for 1MB
         stats = benchmark.stats
-        assert stats['mean'] < 0.1, "Large data encryption should be < 100ms"
+        assert stats["mean"] < 0.1, "Large data encryption should be < 100ms"
 
 
 @pytest.mark.performance
@@ -195,9 +177,7 @@ class TestThroughputBenchmarks:
 
         for i in range(iterations):
             cert_manager.generate_certificate(
-                f"service-{i}",
-                "qbitel-service-mesh",
-                [f"service-{i}.qbitel-service-mesh.svc.cluster.local"]
+                f"service-{i}", "qbitel-service-mesh", [f"service-{i}.qbitel-service-mesh.svc.cluster.local"]
             )
 
         elapsed_time = time.perf_counter() - start_time
@@ -335,10 +315,7 @@ class TestKafkaProducerPerformance:
     @pytest.mark.skip(reason="Requires running Kafka cluster")
     def test_kafka_producer_throughput(self):
         """Measure Kafka producer throughput with encryption"""
-        producer = SecureKafkaProducer(
-            bootstrap_servers="localhost:9092",
-            enable_encryption=True
-        )
+        producer = SecureKafkaProducer(bootstrap_servers="localhost:9092", enable_encryption=True)
 
         # Send 10,000 messages
         messages_count = 10000
@@ -363,14 +340,16 @@ class TestKafkaProducerPerformance:
 
 def run_all_benchmarks():
     """Run all performance benchmarks and generate report"""
-    pytest.main([
-        __file__,
-        "-v",
-        "--benchmark-only",
-        "--benchmark-min-rounds=10",
-        "--benchmark-warmup=on",
-        "--benchmark-json=benchmark_results.json"
-    ])
+    pytest.main(
+        [
+            __file__,
+            "-v",
+            "--benchmark-only",
+            "--benchmark-min-rounds=10",
+            "--benchmark-warmup=on",
+            "--benchmark-json=benchmark_results.json",
+        ]
+    )
 
 
 if __name__ == "__main__":

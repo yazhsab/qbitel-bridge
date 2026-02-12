@@ -13,7 +13,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import uuid
 import re
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -132,9 +131,7 @@ class ProtocolAdapterGenerator:
 
         # Generate field mappings
         if not config.mappings:
-            config.mappings = self._generate_field_mappings(
-                source_analysis, target_analysis
-            )
+            config.mappings = self._generate_field_mappings(source_analysis, target_analysis)
 
         # Generate adapter code
         adapter_code = self._generate_adapter_code(config)
@@ -160,10 +157,7 @@ class ProtocolAdapterGenerator:
             test_code=test_code,
             documentation=documentation,
             field_count=len(config.mappings),
-            transformation_count=sum(
-                1 for m in config.mappings
-                if m.transformation != TransformationType.DIRECT_MAP
-            ),
+            transformation_count=sum(1 for m in config.mappings if m.transformation != TransformationType.DIRECT_MAP),
             complexity_score=complexity,
         )
 
@@ -187,17 +181,17 @@ class ProtocolAdapterGenerator:
         # Create mappings from comparison
         for mapping in comparison.get("field_mappings", []):
             transform_type = (
-                TransformationType.DIRECT_MAP
-                if mapping.get("type_compatible")
-                else TransformationType.FORMAT_CONVERSION
+                TransformationType.DIRECT_MAP if mapping.get("type_compatible") else TransformationType.FORMAT_CONVERSION
             )
 
-            mappings.append(FieldMapping(
-                source_field=mapping["source"],
-                target_field=mapping["target"],
-                transformation=transform_type,
-                transform_config={"confidence": mapping.get("confidence", 1.0)},
-            ))
+            mappings.append(
+                FieldMapping(
+                    source_field=mapping["source"],
+                    target_field=mapping["target"],
+                    transformation=transform_type,
+                    transform_config={"confidence": mapping.get("confidence", 1.0)},
+                )
+            )
 
         config = AdapterConfig(
             name=adapter_name,
@@ -217,14 +211,8 @@ class ProtocolAdapterGenerator:
         """Generate field mappings from protocol analysis."""
         mappings = []
 
-        source_fields = {
-            f.get("name", ""): f
-            for f in source_analysis.get("fields", [])
-        }
-        target_fields = {
-            f.get("name", ""): f
-            for f in target_analysis.get("fields", [])
-        }
+        source_fields = {f.get("name", ""): f for f in source_analysis.get("fields", [])}
+        target_fields = {f.get("name", ""): f for f in target_analysis.get("fields", [])}
 
         # Match fields by name similarity
         for source_name, source_field in source_fields.items():
@@ -234,21 +222,21 @@ class ProtocolAdapterGenerator:
                 target_name, target_field, confidence = best_match
 
                 # Determine transformation type
-                transform_type = self._determine_transformation(
-                    source_field, target_field
-                )
+                transform_type = self._determine_transformation(source_field, target_field)
 
-                mappings.append(FieldMapping(
-                    source_field=source_name,
-                    target_field=target_name,
-                    transformation=transform_type,
-                    transform_config={
-                        "source_type": source_field.get("data_type"),
-                        "target_type": target_field.get("data_type"),
-                        "confidence": confidence,
-                    },
-                    required=source_field.get("required", False),
-                ))
+                mappings.append(
+                    FieldMapping(
+                        source_field=source_name,
+                        target_field=target_name,
+                        transformation=transform_type,
+                        transform_config={
+                            "source_type": source_field.get("data_type"),
+                            "target_type": target_field.get("data_type"),
+                            "confidence": confidence,
+                        },
+                        required=source_field.get("required", False),
+                    )
+                )
 
         return mappings
 
@@ -261,10 +249,10 @@ class ProtocolAdapterGenerator:
         best_match = None
         best_score = 0.0
 
-        source_tokens = set(re.split(r'[_\-\s]', source_name.lower()))
+        source_tokens = set(re.split(r"[_\-\s]", source_name.lower()))
 
         for target_name, target_field in target_fields.items():
-            target_tokens = set(re.split(r'[_\-\s]', target_name.lower()))
+            target_tokens = set(re.split(r"[_\-\s]", target_name.lower()))
 
             # Calculate similarity
             if source_tokens and target_tokens:
@@ -301,8 +289,13 @@ class ProtocolAdapterGenerator:
             return TransformationType.FORMAT_CONVERSION
 
         # Numeric conversions
-        if source_type in ("int", "integer", "decimal", "float") and \
-           target_type in ("int", "integer", "decimal", "float", "string"):
+        if source_type in ("int", "integer", "decimal", "float") and target_type in (
+            "int",
+            "integer",
+            "decimal",
+            "float",
+            "string",
+        ):
             return TransformationType.FORMAT_CONVERSION
 
         # Encoding
@@ -396,10 +389,12 @@ class {self._to_class_name(config.name)}Adapter:
         # Add transformers for non-direct mappings
         for mapping in config.mappings:
             if mapping.transformation != TransformationType.DIRECT_MAP:
-                code += f'            "{mapping.source_field}": self._transform_{self._to_method_name(mapping.source_field)},\n'
+                code += (
+                    f'            "{mapping.source_field}": self._transform_{self._to_method_name(mapping.source_field)},\n'
+                )
 
-        code += '''        }
-'''
+        code += """        }
+"""
         # Add transformer methods
         for mapping in config.mappings:
             if mapping.transformation != TransformationType.DIRECT_MAP:
@@ -481,16 +476,16 @@ class {self._to_class_name(config.name)}Validator:
         for mapping in config.mappings:
             if mapping.required:
                 field = mapping.source_field if config.adapter_type == AdapterType.INBOUND else mapping.target_field
-                code += f'''        if "{field}" not in data or data["{field}"] is None:
+                code += f"""        if "{field}" not in data or data["{field}"] is None:
             errors.append("Required field missing: {field}")
 
-'''
-        code += '''        return ValidationResult(
+"""
+        code += """        return ValidationResult(
             valid=len(errors) == 0,
             errors=errors,
             warnings=warnings,
         )
-'''
+"""
         return code
 
     def _generate_test_code(self, config: AdapterConfig) -> str:
@@ -548,7 +543,7 @@ class Test{self._to_class_name(config.name)}Adapter:
 
     def _generate_documentation(self, config: AdapterConfig) -> str:
         """Generate documentation."""
-        doc = f'''# {config.name} Adapter
+        doc = f"""# {config.name} Adapter
 
 ## Overview
 
@@ -562,11 +557,11 @@ Auto-generated protocol adapter for converting between {config.source_protocol} 
 
 | Source Field | Target Field | Transformation | Required |
 |--------------|--------------|----------------|----------|
-'''
+"""
         for mapping in config.mappings:
             doc += f'| {mapping.source_field} | {mapping.target_field} | {mapping.transformation.value} | {"Yes" if mapping.required else "No"} |\n'
 
-        doc += f'''
+        doc += f"""
 ## Usage
 
 ```python
@@ -592,7 +587,7 @@ When handling sensitive data, ensure PQC-ready encryption is applied:
 ## Generated by Qbitel AI
 
 This adapter was auto-generated by Qbitel AI Zero-Touch Automation.
-'''
+"""
         return doc
 
     def _calculate_complexity(self, config: AdapterConfig) -> float:
@@ -617,17 +612,17 @@ This adapter was auto-generated by Qbitel AI Zero-Touch Automation.
 
     def _to_class_name(self, name: str) -> str:
         """Convert name to PascalCase class name."""
-        parts = re.split(r'[_\-\s]+', name)
-        return ''.join(p.capitalize() for p in parts)
+        parts = re.split(r"[_\-\s]+", name)
+        return "".join(p.capitalize() for p in parts)
 
     def _to_method_name(self, name: str) -> str:
         """Convert name to snake_case method name."""
-        name = re.sub(r'[^\w]', '_', name)
+        name = re.sub(r"[^\w]", "_", name)
         return name.lower()
 
     def _to_module_name(self, name: str) -> str:
         """Convert name to module name."""
-        return name.lower().replace('-', '_').replace(' ', '_')
+        return name.lower().replace("-", "_").replace(" ", "_")
 
     def _load_transform_templates(self) -> Dict[str, str]:
         """Load transformation templates."""

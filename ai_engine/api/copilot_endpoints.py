@@ -36,12 +36,8 @@ COPILOT_API_REQUESTS = Counter(
     "Total copilot API requests",
     ["endpoint", "status"],
 )
-COPILOT_API_DURATION = Histogram(
-    "qbitel_copilot_api_duration_seconds", "Copilot API request duration", ["endpoint"]
-)
-WEBSOCKET_CONNECTIONS = Counter(
-    "qbitel_copilot_websocket_connections_total", "Total WebSocket connections"
-)
+COPILOT_API_DURATION = Histogram("qbitel_copilot_api_duration_seconds", "Copilot API request duration", ["endpoint"])
+WEBSOCKET_CONNECTIONS = Counter("qbitel_copilot_websocket_connections_total", "Total WebSocket connections")
 
 logger = logging.getLogger(__name__)
 
@@ -53,18 +49,10 @@ security = HTTPBearer()
 class CopilotQueryRequest(BaseModel):
     """Request model for copilot queries."""
 
-    query: str = Field(
-        ..., min_length=1, max_length=2000, description="Natural language query"
-    )
-    session_id: Optional[str] = Field(
-        None, description="Session identifier for conversation continuity"
-    )
-    context: Optional[Dict[str, Any]] = Field(
-        None, description="Additional context for the query"
-    )
-    packet_data: Optional[str] = Field(
-        None, description="Base64 encoded packet data for analysis"
-    )
+    query: str = Field(..., min_length=1, max_length=2000, description="Natural language query")
+    session_id: Optional[str] = Field(None, description="Session identifier for conversation continuity")
+    context: Optional[Dict[str, Any]] = Field(None, description="Additional context for the query")
+    packet_data: Optional[str] = Field(None, description="Base64 encoded packet data for analysis")
 
     @validator("packet_data")
     def validate_packet_data(cls, v):
@@ -83,24 +71,14 @@ class CopilotQueryResponse(BaseModel):
     """Response model for copilot queries."""
 
     response: str = Field(..., description="Copilot's response to the query")
-    confidence: float = Field(
-        ..., ge=0, le=1, description="Confidence score of the response"
-    )
+    confidence: float = Field(..., ge=0, le=1, description="Confidence score of the response")
     query_type: str = Field(..., description="Classified type of the query")
-    processing_time: float = Field(
-        ..., description="Time taken to process the query in seconds"
-    )
+    processing_time: float = Field(..., description="Time taken to process the query in seconds")
     session_id: str = Field(..., description="Session identifier")
     suggestions: List[str] = Field(default=[], description="Follow-up suggestions")
-    source_data: List[Dict[str, Any]] = Field(
-        default=[], description="Source data used for the response"
-    )
-    visualizations: Optional[List[Dict[str, Any]]] = Field(
-        None, description="Visualization data"
-    )
-    metadata: Dict[str, Any] = Field(
-        default={}, description="Additional response metadata"
-    )
+    source_data: List[Dict[str, Any]] = Field(default=[], description="Source data used for the response")
+    visualizations: Optional[List[Dict[str, Any]]] = Field(None, description="Visualization data")
+    metadata: Dict[str, Any] = Field(default={}, description="Additional response metadata")
 
 
 class SessionSummaryResponse(BaseModel):
@@ -119,14 +97,10 @@ class SessionSummaryResponse(BaseModel):
 class WebSocketMessage(BaseModel):
     """WebSocket message model."""
 
-    type: str = Field(
-        ..., description="Message type: 'query', 'response', 'error', 'ping', 'pong'"
-    )
+    type: str = Field(..., description="Message type: 'query', 'response', 'error', 'ping', 'pong'")
     data: Dict[str, Any] = Field(default={}, description="Message data")
     timestamp: Optional[str] = Field(None, description="Message timestamp")
-    correlation_id: Optional[str] = Field(
-        None, description="Correlation ID for request-response matching"
-    )
+    correlation_id: Optional[str] = Field(None, description="Correlation ID for request-response matching")
 
 
 # Router setup
@@ -185,9 +159,7 @@ async def process_copilot_query(
 
         # Log successful request
         COPILOT_API_REQUESTS.labels(endpoint="query", status="success").inc()
-        COPILOT_API_DURATION.labels(endpoint="query").observe(
-            asyncio.get_event_loop().time() - start_time
-        )
+        COPILOT_API_DURATION.labels(endpoint="query").observe(asyncio.get_event_loop().time() - start_time)
 
         # Background task for analytics
         background_tasks.add_task(
@@ -229,9 +201,7 @@ async def get_user_sessions(
 ) -> List[Dict[str, Any]]:
     """Get recent sessions for the current user."""
     try:
-        sessions = await copilot.context_manager.get_user_sessions(
-            current_user["user_id"], limit
-        )
+        sessions = await copilot.context_manager.get_user_sessions(current_user["user_id"], limit)
 
         COPILOT_API_REQUESTS.labels(endpoint="sessions", status="success").inc()
         return sessions
@@ -250,9 +220,7 @@ async def get_session_summary(
 ) -> SessionSummaryResponse:
     """Get summary of a specific conversation session."""
     try:
-        summary = await copilot.context_manager.get_session_summary(
-            current_user["user_id"], session_id
-        )
+        summary = await copilot.context_manager.get_session_summary(current_user["user_id"], session_id)
 
         if not summary:
             raise HTTPException(status_code=404, detail="Session not found")
@@ -275,9 +243,7 @@ async def get_session_summary(
     except Exception as e:
         COPILOT_API_REQUESTS.labels(endpoint="session_summary", status="error").inc()
         logger.error(f"Error getting session summary: {e}")
-        raise HTTPException(
-            status_code=500, detail="Failed to retrieve session summary"
-        )
+        raise HTTPException(status_code=500, detail="Failed to retrieve session summary")
 
 
 @router.delete("/sessions/{session_id}")
@@ -288,14 +254,10 @@ async def clear_session(
 ) -> Dict[str, str]:
     """Clear a specific conversation session."""
     try:
-        success = await copilot.context_manager.clear_session(
-            current_user["user_id"], session_id
-        )
+        success = await copilot.context_manager.clear_session(current_user["user_id"], session_id)
 
         if not success:
-            raise HTTPException(
-                status_code=404, detail="Session not found or could not be cleared"
-            )
+            raise HTTPException(status_code=404, detail="Session not found or could not be cleared")
 
         COPILOT_API_REQUESTS.labels(endpoint="clear_session", status="success").inc()
         return {"message": f"Session {session_id} cleared successfully"}
@@ -331,9 +293,7 @@ async def get_copilot_health(copilot=Depends(get_copilot)) -> Dict[str, Any]:
 
 # WebSocket endpoint for real-time interaction
 @router.websocket("/ws")
-async def websocket_copilot_chat(
-    websocket: WebSocket, token: str, copilot=Depends(get_copilot)
-):
+async def websocket_copilot_chat(websocket: WebSocket, token: str, copilot=Depends(get_copilot)):
     """
     WebSocket endpoint for real-time copilot interaction.
 
@@ -354,9 +314,7 @@ async def websocket_copilot_chat(
         await websocket.accept()
         WEBSOCKET_CONNECTIONS.inc()
 
-        logger.info(
-            f"WebSocket connection established for user {user_info.get('user_id')}"
-        )
+        logger.info(f"WebSocket connection established for user {user_info.get('user_id')}")
 
         # Send welcome message
         welcome_msg = WebSocketMessage(
@@ -402,9 +360,7 @@ async def websocket_copilot_chat(
                         continue
 
                     # Use existing session ID or create new one
-                    session_id = (
-                        query_data.get("session_id") or session_id or str(uuid.uuid4())
-                    )
+                    session_id = query_data.get("session_id") or session_id or str(uuid.uuid4())
 
                     # Decode packet data if provided
                     packet_data = None
@@ -469,11 +425,7 @@ async def websocket_copilot_chat(
                 error_msg = WebSocketMessage(
                     type="error",
                     data={"error": "Internal server error"},
-                    correlation_id=(
-                        getattr(message, "correlation_id", None)
-                        if "message" in locals()
-                        else None
-                    ),
+                    correlation_id=(getattr(message, "correlation_id", None) if "message" in locals() else None),
                 )
                 try:
                     await websocket.send_text(error_msg.json())
@@ -481,9 +433,7 @@ async def websocket_copilot_chat(
                     break
 
     except WebSocketDisconnect:
-        logger.info(
-            f"WebSocket disconnected for user {user_info.get('user_id', 'unknown')}"
-        )
+        logger.info(f"WebSocket disconnected for user {user_info.get('user_id', 'unknown')}")
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
     finally:
@@ -491,9 +441,7 @@ async def websocket_copilot_chat(
 
 
 # Background task functions
-async def log_query_analytics(
-    user_id: str, query: str, query_type: str, confidence: float
-):
+async def log_query_analytics(user_id: str, query: str, query_type: str, confidence: float):
     """Log query analytics for improvement and monitoring."""
     try:
         analytics_data = {

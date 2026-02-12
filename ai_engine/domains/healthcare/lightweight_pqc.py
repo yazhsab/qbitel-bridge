@@ -29,9 +29,9 @@ class MemoryConstraint(Enum):
     """Memory constraint levels for medical devices."""
 
     ULTRA_CONSTRAINED = auto()  # <32KB RAM (cannot run standard PQC)
-    CONSTRAINED = auto()        # 32-64KB RAM (ML-KEM-512 possible)
-    MODERATE = auto()           # 64-256KB RAM (ML-KEM-768 possible)
-    STANDARD = auto()           # >256KB RAM (full PQC support)
+    CONSTRAINED = auto()  # 32-64KB RAM (ML-KEM-512 possible)
+    MODERATE = auto()  # 64-256KB RAM (ML-KEM-768 possible)
+    STANDARD = auto()  # >256KB RAM (full PQC support)
 
 
 @dataclass
@@ -111,23 +111,17 @@ ICD_PROFILE = ConstrainedDeviceProfile(
 
 
 # Prometheus metrics
-LIGHTWEIGHT_PQC_OPS = Counter(
-    'healthcare_pqc_operations_total',
-    'Healthcare PQC operations',
-    ['operation', 'device_type']
-)
+LIGHTWEIGHT_PQC_OPS = Counter("healthcare_pqc_operations_total", "Healthcare PQC operations", ["operation", "device_type"])
 
 LIGHTWEIGHT_PQC_LATENCY = Histogram(
-    'healthcare_pqc_latency_seconds',
-    'Healthcare PQC operation latency',
-    ['operation', 'device_type'],
-    buckets=[0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0]
+    "healthcare_pqc_latency_seconds",
+    "Healthcare PQC operation latency",
+    ["operation", "device_type"],
+    buckets=[0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0],
 )
 
 DEVICE_BATTERY_ESTIMATE = Gauge(
-    'healthcare_device_battery_years_remaining',
-    'Estimated battery life remaining',
-    ['device_id', 'device_type']
+    "healthcare_device_battery_years_remaining", "Estimated battery life remaining", ["device_id", "device_type"]
 )
 
 
@@ -144,10 +138,7 @@ class SessionKey:
 
     @property
     def is_valid(self) -> bool:
-        return (
-            time.time() < self.expires_at and
-            self.operations_count < self.max_operations
-        )
+        return time.time() < self.expires_at and self.operations_count < self.max_operations
 
     def use(self) -> None:
         self.operations_count += 1
@@ -270,10 +261,7 @@ class LightweightPQCEngine:
             if session.is_valid:
                 session.use()
                 logger.debug(f"Using cached session key for {peer_id}")
-                LIGHTWEIGHT_PQC_OPS.labels(
-                    operation="session_cache_hit",
-                    device_type=self.profile.device_type
-                ).inc()
+                LIGHTWEIGHT_PQC_OPS.labels(operation="session_cache_hit", device_type=self.profile.device_type).inc()
                 return session.key
 
         # Check pre-computed pool
@@ -282,10 +270,7 @@ class LightweightPQCEngine:
             if key:
                 logger.debug(f"Using pre-computed session key for {peer_id}")
                 self._cache_session_key(key, peer_id, cache_key)
-                LIGHTWEIGHT_PQC_OPS.labels(
-                    operation="session_precomputed",
-                    device_type=self.profile.device_type
-                ).inc()
+                LIGHTWEIGHT_PQC_OPS.labels(operation="session_precomputed", device_type=self.profile.device_type).inc()
                 return key
 
         # Fall back to runtime key exchange
@@ -296,10 +281,7 @@ class LightweightPQCEngine:
 
         from ai_engine.crypto.mlkem import MlKemPublicKey
 
-        mlkem_pk = MlKemPublicKey(
-            self._kem_engine.level,
-            peer_public_key
-        )
+        mlkem_pk = MlKemPublicKey(self._kem_engine.level, peer_public_key)
 
         ciphertext, shared_secret = await self._kem_engine.encapsulate(mlkem_pk)
 
@@ -309,14 +291,8 @@ class LightweightPQCEngine:
         self._cache_session_key(session_key, peer_id, cache_key)
 
         elapsed = time.time() - start
-        LIGHTWEIGHT_PQC_OPS.labels(
-            operation="session_establish",
-            device_type=self.profile.device_type
-        ).inc()
-        LIGHTWEIGHT_PQC_LATENCY.labels(
-            operation="session_establish",
-            device_type=self.profile.device_type
-        ).observe(elapsed)
+        LIGHTWEIGHT_PQC_OPS.labels(operation="session_establish", device_type=self.profile.device_type).inc()
+        LIGHTWEIGHT_PQC_LATENCY.labels(operation="session_establish", device_type=self.profile.device_type).observe(elapsed)
 
         logger.info(f"Established session with {peer_id} in {elapsed:.3f}s")
 
@@ -377,10 +353,7 @@ class LightweightPQCEngine:
         result = nonce + ciphertext
 
         elapsed = time.time() - start
-        LIGHTWEIGHT_PQC_LATENCY.labels(
-            operation="encrypt",
-            device_type=self.profile.device_type
-        ).observe(elapsed)
+        LIGHTWEIGHT_PQC_LATENCY.labels(operation="encrypt", device_type=self.profile.device_type).observe(elapsed)
 
         return result
 
@@ -410,10 +383,7 @@ class LightweightPQCEngine:
         plaintext = aesgcm.decrypt(nonce, actual_ciphertext, None)
 
         elapsed = time.time() - start
-        LIGHTWEIGHT_PQC_LATENCY.labels(
-            operation="decrypt",
-            device_type=self.profile.device_type
-        ).observe(elapsed)
+        LIGHTWEIGHT_PQC_LATENCY.labels(operation="decrypt", device_type=self.profile.device_type).observe(elapsed)
 
         return plaintext
 
@@ -442,24 +412,15 @@ class LightweightPQCEngine:
 
         # Use pre-computed private key if available
         if self.precomputed:
-            sk = FalconPrivateKey(
-                self._sig_engine.level,
-                self.precomputed.signature_private_key
-            )
+            sk = FalconPrivateKey(self._sig_engine.level, self.precomputed.signature_private_key)
         else:
             raise RuntimeError("No signing key available")
 
         signature = await self._sig_engine.sign(data, sk)
 
         elapsed = time.time() - start
-        LIGHTWEIGHT_PQC_OPS.labels(
-            operation="sign",
-            device_type=self.profile.device_type
-        ).inc()
-        LIGHTWEIGHT_PQC_LATENCY.labels(
-            operation="sign",
-            device_type=self.profile.device_type
-        ).observe(elapsed)
+        LIGHTWEIGHT_PQC_OPS.labels(operation="sign", device_type=self.profile.device_type).inc()
+        LIGHTWEIGHT_PQC_LATENCY.labels(operation="sign", device_type=self.profile.device_type).observe(elapsed)
 
         logger.debug(f"Signed telemetry: {signature.size} bytes in {elapsed:.3f}s")
 
@@ -474,9 +435,7 @@ class LightweightPQCEngine:
             "recommended_algorithm": self.profile.recommended_algorithm,
             "uses_external_shield": self._use_external_shield,
             "cached_sessions": len(self._session_cache),
-            "precomputed_keys_remaining": (
-                self.precomputed.keys_remaining if self.precomputed else 0
-            ),
+            "precomputed_keys_remaining": (self.precomputed.keys_remaining if self.precomputed else 0),
         }
 
 
@@ -538,10 +497,6 @@ async def provision_device(
         session_key_pool=session_keys,
     )
 
-    logger.info(
-        f"Provisioned {device_id}: "
-        f"mlkem={mlkem_level.value}, "
-        f"session_keys={session_key_pool_size}"
-    )
+    logger.info(f"Provisioned {device_id}: " f"mlkem={mlkem_level.value}, " f"session_keys={session_key_pool_size}")
 
     return precomputed

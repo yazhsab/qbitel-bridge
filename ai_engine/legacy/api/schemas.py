@@ -152,9 +152,7 @@ class HealthAnalysisRequest(BaseModel):
     time_series_data: Optional[List[TimeSeriesDataPoint]] = None
     prediction_horizon: PredictionHorizonAPI = PredictionHorizonAPI.MEDIUM_TERM
     include_recommendations: bool = True
-    analysis_depth: str = Field(
-        default="standard", regex="^(basic|standard|comprehensive)$"
-    )
+    analysis_depth: str = Field(default="standard", regex="^(basic|standard|comprehensive)$")
 
 
 class FailurePredictionData(BaseModel):
@@ -312,9 +310,7 @@ class MaintenanceSchedulingRequest(BaseModel):
     maintenance_requests: List[MaintenanceRequest]
     resource_constraints: Optional[Dict[str, Any]] = None
     business_constraints: Optional[Dict[str, Any]] = None
-    optimization_criteria: List[str] = Field(
-        default_factory=lambda: ["minimize_cost", "maximize_availability"]
-    )
+    optimization_criteria: List[str] = Field(default_factory=lambda: ["minimize_cost", "maximize_availability"])
     scheduling_horizon_days: int = Field(default=90, ge=1, le=365)
 
 
@@ -398,9 +394,7 @@ class BulkSystemAnalysisRequest(BaseModel):
     """Request schema for bulk system analysis."""
 
     system_ids: List[str] = Field(..., min_items=1, max_items=50)
-    analysis_type: str = Field(
-        default="health", regex="^(health|performance|risk|compliance)$"
-    )
+    analysis_type: str = Field(default="health", regex="^(health|performance|risk|compliance)$")
     prediction_horizon: PredictionHorizonAPI = PredictionHorizonAPI.MEDIUM_TERM
     include_recommendations: bool = True
     parallel_processing: bool = True
@@ -445,9 +439,7 @@ class SystemExportRequest(BaseModel):
     """Request schema for system data export."""
 
     system_ids: List[str] = Field(..., min_items=1)
-    export_types: List[str] = Field(
-        ..., min_items=1
-    )  # e.g., ["configuration", "history", "patterns"]
+    export_types: List[str] = Field(..., min_items=1)  # e.g., ["configuration", "history", "patterns"]
     date_range: Optional[Dict[str, datetime]] = None
     format: str = Field(default="json", regex="^(json|csv|xml)$")
     include_sensitive_data: bool = False

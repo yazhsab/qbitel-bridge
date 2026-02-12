@@ -35,12 +35,8 @@ def main():
     parser.add_argument("--enable-grpc", action="store_true", help="Enable gRPC server")
 
     # Environment
-    parser.add_argument(
-        "--development", action="store_true", help="Run in development mode"
-    )
-    parser.add_argument(
-        "--reload", action="store_true", help="Enable hot reloading (dev only)"
-    )
+    parser.add_argument("--development", action="store_true", help="Run in development mode")
+    parser.add_argument("--reload", action="store_true", help="Enable hot reloading (dev only)")
 
     # Logging
     parser.add_argument(
@@ -82,9 +78,7 @@ def main():
         logger.info(f"Mode: {'Development' if args.development else 'Production'}")
 
         # Run startup validation
-        environment = os.getenv(
-            "QBITEL_ENVIRONMENT", "development" if args.development else "production"
-        )
+        environment = os.getenv("QBITEL_ENVIRONMENT", "development" if args.development else "production")
         logger.info(f"\n{'='*80}")
         logger.info("Running startup validation...")
         logger.info(f"{'='*80}\n")
@@ -93,17 +87,11 @@ def main():
 
         if not validation_passed:
             if environment == "production":
-                logger.critical(
-                    "Startup validation failed in production. Aborting startup."
-                )
+                logger.critical("Startup validation failed in production. Aborting startup.")
                 sys.exit(1)
             else:
-                logger.warning(
-                    "Startup validation found issues, but continuing in non-production environment..."
-                )
-                logger.warning(
-                    "Please address the issues before deploying to production."
-                )
+                logger.warning("Startup validation found issues, but continuing in non-production environment...")
+                logger.warning("Please address the issues before deploying to production.")
 
         logger.info("\n")
 
@@ -121,9 +109,7 @@ def main():
         if tracing_initialized:
             logger.info("✅ OpenTelemetry tracing initialized successfully")
         else:
-            logger.info(
-                "⚠️  OpenTelemetry tracing not initialized (disabled or not configured)"
-            )
+            logger.info("⚠️  OpenTelemetry tracing not initialized (disabled or not configured)")
 
         # Load configuration
         config = Config()

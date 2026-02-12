@@ -90,9 +90,7 @@ class LoggerConfig:
     enable_json_format: bool = False
     include_trace_info: bool = True
     include_system_info: bool = True
-    sensitive_fields: List[str] = field(
-        default_factory=lambda: ["password", "token", "api_key"]
-    )
+    sensitive_fields: List[str] = field(default_factory=lambda: ["password", "token", "api_key"])
     custom_fields: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -184,9 +182,7 @@ class StructuredFormatter(logging.Formatter):
                 "stack_info",
             ]:
                 # Filter sensitive fields
-                if key.lower() in [
-                    field.lower() for field in self.config.sensitive_fields
-                ]:
+                if key.lower() in [field.lower() for field in self.config.sensitive_fields]:
                     log_data[key] = "[REDACTED]"
                 else:
                     log_data[key] = value
@@ -446,9 +442,7 @@ class StructuredLogger:
                 **log_data,
             )
         else:
-            self.warning(
-                f"No protocol discovered (confidence: {confidence:.2f})", **log_data
-            )
+            self.warning(f"No protocol discovered (confidence: {confidence:.2f})", **log_data)
 
     def log_field_detection(
         self,
@@ -467,9 +461,7 @@ class StructuredLogger:
 
         log_data.update(kwargs)
 
-        self.info(
-            f"Field detection completed: {field_count} fields detected", **log_data
-        )
+        self.info(f"Field detection completed: {field_count} fields detected", **log_data)
 
     def log_anomaly_detection(
         self,
@@ -530,13 +522,9 @@ class StructuredLogger:
         if status_code < 400:
             self.info(f"API request: {method} {endpoint} -> {status_code}", **log_data)
         elif status_code < 500:
-            self.warning(
-                f"Client error: {method} {endpoint} -> {status_code}", **log_data
-            )
+            self.warning(f"Client error: {method} {endpoint} -> {status_code}", **log_data)
         else:
-            self.error(
-                f"Server error: {method} {endpoint} -> {status_code}", **log_data
-            )
+            self.error(f"Server error: {method} {endpoint} -> {status_code}", **log_data)
 
     def get_performance_stats(self) -> Dict[str, Any]:
         """Get logging performance statistics."""
@@ -646,10 +634,7 @@ def configure_all_loggers(level: LogLevel) -> None:
 def get_all_logger_stats() -> Dict[str, Any]:
     """Get performance stats for all loggers."""
     with _registry_lock:
-        return {
-            name: logger.get_performance_stats()
-            for name, logger in _logger_registry.items()
-        }
+        return {name: logger.get_performance_stats() for name, logger in _logger_registry.items()}
 
 
 # Convenience functions for common logging patterns
@@ -671,9 +656,7 @@ def log_function_call(logger: StructuredLogger):
                     logger.debug(f"Function completed: {func.__name__}")
                     return result
                 except Exception as e:
-                    logger.error(
-                        f"Function failed: {func.__name__}", error=str(e), exc_info=True
-                    )
+                    logger.error(f"Function failed: {func.__name__}", error=str(e), exc_info=True)
                     raise
 
         return wrapper

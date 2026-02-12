@@ -42,9 +42,7 @@ class ProductionModeDetector:
         Returns:
             bool: True if in production mode, False otherwise
         """
-        env = os.getenv(
-            "QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
-        ).lower()
+        env = os.getenv("QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")).lower()
         return env in ProductionModeDetector.PRODUCTION_ALIASES
 
     @staticmethod
@@ -55,9 +53,7 @@ class ProductionModeDetector:
         Returns:
             EnvironmentMode: The current environment mode
         """
-        env = os.getenv(
-            "QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
-        ).lower()
+        env = os.getenv("QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")).lower()
 
         if env in ProductionModeDetector.PRODUCTION_ALIASES:
             return EnvironmentMode.PRODUCTION
@@ -91,10 +87,7 @@ class ProductionModeDetector:
 
         for var_name, description in required_vars.items():
             if not os.getenv(var_name):
-                errors.append(
-                    f"{description} is REQUIRED in production mode. "
-                    f"Set {var_name} environment variable."
-                )
+                errors.append(f"{description} is REQUIRED in production mode. " f"Set {var_name} environment variable.")
 
         return len(errors) == 0, errors
 
@@ -165,9 +158,7 @@ class ProductionValidator:
     ]
 
     @staticmethod
-    def validate_password_strength(
-        password: str, min_length: int = MIN_PASSWORD_LENGTH
-    ) -> Tuple[bool, List[str]]:
+    def validate_password_strength(password: str, min_length: int = MIN_PASSWORD_LENGTH) -> Tuple[bool, List[str]]:
         """
         Validate password strength.
 
@@ -182,20 +173,13 @@ class ProductionValidator:
 
         # Check minimum length
         if len(password) < min_length:
-            errors.append(
-                f"Password too short: {len(password)} characters "
-                f"(minimum: {min_length})"
-            )
+            errors.append(f"Password too short: {len(password)} characters " f"(minimum: {min_length})")
 
         # Check for weak patterns
         password_lower = password.lower()
-        found_patterns = [
-            p for p in ProductionValidator.WEAK_PATTERNS if p in password_lower
-        ]
+        found_patterns = [p for p in ProductionValidator.WEAK_PATTERNS if p in password_lower]
         if found_patterns:
-            errors.append(
-                f"Password contains weak patterns: {', '.join(found_patterns)}"
-            )
+            errors.append(f"Password contains weak patterns: {', '.join(found_patterns)}")
 
         # Check for sequential characters
         if ProductionValidator._has_sequential_chars(password):
@@ -208,9 +192,7 @@ class ProductionValidator:
         return len(errors) == 0, errors
 
     @staticmethod
-    def validate_secret_strength(
-        secret: str, min_length: int = MIN_SECRET_LENGTH
-    ) -> Tuple[bool, List[str]]:
+    def validate_secret_strength(secret: str, min_length: int = MIN_SECRET_LENGTH) -> Tuple[bool, List[str]]:
         """
         Validate secret strength.
 
@@ -225,16 +207,11 @@ class ProductionValidator:
 
         # Check minimum length
         if len(secret) < min_length:
-            errors.append(
-                f"Secret too short: {len(secret)} characters "
-                f"(minimum: {min_length})"
-            )
+            errors.append(f"Secret too short: {len(secret)} characters " f"(minimum: {min_length})")
 
         # Check for weak patterns
         secret_lower = secret.lower()
-        found_patterns = [
-            p for p in ProductionValidator.WEAK_PATTERNS if p in secret_lower
-        ]
+        found_patterns = [p for p in ProductionValidator.WEAK_PATTERNS if p in secret_lower]
         if found_patterns:
             errors.append(f"Secret contains weak patterns: {', '.join(found_patterns)}")
 
@@ -249,9 +226,7 @@ class ProductionValidator:
         return len(errors) == 0, errors
 
     @staticmethod
-    def validate_cors_origins(
-        origins: List[str], allow_wildcard: bool = False
-    ) -> Tuple[bool, List[str]]:
+    def validate_cors_origins(origins: List[str], allow_wildcard: bool = False) -> Tuple[bool, List[str]]:
         """
         Validate CORS origins configuration.
 
@@ -265,18 +240,13 @@ class ProductionValidator:
         errors = []
 
         if "*" in origins and not allow_wildcard:
-            errors.append(
-                "CORS wildcard (*) is not allowed in production mode. "
-                "Specify explicit allowed origins."
-            )
+            errors.append("CORS wildcard (*) is not allowed in production mode. " "Specify explicit allowed origins.")
 
         # Validate HTTPS in production
         if ProductionModeDetector.is_production_mode():
             for origin in origins:
                 if origin != "*" and not origin.startswith("https://"):
-                    errors.append(
-                        f"Origin '{origin}' must use HTTPS in production mode"
-                    )
+                    errors.append(f"Origin '{origin}' must use HTTPS in production mode")
 
         return len(errors) == 0, errors
 

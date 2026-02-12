@@ -29,25 +29,19 @@ from prometheus_client import Counter, Histogram
 logger = logging.getLogger(__name__)
 
 # Metrics
-VRF_EVALUATIONS = Counter(
-    'vrf_evaluations_total',
-    'Total VRF evaluations',
-    ['operation']
-)
+VRF_EVALUATIONS = Counter("vrf_evaluations_total", "Total VRF evaluations", ["operation"])
 
 VRF_VERIFICATION_TIME = Histogram(
-    'vrf_verification_seconds',
-    'Time to verify VRF proof',
-    buckets=[0.001, 0.005, 0.01, 0.025, 0.05, 0.1]
+    "vrf_verification_seconds", "Time to verify VRF proof", buckets=[0.001, 0.005, 0.01, 0.025, 0.05, 0.1]
 )
 
 
 class VRFSecurityLevel(Enum):
     """VRF security levels."""
 
-    LEVEL_128 = 128    # 128-bit security
-    LEVEL_192 = 192    # 192-bit security
-    LEVEL_256 = 256    # 256-bit security
+    LEVEL_128 = 128  # 128-bit security
+    LEVEL_192 = 192  # 192-bit security
+    LEVEL_256 = 256  # 256-bit security
 
 
 @dataclass
@@ -57,25 +51,25 @@ class VRFKeyPair:
     public_key: bytes
     private_key: bytes
     security_level: VRFSecurityLevel
-    created_at: float = field(default_factory=lambda: __import__('time').time())
+    created_at: float = field(default_factory=lambda: __import__("time").time())
 
 
 @dataclass
 class VRFOutput:
     """VRF output with proof."""
 
-    output: bytes       # The random output (hash)
-    proof: bytes        # Proof of correct evaluation
-    input_data: bytes   # Original input (alpha)
+    output: bytes  # The random output (hash)
+    proof: bytes  # Proof of correct evaluation
+    input_data: bytes  # Original input (alpha)
 
 
 @dataclass
 class VRFProof:
     """VRF proof components."""
 
-    gamma: bytes        # VRF output point
-    c: bytes           # Challenge
-    s: bytes           # Response
+    gamma: bytes  # VRF output point
+    c: bytes  # Challenge
+    s: bytes  # Response
 
 
 class VRFEngine:
@@ -157,11 +151,12 @@ class VRFEngine:
         Returns (is_valid, output) where output is the verified beta.
         """
         import time
+
         start = time.time()
 
         proof = vrf_output.proof
         if len(proof) < 96:  # gamma + c + s
-            return False, b''
+            return False, b""
 
         gamma = proof[:32]
         c = proof[32:64]
@@ -171,14 +166,14 @@ class VRFEngine:
         expected_c = hashlib.sha3_256(b"VRF_CHALLENGE" + gamma + alpha).digest()
         if not secrets.compare_digest(c, expected_c):
             VRF_EVALUATIONS.labels(operation="verify_fail").inc()
-            return False, b''
+            return False, b""
 
         # Compute expected output
         expected_beta = hashlib.sha3_256(b"VRF_OUTPUT" + gamma).digest()
 
         if not secrets.compare_digest(vrf_output.output, expected_beta):
             VRF_EVALUATIONS.labels(operation="verify_fail").inc()
-            return False, b''
+            return False, b""
 
         elapsed = time.time() - start
         VRF_VERIFICATION_TIME.observe(elapsed)
@@ -223,9 +218,7 @@ class DistributedVRF:
         # Party shares
         self._shares: Dict[int, bytes] = {}
 
-        logger.info(
-            f"Distributed VRF initialized: {threshold}-of-{num_parties}"
-        )
+        logger.info(f"Distributed VRF initialized: {threshold}-of-{num_parties}")
 
     async def setup(self) -> Tuple[bytes, Dict[int, bytes]]:
         """
@@ -238,10 +231,7 @@ class DistributedVRF:
 
         # Generate shares using Shamir's secret sharing (simplified)
         shares = {}
-        coefficients = [master_secret] + [
-            secrets.token_bytes(32)
-            for _ in range(self.threshold - 1)
-        ]
+        coefficients = [master_secret] + [secrets.token_bytes(32) for _ in range(self.threshold - 1)]
 
         for party_id in range(1, self.num_parties + 1):
             share = self._evaluate_polynomial(coefficients, party_id)
@@ -259,13 +249,13 @@ class DistributedVRF:
         x: int,
     ) -> bytes:
         """Evaluate polynomial at point x."""
-        result = int.from_bytes(coefficients[0], 'big')
+        result = int.from_bytes(coefficients[0], "big")
 
         for i, coef in enumerate(coefficients[1:], 1):
-            coef_int = int.from_bytes(coef, 'big')
-            result = (result + coef_int * (x ** i)) % (2 ** 256)
+            coef_int = int.from_bytes(coef, "big")
+            result = (result + coef_int * (x**i)) % (2**256)
 
-        return result.to_bytes(32, 'big')
+        return result.to_bytes(32, "big")
 
     async def partial_evaluate(
         self,
@@ -292,22 +282,18 @@ class DistributedVRF:
         Requires at least threshold partials.
         """
         if len(partials) < self.threshold:
-            raise ValueError(
-                f"Need at least {self.threshold} partials, got {len(partials)}"
-            )
+            raise ValueError(f"Need at least {self.threshold} partials, got {len(partials)}")
 
         # Combine using Lagrange interpolation (simplified)
-        combined = b'\x00' * 32
+        combined = b"\x00" * 32
         party_ids = list(partials.keys())
 
-        for party_id in party_ids[:self.threshold]:
+        for party_id in party_ids[: self.threshold]:
             partial = partials[party_id]
             lambda_i = self._lagrange_coefficient(party_id, party_ids)
 
             # XOR combine (simplified)
-            partial_weighted = bytes(
-                b ^ (lambda_i % 256) for b in partial
-            )
+            partial_weighted = bytes(b ^ (lambda_i % 256) for b in partial)
             combined = bytes(a ^ b for a, b in zip(combined, partial_weighted))
 
         # Generate proof
@@ -332,9 +318,9 @@ class DistributedVRF:
         for j in party_ids:
             if j != i:
                 numerator *= j
-                denominator *= (j - i)
+                denominator *= j - i
 
-        return (numerator // denominator) % (2 ** 32)
+        return (numerator // denominator) % (2**32)
 
 
 class RandomBeacon:
@@ -373,9 +359,9 @@ class RandomBeacon:
         if self._history:
             previous_output = self._history[-1][1]
         else:
-            previous_output = b'\x00' * 32
+            previous_output = b"\x00" * 32
 
-        alpha = round_number.to_bytes(8, 'big') + previous_output
+        alpha = round_number.to_bytes(8, "big") + previous_output
 
         result = await self.vrf.evaluate(self.keypair.private_key, alpha)
 
@@ -392,10 +378,10 @@ class RandomBeacon:
         round_number: int,
         output: bytes,
         proof: bytes,
-        previous_output: bytes = b'\x00' * 32,
+        previous_output: bytes = b"\x00" * 32,
     ) -> bool:
         """Verify randomness for a specific round."""
-        alpha = round_number.to_bytes(8, 'big') + previous_output
+        alpha = round_number.to_bytes(8, "big") + previous_output
 
         vrf_output = VRFOutput(
             output=output,
@@ -440,10 +426,7 @@ class LeaderElection:
         self.total_stake = total_stake
         self.my_stake = my_stake
 
-        logger.info(
-            f"Leader election initialized: {participant_id} "
-            f"stake={my_stake}/{total_stake}"
-        )
+        logger.info(f"Leader election initialized: {participant_id} " f"stake={my_stake}/{total_stake}")
 
     async def check_leader(
         self,
@@ -456,16 +439,12 @@ class LeaderElection:
         Returns (is_leader, vrf_output).
         """
         # Generate input
-        alpha = (
-            round_number.to_bytes(8, 'big') +
-            seed +
-            self.participant_id.encode()
-        )
+        alpha = round_number.to_bytes(8, "big") + seed + self.participant_id.encode()
 
         result = await self.vrf.evaluate(self.keypair.private_key, alpha)
 
         # Convert output to number in [0, 1)
-        output_int = int.from_bytes(result.output, 'big')
+        output_int = int.from_bytes(result.output, "big")
         max_int = 2 ** (len(result.output) * 8)
         output_fraction = output_int / max_int
 
@@ -486,11 +465,7 @@ class LeaderElection:
     ) -> bool:
         """Verify another participant's leader claim."""
         # Reconstruct input
-        alpha = (
-            round_number.to_bytes(8, 'big') +
-            seed +
-            claimer_id.encode()
-        )
+        alpha = round_number.to_bytes(8, "big") + seed + claimer_id.encode()
 
         # Verify VRF output
         valid, output = await self.vrf.verify(public_key, alpha, vrf_output)
@@ -498,7 +473,7 @@ class LeaderElection:
             return False
 
         # Check stake threshold
-        output_int = int.from_bytes(output, 'big')
+        output_int = int.from_bytes(output, "big")
         max_int = 2 ** (len(output) * 8)
         output_fraction = output_int / max_int
 

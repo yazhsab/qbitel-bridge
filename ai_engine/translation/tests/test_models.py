@@ -56,9 +56,7 @@ class TestProtocolSchema:
             }
         ]
 
-        schema = ProtocolSchema(
-            name="ValidProtocol", version="1.0", fields=valid_fields
-        )
+        schema = ProtocolSchema(name="ValidProtocol", version="1.0", fields=valid_fields)
 
         validation_errors = schema.validate()
         assert len(validation_errors) == 0
@@ -74,9 +72,7 @@ class TestProtocolSchema:
             }
         ]
 
-        schema = ProtocolSchema(
-            name="InvalidProtocol", version="1.0", fields=invalid_fields
-        )
+        schema = ProtocolSchema(name="InvalidProtocol", version="1.0", fields=invalid_fields)
 
         validation_errors = schema.validate()
         assert len(validation_errors) > 0
@@ -221,9 +217,7 @@ class TestAPISpecification:
             (APIStyle.GRPC, []),  # gRPC doesn't use HTTP paths
         ],
     )
-    def test_api_style_specific_generation(
-        self, sample_protocol_schema, api_style, expected_paths
-    ):
+    def test_api_style_specific_generation(self, sample_protocol_schema, api_style, expected_paths):
         """Test API generation for different styles."""
         spec = create_api_specification(
             protocol_schema=sample_protocol_schema,
@@ -315,9 +309,7 @@ class TestGeneratedSDK:
             language=language,
             version="1.0.0",
             source_files={f"client{ext}": "code" for ext in expected_extensions},
-            test_files={
-                f"test_client{ext}": "test code" for ext in expected_extensions
-            },
+            test_files={f"test_client{ext}": "test code" for ext in expected_extensions},
             config_files={"package.json": "config"},
         )
 
@@ -406,10 +398,7 @@ class TestTranslationResult:
         assert len(sample_translation_result.validation_errors) == 0
 
         # Result should be considered successful
-        is_successful = (
-            sample_translation_result.confidence > 0.7
-            and len(sample_translation_result.validation_errors) == 0
-        )
+        is_successful = sample_translation_result.confidence > 0.7 and len(sample_translation_result.validation_errors) == 0
         assert is_successful
 
 

@@ -146,9 +146,7 @@ class TestAuthenticationService:
     @pytest.mark.asyncio
     async def test_initialize_without_redis(self, auth_service):
         """Test service initialization without Redis."""
-        with patch(
-            "ai_engine.api.auth.redis.Redis", side_effect=Exception("Redis unavailable")
-        ):
+        with patch("ai_engine.api.auth.redis.Redis", side_effect=Exception("Redis unavailable")):
             await auth_service.initialize()
 
             assert auth_service.redis_client is None
@@ -186,9 +184,7 @@ class TestAuthenticationService:
         assert len(token) > 0
 
         # Decode and verify
-        payload = jwt.decode(
-            token, auth_service.secret_key, algorithms=[auth_service.algorithm]
-        )
+        payload = jwt.decode(token, auth_service.secret_key, algorithms=[auth_service.algorithm])
         assert payload["user_id"] == "user123"
         assert payload["type"] == "access"
 
@@ -201,9 +197,7 @@ class TestAuthenticationService:
         assert len(token) > 0
 
         # Decode and verify
-        payload = jwt.decode(
-            token, auth_service.secret_key, algorithms=[auth_service.algorithm]
-        )
+        payload = jwt.decode(token, auth_service.secret_key, algorithms=[auth_service.algorithm])
         assert payload["user_id"] == "user123"
         assert payload["type"] == "refresh"
 
@@ -225,9 +219,7 @@ class TestAuthenticationService:
         # Create token that expires immediately
         expire = datetime.utcnow() - timedelta(seconds=1)
         data.update({"exp": expire})
-        token = jwt.encode(
-            data, auth_service.secret_key, algorithm=auth_service.algorithm
-        )
+        token = jwt.encode(data, auth_service.secret_key, algorithm=auth_service.algorithm)
 
         with pytest.raises(AuthenticationError, match="Token has expired"):
             await auth_service.verify_token(token)
@@ -335,9 +327,7 @@ class TestAuthenticationService:
     async def test_authenticate_user_success(self, auth_service):
         """Test successful user authentication."""
         # This uses demo users in development mode
-        user = await auth_service.authenticate_user(
-            "admin", "DemoOnly_NotForProduction_123!"
-        )
+        user = await auth_service.authenticate_user("admin", "DemoOnly_NotForProduction_123!")
 
         assert user is not None
         assert user["username"] == "admin"
@@ -362,21 +352,15 @@ class TestAuthenticationService:
 
         service = AuthenticationService(config)
 
-        with pytest.raises(
-            AuthenticationError, match="Legacy authentication not available"
-        ):
+        with pytest.raises(AuthenticationError, match="Legacy authentication not available"):
             await service.authenticate_user("admin", "password")
 
     def test_prune_blacklist(self, auth_service):
         """Test blacklist pruning."""
         # Add expired token
-        auth_service._token_blacklist["expired_token"] = datetime.utcnow() - timedelta(
-            hours=1
-        )
+        auth_service._token_blacklist["expired_token"] = datetime.utcnow() - timedelta(hours=1)
         # Add valid token
-        auth_service._token_blacklist["valid_token"] = datetime.utcnow() + timedelta(
-            hours=1
-        )
+        auth_service._token_blacklist["valid_token"] = datetime.utcnow() + timedelta(hours=1)
 
         auth_service._prune_blacklist()
 
@@ -387,14 +371,10 @@ class TestAuthenticationService:
         """Test session pruning."""
         # Add expired session
         auth_service._session_store["expired_user"] = {}
-        auth_service._session_expiry["expired_user"] = datetime.utcnow() - timedelta(
-            hours=1
-        )
+        auth_service._session_expiry["expired_user"] = datetime.utcnow() - timedelta(hours=1)
         # Add valid session
         auth_service._session_store["valid_user"] = {}
-        auth_service._session_expiry["valid_user"] = datetime.utcnow() + timedelta(
-            hours=1
-        )
+        auth_service._session_expiry["valid_user"] = datetime.utcnow() + timedelta(hours=1)
 
         auth_service._prune_sessions()
 
@@ -442,9 +422,7 @@ class TestVerifyToken:
     @pytest.mark.asyncio
     async def test_verify_token_success(self):
         """Test successful token verification."""
-        credentials = HTTPAuthorizationCredentials(
-            scheme="Bearer", credentials="valid_token"
-        )
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials="valid_token")
 
         with patch("ai_engine.api.auth.get_auth_service") as mock_get_service:
             mock_service = AsyncMock()
@@ -464,9 +442,7 @@ class TestVerifyToken:
     async def test_verify_token_api_key(self):
         """Test verification with API key."""
         with patch("ai_engine.api.auth.get_api_key", return_value="test_api_key"):
-            credentials = HTTPAuthorizationCredentials(
-                scheme="Bearer", credentials="test_api_key"
-            )
+            credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials="test_api_key")
 
             result = await verify_token(credentials)
 
@@ -485,15 +461,11 @@ class TestVerifyToken:
     @pytest.mark.asyncio
     async def test_verify_token_authentication_error(self):
         """Test verification with authentication error."""
-        credentials = HTTPAuthorizationCredentials(
-            scheme="Bearer", credentials="invalid_token"
-        )
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials="invalid_token")
 
         with patch("ai_engine.api.auth.get_auth_service") as mock_get_service:
             mock_service = AsyncMock()
-            mock_service.verify_token = AsyncMock(
-                side_effect=AuthenticationError("Invalid token")
-            )
+            mock_service.verify_token = AsyncMock(side_effect=AuthenticationError("Invalid token"))
             mock_get_service.return_value = mock_service
 
             with pytest.raises(HTTPException) as exc_info:
@@ -787,9 +759,7 @@ class TestGetApiKey:
 
         auth_module._api_key = None
 
-        with patch(
-            "ai_engine.api.auth.initialize_auth", return_value="initialized_key"
-        ):
+        with patch("ai_engine.api.auth.initialize_auth", return_value="initialized_key"):
             api_key = get_api_key()
 
             assert api_key == "initialized_key"
@@ -858,9 +828,7 @@ class TestAuthenticationServiceEdgeCases:
     @pytest.mark.asyncio
     async def test_authenticate_user_analyst(self, auth_service):
         """Test authentication with analyst user."""
-        user = await auth_service.authenticate_user(
-            "analyst", "DemoOnly_NotForProduction_456!"
-        )
+        user = await auth_service.authenticate_user("analyst", "DemoOnly_NotForProduction_456!")
 
         assert user is not None
         assert user["username"] == "analyst"
@@ -999,9 +967,7 @@ class TestAuthenticationServiceEdgeCases:
 
         with patch("ai_engine.api.auth.get_auth_service") as mock_get_service:
             mock_service = AsyncMock()
-            mock_service.verify_token = AsyncMock(
-                side_effect=Exception("Unexpected error")
-            )
+            mock_service.verify_token = AsyncMock(side_effect=Exception("Unexpected error"))
             mock_get_service.return_value = mock_service
 
             with patch("ai_engine.api.auth.get_api_key", return_value="different_key"):
@@ -1016,9 +982,7 @@ class TestAuthenticationServiceEdgeCases:
         """Test token refresh with authentication error."""
         with patch("ai_engine.api.auth.get_auth_service") as mock_get_service:
             mock_service = AsyncMock()
-            mock_service.verify_token = AsyncMock(
-                side_effect=AuthenticationError("Token expired")
-            )
+            mock_service.verify_token = AsyncMock(side_effect=AuthenticationError("Token expired"))
             mock_get_service.return_value = mock_service
 
             with pytest.raises(HTTPException) as exc_info:

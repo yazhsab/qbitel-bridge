@@ -156,10 +156,12 @@ class Span:
         attributes: Optional[Dict[str, Any]] = None,
     ) -> "Span":
         """Add an event to the span."""
-        self.events.append(SpanEvent(
-            name=name,
-            attributes=attributes or {},
-        ))
+        self.events.append(
+            SpanEvent(
+                name=name,
+                attributes=attributes or {},
+            )
+        )
         return self
 
     def add_link(
@@ -168,10 +170,12 @@ class Span:
         attributes: Optional[Dict[str, Any]] = None,
     ) -> "Span":
         """Add a link to another span."""
-        self.links.append(SpanLink(
-            context=context,
-            attributes=attributes or {},
-        ))
+        self.links.append(
+            SpanLink(
+                context=context,
+                attributes=attributes or {},
+            )
+        )
         return self
 
     def set_status(self, status: SpanStatus, message: str = "") -> "Span":
@@ -223,14 +227,8 @@ class Span:
             "status": self.status.value,
             "status_message": self.status_message,
             "attributes": self.attributes,
-            "events": [
-                {"name": e.name, "timestamp": e.timestamp, "attributes": e.attributes}
-                for e in self.events
-            ],
-            "links": [
-                {"context": l.context.to_dict(), "attributes": l.attributes}
-                for l in self.links
-            ],
+            "events": [{"name": e.name, "timestamp": e.timestamp, "attributes": e.attributes} for e in self.events],
+            "links": [{"context": l.context.to_dict(), "attributes": l.attributes} for l in self.links],
         }
 
     def __enter__(self) -> "Span":
@@ -335,8 +333,8 @@ class TracingProvider:
 
             # Trim old spans
             if len(self._spans) > self.max_spans:
-                old_spans = self._spans[:-self.max_spans]
-                self._spans = self._spans[-self.max_spans:]
+                old_spans = self._spans[: -self.max_spans]
+                self._spans = self._spans[-self.max_spans :]
                 # Export old spans
                 self._export_spans(old_spans)
 
@@ -464,6 +462,7 @@ def trace_method(
     Returns:
         Decorated function
     """
+
     def decorator(func: F) -> F:
         span_name = name or func.__name__
 

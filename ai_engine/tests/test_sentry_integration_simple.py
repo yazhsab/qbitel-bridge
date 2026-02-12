@@ -200,9 +200,7 @@ class TestSentryErrorTracker:
         mock_sentry_sdk.set_tag.assert_called()
         mock_sentry_sdk.set_context.assert_called()
 
-    def test_capture_error_record_critical_severity(
-        self, sentry_tracker, mock_sentry_sdk
-    ):
+    def test_capture_error_record_critical_severity(self, sentry_tracker, mock_sentry_sdk):
         """Test capturing error record with critical severity."""
         error_record = ErrorRecord(
             error_id="test-error-critical",
@@ -321,17 +319,13 @@ class TestSentryErrorTracker:
     def test_sentry_integration_workflow(self, mock_sentry_sdk):
         """Test complete Sentry integration workflow."""
         # Initialize tracker
-        tracker = SentryErrorTracker(
-            dsn="https://test@sentry.io/123456", environment="testing"
-        )
+        tracker = SentryErrorTracker(dsn="https://test@sentry.io/123456", environment="testing")
 
         # Set user context
         tracker.set_user_context({"id": "user123", "username": "testuser"})
 
         # Add breadcrumb
-        tracker.add_breadcrumb(
-            {"message": "User performed action", "category": "user_action"}
-        )
+        tracker.add_breadcrumb({"message": "User performed action", "category": "user_action"})
 
         # Capture error
         error_record = ErrorRecord(
@@ -407,12 +401,8 @@ class TestSentryErrorTracker:
 
     def test_sentry_tracker_performance_tracking(self, sentry_tracker, mock_sentry_sdk):
         """Test Sentry performance tracking."""
-        with sentry_tracker.start_transaction(
-            "test_transaction", "test_operation"
-        ) as transaction:
-            with sentry_tracker.start_span(
-                transaction, "test_span", "test_operation"
-            ) as span:
+        with sentry_tracker.start_transaction("test_transaction", "test_operation") as transaction:
+            with sentry_tracker.start_span(transaction, "test_span", "test_operation") as span:
                 span.set_tag("test", "value")
                 span.set_data("test_data", "value")
 

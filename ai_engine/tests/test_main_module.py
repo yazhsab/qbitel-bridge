@@ -110,9 +110,7 @@ class TestMainModule:
     async def test_initialize_components(self, mock_config):
         """Test component initialization."""
         with (
-            patch(
-                "ai_engine.__main__.ProtocolDiscoveryOrchestrator"
-            ) as mock_orchestrator,
+            patch("ai_engine.__main__.ProtocolDiscoveryOrchestrator") as mock_orchestrator,
             patch("ai_engine.__main__.ComplianceService") as mock_compliance,
             patch("ai_engine.__main__.SecurityService") as mock_security,
             patch("ai_engine.__main__.ModelManager") as mock_models,
@@ -136,9 +134,7 @@ class TestMainModule:
     @pytest.mark.asyncio
     async def test_initialize_components_with_failure(self, mock_config):
         """Test component initialization with failure."""
-        with patch(
-            "ai_engine.__main__.ProtocolDiscoveryOrchestrator"
-        ) as mock_orchestrator:
+        with patch("ai_engine.__main__.ProtocolDiscoveryOrchestrator") as mock_orchestrator:
             mock_orchestrator.side_effect = Exception("Initialization failed")
 
             with pytest.raises(Exception):
@@ -151,12 +147,8 @@ class TestMainModule:
         mock_grpc_server = AsyncMock()
 
         with (
-            patch(
-                "ai_engine.__main__.create_rest_server", return_value=mock_rest_server
-            ),
-            patch(
-                "ai_engine.__main__.create_grpc_server", return_value=mock_grpc_server
-            ),
+            patch("ai_engine.__main__.create_rest_server", return_value=mock_rest_server),
+            patch("ai_engine.__main__.create_grpc_server", return_value=mock_grpc_server),
         ):
 
             servers = await __main__.start_servers(mock_config, {})
@@ -173,9 +165,7 @@ class TestMainModule:
         mock_rest_server.start.side_effect = Exception("Server start failed")
 
         with (
-            patch(
-                "ai_engine.__main__.create_rest_server", return_value=mock_rest_server
-            ),
+            patch("ai_engine.__main__.create_rest_server", return_value=mock_rest_server),
             patch("ai_engine.__main__.create_grpc_server", return_value=AsyncMock()),
         ):
 
@@ -208,15 +198,9 @@ class TestMainModule:
         """Test main function execution."""
         with (
             patch("ai_engine.__main__.setup_logging") as mock_setup_logging,
-            patch(
-                "ai_engine.__main__.load_configuration", return_value=mock_config
-            ) as mock_load_config,
-            patch(
-                "ai_engine.__main__.initialize_components", return_value={}
-            ) as mock_init_components,
-            patch(
-                "ai_engine.__main__.start_servers", return_value={}
-            ) as mock_start_servers,
+            patch("ai_engine.__main__.load_configuration", return_value=mock_config) as mock_load_config,
+            patch("ai_engine.__main__.initialize_components", return_value={}) as mock_init_components,
+            patch("ai_engine.__main__.start_servers", return_value={}) as mock_start_servers,
             patch("ai_engine.__main__.shutdown_servers") as mock_shutdown_servers,
             patch("ai_engine.__main__.signal") as mock_signal,
         ):
@@ -237,9 +221,7 @@ class TestMainModule:
         """Test main function with exception."""
         with (
             patch("ai_engine.__main__.setup_logging") as mock_setup_logging,
-            patch(
-                "ai_engine.__main__.load_configuration", return_value=mock_config
-            ) as mock_load_config,
+            patch("ai_engine.__main__.load_configuration", return_value=mock_config) as mock_load_config,
             patch(
                 "ai_engine.__main__.initialize_components",
                 side_effect=Exception("Test error"),
@@ -322,12 +304,8 @@ class TestMainModule:
         """Test system health check with critical resources."""
         with patch("ai_engine.__main__.psutil") as mock_psutil:
             mock_psutil.cpu_percent.return_value = 95.0  # Critical CPU usage
-            mock_psutil.virtual_memory.return_value = Mock(
-                percent=90.0
-            )  # Critical memory usage
-            mock_psutil.disk_usage.return_value = Mock(
-                percent=95.0
-            )  # Critical disk usage
+            mock_psutil.virtual_memory.return_value = Mock(percent=90.0)  # Critical memory usage
+            mock_psutil.disk_usage.return_value = Mock(percent=95.0)  # Critical disk usage
 
             result = await __main__.check_system_health(mock_config)
 
@@ -412,12 +390,8 @@ class TestMainModule:
             patch("ai_engine.__main__.argparse") as mock_argparse,
             patch("ai_engine.__main__.setup_logging") as mock_setup_logging,
             patch("ai_engine.__main__.load_configuration") as mock_load_config,
-            patch(
-                "ai_engine.__main__.initialize_components", return_value={}
-            ) as mock_init_components,
-            patch(
-                "ai_engine.__main__.start_servers", return_value={}
-            ) as mock_start_servers,
+            patch("ai_engine.__main__.initialize_components", return_value={}) as mock_init_components,
+            patch("ai_engine.__main__.start_servers", return_value={}) as mock_start_servers,
             patch("ai_engine.__main__.shutdown_servers") as mock_shutdown_servers,
             patch("ai_engine.__main__.signal") as mock_signal,
         ):
@@ -426,9 +400,7 @@ class TestMainModule:
             mock_args.config = "test_config.yaml"
             mock_args.verbose = False
             mock_args.daemon = False
-            mock_argparse.ArgumentParser.return_value.parse_args.return_value = (
-                mock_args
-            )
+            mock_argparse.ArgumentParser.return_value.parse_args.return_value = mock_args
 
             mock_signal.signal = Mock()
 
@@ -449,9 +421,7 @@ class TestMainModule:
 
     def test_error_handling_in_main(self):
         """Test error handling in main function."""
-        with patch(
-            "ai_engine.__main__.setup_logging", side_effect=Exception("Logging error")
-        ):
+        with patch("ai_engine.__main__.setup_logging", side_effect=Exception("Logging error")):
             with pytest.raises(Exception):
                 asyncio.run(__main__.main())
 
@@ -471,9 +441,7 @@ class TestMainModule:
             return decorator
 
         with (
-            patch(
-                "ai_engine.__main__.ProtocolDiscoveryOrchestrator"
-            ) as mock_orchestrator,
+            patch("ai_engine.__main__.ProtocolDiscoveryOrchestrator") as mock_orchestrator,
             patch("ai_engine.__main__.ComplianceService") as mock_compliance,
             patch("ai_engine.__main__.SecurityService") as mock_security,
             patch("ai_engine.__main__.ModelManager") as mock_models,

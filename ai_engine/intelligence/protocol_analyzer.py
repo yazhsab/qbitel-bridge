@@ -24,7 +24,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 import hashlib
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -172,8 +171,7 @@ class ProtocolAnalysisResult:
                 "encryption_detected": self.encryption_detected,
                 "signature_detected": self.signature_detected,
                 "characteristics": [
-                    {"name": s.name, "present": s.present, "strength": s.strength}
-                    for s in self.security_characteristics
+                    {"name": s.name, "present": s.present, "strength": s.strength} for s in self.security_characteristics
                 ],
             },
             "compliance": {
@@ -264,9 +262,7 @@ class ProtocolAnalyzer:
             self._map_compliance(result)
 
             # Calculate duration
-            result.analysis_duration_ms = (
-                datetime.utcnow() - start_time
-            ).total_seconds() * 1000
+            result.analysis_duration_ms = (datetime.utcnow() - start_time).total_seconds() * 1000
 
             return result
 
@@ -330,22 +326,26 @@ class ProtocolAnalyzer:
         for name, source_field in source_fields.items():
             if name in target_fields:
                 target_field = target_fields[name]
-                field_mappings.append({
-                    "source": source_field.name,
-                    "target": target_field.name,
-                    "type_compatible": source_field.data_type == target_field.data_type,
-                    "confidence": 1.0,
-                })
+                field_mappings.append(
+                    {
+                        "source": source_field.name,
+                        "target": target_field.name,
+                        "type_compatible": source_field.data_type == target_field.data_type,
+                        "confidence": 1.0,
+                    }
+                )
             else:
                 # Try fuzzy matching
                 best_match = self._find_best_field_match(source_field, target_fields.values())
                 if best_match:
-                    field_mappings.append({
-                        "source": source_field.name,
-                        "target": best_match[0].name,
-                        "type_compatible": source_field.data_type == best_match[0].data_type,
-                        "confidence": best_match[1],
-                    })
+                    field_mappings.append(
+                        {
+                            "source": source_field.name,
+                            "target": best_match[0].name,
+                            "type_compatible": source_field.data_type == best_match[0].data_type,
+                            "confidence": best_match[1],
+                        }
+                    )
                 else:
                     unmapped_source.append(source_field.name)
 
@@ -376,9 +376,7 @@ class ProtocolAnalyzer:
                 "source_pqc_ready": source.pqc_ready,
                 "target_pqc_ready": target.pqc_ready,
             },
-            "migration_complexity": self._calculate_migration_complexity(
-                field_mappings, unmapped_source, unmapped_target
-            ),
+            "migration_complexity": self._calculate_migration_complexity(field_mappings, unmapped_source, unmapped_target),
         }
 
     # =========================================================================
@@ -499,12 +497,14 @@ class ProtocolAnalyzer:
                 if "pain" in ns:
                     result.capabilities.add(ProtocolCapability.PAYMENT_INITIATION)
                     if "001" in ns:
-                        result.messages.append(ProtocolMessage(
-                            name="CustomerCreditTransferInitiation",
-                            message_type="pain.001",
-                            protocol=ProtocolType.ISO20022,
-                            capabilities=[ProtocolCapability.PAYMENT_INITIATION],
-                        ))
+                        result.messages.append(
+                            ProtocolMessage(
+                                name="CustomerCreditTransferInitiation",
+                                message_type="pain.001",
+                                protocol=ProtocolType.ISO20022,
+                                capabilities=[ProtocolCapability.PAYMENT_INITIATION],
+                            )
+                        )
                 elif "pacs" in ns:
                     result.capabilities.add(ProtocolCapability.PAYMENT_CLEARING)
                 elif "camt" in ns:
@@ -523,7 +523,7 @@ class ProtocolAnalyzer:
     def _analyze_swift_mt(self, text: str, result: ProtocolAnalysisResult) -> None:
         """Analyze SWIFT MT message."""
         # Detect message type
-        mt_match = re.search(r'\{2:[IO](\d{3})', text)
+        mt_match = re.search(r"\{2:[IO](\d{3})", text)
         if mt_match:
             mt_type = mt_match.group(1)
             result.version = f"MT{mt_type}"
@@ -540,7 +540,7 @@ class ProtocolAnalyzer:
                 result.capabilities.add(cap)
 
         # Extract fields
-        field_pattern = re.compile(r':(\d{2}[A-Z]?):([^\n]+(?:\n(?!:)[^\n]+)*)')
+        field_pattern = re.compile(r":(\d{2}[A-Z]?):([^\n]+(?:\n(?!:)[^\n]+)*)")
         for match in field_pattern.finditer(text):
             tag = match.group(1)
             value = match.group(2).strip()
@@ -565,12 +565,12 @@ class ProtocolAnalyzer:
     def _analyze_fix(self, text: str, result: ProtocolAnalysisResult) -> None:
         """Analyze FIX protocol message."""
         # Detect FIX version
-        version_match = re.search(r'8=FIX\.(\d+\.\d+)', text)
+        version_match = re.search(r"8=FIX\.(\d+\.\d+)", text)
         if version_match:
             result.version = f"FIX.{version_match.group(1)}"
 
         # Detect message type
-        msg_type_match = re.search(r'35=([A-Z0-9]+)', text)
+        msg_type_match = re.search(r"35=([A-Z0-9]+)", text)
         if msg_type_match:
             msg_type = msg_type_match.group(1)
 
@@ -585,23 +585,27 @@ class ProtocolAnalyzer:
             if msg_type in msg_type_map:
                 name, capability = msg_type_map[msg_type]
                 result.capabilities.add(capability)
-                result.messages.append(ProtocolMessage(
-                    name=name,
-                    message_type=msg_type,
-                    protocol=ProtocolType.FIX,
-                    capabilities=[capability],
-                ))
+                result.messages.append(
+                    ProtocolMessage(
+                        name=name,
+                        message_type=msg_type,
+                        protocol=ProtocolType.FIX,
+                        capabilities=[capability],
+                    )
+                )
 
         # Extract FIX fields
         delimiter = "\x01" if "\x01" in text else "|"
         for field in text.split(delimiter):
             if "=" in field:
                 tag, value = field.split("=", 1)
-                result.fields.append(ProtocolField(
-                    name=f"Tag_{tag}",
-                    data_type="string",
-                    example=value[:30],
-                ))
+                result.fields.append(
+                    ProtocolField(
+                        name=f"Tag_{tag}",
+                        data_type="string",
+                        example=value[:30],
+                    )
+                )
 
         result.total_field_count = len(result.fields)
 
@@ -615,23 +619,29 @@ class ProtocolAnalyzer:
             if len(line) >= 94:
                 record_type = line[0]
                 if record_type == "1":
-                    result.messages.append(ProtocolMessage(
-                        name="FileHeaderRecord",
-                        message_type="1",
-                        protocol=ProtocolType.ACH_NACHA,
-                    ))
+                    result.messages.append(
+                        ProtocolMessage(
+                            name="FileHeaderRecord",
+                            message_type="1",
+                            protocol=ProtocolType.ACH_NACHA,
+                        )
+                    )
                 elif record_type == "5":
-                    result.messages.append(ProtocolMessage(
-                        name="BatchHeaderRecord",
-                        message_type="5",
-                        protocol=ProtocolType.ACH_NACHA,
-                    ))
+                    result.messages.append(
+                        ProtocolMessage(
+                            name="BatchHeaderRecord",
+                            message_type="5",
+                            protocol=ProtocolType.ACH_NACHA,
+                        )
+                    )
                 elif record_type == "6":
-                    result.messages.append(ProtocolMessage(
-                        name="EntryDetailRecord",
-                        message_type="6",
-                        protocol=ProtocolType.ACH_NACHA,
-                    ))
+                    result.messages.append(
+                        ProtocolMessage(
+                            name="EntryDetailRecord",
+                            message_type="6",
+                            protocol=ProtocolType.ACH_NACHA,
+                        )
+                    )
 
         result.total_field_count = len(lines) * 10  # Approximate
 
@@ -650,12 +660,14 @@ class ProtocolAnalyzer:
 
         for tag, (name, classification) in emv_tags.items():
             if tag in text:
-                result.fields.append(ProtocolField(
-                    name=name,
-                    data_type="hex",
-                    path=f"Tag_{tag}",
-                    security_classification=classification,
-                ))
+                result.fields.append(
+                    ProtocolField(
+                        name=name,
+                        data_type="hex",
+                        path=f"Tag_{tag}",
+                        security_classification=classification,
+                    )
+                )
 
         result.total_field_count = len(result.fields)
 
@@ -665,6 +677,7 @@ class ProtocolAnalyzer:
 
         try:
             import json
+
             data = json.loads(text)
 
             # Detect 3DS version
@@ -707,6 +720,7 @@ class ProtocolAnalyzer:
         # Try JSON
         try:
             import json
+
             data = json.loads(text)
             result.protocol_type = ProtocolType.JSON
             self._extract_json_fields(data, result, "$")
@@ -717,6 +731,7 @@ class ProtocolAnalyzer:
         # Try XML
         try:
             import xml.etree.ElementTree as ET
+
             root = ET.fromstring(text)
             result.protocol_type = ProtocolType.XML
             self._extract_xml_fields(root, result, "")
@@ -745,11 +760,13 @@ class ProtocolAnalyzer:
         for pattern, name in encryption_patterns:
             if pattern.lower() in text.lower():
                 result.encryption_detected = True
-                result.security_characteristics.append(SecurityCharacteristic(
-                    name=name,
-                    present=True,
-                    strength="moderate" if "AES" in pattern else "weak",
-                ))
+                result.security_characteristics.append(
+                    SecurityCharacteristic(
+                        name=name,
+                        present=True,
+                        strength="moderate" if "AES" in pattern else "weak",
+                    )
+                )
 
         # Check for signature indicators
         signature_patterns = [
@@ -763,23 +780,27 @@ class ProtocolAnalyzer:
         for pattern, name in signature_patterns:
             if pattern.lower() in text.lower():
                 result.signature_detected = True
-                result.security_characteristics.append(SecurityCharacteristic(
-                    name=name,
-                    present=True,
-                    strength="strong" if "SHA" in pattern else "moderate",
-                ))
+                result.security_characteristics.append(
+                    SecurityCharacteristic(
+                        name=name,
+                        present=True,
+                        strength="strong" if "SHA" in pattern else "moderate",
+                    )
+                )
 
         # Check PQC readiness
         pqc_patterns = ["ML-KEM", "ML-DSA", "Kyber", "Dilithium", "post-quantum"]
         result.pqc_ready = any(p.lower() in text.lower() for p in pqc_patterns)
 
         if not result.pqc_ready:
-            result.security_characteristics.append(SecurityCharacteristic(
-                name="Post-Quantum Cryptography",
-                present=False,
-                strength="none",
-                recommendation="Consider PQC migration for quantum resistance",
-            ))
+            result.security_characteristics.append(
+                SecurityCharacteristic(
+                    name="Post-Quantum Cryptography",
+                    present=False,
+                    strength="none",
+                    recommendation="Consider PQC migration for quantum resistance",
+                )
+            )
 
         # Identify PCI-relevant fields
         for field in result.fields:
@@ -836,26 +857,30 @@ class ProtocolAnalyzer:
         path: str,
     ) -> None:
         """Recursively extract fields from XML element."""
-        current_path = f"{path}/{element.tag.split('}')[-1]}" if path else element.tag.split('}')[-1]
+        current_path = f"{path}/{element.tag.split('}')[-1]}" if path else element.tag.split("}")[-1]
 
         # Extract text content
         if element.text and element.text.strip():
-            result.fields.append(ProtocolField(
-                name=element.tag.split('}')[-1],
-                data_type="string",
-                path=current_path,
-                example=element.text.strip()[:30],
-            ))
+            result.fields.append(
+                ProtocolField(
+                    name=element.tag.split("}")[-1],
+                    data_type="string",
+                    path=current_path,
+                    example=element.text.strip()[:30],
+                )
+            )
             result.total_field_count += 1
 
         # Extract attributes
         for attr_name, attr_value in element.attrib.items():
-            result.fields.append(ProtocolField(
-                name=f"{element.tag.split('}')[-1]}@{attr_name}",
-                data_type="attribute",
-                path=f"{current_path}/@{attr_name}",
-                example=attr_value[:30],
-            ))
+            result.fields.append(
+                ProtocolField(
+                    name=f"{element.tag.split('}')[-1]}@{attr_name}",
+                    data_type="attribute",
+                    path=f"{current_path}/@{attr_name}",
+                    example=attr_value[:30],
+                )
+            )
             result.total_field_count += 1
 
         # Process children
@@ -877,12 +902,14 @@ class ProtocolAnalyzer:
             if data:
                 self._extract_json_fields(data[0], result, f"{path}[0]")
         else:
-            result.fields.append(ProtocolField(
-                name=path.split(".")[-1],
-                data_type=type(data).__name__,
-                path=path,
-                example=str(data)[:30] if data else None,
-            ))
+            result.fields.append(
+                ProtocolField(
+                    name=path.split(".")[-1],
+                    data_type=type(data).__name__,
+                    path=path,
+                    example=str(data)[:30] if data else None,
+                )
+            )
             result.total_field_count += 1
 
     def _detect_fixed_fields(self, line: str, result: ProtocolAnalysisResult) -> int:
@@ -932,8 +959,8 @@ class ProtocolAnalyzer:
     def _similarity_score(self, s1: str, s2: str) -> float:
         """Calculate similarity score between two strings."""
         # Simple token overlap
-        tokens1 = set(re.split(r'[_\s\-]', s1.lower()))
-        tokens2 = set(re.split(r'[_\s\-]', s2.lower()))
+        tokens1 = set(re.split(r"[_\s\-]", s1.lower()))
+        tokens2 = set(re.split(r"[_\s\-]", s2.lower()))
 
         if not tokens1 or not tokens2:
             return 0.0
@@ -976,11 +1003,19 @@ class ProtocolAnalyzer:
     def _build_pci_patterns(self) -> List[str]:
         """Build PCI-relevant field patterns."""
         return [
-            "pan", "primaryaccountnumber", "cardnumber",
-            "cvv", "cvc", "cvv2", "cvc2",
-            "pin", "pinblock",
-            "track1", "track2",
-            "expiry", "expirationdate",
+            "pan",
+            "primaryaccountnumber",
+            "cardnumber",
+            "cvv",
+            "cvc",
+            "cvv2",
+            "cvc2",
+            "pin",
+            "pinblock",
+            "track1",
+            "track2",
+            "expiry",
+            "expirationdate",
         ]
 
     def _analyze_xsd_schema(self, text: str) -> ProtocolAnalysisResult:
@@ -993,10 +1028,12 @@ class ProtocolAnalyzer:
         # Extract element definitions
         element_pattern = re.compile(r'<xs:element\s+name="([^"]+)"')
         for match in element_pattern.finditer(text):
-            result.fields.append(ProtocolField(
-                name=match.group(1),
-                data_type="element",
-            ))
+            result.fields.append(
+                ProtocolField(
+                    name=match.group(1),
+                    data_type="element",
+                )
+            )
 
         result.total_field_count = len(result.fields)
         return result
@@ -1027,12 +1064,14 @@ class ProtocolAnalyzer:
         """Extract fields from JSON Schema."""
         if "properties" in schema:
             for name, prop in schema["properties"].items():
-                result.fields.append(ProtocolField(
-                    name=name,
-                    data_type=prop.get("type", "any"),
-                    path=f"{path}.{name}",
-                    required=name in schema.get("required", []),
-                ))
+                result.fields.append(
+                    ProtocolField(
+                        name=name,
+                        data_type=prop.get("type", "any"),
+                        path=f"{path}.{name}",
+                        required=name in schema.get("required", []),
+                    )
+                )
                 result.total_field_count += 1
 
                 # Recurse for nested objects
@@ -1047,21 +1086,20 @@ class ProtocolAnalyzer:
         )
 
         # Parse PIC clauses
-        pic_pattern = re.compile(
-            r'(\d{2})\s+(\S+)\s+PIC\s+([X9\(\)V\-]+)',
-            re.IGNORECASE
-        )
+        pic_pattern = re.compile(r"(\d{2})\s+(\S+)\s+PIC\s+([X9\(\)V\-]+)", re.IGNORECASE)
 
         for match in pic_pattern.finditer(text):
             level = match.group(1)
             name = match.group(2)
             pic = match.group(3)
 
-            result.fields.append(ProtocolField(
-                name=name,
-                data_type=self._pic_to_type(pic),
-                pattern=pic,
-            ))
+            result.fields.append(
+                ProtocolField(
+                    name=name,
+                    data_type=self._pic_to_type(pic),
+                    pattern=pic,
+                )
+            )
 
         result.total_field_count = len(result.fields)
         return result

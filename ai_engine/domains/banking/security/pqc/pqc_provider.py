@@ -163,10 +163,7 @@ class PQCProvider:
             Tuple of (key_id, key_pair)
         """
         if algorithm is None:
-            algorithm = (
-                self.config.hybrid_kem if self.config.prefer_hybrid
-                else self.config.default_kem
-            )
+            algorithm = self.config.hybrid_kem if self.config.prefer_hybrid else self.config.default_kem
 
         if not algorithm.is_kem:
             raise ValueError(f"Algorithm {algorithm} is not a KEM")
@@ -180,10 +177,13 @@ class PQCProvider:
         # Generate key ID
         if key_id is None:
             import uuid
+
             key_id = str(uuid.uuid4())
 
         # Create key info
-        pk_bytes = keypair.public_key.to_bytes() if hasattr(keypair.public_key, 'to_bytes') else bytes(keypair.public_key.key_bytes)
+        pk_bytes = (
+            keypair.public_key.to_bytes() if hasattr(keypair.public_key, "to_bytes") else bytes(keypair.public_key.key_bytes)
+        )
         key_info = PQCKeyInfo(
             key_id=key_id,
             algorithm=algorithm,
@@ -213,10 +213,7 @@ class PQCProvider:
             Tuple of (key_id, key_pair)
         """
         if algorithm is None:
-            algorithm = (
-                self.config.hybrid_signature if self.config.prefer_hybrid
-                else self.config.default_signature
-            )
+            algorithm = self.config.hybrid_signature if self.config.prefer_hybrid else self.config.default_signature
 
         if not algorithm.is_signature:
             raise ValueError(f"Algorithm {algorithm} is not a signature algorithm")
@@ -230,10 +227,13 @@ class PQCProvider:
         # Generate key ID
         if key_id is None:
             import uuid
+
             key_id = str(uuid.uuid4())
 
         # Create key info
-        pk_bytes = keypair.public_key.to_bytes() if hasattr(keypair.public_key, 'to_bytes') else bytes(keypair.public_key.key_bytes)
+        pk_bytes = (
+            keypair.public_key.to_bytes() if hasattr(keypair.public_key, "to_bytes") else bytes(keypair.public_key.key_bytes)
+        )
         key_info = PQCKeyInfo(
             key_id=key_id,
             algorithm=algorithm,
@@ -356,13 +356,9 @@ class PQCProvider:
             algorithm = self._infer_sig_algorithm(public_key)
 
         if algorithm.is_hybrid:
-            result = self._get_hybrid_signer(algorithm).verify(
-                message, signature, public_key, context
-            )
+            result = self._get_hybrid_signer(algorithm).verify(message, signature, public_key, context)
         else:
-            result = self._get_dsa(algorithm).verify(
-                message, signature, public_key, context
-            )
+            result = self._get_dsa(algorithm).verify(message, signature, public_key, context)
 
         self._log_operation("verify", algorithm, success=result)
         return result
@@ -447,8 +443,7 @@ class PQCProvider:
         target_pqc = classical_to_pqc.get(current_algorithm)
         if not target_pqc:
             target_pqc = self.get_recommended_algorithm(
-                "kem" if "RSA" in current_algorithm or "ECDH" in current_algorithm else "signature",
-                target_security_level
+                "kem" if "RSA" in current_algorithm or "ECDH" in current_algorithm else "signature", target_security_level
             )
 
         # Get hybrid intermediate
@@ -487,10 +482,7 @@ class PQCProvider:
         return {
             "total_keys": len(self._keys),
             "operations_logged": len(self._operation_log),
-            "algorithms_used": list(set(
-                op.get("algorithm", "unknown")
-                for op in self._operation_log
-            )),
+            "algorithms_used": list(set(op.get("algorithm", "unknown") for op in self._operation_log)),
             "hybrid_preference": self.config.prefer_hybrid,
             "default_kem": self.config.default_kem.algorithm_name,
             "default_signature": self.config.default_signature.algorithm_name,
@@ -534,13 +526,13 @@ class PQCProvider:
 
     def _infer_kem_algorithm(self, key: Any) -> PQCAlgorithm:
         """Infer KEM algorithm from key type."""
-        if isinstance(key, HybridKeyPair) or hasattr(key, 'mode'):
+        if isinstance(key, HybridKeyPair) or hasattr(key, "mode"):
             return self.config.hybrid_kem
         return self.config.default_kem
 
     def _infer_sig_algorithm(self, key: Any) -> PQCAlgorithm:
         """Infer signature algorithm from key type."""
-        if isinstance(key, HybridKeyPair) or hasattr(key, 'mode'):
+        if isinstance(key, HybridKeyPair) or hasattr(key, "mode"):
             return self.config.hybrid_signature
         return self.config.default_signature
 
@@ -553,10 +545,12 @@ class PQCProvider:
     ) -> None:
         """Log operation for audit."""
         if self.config.log_all_operations:
-            self._operation_log.append({
-                "operation": operation,
-                "algorithm": algorithm.algorithm_name,
-                "timestamp": datetime.utcnow().isoformat(),
-                "key_id": key_id,
-                **kwargs,
-            })
+            self._operation_log.append(
+                {
+                    "operation": operation,
+                    "algorithm": algorithm.algorithm_name,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "key_id": key_id,
+                    **kwargs,
+                }
+            )

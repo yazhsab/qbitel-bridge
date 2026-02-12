@@ -80,16 +80,12 @@ class ProtocolDiscoveryRequest(BaseModel):
     target_languages: List[CodeLanguage] = Field(
         default=[CodeLanguage.PYTHON], description="Target languages for SDK generation"
     )
-    security_level: SecurityLevel = Field(
-        SecurityLevel.AUTHENTICATED, description="Security level for generated API"
-    )
+    security_level: SecurityLevel = Field(SecurityLevel.AUTHENTICATED, description="Security level for generated API")
     generate_documentation: bool = Field(True, description="Generate documentation")
     generate_tests: bool = Field(True, description="Generate test files")
     generate_examples: bool = Field(True, description="Generate examples")
     api_base_path: str = Field("/api/v1", description="Base path for generated API")
-    user_context: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional user context"
-    )
+    user_context: Dict[str, Any] = Field(default_factory=dict, description="Additional user context")
 
     @validator("messages")
     def validate_messages(cls, v):
@@ -116,32 +112,20 @@ class ProtocolDiscoveryResponse(BaseModel):
 class APIGenerationRequest(BaseModel):
     """Request model for API generation from protocol schema."""
 
-    protocol_schema: Dict[str, Any] = Field(
-        ..., description="Protocol schema definition"
-    )
+    protocol_schema: Dict[str, Any] = Field(..., description="Protocol schema definition")
     api_style: APIStyle = Field(APIStyle.REST, description="API style")
-    security_level: SecurityLevel = Field(
-        SecurityLevel.AUTHENTICATED, description="Security level"
-    )
+    security_level: SecurityLevel = Field(SecurityLevel.AUTHENTICATED, description="Security level")
     base_path: str = Field("/api/v1", description="Base path for API")
-    include_examples: bool = Field(
-        True, description="Include examples in specification"
-    )
-    include_documentation: bool = Field(
-        True, description="Include comprehensive documentation"
-    )
-    custom_endpoints: List[Dict[str, Any]] = Field(
-        default=[], description="Custom endpoint definitions"
-    )
+    include_examples: bool = Field(True, description="Include examples in specification")
+    include_documentation: bool = Field(True, description="Include comprehensive documentation")
+    custom_endpoints: List[Dict[str, Any]] = Field(default=[], description="Custom endpoint definitions")
 
 
 class SDKGenerationRequest(BaseModel):
     """Request model for SDK generation."""
 
     api_specification: Dict[str, Any] = Field(..., description="OpenAPI specification")
-    target_languages: List[CodeLanguage] = Field(
-        ..., description="Target programming languages"
-    )
+    target_languages: List[CodeLanguage] = Field(..., description="Target programming languages")
     package_name: str = Field(..., description="SDK package name")
     version: str = Field("1.0.0", description="SDK version")
     author: Optional[str] = Field(None, description="SDK author")
@@ -160,9 +144,7 @@ class ProtocolTranslationRequest(BaseModel):
     translation_mode: str = Field("hybrid", description="Translation mode")
     quality_level: str = Field("balanced", description="Quality level")
     preserve_metadata: bool = Field(True, description="Preserve metadata")
-    custom_rules: List[Dict[str, Any]] = Field(
-        default=[], description="Custom translation rules"
-    )
+    custom_rules: List[Dict[str, Any]] = Field(default=[], description="Custom translation rules")
 
 
 class StreamingConnectionRequest(BaseModel):
@@ -177,9 +159,7 @@ class StreamingConnectionRequest(BaseModel):
 class BatchTranslationRequest(BaseModel):
     """Request model for batch translation."""
 
-    translations: List[ProtocolTranslationRequest] = Field(
-        ..., description="Batch of translations"
-    )
+    translations: List[ProtocolTranslationRequest] = Field(..., description="Batch of translations")
     parallel_processing: bool = Field(True, description="Enable parallel processing")
     fail_fast: bool = Field(False, description="Stop on first failure")
 
@@ -205,9 +185,7 @@ async def initialize_services():
         llm_service = get_llm_service()
 
         # Initialize services
-        discovery_orchestrator = EnhancedProtocolDiscoveryOrchestrator(
-            config, llm_service
-        )
+        discovery_orchestrator = EnhancedProtocolDiscoveryOrchestrator(config, llm_service)
         await discovery_orchestrator.initialize()
 
         api_generator = APIGenerator(config, llm_service)
@@ -247,9 +225,7 @@ async def discover_protocol_and_generate_api(
     request_id = str(uuid.uuid4())
 
     try:
-        API_REQUEST_COUNTER.labels(
-            endpoint="discover", method="POST", status="started"
-        ).inc()
+        API_REQUEST_COUNTER.labels(endpoint="discover", method="POST", status="started").inc()
 
         # Decode base64 messages
         decoded_messages = []
@@ -260,9 +236,7 @@ async def discover_protocol_and_generate_api(
                 decoded_msg = base64.b64decode(msg)
                 decoded_messages.append(decoded_msg)
             except Exception as e:
-                raise HTTPException(
-                    status_code=400, detail=f"Invalid base64 message: {e}"
-                )
+                raise HTTPException(status_code=400, detail=f"Invalid base64 message: {e}")
 
         # Create discovery request
         discovery_request = APIGenerationRequest(
@@ -279,9 +253,7 @@ async def discover_protocol_and_generate_api(
         )
 
         # Perform discovery and API generation
-        discovery_result = await discovery_orchestrator.discover_and_generate_api(
-            discovery_request
-        )
+        discovery_result = await discovery_orchestrator.discover_and_generate_api(discovery_request)
 
         # Generate SDKs if API was successfully generated
         generated_sdks = []
@@ -312,9 +284,7 @@ async def discover_protocol_and_generate_api(
                             "language": language.value,
                             "name": sdk.name,
                             "version": sdk.version,
-                            "files_count": len(sdk.source_files)
-                            + len(sdk.test_files)
-                            + len(sdk.config_files),
+                            "files_count": len(sdk.source_files) + len(sdk.test_files) + len(sdk.config_files),
                             "sdk_id": sdk.sdk_id,
                         }
                     )
@@ -328,54 +298,36 @@ async def discover_protocol_and_generate_api(
             protocol_type=discovery_result.protocol_type,
             confidence=discovery_result.confidence,
             api_specification=(
-                discovery_result.api_specification.to_openapi_dict()
-                if discovery_result.api_specification
-                else None
+                discovery_result.api_specification.to_openapi_dict() if discovery_result.api_specification else None
             ),
             generated_sdks=generated_sdks,
             processing_time=time.time() - start_time,
-            status=(
-                GenerationStatus.COMPLETED
-                if discovery_result.confidence > 0.6
-                else GenerationStatus.FAILED
-            ),
+            status=(GenerationStatus.COMPLETED if discovery_result.confidence > 0.6 else GenerationStatus.FAILED),
             recommendations=discovery_result.recommendations,
             warnings=[],
             natural_language_summary=discovery_result.natural_language_summary,
         )
 
-        API_REQUEST_COUNTER.labels(
-            endpoint="discover", method="POST", status="success"
-        ).inc()
-        API_REQUEST_DURATION.labels(endpoint="discover").observe(
-            response.processing_time
-        )
+        API_REQUEST_COUNTER.labels(endpoint="discover", method="POST", status="success").inc()
+        API_REQUEST_DURATION.labels(endpoint="discover").observe(response.processing_time)
 
-        logger.info(
-            f"Discovery completed: {discovery_result.protocol_type} (confidence: {discovery_result.confidence:.2f})"
-        )
+        logger.info(f"Discovery completed: {discovery_result.protocol_type} (confidence: {discovery_result.confidence:.2f})")
 
         return response
 
     except Exception as e:
-        API_REQUEST_COUNTER.labels(
-            endpoint="discover", method="POST", status="error"
-        ).inc()
+        API_REQUEST_COUNTER.labels(endpoint="discover", method="POST", status="error").inc()
         logger.error(f"Protocol discovery failed: {e}")
         raise HTTPException(status_code=500, detail=f"Discovery failed: {str(e)}")
 
 
 @router.post("/generate-api", response_model=Dict[str, Any])
-async def generate_api_specification(
-    request: APIGenerationRequest, current_user=Depends(get_current_user)
-):
+async def generate_api_specification(request: APIGenerationRequest, current_user=Depends(get_current_user)):
     """Generate API specification from protocol schema."""
     start_time = time.time()
 
     try:
-        API_REQUEST_COUNTER.labels(
-            endpoint="generate-api", method="POST", status="started"
-        ).inc()
+        API_REQUEST_COUNTER.labels(endpoint="generate-api", method="POST", status="started").inc()
 
         # Convert protocol schema
         protocol_schema = ProtocolSchema(**request.protocol_schema)
@@ -401,19 +353,13 @@ async def generate_api_specification(
             "spec_id": api_spec.spec_id,
         }
 
-        API_REQUEST_COUNTER.labels(
-            endpoint="generate-api", method="POST", status="success"
-        ).inc()
-        API_REQUEST_DURATION.labels(endpoint="generate-api").observe(
-            response["processing_time"]
-        )
+        API_REQUEST_COUNTER.labels(endpoint="generate-api", method="POST", status="success").inc()
+        API_REQUEST_DURATION.labels(endpoint="generate-api").observe(response["processing_time"])
 
         return response
 
     except Exception as e:
-        API_REQUEST_COUNTER.labels(
-            endpoint="generate-api", method="POST", status="error"
-        ).inc()
+        API_REQUEST_COUNTER.labels(endpoint="generate-api", method="POST", status="error").inc()
         logger.error(f"API generation failed: {e}")
         raise HTTPException(status_code=500, detail=f"API generation failed: {str(e)}")
 
@@ -422,16 +368,12 @@ async def generate_api_specification(
 
 
 @router.post("/generate-sdk")
-async def generate_sdk(
-    request: SDKGenerationRequest, current_user=Depends(get_current_user)
-):
+async def generate_sdk(request: SDKGenerationRequest, current_user=Depends(get_current_user)):
     """Generate SDK for specified languages from API specification."""
     start_time = time.time()
 
     try:
-        API_REQUEST_COUNTER.labels(
-            endpoint="generate-sdk", method="POST", status="started"
-        ).inc()
+        API_REQUEST_COUNTER.labels(endpoint="generate-sdk", method="POST", status="started").inc()
 
         # Convert API specification
         api_spec = APISpecification(**request.api_specification)
@@ -467,36 +409,26 @@ async def generate_sdk(
             "total_languages": len(generated_sdks),
         }
 
-        API_REQUEST_COUNTER.labels(
-            endpoint="generate-sdk", method="POST", status="success"
-        ).inc()
-        API_REQUEST_DURATION.labels(endpoint="generate-sdk").observe(
-            response["processing_time"]
-        )
+        API_REQUEST_COUNTER.labels(endpoint="generate-sdk", method="POST", status="success").inc()
+        API_REQUEST_DURATION.labels(endpoint="generate-sdk").observe(response["processing_time"])
 
         return response
 
     except Exception as e:
-        API_REQUEST_COUNTER.labels(
-            endpoint="generate-sdk", method="POST", status="error"
-        ).inc()
+        API_REQUEST_COUNTER.labels(endpoint="generate-sdk", method="POST", status="error").inc()
         logger.error(f"SDK generation failed: {e}")
         raise HTTPException(status_code=500, detail=f"SDK generation failed: {str(e)}")
 
 
 @router.get("/download-sdk/{sdk_id}")
-async def download_sdk(
-    sdk_id: str, format: str = "zip", current_user=Depends(get_current_user)
-):
+async def download_sdk(sdk_id: str, format: str = "zip", current_user=Depends(get_current_user)):
     """Download generated SDK as a zip file."""
     try:
         # This would retrieve the SDK from storage
         # For now, return a placeholder response
 
         if format not in ["zip", "tar.gz"]:
-            raise HTTPException(
-                status_code=400, detail="Unsupported format. Use 'zip' or 'tar.gz'"
-            )
+            raise HTTPException(status_code=400, detail="Unsupported format. Use 'zip' or 'tar.gz'")
 
         # Create temporary zip file
         temp_dir = tempfile.mkdtemp()
@@ -525,16 +457,12 @@ async def download_sdk(
 
 
 @router.post("/translate")
-async def translate_protocol(
-    request: ProtocolTranslationRequest, current_user=Depends(get_current_user)
-):
+async def translate_protocol(request: ProtocolTranslationRequest, current_user=Depends(get_current_user)):
     """Translate protocol data between different protocol formats."""
     start_time = time.time()
 
     try:
-        API_REQUEST_COUNTER.labels(
-            endpoint="translate", method="POST", status="started"
-        ).inc()
+        API_REQUEST_COUNTER.labels(endpoint="translate", method="POST", status="started").inc()
 
         # Decode protocol data
         import base64
@@ -567,19 +495,13 @@ async def translate_protocol(
             "validation_errors": result.validation_errors,
         }
 
-        API_REQUEST_COUNTER.labels(
-            endpoint="translate", method="POST", status="success"
-        ).inc()
-        API_REQUEST_DURATION.labels(endpoint="translate").observe(
-            response["processing_time"]
-        )
+        API_REQUEST_COUNTER.labels(endpoint="translate", method="POST", status="success").inc()
+        API_REQUEST_DURATION.labels(endpoint="translate").observe(response["processing_time"])
 
         return response
 
     except Exception as e:
-        API_REQUEST_COUNTER.labels(
-            endpoint="translate", method="POST", status="error"
-        ).inc()
+        API_REQUEST_COUNTER.labels(endpoint="translate", method="POST", status="error").inc()
         logger.error(f"Protocol translation failed: {e}")
         raise HTTPException(status_code=500, detail=f"Translation failed: {str(e)}")
 
@@ -595,9 +517,7 @@ async def batch_translate_protocols(
     job_id = str(uuid.uuid4())
 
     try:
-        API_REQUEST_COUNTER.labels(
-            endpoint="translate-batch", method="POST", status="started"
-        ).inc()
+        API_REQUEST_COUNTER.labels(endpoint="translate-batch", method="POST", status="started").inc()
 
         # Create translation contexts
         contexts = []
@@ -622,9 +542,7 @@ async def batch_translate_protocols(
         response = {
             "job_id": job_id,
             "total_translations": len(request.translations),
-            "successful_translations": len(
-                [r for r in results if not r.validation_errors]
-            ),
+            "successful_translations": len([r for r in results if not r.validation_errors]),
             "failed_translations": len([r for r in results if r.validation_errors]),
             "processing_time": time.time() - start_time,
             "results": [
@@ -640,32 +558,22 @@ async def batch_translate_protocols(
             ],
         }
 
-        API_REQUEST_COUNTER.labels(
-            endpoint="translate-batch", method="POST", status="success"
-        ).inc()
-        API_REQUEST_DURATION.labels(endpoint="translate-batch").observe(
-            response["processing_time"]
-        )
+        API_REQUEST_COUNTER.labels(endpoint="translate-batch", method="POST", status="success").inc()
+        API_REQUEST_DURATION.labels(endpoint="translate-batch").observe(response["processing_time"])
 
         return response
 
     except Exception as e:
-        API_REQUEST_COUNTER.labels(
-            endpoint="translate-batch", method="POST", status="error"
-        ).inc()
+        API_REQUEST_COUNTER.labels(endpoint="translate-batch", method="POST", status="error").inc()
         logger.error(f"Batch translation failed: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Batch translation failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Batch translation failed: {str(e)}")
 
 
 # Streaming Translation Endpoints
 
 
 @router.post("/streaming/create")
-async def create_streaming_connection(
-    request: StreamingConnectionRequest, current_user=Depends(get_current_user)
-):
+async def create_streaming_connection(request: StreamingConnectionRequest, current_user=Depends(get_current_user)):
     """Create a streaming translation connection."""
     try:
         from .protocol_bridge.protocol_bridge import QualityLevel
@@ -686,15 +594,11 @@ async def create_streaming_connection(
 
     except Exception as e:
         logger.error(f"Streaming connection creation failed: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Connection creation failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Connection creation failed: {str(e)}")
 
 
 @router.get("/streaming/{connection_id}/status")
-async def get_streaming_connection_status(
-    connection_id: str, current_user=Depends(get_current_user)
-):
+async def get_streaming_connection_status(connection_id: str, current_user=Depends(get_current_user)):
     """Get status of a streaming connection."""
     try:
         status = protocol_bridge.get_connection_status(connection_id)
@@ -710,9 +614,7 @@ async def get_streaming_connection_status(
 
 
 @router.delete("/streaming/{connection_id}")
-async def close_streaming_connection(
-    connection_id: str, current_user=Depends(get_current_user)
-):
+async def close_streaming_connection(connection_id: str, current_user=Depends(get_current_user)):
     """Close a streaming connection."""
     try:
         await protocol_bridge.close_streaming_connection(connection_id)
@@ -725,9 +627,7 @@ async def close_streaming_connection(
 
     except Exception as e:
         logger.error(f"Connection closure failed: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Connection closure failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Connection closure failed: {str(e)}")
 
 
 # Knowledge Base and RAG Endpoints
@@ -752,11 +652,7 @@ async def get_protocol_patterns(
             "patterns": [
                 {
                     "id": doc.id,
-                    "content": (
-                        doc.content[:500] + "..."
-                        if len(doc.content) > 500
-                        else doc.content
-                    ),
+                    "content": (doc.content[:500] + "..." if len(doc.content) > 500 else doc.content),
                     "metadata": doc.metadata,
                     "similarity": score,
                 }
@@ -805,14 +701,10 @@ async def get_code_templates(
 
 
 @router.get("/knowledge/best-practices")
-async def get_best_practices(
-    context: str = "general", limit: int = 5, current_user=Depends(get_current_user)
-):
+async def get_best_practices(context: str = "general", limit: int = 5, current_user=Depends(get_current_user)):
     """Get translation best practices."""
     try:
-        result = await rag_engine.get_translation_best_practices(
-            context=context, n_results=limit
-        )
+        result = await rag_engine.get_translation_best_practices(context=context, n_results=limit)
 
         return {
             "context": context,
@@ -830,9 +722,7 @@ async def get_best_practices(
 
     except Exception as e:
         logger.error(f"Best practices query failed: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Best practices query failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Best practices query failed: {str(e)}")
 
 
 # Status and Metrics Endpoints
@@ -853,9 +743,7 @@ async def get_translation_studio_status():
                 "rag_engine": rag_engine is not None,
             },
             "capabilities": {
-                "supported_languages": (
-                    [lang.value for lang in CodeLanguage] if code_generator else []
-                ),
+                "supported_languages": ([lang.value for lang in CodeLanguage] if code_generator else []),
                 "supported_api_styles": [style.value for style in APIStyle],
                 "supported_security_levels": [level.value for level in SecurityLevel],
             },
@@ -863,9 +751,7 @@ async def get_translation_studio_status():
 
         # Add service-specific metrics
         if discovery_orchestrator:
-            discovery_metrics = (
-                await discovery_orchestrator.get_api_generation_metrics()
-            )
+            discovery_metrics = await discovery_orchestrator.get_api_generation_metrics()
             status["metrics"] = {"discovery": discovery_metrics}
 
         if api_generator:
@@ -894,24 +780,16 @@ async def get_translation_metrics():
         metrics = {"timestamp": datetime.now(timezone.utc).isoformat(), "services": {}}
 
         if discovery_orchestrator:
-            metrics["services"][
-                "discovery"
-            ] = await discovery_orchestrator.get_api_generation_metrics()
+            metrics["services"]["discovery"] = await discovery_orchestrator.get_api_generation_metrics()
 
         if api_generator:
-            metrics["services"][
-                "api_generation"
-            ] = api_generator.get_generation_metrics()
+            metrics["services"]["api_generation"] = api_generator.get_generation_metrics()
 
         if code_generator:
-            metrics["services"][
-                "code_generation"
-            ] = code_generator.get_generation_metrics()
+            metrics["services"]["code_generation"] = code_generator.get_generation_metrics()
 
         if protocol_bridge:
-            metrics["services"][
-                "protocol_bridge"
-            ] = protocol_bridge.get_bridge_metrics()
+            metrics["services"]["protocol_bridge"] = protocol_bridge.get_bridge_metrics()
 
         if rag_engine:
             metrics["services"]["knowledge_base"] = rag_engine.get_collection_stats()
@@ -920,9 +798,7 @@ async def get_translation_metrics():
 
     except Exception as e:
         logger.error(f"Metrics retrieval failed: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Metrics retrieval failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Metrics retrieval failed: {str(e)}")
 
 
 # File Upload Endpoints
@@ -940,9 +816,7 @@ async def upload_protocol_samples(
 
         for file in files:
             if file.size > 10 * 1024 * 1024:  # 10MB limit
-                raise HTTPException(
-                    status_code=413, detail=f"File {file.filename} is too large"
-                )
+                raise HTTPException(status_code=413, detail=f"File {file.filename} is too large")
 
             content = await file.read()
 

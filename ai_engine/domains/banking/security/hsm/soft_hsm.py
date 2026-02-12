@@ -45,6 +45,7 @@ try:
     from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
     from cryptography.hazmat.primitives.kdf.hkdf import HKDF
     from cryptography.hazmat.backends import default_backend
+
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False
@@ -621,6 +622,7 @@ class SoftHSM(HSMProvider):
             raise HSMOperationError(f"Unsupported hash algorithm: {algorithm}")
 
         from cryptography.hazmat.primitives.hashes import Hash
+
         digest = Hash(hash_map[algorithm], backend=default_backend())
         digest.update(data)
         return digest.finalize()

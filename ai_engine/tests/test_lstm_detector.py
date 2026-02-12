@@ -26,9 +26,7 @@ class TestLSTMModel:
         """Test custom model configuration."""
         from ai_engine.anomaly.lstm_detector import LSTMModel
 
-        model = LSTMModel(
-            input_size=512, hidden_size=128, num_layers=3, dropout=0.2, version="2.0.0"
-        )
+        model = LSTMModel(input_size=512, hidden_size=128, num_layers=3, dropout=0.2, version="2.0.0")
 
         assert model.input_size == 512
         assert model.hidden_size == 128

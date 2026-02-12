@@ -71,9 +71,7 @@ def test_sensitive_data_masker_masks_known_patterns():
 
 def test_security_logger_masks_and_logs_events(monkeypatch, stub_config_factory):
     config = stub_config_factory()
-    monkeypatch.setattr(
-        "ai_engine.security.logging.get_security_config", lambda: config
-    )
+    monkeypatch.setattr("ai_engine.security.logging.get_security_config", lambda: config)
 
     logger = SecurityLogger("test.logger")
 
@@ -103,9 +101,7 @@ def test_security_logger_masks_and_logs_events(monkeypatch, stub_config_factory)
     logger.log_security_event_obj(security_event)
     assert logger.log_counts[LogLevel.CRITICAL.value] == 1
 
-    threat_analysis = ThreatAnalysis(
-        threat_level=ThreatLevel.HIGH, confidence_score=0.9
-    )
+    threat_analysis = ThreatAnalysis(threat_level=ThreatLevel.HIGH, confidence_score=0.9)
     logger.log_threat_analysis(threat_analysis)
     assert logger.log_counts[LogLevel.ERROR.value] == 1
 
@@ -132,12 +128,8 @@ def test_security_logger_creates_file_handlers(monkeypatch, stub_config_factory)
             return None
 
     config = stub_config_factory(file_enabled=True, audit_enabled=True)
-    monkeypatch.setattr(
-        "ai_engine.security.logging.get_security_config", lambda: config
-    )
-    monkeypatch.setattr(
-        logging.handlers, "RotatingFileHandler", DummyRotatingFileHandler
-    )
+    monkeypatch.setattr("ai_engine.security.logging.get_security_config", lambda: config)
+    monkeypatch.setattr(logging.handlers, "RotatingFileHandler", DummyRotatingFileHandler)
 
     logger = SecurityLogger("enterprise.logger")
 
@@ -145,15 +137,13 @@ def test_security_logger_creates_file_handlers(monkeypatch, stub_config_factory)
     # Security handler should add security filter
     security_handler = created_handlers[1]
     assert any(
-        getattr(f, "__name__", "").startswith("_security_log_filter")
-        or getattr(f, "__self__", None) is logger
+        getattr(f, "__name__", "").startswith("_security_log_filter") or getattr(f, "__self__", None) is logger
         for f in security_handler._filters
     )
     # Audit handler should include audit filter
     audit_handler = created_handlers[2]
     assert any(
-        getattr(f, "__name__", "").startswith("_audit_log_filter")
-        or getattr(f, "__self__", None) is logger
+        getattr(f, "__name__", "").startswith("_audit_log_filter") or getattr(f, "__self__", None) is logger
         for f in audit_handler._filters
     )
 
@@ -185,9 +175,7 @@ def test_structured_formatter_serializes_record():
 
 def test_get_security_logger_returns_singleton(monkeypatch, stub_config_factory):
     config = stub_config_factory()
-    monkeypatch.setattr(
-        "ai_engine.security.logging.get_security_config", lambda: config
-    )
+    monkeypatch.setattr("ai_engine.security.logging.get_security_config", lambda: config)
 
     logger_one = get_security_logger("singleton.test")
     logger_two = get_security_logger("singleton.test")

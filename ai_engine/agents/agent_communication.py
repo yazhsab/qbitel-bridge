@@ -143,7 +143,7 @@ class Channel:
         """Add message to history."""
         self.message_history.append(message)
         if len(self.message_history) > self.max_history:
-            self.message_history = self.message_history[-self.max_history:]
+            self.message_history = self.message_history[-self.max_history :]
 
 
 @dataclass
@@ -250,7 +250,7 @@ class AgentCommunicationProtocol:
                 "agent_id": agent_id,
                 "agent_type": agent.agent_type,
                 "capabilities": [c.value for c in agent.capabilities],
-            }
+            },
         )
 
     async def unregister_agent(self, agent_id: str) -> None:
@@ -261,11 +261,7 @@ class AgentCommunicationProtocol:
         agent = self.agents[agent_id]
 
         # Broadcast unregistration event
-        await self.broadcast(
-            sender=agent,
-            message_type=MessageType.UNREGISTER,
-            payload={"agent_id": agent_id}
-        )
+        await self.broadcast(sender=agent, message_type=MessageType.UNREGISTER, payload={"agent_id": agent_id})
 
         # Remove from channels
         for channel in self.channels.values():
@@ -327,7 +323,7 @@ class AgentCommunicationProtocol:
         message_type: str = "task_request",
         payload: Dict[str, Any] = None,
         timeout: float = None,
-        **kwargs
+        **kwargs,
     ) -> Any:
         """
         Send a request and wait for response (request/response pattern).
@@ -456,7 +452,7 @@ class AgentCommunicationProtocol:
                     sender_type=message.sender_type,
                     recipient_id=agent_id,
                     payload=message.payload,
-                    metadata={"broadcast_id": message.message_id}
+                    metadata={"broadcast_id": message.message_id},
                 )
                 await self._route_message(agent_message)
 
@@ -556,7 +552,7 @@ class AgentCommunicationProtocol:
                     recipient_id=subscriber_id,
                     channel=channel_name,
                     payload=message.payload,
-                    metadata={"channel_message_id": message.message_id}
+                    metadata={"channel_message_id": message.message_id},
                 )
                 try:
                     await self._route_message(subscriber_message)
@@ -610,10 +606,7 @@ class AgentCommunicationProtocol:
                 # Priority-based insertion would require a priority queue
                 await self.agent_queues[recipient_id].put(message)
                 self.stats["messages_sent"] += 1
-                ACP_MESSAGES_SENT.labels(
-                    message_type=message.message_type.value,
-                    sender_type=message.sender_type
-                ).inc()
+                ACP_MESSAGES_SENT.labels(message_type=message.message_type.value, sender_type=message.sender_type).inc()
             except asyncio.QueueFull:
                 self.logger.error(f"Queue full for agent: {recipient_id[:8]}")
                 self.stats["messages_failed"] += 1
@@ -637,9 +630,7 @@ class AgentCommunicationProtocol:
 
                 # Calculate latency
                 latency = (datetime.utcnow() - message.created_at).total_seconds()
-                ACP_MESSAGE_LATENCY.labels(
-                    message_type=message.message_type.value
-                ).observe(latency)
+                ACP_MESSAGE_LATENCY.labels(message_type=message.message_type.value).observe(latency)
 
                 # Check if this is a response to a pending request
                 if message.correlation_id and message.correlation_id in self.pending_requests:
@@ -657,10 +648,7 @@ class AgentCommunicationProtocol:
                         await self.respond(agent, message, response)
 
                     self.stats["messages_delivered"] += 1
-                    ACP_MESSAGES_RECEIVED.labels(
-                        message_type=message.message_type.value,
-                        receiver_type=agent.agent_type
-                    ).inc()
+                    ACP_MESSAGES_RECEIVED.labels(message_type=message.message_type.value, receiver_type=agent.agent_type).inc()
 
                 except Exception as e:
                     self.logger.error(f"Message handling error: {e}")
@@ -683,9 +671,7 @@ class AgentCommunicationProtocol:
                     age = (now - pending.created_at).total_seconds()
                     if age > pending.timeout:
                         if not pending.future.done():
-                            pending.future.set_exception(
-                                asyncio.TimeoutError(f"Request {request_id} expired")
-                            )
+                            pending.future.set_exception(asyncio.TimeoutError(f"Request {request_id} expired"))
                         expired.append(request_id)
 
                 for request_id in expired:

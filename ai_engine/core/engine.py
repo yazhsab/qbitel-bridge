@@ -40,12 +40,8 @@ if TYPE_CHECKING:  # pragma: no cover - for type checkers only
 
 
 # Prometheus metrics
-INFERENCE_COUNTER = Counter(
-    "qbitel_inference_total", "Total inference requests", ["component", "status"]
-)
-INFERENCE_DURATION = Histogram(
-    "qbitel_inference_duration_seconds", "Inference duration", ["component"]
-)
+INFERENCE_COUNTER = Counter("qbitel_inference_total", "Total inference requests", ["component", "status"])
+INFERENCE_DURATION = Histogram("qbitel_inference_duration_seconds", "Inference duration", ["component"])
 MODEL_ACCURACY = Gauge("qbitel_model_accuracy", "Model accuracy", ["model_name"])
 ACTIVE_MODELS = Gauge("qbitel_active_models", "Number of active models")
 
@@ -84,9 +80,7 @@ class AIEngine:
     async def discover_protocol(self, model_input: Any) -> Any:
         """Delegate protocol discovery to the configured component."""
         self._ensure_ready("protocol discovery")
-        if not self.protocol_discovery or not hasattr(
-            self.protocol_discovery, "discover_protocol"
-        ):
+        if not self.protocol_discovery or not hasattr(self.protocol_discovery, "discover_protocol"):
             raise AIEngineException("Protocol discovery component not configured")
 
         start_time = time.time()
@@ -206,9 +200,7 @@ class QbitelAIEngine:
         self._models_loaded = {}
         self._performance_stats = {}
 
-        self.logger.info(
-            f"AI Engine initialized with config: {self.config.environment.value}"
-        )
+        self.logger.info(f"AI Engine initialized with config: {self.config.environment.value}")
 
     async def initialize(self) -> None:
         """Initialize all AI components and load models."""
@@ -265,9 +257,7 @@ class QbitelAIEngine:
             self.logger.error(f"Error during AI Engine shutdown: {e}")
             raise QbitelAIException(f"Engine shutdown failed: {e}")
 
-    async def discover_protocol(
-        self, packet_data: bytes, metadata: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    async def discover_protocol(self, packet_data: bytes, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Discover protocol from packet data.
 
@@ -296,12 +286,8 @@ class QbitelAIEngine:
                 protocol_result["grammar"] = grammar_result
 
             # Update metrics
-            INFERENCE_COUNTER.labels(
-                component="protocol_discovery", status="success"
-            ).inc()
-            INFERENCE_DURATION.labels(component="protocol_discovery").observe(
-                time.time() - start_time
-            )
+            INFERENCE_COUNTER.labels(component="protocol_discovery", status="success").inc()
+            INFERENCE_DURATION.labels(component="protocol_discovery").observe(time.time() - start_time)
 
             return {
                 "protocol_type": protocol_result.get("protocol_type", "unknown"),
@@ -313,15 +299,11 @@ class QbitelAIEngine:
             }
 
         except Exception as e:
-            INFERENCE_COUNTER.labels(
-                component="protocol_discovery", status="error"
-            ).inc()
+            INFERENCE_COUNTER.labels(component="protocol_discovery", status="error").inc()
             self.logger.error(f"Protocol discovery failed: {e}")
             raise InferenceException(f"Protocol discovery failed: {e}")
 
-    async def detect_fields(
-        self, message_data: bytes, protocol_type: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+    async def detect_fields(self, message_data: bytes, protocol_type: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Detect fields in a protocol message.
 
@@ -346,17 +328,11 @@ class QbitelAIEngine:
 
             # Infer field types
             for field in fields:
-                field["type"] = await self._infer_field_type(
-                    message_data[field["start"] : field["end"]]
-                )
+                field["type"] = await self._infer_field_type(message_data[field["start"] : field["end"]])
 
             # Update metrics
-            INFERENCE_COUNTER.labels(
-                component="field_detection", status="success"
-            ).inc()
-            INFERENCE_DURATION.labels(component="field_detection").observe(
-                time.time() - start_time
-            )
+            INFERENCE_COUNTER.labels(component="field_detection", status="success").inc()
+            INFERENCE_DURATION.labels(component="field_detection").observe(time.time() - start_time)
 
             return fields
 
@@ -396,12 +372,8 @@ class QbitelAIEngine:
             anomaly_result = await self._detect_anomaly_ensemble(features, context)
 
             # Update metrics
-            INFERENCE_COUNTER.labels(
-                component="anomaly_detection", status="success"
-            ).inc()
-            INFERENCE_DURATION.labels(component="anomaly_detection").observe(
-                time.time() - start_time
-            )
+            INFERENCE_COUNTER.labels(component="anomaly_detection", status="success").inc()
+            INFERENCE_DURATION.labels(component="anomaly_detection").observe(time.time() - start_time)
 
             return {
                 "is_anomaly": anomaly_result["score"] > self.config.anomaly_threshold,
@@ -414,15 +386,11 @@ class QbitelAIEngine:
             }
 
         except Exception as e:
-            INFERENCE_COUNTER.labels(
-                component="anomaly_detection", status="error"
-            ).inc()
+            INFERENCE_COUNTER.labels(component="anomaly_detection", status="error").inc()
             self.logger.error(f"Anomaly detection failed: {e}")
             raise InferenceException(f"Anomaly detection failed: {e}")
 
-    async def batch_process(
-        self, batch_data: List[bytes], operation: str = "discover_protocol"
-    ) -> List[Dict[str, Any]]:
+    async def batch_process(self, batch_data: List[bytes], operation: str = "discover_protocol") -> List[Dict[str, Any]]:
         """
         Process a batch of data efficiently.
 
@@ -436,28 +404,17 @@ class QbitelAIEngine:
         if not self._initialized:
             raise QbitelAIException("AI Engine not initialized")
 
-        self.logger.info(
-            f"Processing batch of {len(batch_data)} items with operation: {operation}"
-        )
+        self.logger.info(f"Processing batch of {len(batch_data)} items with operation: {operation}")
 
         # Process in parallel using thread pool
         loop = asyncio.get_event_loop()
 
         if operation == "discover_protocol":
-            tasks = [
-                loop.run_in_executor(self._executor, self._sync_discover_protocol, data)
-                for data in batch_data
-            ]
+            tasks = [loop.run_in_executor(self._executor, self._sync_discover_protocol, data) for data in batch_data]
         elif operation == "detect_fields":
-            tasks = [
-                loop.run_in_executor(self._executor, self._sync_detect_fields, data)
-                for data in batch_data
-            ]
+            tasks = [loop.run_in_executor(self._executor, self._sync_detect_fields, data) for data in batch_data]
         elif operation == "detect_anomaly":
-            tasks = [
-                loop.run_in_executor(self._executor, self._sync_detect_anomaly, data)
-                for data in batch_data
-            ]
+            tasks = [loop.run_in_executor(self._executor, self._sync_detect_anomaly, data) for data in batch_data]
         else:
             raise InferenceException(f"Unknown operation: {operation}")
 
@@ -497,9 +454,7 @@ class QbitelAIEngine:
 
         try:
             # Load new model version
-            model_info = await self._model_registry.load_model(
-                model_name, model_version
-            )
+            model_info = await self._model_registry.load_model(model_name, model_version)
 
             # Update model in components
             if model_name == "protocol_classifier" and self._protocol_classifier:
@@ -516,9 +471,7 @@ class QbitelAIEngine:
                 "last_updated": time.time(),
             }
 
-            self.logger.info(
-                f"Successfully updated model {model_name} to version {model_version}"
-            )
+            self.logger.info(f"Successfully updated model {model_name} to version {model_version}")
 
         except Exception as e:
             self.logger.error(f"Failed to update model {model_name}: {e}")
@@ -568,9 +521,7 @@ class QbitelAIEngine:
         """Load all configured models."""
         for model_name, model_config in self.config.models.items():
             try:
-                model_info = await self._model_registry.load_model(
-                    model_name, model_config.version
-                )
+                model_info = await self._model_registry.load_model(model_name, model_config.version)
                 self._models_loaded[model_name] = {
                     "version": model_config.version,
                     "config": model_config,
@@ -582,9 +533,7 @@ class QbitelAIEngine:
             except Exception as e:
                 self.logger.error(f"Failed to load model {model_name}: {e}")
                 if self.config.environment.value == "production":
-                    raise ModelException(
-                        f"Critical model loading failed: {e}", model_name
-                    )
+                    raise ModelException(f"Critical model loading failed: {e}", model_name)
 
     async def _start_monitoring(self) -> None:
         """Start monitoring and metrics collection."""
@@ -603,9 +552,7 @@ class QbitelAIEngine:
         """Infer grammar structure from data."""
         return await self._pcfg_inference.infer(data)
 
-    async def _detect_field_boundaries(
-        self, features: np.ndarray, protocol_type: Optional[str]
-    ) -> List[Dict[str, Any]]:
+    async def _detect_field_boundaries(self, features: np.ndarray, protocol_type: Optional[str]) -> List[Dict[str, Any]]:
         """Detect field boundaries."""
         return await self._field_detector.detect_boundaries(features, protocol_type)
 
@@ -627,9 +574,8 @@ class QbitelAIEngine:
             loop = asyncio.get_running_loop()
             # Already in an event loop — use concurrent.futures to bridge
             import concurrent.futures
-            future = asyncio.run_coroutine_threadsafe(
-                self.discover_protocol(data), loop
-            )
+
+            future = asyncio.run_coroutine_threadsafe(self.discover_protocol(data), loop)
             return future.result(timeout=30)
         except RuntimeError:
             # No event loop running — safe to create a new one
@@ -640,9 +586,8 @@ class QbitelAIEngine:
         try:
             loop = asyncio.get_running_loop()
             import concurrent.futures
-            future = asyncio.run_coroutine_threadsafe(
-                self.detect_fields(data), loop
-            )
+
+            future = asyncio.run_coroutine_threadsafe(self.detect_fields(data), loop)
             return future.result(timeout=30)
         except RuntimeError:
             return asyncio.run(self.detect_fields(data))
@@ -652,9 +597,8 @@ class QbitelAIEngine:
         try:
             loop = asyncio.get_running_loop()
             import concurrent.futures
-            future = asyncio.run_coroutine_threadsafe(
-                self.detect_anomaly(data), loop
-            )
+
+            future = asyncio.run_coroutine_threadsafe(self.detect_anomaly(data), loop)
             return future.result(timeout=30)
         except RuntimeError:
             return asyncio.run(self.detect_anomaly(data))
@@ -666,9 +610,7 @@ class QbitelAIEngine:
 
         if not logger.handlers:
             handler = logging.StreamHandler()
-            formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            )
+            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
             handler.setFormatter(formatter)
             logger.addHandler(handler)
 

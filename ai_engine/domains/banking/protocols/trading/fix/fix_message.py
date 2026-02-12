@@ -19,7 +19,6 @@ from ai_engine.domains.banking.protocols.trading.fix.fix_codes import (
     FIX_TAG_NAMES,
 )
 
-
 # FIX field delimiter (SOH - Start of Header, ASCII 1)
 SOH = "\x01"
 
@@ -168,9 +167,7 @@ class FixHeader:
         ]
 
         if self.sending_time:
-            fields.append(
-                FixField(tag=52, value=self.sending_time.strftime("%Y%m%d-%H:%M:%S.%f")[:-3])
-            )
+            fields.append(FixField(tag=52, value=self.sending_time.strftime("%Y%m%d-%H:%M:%S.%f")[:-3]))
 
         if self.poss_dup_flag:
             fields.append(FixField(tag=43, value="Y"))
@@ -179,9 +176,7 @@ class FixHeader:
             fields.append(FixField(tag=97, value="Y"))
 
         if self.orig_sending_time:
-            fields.append(
-                FixField(tag=122, value=self.orig_sending_time.strftime("%Y%m%d-%H:%M:%S.%f")[:-3])
-            )
+            fields.append(FixField(tag=122, value=self.orig_sending_time.strftime("%Y%m%d-%H:%M:%S.%f")[:-3]))
 
         if self.on_behalf_of_comp_id:
             fields.append(FixField(tag=115, value=self.on_behalf_of_comp_id))
@@ -402,9 +397,7 @@ class FixMessage:
             "sender": self.header.sender_comp_id,
             "target": self.header.target_comp_id,
             "seq_num": self.header.msg_seq_num,
-            "sending_time": (
-                self.header.sending_time.isoformat() if self.header.sending_time else None
-            ),
+            "sending_time": (self.header.sending_time.isoformat() if self.header.sending_time else None),
             "fields": {},
             "groups": {},
         }

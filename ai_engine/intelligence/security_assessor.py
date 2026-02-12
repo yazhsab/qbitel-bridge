@@ -13,7 +13,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set
 import uuid
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -214,17 +213,13 @@ class SecurityAssessor:
 
         # Assess compliance
         if context and context.get("compliance_frameworks"):
-            assessment.compliance_statuses = self._assess_compliance(
-                protocol_analysis, context["compliance_frameworks"]
-            )
+            assessment.compliance_statuses = self._assess_compliance(protocol_analysis, context["compliance_frameworks"])
 
         # Calculate scores
         self._calculate_scores(assessment)
 
         # Calculate duration
-        assessment.assessment_duration_ms = (
-            datetime.utcnow() - start_time
-        ).total_seconds() * 1000
+        assessment.assessment_duration_ms = (datetime.utcnow() - start_time).total_seconds() * 1000
 
         return assessment
 
@@ -251,19 +246,29 @@ class SecurityAssessor:
 
         # Identify quantum-vulnerable algorithms
         quantum_vulnerable = [
-            "RSA", "DSA", "ECDSA", "ECDH", "DH",
-            "RSA-2048", "RSA-3072", "RSA-4096",
-            "P-256", "P-384", "P-521",
+            "RSA",
+            "DSA",
+            "ECDSA",
+            "ECDH",
+            "DH",
+            "RSA-2048",
+            "RSA-3072",
+            "RSA-4096",
+            "P-256",
+            "P-384",
+            "P-521",
         ]
 
         for algo in current_crypto.get("algorithms", []):
             for qv in quantum_vulnerable:
                 if qv.lower() in algo.lower():
                     report["quantum_vulnerable_algorithms"].append(algo)
-                    report["migration_required"].append({
-                        "current": algo,
-                        "recommended": self._get_pqc_replacement(algo),
-                    })
+                    report["migration_required"].append(
+                        {
+                            "current": algo,
+                            "recommended": self._get_pqc_replacement(algo),
+                        }
+                    )
 
         # Calculate readiness score
         if current_crypto.get("pqc_algorithms"):
@@ -271,9 +276,7 @@ class SecurityAssessor:
         elif not report["quantum_vulnerable_algorithms"]:
             report["readiness_score"] = 50
         else:
-            vuln_ratio = len(report["quantum_vulnerable_algorithms"]) / max(
-                len(current_crypto.get("algorithms", [])), 1
-            )
+            vuln_ratio = len(report["quantum_vulnerable_algorithms"]) / max(len(current_crypto.get("algorithms", [])), 1)
             report["readiness_score"] = int((1 - vuln_ratio) * 40)
 
         # Timeline recommendation
@@ -316,24 +319,20 @@ class SecurityAssessor:
 
         # Check PQC readiness
         pqc_patterns = ["ML-KEM", "ML-DSA", "Kyber", "Dilithium"]
-        assessment.quantum_safe = any(
-            any(pqc in algo for pqc in pqc_patterns)
-            for algo in assessment.algorithms_detected
-        )
+        assessment.quantum_safe = any(any(pqc in algo for pqc in pqc_patterns) for algo in assessment.algorithms_detected)
 
         if not assessment.quantum_safe:
             assessment.pqc_migration_urgency = "high"
-            assessment.recommendations.extend([
-                "Implement ML-KEM-768 for key encapsulation",
-                "Deploy ML-DSA-65 for digital signatures",
-                "Consider hybrid mode during transition",
-            ])
+            assessment.recommendations.extend(
+                [
+                    "Implement ML-KEM-768 for key encapsulation",
+                    "Deploy ML-DSA-65 for digital signatures",
+                    "Consider hybrid mode during transition",
+                ]
+            )
 
         if assessment.weak_algorithms:
-            assessment.recommendations.extend([
-                f"Replace weak algorithm: {algo}"
-                for algo in assessment.weak_algorithms
-            ])
+            assessment.recommendations.extend([f"Replace weak algorithm: {algo}" for algo in assessment.weak_algorithms])
 
         return assessment
 
@@ -348,67 +347,77 @@ class SecurityAssessor:
         # Check for PCI-relevant fields without encryption
         pci_fields = protocol_analysis.get("pci_relevant_fields", [])
         if pci_fields and not protocol_analysis.get("encryption_detected"):
-            findings.append(VulnerabilityFinding(
-                finding_id=str(uuid.uuid4()),
-                title="Unencrypted PCI Data Detected",
-                category=VulnerabilityCategory.DATA_EXPOSURE,
-                severity=SecurityRisk.CRITICAL,
-                description="Payment card data fields detected without encryption",
-                evidence=pci_fields,
-                cwe_id="CWE-311",
-                business_impact="PCI-DSS violation, potential card data breach",
-            ))
+            findings.append(
+                VulnerabilityFinding(
+                    finding_id=str(uuid.uuid4()),
+                    title="Unencrypted PCI Data Detected",
+                    category=VulnerabilityCategory.DATA_EXPOSURE,
+                    severity=SecurityRisk.CRITICAL,
+                    description="Payment card data fields detected without encryption",
+                    evidence=pci_fields,
+                    cwe_id="CWE-311",
+                    business_impact="PCI-DSS violation, potential card data breach",
+                )
+            )
 
         # Check for weak cryptography
         security_chars = protocol_analysis.get("security_characteristics", [])
         for char in security_chars:
             if char.get("strength") == "weak":
-                findings.append(VulnerabilityFinding(
-                    finding_id=str(uuid.uuid4()),
-                    title=f"Weak Cryptographic Algorithm: {char.get('name')}",
-                    category=VulnerabilityCategory.CRYPTOGRAPHIC,
-                    severity=SecurityRisk.HIGH,
-                    description=f"Weak algorithm {char.get('name')} provides insufficient security",
-                    cwe_id="CWE-327",
-                    business_impact="Data may be decrypted by attackers",
-                ))
+                findings.append(
+                    VulnerabilityFinding(
+                        finding_id=str(uuid.uuid4()),
+                        title=f"Weak Cryptographic Algorithm: {char.get('name')}",
+                        category=VulnerabilityCategory.CRYPTOGRAPHIC,
+                        severity=SecurityRisk.HIGH,
+                        description=f"Weak algorithm {char.get('name')} provides insufficient security",
+                        cwe_id="CWE-327",
+                        business_impact="Data may be decrypted by attackers",
+                    )
+                )
 
         # Check for quantum vulnerability
         if not protocol_analysis.get("pqc_ready"):
-            findings.append(VulnerabilityFinding(
-                finding_id=str(uuid.uuid4()),
-                title="Quantum-Vulnerable Cryptography",
-                category=VulnerabilityCategory.QUANTUM_VULNERABLE,
-                severity=SecurityRisk.MEDIUM,
-                description="Current cryptographic algorithms are vulnerable to quantum attacks",
-                cwe_id="CWE-327",
-                business_impact="Future quantum computers may decrypt historical data",
-            ))
+            findings.append(
+                VulnerabilityFinding(
+                    finding_id=str(uuid.uuid4()),
+                    title="Quantum-Vulnerable Cryptography",
+                    category=VulnerabilityCategory.QUANTUM_VULNERABLE,
+                    severity=SecurityRisk.MEDIUM,
+                    description="Current cryptographic algorithms are vulnerable to quantum attacks",
+                    cwe_id="CWE-327",
+                    business_impact="Future quantum computers may decrypt historical data",
+                )
+            )
 
         # Protocol-specific vulnerabilities
         protocol_type = protocol_analysis.get("protocol_type", "")
 
         if protocol_type == "swift_mt":
-            findings.append(VulnerabilityFinding(
-                finding_id=str(uuid.uuid4()),
-                title="Legacy SWIFT MT Format",
-                category=VulnerabilityCategory.PROTOCOL,
-                severity=SecurityRisk.LOW,
-                description="SWIFT MT format being deprecated in favor of ISO 20022",
-                business_impact="Migration required by industry deadlines",
-            ))
+            findings.append(
+                VulnerabilityFinding(
+                    finding_id=str(uuid.uuid4()),
+                    title="Legacy SWIFT MT Format",
+                    category=VulnerabilityCategory.PROTOCOL,
+                    severity=SecurityRisk.LOW,
+                    description="SWIFT MT format being deprecated in favor of ISO 20022",
+                    business_impact="Migration required by industry deadlines",
+                )
+            )
 
         if protocol_type == "fix":
             # Check for FIX without encryption
             if not protocol_analysis.get("encryption_detected"):
-                findings.append(VulnerabilityFinding(
-                    finding_id=str(uuid.uuid4()),
-                    title="Unencrypted FIX Protocol",
-                    category=VulnerabilityCategory.DATA_EXPOSURE,
-                    severity=SecurityRisk.HIGH,
-                    description="FIX trading messages transmitted without encryption",
-                    business_impact="Trade data exposure, market manipulation risk",
-                ))
+                findings.append(
+                    VulnerabilityFinding(
+                        finding_id=str(uuid.uuid4()),
+                        title="Unencrypted FIX Protocol",
+                        category=VulnerabilityCategory.DATA_EXPOSURE,
+                        severity=SecurityRisk.HIGH,
+                        description="FIX trading messages transmitted without encryption",
+                        business_impact="Trade data exposure, market manipulation risk",
+                    )
+                )
 
         return findings
 
@@ -606,11 +615,11 @@ class SecurityAssessor:
 
         # Calculate risk score (higher is worse)
         assessment.risk_score = min(
-            assessment.critical_count * 30 +
-            assessment.high_count * 15 +
-            assessment.medium_count * 5 +
-            assessment.low_count * 1,
-            100
+            assessment.critical_count * 30
+            + assessment.high_count * 15
+            + assessment.medium_count * 5
+            + assessment.low_count * 1,
+            100,
         )
 
         # Calculate security score (higher is better)

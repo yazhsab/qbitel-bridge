@@ -80,9 +80,7 @@ def rate_limit_config():
 @pytest.fixture
 async def rate_limiter(mock_redis_client, rate_limit_config):
     """Create RedisRateLimiter instance."""
-    limiter = RedisRateLimiter(
-        redis_url="redis://localhost:6379/0", config=rate_limit_config
-    )
+    limiter = RedisRateLimiter(redis_url="redis://localhost:6379/0", config=rate_limit_config)
     limiter.redis_client = mock_redis_client
     return limiter
 
@@ -93,9 +91,7 @@ class TestRateLimiterBasicFunctionality:
     @pytest.mark.asyncio
     async def test_rate_limiter_initialization(self, rate_limit_config):
         """Test rate limiter can be initialized."""
-        limiter = RedisRateLimiter(
-            redis_url="redis://localhost:6379/0", config=rate_limit_config
-        )
+        limiter = RedisRateLimiter(redis_url="redis://localhost:6379/0", config=rate_limit_config)
         assert limiter.config == rate_limit_config
         assert limiter.redis_client is None
 
@@ -107,13 +103,9 @@ class TestRateLimiterBasicFunctionality:
         async def mock_execute_low():
             return [None, 5, None, None]
 
-        rate_limiter.redis_client.pipeline().execute = MagicMock(
-            return_value=mock_execute_low()
-        )
+        rate_limiter.redis_client.pipeline().execute = MagicMock(return_value=mock_execute_low())
 
-        is_allowed, metadata = await rate_limiter.check_rate_limit(
-            "test_user", limit=10, window_seconds=60
-        )
+        is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", limit=10, window_seconds=60)
 
         assert is_allowed is True
         assert "limit" in metadata
@@ -127,13 +119,9 @@ class TestRateLimiterBasicFunctionality:
         async def mock_execute_high():
             return [None, 15, None, None]
 
-        rate_limiter.redis_client.pipeline().execute = MagicMock(
-            return_value=mock_execute_high()
-        )
+        rate_limiter.redis_client.pipeline().execute = MagicMock(return_value=mock_execute_high())
 
-        is_allowed, metadata = await rate_limiter.check_rate_limit(
-            "test_user", limit=10, window_seconds=60
-        )
+        is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", limit=10, window_seconds=60)
 
         assert is_allowed is False
         assert metadata["remaining"] == 0
@@ -145,13 +133,9 @@ class TestRateLimiterBasicFunctionality:
         async def mock_execute_metadata():
             return [None, 3, None, None]
 
-        rate_limiter.redis_client.pipeline().execute = MagicMock(
-            return_value=mock_execute_metadata()
-        )
+        rate_limiter.redis_client.pipeline().execute = MagicMock(return_value=mock_execute_metadata())
 
-        is_allowed, metadata = await rate_limiter.check_rate_limit(
-            "test_user", limit=10, window_seconds=60
-        )
+        is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", limit=10, window_seconds=60)
 
         assert "limit" in metadata
         assert "remaining" in metadata
@@ -276,13 +260,9 @@ class TestRateLimitStrategies:
         async def mock_execute_sliding():
             return [None, 5, None, None]
 
-        rate_limiter.redis_client.pipeline().execute = MagicMock(
-            return_value=mock_execute_sliding()
-        )
+        rate_limiter.redis_client.pipeline().execute = MagicMock(return_value=mock_execute_sliding())
 
-        is_allowed, metadata = await rate_limiter.check_rate_limit(
-            "test_user", limit=10, window_seconds=60
-        )
+        is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", limit=10, window_seconds=60)
 
         assert is_allowed is True
 
@@ -296,9 +276,7 @@ class TestRateLimitStrategies:
 
         rate_limiter.redis_client.incr = MagicMock(return_value=mock_incr())
 
-        is_allowed, metadata = await rate_limiter.check_rate_limit(
-            "test_user", limit=10, window_seconds=60
-        )
+        is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", limit=10, window_seconds=60)
 
         assert is_allowed is True
 
@@ -316,9 +294,7 @@ class TestRateLimitStrategies:
         rate_limiter.redis_client.hgetall = MagicMock(return_value=mock_hgetall())
         rate_limiter.redis_client.hset = MagicMock(return_value=mock_hset())
 
-        is_allowed, metadata = await rate_limiter.check_rate_limit(
-            "test_user", limit=10, window_seconds=60
-        )
+        is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", limit=10, window_seconds=60)
 
         assert is_allowed is True
 
@@ -336,9 +312,7 @@ class TestRateLimitStrategies:
         rate_limiter.redis_client.hgetall = MagicMock(return_value=mock_hgetall())
         rate_limiter.redis_client.hset = MagicMock(return_value=mock_hset())
 
-        is_allowed, metadata = await rate_limiter.check_rate_limit(
-            "test_user", limit=10, window_seconds=60
-        )
+        is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", limit=10, window_seconds=60)
 
         assert is_allowed is True
 
@@ -349,14 +323,10 @@ class TestRateLimitingEdgeCases:
     @pytest.mark.asyncio
     async def test_rate_limiter_handles_redis_unavailable(self, rate_limit_config):
         """Test that rate limiter fails open when Redis is unavailable."""
-        limiter = RedisRateLimiter(
-            redis_url="redis://localhost:6379/0", config=rate_limit_config
-        )
+        limiter = RedisRateLimiter(redis_url="redis://localhost:6379/0", config=rate_limit_config)
         # Redis client is None (not initialized)
 
-        is_allowed, metadata = await limiter.check_rate_limit(
-            "test_user", limit=10, window_seconds=60
-        )
+        is_allowed, metadata = await limiter.check_rate_limit("test_user", limit=10, window_seconds=60)
 
         # Should allow request when Redis is unavailable (fail open)
         assert is_allowed is True
@@ -365,21 +335,15 @@ class TestRateLimitingEdgeCases:
     async def test_rate_limiter_handles_redis_errors(self, rate_limiter):
         """Test that rate limiter handles Redis errors gracefully."""
         # Mock Redis to raise exception
-        rate_limiter.redis_client.pipeline = MagicMock(
-            side_effect=Exception("Redis connection error")
-        )
+        rate_limiter.redis_client.pipeline = MagicMock(side_effect=Exception("Redis connection error"))
 
-        is_allowed, metadata = await rate_limiter.check_rate_limit(
-            "test_user", limit=10, window_seconds=60
-        )
+        is_allowed, metadata = await rate_limiter.check_rate_limit("test_user", limit=10, window_seconds=60)
 
         # Should fail open (allow request) on error
         assert is_allowed is True
 
     @pytest.mark.asyncio
-    async def test_whitelist_bypasses_rate_limiting(
-        self, rate_limiter, rate_limit_config
-    ):
+    async def test_whitelist_bypasses_rate_limiting(self, rate_limiter, rate_limit_config):
         """Test that whitelisted IPs bypass rate limiting."""
         rate_limit_config.whitelist_ips = ["192.168.1.100"]
 
@@ -413,10 +377,7 @@ class TestRateLimitingProduction:
 
         assert production_config["rate_limiting"]["enabled"] is True
         assert production_config["rate_limiting"]["default_limit"] > 0
-        assert (
-            production_config["rate_limiting"]["burst_limit"]
-            >= production_config["rate_limiting"]["default_limit"]
-        )
+        assert production_config["rate_limiting"]["burst_limit"] >= production_config["rate_limiting"]["default_limit"]
 
     def test_rate_limiting_always_active_in_middleware(self):
         """Test that rate limiting is always active in middleware setup."""

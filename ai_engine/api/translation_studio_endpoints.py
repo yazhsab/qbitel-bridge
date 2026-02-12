@@ -145,9 +145,7 @@ async def get_studio() -> ProtocolTranslationStudio:
 
 # Endpoints
 @router.post("/translate", response_model=TranslateResponse)
-async def translate_protocol(
-    request: TranslateRequest, studio: ProtocolTranslationStudio = Depends(get_studio)
-):
+async def translate_protocol(request: TranslateRequest, studio: ProtocolTranslationStudio = Depends(get_studio)):
     """
     Translate message from source protocol to target protocol.
 
@@ -162,9 +160,7 @@ async def translate_protocol(
     start_time = time.time()
 
     try:
-        logger.info(
-            f"Translation request: {request.source_protocol} -> {request.target_protocol}"
-        )
+        logger.info(f"Translation request: {request.source_protocol} -> {request.target_protocol}")
 
         # Decode message
         try:
@@ -176,9 +172,7 @@ async def translate_protocol(
             )
 
         # Perform translation
-        translated_bytes = await studio.translate_protocol(
-            request.source_protocol, request.target_protocol, message_bytes
-        )
+        translated_bytes = await studio.translate_protocol(request.source_protocol, request.target_protocol, message_bytes)
 
         # Calculate actual latency
         actual_latency_ms = (time.time() - start_time) * 1000
@@ -212,9 +206,7 @@ async def translate_protocol(
 
     except TranslationException as e:
         logger.error(f"Translation failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(
@@ -239,9 +231,7 @@ async def generate_translation_rules(
     - Caches rules for future use
     """
     try:
-        logger.info(
-            f"Generating rules: {request.source_protocol_id} -> {request.target_protocol_id}"
-        )
+        logger.info(f"Generating rules: {request.source_protocol_id} -> {request.target_protocol_id}")
 
         # Get protocol specifications
         source_spec = await studio._get_protocol_spec(request.source_protocol_id)
@@ -268,9 +258,7 @@ async def generate_translation_rules(
 
 
 @router.post("/optimize", response_model=OptimizeResponse)
-async def optimize_translation(
-    request: OptimizeRequest, studio: ProtocolTranslationStudio = Depends(get_studio)
-):
+async def optimize_translation(request: OptimizeRequest, studio: ProtocolTranslationStudio = Depends(get_studio)):
     """
     Optimize translation rules for better performance.
 
@@ -299,17 +287,13 @@ async def optimize_translation(
         # Create performance data
         perf_data = PerformanceData(
             total_translations=request.performance_data.get("total_translations", 1000),
-            successful_translations=request.performance_data.get(
-                "successful_translations", 950
-            ),
+            successful_translations=request.performance_data.get("successful_translations", 950),
             failed_translations=request.performance_data.get("failed_translations", 50),
             average_latency_ms=request.performance_data.get("average_latency_ms", 2.0),
             p50_latency_ms=request.performance_data.get("p50_latency_ms", 1.5),
             p95_latency_ms=request.performance_data.get("p95_latency_ms", 3.0),
             p99_latency_ms=request.performance_data.get("p99_latency_ms", 5.0),
-            throughput_per_second=request.performance_data.get(
-                "throughput_per_second", 50000
-            ),
+            throughput_per_second=request.performance_data.get("throughput_per_second", 50000),
             error_rate=request.performance_data.get("error_rate", 0.05),
             accuracy=request.performance_data.get("accuracy", 0.95),
         )
@@ -336,9 +320,7 @@ async def optimize_translation(
 
 
 @router.post("/protocols/register", status_code=status.HTTP_201_CREATED)
-async def register_protocol(
-    spec: ProtocolSpecModel, studio: ProtocolTranslationStudio = Depends(get_studio)
-):
+async def register_protocol(spec: ProtocolSpecModel, studio: ProtocolTranslationStudio = Depends(get_studio)):
     """
     Register a new protocol specification.
 
@@ -397,9 +379,7 @@ async def list_protocols(studio: ProtocolTranslationStudio = Depends(get_studio)
 
 
 @router.get("/protocols/{protocol_id}", response_model=ProtocolSpecModel)
-async def get_protocol(
-    protocol_id: str, studio: ProtocolTranslationStudio = Depends(get_studio)
-):
+async def get_protocol(protocol_id: str, studio: ProtocolTranslationStudio = Depends(get_studio)):
     """
     Get protocol specification details.
     """

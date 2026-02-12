@@ -281,26 +281,16 @@ class LegacySystemMetrics:
     def record_system_registration(self, system_type: str, criticality: str):
         """Record system registration."""
         if PROMETHEUS_AVAILABLE:
-            self.registered_systems.labels(
-                system_type=system_type, criticality=criticality
-            ).inc()
+            self.registered_systems.labels(system_type=system_type, criticality=criticality).inc()
 
-    def record_anomaly_detection(
-        self, system_id: str, system_type: str, severity: str, duration_seconds: float
-    ):
+    def record_anomaly_detection(self, system_id: str, system_type: str, severity: str, duration_seconds: float):
         """Record anomaly detection metrics."""
         if PROMETHEUS_AVAILABLE:
-            self.anomalies_detected.labels(
-                system_id=system_id, system_type=system_type, severity=severity
-            ).inc()
+            self.anomalies_detected.labels(system_id=system_id, system_type=system_type, severity=severity).inc()
 
-            self.anomaly_detection_duration.labels(
-                system_id=system_id, system_type=system_type
-            ).observe(duration_seconds)
+            self.anomaly_detection_duration.labels(system_id=system_id, system_type=system_type).observe(duration_seconds)
 
-    def record_failure_prediction(
-        self, system_id: str, prediction_horizon: str, confidence_level: str
-    ):
+    def record_failure_prediction(self, system_id: str, prediction_horizon: str, confidence_level: str):
         """Record failure prediction metrics."""
         if PROMETHEUS_AVAILABLE:
             self.failure_predictions.labels(
@@ -309,51 +299,35 @@ class LegacySystemMetrics:
                 confidence_level=confidence_level,
             ).inc()
 
-    def update_prediction_accuracy(
-        self, system_id: str, prediction_type: str, accuracy: float
-    ):
+    def update_prediction_accuracy(self, system_id: str, prediction_type: str, accuracy: float):
         """Update prediction accuracy metrics."""
         if PROMETHEUS_AVAILABLE:
-            self.prediction_accuracy.labels(
-                system_id=system_id, prediction_type=prediction_type
-            ).set(accuracy)
+            self.prediction_accuracy.labels(system_id=system_id, prediction_type=prediction_type).set(accuracy)
 
     def record_knowledge_session(self, session_type: str, status: str):
         """Record knowledge capture session."""
         if PROMETHEUS_AVAILABLE:
-            self.knowledge_sessions.labels(
-                session_type=session_type, status=status
-            ).inc()
+            self.knowledge_sessions.labels(session_type=session_type, status=status).inc()
 
     def update_knowledge_items(self, category: str, validation_status: str, count: int):
         """Update knowledge items count."""
         if PROMETHEUS_AVAILABLE:
-            self.knowledge_items.labels(
-                category=category, validation_status=validation_status
-            ).set(count)
+            self.knowledge_items.labels(category=category, validation_status=validation_status).set(count)
 
     def record_recommendation(self, decision_category: str, confidence_level: str):
         """Record recommendation generation."""
         if PROMETHEUS_AVAILABLE:
-            self.recommendations_generated.labels(
-                decision_category=decision_category, confidence_level=confidence_level
-            ).inc()
+            self.recommendations_generated.labels(decision_category=decision_category, confidence_level=confidence_level).inc()
 
-    def record_decision_response_time(
-        self, decision_category: str, duration_seconds: float
-    ):
+    def record_decision_response_time(self, decision_category: str, duration_seconds: float):
         """Record decision support response time."""
         if PROMETHEUS_AVAILABLE:
-            self.decision_response_time.labels(
-                decision_category=decision_category
-            ).observe(duration_seconds)
+            self.decision_response_time.labels(decision_category=decision_category).observe(duration_seconds)
 
     def record_maintenance_scheduled(self, maintenance_type: str, system_type: str):
         """Record scheduled maintenance."""
         if PROMETHEUS_AVAILABLE:
-            self.maintenance_scheduled.labels(
-                maintenance_type=maintenance_type, system_type=system_type
-            ).inc()
+            self.maintenance_scheduled.labels(maintenance_type=maintenance_type, system_type=system_type).inc()
 
     def update_maintenance_optimization(self, system_id: str, score: float):
         """Update maintenance optimization score."""
@@ -370,18 +344,12 @@ class LegacySystemMetrics:
     ):
         """Record LLM request metrics."""
         if PROMETHEUS_AVAILABLE:
-            self.llm_requests.labels(
-                provider=provider, request_type=request_type, status=status
-            ).inc()
+            self.llm_requests.labels(provider=provider, request_type=request_type, status=status).inc()
 
-            self.llm_response_time.labels(
-                provider=provider, request_type=request_type
-            ).observe(duration_seconds)
+            self.llm_response_time.labels(provider=provider, request_type=request_type).observe(duration_seconds)
 
             if tokens_used > 0:
-                self.llm_token_usage.labels(
-                    provider=provider, request_type=request_type
-                ).inc(tokens_used)
+                self.llm_token_usage.labels(provider=provider, request_type=request_type).inc(tokens_used)
 
     def update_system_health(self, system_id: str, health_score: float):
         """Update system health score."""
@@ -393,29 +361,21 @@ class LegacySystemMetrics:
         if PROMETHEUS_AVAILABLE:
             self.component_status.info(component_info)
 
-    def record_resource_usage(
-        self, component: str, memory_bytes: float, cpu_percent: float
-    ):
+    def record_resource_usage(self, component: str, memory_bytes: float, cpu_percent: float):
         """Record resource usage."""
         if PROMETHEUS_AVAILABLE:
             self.memory_usage.labels(component=component).set(memory_bytes)
             self.cpu_usage.labels(component=component).set(cpu_percent)
 
-    def record_operation(
-        self, operation: str, component: str, status: str, duration_seconds: float
-    ):
+    def record_operation(self, operation: str, component: str, status: str, duration_seconds: float):
         """Record operation metrics."""
         if PROMETHEUS_AVAILABLE:
-            self.operation_duration.labels(
-                operation=operation, component=component, status=status
-            ).observe(duration_seconds)
+            self.operation_duration.labels(operation=operation, component=component, status=status).observe(duration_seconds)
 
     def record_error(self, error_category: str, severity: str, component: str):
         """Record error occurrence."""
         if PROMETHEUS_AVAILABLE:
-            self.errors_total.labels(
-                error_category=error_category, severity=severity, component=component
-            ).inc()
+            self.errors_total.labels(error_category=error_category, severity=severity, component=component).inc()
 
 
 class HealthMonitor:
@@ -647,9 +607,7 @@ class HealthMonitor:
         for component, history in self.health_history.items():
             if len(history) >= 2:
                 recent_checks = list(history)[-10:]  # Last 10 checks
-                healthy_ratio = sum(
-                    1 for check in recent_checks if check.status == HealthStatus.HEALTHY
-                ) / len(recent_checks)
+                healthy_ratio = sum(1 for check in recent_checks if check.status == HealthStatus.HEALTHY) / len(recent_checks)
 
                 if healthy_ratio >= 0.9:
                     trend = "stable"
@@ -705,17 +663,12 @@ class HealthMonitor:
                 for component, interval in self.check_intervals.items():
                     last_check = self.last_check_times.get(component)
 
-                    if (
-                        last_check is None
-                        or (current_time - last_check).total_seconds() >= interval
-                    ):
+                    if last_check is None or (current_time - last_check).total_seconds() >= interval:
                         components_to_check.append(component)
 
                 # Perform health checks
                 if components_to_check:
-                    self.logger.debug(
-                        f"Performing scheduled health checks for: {components_to_check}"
-                    )
+                    self.logger.debug(f"Performing scheduled health checks for: {components_to_check}")
 
                     for component in components_to_check:
                         try:
@@ -882,9 +835,7 @@ class AlertManager:
                     should_alert = float(metric_value) <= float(threshold)
 
             except (ValueError, TypeError):
-                self.logger.warning(
-                    f"Unable to evaluate alert rule {rule_name}: invalid metric value or threshold"
-                )
+                self.logger.warning(f"Unable to evaluate alert rule {rule_name}: invalid metric value or threshold")
                 continue
 
             # Generate alert ID based on rule and labels
@@ -901,16 +852,8 @@ class AlertManager:
                         severity=rule["severity"],
                         source_component="legacy_system_whisperer",
                         metric_name=metric_name,
-                        threshold_value=(
-                            float(threshold)
-                            if isinstance(threshold, (int, float))
-                            else None
-                        ),
-                        current_value=(
-                            float(metric_value)
-                            if isinstance(metric_value, (int, float))
-                            else None
-                        ),
+                        threshold_value=(float(threshold) if isinstance(threshold, (int, float)) else None),
+                        current_value=(float(metric_value) if isinstance(metric_value, (int, float)) else None),
                         labels={**labels, **rule.get("labels", {})},
                     )
 
@@ -989,9 +932,7 @@ class AlertManager:
             f"ALERT RESOLVED: {alert.title}",
             extra_data={
                 "alert_id": alert_id,
-                "duration_seconds": (
-                    alert.resolution_timestamp - alert.timestamp
-                ).total_seconds(),
+                "duration_seconds": (alert.resolution_timestamp - alert.timestamp).total_seconds(),
             },
         )
 
@@ -1011,11 +952,7 @@ class AlertManager:
                     recent_alerts = [
                         a
                         for a in self.alert_history
-                        if (
-                            a.title == alert.title
-                            and datetime.now(timezone.utc) - a.timestamp
-                            < timedelta(hours=1)
-                        )
+                        if (a.title == alert.title and datetime.now(timezone.utc) - a.timestamp < timedelta(hours=1))
                     ]
 
                     if len(recent_alerts) >= suppression["max_alerts_per_hour"]:
@@ -1051,11 +988,7 @@ class AlertManager:
         """Get alert summary statistics."""
 
         now = datetime.now(timezone.utc)
-        last_hour_alerts = [
-            alert
-            for alert in self.alert_history
-            if now - alert.timestamp < timedelta(hours=1)
-        ]
+        last_hour_alerts = [alert for alert in self.alert_history if now - alert.timestamp < timedelta(hours=1)]
 
         severity_counts = defaultdict(int)
         for alert in self.active_alerts.values():
@@ -1064,17 +997,9 @@ class AlertManager:
         return {
             "active_alerts": len(self.active_alerts),
             "alerts_last_hour": len(last_hour_alerts),
-            "total_alerts_today": len(
-                [
-                    alert
-                    for alert in self.alert_history
-                    if now - alert.timestamp < timedelta(days=1)
-                ]
-            ),
+            "total_alerts_today": len([alert for alert in self.alert_history if now - alert.timestamp < timedelta(days=1)]),
             "severity_breakdown": dict(severity_counts),
-            "oldest_active_alert": min(
-                (alert.timestamp for alert in self.active_alerts.values()), default=None
-            ),
+            "oldest_active_alert": min((alert.timestamp for alert in self.active_alerts.values()), default=None),
         }
 
 
@@ -1154,22 +1079,16 @@ class LegacySystemMonitor:
                 )
 
         # Register health checks
-        self.health_monitor.register_health_check(
-            "legacy_whisperer_service", service_health_check, interval_seconds=30
-        )
+        self.health_monitor.register_health_check("legacy_whisperer_service", service_health_check, interval_seconds=30)
 
-        self.health_monitor.register_health_check(
-            "memory", memory_health_check, interval_seconds=60
-        )
+        self.health_monitor.register_health_check("memory", memory_health_check, interval_seconds=60)
 
     def _setup_default_alert_handlers(self):
         """Setup default alert handlers."""
 
         def log_alert_handler(alert: Alert):
             """Log alert to system logs."""
-            log_level = (
-                "critical" if alert.severity == AlertSeverity.EMERGENCY else "error"
-            )
+            log_level = "critical" if alert.severity == AlertSeverity.EMERGENCY else "error"
 
             self.logger.log_structured(
                 getattr(self.logger, log_level.upper()),
@@ -1198,9 +1117,7 @@ class LegacySystemMonitor:
             await self.health_monitor.start_monitoring()
 
             # Start resource monitoring
-            self.resource_monitor_task = asyncio.create_task(
-                self._resource_monitoring_loop()
-            )
+            self.resource_monitor_task = asyncio.create_task(self._resource_monitoring_loop())
 
             self.monitoring_started = True
             self.logger.info("Legacy System Whisperer monitoring started")
@@ -1298,9 +1215,7 @@ class LegacySystemMonitor:
         return generate_latest(self.metrics.registry)
 
     @contextmanager
-    def monitor_operation(
-        self, operation: str, component: str, system_id: Optional[str] = None
-    ):
+    def monitor_operation(self, operation: str, component: str, system_id: Optional[str] = None):
         """Context manager for monitoring operations."""
 
         start_time = time.time()
@@ -1333,17 +1248,11 @@ class LegacySystemMonitor:
     # Convenience methods for recording specific metrics
     def record_system_registration(self, system_context: LegacySystemContext):
         """Record system registration."""
-        self.metrics.record_system_registration(
-            system_context.system_type.value, system_context.criticality.value
-        )
+        self.metrics.record_system_registration(system_context.system_type.value, system_context.criticality.value)
 
-    def record_anomaly_detection(
-        self, system_id: str, system_type: str, severity: str, duration_seconds: float
-    ):
+    def record_anomaly_detection(self, system_id: str, system_type: str, severity: str, duration_seconds: float):
         """Record anomaly detection."""
-        self.metrics.record_anomaly_detection(
-            system_id, system_type, severity, duration_seconds
-        )
+        self.metrics.record_anomaly_detection(system_id, system_type, severity, duration_seconds)
 
     def record_knowledge_session(self, session_type: str, status: str):
         """Record knowledge capture session."""
@@ -1358,9 +1267,7 @@ class LegacySystemMonitor:
         tokens_used: int = 0,
     ):
         """Record LLM request."""
-        self.metrics.record_llm_request(
-            provider, request_type, status, duration_seconds, tokens_used
-        )
+        self.metrics.record_llm_request(provider, request_type, status, duration_seconds, tokens_used)
 
 
 def create_legacy_monitor(

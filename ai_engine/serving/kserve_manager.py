@@ -365,9 +365,7 @@ class KServeManager:
             self._deployments[config.name] = deployment
 
             if wait_ready:
-                deployment = await self._wait_for_ready(
-                    config.name, timeout
-                )
+                deployment = await self._wait_for_ready(config.name, timeout)
 
             # Start health check task
             self._start_health_check(config.name)
@@ -516,10 +514,7 @@ class KServeManager:
 
         if self._k8s_client:
             try:
-                await self._delete_inference_service(
-                    name,
-                    deployment.namespace if deployment else self.namespace
-                )
+                await self._delete_inference_service(name, deployment.namespace if deployment else self.namespace)
             except Exception as e:
                 if "NotFound" not in str(e):
                     raise
@@ -607,14 +602,16 @@ class KServeManager:
 
         # Runtime-specific configuration
         if config.runtime == RuntimeType.VLLM:
-            predictor_spec["containers"] = [{
-                "name": "kserve-container",
-                "image": config.get_runtime_image(),
-                "args": self._build_vllm_args(config),
-                "env": [{"name": k, "value": v} for k, v in config.env.items()],
-                "resources": config.resources.to_k8s_resources(),
-                "ports": [{"containerPort": 8000, "protocol": "TCP"}],
-            }]
+            predictor_spec["containers"] = [
+                {
+                    "name": "kserve-container",
+                    "image": config.get_runtime_image(),
+                    "args": self._build_vllm_args(config),
+                    "env": [{"name": k, "value": v} for k, v in config.env.items()],
+                    "resources": config.resources.to_k8s_resources(),
+                    "ports": [{"containerPort": 8000, "protocol": "TCP"}],
+                }
+            ]
         elif config.runtime == RuntimeType.TRITON:
             predictor_spec["triton"] = {
                 "storageUri": config.model_uri,
@@ -644,14 +641,16 @@ class KServeManager:
             }
         else:
             # Custom runtime
-            predictor_spec["containers"] = [{
-                "name": "kserve-container",
-                "image": config.get_runtime_image(),
-                "command": config.command,
-                "args": config.args,
-                "env": [{"name": k, "value": v} for k, v in config.env.items()],
-                "resources": config.resources.to_k8s_resources(),
-            }]
+            predictor_spec["containers"] = [
+                {
+                    "name": "kserve-container",
+                    "image": config.get_runtime_image(),
+                    "command": config.command,
+                    "args": config.args,
+                    "env": [{"name": k, "value": v} for k, v in config.env.items()],
+                    "resources": config.resources.to_k8s_resources(),
+                }
+            ]
 
         # Add node selector and tolerations
         if config.resources.node_selector:
@@ -669,15 +668,17 @@ class KServeManager:
         # Add transformer if configured
         if config.transformer_image:
             spec["transformer"] = {
-                "containers": [{
-                    "name": "transformer",
-                    "image": config.transformer_image,
-                    "resources": (
-                        config.transformer_resources.to_k8s_resources()
-                        if config.transformer_resources
-                        else config.resources.to_k8s_resources()
-                    ),
-                }]
+                "containers": [
+                    {
+                        "name": "transformer",
+                        "image": config.transformer_image,
+                        "resources": (
+                            config.transformer_resources.to_k8s_resources()
+                            if config.transformer_resources
+                            else config.resources.to_k8s_resources()
+                        ),
+                    }
+                ]
             }
 
         # Add explainer if configured
@@ -719,9 +720,12 @@ class KServeManager:
     def _build_vllm_args(self, config: InferenceServiceConfig) -> List[str]:
         """Build vLLM server arguments."""
         args = [
-            "--model", config.model_uri,
-            "--port", "8000",
-            "--host", "0.0.0.0",
+            "--model",
+            config.model_uri,
+            "--port",
+            "8000",
+            "--host",
+            "0.0.0.0",
         ]
 
         if config.resources.gpu_count > 1:
@@ -936,14 +940,13 @@ class KServeManager:
         if deployment.url:
             try:
                 import httpx
+
                 async with httpx.AsyncClient() as client:
                     response = await client.get(
                         f"{deployment.url}/v2/health/ready",
                         timeout=10,
                     )
-                    deployment.health_status = (
-                        "healthy" if response.status_code == 200 else "unhealthy"
-                    )
+                    deployment.health_status = "healthy" if response.status_code == 200 else "unhealthy"
             except ImportError:
                 deployment.health_status = "unknown"
             except Exception:
@@ -953,11 +956,14 @@ class KServeManager:
 
     def _compute_model_hash(self, config: InferenceServiceConfig) -> str:
         """Compute hash of model configuration."""
-        hash_data = json.dumps({
-            "model_uri": config.model_uri,
-            "runtime": config.runtime.value,
-            "image": config.get_runtime_image(),
-        }, sort_keys=True)
+        hash_data = json.dumps(
+            {
+                "model_uri": config.model_uri,
+                "runtime": config.runtime.value,
+                "image": config.get_runtime_image(),
+            },
+            sort_keys=True,
+        )
         return hashlib.sha256(hash_data.encode()).hexdigest()[:12]
 
     def _notify_callbacks(self, deployment: ModelDeployment) -> None:

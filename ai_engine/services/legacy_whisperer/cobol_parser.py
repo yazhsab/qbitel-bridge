@@ -74,9 +74,7 @@ class COBOLParserService:
                 byte_sequences[seq] = byte_sequences.get(seq, 0) + 1
 
         # Find common sequences (appear in >50% of samples)
-        for seq, count in sorted(
-            byte_sequences.items(), key=lambda x: x[1], reverse=True
-        )[:5]:
+        for seq, count in sorted(byte_sequences.items(), key=lambda x: x[1], reverse=True)[:5]:
             if count > len(samples) * 0.5:
                 patterns.append(
                     ProtocolPattern(
@@ -111,9 +109,7 @@ class COBOLParserService:
 
         return patterns
 
-    async def infer_protocol_structure(
-        self, samples: List[bytes], patterns: List[ProtocolPattern]
-    ) -> List[ProtocolField]:
+    async def infer_protocol_structure(self, samples: List[bytes], patterns: List[ProtocolPattern]) -> List[ProtocolField]:
         """
         Infer protocol field structure using LLM.
 
@@ -193,9 +189,7 @@ class COBOLParserService:
                 )
             ]
 
-    async def identify_message_types(
-        self, samples: List[bytes], fields: List[ProtocolField]
-    ) -> List[Dict[str, Any]]:
+    async def identify_message_types(self, samples: List[bytes], fields: List[ProtocolField]) -> List[Dict[str, Any]]:
         """
         Identify different message types in the protocol.
 

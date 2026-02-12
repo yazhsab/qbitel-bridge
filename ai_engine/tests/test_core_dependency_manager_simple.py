@@ -157,9 +157,7 @@ class TestDependencyManager:
 
             assert is_valid is True
 
-    def test_validate_dependency_requirements_version_mismatch(
-        self, dependency_manager
-    ):
+    def test_validate_dependency_requirements_version_mismatch(self, dependency_manager):
         """Test validating dependency requirements with version mismatch."""
         with patch("importlib.import_module") as mock_import:
             mock_module = MagicMock()
@@ -205,9 +203,7 @@ class TestDependencyManager:
 
     def test_get_missing_dependencies(self, dependency_manager):
         """Test getting missing dependencies."""
-        with patch.object(
-            dependency_manager, "check_dependency_available", return_value=False
-        ):
+        with patch.object(dependency_manager, "check_dependency_available", return_value=False):
             missing = dependency_manager.get_missing_dependencies()
 
             assert isinstance(missing, list)
@@ -215,9 +211,7 @@ class TestDependencyManager:
 
     def test_get_available_dependencies(self, dependency_manager):
         """Test getting available dependencies."""
-        with patch.object(
-            dependency_manager, "check_dependency_available", return_value=True
-        ):
+        with patch.object(dependency_manager, "check_dependency_available", return_value=True):
             available = dependency_manager.get_available_dependencies()
 
             assert isinstance(available, list)
@@ -225,9 +219,7 @@ class TestDependencyManager:
 
     def test_get_dependency_status_summary(self, dependency_manager):
         """Test getting dependency status summary."""
-        with patch.object(
-            dependency_manager, "check_dependency_available"
-        ) as mock_check:
+        with patch.object(dependency_manager, "check_dependency_available") as mock_check:
             mock_check.return_value = True
 
             summary = dependency_manager.get_dependency_status_summary()

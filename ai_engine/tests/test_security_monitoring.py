@@ -21,9 +21,7 @@ class _DummyLogger:
         self.name = name
         self.events = []
 
-    def log_security_event(
-        self, log_type, message, level=None, metadata=None, **kwargs
-    ):
+    def log_security_event(self, log_type, message, level=None, metadata=None, **kwargs):
         entry = {
             "log_type": log_type,
             "message": message,
@@ -120,9 +118,7 @@ async def test_health_check_manager_runs_registered_checks(stub_security_logger)
 
     # Verify logging captured the events
     logger = stub_security_logger["qbitel.security.monitoring"]
-    assert any(
-        "Health check for database" in event["message"] for event in logger.events
-    )
+    assert any("Health check for database" in event["message"] for event in logger.events)
 
 
 @pytest.mark.asyncio
@@ -142,9 +138,7 @@ async def test_health_check_manager_background_loop_updates_results():
 @pytest.mark.asyncio
 async def test_health_check_manager_handles_exceptions():
     manager = HealthCheckManager()
-    manager.register_health_check(
-        "explosive", lambda: (_ for _ in ()).throw(RuntimeError("boom"))
-    )
+    manager.register_health_check("explosive", lambda: (_ for _ in ()).throw(RuntimeError("boom")))
 
     result = await manager.run_health_check("explosive")
 
@@ -169,10 +163,7 @@ def test_performance_monitor_tracks_metrics(stub_security_logger):
 
     logger = stub_security_logger["qbitel.security.monitoring"]
     monitor_logger_messages = [event["message"] for event in logger.events]
-    assert (
-        any("Performance monitoring started" in msg for msg in monitor_logger_messages)
-        is False
-    )
+    assert any("Performance monitoring started" in msg for msg in monitor_logger_messages) is False
 
 
 @pytest.mark.asyncio
@@ -210,9 +201,7 @@ async def test_security_monitor_lifecycle(monkeypatch, stub_security_logger):
     monitor.health_check_manager.stop_background_checks = AsyncMock()
     monitor.performance_monitor.start_monitoring = AsyncMock()
     monitor.performance_monitor.stop_monitoring = AsyncMock()
-    monitor.performance_monitor.record_security_event = (
-        lambda duration, success=True: None
-    )
+    monitor.performance_monitor.record_security_event = lambda duration, success=True: None
 
     await monitor.initialize()
     assert monitor._initialized is True
@@ -229,12 +218,8 @@ async def test_security_monitor_lifecycle(monkeypatch, stub_security_logger):
     logger = stub_security_logger["qbitel.security.monitoring"]
     messages = [event["message"] for event in logger.events]
     assert any("Security orchestration monitor initialized" in msg for msg in messages)
-    assert any(
-        "Security orchestration monitor started successfully" in msg for msg in messages
-    )
-    assert any(
-        "Security orchestration monitor stopped successfully" in msg for msg in messages
-    )
+    assert any("Security orchestration monitor started successfully" in msg for msg in messages)
+    assert any("Security orchestration monitor stopped successfully" in msg for msg in messages)
 
 
 def test_security_monitor_reporting(monkeypatch):

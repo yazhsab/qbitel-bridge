@@ -105,9 +105,7 @@ class RoutingConfig:
     # Retry configuration
     max_retries: int = 2
     retry_delay_ms: int = 100
-    retry_on_status: List[int] = field(
-        default_factory=lambda: [502, 503, 504]
-    )
+    retry_on_status: List[int] = field(default_factory=lambda: [502, 503, 504])
 
     # Timeout
     request_timeout: int = 300
@@ -394,9 +392,7 @@ class ModelRouter:
 
         # Filter to only healthy endpoints
         available_endpoints = [
-            (name, weight)
-            for name, weight in zip(endpoint_names, weights)
-            if name in [e.name for e in endpoints]
+            (name, weight) for name, weight in zip(endpoint_names, weights) if name in [e.name for e in endpoints]
         ]
 
         if not available_endpoints:
@@ -410,10 +406,7 @@ class ModelRouter:
         if split.sticky:
             sticky_key = self._get_sticky_key(context, split.split_key)
             if sticky_key:
-                self._sticky_sessions[sticky_key] = (
-                    selected_name,
-                    datetime.utcnow()
-                )
+                self._sticky_sessions[sticky_key] = (selected_name, datetime.utcnow())
 
         return endpoint
 
@@ -546,10 +539,7 @@ class ModelRouter:
         current_time = time.time()
         window_seconds = self.config.dedup_window_ms / 1000
 
-        expired = [
-            key for key, (_, cache_time) in self._dedup_cache.items()
-            if current_time - cache_time > window_seconds
-        ]
+        expired = [key for key, (_, cache_time) in self._dedup_cache.items() if current_time - cache_time > window_seconds]
 
         for key in expired:
             del self._dedup_cache[key]
@@ -586,10 +576,7 @@ class ModelRouter:
 
     async def _run_health_checks(self) -> None:
         """Run health checks on all endpoints."""
-        tasks = [
-            self._check_endpoint_health(endpoint)
-            for endpoint in self._endpoints.values()
-        ]
+        tasks = [self._check_endpoint_health(endpoint) for endpoint in self._endpoints.values()]
         await asyncio.gather(*tasks, return_exceptions=True)
 
     async def _check_endpoint_health(self, endpoint: ModelEndpoint) -> None:

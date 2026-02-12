@@ -38,7 +38,6 @@ from ai_engine.api.copilot_endpoints import (
 from ai_engine.copilot.protocol_copilot import CopilotQuery, CopilotResponse
 from ai_engine.core.exceptions import QbitelAIException
 
-
 # Fixtures
 
 
@@ -138,24 +137,18 @@ def test_copilot_query_request_max_length():
 
 
 @pytest.mark.asyncio
-async def test_process_copilot_query_success(
-    mock_copilot, mock_current_user, mock_background_tasks, sample_copilot_response
-):
+async def test_process_copilot_query_success(mock_copilot, mock_current_user, mock_background_tasks, sample_copilot_response):
     """Test successful copilot query processing."""
     request = CopilotQueryRequest(query="What protocol is this?")
 
     mock_copilot.process_query.return_value = sample_copilot_response
 
-    with patch(
-        "ai_engine.api.copilot_endpoints.get_copilot", return_value=mock_copilot
-    ):
+    with patch("ai_engine.api.copilot_endpoints.get_copilot", return_value=mock_copilot):
         with patch(
             "ai_engine.api.copilot_endpoints.get_current_user",
             return_value=mock_current_user,
         ):
-            response = await process_copilot_query(
-                request, mock_background_tasks, mock_current_user, mock_copilot
-            )
+            response = await process_copilot_query(request, mock_background_tasks, mock_current_user, mock_copilot)
 
             assert isinstance(response, CopilotQueryResponse)
             assert response.response == "This is HTTP traffic on port 80."
@@ -171,15 +164,11 @@ async def test_process_copilot_query_with_session_id(
     mock_copilot, mock_current_user, mock_background_tasks, sample_copilot_response
 ):
     """Test query with existing session ID."""
-    request = CopilotQueryRequest(
-        query="Follow-up question", session_id="existing-session-123"
-    )
+    request = CopilotQueryRequest(query="Follow-up question", session_id="existing-session-123")
 
     mock_copilot.process_query.return_value = sample_copilot_response
 
-    response = await process_copilot_query(
-        request, mock_background_tasks, mock_current_user, mock_copilot
-    )
+    response = await process_copilot_query(request, mock_background_tasks, mock_current_user, mock_copilot)
 
     assert response.session_id == "existing-session-123"
 
@@ -196,9 +185,7 @@ async def test_process_copilot_query_with_packet_data(
 
     mock_copilot.process_query.return_value = sample_copilot_response
 
-    response = await process_copilot_query(
-        request, mock_background_tasks, mock_current_user, mock_copilot
-    )
+    response = await process_copilot_query(request, mock_background_tasks, mock_current_user, mock_copilot)
 
     # Verify packet_data was decoded and passed to copilot
     call_args = mock_copilot.process_query.call_args[0][0]
@@ -210,15 +197,11 @@ async def test_process_copilot_query_with_context(
     mock_copilot, mock_current_user, mock_background_tasks, sample_copilot_response
 ):
     """Test query with additional context."""
-    request = CopilotQueryRequest(
-        query="Is this suspicious?", context={"ip": "10.0.0.1", "port": 443}
-    )
+    request = CopilotQueryRequest(query="Is this suspicious?", context={"ip": "10.0.0.1", "port": 443})
 
     mock_copilot.process_query.return_value = sample_copilot_response
 
-    response = await process_copilot_query(
-        request, mock_background_tasks, mock_current_user, mock_copilot
-    )
+    response = await process_copilot_query(request, mock_background_tasks, mock_current_user, mock_copilot)
 
     # Verify context was passed
     call_args = mock_copilot.process_query.call_args[0][0]
@@ -234,9 +217,7 @@ async def test_process_copilot_query_background_task(
 
     mock_copilot.process_query.return_value = sample_copilot_response
 
-    await process_copilot_query(
-        request, mock_background_tasks, mock_current_user, mock_copilot
-    )
+    await process_copilot_query(request, mock_background_tasks, mock_current_user, mock_copilot)
 
     # Verify background task was added
     mock_background_tasks.add_task.assert_called_once()
@@ -244,36 +225,28 @@ async def test_process_copilot_query_background_task(
 
 
 @pytest.mark.asyncio
-async def test_process_copilot_query_qbitel_exception(
-    mock_copilot, mock_current_user, mock_background_tasks
-):
+async def test_process_copilot_query_qbitel_exception(mock_copilot, mock_current_user, mock_background_tasks):
     """Test handling of QbitelAIException."""
     request = CopilotQueryRequest(query="Test")
 
     mock_copilot.process_query.side_effect = QbitelAIException("Processing failed")
 
     with pytest.raises(HTTPException) as exc_info:
-        await process_copilot_query(
-            request, mock_background_tasks, mock_current_user, mock_copilot
-        )
+        await process_copilot_query(request, mock_background_tasks, mock_current_user, mock_copilot)
 
     assert exc_info.value.status_code == 400
     assert "Processing failed" in str(exc_info.value.detail)
 
 
 @pytest.mark.asyncio
-async def test_process_copilot_query_unexpected_exception(
-    mock_copilot, mock_current_user, mock_background_tasks
-):
+async def test_process_copilot_query_unexpected_exception(mock_copilot, mock_current_user, mock_background_tasks):
     """Test handling of unexpected exceptions."""
     request = CopilotQueryRequest(query="Test")
 
     mock_copilot.process_query.side_effect = Exception("Unexpected error")
 
     with pytest.raises(HTTPException) as exc_info:
-        await process_copilot_query(
-            request, mock_background_tasks, mock_current_user, mock_copilot
-        )
+        await process_copilot_query(request, mock_background_tasks, mock_current_user, mock_copilot)
 
     assert exc_info.value.status_code == 500
     assert "Internal server error" in str(exc_info.value.detail)
@@ -305,9 +278,7 @@ async def test_get_user_sessions_with_limit(mock_copilot, mock_current_user):
 
     await get_user_sessions(5, mock_current_user, mock_copilot)
 
-    mock_copilot.context_manager.get_user_sessions.assert_called_with(
-        mock_current_user["user_id"], 5
-    )
+    mock_copilot.context_manager.get_user_sessions.assert_called_with(mock_current_user["user_id"], 5)
 
 
 @pytest.mark.asyncio
@@ -431,9 +402,7 @@ async def test_get_copilot_health_error():
 
 def test_websocket_message_creation():
     """Test WebSocket message creation."""
-    message = WebSocketMessage(
-        type="query", data={"query": "Test"}, correlation_id="corr-123"
-    )
+    message = WebSocketMessage(type="query", data={"query": "Test"}, correlation_id="corr-123")
 
     assert message.type == "query"
     assert message.data["query"] == "Test"
@@ -459,9 +428,7 @@ def test_websocket_message_json():
 async def test_log_query_analytics_success():
     """Test query analytics logging."""
     # Should not raise exception
-    await log_query_analytics(
-        "user-123", "What is this protocol?", "protocol_analysis", 0.95
-    )
+    await log_query_analytics("user-123", "What is this protocol?", "protocol_analysis", 0.95)
 
 
 @pytest.mark.asyncio
@@ -481,9 +448,7 @@ async def test_log_query_analytics_error():
 @pytest.mark.asyncio
 async def test_get_copilot_singleton():
     """Test copilot singleton pattern."""
-    with patch(
-        "ai_engine.api.copilot_endpoints.create_protocol_copilot"
-    ) as mock_create:
+    with patch("ai_engine.api.copilot_endpoints.create_protocol_copilot") as mock_create:
         mock_copilot = AsyncMock()
         mock_create.return_value = mock_copilot
 
@@ -501,9 +466,7 @@ async def test_get_copilot_singleton():
 
 
 @pytest.mark.asyncio
-async def test_full_query_workflow(
-    mock_copilot, mock_current_user, sample_copilot_response
-):
+async def test_full_query_workflow(mock_copilot, mock_current_user, sample_copilot_response):
     """Test complete query workflow."""
     # Setup
     mock_copilot.process_query.return_value = sample_copilot_response
@@ -513,9 +476,7 @@ async def test_full_query_workflow(
     request = CopilotQueryRequest(query="Analyze this traffic")
     background_tasks = Mock(spec=BackgroundTasks)
 
-    response = await process_copilot_query(
-        request, background_tasks, mock_current_user, mock_copilot
-    )
+    response = await process_copilot_query(request, background_tasks, mock_current_user, mock_copilot)
 
     session_id = response.session_id
 
@@ -547,9 +508,7 @@ async def test_full_query_workflow(
 
 
 @pytest.mark.asyncio
-async def test_multiple_queries_same_session(
-    mock_copilot, mock_current_user, sample_copilot_response
-):
+async def test_multiple_queries_same_session(mock_copilot, mock_current_user, sample_copilot_response):
     """Test multiple queries in same session."""
     mock_copilot.process_query.return_value = sample_copilot_response
 
@@ -559,17 +518,13 @@ async def test_multiple_queries_same_session(
     for i in range(3):
         request = CopilotQueryRequest(query=f"Query {i}", session_id=session_id)
 
-        response = await process_copilot_query(
-            request, Mock(spec=BackgroundTasks), mock_current_user, mock_copilot
-        )
+        response = await process_copilot_query(request, Mock(spec=BackgroundTasks), mock_current_user, mock_copilot)
 
         assert response.session_id == session_id
 
 
 @pytest.mark.asyncio
-async def test_concurrent_queries(
-    mock_copilot, mock_current_user, sample_copilot_response
-):
+async def test_concurrent_queries(mock_copilot, mock_current_user, sample_copilot_response):
     """Test handling concurrent queries."""
     mock_copilot.process_query.return_value = sample_copilot_response
 
@@ -578,12 +533,7 @@ async def test_concurrent_queries(
 
     # Process concurrently
     results = await asyncio.gather(
-        *[
-            process_copilot_query(
-                query, Mock(spec=BackgroundTasks), mock_current_user, mock_copilot
-            )
-            for query in queries
-        ]
+        *[process_copilot_query(query, Mock(spec=BackgroundTasks), mock_current_user, mock_copilot) for query in queries]
     )
 
     assert len(results) == 5
@@ -620,9 +570,7 @@ def test_metrics_counters_exist():
 
 
 @pytest.mark.asyncio
-async def test_process_query_empty_suggestions(
-    mock_copilot, mock_current_user, mock_background_tasks
-):
+async def test_process_query_empty_suggestions(mock_copilot, mock_current_user, mock_background_tasks):
     """Test handling of None suggestions."""
     response_data = CopilotResponse(
         response="Answer",
@@ -639,9 +587,7 @@ async def test_process_query_empty_suggestions(
 
     request = CopilotQueryRequest(query="Test")
 
-    response = await process_copilot_query(
-        request, mock_background_tasks, mock_current_user, mock_copilot
-    )
+    response = await process_copilot_query(request, mock_background_tasks, mock_current_user, mock_copilot)
 
     # Should convert None to empty list
     assert response.suggestions == []
@@ -649,9 +595,7 @@ async def test_process_query_empty_suggestions(
 
 
 @pytest.mark.asyncio
-async def test_process_query_large_context(
-    mock_copilot, mock_current_user, mock_background_tasks, sample_copilot_response
-):
+async def test_process_query_large_context(mock_copilot, mock_current_user, mock_background_tasks, sample_copilot_response):
     """Test query with large context dictionary."""
     large_context = {f"key_{i}": f"value_{i}" for i in range(100)}
 
@@ -660,9 +604,7 @@ async def test_process_query_large_context(
     mock_copilot.process_query.return_value = sample_copilot_response
 
     # Should handle large context
-    response = await process_copilot_query(
-        request, mock_background_tasks, mock_current_user, mock_copilot
-    )
+    response = await process_copilot_query(request, mock_background_tasks, mock_current_user, mock_copilot)
 
     assert response is not None
 

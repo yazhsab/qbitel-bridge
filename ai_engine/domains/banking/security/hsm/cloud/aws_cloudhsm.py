@@ -46,7 +46,6 @@ from ai_engine.domains.banking.security.hsm.hsm_provider import (
     KEMEncapsulationResult,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -176,19 +175,14 @@ class AWSCloudHSMProvider(HSMProvider):
 
         with self._lock:
             try:
-                logger.info(
-                    f"Connecting to AWS CloudHSM cluster: {self._aws_config.cluster_id}"
-                )
+                logger.info(f"Connecting to AWS CloudHSM cluster: {self._aws_config.cluster_id}")
 
                 # Initialize AWS clients if CloudWatch enabled
                 if self._aws_config.enable_cloudwatch:
                     self._init_cloudwatch_client()
 
                 # Discover cluster if only cluster_id provided
-                if (
-                    self._aws_config.cluster_id
-                    and not self._aws_config.hsm_ip_addresses
-                ):
+                if self._aws_config.cluster_id and not self._aws_config.hsm_ip_addresses:
                     self._discover_cluster()
 
                 # Load PKCS#11 library
@@ -331,13 +325,9 @@ class AWSCloudHSMProvider(HSMProvider):
 
             # Use first available slot or configured slot
             if self._aws_config.slot_id is not None:
-                matching_slots = [
-                    s for s in slots if getattr(s, "slot_id", 0) == self._aws_config.slot_id
-                ]
+                matching_slots = [s for s in slots if getattr(s, "slot_id", 0) == self._aws_config.slot_id]
                 if not matching_slots:
-                    raise HSMConnectionError(
-                        f"Slot {self._aws_config.slot_id} not found"
-                    )
+                    raise HSMConnectionError(f"Slot {self._aws_config.slot_id} not found")
                 self._slot_id = matching_slots[0]
             else:
                 self._slot_id = slots[0]
@@ -378,41 +368,29 @@ class AWSCloudHSMProvider(HSMProvider):
 
             if self._aws_config.aws_access_key_id:
                 session_kwargs["aws_access_key_id"] = self._aws_config.aws_access_key_id
-                session_kwargs["aws_secret_access_key"] = (
-                    self._aws_config.aws_secret_access_key
-                )
+                session_kwargs["aws_secret_access_key"] = self._aws_config.aws_secret_access_key
                 if self._aws_config.aws_session_token:
-                    session_kwargs["aws_session_token"] = (
-                        self._aws_config.aws_session_token
-                    )
+                    session_kwargs["aws_session_token"] = self._aws_config.aws_session_token
 
             client = boto3.client("cloudhsmv2", **session_kwargs)
 
             # Describe clusters
-            response = client.describe_clusters(
-                Filters={"clusterIds": [self._aws_config.cluster_id]}
-            )
+            response = client.describe_clusters(Filters={"clusterIds": [self._aws_config.cluster_id]})
 
             if not response.get("Clusters"):
-                raise HSMConnectionError(
-                    f"Cluster not found: {self._aws_config.cluster_id}"
-                )
+                raise HSMConnectionError(f"Cluster not found: {self._aws_config.cluster_id}")
 
             cluster = response["Clusters"][0]
             self._cluster_info = cluster
 
             # Extract HSM IP addresses
             hsms = cluster.get("Hsms", [])
-            self._aws_config.hsm_ip_addresses = [
-                hsm["EniIp"] for hsm in hsms if hsm.get("State") == "ACTIVE"
-            ]
+            self._aws_config.hsm_ip_addresses = [hsm["EniIp"] for hsm in hsms if hsm.get("State") == "ACTIVE"]
 
             if not self._aws_config.hsm_ip_addresses:
                 raise HSMConnectionError("No active HSMs in cluster")
 
-            logger.info(
-                f"Discovered {len(self._aws_config.hsm_ip_addresses)} active HSMs"
-            )
+            logger.info(f"Discovered {len(self._aws_config.hsm_ip_addresses)} active HSMs")
 
         except ImportError:
             logger.warning("boto3 not available, using configured IP addresses")
@@ -428,9 +406,7 @@ class AWSCloudHSMProvider(HSMProvider):
 
             if self._aws_config.aws_access_key_id:
                 session_kwargs["aws_access_key_id"] = self._aws_config.aws_access_key_id
-                session_kwargs["aws_secret_access_key"] = (
-                    self._aws_config.aws_secret_access_key
-                )
+                session_kwargs["aws_secret_access_key"] = self._aws_config.aws_secret_access_key
 
             self._metrics_client = boto3.client("cloudwatch", **session_kwargs)
             logger.debug("CloudWatch metrics client initialized")
@@ -440,9 +416,7 @@ class AWSCloudHSMProvider(HSMProvider):
         except Exception as e:
             logger.warning(f"CloudWatch initialization failed: {e}")
 
-    def _emit_metric(
-        self, metric_name: str, value: float, unit: str = "Count"
-    ) -> None:
+    def _emit_metric(self, metric_name: str, value: float, unit: str = "Count") -> None:
         """Emit a metric to CloudWatch."""
         if not self._metrics_client:
             return
@@ -579,9 +553,7 @@ class AWSCloudHSMProvider(HSMProvider):
             raise HSMConnectionError("Not connected to HSM")
 
         if key_type.is_pqc:
-            raise HSMCapabilityError(
-                "AWS CloudHSM does not natively support PQC algorithms"
-            )
+            raise HSMCapabilityError("AWS CloudHSM does not natively support PQC algorithms")
 
         with self._lock:
             try:
@@ -802,9 +774,7 @@ class AWSCloudHSMProvider(HSMProvider):
                 # Simulate AES-GCM encryption
                 if algorithm == HSMAlgorithm.AES_GCM:
                     key_data = os.urandom(32)  # Simulated key data
-                    cipher = Cipher(
-                        algorithms.AES(key_data), modes.GCM(iv), backend=default_backend()
-                    )
+                    cipher = Cipher(algorithms.AES(key_data), modes.GCM(iv), backend=default_backend())
                     encryptor = cipher.encryptor()
 
                     if aad:
@@ -822,9 +792,7 @@ class AWSCloudHSMProvider(HSMProvider):
                 else:
                     # CBC mode
                     key_data = os.urandom(32)
-                    cipher = Cipher(
-                        algorithms.AES(key_data), modes.CBC(iv), backend=default_backend()
-                    )
+                    cipher = Cipher(algorithms.AES(key_data), modes.CBC(iv), backend=default_backend())
                     encryptor = cipher.encryptor()
 
                     # Pad plaintext

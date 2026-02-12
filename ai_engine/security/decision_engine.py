@@ -38,7 +38,6 @@ from .threat_analyzer import ThreatAnalyzer
 
 from prometheus_client import Counter, Histogram, Gauge
 
-
 _METRIC_CACHE = {}
 
 
@@ -62,21 +61,15 @@ DECISION_COUNTER = _get_metric(
     "Security decisions made",
     ["decision_type", "confidence_level"],
 )
-DECISION_DURATION = _get_metric(
-    Histogram, "qbitel_security_decision_duration_seconds", "Decision making duration"
-)
+DECISION_DURATION = _get_metric(Histogram, "qbitel_security_decision_duration_seconds", "Decision making duration")
 RESPONSE_EXECUTION_COUNTER = _get_metric(
     Counter,
     "qbitel_security_responses_total",
     "Security responses executed",
     ["response_type", "status"],
 )
-AUTO_EXECUTE_GAUGE = _get_metric(
-    Gauge, "qbitel_security_auto_executions", "Autonomous executions per hour"
-)
-HUMAN_ESCALATIONS_GAUGE = _get_metric(
-    Gauge, "qbitel_security_human_escalations", "Human escalations per hour"
-)
+AUTO_EXECUTE_GAUGE = _get_metric(Gauge, "qbitel_security_auto_executions", "Autonomous executions per hour")
+HUMAN_ESCALATIONS_GAUGE = _get_metric(Gauge, "qbitel_security_human_escalations", "Human escalations per hour")
 
 logger = logging.getLogger(__name__)
 
@@ -142,9 +135,7 @@ class ZeroTouchDecisionEngine:
             # Get LLM service - must be initialized first
             self.llm_service = get_llm_service()
             if self.llm_service is None:
-                raise SecurityException(
-                    "LLM service not initialized. Call initialize_llm_service() first."
-                )
+                raise SecurityException("LLM service not initialized. Call initialize_llm_service() first.")
 
             # Initialize threat analyzer
             self.threat_analyzer = ThreatAnalyzer(self.config)
@@ -188,14 +179,10 @@ class ZeroTouchDecisionEngine:
             self.logger.info(f"Analyzing security event: {security_event.event_id}")
 
             # Step 1: Comprehensive threat analysis
-            threat_analysis = await self._analyze_threat(
-                security_event, security_context, legacy_systems
-            )
+            threat_analysis = await self._analyze_threat(security_event, security_context, legacy_systems)
 
             # Step 2: Assess business impact
-            business_impact = await self._assess_business_impact(
-                security_event, threat_analysis, legacy_systems
-            )
+            business_impact = await self._assess_business_impact(security_event, threat_analysis, legacy_systems)
 
             # Step 3: Generate response options
             response_options = await self._generate_response_options(
@@ -212,14 +199,10 @@ class ZeroTouchDecisionEngine:
             )
 
             # Step 5: Create automated response plan
-            automated_response = await self._create_response_plan(
-                security_event, threat_analysis, decision, legacy_systems
-            )
+            automated_response = await self._create_response_plan(security_event, threat_analysis, decision, legacy_systems)
 
             # Step 6: Apply safety checks and constraints
-            validated_response = await self._apply_safety_constraints(
-                automated_response, legacy_systems
-            )
+            validated_response = await self._apply_safety_constraints(automated_response, legacy_systems)
 
             # Update metrics
             processing_time = time.time() - start_time
@@ -237,14 +220,10 @@ class ZeroTouchDecisionEngine:
             return validated_response
 
         except Exception as e:
-            self.logger.error(
-                f"Decision making failed for event {security_event.event_id}: {e}"
-            )
+            self.logger.error(f"Decision making failed for event {security_event.event_id}: {e}")
 
             # Create fallback escalation response
-            fallback_response = await self._create_fallback_response(
-                security_event, str(e)
-            )
+            fallback_response = await self._create_fallback_response(security_event, str(e))
             return fallback_response
 
     async def _analyze_threat(
@@ -259,14 +238,10 @@ class ZeroTouchDecisionEngine:
             raise ThreatAnalysisException("Threat analyzer not initialized")
 
         # Use the threat analyzer to get detailed analysis
-        threat_analysis = await self.threat_analyzer.analyze_threat(
-            security_event, security_context, legacy_systems
-        )
+        threat_analysis = await self.threat_analyzer.analyze_threat(security_event, security_context, legacy_systems)
 
         # Enhance with LLM analysis for context and insights
-        llm_analysis = await self._get_llm_threat_analysis(
-            security_event, threat_analysis
-        )
+        llm_analysis = await self._get_llm_threat_analysis(security_event, threat_analysis)
         threat_analysis.expert_analysis = llm_analysis.get("analysis")
         threat_analysis.contextual_factors = llm_analysis.get("contextual_factors", [])
         threat_analysis.similar_incidents = llm_analysis.get("similar_incidents", [])
@@ -320,9 +295,7 @@ class ZeroTouchDecisionEngine:
                     # Check compliance implications
                     if system.compliance_requirements:
                         business_impact["compliance_impact"] = "high"
-                        business_impact["compliance_requirements"] = (
-                            system.compliance_requirements
-                        )
+                        business_impact["compliance_requirements"] = system.compliance_requirements
 
             business_impact["affected_users"] = max_users
             business_impact["criticality_score"] = total_criticality_score
@@ -336,14 +309,10 @@ class ZeroTouchDecisionEngine:
                 ThreatLevel.INFO: 0.5,
             }.get(threat_analysis.threat_level, 1.0)
 
-            business_impact["financial_impact"] = (
-                total_criticality_score * threat_multiplier * 100000
-            )  # Base cost
+            business_impact["financial_impact"] = total_criticality_score * threat_multiplier * 100000  # Base cost
 
         # Use LLM for contextual business impact assessment
-        llm_impact = await self._get_llm_business_impact(
-            security_event, threat_analysis, business_impact
-        )
+        llm_impact = await self._get_llm_business_impact(security_event, threat_analysis, business_impact)
         business_impact.update(llm_impact)
 
         return business_impact
@@ -360,30 +329,20 @@ class ZeroTouchDecisionEngine:
         response_options = []
 
         # Base response options based on threat type and level
-        base_responses = self._get_base_responses(
-            security_event.event_type, threat_analysis.threat_level
-        )
+        base_responses = self._get_base_responses(security_event.event_type, threat_analysis.threat_level)
 
         for response_type in base_responses:
             option = {
                 "response_type": response_type,
                 "risk_score": self.response_risk_scores.get(response_type, 0.5),
-                "estimated_effectiveness": self._estimate_effectiveness(
-                    response_type, threat_analysis
-                ),
-                "business_impact": self._assess_response_business_impact(
-                    response_type, business_impact
-                ),
-                "legacy_considerations": self._assess_legacy_considerations(
-                    response_type, legacy_systems
-                ),
+                "estimated_effectiveness": self._estimate_effectiveness(response_type, threat_analysis),
+                "business_impact": self._assess_response_business_impact(response_type, business_impact),
+                "legacy_considerations": self._assess_legacy_considerations(response_type, legacy_systems),
             }
             response_options.append(option)
 
         # Sort by effectiveness and risk balance
-        response_options.sort(
-            key=lambda x: x["estimated_effectiveness"] - x["risk_score"], reverse=True
-        )
+        response_options.sort(key=lambda x: x["estimated_effectiveness"] - x["risk_score"], reverse=True)
 
         return response_options
 
@@ -416,17 +375,9 @@ class ZeroTouchDecisionEngine:
             "business_impact": business_impact,
             "response_options": response_options[:5],  # Top 5 options
             "security_context": {
-                "current_threat_level": (
-                    security_context.current_threat_level.value
-                    if security_context
-                    else "medium"
-                ),
-                "active_incidents": (
-                    len(security_context.active_incidents) if security_context else 0
-                ),
-                "business_hours": (
-                    security_context.business_hours if security_context else True
-                ),
+                "current_threat_level": (security_context.current_threat_level.value if security_context else "medium"),
+                "active_incidents": (len(security_context.active_incidents) if security_context else 0),
+                "business_hours": (security_context.business_hours if security_context else True),
             },
         }
 
@@ -446,16 +397,12 @@ class ZeroTouchDecisionEngine:
             decision_data = self._parse_llm_decision(llm_response.content)
 
             # Validate and adjust decision based on safety constraints
-            validated_decision = self._validate_llm_decision(
-                decision_data, threat_analysis, business_impact
-            )
+            validated_decision = self._validate_llm_decision(decision_data, threat_analysis, business_impact)
 
             return {
                 "recommended_actions": validated_decision.get("actions", []),
                 "confidence": validated_decision.get("confidence", 0.5),
-                "confidence_level": self._get_confidence_level(
-                    validated_decision.get("confidence", 0.5)
-                ),
+                "confidence_level": self._get_confidence_level(validated_decision.get("confidence", 0.5)),
                 "reasoning": validated_decision.get("reasoning", ""),
                 "risk_assessment": validated_decision.get("risk_assessment", {}),
                 "auto_execute": self._should_auto_execute(validated_decision),
@@ -467,9 +414,7 @@ class ZeroTouchDecisionEngine:
             self.logger.error(f"LLM decision making failed: {e}")
 
             # Fallback to rule-based decision
-            return self._fallback_decision(
-                threat_analysis, business_impact, response_options
-            )
+            return self._fallback_decision(threat_analysis, business_impact, response_options)
 
     def _create_decision_prompt(self, context: Dict[str, Any]) -> str:
         """Create the decision-making prompt for the LLM."""
@@ -500,9 +445,7 @@ AVAILABLE RESPONSE OPTIONS:
 """
 
         for i, option in enumerate(context["response_options"], 1):
-            prompt += (
-                f"{i}. {option['response_type'].value.replace('_', ' ').title()}\n"
-            )
+            prompt += f"{i}. {option['response_type'].value.replace('_', ' ').title()}\n"
             prompt += f"   - Risk Score: {option['risk_score']:.2f}\n"
             prompt += f"   - Effectiveness: {option['estimated_effectiveness']:.2f}\n"
             prompt += f"   - Business Impact: {option['business_impact']}\n\n"
@@ -607,9 +550,7 @@ Be decisive but cautious. Favor containment over disruption for uncertain threat
         if threat_analysis.threat_level == ThreatLevel.CRITICAL:
             # Critical threats always need human oversight initially
             validated_decision["escalation_needed"] = True
-            validated_decision["confidence"] = min(
-                validated_decision["confidence"], 0.8
-            )
+            validated_decision["confidence"] = min(validated_decision["confidence"], 0.8)
 
         if business_impact.get("operational_impact") == "critical":
             # Critical business impact requires human approval
@@ -690,18 +631,13 @@ Be decisive but cautious. Favor containment over disruption for uncertain threat
         for action_type in decision.get("actions", []):
             try:
                 response_type = ResponseType(action_type.lower())
-                action = await self._create_response_action(
-                    response_type, security_event, threat_analysis, legacy_systems
-                )
+                action = await self._create_response_action(response_type, security_event, threat_analysis, legacy_systems)
                 response_actions.append(action)
             except ValueError:
                 self.logger.warning(f"Skipping invalid response type: {action_type}")
 
         # Always include alert action as baseline
-        if not any(
-            action.action_type == ResponseType.ALERT_SECURITY_TEAM
-            for action in response_actions
-        ):
+        if not any(action.action_type == ResponseType.ALERT_SECURITY_TEAM for action in response_actions):
             alert_action = await self._create_response_action(
                 ResponseType.ALERT_SECURITY_TEAM,
                 security_event,
@@ -720,9 +656,7 @@ Be decisive but cautious. Favor containment over disruption for uncertain threat
             actions=response_actions,
             auto_execute=decision.get("auto_execute", False),
             requires_human_approval=decision.get("escalation_needed", True),
-            overall_risk_score=decision.get("risk_assessment", {}).get(
-                "overall_risk_score", 0.5
-            ),
+            overall_risk_score=decision.get("risk_assessment", {}).get("overall_risk_score", 0.5),
             estimated_business_impact={
                 "reasoning": decision.get("business_justification", ""),
                 "timeline": decision.get("timeline", "immediate"),
@@ -747,9 +681,7 @@ Be decisive but cautious. Favor containment over disruption for uncertain threat
             target_systems=security_event.affected_systems.copy(),
             risk_level=self._get_action_risk_level(response_type),
             requires_approval=self._action_requires_approval(response_type),
-            priority=self._get_action_priority(
-                response_type, threat_analysis.threat_level
-            ),
+            priority=self._get_action_priority(response_type, threat_analysis.threat_level),
         )
 
         # Add specific parameters based on action type
@@ -774,15 +706,11 @@ Be decisive but cautious. Favor containment over disruption for uncertain threat
 
         # Add legacy system considerations
         if legacy_systems:
-            action.metadata["legacy_considerations"] = self._get_legacy_considerations(
-                response_type, legacy_systems
-            )
+            action.metadata["legacy_considerations"] = self._get_legacy_considerations(response_type, legacy_systems)
 
         return action
 
-    def _get_action_description(
-        self, response_type: ResponseType, security_event: SecurityEvent
-    ) -> str:
+    def _get_action_description(self, response_type: ResponseType, security_event: SecurityEvent) -> str:
         """Get human-readable description for the action."""
         descriptions = {
             ResponseType.ALERT_SECURITY_TEAM: f"Alert security team about {security_event.event_type.value}",
@@ -792,9 +720,7 @@ Be decisive but cautious. Favor containment over disruption for uncertain threat
             ResponseType.ISOLATE_SYSTEM: f"Isolate compromised systems from the network",
             ResponseType.VIRTUAL_PATCH: f"Apply virtual patching to protect against the exploit",
         }
-        return descriptions.get(
-            response_type, f"Execute {response_type.value} response"
-        )
+        return descriptions.get(response_type, f"Execute {response_type.value} response")
 
     def _get_action_risk_level(self, response_type: ResponseType) -> ThreatLevel:
         """Get risk level for the action."""
@@ -816,9 +742,7 @@ Be decisive but cautious. Favor containment over disruption for uncertain threat
         }
         return response_type in high_risk_actions
 
-    def _get_action_priority(
-        self, response_type: ResponseType, threat_level: ThreatLevel
-    ) -> int:
+    def _get_action_priority(self, response_type: ResponseType, threat_level: ThreatLevel) -> int:
         """Get action priority (1 = highest)."""
         base_priorities = {
             ResponseType.ALERT_SECURITY_TEAM: 1,
@@ -866,9 +790,7 @@ Be decisive but cautious. Favor containment over disruption for uncertain threat
                     ResponseType.PATCH_VULNERABILITY,
                 }:
                     action.requires_approval = True
-                    action.metadata["constraint_reason"] = (
-                        "After business hours - requires approval"
-                    )
+                    action.metadata["constraint_reason"] = "After business hours - requires approval"
 
         # Apply legacy system constraints
         if legacy_systems:
@@ -878,9 +800,7 @@ Be decisive but cautious. Favor containment over disruption for uncertain threat
         automated_response.actions = validated_actions
         return automated_response
 
-    def _apply_legacy_constraints(
-        self, action: ResponseAction, legacy_systems: List[LegacySystem]
-    ):
+    def _apply_legacy_constraints(self, action: ResponseAction, legacy_systems: List[LegacySystem]):
         """Apply constraints specific to legacy systems."""
 
         for system in legacy_systems:
@@ -891,25 +811,17 @@ Be decisive but cautious. Favor containment over disruption for uncertain threat
                     SystemCriticality.BUSINESS_CRITICAL,
                 }:
                     action.requires_approval = True
-                    action.metadata.setdefault("constraints", []).append(
-                        f"Critical system {system.system_name}"
-                    )
+                    action.metadata.setdefault("constraints", []).append(f"Critical system {system.system_name}")
 
                 # Check maintenance windows
                 if system.maintenance_windows:
-                    action.metadata.setdefault("maintenance_windows", []).extend(
-                        system.maintenance_windows
-                    )
+                    action.metadata.setdefault("maintenance_windows", []).extend(system.maintenance_windows)
 
                 # Add protocol-specific considerations
                 if system.protocol_types:
-                    action.metadata.setdefault("protocols", []).extend(
-                        [p.value for p in system.protocol_types]
-                    )
+                    action.metadata.setdefault("protocols", []).extend([p.value for p in system.protocol_types])
 
-    async def _create_fallback_response(
-        self, security_event: SecurityEvent, error_message: str
-    ) -> AutomatedResponse:
+    async def _create_fallback_response(self, security_event: SecurityEvent, error_message: str) -> AutomatedResponse:
         """Create a safe fallback response when decision making fails."""
 
         # Create basic alert action
@@ -947,9 +859,7 @@ Be decisive but cautious. Favor containment over disruption for uncertain threat
         )
 
     # Helper methods for LLM integration
-    async def _get_llm_threat_analysis(
-        self, security_event: SecurityEvent, threat_analysis: ThreatAnalysis
-    ) -> Dict[str, Any]:
+    async def _get_llm_threat_analysis(self, security_event: SecurityEvent, threat_analysis: ThreatAnalysis) -> Dict[str, Any]:
         """Get additional threat analysis from LLM."""
 
         prompt = f"""Provide expert cybersecurity analysis for this security event:
@@ -985,9 +895,7 @@ Focus on actionable intelligence and context."""
             # Parse response for structured data
             return {
                 "analysis": response.content,
-                "contextual_factors": self._extract_contextual_factors(
-                    response.content
-                ),
+                "contextual_factors": self._extract_contextual_factors(response.content),
                 "similar_incidents": self._extract_similar_incidents(response.content),
             }
 
@@ -1034,9 +942,7 @@ Provide realistic estimates and context."""
             response = await self.llm_service.process_request(llm_request)
 
             # Extract enhanced impact data from response
-            return self._parse_business_impact_response(
-                response.content, current_impact
-            )
+            return self._parse_business_impact_response(response.content, current_impact)
 
         except Exception as e:
             self.logger.warning(f"LLM business impact analysis failed: {e}")
@@ -1050,10 +956,7 @@ Provide realistic estimates and context."""
         lines = analysis_text.split("\n")
         for line in lines:
             line = line.strip()
-            if any(
-                keyword in line.lower()
-                for keyword in ["factor", "consider", "context", "important"]
-            ):
+            if any(keyword in line.lower() for keyword in ["factor", "consider", "context", "important"]):
                 if line and not line.startswith("#") and len(line) > 10:
                     factors.append(line)
 
@@ -1066,18 +969,13 @@ Provide realistic estimates and context."""
         # Look for references to similar incidents
         lines = analysis_text.split("\n")
         for line in lines:
-            if any(
-                keyword in line.lower()
-                for keyword in ["similar", "previous", "historical", "past"]
-            ):
+            if any(keyword in line.lower() for keyword in ["similar", "previous", "historical", "past"]):
                 if line.strip() and len(line.strip()) > 15:
                     incidents.append(line.strip())
 
         return incidents[:5]  # Limit to top 5
 
-    def _parse_business_impact_response(
-        self, response_text: str, current_impact: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _parse_business_impact_response(self, response_text: str, current_impact: Dict[str, Any]) -> Dict[str, Any]:
         """Parse business impact response from LLM."""
 
         enhanced_impact = current_impact.copy()
@@ -1086,10 +984,7 @@ Provide realistic estimates and context."""
         text_lower = response_text.lower()
 
         # Update operational impact
-        if any(
-            word in text_lower
-            for word in ["severe", "major disruption", "critical impact"]
-        ):
+        if any(word in text_lower for word in ["severe", "major disruption", "critical impact"]):
             enhanced_impact["operational_impact"] = "critical"
         elif any(word in text_lower for word in ["significant", "moderate disruption"]):
             enhanced_impact["operational_impact"] = "high"
@@ -1107,9 +1002,7 @@ Provide realistic estimates and context."""
             if matches:
                 try:
                     amount = int(matches[0].replace(",", ""))
-                    enhanced_impact["financial_impact"] = max(
-                        enhanced_impact.get("financial_impact", 0), amount
-                    )
+                    enhanced_impact["financial_impact"] = max(enhanced_impact.get("financial_impact", 0), amount)
                 except (ValueError, IndexError):
                     continue
 
@@ -1119,9 +1012,7 @@ Provide realistic estimates and context."""
         return enhanced_impact
 
     # Response generation helpers
-    def _get_base_responses(
-        self, event_type: SecurityEventType, threat_level: ThreatLevel
-    ) -> List[ResponseType]:
+    def _get_base_responses(self, event_type: SecurityEventType, threat_level: ThreatLevel) -> List[ResponseType]:
         """Get base response types for event and threat level."""
 
         base_responses = [
@@ -1161,15 +1052,11 @@ Provide realistic estimates and context."""
 
         # Add responses based on threat level
         if threat_level in {ThreatLevel.CRITICAL, ThreatLevel.HIGH}:
-            base_responses.extend(
-                [ResponseType.ESCALATE_TO_HUMAN, ResponseType.DEPLOY_HONEYPOT]
-            )
+            base_responses.extend([ResponseType.ESCALATE_TO_HUMAN, ResponseType.DEPLOY_HONEYPOT])
 
         return list(set(base_responses))  # Remove duplicates
 
-    def _estimate_effectiveness(
-        self, response_type: ResponseType, threat_analysis: ThreatAnalysis
-    ) -> float:
+    def _estimate_effectiveness(self, response_type: ResponseType, threat_analysis: ThreatAnalysis) -> float:
         """Estimate effectiveness of response type for the threat."""
 
         # Base effectiveness scores
@@ -1197,9 +1084,7 @@ Provide realistic estimates and context."""
 
         return min(1.0, effectiveness)
 
-    def _assess_response_business_impact(
-        self, response_type: ResponseType, business_impact: Dict[str, Any]
-    ) -> str:
+    def _assess_response_business_impact(self, response_type: ResponseType, business_impact: Dict[str, Any]) -> str:
         """Assess business impact of the response action."""
 
         impact_levels = {
@@ -1237,14 +1122,10 @@ Provide realistic estimates and context."""
 
             # Add protocol-specific risks
             if "modbus" in protocols and response_type == ResponseType.QUARANTINE:
-                considerations["risk_factors"].append(
-                    "MODBUS quarantine may disrupt industrial processes"
-                )
+                considerations["risk_factors"].append("MODBUS quarantine may disrupt industrial processes")
 
             if "hl7_mllp" in protocols and response_type == ResponseType.ISOLATE_SYSTEM:
-                considerations["risk_factors"].append(
-                    "HL7 isolation may impact patient care systems"
-                )
+                considerations["risk_factors"].append("HL7 isolation may impact patient care systems")
 
         return considerations
 
@@ -1279,9 +1160,7 @@ Provide realistic estimates and context."""
             "auto_execute": False,
         }
 
-    def _get_legacy_considerations(
-        self, response_type: ResponseType, legacy_systems: List[LegacySystem]
-    ) -> Dict[str, Any]:
+    def _get_legacy_considerations(self, response_type: ResponseType, legacy_systems: List[LegacySystem]) -> Dict[str, Any]:
         """Get detailed legacy system considerations."""
 
         considerations = {
@@ -1292,9 +1171,7 @@ Provide realistic estimates and context."""
         }
 
         for system in legacy_systems:
-            considerations["affected_protocols"].extend(
-                [p.value for p in system.protocol_types]
-            )
+            considerations["affected_protocols"].extend([p.value for p in system.protocol_types])
             considerations["criticality_levels"].append(system.criticality.value)
             considerations["dependency_risks"].extend(system.dependent_systems)
             considerations["maintenance_windows"].extend(system.maintenance_windows)
@@ -1311,23 +1188,15 @@ Provide realistic estimates and context."""
 
         return {
             "total_decisions": len(self.decision_history),
-            "auto_executions": sum(
-                1 for d in self.decision_history if d.get("auto_execute")
-            ),
-            "human_escalations": sum(
-                1 for d in self.decision_history if d.get("escalation_needed")
-            ),
-            "average_confidence": sum(
-                d.get("confidence", 0) for d in self.decision_history
-            )
+            "auto_executions": sum(1 for d in self.decision_history if d.get("auto_execute")),
+            "human_escalations": sum(1 for d in self.decision_history if d.get("escalation_needed")),
+            "average_confidence": sum(d.get("confidence", 0) for d in self.decision_history)
             / max(len(self.decision_history), 1),
             "success_rates": self.success_rates.copy(),
             "confidence_thresholds": self.confidence_thresholds.copy(),
         }
 
-    async def update_decision_outcome(
-        self, response_id: str, success: bool, effectiveness_score: float
-    ):
+    async def update_decision_outcome(self, response_id: str, success: bool, effectiveness_score: float):
         """Update decision outcome for learning and improvement."""
 
         # Find the decision in history
@@ -1346,15 +1215,11 @@ Provide realistic estimates and context."""
 
                 # Keep only recent success rates (last 100 decisions per type)
                 if len(self.success_rates[decision_type]) > 100:
-                    self.success_rates[decision_type] = self.success_rates[
-                        decision_type
-                    ][-100:]
+                    self.success_rates[decision_type] = self.success_rates[decision_type][-100:]
 
                 break
 
-        self.logger.info(
-            f"Updated decision outcome for {response_id}: success={success}, effectiveness={effectiveness_score}"
-        )
+        self.logger.info(f"Updated decision outcome for {response_id}: success={success}, effectiveness={effectiveness_score}")
 
     async def shutdown(self):
         """Shutdown the decision engine."""

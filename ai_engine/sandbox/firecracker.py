@@ -394,21 +394,29 @@ class FirecrackerSandbox:
         """Build jailer command line."""
         return [
             self.config.jailer_bin,
-            "--id", self.sandbox_id,
-            "--exec-file", self.config.firecracker_bin,
-            "--uid", "1000",
-            "--gid", "1000",
-            "--chroot-base-dir", self.config.chroot_base,
+            "--id",
+            self.sandbox_id,
+            "--exec-file",
+            self.config.firecracker_bin,
+            "--uid",
+            "1000",
+            "--gid",
+            "1000",
+            "--chroot-base-dir",
+            self.config.chroot_base,
             "--",
-            "--api-sock", self._socket_path,
+            "--api-sock",
+            self._socket_path,
         ]
 
     def _build_firecracker_command(self) -> List[str]:
         """Build Firecracker command line."""
         return [
             self.config.firecracker_bin,
-            "--api-sock", self._socket_path,
-            "--level", self.config.log_level,
+            "--api-sock",
+            self._socket_path,
+            "--level",
+            self.config.log_level,
         ]
 
     async def _wait_for_socket(self, timeout: float = 5.0) -> None:
@@ -423,24 +431,36 @@ class FirecrackerSandbox:
     async def _configure_vm(self) -> None:
         """Configure the VM via API."""
         # Set boot source
-        await self._api_request("PUT", "/boot-source", {
-            "kernel_image_path": self.config.kernel_path,
-            "boot_args": "console=ttyS0 reboot=k panic=1 pci=off",
-        })
+        await self._api_request(
+            "PUT",
+            "/boot-source",
+            {
+                "kernel_image_path": self.config.kernel_path,
+                "boot_args": "console=ttyS0 reboot=k panic=1 pci=off",
+            },
+        )
 
         # Set root drive
-        await self._api_request("PUT", "/drives/rootfs", {
-            "drive_id": "rootfs",
-            "path_on_host": self.config.rootfs_path,
-            "is_root_device": True,
-            "is_read_only": False,
-        })
+        await self._api_request(
+            "PUT",
+            "/drives/rootfs",
+            {
+                "drive_id": "rootfs",
+                "path_on_host": self.config.rootfs_path,
+                "is_root_device": True,
+                "is_read_only": False,
+            },
+        )
 
         # Set machine config
-        await self._api_request("PUT", "/machine-config", {
-            "vcpu_count": self.config.resources.vcpu_count,
-            "mem_size_mib": self.config.resources.memory_mb,
-        })
+        await self._api_request(
+            "PUT",
+            "/machine-config",
+            {
+                "vcpu_count": self.config.resources.vcpu_count,
+                "mem_size_mib": self.config.resources.memory_mb,
+            },
+        )
 
         # Configure network if enabled
         if self.config.network.enabled:
@@ -455,27 +475,43 @@ class FirecrackerSandbox:
 
         # Create TAP device
         await asyncio.create_subprocess_exec(
-            "ip", "tuntap", "add", tap_device, "mode", "tap",
+            "ip",
+            "tuntap",
+            "add",
+            tap_device,
+            "mode",
+            "tap",
             stdout=asyncio.subprocess.DEVNULL,
             stderr=asyncio.subprocess.DEVNULL,
         )
 
         # Configure TAP
         await asyncio.create_subprocess_exec(
-            "ip", "addr", "add",
+            "ip",
+            "addr",
+            "add",
             f"{self.config.network.host_ip}/24",
-            "dev", tap_device,
+            "dev",
+            tap_device,
         )
         await asyncio.create_subprocess_exec(
-            "ip", "link", "set", tap_device, "up",
+            "ip",
+            "link",
+            "set",
+            tap_device,
+            "up",
         )
 
         # Add network interface to VM
-        await self._api_request("PUT", "/network-interfaces/eth0", {
-            "iface_id": "eth0",
-            "host_dev_name": tap_device,
-            "guest_mac": self._generate_mac_address(),
-        })
+        await self._api_request(
+            "PUT",
+            "/network-interfaces/eth0",
+            {
+                "iface_id": "eth0",
+                "host_dev_name": tap_device,
+                "guest_mac": self._generate_mac_address(),
+            },
+        )
 
     async def _configure_rate_limiters(self) -> None:
         """Configure rate limiters for resources."""
@@ -495,16 +531,24 @@ class FirecrackerSandbox:
                     "refill_time": 1000,
                 }
 
-            await self._api_request("PATCH", "/drives/rootfs", {
-                "drive_id": "rootfs",
-                "rate_limiter": rate_limiter,
-            })
+            await self._api_request(
+                "PATCH",
+                "/drives/rootfs",
+                {
+                    "drive_id": "rootfs",
+                    "rate_limiter": rate_limiter,
+                },
+            )
 
     async def _start_vm(self) -> None:
         """Start the VM instance."""
-        await self._api_request("PUT", "/actions", {
-            "action_type": "InstanceStart",
-        })
+        await self._api_request(
+            "PUT",
+            "/actions",
+            {
+                "action_type": "InstanceStart",
+            },
+        )
 
         # Wait for VM to boot
         await asyncio.sleep(0.5)
@@ -596,6 +640,7 @@ class FirecrackerSandbox:
     def _generate_mac_address(self) -> str:
         """Generate unique MAC address."""
         import random
+
         return "02:FC:{:02X}:{:02X}:{:02X}:{:02X}".format(
             random.randint(0, 255),
             random.randint(0, 255),

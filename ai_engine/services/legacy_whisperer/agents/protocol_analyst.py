@@ -16,7 +16,6 @@ from .base import (
 )
 from .tools import TrafficAnalysisTool, PatternRecognitionTool
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -131,11 +130,7 @@ Recommendations:
 """
         return base_prompt + analyst_prompt
 
-    async def analyze_traffic(
-        self,
-        traffic_samples: List[bytes],
-        context: str = ""
-    ) -> Dict[str, Any]:
+    async def analyze_traffic(self, traffic_samples: List[bytes], context: str = "") -> Dict[str, Any]:
         """
         Analyze protocol traffic samples.
 
@@ -148,6 +143,7 @@ Recommendations:
         """
         # Convert samples to base64 for tool
         import base64
+
         encoded_samples = [base64.b64encode(s).decode() for s in traffic_samples]
 
         # Create task message
@@ -171,10 +167,7 @@ Focus on:
 - Message types
 - Any security concerns
 """,
-            data={
-                "samples": encoded_samples,
-                "sample_count": len(traffic_samples)
-            }
+            data={"samples": encoded_samples, "sample_count": len(traffic_samples)},
         )
 
         # Process message using agentic loop
@@ -185,16 +178,12 @@ Focus on:
         self.analyzed_protocols[analysis_id] = {
             "samples_count": len(traffic_samples),
             "context": context,
-            "result": response.data
+            "result": response.data,
         }
 
         return response.data
 
-    async def identify_fields(
-        self,
-        samples: List[bytes],
-        hints: Optional[Dict[str, Any]] = None
-    ) -> List[Dict[str, Any]]:
+    async def identify_fields(self, samples: List[bytes], hints: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """
         Identify protocol fields from samples.
 
@@ -206,6 +195,7 @@ Focus on:
             List of identified fields with positions and types
         """
         import base64
+
         encoded_samples = [base64.b64encode(s).decode() for s in samples]
 
         message = AgentMessage(
@@ -227,19 +217,14 @@ For each field, provide:
 - Likely purpose
 - Whether it's fixed or variable length
 """,
-            data={
-                "samples": encoded_samples,
-                "hints": hints or {}
-            }
+            data={"samples": encoded_samples, "hints": hints or {}},
         )
 
         response = await self.process_message(message)
         return response.data.get("fields", [])
 
     async def classify_message_types(
-        self,
-        samples: List[bytes],
-        field_info: Optional[List[Dict[str, Any]]] = None
+        self, samples: List[bytes], field_info: Optional[List[Dict[str, Any]]] = None
     ) -> Dict[str, List[int]]:
         """
         Classify samples into message types.
@@ -252,6 +237,7 @@ For each field, provide:
             Dictionary mapping message type to sample indices
         """
         import base64
+
         encoded_samples = [base64.b64encode(s).decode() for s in samples]
 
         message = AgentMessage(
@@ -272,10 +258,7 @@ Provide:
 - Characteristics of each type
 - Which samples belong to which type
 """,
-            data={
-                "samples": encoded_samples,
-                "field_info": field_info
-            }
+            data={"samples": encoded_samples, "field_info": field_info},
         )
 
         response = await self.process_message(message)

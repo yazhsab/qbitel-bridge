@@ -140,14 +140,10 @@ class AuditLogger:
         """Setup file handler for audit logs."""
         from logging.handlers import RotatingFileHandler
 
-        file_handler = RotatingFileHandler(
-            self.audit_file, maxBytes=100 * 1024 * 1024, backupCount=10  # 100MB
-        )
+        file_handler = RotatingFileHandler(self.audit_file, maxBytes=100 * 1024 * 1024, backupCount=10)  # 100MB
         file_handler.setLevel(logging.INFO)
 
-        formatter = logging.Formatter(
-            "%(asctime)s - AUDIT - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-        )
+        formatter = logging.Formatter("%(asctime)s - AUDIT - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
         file_handler.setFormatter(formatter)
 
         audit_logger = logging.getLogger("qbitel.security.audit")
@@ -255,9 +251,7 @@ class AuditLogger:
         )
         self.log_event(event)
 
-    def log_password_changed(
-        self, user_id: str, username: str, forced: bool = False, **kwargs
-    ):
+    def log_password_changed(self, user_id: str, username: str, forced: bool = False, **kwargs):
         """Log password change."""
         event = AuditEvent(
             event_type=AuditEventType.PASSWORD_CHANGED,
@@ -308,9 +302,7 @@ class AuditLogger:
         )
         self.log_event(event)
 
-    def log_access_denied(
-        self, user_id: Optional[str], resource: str, action: str, reason: str, **kwargs
-    ):
+    def log_access_denied(self, user_id: Optional[str], resource: str, action: str, reason: str, **kwargs):
         """Log access denied."""
         event = AuditEvent(
             event_type=AuditEventType.ACCESS_DENIED,

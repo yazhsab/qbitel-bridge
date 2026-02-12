@@ -77,9 +77,7 @@ class HealthCheck(ABC):
 
     def __init__(self, config: HealthCheckConfig):
         self.config = config
-        self.logger = get_security_logger(
-            f"qbitel.security.resilience.health_check.{config.name}"
-        )
+        self.logger = get_security_logger(f"qbitel.security.resilience.health_check.{config.name}")
 
         # State tracking
         self._current_status = HealthStatus.UNKNOWN
@@ -116,9 +114,7 @@ class HealthCheck(ABC):
 
         try:
             # Execute check with timeout
-            result = await asyncio.wait_for(
-                self.perform_check(), timeout=self.config.timeout
-            )
+            result = await asyncio.wait_for(self.perform_check(), timeout=self.config.timeout)
 
             # Update state based on result
             await self._update_state(result)
@@ -188,11 +184,7 @@ class HealthCheck(ABC):
             self.logger.log_security_event(
                 SecurityLogType.PERFORMANCE_METRIC,
                 f"Health check '{self.config.name}' status changed: {previous_status.value} -> {self._current_status.value}",
-                level=(
-                    LogLevel.WARNING
-                    if self._current_status == HealthStatus.UNHEALTHY
-                    else LogLevel.INFO
-                ),
+                level=(LogLevel.WARNING if self._current_status == HealthStatus.UNHEALTHY else LogLevel.INFO),
                 metadata={
                     "check_name": self.config.name,
                     "previous_status": previous_status.value,
@@ -213,20 +205,14 @@ class HealthCheck(ABC):
             "type": self.config.check_type.value,
             "current_status": self._current_status.value,
             "enabled": self.config.enabled,
-            "last_check": (
-                self._last_check_time.isoformat() if self._last_check_time else None
-            ),
+            "last_check": (self._last_check_time.isoformat() if self._last_check_time else None),
             "last_result": self._last_result.to_dict() if self._last_result else None,
             "consecutive_failures": self._consecutive_failures,
             "consecutive_successes": self._consecutive_successes,
             "total_checks": self._total_checks,
             "successful_checks": self._successful_checks,
             "failed_checks": self._failed_checks,
-            "success_rate": (
-                self._successful_checks / self._total_checks
-                if self._total_checks > 0
-                else 0
-            ),
+            "success_rate": (self._successful_checks / self._total_checks if self._total_checks > 0 else 0),
             "average_duration": self._average_duration,
             "max_duration": self._max_duration,
             "dependencies": self.config.dependencies,
@@ -514,25 +500,18 @@ class HealthChecker:
             return HealthStatus.UNHEALTHY
 
         # Check if any component is degraded
-        any_degraded = any(
-            check.get_status() == HealthStatus.DEGRADED
-            for check in self.health_checks.values()
-        )
+        any_degraded = any(check.get_status() == HealthStatus.DEGRADED for check in self.health_checks.values())
 
         if any_degraded:
             return HealthStatus.DEGRADED
 
         # Check if all enabled checks are healthy
-        enabled_checks = [
-            check for check in self.health_checks.values() if check.config.enabled
-        ]
+        enabled_checks = [check for check in self.health_checks.values() if check.config.enabled]
 
         if not enabled_checks:
             return HealthStatus.UNKNOWN
 
-        all_healthy = all(
-            check.get_status() == HealthStatus.HEALTHY for check in enabled_checks
-        )
+        all_healthy = all(check.get_status() == HealthStatus.HEALTHY for check in enabled_checks)
 
         return HealthStatus.HEALTHY if all_healthy else HealthStatus.DEGRADED
 
@@ -555,43 +534,19 @@ class HealthChecker:
 
         # Calculate aggregate metrics
         total_checks = sum(c._total_checks for c in self.health_checks.values())
-        successful_checks = sum(
-            c._successful_checks for c in self.health_checks.values()
-        )
+        successful_checks = sum(c._successful_checks for c in self.health_checks.values())
 
         return {
             "overall_status": overall_status.value,
             "uptime": str(datetime.utcnow() - self._start_time),
             "total_registered_checks": len(self.health_checks),
-            "enabled_checks": len(
-                [c for c in self.health_checks.values() if c.config.enabled]
-            ),
-            "healthy_checks": len(
-                [
-                    c
-                    for c in self.health_checks.values()
-                    if c.get_status() == HealthStatus.HEALTHY
-                ]
-            ),
-            "degraded_checks": len(
-                [
-                    c
-                    for c in self.health_checks.values()
-                    if c.get_status() == HealthStatus.DEGRADED
-                ]
-            ),
-            "unhealthy_checks": len(
-                [
-                    c
-                    for c in self.health_checks.values()
-                    if c.get_status() == HealthStatus.UNHEALTHY
-                ]
-            ),
+            "enabled_checks": len([c for c in self.health_checks.values() if c.config.enabled]),
+            "healthy_checks": len([c for c in self.health_checks.values() if c.get_status() == HealthStatus.HEALTHY]),
+            "degraded_checks": len([c for c in self.health_checks.values() if c.get_status() == HealthStatus.DEGRADED]),
+            "unhealthy_checks": len([c for c in self.health_checks.values() if c.get_status() == HealthStatus.UNHEALTHY]),
             "total_check_executions": total_checks,
             "successful_check_executions": successful_checks,
-            "overall_success_rate": (
-                successful_checks / total_checks if total_checks > 0 else 0
-            ),
+            "overall_success_rate": (successful_checks / total_checks if total_checks > 0 else 0),
             "checks": check_summaries,
             "monitoring_active": self._running,
         }
@@ -669,9 +624,7 @@ class HealthChecker:
             task.cancel()
 
         if self._monitoring_tasks:
-            await asyncio.gather(
-                *self._monitoring_tasks.values(), return_exceptions=True
-            )
+            await asyncio.gather(*self._monitoring_tasks.values(), return_exceptions=True)
 
         self._monitoring_tasks.clear()
 

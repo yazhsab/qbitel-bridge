@@ -194,9 +194,7 @@ async def search_protocols(
     """
     try:
         # Build query
-        query = db.query(MarketplaceProtocol).filter(
-            MarketplaceProtocol.status == ProtocolStatus.PUBLISHED
-        )
+        query = db.query(MarketplaceProtocol).filter(MarketplaceProtocol.status == ProtocolStatus.PUBLISHED)
 
         # Apply filters
         if q:
@@ -295,11 +293,7 @@ async def get_protocol(
     Get detailed protocol information including specs, author, licensing, and reviews.
     """
     try:
-        protocol = (
-            db.query(MarketplaceProtocol)
-            .filter(MarketplaceProtocol.protocol_id == protocol_id)
-            .first()
-        )
+        protocol = db.query(MarketplaceProtocol).filter(MarketplaceProtocol.protocol_id == protocol_id).first()
 
         if not protocol:
             raise HTTPException(status_code=404, detail="Protocol not found")
@@ -327,7 +321,7 @@ async def submit_protocol(
     request: ProtocolSubmitRequest,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
     """
     Submit a new protocol to the marketplace for validation and certification.
@@ -336,23 +330,12 @@ async def submit_protocol(
     """
     try:
         # Check if protocol name already exists
-        existing = (
-            db.query(MarketplaceProtocol)
-            .filter(MarketplaceProtocol.protocol_name == request.protocol_name)
-            .first()
-        )
+        existing = db.query(MarketplaceProtocol).filter(MarketplaceProtocol.protocol_name == request.protocol_name).first()
         if existing:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Protocol '{request.protocol_name}' already exists"
-            )
+            raise HTTPException(status_code=400, detail=f"Protocol '{request.protocol_name}' already exists")
 
         # Get or create marketplace user
-        marketplace_user = (
-            db.query(MarketplaceUser)
-            .filter(MarketplaceUser.email == current_user.email)
-            .first()
-        )
+        marketplace_user = db.query(MarketplaceUser).filter(MarketplaceUser.email == current_user.email).first()
 
         if not marketplace_user:
             marketplace_user = MarketplaceUser(
@@ -464,17 +447,13 @@ async def submit_protocol(
 async def get_validation_status(
     protocol_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
     """
     Get the validation status and results for a submitted protocol.
     """
     try:
-        protocol = (
-            db.query(MarketplaceProtocol)
-            .filter(MarketplaceProtocol.protocol_id == protocol_id)
-            .first()
-        )
+        protocol = db.query(MarketplaceProtocol).filter(MarketplaceProtocol.protocol_id == protocol_id).first()
 
         if not protocol:
             raise HTTPException(status_code=404, detail="Protocol not found")
@@ -535,7 +514,7 @@ async def purchase_protocol(
     protocol_id: uuid.UUID,
     request: ProtocolPurchaseRequest,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
     """
     Purchase or subscribe to a marketplace protocol.
@@ -543,11 +522,7 @@ async def purchase_protocol(
     Creates an installation and license key for the customer.
     """
     try:
-        protocol = (
-            db.query(MarketplaceProtocol)
-            .filter(MarketplaceProtocol.protocol_id == protocol_id)
-            .first()
-        )
+        protocol = db.query(MarketplaceProtocol).filter(MarketplaceProtocol.protocol_id == protocol_id).first()
 
         if not protocol:
             raise HTTPException(status_code=404, detail="Protocol not found")
@@ -569,10 +544,7 @@ async def purchase_protocol(
         )
 
         if existing_installation and existing_installation.status == InstallationStatus.ACTIVE:
-            raise HTTPException(
-                status_code=400,
-                detail="Protocol already installed for this environment"
-            )
+            raise HTTPException(status_code=400, detail="Protocol already installed for this environment")
 
         # Process payment with Stripe (if not free)
         stripe_response = None
@@ -589,10 +561,7 @@ async def purchase_protocol(
                 )
 
                 if not stripe_response.get("success"):
-                    raise HTTPException(
-                        status_code=402,
-                        detail="Payment failed: Unable to create subscription"
-                    )
+                    raise HTTPException(status_code=402, detail="Payment failed: Unable to create subscription")
             else:
                 # One-time payment
                 stripe_response = await stripe_manager.process_one_time_payment(
@@ -604,10 +573,7 @@ async def purchase_protocol(
                 )
 
                 if not stripe_response.get("success"):
-                    raise HTTPException(
-                        status_code=402,
-                        detail="Payment failed: Unable to process payment"
-                    )
+                    raise HTTPException(status_code=402, detail="Payment failed: Unable to process payment")
 
         # Create installation
         installation = MarketplaceInstallation(
@@ -636,8 +602,12 @@ async def purchase_protocol(
             installation_id=installation.installation_id,
             transaction_type=transaction_type,
             amount=protocol.base_price or Decimal("0.00"),
-            platform_fee=stripe_response.get("platform_fee", protocol.base_price * Decimal("0.30") if protocol.base_price else Decimal("0.00")),
-            creator_revenue=stripe_response.get("creator_revenue", protocol.base_price * Decimal("0.70") if protocol.base_price else Decimal("0.00")),
+            platform_fee=stripe_response.get(
+                "platform_fee", protocol.base_price * Decimal("0.30") if protocol.base_price else Decimal("0.00")
+            ),
+            creator_revenue=stripe_response.get(
+                "creator_revenue", protocol.base_price * Decimal("0.70") if protocol.base_price else Decimal("0.00")
+            ),
             status="completed",
             stripe_payment_intent_id=stripe_response.get("payment_intent_id") if stripe_response else None,
         )
@@ -689,7 +659,7 @@ async def submit_review(
     protocol_id: uuid.UUID,
     request: ReviewSubmitRequest,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
     """
     Submit a review and rating for a marketplace protocol.
@@ -698,21 +668,13 @@ async def submit_review(
     """
     try:
         # Check if protocol exists
-        protocol = (
-            db.query(MarketplaceProtocol)
-            .filter(MarketplaceProtocol.protocol_id == protocol_id)
-            .first()
-        )
+        protocol = db.query(MarketplaceProtocol).filter(MarketplaceProtocol.protocol_id == protocol_id).first()
 
         if not protocol:
             raise HTTPException(status_code=404, detail="Protocol not found")
 
         # Get marketplace user
-        marketplace_user = (
-            db.query(MarketplaceUser)
-            .filter(MarketplaceUser.email == current_user.email)
-            .first()
-        )
+        marketplace_user = db.query(MarketplaceUser).filter(MarketplaceUser.email == current_user.email).first()
 
         if not marketplace_user:
             raise HTTPException(status_code=400, detail="Marketplace user not found")
@@ -797,26 +759,18 @@ async def submit_review(
 )
 async def get_my_protocols(
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
     """
     Get all protocols created by the current user.
     """
     try:
-        marketplace_user = (
-            db.query(MarketplaceUser)
-            .filter(MarketplaceUser.email == current_user.email)
-            .first()
-        )
+        marketplace_user = db.query(MarketplaceUser).filter(MarketplaceUser.email == current_user.email).first()
 
         if not marketplace_user:
             return []
 
-        protocols = (
-            db.query(MarketplaceProtocol)
-            .filter(MarketplaceProtocol.author_id == marketplace_user.user_id)
-            .all()
-        )
+        protocols = db.query(MarketplaceProtocol).filter(MarketplaceProtocol.author_id == marketplace_user.user_id).all()
 
         return [build_protocol_summary(p) for p in protocols]
 
@@ -833,17 +787,13 @@ async def get_my_protocols(
 )
 async def get_my_installations(
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
     """
     Get all protocol installations for the current user.
     """
     try:
-        installations = (
-            db.query(MarketplaceInstallation)
-            .filter(MarketplaceInstallation.customer_id == current_user.id)
-            .all()
-        )
+        installations = db.query(MarketplaceInstallation).filter(MarketplaceInstallation.customer_id == current_user.id).all()
 
         return [
             InstallationInfo(
@@ -870,6 +820,7 @@ async def get_my_installations(
 # =============================================================================
 # Stripe Payment Integration Endpoints
 # =============================================================================
+
 
 @router.post(
     "/webhooks/stripe",
@@ -918,7 +869,7 @@ async def cancel_subscription(
     subscription_id: str,
     at_period_end: bool = Query(True, description="Cancel at end of billing period"),
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
     """
     Cancel a subscription for a protocol.
@@ -931,10 +882,7 @@ async def cancel_subscription(
         # Note: In production, you'd query the transaction/installation to verify ownership
 
         stripe_manager = get_stripe_manager()
-        result = await stripe_manager.cancel_subscription(
-            subscription_id=subscription_id,
-            at_period_end=at_period_end
-        )
+        result = await stripe_manager.cancel_subscription(subscription_id=subscription_id, at_period_end=at_period_end)
 
         logger.info(f"Subscription {subscription_id} cancelled by {current_user.username}")
 
@@ -943,7 +891,11 @@ async def cancel_subscription(
             "subscription_id": subscription_id,
             "status": result.get("status"),
             "cancel_at_period_end": result.get("cancel_at_period_end"),
-            "message": "Subscription will be cancelled at the end of the billing period" if at_period_end else "Subscription cancelled immediately"
+            "message": (
+                "Subscription will be cancelled at the end of the billing period"
+                if at_period_end
+                else "Subscription cancelled immediately"
+            ),
         }
 
     except HTTPException:
@@ -964,7 +916,7 @@ async def onboard_creator(
     country: str = Query("US", description="Country code (ISO 3166-1 alpha-2)"),
     business_type: str = Query("individual", description="individual or company"),
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
     """
     Create a Stripe Connect account for a protocol creator.
@@ -974,31 +926,18 @@ async def onboard_creator(
     """
     try:
         # Get or create marketplace user
-        marketplace_user = (
-            db.query(MarketplaceUser)
-            .filter(MarketplaceUser.user_id == current_user.id)
-            .first()
-        )
+        marketplace_user = db.query(MarketplaceUser).filter(MarketplaceUser.user_id == current_user.id).first()
 
         if not marketplace_user:
-            raise HTTPException(
-                status_code=404,
-                detail="Marketplace user not found. Please complete profile setup first."
-            )
+            raise HTTPException(status_code=404, detail="Marketplace user not found. Please complete profile setup first.")
 
         if marketplace_user.stripe_account_id:
-            raise HTTPException(
-                status_code=400,
-                detail="Creator account already exists"
-            )
+            raise HTTPException(status_code=400, detail="Creator account already exists")
 
         # Create Stripe Connect account
         stripe_manager = get_stripe_manager()
         result = await stripe_manager.create_connected_account(
-            user_id=current_user.id,
-            email=email,
-            country=country,
-            business_type=business_type
+            user_id=current_user.id, email=email, country=country, business_type=business_type
         )
 
         # Save Stripe account ID
@@ -1011,7 +950,7 @@ async def onboard_creator(
             "success": True,
             "account_id": result["account_id"],
             "onboarding_url": result["onboarding_url"],
-            "message": "Please complete the onboarding process at the provided URL"
+            "message": "Please complete the onboarding process at the provided URL",
         }
 
     except HTTPException:

@@ -96,16 +96,13 @@ class FieldDetectionDataset(Dataset):
         self.max_sequence_length = max_sequence_length
         self.tag_to_id = tag_to_id
         self._encoded_samples: List[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = [
-            self._encode_sample(message, annotations or [])
-            for message, annotations in samples
+            self._encode_sample(message, annotations or []) for message, annotations in samples
         ]
 
     def __len__(self) -> int:
         return len(self._encoded_samples)
 
-    def __getitem__(
-        self, index: int
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         return self._encoded_samples[index]
 
     def _encode_sample(
@@ -146,9 +143,7 @@ class FieldDetectionDataset(Dataset):
             mask.extend([False] * pad_length)
 
         sequence_tensor = torch.tensor(sequence, dtype=torch.long)
-        tags_tensor = torch.tensor(
-            [self.tag_to_id[tag] for tag in tags], dtype=torch.long
-        )
+        tags_tensor = torch.tensor([self.tag_to_id[tag] for tag in tags], dtype=torch.long)
         mask_tensor = torch.tensor(mask, dtype=torch.bool)
 
         return sequence_tensor, tags_tensor, mask_tensor
@@ -228,9 +223,7 @@ class BiLSTMCRF(nn.Module):
             for s in range(seq_len):
                 # Simple character representation (byte value as character)
                 byte_val = sequences[b, s].item()
-                char_emb = self.char_embeddings(
-                    torch.tensor([byte_val % 256], device=sequences.device)
-                )
+                char_emb = self.char_embeddings(torch.tensor([byte_val % 256], device=sequences.device))
                 char_out, _ = self.char_lstm(char_emb.unsqueeze(0))
                 char_feat = char_out.squeeze(0)[-1]  # Take last hidden state
                 seq_char_features.append(char_feat)
@@ -239,9 +232,7 @@ class BiLSTMCRF(nn.Module):
 
         return torch.stack(char_features)
 
-    def _get_lstm_features(
-        self, sequences: torch.Tensor, masks: torch.Tensor
-    ) -> torch.Tensor:
+    def _get_lstm_features(self, sequences: torch.Tensor, masks: torch.Tensor) -> torch.Tensor:
         """Get LSTM features for sequences."""
         batch_size, seq_len = sequences.shape
 
@@ -261,15 +252,11 @@ class BiLSTMCRF(nn.Module):
 
         # Pack sequences for LSTM
         lengths = masks.sum(dim=1).cpu()
-        packed_embeddings = nn.utils.rnn.pack_padded_sequence(
-            embeddings, lengths, batch_first=True, enforce_sorted=False
-        )
+        packed_embeddings = nn.utils.rnn.pack_padded_sequence(embeddings, lengths, batch_first=True, enforce_sorted=False)
 
         # BiLSTM
         packed_lstm_out, _ = self.lstm(packed_embeddings)
-        lstm_out, _ = nn.utils.rnn.pad_packed_sequence(
-            packed_lstm_out, batch_first=True
-        )
+        lstm_out, _ = nn.utils.rnn.pad_packed_sequence(packed_lstm_out, batch_first=True)
 
         # Apply dropout to LSTM output
         lstm_out = self.dropout(lstm_out)
@@ -279,9 +266,7 @@ class BiLSTMCRF(nn.Module):
 
         return lstm_feats
 
-    def forward(
-        self, sequences: torch.Tensor, tags: torch.Tensor, masks: torch.Tensor
-    ) -> torch.Tensor:
+    def forward(self, sequences: torch.Tensor, tags: torch.Tensor, masks: torch.Tensor) -> torch.Tensor:
         """Forward pass for training."""
         lstm_feats = self._get_lstm_features(sequences, masks)
         log_likelihood = self.crf(lstm_feats, tags, mask=masks.bool())
@@ -308,9 +293,7 @@ class FieldDetector:
     def __init__(self, config: Config):
         """Initialize field detector."""
         if CRF is None:
-            raise FieldDetectionException(
-                "torchcrf is required for FieldDetector. Install with 'pip install torchcrf'."
-            )
+            raise FieldDetectionException("torchcrf is required for FieldDetector. Install with 'pip install torchcrf'.")
 
         self.config = config
         self.logger = logging.getLogger(__name__)
@@ -361,9 +344,7 @@ class FieldDetector:
             self.logger.error(f"Failed to initialize FieldDetector: {e}")
             raise ModelException(f"FieldDetector initialization failed: {e}")
 
-    async def detect_boundaries(
-        self, message_data: bytes, protocol_type: Optional[str] = None
-    ) -> List[FieldBoundary]:
+    async def detect_boundaries(self, message_data: bytes, protocol_type: Optional[str] = None) -> List[FieldBoundary]:
         """
         Detect field boundaries in a protocol message.
 
@@ -387,9 +368,7 @@ class FieldDetector:
                 predictions = self.model.predict(sequences, masks)
 
             # Post-process predictions to field boundaries
-            field_boundaries = self._postprocess_predictions(
-                predictions[0], message_data, protocol_type
-            )
+            field_boundaries = self._postprocess_predictions(predictions[0], message_data, protocol_type)
 
             return field_boundaries
 
@@ -397,14 +376,10 @@ class FieldDetector:
             self.logger.error(f"Field boundary detection failed: {e}")
             raise FieldDetectionException(f"Boundary detection error: {e}")
 
-    async def infer_field_types(
-        self, field_boundaries: List[FieldBoundary]
-    ) -> List[FieldBoundary]:
+    async def infer_field_types(self, field_boundaries: List[FieldBoundary]) -> List[FieldBoundary]:
         """Infer field types for detected boundaries."""
         # Check if ML classifier is enabled via feature flag
-        ml_classifier_enabled = getattr(
-            self.config, "field_detection_ml_classifier_enabled", False
-        )
+        ml_classifier_enabled = getattr(self.config, "field_detection_ml_classifier_enabled", False)
 
         if not self.type_classifier or not ml_classifier_enabled:
             # Use simple heuristic-based type inference
@@ -426,9 +401,7 @@ class FieldDetector:
     def train(
         self,
         training_data: List[Tuple[bytes, List[Tuple[int, int, str]]]],
-        validation_data: Optional[
-            List[Tuple[bytes, List[Tuple[int, int, str]]]]
-        ] = None,
+        validation_data: Optional[List[Tuple[bytes, List[Tuple[int, int, str]]]]] = None,
         num_epochs: int = 50,
         learning_rate: float = 1e-3,
         batch_size: int = 16,
@@ -461,15 +434,11 @@ class FieldDetector:
         train_loader = self._create_data_loader(training_data, batch_size, shuffle=True)
         val_loader = None
         if validation_data:
-            val_loader = self._create_data_loader(
-                validation_data, batch_size, shuffle=False
-            )
+            val_loader = self._create_data_loader(validation_data, batch_size, shuffle=False)
 
         # Initialize optimizer and scheduler
         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=learning_rate)
-        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            self.optimizer, patience=5, factor=0.5
-        )
+        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, patience=5, factor=0.5)
 
         # Training loop with comprehensive metrics
         history = {
@@ -515,12 +484,8 @@ class FieldDetector:
                     epochs_without_improvement = 0
 
                     if save_best_only:
-                        checkpoint_path = self._save_checkpoint(
-                            epoch, val_metrics, checkpoint_dir
-                        )
-                        self.logger.info(
-                            f"Saved best model checkpoint: {checkpoint_path}"
-                        )
+                        checkpoint_path = self._save_checkpoint(epoch, val_metrics, checkpoint_dir)
+                        self.logger.info(f"Saved best model checkpoint: {checkpoint_path}")
                 else:
                     epochs_without_improvement += 1
 
@@ -546,27 +511,19 @@ class FieldDetector:
                 epoch_time = time.time() - epoch_start
                 history["epoch_time"].append(epoch_time)
                 self.logger.info(
-                    f"Epoch {epoch+1}/{num_epochs} ({epoch_time:.2f}s): "
-                    f"train_loss={train_loss:.4f}, lr={current_lr:.6f}"
+                    f"Epoch {epoch+1}/{num_epochs} ({epoch_time:.2f}s): " f"train_loss={train_loss:.4f}, lr={current_lr:.6f}"
                 )
 
         # Final summary
         total_time = sum(history["epoch_time"])
-        self.logger.info(
-            f"Training completed in {total_time:.2f}s. "
-            f"Best validation F1: {best_val_f1:.4f}"
-        )
+        self.logger.info(f"Training completed in {total_time:.2f}s. " f"Best validation F1: {best_val_f1:.4f}")
 
         # Add summary statistics
         history["summary"] = {
             "best_val_f1": best_val_f1,
             "total_epochs": len(history["train_loss"]),
             "total_time_seconds": total_time,
-            "final_learning_rate": (
-                history["learning_rate"][-1]
-                if history["learning_rate"]
-                else learning_rate
-            ),
+            "final_learning_rate": (history["learning_rate"][-1] if history["learning_rate"] else learning_rate),
         }
 
         return history
@@ -574,9 +531,7 @@ class FieldDetector:
     def train_batch(
         self,
         training_batches: List[List[Tuple[bytes, List[Tuple[int, int, str]]]]],
-        validation_data: Optional[
-            List[Tuple[bytes, List[Tuple[int, int, str]]]]
-        ] = None,
+        validation_data: Optional[List[Tuple[bytes, List[Tuple[int, int, str]]]]] = None,
         num_epochs_per_batch: int = 10,
         learning_rate: float = 1e-3,
         batch_size: int = 16,
@@ -597,9 +552,7 @@ class FieldDetector:
         if self.model is None:
             raise FieldDetectionException("Model not initialized")
 
-        self.logger.info(
-            f"Starting batch training with {len(training_batches)} batches"
-        )
+        self.logger.info(f"Starting batch training with {len(training_batches)} batches")
 
         combined_history = {
             "batch_histories": [],
@@ -609,10 +562,7 @@ class FieldDetector:
         }
 
         for batch_idx, batch_data in enumerate(training_batches):
-            self.logger.info(
-                f"Training on batch {batch_idx + 1}/{len(training_batches)} "
-                f"({len(batch_data)} samples)"
-            )
+            self.logger.info(f"Training on batch {batch_idx + 1}/{len(training_batches)} " f"({len(batch_data)} samples)")
 
             # Train on this batch
             batch_history = self.train(
@@ -670,9 +620,7 @@ class FieldDetector:
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, self._save_model, model_path)
 
-    def _preprocess_message(
-        self, message_data: bytes
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def _preprocess_message(self, message_data: bytes) -> Tuple[torch.Tensor, torch.Tensor]:
         """Preprocess message data for model input."""
         # Convert bytes to sequence of integers
         byte_sequence = list(message_data)
@@ -752,9 +700,7 @@ class FieldDetector:
 
         return field_boundaries
 
-    def _heuristic_type_inference(
-        self, field_boundaries: List[FieldBoundary]
-    ) -> List[FieldBoundary]:
+    def _heuristic_type_inference(self, field_boundaries: List[FieldBoundary]) -> List[FieldBoundary]:
         """Simple heuristic-based field type inference."""
         for boundary in field_boundaries:
             if not boundary.raw_value:
@@ -791,8 +737,7 @@ class FieldDetector:
         Falls back to heuristic-based inference.
         """
         self.logger.warning(
-            "ML-based field type prediction called but not implemented (scaffold code). "
-            "Using heuristic fallback."
+            "ML-based field type prediction called but not implemented (scaffold code). " "Using heuristic fallback."
         )
 
         field_length = len(field_data)
@@ -811,9 +756,7 @@ class FieldDetector:
         NOTE: This is scaffold code. ML-based classifier not yet implemented.
         """
         self.type_classifier = None
-        ml_classifier_enabled = getattr(
-            self.config, "field_detection_ml_classifier_enabled", False
-        )
+        ml_classifier_enabled = getattr(self.config, "field_detection_ml_classifier_enabled", False)
 
         if ml_classifier_enabled:
             self.logger.warning(
@@ -843,17 +786,11 @@ class FieldDetector:
         )
 
         if len(dataset) == 0:
-            self.logger.warning(
-                "Field detection dataset is empty; loader will be empty"
-            )
+            self.logger.warning("Field detection dataset is empty; loader will be empty")
 
         return DataLoader(
             dataset,
-            batch_size=(
-                min(batch_size, max(1, len(dataset)))
-                if len(dataset) > 0
-                else batch_size
-            ),
+            batch_size=(min(batch_size, max(1, len(dataset))) if len(dataset) > 0 else batch_size),
             shuffle=shuffle and len(dataset) > 1,
             drop_last=False,
         )
@@ -861,9 +798,7 @@ class FieldDetector:
     def _train_epoch(self, train_loader) -> float:
         """Train for one epoch."""
         if self.model is None or self.optimizer is None:
-            raise FieldDetectionException(
-                "Model and optimizer must be initialized before training"
-            )
+            raise FieldDetectionException("Model and optimizer must be initialized before training")
 
         self.model.train()
         total_loss = 0.0
@@ -915,12 +850,8 @@ class FieldDetector:
 
                 outside_tag_id = self.tag_to_id[IOBTag.OUTSIDE.value]
 
-                for pred_seq, true_seq, mask_seq in zip(
-                    predictions, tags_cpu, masks_cpu
-                ):
-                    for pred_label, true_label, mask_flag in zip(
-                        pred_seq, true_seq, mask_seq
-                    ):
+                for pred_seq, true_seq, mask_seq in zip(predictions, tags_cpu, masks_cpu):
+                    for pred_label, true_label, mask_flag in zip(pred_seq, true_seq, mask_seq):
                         if not mask_flag:
                             continue
 
@@ -939,9 +870,7 @@ class FieldDetector:
         precision_denominator = true_positive + false_positive
         recall_denominator = true_positive + false_negative
 
-        precision = (
-            true_positive / precision_denominator if precision_denominator > 0 else 0.0
-        )
+        precision = true_positive / precision_denominator if precision_denominator > 0 else 0.0
         recall = true_positive / recall_denominator if recall_denominator > 0 else 0.0
 
         if precision == 0.0 and recall == 0.0:
@@ -970,9 +899,7 @@ class FieldDetector:
         true_negative = 0
 
         # Per-tag metrics
-        tag_stats = {
-            tag: {"tp": 0, "fp": 0, "fn": 0, "tn": 0} for tag in self.tag_to_id.keys()
-        }
+        tag_stats = {tag: {"tp": 0, "fp": 0, "fn": 0, "tn": 0} for tag in self.tag_to_id.keys()}
 
         with torch.no_grad():
             for sequences, tags, masks in val_loader:
@@ -990,12 +917,8 @@ class FieldDetector:
 
                 outside_tag_id = self.tag_to_id[IOBTag.OUTSIDE.value]
 
-                for pred_seq, true_seq, mask_seq in zip(
-                    predictions, tags_cpu, masks_cpu
-                ):
-                    for pred_label, true_label, mask_flag in zip(
-                        pred_seq, true_seq, mask_seq
-                    ):
+                for pred_seq, true_seq, mask_seq in zip(predictions, tags_cpu, masks_cpu):
+                    for pred_label, true_label, mask_flag in zip(pred_seq, true_seq, mask_seq):
                         if not mask_flag:
                             continue
 
@@ -1027,19 +950,11 @@ class FieldDetector:
 
         precision_denominator = true_positive + false_positive
         recall_denominator = true_positive + false_negative
-        accuracy_denominator = (
-            true_positive + false_positive + true_negative + false_negative
-        )
+        accuracy_denominator = true_positive + false_positive + true_negative + false_negative
 
-        precision = (
-            true_positive / precision_denominator if precision_denominator > 0 else 0.0
-        )
+        precision = true_positive / precision_denominator if precision_denominator > 0 else 0.0
         recall = true_positive / recall_denominator if recall_denominator > 0 else 0.0
-        accuracy = (
-            (true_positive + true_negative) / accuracy_denominator
-            if accuracy_denominator > 0
-            else 0.0
-        )
+        accuracy = (true_positive + true_negative) / accuracy_denominator if accuracy_denominator > 0 else 0.0
 
         if precision == 0.0 and recall == 0.0:
             f1_score = 0.0
@@ -1049,20 +964,10 @@ class FieldDetector:
         # Calculate per-tag metrics
         per_tag_metrics = {}
         for tag, stats in tag_stats.items():
-            tag_precision = (
-                stats["tp"] / (stats["tp"] + stats["fp"])
-                if (stats["tp"] + stats["fp"]) > 0
-                else 0.0
-            )
-            tag_recall = (
-                stats["tp"] / (stats["tp"] + stats["fn"])
-                if (stats["tp"] + stats["fn"]) > 0
-                else 0.0
-            )
+            tag_precision = stats["tp"] / (stats["tp"] + stats["fp"]) if (stats["tp"] + stats["fp"]) > 0 else 0.0
+            tag_recall = stats["tp"] / (stats["tp"] + stats["fn"]) if (stats["tp"] + stats["fn"]) > 0 else 0.0
             tag_f1 = (
-                (2 * tag_precision * tag_recall) / (tag_precision + tag_recall)
-                if (tag_precision + tag_recall) > 0
-                else 0.0
+                (2 * tag_precision * tag_recall) / (tag_precision + tag_recall) if (tag_precision + tag_recall) > 0 else 0.0
             )
 
             per_tag_metrics[tag] = {
@@ -1117,12 +1022,8 @@ class FieldDetector:
         checkpoint = {
             "epoch": epoch,
             "model_state_dict": self.model.state_dict(),
-            "optimizer_state_dict": (
-                self.optimizer.state_dict() if self.optimizer else None
-            ),
-            "scheduler_state_dict": (
-                self.scheduler.state_dict() if self.scheduler else None
-            ),
+            "optimizer_state_dict": (self.optimizer.state_dict() if self.optimizer else None),
+            "scheduler_state_dict": (self.scheduler.state_dict() if self.scheduler else None),
             "version": self.model_version,
             "timestamp": timestamp,
             "metrics": metrics,
@@ -1143,9 +1044,7 @@ class FieldDetector:
         torch.save(checkpoint, checkpoint_path)
 
         # Also save as "latest" for easy access
-        latest_path = os.path.join(
-            checkpoint_dir, f"field_detector_v{self.model_version}_latest.pt"
-        )
+        latest_path = os.path.join(checkpoint_dir, f"field_detector_v{self.model_version}_latest.pt")
         torch.save(checkpoint, latest_path)
 
         self.logger.info(f"Checkpoint saved: {checkpoint_path}")
@@ -1187,25 +1086,15 @@ class FieldDetector:
             self.model_version = checkpoint.get("version", "1.0.0")
 
             # Restore optimizer state if requested
-            if (
-                load_optimizer
-                and "optimizer_state_dict" in checkpoint
-                and checkpoint["optimizer_state_dict"]
-            ):
+            if load_optimizer and "optimizer_state_dict" in checkpoint and checkpoint["optimizer_state_dict"]:
                 if self.optimizer is None:
                     self.optimizer = torch.optim.AdamW(self.model.parameters())
                 self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
             # Restore scheduler state if requested
-            if (
-                load_scheduler
-                and "scheduler_state_dict" in checkpoint
-                and checkpoint["scheduler_state_dict"]
-            ):
+            if load_scheduler and "scheduler_state_dict" in checkpoint and checkpoint["scheduler_state_dict"]:
                 if self.scheduler is None:
-                    self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-                        self.optimizer
-                    )
+                    self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer)
                 self.scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
 
             # Restore type classifier if available
@@ -1214,12 +1103,8 @@ class FieldDetector:
 
             # Restore tag mappings if available
             if "tag_mappings" in checkpoint:
-                self.tag_to_id = checkpoint["tag_mappings"].get(
-                    "tag_to_id", self.tag_to_id
-                )
-                self.id_to_tag = checkpoint["tag_mappings"].get(
-                    "id_to_tag", self.id_to_tag
-                )
+                self.tag_to_id = checkpoint["tag_mappings"].get("tag_to_id", self.tag_to_id)
+                self.id_to_tag = checkpoint["tag_mappings"].get("id_to_tag", self.id_to_tag)
 
             metadata = {
                 "epoch": checkpoint.get("epoch", 0),

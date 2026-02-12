@@ -132,9 +132,7 @@ class FedWireParser:
 
         # Check for errors
         if self.errors and self.strict:
-            raise FedWireParseError(
-                f"Failed to parse FedWire message: {'; '.join(self.errors)}"
-            )
+            raise FedWireParseError(f"Failed to parse FedWire message: {'; '.join(self.errors)}")
 
         return message
 
@@ -442,8 +440,7 @@ class FedWireParser:
         if value:
             message.account_credited = value.strip()
 
-    def _parse_originator_to_beneficiary(self, tags: Dict[str, str],
-                                          message: FedWireMessage) -> None:
+    def _parse_originator_to_beneficiary(self, tags: Dict[str, str], message: FedWireMessage) -> None:
         """Parse Originator to Beneficiary Information (6000)."""
         value = tags.get("6000", "")
         if value:
@@ -488,8 +485,7 @@ class FedWireParser:
                 message.drawdown_advice_code = parts[0][:3] if parts[0] else ""
                 message.drawdown_advice_info = parts[1:] if len(parts) > 1 else []
 
-    def _parse_unstructured_addenda(self, tags: Dict[str, str],
-                                     message: FedWireMessage) -> None:
+    def _parse_unstructured_addenda(self, tags: Dict[str, str], message: FedWireMessage) -> None:
         """Parse Unstructured Addenda (7500)."""
         value = tags.get("7500", "")
         if value:
@@ -498,8 +494,7 @@ class FedWireParser:
     def _parse_remittance(self, tags: Dict[str, str], message: FedWireMessage) -> None:
         """Parse Remittance Information (8200-8750)."""
         # Check if any remittance tags present
-        remit_tags = ["8200", "8300", "8350", "8400", "8450", "8500",
-                      "8550", "8600", "8650", "8700", "8750"]
+        remit_tags = ["8200", "8300", "8350", "8400", "8450", "8500", "8550", "8600", "8650", "8700", "8750"]
         has_remittance = any(tag in tags for tag in remit_tags)
 
         if not has_remittance:
@@ -555,9 +550,7 @@ class FedWireParser:
         # Document date (8650)
         if "8650" in tags:
             try:
-                remit.document_date = datetime.strptime(
-                    tags["8650"][:8], "%Y%m%d"
-                ).date()
+                remit.document_date = datetime.strptime(tags["8650"][:8], "%Y%m%d").date()
             except ValueError:
                 pass
 
@@ -582,9 +575,7 @@ class FedWireParser:
         # Receipt timestamp (1110)
         if "1110" in tags:
             try:
-                message.receipt_timestamp = datetime.strptime(
-                    tags["1110"][:14], "%Y%m%d%H%M%S"
-                )
+                message.receipt_timestamp = datetime.strptime(tags["1110"][:14], "%Y%m%d%H%M%S")
             except ValueError:
                 pass
 

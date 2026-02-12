@@ -141,9 +141,7 @@ class StatisticalAnalyzer:
 
         # Performance optimization
         self.use_parallel_processing = True
-        self.max_workers = (
-            config.inference.num_workers if hasattr(config, "inference") else 4
-        )
+        self.max_workers = config.inference.num_workers if hasattr(config, "inference") else 4
         self.executor = ThreadPoolExecutor(max_workers=self.max_workers)
 
         # Cache for performance
@@ -159,15 +157,11 @@ class StatisticalAnalyzer:
 
         start_time = time.time()
 
-        byte_stats_task = asyncio.create_task(
-            self._compute_byte_statistics(b"".join(messages))
-        )
+        byte_stats_task = asyncio.create_task(self._compute_byte_statistics(b"".join(messages)))
         pattern_task = asyncio.create_task(self.detect_patterns(messages))
         boundary_task = asyncio.create_task(self.detect_field_boundaries(messages))
 
-        byte_stats, patterns, boundaries = await asyncio.gather(
-            byte_stats_task, pattern_task, boundary_task
-        )
+        byte_stats, patterns, boundaries = await asyncio.gather(byte_stats_task, pattern_task, boundary_task)
 
         processing_time = time.time() - start_time
         message_lengths = [len(msg) for msg in messages]
@@ -233,9 +227,7 @@ class StatisticalAnalyzer:
             # Execute all analyses in parallel
             results = await asyncio.gather(*tasks)
 
-            byte_stats, structural_features, patterns, boundaries, classifications = (
-                results
-            )
+            byte_stats, structural_features, patterns, boundaries, classifications = results
 
             # Combine results
             analysis_result = {
@@ -252,18 +244,14 @@ class StatisticalAnalyzer:
                 },
             }
 
-            self.logger.info(
-                f"Statistical analysis completed in {time.time() - start_time:.2f}s"
-            )
+            self.logger.info(f"Statistical analysis completed in {time.time() - start_time:.2f}s")
             return analysis_result
 
         except Exception as e:
             self.logger.error(f"Statistical analysis failed: {e}")
             raise ModelException(f"Statistical analysis error: {e}")
 
-    async def _analyze_byte_statistics(
-        self, messages: List[bytes]
-    ) -> Dict[str, ByteStatistics]:
+    async def _analyze_byte_statistics(self, messages: List[bytes]) -> Dict[str, ByteStatistics]:
         """Analyze byte-level statistics for all messages."""
         self.logger.debug("Analyzing byte statistics")
 
@@ -390,28 +378,16 @@ class StatisticalAnalyzer:
         avg_len = float(lengths.mean())
         length_std_dev = float(lengths.std())
 
-        normalized_values = [
-            self._normalize_field_value(value) for value in field_values
-        ]
+        normalized_values = [self._normalize_field_value(value) for value in field_values]
         frequency = Counter(normalized_values)
         total = sum(frequency.values())
 
-        distribution = (
-            np.array(list(frequency.values()), dtype=np.float64) / total
-            if total
-            else np.array([])
-        )
-        entropy_value = (
-            float(entropy(distribution, base=2)) if distribution.size else 0.0
-        )
+        distribution = np.array(list(frequency.values()), dtype=np.float64) / total if total else np.array([])
+        entropy_value = float(entropy(distribution, base=2)) if distribution.size else 0.0
 
         is_fixed_length = min_len == max_len
-        is_printable = all(
-            self._is_printable(value) for value in field_values if len(value) > 0
-        )
-        is_numeric = all(
-            self._is_numeric(value) for value in field_values if len(value) > 0
-        )
+        is_printable = all(self._is_printable(value) for value in field_values if len(value) > 0)
+        is_numeric = all(self._is_numeric(value) for value in field_values if len(value) > 0)
 
         return FieldStatistics(
             min_length=min_len,
@@ -436,11 +412,7 @@ class StatisticalAnalyzer:
         except UnicodeDecodeError:
             decoded = None
 
-        if (
-            decoded
-            and decoded.strip()
-            and all(ch in string.printable for ch in decoded)
-        ):
+        if decoded and decoded.strip() and all(ch in string.printable for ch in decoded):
             return decoded.strip()
 
         return value.hex()
@@ -521,9 +493,7 @@ class StatisticalAnalyzer:
 
         # Extract all possible subsequences
         for msg_idx, message in enumerate(messages):
-            for length in range(
-                self.min_pattern_length, min(self.max_pattern_length + 1, len(message))
-            ):
+            for length in range(self.min_pattern_length, min(self.max_pattern_length + 1, len(message))):
                 for start in range(len(message) - length + 1):
                     pattern = message[start : start + length]
                     pattern_candidates[pattern].append((msg_idx, start))
@@ -543,17 +513,13 @@ class StatisticalAnalyzer:
                     contexts.append(msg[context_start:context_end])
 
                 # Calculate pattern entropy
-                pattern_entropy = entropy(
-                    [pattern.count(b) for b in set(pattern)], base=2
-                )
+                pattern_entropy = entropy([pattern.count(b) for b in set(pattern)], base=2)
 
                 # Determine pattern type
                 pattern_type = self._classify_pattern_type(pattern, positions, contexts)
 
                 # Calculate significance score
-                significance = self._calculate_pattern_significance(
-                    pattern, occurrences, messages
-                )
+                significance = self._calculate_pattern_significance(pattern, occurrences, messages)
 
                 pattern_info = PatternInfo(
                     pattern=pattern,
@@ -573,9 +539,7 @@ class StatisticalAnalyzer:
         self.logger.debug(f"Detected {len(patterns)} significant patterns")
         return patterns[:100]  # Return top 100 patterns
 
-    async def _detect_field_boundaries(
-        self, messages: List[bytes]
-    ) -> List[FieldBoundary]:
+    async def _detect_field_boundaries(self, messages: List[bytes]) -> List[FieldBoundary]:
         """Detect potential field boundaries using multiple techniques."""
         self.logger.debug("Detecting field boundaries")
 
@@ -583,9 +547,7 @@ class StatisticalAnalyzer:
             return []
 
         # Use cache if available
-        cache_key = hashlib.md5(
-            b"".join(messages[:10])
-        ).hexdigest()  # Cache based on first 10 messages
+        cache_key = hashlib.md5(b"".join(messages[:10])).hexdigest()  # Cache based on first 10 messages
         if cache_key in self._boundary_cache:
             return self._boundary_cache[cache_key]
 
@@ -609,11 +571,7 @@ class StatisticalAnalyzer:
 
         # Merge and filter boundaries
         merged_boundaries = self._merge_boundaries(boundaries)
-        filtered_boundaries = [
-            b
-            for b in merged_boundaries
-            if b.confidence >= self.boundary_confidence_threshold
-        ]
+        filtered_boundaries = [b for b in merged_boundaries if b.confidence >= self.boundary_confidence_threshold]
 
         # Cache results
         self._boundary_cache[cache_key] = filtered_boundaries
@@ -685,9 +643,7 @@ class StatisticalAnalyzer:
             text_count = sum(1 for b in data if b in text_bytes)
             return text_count / len(data) > 0.8 if data else False
 
-    async def _find_common_prefixes(
-        self, messages: List[bytes]
-    ) -> List[Tuple[bytes, int]]:
+    async def _find_common_prefixes(self, messages: List[bytes]) -> List[Tuple[bytes, int]]:
         """Find common prefixes across messages."""
         if not messages:
             return []
@@ -702,20 +658,14 @@ class StatisticalAnalyzer:
 
         # Filter significant prefixes
         threshold = max(2, len(messages) * 0.1)
-        significant_prefixes = [
-            (prefix, count)
-            for prefix, count in prefix_counts.items()
-            if count >= threshold
-        ]
+        significant_prefixes = [(prefix, count) for prefix, count in prefix_counts.items() if count >= threshold]
 
         # Sort by count and length
         significant_prefixes.sort(key=lambda x: (x[1], len(x[0])), reverse=True)
 
         return significant_prefixes[:20]  # Return top 20
 
-    async def _find_common_suffixes(
-        self, messages: List[bytes]
-    ) -> List[Tuple[bytes, int]]:
+    async def _find_common_suffixes(self, messages: List[bytes]) -> List[Tuple[bytes, int]]:
         """Find common suffixes across messages."""
         if not messages:
             return []
@@ -730,20 +680,14 @@ class StatisticalAnalyzer:
 
         # Filter significant suffixes
         threshold = max(2, len(messages) * 0.1)
-        significant_suffixes = [
-            (suffix, count)
-            for suffix, count in suffix_counts.items()
-            if count >= threshold
-        ]
+        significant_suffixes = [(suffix, count) for suffix, count in suffix_counts.items() if count >= threshold]
 
         # Sort by count and length
         significant_suffixes.sort(key=lambda x: (x[1], len(x[0])), reverse=True)
 
         return significant_suffixes[:20]  # Return top 20
 
-    async def _find_repeating_sequences(
-        self, messages: List[bytes]
-    ) -> List[PatternInfo]:
+    async def _find_repeating_sequences(self, messages: List[bytes]) -> List[PatternInfo]:
         """Find repeating sequences within individual messages."""
         repeating_patterns = []
 
@@ -774,9 +718,7 @@ class StatisticalAnalyzer:
                     positions=all_positions,
                     contexts=all_contexts,
                     pattern_type="repeated",
-                    entropy=entropy(
-                        [pattern_bytes.count(b) for b in set(pattern_bytes)], base=2
-                    ),
+                    entropy=entropy([pattern_bytes.count(b) for b in set(pattern_bytes)], base=2),
                     significance=merged_frequency / len(messages),
                 )
 
@@ -796,10 +738,7 @@ class StatisticalAnalyzer:
                 repeat_count = 0
                 pos = start
 
-                while (
-                    pos + length <= len(message)
-                    and message[pos : pos + length] == pattern
-                ):
+                while pos + length <= len(message) and message[pos : pos + length] == pattern:
                     repeat_count += 1
                     pos += length
 
@@ -809,26 +748,16 @@ class StatisticalAnalyzer:
                             pattern=pattern,
                             frequency=repeat_count,
                             positions=[start + i * length for i in range(repeat_count)],
-                            contexts=[
-                                message[
-                                    max(0, start - 4) : start
-                                    + length * repeat_count
-                                    + 4
-                                ]
-                            ],
+                            contexts=[message[max(0, start - 4) : start + length * repeat_count + 4]],
                             pattern_type="repeated",
-                            entropy=entropy(
-                                [pattern.count(b) for b in set(pattern)], base=2
-                            ),
+                            entropy=entropy([pattern.count(b) for b in set(pattern)], base=2),
                             significance=repeat_count * length / len(message),
                         )
                     )
 
         return patterns
 
-    def _detect_header_length(
-        self, common_prefixes: List[Tuple[bytes, int]]
-    ) -> Optional[int]:
+    def _detect_header_length(self, common_prefixes: List[Tuple[bytes, int]]) -> Optional[int]:
         """Detect likely header length from common prefixes."""
         if not common_prefixes:
             return None
@@ -840,9 +769,7 @@ class StatisticalAnalyzer:
 
         return None
 
-    def _detect_footer_length(
-        self, common_suffixes: List[Tuple[bytes, int]]
-    ) -> Optional[int]:
+    def _detect_footer_length(self, common_suffixes: List[Tuple[bytes, int]]) -> Optional[int]:
         """Detect likely footer length from common suffixes."""
         if not common_suffixes:
             return None
@@ -941,9 +868,7 @@ class StatisticalAnalyzer:
 
         return False
 
-    async def _detect_entropy_boundaries(
-        self, messages: List[bytes]
-    ) -> List[FieldBoundary]:
+    async def _detect_entropy_boundaries(self, messages: List[bytes]) -> List[FieldBoundary]:
         """Detect boundaries based on entropy changes."""
         boundaries = []
 
@@ -979,9 +904,7 @@ class StatisticalAnalyzer:
 
         return boundaries
 
-    async def _detect_delimiter_boundaries(
-        self, messages: List[bytes]
-    ) -> List[FieldBoundary]:
+    async def _detect_delimiter_boundaries(self, messages: List[bytes]) -> List[FieldBoundary]:
         """Detect boundaries based on delimiter patterns."""
         boundaries = []
         delimiter_candidates = defaultdict(list)
@@ -993,9 +916,7 @@ class StatisticalAnalyzer:
 
         # Evaluate delimiter candidates
         for delimiter, positions in delimiter_candidates.items():
-            if (
-                len(positions) >= len(messages) * 0.5
-            ):  # Appears in at least 50% of messages
+            if len(positions) >= len(messages) * 0.5:  # Appears in at least 50% of messages
                 # Check if delimiter appears at consistent relative positions
                 relative_positions = []
                 for msg_idx, pos in positions:
@@ -1025,18 +946,14 @@ class StatisticalAnalyzer:
 
         return boundaries
 
-    async def _detect_length_field_boundaries(
-        self, messages: List[bytes]
-    ) -> List[FieldBoundary]:
+    async def _detect_length_field_boundaries(self, messages: List[bytes]) -> List[FieldBoundary]:
         """Detect boundaries based on length field patterns."""
         boundaries = []
 
         for msg in messages:
             # Check for potential length fields at the beginning
             for length_size in [1, 2, 4]:
-                if (
-                    len(msg) < length_size + 4
-                ):  # Need at least some data after length field
+                if len(msg) < length_size + 4:  # Need at least some data after length field
                     continue
 
                 try:
@@ -1072,9 +989,7 @@ class StatisticalAnalyzer:
 
         return boundaries
 
-    async def _detect_pattern_break_boundaries(
-        self, messages: List[bytes]
-    ) -> List[FieldBoundary]:
+    async def _detect_pattern_break_boundaries(self, messages: List[bytes]) -> List[FieldBoundary]:
         """Detect boundaries where patterns change significantly."""
         boundaries = []
 
@@ -1092,9 +1007,7 @@ class StatisticalAnalyzer:
                 next_byte = msg[i + 1]
 
                 # Detect transitions between different value ranges
-                if (curr_byte < 32 and next_byte >= 32) or (
-                    curr_byte >= 32 and next_byte < 32
-                ):
+                if (curr_byte < 32 and next_byte >= 32) or (curr_byte >= 32 and next_byte < 32):
                     transitions.append(i + 1)
                 elif abs(int(curr_byte) - int(next_byte)) > 128:
                     transitions.append(i + 1)
@@ -1139,9 +1052,7 @@ class StatisticalAnalyzer:
         merged.append(current_boundary)
         return merged
 
-    async def detect_field_boundaries(
-        self, messages: List[bytes]
-    ) -> List[FieldBoundary]:
+    async def detect_field_boundaries(self, messages: List[bytes]) -> List[FieldBoundary]:
         """Public interface for field boundary detection."""
         boundaries = await self._detect_field_boundaries(messages)
         # Ensure delimiter boundaries expose separator attribute for consumers
@@ -1159,9 +1070,7 @@ class StatisticalAnalyzer:
         patterns = await self._detect_patterns(messages)
         return patterns
 
-    def _classify_pattern_type(
-        self, pattern: bytes, positions: List[int], contexts: List[bytes]
-    ) -> str:
+    def _classify_pattern_type(self, pattern: bytes, positions: List[int], contexts: List[bytes]) -> str:
         """Classify the type of pattern detected."""
         if len(set(pattern)) == 1:
             return "fixed"
@@ -1266,9 +1175,7 @@ class StatisticalAnalyzer:
                 entropy([msg.count(b) for b in set(msg)], base=2),  # Entropy
                 len(set(msg)),  # Unique byte count
                 msg.count(0) / len(msg) if msg else 0,  # Null byte ratio
-                (
-                    sum(1 for b in msg if 32 <= b <= 126) / len(msg) if msg else 0
-                ),  # Printable ratio
+                (sum(1 for b in msg if 32 <= b <= 126) / len(msg) if msg else 0),  # Printable ratio
             ]
             features.append(feature_vector)
 
@@ -1277,9 +1184,7 @@ class StatisticalAnalyzer:
         normalized_features = scaler.fit_transform(features)
 
         # Perform DBSCAN clustering
-        clusterer = DBSCAN(
-            eps=self.clustering_eps, min_samples=self.clustering_min_samples
-        )
+        clusterer = DBSCAN(eps=self.clustering_eps, min_samples=self.clustering_min_samples)
         cluster_labels = clusterer.fit_predict(normalized_features)
 
         # Organize results
@@ -1293,9 +1198,7 @@ class StatisticalAnalyzer:
                 "cluster_id": int(label),
                 "message_indices": cluster_indices,
                 "size": len(cluster_indices),
-                "representative_features": np.mean(
-                    [features[i] for i in cluster_indices], axis=0
-                ).tolist(),
+                "representative_features": np.mean([features[i] for i in cluster_indices], axis=0).tolist(),
             }
             clusters.append(cluster_info)
 

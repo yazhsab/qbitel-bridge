@@ -267,10 +267,7 @@ class ResponseCache:
             if service is None:
                 self._cache.clear()
             else:
-                keys_to_delete = [
-                    k for k, v in self._cache.items()
-                    if service in k
-                ]
+                keys_to_delete = [k for k, v in self._cache.items() if service in k]
                 for key in keys_to_delete:
                     del self._cache[key]
 
@@ -360,9 +357,7 @@ class DegradationService:
             )
             DEGRADATION_MODE.labels(service=service_name).set(0)
 
-        logger.info(
-            f"Registered fallback for '{service_name}': {strategy.value} (priority={priority})"
-        )
+        logger.info(f"Registered fallback for '{service_name}': {strategy.value} (priority={priority})")
 
     async def execute_with_fallback(
         self,
@@ -405,9 +400,7 @@ class DegradationService:
             await self._record_failure(service_name, e)
 
             # Try fallbacks
-            return await self._execute_fallbacks(
-                service_name, e, *args, **kwargs
-            )
+            return await self._execute_fallbacks(service_name, e, *args, **kwargs)
 
     async def _execute_fallbacks(
         self,
@@ -428,9 +421,7 @@ class DegradationService:
                 continue
 
             try:
-                result = await self._execute_fallback(
-                    service_name, fallback, *args, **kwargs
-                )
+                result = await self._execute_fallback(service_name, fallback, *args, **kwargs)
                 FALLBACK_EXECUTIONS.labels(
                     service=service_name,
                     fallback_type=fallback.strategy.value,
@@ -438,9 +429,7 @@ class DegradationService:
                 return result
 
             except Exception as e:
-                logger.warning(
-                    f"Fallback '{fallback.name}' failed for '{service_name}': {e}"
-                )
+                logger.warning(f"Fallback '{fallback.name}' failed for '{service_name}': {e}")
                 continue
 
         # All fallbacks failed
@@ -518,10 +507,7 @@ class DegradationService:
             health.consecutive_failures = 0
 
             # Check for recovery
-            if (
-                health.mode != DegradationMode.NORMAL
-                and health.consecutive_successes >= self.recovery_threshold
-            ):
+            if health.mode != DegradationMode.NORMAL and health.consecutive_successes >= self.recovery_threshold:
                 await self._recover_service(service_name)
 
     async def _record_failure(
@@ -543,15 +529,9 @@ class DegradationService:
             health.consecutive_successes = 0
 
             # Check for degradation
-            if (
-                health.mode == DegradationMode.NORMAL
-                and health.consecutive_failures >= self.failure_threshold
-            ):
+            if health.mode == DegradationMode.NORMAL and health.consecutive_failures >= self.failure_threshold:
                 await self._degrade_service(service_name)
-            elif (
-                health.mode == DegradationMode.DEGRADED
-                and health.consecutive_failures >= self.failure_threshold * 2
-            ):
+            elif health.mode == DegradationMode.DEGRADED and health.consecutive_failures >= self.failure_threshold * 2:
                 await self._minimize_service(service_name)
 
     async def _degrade_service(self, service_name: str) -> None:
@@ -589,9 +569,7 @@ class DegradationService:
 
         DEGRADATION_MODE.labels(service=service_name).set(0)
 
-        logger.info(
-            f"Service '{service_name}' recovered from {old_mode.value} to NORMAL"
-        )
+        logger.info(f"Service '{service_name}' recovered from {old_mode.value} to NORMAL")
 
     def get_service_health(self, service_name: str) -> Optional[ServiceHealth]:
         """Get health status for a service."""
@@ -603,11 +581,7 @@ class DegradationService:
 
     def get_degraded_services(self) -> List[str]:
         """Get list of services currently in degraded mode."""
-        return [
-            name
-            for name, health in self._health.items()
-            if health.mode != DegradationMode.NORMAL
-        ]
+        return [name for name, health in self._health.items() if health.mode != DegradationMode.NORMAL]
 
     async def force_mode(
         self,
@@ -649,9 +623,7 @@ class DegradationService:
                     "mode": h.mode.value,
                     "consecutive_failures": h.consecutive_failures,
                     "consecutive_successes": h.consecutive_successes,
-                    "degraded_since": (
-                        h.degraded_since.isoformat() if h.degraded_since else None
-                    ),
+                    "degraded_since": (h.degraded_since.isoformat() if h.degraded_since else None),
                 }
                 for name, h in self._health.items()
             },

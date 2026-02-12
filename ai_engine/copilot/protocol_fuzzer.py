@@ -23,7 +23,6 @@ from ..llm.unified_llm_service import UnifiedLLMService, LLMRequest, get_llm_ser
 from ..core.config import Config
 from ..core.exceptions import QbitelAIException
 
-
 # Prometheus metrics
 FUZZING_SESSION_COUNTER = Counter(
     "qbitel_fuzzing_sessions_total",
@@ -226,9 +225,7 @@ class ProtocolFuzzer:
         session_id = f"fuzz_{protocol_name}_{int(start_time)}"
 
         self.logger.info(
-            f"Starting fuzzing session: {session_id}, "
-            f"max_test_cases={max_test_cases}, "
-            f"duration={duration_minutes}m"
+            f"Starting fuzzing session: {session_id}, " f"max_test_cases={max_test_cases}, " f"duration={duration_minutes}m"
         )
 
         session = FuzzingSession(
@@ -247,27 +244,19 @@ class ProtocolFuzzer:
 
         try:
             # Generate test cases using multiple strategies
-            test_cases = await self._generate_test_cases(
-                protocol_name, protocol_spec, max_test_cases
-            )
+            test_cases = await self._generate_test_cases(protocol_name, protocol_spec, max_test_cases)
             session.test_cases_generated = len(test_cases)
 
             # Execute test cases (simulated for now)
-            vulnerabilities = await self._execute_test_cases(
-                test_cases, protocol_name, protocol_spec
-            )
+            vulnerabilities = await self._execute_test_cases(test_cases, protocol_name, protocol_spec)
             session.test_cases_executed = len(test_cases)
             session.vulnerabilities_found = vulnerabilities
 
             # Calculate coverage metrics
-            session.coverage_metrics = self._calculate_coverage(
-                test_cases, protocol_spec
-            )
+            session.coverage_metrics = self._calculate_coverage(test_cases, protocol_spec)
 
             # Get LLM insights
-            session.llm_insights = await self._generate_llm_insights(
-                session, test_cases, vulnerabilities
-            )
+            session.llm_insights = await self._generate_llm_insights(session, test_cases, vulnerabilities)
 
             session.end_time = datetime.utcnow()
             session.status = "completed"
@@ -279,10 +268,7 @@ class ProtocolFuzzer:
             for vuln in vulnerabilities:
                 FUZZING_VULNERABILITIES_COUNTER.labels(severity=vuln.severity).inc()
 
-            self.logger.info(
-                f"Fuzzing session completed: {session_id}, "
-                f"vulnerabilities={len(vulnerabilities)}"
-            )
+            self.logger.info(f"Fuzzing session completed: {session_id}, " f"vulnerabilities={len(vulnerabilities)}")
 
             return session
 
@@ -306,9 +292,7 @@ class ProtocolFuzzer:
 
         # Generate test cases for each strategy
         for strategy in MutationStrategy:
-            strategy_cases = await self._generate_strategy_cases(
-                strategy, base_samples, protocol_spec, cases_per_strategy
-            )
+            strategy_cases = await self._generate_strategy_cases(strategy, base_samples, protocol_spec, cases_per_strategy)
             test_cases.extend(strategy_cases)
 
             # Limit total cases
@@ -372,9 +356,7 @@ class ProtocolFuzzer:
             elif strategy == MutationStrategy.FORMAT_STRING:
                 payload, desc = self._mutate_format_string(base_sample)
             elif strategy == MutationStrategy.LLM_GUIDED:
-                payload, desc = await self._mutate_llm_guided(
-                    base_sample, protocol_spec
-                )
+                payload, desc = await self._mutate_llm_guided(base_sample, protocol_spec)
             else:
                 payload, desc = base_sample, "Default mutation"
 
@@ -481,9 +463,7 @@ class ProtocolFuzzer:
             f"Appended format string pattern: {pattern.decode('ascii', errors='ignore')}",
         )
 
-    async def _mutate_llm_guided(
-        self, data: bytes, protocol_spec: Dict[str, Any]
-    ) -> Tuple[bytes, str]:
+    async def _mutate_llm_guided(self, data: bytes, protocol_spec: Dict[str, Any]) -> Tuple[bytes, str]:
         """Generate LLM-guided mutation."""
         prompt = f"""
 Generate a fuzzing mutation for the following protocol data.
@@ -632,9 +612,7 @@ Provide the mutation as:
 
         return vuln
 
-    def _calculate_coverage(
-        self, test_cases: List[FuzzTestCase], protocol_spec: Dict[str, Any]
-    ) -> Dict[str, float]:
+    def _calculate_coverage(self, test_cases: List[FuzzTestCase], protocol_spec: Dict[str, Any]) -> Dict[str, float]:
         """Calculate code coverage metrics."""
         # Simulate coverage metrics
         strategies_used = set(tc.strategy for tc in test_cases)
@@ -689,15 +667,11 @@ Keep the response under 300 words.
         except Exception as e:
             self.logger.warning(f"Failed to generate LLM insights: {e}")
             return (
-                f"Fuzzing session completed. "
-                f"{len(vulnerabilities)} vulnerabilities found. "
-                f"Review results for details."
+                f"Fuzzing session completed. " f"{len(vulnerabilities)} vulnerabilities found. " f"Review results for details."
             )
 
 
 # Factory function
-def get_protocol_fuzzer(
-    config: Config, llm_service: Optional[UnifiedLLMService] = None
-) -> ProtocolFuzzer:
+def get_protocol_fuzzer(config: Config, llm_service: Optional[UnifiedLLMService] = None) -> ProtocolFuzzer:
     """Factory function to get ProtocolFuzzer instance."""
     return ProtocolFuzzer(config, llm_service)

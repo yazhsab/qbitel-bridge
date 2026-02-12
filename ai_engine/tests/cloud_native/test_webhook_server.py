@@ -1,6 +1,7 @@
 """
 Unit tests for Kubernetes Admission Webhook Server.
 """
+
 import pytest
 import asyncio
 import sys
@@ -13,7 +14,7 @@ from cloud_native.container_security.admission_control.webhook_server import (
     AdmissionAction,
     AdmissionRequest,
     SecurityPolicy,
-    AdmissionWebhookServer
+    AdmissionWebhookServer,
 )
 
 
@@ -33,11 +34,7 @@ class TestAdmissionRequest:
     def test_request_creation(self):
         """Test creating admission request"""
         request = AdmissionRequest(
-            uid="abc-123",
-            kind="Pod",
-            namespace="default",
-            operation="CREATE",
-            object={"metadata": {"name": "test-pod"}}
+            uid="abc-123", kind="Pod", namespace="default", operation="CREATE", object={"metadata": {"name": "test-pod"}}
         )
 
         assert request.uid == "abc-123"
@@ -56,7 +53,7 @@ class TestSecurityPolicy:
             allowed_registries=["docker.io", "gcr.io"],
             require_signature=True,
             block_privileged=True,
-            scan_for_quantum_vulnerabilities=True
+            scan_for_quantum_vulnerabilities=True,
         )
 
         assert policy.name == "strict-policy"
@@ -72,9 +69,7 @@ class TestAdmissionWebhookServer:
     def webhook_server(self):
         """Create webhook server instance"""
         return AdmissionWebhookServer(
-            port=8443,
-            tls_cert_path="/etc/webhook/certs/tls.crt",
-            tls_key_path="/etc/webhook/certs/tls.key"
+            port=8443, tls_cert_path="/etc/webhook/certs/tls.crt", tls_key_path="/etc/webhook/certs/tls.key"
         )
 
     def test_server_initialization(self, webhook_server):
@@ -86,22 +81,12 @@ class TestAdmissionWebhookServer:
     def test_validate_pod_allowed(self, webhook_server):
         """Test pod validation - allow case"""
         policy = SecurityPolicy(
-            name="permissive",
-            allowed_registries=["docker.io"],
-            require_signature=False,
-            block_privileged=False
+            name="permissive", allowed_registries=["docker.io"], require_signature=False, block_privileged=False
         )
 
         webhook_server.add_policy(policy)
 
-        pod = {
-            "metadata": {"name": "test-pod"},
-            "spec": {
-                "containers": [
-                    {"name": "app", "image": "docker.io/nginx:latest"}
-                ]
-            }
-        }
+        pod = {"metadata": {"name": "test-pod"}, "spec": {"containers": [{"name": "app", "image": "docker.io/nginx:latest"}]}}
 
         result = webhook_server.validate_pod(pod, "permissive")
 
@@ -110,23 +95,11 @@ class TestAdmissionWebhookServer:
 
     def test_validate_pod_denied_registry(self, webhook_server):
         """Test pod validation - deny due to registry"""
-        policy = SecurityPolicy(
-            name="strict",
-            allowed_registries=["gcr.io"],
-            require_signature=False,
-            block_privileged=False
-        )
+        policy = SecurityPolicy(name="strict", allowed_registries=["gcr.io"], require_signature=False, block_privileged=False)
 
         webhook_server.add_policy(policy)
 
-        pod = {
-            "metadata": {"name": "test-pod"},
-            "spec": {
-                "containers": [
-                    {"name": "app", "image": "docker.io/nginx:latest"}
-                ]
-            }
-        }
+        pod = {"metadata": {"name": "test-pod"}, "spec": {"containers": [{"name": "app", "image": "docker.io/nginx:latest"}]}}
 
         result = webhook_server.validate_pod(pod, "strict")
 
@@ -137,10 +110,7 @@ class TestAdmissionWebhookServer:
     def test_validate_pod_privileged(self, webhook_server):
         """Test blocking privileged pods"""
         policy = SecurityPolicy(
-            name="no-privilege",
-            allowed_registries=["docker.io"],
-            require_signature=False,
-            block_privileged=True
+            name="no-privilege", allowed_registries=["docker.io"], require_signature=False, block_privileged=True
         )
 
         webhook_server.add_policy(policy)
@@ -148,14 +118,8 @@ class TestAdmissionWebhookServer:
         privileged_pod = {
             "metadata": {"name": "privileged-pod"},
             "spec": {
-                "containers": [
-                    {
-                        "name": "app",
-                        "image": "docker.io/nginx:latest",
-                        "securityContext": {"privileged": True}
-                    }
-                ]
-            }
+                "containers": [{"name": "app", "image": "docker.io/nginx:latest", "securityContext": {"privileged": True}}]
+            },
         }
 
         result = webhook_server.validate_pod(privileged_pod, "no-privilege")
@@ -187,10 +151,7 @@ class TestAdmissionWebhookServer:
 
     def test_validate_image_registry(self, webhook_server):
         """Test registry validation"""
-        policy = SecurityPolicy(
-            name="test-policy",
-            allowed_registries=["docker.io", "gcr.io", "ghcr.io"]
-        )
+        policy = SecurityPolicy(name="test-policy", allowed_registries=["docker.io", "gcr.io", "ghcr.io"])
 
         # Allowed registry
         assert webhook_server._validate_image_registry("docker.io/nginx:latest", policy) is True
@@ -201,10 +162,7 @@ class TestAdmissionWebhookServer:
 
     def test_add_remove_policy(self, webhook_server):
         """Test adding and removing policies"""
-        policy = SecurityPolicy(
-            name="temp-policy",
-            allowed_registries=["docker.io"]
-        )
+        policy = SecurityPolicy(name="temp-policy", allowed_registries=["docker.io"])
 
         # Add policy
         webhook_server.add_policy(policy)
@@ -217,6 +175,7 @@ class TestAdmissionWebhookServer:
     @pytest.mark.asyncio
     async def test_handle_health(self, webhook_server):
         """Test health check handler"""
+
         # Mock request
         class MockRequest:
             pass
@@ -248,20 +207,11 @@ class TestAdmissionWebhookServer:
 
     def test_patch_action(self, webhook_server):
         """Test patch action generation"""
-        policy = SecurityPolicy(
-            name="patch-policy",
-            allowed_registries=["docker.io"],
-            add_security_labels=True
-        )
+        policy = SecurityPolicy(name="patch-policy", allowed_registries=["docker.io"], add_security_labels=True)
 
         webhook_server.add_policy(policy)
 
-        pod = {
-            "metadata": {"name": "test-pod"},
-            "spec": {
-                "containers": [{"name": "app", "image": "docker.io/nginx:latest"}]
-            }
-        }
+        pod = {"metadata": {"name": "test-pod"}, "spec": {"containers": [{"name": "app", "image": "docker.io/nginx:latest"}]}}
 
         result = webhook_server.validate_pod(pod, "patch-policy")
 
@@ -272,11 +222,7 @@ class TestAdmissionWebhookServer:
 
     def test_multiple_containers_validation(self, webhook_server):
         """Test validating pod with multiple containers"""
-        policy = SecurityPolicy(
-            name="multi-container",
-            allowed_registries=["docker.io"],
-            require_signature=False
-        )
+        policy = SecurityPolicy(name="multi-container", allowed_registries=["docker.io"], require_signature=False)
 
         webhook_server.add_policy(policy)
 
@@ -285,9 +231,9 @@ class TestAdmissionWebhookServer:
             "spec": {
                 "containers": [
                     {"name": "app", "image": "docker.io/nginx:latest"},
-                    {"name": "sidecar", "image": "docker.io/envoy:v1.28"}
+                    {"name": "sidecar", "image": "docker.io/envoy:v1.28"},
                 ]
-            }
+            },
         }
 
         result = webhook_server.validate_pod(pod, "multi-container")

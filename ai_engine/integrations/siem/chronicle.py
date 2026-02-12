@@ -414,9 +414,8 @@ class ChronicleConnector(BaseSIEMConnector):
             else:
                 # Use default credentials
                 from google.auth import default
-                self._credentials, _ = default(
-                    scopes=["https://www.googleapis.com/auth/chronicle-backstory"]
-                )
+
+                self._credentials, _ = default(scopes=["https://www.googleapis.com/auth/chronicle-backstory"])
 
         except ImportError:
             logger.warning("google-auth package not installed, using API key auth")
@@ -429,6 +428,7 @@ class ChronicleConnector(BaseSIEMConnector):
         if self._credentials:
             if not self._credentials.valid:
                 from google.auth.transport.requests import Request
+
                 self._credentials.refresh(Request())
 
             headers["Authorization"] = f"Bearer {self._credentials.token}"
@@ -524,11 +524,13 @@ class ChronicleConnector(BaseSIEMConnector):
                 "vendorName": "QBITEL",
                 "description": event.message,
             },
-            "securityResult": [{
-                "severity": self._severity_to_udm(event.severity),
-                "category": event.category.upper() if event.category else "UNKNOWN",
-                "summary": event.message,
-            }],
+            "securityResult": [
+                {
+                    "severity": self._severity_to_udm(event.severity),
+                    "category": event.category.upper() if event.category else "UNKNOWN",
+                    "summary": event.message,
+                }
+            ],
             "additional": {
                 "fields": {
                     "event_type": {"stringValue": event.event_type},
@@ -566,11 +568,7 @@ class ChronicleConnector(BaseSIEMConnector):
             target = data.get("udm", {}).get("target", {})
 
             timestamp_str = metadata.get("eventTimestamp", "")
-            timestamp = (
-                datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
-                if timestamp_str
-                else datetime.utcnow()
-            )
+            timestamp = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00")) if timestamp_str else datetime.utcnow()
 
             return SIEMEvent(
                 event_type=metadata.get("eventType", "GENERIC_EVENT"),
@@ -594,13 +592,13 @@ class ChronicleConnector(BaseSIEMConnector):
                 alert_id=detection.get("id", str(uuid.uuid4())),
                 title=detection.get("detection", [{}])[0].get("ruleName", ""),
                 description=detection.get("detection", [{}])[0].get("description", ""),
-                severity=self._udm_to_severity(
-                    detection.get("detection", [{}])[0].get("severity")
-                ),
+                severity=self._udm_to_severity(detection.get("detection", [{}])[0].get("severity")),
                 status="new",
-                created_at=datetime.fromisoformat(
-                    detection.get("detectionTime", "").replace("Z", "+00:00")
-                ) if detection.get("detectionTime") else datetime.utcnow(),
+                created_at=(
+                    datetime.fromisoformat(detection.get("detectionTime", "").replace("Z", "+00:00"))
+                    if detection.get("detectionTime")
+                    else datetime.utcnow()
+                ),
                 rule_id=detection.get("detection", [{}])[0].get("ruleId"),
                 rule_name=detection.get("detection", [{}])[0].get("ruleName"),
                 raw=detection,

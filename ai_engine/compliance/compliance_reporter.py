@@ -236,34 +236,24 @@ class AutonomousComplianceReporter:
             if self.llm_service is None:
                 self.llm_service = get_llm_service()
                 if self.llm_service is None:
-                    raise ComplianceReporterException(
-                        "LLM service not initialized. Call initialize_llm_service() first."
-                    )
+                    raise ComplianceReporterException("LLM service not initialized. Call initialize_llm_service() first.")
 
             # Now that LLM service is confirmed, initialize core components
             # Strategy: Always create fresh instances with the confirmed LLM service
             # to avoid any possibility of capturing None during initialization
 
             if self.regulatory_kb is None:
-                if (
-                    self._provided_regulatory_kb
-                    and self._provided_regulatory_kb.llm_service is not None
-                ):
+                if self._provided_regulatory_kb and self._provided_regulatory_kb.llm_service is not None:
                     # Use provided instance only if it already has a valid LLM service
                     self.regulatory_kb = self._provided_regulatory_kb
                     # Update to use our confirmed LLM service
                     self.regulatory_kb.llm_service = self.llm_service
                 else:
                     # Create fresh instance with confirmed LLM service
-                    self.regulatory_kb = RegulatoryKnowledgeBase(
-                        self.config, self.llm_service
-                    )
+                    self.regulatory_kb = RegulatoryKnowledgeBase(self.config, self.llm_service)
 
             if self.assessment_engine is None:
-                if (
-                    self._provided_assessment_engine
-                    and self._provided_assessment_engine.llm_service is not None
-                ):
+                if self._provided_assessment_engine and self._provided_assessment_engine.llm_service is not None:
                     # Use provided instance only if it already has a valid LLM service
                     self.assessment_engine = self._provided_assessment_engine
                     # Update to use our confirmed LLM service
@@ -271,36 +261,25 @@ class AutonomousComplianceReporter:
                 else:
                     # Create fresh instance with confirmed LLM service
                     # Note: Pass the already-initialized regulatory_kb
-                    self.assessment_engine = ComplianceAssessmentEngine(
-                        self.config, self.regulatory_kb, self.llm_service
-                    )
+                    self.assessment_engine = ComplianceAssessmentEngine(self.config, self.regulatory_kb, self.llm_service)
 
             if self.report_generator is None:
-                if (
-                    self._provided_report_generator
-                    and self._provided_report_generator.llm_service is not None
-                ):
+                if self._provided_report_generator and self._provided_report_generator.llm_service is not None:
                     # Use provided instance only if it already has a valid LLM service
                     self.report_generator = self._provided_report_generator
                     # Update to use our confirmed LLM service
                     self.report_generator.llm_service = self.llm_service
                 else:
                     # Create fresh instance with confirmed LLM service
-                    self.report_generator = AutomatedReportGenerator(
-                        self.config, self.llm_service
-                    )
+                    self.report_generator = AutomatedReportGenerator(self.config, self.llm_service)
 
             # Start audit trail
             await self.audit_trail.start()
 
             # Start background tasks
             if self.monitoring_config.enabled:
-                self._monitor_task = asyncio.create_task(
-                    self._continuous_monitoring_loop()
-                )
-                self._alert_processor_task = asyncio.create_task(
-                    self._alert_processor_loop()
-                )
+                self._monitor_task = asyncio.create_task(self._continuous_monitoring_loop())
+                self._alert_processor_task = asyncio.create_task(self._alert_processor_loop())
 
             self._running = True
 
@@ -410,22 +389,16 @@ class AutonomousComplianceReporter:
             framework = self._map_standard_to_framework(standard)
 
             # Perform compliance assessment
-            assessment = await self._perform_compliance_assessment(
-                protocol, framework, evidence
-            )
+            assessment = await self._perform_compliance_assessment(protocol, framework, evidence)
 
             # Analyze protocol against standard
-            analysis = await self._analyze_protocol_compliance(
-                protocol, standard, assessment, evidence
-            )
+            analysis = await self._analyze_protocol_compliance(protocol, standard, assessment, evidence)
 
             # Identify compliance gaps
             gaps = await self._identify_compliance_gaps(assessment, analysis, standard)
 
             # Generate remediation recommendations
-            recommendations = await self._generate_remediation_recommendations(
-                gaps, standard, evidence
-            )
+            recommendations = await self._generate_remediation_recommendations(gaps, standard, evidence)
 
             # Update assessment with enhanced analysis
             assessment.gaps = gaps
@@ -472,18 +445,12 @@ class AutonomousComplianceReporter:
 
             # Validate success metrics
             if generation_time < 600:  # <10 minutes
-                self.logger.info(
-                    f"✓ Report generated in {generation_time:.2f}s (target: <600s)"
-                )
+                self.logger.info(f"✓ Report generated in {generation_time:.2f}s (target: <600s)")
             else:
-                self.logger.warning(
-                    f"⚠ Report generation exceeded target: {generation_time:.2f}s"
-                )
+                self.logger.warning(f"⚠ Report generation exceeded target: {generation_time:.2f}s")
 
             if assessment.overall_compliance_score >= 95.0:
-                self.logger.info(
-                    f"✓ Compliance accuracy: {assessment.overall_compliance_score:.1f}% (target: ≥95%)"
-                )
+                self.logger.info(f"✓ Compliance accuracy: {assessment.overall_compliance_score:.1f}% (target: ≥95%)")
 
             return report
 
@@ -530,17 +497,13 @@ class AutonomousComplianceReporter:
             if config:
                 self.monitoring_config = config
 
-            self.logger.info(
-                f"Starting continuous monitoring for {len(protocols)} protocols, {len(standards)} standards"
-            )
+            self.logger.info(f"Starting continuous monitoring for {len(protocols)} protocols, {len(standards)} standards")
 
             # Start monitors for each framework
             for standard in standards:
                 framework = self._map_standard_to_framework(standard)
                 if framework not in self.active_monitors:
-                    monitor_task = asyncio.create_task(
-                        self._monitor_framework_compliance(framework, protocols)
-                    )
+                    monitor_task = asyncio.create_task(self._monitor_framework_compliance(framework, protocols))
                     self.active_monitors[framework] = monitor_task
 
             # Yield alerts as they are generated
@@ -568,9 +531,7 @@ class AutonomousComplianceReporter:
             self.logger.error(f"Continuous monitoring failed: {e}")
             raise ComplianceReporterException(f"Monitoring failed: {e}")
 
-    async def generate_audit_evidence(
-        self, audit_request: AuditRequest
-    ) -> AuditEvidence:
+    async def generate_audit_evidence(self, audit_request: AuditRequest) -> AuditEvidence:
         """
         Generate comprehensive audit evidence automatically.
 
@@ -600,9 +561,7 @@ class AutonomousComplianceReporter:
             )
 
             # Generate evidence documentation
-            evidence_items = await self._generate_evidence_documentation(
-                audit_request, logs
-            )
+            evidence_items = await self._generate_evidence_documentation(audit_request, logs)
 
             # Create audit trail
             audit_trail_data = await self._create_audit_trail_report(
@@ -612,19 +571,13 @@ class AutonomousComplianceReporter:
             )
 
             # Prepare compliance summary
-            compliance_summary = await self._prepare_compliance_summary(
-                audit_request.framework, audit_request.requirements
-            )
+            compliance_summary = await self._prepare_compliance_summary(audit_request.framework, audit_request.requirements)
 
             # Generate supporting documents
-            supporting_docs = await self._generate_supporting_documents(
-                audit_request, evidence_items
-            )
+            supporting_docs = await self._generate_supporting_documents(audit_request, evidence_items)
 
             # Create digital signature for verification
-            digital_signature = self._create_digital_signature(
-                evidence_items, audit_trail_data
-            )
+            digital_signature = self._create_digital_signature(evidence_items, audit_trail_data)
 
             # Assemble audit evidence package
             audit_evidence = AuditEvidence(
@@ -681,15 +634,11 @@ class AutonomousComplianceReporter:
                 cached_assessment = self.compliance_cache[cache_key]
                 cache_age = datetime.utcnow() - cached_assessment.assessment_date
                 if cache_age.total_seconds() < 3600:  # 1 hour cache
-                    self.logger.info(
-                        f"Using cached assessment for {protocol}/{framework}"
-                    )
+                    self.logger.info(f"Using cached assessment for {protocol}/{framework}")
                     return cached_assessment
 
             # Perform fresh assessment
-            assessment = await self.assessment_engine.assess_compliance(
-                framework=framework, use_cached_snapshot=False
-            )
+            assessment = await self.assessment_engine.assess_compliance(framework=framework, use_cached_snapshot=False)
 
             # Cache result
             self.compliance_cache[cache_key] = assessment
@@ -770,9 +719,7 @@ Return analysis as JSON with structured insights.
         # Sort by severity and impact
         gaps.sort(
             key=lambda g: (
-                {"critical": 0, "high": 1, "medium": 2, "low": 3}.get(
-                    g.severity.value, 4
-                ),
+                {"critical": 0, "high": 1, "medium": 2, "low": 3}.get(g.severity.value, 4),
                 len(g.gap_description),
             )
         )
@@ -797,9 +744,7 @@ Return analysis as JSON with structured insights.
                     "Validate compliance achievement",
                     "Document evidence for audit",
                 ],
-                estimated_effort_days=self._estimate_effort_days(
-                    gap.remediation_effort
-                ),
+                estimated_effort_days=self._estimate_effort_days(gap.remediation_effort),
                 business_impact=gap.impact_assessment,
             )
             recommendations.append(recommendation)
@@ -851,18 +796,14 @@ Return analysis as JSON with structured insights.
             try:
                 for protocol in protocols:
                     # Perform quick compliance check
-                    assessment = await self.assessment_engine.assess_compliance(
-                        framework
-                    )
+                    assessment = await self.assessment_engine.assess_compliance(framework)
 
                     # Check for violations
                     violations = self._detect_violations(assessment)
 
                     # Generate alerts for violations
                     for violation in violations:
-                        alert = self._create_compliance_alert(
-                            framework, protocol, violation, assessment
-                        )
+                        alert = self._create_compliance_alert(framework, protocol, violation, assessment)
                         await self.alert_queue.put(alert)
 
                 # Wait before next check
@@ -874,16 +815,10 @@ Return analysis as JSON with structured insights.
                 self.logger.error(f"Framework monitoring error for {framework}: {e}")
                 await asyncio.sleep(60)
 
-    def _detect_violations(
-        self, assessment: ComplianceAssessment
-    ) -> List[ComplianceGap]:
+    def _detect_violations(self, assessment: ComplianceAssessment) -> List[ComplianceGap]:
         """Detect compliance violations from assessment."""
         # Return critical and high severity gaps as violations
-        return [
-            gap
-            for gap in assessment.gaps
-            if gap.severity in [RequirementSeverity.CRITICAL, RequirementSeverity.HIGH]
-        ]
+        return [gap for gap in assessment.gaps if gap.severity in [RequirementSeverity.CRITICAL, RequirementSeverity.HIGH]]
 
     def _create_compliance_alert(
         self,
@@ -961,15 +896,10 @@ Return analysis as JSON with structured insights.
             )
 
             # Auto-remediation if enabled and available
-            if (
-                self.monitoring_config.auto_remediation
-                and alert.auto_remediation_available
-            ):
+            if self.monitoring_config.auto_remediation and alert.auto_remediation_available:
                 await self._attempt_auto_remediation(alert)
 
-            self.logger.info(
-                f"Alert processed: {alert.alert_id} - {alert.severity.value}"
-            )
+            self.logger.info(f"Alert processed: {alert.alert_id} - {alert.severity.value}")
 
         except Exception as e:
             self.logger.error(f"Alert processing failed: {e}")
@@ -992,9 +922,7 @@ Return analysis as JSON with structured insights.
             # Execute remediation script if available
             if alert.remediation_script:
                 # In production, this would execute the remediation
-                self.logger.info(
-                    f"Remediation script available for {alert.requirement_id}"
-                )
+                self.logger.info(f"Remediation script available for {alert.requirement_id}")
 
         except Exception as e:
             self.logger.error(f"Auto-remediation failed: {e}")
@@ -1015,20 +943,14 @@ Return analysis as JSON with structured insights.
         except Exception as e:
             self.logger.error(f"Framework compliance check failed for {framework}: {e}")
 
-    async def _collect_audit_logs(
-        self, framework: str, start_date: datetime, end_date: datetime
-    ) -> List[Dict[str, Any]]:
+    async def _collect_audit_logs(self, framework: str, start_date: datetime, end_date: datetime) -> List[Dict[str, Any]]:
         """Collect audit logs for specified period."""
         try:
             # Query audit trail for relevant events
-            events = await self.audit_trail.blockchain.query_events(
-                start_time=start_date, end_time=end_date, limit=10000
-            )
+            events = await self.audit_trail.blockchain.query_events(start_time=start_date, end_time=end_date, limit=10000)
 
             # Filter by framework
-            framework_events = [
-                e for e in events if e.compliance_framework == framework
-            ]
+            framework_events = [e for e in events if e.compliance_framework == framework]
 
             # Convert to dict format
             logs = [
@@ -1133,9 +1055,7 @@ Return analysis as JSON with structured insights.
     ) -> List[Dict[str, Any]]:
         """Create comprehensive audit trail report."""
         try:
-            report = await self.audit_trail.generate_compliance_audit_report(
-                framework, start_date, end_date
-            )
+            report = await self.audit_trail.generate_compliance_audit_report(framework, start_date, end_date)
 
             # Convert to list format for evidence package
             audit_trail_data = [
@@ -1159,9 +1079,7 @@ Return analysis as JSON with structured insights.
             self.logger.error(f"Audit trail report creation failed: {e}")
             return []
 
-    async def _prepare_compliance_summary(
-        self, framework: str, requirements: List[str]
-    ) -> Dict[str, Any]:
+    async def _prepare_compliance_summary(self, framework: str, requirements: List[str]) -> Dict[str, Any]:
         """Prepare compliance summary for audit."""
         try:
             # Get latest assessment
@@ -1182,20 +1100,8 @@ Return analysis as JSON with structured insights.
                     "non_compliant": assessment.non_compliant_requirements,
                     "partially_compliant": assessment.partially_compliant_requirements,
                 },
-                "critical_gaps": len(
-                    [
-                        g
-                        for g in assessment.gaps
-                        if g.severity == RequirementSeverity.CRITICAL
-                    ]
-                ),
-                "high_priority_gaps": len(
-                    [
-                        g
-                        for g in assessment.gaps
-                        if g.severity == RequirementSeverity.HIGH
-                    ]
-                ),
+                "critical_gaps": len([g for g in assessment.gaps if g.severity == RequirementSeverity.CRITICAL]),
+                "high_priority_gaps": len([g for g in assessment.gaps if g.severity == RequirementSeverity.HIGH]),
                 "next_assessment_due": assessment.next_assessment_due.isoformat(),
             }
 
@@ -1221,9 +1127,7 @@ Return analysis as JSON with structured insights.
             documents.append(report_doc)
 
             # Generate audit trail export
-            trail_doc = (
-                f"audit_trail_{audit_request.framework}_{audit_request.request_id}.json"
-            )
+            trail_doc = f"audit_trail_{audit_request.framework}_{audit_request.request_id}.json"
             documents.append(trail_doc)
 
             return documents
@@ -1285,63 +1189,31 @@ Return analysis as JSON with structured insights.
         """Get performance metrics for compliance reporter."""
         return {
             "report_generation": {
-                "average_time_seconds": (
-                    np.mean(self.report_generation_times)
-                    if self.report_generation_times
-                    else 0
-                ),
-                "min_time_seconds": (
-                    min(self.report_generation_times)
-                    if self.report_generation_times
-                    else 0
-                ),
-                "max_time_seconds": (
-                    max(self.report_generation_times)
-                    if self.report_generation_times
-                    else 0
-                ),
+                "average_time_seconds": (np.mean(self.report_generation_times) if self.report_generation_times else 0),
+                "min_time_seconds": (min(self.report_generation_times) if self.report_generation_times else 0),
+                "max_time_seconds": (max(self.report_generation_times) if self.report_generation_times else 0),
                 "total_reports": len(self.report_generation_times),
                 "target_met": (
-                    sum(1 for t in self.report_generation_times if t < 600)
-                    / len(self.report_generation_times)
-                    * 100
+                    sum(1 for t in self.report_generation_times if t < 600) / len(self.report_generation_times) * 100
                     if self.report_generation_times
                     else 0
                 ),
             },
             "compliance_accuracy": {
-                "average_score": (
-                    np.mean(self.compliance_accuracy_scores)
-                    if self.compliance_accuracy_scores
-                    else 0
-                ),
-                "min_score": (
-                    min(self.compliance_accuracy_scores)
-                    if self.compliance_accuracy_scores
-                    else 0
-                ),
-                "max_score": (
-                    max(self.compliance_accuracy_scores)
-                    if self.compliance_accuracy_scores
-                    else 0
-                ),
+                "average_score": (np.mean(self.compliance_accuracy_scores) if self.compliance_accuracy_scores else 0),
+                "min_score": (min(self.compliance_accuracy_scores) if self.compliance_accuracy_scores else 0),
+                "max_score": (max(self.compliance_accuracy_scores) if self.compliance_accuracy_scores else 0),
                 "target_met": (
-                    sum(1 for s in self.compliance_accuracy_scores if s >= 95.0)
-                    / len(self.compliance_accuracy_scores)
-                    * 100
+                    sum(1 for s in self.compliance_accuracy_scores if s >= 95.0) / len(self.compliance_accuracy_scores) * 100
                     if self.compliance_accuracy_scores
                     else 0
                 ),
             },
             "audit_pass_rate": {
-                "average_rate": (
-                    np.mean(self.audit_pass_rates) if self.audit_pass_rates else 0
-                ),
+                "average_rate": (np.mean(self.audit_pass_rates) if self.audit_pass_rates else 0),
                 "total_audits": len(self.audit_pass_rates),
                 "target_met": (
-                    sum(1 for r in self.audit_pass_rates if r >= 98.0)
-                    / len(self.audit_pass_rates)
-                    * 100
+                    sum(1 for r in self.audit_pass_rates if r >= 98.0) / len(self.audit_pass_rates) * 100
                     if self.audit_pass_rates
                     else 0
                 ),

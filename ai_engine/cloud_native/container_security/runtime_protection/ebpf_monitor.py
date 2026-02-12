@@ -17,6 +17,7 @@ from datetime import datetime
 # Try to import BCC (BPF Compiler Collection)
 try:
     from bcc import BPF
+
     BCC_AVAILABLE = True
 except ImportError:
     BCC_AVAILABLE = False
@@ -27,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 class EventType(Enum):
     """eBPF event types"""
+
     PROCESS_EXEC = "process_exec"
     FILE_ACCESS = "file_access"
     NETWORK_CONNECT = "network_connect"
@@ -36,6 +38,7 @@ class EventType(Enum):
 @dataclass
 class RuntimeEvent:
     """Runtime security event"""
+
     event_type: EventType
     container_id: str
     process_name: str
@@ -70,22 +73,34 @@ class eBPFMonitor:
         """Load threat detection rules"""
         return {
             "suspicious_processes": [
-                "nc", "netcat", "ncat",  # Network tools
-                "nmap", "masscan",  # Port scanners
-                "wget", "curl",  # Download tools (in production)
-                "python", "perl", "ruby",  # Interpreters (suspicious in minimal containers)
-                "base64", "xxd"  # Encoding tools
+                "nc",
+                "netcat",
+                "ncat",  # Network tools
+                "nmap",
+                "masscan",  # Port scanners
+                "wget",
+                "curl",  # Download tools (in production)
+                "python",
+                "perl",
+                "ruby",  # Interpreters (suspicious in minimal containers)
+                "base64",
+                "xxd",  # Encoding tools
             ],
             "sensitive_files": [
-                "/etc/passwd", "/etc/shadow",
-                "/etc/ssh/", "/root/.ssh/",
-                "/proc/*/environ", "/proc/*/cmdline"
+                "/etc/passwd",
+                "/etc/shadow",
+                "/etc/ssh/",
+                "/root/.ssh/",
+                "/proc/*/environ",
+                "/proc/*/cmdline",
             ],
             "suspicious_syscalls": [
                 "ptrace",  # Process debugging
-                "mount", "umount",  # Filesystem operations
-                "setuid", "setgid"  # Privilege escalation
-            ]
+                "mount",
+                "umount",  # Filesystem operations
+                "setuid",
+                "setgid",  # Privilege escalation
+            ],
         }
 
     def monitor_container(self, container_id: str) -> Dict[str, Any]:
@@ -100,11 +115,7 @@ class eBPFMonitor:
         """
         if not BCC_AVAILABLE:
             logger.error("BCC not available. Cannot start eBPF monitoring")
-            return {
-                "container_id": container_id,
-                "monitoring": False,
-                "error": "BCC not installed"
-            }
+            return {"container_id": container_id, "monitoring": False, "error": "BCC not installed"}
 
         logger.info(f"Starting eBPF monitoring for container {container_id}")
 
@@ -120,11 +131,7 @@ class eBPFMonitor:
 
             # Start monitoring thread
             self._monitoring_active[container_id] = True
-            thread = threading.Thread(
-                target=self._monitor_loop,
-                args=(container_id,),
-                daemon=True
-            )
+            thread = threading.Thread(target=self._monitor_loop, args=(container_id,), daemon=True)
             thread.start()
             self._monitoring_threads[container_id] = thread
 
@@ -133,7 +140,7 @@ class eBPFMonitor:
                 "monitoring": True,
                 "cpu_overhead": "<1%",
                 "events_captured": 0,
-                "started_at": datetime.now().isoformat()
+                "started_at": datetime.now().isoformat(),
             }
 
             self._monitored_containers[container_id] = status
@@ -143,11 +150,7 @@ class eBPFMonitor:
 
         except Exception as e:
             logger.error(f"Failed to start monitoring for {container_id}: {e}")
-            return {
-                "container_id": container_id,
-                "monitoring": False,
-                "error": str(e)
-            }
+            return {"container_id": container_id, "monitoring": False, "error": str(e)}
 
     def stop_monitoring(self, container_id: str):
         """Stop monitoring a container"""
@@ -277,6 +280,7 @@ class eBPFMonitor:
         Args:
             container_id: Container to monitor
         """
+
         # Define callbacks for different event types
         def handle_exec_event(cpu, data, size):
             event = self._bpf["exec_events"].event(data)
@@ -311,15 +315,12 @@ class eBPFMonitor:
         runtime_event = RuntimeEvent(
             event_type=EventType.PROCESS_EXEC,
             container_id=container_id,
-            process_name=event.comm.decode('utf-8', 'ignore'),
+            process_name=event.comm.decode("utf-8", "ignore"),
             timestamp=time.time(),
             pid=event.pid,
             uid=event.uid,
-            comm=event.comm.decode('utf-8', 'ignore'),
-            details={
-                "filename": event.filename.decode('utf-8', 'ignore'),
-                "ppid": event.ppid
-            }
+            comm=event.comm.decode("utf-8", "ignore"),
+            details={"filename": event.filename.decode("utf-8", "ignore"), "ppid": event.ppid},
         )
 
         # Check for threats
@@ -340,20 +341,17 @@ class eBPFMonitor:
 
     def _process_file_event(self, container_id: str, event):
         """Process a file access event"""
-        filename = event.filename.decode('utf-8', 'ignore')
+        filename = event.filename.decode("utf-8", "ignore")
 
         runtime_event = RuntimeEvent(
             event_type=EventType.FILE_ACCESS,
             container_id=container_id,
-            process_name=event.comm.decode('utf-8', 'ignore'),
+            process_name=event.comm.decode("utf-8", "ignore"),
             timestamp=time.time(),
             pid=event.pid,
             uid=event.uid,
-            comm=event.comm.decode('utf-8', 'ignore'),
-            details={
-                "filename": filename,
-                "flags": event.flags
-            }
+            comm=event.comm.decode("utf-8", "ignore"),
+            details={"filename": filename, "flags": event.flags},
         )
 
         # Check for sensitive file access
@@ -378,21 +376,18 @@ class eBPFMonitor:
         import socket
 
         # Convert IP address
-        daddr = socket.inet_ntoa(event.daddr.to_bytes(4, byteorder='little'))
+        daddr = socket.inet_ntoa(event.daddr.to_bytes(4, byteorder="little"))
         dport = socket.ntohs(event.dport)
 
         runtime_event = RuntimeEvent(
             event_type=EventType.NETWORK_CONNECT,
             container_id=container_id,
-            process_name=event.comm.decode('utf-8', 'ignore'),
+            process_name=event.comm.decode("utf-8", "ignore"),
             timestamp=time.time(),
             pid=event.pid,
             uid=event.uid,
-            comm=event.comm.decode('utf-8', 'ignore'),
-            details={
-                "destination_ip": daddr,
-                "destination_port": dport
-            }
+            comm=event.comm.decode("utf-8", "ignore"),
+            details={"destination_ip": daddr, "destination_port": dport},
         )
 
         # Store event
@@ -424,5 +419,5 @@ class eBPFMonitor:
             "total_events": len(self._events),
             "threats_detected": sum(1 for e in self._events if e.threat_score > 0.5),
             "cpu_overhead_percent": 0.8,
-            "monitoring_enabled": True
+            "monitoring_enabled": True,
         }

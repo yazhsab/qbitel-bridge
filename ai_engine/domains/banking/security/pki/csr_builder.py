@@ -176,10 +176,12 @@ class CSRBuilder:
             KeyUsage.DIGITAL_SIGNATURE,
             KeyUsage.KEY_ENCIPHERMENT,
         ]
-        self._extended_key_usage.extend([
-            ExtendedKeyUsage.SERVER_AUTH,
-            ExtendedKeyUsage.CLIENT_AUTH,
-        ])
+        self._extended_key_usage.extend(
+            [
+                ExtendedKeyUsage.SERVER_AUTH,
+                ExtendedKeyUsage.CLIENT_AUTH,
+            ]
+        )
         return self
 
     def for_psd2_qseal(self) -> "CSRBuilder":

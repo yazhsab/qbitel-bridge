@@ -185,9 +185,7 @@ class TestTransactionManagement:
         assert user.id is not None
 
         # Verify user was committed
-        result = await db_session.execute(
-            select(User).where(User.username == "test_user")
-        )
+        result = await db_session.execute(select(User).where(User.username == "test_user"))
         saved_user = result.scalar_one_or_none()
         assert saved_user is not None
         assert saved_user.username == "test_user"
@@ -215,9 +213,7 @@ class TestTransactionManagement:
             await create_user_with_error(db=db_session)
 
         # User should NOT exist
-        result = await db_session.execute(
-            select(User).where(User.username == "rollback_test")
-        )
+        result = await db_session.execute(select(User).where(User.username == "rollback_test"))
         user = result.scalar_one_or_none()
         assert user is None
 
@@ -372,18 +368,14 @@ class TestDatabaseEncryption:
         await db_session.commit()
 
         # Read user back
-        result = await db_session.execute(
-            select(User).where(User.username == "encrypted_test")
-        )
+        result = await db_session.execute(select(User).where(User.username == "encrypted_test"))
         saved_user = result.scalar_one()
 
         # MFA secret should be decrypted automatically
         assert saved_user.mfa_secret == "JBSWY3DPEHPK3PXP"
 
         # Verify it's actually encrypted in database (raw query)
-        raw_result = await db_session.execute(
-            text("SELECT mfa_secret FROM users WHERE username = 'encrypted_test'")
-        )
+        raw_result = await db_session.execute(text("SELECT mfa_secret FROM users WHERE username = 'encrypted_test'"))
         raw_value = raw_result.scalar()
 
         # Raw value should be bytes (encrypted)
@@ -408,9 +400,7 @@ class TestDatabaseEncryption:
         await db_session.commit()
 
         # Read back
-        result = await db_session.execute(
-            select(User).where(User.username == "json_encrypted_test")
-        )
+        result = await db_session.execute(select(User).where(User.username == "json_encrypted_test"))
         saved_user = result.scalar_one()
 
         # Should be decrypted automatically

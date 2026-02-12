@@ -48,7 +48,6 @@ from ai_engine.intelligence.compliance_mapper import (
     ComplianceFramework,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -197,9 +196,7 @@ class IntelligenceEngine:
             # Security Assessment
             if self._config.enable_security_assessment and result.protocol_analysis:
                 analysis_dict = result.protocol_analysis.to_dict()
-                result.security_assessment = self._security_assessor.assess(
-                    analysis_dict, context
-                )
+                result.security_assessment = self._security_assessor.assess(analysis_dict, context)
                 result.security_score = result.security_assessment.security_score
 
             # Compliance Mapping
@@ -209,19 +206,21 @@ class IntelligenceEngine:
                     self._config.compliance_frameworks,
                 )
                 if result.compliance_reports:
-                    result.compliance_score = sum(
-                        r.compliance_score for r in result.compliance_reports
-                    ) / len(result.compliance_reports)
+                    result.compliance_score = sum(r.compliance_score for r in result.compliance_reports) / len(
+                        result.compliance_reports
+                    )
 
             # Generate recommendations
             result.recommendations = self._generate_recommendations(result)
 
         except Exception as e:
             logger.error(f"Intelligence analysis failed: {e}")
-            result.recommendations.append({
-                "type": "error",
-                "message": f"Analysis error: {e}",
-            })
+            result.recommendations.append(
+                {
+                    "type": "error",
+                    "message": f"Analysis error: {e}",
+                }
+            )
 
         return result
 
@@ -279,9 +278,7 @@ class IntelligenceEngine:
         result = IntelligenceResult(result_id=str(uuid.uuid4()))
 
         # Protocol analysis
-        result.protocol_analysis = self._protocol_analyzer.analyze(
-            message_data, hint=protocol_hint
-        )
+        result.protocol_analysis = self._protocol_analyzer.analyze(message_data, hint=protocol_hint)
         result.protocol_type = result.protocol_analysis.protocol_type.value
 
         # Threat detection
@@ -291,9 +288,7 @@ class IntelligenceEngine:
                 "protocol_type": result.protocol_type,
                 "fields": {f.name: f.example for f in result.protocol_analysis.fields},
             }
-            result.threat_alerts = self._threat_detector.analyze(
-                message_dict, result.protocol_type
-            )
+            result.threat_alerts = self._threat_detector.analyze(message_dict, result.protocol_type)
 
         return result
 
@@ -348,9 +343,7 @@ class IntelligenceEngine:
         source_analysis = self._protocol_analyzer.analyze(source_data)
         target_analysis = self._protocol_analyzer.analyze(target_data)
 
-        return self._protocol_analyzer.compare_protocols(
-            source_analysis, target_analysis
-        )
+        return self._protocol_analyzer.compare_protocols(source_analysis, target_analysis)
 
     def get_compliance_report(
         self,
@@ -368,9 +361,7 @@ class IntelligenceEngine:
             List of compliance reports
         """
         frameworks = frameworks or self._config.compliance_frameworks
-        return self._compliance_mapper.assess_compliance(
-            protocol_analysis, frameworks
-        )
+        return self._compliance_mapper.assess_compliance(protocol_analysis, frameworks)
 
     def train_threat_baseline(
         self,
@@ -383,11 +374,7 @@ class IntelligenceEngine:
             historical_data: List of historical messages/transactions
         """
         # Extract amounts for baseline
-        amounts = [
-            float(d.get("amount", 0) or 0)
-            for d in historical_data
-            if d.get("amount") is not None
-        ]
+        amounts = [float(d.get("amount", 0) or 0) for d in historical_data if d.get("amount") is not None]
 
         if amounts:
             self._threat_detector.train_baseline("amount", amounts)
@@ -438,75 +425,83 @@ class IntelligenceEngine:
 
         # PQC recommendation
         if not result.pqc_ready:
-            recommendations.append({
-                "type": "security",
-                "priority": "high",
-                "title": "Implement Post-Quantum Cryptography",
-                "description": "Current cryptographic algorithms are vulnerable to quantum attacks",
-                "actions": [
-                    "Deploy ML-KEM-768 for key encapsulation",
-                    "Deploy ML-DSA-65 for digital signatures",
-                    "Implement hybrid classical+PQC mode during transition",
-                ],
-                "automated": True,
-                "tool": "Qbitel AI PQC Provider",
-            })
+            recommendations.append(
+                {
+                    "type": "security",
+                    "priority": "high",
+                    "title": "Implement Post-Quantum Cryptography",
+                    "description": "Current cryptographic algorithms are vulnerable to quantum attacks",
+                    "actions": [
+                        "Deploy ML-KEM-768 for key encapsulation",
+                        "Deploy ML-DSA-65 for digital signatures",
+                        "Implement hybrid classical+PQC mode during transition",
+                    ],
+                    "automated": True,
+                    "tool": "Qbitel AI PQC Provider",
+                }
+            )
 
         # Security recommendations
         if result.security_assessment:
             if result.security_score < 70:
-                recommendations.append({
-                    "type": "security",
-                    "priority": "critical" if result.security_score < 50 else "high",
-                    "title": "Address Security Vulnerabilities",
-                    "description": f"Security score ({result.security_score:.0f}) below acceptable threshold",
-                    "actions": [
-                        f.title for f in result.security_assessment.findings[:5]
-                    ],
-                })
+                recommendations.append(
+                    {
+                        "type": "security",
+                        "priority": "critical" if result.security_score < 50 else "high",
+                        "title": "Address Security Vulnerabilities",
+                        "description": f"Security score ({result.security_score:.0f}) below acceptable threshold",
+                        "actions": [f.title for f in result.security_assessment.findings[:5]],
+                    }
+                )
 
         # Compliance recommendations
         for report in result.compliance_reports:
             if report.compliance_score < 80:
-                recommendations.append({
-                    "type": "compliance",
-                    "priority": "high",
-                    "title": f"Address {report.framework.value} Compliance Gaps",
-                    "description": f"Compliance score ({report.compliance_score:.0f}%) needs improvement",
-                    "actions": report.priority_actions[:3],
-                })
+                recommendations.append(
+                    {
+                        "type": "compliance",
+                        "priority": "high",
+                        "title": f"Address {report.framework.value} Compliance Gaps",
+                        "description": f"Compliance score ({report.compliance_score:.0f}%) needs improvement",
+                        "actions": report.priority_actions[:3],
+                    }
+                )
 
         # Modernization recommendation
         if result.modernization_complexity in ("high", "very_high"):
-            recommendations.append({
-                "type": "modernization",
-                "priority": "medium",
-                "title": "Plan System Modernization",
-                "description": f"Legacy system with {result.modernization_complexity} modernization complexity",
-                "actions": [
-                    "Conduct detailed migration assessment",
-                    "Identify quick-win modernization opportunities",
-                    "Plan phased migration approach",
-                ],
-                "automated": True,
-                "tool": "Qbitel AI Migration Planner",
-            })
+            recommendations.append(
+                {
+                    "type": "modernization",
+                    "priority": "medium",
+                    "title": "Plan System Modernization",
+                    "description": f"Legacy system with {result.modernization_complexity} modernization complexity",
+                    "actions": [
+                        "Conduct detailed migration assessment",
+                        "Identify quick-win modernization opportunities",
+                        "Plan phased migration approach",
+                    ],
+                    "automated": True,
+                    "tool": "Qbitel AI Migration Planner",
+                }
+            )
 
         # Protocol upgrade
         if result.protocol_type in ("swift_mt", "cobol_copybook", "ebcdic_fixed"):
-            recommendations.append({
-                "type": "protocol",
-                "priority": "medium",
-                "title": "Protocol Migration Recommended",
-                "description": f"Legacy protocol ({result.protocol_type}) should be migrated",
-                "actions": [
-                    "Map to ISO 20022 format",
-                    "Implement protocol adapters",
-                    "Plan parallel run period",
-                ],
-                "automated": True,
-                "tool": "Qbitel AI Protocol Migrator",
-            })
+            recommendations.append(
+                {
+                    "type": "protocol",
+                    "priority": "medium",
+                    "title": "Protocol Migration Recommended",
+                    "description": f"Legacy protocol ({result.protocol_type}) should be migrated",
+                    "actions": [
+                        "Map to ISO 20022 format",
+                        "Implement protocol adapters",
+                        "Plan parallel run period",
+                    ],
+                    "automated": True,
+                    "tool": "Qbitel AI Protocol Migrator",
+                }
+            )
 
         return recommendations
 

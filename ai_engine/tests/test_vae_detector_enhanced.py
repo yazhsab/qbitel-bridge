@@ -268,9 +268,7 @@ class TestVAEDetector:
 
         samples = np.random.randn(10, 64)
 
-        with patch.object(
-            detector, "_compute_reconstruction_error", return_value=np.array([0.5] * 10)
-        ):
+        with patch.object(detector, "_compute_reconstruction_error", return_value=np.array([0.5] * 10)):
             is_anomaly, scores = detector.detect(samples)
 
             assert len(is_anomaly) == 10
@@ -303,9 +301,7 @@ class TestVAEDetector:
 
         data = np.random.randn(100, 64)
 
-        with patch.object(
-            detector, "_compute_reconstruction_error", return_value=np.random.randn(100)
-        ):
+        with patch.object(detector, "_compute_reconstruction_error", return_value=np.random.randn(100)):
             detector.set_threshold(data, percentile=95)
 
             assert detector.threshold is not None
@@ -378,9 +374,7 @@ class TestVAEDetector:
         val_losses = [0.5, 0.6, 0.7, 0.8, 0.9]
         with patch.object(detector, "_train_epoch", return_value=0.5):
             with patch.object(detector, "_validate_epoch", side_effect=val_losses):
-                detector.train(
-                    train_data, val_data=val_data, epochs=10, early_stopping_patience=2
-                )
+                detector.train(train_data, val_data=val_data, epochs=10, early_stopping_patience=2)
 
                 assert detector.is_trained
 

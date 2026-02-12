@@ -58,12 +58,8 @@ def http_spec():
         name="HTTP",
         description="HTTP Protocol",
         fields=[
-            ProtocolField(
-                name="method", field_type=FieldType.STRING, length=10, required=True
-            ),
-            ProtocolField(
-                name="path", field_type=FieldType.STRING, length=256, required=True
-            ),
+            ProtocolField(name="method", field_type=FieldType.STRING, length=10, required=True),
+            ProtocolField(name="path", field_type=FieldType.STRING, length=256, required=True),
         ],
     )
 
@@ -84,9 +80,7 @@ def mqtt_spec():
                 length=1,
                 required=True,
             ),
-            ProtocolField(
-                name="topic", field_type=FieldType.STRING, length=256, required=True
-            ),
+            ProtocolField(name="topic", field_type=FieldType.STRING, length=256, required=True),
             ProtocolField(name="payload", field_type=FieldType.BINARY, required=True),
         ],
     )
@@ -112,9 +106,7 @@ class TestProtocolTranslationStudio:
             "topic": "Main/Queue ",
         }
 
-        trimmed = await translation_studio._apply_processing_step(
-            payload, "trim_strings"
-        )
+        trimmed = await translation_studio._apply_processing_step(payload, "trim_strings")
         assert trimmed["method"] == "GET"
         assert trimmed["topic"] == "Main/Queue"
 
@@ -135,15 +127,11 @@ class TestProtocolTranslationStudio:
 
         converted = await translation_studio._apply_processing_step(
             payload,
-            json.dumps(
-                {"operation": "convert_type", "fields": ["port"], "type": "int"}
-            ),
+            json.dumps({"operation": "convert_type", "fields": ["port"], "type": "int"}),
         )
         assert converted["port"] == 8080
 
-        renamed = await translation_studio._apply_processing_step(
-            converted, "rename_field:from=payload,to=body"
-        )
+        renamed = await translation_studio._apply_processing_step(converted, "rename_field:from=payload,to=body")
         assert "payload" not in renamed
         assert renamed["body"] == b"data"
 
@@ -173,12 +161,8 @@ class TestProtocolTranslationStudio:
             name="Test",
             description="Test protocol",
             fields=[
-                ProtocolField(
-                    name="id", field_type=FieldType.INTEGER, length=4, required=True
-                ),
-                ProtocolField(
-                    name="name", field_type=FieldType.STRING, length=10, required=True
-                ),
+                ProtocolField(name="id", field_type=FieldType.INTEGER, length=4, required=True),
+                ProtocolField(name="name", field_type=FieldType.STRING, length=10, required=True),
             ],
         )
 
@@ -200,12 +184,8 @@ class TestProtocolTranslationStudio:
             name="Test",
             description="Test protocol",
             fields=[
-                ProtocolField(
-                    name="id", field_type=FieldType.INTEGER, length=4, required=True
-                ),
-                ProtocolField(
-                    name="name", field_type=FieldType.STRING, length=10, required=True
-                ),
+                ProtocolField(name="id", field_type=FieldType.INTEGER, length=4, required=True),
+                ProtocolField(name="name", field_type=FieldType.STRING, length=10, required=True),
             ],
         )
 
@@ -217,9 +197,7 @@ class TestProtocolTranslationStudio:
         assert struct.unpack(">I", message[0:4])[0] == 12345
 
     @pytest.mark.asyncio
-    async def test_generate_translation_rules(
-        self, translation_studio, mock_llm_service, http_spec, mqtt_spec
-    ):
+    async def test_generate_translation_rules(self, translation_studio, mock_llm_service, http_spec, mqtt_spec):
         """Test translation rule generation."""
         # Mock LLM response
         mock_llm_service.process_request.return_value = LLMResponse(
@@ -230,9 +208,7 @@ class TestProtocolTranslationStudio:
             confidence=0.9,
         )
 
-        rules = await translation_studio.generate_translation_rules(
-            http_spec, mqtt_spec
-        )
+        rules = await translation_studio.generate_translation_rules(http_spec, mqtt_spec)
 
         assert rules is not None
         assert len(rules.rules) > 0
@@ -240,9 +216,7 @@ class TestProtocolTranslationStudio:
         assert rules.target_protocol == mqtt_spec
 
     @pytest.mark.asyncio
-    async def test_apply_translation_rules(
-        self, translation_studio, http_spec, mqtt_spec
-    ):
+    async def test_apply_translation_rules(self, translation_studio, http_spec, mqtt_spec):
         """Test applying translation rules."""
         # Create simple rules
         rules = TranslationRules(
@@ -273,9 +247,7 @@ class TestProtocolTranslationStudio:
         assert "topic" in result
 
     @pytest.mark.asyncio
-    async def test_optimize_translation(
-        self, translation_studio, mock_llm_service, http_spec, mqtt_spec
-    ):
+    async def test_optimize_translation(self, translation_studio, mock_llm_service, http_spec, mqtt_spec):
         """Test translation optimization."""
         # Create test rules
         rules = TranslationRules(
@@ -326,9 +298,7 @@ class TestProtocolTranslationStudio:
     async def test_validate_translation(self, translation_studio, mqtt_spec):
         """Test translation validation."""
         source_message = b"test_source"
-        target_message = (
-            struct.pack("B", 1) + b"test_topic".ljust(256, b"\x00") + b"payload"
-        )
+        target_message = struct.pack("B", 1) + b"test_topic".ljust(256, b"\x00") + b"payload"
 
         result = await translation_studio._validate_translation(
             source_message,
@@ -383,9 +353,7 @@ class TestProtocolTranslationStudio:
         """Test error handling in translation."""
         with pytest.raises(TranslationException):
             # Try to translate with invalid protocol
-            await translation_studio.translate_protocol(
-                "invalid_protocol", "another_invalid", b"test"
-            )
+            await translation_studio.translate_protocol("invalid_protocol", "another_invalid", b"test")
 
     @pytest.mark.asyncio
     async def test_transformation_application(self, translation_studio):
@@ -415,9 +383,7 @@ class TestProtocolTranslationStudio:
         data = {"field1": 10, "field2": "test"}
 
         # Test valid condition
-        result = await translation_studio._check_conditions(
-            data, ["field1 > 5", "field2 == 'test'"]
-        )
+        result = await translation_studio._check_conditions(data, ["field1 > 5", "field2 == 'test'"])
         assert result is True
 
         # Test invalid condition

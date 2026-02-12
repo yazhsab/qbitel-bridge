@@ -28,42 +28,33 @@ from prometheus_client import Counter, Gauge, Histogram
 logger = logging.getLogger(__name__)
 
 # Metrics
-SCADA_KEY_OPS = Counter(
-    'scada_pqc_key_operations_total',
-    'Total SCADA PQC key operations',
-    ['operation', 'security_level']
-)
+SCADA_KEY_OPS = Counter("scada_pqc_key_operations_total", "Total SCADA PQC key operations", ["operation", "security_level"])
 
 SCADA_AUTH_LATENCY = Histogram(
-    'scada_authentication_latency_ms',
-    'SCADA authentication latency in milliseconds',
-    buckets=[0.1, 0.5, 1, 2, 5, 10, 20, 50]
+    "scada_authentication_latency_ms", "SCADA authentication latency in milliseconds", buckets=[0.1, 0.5, 1, 2, 5, 10, 20, 50]
 )
 
-SCADA_ACTIVE_SESSIONS = Gauge(
-    'scada_active_sessions',
-    'Number of active SCADA sessions'
-)
+SCADA_ACTIVE_SESSIONS = Gauge("scada_active_sessions", "Number of active SCADA sessions")
 
 
 class ScadaSecurityLevel(Enum):
     """SCADA security levels based on IEC 62443."""
 
-    SL1 = 1    # Protection against casual/unintentional
-    SL2 = 2    # Protection against intentional with low resources
-    SL3 = 3    # Protection against sophisticated attackers
-    SL4 = 4    # Protection against state-level attackers
+    SL1 = 1  # Protection against casual/unintentional
+    SL2 = 2  # Protection against intentional with low resources
+    SL3 = 3  # Protection against sophisticated attackers
+    SL4 = 4  # Protection against state-level attackers
 
 
 class ScadaDeviceType(Enum):
     """SCADA device types with different constraints."""
 
-    RTU = auto()           # Remote Terminal Unit
-    PLC = auto()           # Programmable Logic Controller
-    IED = auto()           # Intelligent Electronic Device
-    HMI = auto()           # Human Machine Interface
-    HISTORIAN = auto()     # Data Historian
-    GATEWAY = auto()       # Protocol Gateway
+    RTU = auto()  # Remote Terminal Unit
+    PLC = auto()  # Programmable Logic Controller
+    IED = auto()  # Intelligent Electronic Device
+    HMI = auto()  # Human Machine Interface
+    HISTORIAN = auto()  # Data Historian
+    GATEWAY = auto()  # Protocol Gateway
 
 
 @dataclass
@@ -112,10 +103,7 @@ class ScadaSessionContext:
     def is_valid(self) -> bool:
         """Check if session is still valid."""
         age = time.time() - self.created_at
-        return (
-            age < self.max_age_seconds and
-            self.message_count < self.max_messages
-        )
+        return age < self.max_age_seconds and self.message_count < self.max_messages
 
     def get_next_sequence(self) -> int:
         """Get next sequence number."""
@@ -145,8 +133,7 @@ class ScadaKeyExchange:
         self.use_pqc = use_pqc
 
         logger.info(
-            f"SCADA key exchange initialized: SL{security_level.value}, "
-            f"PQC={'enabled' if use_pqc else 'disabled'}"
+            f"SCADA key exchange initialized: SL{security_level.value}, " f"PQC={'enabled' if use_pqc else 'disabled'}"
         )
 
     async def initiate(
@@ -188,10 +175,7 @@ class ScadaKeyExchange:
         # Store private key material
         private_key = keypair.private_key.classical + keypair.private_key.pqc
 
-        SCADA_KEY_OPS.labels(
-            operation="kex_initiate",
-            security_level=f"SL{self.security_level.value}"
-        ).inc()
+        SCADA_KEY_OPS.labels(operation="kex_initiate", security_level=f"SL{self.security_level.value}").inc()
 
         return message, private_key
 
@@ -229,9 +213,9 @@ class ScadaKeyExchange:
     ) -> bytes:
         """Build key exchange message."""
         header = b"\x01" if is_pqc else b"\x00"  # Version/type byte
-        header += self.security_level.value.to_bytes(1, 'big')
-        header += len(device_id).to_bytes(1, 'big') + device_id.encode()
-        header += len(peer_device_id).to_bytes(1, 'big') + peer_device_id.encode()
+        header += self.security_level.value.to_bytes(1, "big")
+        header += len(device_id).to_bytes(1, "big") + device_id.encode()
+        header += len(peer_device_id).to_bytes(1, "big") + peer_device_id.encode()
 
         return header + public_key
 
@@ -254,7 +238,7 @@ class ScadaKeyExchange:
         offset = 2
 
         peer_id_len = kex_message[offset]
-        peer_device_id = kex_message[offset+1:offset+1+peer_id_len].decode()
+        peer_device_id = kex_message[offset + 1 : offset + 1 + peer_id_len].decode()
         offset += 1 + peer_id_len
 
         local_id_len = kex_message[offset]
@@ -286,10 +270,7 @@ class ScadaKeyExchange:
 
         elapsed_ms = (time.time() - start) * 1000
         SCADA_AUTH_LATENCY.observe(elapsed_ms)
-        SCADA_KEY_OPS.labels(
-            operation="kex_respond",
-            security_level=f"SL{security_level.value}"
-        ).inc()
+        SCADA_KEY_OPS.labels(operation="kex_respond", security_level=f"SL{security_level.value}").inc()
 
         return session_id + response, context
 
@@ -298,9 +279,7 @@ class ScadaKeyExchange:
         peer_public_key: bytes,
     ) -> Tuple[bytes, bytes]:
         """Respond with hybrid key exchange."""
-        from ai_engine.crypto.hybrid import (
-            HybridKemEngine, HybridKexVariant, HybridPublicKey
-        )
+        from ai_engine.crypto.hybrid import HybridKemEngine, HybridKexVariant, HybridPublicKey
 
         engine = HybridKemEngine(HybridKexVariant.X25519_MLKEM_512)
         peer_pk = HybridPublicKey.from_bytes(
@@ -317,9 +296,7 @@ class ScadaKeyExchange:
     ) -> Tuple[bytes, bytes]:
         """Respond with classical key exchange."""
         try:
-            from cryptography.hazmat.primitives.asymmetric.x25519 import (
-                X25519PrivateKey, X25519PublicKey
-            )
+            from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
 
             our_private = X25519PrivateKey.generate()
             our_public = our_private.public_key().public_bytes_raw()
@@ -359,9 +336,7 @@ class ScadaMessageAuthenticator:
         self.use_truncated_mac = use_truncated_mac
         self._mac_length = 8 if use_truncated_mac else 32  # 64-bit or 256-bit
 
-        logger.debug(
-            f"Message authenticator initialized: session={context.session_id.hex()[:8]}"
-        )
+        logger.debug(f"Message authenticator initialized: session={context.session_id.hex()[:8]}")
 
     async def authenticate_message(
         self,
@@ -378,19 +353,15 @@ class ScadaMessageAuthenticator:
         sequence = self.context.get_next_sequence()
 
         # Build authenticated data
-        auth_header = sequence.to_bytes(8, 'big')
+        auth_header = sequence.to_bytes(8, "big")
 
         if include_timestamp:
             timestamp = int(time.time() * 1000)  # milliseconds
-            auth_header += timestamp.to_bytes(8, 'big')
+            auth_header += timestamp.to_bytes(8, "big")
 
         # Compute MAC
         mac_input = self.context.session_id + auth_header + message
-        mac = hmac.new(
-            self.context.authentication_key,
-            mac_input,
-            hashlib.sha256
-        ).digest()[:self._mac_length]
+        mac = hmac.new(self.context.authentication_key, mac_input, hashlib.sha256).digest()[: self._mac_length]
 
         elapsed_ms = (time.time() - start) * 1000
         SCADA_AUTH_LATENCY.observe(elapsed_ms)
@@ -410,19 +381,15 @@ class ScadaMessageAuthenticator:
             return None
 
         # Extract components
-        sequence = int.from_bytes(authenticated_message[:8], 'big')
-        timestamp = int.from_bytes(authenticated_message[8:16], 'big')
-        message = authenticated_message[16:-self._mac_length]
-        received_mac = authenticated_message[-self._mac_length:]
+        sequence = int.from_bytes(authenticated_message[:8], "big")
+        timestamp = int.from_bytes(authenticated_message[8:16], "big")
+        message = authenticated_message[16 : -self._mac_length]
+        received_mac = authenticated_message[-self._mac_length :]
 
         # Recompute MAC
         auth_header = authenticated_message[:16]
         mac_input = self.context.session_id + auth_header + message
-        expected_mac = hmac.new(
-            self.context.authentication_key,
-            mac_input,
-            hashlib.sha256
-        ).digest()[:self._mac_length]
+        expected_mac = hmac.new(self.context.authentication_key, mac_input, hashlib.sha256).digest()[: self._mac_length]
 
         if not secrets.compare_digest(received_mac, expected_mac):
             logger.warning(f"MAC verification failed: seq={sequence}")
@@ -462,8 +429,7 @@ class LightweightScadaPQC:
         )
 
         logger.info(
-            f"Lightweight SCADA PQC initialized: device={device_profile.device_id}, "
-            f"type={device_profile.device_type.name}"
+            f"Lightweight SCADA PQC initialized: device={device_profile.device_id}, " f"type={device_profile.device_type.name}"
         )
 
     async def establish_session(
@@ -543,10 +509,7 @@ class LightweightScadaPQC:
 
     async def cleanup_expired_sessions(self) -> int:
         """Remove expired sessions."""
-        expired = [
-            peer_id for peer_id, session in self._sessions.items()
-            if not session.is_valid()
-        ]
+        expired = [peer_id for peer_id, session in self._sessions.items() if not session.is_valid()]
 
         for peer_id in expired:
             del self._sessions[peer_id]

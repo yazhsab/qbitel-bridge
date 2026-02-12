@@ -14,17 +14,12 @@ class TestKyberPerformance:
     """Performance benchmarks for Kyber post-quantum key encapsulation."""
 
     ITERATIONS = 100
-    KYBER_VARIANTS = ['Kyber512', 'Kyber768', 'Kyber1024']
+    KYBER_VARIANTS = ["Kyber512", "Kyber768", "Kyber1024"]
 
     @pytest.fixture
     def performance_metrics(self):
         """Initialize metrics collection."""
-        return {
-            'key_generation': [],
-            'encapsulation': [],
-            'decapsulation': [],
-            'total_time': []
-        }
+        return {"key_generation": [], "encapsulation": [], "decapsulation": [], "total_time": []}
 
     def measure_key_generation(self, algorithm: str, iterations: int) -> List[float]:
         """Measure key generation performance."""
@@ -159,7 +154,7 @@ class TestKyberPerformance:
 
     def test_kyber_throughput(self):
         """Test Kyber operations throughput."""
-        algorithm = 'Kyber768'  # Standard recommended variant
+        algorithm = "Kyber768"  # Standard recommended variant
         kem = KeyEncapsulation(algorithm)
 
         # Measure key generations per second
@@ -181,7 +176,7 @@ class TestKyberPerformance:
         """Test memory usage during Kyber operations."""
         import tracemalloc
 
-        algorithm = 'Kyber768'
+        algorithm = "Kyber768"
         tracemalloc.start()
 
         # Perform operations

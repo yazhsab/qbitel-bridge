@@ -62,8 +62,10 @@ COST_PER_REQUEST = Histogram(
 # Data Classes
 # =============================================================================
 
+
 class AlertSeverity(str, Enum):
     """Alert severity levels."""
+
     INFO = "info"
     WARNING = "warning"
     CRITICAL = "critical"
@@ -97,12 +99,10 @@ MODEL_PRICING = {
     "gpt-4-turbo": ModelPricing("gpt-4-turbo", "openai", 0.01, 0.03, 128000),
     "o1": ModelPricing("o1", "openai", 0.015, 0.06, 200000),
     "o1-mini": ModelPricing("o1-mini", "openai", 0.003, 0.012, 128000),
-
     # Anthropic
     "claude-opus-4-5": ModelPricing("claude-opus-4-5", "anthropic", 0.015, 0.075, 200000),
     "claude-sonnet-4-5": ModelPricing("claude-sonnet-4-5", "anthropic", 0.003, 0.015, 200000),
     "claude-3-5-haiku": ModelPricing("claude-3-5-haiku", "anthropic", 0.0008, 0.004, 200000),
-
     # Local models (zero cost)
     "llama3.2": ModelPricing("llama3.2", "ollama", 0.0, 0.0, 128000, is_local=True),
     "qwen2.5": ModelPricing("qwen2.5", "ollama", 0.0, 0.0, 32000, is_local=True),
@@ -153,13 +153,15 @@ class BudgetConfig:
     per_request_limit: float = 1.0  # Max cost per request
 
     # Domain-specific limits
-    domain_limits: Dict[str, float] = field(default_factory=lambda: {
-        "protocol_copilot": 500.0,  # Monthly
-        "security_orchestrator": 800.0,
-        "legacy_whisperer": 300.0,
-        "compliance_reporter": 200.0,
-        "translation_studio": 200.0,
-    })
+    domain_limits: Dict[str, float] = field(
+        default_factory=lambda: {
+            "protocol_copilot": 500.0,  # Monthly
+            "security_orchestrator": 800.0,
+            "legacy_whisperer": 300.0,
+            "compliance_reporter": 200.0,
+            "translation_studio": 200.0,
+        }
+    )
 
     # Alert thresholds (percentage of budget)
     warning_threshold: float = 0.7  # 70%
@@ -227,6 +229,7 @@ class CostReport:
 # =============================================================================
 # Cost Tracker
 # =============================================================================
+
 
 class CostTracker:
     """
@@ -463,16 +466,20 @@ class CostTracker:
                     "total": self._daily_usage["total"],
                     "limit": self.config.daily_limit,
                     "remaining": max(0, self.config.daily_limit - self._daily_usage["total"]),
-                    "percentage": (self._daily_usage["total"] / self.config.daily_limit * 100)
-                    if self.config.daily_limit > 0 else 0,
+                    "percentage": (
+                        (self._daily_usage["total"] / self.config.daily_limit * 100) if self.config.daily_limit > 0 else 0
+                    ),
                     "by_domain": dict(self._daily_usage),
                 },
                 "monthly": {
                     "total": self._monthly_usage["total"],
                     "limit": self.config.monthly_limit,
                     "remaining": max(0, self.config.monthly_limit - self._monthly_usage["total"]),
-                    "percentage": (self._monthly_usage["total"] / self.config.monthly_limit * 100)
-                    if self.config.monthly_limit > 0 else 0,
+                    "percentage": (
+                        (self._monthly_usage["total"] / self.config.monthly_limit * 100)
+                        if self.config.monthly_limit > 0
+                        else 0
+                    ),
                     "by_domain": dict(self._monthly_usage),
                 },
                 "alerts": [a.to_dict() for a in self._alerts if not a.acknowledged],
@@ -494,10 +501,7 @@ class CostTracker:
 
         # Filter records
         async with self._lock:
-            records = [
-                r for r in self._usage_records
-                if start_ts <= r.timestamp <= end_ts
-            ]
+            records = [r for r in self._usage_records if start_ts <= r.timestamp <= end_ts]
 
         # Calculate metrics
         report = CostReport(
@@ -513,19 +517,13 @@ class CostTracker:
             report.output_tokens += record.output_tokens
 
             # By domain
-            report.cost_by_domain[record.domain] = (
-                report.cost_by_domain.get(record.domain, 0) + record.total_cost
-            )
+            report.cost_by_domain[record.domain] = report.cost_by_domain.get(record.domain, 0) + record.total_cost
 
             # By model
-            report.cost_by_model[record.model] = (
-                report.cost_by_model.get(record.model, 0) + record.total_cost
-            )
+            report.cost_by_model[record.model] = report.cost_by_model.get(record.model, 0) + record.total_cost
 
             # By provider
-            report.cost_by_provider[record.provider] = (
-                report.cost_by_provider.get(record.provider, 0) + record.total_cost
-            )
+            report.cost_by_provider[record.provider] = report.cost_by_provider.get(record.provider, 0) + record.total_cost
 
         # Calculate averages
         if report.total_requests > 0:
@@ -561,18 +559,11 @@ class CostTracker:
             monthly_pct = self._monthly_usage["total"] / self.config.monthly_limit
 
             domain_limit = self.config.domain_limits.get(domain, float("inf"))
-            domain_pct = (
-                self._monthly_usage[domain] / domain_limit
-                if domain_limit < float("inf") else 0
-            )
+            domain_pct = self._monthly_usage[domain] / domain_limit if domain_limit < float("inf") else 0
 
         # Update Prometheus
-        BUDGET_REMAINING.labels(budget_type="daily").set(
-            max(0, self.config.daily_limit - self._daily_usage["total"])
-        )
-        BUDGET_REMAINING.labels(budget_type="monthly").set(
-            max(0, self.config.monthly_limit - self._monthly_usage["total"])
-        )
+        BUDGET_REMAINING.labels(budget_type="daily").set(max(0, self.config.daily_limit - self._daily_usage["total"]))
+        BUDGET_REMAINING.labels(budget_type="monthly").set(max(0, self.config.monthly_limit - self._monthly_usage["total"]))
 
         # Check daily budget
         await self._check_and_alert(
@@ -618,12 +609,7 @@ class CostTracker:
             return  # No alert needed
 
         # Check if we already have a similar unacknowledged alert
-        existing = [
-            a for a in self._alerts
-            if a.budget_type == budget_type
-            and a.severity == severity
-            and not a.acknowledged
-        ]
+        existing = [a for a in self._alerts if a.budget_type == budget_type and a.severity == severity and not a.acknowledged]
         if existing:
             return  # Already alerted
 
@@ -696,27 +682,17 @@ class CostTracker:
 
         try:
             # Update daily totals
-            await self._redis.hincrbyfloat(
-                "qbitel:cost_tracker:daily", "total", record.total_cost
-            )
-            await self._redis.hincrbyfloat(
-                "qbitel:cost_tracker:daily", record.domain, record.total_cost
-            )
+            await self._redis.hincrbyfloat("qbitel:cost_tracker:daily", "total", record.total_cost)
+            await self._redis.hincrbyfloat("qbitel:cost_tracker:daily", record.domain, record.total_cost)
 
             # Update monthly totals
-            await self._redis.hincrbyfloat(
-                "qbitel:cost_tracker:monthly", "total", record.total_cost
-            )
-            await self._redis.hincrbyfloat(
-                "qbitel:cost_tracker:monthly", record.domain, record.total_cost
-            )
+            await self._redis.hincrbyfloat("qbitel:cost_tracker:monthly", "total", record.total_cost)
+            await self._redis.hincrbyfloat("qbitel:cost_tracker:monthly", record.domain, record.total_cost)
 
             # Store record (with expiry)
             import json
-            await self._redis.lpush(
-                "qbitel:cost_tracker:records",
-                json.dumps(record.to_dict())
-            )
+
+            await self._redis.lpush("qbitel:cost_tracker:records", json.dumps(record.to_dict()))
             await self._redis.ltrim("qbitel:cost_tracker:records", 0, 99999)
 
         except Exception as e:

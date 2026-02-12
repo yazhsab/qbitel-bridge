@@ -207,10 +207,7 @@ class BaseExplainer(ABC):
         top_feature_names = [f.feature_name for f in top_features[:3]]
         feature_list = ", ".join(top_feature_names)
 
-        return (
-            f"Model predicted {model_output} with {confidence:.1%} confidence. "
-            f"Key factors: {feature_list}."
-        )
+        return f"Model predicted {model_output} with {confidence:.1%} confidence. " f"Key factors: {feature_list}."
 
     def _rank_features(
         self,

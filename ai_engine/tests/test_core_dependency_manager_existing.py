@@ -327,9 +327,7 @@ class TestDependencyManager:
 
         original_time = info.last_check
 
-        dependency_manager.update_dependency_status(
-            "test_service", DependencyStatus.UNHEALTHY
-        )
+        dependency_manager.update_dependency_status("test_service", DependencyStatus.UNHEALTHY)
 
         updated_info = dependency_manager.get_dependency("test_service")
         assert updated_info.status == DependencyStatus.UNHEALTHY
@@ -338,9 +336,7 @@ class TestDependencyManager:
     def test_update_dependency_status_not_found(self, dependency_manager):
         """Test updating status of non-existent dependency."""
         with pytest.raises(ValueError, match="Dependency not found"):
-            dependency_manager.update_dependency_status(
-                "nonexistent_service", DependencyStatus.HEALTHY
-            )
+            dependency_manager.update_dependency_status("nonexistent_service", DependencyStatus.HEALTHY)
 
     def test_update_dependency_metadata(self, dependency_manager):
         """Test updating dependency metadata."""
@@ -362,9 +358,7 @@ class TestDependencyManager:
     def test_update_dependency_metadata_not_found(self, dependency_manager):
         """Test updating metadata of non-existent dependency."""
         with pytest.raises(ValueError, match="Dependency not found"):
-            dependency_manager.update_dependency_metadata(
-                "nonexistent_service", {"key": "value"}
-            )
+            dependency_manager.update_dependency_metadata("nonexistent_service", {"key": "value"})
 
     def test_register_health_check(self, dependency_manager):
         """Test registering health check."""
@@ -589,12 +583,8 @@ class TestDependencyManager:
         dependency_manager.register_dependency(info2)
         dependency_manager.register_dependency(info3)
 
-        healthy_deps = dependency_manager.get_dependencies_by_status(
-            DependencyStatus.HEALTHY
-        )
-        unhealthy_deps = dependency_manager.get_dependencies_by_status(
-            DependencyStatus.UNHEALTHY
-        )
+        healthy_deps = dependency_manager.get_dependencies_by_status(DependencyStatus.HEALTHY)
+        unhealthy_deps = dependency_manager.get_dependencies_by_status(DependencyStatus.UNHEALTHY)
 
         assert len(healthy_deps) == 2
         assert "service1" in healthy_deps

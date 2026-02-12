@@ -18,13 +18,13 @@ import numpy as np
 
 from .base import AgentTool, ToolResult, ToolStatus
 
-
 logger = logging.getLogger(__name__)
 
 
 # =============================================================================
 # Traffic Analysis Tools
 # =============================================================================
+
 
 class TrafficAnalysisTool(AgentTool):
     """
@@ -38,7 +38,7 @@ class TrafficAnalysisTool(AgentTool):
                 "Analyzes protocol traffic samples to identify byte patterns, "
                 "field boundaries, encoding types, and message structures. "
                 "Returns statistical analysis and detected patterns."
-            )
+            ),
         )
 
     @property
@@ -49,28 +49,25 @@ class TrafficAnalysisTool(AgentTool):
                 "samples": {
                     "type": "array",
                     "description": "List of base64-encoded traffic samples",
-                    "items": {"type": "string"}
+                    "items": {"type": "string"},
                 },
                 "analysis_depth": {
                     "type": "string",
                     "enum": ["quick", "standard", "deep"],
                     "description": "Depth of analysis",
-                    "default": "standard"
-                }
+                    "default": "standard",
+                },
             },
-            "required": ["samples"]
+            "required": ["samples"],
         }
 
-    async def execute(
-        self,
-        samples: List[str],
-        analysis_depth: str = "standard"
-    ) -> ToolResult:
+    async def execute(self, samples: List[str], analysis_depth: str = "standard") -> ToolResult:
         """Execute traffic analysis."""
         start_time = time.time()
 
         try:
             import base64
+
             decoded_samples = []
             for s in samples:
                 try:
@@ -79,11 +76,7 @@ class TrafficAnalysisTool(AgentTool):
                     decoded_samples.append(s.encode() if isinstance(s, str) else s)
 
             if not decoded_samples:
-                return ToolResult(
-                    tool_name=self.name,
-                    status=ToolStatus.FAILURE,
-                    error="No valid samples provided"
-                )
+                return ToolResult(tool_name=self.name, status=ToolStatus.FAILURE, error="No valid samples provided")
 
             # Perform analysis
             results = {
@@ -100,19 +93,13 @@ class TrafficAnalysisTool(AgentTool):
                 results["entropy_analysis"] = self._analyze_entropy(decoded_samples)
 
             return ToolResult(
-                tool_name=self.name,
-                status=ToolStatus.SUCCESS,
-                result=results,
-                execution_time=time.time() - start_time
+                tool_name=self.name, status=ToolStatus.SUCCESS, result=results, execution_time=time.time() - start_time
             )
 
         except Exception as e:
             logger.error(f"Traffic analysis failed: {e}")
             return ToolResult(
-                tool_name=self.name,
-                status=ToolStatus.FAILURE,
-                error=str(e),
-                execution_time=time.time() - start_time
+                tool_name=self.name, status=ToolStatus.FAILURE, error=str(e), execution_time=time.time() - start_time
             )
 
     def _analyze_lengths(self, samples: List[bytes]) -> Dict[str, Any]:
@@ -123,7 +110,7 @@ class TrafficAnalysisTool(AgentTool):
             "max": max(lengths),
             "mean": np.mean(lengths),
             "std": np.std(lengths),
-            "fixed_length": len(set(lengths)) == 1
+            "fixed_length": len(set(lengths)) == 1,
         }
 
     def _analyze_byte_distribution(self, samples: List[bytes]) -> Dict[str, Any]:
@@ -132,26 +119,18 @@ class TrafficAnalysisTool(AgentTool):
         if not all_bytes:
             return {}
 
-        byte_counts = np.bincount(
-            np.frombuffer(all_bytes, dtype=np.uint8),
-            minlength=256
-        )
+        byte_counts = np.bincount(np.frombuffer(all_bytes, dtype=np.uint8), minlength=256)
 
         # Find most common bytes
         top_indices = np.argsort(byte_counts)[-10:][::-1]
-        top_bytes = {
-            f"0x{i:02x}": int(byte_counts[i])
-            for i in top_indices if byte_counts[i] > 0
-        }
+        top_bytes = {f"0x{i:02x}": int(byte_counts[i]) for i in top_indices if byte_counts[i] > 0}
 
         return {
             "total_bytes": len(all_bytes),
             "unique_bytes": np.count_nonzero(byte_counts),
             "top_bytes": top_bytes,
             "null_ratio": float(byte_counts[0] / len(all_bytes)),
-            "printable_ratio": float(
-                sum(byte_counts[32:127]) / len(all_bytes)
-            )
+            "printable_ratio": float(sum(byte_counts[32:127]) / len(all_bytes)),
         }
 
     def _detect_encoding(self, samples: List[bytes]) -> Dict[str, Any]:
@@ -162,7 +141,7 @@ class TrafficAnalysisTool(AgentTool):
         is_ascii = all(32 <= b <= 126 or b in (9, 10, 13) for b in all_bytes)
         is_utf8 = True
         try:
-            all_bytes.decode('utf-8')
+            all_bytes.decode("utf-8")
         except UnicodeDecodeError:
             is_utf8 = False
 
@@ -179,15 +158,10 @@ class TrafficAnalysisTool(AgentTool):
             "is_utf8": is_utf8,
             "is_ebcdic_likely": is_ebcdic_likely,
             "is_binary": is_binary,
-            "suggested_encoding": self._suggest_encoding(
-                is_ascii, is_utf8, is_ebcdic_likely, is_binary
-            )
+            "suggested_encoding": self._suggest_encoding(is_ascii, is_utf8, is_ebcdic_likely, is_binary),
         }
 
-    def _suggest_encoding(
-        self, is_ascii: bool, is_utf8: bool,
-        is_ebcdic: bool, is_binary: bool
-    ) -> str:
+    def _suggest_encoding(self, is_ascii: bool, is_utf8: bool, is_ebcdic: bool, is_binary: bool) -> str:
         """Suggest likely encoding."""
         if is_ascii:
             return "ASCII"
@@ -201,12 +175,7 @@ class TrafficAnalysisTool(AgentTool):
 
     def _find_pattern_hints(self, samples: List[bytes]) -> Dict[str, Any]:
         """Find hints about protocol patterns."""
-        hints = {
-            "common_prefixes": [],
-            "common_suffixes": [],
-            "delimiters_found": [],
-            "fixed_positions": []
-        }
+        hints = {"common_prefixes": [], "common_suffixes": [], "delimiters_found": [], "fixed_positions": []}
 
         if len(samples) < 2:
             return hints
@@ -221,20 +190,14 @@ class TrafficAnalysisTool(AgentTool):
                 break
 
         if prefix_len > 0:
-            hints["common_prefixes"].append({
-                "length": prefix_len,
-                "value": samples[0][:prefix_len].hex()
-            })
+            hints["common_prefixes"].append({"length": prefix_len, "value": samples[0][:prefix_len].hex()})
 
         # Find common delimiters
-        common_delimiters = [b'\r\n', b'\n', b'\x00', b'|', b',', b'\t']
+        common_delimiters = [b"\r\n", b"\n", b"\x00", b"|", b",", b"\t"]
         for delim in common_delimiters:
             counts = [s.count(delim) for s in samples]
             if all(c > 0 for c in counts):
-                hints["delimiters_found"].append({
-                    "delimiter": delim.hex(),
-                    "avg_count": np.mean(counts)
-                })
+                hints["delimiters_found"].append({"delimiter": delim.hex(), "avg_count": np.mean(counts)})
 
         return hints
 
@@ -255,18 +218,10 @@ class TrafficAnalysisTool(AgentTool):
 
             if unique == 1:
                 # Fixed value
-                boundaries.append({
-                    "position": pos,
-                    "type": "fixed",
-                    "value": f"0x{values[0]:02x}"
-                })
+                boundaries.append({"position": pos, "type": "fixed", "value": f"0x{values[0]:02x}"})
             elif unique == len(samples):
                 # Highly variable (counter, ID, etc.)
-                boundaries.append({
-                    "position": pos,
-                    "type": "variable",
-                    "hint": "possibly counter or ID"
-                })
+                boundaries.append({"position": pos, "type": "variable", "hint": "possibly counter or ID"})
 
         return boundaries[:20]  # Return first 20
 
@@ -279,17 +234,12 @@ class TrafficAnalysisTool(AgentTool):
         # Bigrams
         bigrams = {}
         for i in range(len(all_bytes) - 1):
-            bg = all_bytes[i:i+2]
+            bg = all_bytes[i : i + 2]
             bigrams[bg] = bigrams.get(bg, 0) + 1
 
         top_bigrams = sorted(bigrams.items(), key=lambda x: x[1], reverse=True)[:10]
 
-        return {
-            "top_bigrams": [
-                {"pattern": p.hex(), "count": c}
-                for p, c in top_bigrams
-            ]
-        }
+        return {"top_bigrams": [{"pattern": p.hex(), "count": c} for p, c in top_bigrams]}
 
     def _analyze_entropy(self, samples: List[bytes]) -> Dict[str, Any]:
         """Analyze entropy to detect encryption/compression."""
@@ -297,10 +247,7 @@ class TrafficAnalysisTool(AgentTool):
         if not all_bytes:
             return {}
 
-        byte_counts = np.bincount(
-            np.frombuffer(all_bytes, dtype=np.uint8),
-            minlength=256
-        )
+        byte_counts = np.bincount(np.frombuffer(all_bytes, dtype=np.uint8), minlength=256)
         probs = byte_counts / len(all_bytes)
         probs = probs[probs > 0]
 
@@ -311,7 +258,7 @@ class TrafficAnalysisTool(AgentTool):
             "max_entropy": 8.0,
             "entropy_ratio": float(entropy / 8.0),
             "likely_encrypted": entropy > 7.5,
-            "likely_compressed": 6.0 < entropy <= 7.5
+            "likely_compressed": 6.0 < entropy <= 7.5,
         }
 
 
@@ -327,7 +274,7 @@ class PatternRecognitionTool(AgentTool):
                 "Recognizes known protocol patterns and message types "
                 "in traffic samples. Identifies headers, trailers, "
                 "field types, and protocol signatures."
-            )
+            ),
         )
 
         # Known protocol signatures
@@ -345,39 +292,29 @@ class PatternRecognitionTool(AgentTool):
         return {
             "type": "object",
             "properties": {
-                "sample": {
-                    "type": "string",
-                    "description": "Base64-encoded traffic sample"
-                },
+                "sample": {"type": "string", "description": "Base64-encoded traffic sample"},
                 "check_protocols": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "Specific protocols to check for"
-                }
+                    "description": "Specific protocols to check for",
+                },
             },
-            "required": ["sample"]
+            "required": ["sample"],
         }
 
-    async def execute(
-        self,
-        sample: str,
-        check_protocols: Optional[List[str]] = None
-    ) -> ToolResult:
+    async def execute(self, sample: str, check_protocols: Optional[List[str]] = None) -> ToolResult:
         """Execute pattern recognition."""
         start_time = time.time()
 
         try:
             import base64
+
             try:
                 data = base64.b64decode(sample)
             except Exception:
                 data = sample.encode() if isinstance(sample, str) else sample
 
-            results = {
-                "detected_protocols": [],
-                "message_structure": {},
-                "confidence_scores": {}
-            }
+            results = {"detected_protocols": [], "message_structure": {}, "confidence_scores": {}}
 
             # Check for known signatures
             protocols_to_check = check_protocols or list(self.signatures.keys())
@@ -394,43 +331,24 @@ class PatternRecognitionTool(AgentTool):
             results["message_structure"] = self._analyze_structure(data)
 
             return ToolResult(
-                tool_name=self.name,
-                status=ToolStatus.SUCCESS,
-                result=results,
-                execution_time=time.time() - start_time
+                tool_name=self.name, status=ToolStatus.SUCCESS, result=results, execution_time=time.time() - start_time
             )
 
         except Exception as e:
             return ToolResult(
-                tool_name=self.name,
-                status=ToolStatus.FAILURE,
-                error=str(e),
-                execution_time=time.time() - start_time
+                tool_name=self.name, status=ToolStatus.FAILURE, error=str(e), execution_time=time.time() - start_time
             )
 
     def _analyze_structure(self, data: bytes) -> Dict[str, Any]:
         """Analyze message structure."""
-        structure = {
-            "total_length": len(data),
-            "sections": []
-        }
+        structure = {"total_length": len(data), "sections": []}
 
         # Try to identify sections based on common delimiters
-        if b'\r\n\r\n' in data:  # HTTP-like
-            parts = data.split(b'\r\n\r\n', 1)
-            structure["sections"].append({
-                "name": "header",
-                "start": 0,
-                "end": len(parts[0]),
-                "type": "text"
-            })
+        if b"\r\n\r\n" in data:  # HTTP-like
+            parts = data.split(b"\r\n\r\n", 1)
+            structure["sections"].append({"name": "header", "start": 0, "end": len(parts[0]), "type": "text"})
             if len(parts) > 1:
-                structure["sections"].append({
-                    "name": "body",
-                    "start": len(parts[0]) + 4,
-                    "end": len(data),
-                    "type": "unknown"
-                })
+                structure["sections"].append({"name": "body", "start": len(parts[0]) + 4, "end": len(data), "type": "unknown"})
 
         return structure
 
@@ -438,6 +356,7 @@ class PatternRecognitionTool(AgentTool):
 # =============================================================================
 # Documentation Tools
 # =============================================================================
+
 
 class DocumentationSearchTool(AgentTool):
     """
@@ -450,7 +369,7 @@ class DocumentationSearchTool(AgentTool):
             description=(
                 "Searches protocol documentation, RFCs, and knowledge bases "
                 "for relevant information about legacy protocols and systems."
-            )
+            ),
         )
         self.rag_engine = rag_engine
 
@@ -459,79 +378,41 @@ class DocumentationSearchTool(AgentTool):
         return {
             "type": "object",
             "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "Search query"
-                },
-                "protocol_type": {
-                    "type": "string",
-                    "description": "Specific protocol type to search for"
-                },
-                "max_results": {
-                    "type": "integer",
-                    "description": "Maximum results to return",
-                    "default": 5
-                }
+                "query": {"type": "string", "description": "Search query"},
+                "protocol_type": {"type": "string", "description": "Specific protocol type to search for"},
+                "max_results": {"type": "integer", "description": "Maximum results to return", "default": 5},
             },
-            "required": ["query"]
+            "required": ["query"],
         }
 
-    async def execute(
-        self,
-        query: str,
-        protocol_type: Optional[str] = None,
-        max_results: int = 5
-    ) -> ToolResult:
+    async def execute(self, query: str, protocol_type: Optional[str] = None, max_results: int = 5) -> ToolResult:
         """Execute documentation search."""
         start_time = time.time()
 
         try:
-            results = {
-                "query": query,
-                "documents": [],
-                "protocol_type": protocol_type
-            }
+            results = {"query": query, "documents": [], "protocol_type": protocol_type}
 
             # If RAG engine available, use it
             if self.rag_engine:
-                search_results = await self.rag_engine.search(
-                    query,
-                    top_k=max_results
-                )
+                search_results = await self.rag_engine.search(query, top_k=max_results)
                 results["documents"] = [
-                    {
-                        "content": doc.content[:500],
-                        "source": doc.metadata.get("source", "unknown"),
-                        "relevance": doc.score
-                    }
+                    {"content": doc.content[:500], "source": doc.metadata.get("source", "unknown"), "relevance": doc.score}
                     for doc in search_results
                 ]
             else:
                 # Return placeholder with known protocol info
-                results["documents"] = self._get_builtin_knowledge(
-                    query, protocol_type
-                )
+                results["documents"] = self._get_builtin_knowledge(query, protocol_type)
 
             return ToolResult(
-                tool_name=self.name,
-                status=ToolStatus.SUCCESS,
-                result=results,
-                execution_time=time.time() - start_time
+                tool_name=self.name, status=ToolStatus.SUCCESS, result=results, execution_time=time.time() - start_time
             )
 
         except Exception as e:
             return ToolResult(
-                tool_name=self.name,
-                status=ToolStatus.FAILURE,
-                error=str(e),
-                execution_time=time.time() - start_time
+                tool_name=self.name, status=ToolStatus.FAILURE, error=str(e), execution_time=time.time() - start_time
             )
 
-    def _get_builtin_knowledge(
-        self,
-        query: str,
-        protocol_type: Optional[str]
-    ) -> List[Dict[str, Any]]:
+    def _get_builtin_knowledge(self, query: str, protocol_type: Optional[str]) -> List[Dict[str, Any]]:
         """Return built-in knowledge about common protocols."""
         knowledge = {
             "fix": {
@@ -539,22 +420,21 @@ class DocumentationSearchTool(AgentTool):
                     "FIX Protocol (Financial Information eXchange) is a messaging "
                     "standard for trading. Uses tag=value format with SOH delimiter."
                 ),
-                "source": "builtin"
+                "source": "builtin",
             },
             "swift": {
                 "content": (
                     "SWIFT MT messages are used for financial messaging. "
                     "Structure includes blocks 1-5 with different purposes."
                 ),
-                "source": "builtin"
+                "source": "builtin",
             },
             "iso8583": {
                 "content": (
-                    "ISO 8583 is a financial transaction message standard. "
-                    "Uses bitmap to indicate present fields."
+                    "ISO 8583 is a financial transaction message standard. " "Uses bitmap to indicate present fields."
                 ),
-                "source": "builtin"
-            }
+                "source": "builtin",
+            },
         }
 
         if protocol_type and protocol_type.lower() in knowledge:
@@ -562,15 +442,13 @@ class DocumentationSearchTool(AgentTool):
 
         # Return matching entries
         query_lower = query.lower()
-        return [
-            info for proto, info in knowledge.items()
-            if proto in query_lower or query_lower in info["content"].lower()
-        ]
+        return [info for proto, info in knowledge.items() if proto in query_lower or query_lower in info["content"].lower()]
 
 
 # =============================================================================
 # Risk Assessment Tools
 # =============================================================================
+
 
 class RiskCalculatorTool(AgentTool):
     """
@@ -583,7 +461,7 @@ class RiskCalculatorTool(AgentTool):
             description=(
                 "Calculates and categorizes modernization risks including "
                 "technical, business, operational, and security risks."
-            )
+            ),
         )
 
     @property
@@ -594,28 +472,22 @@ class RiskCalculatorTool(AgentTool):
                 "protocol_complexity": {
                     "type": "string",
                     "enum": ["simple", "medium", "complex", "very_complex"],
-                    "description": "Complexity of the legacy protocol"
+                    "description": "Complexity of the legacy protocol",
                 },
                 "criticality": {
                     "type": "string",
                     "enum": ["low", "medium", "high", "critical"],
-                    "description": "Business criticality of the system"
+                    "description": "Business criticality of the system",
                 },
                 "documentation_quality": {
                     "type": "string",
                     "enum": ["none", "poor", "adequate", "good"],
-                    "description": "Quality of existing documentation"
+                    "description": "Quality of existing documentation",
                 },
-                "test_coverage": {
-                    "type": "number",
-                    "description": "Existing test coverage percentage (0-100)"
-                },
-                "dependencies": {
-                    "type": "integer",
-                    "description": "Number of dependent systems"
-                }
+                "test_coverage": {"type": "number", "description": "Existing test coverage percentage (0-100)"},
+                "dependencies": {"type": "integer", "description": "Number of dependent systems"},
             },
-            "required": ["protocol_complexity", "criticality"]
+            "required": ["protocol_complexity", "criticality"],
         }
 
     async def execute(
@@ -624,22 +496,16 @@ class RiskCalculatorTool(AgentTool):
         criticality: str,
         documentation_quality: str = "poor",
         test_coverage: float = 0,
-        dependencies: int = 0
+        dependencies: int = 0,
     ) -> ToolResult:
         """Calculate modernization risks."""
         start_time = time.time()
 
         try:
             # Risk scoring
-            complexity_scores = {
-                "simple": 1, "medium": 2, "complex": 3, "very_complex": 4
-            }
-            criticality_scores = {
-                "low": 1, "medium": 2, "high": 3, "critical": 4
-            }
-            doc_scores = {
-                "none": 4, "poor": 3, "adequate": 2, "good": 1
-            }
+            complexity_scores = {"simple": 1, "medium": 2, "complex": 3, "very_complex": 4}
+            criticality_scores = {"low": 1, "medium": 2, "high": 3, "critical": 4}
+            doc_scores = {"none": 4, "poor": 3, "adequate": 2, "good": 1}
 
             complexity_score = complexity_scores.get(protocol_complexity, 2)
             criticality_score = criticality_scores.get(criticality, 2)
@@ -648,12 +514,12 @@ class RiskCalculatorTool(AgentTool):
             dep_score = min(4, 1 + dependencies * 0.5)
 
             # Calculate risk scores
-            technical_risk = (complexity_score * 0.4 + test_score * 0.3 + doc_score * 0.3)
-            business_risk = (criticality_score * 0.5 + dep_score * 0.5)
-            operational_risk = (dep_score * 0.4 + doc_score * 0.3 + complexity_score * 0.3)
+            technical_risk = complexity_score * 0.4 + test_score * 0.3 + doc_score * 0.3
+            business_risk = criticality_score * 0.5 + dep_score * 0.5
+            operational_risk = dep_score * 0.4 + doc_score * 0.3 + complexity_score * 0.3
 
             # Overall risk
-            overall_risk = (technical_risk * 0.4 + business_risk * 0.35 + operational_risk * 0.25)
+            overall_risk = technical_risk * 0.4 + business_risk * 0.35 + operational_risk * 0.25
 
             # Risk level
             def risk_level(score):
@@ -673,82 +539,48 @@ class RiskCalculatorTool(AgentTool):
                         "factors": [
                             f"Protocol complexity: {protocol_complexity}",
                             f"Test coverage: {test_coverage}%",
-                            f"Documentation: {documentation_quality}"
-                        ]
+                            f"Documentation: {documentation_quality}",
+                        ],
                     },
                     "business": {
                         "score": round(business_risk, 2),
                         "level": risk_level(business_risk),
-                        "factors": [
-                            f"Criticality: {criticality}",
-                            f"Dependencies: {dependencies} systems"
-                        ]
+                        "factors": [f"Criticality: {criticality}", f"Dependencies: {dependencies} systems"],
                     },
                     "operational": {
                         "score": round(operational_risk, 2),
                         "level": risk_level(operational_risk),
-                        "factors": [
-                            f"Dependencies: {dependencies} systems",
-                            f"Documentation: {documentation_quality}"
-                        ]
-                    }
+                        "factors": [f"Dependencies: {dependencies} systems", f"Documentation: {documentation_quality}"],
+                    },
                 },
-                "overall": {
-                    "score": round(overall_risk, 2),
-                    "level": risk_level(overall_risk)
-                },
-                "recommendations": self._generate_recommendations(
-                    technical_risk, business_risk, operational_risk
-                )
+                "overall": {"score": round(overall_risk, 2), "level": risk_level(overall_risk)},
+                "recommendations": self._generate_recommendations(technical_risk, business_risk, operational_risk),
             }
 
             return ToolResult(
-                tool_name=self.name,
-                status=ToolStatus.SUCCESS,
-                result=results,
-                execution_time=time.time() - start_time
+                tool_name=self.name, status=ToolStatus.SUCCESS, result=results, execution_time=time.time() - start_time
             )
 
         except Exception as e:
             return ToolResult(
-                tool_name=self.name,
-                status=ToolStatus.FAILURE,
-                error=str(e),
-                execution_time=time.time() - start_time
+                tool_name=self.name, status=ToolStatus.FAILURE, error=str(e), execution_time=time.time() - start_time
             )
 
-    def _generate_recommendations(
-        self,
-        technical: float,
-        business: float,
-        operational: float
-    ) -> List[str]:
+    def _generate_recommendations(self, technical: float, business: float, operational: float) -> List[str]:
         """Generate risk mitigation recommendations."""
         recommendations = []
 
         if technical > 2.5:
-            recommendations.append(
-                "Invest in comprehensive protocol documentation before modernization"
-            )
-            recommendations.append(
-                "Create extensive test suite to validate behavior"
-            )
+            recommendations.append("Invest in comprehensive protocol documentation before modernization")
+            recommendations.append("Create extensive test suite to validate behavior")
 
         if business > 2.5:
-            recommendations.append(
-                "Implement phased migration with rollback capability"
-            )
-            recommendations.append(
-                "Establish parallel running period for validation"
-            )
+            recommendations.append("Implement phased migration with rollback capability")
+            recommendations.append("Establish parallel running period for validation")
 
         if operational > 2.5:
-            recommendations.append(
-                "Document all system dependencies and interfaces"
-            )
-            recommendations.append(
-                "Create runbooks for common operational scenarios"
-            )
+            recommendations.append("Document all system dependencies and interfaces")
+            recommendations.append("Create runbooks for common operational scenarios")
 
         return recommendations
 
@@ -756,6 +588,7 @@ class RiskCalculatorTool(AgentTool):
 # =============================================================================
 # Code Generation Tools
 # =============================================================================
+
 
 class CodeGenerationTool(AgentTool):
     """
@@ -766,9 +599,8 @@ class CodeGenerationTool(AgentTool):
         super().__init__(
             name="generate_code",
             description=(
-                "Generates protocol adapter code in various languages "
-                "including Python, Java, Go, and TypeScript."
-            )
+                "Generates protocol adapter code in various languages " "including Python, Java, Go, and TypeScript."
+            ),
         )
         self.llm_service = llm_service
 
@@ -777,78 +609,49 @@ class CodeGenerationTool(AgentTool):
         return {
             "type": "object",
             "properties": {
-                "source_protocol": {
-                    "type": "object",
-                    "description": "Source protocol specification"
-                },
-                "target_protocol": {
-                    "type": "string",
-                    "description": "Target protocol (REST, gRPC, GraphQL, etc.)"
-                },
+                "source_protocol": {"type": "object", "description": "Source protocol specification"},
+                "target_protocol": {"type": "string", "description": "Target protocol (REST, gRPC, GraphQL, etc.)"},
                 "language": {
                     "type": "string",
                     "enum": ["python", "java", "go", "typescript"],
-                    "description": "Target programming language"
+                    "description": "Target programming language",
                 },
-                "include_tests": {
-                    "type": "boolean",
-                    "description": "Whether to include test code",
-                    "default": True
-                }
+                "include_tests": {"type": "boolean", "description": "Whether to include test code", "default": True},
             },
-            "required": ["source_protocol", "target_protocol", "language"]
+            "required": ["source_protocol", "target_protocol", "language"],
         }
 
     async def execute(
-        self,
-        source_protocol: Dict[str, Any],
-        target_protocol: str,
-        language: str,
-        include_tests: bool = True
+        self, source_protocol: Dict[str, Any], target_protocol: str, language: str, include_tests: bool = True
     ) -> ToolResult:
         """Generate adapter code."""
         start_time = time.time()
 
         try:
             # Generate code structure
-            code = self._generate_adapter_structure(
-                source_protocol, target_protocol, language
-            )
+            code = self._generate_adapter_structure(source_protocol, target_protocol, language)
 
             results = {
                 "adapter_code": code["adapter"],
                 "models": code.get("models", ""),
                 "utilities": code.get("utilities", ""),
                 "language": language,
-                "target_protocol": target_protocol
+                "target_protocol": target_protocol,
             }
 
             if include_tests:
-                results["test_code"] = self._generate_test_structure(
-                    source_protocol, language
-                )
+                results["test_code"] = self._generate_test_structure(source_protocol, language)
 
             return ToolResult(
-                tool_name=self.name,
-                status=ToolStatus.SUCCESS,
-                result=results,
-                execution_time=time.time() - start_time
+                tool_name=self.name, status=ToolStatus.SUCCESS, result=results, execution_time=time.time() - start_time
             )
 
         except Exception as e:
             return ToolResult(
-                tool_name=self.name,
-                status=ToolStatus.FAILURE,
-                error=str(e),
-                execution_time=time.time() - start_time
+                tool_name=self.name, status=ToolStatus.FAILURE, error=str(e), execution_time=time.time() - start_time
             )
 
-    def _generate_adapter_structure(
-        self,
-        source: Dict[str, Any],
-        target: str,
-        language: str
-    ) -> Dict[str, str]:
+    def _generate_adapter_structure(self, source: Dict[str, Any], target: str, language: str) -> Dict[str, str]:
         """Generate adapter code structure."""
         if language == "python":
             return self._generate_python_adapter(source, target)
@@ -861,9 +664,7 @@ class CodeGenerationTool(AgentTool):
         else:
             return {"adapter": f"// {language} adapter generation not implemented"}
 
-    def _generate_python_adapter(
-        self, source: Dict[str, Any], target: str
-    ) -> Dict[str, str]:
+    def _generate_python_adapter(self, source: Dict[str, Any], target: str) -> Dict[str, str]:
         """Generate Python adapter code."""
         protocol_name = source.get("protocol_name", "Legacy")
 
@@ -949,13 +750,11 @@ class {protocol_name}To{target}Adapter:
 
         return {"adapter": adapter}
 
-    def _generate_java_adapter(
-        self, source: Dict[str, Any], target: str
-    ) -> Dict[str, str]:
+    def _generate_java_adapter(self, source: Dict[str, Any], target: str) -> Dict[str, str]:
         """Generate Java adapter code."""
         protocol_name = source.get("protocol_name", "Legacy")
 
-        adapter = f'''/**
+        adapter = f"""/**
  * {protocol_name} to {target} Protocol Adapter
  * Auto-generated by QBITEL Legacy Whisperer
  */
@@ -998,17 +797,15 @@ public class {protocol_name}To{target}Adapter {{
         return new byte[0];
     }}
 }}
-'''
+"""
 
         return {"adapter": adapter}
 
-    def _generate_go_adapter(
-        self, source: Dict[str, Any], target: str
-    ) -> Dict[str, str]:
+    def _generate_go_adapter(self, source: Dict[str, Any], target: str) -> Dict[str, str]:
         """Generate Go adapter code."""
         protocol_name = source.get("protocol_name", "Legacy")
 
-        adapter = f'''// {protocol_name} to {target} Protocol Adapter
+        adapter = f"""// {protocol_name} to {target} Protocol Adapter
 // Auto-generated by QBITEL Legacy Whisperer
 
 package adapters
@@ -1049,17 +846,15 @@ func (a *{protocol_name}To{target}Adapter) TransformResponse(modernResponse map[
     // TODO: Implement reverse transformation
     return nil, nil
 }}
-'''
+"""
 
         return {"adapter": adapter}
 
-    def _generate_typescript_adapter(
-        self, source: Dict[str, Any], target: str
-    ) -> Dict[str, str]:
+    def _generate_typescript_adapter(self, source: Dict[str, Any], target: str) -> Dict[str, str]:
         """Generate TypeScript adapter code."""
         protocol_name = source.get("protocol_name", "Legacy")
 
-        adapter = f'''/**
+        adapter = f"""/**
  * {protocol_name} to {target} Protocol Adapter
  * Auto-generated by QBITEL Legacy Whisperer
  */
@@ -1095,15 +890,11 @@ export class {protocol_name}To{target}Adapter {{
         return new Uint8Array();
     }}
 }}
-'''
+"""
 
         return {"adapter": adapter}
 
-    def _generate_test_structure(
-        self,
-        source: Dict[str, Any],
-        language: str
-    ) -> str:
+    def _generate_test_structure(self, source: Dict[str, Any], language: str) -> str:
         """Generate test code structure."""
         protocol_name = source.get("protocol_name", "Legacy")
 
@@ -1146,7 +937,7 @@ class TestGenerationTool(AgentTool):
             description=(
                 "Generates comprehensive test cases for protocol adapters "
                 "including unit tests, integration tests, and edge cases."
-            )
+            ),
         )
 
     @property
@@ -1154,44 +945,25 @@ class TestGenerationTool(AgentTool):
         return {
             "type": "object",
             "properties": {
-                "adapter_code": {
-                    "type": "string",
-                    "description": "The adapter code to generate tests for"
-                },
-                "language": {
-                    "type": "string",
-                    "enum": ["python", "java", "go", "typescript"]
-                },
+                "adapter_code": {"type": "string", "description": "The adapter code to generate tests for"},
+                "language": {"type": "string", "enum": ["python", "java", "go", "typescript"]},
                 "test_types": {
                     "type": "array",
-                    "items": {
-                        "type": "string",
-                        "enum": ["unit", "integration", "edge_cases", "performance"]
-                    },
-                    "description": "Types of tests to generate"
-                }
+                    "items": {"type": "string", "enum": ["unit", "integration", "edge_cases", "performance"]},
+                    "description": "Types of tests to generate",
+                },
             },
-            "required": ["adapter_code", "language"]
+            "required": ["adapter_code", "language"],
         }
 
-    async def execute(
-        self,
-        adapter_code: str,
-        language: str,
-        test_types: List[str] = None
-    ) -> ToolResult:
+    async def execute(self, adapter_code: str, language: str, test_types: List[str] = None) -> ToolResult:
         """Generate test cases."""
         start_time = time.time()
 
         test_types = test_types or ["unit", "integration"]
 
         try:
-            tests = {
-                "unit_tests": "",
-                "integration_tests": "",
-                "edge_case_tests": "",
-                "performance_tests": ""
-            }
+            tests = {"unit_tests": "", "integration_tests": "", "edge_case_tests": "", "performance_tests": ""}
 
             if "unit" in test_types:
                 tests["unit_tests"] = self._generate_unit_tests(language)
@@ -1206,18 +978,12 @@ class TestGenerationTool(AgentTool):
                 tests["performance_tests"] = self._generate_performance_tests(language)
 
             return ToolResult(
-                tool_name=self.name,
-                status=ToolStatus.SUCCESS,
-                result=tests,
-                execution_time=time.time() - start_time
+                tool_name=self.name, status=ToolStatus.SUCCESS, result=tests, execution_time=time.time() - start_time
             )
 
         except Exception as e:
             return ToolResult(
-                tool_name=self.name,
-                status=ToolStatus.FAILURE,
-                error=str(e),
-                execution_time=time.time() - start_time
+                tool_name=self.name, status=ToolStatus.FAILURE, error=str(e), execution_time=time.time() - start_time
             )
 
     def _generate_unit_tests(self, language: str) -> str:

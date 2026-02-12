@@ -31,67 +31,58 @@ from prometheus_client import Counter, Histogram, Gauge
 logger = logging.getLogger(__name__)
 
 # Metrics
-FIVEG_AUTH_OPS = Counter(
-    'fiveg_auth_operations_total',
-    'Total 5G authentication operations',
-    ['operation', 'status']
-)
+FIVEG_AUTH_OPS = Counter("fiveg_auth_operations_total", "Total 5G authentication operations", ["operation", "status"])
 
 FIVEG_AUTH_LATENCY = Histogram(
-    'fiveg_auth_latency_ms',
-    '5G authentication latency in milliseconds',
-    buckets=[1, 5, 10, 25, 50, 100, 250, 500]
+    "fiveg_auth_latency_ms", "5G authentication latency in milliseconds", buckets=[1, 5, 10, 25, 50, 100, 250, 500]
 )
 
-FIVEG_ACTIVE_SESSIONS = Gauge(
-    'fiveg_active_ue_sessions',
-    'Number of active UE security contexts'
-)
+FIVEG_ACTIVE_SESSIONS = Gauge("fiveg_active_ue_sessions", "Number of active UE security contexts")
 
 
 class NetworkFunction(Enum):
     """5G Network Functions."""
 
-    AMF = "amf"       # Access and Mobility Management Function
-    SMF = "smf"       # Session Management Function
-    UPF = "upf"       # User Plane Function
-    AUSF = "ausf"     # Authentication Server Function
-    UDM = "udm"       # Unified Data Management
-    NEF = "nef"       # Network Exposure Function
-    NRF = "nrf"       # Network Repository Function
-    NSSF = "nssf"     # Network Slice Selection Function
+    AMF = "amf"  # Access and Mobility Management Function
+    SMF = "smf"  # Session Management Function
+    UPF = "upf"  # User Plane Function
+    AUSF = "ausf"  # Authentication Server Function
+    UDM = "udm"  # Unified Data Management
+    NEF = "nef"  # Network Exposure Function
+    NRF = "nrf"  # Network Repository Function
+    NSSF = "nssf"  # Network Slice Selection Function
 
 
 class AuthenticationMethod(Enum):
     """5G Authentication methods."""
 
-    FIVEG_AKA = "5g-aka"           # 5G-AKA (standard)
-    EAP_AKA_PRIME = "eap-aka'"     # EAP-AKA'
-    FIVEG_AKA_PQC = "5g-aka-pqc"   # 5G-AKA with PQC (experimental)
+    FIVEG_AKA = "5g-aka"  # 5G-AKA (standard)
+    EAP_AKA_PRIME = "eap-aka'"  # EAP-AKA'
+    FIVEG_AKA_PQC = "5g-aka-pqc"  # 5G-AKA with PQC (experimental)
 
 
 class SliceSecurityLevel(Enum):
     """Network slice security levels."""
 
-    BASIC = auto()        # Standard security
-    ENHANCED = auto()     # Enhanced for enterprise
-    CRITICAL = auto()     # Critical infrastructure
-    GOVERNMENT = auto()   # Government grade
+    BASIC = auto()  # Standard security
+    ENHANCED = auto()  # Enhanced for enterprise
+    CRITICAL = auto()  # Critical infrastructure
+    GOVERNMENT = auto()  # Government grade
 
 
 @dataclass
 class SUPI:
     """Subscription Permanent Identifier."""
 
-    imsi: str             # IMSI format
-    mcc: str              # Mobile Country Code
-    mnc: str              # Mobile Network Code
+    imsi: str  # IMSI format
+    mcc: str  # Mobile Country Code
+    mnc: str  # Mobile Network Code
 
     def to_bytes(self) -> bytes:
         return f"{self.mcc}{self.mnc}{self.imsi}".encode()
 
     @classmethod
-    def from_string(cls, supi_string: str) -> 'SUPI':
+    def from_string(cls, supi_string: str) -> "SUPI":
         """Parse SUPI from string format."""
         # Format: imsi-<mcc><mnc><msin>
         if supi_string.startswith("imsi-"):
@@ -120,10 +111,10 @@ class SUCI:
 class FiveGKeySet:
     """5G Key Set."""
 
-    kamf: bytes          # Key for AMF
-    kausf: bytes         # Key for AUSF
-    kseaf: bytes         # Key for SEAF
-    kgnb: bytes          # Key for gNB
+    kamf: bytes  # Key for AMF
+    kausf: bytes  # Key for AUSF
+    kseaf: bytes  # Key for SEAF
+    kgnb: bytes  # Key for gNB
 
     # Session keys
     nas_enc_key: Optional[bytes] = None
@@ -141,7 +132,7 @@ class UESecurityContext:
     key_set: FiveGKeySet
 
     # State
-    ngksi: int = 0                # Next Generation Key Set Identifier
+    ngksi: int = 0  # Next Generation Key Set Identifier
     sequence_number: int = 0
     created_at: float = field(default_factory=time.time)
     last_activity: float = field(default_factory=time.time)
@@ -155,11 +146,11 @@ class UESecurityContext:
 class AuthenticationVector:
     """5G Authentication Vector."""
 
-    rand: bytes           # Random challenge
-    autn: bytes          # Authentication token
-    xres_star: bytes     # Expected response
-    kausf: bytes         # Key for AUSF
-    hxres_star: bytes    # Hashed expected response
+    rand: bytes  # Random challenge
+    autn: bytes  # Authentication token
+    xres_star: bytes  # Expected response
+    kausf: bytes  # Key for AUSF
+    hxres_star: bytes  # Hashed expected response
 
 
 class SUPIConcealment:
@@ -180,7 +171,7 @@ class SUPIConcealment:
         self,
         supi: SUPI,
         home_network_public_key: bytes,
-        routing_indicator: bytes = b'\x00\x00',
+        routing_indicator: bytes = b"\x00\x00",
     ) -> SUCI:
         """
         Conceal SUPI to produce SUCI.
@@ -210,16 +201,14 @@ class SUPIConcealment:
         ephemeral_public = hashlib.sha256(b"EPK" + ephemeral_private).digest()
 
         # Derive shared secret
-        shared_secret = hashlib.sha256(
-            ephemeral_private + public_key
-        ).digest()
+        shared_secret = hashlib.sha256(ephemeral_private + public_key).digest()
 
         # Encrypt SUPI
         supi_bytes = supi.to_bytes()
-        concealed = bytes(a ^ b for a, b in zip(
-            supi_bytes + b'\x00' * (32 - len(supi_bytes) % 32),
-            shared_secret * ((len(supi_bytes) // 32) + 1)
-        ))[:len(supi_bytes)]
+        concealed = bytes(
+            a ^ b
+            for a, b in zip(supi_bytes + b"\x00" * (32 - len(supi_bytes) % 32), shared_secret * ((len(supi_bytes) // 32) + 1))
+        )[: len(supi_bytes)]
 
         return SUCI(
             supi_type=0,  # IMSI
@@ -248,10 +237,9 @@ class SUPIConcealment:
         # Encrypt SUPI
         supi_bytes = supi.to_bytes()
         enc_key = hashlib.sha256(shared_secret.data + b"SUPI_ENC").digest()
-        concealed = bytes(a ^ b for a, b in zip(
-            supi_bytes + b'\x00' * (32 - len(supi_bytes) % 32),
-            enc_key * ((len(supi_bytes) // 32) + 1)
-        ))[:len(supi_bytes)]
+        concealed = bytes(
+            a ^ b for a, b in zip(supi_bytes + b"\x00" * (32 - len(supi_bytes) % 32), enc_key * ((len(supi_bytes) // 32) + 1))
+        )[: len(supi_bytes)]
 
         return SUCI(
             supi_type=0,
@@ -289,24 +277,25 @@ class SUPIConcealment:
     ) -> SUPI:
         """Standard ECIES reveal."""
         # Derive shared secret from ephemeral public key
-        shared_secret = hashlib.sha256(
-            private_key + suci.ephemeral_public_key
-        ).digest()
+        shared_secret = hashlib.sha256(private_key + suci.ephemeral_public_key).digest()
 
         # Decrypt
-        decrypted = bytes(a ^ b for a, b in zip(
-            suci.concealed_data + b'\x00' * (32 - len(suci.concealed_data) % 32),
-            shared_secret * ((len(suci.concealed_data) // 32) + 1)
-        ))[:len(suci.concealed_data)]
+        decrypted = bytes(
+            a ^ b
+            for a, b in zip(
+                suci.concealed_data + b"\x00" * (32 - len(suci.concealed_data) % 32),
+                shared_secret * ((len(suci.concealed_data) // 32) + 1),
+            )
+        )[: len(suci.concealed_data)]
 
-        supi_str = decrypted.decode().rstrip('\x00')
+        supi_str = decrypted.decode().rstrip("\x00")
         mcc = suci.home_network_id[:3].decode()
         mnc = suci.home_network_id[3:].decode()
 
         return SUPI(
             mcc=mcc,
             mnc=mnc,
-            imsi=supi_str[len(mcc)+len(mnc):],
+            imsi=supi_str[len(mcc) + len(mnc) :],
         )
 
     async def _reveal_pqc(
@@ -315,9 +304,7 @@ class SUPIConcealment:
         private_key: bytes,
     ) -> SUPI:
         """PQC reveal using ML-KEM decapsulation."""
-        from ai_engine.crypto.mlkem import (
-            MlKemEngine, MlKemSecurityLevel, MlKemPrivateKey, MlKemCiphertext
-        )
+        from ai_engine.crypto.mlkem import MlKemEngine, MlKemSecurityLevel, MlKemPrivateKey, MlKemCiphertext
 
         engine = MlKemEngine(MlKemSecurityLevel.MLKEM_768)
         sk = MlKemPrivateKey(MlKemSecurityLevel.MLKEM_768, private_key)
@@ -326,16 +313,19 @@ class SUPIConcealment:
         shared_secret = await engine.decapsulate(ct, sk)
 
         enc_key = hashlib.sha256(shared_secret.data + b"SUPI_ENC").digest()
-        decrypted = bytes(a ^ b for a, b in zip(
-            suci.concealed_data + b'\x00' * (32 - len(suci.concealed_data) % 32),
-            enc_key * ((len(suci.concealed_data) // 32) + 1)
-        ))[:len(suci.concealed_data)]
+        decrypted = bytes(
+            a ^ b
+            for a, b in zip(
+                suci.concealed_data + b"\x00" * (32 - len(suci.concealed_data) % 32),
+                enc_key * ((len(suci.concealed_data) // 32) + 1),
+            )
+        )[: len(suci.concealed_data)]
 
-        supi_str = decrypted.decode().rstrip('\x00')
+        supi_str = decrypted.decode().rstrip("\x00")
         mcc = suci.home_network_id[:3].decode()
         mnc = suci.home_network_id[3:].decode()
 
-        return SUPI(mcc=mcc, mnc=mnc, imsi=supi_str[len(mcc)+len(mnc):])
+        return SUPI(mcc=mcc, mnc=mnc, imsi=supi_str[len(mcc) + len(mnc) :])
 
 
 class FiveGKeyHierarchy:
@@ -351,7 +341,7 @@ class FiveGKeyHierarchy:
 
     async def derive_keys(
         self,
-        k: bytes,                    # Long-term key K
+        k: bytes,  # Long-term key K
         serving_network_name: str,
         rand: bytes,
     ) -> FiveGKeySet:
@@ -405,11 +395,7 @@ class FiveGKeyHierarchy:
 
     def _kdf(self, key: bytes, label: bytes, context: bytes) -> bytes:
         """Key derivation function (HMAC-SHA256)."""
-        return hmac.new(
-            key,
-            label + b'\x00' + context + len(label).to_bytes(2, 'big'),
-            hashlib.sha256
-        ).digest()
+        return hmac.new(key, label + b"\x00" + context + len(label).to_bytes(2, "big"), hashlib.sha256).digest()
 
 
 class UEAuthenticator:
@@ -435,7 +421,7 @@ class UEAuthenticator:
     async def generate_auth_vector(
         self,
         supi: SUPI,
-        k: bytes,                    # Long-term key
+        k: bytes,  # Long-term key
         serving_network_name: str,
     ) -> AuthenticationVector:
         """
@@ -449,28 +435,24 @@ class UEAuthenticator:
         rand = secrets.token_bytes(16)
 
         # Generate sequence number (SQN)
-        sqn = int(time.time() * 1000).to_bytes(6, 'big')
+        sqn = int(time.time() * 1000).to_bytes(6, "big")
 
         # Compute authentication token components
-        ak = self._f5(k, rand)     # Anonymity key
-        mac = self._f1(k, rand, sqn)   # MAC
-        xres = self._f2(k, rand)   # Expected response
+        ak = self._f5(k, rand)  # Anonymity key
+        mac = self._f1(k, rand, sqn)  # MAC
+        xres = self._f2(k, rand)  # Expected response
 
         # Build AUTN = SQN XOR AK || AMF || MAC
-        amf = b'\x80\x00'  # Authentication Management Field
+        amf = b"\x80\x00"  # Authentication Management Field
         autn = bytes(a ^ b for a, b in zip(sqn, ak)) + amf + mac
 
         # Compute XRES* and HXRES*
-        xres_star = hashlib.sha256(
-            serving_network_name.encode() + rand + xres
-        ).digest()[:16]
+        xres_star = hashlib.sha256(serving_network_name.encode() + rand + xres).digest()[:16]
 
         hxres_star = hashlib.sha256(rand + xres_star).digest()[:16]
 
         # Derive KAUSF
-        key_set = await self.key_hierarchy.derive_keys(
-            k, serving_network_name, rand
-        )
+        key_set = await self.key_hierarchy.derive_keys(k, serving_network_name, rand)
 
         elapsed = (time.time() - start) * 1000
         FIVEG_AUTH_LATENCY.observe(elapsed)
@@ -505,18 +487,18 @@ class UEAuthenticator:
 
         # Create security context
         key_set = FiveGKeySet(
-            kamf=b'',  # Would be derived
+            kamf=b"",  # Would be derived
             kausf=av.kausf,
-            kseaf=b'',
-            kgnb=b'',
+            kseaf=b"",
+            kgnb=b"",
         )
 
         suci = SUCI(
             supi_type=0,
             home_network_id=f"{supi.mcc}{supi.mnc}".encode(),
-            routing_indicator=b'\x00\x00',
+            routing_indicator=b"\x00\x00",
             protection_scheme=0,
-            concealed_data=b'',
+            concealed_data=b"",
         )
 
         context = UESecurityContext(
@@ -541,11 +523,11 @@ class UEAuthenticator:
 
     def _f2(self, k: bytes, rand: bytes) -> bytes:
         """f2: XRES generation function."""
-        return hmac.new(k, rand + b'\x02', hashlib.sha256).digest()[:8]
+        return hmac.new(k, rand + b"\x02", hashlib.sha256).digest()[:8]
 
     def _f5(self, k: bytes, rand: bytes) -> bytes:
         """f5: Anonymity key generation."""
-        return hmac.new(k, rand + b'\x05', hashlib.sha256).digest()[:6]
+        return hmac.new(k, rand + b"\x05", hashlib.sha256).digest()[:6]
 
 
 class NEFAuthenticator:
@@ -578,6 +560,7 @@ class NEFAuthenticator:
         if self.use_pqc:
             # Use PQC-derived secret
             from ai_engine.crypto.mlkem import MlKemEngine, MlKemSecurityLevel
+
             engine = MlKemEngine(MlKemSecurityLevel.MLKEM_768)
             keypair = await engine.generate_keypair()
             ct, ss = await engine.encapsulate(keypair.public_key)
@@ -632,7 +615,7 @@ class NetworkSliceSecurityProfile:
 
     # Cryptographic settings
     encryption_algorithm: str = "NEA2"  # 128-EEA2 (AES)
-    integrity_algorithm: str = "NIA2"   # 128-EIA2 (AES)
+    integrity_algorithm: str = "NIA2"  # 128-EIA2 (AES)
     use_pqc: bool = False
 
     # Access control
@@ -665,8 +648,7 @@ class FiveGSecurityManager:
         """Register network slice security profile."""
         self._slice_profiles[profile.slice_id] = profile
         logger.info(
-            f"Registered slice: {profile.slice_id} "
-            f"(type={profile.slice_type}, security={profile.security_level.name})"
+            f"Registered slice: {profile.slice_id} " f"(type={profile.slice_type}, security={profile.security_level.name})"
         )
 
     def get_slice_profile(
@@ -701,9 +683,7 @@ class FiveGSecurityManager:
         res_star = av.xres_star  # UE would compute this
 
         # Authenticate
-        context = await self.ue_authenticator.authenticate_ue(
-            supi, av, res_star
-        )
+        context = await self.ue_authenticator.authenticate_ue(supi, av, res_star)
 
         if context and slice_id:
             context.slice_id = slice_id

@@ -211,9 +211,7 @@ class TestSystemMetrics:
     @pytest.mark.unit
     def test_metrics_validation_negative_values(self):
         """Test metrics validation with negative values."""
-        with pytest.raises(
-            ValidationException, match="Utilization values must be non-negative"
-        ):
+        with pytest.raises(ValidationException, match="Utilization values must be non-negative"):
             SystemMetrics.validate_metrics(
                 {
                     "cpu_utilization": -10.0,
@@ -225,9 +223,7 @@ class TestSystemMetrics:
     @pytest.mark.unit
     def test_metrics_validation_utilization_over_100(self):
         """Test metrics validation with utilization over 100%."""
-        with pytest.raises(
-            ValidationException, match="Utilization values cannot exceed 100%"
-        ):
+        with pytest.raises(ValidationException, match="Utilization values cannot exceed 100%"):
             SystemMetrics.validate_metrics(
                 {
                     "cpu_utilization": 150.0,  # Over 100%
@@ -239,9 +235,7 @@ class TestSystemMetrics:
     @pytest.mark.unit
     def test_metrics_validation_negative_response_time(self):
         """Test metrics validation with negative response time."""
-        with pytest.raises(
-            ValidationException, match="Response time must be non-negative"
-        ):
+        with pytest.raises(ValidationException, match="Response time must be non-negative"):
             SystemMetrics.validate_metrics(
                 {
                     "cpu_utilization": 50.0,
@@ -253,9 +247,7 @@ class TestSystemMetrics:
     @pytest.mark.unit
     def test_metrics_validation_invalid_error_rate(self):
         """Test metrics validation with invalid error rate."""
-        with pytest.raises(
-            ValidationException, match="Error rate must be between 0 and 1"
-        ):
+        with pytest.raises(ValidationException, match="Error rate must be between 0 and 1"):
             SystemMetrics.validate_metrics(
                 {
                     "cpu_utilization": 50.0,
@@ -267,9 +259,7 @@ class TestSystemMetrics:
     @pytest.mark.unit
     def test_metrics_validation_invalid_availability(self):
         """Test metrics validation with invalid availability."""
-        with pytest.raises(
-            ValidationException, match="Availability must be between 0 and 1"
-        ):
+        with pytest.raises(ValidationException, match="Availability must be between 0 and 1"):
             SystemMetrics.validate_metrics(
                 {
                     "cpu_utilization": 50.0,
@@ -365,9 +355,7 @@ class TestSystemFailurePrediction:
     @pytest.mark.unit
     def test_prediction_validation_invalid_probability(self):
         """Test prediction validation with invalid probability."""
-        with pytest.raises(
-            ValidationException, match="Failure probability must be between 0 and 1"
-        ):
+        with pytest.raises(ValidationException, match="Failure probability must be between 0 and 1"):
             SystemFailurePrediction.validate_prediction(
                 {
                     "system_id": "test_001",
@@ -379,9 +367,7 @@ class TestSystemFailurePrediction:
     @pytest.mark.unit
     def test_prediction_validation_invalid_confidence(self):
         """Test prediction validation with invalid confidence."""
-        with pytest.raises(
-            ValidationException, match="Confidence must be between 0 and 1"
-        ):
+        with pytest.raises(ValidationException, match="Confidence must be between 0 and 1"):
             SystemFailurePrediction.validate_prediction(
                 {
                     "system_id": "test_001",
@@ -448,9 +434,7 @@ class TestMaintenanceRecommendation:
     @pytest.mark.unit
     def test_maintenance_validation_negative_duration(self):
         """Test maintenance validation with negative duration."""
-        with pytest.raises(
-            ValidationException, match="Estimated duration must be positive"
-        ):
+        with pytest.raises(ValidationException, match="Estimated duration must be positive"):
             MaintenanceRecommendation.validate_maintenance(
                 {
                     "system_id": "test_001",
@@ -462,9 +446,7 @@ class TestMaintenanceRecommendation:
     @pytest.mark.unit
     def test_maintenance_validation_negative_cost(self):
         """Test maintenance validation with negative cost."""
-        with pytest.raises(
-            ValidationException, match="Cost estimate must be non-negative"
-        ):
+        with pytest.raises(ValidationException, match="Cost estimate must be non-negative"):
             MaintenanceRecommendation.validate_maintenance(
                 {
                     "system_id": "test_001",
@@ -560,9 +542,7 @@ class TestDecisionContext:
         )
 
         assert decision_context.decision_id == "decision_001"
-        assert (
-            decision_context.decision_category == DecisionCategory.MAINTENANCE_PLANNING
-        )
+        assert decision_context.decision_category == DecisionCategory.MAINTENANCE_PLANNING
         assert decision_context.system_context.system_id == "test_system"
         assert decision_context.current_situation["performance_degraded"] is True
         assert decision_context.constraints["budget"] == 50000

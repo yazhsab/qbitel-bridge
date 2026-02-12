@@ -26,42 +26,36 @@ logger = logging.getLogger(__name__)
 
 # Metrics
 PARTITION_CRYPTO_OPS = Counter(
-    'arinc653_crypto_operations_total',
-    'Total cryptographic operations in partitions',
-    ['partition_name', 'operation']
+    "arinc653_crypto_operations_total", "Total cryptographic operations in partitions", ["partition_name", "operation"]
 )
 
 PARTITION_CRYPTO_LATENCY = Histogram(
-    'arinc653_crypto_latency_seconds',
-    'Cryptographic operation latency',
-    ['operation'],
-    buckets=[0.0001, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.05]
+    "arinc653_crypto_latency_seconds",
+    "Cryptographic operation latency",
+    ["operation"],
+    buckets=[0.0001, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.05],
 )
 
-PARTITION_KEY_STATUS = Gauge(
-    'arinc653_partition_key_valid',
-    'Key validity status (1=valid, 0=invalid)',
-    ['partition_name']
-)
+PARTITION_KEY_STATUS = Gauge("arinc653_partition_key_valid", "Key validity status (1=valid, 0=invalid)", ["partition_name"])
 
 
 class PartitionMode(Enum):
     """ARINC 653 partition operating modes."""
 
-    IDLE = auto()           # Partition not running
-    COLD_START = auto()     # Initial startup
-    WARM_START = auto()     # Restart without full initialization
-    NORMAL = auto()         # Normal operation
+    IDLE = auto()  # Partition not running
+    COLD_START = auto()  # Initial startup
+    WARM_START = auto()  # Restart without full initialization
+    NORMAL = auto()  # Normal operation
 
 
 class CriticalityLevel(Enum):
     """DO-178C Design Assurance Levels."""
 
-    DAL_A = "A"    # Catastrophic failure condition
-    DAL_B = "B"    # Hazardous/Severe-Major
-    DAL_C = "C"    # Major failure condition
-    DAL_D = "D"    # Minor failure condition
-    DAL_E = "E"    # No safety effect
+    DAL_A = "A"  # Catastrophic failure condition
+    DAL_B = "B"  # Hazardous/Severe-Major
+    DAL_C = "C"  # Major failure condition
+    DAL_D = "D"  # Minor failure condition
+    DAL_E = "E"  # No safety effect
 
 
 class PortDirection(Enum):
@@ -74,8 +68,8 @@ class PortDirection(Enum):
 class PortType(Enum):
     """Inter-partition communication port types."""
 
-    SAMPLING = auto()   # Latest value only
-    QUEUING = auto()    # FIFO message queue
+    SAMPLING = auto()  # Latest value only
+    QUEUING = auto()  # FIFO message queue
 
 
 @dataclass
@@ -87,8 +81,8 @@ class PartitionConfig:
     criticality: CriticalityLevel
 
     # Time allocation (microseconds)
-    period: int              # Scheduling period
-    duration: int            # Execution time per period
+    period: int  # Scheduling period
+    duration: int  # Execution time per period
 
     # Memory allocation (bytes)
     code_size: int
@@ -122,10 +116,7 @@ class PartitionSecurityContext:
     def needs_rotation(self, max_ops: int = 100000, max_age: int = 3600) -> bool:
         """Check if key rotation is needed."""
         age = time.time() - self.last_rotation
-        return (
-            self.operations_since_rotation >= max_ops or
-            age >= max_age
-        )
+        return self.operations_since_rotation >= max_ops or age >= max_age
 
     def increment_ops(self) -> None:
         """Increment operation counter."""
@@ -232,11 +223,7 @@ class PartitionKeyManager:
         length: int,
     ) -> bytes:
         """Derive key for specific purpose."""
-        material = hashlib.sha512(
-            self._key_derivation_secret +
-            partition_id.to_bytes(4, 'big') +
-            purpose.encode()
-        ).digest()
+        material = hashlib.sha512(self._key_derivation_secret + partition_id.to_bytes(4, "big") + purpose.encode()).digest()
 
         return material[:length]
 
@@ -252,9 +239,7 @@ class PartitionKeyManager:
 
         # Generate new derivation material
         new_secret = hashlib.sha256(
-            self._key_derivation_secret +
-            old_context.key_version.to_bytes(4, 'big') +
-            secrets.token_bytes(16)
+            self._key_derivation_secret + old_context.key_version.to_bytes(4, "big") + secrets.token_bytes(16)
         ).digest()
 
         self._key_derivation_secret = new_secret
@@ -330,10 +315,7 @@ class PartitionCryptoEngine:
 
         elapsed = time.time() - start
         PARTITION_CRYPTO_LATENCY.labels(operation="sign").observe(elapsed)
-        PARTITION_CRYPTO_OPS.labels(
-            partition_name=self.config.name,
-            operation="sign"
-        ).inc()
+        PARTITION_CRYPTO_OPS.labels(partition_name=self.config.name, operation="sign").inc()
 
         return signature
 
@@ -352,10 +334,7 @@ class PartitionCryptoEngine:
 
         elapsed = time.time() - start
         PARTITION_CRYPTO_LATENCY.labels(operation="verify").observe(elapsed)
-        PARTITION_CRYPTO_OPS.labels(
-            partition_name=self.config.name,
-            operation="verify"
-        ).inc()
+        PARTITION_CRYPTO_OPS.labels(partition_name=self.config.name, operation="verify").inc()
 
         return result
 
@@ -368,18 +347,11 @@ class PartitionCryptoEngine:
 
         start = time.time()
 
-        mac = hmac.new(
-            self.context.hmac_key,
-            message,
-            hashlib.sha256
-        ).digest()
+        mac = hmac.new(self.context.hmac_key, message, hashlib.sha256).digest()
 
         elapsed = time.time() - start
         PARTITION_CRYPTO_LATENCY.labels(operation="mac").observe(elapsed)
-        PARTITION_CRYPTO_OPS.labels(
-            partition_name=self.config.name,
-            operation="mac"
-        ).inc()
+        PARTITION_CRYPTO_OPS.labels(partition_name=self.config.name, operation="mac").inc()
 
         return mac
 
@@ -394,16 +366,9 @@ class PartitionCryptoEngine:
         # For inter-partition, a shared key derived from both IDs
         import hmac as hmac_module
 
-        shared_key = hashlib.sha256(
-            self.context.hmac_key +
-            source_partition_id.to_bytes(4, 'big')
-        ).digest()
+        shared_key = hashlib.sha256(self.context.hmac_key + source_partition_id.to_bytes(4, "big")).digest()
 
-        expected = hmac_module.new(
-            shared_key,
-            message,
-            hashlib.sha256
-        ).digest()
+        expected = hmac_module.new(shared_key, message, hashlib.sha256).digest()
 
         return secrets.compare_digest(mac, expected)
 
@@ -416,7 +381,7 @@ class PartitionCryptoEngine:
         from ai_engine.crypto.falcon import FalconEngine, FalconSecurityLevel, FalconPrivateKey
 
         # Pad message to fixed size for constant-time
-        padded = message + b'\x00' * (1024 - len(message) % 1024)
+        padded = message + b"\x00" * (1024 - len(message) % 1024)
 
         engine = FalconEngine(FalconSecurityLevel.FALCON_512)
         sk = FalconPrivateKey(FalconSecurityLevel.FALCON_512, self.context.signing_key)
@@ -459,9 +424,7 @@ class SecureInterPartitionChannel:
         self._sequence = 0
         self._ports: Dict[str, SecurePort] = {}
 
-        logger.debug(
-            f"Secure channel created: {source_partition} -> {dest_partition}"
-        )
+        logger.debug(f"Secure channel created: {source_partition} -> {dest_partition}")
 
     def create_port(
         self,
@@ -517,12 +480,12 @@ class SecureInterPartitionChannel:
 
         # Build message for authentication
         auth_data = (
-            self.source_partition.to_bytes(4, 'big') +
-            self.dest_partition.to_bytes(4, 'big') +
-            port_name.encode() +
-            self._sequence.to_bytes(8, 'big') +
-            int(timestamp * 1000000).to_bytes(8, 'big') +
-            payload
+            self.source_partition.to_bytes(4, "big")
+            + self.dest_partition.to_bytes(4, "big")
+            + port_name.encode()
+            + self._sequence.to_bytes(8, "big")
+            + int(timestamp * 1000000).to_bytes(8, "big")
+            + payload
         )
 
         # Compute MAC
@@ -566,22 +529,17 @@ class SecureInterPartitionChannel:
 
         # Verify message
         auth_data = (
-            message.source_partition.to_bytes(4, 'big') +
-            message.destination_partition.to_bytes(4, 'big') +
-            message.port_name.encode() +
-            message.sequence.to_bytes(8, 'big') +
-            int(message.timestamp * 1000000).to_bytes(8, 'big') +
-            message.payload
+            message.source_partition.to_bytes(4, "big")
+            + message.destination_partition.to_bytes(4, "big")
+            + message.port_name.encode()
+            + message.sequence.to_bytes(8, "big")
+            + int(message.timestamp * 1000000).to_bytes(8, "big")
+            + message.payload
         )
 
-        if not await self.engine.verify_mac(
-            auth_data,
-            message.mac,
-            message.source_partition
-        ):
+        if not await self.engine.verify_mac(auth_data, message.mac, message.source_partition):
             logger.warning(
-                f"MAC verification failed: partition {message.source_partition} "
-                f"-> {message.destination_partition}"
+                f"MAC verification failed: partition {message.source_partition} " f"-> {message.destination_partition}"
             )
             return None
 
@@ -615,10 +573,7 @@ class ARINC653SecurityManager:
 
         self._partitions[config.partition_id] = (config, engine)
 
-        logger.info(
-            f"Partition registered: {config.name} "
-            f"(ID={config.partition_id}, DAL={config.criticality.value})"
-        )
+        logger.info(f"Partition registered: {config.name} " f"(ID={config.partition_id}, DAL={config.criticality.value})")
 
         return engine
 
@@ -641,9 +596,7 @@ class ARINC653SecurityManager:
 
         self._channels[(source_partition, dest_partition)] = channel
 
-        logger.info(
-            f"Secure channel created: {source_partition} -> {dest_partition}"
-        )
+        logger.info(f"Secure channel created: {source_partition} -> {dest_partition}")
 
         return channel
 
@@ -653,9 +606,7 @@ class ARINC653SecurityManager:
 
         for partition_id, (config, engine) in self._partitions.items():
             context = self.key_manager.get_context(partition_id)
-            if context and context.needs_rotation(
-                max_age=config.key_rotation_period
-            ):
+            if context and context.needs_rotation(max_age=config.key_rotation_period):
                 new_context = await self.key_manager.rotate_keys(partition_id)
                 engine.context = new_context
                 rotated += 1

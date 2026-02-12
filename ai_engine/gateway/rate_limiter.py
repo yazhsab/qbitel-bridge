@@ -60,6 +60,7 @@ RATE_LIMIT_WAIT_TIME = Histogram(
 # Exceptions
 # =============================================================================
 
+
 class RateLimitExceeded(Exception):
     """Raised when rate limit is exceeded and request cannot proceed."""
 
@@ -82,6 +83,7 @@ class RateLimitExceeded(Exception):
 # Data Classes
 # =============================================================================
 
+
 @dataclass
 class RateLimitConfig:
     """Rate limit configuration."""
@@ -91,13 +93,15 @@ class RateLimitConfig:
     global_tokens_per_minute: int = 500000
 
     # Per-domain limits (requests per minute)
-    domain_limits: Dict[str, int] = field(default_factory=lambda: {
-        "protocol_copilot": 200,
-        "security_orchestrator": 300,
-        "legacy_whisperer": 100,
-        "compliance_reporter": 100,
-        "translation_studio": 150,
-    })
+    domain_limits: Dict[str, int] = field(
+        default_factory=lambda: {
+            "protocol_copilot": 200,
+            "security_orchestrator": 300,
+            "legacy_whisperer": 100,
+            "compliance_reporter": 100,
+            "translation_studio": 150,
+        }
+    )
 
     # Per-user limits (requests per minute)
     user_requests_per_minute: int = 60
@@ -153,6 +157,7 @@ class TokenBucket:
 # Rate Limiter
 # =============================================================================
 
+
 class RateLimiter:
     """
     Token bucket rate limiter with distributed support.
@@ -174,9 +179,7 @@ class RateLimiter:
         self._user_buckets: Dict[str, TokenBucket] = {}
 
         # Request queues
-        self._queues: Dict[str, asyncio.Queue] = defaultdict(
-            lambda: asyncio.Queue(maxsize=self.config.max_queue_size)
-        )
+        self._queues: Dict[str, asyncio.Queue] = defaultdict(lambda: asyncio.Queue(maxsize=self.config.max_queue_size))
 
         # Redis client
         self._redis: Optional[Any] = None
@@ -288,9 +291,7 @@ class RateLimiter:
         async with self._lock:
             bucket = self._domain_buckets.get(domain)
             if not bucket:
-                limit = self.config.domain_limits.get(
-                    domain, self.config.global_requests_per_minute
-                )
+                limit = self.config.domain_limits.get(domain, self.config.global_requests_per_minute)
                 bucket = TokenBucket(
                     capacity=limit,
                     tokens=float(limit),
@@ -322,9 +323,7 @@ class RateLimiter:
         """Check domain rate limit."""
         async with self._lock:
             if domain not in self._domain_buckets:
-                limit = self.config.domain_limits.get(
-                    domain, self.config.global_requests_per_minute
-                )
+                limit = self.config.domain_limits.get(domain, self.config.global_requests_per_minute)
                 self._domain_buckets[domain] = TokenBucket(
                     capacity=limit,
                     tokens=float(limit),

@@ -62,9 +62,7 @@ TRANSLATION_THROUGHPUT = Summary(
     "Translation throughput",
     ["source_protocol", "target_protocol"],
 )
-RULE_GENERATION_DURATION = Histogram(
-    "qbitel_rule_generation_duration_seconds", "Rule generation processing time"
-)
+RULE_GENERATION_DURATION = Histogram("qbitel_rule_generation_duration_seconds", "Rule generation processing time")
 OPTIMIZATION_IMPROVEMENTS = Counter(
     "qbitel_optimization_improvements_total",
     "Total optimization improvements applied",
@@ -303,9 +301,7 @@ class ProtocolTranslationStudio:
 
         self.logger.info("Protocol Translation Studio initialized")
 
-    async def translate_protocol(
-        self, source_protocol: str, target_protocol: str, message: bytes
-    ) -> bytes:
+    async def translate_protocol(self, source_protocol: str, target_protocol: str, message: bytes) -> bytes:
         """
         Translate message from source protocol to target protocol.
 
@@ -321,9 +317,7 @@ class ProtocolTranslationStudio:
         translation_id = str(uuid.uuid4())
 
         try:
-            self.logger.info(
-                f"Translating from {source_protocol} to {target_protocol}: {translation_id}"
-            )
+            self.logger.info(f"Translating from {source_protocol} to {target_protocol}: {translation_id}")
 
             TRANSLATION_REQUESTS.labels(
                 source_protocol=source_protocol,
@@ -348,9 +342,7 @@ class ProtocolTranslationStudio:
             target_message = await self._generate_message(translated_data, target_spec)
 
             # Step 6: Validate translation
-            validation_result = await self._validate_translation(
-                message, target_message, source_spec, target_spec, rules
-            )
+            validation_result = await self._validate_translation(message, target_message, source_spec, target_spec, rules)
 
             # Record metrics
             latency_ms = (time.time() - start_time) * 1000
@@ -367,16 +359,14 @@ class ProtocolTranslationStudio:
                 status="success",
             ).inc()
 
-            TRANSLATION_DURATION.labels(
-                source_protocol=source_protocol, target_protocol=target_protocol
-            ).observe(time.time() - start_time)
+            TRANSLATION_DURATION.labels(source_protocol=source_protocol, target_protocol=target_protocol).observe(
+                time.time() - start_time
+            )
 
             self.stats["total_translations"] += 1
             self.stats["successful_translations"] += 1
 
-            self.logger.info(
-                f"Translation completed: {translation_id} in {latency_ms:.2f}ms"
-            )
+            self.logger.info(f"Translation completed: {translation_id} in {latency_ms:.2f}ms")
 
             return target_message
 
@@ -410,9 +400,7 @@ class ProtocolTranslationStudio:
         start_time = time.time()
 
         try:
-            self.logger.info(
-                f"Generating translation rules: {source_spec.protocol_type} -> {target_spec.protocol_type}"
-            )
+            self.logger.info(f"Generating translation rules: {source_spec.protocol_type} -> {target_spec.protocol_type}")
 
             # Prepare context for LLM
             context = {
@@ -514,9 +502,7 @@ Format response as JSON with this structure:
                     rule_id=str(uuid.uuid4()),
                     source_field=rule_data.get("source_field", ""),
                     target_field=rule_data.get("target_field", ""),
-                    strategy=TranslationStrategy(
-                        rule_data.get("strategy", "direct_mapping")
-                    ),
+                    strategy=TranslationStrategy(rule_data.get("strategy", "direct_mapping")),
                     transformation=rule_data.get("transformation"),
                     validation=rule_data.get("validation"),
                     priority=rule_data.get("priority", 0),
@@ -554,9 +540,7 @@ Format response as JSON with this structure:
 
             self.stats["rules_generated"] += 1
 
-            self.logger.info(
-                f"Generated {len(rules)} translation rules with {accuracy:.2%} accuracy in {duration:.2f}s"
-            )
+            self.logger.info(f"Generated {len(rules)} translation rules with {accuracy:.2%} accuracy in {duration:.2f}s")
 
             return translation_rules
 
@@ -564,9 +548,7 @@ Format response as JSON with this structure:
             self.logger.error(f"Rule generation failed: {e}")
             raise TranslationException(f"Failed to generate translation rules: {e}")
 
-    async def optimize_translation(
-        self, rules: TranslationRules, performance_data: PerformanceData
-    ) -> OptimizedRules:
+    async def optimize_translation(self, rules: TranslationRules, performance_data: PerformanceData) -> OptimizedRules:
         """
         Optimize translation performance using LLM analysis.
 
@@ -672,9 +654,7 @@ Format response as JSON with:
             optimized = OptimizedRules(
                 original_rules=rules,
                 optimized_rules=optimized_rules,
-                optimizations_applied=[
-                    opt["type"] for opt in optimization_data.get("optimizations", [])
-                ],
+                optimizations_applied=[opt["type"] for opt in optimization_data.get("optimizations", [])],
                 performance_improvement=benchmarks["latency_improvement"],
                 accuracy_improvement=benchmarks["accuracy_improvement"],
                 benchmarks=benchmarks,
@@ -726,9 +706,7 @@ Format response as JSON with:
         rules = await self.generate_translation_rules(source_spec, target_spec)
         return rules
 
-    async def _parse_message(
-        self, message: bytes, spec: ProtocolSpecification
-    ) -> Dict[str, Any]:
+    async def _parse_message(self, message: bytes, spec: ProtocolSpecification) -> Dict[str, Any]:
         """Parse message according to protocol specification."""
         parsed = {}
         offset = spec.header_size
@@ -755,11 +733,7 @@ Format response as JSON with:
                     offset += field.length
 
                 elif field.field_type == FieldType.STRING:
-                    value = (
-                        message[offset : offset + field.length]
-                        .decode(spec.encoding)
-                        .rstrip("\x00")
-                    )
+                    value = message[offset : offset + field.length].decode(spec.encoding).rstrip("\x00")
                     offset += field.length
 
                 elif field.field_type == FieldType.BINARY:
@@ -768,27 +742,19 @@ Format response as JSON with:
 
                 else:
                     # Default to binary
-                    value = (
-                        message[offset : offset + field.length]
-                        if field.length
-                        else message[offset:]
-                    )
+                    value = message[offset : offset + field.length] if field.length else message[offset:]
                     offset += field.length if field.length else len(message) - offset
 
                 parsed[field.name] = value
 
             except Exception as e:
                 if field.required:
-                    raise TranslationException(
-                        f"Failed to parse required field {field.name}: {e}"
-                    )
+                    raise TranslationException(f"Failed to parse required field {field.name}: {e}")
                 parsed[field.name] = field.default_value
 
         return parsed
 
-    async def _apply_translation_rules(
-        self, source_data: Dict[str, Any], rules: TranslationRules
-    ) -> Dict[str, Any]:
+    async def _apply_translation_rules(self, source_data: Dict[str, Any], rules: TranslationRules) -> Dict[str, Any]:
         """Apply translation rules to source data."""
         target_data = {}
 
@@ -802,9 +768,7 @@ Format response as JSON with:
         for rule in sorted_rules:
             try:
                 # Check conditions
-                if rule.conditions and not await self._check_conditions(
-                    source_data, rule.conditions
-                ):
+                if rule.conditions and not await self._check_conditions(source_data, rule.conditions):
                     continue
 
                 # Get source value
@@ -814,30 +778,22 @@ Format response as JSON with:
                     # Handle missing field
                     error_strategy = rules.error_handling.get("missing_field", "skip")
                     if error_strategy == "use_default":
-                        source_value = self._get_default_value(
-                            rule.target_field, rules.target_protocol
-                        )
+                        source_value = self._get_default_value(rule.target_field, rules.target_protocol)
                     elif error_strategy == "error":
-                        raise TranslationException(
-                            f"Missing required field: {rule.source_field}"
-                        )
+                        raise TranslationException(f"Missing required field: {rule.source_field}")
                     else:
                         continue
 
                 # Apply transformation
                 if rule.transformation:
-                    target_value = await self._apply_transformation(
-                        source_value, rule.transformation
-                    )
+                    target_value = await self._apply_transformation(source_value, rule.transformation)
                 else:
                     target_value = source_value
 
                 # Validate
                 if rule.validation:
                     if not await self._validate_value(target_value, rule.validation):
-                        raise TranslationException(
-                            f"Validation failed for {rule.target_field}: {rule.validation}"
-                        )
+                        raise TranslationException(f"Validation failed for {rule.target_field}: {rule.validation}")
 
                 target_data[rule.target_field] = target_value
 
@@ -852,9 +808,7 @@ Format response as JSON with:
 
         return target_data
 
-    async def _generate_message(
-        self, data: Dict[str, Any], spec: ProtocolSpecification
-    ) -> bytes:
+    async def _generate_message(self, data: Dict[str, Any], spec: ProtocolSpecification) -> bytes:
         """Generate message bytes from data according to protocol specification."""
         message = bytearray(spec.header_size)
         offset = spec.header_size
@@ -881,9 +835,7 @@ Format response as JSON with:
                         fmt = ">I" if spec.byte_order == "big" else "<I"
                         message.extend(struct.pack(fmt, value))
                     else:
-                        message.extend(
-                            value.to_bytes(field.length, byteorder=spec.byte_order)
-                        )
+                        message.extend(value.to_bytes(field.length, byteorder=spec.byte_order))
                     offset += field.length
 
                 elif field.field_type == FieldType.STRING:
@@ -904,9 +856,7 @@ Format response as JSON with:
                     offset += field.length
 
             except Exception as e:
-                raise TranslationException(
-                    f"Failed to generate field {field.name}: {e}"
-                )
+                raise TranslationException(f"Failed to generate field {field.name}: {e}")
 
         return bytes(message)
 
@@ -927,9 +877,7 @@ Format response as JSON with:
 
             # Validate against schema if available
             if target_spec.validation_schema:
-                schema_valid = await self._validate_against_schema(
-                    parsed_target, target_spec.validation_schema
-                )
+                schema_valid = await self._validate_against_schema(parsed_target, target_spec.validation_schema)
                 if not schema_valid:
                     validation_result["errors"].append("Schema validation failed")
                     validation_result["passed"] = False
@@ -937,9 +885,7 @@ Format response as JSON with:
             # Check field requirements
             for field in target_spec.fields:
                 if field.required and field.name not in parsed_target:
-                    validation_result["errors"].append(
-                        f"Missing required field: {field.name}"
-                    )
+                    validation_result["errors"].append(f"Missing required field: {field.name}")
                     validation_result["passed"] = False
 
         except Exception as e:
@@ -948,9 +894,7 @@ Format response as JSON with:
 
         return validation_result
 
-    def _parse_processing_step_descriptor(
-        self, step: Union[str, Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    def _parse_processing_step_descriptor(self, step: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
         """Normalize processing step descriptors into a dictionary."""
         if isinstance(step, dict):
             return step
@@ -992,9 +936,7 @@ Format response as JSON with:
                 continue
 
         # JSON structures (lists/dicts) – fall back gracefully on parse errors
-        if (value.startswith("[") and value.endswith("]")) or (
-            value.startswith("{") and value.endswith("}")
-        ):
+        if (value.startswith("[") and value.endswith("]")) or (value.startswith("{") and value.endswith("}")):
             try:
                 return json.loads(value)
             except json.JSONDecodeError:
@@ -1024,9 +966,7 @@ Format response as JSON with:
 
         return params
 
-    async def _apply_processing_step(
-        self, data: Dict[str, Any], step: Union[str, Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    async def _apply_processing_step(self, data: Dict[str, Any], step: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
         """Apply a processing step to data."""
         if not data:
             return {}
@@ -1161,9 +1101,7 @@ Format response as JSON with:
                     elif target_type in {"str", "string"}:
                         if isinstance(value, bytes):
                             encoding = step_config.get("encoding", "utf-8")
-                            result[field] = value.decode(
-                                encoding, step_config.get("errors", "ignore")
-                            )
+                            result[field] = value.decode(encoding, step_config.get("errors", "ignore"))
                         else:
                             result[field] = str(value)
                     elif target_type == "bytes":
@@ -1244,9 +1182,7 @@ Format response as JSON with:
                     for op, comparator in zip(node.ops, node.comparators):
                         op_type = type(op)
                         if op_type not in allowed_ops:
-                            raise ValueError(
-                                f"Operation not allowed: {op_type.__name__}"
-                            )
+                            raise ValueError(f"Operation not allowed: {op_type.__name__}")
                         right = eval_node(comparator)
                         if not allowed_ops[op_type](left, right):
                             return False
@@ -1277,10 +1213,7 @@ Format response as JSON with:
                         }
                         if func_name in safe_functions:
                             args = [eval_node(arg) for arg in node.args]
-                            kwargs = {
-                                kw.arg: eval_node(kw.value)
-                                for kw in getattr(node, "keywords", []) or []
-                            }
+                            kwargs = {kw.arg: eval_node(kw.value) for kw in getattr(node, "keywords", []) or []}
                             return safe_functions[func_name](*args, **kwargs)
                     elif isinstance(node.func, ast.Attribute):
                         target = eval_node(node.func.value)
@@ -1300,14 +1233,9 @@ Format response as JSON with:
                             method = getattr(target, attr)
                             if callable(method):
                                 args = [eval_node(arg) for arg in node.args]
-                                kwargs = {
-                                    kw.arg: eval_node(kw.value)
-                                    for kw in getattr(node, "keywords", []) or []
-                                }
+                                kwargs = {kw.arg: eval_node(kw.value) for kw in getattr(node, "keywords", []) or []}
                                 return method(*args, **kwargs)
-                    raise ValueError(
-                        f"Function calls not allowed: {ast.dump(node.func)}"
-                    )
+                    raise ValueError(f"Function calls not allowed: {ast.dump(node.func)}")
                 elif isinstance(node, ast.Attribute):
                     # Allow attribute access for specific safe operations
                     obj = eval_node(node.value)
@@ -1325,9 +1253,7 @@ Format response as JSON with:
             self.logger.error(f"Safe eval failed: {e}")
             raise TranslationException(f"Expression evaluation failed: {e}")
 
-    async def _check_conditions(
-        self, data: Dict[str, Any], conditions: List[str]
-    ) -> bool:
+    async def _check_conditions(self, data: Dict[str, Any], conditions: List[str]) -> bool:
         """Check if conditions are met using safe evaluation."""
         for condition in conditions:
             try:
@@ -1357,9 +1283,7 @@ Format response as JSON with:
             self.logger.warning(f"Validation failed: {e}")
             return False
 
-    async def _validate_against_schema(
-        self, data: Dict[str, Any], schema: Dict[str, Any]
-    ) -> bool:
+    async def _validate_against_schema(self, data: Dict[str, Any], schema: Dict[str, Any]) -> bool:
         """Validate data against JSON schema."""
         try:
             # Import jsonschema if available
@@ -1369,9 +1293,7 @@ Format response as JSON with:
                 jsonschema.validate(instance=data, schema=schema)
                 return True
             except ImportError:
-                self.logger.warning(
-                    "jsonschema not installed, performing basic validation"
-                )
+                self.logger.warning("jsonschema not installed, performing basic validation")
                 # Basic validation without jsonschema
                 return self._basic_schema_validation(data, schema)
             except jsonschema.ValidationError as e:
@@ -1381,9 +1303,7 @@ Format response as JSON with:
             self.logger.error(f"Validation error: {e}")
             return False
 
-    def _basic_schema_validation(
-        self, data: Dict[str, Any], schema: Dict[str, Any]
-    ) -> bool:
+    def _basic_schema_validation(self, data: Dict[str, Any], schema: Dict[str, Any]) -> bool:
         """Basic schema validation without jsonschema library."""
         try:
             # Check required fields
@@ -1456,9 +1376,7 @@ Format response as JSON with:
 
         return passed / total if total > 0 else 0.95
 
-    async def _analyze_bottlenecks(
-        self, rules: TranslationRules, performance_data: PerformanceData
-    ) -> List[str]:
+    async def _analyze_bottlenecks(self, rules: TranslationRules, performance_data: PerformanceData) -> List[str]:
         """Analyze performance bottlenecks."""
         bottlenecks = []
 
@@ -1476,9 +1394,7 @@ Format response as JSON with:
 
         return bottlenecks
 
-    async def _apply_optimizations(
-        self, rules: TranslationRules, optimization_data: Dict[str, Any]
-    ) -> TranslationRules:
+    async def _apply_optimizations(self, rules: TranslationRules, optimization_data: Dict[str, Any]) -> TranslationRules:
         """Apply optimizations to rules."""
         # Create a copy of rules
         optimized = TranslationRules(
@@ -1495,9 +1411,7 @@ Format response as JSON with:
 
         return optimized
 
-    async def _benchmark_rules(
-        self, original: TranslationRules, optimized: TranslationRules
-    ) -> Dict[str, Any]:
+    async def _benchmark_rules(self, original: TranslationRules, optimized: TranslationRules) -> Dict[str, Any]:
         """Benchmark rules performance."""
         return {
             "latency_improvement": 0.20,  # 20% improvement
@@ -1509,10 +1423,7 @@ Format response as JSON with:
         """Load or generate protocol specification."""
         # Try to match built-in protocols
         for spec in self.protocol_specs.values():
-            if (
-                spec.protocol_id == protocol_id
-                or spec.protocol_type.value == protocol_id
-            ):
+            if spec.protocol_id == protocol_id or spec.protocol_type.value == protocol_id:
                 return spec
 
         # Generate basic spec
@@ -1525,9 +1436,7 @@ Format response as JSON with:
             fields=[],
         )
 
-    def _get_rules_cache_key(
-        self, source_spec: ProtocolSpecification, target_spec: ProtocolSpecification
-    ) -> str:
+    def _get_rules_cache_key(self, source_spec: ProtocolSpecification, target_spec: ProtocolSpecification) -> str:
         """Generate cache key for translation rules."""
         key_data = f"{source_spec.protocol_id}:{target_spec.protocol_id}"
         return hashlib.md5(key_data.encode()).hexdigest()
@@ -1550,13 +1459,9 @@ Format response as JSON with:
 
         # Update statistics
         if self.latency_samples[key]:
-            self.stats["average_latency_ms"] = sum(self.latency_samples[key]) / len(
-                self.latency_samples[key]
-            )
+            self.stats["average_latency_ms"] = sum(self.latency_samples[key]) / len(self.latency_samples[key])
 
-    def _generate_basic_rules(
-        self, source_spec: ProtocolSpecification, target_spec: ProtocolSpecification
-    ) -> Dict[str, Any]:
+    def _generate_basic_rules(self, source_spec: ProtocolSpecification, target_spec: ProtocolSpecification) -> Dict[str, Any]:
         """Generate basic translation rules as fallback."""
         rules = []
 
@@ -1721,9 +1626,7 @@ Format response as JSON with:
         self.protocol_specs[spec.protocol_id] = spec
         self.logger.info(f"Registered protocol: {spec.protocol_id}")
 
-    async def get_performance_data(
-        self, source_protocol: str, target_protocol: str
-    ) -> Optional[PerformanceData]:
+    async def get_performance_data(self, source_protocol: str, target_protocol: str) -> Optional[PerformanceData]:
         """Get performance data for a translation pair."""
         key = f"{source_protocol}_to_{target_protocol}"
         return self.performance_tracker.get(key)
@@ -1747,9 +1650,7 @@ Format response as JSON with:
         Returns:
             Combined training history across all batches
         """
-        self.logger.info(
-            f"Starting batch training with {len(training_batches)} batches"
-        )
+        self.logger.info(f"Starting batch training with {len(training_batches)} batches")
 
         combined_history = {
             "batch_histories": [],
@@ -1762,15 +1663,10 @@ Format response as JSON with:
         current_rules = await self.generate_translation_rules(source_spec, target_spec)
 
         for batch_idx, batch_data in enumerate(training_batches):
-            self.logger.info(
-                f"Training on batch {batch_idx + 1}/{len(training_batches)} "
-                f"({len(batch_data)} samples)"
-            )
+            self.logger.info(f"Training on batch {batch_idx + 1}/{len(training_batches)} " f"({len(batch_data)} samples)")
 
             # Update rules based on batch data
-            batch_rules = await self._refine_rules_with_data(
-                current_rules, batch_data, source_spec, target_spec
-            )
+            batch_rules = await self._refine_rules_with_data(current_rules, batch_data, source_spec, target_spec)
 
             # Validate refined rules
             batch_metrics = await self._validate_translation_rules(
@@ -1785,9 +1681,7 @@ Format response as JSON with:
                 }
             )
             combined_history["overall_accuracy"].append(batch_rules.accuracy)
-            combined_history["overall_test_pass_rate"].append(
-                batch_metrics["pass_rate"]
-            )
+            combined_history["overall_test_pass_rate"].append(batch_metrics["pass_rate"])
 
             # Record batch metrics
             batch_summary = {
@@ -1907,9 +1801,7 @@ Format response as JSON with:
 
         try:
             suggestions = json.loads(llm_response.content)
-            refined_rules = await self._apply_rule_modifications(
-                current_rules, suggestions.get("rule_modifications", [])
-            )
+            refined_rules = await self._apply_rule_modifications(current_rules, suggestions.get("rule_modifications", []))
 
             # Test refined rules
             accuracy = await self._test_translation_rules(refined_rules)
@@ -1966,9 +1858,7 @@ Format response as JSON with:
 
             elif mod_type == "remove":
                 rule_id = mod.get("rule_id")
-                refined_rules.rules = [
-                    r for r in refined_rules.rules if r.rule_id != rule_id
-                ]
+                refined_rules.rules = [r for r in refined_rules.rules if r.rule_id != rule_id]
 
         return refined_rules
 
@@ -2013,12 +1903,8 @@ Format response as JSON with:
             "fail_rate": failed / total if total > 0 else 0.0,
             "error_rate": errors / total if total > 0 else 0.0,
             "avg_latency_ms": sum(latencies) / len(latencies) if latencies else 0.0,
-            "p50_latency_ms": (
-                sorted(latencies)[len(latencies) // 2] if latencies else 0.0
-            ),
-            "p95_latency_ms": (
-                sorted(latencies)[int(len(latencies) * 0.95)] if latencies else 0.0
-            ),
+            "p50_latency_ms": (sorted(latencies)[len(latencies) // 2] if latencies else 0.0),
+            "p95_latency_ms": (sorted(latencies)[int(len(latencies) * 0.95)] if latencies else 0.0),
             "total_examples": total,
             "passed": passed,
             "failed": failed,
@@ -2132,10 +2018,7 @@ Format response as JSON with:
             cache_key = self._get_rules_cache_key(source_spec, target_spec)
             self.translation_rules_cache[cache_key] = translation_rules
 
-            self.logger.info(
-                f"Translation rules loaded from {rules_path}: "
-                f"accuracy={translation_rules.accuracy:.4f}"
-            )
+            self.logger.info(f"Translation rules loaded from {rules_path}: " f"accuracy={translation_rules.accuracy:.4f}")
 
             return translation_rules
 
@@ -2194,11 +2077,7 @@ Format response as JSON with:
                         "unknown",
                     )
                     accuracy = next(
-                        (
-                            float(p.replace("acc", ""))
-                            for p in parts
-                            if p.startswith("acc")
-                        ),
+                        (float(p.replace("acc", "")) for p in parts if p.startswith("acc")),
                         0.0,
                     )
                     timestamp = parts[-1] if len(parts) > 0 else "unknown"
@@ -2212,9 +2091,7 @@ Format response as JSON with:
                             "version": version,
                             "accuracy": accuracy,
                             "timestamp": timestamp,
-                            "size_bytes": os.path.getsize(
-                                os.path.join(rules_dir, filename)
-                            ),
+                            "size_bytes": os.path.getsize(os.path.join(rules_dir, filename)),
                         }
                     )
             except Exception as e:
@@ -2242,9 +2119,7 @@ async def initialize_translation_studio(
     """Initialize global translation studio."""
     global _translation_studio
 
-    _translation_studio = ProtocolTranslationStudio(
-        config, llm_service, metrics_collector
-    )
+    _translation_studio = ProtocolTranslationStudio(config, llm_service, metrics_collector)
 
     return _translation_studio
 

@@ -78,7 +78,7 @@ class ButterflyKeyExpansion:
         import secrets
 
         # Simplified expansion - real implementation uses lattice math
-        expansion_input = self.seed + self._expansion_counter.to_bytes(4, 'big')
+        expansion_input = self.seed + self._expansion_counter.to_bytes(4, "big")
         self._expansion_counter += 1
 
         # Derive pseudonymous keys

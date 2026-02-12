@@ -42,7 +42,7 @@ class TestLatency:
 
     def test_key_encapsulation_latency(self):
         """Test latency of quantum key encapsulation."""
-        algorithm = 'Kyber768'
+        algorithm = "Kyber768"
 
         def key_encapsulation():
             kem = KeyEncapsulation(algorithm)
@@ -71,7 +71,7 @@ class TestLatency:
 
     def test_signature_generation_latency(self):
         """Test latency of quantum signature generation."""
-        algorithm = 'Dilithium3'
+        algorithm = "Dilithium3"
         message = b"Test message for latency measurement"
 
         def sign_operation():
@@ -94,7 +94,7 @@ class TestLatency:
 
     def test_signature_verification_latency(self):
         """Test latency of quantum signature verification."""
-        algorithm = 'Dilithium3'
+        algorithm = "Dilithium3"
         message = b"Test message for latency measurement"
 
         # Pre-generate signature
@@ -188,7 +188,7 @@ class TestLatency:
 
     def test_key_generation_latency(self):
         """Test latency of quantum key generation."""
-        algorithm = 'Kyber768'
+        algorithm = "Kyber768"
 
         def key_generation():
             kem = KeyEncapsulation(algorithm)
@@ -213,7 +213,7 @@ class TestLatency:
 
         def secure_message_exchange():
             # Key exchange
-            kem = KeyEncapsulation('Kyber768')
+            kem = KeyEncapsulation("Kyber768")
             public_key = kem.generate_keypair()
             ciphertext, shared_secret = kem.encap_secret(public_key)
 
@@ -222,23 +222,18 @@ class TestLatency:
             from cryptography.hazmat.primitives.kdf.hkdf import HKDF
             from cryptography.hazmat.backends import default_backend
 
-            kdf = HKDF(
-                algorithm=hashes.SHA256(),
-                length=32,
-                salt=None,
-                info=b'',
-                backend=default_backend()
-            )
+            kdf = HKDF(algorithm=hashes.SHA256(), length=32, salt=None, info=b"", backend=default_backend())
             encryption_key = kdf.derive(shared_secret)
 
             # Encrypt message
             from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
+
             cipher = ChaCha20Poly1305(encryption_key)
             nonce = os.urandom(12)
             encrypted_message = cipher.encrypt(nonce, message, None)
 
             # Sign the encrypted message
-            sig = Signature('Dilithium3')
+            sig = Signature("Dilithium3")
             sig_public_key = sig.generate_keypair()
             signature = sig.sign(encrypted_message)
 
@@ -270,7 +265,7 @@ class TestLatency:
 
     def test_latency_jitter(self):
         """Test latency jitter (variability) for critical operations."""
-        algorithm = 'Kyber768'
+        algorithm = "Kyber768"
 
         def operation():
             kem = KeyEncapsulation(algorithm)
@@ -297,7 +292,7 @@ class TestLatency:
 
         # Measure first operation (cold start)
         start = time.perf_counter()
-        kem = KeyEncapsulation('Kyber768')
+        kem = KeyEncapsulation("Kyber768")
         public_key = kem.generate_keypair()
         cold_start_time = (time.perf_counter() - start) * 1000
 
@@ -305,7 +300,7 @@ class TestLatency:
         warm_timings = []
         for _ in range(10):
             start = time.perf_counter()
-            kem = KeyEncapsulation('Kyber768')
+            kem = KeyEncapsulation("Kyber768")
             public_key = kem.generate_keypair()
             warm_timings.append((time.perf_counter() - start) * 1000)
 
@@ -323,7 +318,7 @@ class TestLatency:
     @pytest.mark.benchmark
     def test_tail_latency_analysis(self):
         """Comprehensive tail latency analysis."""
-        algorithm = 'Kyber768'
+        algorithm = "Kyber768"
 
         def operation():
             kem = KeyEncapsulation(algorithm)
@@ -335,12 +330,12 @@ class TestLatency:
 
         sorted_timings = sorted(timings)
         tail_percentiles = {
-            'P50': sorted_timings[499],
-            'P90': sorted_timings[899],
-            'P95': sorted_timings[949],
-            'P99': sorted_timings[989],
-            'P99.9': sorted_timings[998],
-            'Max': max(timings)
+            "P50": sorted_timings[499],
+            "P90": sorted_timings[899],
+            "P95": sorted_timings[949],
+            "P99": sorted_timings[989],
+            "P99.9": sorted_timings[998],
+            "Max": max(timings),
         }
 
         print(f"\nTail Latency Analysis ({algorithm}, n=1000):")
@@ -348,6 +343,6 @@ class TestLatency:
             print(f"  {label}: {value:.3f} ms")
 
         # Tail latency assertions
-        assert tail_percentiles['P99'] < 15.0, f"P99 too high: {tail_percentiles['P99']:.3f} ms"
-        assert tail_percentiles['P99.9'] < 25.0, f"P99.9 too high: {tail_percentiles['P99.9']:.3f} ms"
-        assert tail_percentiles['Max'] < 50.0, f"Max latency too high: {tail_percentiles['Max']:.3f} ms"
+        assert tail_percentiles["P99"] < 15.0, f"P99 too high: {tail_percentiles['P99']:.3f} ms"
+        assert tail_percentiles["P99.9"] < 25.0, f"P99.9 too high: {tail_percentiles['P99.9']:.3f} ms"
+        assert tail_percentiles["Max"] < 50.0, f"Max latency too high: {tail_percentiles['Max']:.3f} ms"

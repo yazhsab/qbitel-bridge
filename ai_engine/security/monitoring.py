@@ -223,20 +223,14 @@ class HealthCheckManager:
         self.logger = get_security_logger("qbitel.security.monitoring")
 
         # Health check configuration
-        self.check_interval = self.config.monitoring.health_checks.get(
-            "interval_seconds", 30
-        )
-        self.check_timeout = self.config.monitoring.health_checks.get(
-            "timeout_seconds", 10
-        )
+        self.check_interval = self.config.monitoring.health_checks.get("interval_seconds", 30)
+        self.check_timeout = self.config.monitoring.health_checks.get("timeout_seconds", 10)
 
         # Background task management
         self._running = False
         self._health_check_task: Optional[asyncio.Task] = None
 
-    def register_health_check(
-        self, component: str, check_func: Callable[[], Dict[str, Any]]
-    ):
+    def register_health_check(self, component: str, check_func: Callable[[], Dict[str, Any]]):
         """Register a health check function for a component."""
         self.health_checks[component] = check_func
         self.logger.log_security_event(
@@ -264,9 +258,7 @@ class HealthCheckManager:
 
             # Run health check with timeout
             try:
-                result = await asyncio.wait_for(
-                    asyncio.to_thread(check_func), timeout=self.check_timeout
-                )
+                result = await asyncio.wait_for(asyncio.to_thread(check_func), timeout=self.check_timeout)
             except asyncio.TimeoutError:
                 return HealthCheckResult(
                     component=component,
@@ -301,9 +293,7 @@ class HealthCheckManager:
             self.health_results[component] = health_result
 
             # Log health check result
-            log_level = (
-                LogLevel.ERROR if status == HealthStatus.UNHEALTHY else LogLevel.DEBUG
-            )
+            log_level = LogLevel.ERROR if status == HealthStatus.UNHEALTHY else LogLevel.DEBUG
             self.logger.log_security_event(
                 SecurityLogType.PERFORMANCE_METRIC,
                 f"Health check for {component}: {status.value} - {message}",
@@ -485,14 +475,10 @@ class PerformanceMonitor:
         # Calculate rates
         uptime_seconds = time.time() - self.start_time
         events_per_second = self.event_counts["total"] / max(uptime_seconds, 1)
-        decisions_per_minute = (
-            self.decision_counts["total"] / max(uptime_seconds, 1)
-        ) * 60
+        decisions_per_minute = (self.decision_counts["total"] / max(uptime_seconds, 1)) * 60
 
         # Response time statistics
-        avg_response_time = (
-            sum(self.response_times) / max(len(self.response_times), 1) * 1000
-        )  # ms
+        avg_response_time = sum(self.response_times) / max(len(self.response_times), 1) * 1000  # ms
 
         # Error rate
         error_rate = self.event_counts["errors"] / max(self.event_counts["total"], 1)
@@ -517,9 +503,7 @@ class PerformanceMonitor:
         # System metrics
         self.metrics.cpu_usage.set(metrics.cpu_percent)
         self.metrics.memory_usage.set(metrics.memory_percent)
-        self.metrics.memory_used.set(
-            metrics.memory_used_mb * 1024 * 1024
-        )  # Convert to bytes
+        self.metrics.memory_used.set(metrics.memory_used_mb * 1024 * 1024)  # Convert to bytes
         self.metrics.active_threads.set(metrics.active_threads)
 
         # Business metrics
@@ -747,9 +731,7 @@ class SecurityOrchestrationMonitor:
         self.response_manager = response_manager
         self.threat_analyzer = threat_analyzer
 
-    def record_security_event_processing(
-        self, processing_time_ms: float, success: bool = True
-    ):
+    def record_security_event_processing(self, processing_time_ms: float, success: bool = True):
         """Record security event processing metrics."""
         self.performance_monitor.record_security_event(processing_time_ms, success)
 
@@ -764,8 +746,7 @@ class SecurityOrchestrationMonitor:
         return {
             "overall_status": overall_status.value,
             "components": {
-                component: result.to_dict()
-                for component, result in self.health_check_manager.health_results.items()
+                component: result.to_dict() for component, result in self.health_check_manager.health_results.items()
             },
             "last_updated": datetime.now().isoformat(),
         }
@@ -777,15 +758,9 @@ class SecurityOrchestrationMonitor:
         # Add component-specific metrics if available
         if self.security_service:
             try:
-                service_metrics = asyncio.run(
-                    self.security_service.get_service_metrics()
-                )
-                metrics.active_incidents = service_metrics.get("incidents", {}).get(
-                    "active_count", 0
-                )
-                metrics.active_quarantines = service_metrics.get("systems", {}).get(
-                    "active_quarantines", 0
-                )
+                service_metrics = asyncio.run(self.security_service.get_service_metrics())
+                metrics.active_incidents = service_metrics.get("incidents", {}).get("active_count", 0)
+                metrics.active_quarantines = service_metrics.get("systems", {}).get("active_quarantines", 0)
             except Exception as e:
                 self.logger.log_security_event(
                     SecurityLogType.PERFORMANCE_METRIC,
@@ -867,9 +842,7 @@ class SecurityOrchestrationMonitor:
                     "details": {"error": str(e)},
                 }
 
-        self.health_check_manager.register_health_check(
-            "configuration", config_health_check
-        )
+        self.health_check_manager.register_health_check("configuration", config_health_check)
 
     async def shutdown(self):
         """Shutdown the monitoring system."""

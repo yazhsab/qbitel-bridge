@@ -6,7 +6,6 @@ from typing import Generator
 
 import pytest
 
-
 DEFAULT_ENV_FLAG = "QBITEL_TEST_ENV"
 
 

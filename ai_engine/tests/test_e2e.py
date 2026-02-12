@@ -68,16 +68,12 @@ class TestCompleteWorkflows:
                             {"name": "path", "value": "/api/v1/users"},
                         ]
                     },
-                    "metadata": {
-                        "characteristics": {"method": "GET", "version": "HTTP/1.1"}
-                    },
+                    "metadata": {"characteristics": {"method": "GET", "version": "HTTP/1.1"}},
                     "processing_time": 0.05,
                 }
             )
 
-            response = client.post(
-                "/api/v1/discover", json=payload, headers=auth_headers
-            )
+            response = client.post("/api/v1/discover", json=payload, headers=auth_headers)
 
         # Verify response
         assert response.status_code == 200
@@ -126,9 +122,7 @@ class TestCompleteWorkflows:
                 ]
             )
 
-            response = client.post(
-                "/api/v1/detect-fields", json=payload, headers=auth_headers
-            )
+            response = client.post("/api/v1/detect-fields", json=payload, headers=auth_headers)
 
         # Verify response
         assert response.status_code == 200
@@ -380,9 +374,7 @@ class TestFailureScenarios:
         # Make multiple rapid requests
         responses = []
         for _ in range(10):
-            response = client.post(
-                "/api/v1/discover", json=payload, headers=auth_headers
-            )
+            response = client.post("/api/v1/discover", json=payload, headers=auth_headers)
             responses.append(response.status_code)
 
         # At least some requests should succeed

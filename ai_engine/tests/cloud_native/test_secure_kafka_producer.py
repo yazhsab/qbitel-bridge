@@ -1,6 +1,7 @@
 """
 Unit tests for Secure Kafka Producer.
 """
+
 import pytest
 import base64
 from unittest.mock import Mock, patch, MagicMock
@@ -10,9 +11,7 @@ from pathlib import Path
 # Add ai_engine to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from cloud_native.event_streaming.kafka.secure_producer import (
-    SecureKafkaProducer
-)
+from cloud_native.event_streaming.kafka.secure_producer import SecureKafkaProducer
 
 
 class TestSecureKafkaProducer:
@@ -21,13 +20,13 @@ class TestSecureKafkaProducer:
     @pytest.fixture
     def producer(self):
         """Create secure Kafka producer instance"""
-        with patch('kafka.KafkaProducer'):
+        with patch("kafka.KafkaProducer"):
             return SecureKafkaProducer(
                 bootstrap_servers=["localhost:9092"],
                 topic="security-events",
                 enable_quantum_encryption=True,
                 kafka_config={},
-                max_retries=3
+                max_retries=3,
             )
 
     def test_initialization(self, producer):
@@ -37,36 +36,28 @@ class TestSecureKafkaProducer:
         assert producer.enable_quantum_encryption is True
         assert producer.max_retries == 3
 
-    @patch('kafka.KafkaProducer')
+    @patch("kafka.KafkaProducer")
     def test_send_message(self, mock_kafka_producer):
         """Test sending message"""
         mock_producer_instance = MagicMock()
         mock_producer_instance.send.return_value = MagicMock()
         mock_kafka_producer.return_value = mock_producer_instance
 
-        producer = SecureKafkaProducer(
-            bootstrap_servers=["localhost:9092"],
-            topic="test-topic"
-        )
+        producer = SecureKafkaProducer(bootstrap_servers=["localhost:9092"], topic="test-topic")
 
-        result = producer.send(
-            value={"event": "test", "data": "sample"},
-            key="test-key"
-        )
+        result = producer.send(value={"event": "test", "data": "sample"}, key="test-key")
 
         assert result is not None
         mock_producer_instance.send.assert_called()
 
-    @patch('kafka.KafkaProducer')
+    @patch("kafka.KafkaProducer")
     def test_message_encryption(self, mock_kafka_producer):
         """Test message encryption"""
         mock_producer_instance = MagicMock()
         mock_kafka_producer.return_value = mock_producer_instance
 
         producer = SecureKafkaProducer(
-            bootstrap_servers=["localhost:9092"],
-            topic="test-topic",
-            enable_quantum_encryption=True
+            bootstrap_servers=["localhost:9092"], topic="test-topic", enable_quantum_encryption=True
         )
 
         # Send a message
@@ -97,87 +88,63 @@ class TestSecureKafkaProducer:
         # For full test, would need decrypt method
         assert encrypted is not None
 
-    @patch('kafka.KafkaProducer')
+    @patch("kafka.KafkaProducer")
     def test_send_with_headers(self, mock_kafka_producer):
         """Test sending message with headers"""
         mock_producer_instance = MagicMock()
         mock_kafka_producer.return_value = mock_producer_instance
 
-        producer = SecureKafkaProducer(
-            bootstrap_servers=["localhost:9092"],
-            topic="test-topic"
-        )
+        producer = SecureKafkaProducer(bootstrap_servers=["localhost:9092"], topic="test-topic")
 
-        headers = [
-            ("event-type", b"security-alert"),
-            ("severity", b"high")
-        ]
+        headers = [("event-type", b"security-alert"), ("severity", b"high")]
 
-        producer.send(
-            value={"data": "test"},
-            headers=headers
-        )
+        producer.send(value={"data": "test"}, headers=headers)
 
         mock_producer_instance.send.assert_called()
 
-    @patch('kafka.KafkaProducer')
+    @patch("kafka.KafkaProducer")
     def test_send_with_partition(self, mock_kafka_producer):
         """Test sending message to specific partition"""
         mock_producer_instance = MagicMock()
         mock_kafka_producer.return_value = mock_producer_instance
 
-        producer = SecureKafkaProducer(
-            bootstrap_servers=["localhost:9092"],
-            topic="test-topic"
-        )
+        producer = SecureKafkaProducer(bootstrap_servers=["localhost:9092"], topic="test-topic")
 
-        producer.send(
-            value={"data": "test"},
-            partition=2
-        )
+        producer.send(value={"data": "test"}, partition=2)
 
         mock_producer_instance.send.assert_called()
 
-    @patch('kafka.KafkaProducer')
+    @patch("kafka.KafkaProducer")
     def test_flush(self, mock_kafka_producer):
         """Test flushing buffered messages"""
         mock_producer_instance = MagicMock()
         mock_kafka_producer.return_value = mock_producer_instance
 
-        producer = SecureKafkaProducer(
-            bootstrap_servers=["localhost:9092"],
-            topic="test-topic"
-        )
+        producer = SecureKafkaProducer(bootstrap_servers=["localhost:9092"], topic="test-topic")
 
         producer.flush(timeout=10)
 
         mock_producer_instance.flush.assert_called_once()
 
-    @patch('kafka.KafkaProducer')
+    @patch("kafka.KafkaProducer")
     def test_close(self, mock_kafka_producer):
         """Test closing producer"""
         mock_producer_instance = MagicMock()
         mock_kafka_producer.return_value = mock_producer_instance
 
-        producer = SecureKafkaProducer(
-            bootstrap_servers=["localhost:9092"],
-            topic="test-topic"
-        )
+        producer = SecureKafkaProducer(bootstrap_servers=["localhost:9092"], topic="test-topic")
 
         producer.close()
 
         mock_producer_instance.close.assert_called_once()
 
-    @patch('kafka.KafkaProducer')
+    @patch("kafka.KafkaProducer")
     def test_get_metrics(self, mock_kafka_producer):
         """Test getting producer metrics"""
         mock_producer_instance = MagicMock()
         mock_kafka_producer.return_value = mock_producer_instance
 
-        producer = SecureKafkaProducer(
-            bootstrap_servers=["localhost:9092"],
-            topic="test-topic"
-        )
+        producer = SecureKafkaProducer(bootstrap_servers=["localhost:9092"], topic="test-topic")
 
         metrics = producer.get_metrics()
 
@@ -199,41 +166,27 @@ class TestSecureKafkaProducer:
         assert "connector.class" in connector_config
         assert "topics" in connector_config
 
-    @patch('kafka.KafkaProducer')
+    @patch("kafka.KafkaProducer")
     def test_send_with_timeout(self, mock_kafka_producer):
         """Test sending message with timeout"""
         mock_producer_instance = MagicMock()
         mock_kafka_producer.return_value = mock_producer_instance
 
-        producer = SecureKafkaProducer(
-            bootstrap_servers=["localhost:9092"],
-            topic="test-topic"
-        )
+        producer = SecureKafkaProducer(bootstrap_servers=["localhost:9092"], topic="test-topic")
 
-        producer.send(
-            value={"data": "test"},
-            timeout=5
-        )
+        producer.send(value={"data": "test"}, timeout=5)
 
         mock_producer_instance.send.assert_called()
 
-    @patch('kafka.KafkaProducer')
+    @patch("kafka.KafkaProducer")
     def test_retry_on_failure(self, mock_kafka_producer):
         """Test retry logic on send failure"""
         mock_producer_instance = MagicMock()
         # Fail twice, then succeed
-        mock_producer_instance.send.side_effect = [
-            Exception("Broker not available"),
-            Exception("Timeout"),
-            MagicMock()
-        ]
+        mock_producer_instance.send.side_effect = [Exception("Broker not available"), Exception("Timeout"), MagicMock()]
         mock_kafka_producer.return_value = mock_producer_instance
 
-        producer = SecureKafkaProducer(
-            bootstrap_servers=["localhost:9092"],
-            topic="test-topic",
-            max_retries=3
-        )
+        producer = SecureKafkaProducer(bootstrap_servers=["localhost:9092"], topic="test-topic", max_retries=3)
 
         try:
             producer.send(value={"data": "test"})
@@ -242,22 +195,15 @@ class TestSecureKafkaProducer:
             # Acceptable if retries exhausted
             pass
 
-    @patch('kafka.KafkaProducer')
+    @patch("kafka.KafkaProducer")
     def test_batch_send(self, mock_kafka_producer):
         """Test sending multiple messages"""
         mock_producer_instance = MagicMock()
         mock_kafka_producer.return_value = mock_producer_instance
 
-        producer = SecureKafkaProducer(
-            bootstrap_servers=["localhost:9092"],
-            topic="test-topic"
-        )
+        producer = SecureKafkaProducer(bootstrap_servers=["localhost:9092"], topic="test-topic")
 
-        messages = [
-            {"event": "event1"},
-            {"event": "event2"},
-            {"event": "event3"}
-        ]
+        messages = [{"event": "event1"}, {"event": "event2"}, {"event": "event3"}]
 
         for msg in messages:
             producer.send(value=msg)
@@ -266,29 +212,19 @@ class TestSecureKafkaProducer:
 
     def test_quantum_encryption_flag(self):
         """Test with quantum encryption disabled"""
-        with patch('kafka.KafkaProducer'):
+        with patch("kafka.KafkaProducer"):
             producer = SecureKafkaProducer(
-                bootstrap_servers=["localhost:9092"],
-                topic="test-topic",
-                enable_quantum_encryption=False
+                bootstrap_servers=["localhost:9092"], topic="test-topic", enable_quantum_encryption=False
             )
 
             assert producer.enable_quantum_encryption is False
 
-    @patch('kafka.KafkaProducer')
+    @patch("kafka.KafkaProducer")
     def test_kafka_config_passthrough(self, mock_kafka_producer):
         """Test passing custom Kafka configuration"""
-        custom_config = {
-            "compression.type": "gzip",
-            "acks": "all",
-            "retries": 5
-        }
+        custom_config = {"compression.type": "gzip", "acks": "all", "retries": 5}
 
-        producer = SecureKafkaProducer(
-            bootstrap_servers=["localhost:9092"],
-            topic="test-topic",
-            kafka_config=custom_config
-        )
+        producer = SecureKafkaProducer(bootstrap_servers=["localhost:9092"], topic="test-topic", kafka_config=custom_config)
 
         # Verify config was passed to KafkaProducer
         mock_kafka_producer.assert_called()

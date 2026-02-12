@@ -122,15 +122,11 @@ class TestComplianceReportGeneration:
         generation_time = time.time() - start_time
 
         # Should complete in less than 10 minutes (600 seconds)
-        assert (
-            generation_time < 600
-        ), f"Report generation took {generation_time}s, target is <600s"
+        assert generation_time < 600, f"Report generation took {generation_time}s, target is <600s"
         assert report is not None
 
     @pytest.mark.asyncio
-    async def test_multiple_format_generation(
-        self, compliance_reporter, sample_evidence
-    ):
+    async def test_multiple_format_generation(self, compliance_reporter, sample_evidence):
         """Test generating reports in multiple formats."""
         formats = [ReportFormat.PDF, ReportFormat.JSON, ReportFormat.HTML]
 
@@ -227,9 +223,7 @@ class TestContinuousMonitoring:
         ]
 
         for frequency in frequencies:
-            config = ContinuousMonitoringConfig(
-                enabled=True, frequency=frequency, frameworks=["PCI_DSS_4_0"]
-            )
+            config = ContinuousMonitoringConfig(enabled=True, frequency=frequency, frameworks=["PCI_DSS_4_0"])
 
             compliance_reporter.monitoring_config = config
             interval = compliance_reporter._get_monitoring_interval()
@@ -256,9 +250,7 @@ class TestAuditEvidenceGeneration:
         assert evidence.verification_status == "verified"
 
     @pytest.mark.asyncio
-    async def test_audit_evidence_completeness(
-        self, compliance_reporter, audit_request
-    ):
+    async def test_audit_evidence_completeness(self, compliance_reporter, audit_request):
         """Test audit evidence contains all required components."""
         evidence = await compliance_reporter.generate_audit_evidence(audit_request)
 
@@ -285,9 +277,7 @@ class TestAuditEvidenceGeneration:
         assert len(evidence.audit_trail) > 0
 
     @pytest.mark.asyncio
-    async def test_audit_evidence_digital_signature(
-        self, compliance_reporter, audit_request
-    ):
+    async def test_audit_evidence_digital_signature(self, compliance_reporter, audit_request):
         """Test digital signature generation for audit evidence."""
         evidence = await compliance_reporter.generate_audit_evidence(audit_request)
 
@@ -296,12 +286,8 @@ class TestAuditEvidenceGeneration:
         assert len(evidence.digital_signature) == 64  # SHA-256 hex digest
 
         # Signature should be consistent for same data
-        signature1 = compliance_reporter._create_digital_signature(
-            evidence.evidence_items, evidence.audit_trail
-        )
-        signature2 = compliance_reporter._create_digital_signature(
-            evidence.evidence_items, evidence.audit_trail
-        )
+        signature1 = compliance_reporter._create_digital_signature(evidence.evidence_items, evidence.audit_trail)
+        signature2 = compliance_reporter._create_digital_signature(evidence.evidence_items, evidence.audit_trail)
 
         assert signature1 == signature2
 
@@ -310,9 +296,7 @@ class TestPerformanceMetrics:
     """Test performance metrics and success criteria."""
 
     @pytest.mark.asyncio
-    async def test_report_generation_time_tracking(
-        self, compliance_reporter, sample_evidence
-    ):
+    async def test_report_generation_time_tracking(self, compliance_reporter, sample_evidence):
         """Test report generation time is tracked."""
         # Generate a report
         await compliance_reporter.generate_compliance_report(
@@ -327,9 +311,7 @@ class TestPerformanceMetrics:
         assert metrics["report_generation"]["average_time_seconds"] >= 0
 
     @pytest.mark.asyncio
-    async def test_compliance_accuracy_tracking(
-        self, compliance_reporter, sample_evidence
-    ):
+    async def test_compliance_accuracy_tracking(self, compliance_reporter, sample_evidence):
         """Test compliance accuracy is tracked."""
         # Generate a report
         await compliance_reporter.generate_compliance_report(
@@ -361,9 +343,7 @@ class TestIntegration:
     """Integration tests for compliance reporter."""
 
     @pytest.mark.asyncio
-    async def test_end_to_end_compliance_workflow(
-        self, compliance_reporter, sample_evidence, audit_request
-    ):
+    async def test_end_to_end_compliance_workflow(self, compliance_reporter, sample_evidence, audit_request):
         """Test complete compliance workflow."""
         # 1. Generate compliance report
         report = await compliance_reporter.generate_compliance_report(
@@ -452,9 +432,7 @@ class TestPerformanceBenchmarks:
 
     @pytest.mark.asyncio
     @pytest.mark.benchmark
-    async def test_report_generation_benchmark(
-        self, compliance_reporter, sample_evidence, benchmark
-    ):
+    async def test_report_generation_benchmark(self, compliance_reporter, sample_evidence, benchmark):
         """Benchmark report generation performance."""
 
         async def generate_report():
@@ -468,9 +446,7 @@ class TestPerformanceBenchmarks:
 
     @pytest.mark.asyncio
     @pytest.mark.benchmark
-    async def test_audit_evidence_benchmark(
-        self, compliance_reporter, audit_request, benchmark
-    ):
+    async def test_audit_evidence_benchmark(self, compliance_reporter, audit_request, benchmark):
         """Benchmark audit evidence generation performance."""
 
         async def generate_evidence():

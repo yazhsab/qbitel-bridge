@@ -27,7 +27,6 @@ from ai_engine.discovery.enhanced_pcfg_inference import (
 )
 from ai_engine.discovery.production_enhancements import ProductionConfig, CacheBackend
 
-
 # ============================================================================
 # FIXTURES
 # ============================================================================
@@ -147,9 +146,7 @@ async def test_grammar_structure(pcfg_engine, sample_messages):
 
     for lhs, rules in rules_by_lhs.items():
         total_prob = sum(rule.probability for rule in rules)
-        assert (
-            0.99 <= total_prob <= 1.01
-        ), f"Probabilities for {lhs} don't sum to 1: {total_prob}"
+        assert 0.99 <= total_prob <= 1.01, f"Probabilities for {lhs} don't sum to 1: {total_prob}"
 
 
 @pytest.mark.asyncio
@@ -175,9 +172,7 @@ async def test_bayesian_optimization(config, sample_messages):
     """Test Bayesian hyperparameter optimization."""
     optimizer = BayesianOptimizer(config)
 
-    optimal_config = await optimizer.optimize_hyperparameters(
-        sample_messages, n_iterations=5, n_random_starts=2
-    )
+    optimal_config = await optimizer.optimize_hyperparameters(sample_messages, n_iterations=5, n_random_starts=2)
 
     assert optimal_config is not None
     assert isinstance(optimal_config, HyperparameterConfig)
@@ -189,9 +184,7 @@ async def test_bayesian_optimization_improves(config, complex_messages):
     """Test that Bayesian optimization improves over random."""
     optimizer = BayesianOptimizer(config)
 
-    optimal_config = await optimizer.optimize_hyperparameters(
-        complex_messages, n_iterations=10, n_random_starts=3
-    )
+    optimal_config = await optimizer.optimize_hyperparameters(complex_messages, n_iterations=10, n_random_starts=3)
 
     # Check that later iterations have better scores
     scores = [h["score"] for h in optimizer.optimization_history]
@@ -201,15 +194,11 @@ async def test_bayesian_optimization_improves(config, complex_messages):
     best_early = max(scores[:mid_point])
     best_late = max(scores[mid_point:])
 
-    assert (
-        best_late >= best_early * 0.9
-    ), "Optimization should improve or maintain quality"
+    assert best_late >= best_early * 0.9, "Optimization should improve or maintain quality"
 
 
 @pytest.mark.asyncio
-async def test_infer_with_bayesian_optimization(
-    config, production_config, complex_messages
-):
+async def test_infer_with_bayesian_optimization(config, production_config, complex_messages):
     """Test inference with Bayesian optimization."""
     engine = EnhancedPCFGInference(
         config=config,
@@ -218,9 +207,7 @@ async def test_infer_with_bayesian_optimization(
         enable_parallel=False,
     )
 
-    grammar = await engine.infer_with_bayesian_optimization(
-        complex_messages, n_optimization_iterations=5
-    )
+    grammar = await engine.infer_with_bayesian_optimization(complex_messages, n_optimization_iterations=5)
 
     assert grammar is not None
     assert grammar.f1_score > 0.0
@@ -302,9 +289,7 @@ async def test_incremental_learning(pcfg_engine, sample_messages):
     initial_grammar = await pcfg_engine.infer(sample_messages[:3])
 
     # Incremental update with new messages
-    updated_grammar = await pcfg_engine.incremental_grammar_update(
-        initial_grammar, sample_messages[3:]
-    )
+    updated_grammar = await pcfg_engine.incremental_grammar_update(initial_grammar, sample_messages[3:])
 
     assert updated_grammar is not None
     assert updated_grammar.message_count == len(sample_messages)
@@ -319,9 +304,7 @@ async def test_incremental_learning_preserves_knowledge(pcfg_engine, complex_mes
     initial_rule_count = len(initial_grammar.rules)
 
     # Update with second half
-    updated_grammar = await pcfg_engine.incremental_grammar_update(
-        initial_grammar, complex_messages[10:]
-    )
+    updated_grammar = await pcfg_engine.incremental_grammar_update(initial_grammar, complex_messages[10:])
 
     # Should have at least as many rules
     assert len(updated_grammar.rules) >= initial_rule_count * 0.8
@@ -336,9 +319,7 @@ async def test_incremental_learning_adds_new_patterns(pcfg_engine):
 
     # New messages with pattern B
     new_messages = [b"\x04\x05\x06" + bytes([i]) for i in range(5)]
-    updated_grammar = await pcfg_engine.incremental_grammar_update(
-        initial_grammar, new_messages
-    )
+    updated_grammar = await pcfg_engine.incremental_grammar_update(initial_grammar, new_messages)
 
     # Should have more terminals (new bytes)
     assert len(updated_grammar.terminals) > len(initial_grammar.terminals)
@@ -389,9 +370,7 @@ async def test_grammar_quality_metrics(pcfg_engine, sample_messages):
 
 
 @pytest.mark.asyncio
-async def test_grammar_complexity_calculation(
-    pcfg_engine, sample_messages, complex_messages
-):
+async def test_grammar_complexity_calculation(pcfg_engine, sample_messages, complex_messages):
     """Test that complexity increases with message complexity."""
     simple_grammar = await pcfg_engine.infer(sample_messages)
     complex_grammar = await pcfg_engine.infer(complex_messages)
@@ -428,9 +407,7 @@ async def test_quality_metrics_on_test_set(pcfg_engine, complex_messages):
 @pytest.mark.asyncio
 async def test_caching(config, hyperparams, sample_messages):
     """Test grammar caching."""
-    production_config = ProductionConfig(
-        enable_caching=True, cache_backend=CacheBackend.MEMORY
-    )
+    production_config = ProductionConfig(enable_caching=True, cache_backend=CacheBackend.MEMORY)
 
     engine = EnhancedPCFGInference(
         config=config,
@@ -500,9 +477,7 @@ def test_production_rule_bayesian_update():
 
 def test_production_rule_is_terminal():
     """Test terminal rule detection."""
-    terminal_rule = ProductionRule(
-        left_hand_side="<BODY>", right_hand_side=["0x01", "0x02"], probability=0.5
-    )
+    terminal_rule = ProductionRule(left_hand_side="<BODY>", right_hand_side=["0x01", "0x02"], probability=0.5)
 
     non_terminal_rule = ProductionRule(
         left_hand_side="<MESSAGE>",
@@ -653,9 +628,7 @@ async def test_memory_efficiency(pcfg_engine, complex_messages):
 
 
 @pytest.mark.asyncio
-async def test_end_to_end_workflow(
-    config, hyperparams, production_config, complex_messages
-):
+async def test_end_to_end_workflow(config, hyperparams, production_config, complex_messages):
     """Test complete end-to-end workflow."""
     engine = EnhancedPCFGInference(
         config=config,
@@ -670,9 +643,7 @@ async def test_end_to_end_workflow(
     assert initial_grammar is not None
 
     # 2. Incremental update
-    updated_grammar = await engine.incremental_grammar_update(
-        initial_grammar, complex_messages[10:]
-    )
+    updated_grammar = await engine.incremental_grammar_update(initial_grammar, complex_messages[10:])
     assert updated_grammar is not None
 
     # 3. Quality metrics

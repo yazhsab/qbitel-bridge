@@ -81,18 +81,14 @@ class TestComponentHealth:
     def test_component_health_with_details(self):
         """Test component health with details."""
         details = {"latency_ms": 50, "error_rate": 0.01}
-        health = ComponentHealth(
-            name="detailed_comp", status=HealthStatus.HEALTHY, details=details
-        )
+        health = ComponentHealth(name="detailed_comp", status=HealthStatus.HEALTHY, details=details)
 
         assert health.details == details
 
     def test_component_health_with_dependencies(self):
         """Test component health with dependencies."""
         deps = ["database", "cache", "message_queue"]
-        health = ComponentHealth(
-            name="dependent_comp", status=HealthStatus.HEALTHY, dependencies=deps
-        )
+        health = ComponentHealth(name="dependent_comp", status=HealthStatus.HEALTHY, dependencies=deps)
 
         assert health.dependencies == deps
 
@@ -242,9 +238,7 @@ class TestHealthChecker:
         """Test checking all healthy components."""
 
         async def healthy_checker():
-            return ComponentHealth(
-                name="healthy", status=HealthStatus.HEALTHY, message="All good"
-            )
+            return ComponentHealth(name="healthy", status=HealthStatus.HEALTHY, message="All good")
 
         checker.health_checkers = {"healthy": healthy_checker}
 
@@ -393,9 +387,7 @@ class TestHealthCheckerEdgeCases:
             start = time.time()
             await asyncio.sleep(0.05)
             duration = (time.time() - start) * 1000
-            return ComponentHealth(
-                "timed", HealthStatus.HEALTHY, check_duration_ms=duration
-            )
+            return ComponentHealth("timed", HealthStatus.HEALTHY, check_duration_ms=duration)
 
         checker.health_checkers = {"timed": timed_checker}
 

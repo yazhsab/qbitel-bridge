@@ -147,9 +147,7 @@ class ObservabilityConfig:
         self.service_name = service_name
         self.environment = environment or os.getenv("QBITEL_AI_ENVIRONMENT", "production")
         self.log_level = log_level or os.getenv("LOG_LEVEL", "INFO")
-        self.log_format = log_format or os.getenv(
-            "LOG_FORMAT", "json" if self.environment == "production" else "text"
-        )
+        self.log_format = log_format or os.getenv("LOG_FORMAT", "json" if self.environment == "production" else "text")
         self.tracing_enabled = tracing_enabled and os.getenv("TRACING_ENABLED", "true").lower() == "true"
         self.metrics_enabled = metrics_enabled
         self.audit_enabled = audit_enabled

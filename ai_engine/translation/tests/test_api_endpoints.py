@@ -70,11 +70,7 @@ class TestProtocolDiscoveryEndpoints:
         mock_discovery_orchestrator.discover_and_generate_api.return_value = Mock(
             protocol_type="TestProtocol",
             confidence=0.95,
-            api_specification=Mock(
-                to_openapi_dict=Mock(
-                    return_value={"openapi": "3.0.0", "info": {"title": "Test API"}}
-                )
-            ),
+            api_specification=Mock(to_openapi_dict=Mock(return_value={"openapi": "3.0.0", "info": {"title": "Test API"}})),
             recommendations=["Add rate limiting", "Implement caching"],
             natural_language_summary="This is a test messaging protocol",
         )
@@ -109,9 +105,7 @@ class TestProtocolDiscoveryEndpoints:
         assert "processing_time" in result
         assert len(result["recommendations"]) == 2
 
-    def test_discover_protocol_invalid_messages(
-        self, app_with_mocks, mock_current_user
-    ):
+    def test_discover_protocol_invalid_messages(self, app_with_mocks, mock_current_user):
         """Test protocol discovery with invalid base64 messages."""
         from fastapi.testclient import TestClient
 
@@ -165,8 +159,8 @@ class TestProtocolDiscoveryEndpoints:
         from fastapi.testclient import TestClient
 
         # Setup mock to raise exception
-        mock_discovery_orchestrator.discover_and_generate_api.side_effect = (
-            ProtocolDiscoveryException("Protocol discovery failed")
+        mock_discovery_orchestrator.discover_and_generate_api.side_effect = ProtocolDiscoveryException(
+            "Protocol discovery failed"
         )
 
         client = TestClient(app_with_mocks)
@@ -286,9 +280,7 @@ class TestSDKGenerationEndpoints:
         app = FastAPI()
         app.include_router(router)
 
-        with patch(
-            "ai_engine.translation.api_endpoints.code_generator", mock_code_generator
-        ):
+        with patch("ai_engine.translation.api_endpoints.code_generator", mock_code_generator):
             yield app
 
     def test_generate_sdk_success(
@@ -355,9 +347,7 @@ class TestSDKGenerationEndpoints:
         assert "python" in languages
         assert "typescript" in languages
 
-    def test_generate_sdk_invalid_specification(
-        self, app_with_mocks, mock_current_user
-    ):
+    def test_generate_sdk_invalid_specification(self, app_with_mocks, mock_current_user):
         """Test SDK generation with invalid API specification."""
         from fastapi.testclient import TestClient
 
@@ -408,9 +398,7 @@ class TestSDKGenerationEndpoints:
             "ai_engine.translation.api_endpoints.get_current_user",
             return_value=mock_current_user,
         ):
-            response = client.get(
-                f"/api/v1/translation/download-sdk/{sdk_id}?format=invalid"
-            )
+            response = client.get(f"/api/v1/translation/download-sdk/{sdk_id}?format=invalid")
 
         assert response.status_code == 400
         assert "Unsupported format" in response.json()["detail"]
@@ -427,14 +415,10 @@ class TestProtocolTranslationEndpoints:
         app = FastAPI()
         app.include_router(router)
 
-        with patch(
-            "ai_engine.translation.api_endpoints.protocol_bridge", mock_protocol_bridge
-        ):
+        with patch("ai_engine.translation.api_endpoints.protocol_bridge", mock_protocol_bridge):
             yield app
 
-    def test_translate_protocol_success(
-        self, app_with_mocks, mock_protocol_bridge, mock_current_user
-    ):
+    def test_translate_protocol_success(self, app_with_mocks, mock_protocol_bridge, mock_current_user):
         """Test successful protocol translation."""
         from fastapi.testclient import TestClient
 
@@ -504,9 +488,7 @@ class TestProtocolTranslationEndpoints:
         assert response.status_code == 500
         assert "Translation failed" in response.json()["detail"]
 
-    def test_batch_translate_protocols(
-        self, app_with_mocks, mock_protocol_bridge, mock_current_user
-    ):
+    def test_batch_translate_protocols(self, app_with_mocks, mock_protocol_bridge, mock_current_user):
         """Test batch protocol translation."""
         from fastapi.testclient import TestClient
 
@@ -580,14 +562,10 @@ class TestStreamingEndpoints:
         app = FastAPI()
         app.include_router(router)
 
-        with patch(
-            "ai_engine.translation.api_endpoints.protocol_bridge", mock_protocol_bridge
-        ):
+        with patch("ai_engine.translation.api_endpoints.protocol_bridge", mock_protocol_bridge):
             yield app
 
-    def test_create_streaming_connection(
-        self, app_with_mocks, mock_protocol_bridge, mock_current_user
-    ):
+    def test_create_streaming_connection(self, app_with_mocks, mock_protocol_bridge, mock_current_user):
         """Test creating streaming connection."""
         from fastapi.testclient import TestClient
 
@@ -618,9 +596,7 @@ class TestStreamingEndpoints:
         assert result["target_protocol"] == "WebSocket"
         assert "created_at" in result
 
-    def test_get_streaming_connection_status(
-        self, app_with_mocks, mock_protocol_bridge, mock_current_user
-    ):
+    def test_get_streaming_connection_status(self, app_with_mocks, mock_protocol_bridge, mock_current_user):
         """Test getting streaming connection status."""
         from fastapi.testclient import TestClient
 
@@ -639,9 +615,7 @@ class TestStreamingEndpoints:
             "ai_engine.translation.api_endpoints.get_current_user",
             return_value=mock_current_user,
         ):
-            response = client.get(
-                f"/api/v1/translation/streaming/{connection_id}/status"
-            )
+            response = client.get(f"/api/v1/translation/streaming/{connection_id}/status")
 
         assert response.status_code == 200
         result = response.json()
@@ -650,9 +624,7 @@ class TestStreamingEndpoints:
         assert result["status"] == "active"
         assert "messages_translated" in result
 
-    def test_get_streaming_connection_status_not_found(
-        self, app_with_mocks, mock_protocol_bridge, mock_current_user
-    ):
+    def test_get_streaming_connection_status_not_found(self, app_with_mocks, mock_protocol_bridge, mock_current_user):
         """Test getting status for non-existent connection."""
         from fastapi.testclient import TestClient
 
@@ -665,16 +637,12 @@ class TestStreamingEndpoints:
             "ai_engine.translation.api_endpoints.get_current_user",
             return_value=mock_current_user,
         ):
-            response = client.get(
-                f"/api/v1/translation/streaming/{connection_id}/status"
-            )
+            response = client.get(f"/api/v1/translation/streaming/{connection_id}/status")
 
         assert response.status_code == 404
         assert "Connection not found" in response.json()["detail"]
 
-    def test_close_streaming_connection(
-        self, app_with_mocks, mock_protocol_bridge, mock_current_user
-    ):
+    def test_close_streaming_connection(self, app_with_mocks, mock_protocol_bridge, mock_current_user):
         """Test closing streaming connection."""
         from fastapi.testclient import TestClient
 
@@ -711,9 +679,7 @@ class TestKnowledgeBaseEndpoints:
         with patch("ai_engine.translation.api_endpoints.rag_engine", mock_rag_engine):
             yield app
 
-    def test_get_protocol_patterns(
-        self, app_with_mocks, mock_rag_engine, mock_current_user
-    ):
+    def test_get_protocol_patterns(self, app_with_mocks, mock_rag_engine, mock_current_user):
         """Test getting protocol patterns from knowledge base."""
         from fastapi.testclient import TestClient
 
@@ -736,9 +702,7 @@ class TestKnowledgeBaseEndpoints:
         assert "patterns" in result
         assert len(result["patterns"]) <= 3
 
-    def test_get_code_templates(
-        self, app_with_mocks, mock_rag_engine, mock_current_user
-    ):
+    def test_get_code_templates(self, app_with_mocks, mock_rag_engine, mock_current_user):
         """Test getting code generation templates."""
         from fastapi.testclient import TestClient
 
@@ -761,9 +725,7 @@ class TestKnowledgeBaseEndpoints:
         assert "templates" in result
         assert len(result["templates"]) <= 2
 
-    def test_get_best_practices(
-        self, app_with_mocks, mock_rag_engine, mock_current_user
-    ):
+    def test_get_best_practices(self, app_with_mocks, mock_rag_engine, mock_current_user):
         """Test getting translation best practices."""
         from fastapi.testclient import TestClient
 
@@ -937,25 +899,19 @@ class TestFileUploadEndpoints:
         assert uploaded_files[0]["filename"] == "test1.bin"
         assert uploaded_files[0]["protocol_type"] == "TestProtocol"
 
-    def test_upload_protocol_samples_file_too_large(
-        self, api_test_client, mock_current_user
-    ):
+    def test_upload_protocol_samples_file_too_large(self, api_test_client, mock_current_user):
         """Test file upload with file too large."""
         from fastapi.testclient import TestClient
 
         # Create large file (larger than 10MB limit)
         large_content = b"x" * (11 * 1024 * 1024)  # 11MB
-        test_files = [
-            ("files", ("large.bin", large_content, "application/octet-stream"))
-        ]
+        test_files = [("files", ("large.bin", large_content, "application/octet-stream"))]
 
         with patch(
             "ai_engine.translation.api_endpoints.get_current_user",
             return_value=mock_current_user,
         ):
-            response = api_test_client.post(
-                "/api/v1/translation/upload/protocol-samples", files=test_files
-            )
+            response = api_test_client.post("/api/v1/translation/upload/protocol-samples", files=test_files)
 
         assert response.status_code == 413
         assert "too large" in response.json()["detail"]

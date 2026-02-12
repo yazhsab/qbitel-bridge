@@ -42,12 +42,8 @@ async def get_whisperer() -> LegacySystemWhisperer:
 class ReverseEngineerRequest(BaseModel):
     """Request for protocol reverse engineering."""
 
-    traffic_samples: List[str] = Field(
-        ..., description="List of protocol message samples (hex-encoded)", min_items=10
-    )
-    system_context: str = Field(
-        default="", description="Additional context about the system"
-    )
+    traffic_samples: List[str] = Field(..., description="List of protocol message samples (hex-encoded)", min_items=10)
+    system_context: str = Field(default="", description="Additional context about the system")
 
 
 class ReverseEngineerResponse(BaseModel):
@@ -71,9 +67,7 @@ class GenerateAdapterRequest(BaseModel):
     """Request for adapter code generation."""
 
     spec_id: str = Field(..., description="Protocol specification ID")
-    target_protocol: str = Field(
-        ..., description="Target protocol (REST, gRPC, GraphQL)"
-    )
+    target_protocol: str = Field(..., description="Target protocol (REST, gRPC, GraphQL)")
     language: str = Field(default="python", description="Programming language")
 
 
@@ -98,9 +92,7 @@ class ExplainBehaviorRequest(BaseModel):
     """Request for behavior explanation."""
 
     behavior: str = Field(..., description="Description of the legacy behavior")
-    context: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional context"
-    )
+    context: Dict[str, Any] = Field(default_factory=dict, description="Additional context")
 
 
 class ExplainBehaviorResponse(BaseModel):
@@ -232,9 +224,7 @@ async def generate_adapter_code(
         try:
             language = AdapterLanguage(request.language.lower())
         except ValueError:
-            raise HTTPException(
-                status_code=400, detail=f"Unsupported language: {request.language}"
-            )
+            raise HTTPException(status_code=400, detail=f"Unsupported language: {request.language}")
 
         # Generate adapter code
         adapter = await whisperer.generate_adapter_code(
@@ -292,9 +282,7 @@ async def explain_legacy_behavior(
     """
     try:
         # Explain behavior
-        explanation = await whisperer.explain_legacy_behavior(
-            behavior=request.behavior, context=request.context
-        )
+        explanation = await whisperer.explain_legacy_behavior(behavior=request.behavior, context=request.context)
 
         # Convert to response
         return ExplainBehaviorResponse(

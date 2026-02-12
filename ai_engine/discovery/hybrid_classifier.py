@@ -32,6 +32,7 @@ try:
         ClassificationResult as TransformerResult,
         ProtocolSample as TransformerSample,
     )
+
     TRANSFORMER_AVAILABLE = True
 except ImportError:
     TRANSFORMER_AVAILABLE = False
@@ -42,6 +43,7 @@ try:
         ClassificationResult as LegacyResult,
         ProtocolSample as LegacySample,
     )
+
     LEGACY_AVAILABLE = True
 except ImportError:
     LEGACY_AVAILABLE = False
@@ -54,6 +56,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 # Configuration
 # =============================================================================
+
 
 @dataclass
 class HybridClassifierConfig:
@@ -117,6 +120,7 @@ class HybridClassificationResult:
 # Hybrid Classifier
 # =============================================================================
 
+
 class HybridProtocolClassifier:
     """
     Hybrid classifier combining Transformer and legacy models.
@@ -128,11 +132,7 @@ class HybridProtocolClassifier:
     - Ensemble voting for maximum reliability
     """
 
-    def __init__(
-        self,
-        config: Config,
-        hybrid_config: Optional[HybridClassifierConfig] = None
-    ):
+    def __init__(self, config: Config, hybrid_config: Optional[HybridClassifierConfig] = None):
         self.config = config
         self.hybrid_config = hybrid_config or HybridClassifierConfig()
         self.logger = logging.getLogger(__name__)
@@ -162,12 +162,8 @@ class HybridProtocolClassifier:
         # Initialize Transformer classifier
         if self.hybrid_config.use_transformer and TRANSFORMER_AVAILABLE:
             try:
-                transformer_config = (
-                    self.hybrid_config.transformer_config or TransformerConfig()
-                )
-                self.transformer_classifier = ProtocolTransformerClassifier(
-                    transformer_config
-                )
+                transformer_config = self.hybrid_config.transformer_config or TransformerConfig()
+                self.transformer_classifier = ProtocolTransformerClassifier(transformer_config)
                 self.logger.info("Transformer classifier initialized")
             except Exception as e:
                 self.logger.warning(f"Failed to initialize Transformer: {e}")
@@ -198,7 +194,7 @@ class HybridProtocolClassifier:
         training_samples: List[Dict[str, Any]],
         validation_split: float = 0.2,
         epochs: int = 50,
-        pretrain_corpus: Optional[List[bytes]] = None
+        pretrain_corpus: Optional[List[bytes]] = None,
     ) -> Dict[str, Any]:
         """
         Train both classifiers on training data.
@@ -222,18 +218,17 @@ class HybridProtocolClassifier:
             "training_time": 0,
             "num_samples": len(training_samples),
             "transformer_results": None,
-            "legacy_results": None
+            "legacy_results": None,
         }
 
         # Count samples per protocol
-        self.protocol_sample_counts = Counter(
-            sample.get("label", "unknown") for sample in training_samples
-        )
+        self.protocol_sample_counts = Counter(sample.get("label", "unknown") for sample in training_samples)
         self.known_protocols = set(self.protocol_sample_counts.keys())
 
         # Identify rare protocols for few-shot
         rare_protocols = {
-            protocol for protocol, count in self.protocol_sample_counts.items()
+            protocol
+            for protocol, count in self.protocol_sample_counts.items()
             if count < self.hybrid_config.few_shot_threshold
         }
 
@@ -254,25 +249,19 @@ class HybridProtocolClassifier:
                 # Optional pre-training
                 if pretrain_corpus and len(pretrain_corpus) > 100:
                     self.logger.info("Pre-training Transformer on corpus")
-                    pretrain_results = await self.transformer_classifier.pretrain(
-                        pretrain_corpus
-                    )
+                    pretrain_results = await self.transformer_classifier.pretrain(pretrain_corpus)
                     results["pretrain_results"] = pretrain_results
 
                 # Convert samples for Transformer
                 transformer_samples = [
                     TransformerSample(
-                        data=sample.get("data", b""),
-                        label=sample.get("label", "unknown"),
-                        metadata=sample.get("metadata", {})
+                        data=sample.get("data", b""), label=sample.get("label", "unknown"), metadata=sample.get("metadata", {})
                     )
                     for sample in training_samples
                 ]
 
                 transformer_results = await self.transformer_classifier.train(
-                    transformer_samples,
-                    validation_split=validation_split,
-                    epochs=epochs
+                    transformer_samples, validation_split=validation_split, epochs=epochs
                 )
                 results["transformer_results"] = transformer_results
 
@@ -286,17 +275,13 @@ class HybridProtocolClassifier:
                 # Convert samples for legacy
                 legacy_samples = [
                     LegacySample(
-                        data=sample.get("data", b""),
-                        label=sample.get("label", "unknown"),
-                        metadata=sample.get("metadata", {})
+                        data=sample.get("data", b""), label=sample.get("label", "unknown"), metadata=sample.get("metadata", {})
                     )
                     for sample in training_samples
                 ]
 
                 legacy_results = await self.legacy_classifier.train(
-                    legacy_samples,
-                    validation_split=validation_split,
-                    epochs=epochs
+                    legacy_samples, validation_split=validation_split, epochs=epochs
                 )
                 results["legacy_results"] = legacy_results
 
@@ -313,10 +298,7 @@ class HybridProtocolClassifier:
         return results
 
     async def classify(
-        self,
-        data: bytes,
-        return_all_results: bool = False,
-        return_explanation: bool = False
+        self, data: bytes, return_all_results: bool = False, return_explanation: bool = False
     ) -> HybridClassificationResult:
         """
         Classify protocol using hybrid approach.
@@ -334,15 +316,13 @@ class HybridProtocolClassifier:
 
         if not data:
             return HybridClassificationResult(
-                protocol_type="unknown",
-                confidence=0.0,
-                probabilities={},
-                metadata={"error": "Empty data"}
+                protocol_type="unknown", confidence=0.0, probabilities={}, metadata={"error": "Empty data"}
             )
 
         # Check cache
         if self.hybrid_config.cache_predictions:
             import hashlib
+
             cache_key = hashlib.sha256(data).hexdigest()[:16]
             if cache_key in self._prediction_cache:
                 return self._prediction_cache[cache_key]
@@ -380,11 +360,7 @@ class HybridProtocolClassifier:
 
         return result
 
-    async def _classify_weighted(
-        self,
-        data: bytes,
-        return_explanation: bool = False
-    ) -> HybridClassificationResult:
+    async def _classify_weighted(self, data: bytes, return_explanation: bool = False) -> HybridClassificationResult:
         """
         Weighted ensemble classification.
 
@@ -399,11 +375,7 @@ class HybridProtocolClassifier:
             tasks = []
 
             if self.transformer_classifier:
-                tasks.append(
-                    self.transformer_classifier.classify(
-                        data, return_explanation=return_explanation
-                    )
-                )
+                tasks.append(self.transformer_classifier.classify(data, return_explanation=return_explanation))
             if self.legacy_classifier:
                 tasks.append(self.legacy_classifier.classify(data))
 
@@ -453,9 +425,7 @@ class HybridProtocolClassifier:
 
         # Normalize
         if total_weight > 0:
-            combined_probs = {
-                k: v / total_weight for k, v in combined_probs.items()
-            }
+            combined_probs = {k: v / total_weight for k, v in combined_probs.items()}
 
         # Get final prediction
         if combined_probs:
@@ -475,21 +445,15 @@ class HybridProtocolClassifier:
             model_contributions=model_contributions,
             attention_weights=(
                 transformer_result.attention_weights
-                if transformer_result and hasattr(transformer_result, 'attention_weights')
+                if transformer_result and hasattr(transformer_result, "attention_weights")
                 else None
             ),
             explanation=(
-                transformer_result.explanation
-                if transformer_result and hasattr(transformer_result, 'explanation')
-                else None
-            )
+                transformer_result.explanation if transformer_result and hasattr(transformer_result, "explanation") else None
+            ),
         )
 
-    async def _classify_voting(
-        self,
-        data: bytes,
-        return_explanation: bool = False
-    ) -> HybridClassificationResult:
+    async def _classify_voting(self, data: bytes, return_explanation: bool = False) -> HybridClassificationResult:
         """
         Voting ensemble classification.
 
@@ -503,13 +467,9 @@ class HybridProtocolClassifier:
         # Get predictions
         if self.transformer_classifier:
             try:
-                transformer_result = await self.transformer_classifier.classify(
-                    data, return_explanation=return_explanation
-                )
+                transformer_result = await self.transformer_classifier.classify(data, return_explanation=return_explanation)
                 if transformer_result.confidence > self.hybrid_config.low_confidence_threshold:
-                    votes[transformer_result.protocol_type] = votes.get(
-                        transformer_result.protocol_type, 0
-                    ) + 1
+                    votes[transformer_result.protocol_type] = votes.get(transformer_result.protocol_type, 0) + 1
                     for protocol, prob in transformer_result.probabilities.items():
                         if protocol not in all_probs:
                             all_probs[protocol] = []
@@ -521,9 +481,7 @@ class HybridProtocolClassifier:
             try:
                 legacy_result = await self.legacy_classifier.classify(data)
                 if legacy_result.confidence > self.hybrid_config.low_confidence_threshold:
-                    votes[legacy_result.protocol_type] = votes.get(
-                        legacy_result.protocol_type, 0
-                    ) + 1
+                    votes[legacy_result.protocol_type] = votes.get(legacy_result.protocol_type, 0) + 1
                     for protocol, prob in legacy_result.probabilities.items():
                         if protocol not in all_probs:
                             all_probs[protocol] = []
@@ -537,10 +495,7 @@ class HybridProtocolClassifier:
             final_confidence = np.mean(all_probs.get(final_protocol, [0.0]))
         else:
             # Fallback to highest confidence
-            if transformer_result and (
-                not legacy_result or
-                transformer_result.confidence > legacy_result.confidence
-            ):
+            if transformer_result and (not legacy_result or transformer_result.confidence > legacy_result.confidence):
                 final_protocol = transformer_result.protocol_type
                 final_confidence = transformer_result.confidence
             elif legacy_result:
@@ -551,9 +506,7 @@ class HybridProtocolClassifier:
                 final_confidence = 0.0
 
         # Average probabilities
-        combined_probs = {
-            protocol: np.mean(probs) for protocol, probs in all_probs.items()
-        }
+        combined_probs = {protocol: np.mean(probs) for protocol, probs in all_probs.items()}
 
         return HybridClassificationResult(
             protocol_type=final_protocol,
@@ -562,14 +515,10 @@ class HybridProtocolClassifier:
             transformer_result=transformer_result,
             legacy_result=legacy_result,
             ensemble_method="voting",
-            model_contributions={"votes": votes}
+            model_contributions={"votes": votes},
         )
 
-    async def _classify_cascade(
-        self,
-        data: bytes,
-        return_explanation: bool = False
-    ) -> HybridClassificationResult:
+    async def _classify_cascade(self, data: bytes, return_explanation: bool = False) -> HybridClassificationResult:
         """
         Cascade classification.
 
@@ -580,23 +529,13 @@ class HybridProtocolClassifier:
         model_contributions = {}
 
         # Try Transformer first (if preferred)
-        primary_classifier = (
-            self.transformer_classifier
-            if self.hybrid_config.prefer_transformer
-            else self.legacy_classifier
-        )
-        secondary_classifier = (
-            self.legacy_classifier
-            if self.hybrid_config.prefer_transformer
-            else self.transformer_classifier
-        )
+        primary_classifier = self.transformer_classifier if self.hybrid_config.prefer_transformer else self.legacy_classifier
+        secondary_classifier = self.legacy_classifier if self.hybrid_config.prefer_transformer else self.transformer_classifier
 
         if primary_classifier:
             try:
                 if primary_classifier == self.transformer_classifier:
-                    result = await primary_classifier.classify(
-                        data, return_explanation=return_explanation
-                    )
+                    result = await primary_classifier.classify(data, return_explanation=return_explanation)
                     transformer_result = result
                     model_contributions["primary"] = "transformer"
                 else:
@@ -616,9 +555,9 @@ class HybridProtocolClassifier:
                         model_contributions=model_contributions,
                         attention_weights=(
                             transformer_result.attention_weights
-                            if transformer_result and hasattr(transformer_result, 'attention_weights')
+                            if transformer_result and hasattr(transformer_result, "attention_weights")
                             else None
-                        )
+                        ),
                     )
             except Exception as e:
                 self.logger.warning(f"Primary classifier failed: {e}")
@@ -627,9 +566,7 @@ class HybridProtocolClassifier:
         if secondary_classifier:
             try:
                 if secondary_classifier == self.transformer_classifier:
-                    result = await secondary_classifier.classify(
-                        data, return_explanation=return_explanation
-                    )
+                    result = await secondary_classifier.classify(data, return_explanation=return_explanation)
                     transformer_result = result
                     model_contributions["secondary"] = "transformer"
                 else:
@@ -644,7 +581,7 @@ class HybridProtocolClassifier:
                     transformer_result=transformer_result,
                     legacy_result=legacy_result,
                     ensemble_method="cascade",
-                    model_contributions=model_contributions
+                    model_contributions=model_contributions,
                 )
             except Exception as e:
                 self.logger.warning(f"Secondary classifier failed: {e}")
@@ -654,13 +591,11 @@ class HybridProtocolClassifier:
             confidence=0.0,
             probabilities={},
             ensemble_method="cascade",
-            metadata={"error": "Both classifiers failed"}
+            metadata={"error": "Both classifiers failed"},
         )
 
     async def classify_few_shot(
-        self,
-        data: bytes,
-        support_samples: Optional[List[Dict[str, Any]]] = None
+        self, data: bytes, support_samples: Optional[List[Dict[str, Any]]] = None
     ) -> HybridClassificationResult:
         """
         Classify using few-shot learning for rare protocols.
@@ -681,10 +616,7 @@ class HybridProtocolClassifier:
             support_samples = []
             for label, samples in self._few_shot_support.items():
                 for sample_data in samples[:5]:  # Limit to 5 per class
-                    support_samples.append({
-                        "data": sample_data,
-                        "label": label
-                    })
+                    support_samples.append({"data": sample_data, "label": label})
 
         if not support_samples:
             # Fall back to regular classification
@@ -692,23 +624,17 @@ class HybridProtocolClassifier:
 
         # Convert to Transformer format
         transformer_support = [
-            TransformerSample(
-                data=sample.get("data", b""),
-                label=sample.get("label", "unknown")
-            )
-            for sample in support_samples
+            TransformerSample(data=sample.get("data", b""), label=sample.get("label", "unknown")) for sample in support_samples
         ]
 
-        result = await self.transformer_classifier.classify_few_shot(
-            data, transformer_support
-        )
+        result = await self.transformer_classifier.classify_few_shot(data, transformer_support)
 
         return HybridClassificationResult(
             protocol_type=result.protocol_type,
             confidence=result.confidence,
             probabilities=result.probabilities,
             ensemble_method="few_shot",
-            metadata=result.metadata
+            metadata=result.metadata,
         )
 
     async def get_embeddings(self, data: bytes) -> np.ndarray:
@@ -758,7 +684,7 @@ class HybridProtocolClassifier:
                 "known_protocols": list(self.known_protocols),
                 "ensemble_strategy": self.hybrid_config.ensemble_strategy,
                 "transformer_available": self.transformer_classifier is not None,
-                "legacy_available": self.legacy_classifier is not None
+                "legacy_available": self.legacy_classifier is not None,
             }
         }
 
@@ -790,10 +716,9 @@ class HybridProtocolClassifier:
 # Factory Function
 # =============================================================================
 
+
 async def create_hybrid_classifier(
-    config: Config,
-    hybrid_config: Optional[HybridClassifierConfig] = None,
-    pretrained_path: Optional[str] = None
+    config: Config, hybrid_config: Optional[HybridClassifierConfig] = None, pretrained_path: Optional[str] = None
 ) -> HybridProtocolClassifier:
     """
     Factory function to create and initialize a Hybrid Protocol Classifier.
@@ -815,9 +740,4 @@ async def create_hybrid_classifier(
     return classifier
 
 
-__all__ = [
-    "HybridClassifierConfig",
-    "HybridClassificationResult",
-    "HybridProtocolClassifier",
-    "create_hybrid_classifier"
-]
+__all__ = ["HybridClassifierConfig", "HybridClassificationResult", "HybridProtocolClassifier", "create_hybrid_classifier"]

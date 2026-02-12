@@ -96,35 +96,29 @@ class FDAComplianceValidator:
     def _check_algorithm_update(self) -> bool:
         """Check if device supports algorithm updates."""
         evidence = [
-            e for e in self._evidence
-            if e.requirement == CybersecurityRequirement.CRYPTO_AGILITY
-            and "algorithm_update" in e.description.lower()
+            e
+            for e in self._evidence
+            if e.requirement == CybersecurityRequirement.CRYPTO_AGILITY and "algorithm_update" in e.description.lower()
         ]
         return len(evidence) > 0 and any(e.verified for e in evidence)
 
     def _check_key_rotation(self) -> bool:
         """Check if device supports key rotation."""
         evidence = [
-            e for e in self._evidence
-            if e.requirement == CybersecurityRequirement.CRYPTO_AGILITY
-            and "key_rotation" in e.description.lower()
+            e
+            for e in self._evidence
+            if e.requirement == CybersecurityRequirement.CRYPTO_AGILITY and "key_rotation" in e.description.lower()
         ]
         return len(evidence) > 0
 
     def _check_pqc_readiness(self) -> bool:
         """Check if device is PQC-ready."""
-        evidence = [
-            e for e in self._evidence
-            if "pqc" in e.description.lower() or "quantum" in e.description.lower()
-        ]
+        evidence = [e for e in self._evidence if "pqc" in e.description.lower() or "quantum" in e.description.lower()]
         return len(evidence) > 0
 
     def _check_hybrid_support(self) -> bool:
         """Check if device supports hybrid classical/PQC."""
-        evidence = [
-            e for e in self._evidence
-            if "hybrid" in e.description.lower()
-        ]
+        evidence = [e for e in self._evidence if "hybrid" in e.description.lower()]
         return len(evidence) > 0
 
     def _get_recommendation(self, checks: Dict[str, bool]) -> str:

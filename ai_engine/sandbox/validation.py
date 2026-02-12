@@ -118,9 +118,7 @@ class ValidationConfig:
     sandbox_config: SandboxConfig = field(default_factory=SandboxConfig)
 
     # Compliance frameworks
-    compliance_frameworks: List[str] = field(
-        default_factory=lambda: ["SOC2", "GDPR"]
-    )
+    compliance_frameworks: List[str] = field(default_factory=lambda: ["SOC2", "GDPR"])
 
 
 @dataclass
@@ -216,13 +214,9 @@ class MarketplaceValidator:
             "yaml_unsafe": re.compile(r"\byaml\.(load|unsafe_load)\s*\("),
             "shell_injection": re.compile(r"[;|&`$]"),
             "path_traversal": re.compile(r"\.\.\/|\.\.\\"),
-            "secrets_hardcoded": re.compile(
-                r"(?:password|secret|api_key|token)\s*=\s*['\"][^'\"]{8,}['\"]",
-                re.IGNORECASE
-            ),
+            "secrets_hardcoded": re.compile(r"(?:password|secret|api_key|token)\s*=\s*['\"][^'\"]{8,}['\"]", re.IGNORECASE),
             "sql_injection": re.compile(
-                r"(?:SELECT|INSERT|UPDATE|DELETE|DROP|UNION).*%s|f['\"].*\{.*\}.*(?:SELECT|INSERT)",
-                re.IGNORECASE
+                r"(?:SELECT|INSERT|UPDATE|DELETE|DROP|UNION).*%s|f['\"].*\{.*\}.*(?:SELECT|INSERT)", re.IGNORECASE
             ),
         }
 
@@ -263,16 +257,12 @@ class MarketplaceValidator:
 
             # Run dynamic analysis in sandbox
             if test_inputs:
-                exec_results = await self._run_dynamic_analysis(
-                    code, language, test_inputs
-                )
+                exec_results = await self._run_dynamic_analysis(code, language, test_inputs)
                 result.execution_results.extend(exec_results)
 
             # Run performance checks
             if self.config.run_performance_checks:
-                perf_checks = await self._run_performance_checks(
-                    code, language, test_inputs
-                )
+                perf_checks = await self._run_performance_checks(code, language, test_inputs)
                 result.security_checks.extend(perf_checks)
 
             # Run compliance checks
@@ -285,21 +275,21 @@ class MarketplaceValidator:
 
         except Exception as e:
             logger.error(f"Validation error: {e}")
-            result.security_checks.append(SecurityCheck(
-                name="validation_error",
-                category=CheckCategory.SECURITY,
-                severity=CheckSeverity.CRITICAL,
-                passed=False,
-                message=f"Validation failed: {str(e)}",
-            ))
+            result.security_checks.append(
+                SecurityCheck(
+                    name="validation_error",
+                    category=CheckCategory.SECURITY,
+                    severity=CheckSeverity.CRITICAL,
+                    passed=False,
+                    message=f"Validation failed: {str(e)}",
+                )
+            )
             result.passed = False
             result.score = 0.0
 
         finally:
             result.completed_at = datetime.utcnow()
-            result.duration_ms = (
-                result.completed_at - result.started_at
-            ).total_seconds() * 1000
+            result.duration_ms = (result.completed_at - result.started_at).total_seconds() * 1000
 
         return result
 
@@ -315,23 +305,27 @@ class MarketplaceValidator:
         for name, pattern in self._security_patterns.items():
             matches = pattern.findall(code)
             if matches:
-                checks.append(SecurityCheck(
-                    name=f"security_{name}",
-                    category=CheckCategory.SECURITY,
-                    severity=CheckSeverity.ERROR,
-                    passed=False,
-                    message=f"Potentially dangerous pattern detected: {name}",
-                    details={"matches": matches[:5], "count": len(matches)},
-                    remediation=self._get_remediation(name),
-                ))
+                checks.append(
+                    SecurityCheck(
+                        name=f"security_{name}",
+                        category=CheckCategory.SECURITY,
+                        severity=CheckSeverity.ERROR,
+                        passed=False,
+                        message=f"Potentially dangerous pattern detected: {name}",
+                        details={"matches": matches[:5], "count": len(matches)},
+                        remediation=self._get_remediation(name),
+                    )
+                )
             else:
-                checks.append(SecurityCheck(
-                    name=f"security_{name}",
-                    category=CheckCategory.SECURITY,
-                    severity=CheckSeverity.INFO,
-                    passed=True,
-                    message=f"No {name} patterns detected",
-                ))
+                checks.append(
+                    SecurityCheck(
+                        name=f"security_{name}",
+                        category=CheckCategory.SECURITY,
+                        severity=CheckSeverity.INFO,
+                        passed=True,
+                        message=f"No {name} patterns detected",
+                    )
+                )
 
         # Import analysis
         import_check = self._check_imports(code, language)
@@ -354,36 +348,42 @@ class MarketplaceValidator:
         # Line count
         lines = code.split("\n")
         line_count = len(lines)
-        checks.append(SecurityCheck(
-            name="code_size",
-            category=CheckCategory.QUALITY,
-            severity=CheckSeverity.INFO if line_count < 1000 else CheckSeverity.WARNING,
-            passed=line_count < 5000,
-            message=f"Code contains {line_count} lines",
-            details={"line_count": line_count},
-        ))
+        checks.append(
+            SecurityCheck(
+                name="code_size",
+                category=CheckCategory.QUALITY,
+                severity=CheckSeverity.INFO if line_count < 1000 else CheckSeverity.WARNING,
+                passed=line_count < 5000,
+                message=f"Code contains {line_count} lines",
+                details={"line_count": line_count},
+            )
+        )
 
         # Complexity estimation (basic)
         nesting_depth = self._estimate_nesting_depth(code)
-        checks.append(SecurityCheck(
-            name="complexity",
-            category=CheckCategory.QUALITY,
-            severity=CheckSeverity.INFO if nesting_depth < 5 else CheckSeverity.WARNING,
-            passed=nesting_depth < 10,
-            message=f"Estimated max nesting depth: {nesting_depth}",
-            details={"nesting_depth": nesting_depth},
-        ))
+        checks.append(
+            SecurityCheck(
+                name="complexity",
+                category=CheckCategory.QUALITY,
+                severity=CheckSeverity.INFO if nesting_depth < 5 else CheckSeverity.WARNING,
+                passed=nesting_depth < 10,
+                message=f"Estimated max nesting depth: {nesting_depth}",
+                details={"nesting_depth": nesting_depth},
+            )
+        )
 
         # Documentation check
         doc_ratio = self._check_documentation(code, language)
-        checks.append(SecurityCheck(
-            name="documentation",
-            category=CheckCategory.QUALITY,
-            severity=CheckSeverity.INFO if doc_ratio > 0.1 else CheckSeverity.WARNING,
-            passed=doc_ratio > 0.05,
-            message=f"Documentation ratio: {doc_ratio:.1%}",
-            details={"doc_ratio": doc_ratio},
-        ))
+        checks.append(
+            SecurityCheck(
+                name="documentation",
+                category=CheckCategory.QUALITY,
+                severity=CheckSeverity.INFO if doc_ratio > 0.1 else CheckSeverity.WARNING,
+                passed=doc_ratio > 0.05,
+                message=f"Documentation ratio: {doc_ratio:.1%}",
+                details={"doc_ratio": doc_ratio},
+            )
+        )
 
         return checks
 
@@ -421,13 +421,15 @@ class MarketplaceValidator:
         checks = []
 
         if not test_inputs:
-            checks.append(SecurityCheck(
-                name="performance_skipped",
-                category=CheckCategory.PERFORMANCE,
-                severity=CheckSeverity.INFO,
-                passed=True,
-                message="Performance checks skipped (no test inputs)",
-            ))
+            checks.append(
+                SecurityCheck(
+                    name="performance_skipped",
+                    category=CheckCategory.PERFORMANCE,
+                    severity=CheckSeverity.INFO,
+                    passed=True,
+                    message="Performance checks skipped (no test inputs)",
+                )
+            )
             return checks
 
         # Run benchmark
@@ -436,23 +438,29 @@ class MarketplaceValidator:
             result = await sandbox.execute(code, language)
             duration = (datetime.utcnow() - start).total_seconds() * 1000
 
-            checks.append(SecurityCheck(
-                name="execution_time",
-                category=CheckCategory.PERFORMANCE,
-                severity=CheckSeverity.INFO if duration < self.config.max_execution_time_ms else CheckSeverity.WARNING,
-                passed=duration < self.config.max_execution_time_ms,
-                message=f"Execution time: {duration:.2f}ms",
-                details={"duration_ms": duration},
-            ))
+            checks.append(
+                SecurityCheck(
+                    name="execution_time",
+                    category=CheckCategory.PERFORMANCE,
+                    severity=CheckSeverity.INFO if duration < self.config.max_execution_time_ms else CheckSeverity.WARNING,
+                    passed=duration < self.config.max_execution_time_ms,
+                    message=f"Execution time: {duration:.2f}ms",
+                    details={"duration_ms": duration},
+                )
+            )
 
-            checks.append(SecurityCheck(
-                name="memory_usage",
-                category=CheckCategory.PERFORMANCE,
-                severity=CheckSeverity.INFO if result.peak_memory_mb < self.config.max_memory_mb else CheckSeverity.WARNING,
-                passed=result.peak_memory_mb < self.config.max_memory_mb,
-                message=f"Peak memory: {result.peak_memory_mb:.2f}MB",
-                details={"peak_memory_mb": result.peak_memory_mb},
-            ))
+            checks.append(
+                SecurityCheck(
+                    name="memory_usage",
+                    category=CheckCategory.PERFORMANCE,
+                    severity=(
+                        CheckSeverity.INFO if result.peak_memory_mb < self.config.max_memory_mb else CheckSeverity.WARNING
+                    ),
+                    passed=result.peak_memory_mb < self.config.max_memory_mb,
+                    message=f"Peak memory: {result.peak_memory_mb:.2f}MB",
+                    details={"peak_memory_mb": result.peak_memory_mb},
+                )
+            )
 
         return checks
 
@@ -478,11 +486,20 @@ class MarketplaceValidator:
         """Check for dangerous imports."""
         dangerous_imports = {
             "python": [
-                "os.system", "subprocess", "ctypes", "pickle",
-                "marshal", "shelve", "__import__",
+                "os.system",
+                "subprocess",
+                "ctypes",
+                "pickle",
+                "marshal",
+                "shelve",
+                "__import__",
             ],
             "javascript": [
-                "child_process", "fs", "net", "dgram", "cluster",
+                "child_process",
+                "fs",
+                "net",
+                "dgram",
+                "cluster",
             ],
         }
 
@@ -594,28 +611,36 @@ if callable(handler):
         checks = []
 
         # CC6.1 - Logical and Physical Access Controls
-        checks.append(ComplianceCheck(
-            framework="SOC2",
-            control_id="CC6.1",
-            control_name="Logical Access Controls",
-            passed=not any(p.search(code) for p in [
-                self._security_patterns.get("subprocess"),
-                self._security_patterns.get("file_operations"),
-            ] if p),
-            evidence="Static analysis of access patterns",
-            findings=[],
-        ))
+        checks.append(
+            ComplianceCheck(
+                framework="SOC2",
+                control_id="CC6.1",
+                control_name="Logical Access Controls",
+                passed=not any(
+                    p.search(code)
+                    for p in [
+                        self._security_patterns.get("subprocess"),
+                        self._security_patterns.get("file_operations"),
+                    ]
+                    if p
+                ),
+                evidence="Static analysis of access patterns",
+                findings=[],
+            )
+        )
 
         # CC6.6 - Encryption
         has_encryption = "encrypt" in code.lower() or "hash" in code.lower()
-        checks.append(ComplianceCheck(
-            framework="SOC2",
-            control_id="CC6.6",
-            control_name="Encryption",
-            passed=True,  # Info only
-            evidence=f"Encryption patterns {'found' if has_encryption else 'not found'}",
-            findings=[],
-        ))
+        checks.append(
+            ComplianceCheck(
+                framework="SOC2",
+                control_id="CC6.6",
+                control_name="Encryption",
+                passed=True,  # Info only
+                evidence=f"Encryption patterns {'found' if has_encryption else 'not found'}",
+                findings=[],
+            )
+        )
 
         return checks
 
@@ -628,20 +653,19 @@ if callable(handler):
         checks = []
 
         # Check for PII handling patterns
-        pii_patterns = re.compile(
-            r"(?:email|phone|address|ssn|passport|credit.?card)",
-            re.IGNORECASE
-        )
+        pii_patterns = re.compile(r"(?:email|phone|address|ssn|passport|credit.?card)", re.IGNORECASE)
         has_pii = bool(pii_patterns.search(code))
 
-        checks.append(ComplianceCheck(
-            framework="GDPR",
-            control_id="Art.32",
-            control_name="Security of Processing",
-            passed=not has_pii or "encrypt" in code.lower(),
-            evidence="Check for PII handling and encryption",
-            findings=["PII patterns detected"] if has_pii else [],
-        ))
+        checks.append(
+            ComplianceCheck(
+                framework="GDPR",
+                control_id="Art.32",
+                control_name="Security of Processing",
+                passed=not has_pii or "encrypt" in code.lower(),
+                evidence="Check for PII handling and encryption",
+                findings=["PII patterns detected"] if has_pii else [],
+            )
+        )
 
         return checks
 
@@ -654,20 +678,19 @@ if callable(handler):
         checks = []
 
         # Check for PHI handling
-        phi_patterns = re.compile(
-            r"(?:patient|medical|health|diagnosis|treatment)",
-            re.IGNORECASE
-        )
+        phi_patterns = re.compile(r"(?:patient|medical|health|diagnosis|treatment)", re.IGNORECASE)
         has_phi = bool(phi_patterns.search(code))
 
-        checks.append(ComplianceCheck(
-            framework="HIPAA",
-            control_id="164.312(a)(1)",
-            control_name="Access Control",
-            passed=not has_phi or "authorization" in code.lower(),
-            evidence="Check for PHI handling and access controls",
-            findings=["PHI patterns detected"] if has_phi else [],
-        ))
+        checks.append(
+            ComplianceCheck(
+                framework="HIPAA",
+                control_id="164.312(a)(1)",
+                control_name="Access Control",
+                passed=not has_phi or "authorization" in code.lower(),
+                evidence="Check for PHI handling and access controls",
+                findings=["PHI patterns detected"] if has_phi else [],
+            )
+        )
 
         return checks
 
@@ -688,10 +711,7 @@ if callable(handler):
         result.total_checks = len(all_checks)
         result.passed_checks = sum(1 for c in all_checks if c.passed)
         result.failed_checks = sum(1 for c in all_checks if not c.passed)
-        result.warnings = sum(
-            1 for c in all_checks
-            if not c.passed and c.severity == CheckSeverity.WARNING
-        )
+        result.warnings = sum(1 for c in all_checks if not c.passed and c.severity == CheckSeverity.WARNING)
 
         # Calculate score
         if result.total_checks > 0:
@@ -700,17 +720,7 @@ if callable(handler):
             result.score = 1.0
 
         # Determine pass/fail
-        critical_failures = sum(
-            1 for c in all_checks
-            if not c.passed and c.severity == CheckSeverity.CRITICAL
-        )
-        error_failures = sum(
-            1 for c in all_checks
-            if not c.passed and c.severity == CheckSeverity.ERROR
-        )
+        critical_failures = sum(1 for c in all_checks if not c.passed and c.severity == CheckSeverity.CRITICAL)
+        error_failures = sum(1 for c in all_checks if not c.passed and c.severity == CheckSeverity.ERROR)
 
-        result.passed = (
-            critical_failures == 0
-            and error_failures == 0
-            and result.score >= self.config.required_security_score
-        )
+        result.passed = critical_failures == 0 and error_failures == 0 and result.score >= self.config.required_security_score

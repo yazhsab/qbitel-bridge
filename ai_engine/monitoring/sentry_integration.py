@@ -29,9 +29,7 @@ class SentryConfig:
 
         # Performance monitoring
         self.traces_sample_rate = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1"))
-        self.profiles_sample_rate = float(
-            os.getenv("SENTRY_PROFILES_SAMPLE_RATE", "0.1")
-        )
+        self.profiles_sample_rate = float(os.getenv("SENTRY_PROFILES_SAMPLE_RATE", "0.1"))
 
         # Error filtering
         self.enabled = os.getenv("SENTRY_ENABLED", "true").lower() == "true"
@@ -128,9 +126,7 @@ def shutdown_sentry():
         logger.error(f"Error shutting down Sentry: {e}")
 
 
-def before_send_filter(
-    event: Dict[str, Any], hint: Dict[str, Any]
-) -> Optional[Dict[str, Any]]:
+def before_send_filter(event: Dict[str, Any], hint: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """
     Filter events before sending to Sentry.
 
@@ -172,9 +168,7 @@ def before_send_filter(
     return event
 
 
-def before_send_transaction_filter(
-    event: Dict[str, Any], hint: Dict[str, Any]
-) -> Optional[Dict[str, Any]]:
+def before_send_transaction_filter(event: Dict[str, Any], hint: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """
     Filter transactions before sending to Sentry.
 
@@ -235,9 +229,7 @@ def capture_error(
         return None
 
 
-def capture_message(
-    message: str, level: str = "info", context: Optional[Dict[str, Any]] = None
-) -> Optional[str]:
+def capture_message(message: str, level: str = "info", context: Optional[Dict[str, Any]] = None) -> Optional[str]:
     """
     Capture a message with optional context.
 
@@ -281,9 +273,7 @@ def add_breadcrumb(
         data: Additional data
     """
     try:
-        sentry_sdk.add_breadcrumb(
-            message=message, category=category, level=level, data=data or {}
-        )
+        sentry_sdk.add_breadcrumb(message=message, category=category, level=level, data=data or {})
     except Exception as e:
         logger.error(f"Failed to add breadcrumb: {e}")
 
@@ -354,9 +344,7 @@ def monitor_performance(transaction_name: str, operation: str = "function"):
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
-            with sentry_sdk.start_transaction(
-                op=operation, name=transaction_name
-            ) as transaction:
+            with sentry_sdk.start_transaction(op=operation, name=transaction_name) as transaction:
                 try:
                     result = await func(*args, **kwargs)
                     transaction.set_status("ok")
@@ -374,9 +362,7 @@ def monitor_performance(transaction_name: str, operation: str = "function"):
 
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
-            with sentry_sdk.start_transaction(
-                op=operation, name=transaction_name
-            ) as transaction:
+            with sentry_sdk.start_transaction(op=operation, name=transaction_name) as transaction:
                 try:
                     result = func(*args, **kwargs)
                     transaction.set_status("ok")
@@ -420,9 +406,7 @@ def trace_span(operation: str, description: Optional[str] = None):
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
-            with sentry_sdk.start_span(
-                op=operation, description=description or func.__name__
-            ) as span:
+            with sentry_sdk.start_span(op=operation, description=description or func.__name__) as span:
                 try:
                     result = await func(*args, **kwargs)
                     span.set_status("ok")
@@ -433,9 +417,7 @@ def trace_span(operation: str, description: Optional[str] = None):
 
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
-            with sentry_sdk.start_span(
-                op=operation, description=description or func.__name__
-            ) as span:
+            with sentry_sdk.start_span(op=operation, description=description or func.__name__) as span:
                 try:
                     result = func(*args, **kwargs)
                     span.set_status("ok")
@@ -467,9 +449,7 @@ class SentryMiddleware:
             return await self.app(scope, receive, send)
 
         # Start transaction
-        transaction = sentry_sdk.start_transaction(
-            op="http.server", name=f"{scope['method']} {scope['path']}", source="route"
-        )
+        transaction = sentry_sdk.start_transaction(op="http.server", name=f"{scope['method']} {scope['path']}", source="route")
 
         # Add request context
         sentry_sdk.set_context(
@@ -533,9 +513,7 @@ class sentry_transaction:
         self.transaction = None
 
     def __enter__(self):
-        self.transaction = sentry_sdk.start_transaction(
-            op=self.operation, name=self.name
-        )
+        self.transaction = sentry_sdk.start_transaction(op=self.operation, name=self.name)
         self.transaction.__enter__()
         return self.transaction
 

@@ -27,39 +27,33 @@ logger = logging.getLogger(__name__)
 
 # Metrics
 THRESHOLD_OPS = Counter(
-    'threshold_signature_operations_total',
-    'Total threshold signature operations',
-    ['operation', 'scheme']
+    "threshold_signature_operations_total", "Total threshold signature operations", ["operation", "scheme"]
 )
 
 THRESHOLD_COMBINE_TIME = Histogram(
-    'threshold_combine_seconds',
-    'Time to combine signature shares',
-    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0]
+    "threshold_combine_seconds", "Time to combine signature shares", buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0]
 )
 
 
 class ThresholdScheme(Enum):
     """Threshold signature schemes."""
 
-    FROST = auto()           # Flexible Round-Optimized Schnorr Threshold
+    FROST = auto()  # Flexible Round-Optimized Schnorr Threshold
     DILITHIUM_SHARE = auto()  # Shared Dilithium
-    FALCON_SHARE = auto()     # Shared Falcon
+    FALCON_SHARE = auto()  # Shared Falcon
 
 
 @dataclass
 class ThresholdConfig:
     """Configuration for threshold signature scheme."""
 
-    threshold: int           # t: minimum signers needed
-    num_parties: int        # n: total number of parties
+    threshold: int  # t: minimum signers needed
+    num_parties: int  # n: total number of parties
     scheme: ThresholdScheme
 
     def __post_init__(self):
         if self.threshold > self.num_parties:
-            raise ValueError(
-                f"Threshold {self.threshold} cannot exceed parties {self.num_parties}"
-            )
+            raise ValueError(f"Threshold {self.threshold} cannot exceed parties {self.num_parties}")
         if self.threshold < 1:
             raise ValueError("Threshold must be at least 1")
 
@@ -116,7 +110,7 @@ class SecretSharing:
 
     def split_secret(self, secret: bytes) -> Dict[int, bytes]:
         """Split secret into shares."""
-        secret_int = int.from_bytes(secret, 'big') % self.prime
+        secret_int = int.from_bytes(secret, "big") % self.prime
 
         # Generate random polynomial coefficients
         coefficients = [secret_int]
@@ -128,7 +122,7 @@ class SecretSharing:
         shares = {}
         for i in range(1, self.num_shares + 1):
             share_value = self._evaluate_polynomial(coefficients, i)
-            shares[i] = share_value.to_bytes(32, 'big')
+            shares[i] = share_value.to_bytes(32, "big")
 
         return shares
 
@@ -153,17 +147,15 @@ class SecretSharing:
     ) -> bytes:
         """Reconstruct secret from shares."""
         if len(shares) < self.threshold:
-            raise ValueError(
-                f"Need {self.threshold} shares, got {len(shares)}"
-            )
+            raise ValueError(f"Need {self.threshold} shares, got {len(shares)}")
 
         # Use first t shares
-        share_items = list(shares.items())[:self.threshold]
+        share_items = list(shares.items())[: self.threshold]
 
         # Lagrange interpolation at x=0
         secret = 0
         for i, (xi, yi_bytes) in enumerate(share_items):
-            yi = int.from_bytes(yi_bytes, 'big')
+            yi = int.from_bytes(yi_bytes, "big")
 
             # Compute Lagrange basis polynomial at 0
             numerator = 1
@@ -180,7 +172,7 @@ class SecretSharing:
 
             secret = (secret + yi * lagrange_coef) % self.prime
 
-        return secret.to_bytes(32, 'big')
+        return secret.to_bytes(32, "big")
 
 
 class ThresholdKeyGenerator:
@@ -208,16 +200,12 @@ class ThresholdKeyGenerator:
         shares = self.secret_sharing.split_secret(master_secret)
 
         # Compute group public key
-        group_public_key = hashlib.sha3_256(
-            b"GROUP_PK" + master_secret
-        ).digest()
+        group_public_key = hashlib.sha3_256(b"GROUP_PK" + master_secret).digest()
 
         # Create key shares
         key_shares = {}
         for party_id, share in shares.items():
-            verification_key = hashlib.sha3_256(
-                b"VERIFY_KEY" + share
-            ).digest()
+            verification_key = hashlib.sha3_256(b"VERIFY_KEY" + share).digest()
 
             key_shares[party_id] = ThresholdKeyShare(
                 party_id=party_id,
@@ -226,10 +214,7 @@ class ThresholdKeyGenerator:
                 group_public_key=group_public_key,
             )
 
-        logger.info(
-            f"Generated {self.config.num_parties} shares with "
-            f"threshold {self.config.threshold}"
-        )
+        logger.info(f"Generated {self.config.num_parties} shares with " f"threshold {self.config.threshold}")
 
         return ThresholdSetup(
             config=self.config,
@@ -260,26 +245,20 @@ class ThresholdKeyGenerator:
         for recipient_id in range(1, self.config.num_parties + 1):
             combined = 0
             for sender_id, poly_shares in party_polynomials.items():
-                share_int = int.from_bytes(poly_shares[recipient_id], 'big')
+                share_int = int.from_bytes(poly_shares[recipient_id], "big")
                 combined = (combined + share_int) % self.secret_sharing.prime
 
-            final_shares[recipient_id] = combined.to_bytes(32, 'big')
+            final_shares[recipient_id] = combined.to_bytes(32, "big")
 
         # Compute group public key (sum of individual public keys)
-        combined_secret = sum(
-            int.from_bytes(s, 'big') for s in party_secrets.values()
-        ) % self.secret_sharing.prime
+        combined_secret = sum(int.from_bytes(s, "big") for s in party_secrets.values()) % self.secret_sharing.prime
 
-        group_public_key = hashlib.sha3_256(
-            b"GROUP_PK" + combined_secret.to_bytes(32, 'big')
-        ).digest()
+        group_public_key = hashlib.sha3_256(b"GROUP_PK" + combined_secret.to_bytes(32, "big")).digest()
 
         # Create key shares
         key_shares = {}
         for party_id, share in final_shares.items():
-            verification_key = hashlib.sha3_256(
-                b"VERIFY_KEY" + share
-            ).digest()
+            verification_key = hashlib.sha3_256(b"VERIFY_KEY" + share).digest()
 
             key_shares[party_id] = ThresholdKeyShare(
                 party_id=party_id,
@@ -356,32 +335,27 @@ class ThresholdSigner:
             raise ValueError("No commitment found for this message")
 
         # Aggregate commitment point
-        combined_commitment = b''
+        combined_commitment = b""
         for party_id in sorted(all_commitments.keys()):
             combined_commitment += all_commitments[party_id]
         R = hashlib.sha3_256(combined_commitment).digest()
 
         # Compute challenge
-        challenge = hashlib.sha3_256(
-            R + self.setup.group_public_key + message_hash
-        ).digest()
+        challenge = hashlib.sha3_256(R + self.setup.group_public_key + message_hash).digest()
 
         # Compute signature share: s_i = r_i + c * sk_i
-        r_i = int.from_bytes(nonce, 'big')
-        c = int.from_bytes(challenge, 'big')
-        sk_i = int.from_bytes(self.my_share.share, 'big')
+        r_i = int.from_bytes(nonce, "big")
+        c = int.from_bytes(challenge, "big")
+        sk_i = int.from_bytes(self.my_share.share, "big")
 
         prime = (1 << 256) - 189
         s_i = (r_i + c * sk_i) % prime
 
-        THRESHOLD_OPS.labels(
-            operation="create_share",
-            scheme=self.setup.config.scheme.name
-        ).inc()
+        THRESHOLD_OPS.labels(operation="create_share", scheme=self.setup.config.scheme.name).inc()
 
         return SignatureShare(
             party_id=self.party_id,
-            share=s_i.to_bytes(32, 'big'),
+            share=s_i.to_bytes(32, "big"),
             commitment=all_commitments[self.party_id],
             message_hash=message_hash,
         )
@@ -394,10 +368,7 @@ class ThresholdCombiner:
 
     def __init__(self, setup: ThresholdSetup):
         self.setup = setup
-        self.secret_sharing = SecretSharing(
-            setup.config.threshold,
-            setup.config.num_parties
-        )
+        self.secret_sharing = SecretSharing(setup.config.threshold, setup.config.num_parties)
 
     async def combine_shares(
         self,
@@ -410,12 +381,11 @@ class ThresholdCombiner:
         Requires at least threshold shares.
         """
         import time
+
         start = time.time()
 
         if len(shares) < self.setup.config.threshold:
-            raise ValueError(
-                f"Need {self.setup.config.threshold} shares, got {len(shares)}"
-            )
+            raise ValueError(f"Need {self.setup.config.threshold} shares, got {len(shares)}")
 
         # Verify all shares for same message
         message_hashes = set(s.message_hash for s in shares)
@@ -429,35 +399,29 @@ class ThresholdCombiner:
         combined_s = 0
         party_ids = [s.party_id for s in shares]
 
-        for share in shares[:self.setup.config.threshold]:
-            s_i = int.from_bytes(share.share, 'big')
+        for share in shares[: self.setup.config.threshold]:
+            s_i = int.from_bytes(share.share, "big")
             lambda_i = self._lagrange_coefficient(share.party_id, party_ids, prime)
             combined_s = (combined_s + s_i * lambda_i) % prime
 
         # Combine R values
-        combined_R = b''
+        combined_R = b""
         for party_id in sorted(all_commitments.keys()):
             combined_R += all_commitments[party_id]
         R = hashlib.sha3_256(combined_R).digest()
 
         # Create final signature
-        signature = R + combined_s.to_bytes(32, 'big')
+        signature = R + combined_s.to_bytes(32, "big")
 
         elapsed = time.time() - start
         THRESHOLD_COMBINE_TIME.observe(elapsed)
-        THRESHOLD_OPS.labels(
-            operation="combine",
-            scheme=self.setup.config.scheme.name
-        ).inc()
+        THRESHOLD_OPS.labels(operation="combine", scheme=self.setup.config.scheme.name).inc()
 
-        logger.info(
-            f"Combined {len(shares)} signature shares from parties "
-            f"{party_ids[:self.setup.config.threshold]}"
-        )
+        logger.info(f"Combined {len(shares)} signature shares from parties " f"{party_ids[:self.setup.config.threshold]}")
 
         return ThresholdSignature(
             signature=signature,
-            participating_parties=party_ids[:self.setup.config.threshold],
+            participating_parties=party_ids[: self.setup.config.threshold],
             message_hash=message_hash,
         )
 
@@ -471,7 +435,7 @@ class ThresholdCombiner:
         numerator = 1
         denominator = 1
 
-        for j in party_ids[:self.setup.config.threshold]:
+        for j in party_ids[: self.setup.config.threshold]:
             if j != i:
                 numerator = (numerator * (-j)) % prime
                 denominator = (denominator * (i - j)) % prime
@@ -502,22 +466,15 @@ class ThresholdVerifier:
 
         # Recompute challenge
         message_hash = hashlib.sha3_256(message).digest()
-        expected_challenge = hashlib.sha3_256(
-            R + self.group_public_key + message_hash
-        ).digest()
+        expected_challenge = hashlib.sha3_256(R + self.group_public_key + message_hash).digest()
 
         # Verify signature (simplified - real impl would use group operations)
         # Check that s*G = R + c*PK
 
-        THRESHOLD_OPS.labels(
-            operation="verify",
-            scheme="threshold"
-        ).inc()
+        THRESHOLD_OPS.labels(operation="verify", scheme="threshold").inc()
 
         # Simplified verification
-        expected_R = hashlib.sha3_256(
-            s + expected_challenge + self.group_public_key
-        ).digest()
+        expected_R = hashlib.sha3_256(s + expected_challenge + self.group_public_key).digest()
 
         # In real implementation, this would be elliptic curve verification
         return True  # Simplified
@@ -544,10 +501,7 @@ class ThresholdSignatureScheme:
         self._setup: Optional[ThresholdSetup] = None
         self._signers: Dict[int, ThresholdSigner] = {}
 
-        logger.info(
-            f"Threshold scheme initialized: {threshold}-of-{num_parties} "
-            f"using {scheme.name}"
-        )
+        logger.info(f"Threshold scheme initialized: {threshold}-of-{num_parties} " f"using {scheme.name}")
 
     async def setup(self) -> ThresholdSetup:
         """Initialize the scheme with fresh keys."""
@@ -585,10 +539,7 @@ class ThresholdSignatureScheme:
             participating_parties = list(range(1, self.config.threshold + 1))
 
         if len(participating_parties) < self.config.threshold:
-            raise ValueError(
-                f"Need {self.config.threshold} parties, "
-                f"got {len(participating_parties)}"
-            )
+            raise ValueError(f"Need {self.config.threshold} parties, " f"got {len(participating_parties)}")
 
         # Round 1: Collect commitments
         commitments = {}

@@ -101,6 +101,7 @@ class FuturexHSM(HSMProvider):
             raise HSMConnectionError("Not connected to HSM")
 
         import uuid
+
         session_id = str(uuid.uuid4())
         return HSMSession(self, session_id)
 
@@ -119,6 +120,7 @@ class FuturexHSM(HSMProvider):
         self._check_connected()
 
         import uuid
+
         key_id = str(uuid.uuid4())
 
         return HSMKeyHandle(
@@ -146,6 +148,7 @@ class FuturexHSM(HSMProvider):
         self._check_connected()
 
         import uuid
+
         pub_key_id = str(uuid.uuid4())
         priv_key_id = str(uuid.uuid4())
 
@@ -186,6 +189,7 @@ class FuturexHSM(HSMProvider):
         self._check_connected()
 
         import uuid
+
         key_id = str(uuid.uuid4())
 
         return HSMKeyHandle(
@@ -406,6 +410,7 @@ class FuturexHSM(HSMProvider):
         self._check_connected()
 
         import secrets
+
         return secrets.token_bytes(length)
 
     def _check_connected(self) -> None:

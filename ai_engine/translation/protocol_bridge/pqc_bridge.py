@@ -254,9 +254,7 @@ class PQCProtocolBridge:
 
             # Generate master keypairs
             self.master_kem_keypair = await self.pqc_engine.generate_kem_keypair()
-            self.master_signature_keypair = (
-                await self.pqc_engine.generate_signature_keypair()
-            )
+            self.master_signature_keypair = await self.pqc_engine.generate_signature_keypair()
 
             self.logger.info(
                 f"Generated master KEM keypair: "
@@ -274,9 +272,7 @@ class PQCProtocolBridge:
 
             # Start key rotation task
             if self.bridge_config.rotation_policy != KeyRotationPolicy.MANUAL:
-                self.key_rotation_task = asyncio.create_task(
-                    self._key_rotation_loop()
-                )
+                self.key_rotation_task = asyncio.create_task(self._key_rotation_loop())
 
             self.is_initialized = True
 
@@ -323,23 +319,15 @@ class PQCProtocolBridge:
 
             # Apply PQC protection based on mode
             if pqc_mode == PQCBridgeMode.PASSTHROUGH:
-                pqc_result = await self._create_passthrough_result(
-                    translation_result, session
-                )
+                pqc_result = await self._create_passthrough_result(translation_result, session)
             elif pqc_mode == PQCBridgeMode.ENCRYPT_ONLY:
-                pqc_result = await self._encrypt_translation(
-                    translation_result, session
-                )
+                pqc_result = await self._encrypt_translation(translation_result, session)
             elif pqc_mode == PQCBridgeMode.SIGN_ONLY:
                 pqc_result = await self._sign_translation(translation_result, session)
             elif pqc_mode == PQCBridgeMode.FULL:
-                pqc_result = await self._full_protect_translation(
-                    translation_result, session
-                )
+                pqc_result = await self._full_protect_translation(translation_result, session)
             elif pqc_mode == PQCBridgeMode.HYBRID:
-                pqc_result = await self._hybrid_protect_translation(
-                    translation_result, session
-                )
+                pqc_result = await self._hybrid_protect_translation(translation_result, session)
             else:
                 raise BridgeException(f"Unknown PQC mode: {pqc_mode}")
 
@@ -373,8 +361,7 @@ class PQCProtocolBridge:
             ).observe(pqc_result.total_processing_time)
 
             self.logger.debug(
-                f"PQC translation completed: mode={pqc_mode.value}, "
-                f"overhead={pqc_result.pqc_overhead_ms:.2f}ms"
+                f"PQC translation completed: mode={pqc_mode.value}, " f"overhead={pqc_result.pqc_overhead_ms:.2f}ms"
             )
 
             return pqc_result
@@ -400,22 +387,16 @@ class PQCProtocolBridge:
             session_id=session.session_id,
         )
 
-    async def _encrypt_translation(
-        self, translation_result: TranslationResult, session: PQCSession
-    ) -> PQCTranslationResult:
+    async def _encrypt_translation(self, translation_result: TranslationResult, session: PQCSession) -> PQCTranslationResult:
         """Encrypt translation result using PQC KEM."""
         # Encapsulate to generate ephemeral shared secret
-        encap_result = await self.pqc_engine.encapsulate(
-            session.kem_keypair.public_key
-        )
+        encap_result = await self.pqc_engine.encapsulate(session.kem_keypair.public_key)
 
         # Use shared secret to derive encryption key
         encryption_key = self._derive_encryption_key(encap_result.shared_secret)
 
         # Encrypt the translated data using AES-GCM with PQC-derived key
-        encrypted_data = await self._aes_encrypt(
-            translation_result.translated_data, encryption_key
-        )
+        encrypted_data = await self._aes_encrypt(translation_result.translated_data, encryption_key)
 
         return PQCTranslationResult(
             translation_result=translation_result,
@@ -426,9 +407,7 @@ class PQCProtocolBridge:
             session_id=session.session_id,
         )
 
-    async def _sign_translation(
-        self, translation_result: TranslationResult, session: PQCSession
-    ) -> PQCTranslationResult:
+    async def _sign_translation(self, translation_result: TranslationResult, session: PQCSession) -> PQCTranslationResult:
         """Sign translation result using PQC signatures."""
         # Sign the translated data
         signature = await self.pqc_engine.sign(
@@ -450,13 +429,9 @@ class PQCProtocolBridge:
     ) -> PQCTranslationResult:
         """Apply full PQC protection (encrypt + sign)."""
         # First encrypt
-        encap_result = await self.pqc_engine.encapsulate(
-            session.kem_keypair.public_key
-        )
+        encap_result = await self.pqc_engine.encapsulate(session.kem_keypair.public_key)
         encryption_key = self._derive_encryption_key(encap_result.shared_secret)
-        encrypted_data = await self._aes_encrypt(
-            translation_result.translated_data, encryption_key
-        )
+        encrypted_data = await self._aes_encrypt(translation_result.translated_data, encryption_key)
 
         # Then sign the encrypted data
         signature = await self.pqc_engine.sign(
@@ -484,23 +459,18 @@ class PQCProtocolBridge:
 
         # Generate classical ECDH shared secret (simplified)
         import secrets
+
         classical_secret = secrets.token_bytes(32)
 
         # Generate PQC shared secret
-        encap_result = await self.pqc_engine.encapsulate(
-            session.kem_keypair.public_key
-        )
+        encap_result = await self.pqc_engine.encapsulate(session.kem_keypair.public_key)
 
         # Combine secrets using KDF
-        combined_secret = self._combine_secrets(
-            classical_secret, encap_result.shared_secret
-        )
+        combined_secret = self._combine_secrets(classical_secret, encap_result.shared_secret)
         encryption_key = self._derive_encryption_key(combined_secret)
 
         # Encrypt
-        encrypted_data = await self._aes_encrypt(
-            translation_result.translated_data, encryption_key
-        )
+        encrypted_data = await self._aes_encrypt(translation_result.translated_data, encryption_key)
 
         # Sign with PQC signature
         signature = await self.pqc_engine.sign(
@@ -561,6 +531,7 @@ class PQCProtocolBridge:
                 # For hybrid mode, we need the classical secret too
                 # In a real implementation, this would be stored/transmitted
                 import secrets
+
                 classical_secret = secrets.token_bytes(32)
                 combined_secret = self._combine_secrets(classical_secret, shared_secret)
                 decryption_key = self._derive_encryption_key(combined_secret)
@@ -586,6 +557,7 @@ class PQCProtocolBridge:
     def _combine_secrets(self, classical: bytes, pqc: bytes) -> bytes:
         """Combine classical and PQC secrets for hybrid mode."""
         import hashlib
+
         combined = classical + pqc
         return hashlib.sha256(combined).digest()
 
@@ -692,10 +664,7 @@ class PQCProtocolBridge:
                 for session_id, session in self.sessions.items():
                     if session_id == self.default_session.session_id:
                         continue
-                    if (
-                        session.age_seconds
-                        > self.bridge_config.session_timeout_seconds
-                    ):
+                    if session.age_seconds > self.bridge_config.session_timeout_seconds:
                         expired_sessions.append(session_id)
 
                 for session_id in expired_sessions:

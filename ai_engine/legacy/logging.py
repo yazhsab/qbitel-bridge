@@ -230,20 +230,17 @@ class LegacySystemLogger:
 
         # Structured JSON formatter for audit logs
         audit_formatter = logging.Formatter(
-            '{"timestamp": "%(asctime)s", "level": "%(levelname)s", '
-            '"logger": "%(name)s", "audit_entry": %(message)s}'
+            '{"timestamp": "%(asctime)s", "level": "%(levelname)s", ' '"logger": "%(name)s", "audit_entry": %(message)s}'
         )
 
         # Security event formatter
         security_formatter = logging.Formatter(
-            '{"timestamp": "%(asctime)s", "level": "SECURITY", '
-            '"logger": "%(name)s", "security_event": %(message)s}'
+            '{"timestamp": "%(asctime)s", "level": "SECURITY", ' '"logger": "%(name)s", "security_event": %(message)s}'
         )
 
         # Performance metrics formatter
         performance_formatter = logging.Formatter(
-            '{"timestamp": "%(asctime)s", "level": "PERFORMANCE", '
-            '"logger": "%(name)s", "performance_data": %(message)s}'
+            '{"timestamp": "%(asctime)s", "level": "PERFORMANCE", ' '"logger": "%(name)s", "performance_data": %(message)s}'
         )
 
         # Apply formatters if handlers exist
@@ -261,9 +258,7 @@ class LegacySystemLogger:
         context = LogContext(**kwargs)
         return ContextualLogger(self, context)
 
-    def with_system_context(
-        self, system_context: LegacySystemContext
-    ) -> "ContextualLogger":
+    def with_system_context(self, system_context: LegacySystemContext) -> "ContextualLogger":
         """Create a contextual logger with system context."""
         context = LogContext(
             system_id=system_context.system_id,
@@ -492,9 +487,7 @@ class LegacySystemLogger:
         self.context_stack.append(context)
 
         try:
-            self.log_structured(
-                LogLevel.DEBUG, f"Starting operation: {operation}", context
-            )
+            self.log_structured(LogLevel.DEBUG, f"Starting operation: {operation}", context)
 
             yield context
 
@@ -549,9 +542,7 @@ class LegacySystemLogger:
         self.context_stack.append(context)
 
         try:
-            self.log_structured(
-                LogLevel.DEBUG, f"Starting async operation: {operation}", context
-            )
+            self.log_structured(LogLevel.DEBUG, f"Starting async operation: {operation}", context)
 
             yield context
 
@@ -595,9 +586,7 @@ class LegacySystemLogger:
         return {
             "operation_stats": self.operation_stats.copy(),
             "error_counts": self.error_counts.copy(),
-            "total_operations": sum(
-                stats["count"] for stats in self.operation_stats.values()
-            ),
+            "total_operations": sum(stats["count"] for stats in self.operation_stats.values()),
             "total_errors": sum(self.error_counts.values()),
             "audit_entries_count": len(self.audit_entries),
         }
@@ -705,9 +694,7 @@ def create_legacy_logger(
     )
 
 
-def setup_legacy_logging_handlers(
-    log_dir: Union[str, Path], service_name: str = "legacy-system-whisperer"
-) -> None:
+def setup_legacy_logging_handlers(log_dir: Union[str, Path], service_name: str = "legacy-system-whisperer") -> None:
     """Setup file handlers for Legacy System Whisperer logging."""
 
     log_path = Path(log_dir)
@@ -726,9 +713,7 @@ def setup_legacy_logging_handlers(
     security_handler.setLevel(logging.WARNING)
 
     # Performance log
-    performance_handler = logging.FileHandler(
-        log_path / f"{service_name}-performance.log"
-    )
+    performance_handler = logging.FileHandler(log_path / f"{service_name}-performance.log")
     performance_handler.setLevel(logging.INFO)
 
     # Add handlers to appropriate loggers
@@ -769,9 +754,7 @@ def log_operation(
                     context.metadata["args"] = str(args)
                     context.metadata["kwargs"] = str(kwargs)
 
-                async with op_logger.async_operation_context(
-                    op_name, metadata=context.metadata
-                ):
+                async with op_logger.async_operation_context(op_name, metadata=context.metadata):
                     result = await func(*args, **kwargs)
 
                     if log_result:

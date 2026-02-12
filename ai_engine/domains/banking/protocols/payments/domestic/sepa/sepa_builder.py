@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 class SEPABuildError(Exception):
     """Exception raised when SEPA message building fails."""
+
     pass
 
 

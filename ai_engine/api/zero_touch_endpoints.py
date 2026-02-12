@@ -66,9 +66,7 @@ def get_decision_engine() -> ZeroTouchDecisionEngine:
     """Get the decision engine instance."""
     global _decision_engine
     if _decision_engine is None:
-        raise HTTPException(
-            status_code=503, detail="Zero-Touch Decision Engine not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Zero-Touch Decision Engine not initialized")
     return _decision_engine
 
 
@@ -171,18 +169,12 @@ class ConfigurationUpdate(BaseModel):
     auto_execute_threshold: Optional[float] = Field(
         None, ge=0.0, le=1.0, description="Confidence threshold for auto-execution"
     )
-    auto_approve_threshold: Optional[float] = Field(
-        None, ge=0.0, le=1.0, description="Confidence threshold for auto-approval"
-    )
-    escalation_threshold: Optional[float] = Field(
-        None, ge=0.0, le=1.0, description="Confidence threshold for escalation"
-    )
+    auto_approve_threshold: Optional[float] = Field(None, ge=0.0, le=1.0, description="Confidence threshold for auto-approval")
+    escalation_threshold: Optional[float] = Field(None, ge=0.0, le=1.0, description="Confidence threshold for escalation")
     enable_business_hour_constraints: Optional[bool] = Field(
         None, description="Enable business hour constraints for disruptive actions"
     )
-    high_risk_actions: Optional[List[str]] = Field(
-        None, description="Actions requiring extra approval"
-    )
+    high_risk_actions: Optional[List[str]] = Field(None, description="Actions requiring extra approval")
 
 
 class MetricsResponse(BaseModel):
@@ -497,9 +489,7 @@ async def update_configuration(
     """
     # Check admin privileges
     if not current_user.get("is_admin", False):
-        raise HTTPException(
-            status_code=403, detail="Admin privileges required to update configuration"
-        )
+        raise HTTPException(status_code=403, detail="Admin privileges required to update configuration")
 
     ZERO_TOUCH_REQUESTS.labels(endpoint="update_config", status="started").inc()
 
@@ -514,18 +504,14 @@ async def update_configuration(
 
         ZERO_TOUCH_REQUESTS.labels(endpoint="update_config", status="success").inc()
 
-        logger.info(
-            f"Configuration updated by {current_user.get('user_id')}: {request.model_dump(exclude_none=True)}"
-        )
+        logger.info(f"Configuration updated by {current_user.get('user_id')}: {request.model_dump(exclude_none=True)}")
 
         return {"message": "Configuration updated", "configuration": updated}
 
     except Exception as e:
         ZERO_TOUCH_REQUESTS.labels(endpoint="update_config", status="error").inc()
         logger.error(f"Configuration update failed: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Configuration update failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Configuration update failed: {str(e)}")
 
 
 @router.get("/metrics", response_model=MetricsResponse)

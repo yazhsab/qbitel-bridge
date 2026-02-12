@@ -70,9 +70,7 @@ class CircuitBreaker:
     def __init__(self, name: str, config: Optional[CircuitBreakerConfig] = None):
         self.name = name
         self.config = config or CircuitBreakerConfig()
-        self.logger = get_security_logger(
-            f"qbitel.security.resilience.circuit_breaker.{name}"
-        )
+        self.logger = get_security_logger(f"qbitel.security.resilience.circuit_breaker.{name}")
 
         # State management
         self._state = CircuitBreakerState.CLOSED
@@ -132,12 +130,8 @@ class CircuitBreaker:
             "success_count": self._success_count,
             "failure_rate": self._calculate_failure_rate(),
             "slow_call_rate": self._calculate_slow_call_rate(),
-            "last_failure_time": (
-                self._last_failure_time.isoformat() if self._last_failure_time else None
-            ),
-            "next_attempt_time": (
-                self._next_attempt_time.isoformat() if self._next_attempt_time else None
-            ),
+            "last_failure_time": (self._last_failure_time.isoformat() if self._last_failure_time else None),
+            "next_attempt_time": (self._next_attempt_time.isoformat() if self._next_attempt_time else None),
         }
 
     async def call(self, func: Callable, *args, **kwargs) -> Any:
@@ -175,9 +169,7 @@ class CircuitBreaker:
                     },
                 )
 
-                raise CircuitBreakerException(
-                    f"Circuit breaker '{self.name}' is {self._state.value}", self._state
-                )
+                raise CircuitBreakerException(f"Circuit breaker '{self.name}' is {self._state.value}", self._state)
 
         # Execute the function call
         start_time = time.time()
@@ -328,15 +320,11 @@ class CircuitBreaker:
                         )
                     else:
                         # Use simple failure count threshold when not enough data
-                        should_open = (
-                            self._failure_count >= self.config.failure_threshold
-                        )
+                        should_open = self._failure_count >= self.config.failure_threshold
 
                 if should_open:
                     self._state = CircuitBreakerState.OPEN
-                    self._next_attempt_time = datetime.utcnow() + timedelta(
-                        seconds=self.config.recovery_timeout
-                    )
+                    self._next_attempt_time = datetime.utcnow() + timedelta(seconds=self.config.recovery_timeout)
 
                     self.logger.log_security_event(
                         SecurityLogType.CONFIGURATION_CHANGE,
@@ -366,11 +354,7 @@ class CircuitBreaker:
         if not self._call_history:
             return 0.0
 
-        slow_calls = sum(
-            1
-            for call in self._call_history
-            if call.duration > self.config.slow_call_duration_threshold
-        )
+        slow_calls = sum(1 for call in self._call_history if call.duration > self.config.slow_call_duration_threshold)
         return slow_calls / len(self._call_history)
 
     def _cleanup_old_calls(self):
@@ -402,9 +386,7 @@ class CircuitBreaker:
 
         async with self._lock:
             self._state = CircuitBreakerState.OPEN
-            self._next_attempt_time = datetime.utcnow() + timedelta(
-                seconds=self.config.recovery_timeout
-            )
+            self._next_attempt_time = datetime.utcnow() + timedelta(seconds=self.config.recovery_timeout)
 
             self.logger.log_security_event(
                 SecurityLogType.CONFIGURATION_CHANGE,
@@ -427,13 +409,9 @@ class CircuitBreakerManager:
 
     def __init__(self):
         self.circuit_breakers: Dict[str, CircuitBreaker] = {}
-        self.logger = get_security_logger(
-            "qbitel.security.resilience.circuit_breaker_manager"
-        )
+        self.logger = get_security_logger("qbitel.security.resilience.circuit_breaker_manager")
 
-    def get_circuit_breaker(
-        self, name: str, config: Optional[CircuitBreakerConfig] = None
-    ) -> CircuitBreaker:
+    def get_circuit_breaker(self, name: str, config: Optional[CircuitBreakerConfig] = None) -> CircuitBreaker:
         """Get or create a circuit breaker."""
 
         if name not in self.circuit_breakers:

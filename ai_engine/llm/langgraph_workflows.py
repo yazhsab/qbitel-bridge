@@ -23,6 +23,7 @@ try:
     from langgraph.graph import StateGraph, END
     from langgraph.checkpoint.memory import MemorySaver
     from langgraph.prebuilt import ToolNode
+
     LANGGRAPH_AVAILABLE = True
 except ImportError:
     LANGGRAPH_AVAILABLE = False
@@ -35,6 +36,7 @@ except ImportError:
 try:
     from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
     from langchain_core.tools import tool
+
     LANGCHAIN_AVAILABLE = True
 except ImportError:
     LANGCHAIN_AVAILABLE = False
@@ -50,28 +52,20 @@ logger = logging.getLogger(__name__)
 
 # Metrics
 WORKFLOW_EXECUTION_COUNTER = Counter(
-    "qbitel_workflow_executions_total",
-    "Total workflow executions",
-    ["workflow_type", "status"]
+    "qbitel_workflow_executions_total", "Total workflow executions", ["workflow_type", "status"]
 )
-WORKFLOW_DURATION = Histogram(
-    "qbitel_workflow_duration_seconds",
-    "Workflow execution duration",
-    ["workflow_type"]
-)
-WORKFLOW_STEP_COUNTER = Counter(
-    "qbitel_workflow_steps_total",
-    "Total workflow steps executed",
-    ["workflow_type", "step_name"]
-)
+WORKFLOW_DURATION = Histogram("qbitel_workflow_duration_seconds", "Workflow execution duration", ["workflow_type"])
+WORKFLOW_STEP_COUNTER = Counter("qbitel_workflow_steps_total", "Total workflow steps executed", ["workflow_type", "step_name"])
 
 
 # =============================================================================
 # State Definitions
 # =============================================================================
 
+
 class WorkflowStatus(Enum):
     """Workflow execution status."""
+
     PENDING = "pending"
     RUNNING = "running"
     WAITING_HUMAN = "waiting_human"
@@ -83,6 +77,7 @@ class WorkflowStatus(Enum):
 @dataclass
 class WorkflowCheckpoint:
     """Checkpoint for workflow state persistence."""
+
     workflow_id: str
     step_name: str
     state: Dict[str, Any]
@@ -92,6 +87,7 @@ class WorkflowCheckpoint:
 
 class ProtocolAnalysisState(TypedDict, total=False):
     """State for protocol analysis workflow."""
+
     # Input
     protocol_data: str
     protocol_hint: Optional[str]
@@ -118,6 +114,7 @@ class ProtocolAnalysisState(TypedDict, total=False):
 
 class SecurityOrchestrationState(TypedDict, total=False):
     """State for security orchestration workflow."""
+
     # Input
     threat_data: Dict[str, Any]
     severity: str
@@ -147,6 +144,7 @@ class SecurityOrchestrationState(TypedDict, total=False):
 
 class ComplianceCheckState(TypedDict, total=False):
     """State for compliance checking workflow."""
+
     # Input
     configuration: Dict[str, Any]
     frameworks: List[str]
@@ -175,6 +173,7 @@ class ComplianceCheckState(TypedDict, total=False):
 # =============================================================================
 # Workflow Manager
 # =============================================================================
+
 
 class WorkflowManager:
     """
@@ -249,10 +248,7 @@ class WorkflowManager:
         workflow.add_conditional_edges(
             "assess_security",
             self._should_require_human_review,
-            {
-                "human_review": "human_review",
-                "generate_report": "generate_report"
-            }
+            {"human_review": "human_review", "generate_report": "generate_report"},
         )
 
         workflow.add_edge("human_review", "generate_report")
@@ -264,57 +260,30 @@ class WorkflowManager:
 
     async def _classify_protocol_node(self, state: ProtocolAnalysisState) -> Dict[str, Any]:
         """Classify the protocol type."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="protocol_analysis",
-            step_name="classify_protocol"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="protocol_analysis", step_name="classify_protocol").inc()
 
         # Simulated classification (in production, use actual LLM service)
-        classification = {
-            "protocol_type": "unknown",
-            "confidence": 0.0,
-            "possible_matches": [],
-            "features_detected": []
-        }
+        classification = {"protocol_type": "unknown", "confidence": 0.0, "possible_matches": [], "features_detected": []}
 
         return {
             "classification_result": classification,
             "current_step": "classify_protocol",
-            "status": WorkflowStatus.RUNNING.value
+            "status": WorkflowStatus.RUNNING.value,
         }
 
     async def _analyze_fields_node(self, state: ProtocolAnalysisState) -> Dict[str, Any]:
         """Analyze protocol fields."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="protocol_analysis",
-            step_name="analyze_fields"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="protocol_analysis", step_name="analyze_fields").inc()
 
-        field_analysis = {
-            "fields_detected": [],
-            "field_boundaries": [],
-            "data_types": {},
-            "patterns": []
-        }
+        field_analysis = {"fields_detected": [], "field_boundaries": [], "data_types": {}, "patterns": []}
 
-        return {
-            "field_analysis": field_analysis,
-            "current_step": "analyze_fields"
-        }
+        return {"field_analysis": field_analysis, "current_step": "analyze_fields"}
 
     async def _assess_security_node(self, state: ProtocolAnalysisState) -> Dict[str, Any]:
         """Assess security implications."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="protocol_analysis",
-            step_name="assess_security"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="protocol_analysis", step_name="assess_security").inc()
 
-        security_assessment = {
-            "vulnerabilities": [],
-            "risk_level": "low",
-            "recommendations": [],
-            "encryption_detected": False
-        }
+        security_assessment = {"vulnerabilities": [], "risk_level": "low", "recommendations": [], "encryption_detected": False}
 
         # Determine if human review is needed
         requires_review = security_assessment.get("risk_level") in ["high", "critical"]
@@ -322,7 +291,7 @@ class WorkflowManager:
         return {
             "security_assessment": security_assessment,
             "current_step": "assess_security",
-            "requires_human_review": requires_review
+            "requires_human_review": requires_review,
         }
 
     def _should_require_human_review(self, state: ProtocolAnalysisState) -> str:
@@ -333,29 +302,20 @@ class WorkflowManager:
 
     async def _human_review_node(self, state: ProtocolAnalysisState) -> Dict[str, Any]:
         """Handle human review step."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="protocol_analysis",
-            step_name="human_review"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="protocol_analysis", step_name="human_review").inc()
 
-        return {
-            "current_step": "human_review",
-            "status": WorkflowStatus.WAITING_HUMAN.value
-        }
+        return {"current_step": "human_review", "status": WorkflowStatus.WAITING_HUMAN.value}
 
     async def _generate_report_node(self, state: ProtocolAnalysisState) -> Dict[str, Any]:
         """Generate final analysis report."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="protocol_analysis",
-            step_name="generate_report"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="protocol_analysis", step_name="generate_report").inc()
 
         final_report = {
             "protocol_classification": state.get("classification_result", {}),
             "field_analysis": state.get("field_analysis", {}),
             "security_assessment": state.get("security_assessment", {}),
             "generated_at": datetime.utcnow().isoformat(),
-            "workflow_id": state.get("workflow_id")
+            "workflow_id": state.get("workflow_id"),
         }
 
         # Calculate confidence score
@@ -366,7 +326,7 @@ class WorkflowManager:
             "final_report": final_report,
             "confidence_score": confidence_score,
             "current_step": "generate_report",
-            "status": WorkflowStatus.COMPLETED.value
+            "status": WorkflowStatus.COMPLETED.value,
         }
 
     # =========================================================================
@@ -398,10 +358,7 @@ class WorkflowManager:
         workflow.add_conditional_edges(
             "plan_mitigation",
             self._should_require_approval,
-            {
-                "human_approval": "human_approval",
-                "execute_actions": "execute_actions"
-            }
+            {"human_approval": "human_approval", "execute_actions": "execute_actions"},
         )
 
         workflow.add_edge("human_approval", "execute_actions")
@@ -413,55 +370,33 @@ class WorkflowManager:
 
     async def _classify_threat_node(self, state: SecurityOrchestrationState) -> Dict[str, Any]:
         """Classify the security threat."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="security_orchestration",
-            step_name="classify_threat"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="security_orchestration", step_name="classify_threat").inc()
 
-        threat_classification = {
-            "threat_type": "unknown",
-            "category": "unclassified",
-            "indicators": [],
-            "related_threats": []
-        }
+        threat_classification = {"threat_type": "unknown", "category": "unclassified", "indicators": [], "related_threats": []}
 
         return {
             "threat_classification": threat_classification,
             "current_step": "classify_threat",
-            "status": WorkflowStatus.RUNNING.value
+            "status": WorkflowStatus.RUNNING.value,
         }
 
     async def _assess_impact_node(self, state: SecurityOrchestrationState) -> Dict[str, Any]:
         """Assess the impact of the threat."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="security_orchestration",
-            step_name="assess_impact"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="security_orchestration", step_name="assess_impact").inc()
 
-        impact_assessment = {
-            "affected_systems": [],
-            "data_at_risk": [],
-            "business_impact": "low",
-            "urgency": "normal"
-        }
+        impact_assessment = {"affected_systems": [], "data_at_risk": [], "business_impact": "low", "urgency": "normal"}
 
-        return {
-            "impact_assessment": impact_assessment,
-            "current_step": "assess_impact"
-        }
+        return {"impact_assessment": impact_assessment, "current_step": "assess_impact"}
 
     async def _plan_mitigation_node(self, state: SecurityOrchestrationState) -> Dict[str, Any]:
         """Plan mitigation actions."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="security_orchestration",
-            step_name="plan_mitigation"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="security_orchestration", step_name="plan_mitigation").inc()
 
         mitigation_plan = {
             "immediate_actions": [],
             "short_term_actions": [],
             "long_term_actions": [],
-            "estimated_resolution_time": "unknown"
+            "estimated_resolution_time": "unknown",
         }
 
         # Determine if approval is needed
@@ -472,7 +407,7 @@ class WorkflowManager:
             "mitigation_plan": mitigation_plan,
             "current_step": "plan_mitigation",
             "requires_human_approval": requires_approval,
-            "actions_pending": mitigation_plan.get("immediate_actions", [])
+            "actions_pending": mitigation_plan.get("immediate_actions", []),
         }
 
     def _should_require_approval(self, state: SecurityOrchestrationState) -> str:
@@ -483,44 +418,24 @@ class WorkflowManager:
 
     async def _human_approval_node(self, state: SecurityOrchestrationState) -> Dict[str, Any]:
         """Handle human approval step."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="security_orchestration",
-            step_name="human_approval"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="security_orchestration", step_name="human_approval").inc()
 
-        return {
-            "current_step": "human_approval",
-            "status": WorkflowStatus.WAITING_HUMAN.value
-        }
+        return {"current_step": "human_approval", "status": WorkflowStatus.WAITING_HUMAN.value}
 
     async def _execute_actions_node(self, state: SecurityOrchestrationState) -> Dict[str, Any]:
         """Execute mitigation actions."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="security_orchestration",
-            step_name="execute_actions"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="security_orchestration", step_name="execute_actions").inc()
 
         # Execute pending actions (simulated)
         actions_executed = []
         for action in state.get("actions_pending", []):
-            actions_executed.append({
-                **action,
-                "executed_at": datetime.utcnow().isoformat(),
-                "status": "completed"
-            })
+            actions_executed.append({**action, "executed_at": datetime.utcnow().isoformat(), "status": "completed"})
 
-        return {
-            "actions_executed": actions_executed,
-            "actions_pending": [],
-            "current_step": "execute_actions"
-        }
+        return {"actions_executed": actions_executed, "actions_pending": [], "current_step": "execute_actions"}
 
     async def _generate_incident_report_node(self, state: SecurityOrchestrationState) -> Dict[str, Any]:
         """Generate incident report."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="security_orchestration",
-            step_name="generate_incident_report"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="security_orchestration", step_name="generate_incident_report").inc()
 
         incident_report = {
             "incident_id": state.get("workflow_id"),
@@ -528,13 +443,13 @@ class WorkflowManager:
             "impact_assessment": state.get("impact_assessment", {}),
             "mitigation_plan": state.get("mitigation_plan", {}),
             "actions_taken": state.get("actions_executed", []),
-            "generated_at": datetime.utcnow().isoformat()
+            "generated_at": datetime.utcnow().isoformat(),
         }
 
         return {
             "incident_report": incident_report,
             "current_step": "generate_incident_report",
-            "status": WorkflowStatus.COMPLETED.value
+            "status": WorkflowStatus.COMPLETED.value,
         }
 
     # =========================================================================
@@ -567,10 +482,7 @@ class WorkflowManager:
 
     async def _check_frameworks_node(self, state: ComplianceCheckState) -> Dict[str, Any]:
         """Check compliance against specified frameworks."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="compliance_check",
-            step_name="check_frameworks"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="compliance_check", step_name="check_frameworks").inc()
 
         framework_results = {}
         for framework in state.get("frameworks", []):
@@ -578,64 +490,53 @@ class WorkflowManager:
                 "checked_controls": [],
                 "passed_controls": [],
                 "failed_controls": [],
-                "not_applicable": []
+                "not_applicable": [],
             }
 
         return {
             "framework_results": framework_results,
             "current_step": "check_frameworks",
-            "status": WorkflowStatus.RUNNING.value
+            "status": WorkflowStatus.RUNNING.value,
         }
 
     async def _identify_gaps_node(self, state: ComplianceCheckState) -> Dict[str, Any]:
         """Identify compliance gaps."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="compliance_check",
-            step_name="identify_gaps"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="compliance_check", step_name="identify_gaps").inc()
 
         compliance_gaps = []
         for framework, results in state.get("framework_results", {}).items():
             for control in results.get("failed_controls", []):
-                compliance_gaps.append({
-                    "framework": framework,
-                    "control": control,
-                    "severity": "medium",
-                    "description": f"Failed control {control} in {framework}"
-                })
+                compliance_gaps.append(
+                    {
+                        "framework": framework,
+                        "control": control,
+                        "severity": "medium",
+                        "description": f"Failed control {control} in {framework}",
+                    }
+                )
 
-        return {
-            "compliance_gaps": compliance_gaps,
-            "current_step": "identify_gaps"
-        }
+        return {"compliance_gaps": compliance_gaps, "current_step": "identify_gaps"}
 
     async def _generate_remediation_node(self, state: ComplianceCheckState) -> Dict[str, Any]:
         """Generate remediation steps."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="compliance_check",
-            step_name="generate_remediation"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="compliance_check", step_name="generate_remediation").inc()
 
         remediation_steps = []
         for gap in state.get("compliance_gaps", []):
-            remediation_steps.append({
-                "gap": gap,
-                "remediation": f"Address {gap.get('control')} in {gap.get('framework')}",
-                "priority": gap.get("severity", "medium"),
-                "estimated_effort": "medium"
-            })
+            remediation_steps.append(
+                {
+                    "gap": gap,
+                    "remediation": f"Address {gap.get('control')} in {gap.get('framework')}",
+                    "priority": gap.get("severity", "medium"),
+                    "estimated_effort": "medium",
+                }
+            )
 
-        return {
-            "remediation_steps": remediation_steps,
-            "current_step": "generate_remediation"
-        }
+        return {"remediation_steps": remediation_steps, "current_step": "generate_remediation"}
 
     async def _compile_compliance_report_node(self, state: ComplianceCheckState) -> Dict[str, Any]:
         """Compile final compliance report."""
-        WORKFLOW_STEP_COUNTER.labels(
-            workflow_type="compliance_check",
-            step_name="compile_report"
-        ).inc()
+        WORKFLOW_STEP_COUNTER.labels(workflow_type="compliance_check", step_name="compile_report").inc()
 
         # Calculate overall score
         total_controls = 0
@@ -653,14 +554,14 @@ class WorkflowManager:
             "compliance_gaps": state.get("compliance_gaps", []),
             "remediation_steps": state.get("remediation_steps", []),
             "overall_score": overall_score,
-            "generated_at": datetime.utcnow().isoformat()
+            "generated_at": datetime.utcnow().isoformat(),
         }
 
         return {
             "compliance_report": compliance_report,
             "overall_score": overall_score,
             "current_step": "compile_report",
-            "status": WorkflowStatus.COMPLETED.value
+            "status": WorkflowStatus.COMPLETED.value,
         }
 
     # =========================================================================
@@ -672,7 +573,7 @@ class WorkflowManager:
         workflow_type: str,
         initial_state: Dict[str, Any],
         thread_id: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None
+        config: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Execute a workflow.
@@ -687,6 +588,7 @@ class WorkflowManager:
             Final workflow state
         """
         import time
+
         start_time = time.time()
 
         workflow_id = str(uuid.uuid4())
@@ -714,34 +616,18 @@ class WorkflowManager:
             final_state = await workflow.ainvoke(initial_state, execution_config)
 
             # Update metrics
-            WORKFLOW_EXECUTION_COUNTER.labels(
-                workflow_type=workflow_type,
-                status="success"
-            ).inc()
-            WORKFLOW_DURATION.labels(workflow_type=workflow_type).observe(
-                time.time() - start_time
-            )
+            WORKFLOW_EXECUTION_COUNTER.labels(workflow_type=workflow_type, status="success").inc()
+            WORKFLOW_DURATION.labels(workflow_type=workflow_type).observe(time.time() - start_time)
 
             return final_state
 
         except Exception as e:
             self.logger.error(f"Workflow execution failed: {e}")
-            WORKFLOW_EXECUTION_COUNTER.labels(
-                workflow_type=workflow_type,
-                status="error"
-            ).inc()
+            WORKFLOW_EXECUTION_COUNTER.labels(workflow_type=workflow_type, status="error").inc()
 
-            return {
-                **initial_state,
-                "status": WorkflowStatus.FAILED.value,
-                "error": str(e)
-            }
+            return {**initial_state, "status": WorkflowStatus.FAILED.value, "error": str(e)}
 
-    async def _execute_fallback_workflow(
-        self,
-        workflow_type: str,
-        initial_state: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def _execute_fallback_workflow(self, workflow_type: str, initial_state: Dict[str, Any]) -> Dict[str, Any]:
         """Execute workflow without LangGraph (fallback)."""
         self.logger.warning(f"Executing {workflow_type} workflow in fallback mode")
 
@@ -771,10 +657,7 @@ class WorkflowManager:
         return state
 
     async def resume_workflow(
-        self,
-        workflow_type: str,
-        thread_id: str,
-        human_input: Optional[Dict[str, Any]] = None
+        self, workflow_type: str, thread_id: str, human_input: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Resume a paused workflow (e.g., after human review).
@@ -807,11 +690,7 @@ class WorkflowManager:
 
         return final_state
 
-    def get_workflow_state(
-        self,
-        workflow_type: str,
-        thread_id: str
-    ) -> Optional[Dict[str, Any]]:
+    def get_workflow_state(self, workflow_type: str, thread_id: str) -> Optional[Dict[str, Any]]:
         """Get the current state of a workflow."""
         if not LANGGRAPH_AVAILABLE:
             return self.workflow_states.get(thread_id)
@@ -827,19 +706,11 @@ class WorkflowManager:
         """List available workflow types."""
         return list(self.workflows.keys())
 
-    def register_human_approval_callback(
-        self,
-        workflow_type: str,
-        callback: Callable
-    ) -> None:
+    def register_human_approval_callback(self, workflow_type: str, callback: Callable) -> None:
         """Register a callback for human approval steps."""
         self.human_approval_callbacks[workflow_type] = callback
 
-    def register_human_input_callback(
-        self,
-        workflow_type: str,
-        callback: Callable
-    ) -> None:
+    def register_human_input_callback(self, workflow_type: str, callback: Callable) -> None:
         """Register a callback for human input steps."""
         self.human_input_callbacks[workflow_type] = callback
 

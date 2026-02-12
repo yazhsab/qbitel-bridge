@@ -118,11 +118,7 @@ class AgentInstance:
     @property
     def average_task_time(self) -> float:
         """Calculate average task processing time."""
-        return (
-            self.total_processing_time / self.tasks_completed
-            if self.tasks_completed > 0
-            else 0.0
-        )
+        return self.total_processing_time / self.tasks_completed if self.tasks_completed > 0 else 0.0
 
     @property
     def idle_time(self) -> float:
@@ -200,9 +196,7 @@ class AgentPool:
         self.total_tasks_failed = 0
         self.total_response_time = 0.0
 
-        self.logger = logging.getLogger(
-            f"{__name__}.Pool.{config.agent_type}.{self.pool_id[:8]}"
-        )
+        self.logger = logging.getLogger(f"{__name__}.Pool.{config.agent_type}.{self.pool_id[:8]}")
 
     async def start(self) -> None:
         """Start the agent pool."""
@@ -221,9 +215,7 @@ class AgentPool:
         self._health_checker = asyncio.create_task(self._health_check_loop())
         self._scaler = asyncio.create_task(self._scaling_loop())
 
-        self.logger.info(
-            f"Agent pool started with {len(self.instances)} agents"
-        )
+        self.logger.info(f"Agent pool started with {len(self.instances)} agents")
 
     async def stop(self) -> None:
         """Stop the agent pool."""
@@ -272,9 +264,7 @@ class AgentPool:
         await self.task_queue.put(task)
         self.pending_tasks[task.task_id] = task
 
-        POOL_TASK_QUEUE.labels(agent_type=self.config.agent_type).set(
-            self.task_queue.qsize()
-        )
+        POOL_TASK_QUEUE.labels(agent_type=self.config.agent_type).set(self.task_queue.qsize())
 
         # Wait for result
         try:
@@ -290,10 +280,7 @@ class AgentPool:
             try:
                 # Get task from queue with timeout
                 try:
-                    task = await asyncio.wait_for(
-                        self.task_queue.get(),
-                        timeout=1.0
-                    )
+                    task = await asyncio.wait_for(self.task_queue.get(), timeout=1.0)
                 except asyncio.TimeoutError:
                     continue
 
@@ -308,9 +295,7 @@ class AgentPool:
                     continue
 
                 # Submit task to agent
-                asyncio.create_task(
-                    self._execute_task_on_agent(agent_instance, task)
-                )
+                asyncio.create_task(self._execute_task_on_agent(agent_instance, task))
 
             except asyncio.CancelledError:
                 break
@@ -318,11 +303,7 @@ class AgentPool:
                 self.logger.error(f"Task dispatch error: {e}")
                 await asyncio.sleep(0.1)
 
-    async def _execute_task_on_agent(
-        self,
-        instance: AgentInstance,
-        task: AgentTask
-    ) -> None:
+    async def _execute_task_on_agent(self, instance: AgentInstance, task: AgentTask) -> None:
         """Execute a task on a specific agent instance."""
         start_time = time.time()
         future = task.metadata.get("_future")
@@ -361,12 +342,7 @@ class AgentPool:
             if task.task_id in self.pending_tasks:
                 del self.pending_tasks[task.task_id]
 
-    async def _wait_for_task_completion(
-        self,
-        instance: AgentInstance,
-        task: AgentTask,
-        timeout: float = 300.0
-    ) -> Any:
+    async def _wait_for_task_completion(self, instance: AgentInstance, task: AgentTask, timeout: float = 300.0) -> Any:
         """Wait for a task to complete on an agent."""
         start_time = time.time()
 
@@ -389,10 +365,7 @@ class AgentPool:
 
         raise asyncio.TimeoutError(f"Task {task.task_id} timed out")
 
-    async def _select_agent(
-        self,
-        required_capabilities: List[AgentCapability]
-    ) -> Optional[AgentInstance]:
+    async def _select_agent(self, required_capabilities: List[AgentCapability]) -> Optional[AgentInstance]:
         """Select the best agent for a task based on load balancing strategy."""
         # Get eligible agents
         eligible = []
@@ -403,10 +376,7 @@ class AgentPool:
 
             # Check capabilities
             if required_capabilities:
-                if not all(
-                    instance.agent.has_capability(cap)
-                    for cap in required_capabilities
-                ):
+                if not all(instance.agent.has_capability(cap) for cap in required_capabilities):
                     continue
 
             # Check capacity
@@ -430,15 +400,13 @@ class AgentPool:
 
         elif strategy == LoadBalancingStrategy.RANDOM:
             import random
+
             return random.choice(eligible)
 
         elif strategy == LoadBalancingStrategy.CAPABILITY_MATCH:
             # Prefer agents with exact capability match
             if required_capabilities:
-                exact_match = [
-                    i for i in eligible
-                    if set(required_capabilities).issubset(i.agent.capabilities)
-                ]
+                exact_match = [i for i in eligible if set(required_capabilities).issubset(i.agent.capabilities)]
                 if exact_match:
                     return min(exact_match, key=lambda i: i.agent.task_queue.qsize())
             return min(eligible, key=lambda i: i.agent.task_queue.qsize())
@@ -446,9 +414,7 @@ class AgentPool:
         elif strategy == LoadBalancingStrategy.WEIGHTED:
             # Weight by success rate and response time
             def score(instance: AgentInstance) -> float:
-                load = instance.agent.task_queue.qsize() / max(
-                    instance.agent.max_concurrent_tasks, 1
-                )
+                load = instance.agent.task_queue.qsize() / max(instance.agent.max_concurrent_tasks, 1)
                 return (1 - instance.success_rate) + load + (instance.average_task_time / 100)
 
             return min(eligible, key=score)
@@ -458,9 +424,7 @@ class AgentPool:
     async def _spawn_agent(self) -> Optional[AgentInstance]:
         """Spawn a new agent instance."""
         if len(self.instances) >= self.config.max_agents:
-            self.logger.warning(
-                f"Cannot spawn agent: max agents ({self.config.max_agents}) reached"
-            )
+            self.logger.warning(f"Cannot spawn agent: max agents ({self.config.max_agents}) reached")
             return None
 
         try:
@@ -485,15 +449,9 @@ class AgentPool:
             self.instances[instance.instance_id] = instance
 
             # Update metrics
-            POOL_AGENTS_TOTAL.labels(
-                agent_type=self.config.agent_type,
-                status="active"
-            ).inc()
+            POOL_AGENTS_TOTAL.labels(agent_type=self.config.agent_type, status="active").inc()
 
-            self.logger.info(
-                f"Spawned agent: {instance.instance_id[:8]} "
-                f"(total: {len(self.instances)})"
-            )
+            self.logger.info(f"Spawned agent: {instance.instance_id[:8]} " f"(total: {len(self.instances)})")
 
             return instance
 
@@ -508,9 +466,7 @@ class AgentPool:
             return False
 
         if len(self.instances) <= self.config.min_agents:
-            self.logger.warning(
-                f"Cannot terminate agent: min agents ({self.config.min_agents}) reached"
-            )
+            self.logger.warning(f"Cannot terminate agent: min agents ({self.config.min_agents}) reached")
             return False
 
         try:
@@ -521,15 +477,9 @@ class AgentPool:
             del self.instances[instance_id]
 
             # Update metrics
-            POOL_AGENTS_TOTAL.labels(
-                agent_type=self.config.agent_type,
-                status="active"
-            ).dec()
+            POOL_AGENTS_TOTAL.labels(agent_type=self.config.agent_type, status="active").dec()
 
-            self.logger.info(
-                f"Terminated agent: {instance_id[:8]} "
-                f"(total: {len(self.instances)})"
-            )
+            self.logger.info(f"Terminated agent: {instance_id[:8]} " f"(total: {len(self.instances)})")
 
             return True
 
@@ -551,9 +501,7 @@ class AgentPool:
 
                     # Check heartbeat
                     if instance.agent.last_heartbeat:
-                        heartbeat_age = (
-                            datetime.utcnow() - instance.agent.last_heartbeat
-                        ).total_seconds()
+                        heartbeat_age = (datetime.utcnow() - instance.agent.last_heartbeat).total_seconds()
                         if heartbeat_age > self.config.health_check_interval * 3:
                             unhealthy.append(instance_id)
 
@@ -582,9 +530,7 @@ class AgentPool:
 
                 # Check cooldown
                 if self.last_scale_event:
-                    cooldown_remaining = (
-                        datetime.utcnow() - self.last_scale_event
-                    ).total_seconds()
+                    cooldown_remaining = (datetime.utcnow() - self.last_scale_event).total_seconds()
                     if cooldown_remaining < self.config.scale_cooldown_seconds:
                         await asyncio.sleep(10)
                         continue
@@ -592,33 +538,25 @@ class AgentPool:
                 # Scale up
                 if current_load > self.config.scale_up_threshold:
                     if len(self.instances) < self.config.max_agents:
-                        agents_to_add = min(
-                            2,  # Add up to 2 at a time
-                            self.config.max_agents - len(self.instances)
-                        )
+                        agents_to_add = min(2, self.config.max_agents - len(self.instances))  # Add up to 2 at a time
                         for _ in range(agents_to_add):
                             await self._spawn_agent()
 
                         self.last_scale_event = datetime.utcnow()
                         self.scale_up_count += 1
-                        POOL_SCALING_EVENTS.labels(
-                            agent_type=self.config.agent_type,
-                            direction="up"
-                        ).inc()
-                        self.logger.info(
-                            f"Scaled up pool: load={current_load:.2f}, "
-                            f"agents={len(self.instances)}"
-                        )
+                        POOL_SCALING_EVENTS.labels(agent_type=self.config.agent_type, direction="up").inc()
+                        self.logger.info(f"Scaled up pool: load={current_load:.2f}, " f"agents={len(self.instances)}")
 
                 # Scale down
                 elif current_load < self.config.scale_down_threshold:
                     if len(self.instances) > self.config.min_agents:
                         # Find idle agents to terminate
                         idle_agents = [
-                            instance for instance in self.instances.values()
+                            instance
+                            for instance in self.instances.values()
                             if (
-                                instance.agent.status == AgentStatus.IDLE and
-                                instance.idle_time > self.config.idle_timeout_seconds
+                                instance.agent.status == AgentStatus.IDLE
+                                and instance.idle_time > self.config.idle_timeout_seconds
                             )
                         ]
 
@@ -629,14 +567,8 @@ class AgentPool:
 
                             self.last_scale_event = datetime.utcnow()
                             self.scale_down_count += 1
-                            POOL_SCALING_EVENTS.labels(
-                                agent_type=self.config.agent_type,
-                                direction="down"
-                            ).inc()
-                            self.logger.info(
-                                f"Scaled down pool: load={current_load:.2f}, "
-                                f"agents={len(self.instances)}"
-                            )
+                            POOL_SCALING_EVENTS.labels(agent_type=self.config.agent_type, direction="down").inc()
+                            self.logger.info(f"Scaled down pool: load={current_load:.2f}, " f"agents={len(self.instances)}")
 
                 await asyncio.sleep(10)  # Check every 10 seconds
 
@@ -651,32 +583,17 @@ class AgentPool:
         if not self.instances:
             return 0.0
 
-        total_capacity = sum(
-            i.agent.max_concurrent_tasks for i in self.instances.values()
-        )
-        total_load = sum(
-            i.agent.task_queue.qsize() + len(i.agent.active_tasks)
-            for i in self.instances.values()
-        )
+        total_capacity = sum(i.agent.max_concurrent_tasks for i in self.instances.values())
+        total_load = sum(i.agent.task_queue.qsize() + len(i.agent.active_tasks) for i in self.instances.values())
 
         return total_load / total_capacity if total_capacity > 0 else 0.0
 
     def get_stats(self) -> PoolStats:
         """Get pool statistics."""
-        active = sum(
-            1 for i in self.instances.values()
-            if i.agent.status == AgentStatus.BUSY
-        )
-        idle = sum(
-            1 for i in self.instances.values()
-            if i.agent.status == AgentStatus.IDLE
-        )
+        active = sum(1 for i in self.instances.values() if i.agent.status == AgentStatus.BUSY)
+        idle = sum(1 for i in self.instances.values() if i.agent.status == AgentStatus.IDLE)
 
-        avg_response = (
-            self.total_response_time / self.total_tasks_completed
-            if self.total_tasks_completed > 0
-            else 0.0
-        )
+        avg_response = self.total_response_time / self.total_tasks_completed if self.total_tasks_completed > 0 else 0.0
 
         return PoolStats(
             pool_id=self.pool_id,
@@ -779,10 +696,7 @@ class AgentPoolManager:
 
         return await pool.submit_task(task, required_capabilities)
 
-    def _find_pool_with_capabilities(
-        self,
-        capabilities: List[AgentCapability]
-    ) -> Optional[AgentPool]:
+    def _find_pool_with_capabilities(self, capabilities: List[AgentCapability]) -> Optional[AgentPool]:
         """Find a pool that has agents with the required capabilities."""
         for pool in self.pools.values():
             pool_caps = set(pool.config.agent_config.capabilities)
@@ -790,23 +704,22 @@ class AgentPoolManager:
                 return pool
         return None
 
-    async def get_agents_with_capabilities(
-        self,
-        capabilities: List[AgentCapability]
-    ) -> List[Dict[str, Any]]:
+    async def get_agents_with_capabilities(self, capabilities: List[AgentCapability]) -> List[Dict[str, Any]]:
         """Get all agents with the specified capabilities."""
         agents = []
         for pool in self.pools.values():
             for instance in pool.instances.values():
                 if all(instance.agent.has_capability(cap) for cap in capabilities):
-                    agents.append({
-                        "agent_id": instance.agent.agent_id,
-                        "agent_type": instance.agent_type,
-                        "capabilities": [c.value for c in instance.agent.capabilities],
-                        "status": instance.agent.status.value,
-                        "queue_size": instance.agent.task_queue.qsize(),
-                        "success_rate": instance.success_rate,
-                    })
+                    agents.append(
+                        {
+                            "agent_id": instance.agent.agent_id,
+                            "agent_type": instance.agent_type,
+                            "capabilities": [c.value for c in instance.agent.capabilities],
+                            "status": instance.agent.status.value,
+                            "queue_size": instance.agent.task_queue.qsize(),
+                            "success_rate": instance.success_rate,
+                        }
+                    )
         return agents
 
     async def get_status(self) -> Dict[str, Any]:
@@ -841,13 +754,15 @@ class AgentPoolManager:
         agents = []
         for pool in self.pools.values():
             for instance in pool.instances.values():
-                agents.append({
-                    "agent_id": instance.agent.agent_id,
-                    "agent_type": instance.agent_type,
-                    "pool_id": pool.pool_id,
-                    "status": instance.agent.status.value,
-                    "capabilities": [c.value for c in instance.agent.capabilities],
-                    "tasks_completed": instance.tasks_completed,
-                    "success_rate": instance.success_rate,
-                })
+                agents.append(
+                    {
+                        "agent_id": instance.agent.agent_id,
+                        "agent_type": instance.agent_type,
+                        "pool_id": pool.pool_id,
+                        "status": instance.agent.status.value,
+                        "capabilities": [c.value for c in instance.agent.capabilities],
+                        "tasks_completed": instance.tasks_completed,
+                        "success_rate": instance.success_rate,
+                    }
+                )
         return agents

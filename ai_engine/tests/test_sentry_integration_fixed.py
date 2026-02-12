@@ -32,15 +32,11 @@ class TestSentryErrorTracker:
     @pytest.fixture
     def sentry_tracker(self, mock_sentry_sdk):
         """Create SentryErrorTracker instance."""
-        return SentryErrorTracker(
-            dsn="https://test@sentry.io/123", environment="test", release="1.0.0"
-        )
+        return SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", release="1.0.0")
 
     def test_initialization_with_dsn(self, mock_sentry_sdk):
         """Test initialization with DSN."""
-        tracker = SentryErrorTracker(
-            dsn="https://test@sentry.io/123", environment="test", release="1.0.0"
-        )
+        tracker = SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", release="1.0.0")
 
         assert tracker.dsn == "https://test@sentry.io/123"
         assert tracker.environment == "test"
@@ -115,9 +111,7 @@ class TestSentryErrorTracker:
 
         sentry_tracker.capture_message("Test message", level="info")
 
-        mock_sentry_sdk.capture_message.assert_called_once_with(
-            "Test message", level="info"
-        )
+        mock_sentry_sdk.capture_message.assert_called_once_with("Test message", level="info")
 
     def test_capture_message_not_initialized(self, sentry_tracker, mock_sentry_sdk):
         """Test capturing messages when not initialized."""
@@ -132,9 +126,7 @@ class TestSentryErrorTracker:
 
         sentry_tracker.add_breadcrumb("Test breadcrumb", category="test")
 
-        mock_sentry_sdk.add_breadcrumb.assert_called_once_with(
-            message="Test breadcrumb", category="test"
-        )
+        mock_sentry_sdk.add_breadcrumb.assert_called_once_with(message="Test breadcrumb", category="test")
 
     def test_set_tag(self, sentry_tracker, mock_sentry_sdk):
         """Test setting tags."""
@@ -212,9 +204,7 @@ class TestSentryErrorTracker:
 
     def test_custom_configuration(self, mock_sentry_sdk):
         """Test custom configuration values."""
-        tracker = SentryErrorTracker(
-            traces_sample_rate=0.5, profiles_sample_rate=0.2, enable_tracing=False
-        )
+        tracker = SentryErrorTracker(traces_sample_rate=0.5, profiles_sample_rate=0.2, enable_tracing=False)
 
         assert tracker.traces_sample_rate == 0.5
         assert tracker.profiles_sample_rate == 0.2

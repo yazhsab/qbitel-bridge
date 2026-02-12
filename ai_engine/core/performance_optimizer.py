@@ -110,9 +110,7 @@ class LRUCacheWithTTL:
     def get_metrics(self) -> CacheMetrics:
         with self._lock:
             total_requests = self._metrics.hits + self._metrics.misses
-            self._metrics.hit_rate = (
-                self._metrics.hits / total_requests if total_requests > 0 else 0.0
-            )
+            self._metrics.hit_rate = self._metrics.hits / total_requests if total_requests > 0 else 0.0
             self._metrics.memory_usage = len(pickle.dumps(self._cache))
             return self._metrics
 
@@ -134,8 +132,7 @@ class RedisCache:
             if data:
                 self._metrics.hits += 1
                 self._metrics.avg_access_time = (
-                    self._metrics.avg_access_time * (self._metrics.hits - 1)
-                    + access_time
+                    self._metrics.avg_access_time * (self._metrics.hits - 1) + access_time
                 ) / self._metrics.hits
                 return pickle.loads(data.encode())
             else:
@@ -157,18 +154,14 @@ class RedisCache:
         info = self.redis_client.info()
         self._metrics.memory_usage = info.get("used_memory", 0)
         total_requests = self._metrics.hits + self._metrics.misses
-        self._metrics.hit_rate = (
-            self._metrics.hits / total_requests if total_requests > 0 else 0.0
-        )
+        self._metrics.hit_rate = self._metrics.hits / total_requests if total_requests > 0 else 0.0
         return self._metrics
 
 
 class ComputationCache:
     """High-performance cache for expensive computations."""
 
-    def __init__(
-        self, max_size: int = 1000, use_redis: bool = False, redis_url: str = None
-    ):
+    def __init__(self, max_size: int = 1000, use_redis: bool = False, redis_url: str = None):
         self.local_cache = LRUCacheWithTTL(max_size)
         self.redis_cache = RedisCache(redis_url) if use_redis and redis_url else None
 
@@ -177,9 +170,7 @@ class ComputationCache:
         key_data = f"{func_name}:{args}:{sorted(kwargs.items())}"
         return hashlib.sha256(key_data.encode()).hexdigest()[:16]
 
-    async def get_or_compute(
-        self, key: str, compute_func: Callable, *args, **kwargs
-    ) -> Any:
+    async def get_or_compute(self, key: str, compute_func: Callable, *args, **kwargs) -> Any:
         """Get from cache or compute and store."""
         # Try local cache first
         result = self.local_cache.get(key)
@@ -268,9 +259,7 @@ class ThreadPoolManager:
         loop = asyncio.get_event_loop()
         self._active_tasks += 1
         try:
-            result = await loop.run_in_executor(
-                self.process_pool, func, *args, **kwargs
-            )
+            result = await loop.run_in_executor(self.process_pool, func, *args, **kwargs)
             self._completed_tasks += 1
             return result
         finally:
@@ -292,11 +281,7 @@ class ThreadPoolManager:
             "max_threads": self.max_threads,
             "active_tasks": self._active_tasks,
             "completed_tasks": self._completed_tasks,
-            "thread_pool_size": (
-                self.thread_pool._threads.__len__()
-                if hasattr(self.thread_pool, "_threads")
-                else 0
-            ),
+            "thread_pool_size": (self.thread_pool._threads.__len__() if hasattr(self.thread_pool, "_threads") else 0),
         }
 
     def shutdown(self):
@@ -332,8 +317,7 @@ class BatchProcessor:
             # Check if batch is ready for processing
             current_time = time.time()
             should_flush = (
-                len(processor["batch"]) >= self.batch_size
-                or current_time - processor["last_flush"] >= self.flush_interval
+                len(processor["batch"]) >= self.batch_size or current_time - processor["last_flush"] >= self.flush_interval
             )
 
             if should_flush:
@@ -405,14 +389,10 @@ class PerformanceOptimizer:
             @wraps(func)
             async def wrapper(*args, **kwargs):
                 # Generate cache key
-                key = cache_key or self.computation_cache.cache_key(
-                    func.__name__, args, kwargs
-                )
+                key = cache_key or self.computation_cache.cache_key(func.__name__, args, kwargs)
 
                 # Get or compute
-                return await self.computation_cache.get_or_compute(
-                    key, func, *args, **kwargs
-                )
+                return await self.computation_cache.get_or_compute(key, func, *args, **kwargs)
 
             return wrapper
 
@@ -434,9 +414,7 @@ class PerformanceOptimizer:
                 self._request_times = self._request_times[-1000:]  # Keep last 1000
 
             self._metrics.avg_response_time = np.mean(self._request_times)
-            self._metrics.throughput_per_sec = self._metrics.total_requests / (
-                time.time() - self._start_time
-            )
+            self._metrics.throughput_per_sec = self._metrics.total_requests / (time.time() - self._start_time)
 
     def get_system_metrics(self) -> PerformanceMetrics:
         """Get current system performance metrics."""
@@ -498,9 +476,7 @@ class PerformanceOptimizer:
                 name: {
                     "hit_rate": cache.hit_rate if hasattr(cache, "hit_rate") else 0.0,
                     "size": (
-                        cache.get("pool_size", cache.get("hits", 0))
-                        if isinstance(cache, dict)
-                        else getattr(cache, "hits", 0)
+                        cache.get("pool_size", cache.get("hits", 0)) if isinstance(cache, dict) else getattr(cache, "hits", 0)
                     ),
                 }
                 for name, cache in metrics.cache_metrics.items()

@@ -32,13 +32,25 @@ class ComplianceValidator(BaseValidator):
 
     # Standard thresholds (USD)
     CTR_THRESHOLD = 10_000  # Currency Transaction Report threshold
-    SAR_THRESHOLD = 5_000   # Suspicious Activity Report review threshold
+    SAR_THRESHOLD = 5_000  # Suspicious Activity Report review threshold
     WIRE_REPORTING_THRESHOLD = 3_000  # Wire transfer reporting threshold
 
     # High-risk countries (sample list - should be maintained externally)
     HIGH_RISK_COUNTRIES = {
-        "KP", "IR", "SY", "CU", "VE", "MM", "BY", "RU",
-        "AF", "YE", "LY", "SO", "SD", "ZW",
+        "KP",
+        "IR",
+        "SY",
+        "CU",
+        "VE",
+        "MM",
+        "BY",
+        "RU",
+        "AF",
+        "YE",
+        "LY",
+        "SO",
+        "SD",
+        "ZW",
     }
 
     def __init__(self, strict: bool = True, custom_thresholds: Dict[str, float] = None):
@@ -99,8 +111,8 @@ class ComplianceValidator(BaseValidator):
     def _extract_amount(self, data: Any) -> Optional[float]:
         """Extract amount from transaction data."""
         if isinstance(data, dict):
-            return data.get('amount')
-        elif hasattr(data, 'amount'):
+            return data.get("amount")
+        elif hasattr(data, "amount"):
             amount = data.amount
             if isinstance(amount, Decimal):
                 return float(amount)
@@ -112,34 +124,37 @@ class ComplianceValidator(BaseValidator):
         parties = []
 
         if isinstance(data, dict):
-            for key in ['originator', 'beneficiary', 'sender', 'receiver']:
+            for key in ["originator", "beneficiary", "sender", "receiver"]:
                 if key in data:
-                    parties.append(data[key] if isinstance(data[key], dict) else {'name': str(data[key])})
-        elif hasattr(data, 'originator') or hasattr(data, 'beneficiary'):
-            if hasattr(data, 'originator') and data.originator:
-                parties.append({
-                    'name': getattr(data.originator, 'name', ''),
-                    'country': getattr(getattr(data.originator, 'address', None), 'country', ''),
-                })
-            if hasattr(data, 'beneficiary') and data.beneficiary:
-                parties.append({
-                    'name': getattr(data.beneficiary, 'name', ''),
-                    'country': getattr(getattr(data.beneficiary, 'address', None), 'country', ''),
-                })
+                    parties.append(data[key] if isinstance(data[key], dict) else {"name": str(data[key])})
+        elif hasattr(data, "originator") or hasattr(data, "beneficiary"):
+            if hasattr(data, "originator") and data.originator:
+                parties.append(
+                    {
+                        "name": getattr(data.originator, "name", ""),
+                        "country": getattr(getattr(data.originator, "address", None), "country", ""),
+                    }
+                )
+            if hasattr(data, "beneficiary") and data.beneficiary:
+                parties.append(
+                    {
+                        "name": getattr(data.beneficiary, "name", ""),
+                        "country": getattr(getattr(data.beneficiary, "address", None), "country", ""),
+                    }
+                )
 
         return parties
 
     def _extract_type(self, data: Any) -> str:
         """Extract transaction type."""
         if isinstance(data, dict):
-            return data.get('type', 'unknown')
-        elif hasattr(data, 'business_function_code'):
+            return data.get("type", "unknown")
+        elif hasattr(data, "business_function_code"):
             bfc = data.business_function_code
-            return bfc.code if hasattr(bfc, 'code') else str(bfc)
-        return 'unknown'
+            return bfc.code if hasattr(bfc, "code") else str(bfc)
+        return "unknown"
 
-    def _check_amount_thresholds(self, amount: float, tx_type: str,
-                                  result: ValidationResult) -> None:
+    def _check_amount_thresholds(self, amount: float, tx_type: str, result: ValidationResult) -> None:
         """Check amount against reporting thresholds."""
         # CTR threshold
         if amount >= self.thresholds["ctr"]:
@@ -178,7 +193,7 @@ class ComplianceValidator(BaseValidator):
     def _check_geographic_risk(self, parties: List[Dict], result: ValidationResult) -> None:
         """Check parties for geographic risk factors."""
         for i, party in enumerate(parties):
-            country = party.get('country', '').upper()
+            country = party.get("country", "").upper()
 
             if country in self.HIGH_RISK_COUNTRIES:
                 result.add_warning(
@@ -271,8 +286,7 @@ class AMLValidator(ComplianceValidator):
 
         return result
 
-    def _check_velocity(self, data: Any, history: List[Dict],
-                        result: ValidationResult) -> None:
+    def _check_velocity(self, data: Any, history: List[Dict], result: ValidationResult) -> None:
         """Check transaction velocity against recent history."""
         current_amount = self._extract_amount(data) or 0
         current_time = datetime.now()
@@ -282,13 +296,13 @@ class AMLValidator(ComplianceValidator):
         tx_count = 1
 
         for tx in history:
-            tx_time = tx.get('timestamp')
+            tx_time = tx.get("timestamp")
             if tx_time:
                 if isinstance(tx_time, str):
                     tx_time = datetime.fromisoformat(tx_time)
 
                 if current_time - tx_time <= self.velocity_window:
-                    total_amount += tx.get('amount', 0)
+                    total_amount += tx.get("amount", 0)
                     tx_count += 1
 
         # Check if aggregate exceeds CTR threshold
@@ -302,8 +316,7 @@ class AMLValidator(ComplianceValidator):
             )
             result.metadata["velocity_ctr_exceeded"] = True
 
-    def _check_structuring_pattern(self, data: Any, history: List[Dict],
-                                    result: ValidationResult) -> None:
+    def _check_structuring_pattern(self, data: Any, history: List[Dict], result: ValidationResult) -> None:
         """Detect potential structuring patterns."""
         current_amount = self._extract_amount(data) or 0
         ctr_threshold = self.thresholds["ctr"]
@@ -314,7 +327,7 @@ class AMLValidator(ComplianceValidator):
             below_threshold_count = 1
 
         for tx in history:
-            tx_amount = tx.get('amount', 0)
+            tx_amount = tx.get("amount", 0)
             if ctr_threshold * 0.8 <= tx_amount < ctr_threshold:
                 below_threshold_count += 1
 
@@ -370,7 +383,9 @@ class SanctionsValidator(BaseValidator):
     # Sample sanctioned terms (in production, use actual sanctions lists)
     SAMPLE_BLOCKED_TERMS = {
         # These are examples - real implementation would use OFAC data
-        "BLOCKED_ENTITY", "SANCTIONED_BANK", "PROHIBITED_PERSON",
+        "BLOCKED_ENTITY",
+        "SANCTIONED_BANK",
+        "PROHIBITED_PERSON",
     }
 
     # Sanctioned jurisdictions
@@ -426,9 +441,9 @@ class SanctionsValidator(BaseValidator):
                     f"Potential sanctions match for {party_type}: {match['match_type']}",
                     field=party_type,
                     severity=severity,
-                    match_type=match['match_type'],
-                    matched_value=match['matched_value'],
-                    list_name=match.get('list_name', 'Unknown'),
+                    match_type=match["match_type"],
+                    matched_value=match["matched_value"],
+                    list_name=match.get("list_name", "Unknown"),
                 )
                 result.metadata[f"sanctions_match_{party_type}"] = True
 
@@ -447,33 +462,47 @@ class SanctionsValidator(BaseValidator):
         parties = {}
 
         if isinstance(data, dict):
-            for key in ['originator', 'beneficiary', 'sender', 'receiver',
-                        'originator_fi', 'beneficiary_fi', 'intermediary_fi']:
+            for key in [
+                "originator",
+                "beneficiary",
+                "sender",
+                "receiver",
+                "originator_fi",
+                "beneficiary_fi",
+                "intermediary_fi",
+            ]:
                 if key in data and data[key]:
-                    parties[key] = data[key] if isinstance(data[key], dict) else {'name': str(data[key])}
+                    parties[key] = data[key] if isinstance(data[key], dict) else {"name": str(data[key])}
         else:
             # Handle message objects
-            for attr in ['originator', 'beneficiary', 'sender', 'receiver',
-                         'originator_fi', 'beneficiary_fi', 'intermediary_fi']:
+            for attr in [
+                "originator",
+                "beneficiary",
+                "sender",
+                "receiver",
+                "originator_fi",
+                "beneficiary_fi",
+                "intermediary_fi",
+            ]:
                 obj = getattr(data, attr, None)
                 if obj:
                     parties[attr] = {
-                        'name': getattr(obj, 'name', ''),
-                        'identifier': getattr(obj, 'identifier', ''),
-                        'address': self._extract_address(obj),
+                        "name": getattr(obj, "name", ""),
+                        "identifier": getattr(obj, "identifier", ""),
+                        "address": self._extract_address(obj),
                     }
 
         return parties
 
     def _extract_address(self, obj: Any) -> Dict:
         """Extract address from party object."""
-        address = getattr(obj, 'address', None)
+        address = getattr(obj, "address", None)
         if address:
             return {
-                'line1': getattr(address, 'line1', ''),
-                'line2': getattr(address, 'line2', ''),
-                'city': getattr(address, 'city', ''),
-                'country': getattr(address, 'country', ''),
+                "line1": getattr(address, "line1", ""),
+                "line2": getattr(address, "line2", ""),
+                "city": getattr(address, "city", ""),
+                "country": getattr(address, "country", ""),
             }
         return {}
 
@@ -482,29 +511,33 @@ class SanctionsValidator(BaseValidator):
         matches = []
 
         # Get searchable text
-        name = party_info.get('name', '').upper()
-        identifier = party_info.get('identifier', '').upper()
-        address = party_info.get('address', {})
+        name = party_info.get("name", "").upper()
+        identifier = party_info.get("identifier", "").upper()
+        address = party_info.get("address", {})
 
         # Check name against blocked terms (simplified)
         for term in self.SAMPLE_BLOCKED_TERMS:
             if term in name:
-                matches.append({
-                    'match_type': 'NAME_MATCH',
-                    'matched_value': name,
-                    'matched_term': term,
-                    'list_name': 'SAMPLE_LIST',
-                })
+                matches.append(
+                    {
+                        "match_type": "NAME_MATCH",
+                        "matched_value": name,
+                        "matched_term": term,
+                        "list_name": "SAMPLE_LIST",
+                    }
+                )
 
         # Check country
-        country = address.get('country', '').upper()
+        country = address.get("country", "").upper()
         if country in self.SANCTIONED_JURISDICTIONS:
-            matches.append({
-                'match_type': 'JURISDICTION_MATCH',
-                'matched_value': country,
-                'matched_term': self.SANCTIONED_JURISDICTIONS[country],
-                'list_name': 'JURISDICTION_LIST',
-            })
+            matches.append(
+                {
+                    "match_type": "JURISDICTION_MATCH",
+                    "matched_value": country,
+                    "matched_term": self.SANCTIONED_JURISDICTIONS[country],
+                    "list_name": "JURISDICTION_LIST",
+                }
+            )
 
         return matches
 
@@ -517,13 +550,12 @@ class SanctionsValidator(BaseValidator):
             self._extract_countries_dict(data, countries)
         else:
             # Handle message objects
-            for attr in ['originator', 'beneficiary', 'sender', 'receiver',
-                         'originator_fi', 'beneficiary_fi']:
+            for attr in ["originator", "beneficiary", "sender", "receiver", "originator_fi", "beneficiary_fi"]:
                 obj = getattr(data, attr, None)
                 if obj:
-                    address = getattr(obj, 'address', None)
+                    address = getattr(obj, "address", None)
                     if address:
-                        country = getattr(address, 'country', '')
+                        country = getattr(address, "country", "")
                         if country:
                             countries.add(country.upper())
 
@@ -541,7 +573,7 @@ class SanctionsValidator(BaseValidator):
     def _extract_countries_dict(self, data: Dict, countries: Set[str]) -> None:
         """Recursively extract country codes from dictionary."""
         for key, value in data.items():
-            if key.lower() == 'country' and isinstance(value, str):
+            if key.lower() == "country" and isinstance(value, str):
                 countries.add(value.upper())
             elif isinstance(value, dict):
                 self._extract_countries_dict(value, countries)

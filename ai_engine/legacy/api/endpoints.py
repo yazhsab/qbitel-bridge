@@ -73,7 +73,6 @@ from .schemas import (
 from .auth import get_current_user, require_permission
 from .middleware import get_request_context
 
-
 # Initialize router
 legacy_router = APIRouter(
     prefix="/api/v1/legacy-system-whisperer",
@@ -159,9 +158,7 @@ async def legacy_exception_handler(request, exc: LegacySystemWhispererException)
         status_code=status_code,
         content={
             "success": False,
-            "error_code": (
-                exc.category.value if hasattr(exc, "category") else "UNKNOWN_ERROR"
-            ),
+            "error_code": (exc.category.value if hasattr(exc, "category") else "UNKNOWN_ERROR"),
             "message": str(exc),
             "severity": exc.severity.value if hasattr(exc, "severity") else "medium",
             "timestamp": datetime.now().isoformat(),
@@ -187,11 +184,7 @@ async def health_check():
         monitor_status = monitor.get_monitoring_status()
 
         # Calculate uptime
-        uptime = (
-            (datetime.now() - service.start_time).total_seconds()
-            if service.start_time
-            else 0
-        )
+        uptime = (datetime.now() - service.start_time).total_seconds() if service.start_time else 0
 
         return HealthCheckResponse(
             status=service_status.overall_status,
@@ -206,9 +199,7 @@ async def health_check():
                 },
                 "monitoring_system": {
                     "component_name": "monitoring_system",
-                    "status": (
-                        "healthy" if monitor_status["monitoring_active"] else "degraded"
-                    ),
+                    "status": ("healthy" if monitor_status["monitoring_active"] else "degraded"),
                     "last_check": datetime.now(),
                     "error_count": 0,
                 },
@@ -230,9 +221,7 @@ async def health_check():
 
 
 # System Registration Endpoints
-@legacy_router.post(
-    "/systems", response_model=SystemRegistrationResponse, status_code=HTTP_201_CREATED
-)
+@legacy_router.post("/systems", response_model=SystemRegistrationResponse, status_code=HTTP_201_CREATED)
 async def register_system(
     request: SystemRegistrationRequest,
     background_tasks: BackgroundTasks,
@@ -262,24 +251,18 @@ async def register_system(
         )
 
         # Register system
-        result = await service.register_legacy_system(
-            system_context, enable_monitoring=request.enable_monitoring
-        )
+        result = await service.register_legacy_system(system_context, enable_monitoring=request.enable_monitoring)
 
         # Record metrics
         monitor.record_system_registration(system_context)
 
         # Background task to initialize monitoring
         if request.enable_monitoring:
-            background_tasks.add_task(
-                _initialize_system_monitoring, service, system_context.system_id
-            )
+            background_tasks.add_task(_initialize_system_monitoring, service, system_context.system_id)
 
         logger.info(f"System registered successfully: {request.system_id}")
 
-        return SystemRegistrationResponse(
-            success=True, message="System registered successfully", data=result
-        )
+        return SystemRegistrationResponse(success=True, message="System registered successfully", data=result)
 
     except Exception as e:
         logger.error(f"System registration failed: {e}")
@@ -305,9 +288,7 @@ async def get_system_dashboard(
     try:
         dashboard = service.get_system_dashboard(system_id)
 
-        return SystemDashboardResponse(
-            success=True, message="Dashboard retrieved successfully", data=dashboard
-        )
+        return SystemDashboardResponse(success=True, message="Dashboard retrieved successfully", data=dashboard)
 
     except Exception as e:
         logger.error(f"Dashboard retrieval failed for {system_id}: {e}")
@@ -342,9 +323,7 @@ async def unregister_system(
 
 
 # Health Analysis Endpoints
-@legacy_router.post(
-    "/systems/{system_id}/analyze", response_model=HealthAnalysisResponse
-)
+@legacy_router.post("/systems/{system_id}/analyze", response_model=HealthAnalysisResponse)
 async def analyze_system_health(
     system_id: str = Path(..., description="System ID"),
     request: HealthAnalysisRequest = None,
@@ -415,18 +394,14 @@ async def analyze_system_health(
 
         logger.info(f"Health analysis completed for {system_id}")
 
-        return HealthAnalysisResponse(
-            success=True, message="Health analysis completed successfully", data=result
-        )
+        return HealthAnalysisResponse(success=True, message="Health analysis completed successfully", data=result)
 
     except Exception as e:
         logger.error(f"Health analysis failed for {system_id}: {e}")
         if "not registered" in str(e):
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(e))
         elif isinstance(e, AnomalyDetectionException):
-            raise HTTPException(
-                status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
-            )
+            raise HTTPException(status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
         raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
@@ -459,9 +434,7 @@ async def capture_expert_knowledge(
 
         logger.info(f"Expert knowledge captured from {request.expert_id}")
 
-        return ExpertKnowledgeResponse(
-            success=True, message="Expert knowledge captured successfully", data=result
-        )
+        return ExpertKnowledgeResponse(success=True, message="Expert knowledge captured successfully", data=result)
 
     except Exception as e:
         logger.error(f"Knowledge capture failed: {e}")
@@ -474,9 +447,7 @@ async def search_knowledge(
     query: str = Query(..., min_length=1, max_length=500, description="Search query"),
     system_id: Optional[str] = Query(None, description="Filter by system ID"),
     category: Optional[str] = Query(None, description="Filter by knowledge category"),
-    confidence_threshold: float = Query(
-        0.5, ge=0, le=1, description="Minimum confidence threshold"
-    ),
+    confidence_threshold: float = Query(0.5, ge=0, le=1, description="Minimum confidence threshold"),
     max_results: int = Query(10, ge=1, le=100, description="Maximum number of results"),
     current_user=Depends(get_current_user),
     service: LegacySystemWhispererService = Depends(get_service),
@@ -514,9 +485,7 @@ async def search_knowledge(
 
 
 # Decision Support Endpoints
-@legacy_router.post(
-    "/systems/{system_id}/decision-support", response_model=DecisionSupportResponse
-)
+@legacy_router.post("/systems/{system_id}/decision-support", response_model=DecisionSupportResponse)
 async def get_decision_support(
     system_id: str = Path(..., description="System ID"),
     request: DecisionSupportRequest = None,
@@ -557,9 +526,7 @@ async def get_decision_support(
 
         logger.info(f"Decision support generated for {system_id}")
 
-        return DecisionSupportResponse(
-            success=True, message="Decision support generated successfully", data=result
-        )
+        return DecisionSupportResponse(success=True, message="Decision support generated successfully", data=result)
 
     except Exception as e:
         logger.error(f"Decision support failed for {system_id}: {e}")
@@ -569,9 +536,7 @@ async def get_decision_support(
 
 
 # Maintenance Scheduling Endpoints
-@legacy_router.post(
-    "/maintenance/schedule", response_model=MaintenanceSchedulingResponse
-)
+@legacy_router.post("/maintenance/schedule", response_model=MaintenanceSchedulingResponse)
 async def schedule_maintenance(
     request: MaintenanceSchedulingRequest,
     background_tasks: BackgroundTasks,
@@ -671,12 +636,9 @@ async def bulk_system_analysis(
 
         summary = {
             "total_systems": len(request.system_ids),
-            "successful_analyses": len(
-                [r for r in results if r["status"] == "completed"]
-            ),
+            "successful_analyses": len([r for r in results if r["status"] == "completed"]),
             "failed_analyses": len([r for r in results if r["status"] == "failed"]),
-            "average_processing_time_ms": sum(r["processing_time_ms"] for r in results)
-            / len(results),
+            "average_processing_time_ms": sum(r["processing_time_ms"] for r in results) / len(results),
         }
 
         logger.info(f"Bulk analysis completed for {len(request.system_ids)} systems")
@@ -694,9 +656,7 @@ async def bulk_system_analysis(
 
 
 # Monitoring and Alerting Endpoints
-@legacy_router.post(
-    "/alerts/rules", response_model=AlertRuleResponse, status_code=HTTP_201_CREATED
-)
+@legacy_router.post("/alerts/rules", response_model=AlertRuleResponse, status_code=HTTP_201_CREATED)
 async def create_alert_rule(
     request: CreateAlertRuleRequest,
     current_user=Depends(get_current_user),
@@ -724,9 +684,7 @@ async def create_alert_rule(
 
         logger.info(f"Alert rule created: {alert_rule.rule_name}")
 
-        return AlertRuleResponse(
-            success=True, message="Alert rule created successfully", data=alert_rule
-        )
+        return AlertRuleResponse(success=True, message="Alert rule created successfully", data=alert_rule)
 
     except Exception as e:
         logger.error(f"Alert rule creation failed: {e}")
@@ -828,11 +786,7 @@ async def get_service_status(
                 "name": "Legacy System Whisperer",
                 "version": "1.0.0",
                 "status": service_status.overall_status,
-                "uptime_seconds": (
-                    (datetime.now() - service.start_time).total_seconds()
-                    if service.start_time
-                    else 0
-                ),
+                "uptime_seconds": ((datetime.now() - service.start_time).total_seconds() if service.start_time else 0),
                 "initialized": service.is_initialized,
             },
             "component_status": service_status.components_status,
@@ -885,9 +839,7 @@ async def get_metrics(
 
 
 # Background task functions
-async def _initialize_system_monitoring(
-    service: LegacySystemWhispererService, system_id: str
-):
+async def _initialize_system_monitoring(service: LegacySystemWhispererService, system_id: str):
     """Initialize monitoring for a newly registered system."""
     try:
         logger.info(f"Initializing monitoring for system: {system_id}")

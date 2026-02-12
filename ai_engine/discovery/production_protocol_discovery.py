@@ -28,7 +28,6 @@ from ..core.exceptions import (
 )
 from ..models.base import BaseModel, ModelInput, ModelOutput
 
-
 # Prometheus metrics
 DISCOVERY_SLA_VIOLATIONS = Counter(
     "qbitel_discovery_sla_violations_total",
@@ -203,9 +202,7 @@ class ExplainableDiscovery:
             "sequence_regularity",
         ]
 
-    async def explain_prediction(
-        self, model: BaseModel, input_data: ModelInput, prediction: ModelOutput
-    ) -> ExplanationData:
+    async def explain_prediction(self, model: BaseModel, input_data: ModelInput, prediction: ModelOutput) -> ExplanationData:
         """
         Generate explanation for a prediction.
 
@@ -219,9 +216,7 @@ class ExplainableDiscovery:
         """
         try:
             # Calculate feature importances using gradient-based method
-            feature_importances = await self._calculate_feature_importance(
-                model, input_data, prediction
-            )
+            feature_importances = await self._calculate_feature_importance(model, input_data, prediction)
 
             # Extract decision paths
             decision_paths = await self._extract_decision_paths(model, input_data)
@@ -230,14 +225,10 @@ class ExplainableDiscovery:
             attention_weights = await self._extract_attention_weights(model, input_data)
 
             # Generate confidence breakdown
-            confidence_breakdown = self._generate_confidence_breakdown(
-                prediction, feature_importances
-            )
+            confidence_breakdown = self._generate_confidence_breakdown(prediction, feature_importances)
 
             # Generate human-readable reasoning
-            reasoning = self._generate_reasoning(
-                feature_importances, decision_paths, confidence_breakdown
-            )
+            reasoning = self._generate_reasoning(feature_importances, decision_paths, confidence_breakdown)
 
             return ExplanationData(
                 feature_importances=feature_importances,
@@ -301,9 +292,7 @@ class ExplainableDiscovery:
 
         return importances
 
-    async def _extract_decision_paths(
-        self, model: BaseModel, input_data: ModelInput
-    ) -> List[DecisionPath]:
+    async def _extract_decision_paths(self, model: BaseModel, input_data: ModelInput) -> List[DecisionPath]:
         """Extract decision paths through the model."""
         paths = []
 
@@ -321,9 +310,7 @@ class ExplainableDiscovery:
             # Register hooks on key layers
             hooks = []
             for name, module in model.named_modules():
-                if isinstance(
-                    module, (torch.nn.Linear, torch.nn.Conv1d, torch.nn.LSTM)
-                ):
+                if isinstance(module, (torch.nn.Linear, torch.nn.Conv1d, torch.nn.LSTM)):
                     hooks.append(module.register_forward_hook(hook_fn(name)))
 
             # Forward pass
@@ -360,15 +347,11 @@ class ExplainableDiscovery:
 
         return paths
 
-    async def _extract_attention_weights(
-        self, model: BaseModel, input_data: ModelInput
-    ) -> Optional[Dict[str, List[float]]]:
+    async def _extract_attention_weights(self, model: BaseModel, input_data: ModelInput) -> Optional[Dict[str, List[float]]]:
         """Extract attention weights if model has attention mechanism."""
         try:
             # Check if model has attention layers
-            has_attention = any(
-                "attention" in name.lower() for name, _ in model.named_modules()
-            )
+            has_attention = any("attention" in name.lower() for name, _ in model.named_modules())
 
             if not has_attention:
                 return None
@@ -399,9 +382,7 @@ class ExplainableDiscovery:
         if feature_importances:
             # Calculate feature quality contribution
             top_features = feature_importances[:3]
-            breakdown["feature_quality"] = sum(
-                f.importance_score for f in top_features
-            ) / len(top_features)
+            breakdown["feature_quality"] = sum(f.importance_score for f in top_features) / len(top_features)
 
         # Model certainty from prediction confidence
         if prediction.confidence is not None:
@@ -434,17 +415,13 @@ class ExplainableDiscovery:
         if overall_confidence > 0.8:
             reasoning_parts.append("The model has high confidence in this prediction")
         elif overall_confidence > 0.5:
-            reasoning_parts.append(
-                "The model has moderate confidence in this prediction"
-            )
+            reasoning_parts.append("The model has moderate confidence in this prediction")
         else:
             reasoning_parts.append("The model has low confidence in this prediction")
 
         # Decision path reasoning
         if decision_paths:
-            reasoning_parts.append(
-                f"The prediction was made through {len(decision_paths)} processing layers"
-            )
+            reasoning_parts.append(f"The prediction was made through {len(decision_paths)} processing layers")
 
         return ". ".join(reasoning_parts) + "."
 
@@ -490,14 +467,11 @@ class ModelVersionManager:
         self.versions[version_id] = version
 
         # Update metrics
-        MODEL_VERSION_ACTIVE.labels(
-            model_version=version_id, deployment_type=deployment_type.value
-        ).set(1 if version.is_active else 0)
-
-        self.logger.info(
-            f"Registered model version {version_id} "
-            f"({deployment_type.value}, {traffic_percentage}% traffic)"
+        MODEL_VERSION_ACTIVE.labels(model_version=version_id, deployment_type=deployment_type.value).set(
+            1 if version.is_active else 0
         )
+
+        self.logger.info(f"Registered model version {version_id} " f"({deployment_type.value}, {traffic_percentage}% traffic)")
 
         return version
 
@@ -522,9 +496,7 @@ class ModelVersionManager:
         version.traffic_percentage = 100.0
         self.active_version = version_id
 
-        MODEL_VERSION_ACTIVE.labels(
-            model_version=version_id, deployment_type=DeploymentType.PRIMARY.value
-        ).set(1)
+        MODEL_VERSION_ACTIVE.labels(model_version=version_id, deployment_type=DeploymentType.PRIMARY.value).set(1)
 
         self.logger.info(f"Activated model version {version_id}")
         return True
@@ -538,9 +510,7 @@ class ModelVersionManager:
         self.logger.warning(f"Rolling back to version {version_id}")
         return self.activate_version(version_id)
 
-    def create_canary_deployment(
-        self, version_id: str, traffic_percentage: float = 5.0
-    ) -> bool:
+    def create_canary_deployment(self, version_id: str, traffic_percentage: float = 5.0) -> bool:
         """Create a canary deployment for gradual rollout."""
         if version_id not in self.versions:
             self.logger.error(f"Version {version_id} not found for canary deployment")
@@ -553,14 +523,9 @@ class ModelVersionManager:
 
         self.canary_deployments[version_id] = version
 
-        MODEL_VERSION_ACTIVE.labels(
-            model_version=version_id, deployment_type=DeploymentType.CANARY.value
-        ).set(1)
+        MODEL_VERSION_ACTIVE.labels(model_version=version_id, deployment_type=DeploymentType.CANARY.value).set(1)
 
-        self.logger.info(
-            f"Created canary deployment for {version_id} "
-            f"with {traffic_percentage}% traffic"
-        )
+        self.logger.info(f"Created canary deployment for {version_id} " f"with {traffic_percentage}% traffic")
 
         return True
 
@@ -612,10 +577,7 @@ class ModelVersionManager:
 
         self.ab_tests[test_id] = ab_test
 
-        self.logger.info(
-            f"Created A/B test {test_id}: {version_a} vs {version_b} "
-            f"(split: {traffic_split:.0%})"
-        )
+        self.logger.info(f"Created A/B test {test_id}: {version_a} vs {version_b} " f"(split: {traffic_split:.0%})")
 
         return ab_test
 
@@ -647,9 +609,7 @@ class ModelVersionManager:
         # Default to active version
         return self.active_version or list(self.versions.keys())[0]
 
-    def record_version_metrics(
-        self, version_id: str, metrics: Dict[str, float]
-    ) -> None:
+    def record_version_metrics(self, version_id: str, metrics: Dict[str, float]) -> None:
         """Record performance metrics for a version."""
         if version_id not in self.version_metrics:
             self.version_metrics[version_id] = {key: [] for key in metrics.keys()}
@@ -661,9 +621,7 @@ class ModelVersionManager:
 
             # Keep only last 1000 measurements
             if len(self.version_metrics[version_id][key]) > 1000:
-                self.version_metrics[version_id][key] = self.version_metrics[
-                    version_id
-                ][key][-1000:]
+                self.version_metrics[version_id][key] = self.version_metrics[version_id][key][-1000:]
 
     def get_version_performance(self, version_id: str) -> Dict[str, float]:
         """Get performance statistics for a version."""
@@ -749,9 +707,7 @@ class ProductionProtocolDiscovery:
 
         self.logger.info("Production protocol discovery system initialized")
 
-    async def discover_with_sla(
-        self, request: DiscoveryRequest, sla_ms: int = 100
-    ) -> DiscoveryResult:
+    async def discover_with_sla(self, request: DiscoveryRequest, sla_ms: int = 100) -> DiscoveryResult:
         """
         Discover protocol with SLA guarantees.
 
@@ -780,31 +736,24 @@ class ProductionProtocolDiscovery:
 
             except asyncio.TimeoutError:
                 # SLA violated - use fallback strategy
-                self.logger.warning(
-                    f"SLA violation for request {request.request_id}: "
-                    f"timeout after {sla_ms}ms"
-                )
+                self.logger.warning(f"SLA violation for request {request.request_id}: " f"timeout after {sla_ms}ms")
 
                 result = await self._handle_sla_violation(request, version_id, sla_ms)
 
                 result.sla_met = False
                 self.sla_violations += 1
 
-                DISCOVERY_SLA_VIOLATIONS.labels(
-                    model_version=version_id, sla_threshold_ms=str(sla_ms)
-                ).inc()
+                DISCOVERY_SLA_VIOLATIONS.labels(model_version=version_id, sla_threshold_ms=str(sla_ms)).inc()
 
             # Record metrics
             processing_time_ms = (time.time() - start_time) * 1000
             result.processing_time_ms = processing_time_ms
 
-            DISCOVERY_LATENCY.labels(
-                model_version=version_id, quality_mode=request.quality_mode.value
-            ).observe(processing_time_ms)
-
-            DISCOVERY_CONFIDENCE.labels(model_version=version_id).observe(
-                result.confidence
+            DISCOVERY_LATENCY.labels(model_version=version_id, quality_mode=request.quality_mode.value).observe(
+                processing_time_ms
             )
+
+            DISCOVERY_CONFIDENCE.labels(model_version=version_id).observe(result.confidence)
 
             # Record version metrics
             self.version_manager.record_version_metrics(
@@ -822,9 +771,7 @@ class ProductionProtocolDiscovery:
             self.logger.error(f"Discovery failed for request {request.request_id}: {e}")
             raise DiscoveryException(f"Discovery failed: {e}")
 
-    async def discover_with_explainability(
-        self, request: DiscoveryRequest
-    ) -> DiscoveryResult:
+    async def discover_with_explainability(self, request: DiscoveryRequest) -> DiscoveryResult:
         """
         Discover protocol with explainable AI.
 
@@ -837,15 +784,11 @@ class ProductionProtocolDiscovery:
         request.require_explanation = True
 
         # Perform discovery
-        result = await self.discover_with_sla(
-            request, sla_ms=request.sla_ms or 500  # Default 500ms for explainable
-        )
+        result = await self.discover_with_sla(request, sla_ms=request.sla_ms or 500)  # Default 500ms for explainable
 
         return result
 
-    async def discover_with_versioning(
-        self, request: DiscoveryRequest
-    ) -> DiscoveryResult:
+    async def discover_with_versioning(self, request: DiscoveryRequest) -> DiscoveryResult:
         """
         Discover protocol with model versioning support.
 
@@ -860,15 +803,11 @@ class ProductionProtocolDiscovery:
 
         # Record A/B test metrics if applicable
         if request.ab_test_variant:
-            AB_TEST_REQUESTS.labels(
-                variant=request.ab_test_variant, model_version=result.model_version
-            ).inc()
+            AB_TEST_REQUESTS.labels(variant=request.ab_test_variant, model_version=result.model_version).inc()
 
         return result
 
-    async def _perform_discovery(
-        self, request: DiscoveryRequest, version_id: str
-    ) -> DiscoveryResult:
+    async def _perform_discovery(self, request: DiscoveryRequest, version_id: str) -> DiscoveryResult:
         """Perform actual protocol discovery."""
         # Get model for version
         model = await self._get_model(version_id)
@@ -887,9 +826,7 @@ class ProductionProtocolDiscovery:
         # Generate explanation if required
         explanation = None
         if request.require_explanation:
-            explanation = await self.explainable_discovery.explain_prediction(
-                model, model_input, prediction
-            )
+            explanation = await self.explainable_discovery.explain_prediction(model, model_input, prediction)
 
         # Extract protocol information from prediction
         protocol_type = self._extract_protocol_type(prediction)
@@ -918,9 +855,7 @@ class ProductionProtocolDiscovery:
 
         return result
 
-    async def _handle_sla_violation(
-        self, request: DiscoveryRequest, version_id: str, sla_ms: int
-    ) -> DiscoveryResult:
+    async def _handle_sla_violation(self, request: DiscoveryRequest, version_id: str, sla_ms: int) -> DiscoveryResult:
         """Handle SLA violation with fallback strategy."""
         fallback_strategy = self._determine_fallback_strategy(request)
 
@@ -973,22 +908,16 @@ class ProductionProtocolDiscovery:
 
         return self.models.get(version_id)
 
-    async def _fast_inference(
-        self, model: BaseModel, input_data: ModelInput
-    ) -> ModelOutput:
+    async def _fast_inference(self, model: BaseModel, input_data: ModelInput) -> ModelOutput:
         """Fast inference with reduced accuracy."""
         # Use smaller batch size, fewer iterations, etc.
         return model.predict(input_data)
 
-    async def _balanced_inference(
-        self, model: BaseModel, input_data: ModelInput
-    ) -> ModelOutput:
+    async def _balanced_inference(self, model: BaseModel, input_data: ModelInput) -> ModelOutput:
         """Balanced inference."""
         return model.predict(input_data)
 
-    async def _accurate_inference(
-        self, model: BaseModel, input_data: ModelInput
-    ) -> ModelOutput:
+    async def _accurate_inference(self, model: BaseModel, input_data: ModelInput) -> ModelOutput:
         """Accurate inference with ensemble or multiple passes."""
         # Could use ensemble, multiple passes, etc.
         return model.predict(input_data)
@@ -1017,11 +946,7 @@ class ProductionProtocolDiscovery:
 
         # Clean old cache entries
         current_time = time.time()
-        expired_keys = [
-            k
-            for k, v in self.result_cache.items()
-            if current_time - v.timestamp > self.cache_ttl
-        ]
+        expired_keys = [k for k, v in self.result_cache.items() if current_time - v.timestamp > self.cache_ttl]
         for key in expired_keys:
             del self.result_cache[key]
 
@@ -1041,9 +966,7 @@ class ProductionProtocolDiscovery:
             data = data.encode()
         return hashlib.sha256(data).hexdigest()[:16]
 
-    def _determine_fallback_strategy(
-        self, request: DiscoveryRequest
-    ) -> FallbackStrategy:
+    def _determine_fallback_strategy(self, request: DiscoveryRequest) -> FallbackStrategy:
         """Determine appropriate fallback strategy."""
         # Check if cached result available
         if self._get_cached_result(request.packet_data):
@@ -1061,14 +984,8 @@ class ProductionProtocolDiscovery:
         return {
             "total_requests": self.request_count,
             "sla_violations": self.sla_violations,
-            "sla_compliance_rate": (
-                1.0 - (self.sla_violations / self.request_count)
-                if self.request_count > 0
-                else 1.0
-            ),
+            "sla_compliance_rate": (1.0 - (self.sla_violations / self.request_count) if self.request_count > 0 else 1.0),
             "cache_size": len(self.result_cache),
             "active_versions": len(self.version_manager.versions),
-            "active_ab_tests": len(
-                [t for t in self.version_manager.ab_tests.values() if t.is_active]
-            ),
+            "active_ab_tests": len([t for t in self.version_manager.ab_tests.values() if t.is_active]),
         }

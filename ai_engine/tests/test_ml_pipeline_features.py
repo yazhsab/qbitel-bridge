@@ -58,9 +58,7 @@ class TestFieldDetectorBatchTraining:
     @pytest.mark.asyncio
     async def test_batch_training_completes(self, field_detector, training_batches):
         """Test that batch training completes successfully."""
-        history = field_detector.train_batch(
-            training_batches=training_batches, num_epochs_per_batch=2, batch_size=8
-        )
+        history = field_detector.train_batch(training_batches=training_batches, num_epochs_per_batch=2, batch_size=8)
 
         assert "batch_histories" in history
         assert "batch_metrics" in history
@@ -74,22 +72,16 @@ class TestFieldDetectorBatchTraining:
             assert "best_val_f1" in metrics
 
     @pytest.mark.asyncio
-    async def test_batch_training_improves_over_batches(
-        self, field_detector, training_batches
-    ):
+    async def test_batch_training_improves_over_batches(self, field_detector, training_batches):
         """Test that model improves across batches."""
-        history = field_detector.train_batch(
-            training_batches=training_batches, num_epochs_per_batch=3, batch_size=8
-        )
+        history = field_detector.train_batch(training_batches=training_batches, num_epochs_per_batch=3, batch_size=8)
 
         # Check that loss generally decreases
         losses = [m["final_train_loss"] for m in history["batch_metrics"]]
         assert losses[-1] <= losses[0] * 1.5  # Allow some variance
 
     @pytest.mark.asyncio
-    async def test_batch_training_with_validation(
-        self, field_detector, training_batches
-    ):
+    async def test_batch_training_with_validation(self, field_detector, training_batches):
         """Test batch training with validation data."""
         validation_data = training_batches[0][:10]  # Use subset as validation
 
@@ -116,10 +108,7 @@ class TestFieldDetectorValidationMetrics:
         await detector.initialize()
 
         # Quick training
-        training_data = [
-            (b"\x01\x00TEST1234\xff\xff", [(0, 2, "h"), (2, 10, "p"), (10, 14, "c")])
-            for _ in range(20)
-        ]
+        training_data = [(b"\x01\x00TEST1234\xff\xff", [(0, 2, "h"), (2, 10, "p"), (10, 14, "c")]) for _ in range(20)]
         detector.train(training_data=training_data, num_epochs=2, batch_size=8)
 
         return detector
@@ -127,14 +116,9 @@ class TestFieldDetectorValidationMetrics:
     @pytest.mark.asyncio
     async def test_comprehensive_validation_metrics(self, trained_detector):
         """Test that all validation metrics are computed."""
-        validation_data = [
-            (b"\x01\x00TEST5678\xff\xff", [(0, 2, "h"), (2, 10, "p"), (10, 14, "c")])
-            for _ in range(10)
-        ]
+        validation_data = [(b"\x01\x00TEST5678\xff\xff", [(0, 2, "h"), (2, 10, "p"), (10, 14, "c")]) for _ in range(10)]
 
-        val_loader = trained_detector._create_data_loader(
-            validation_data, batch_size=4, shuffle=False
-        )
+        val_loader = trained_detector._create_data_loader(validation_data, batch_size=4, shuffle=False)
         metrics = trained_detector._validate_epoch_comprehensive(val_loader)
 
         # Check all expected metrics
@@ -167,10 +151,7 @@ class TestFieldDetectorValidationMetrics:
     @pytest.mark.asyncio
     async def test_training_history_completeness(self, trained_detector):
         """Test that training history contains all metrics."""
-        training_data = [
-            (b"\x01\x00TEST1234\xff\xff", [(0, 2, "h"), (2, 10, "p"), (10, 14, "c")])
-            for _ in range(30)
-        ]
+        training_data = [(b"\x01\x00TEST1234\xff\xff", [(0, 2, "h"), (2, 10, "p"), (10, 14, "c")]) for _ in range(30)]
         validation_data = training_data[:10]
 
         history = trained_detector.train(
@@ -214,10 +195,7 @@ class TestFieldDetectorModelPersistence:
         detector = FieldDetector(config)
         await detector.initialize()
 
-        training_data = [
-            (b"\x01\x00TEST1234\xff\xff", [(0, 2, "h"), (2, 10, "p"), (10, 14, "c")])
-            for _ in range(20)
-        ]
+        training_data = [(b"\x01\x00TEST1234\xff\xff", [(0, 2, "h"), (2, 10, "p"), (10, 14, "c")]) for _ in range(20)]
         detector.train(training_data=training_data, num_epochs=2, batch_size=8)
 
         return detector, tmp_path
@@ -269,9 +247,7 @@ class TestFieldDetectorModelPersistence:
             assert os.path.exists(path)
 
         # Verify latest checkpoint exists
-        latest_path = os.path.join(
-            checkpoint_dir, f"field_detector_v{detector.model_version}_latest.pt"
-        )
+        latest_path = os.path.join(checkpoint_dir, f"field_detector_v{detector.model_version}_latest.pt")
         assert os.path.exists(latest_path)
 
     @pytest.mark.asyncio
@@ -280,9 +256,7 @@ class TestFieldDetectorModelPersistence:
         detector, tmp_path = trained_detector
         checkpoint_dir = str(tmp_path / "checkpoints")
 
-        checkpoint_path = detector._save_checkpoint(
-            epoch=10, metrics={"f1": 0.92}, checkpoint_dir=checkpoint_dir
-        )
+        checkpoint_path = detector._save_checkpoint(epoch=10, metrics={"f1": 0.92}, checkpoint_dir=checkpoint_dir)
 
         # Load checkpoint and verify contents
         import torch
@@ -311,9 +285,7 @@ class TestTranslationStudioBatchTraining:
         """Create translation studio instance."""
         config = Mock(spec=Config)
         llm_service = AsyncMock()
-        llm_service.process_request = AsyncMock(
-            return_value=Mock(content='{"rule_modifications": []}')
-        )
+        llm_service.process_request = AsyncMock(return_value=Mock(content='{"rule_modifications": []}'))
 
         studio = ProtocolTranslationStudio(config, llm_service)
         return studio
@@ -394,9 +366,7 @@ class TestTranslationStudioBatchTraining:
         assert len(history["batch_metrics"]) == len(training_batches)
 
     @pytest.mark.asyncio
-    async def test_validation_metrics_comprehensive(
-        self, translation_studio, sample_protocols
-    ):
+    async def test_validation_metrics_comprehensive(self, translation_studio, sample_protocols):
         """Test comprehensive validation metrics."""
         source_spec, target_spec = sample_protocols
 
@@ -415,14 +385,9 @@ class TestTranslationStudioBatchTraining:
             ],
         )
 
-        validation_data = [
-            {"source": {"field1": i}, "expected_target": {"field1": i}}
-            for i in range(10)
-        ]
+        validation_data = [{"source": {"field1": i}, "expected_target": {"field1": i}} for i in range(10)]
 
-        metrics = await translation_studio._validate_translation_rules(
-            rules, validation_data
-        )
+        metrics = await translation_studio._validate_translation_rules(rules, validation_data)
 
         expected_keys = [
             "pass_rate",
@@ -491,16 +456,12 @@ class TestTranslationStudioPersistence:
         return rules
 
     @pytest.mark.asyncio
-    async def test_save_and_load_rules(
-        self, translation_studio, sample_rules, tmp_path
-    ):
+    async def test_save_and_load_rules(self, translation_studio, sample_rules, tmp_path):
         """Test saving and loading translation rules."""
         rules_dir = str(tmp_path / "rules")
 
         # Save rules
-        rules_path = await translation_studio.save_translation_rules(
-            sample_rules, rules_dir=rules_dir, version="1.0.0"
-        )
+        rules_path = await translation_studio.save_translation_rules(sample_rules, rules_dir=rules_dir, version="1.0.0")
 
         assert os.path.exists(rules_path)
 
@@ -519,9 +480,7 @@ class TestTranslationStudioPersistence:
         # Save multiple versions
         for i in range(3):
             sample_rules.accuracy = 0.90 + i * 0.02
-            await translation_studio.save_translation_rules(
-                sample_rules, rules_dir=rules_dir, version=f"1.{i}.0"
-            )
+            await translation_studio.save_translation_rules(sample_rules, rules_dir=rules_dir, version=f"1.{i}.0")
 
         # List rules
         rules_list = translation_studio.list_saved_rules(
@@ -537,15 +496,11 @@ class TestTranslationStudioPersistence:
             assert rules_list[i]["timestamp"] >= rules_list[i + 1]["timestamp"]
 
     @pytest.mark.asyncio
-    async def test_rules_persistence_formats(
-        self, translation_studio, sample_rules, tmp_path
-    ):
+    async def test_rules_persistence_formats(self, translation_studio, sample_rules, tmp_path):
         """Test that rules are saved in multiple formats."""
         rules_dir = str(tmp_path / "rules")
 
-        rules_path = await translation_studio.save_translation_rules(
-            sample_rules, rules_dir=rules_dir
-        )
+        rules_path = await translation_studio.save_translation_rules(sample_rules, rules_dir=rules_dir)
 
         # Check pickle file exists
         assert os.path.exists(rules_path)
@@ -576,25 +531,18 @@ class TestRollbackFunctionality:
         detector1 = FieldDetector(config)
         await detector1.initialize()
 
-        training_data = [
-            (b"\x01\x00TEST1234\xff\xff", [(0, 2, "h"), (2, 10, "p"), (10, 14, "c")])
-            for _ in range(20)
-        ]
+        training_data = [(b"\x01\x00TEST1234\xff\xff", [(0, 2, "h"), (2, 10, "p"), (10, 14, "c")]) for _ in range(20)]
         detector1.train(training_data=training_data, num_epochs=2, batch_size=8)
 
         checkpoint_dir = str(tmp_path / "checkpoints")
-        checkpoint1 = detector1._save_checkpoint(
-            epoch=5, metrics={"f1": 0.95}, checkpoint_dir=checkpoint_dir
-        )
+        checkpoint1 = detector1._save_checkpoint(epoch=5, metrics={"f1": 0.95}, checkpoint_dir=checkpoint_dir)
 
         # Train "worse" model
         detector2 = FieldDetector(config)
         await detector2.initialize()
         detector2.train(training_data=training_data[:10], num_epochs=1, batch_size=8)
 
-        checkpoint2 = detector2._save_checkpoint(
-            epoch=1, metrics={"f1": 0.85}, checkpoint_dir=checkpoint_dir
-        )
+        checkpoint2 = detector2._save_checkpoint(epoch=1, metrics={"f1": 0.85}, checkpoint_dir=checkpoint_dir)
 
         # Rollback to first checkpoint
         detector_rollback = FieldDetector(config)
@@ -639,9 +587,7 @@ class TestRollbackFunctionality:
             rules=[],
             accuracy=0.95,
         )
-        good_path = await studio.save_translation_rules(
-            good_rules, rules_dir=rules_dir, version="1.0.0"
-        )
+        good_path = await studio.save_translation_rules(good_rules, rules_dir=rules_dir, version="1.0.0")
 
         # Save "bad" rules
         bad_rules = TranslationRules(
@@ -651,9 +597,7 @@ class TestRollbackFunctionality:
             rules=[],
             accuracy=0.75,
         )
-        await studio.save_translation_rules(
-            bad_rules, rules_dir=rules_dir, version="1.1.0"
-        )
+        await studio.save_translation_rules(bad_rules, rules_dir=rules_dir, version="1.1.0")
 
         # Rollback to good rules
         rolled_back_rules = await studio.load_translation_rules(good_path)

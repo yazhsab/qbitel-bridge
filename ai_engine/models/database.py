@@ -111,9 +111,7 @@ class User(Base):
     mfa_enabled = Column(Boolean, default=False, nullable=False)
     mfa_method = Column(Enum(MFAMethod), nullable=True)
     mfa_secret = Column(EncryptedString(255), nullable=True)  # Encrypted TOTP secret
-    mfa_backup_codes = Column(
-        EncryptedJSON, nullable=True
-    )  # Encrypted backup codes (list of strings)
+    mfa_backup_codes = Column(EncryptedJSON, nullable=True)  # Encrypted backup codes (list of strings)
 
     # OAuth/SAML integration
     oauth_provider = Column(String(50), nullable=True)
@@ -129,9 +127,7 @@ class User(Base):
     must_change_password = Column(Boolean, default=False, nullable=False)
 
     # Timestamps
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -141,15 +137,9 @@ class User(Base):
     deleted_at = Column(DateTime(timezone=True), nullable=True)  # Soft delete
 
     # Relationships
-    api_keys = relationship(
-        "APIKey", back_populates="user", cascade="all, delete-orphan"
-    )
-    sessions = relationship(
-        "UserSession", back_populates="user", cascade="all, delete-orphan"
-    )
-    audit_logs = relationship(
-        "AuditLog", back_populates="user", cascade="all, delete-orphan"
-    )
+    api_keys = relationship("APIKey", back_populates="user", cascade="all, delete-orphan")
+    sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
+    audit_logs = relationship("AuditLog", back_populates="user", cascade="all, delete-orphan")
 
     # Indexes
     __table_args__ = (
@@ -174,19 +164,13 @@ class APIKey(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     # Key information
-    key_hash = Column(
-        String(255), unique=True, nullable=False, index=True
-    )  # SHA-256 hash
-    key_prefix = Column(
-        String(20), nullable=False
-    )  # First few chars for identification
+    key_hash = Column(String(255), unique=True, nullable=False, index=True)  # SHA-256 hash
+    key_prefix = Column(String(20), nullable=False)  # First few chars for identification
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
 
     # User association
-    user_id = Column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-    )
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     # Status and expiration
     status = Column(Enum(APIKeyStatus), default=APIKeyStatus.ACTIVE, nullable=False)
@@ -204,9 +188,7 @@ class APIKey(Base):
     permissions = Column(JSONB, default=list, nullable=False)
 
     # Timestamps
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     revoked_at = Column(DateTime(timezone=True), nullable=True)
     revoked_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     revoked_reason = Column(Text, nullable=True)
@@ -236,9 +218,7 @@ class UserSession(Base):
 
     # Session information
     session_token = Column(String(255), unique=True, nullable=False, index=True)
-    user_id = Column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-    )
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     # Session metadata
     ip_address = Column(INET, nullable=True)
@@ -246,13 +226,9 @@ class UserSession(Base):
     device_info = Column(JSONB, nullable=True)
 
     # Session lifecycle
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=False)
-    last_activity = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    last_activity = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     revoked_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
@@ -283,9 +259,7 @@ class AuditLog(Base):
     resource_id = Column(String(255), nullable=True)
 
     # User information
-    user_id = Column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
-    )
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     username = Column(String(255), nullable=True)  # Denormalized for deleted users
 
     # Request information
@@ -299,9 +273,7 @@ class AuditLog(Base):
     error_message = Column(Text, nullable=True)
 
     # Timestamp
-    timestamp = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False, index=True
-    )
+    timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
 
     # Relationships
     user = relationship("User", back_populates="audit_logs")
@@ -333,9 +305,7 @@ class OAuthProvider(Base):
 
     # OAuth configuration
     client_id = Column(String(255), nullable=False)
-    client_secret_encrypted = Column(
-        EncryptedText, nullable=False
-    )  # Encrypted client secret
+    client_secret_encrypted = Column(EncryptedText, nullable=False)  # Encrypted client secret
     authorization_endpoint = Column(String(500), nullable=False)
     token_endpoint = Column(String(500), nullable=False)
     userinfo_endpoint = Column(String(500), nullable=True)
@@ -345,9 +315,7 @@ class OAuthProvider(Base):
     is_active = Column(Boolean, default=True, nullable=False)
 
     # Timestamps
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -377,17 +345,13 @@ class SAMLProvider(Base):
     x509_cert = Column(Text, nullable=False)
 
     # Attribute mapping
-    attribute_mapping = Column(
-        JSONB, nullable=False
-    )  # Map SAML attributes to user fields
+    attribute_mapping = Column(JSONB, nullable=False)  # Map SAML attributes to user fields
 
     # Status
     is_active = Column(Boolean, default=True, nullable=False)
 
     # Timestamps
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -409,18 +373,14 @@ class PasswordResetToken(Base):
 
     # Token information
     token_hash = Column(String(255), unique=True, nullable=False, index=True)
-    user_id = Column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-    )
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     # Expiration
     expires_at = Column(DateTime(timezone=True), nullable=False)
     used_at = Column(DateTime(timezone=True), nullable=True)
 
     # Timestamps
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Indexes
     __table_args__ = (

@@ -53,9 +53,7 @@ class DataClassification(Enum):
     # Top Secret - HSM keys, master secrets
     TOP_SECRET = (4, "Top Secret", True, True, 10)
 
-    def __init__(self, level: int, display_name: str,
-                 requires_encryption: bool, requires_hsm: bool,
-                 min_retention_years: int):
+    def __init__(self, level: int, display_name: str, requires_encryption: bool, requires_hsm: bool, min_retention_years: int):
         self.level = level
         self.display_name = display_name
         self.requires_encryption = requires_encryption
@@ -121,8 +119,8 @@ class AccessControl:
     deny_ip_ranges: List[str] = field(default_factory=list)
 
     # Time-based access
-    allowed_hours_start: int = 6   # 6 AM
-    allowed_hours_end: int = 22    # 10 PM
+    allowed_hours_start: int = 6  # 6 AM
+    allowed_hours_end: int = 22  # 10 PM
     allowed_days: Set[int] = field(default_factory=lambda: {0, 1, 2, 3, 4})  # Mon-Fri
 
 
@@ -138,10 +136,12 @@ class EncryptionPolicy:
     # Data in transit
     encrypt_in_transit: bool = True
     min_tls_version: str = "TLS 1.3"
-    allowed_cipher_suites: List[str] = field(default_factory=lambda: [
-        "TLS_AES_256_GCM_SHA384",
-        "TLS_CHACHA20_POLY1305_SHA256",
-    ])
+    allowed_cipher_suites: List[str] = field(
+        default_factory=lambda: [
+            "TLS_AES_256_GCM_SHA384",
+            "TLS_CHACHA20_POLY1305_SHA256",
+        ]
+    )
 
     # PQC settings
     require_pqc: bool = True
@@ -234,8 +234,10 @@ class BankingSecurityPolicy:
         errors = []
 
         # Check security level matches data classification
-        if (self.data_classification == DataClassification.TOP_SECRET and
-                self.security_level.level < SecurityLevel.CRITICAL.level):
+        if (
+            self.data_classification == DataClassification.TOP_SECRET
+            and self.security_level.level < SecurityLevel.CRITICAL.level
+        ):
             errors.append("Top Secret data requires Critical security level")
 
         # Check encryption requirements
@@ -414,9 +416,7 @@ class BankingSecurityPolicy:
             "effective_date": self.effective_date.isoformat(),
             "security_level": self.security_level.display_name,
             "data_classification": self.data_classification.display_name,
-            "compliance_frameworks": [
-                f.code for f in self.compliance_frameworks
-            ],
+            "compliance_frameworks": [f.code for f in self.compliance_frameworks],
             "encryption": {
                 "require_pqc": self.encryption.require_pqc,
                 "hybrid_mode": self.encryption.hybrid_mode,

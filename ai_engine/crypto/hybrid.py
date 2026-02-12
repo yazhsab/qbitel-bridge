@@ -113,10 +113,10 @@ class HybridPrivateKey:
 
     def __del__(self):
         # Zeroize on deletion
-        if hasattr(self, 'classical') and isinstance(self.classical, bytearray):
+        if hasattr(self, "classical") and isinstance(self.classical, bytearray):
             for i in range(len(self.classical)):
                 self.classical[i] = 0
-        if hasattr(self, 'pqc') and isinstance(self.pqc, bytearray):
+        if hasattr(self, "pqc") and isinstance(self.pqc, bytearray):
             for i in range(len(self.pqc)):
                 self.pqc[i] = 0
 
@@ -162,7 +162,7 @@ class HybridSharedSecret:
         return self.data
 
     def __del__(self):
-        if hasattr(self, 'data') and isinstance(self.data, bytearray):
+        if hasattr(self, "data") and isinstance(self.data, bytearray):
             for i in range(len(self.data)):
                 self.data[i] = 0
 
@@ -228,15 +228,14 @@ class HybridKemEngine:
         except ImportError:
             # Fallback
             import secrets
+
             return secrets.token_bytes(32), secrets.token_bytes(32)
 
     def _generate_p384_keypair(self) -> Tuple[bytes, bytes]:
         """Generate P-384 key pair."""
         try:
             from cryptography.hazmat.primitives.asymmetric import ec
-            from cryptography.hazmat.primitives.serialization import (
-                Encoding, PublicFormat, PrivateFormat, NoEncryption
-            )
+            from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, PrivateFormat, NoEncryption
 
             private_key = ec.generate_private_key(ec.SECP384R1())
             public_key = private_key.public_key()
@@ -247,6 +246,7 @@ class HybridKemEngine:
             )
         except ImportError:
             import secrets
+
             return secrets.token_bytes(97), secrets.token_bytes(48)
 
     async def encapsulate(
@@ -275,6 +275,7 @@ class HybridKemEngine:
 
         # ML-KEM encapsulation
         from .mlkem import MlKemPublicKey
+
         mlkem_pk = MlKemPublicKey(self.variant.mlkem_level, server_public_key.pqc)
         mlkem_ct, mlkem_ss = await self.mlkem_engine.encapsulate(mlkem_pk)
 
@@ -318,6 +319,7 @@ class HybridKemEngine:
 
         # ML-KEM decapsulation
         from .mlkem import MlKemCiphertext, MlKemPrivateKey
+
         mlkem_ct = MlKemCiphertext(self.variant.mlkem_level, ciphertext.pqc)
         mlkem_sk = MlKemPrivateKey(self.variant.mlkem_level, private_key.pqc)
         mlkem_ss = await self.mlkem_engine.decapsulate(mlkem_ct, mlkem_sk)
@@ -331,9 +333,7 @@ class HybridKemEngine:
     def _x25519_ecdh(self, their_public: bytes) -> Tuple[bytes, bytes]:
         """Perform X25519 ECDH, return (our_public, shared_secret)."""
         try:
-            from cryptography.hazmat.primitives.asymmetric.x25519 import (
-                X25519PrivateKey, X25519PublicKey
-            )
+            from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
 
             our_private = X25519PrivateKey.generate()
             our_public = our_private.public_key().public_bytes_raw()
@@ -343,42 +343,37 @@ class HybridKemEngine:
             return our_public, shared
         except ImportError:
             import secrets
+
             return secrets.token_bytes(32), secrets.token_bytes(32)
 
     def _x25519_ecdh_decap(self, their_public: bytes, our_private: bytes) -> bytes:
         """Perform X25519 ECDH decapsulation."""
         try:
-            from cryptography.hazmat.primitives.asymmetric.x25519 import (
-                X25519PrivateKey, X25519PublicKey
-            )
+            from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
 
             our_sk = X25519PrivateKey.from_private_bytes(our_private)
             their_pk = X25519PublicKey.from_public_bytes(their_public)
             return our_sk.exchange(their_pk)
         except ImportError:
             import secrets
+
             return secrets.token_bytes(32)
 
     def _p384_ecdh(self, their_public: bytes) -> Tuple[bytes, bytes]:
         """Perform P-384 ECDH."""
         try:
             from cryptography.hazmat.primitives.asymmetric import ec
-            from cryptography.hazmat.primitives.serialization import (
-                Encoding, PublicFormat
-            )
+            from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
             our_private = ec.generate_private_key(ec.SECP384R1())
-            our_public = our_private.public_key().public_bytes(
-                Encoding.X962, PublicFormat.UncompressedPoint
-            )
-            their_pk = ec.EllipticCurvePublicKey.from_encoded_point(
-                ec.SECP384R1(), their_public
-            )
+            our_public = our_private.public_key().public_bytes(Encoding.X962, PublicFormat.UncompressedPoint)
+            their_pk = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP384R1(), their_public)
             shared = our_private.exchange(ec.ECDH(), their_pk)
 
             return our_public, shared
         except ImportError:
             import secrets
+
             return secrets.token_bytes(97), secrets.token_bytes(48)
 
     def _p384_ecdh_decap(self, their_public: bytes, our_private: bytes) -> bytes:
@@ -388,12 +383,11 @@ class HybridKemEngine:
             from cryptography.hazmat.primitives.serialization import load_der_private_key
 
             our_sk = load_der_private_key(our_private, password=None)
-            their_pk = ec.EllipticCurvePublicKey.from_encoded_point(
-                ec.SECP384R1(), their_public
-            )
+            their_pk = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP384R1(), their_public)
             return our_sk.exchange(ec.ECDH(), their_pk)
         except ImportError:
             import secrets
+
             return secrets.token_bytes(48)
 
     def _combine_shared_secrets(self, classical: bytes, pqc: bytes) -> bytes:

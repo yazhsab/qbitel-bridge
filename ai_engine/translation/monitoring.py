@@ -272,9 +272,7 @@ class HealthChecker:
 
     def _setup_default_checks(self):
         """Setup default health checks."""
-        self.register_check(
-            "system_resources", self._check_system_resources, interval=30
-        )
+        self.register_check("system_resources", self._check_system_resources, interval=30)
 
         self.register_check("memory_usage", self._check_memory_usage, interval=30)
 
@@ -547,9 +545,7 @@ class TranslationStudioMonitor:
 
             self.metrics.cpu_usage_percent.set(cpu_percent)
             self.metrics.memory_usage_bytes.labels(type="used").set(memory.used)
-            self.metrics.memory_usage_bytes.labels(type="available").set(
-                memory.available
-            )
+            self.metrics.memory_usage_bytes.labels(type="available").set(memory.available)
             self.metrics.memory_usage_bytes.labels(type="total").set(memory.total)
 
         except Exception as e:
@@ -569,9 +565,7 @@ class TranslationStudioMonitor:
                     HealthStatus.UNKNOWN: -1.0,
                 }.get(result.status, -1.0)
 
-                self.metrics.service_health.labels(
-                    service="translation_studio", component=check_name
-                ).set(health_value)
+                self.metrics.service_health.labels(service="translation_studio", component=check_name).set(health_value)
 
         except Exception as e:
             self.logger.error(f"Failed to run health checks: {e}")
@@ -581,19 +575,13 @@ class TranslationStudioMonitor:
         # These would be implemented as the system grows
         pass
 
-    def record_operation(
-        self, component: str, operation: str, duration: float, success: bool, **metadata
-    ):
+    def record_operation(self, component: str, operation: str, duration: float, success: bool, **metadata):
         """Record an operation for monitoring."""
         status = "success" if success else "error"
 
-        self.metrics.requests_total.labels(
-            component=component, operation=operation, status=status
-        ).inc()
+        self.metrics.requests_total.labels(component=component, operation=operation, status=status).inc()
 
-        self.metrics.request_duration.labels(
-            component=component, operation=operation
-        ).observe(duration)
+        self.metrics.request_duration.labels(component=component, operation=operation).observe(duration)
 
         self.logger.debug(
             f"Recorded operation: {component}.{operation}",
@@ -606,13 +594,9 @@ class TranslationStudioMonitor:
             },
         )
 
-    def record_protocol_discovery(
-        self, protocol_type: str, confidence: float, duration: float, success: bool
-    ):
+    def record_protocol_discovery(self, protocol_type: str, confidence: float, duration: float, success: bool):
         """Record protocol discovery metrics."""
-        self.metrics.protocol_discoveries_total.labels(
-            protocol_type=protocol_type, success=str(success).lower()
-        ).inc()
+        self.metrics.protocol_discoveries_total.labels(protocol_type=protocol_type, success=str(success).lower()).inc()
 
         if success and confidence >= 0:
             self.metrics.protocol_discovery_confidence.observe(confidence)
@@ -632,21 +616,13 @@ class TranslationStudioMonitor:
             success=str(success).lower(),
         ).inc()
 
-        self.metrics.api_generation_duration.labels(api_style=api_style).observe(
-            duration
-        )
+        self.metrics.api_generation_duration.labels(api_style=api_style).observe(duration)
 
-    def record_code_generation(
-        self, language: str, duration: float, lines_generated: int, success: bool
-    ):
+    def record_code_generation(self, language: str, duration: float, lines_generated: int, success: bool):
         """Record code generation metrics."""
-        self.metrics.sdk_generations_total.labels(
-            language=language, success=str(success).lower()
-        ).inc()
+        self.metrics.sdk_generations_total.labels(language=language, success=str(success).lower()).inc()
 
-        self.metrics.code_generation_duration.labels(
-            language=language, template_type="sdk"
-        ).observe(duration)
+        self.metrics.code_generation_duration.labels(language=language, template_type="sdk").observe(duration)
 
     def record_protocol_translation(
         self,
@@ -667,9 +643,7 @@ class TranslationStudioMonitor:
                 source_protocol=source_protocol, target_protocol=target_protocol
             ).observe(confidence)
 
-    def record_llm_request(
-        self, provider: str, model: str, operation: str, duration: float, success: bool
-    ):
+    def record_llm_request(self, provider: str, model: str, operation: str, duration: float, success: bool):
         """Record LLM request metrics."""
         self.metrics.llm_requests_total.labels(
             provider=provider,
@@ -678,9 +652,7 @@ class TranslationStudioMonitor:
             status="success" if success else "error",
         ).inc()
 
-        self.metrics.llm_response_time.labels(provider=provider, model=model).observe(
-            duration
-        )
+        self.metrics.llm_response_time.labels(provider=provider, model=model).observe(duration)
 
     def record_error(self, component: str, error_category: str, error_severity: str):
         """Record error metrics."""

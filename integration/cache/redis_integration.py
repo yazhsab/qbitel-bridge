@@ -97,9 +97,7 @@ class RedisIntegration:
             "host": self.config.get("host", "localhost"),
             "port": self.config.get("port", 6379),
             "db": self.config.get("database", 0),
-            "password": (
-                self.config.get("password") if self.config.get("password") else None
-            ),
+            "password": (self.config.get("password") if self.config.get("password") else None),
             "ssl": self.config.get("ssl", False),
             "retry_on_timeout": True,
             "socket_connect_timeout": self.config.get("connection_timeout", 5),
@@ -188,9 +186,7 @@ class RedisIntegration:
                 health_check_interval=self.redis_config["health_check_interval"],
             )
 
-            logger.info(
-                f"Created Redis client: {self.redis_config['host']}:{self.redis_config['port']}"
-            )
+            logger.info(f"Created Redis client: {self.redis_config['host']}:{self.redis_config['port']}")
 
         except Exception as e:
             logger.error(f"Failed to create Redis client: {e}")
@@ -300,9 +296,7 @@ class RedisIntegration:
             logger.error(f"Error setting cache key {key}: {e}")
             return False
 
-    async def get_cache(
-        self, key: str, serialization: Optional[str] = None
-    ) -> Optional[Any]:
+    async def get_cache(self, key: str, serialization: Optional[str] = None) -> Optional[Any]:
         """Get cache value"""
         try:
             full_key = self.prefixes["cache"] + key
@@ -344,9 +338,7 @@ class RedisIntegration:
             logger.error(f"Error checking cache key existence {key}: {e}")
             return False
 
-    async def set_cache_many(
-        self, data: Dict[str, Any], ttl: Optional[int] = None
-    ) -> int:
+    async def set_cache_many(self, data: Dict[str, Any], ttl: Optional[int] = None) -> int:
         """Set multiple cache values"""
         try:
             pipeline = self.redis_client.pipeline()
@@ -443,9 +435,7 @@ class RedisIntegration:
             logger.error(f"Error getting session {session_id}: {e}")
             return None
 
-    async def update_session(
-        self, session_id: str, data: Dict[str, Any], extend_ttl: bool = True
-    ) -> bool:
+    async def update_session(self, session_id: str, data: Dict[str, Any], extend_ttl: bool = True) -> bool:
         """Update session data"""
         try:
             session = await self.get_session(session_id)
@@ -488,9 +478,7 @@ class RedisIntegration:
             return False
 
     # Rate limiting methods
-    async def check_rate_limit(
-        self, key: str, limit: int, window_seconds: int
-    ) -> RateLimitInfo:
+    async def check_rate_limit(self, key: str, limit: int, window_seconds: int) -> RateLimitInfo:
         """Check and update rate limit"""
         try:
             full_key = self.prefixes["rate_limit"] + key
@@ -546,9 +534,7 @@ class RedisIntegration:
             )
 
     # Distributed locking methods
-    async def acquire_lock(
-        self, lock_name: str, timeout: int = 10, ttl: Optional[int] = None
-    ) -> Optional[str]:
+    async def acquire_lock(self, lock_name: str, timeout: int = 10, ttl: Optional[int] = None) -> Optional[str]:
         """Acquire distributed lock"""
         try:
             if ttl is None:
@@ -561,9 +547,7 @@ class RedisIntegration:
 
             while time.time() < end_time:
                 # Try to acquire lock
-                acquired = await self.redis_client.set(
-                    lock_key, lock_value, nx=True, ex=ttl
-                )
+                acquired = await self.redis_client.set(lock_key, lock_value, nx=True, ex=ttl)
 
                 if acquired:
                     return lock_value
@@ -604,9 +588,7 @@ class RedisIntegration:
             full_channel = self.prefixes["pub_sub"] + channel
             serialized_message = await self._serialize_value(message)
 
-            subscriber_count = await self.redis_client.publish(
-                full_channel, serialized_message
-            )
+            subscriber_count = await self.redis_client.publish(full_channel, serialized_message)
             self.pub_sub_messages += 1
 
             return subscriber_count
@@ -691,9 +673,7 @@ class RedisIntegration:
             logger.error(f"Error serializing value: {e}")
             return json.dumps({"error": "serialization_failed"}).encode("utf-8")
 
-    async def _deserialize_value(
-        self, data: bytes, method: Optional[str] = None
-    ) -> Any:
+    async def _deserialize_value(self, data: bytes, method: Optional[str] = None) -> Any:
         """Deserialize value from storage"""
         try:
             if method is None:
@@ -809,11 +789,7 @@ class RedisIntegration:
                 # Listen for messages
                 async for message in pubsub.listen():
                     if message["type"] == "message":
-                        channel_name = (
-                            message["channel"]
-                            .decode()
-                            .replace(self.prefixes["pub_sub"], "")
-                        )
+                        channel_name = message["channel"].decode().replace(self.prefixes["pub_sub"], "")
                         data = await self._deserialize_value(message["data"])
 
                         # Call handlers
@@ -848,9 +824,7 @@ class RedisIntegration:
         return {
             "cache_hits": self.cache_hits,
             "cache_misses": self.cache_misses,
-            "cache_hit_rate": (
-                self.cache_hits / total_requests if total_requests > 0 else 0
-            ),
+            "cache_hit_rate": (self.cache_hits / total_requests if total_requests > 0 else 0),
             "cache_sets": self.cache_sets,
             "cache_deletes": self.cache_deletes,
             "pub_sub_messages": self.pub_sub_messages,

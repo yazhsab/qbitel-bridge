@@ -449,10 +449,7 @@ class TestQbitelAIExceptionClass:
 
     def test_exception_with_context(self):
         """Test exception with context data."""
-        exc = QbitelAIException(
-            "Test error",
-            context={"request_id": "123", "user_id": "user-456"}
-        )
+        exc = QbitelAIException("Test error", context={"request_id": "123", "user_id": "user-456"})
 
         assert exc.context["request_id"] == "123"
         assert exc.context["user_id"] == "user-456"
@@ -474,11 +471,7 @@ class TestQbitelAIExceptionClass:
 
     def test_protocol_exception_specialization(self):
         """Test ProtocolException includes protocol info."""
-        exc = ProtocolException(
-            "Protocol error",
-            protocol_type="ISO-8583",
-            packet_length=1024
-        )
+        exc = ProtocolException("Protocol error", protocol_type="ISO-8583", packet_length=1024)
 
         assert exc.error_code == "PROTOCOL_ERROR"
         assert exc.context["protocol_type"] == "ISO-8583"

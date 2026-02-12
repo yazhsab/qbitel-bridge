@@ -151,18 +151,14 @@ class TestProcessCopilotQuery:
     """Tests for process_copilot_query endpoint."""
 
     @pytest.mark.asyncio
-    async def test_process_query_success(
-        self, mock_copilot, mock_current_user, mock_background_tasks
-    ):
+    async def test_process_query_success(self, mock_copilot, mock_current_user, mock_background_tasks):
         """Test successful query processing."""
         request = CopilotQueryRequest(
             query="What protocol is this?",
             session_id="session123",
         )
 
-        with patch(
-            "ai_engine.api.copilot_endpoints.get_copilot", return_value=mock_copilot
-        ):
+        with patch("ai_engine.api.copilot_endpoints.get_copilot", return_value=mock_copilot):
             response = await process_copilot_query(
                 request=request,
                 background_tasks=mock_background_tasks,
@@ -178,9 +174,7 @@ class TestProcessCopilotQuery:
         mock_background_tasks.add_task.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_process_query_generates_session_id(
-        self, mock_copilot, mock_current_user, mock_background_tasks
-    ):
+    async def test_process_query_generates_session_id(self, mock_copilot, mock_current_user, mock_background_tasks):
         """Test query processing generates session ID if not provided."""
         request = CopilotQueryRequest(query="What protocol is this?")
 
@@ -195,9 +189,7 @@ class TestProcessCopilotQuery:
         assert len(response.session_id) > 0
 
     @pytest.mark.asyncio
-    async def test_process_query_with_packet_data(
-        self, mock_copilot, mock_current_user, mock_background_tasks
-    ):
+    async def test_process_query_with_packet_data(self, mock_copilot, mock_current_user, mock_background_tasks):
         """Test query processing with packet data."""
         packet_data = base64.b64encode(b"test packet").decode()
         request = CopilotQueryRequest(
@@ -218,9 +210,7 @@ class TestProcessCopilotQuery:
         assert call_args[0][0].packet_data == b"test packet"
 
     @pytest.mark.asyncio
-    async def test_process_query_with_context(
-        self, mock_copilot, mock_current_user, mock_background_tasks
-    ):
+    async def test_process_query_with_context(self, mock_copilot, mock_current_user, mock_background_tasks):
         """Test query processing with context."""
         request = CopilotQueryRequest(
             query="What protocol is this?",
@@ -239,9 +229,7 @@ class TestProcessCopilotQuery:
         assert call_args[0][0].context == request.context
 
     @pytest.mark.asyncio
-    async def test_process_query_qbitel_exception(
-        self, mock_copilot, mock_current_user, mock_background_tasks
-    ):
+    async def test_process_query_qbitel_exception(self, mock_copilot, mock_current_user, mock_background_tasks):
         """Test query processing with QbitelAIException."""
         from ai_engine.core.exceptions import QbitelAIException
 
@@ -260,9 +248,7 @@ class TestProcessCopilotQuery:
         assert "Processing failed" in str(exc_info.value.detail)
 
     @pytest.mark.asyncio
-    async def test_process_query_unexpected_exception(
-        self, mock_copilot, mock_current_user, mock_background_tasks
-    ):
+    async def test_process_query_unexpected_exception(self, mock_copilot, mock_current_user, mock_background_tasks):
         """Test query processing with unexpected exception."""
         request = CopilotQueryRequest(query="What protocol is this?")
         mock_copilot.process_query.side_effect = Exception("Unexpected error")
@@ -293,9 +279,7 @@ class TestGetUserSessions:
 
         assert len(sessions) == 1
         assert sessions[0]["session_id"] == "session1"
-        mock_copilot.context_manager.get_user_sessions.assert_called_once_with(
-            "test_user_123", 10
-        )
+        mock_copilot.context_manager.get_user_sessions.assert_called_once_with("test_user_123", 10)
 
     @pytest.mark.asyncio
     async def test_get_sessions_custom_limit(self, mock_copilot, mock_current_user):
@@ -306,16 +290,12 @@ class TestGetUserSessions:
             copilot=mock_copilot,
         )
 
-        mock_copilot.context_manager.get_user_sessions.assert_called_once_with(
-            "test_user_123", 5
-        )
+        mock_copilot.context_manager.get_user_sessions.assert_called_once_with("test_user_123", 5)
 
     @pytest.mark.asyncio
     async def test_get_sessions_exception(self, mock_copilot, mock_current_user):
         """Test session retrieval with exception."""
-        mock_copilot.context_manager.get_user_sessions.side_effect = Exception(
-            "DB error"
-        )
+        mock_copilot.context_manager.get_user_sessions.side_effect = Exception("DB error")
 
         with pytest.raises(HTTPException) as exc_info:
             await get_user_sessions(
@@ -363,9 +343,7 @@ class TestGetSessionSummary:
     @pytest.mark.asyncio
     async def test_get_summary_exception(self, mock_copilot, mock_current_user):
         """Test session summary with exception."""
-        mock_copilot.context_manager.get_session_summary.side_effect = Exception(
-            "DB error"
-        )
+        mock_copilot.context_manager.get_session_summary.side_effect = Exception("DB error")
 
         with pytest.raises(HTTPException) as exc_info:
             await get_session_summary(
@@ -391,9 +369,7 @@ class TestClearSession:
         )
 
         assert result["message"] == "Session session1 cleared successfully"
-        mock_copilot.context_manager.clear_session.assert_called_once_with(
-            "test_user_123", "session1"
-        )
+        mock_copilot.context_manager.clear_session.assert_called_once_with("test_user_123", "session1")
 
     @pytest.mark.asyncio
     async def test_clear_session_not_found(self, mock_copilot, mock_current_user):
@@ -569,9 +545,7 @@ class TestGetCopilot:
 
         copilot_module._copilot_instance = None
 
-        with patch(
-            "ai_engine.api.copilot_endpoints.create_protocol_copilot"
-        ) as mock_create:
+        with patch("ai_engine.api.copilot_endpoints.create_protocol_copilot") as mock_create:
             mock_copilot = AsyncMock()
             mock_create.return_value = mock_copilot
 

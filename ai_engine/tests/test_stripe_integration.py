@@ -70,9 +70,7 @@ class TestStripeConnectManager:
     @pytest.mark.asyncio
     @patch("ai_engine.marketplace.stripe_integration.stripe.Account.create")
     @patch("ai_engine.marketplace.stripe_integration.stripe.AccountLink.create")
-    async def test_create_connected_account(
-        self, mock_account_link, mock_account_create, stripe_manager
-    ):
+    async def test_create_connected_account(self, mock_account_link, mock_account_create, stripe_manager):
         """Test creating a Stripe Connect account for protocol creator."""
         # Mock Stripe API responses
         mock_account = Mock()
@@ -86,10 +84,7 @@ class TestStripeConnectManager:
         # Create connected account
         user_id = uuid.uuid4()
         result = await stripe_manager.create_connected_account(
-            user_id=user_id,
-            email="creator@example.com",
-            country="US",
-            business_type="individual"
+            user_id=user_id, email="creator@example.com", country="US", business_type="individual"
         )
 
         # Verify result
@@ -129,7 +124,7 @@ class TestStripeConnectManager:
             customer_id=mock_customer.id,
             payment_method_id="pm_test_card",
             amount=Decimal("99.99"),
-            currency="usd"
+            currency="usd",
         )
 
         # Verify result
@@ -158,8 +153,7 @@ class TestStripeConnectManager:
     @patch("ai_engine.marketplace.stripe_integration.stripe.Customer.create")
     @patch("ai_engine.marketplace.stripe_integration.get_database_manager")
     async def test_create_subscription(
-        self, mock_db_manager, mock_customer_create, mock_subscription_create,
-        stripe_manager, mock_protocol, mock_customer
+        self, mock_db_manager, mock_customer_create, mock_subscription_create, stripe_manager, mock_protocol, mock_customer
     ):
         """Test creating a subscription with revenue sharing."""
         # Mock database session
@@ -177,7 +171,7 @@ class TestStripeConnectManager:
             filter_mock = Mock()
 
             # Return protocol for MarketplaceProtocol queries
-            if hasattr(model, '__name__') and 'Protocol' in model.__name__:
+            if hasattr(model, "__name__") and "Protocol" in model.__name__:
                 filter_mock.first.return_value = mock_protocol
             # Return user for User queries
             else:
@@ -205,7 +199,7 @@ class TestStripeConnectManager:
             protocol_id=mock_protocol.protocol_id,
             customer_id=mock_customer.id,
             payment_method_id="pm_test_card",
-            price_id="price_test_123"
+            price_id="price_test_123",
         )
 
         # Verify result
@@ -222,9 +216,7 @@ class TestStripeConnectManager:
 
     @pytest.mark.asyncio
     @patch("ai_engine.marketplace.stripe_integration.stripe.Subscription.modify")
-    async def test_cancel_subscription_at_period_end(
-        self, mock_subscription_modify, stripe_manager
-    ):
+    async def test_cancel_subscription_at_period_end(self, mock_subscription_modify, stripe_manager):
         """Test cancelling subscription at end of billing period."""
         # Mock Stripe Subscription
         mock_sub = Mock()
@@ -234,10 +226,7 @@ class TestStripeConnectManager:
         mock_subscription_modify.return_value = mock_sub
 
         # Cancel subscription
-        result = await stripe_manager.cancel_subscription(
-            subscription_id="sub_test_123",
-            at_period_end=True
-        )
+        result = await stripe_manager.cancel_subscription(subscription_id="sub_test_123", at_period_end=True)
 
         # Verify result
         assert result["success"] is True
@@ -245,16 +234,11 @@ class TestStripeConnectManager:
         assert result["cancel_at_period_end"] is True
 
         # Verify Stripe was called correctly
-        mock_subscription_modify.assert_called_once_with(
-            "sub_test_123",
-            cancel_at_period_end=True
-        )
+        mock_subscription_modify.assert_called_once_with("sub_test_123", cancel_at_period_end=True)
 
     @pytest.mark.asyncio
     @patch("ai_engine.marketplace.stripe_integration.stripe.Subscription.delete")
-    async def test_cancel_subscription_immediately(
-        self, mock_subscription_delete, stripe_manager
-    ):
+    async def test_cancel_subscription_immediately(self, mock_subscription_delete, stripe_manager):
         """Test cancelling subscription immediately."""
         # Mock Stripe Subscription
         mock_sub = Mock()
@@ -264,10 +248,7 @@ class TestStripeConnectManager:
         mock_subscription_delete.return_value = mock_sub
 
         # Cancel subscription immediately
-        result = await stripe_manager.cancel_subscription(
-            subscription_id="sub_test_123",
-            at_period_end=False
-        )
+        result = await stripe_manager.cancel_subscription(subscription_id="sub_test_123", at_period_end=False)
 
         # Verify result
         assert result["success"] is True
@@ -278,9 +259,7 @@ class TestStripeConnectManager:
 
     @pytest.mark.asyncio
     @patch("ai_engine.marketplace.stripe_integration.stripe.Webhook.construct_event")
-    async def test_handle_webhook_payment_succeeded(
-        self, mock_construct_event, stripe_manager
-    ):
+    async def test_handle_webhook_payment_succeeded(self, mock_construct_event, stripe_manager):
         """Test handling successful payment webhook."""
         # Mock webhook event
         event = {
@@ -288,20 +267,14 @@ class TestStripeConnectManager:
             "data": {
                 "object": {
                     "id": "pi_test_123",
-                    "metadata": {
-                        "protocol_id": str(uuid.uuid4()),
-                        "customer_id": str(uuid.uuid4())
-                    }
+                    "metadata": {"protocol_id": str(uuid.uuid4()), "customer_id": str(uuid.uuid4())},
                 }
-            }
+            },
         }
         mock_construct_event.return_value = event
 
         # Handle webhook
-        result = await stripe_manager.handle_webhook(
-            payload=b"webhook_payload",
-            signature="test_signature"
-        )
+        result = await stripe_manager.handle_webhook(payload=b"webhook_payload", signature="test_signature")
 
         # Verify result
         assert result["handled"] is True
@@ -312,27 +285,14 @@ class TestStripeConnectManager:
 
     @pytest.mark.asyncio
     @patch("ai_engine.marketplace.stripe_integration.stripe.Webhook.construct_event")
-    async def test_handle_webhook_subscription_created(
-        self, mock_construct_event, stripe_manager
-    ):
+    async def test_handle_webhook_subscription_created(self, mock_construct_event, stripe_manager):
         """Test handling subscription created webhook."""
         # Mock webhook event
-        event = {
-            "type": "customer.subscription.created",
-            "data": {
-                "object": {
-                    "id": "sub_test_123",
-                    "status": "active"
-                }
-            }
-        }
+        event = {"type": "customer.subscription.created", "data": {"object": {"id": "sub_test_123", "status": "active"}}}
         mock_construct_event.return_value = event
 
         # Handle webhook
-        result = await stripe_manager.handle_webhook(
-            payload=b"webhook_payload",
-            signature="test_signature"
-        )
+        result = await stripe_manager.handle_webhook(payload=b"webhook_payload", signature="test_signature")
 
         # Verify result
         assert result["handled"] is True
@@ -341,9 +301,7 @@ class TestStripeConnectManager:
     @pytest.mark.asyncio
     @patch("ai_engine.marketplace.stripe_integration.stripe.PaymentIntent.create")
     @patch("ai_engine.marketplace.stripe_integration.get_database_manager")
-    async def test_payment_failure(
-        self, mock_db_manager, mock_payment_intent, stripe_manager, mock_protocol, mock_customer
-    ):
+    async def test_payment_failure(self, mock_db_manager, mock_payment_intent, stripe_manager, mock_protocol, mock_customer):
         """Test handling payment failure."""
         # Mock database session
         mock_session = Mock()
@@ -360,7 +318,7 @@ class TestStripeConnectManager:
                 customer_id=mock_customer.id,
                 payment_method_id="pm_test_card",
                 amount=Decimal("99.99"),
-                currency="usd"
+                currency="usd",
             )
 
         # Verify session was rolled back
@@ -368,9 +326,7 @@ class TestStripeConnectManager:
 
     @pytest.mark.asyncio
     @patch("ai_engine.marketplace.stripe_integration.get_database_manager")
-    async def test_protocol_not_found(
-        self, mock_db_manager, stripe_manager, mock_customer
-    ):
+    async def test_protocol_not_found(self, mock_db_manager, stripe_manager, mock_customer):
         """Test payment processing when protocol doesn't exist."""
         # Mock database session returning None
         mock_session = Mock()
@@ -384,14 +340,12 @@ class TestStripeConnectManager:
                 customer_id=mock_customer.id,
                 payment_method_id="pm_test_card",
                 amount=Decimal("99.99"),
-                currency="usd"
+                currency="usd",
             )
 
     @pytest.mark.asyncio
     @patch("ai_engine.marketplace.stripe_integration.get_database_manager")
-    async def test_creator_without_stripe_account(
-        self, mock_db_manager, stripe_manager, mock_protocol, mock_customer
-    ):
+    async def test_creator_without_stripe_account(self, mock_db_manager, stripe_manager, mock_protocol, mock_customer):
         """Test payment processing when creator has no Stripe account."""
         # Mock protocol with creator that has no Stripe account
         mock_protocol.author.stripe_account_id = None
@@ -407,7 +361,7 @@ class TestStripeConnectManager:
                 customer_id=mock_customer.id,
                 payment_method_id="pm_test_card",
                 amount=Decimal("99.99"),
-                currency="usd"
+                currency="usd",
             )
 
 
@@ -418,6 +372,7 @@ class TestStripeSingleton:
         """Test that get_stripe_manager returns the same instance."""
         # Clear the singleton
         import ai_engine.marketplace.stripe_integration as stripe_module
+
         stripe_module._stripe_manager = None
 
         with patch("ai_engine.marketplace.stripe_integration.get_config") as mock_config:
@@ -437,18 +392,19 @@ class TestStripeSingleton:
 class TestRevenueCalculations:
     """Test revenue split calculations."""
 
-    @pytest.mark.parametrize("amount,platform_fee,expected_platform,expected_creator", [
-        (Decimal("100.00"), 0.30, 30.00, 70.00),
-        (Decimal("99.99"), 0.30, 29.997, 69.993),
-        (Decimal("49.99"), 0.30, 14.997, 34.993),
-        (Decimal("9.99"), 0.30, 2.997, 6.993),
-        (Decimal("0.99"), 0.30, 0.297, 0.693),
-        (Decimal("100.00"), 0.20, 20.00, 80.00),  # Different fee rate
-        (Decimal("100.00"), 0.15, 15.00, 85.00),  # Lower fee rate
-    ])
-    def test_revenue_split_calculations(
-        self, amount, platform_fee, expected_platform, expected_creator
-    ):
+    @pytest.mark.parametrize(
+        "amount,platform_fee,expected_platform,expected_creator",
+        [
+            (Decimal("100.00"), 0.30, 30.00, 70.00),
+            (Decimal("99.99"), 0.30, 29.997, 69.993),
+            (Decimal("49.99"), 0.30, 14.997, 34.993),
+            (Decimal("9.99"), 0.30, 2.997, 6.993),
+            (Decimal("0.99"), 0.30, 0.297, 0.693),
+            (Decimal("100.00"), 0.20, 20.00, 80.00),  # Different fee rate
+            (Decimal("100.00"), 0.15, 15.00, 85.00),  # Lower fee rate
+        ],
+    )
+    def test_revenue_split_calculations(self, amount, platform_fee, expected_platform, expected_creator):
         """Test revenue split calculations for different amounts and fee rates."""
         # Convert to cents
         amount_cents = int(amount * 100)

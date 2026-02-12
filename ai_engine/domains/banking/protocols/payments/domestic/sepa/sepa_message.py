@@ -201,12 +201,14 @@ class SEPAMandate:
 
         if self.amendment_indicator:
             # At least one amendment field should be populated
-            has_amendment = any([
-                self.original_mandate_id,
-                self.original_creditor_scheme_id,
-                self.original_debtor_account,
-                self.original_debtor_agent,
-            ])
+            has_amendment = any(
+                [
+                    self.original_mandate_id,
+                    self.original_creditor_scheme_id,
+                    self.original_debtor_account,
+                    self.original_debtor_agent,
+                ]
+            )
             if not has_amendment:
                 errors.append("Amendment details required when amendment indicator is true")
 
@@ -377,10 +379,7 @@ class SEPACreditTransfer:
                 "bic": self.creditor.agent.bic,
             },
             "end_to_end_id": self.end_to_end_id,
-            "requested_execution_date": (
-                self.requested_execution_date.isoformat()
-                if self.requested_execution_date else None
-            ),
+            "requested_execution_date": (self.requested_execution_date.isoformat() if self.requested_execution_date else None),
             "status": self.status,
         }
 
@@ -534,15 +533,11 @@ class SEPADirectDebit:
             },
             "mandate": {
                 "id": self.mandate.mandate_id,
-                "date_of_signature": (
-                    self.mandate.date_of_signature.isoformat()
-                    if self.mandate.date_of_signature else None
-                ),
+                "date_of_signature": (self.mandate.date_of_signature.isoformat() if self.mandate.date_of_signature else None),
             },
             "end_to_end_id": self.end_to_end_id,
             "requested_collection_date": (
-                self.requested_collection_date.isoformat()
-                if self.requested_collection_date else None
+                self.requested_collection_date.isoformat() if self.requested_collection_date else None
             ),
             "status": self.status,
         }

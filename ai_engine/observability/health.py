@@ -343,10 +343,7 @@ class HealthRegistry:
         return {
             "status": overall.value,
             "timestamp": datetime.utcnow().isoformat(),
-            "checks": {
-                name: result.to_dict()
-                for name, result in results.items()
-            },
+            "checks": {name: result.to_dict() for name, result in results.items()},
         }
 
     def is_live(self) -> bool:
@@ -406,6 +403,7 @@ class HealthRegistry:
         def check_memory() -> bool:
             try:
                 import psutil
+
                 memory = psutil.virtual_memory()
                 return memory.percent < 90
             except ImportError:
@@ -422,6 +420,7 @@ class HealthRegistry:
         def check_disk() -> bool:
             try:
                 import psutil
+
                 disk = psutil.disk_usage("/")
                 return disk.percent < 90
             except ImportError:
@@ -456,6 +455,7 @@ def create_http_check(
     expected_status: int = 200,
 ) -> Callable[[], bool]:
     """Create an HTTP health check function."""
+
     def check() -> bool:
         try:
             import urllib.request
@@ -476,6 +476,7 @@ def create_tcp_check(
     timeout_seconds: float = 5.0,
 ) -> Callable[[], bool]:
     """Create a TCP health check function."""
+
     def check() -> bool:
         try:
             import socket
@@ -496,6 +497,7 @@ def create_database_check(
     query: str = "SELECT 1",
 ) -> Callable[[], bool]:
     """Create a database health check function."""
+
     def check() -> bool:
         try:
             conn = connection_fn()

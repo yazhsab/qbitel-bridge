@@ -30,10 +30,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from functools import wraps
-from typing import (
-    Any, Callable, Dict, Generator, List, Optional, Sequence,
-    TypeVar, Union
-)
+from typing import Any, Callable, Dict, Generator, List, Optional, Sequence, TypeVar, Union
 
 logger = logging.getLogger(__name__)
 
@@ -93,8 +90,7 @@ try:
 except ImportError:
     OTEL_AVAILABLE = False
     logger.warning(
-        "OpenTelemetry SDK not installed. Install with: "
-        "pip install opentelemetry-sdk opentelemetry-exporter-otlp"
+        "OpenTelemetry SDK not installed. Install with: " "pip install opentelemetry-sdk opentelemetry-exporter-otlp"
     )
 
 # OTLP Exporters
@@ -105,6 +101,7 @@ try:
     from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
         OTLPMetricExporter,
     )
+
     OTLP_AVAILABLE = True
 except ImportError:
     OTLP_AVAILABLE = False
@@ -112,6 +109,7 @@ except ImportError:
 # Jaeger Exporter
 try:
     from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+
     JAEGER_AVAILABLE = True
 except ImportError:
     JAEGER_AVAILABLE = False
@@ -120,6 +118,7 @@ except ImportError:
 try:
     from opentelemetry.exporter.prometheus import PrometheusMetricReader
     from prometheus_client import start_http_server as start_prometheus_server
+
     PROMETHEUS_AVAILABLE = True
 except ImportError:
     PROMETHEUS_AVAILABLE = False
@@ -127,24 +126,28 @@ except ImportError:
 # Auto-instrumentation libraries
 try:
     from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
     FASTAPI_INSTRUMENTATION = True
 except ImportError:
     FASTAPI_INSTRUMENTATION = False
 
 try:
     from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+
     HTTPX_INSTRUMENTATION = True
 except ImportError:
     HTTPX_INSTRUMENTATION = False
 
 try:
     from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+
     SQLALCHEMY_INSTRUMENTATION = True
 except ImportError:
     SQLALCHEMY_INSTRUMENTATION = False
 
 try:
     from opentelemetry.instrumentation.redis import RedisInstrumentor
+
     REDIS_INSTRUMENTATION = True
 except ImportError:
     REDIS_INSTRUMENTATION = False
@@ -156,6 +159,7 @@ F = TypeVar("F", bound=Callable[..., Any])
 # =============================================================================
 # Configuration
 # =============================================================================
+
 
 @dataclass
 class OTelConfig:
@@ -224,6 +228,7 @@ class OTelConfig:
 # Telemetry Provider
 # =============================================================================
 
+
 class OpenTelemetryProvider:
     """
     Central provider for OpenTelemetry instrumentation.
@@ -260,10 +265,7 @@ class OpenTelemetryProvider:
             Dictionary with initialization status
         """
         if not OTEL_AVAILABLE:
-            return {
-                "status": "unavailable",
-                "error": "OpenTelemetry SDK not installed"
-            }
+            return {"status": "unavailable", "error": "OpenTelemetry SDK not installed"}
 
         if self._initialized:
             return {"status": "already_initialized"}
@@ -290,10 +292,7 @@ class OpenTelemetryProvider:
         results["auto_instrumentation"] = instrumentation_result
 
         self._initialized = True
-        logger.info(
-            f"OpenTelemetry initialized for {self.config.service_name}",
-            extra={"components": results}
-        )
+        logger.info(f"OpenTelemetry initialized for {self.config.service_name}", extra={"components": results})
 
         return {"status": "initialized", "components": results}
 
@@ -312,12 +311,14 @@ class OpenTelemetryProvider:
         if self.config.detect_host:
             try:
                 import socket
+
                 attributes["host.name"] = socket.gethostname()
             except Exception:
                 pass
 
         if self.config.detect_process:
             import os
+
             attributes["process.pid"] = str(os.getpid())
             attributes["process.runtime.name"] = "python"
 
@@ -331,8 +332,7 @@ class OpenTelemetryProvider:
         if self.config.otlp_endpoint and OTLP_AVAILABLE:
             try:
                 otlp_exporter = OTLPSpanExporter(
-                    endpoint=self.config.otlp_endpoint,
-                    insecure=True  # Configure based on endpoint
+                    endpoint=self.config.otlp_endpoint, insecure=True  # Configure based on endpoint
                 )
                 span_processors.append(
                     BatchSpanProcessor(
@@ -374,11 +374,7 @@ class OpenTelemetryProvider:
 
         set_tracer_provider(self._tracer_provider)
 
-        return {
-            "status": "initialized",
-            "exporters": len(span_processors),
-            "sample_rate": self.config.trace_sample_rate
-        }
+        return {"status": "initialized", "exporters": len(span_processors), "sample_rate": self.config.trace_sample_rate}
 
     def _init_metrics(self, resource: "Resource") -> Dict[str, Any]:
         """Initialize metrics with appropriate exporters."""
@@ -392,23 +388,17 @@ class OpenTelemetryProvider:
 
                 # Start Prometheus HTTP server
                 start_prometheus_server(self.config.prometheus_port)
-                logger.info(
-                    f"Prometheus metrics server started on port {self.config.prometheus_port}"
-                )
+                logger.info(f"Prometheus metrics server started on port {self.config.prometheus_port}")
             except Exception as e:
                 logger.error(f"Failed to configure Prometheus: {e}")
 
         # OTLP Metrics exporter
         if self.config.otlp_endpoint and OTLP_AVAILABLE:
             try:
-                otlp_metric_exporter = OTLPMetricExporter(
-                    endpoint=self.config.otlp_endpoint,
-                    insecure=True
-                )
+                otlp_metric_exporter = OTLPMetricExporter(endpoint=self.config.otlp_endpoint, insecure=True)
                 readers.append(
                     PeriodicExportingMetricReader(
-                        otlp_metric_exporter,
-                        export_interval_millis=self.config.metrics_export_interval_ms
+                        otlp_metric_exporter, export_interval_millis=self.config.metrics_export_interval_ms
                     )
                 )
                 logger.info("OTLP metrics exporter configured")
@@ -417,24 +407,16 @@ class OpenTelemetryProvider:
 
         # Fallback console exporter
         if not readers and self.config.environment != "production":
-            readers.append(
-                PeriodicExportingMetricReader(
-                    ConsoleMetricExporter(),
-                    export_interval_millis=30000
-                )
-            )
+            readers.append(PeriodicExportingMetricReader(ConsoleMetricExporter(), export_interval_millis=30000))
 
         # Create and set meter provider
-        self._meter_provider = MeterProvider(
-            resource=resource,
-            metric_readers=readers
-        )
+        self._meter_provider = MeterProvider(resource=resource, metric_readers=readers)
         set_meter_provider(self._meter_provider)
 
         return {
             "status": "initialized",
             "readers": len(readers),
-            "prometheus_port": self.config.prometheus_port if self.config.prometheus_enabled else None
+            "prometheus_port": self.config.prometheus_port if self.config.prometheus_enabled else None,
         }
 
     def _setup_propagators(self) -> None:
@@ -491,10 +473,7 @@ class OpenTelemetryProvider:
         """Get a tracer by name."""
         name = name or self.config.service_name
         if name not in self._tracers:
-            self._tracers[name] = get_tracer(
-                name,
-                self.config.service_version
-            )
+            self._tracers[name] = get_tracer(name, self.config.service_version)
         return self._tracers[name]
 
     @contextmanager
@@ -503,7 +482,7 @@ class OpenTelemetryProvider:
         name: str,
         kind: "SpanKind" = SpanKind.INTERNAL,
         attributes: Optional[Dict[str, Any]] = None,
-        tracer_name: Optional[str] = None
+        tracer_name: Optional[str] = None,
     ) -> Generator["Span", None, None]:
         """
         Context manager for creating a span.
@@ -515,11 +494,7 @@ class OpenTelemetryProvider:
         """
         tracer = self.get_tracer(tracer_name)
 
-        with tracer.start_as_current_span(
-            name,
-            kind=kind,
-            attributes=attributes or {}
-        ) as span:
+        with tracer.start_as_current_span(name, kind=kind, attributes=attributes or {}) as span:
             try:
                 yield span
                 span.set_status(Status(StatusCode.OK))
@@ -529,10 +504,7 @@ class OpenTelemetryProvider:
                 raise
 
     def trace_function(
-        self,
-        name: Optional[str] = None,
-        kind: "SpanKind" = SpanKind.INTERNAL,
-        attributes: Optional[Dict[str, Any]] = None
+        self, name: Optional[str] = None, kind: "SpanKind" = SpanKind.INTERNAL, attributes: Optional[Dict[str, Any]] = None
     ) -> Callable[[F], F]:
         """
         Decorator to trace a function.
@@ -542,6 +514,7 @@ class OpenTelemetryProvider:
             def my_function():
                 pass
         """
+
         def decorator(func: F) -> F:
             span_name = name or f"{func.__module__}.{func.__name__}"
 
@@ -551,11 +524,7 @@ class OpenTelemetryProvider:
                 with tracer.start_as_current_span(
                     span_name,
                     kind=kind,
-                    attributes={
-                        "code.function": func.__name__,
-                        "code.namespace": func.__module__,
-                        **(attributes or {})
-                    }
+                    attributes={"code.function": func.__name__, "code.namespace": func.__module__, **(attributes or {})},
                 ) as span:
                     try:
                         result = func(*args, **kwargs)
@@ -571,12 +540,10 @@ class OpenTelemetryProvider:
         return decorator
 
     def trace_async_function(
-        self,
-        name: Optional[str] = None,
-        kind: "SpanKind" = SpanKind.INTERNAL,
-        attributes: Optional[Dict[str, Any]] = None
+        self, name: Optional[str] = None, kind: "SpanKind" = SpanKind.INTERNAL, attributes: Optional[Dict[str, Any]] = None
     ) -> Callable[[F], F]:
         """Decorator to trace an async function."""
+
         def decorator(func: F) -> F:
             span_name = name or f"{func.__module__}.{func.__name__}"
 
@@ -586,11 +553,7 @@ class OpenTelemetryProvider:
                 with tracer.start_as_current_span(
                     span_name,
                     kind=kind,
-                    attributes={
-                        "code.function": func.__name__,
-                        "code.namespace": func.__module__,
-                        **(attributes or {})
-                    }
+                    attributes={"code.function": func.__name__, "code.namespace": func.__module__, **(attributes or {})},
                 ) as span:
                     try:
                         result = await func(*args, **kwargs)
@@ -613,58 +576,28 @@ class OpenTelemetryProvider:
         """Get a meter by name."""
         name = name or self.config.service_name
         if name not in self._meters:
-            self._meters[name] = get_meter(
-                name,
-                self.config.service_version
-            )
+            self._meters[name] = get_meter(name, self.config.service_version)
         return self._meters[name]
 
-    def counter(
-        self,
-        name: str,
-        description: str = "",
-        unit: str = "1"
-    ) -> "Counter":
+    def counter(self, name: str, description: str = "", unit: str = "1") -> "Counter":
         """Get or create a counter metric."""
         if name not in self._counters:
             meter = self.get_meter()
-            self._counters[name] = meter.create_counter(
-                name,
-                description=description,
-                unit=unit
-            )
+            self._counters[name] = meter.create_counter(name, description=description, unit=unit)
         return self._counters[name]
 
-    def histogram(
-        self,
-        name: str,
-        description: str = "",
-        unit: str = "1"
-    ) -> "Histogram":
+    def histogram(self, name: str, description: str = "", unit: str = "1") -> "Histogram":
         """Get or create a histogram metric."""
         if name not in self._histograms:
             meter = self.get_meter()
-            self._histograms[name] = meter.create_histogram(
-                name,
-                description=description,
-                unit=unit
-            )
+            self._histograms[name] = meter.create_histogram(name, description=description, unit=unit)
         return self._histograms[name]
 
-    def up_down_counter(
-        self,
-        name: str,
-        description: str = "",
-        unit: str = "1"
-    ) -> "UpDownCounter":
+    def up_down_counter(self, name: str, description: str = "", unit: str = "1") -> "UpDownCounter":
         """Get or create an up/down counter metric."""
         if name not in self._up_down_counters:
             meter = self.get_meter()
-            self._up_down_counters[name] = meter.create_up_down_counter(
-                name,
-                description=description,
-                unit=unit
-            )
+            self._up_down_counters[name] = meter.create_up_down_counter(name, description=description, unit=unit)
         return self._up_down_counters[name]
 
     # =========================================================================
@@ -673,11 +606,7 @@ class OpenTelemetryProvider:
 
     @contextmanager
     def llm_span(
-        self,
-        provider: str,
-        model: str,
-        operation: str = "completion",
-        attributes: Optional[Dict[str, Any]] = None
+        self, provider: str, model: str, operation: str = "completion", attributes: Optional[Dict[str, Any]] = None
     ) -> Generator["Span", None, None]:
         """
         Create a span for LLM operations with AI-specific attributes.
@@ -686,12 +615,7 @@ class OpenTelemetryProvider:
         """
         span_name = f"llm.{operation}"
 
-        llm_attributes = {
-            "llm.provider": provider,
-            "llm.model": model,
-            "llm.operation": operation,
-            **(attributes or {})
-        }
+        llm_attributes = {"llm.provider": provider, "llm.model": model, "llm.operation": operation, **(attributes or {})}
 
         with self.span(span_name, SpanKind.CLIENT, llm_attributes) as span:
             start_time = time.time()
@@ -703,31 +627,18 @@ class OpenTelemetryProvider:
 
     @contextmanager
     def inference_span(
-        self,
-        model_name: str,
-        model_version: str = "unknown",
-        attributes: Optional[Dict[str, Any]] = None
+        self, model_name: str, model_version: str = "unknown", attributes: Optional[Dict[str, Any]] = None
     ) -> Generator["Span", None, None]:
         """Create a span for ML model inference."""
         span_name = f"ml.inference.{model_name}"
 
-        ml_attributes = {
-            "ml.model.name": model_name,
-            "ml.model.version": model_version,
-            **(attributes or {})
-        }
+        ml_attributes = {"ml.model.name": model_name, "ml.model.version": model_version, **(attributes or {})}
 
         with self.span(span_name, SpanKind.INTERNAL, ml_attributes) as span:
             yield span
 
     def record_llm_metrics(
-        self,
-        provider: str,
-        model: str,
-        input_tokens: int,
-        output_tokens: int,
-        duration_ms: float,
-        success: bool = True
+        self, provider: str, model: str, input_tokens: int, output_tokens: int, duration_ms: float, success: bool = True
     ) -> None:
         """Record metrics for an LLM request."""
         labels = {"provider": provider, "model": model}
@@ -750,11 +661,9 @@ class OpenTelemetryProvider:
         ).add(output_tokens, labels)
 
         # Duration histogram
-        self.histogram(
-            "llm_request_duration_seconds",
-            "LLM request duration in seconds",
-            "s"
-        ).record(duration_ms / 1000, labels)
+        self.histogram("llm_request_duration_seconds", "LLM request duration in seconds", "s").record(
+            duration_ms / 1000, labels
+        )
 
         # Error tracking
         if not success:
@@ -817,9 +726,7 @@ def get_otel_provider() -> OpenTelemetryProvider:
     return _provider
 
 
-def initialize_opentelemetry(
-    config: Optional[OTelConfig] = None
-) -> Dict[str, Any]:
+def initialize_opentelemetry(config: Optional[OTelConfig] = None) -> Dict[str, Any]:
     """Initialize the global OpenTelemetry provider."""
     global _provider
     _provider = OpenTelemetryProvider(config)
@@ -836,10 +743,11 @@ def shutdown_opentelemetry() -> None:
 # Convenience Functions
 # =============================================================================
 
+
 def trace(
     name: Optional[str] = None,
     kind: "SpanKind" = SpanKind.INTERNAL if OTEL_AVAILABLE else None,
-    attributes: Optional[Dict[str, Any]] = None
+    attributes: Optional[Dict[str, Any]] = None,
 ) -> Callable[[F], F]:
     """Decorator for tracing functions."""
     provider = get_otel_provider()
@@ -849,7 +757,7 @@ def trace(
 def trace_async(
     name: Optional[str] = None,
     kind: "SpanKind" = SpanKind.INTERNAL if OTEL_AVAILABLE else None,
-    attributes: Optional[Dict[str, Any]] = None
+    attributes: Optional[Dict[str, Any]] = None,
 ) -> Callable[[F], F]:
     """Decorator for tracing async functions."""
     provider = get_otel_provider()

@@ -174,21 +174,12 @@ class HealthCheckService:
                 HEALTH_CHECK_ERRORS.labels(component=name, error_type="exception").inc()
             else:
                 components[name] = result
-                HEALTH_CHECK_STATUS.labels(component=name).set(
-                    1 if result.status == HealthStatus.HEALTHY else 0
-                )
+                HEALTH_CHECK_STATUS.labels(component=name).set(1 if result.status == HealthStatus.HEALTHY else 0)
 
         # Determine overall status
-        critical_unhealthy = any(
-            c.status == HealthStatus.UNHEALTHY and c.critical
-            for c in components.values()
-        )
-        any_unhealthy = any(
-            c.status == HealthStatus.UNHEALTHY for c in components.values()
-        )
-        any_degraded = any(
-            c.status == HealthStatus.DEGRADED for c in components.values()
-        )
+        critical_unhealthy = any(c.status == HealthStatus.UNHEALTHY and c.critical for c in components.values())
+        any_unhealthy = any(c.status == HealthStatus.UNHEALTHY for c in components.values())
+        any_degraded = any(c.status == HealthStatus.DEGRADED for c in components.values())
 
         if critical_unhealthy:
             overall_status = HealthStatus.UNHEALTHY
@@ -241,9 +232,7 @@ class HealthCheckService:
                 # Check version for diagnostics
                 version = await conn.fetchval("SELECT version()")
 
-                HEALTH_CHECK_DURATION.labels(component=name).observe(
-                    time.time() - start_time
-                )
+                HEALTH_CHECK_DURATION.labels(component=name).observe(time.time() - start_time)
 
                 return ComponentHealth(
                     name=name,
@@ -347,9 +336,7 @@ class HealthCheckService:
                 # Get info for diagnostics
                 info = await redis.info("server")
 
-                HEALTH_CHECK_DURATION.labels(component=name).observe(
-                    time.time() - start_time
-                )
+                HEALTH_CHECK_DURATION.labels(component=name).observe(time.time() - start_time)
 
                 return ComponentHealth(
                     name=name,
@@ -448,9 +435,7 @@ class HealthCheckService:
 
                     if response.status == 200:
                         data = await response.json()
-                        HEALTH_CHECK_DURATION.labels(component=name).observe(
-                            time.time() - start_time
-                        )
+                        HEALTH_CHECK_DURATION.labels(component=name).observe(time.time() - start_time)
 
                         return ComponentHealth(
                             name=name,
@@ -542,9 +527,7 @@ class HealthCheckService:
                 status = HealthStatus.HEALTHY
                 message = "System resources healthy"
 
-            HEALTH_CHECK_DURATION.labels(component=name).observe(
-                time.time() - start_time
-            )
+            HEALTH_CHECK_DURATION.labels(component=name).observe(time.time() - start_time)
 
             return ComponentHealth(
                 name=name,
@@ -585,9 +568,7 @@ class HealthCheckService:
 
         try:
             # Check DNS resolution
-            dns_check = await asyncio.get_event_loop().run_in_executor(
-                None, socket.gethostbyname, "dns.google"
-            )
+            dns_check = await asyncio.get_event_loop().run_in_executor(None, socket.gethostbyname, "dns.google")
 
             # Check external connectivity
             async with aiohttp.ClientSession() as session:
@@ -599,9 +580,7 @@ class HealthCheckService:
 
             latency_ms = (time.time() - start_time) * 1000
 
-            HEALTH_CHECK_DURATION.labels(component=name).observe(
-                time.time() - start_time
-            )
+            HEALTH_CHECK_DURATION.labels(component=name).observe(time.time() - start_time)
 
             return ComponentHealth(
                 name=name,
@@ -749,11 +728,7 @@ def create_health_router():
         result = await health_service.check_all()
 
         # Ready if no critical components are unhealthy
-        critical_healthy = all(
-            c.status != HealthStatus.UNHEALTHY
-            for c in result.components.values()
-            if c.critical
-        )
+        critical_healthy = all(c.status != HealthStatus.UNHEALTHY for c in result.components.values() if c.critical)
 
         status_code = 200 if critical_healthy else 503
 

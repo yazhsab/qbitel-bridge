@@ -159,9 +159,7 @@ def generate_graphql_assets(
         "}"
     )
 
-    delete_payload_definition = (
-        f"type {delete_payload} {{\n" "  id: ID!\n" "  deleted: Boolean!\n" "}"
-    )
+    delete_payload_definition = f"type {delete_payload} {{\n" "  id: ID!\n" "  deleted: Boolean!\n" "}"
 
     schema_root = "schema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}"
 
@@ -182,14 +180,10 @@ def generate_graphql_assets(
     )
     sdl = "\n\n".join(sdl_parts)
 
-    field_selection = "\n    ".join(
-        _to_camel_case(field.name) for field in protocol_schema.fields
+    field_selection = "\n    ".join(_to_camel_case(field.name) for field in protocol_schema.fields)
+    sample_query = ("query Get{type_name}($id: ID!) {{\n" "  get{type_name}(id: $id) {{\n    {fields}\n  }}\n" "}}").format(
+        type_name=type_name, fields=field_selection
     )
-    sample_query = (
-        "query Get{type_name}($id: ID!) {{\n"
-        "  get{type_name}(id: $id) {{\n    {fields}\n  }}\n"
-        "}}"
-    ).format(type_name=type_name, fields=field_selection)
     sample_mutation = (
         "mutation Create{type_name}($input: {input_name}!) {{\n"
         "  create{type_name}(input: $input) {{\n    {fields}\n  }}\n"
@@ -329,10 +323,7 @@ def generate_examples(
     messages = list(sample_messages or [])[:limit] if sample_messages else []
 
     if not messages:
-        synthetic = {
-            field.name: _default_value_for_field(field)
-            for field in protocol_schema.fields
-        }
+        synthetic = {field.name: _default_value_for_field(field) for field in protocol_schema.fields}
         examples.append(
             {
                 "id": "synthetic",
@@ -355,9 +346,7 @@ def generate_examples(
                 "offset": field.offset,
                 "length": field.length,
                 "raw_hex": raw_slice.hex(),
-                "raw_base64": (
-                    base64.b64encode(raw_slice).decode("ascii") if raw_slice else None
-                ),
+                "raw_base64": (base64.b64encode(raw_slice).decode("ascii") if raw_slice else None),
                 "interpreted": interpreted,
             }
         examples.append(

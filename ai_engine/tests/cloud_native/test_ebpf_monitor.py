@@ -1,6 +1,7 @@
 """
 Unit tests for eBPF Runtime Monitor.
 """
+
 import pytest
 import time
 import sys
@@ -9,11 +10,7 @@ from pathlib import Path
 # Add ai_engine to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from cloud_native.container_security.runtime_protection.ebpf_monitor import (
-    EventType,
-    RuntimeEvent,
-    eBPFMonitor
-)
+from cloud_native.container_security.runtime_protection.ebpf_monitor import EventType, RuntimeEvent, eBPFMonitor
 
 
 class TestEventType:
@@ -38,7 +35,7 @@ class TestRuntimeEvent:
             container_id="abc123",
             process_name="bash",
             pid=1234,
-            details={"command": "/bin/bash -c 'ls'"}
+            details={"command": "/bin/bash -c 'ls'"},
         )
 
         assert event.event_type == EventType.PROCESS_EXEC
@@ -65,7 +62,7 @@ class TestEbpfMonitor:
     def test_monitor_initialization(self, monitor):
         """Test monitor initialization"""
         assert monitor.event_callback is not None
-        assert hasattr(monitor, '_events')
+        assert hasattr(monitor, "_events")
 
     def test_monitor_container(self, monitor):
         """Test starting container monitoring"""
@@ -104,7 +101,7 @@ class TestEbpfMonitor:
             container_id="test-123",
             process_name="nc",
             pid=5678,
-            details={"command": "nc -l -p 4444"}
+            details={"command": "nc -l -p 4444"},
         )
 
         threats = monitor.detect_threats(event)
@@ -122,7 +119,7 @@ class TestEbpfMonitor:
             container_id="test-123",
             process_name="cat",
             pid=5678,
-            details={"path": "/etc/passwd", "operation": "read"}
+            details={"path": "/etc/passwd", "operation": "read"},
         )
 
         threats = monitor.detect_threats(event)
@@ -140,7 +137,7 @@ class TestEbpfMonitor:
             container_id="test-123",
             process_name="exploit",
             pid=5678,
-            details={"syscall": "ptrace", "args": []}
+            details={"syscall": "ptrace", "args": []},
         )
 
         threats = monitor.detect_threats(event)
@@ -158,7 +155,7 @@ class TestEbpfMonitor:
             container_id="test-123",
             process_name="curl",
             pid=5678,
-            details={"destination": "malicious.com", "port": 443}
+            details={"destination": "malicious.com", "port": 443},
         )
 
         threats = monitor.detect_threats(event)
@@ -177,17 +174,13 @@ class TestEbpfMonitor:
     def test_process_exec_event(self, monitor):
         """Test processing exec events"""
         container_id = "test-123"
-        event_data = {
-            "pid": 1234,
-            "comm": "bash",
-            "filename": "/bin/bash"
-        }
+        event_data = {"pid": 1234, "comm": "bash", "filename": "/bin/bash"}
 
         try:
             monitor._process_exec_event(container_id, event_data)
 
             # Check if event was recorded
-            if hasattr(monitor, '_events'):
+            if hasattr(monitor, "_events"):
                 events = monitor._events
                 exec_events = [e for e in events if e.event_type == EventType.PROCESS_EXEC]
                 assert len(exec_events) > 0 or True  # Event processing might be async
@@ -197,11 +190,7 @@ class TestEbpfMonitor:
     def test_process_file_event(self, monitor):
         """Test processing file access events"""
         container_id = "test-123"
-        event_data = {
-            "pid": 1234,
-            "comm": "cat",
-            "filename": "/etc/hosts"
-        }
+        event_data = {"pid": 1234, "comm": "cat", "filename": "/etc/hosts"}
 
         try:
             monitor._process_file_event(container_id, event_data)
@@ -214,12 +203,7 @@ class TestEbpfMonitor:
     def test_process_connect_event(self, monitor):
         """Test processing network connect events"""
         container_id = "test-123"
-        event_data = {
-            "pid": 1234,
-            "comm": "wget",
-            "daddr": "192.168.1.1",
-            "dport": 80
-        }
+        event_data = {"pid": 1234, "comm": "wget", "daddr": "192.168.1.1", "dport": 80}
 
         try:
             monitor._process_connect_event(container_id, event_data)
@@ -252,7 +236,7 @@ class TestEbpfMonitor:
                 container_id="test",
                 process_name=proc_name,
                 pid=1234,
-                details={}
+                details={},
             )
 
             threats = monitor.detect_threats(event)
@@ -260,12 +244,7 @@ class TestEbpfMonitor:
 
     def test_sensitive_file_paths(self, monitor):
         """Test detection of sensitive file access"""
-        sensitive_files = [
-            "/etc/passwd",
-            "/etc/shadow",
-            "/etc/ssh/id_rsa",
-            "/proc/self/environ"
-        ]
+        sensitive_files = ["/etc/passwd", "/etc/shadow", "/etc/ssh/id_rsa", "/proc/self/environ"]
 
         for filepath in sensitive_files:
             event = RuntimeEvent(
@@ -274,7 +253,7 @@ class TestEbpfMonitor:
                 container_id="test",
                 process_name="cat",
                 pid=1234,
-                details={"path": filepath}
+                details={"path": filepath},
             )
 
             threats = monitor.detect_threats(event)

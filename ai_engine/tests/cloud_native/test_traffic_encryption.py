@@ -1,6 +1,7 @@
 """
 Unit tests for Envoy Traffic Encryption.
 """
+
 import pytest
 import sys
 from pathlib import Path
@@ -13,7 +14,7 @@ try:
         TrafficEncryptionManager,
         TLSVersion,
         CipherSuite,
-        EncryptionConfig
+        EncryptionConfig,
     )
 except ImportError:
     pytest.skip("traffic_encryption module not found", allow_module_level=True)
@@ -43,9 +44,7 @@ class TestEncryptionConfig:
     def test_config_creation(self):
         """Test creating encryption config"""
         config = EncryptionConfig(
-            tls_version=TLSVersion.TLS_1_3,
-            cipher_suites=[CipherSuite.AES_256_GCM],
-            enable_quantum_safe=True
+            tls_version=TLSVersion.TLS_1_3, cipher_suites=[CipherSuite.AES_256_GCM], enable_quantum_safe=True
         )
 
         assert config.tls_version == TLSVersion.TLS_1_3
@@ -59,10 +58,7 @@ class TestTrafficEncryptionManager:
     @pytest.fixture
     def encryption_manager(self):
         """Create encryption manager instance"""
-        return TrafficEncryptionManager(
-            enable_quantum_safe=True,
-            min_tls_version=TLSVersion.TLS_1_3
-        )
+        return TrafficEncryptionManager(enable_quantum_safe=True, min_tls_version=TLSVersion.TLS_1_3)
 
     def test_manager_initialization(self, encryption_manager):
         """Test manager initialization"""
@@ -72,9 +68,7 @@ class TestTrafficEncryptionManager:
     def test_create_tls_context(self, encryption_manager):
         """Test TLS context creation"""
         tls_context = encryption_manager.create_tls_context(
-            cert_path="/etc/certs/tls.crt",
-            key_path="/etc/certs/tls.key",
-            ca_path="/etc/certs/ca.crt"
+            cert_path="/etc/certs/tls.crt", key_path="/etc/certs/tls.key", ca_path="/etc/certs/ca.crt"
         )
 
         assert "common_tls_context" in tls_context
@@ -89,10 +83,7 @@ class TestTrafficEncryptionManager:
 
     def test_quantum_safe_cipher_suites(self, encryption_manager):
         """Test quantum-safe cipher suite configuration"""
-        tls_context = encryption_manager.create_tls_context(
-            cert_path="/etc/certs/tls.crt",
-            key_path="/etc/certs/tls.key"
-        )
+        tls_context = encryption_manager.create_tls_context(cert_path="/etc/certs/tls.crt", key_path="/etc/certs/tls.key")
 
         common_ctx = tls_context["common_tls_context"]
         tls_params = common_ctx.get("tls_params", {})
@@ -100,20 +91,14 @@ class TestTrafficEncryptionManager:
         cipher_suites = tls_params.get("cipher_suites", [])
 
         # Check for quantum-resistant ciphers
-        expected_ciphers = [
-            "TLS_AES_256_GCM_SHA384",
-            "TLS_CHACHA20_POLY1305_SHA256"
-        ]
+        expected_ciphers = ["TLS_AES_256_GCM_SHA384", "TLS_CHACHA20_POLY1305_SHA256"]
 
         for cipher in expected_ciphers:
             assert cipher in cipher_suites or cipher.replace("TLS_", "") in cipher_suites
 
     def test_tls_version_configuration(self, encryption_manager):
         """Test TLS version configuration"""
-        tls_context = encryption_manager.create_tls_context(
-            cert_path="/etc/certs/tls.crt",
-            key_path="/etc/certs/tls.key"
-        )
+        tls_context = encryption_manager.create_tls_context(cert_path="/etc/certs/tls.crt", key_path="/etc/certs/tls.key")
 
         common_ctx = tls_context["common_tls_context"]
         tls_params = common_ctx.get("tls_params", {})
@@ -128,7 +113,7 @@ class TestTrafficEncryptionManager:
             cert_path="/etc/certs/tls.crt",
             key_path="/etc/certs/tls.key",
             ca_path="/etc/certs/ca.crt",
-            require_client_cert=True
+            require_client_cert=True,
         )
 
         common_ctx = tls_context["common_tls_context"]
@@ -144,9 +129,7 @@ class TestTrafficEncryptionManager:
     def test_alpn_protocols(self, encryption_manager):
         """Test ALPN protocol configuration"""
         tls_context = encryption_manager.create_tls_context(
-            cert_path="/etc/certs/tls.crt",
-            key_path="/etc/certs/tls.key",
-            alpn_protocols=["h2", "http/1.1"]
+            cert_path="/etc/certs/tls.crt", key_path="/etc/certs/tls.key", alpn_protocols=["h2", "http/1.1"]
         )
 
         common_ctx = tls_context["common_tls_context"]
@@ -158,9 +141,7 @@ class TestTrafficEncryptionManager:
     def test_sni_configuration(self, encryption_manager):
         """Test SNI configuration"""
         sni_context = encryption_manager.create_sni_context(
-            server_name="api.example.com",
-            cert_path="/etc/certs/api.crt",
-            key_path="/etc/certs/api.key"
+            server_name="api.example.com", cert_path="/etc/certs/api.crt", key_path="/etc/certs/api.key"
         )
 
         assert "name" in sni_context
@@ -173,7 +154,7 @@ class TestTrafficEncryptionManager:
             cert_path="/etc/certs/tls.crt",
             key_path="/etc/certs/tls.key",
             ca_path="/etc/certs/ca.crt",
-            verify_subject_alt_name=["service.local"]
+            verify_subject_alt_name=["service.local"],
         )
 
         common_ctx = tls_context["common_tls_context"]
@@ -186,9 +167,7 @@ class TestTrafficEncryptionManager:
     def test_session_resumption(self, encryption_manager):
         """Test TLS session resumption configuration"""
         tls_context = encryption_manager.create_tls_context(
-            cert_path="/etc/certs/tls.crt",
-            key_path="/etc/certs/tls.key",
-            enable_session_resumption=True
+            cert_path="/etc/certs/tls.crt", key_path="/etc/certs/tls.key", enable_session_resumption=True
         )
 
         # Check for session ticket configuration
@@ -201,8 +180,7 @@ class TestTrafficEncryptionManager:
     def test_downstream_tls(self, encryption_manager):
         """Test downstream TLS configuration"""
         downstream_tls = encryption_manager.create_downstream_tls_context(
-            cert_path="/etc/certs/server.crt",
-            key_path="/etc/certs/server.key"
+            cert_path="/etc/certs/server.crt", key_path="/etc/certs/server.key"
         )
 
         assert "common_tls_context" in downstream_tls
@@ -210,10 +188,7 @@ class TestTrafficEncryptionManager:
 
     def test_upstream_tls(self, encryption_manager):
         """Test upstream TLS configuration"""
-        upstream_tls = encryption_manager.create_upstream_tls_context(
-            ca_path="/etc/certs/ca.crt",
-            sni="backend.local"
-        )
+        upstream_tls = encryption_manager.create_upstream_tls_context(ca_path="/etc/certs/ca.crt", sni="backend.local")
 
         assert "common_tls_context" in upstream_tls
         assert upstream_tls.get("sni") == "backend.local"
@@ -222,10 +197,7 @@ class TestTrafficEncryptionManager:
         """Test disabling TLS"""
         manager = TrafficEncryptionManager(enable_tls=False)
 
-        context = manager.create_tls_context(
-            cert_path="/etc/certs/tls.crt",
-            key_path="/etc/certs/tls.key"
-        )
+        context = manager.create_tls_context(cert_path="/etc/certs/tls.crt", key_path="/etc/certs/tls.key")
 
         # Should return None or minimal config when TLS disabled
         assert context is None or context == {}

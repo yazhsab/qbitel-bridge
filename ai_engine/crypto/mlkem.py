@@ -73,10 +73,7 @@ class MlKemPublicKey:
 
     def __post_init__(self):
         if len(self.data) != self.level.public_key_size:
-            raise ValueError(
-                f"Invalid public key size: expected {self.level.public_key_size}, "
-                f"got {len(self.data)}"
-            )
+            raise ValueError(f"Invalid public key size: expected {self.level.public_key_size}, " f"got {len(self.data)}")
 
     def to_bytes(self) -> bytes:
         return self.data
@@ -91,17 +88,14 @@ class MlKemPrivateKey:
 
     def __post_init__(self):
         if len(self.data) != self.level.private_key_size:
-            raise ValueError(
-                f"Invalid private key size: expected {self.level.private_key_size}, "
-                f"got {len(self.data)}"
-            )
+            raise ValueError(f"Invalid private key size: expected {self.level.private_key_size}, " f"got {len(self.data)}")
 
     def to_bytes(self) -> bytes:
         return self.data
 
     def __del__(self):
         # Zeroize on deletion
-        if hasattr(self, 'data') and isinstance(self.data, bytearray):
+        if hasattr(self, "data") and isinstance(self.data, bytearray):
             for i in range(len(self.data)):
                 self.data[i] = 0
 
@@ -125,10 +119,7 @@ class MlKemCiphertext:
 
     def __post_init__(self):
         if len(self.data) != self.level.ciphertext_size:
-            raise ValueError(
-                f"Invalid ciphertext size: expected {self.level.ciphertext_size}, "
-                f"got {len(self.data)}"
-            )
+            raise ValueError(f"Invalid ciphertext size: expected {self.level.ciphertext_size}, " f"got {len(self.data)}")
 
     def to_bytes(self) -> bytes:
         return self.data
@@ -149,7 +140,7 @@ class MlKemSharedSecret:
 
     def __del__(self):
         # Zeroize on deletion
-        if hasattr(self, 'data') and isinstance(self.data, bytearray):
+        if hasattr(self, "data") and isinstance(self.data, bytearray):
             for i in range(len(self.data)):
                 self.data[i] = 0
 
@@ -183,12 +174,14 @@ class MlKemEngine:
         """Detect available crypto provider."""
         try:
             import kyber
+
             return "kyber-py"
         except ImportError:
             pass
 
         try:
             import oqs
+
             return "liboqs"
         except ImportError:
             pass
@@ -199,6 +192,7 @@ class MlKemEngine:
         """Initialize the underlying crypto engine."""
         if self.provider == "kyber-py":
             from kyber import Kyber512, Kyber768, Kyber1024
+
             engines = {
                 MlKemSecurityLevel.MLKEM_512: Kyber512,
                 MlKemSecurityLevel.MLKEM_768: Kyber768,
@@ -223,6 +217,7 @@ class MlKemEngine:
             )
         elif self.provider == "liboqs":
             import oqs
+
             kem_name = {
                 MlKemSecurityLevel.MLKEM_512: "Kyber512",
                 MlKemSecurityLevel.MLKEM_768: "Kyber768",
@@ -241,6 +236,7 @@ class MlKemEngine:
         else:
             # Fallback for testing
             import secrets
+
             keypair = MlKemKeyPair(
                 level=self.level,
                 public_key=MlKemPublicKey(self.level, secrets.token_bytes(self.level.public_key_size)),
@@ -274,6 +270,7 @@ class MlKemEngine:
             shared_secret = MlKemSharedSecret(bytes(ss))
         elif self.provider == "liboqs":
             import oqs
+
             kem_name = {
                 MlKemSecurityLevel.MLKEM_512: "Kyber512",
                 MlKemSecurityLevel.MLKEM_768: "Kyber768",
@@ -287,6 +284,7 @@ class MlKemEngine:
             shared_secret = MlKemSharedSecret(ss)
         else:
             import secrets
+
             ciphertext = MlKemCiphertext(self.level, secrets.token_bytes(self.level.ciphertext_size))
             shared_secret = MlKemSharedSecret(secrets.token_bytes(32))
 
@@ -318,6 +316,7 @@ class MlKemEngine:
             shared_secret = MlKemSharedSecret(bytes(ss))
         elif self.provider == "liboqs":
             import oqs
+
             kem_name = {
                 MlKemSecurityLevel.MLKEM_512: "Kyber512",
                 MlKemSecurityLevel.MLKEM_768: "Kyber768",
@@ -330,6 +329,7 @@ class MlKemEngine:
             shared_secret = MlKemSharedSecret(ss)
         else:
             import secrets
+
             shared_secret = MlKemSharedSecret(secrets.token_bytes(32))
 
         logger.debug(f"Decapsulated in {time.time() - start:.3f}s")

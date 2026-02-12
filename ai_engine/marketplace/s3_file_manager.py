@@ -15,6 +15,7 @@ from uuid import UUID
 try:
     import boto3
     from botocore.exceptions import ClientError, BotoCoreError
+
     BOTO3_AVAILABLE = True
 except ImportError:
     BOTO3_AVAILABLE = False
@@ -209,10 +210,7 @@ class S3FileManager:
             if version:
                 prefix += f"v{version}/"
 
-            response = self.s3_client.list_objects_v2(
-                Bucket=self.bucket_name,
-                Prefix=prefix
-            )
+            response = self.s3_client.list_objects_v2(Bucket=self.bucket_name, Prefix=prefix)
 
             if "Contents" not in response:
                 return {"success": True, "deleted_count": 0, "message": "No files found"}
@@ -221,10 +219,7 @@ class S3FileManager:
             objects_to_delete = [{"Key": obj["Key"]} for obj in response["Contents"]]
 
             if objects_to_delete:
-                delete_response = self.s3_client.delete_objects(
-                    Bucket=self.bucket_name,
-                    Delete={"Objects": objects_to_delete}
-                )
+                delete_response = self.s3_client.delete_objects(Bucket=self.bucket_name, Delete={"Objects": objects_to_delete})
 
                 deleted_count = len(delete_response.get("Deleted", []))
                 logger.info(f"Deleted {deleted_count} files for protocol {protocol_id}")
@@ -232,7 +227,7 @@ class S3FileManager:
                 return {
                     "success": True,
                     "deleted_count": deleted_count,
-                    "deleted_files": [obj["Key"] for obj in delete_response.get("Deleted", [])]
+                    "deleted_files": [obj["Key"] for obj in delete_response.get("Deleted", [])],
                 }
 
             return {"success": True, "deleted_count": 0}
@@ -255,10 +250,7 @@ class S3FileManager:
             return {"error": "S3 client not available"}
 
         try:
-            response = self.s3_client.head_object(
-                Bucket=self.bucket_name,
-                Key=s3_key
-            )
+            response = self.s3_client.head_object(Bucket=self.bucket_name, Key=s3_key)
 
             return {
                 "content_type": response.get("ContentType"),
@@ -274,12 +266,7 @@ class S3FileManager:
             logger.error(f"Failed to get file metadata: {e}")
             raise
 
-    def _validate_file(
-        self,
-        file_content: bytes,
-        filename: str,
-        file_type: str
-    ) -> Dict[str, Any]:
+    def _validate_file(self, file_content: bytes, filename: str, file_type: str) -> Dict[str, Any]:
         """
         Validate file before upload.
 
@@ -301,10 +288,7 @@ class S3FileManager:
 
         max_size = max_sizes.get(file_type, 10 * 1024 * 1024)
         if len(file_content) > max_size:
-            return {
-                "valid": False,
-                "error": f"File too large: {len(file_content)} bytes (max: {max_size})"
-            }
+            return {"valid": False, "error": f"File too large: {len(file_content)} bytes (max: {max_size})"}
 
         # Check for empty files
         if len(file_content) == 0:
@@ -323,7 +307,7 @@ class S3FileManager:
             if file_ext not in valid_extensions[file_type]:
                 return {
                     "valid": False,
-                    "error": f"Invalid file extension: {file_ext} (allowed: {valid_extensions[file_type]})"
+                    "error": f"Invalid file extension: {file_ext} (allowed: {valid_extensions[file_type]})",
                 }
 
         # TODO: Add virus scanning integration
@@ -331,13 +315,7 @@ class S3FileManager:
 
         return {"valid": True}
 
-    def _generate_s3_key(
-        self,
-        protocol_id: UUID,
-        file_type: str,
-        filename: str,
-        version: str
-    ) -> str:
+    def _generate_s3_key(self, protocol_id: UUID, file_type: str, filename: str, version: str) -> str:
         """
         Generate S3 key (path) for a file.
 
@@ -368,12 +346,7 @@ class S3FileManager:
             return f"{self.cdn_url}/{s3_key}"
         return self._get_public_url(s3_key)
 
-    def _get_mock_upload_result(
-        self,
-        protocol_id: UUID,
-        file_type: str,
-        filename: str
-    ) -> Dict[str, Any]:
+    def _get_mock_upload_result(self, protocol_id: UUID, file_type: str, filename: str) -> Dict[str, Any]:
         """Return mock upload result when S3 is not available."""
         mock_key = f"protocols/{protocol_id}/{file_type}/{filename}"
         return {

@@ -1,6 +1,7 @@
 """
 Unit tests for Azure Sentinel Integration.
 """
+
 import pytest
 import json
 from unittest.mock import Mock, patch
@@ -10,9 +11,7 @@ from pathlib import Path
 # Add ai_engine to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from cloud_native.cloud_integrations.azure.sentinel import (
-    AzureSentinelIntegration
-)
+from cloud_native.cloud_integrations.azure.sentinel import AzureSentinelIntegration
 
 
 class TestAzureSentinelIntegration:
@@ -22,8 +21,7 @@ class TestAzureSentinelIntegration:
     def sentinel(self):
         """Create Sentinel integration instance"""
         return AzureSentinelIntegration(
-            workspace_id="12345678-1234-1234-1234-123456789012",
-            subscription_id="87654321-4321-4321-4321-210987654321"
+            workspace_id="12345678-1234-1234-1234-123456789012", subscription_id="87654321-4321-4321-4321-210987654321"
         )
 
     def test_initialization(self, sentinel):
@@ -37,7 +35,7 @@ class TestAzureSentinelIntegration:
             event_type="ThreatDetection",
             severity="High",
             description="Suspicious activity detected in container",
-            resource_id="/subscriptions/xxx/resourceGroups/rg/providers/Microsoft.Compute/virtualMachines/vm1"
+            resource_id="/subscriptions/xxx/resourceGroups/rg/providers/Microsoft.Compute/virtualMachines/vm1",
         )
 
         assert isinstance(result, bool)
@@ -51,7 +49,7 @@ class TestAzureSentinelIntegration:
                 event_type="SecurityAlert",
                 severity=severity,
                 description=f"Test event with {severity} severity",
-                resource_id="/subscriptions/test"
+                resource_id="/subscriptions/test",
             )
 
             assert isinstance(result, bool)
@@ -79,8 +77,8 @@ class TestAzureSentinelIntegration:
             additional_data={
                 "vulnerable_algorithm": "RSA-2048",
                 "recommended_alternative": "Kyber-1024",
-                "container_image": "myapp:v1.0.0"
-            }
+                "container_image": "myapp:v1.0.0",
+            },
         )
 
         assert isinstance(result, bool)
@@ -92,11 +90,7 @@ class TestAzureSentinelIntegration:
             severity="Medium",
             description="Container running with privileged mode",
             resource_id="/subscriptions/xxx/providers/Microsoft.ContainerInstance/containerGroups/cg1",
-            additional_data={
-                "container_name": "nginx",
-                "violation_type": "privileged_mode",
-                "namespace": "production"
-            }
+            additional_data={"container_name": "nginx", "violation_type": "privileged_mode", "namespace": "production"},
         )
 
         assert isinstance(result, bool)
@@ -108,11 +102,7 @@ class TestAzureSentinelIntegration:
             severity="Low",
             description="mTLS configuration updated",
             resource_id="/subscriptions/xxx/resourceGroups/rg",
-            additional_data={
-                "mesh_type": "Istio",
-                "configuration": "strict_mtls",
-                "affected_services": ["api", "backend"]
-            }
+            additional_data={"mesh_type": "Istio", "configuration": "strict_mtls", "affected_services": ["api", "backend"]},
         )
 
         assert isinstance(result, bool)
@@ -124,14 +114,14 @@ class TestAzureSentinelIntegration:
                 "event_type": "ThreatDetection",
                 "severity": "High",
                 "description": "Event 1",
-                "resource_id": "/subscriptions/test/vm1"
+                "resource_id": "/subscriptions/test/vm1",
             },
             {
                 "event_type": "Compliance",
                 "severity": "Medium",
                 "description": "Event 2",
-                "resource_id": "/subscriptions/test/vm2"
-            }
+                "resource_id": "/subscriptions/test/vm2",
+            },
         ]
 
         results = []
@@ -148,11 +138,7 @@ class TestAzureSentinelIntegration:
             severity="Medium",
             description="Custom security alert",
             resource_id="/subscriptions/test",
-            additional_data={
-                "custom_field_1": "value1",
-                "custom_field_2": 123,
-                "custom_field_3": ["item1", "item2"]
-            }
+            additional_data={"custom_field_1": "value1", "custom_field_2": 123, "custom_field_3": ["item1", "item2"]},
         )
 
         assert isinstance(result, bool)
@@ -168,9 +154,6 @@ class TestAzureSentinelIntegration:
     def test_invalid_workspace_id(self):
         """Test initialization with invalid workspace ID"""
         # Should still initialize but might fail on actual API calls
-        sentinel = AzureSentinelIntegration(
-            workspace_id="invalid-id",
-            subscription_id="test-sub"
-        )
+        sentinel = AzureSentinelIntegration(workspace_id="invalid-id", subscription_id="test-sub")
 
         assert sentinel.workspace_id == "invalid-id"

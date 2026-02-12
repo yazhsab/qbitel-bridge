@@ -111,9 +111,7 @@ class TestTimescaleComplianceIntegration:
         mock_pool = AsyncMock()
         mock_conn = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
 
         with patch(
@@ -140,9 +138,7 @@ class TestTimescaleComplianceIntegration:
             "ai_engine.compliance.data_integrations.asyncpg.create_pool",
             side_effect=Exception("Connection failed"),
         ):
-            with pytest.raises(
-                IntegrationException, match="TimescaleDB initialization failed"
-            ):
+            with pytest.raises(IntegrationException, match="TimescaleDB initialization failed"):
                 await timescale_integration.initialize()
 
     @pytest.mark.asyncio
@@ -151,9 +147,7 @@ class TestTimescaleComplianceIntegration:
         mock_conn = AsyncMock()
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
@@ -180,9 +174,7 @@ class TestTimescaleComplianceIntegration:
         )
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
@@ -196,9 +188,7 @@ class TestTimescaleComplianceIntegration:
         mock_conn.execute = AsyncMock(side_effect=Exception("Table creation failed"))
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
@@ -261,9 +251,7 @@ class TestTimescaleComplianceIntegration:
 
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
@@ -298,9 +286,7 @@ class TestTimescaleComplianceIntegration:
 
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
@@ -331,15 +317,11 @@ class TestTimescaleComplianceIntegration:
         mock_conn.fetchrow = AsyncMock(return_value=mock_row)
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
-        with patch(
-            "ai_engine.compliance.data_integrations.ComplianceAssessment"
-        ) as mock_assessment:
+        with patch("ai_engine.compliance.data_integrations.ComplianceAssessment") as mock_assessment:
             result = await timescale_integration.get_latest_assessment("SOC2")
             mock_assessment.assert_called_once()
 
@@ -350,9 +332,7 @@ class TestTimescaleComplianceIntegration:
         mock_conn.fetchrow = AsyncMock(return_value=None)
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
@@ -366,9 +346,7 @@ class TestTimescaleComplianceIntegration:
         mock_conn.fetchrow = AsyncMock(side_effect=Exception("Query failed"))
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
@@ -398,9 +376,7 @@ class TestTimescaleComplianceIntegration:
         mock_conn = AsyncMock()
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
@@ -425,9 +401,7 @@ class TestTimescaleComplianceIntegration:
         mock_conn.fetch = AsyncMock(return_value=mock_rows)
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
@@ -442,9 +416,7 @@ class TestTimescaleComplianceIntegration:
         mock_conn.fetch = AsyncMock(side_effect=Exception("Query failed"))
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
@@ -458,9 +430,7 @@ class TestTimescaleComplianceIntegration:
         mock_conn.execute = AsyncMock(return_value="DELETE 5")
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
@@ -474,9 +444,7 @@ class TestTimescaleComplianceIntegration:
         mock_conn.execute = AsyncMock(return_value=None)
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
@@ -490,9 +458,7 @@ class TestTimescaleComplianceIntegration:
         mock_conn.execute = AsyncMock(side_effect=Exception("Cleanup failed"))
         mock_pool = AsyncMock()
         mock_pool.acquire = AsyncMock(
-            return_value=AsyncMock(
-                __aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock()
-            )
+            return_value=AsyncMock(__aenter__=AsyncMock(return_value=mock_conn), __aexit__=AsyncMock())
         )
         timescale_integration.connection_pool = mock_pool
 
@@ -583,9 +549,7 @@ class TestRedisComplianceCache:
             "ai_engine.compliance.data_integrations.redis.Redis",
             return_value=mock_redis,
         ):
-            with pytest.raises(
-                IntegrationException, match="Redis initialization failed"
-            ):
+            with pytest.raises(IntegrationException, match="Redis initialization failed"):
                 await redis_cache.initialize()
 
     @pytest.mark.asyncio
@@ -688,9 +652,7 @@ class TestRedisComplianceCache:
         mock_redis.get = AsyncMock(return_value=pickle.dumps(assessment_data))
         redis_cache.redis_client = mock_redis
 
-        with patch(
-            "ai_engine.compliance.data_integrations.ComplianceAssessment"
-        ) as mock_assessment:
+        with patch("ai_engine.compliance.data_integrations.ComplianceAssessment") as mock_assessment:
             result = await redis_cache.get_assessment("SOC2")
             mock_assessment.assert_called_once()
 
@@ -919,9 +881,7 @@ class TestComplianceSecurityIntegration:
             "_initialize_encryption",
             side_effect=Exception("Init failed"),
         ):
-            with pytest.raises(
-                IntegrationException, match="Security integration failed"
-            ):
+            with pytest.raises(IntegrationException, match="Security integration failed"):
                 await security_integration.initialize()
 
     @pytest.mark.asyncio
@@ -985,9 +945,7 @@ class TestComplianceSecurityIntegration:
         """Test logging security event when disabled."""
         mock_config.security.audit_logging = False
         integration = ComplianceSecurityIntegration(mock_config)
-        await integration.log_security_event(
-            event_type="access", resource="assessment", action="read", outcome="success"
-        )
+        await integration.log_security_event(event_type="access", resource="assessment", action="read", outcome="success")
         # Should complete without error
 
     @pytest.mark.asyncio
@@ -1016,9 +974,7 @@ class TestComplianceSecurityIntegration:
     @pytest.mark.asyncio
     async def test_validate_data_access_success(self, security_integration):
         """Test validating data access."""
-        result = await security_integration.validate_data_access(
-            user="test_user", resource="assessment", action="read"
-        )
+        result = await security_integration.validate_data_access(user="test_user", resource="assessment", action="read")
         assert result is True
 
     @pytest.mark.asyncio
@@ -1029,9 +985,7 @@ class TestComplianceSecurityIntegration:
             "log_security_event",
             side_effect=Exception("Log failed"),
         ):
-            result = await security_integration.validate_data_access(
-                user="test_user", resource="assessment", action="read"
-            )
+            result = await security_integration.validate_data_access(user="test_user", resource="assessment", action="read")
             assert result is False
 
     @pytest.mark.asyncio

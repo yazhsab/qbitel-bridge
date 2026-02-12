@@ -70,9 +70,7 @@ class SHAPProtocolExplainer(BaseExplainer):
         else:
             # Create synthetic background data if none provided
             # For protocol classifiers, this is random byte sequences
-            self.background_data = torch.randint(
-                0, 256, (background_size, 512), dtype=torch.long, device=self.device
-            )
+            self.background_data = torch.randint(0, 256, (background_size, 512), dtype=torch.long, device=self.device)
 
         # Initialize SHAP explainer
         try:
@@ -80,10 +78,7 @@ class SHAPProtocolExplainer(BaseExplainer):
                 self.model,
                 self.background_data,
             )
-            logger.info(
-                f"Initialized SHAP explainer for {model_name} with "
-                f"{background_size} background samples"
-            )
+            logger.info(f"Initialized SHAP explainer for {model_name} with " f"{background_size} background samples")
         except Exception as e:
             logger.error(f"Failed to initialize SHAP explainer: {e}")
             # Fallback to GradientExplainer if DeepExplainer fails
@@ -148,9 +143,7 @@ class SHAPProtocolExplainer(BaseExplainer):
         except Exception as e:
             logger.error(f"SHAP computation failed: {e}")
             # Return empty explanation on failure
-            return self._create_empty_explanation(
-                decision_id, input_data, predicted_class, confidence, str(e)
-            )
+            return self._create_empty_explanation(decision_id, input_data, predicted_class, confidence, str(e))
 
         # Convert SHAP values to feature importances
         feature_importances = self._shap_to_features(
@@ -166,14 +159,10 @@ class SHAPProtocolExplainer(BaseExplainer):
         summary = self._generate_summary(top_features, predicted_class, confidence)
 
         # Generate regulatory justification
-        regulatory_justification = self._generate_regulatory_justification(
-            top_features, confidence
-        )
+        regulatory_justification = self._generate_regulatory_justification(top_features, confidence)
 
         # Calculate explanation time
-        explanation_time_ms = (
-            datetime.now(timezone.utc) - start_time
-        ).total_seconds() * 1000
+        explanation_time_ms = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
 
         return ExplanationResult(
             explanation_id=str(uuid4()),
@@ -255,9 +244,7 @@ class SHAPProtocolExplainer(BaseExplainer):
             input_array = input_array[:expected_length]
 
         # Convert to tensor
-        input_tensor = torch.tensor(
-            input_array, dtype=torch.long, device=self.device
-        ).unsqueeze(0)
+        input_tensor = torch.tensor(input_array, dtype=torch.long, device=self.device).unsqueeze(0)
 
         return input_tensor
 
@@ -278,13 +265,9 @@ class SHAPProtocolExplainer(BaseExplainer):
         """
         feature_importances = []
 
-        for byte_pos, (shap_value, byte_value) in enumerate(
-            zip(shap_values, input_bytes)
-        ):
+        for byte_pos, (shap_value, byte_value) in enumerate(zip(shap_values, input_bytes)):
             # Create human-readable description
-            char_repr = (
-                chr(byte_value) if 32 <= byte_value < 127 else f"\\x{byte_value:02x}"
-            )
+            char_repr = chr(byte_value) if 32 <= byte_value < 127 else f"\\x{byte_value:02x}"
             description = self._get_byte_description(byte_pos, byte_value, char_repr)
 
             feature_importances.append(
@@ -397,9 +380,7 @@ def create_background_dataset(
 
         # Pad or truncate to 512 bytes
         if len(sample_array) < 512:
-            sample_array = np.pad(
-                sample_array, (0, 512 - len(sample_array)), constant_values=0
-            )
+            sample_array = np.pad(sample_array, (0, 512 - len(sample_array)), constant_values=0)
         else:
             sample_array = sample_array[:512]
 

@@ -1,6 +1,7 @@
 """
 Unit tests for Envoy Policy Engine.
 """
+
 import pytest
 import sys
 from pathlib import Path
@@ -8,11 +9,7 @@ from pathlib import Path
 # Add ai_engine to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from cloud_native.service_mesh.envoy.policy_engine import (
-    PolicyType,
-    TrafficPolicy,
-    TrafficPolicyEngine
-)
+from cloud_native.service_mesh.envoy.policy_engine import PolicyType, TrafficPolicy, TrafficPolicyEngine
 
 
 class TestPolicyType:
@@ -36,7 +33,7 @@ class TestTrafficPolicy:
             name="test-policy",
             service_name="api-service",
             policy_type=PolicyType.RATE_LIMIT,
-            config={"requests_per_second": 100}
+            config={"requests_per_second": 100},
         )
 
         assert policy.name == "test-policy"
@@ -54,11 +51,7 @@ class TestTrafficPolicyEngine:
 
     def test_create_rate_limit_policy(self, policy_engine):
         """Test rate limit policy creation"""
-        policy = policy_engine.create_rate_limit_policy(
-            service_name="api-service",
-            requests_per_second=100,
-            burst=50
-        )
+        policy = policy_engine.create_rate_limit_policy(service_name="api-service", requests_per_second=100, burst=50)
 
         assert policy.policy_type == PolicyType.RATE_LIMIT
         assert policy.service_name == "api-service"
@@ -68,11 +61,7 @@ class TestTrafficPolicyEngine:
     def test_create_circuit_breaker_policy(self, policy_engine):
         """Test circuit breaker policy creation"""
         policy = policy_engine.create_circuit_breaker_policy(
-            service_name="backend-service",
-            max_connections=100,
-            max_pending_requests=50,
-            max_requests=200,
-            max_retries=3
+            service_name="backend-service", max_connections=100, max_pending_requests=50, max_requests=200, max_retries=3
         )
 
         assert policy.policy_type == PolicyType.CIRCUIT_BREAKER
@@ -84,10 +73,7 @@ class TestTrafficPolicyEngine:
     def test_create_retry_policy(self, policy_engine):
         """Test retry policy creation"""
         policy = policy_engine.create_retry_policy(
-            service_name="flaky-service",
-            num_retries=3,
-            retry_on="5xx,reset,connect-failure",
-            per_try_timeout="2s"
+            service_name="flaky-service", num_retries=3, retry_on="5xx,reset,connect-failure", per_try_timeout="2s"
         )
 
         assert policy.policy_type == PolicyType.RETRY
@@ -97,11 +83,7 @@ class TestTrafficPolicyEngine:
 
     def test_create_timeout_policy(self, policy_engine):
         """Test timeout policy creation"""
-        policy = policy_engine.create_timeout_policy(
-            service_name="slow-service",
-            request_timeout="10s",
-            idle_timeout="300s"
-        )
+        policy = policy_engine.create_timeout_policy(service_name="slow-service", request_timeout="10s", idle_timeout="300s")
 
         assert policy.policy_type == PolicyType.TIMEOUT
         assert policy.config["request_timeout"] == "10s"
@@ -110,9 +92,7 @@ class TestTrafficPolicyEngine:
     def test_create_load_balancer_policy(self, policy_engine):
         """Test load balancer policy creation"""
         policy = policy_engine.create_load_balancer_policy(
-            service_name="distributed-service",
-            lb_policy="LEAST_REQUEST",
-            locality_weighted_lb=True
+            service_name="distributed-service", lb_policy="LEAST_REQUEST", locality_weighted_lb=True
         )
 
         assert policy.policy_type == PolicyType.LOAD_BALANCER
@@ -122,10 +102,7 @@ class TestTrafficPolicyEngine:
     def test_get_policy(self, policy_engine):
         """Test retrieving policy"""
         # Create a policy
-        created_policy = policy_engine.create_rate_limit_policy(
-            service_name="test-service",
-            requests_per_second=100
-        )
+        created_policy = policy_engine.create_rate_limit_policy(service_name="test-service", requests_per_second=100)
 
         # Retrieve it
         retrieved_policy = policy_engine.get_policy(created_policy.name)
@@ -157,11 +134,7 @@ class TestTrafficPolicyEngine:
 
         # Create policies
         policy_engine.create_rate_limit_policy(service_name, 100, 50)
-        policy_engine.create_circuit_breaker_policy(
-            service_name,
-            max_connections=100,
-            max_pending_requests=50
-        )
+        policy_engine.create_circuit_breaker_policy(service_name, max_connections=100, max_pending_requests=50)
 
         # Generate config
         envoy_config = policy_engine.generate_envoy_config(service_name)
@@ -187,16 +160,10 @@ class TestTrafficPolicyEngine:
 
     def test_update_policy(self, policy_engine):
         """Test updating an existing policy"""
-        policy = policy_engine.create_rate_limit_policy(
-            "update-service",
-            requests_per_second=100
-        )
+        policy = policy_engine.create_rate_limit_policy("update-service", requests_per_second=100)
 
         # Update the policy
-        updated_policy = policy_engine.update_policy(
-            policy.name,
-            config={"requests_per_second": 200, "burst": 100}
-        )
+        updated_policy = policy_engine.update_policy(policy.name, config={"requests_per_second": 200, "burst": 100})
 
         assert updated_policy.config["requests_per_second"] == 200
         assert updated_policy.config["burst"] == 100
@@ -217,16 +184,10 @@ class TestTrafficPolicyEngine:
         """Test policy configuration validation"""
         # Valid config
         valid_config = {"requests_per_second": 100, "burst": 50}
-        is_valid = policy_engine.validate_policy_config(
-            PolicyType.RATE_LIMIT,
-            valid_config
-        )
+        is_valid = policy_engine.validate_policy_config(PolicyType.RATE_LIMIT, valid_config)
         assert is_valid is True
 
         # Invalid config (missing required field)
         invalid_config = {"burst": 50}
-        is_valid = policy_engine.validate_policy_config(
-            PolicyType.RATE_LIMIT,
-            invalid_config
-        )
+        is_valid = policy_engine.validate_policy_config(PolicyType.RATE_LIMIT, invalid_config)
         assert is_valid is False or is_valid is True  # Depending on implementation

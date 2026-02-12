@@ -41,20 +41,20 @@ logger = logging.getLogger(__name__)
 class ShieldMode(Enum):
     """Operating modes for the security shield."""
 
-    TRANSPARENT = auto()      # Pass-through with encryption
-    FILTERING = auto()        # Filter unauthorized commands
-    MONITORING = auto()       # Log and alert only
-    EMERGENCY = auto()        # Allow all (for medical emergencies)
+    TRANSPARENT = auto()  # Pass-through with encryption
+    FILTERING = auto()  # Filter unauthorized commands
+    MONITORING = auto()  # Log and alert only
+    EMERGENCY = auto()  # Allow all (for medical emergencies)
 
 
 class DeviceProtocol(Enum):
     """Legacy device communication protocols."""
 
-    MICS = auto()             # Medical Implant Communication Service (402-405 MHz)
-    MEDRADIO = auto()         # Medical Device Radio (401-406 MHz)
-    BLUETOOTH_LE = auto()     # Bluetooth Low Energy
-    ZIGBEE = auto()           # ZigBee (medical profile)
-    PROPRIETARY = auto()      # Vendor-specific
+    MICS = auto()  # Medical Implant Communication Service (402-405 MHz)
+    MEDRADIO = auto()  # Medical Device Radio (401-406 MHz)
+    BLUETOOTH_LE = auto()  # Bluetooth Low Energy
+    ZIGBEE = auto()  # ZigBee (medical profile)
+    PROPRIETARY = auto()  # Vendor-specific
 
 
 @dataclass
@@ -103,21 +103,15 @@ class AuditLogEntry:
 
 # Prometheus metrics
 SHIELD_MESSAGES = Counter(
-    'healthcare_shield_messages_total',
-    'Messages processed by security shield',
-    ['direction', 'device_id', 'allowed']
+    "healthcare_shield_messages_total", "Messages processed by security shield", ["direction", "device_id", "allowed"]
 )
 
 SHIELD_LATENCY = Histogram(
-    'healthcare_shield_latency_seconds',
-    'Security shield processing latency',
-    ['operation', 'device_id']
+    "healthcare_shield_latency_seconds", "Security shield processing latency", ["operation", "device_id"]
 )
 
 SHIELD_ATTACKS_BLOCKED = Counter(
-    'healthcare_shield_attacks_blocked_total',
-    'Attacks blocked by security shield',
-    ['attack_type', 'device_id']
+    "healthcare_shield_attacks_blocked_total", "Attacks blocked by security shield", ["attack_type", "device_id"]
 )
 
 
@@ -217,18 +211,13 @@ class MedicalDeviceSecurityShield:
             "ml-kem-768": MlKemSecurityLevel.MLKEM_768,
             "ml-kem-1024": MlKemSecurityLevel.MLKEM_1024,
         }
-        mlkem_level = level_map.get(
-            self.config.pqc_algorithm,
-            MlKemSecurityLevel.MLKEM_768
-        )
+        mlkem_level = level_map.get(self.config.pqc_algorithm, MlKemSecurityLevel.MLKEM_768)
 
         self._kem_engine = MlKemEngine(mlkem_level)
 
         # Select Falcon level
         falcon_level = (
-            FalconSecurityLevel.FALCON_512
-            if "512" in self.config.signature_algorithm
-            else FalconSecurityLevel.FALCON_1024
+            FalconSecurityLevel.FALCON_512 if "512" in self.config.signature_algorithm else FalconSecurityLevel.FALCON_1024
         )
         self._sig_engine = FalconEngine(falcon_level)
 
@@ -310,17 +299,8 @@ class MedicalDeviceSecurityShield:
             Session key if authentication successful, None otherwise
         """
         if peer_id not in self._authorized_peers:
-            self._log_event(
-                "auth_failed",
-                peer_id,
-                None,
-                False,
-                "Unknown peer"
-            )
-            SHIELD_ATTACKS_BLOCKED.labels(
-                attack_type="unauthorized_peer",
-                device_id=self.config.device_id
-            ).inc()
+            self._log_event("auth_failed", peer_id, None, False, "Unknown peer")
+            SHIELD_ATTACKS_BLOCKED.labels(attack_type="unauthorized_peer", device_id=self.config.device_id).inc()
             return None
 
         peer = self._authorized_peers[peer_id]
@@ -340,18 +320,9 @@ class MedicalDeviceSecurityShield:
         peer.last_authenticated = time.time()
 
         elapsed = time.time() - start
-        SHIELD_LATENCY.labels(
-            operation="authenticate",
-            device_id=self.config.device_id
-        ).observe(elapsed)
+        SHIELD_LATENCY.labels(operation="authenticate", device_id=self.config.device_id).observe(elapsed)
 
-        self._log_event(
-            "auth_success",
-            peer_id,
-            None,
-            True,
-            f"Session established in {elapsed:.3f}s"
-        )
+        self._log_event("auth_success", peer_id, None, True, f"Session established in {elapsed:.3f}s")
 
         logger.info(f"Authenticated peer {peer_id}")
 
@@ -382,30 +353,14 @@ class MedicalDeviceSecurityShield:
 
         # Check if peer is authenticated
         if peer_id not in self._authorized_peers:
-            SHIELD_MESSAGES.labels(
-                direction="inbound",
-                device_id=self.config.device_id,
-                allowed="false"
-            ).inc()
-            self._log_event(
-                "message_blocked",
-                peer_id,
-                None,
-                False,
-                "Unknown peer"
-            )
+            SHIELD_MESSAGES.labels(direction="inbound", device_id=self.config.device_id, allowed="false").inc()
+            self._log_event("message_blocked", peer_id, None, False, "Unknown peer")
             return False, None
 
         peer = self._authorized_peers[peer_id]
 
         if peer.session_key is None:
-            self._log_event(
-                "message_blocked",
-                peer_id,
-                None,
-                False,
-                "No session established"
-            )
+            self._log_event("message_blocked", peer_id, None, False, "No session established")
             return False, None
 
         start = time.time()
@@ -414,62 +369,27 @@ class MedicalDeviceSecurityShield:
         try:
             plaintext = await self._decrypt_message(encrypted_message, peer.session_key)
         except Exception as e:
-            SHIELD_ATTACKS_BLOCKED.labels(
-                attack_type="decrypt_failure",
-                device_id=self.config.device_id
-            ).inc()
-            self._log_event(
-                "decrypt_failed",
-                peer_id,
-                None,
-                False,
-                str(e)
-            )
+            SHIELD_ATTACKS_BLOCKED.labels(attack_type="decrypt_failure", device_id=self.config.device_id).inc()
+            self._log_event("decrypt_failed", peer_id, None, False, str(e))
             return False, None
 
         # Check if command is allowed
         allowed = self._check_command_allowed(plaintext, peer)
 
         if not allowed:
-            SHIELD_MESSAGES.labels(
-                direction="inbound",
-                device_id=self.config.device_id,
-                allowed="false"
-            ).inc()
-            SHIELD_ATTACKS_BLOCKED.labels(
-                attack_type="unauthorized_command",
-                device_id=self.config.device_id
-            ).inc()
-            self._log_event(
-                "command_blocked",
-                peer_id,
-                plaintext[:32],
-                False,
-                "Command not authorized for peer"
-            )
+            SHIELD_MESSAGES.labels(direction="inbound", device_id=self.config.device_id, allowed="false").inc()
+            SHIELD_ATTACKS_BLOCKED.labels(attack_type="unauthorized_command", device_id=self.config.device_id).inc()
+            self._log_event("command_blocked", peer_id, plaintext[:32], False, "Command not authorized for peer")
             return False, None
 
         # Forward to device
         success, response = await self._forward_to_device(plaintext)
 
         elapsed = time.time() - start
-        SHIELD_LATENCY.labels(
-            operation="process_inbound",
-            device_id=self.config.device_id
-        ).observe(elapsed)
-        SHIELD_MESSAGES.labels(
-            direction="inbound",
-            device_id=self.config.device_id,
-            allowed="true"
-        ).inc()
+        SHIELD_LATENCY.labels(operation="process_inbound", device_id=self.config.device_id).observe(elapsed)
+        SHIELD_MESSAGES.labels(direction="inbound", device_id=self.config.device_id, allowed="true").inc()
 
-        self._log_event(
-            "message_forwarded",
-            peer_id,
-            plaintext[:32],
-            True,
-            f"Processed in {elapsed:.3f}s"
-        )
+        self._log_event("message_forwarded", peer_id, plaintext[:32], True, f"Processed in {elapsed:.3f}s")
 
         # Encrypt response if any
         if response and peer.session_key:
@@ -505,15 +425,8 @@ class MedicalDeviceSecurityShield:
         encrypted = await self._encrypt_message(data, peer.session_key)
 
         elapsed = time.time() - start
-        SHIELD_LATENCY.labels(
-            operation="process_outbound",
-            device_id=self.config.device_id
-        ).observe(elapsed)
-        SHIELD_MESSAGES.labels(
-            direction="outbound",
-            device_id=self.config.device_id,
-            allowed="true"
-        ).inc()
+        SHIELD_LATENCY.labels(operation="process_outbound", device_id=self.config.device_id).observe(elapsed)
+        SHIELD_MESSAGES.labels(direction="outbound", device_id=self.config.device_id, allowed="true").inc()
 
         return encrypted
 
@@ -607,25 +520,13 @@ class MedicalDeviceSecurityShield:
 
         logger.critical(f"EMERGENCY MODE ENABLED for {self.config.device_id}")
         self._emergency_mode = True
-        self._log_event(
-            "emergency_mode_enabled",
-            None,
-            None,
-            True,
-            "All access control bypassed"
-        )
+        self._log_event("emergency_mode_enabled", None, None, True, "All access control bypassed")
 
     def disable_emergency_mode(self) -> None:
         """Disable emergency mode."""
         logger.info(f"Emergency mode disabled for {self.config.device_id}")
         self._emergency_mode = False
-        self._log_event(
-            "emergency_mode_disabled",
-            None,
-            None,
-            True,
-            "Normal access control resumed"
-        )
+        self._log_event("emergency_mode_disabled", None, None, True, "Normal access control resumed")
 
     def _log_event(
         self,
@@ -652,7 +553,7 @@ class MedicalDeviceSecurityShield:
 
         # Trim log if too large
         if len(self._audit_log) > self._max_audit_entries:
-            self._audit_log = self._audit_log[-self._max_audit_entries:]
+            self._audit_log = self._audit_log[-self._max_audit_entries :]
 
     def get_audit_log(
         self,

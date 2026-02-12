@@ -59,9 +59,7 @@ class TestMetricConfig:
     def test_metric_config_with_buckets(self):
         """Test metric config with histogram buckets."""
         buckets = [0.1, 0.5, 1.0, 5.0, 10.0]
-        config = MetricConfig(
-            name="histogram_metric", help="Histogram metric", buckets=buckets
-        )
+        config = MetricConfig(name="histogram_metric", help="Histogram metric", buckets=buckets)
 
         assert config.buckets == buckets
 
@@ -130,9 +128,7 @@ class TestMetricsCollector:
 
     def test_register_gauge_metric(self, collector):
         """Test registering a gauge metric."""
-        config = MetricConfig(
-            name="active_connections", help="Number of active connections"
-        )
+        config = MetricConfig(name="active_connections", help="Number of active connections")
 
         metric = collector.register_metric(config, MetricType.GAUGE)
 
@@ -185,14 +181,10 @@ class TestMetricsCollector:
 
     def test_increment_counter(self, collector):
         """Test incrementing counter metric."""
-        config = MetricConfig(
-            name="test_counter", help="Test counter", labels=["status"]
-        )
+        config = MetricConfig(name="test_counter", help="Test counter", labels=["status"])
 
         collector.register_metric(config, MetricType.COUNTER)
-        collector.increment_counter(
-            "test_counter", labels={"status": "success"}, value=5.0
-        )
+        collector.increment_counter("test_counter", labels={"status": "success"}, value=5.0)
 
         # Metric should have been incremented (can't easily verify value in Prometheus)
 
@@ -233,9 +225,7 @@ class TestMetricsCollector:
         )
 
         collector.register_metric(config, MetricType.HISTOGRAM)
-        collector.observe_histogram(
-            "test_histogram", 0.75, labels={"operation": "query"}
-        )
+        collector.observe_histogram("test_histogram", 0.75, labels={"operation": "query"})
 
         # Histogram should have observation
 
@@ -329,9 +319,7 @@ class TestMetricsCollectorEdgeCases:
     def test_metric_with_many_labels(self, collector):
         """Test metric with many labels."""
         labels = [f"label{i}" for i in range(10)]
-        config = MetricConfig(
-            name="many_labels", help="Metric with many labels", labels=labels
-        )
+        config = MetricConfig(name="many_labels", help="Metric with many labels", labels=labels)
 
         metric = collector.register_metric(config, MetricType.COUNTER)
         assert metric is not None
@@ -404,14 +392,10 @@ class TestMetricsCollectorThreadSafety:
         import threading
 
         def register_metric(i):
-            config = MetricConfig(
-                name=f"concurrent_metric_{i}", help=f"Concurrent metric {i}"
-            )
+            config = MetricConfig(name=f"concurrent_metric_{i}", help=f"Concurrent metric {i}")
             collector.register_metric(config, MetricType.COUNTER)
 
-        threads = [
-            threading.Thread(target=register_metric, args=(i,)) for i in range(10)
-        ]
+        threads = [threading.Thread(target=register_metric, args=(i,)) for i in range(10)]
 
         for thread in threads:
             thread.start()

@@ -201,9 +201,7 @@ class ConversationContextManager:
         except Exception as e:
             self.logger.error(f"Error updating context for {user_id}/{session_id}: {e}")
 
-    async def get_user_sessions(
-        self, user_id: str, limit: int = 10
-    ) -> List[Dict[str, Any]]:
+    async def get_user_sessions(self, user_id: str, limit: int = 10) -> List[Dict[str, Any]]:
         """Get recent sessions for a user."""
         try:
             pattern = f"context:session:{user_id}:*"
@@ -246,9 +244,7 @@ class ConversationContextManager:
             self.logger.error(f"Error clearing session {user_id}/{session_id}: {e}")
             return False
 
-    async def get_session_summary(
-        self, user_id: str, session_id: str
-    ) -> Dict[str, Any]:
+    async def get_session_summary(self, user_id: str, session_id: str) -> Dict[str, Any]:
         """Get summary of a conversation session."""
         try:
             session = await self._load_session_from_redis(user_id, session_id)
@@ -268,16 +264,12 @@ class ConversationContextManager:
                 keywords = self._extract_keywords(turn.user_query)
                 recent_topics.extend(keywords)
 
-            avg_confidence = (
-                avg_confidence / len(session.turns) if session.turns else 0.0
-            )
+            avg_confidence = avg_confidence / len(session.turns) if session.turns else 0.0
 
             # Get most common topics
             from collections import Counter
 
-            top_topics = [
-                topic for topic, count in Counter(recent_topics).most_common(5)
-            ]
+            top_topics = [topic for topic, count in Counter(recent_topics).most_common(5)]
 
             return {
                 "session_id": session.session_id,
@@ -295,9 +287,7 @@ class ConversationContextManager:
             self.logger.error(f"Error getting session summary: {e}")
             return {}
 
-    def _build_context_from_session(
-        self, session: ConversationSession
-    ) -> Dict[str, Any]:
+    def _build_context_from_session(self, session: ConversationSession) -> Dict[str, Any]:
         """Build context dictionary from session data."""
         context = {
             "session_id": session.session_id,
@@ -340,8 +330,7 @@ class ConversationContextManager:
             context["conversation_patterns"] = {
                 "dominant_query_type": max(set(query_types), key=query_types.count),
                 "query_type_diversity": len(set(query_types)),
-                "average_confidence": sum(turn.confidence for turn in session.turns)
-                / len(session.turns),
+                "average_confidence": sum(turn.confidence for turn in session.turns) / len(session.turns),
             }
 
         return context
@@ -356,21 +345,14 @@ class ConversationContextManager:
         try:
             # Extract and store user preferences
             if "protocol" in turn.user_query.lower():
-                protocols_mentioned = self._extract_protocols_from_query(
-                    turn.user_query
-                )
+                protocols_mentioned = self._extract_protocols_from_query(turn.user_query)
                 if protocols_mentioned:
                     if "preferred_protocols" not in session.persistent_context:
                         session.persistent_context["preferred_protocols"] = []
 
                     for protocol in protocols_mentioned:
-                        if (
-                            protocol
-                            not in session.persistent_context["preferred_protocols"]
-                        ):
-                            session.persistent_context["preferred_protocols"].append(
-                                protocol
-                            )
+                        if protocol not in session.persistent_context["preferred_protocols"]:
+                            session.persistent_context["preferred_protocols"].append(protocol)
 
             # Store user expertise level indicators
             complexity_indicators = [
@@ -464,17 +446,11 @@ class ConversationContextManager:
         }
 
         words = text.lower().split()
-        keywords = [
-            word.strip(".,!?;:")
-            for word in words
-            if len(word) > 3 and word not in common_words
-        ]
+        keywords = [word.strip(".,!?;:") for word in words if len(word) > 3 and word not in common_words]
 
         return keywords[:10]  # Return top 10 keywords
 
-    async def _load_session_from_redis(
-        self, user_id: str, session_id: str
-    ) -> Optional[ConversationSession]:
+    async def _load_session_from_redis(self, user_id: str, session_id: str) -> Optional[ConversationSession]:
         """Load session from Redis."""
         try:
             redis_key = f"context:session:{user_id}:{session_id}"
@@ -503,9 +479,7 @@ class ConversationContextManager:
                 started_at=datetime.fromisoformat(session_data["started_at"]),
                 last_activity=datetime.fromisoformat(session_data["last_activity"]),
                 turns=turns,
-                persistent_context=json.loads(
-                    session_data.get("persistent_context", "{}")
-                ),
+                persistent_context=json.loads(session_data.get("persistent_context", "{}")),
                 metadata=json.loads(session_data.get("metadata", "{}")),
             )
 
@@ -569,9 +543,7 @@ class ConversationContextManager:
                     del self.active_sessions[session_id]
 
                 if expired_sessions:
-                    self.logger.info(
-                        f"Cleaned up {len(expired_sessions)} expired sessions"
-                    )
+                    self.logger.info(f"Cleaned up {len(expired_sessions)} expired sessions")
 
             except asyncio.CancelledError:
                 break

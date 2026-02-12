@@ -104,7 +104,7 @@ class FalconPrivateKey:
         return self.data
 
     def __del__(self):
-        if hasattr(self, 'data') and isinstance(self.data, bytearray):
+        if hasattr(self, "data") and isinstance(self.data, bytearray):
             for i in range(len(self.data)):
                 self.data[i] = 0
 
@@ -155,6 +155,7 @@ class FalconEngine:
     def _detect_provider(self) -> str:
         try:
             import oqs
+
             return "liboqs"
         except ImportError:
             return "fallback"
@@ -165,6 +166,7 @@ class FalconEngine:
 
         if self.provider == "liboqs":
             import oqs
+
             sig_name = {
                 FalconSecurityLevel.FALCON_512: "Falcon-512",
                 FalconSecurityLevel.FALCON_1024: "Falcon-1024",
@@ -181,6 +183,7 @@ class FalconEngine:
             )
         else:
             import secrets
+
             keypair = FalconKeyPair(
                 level=self.level,
                 public_key=FalconPublicKey(self.level, secrets.token_bytes(self.level.public_key_size)),
@@ -212,6 +215,7 @@ class FalconEngine:
 
         if self.provider == "liboqs":
             import oqs
+
             sig_name = {
                 FalconSecurityLevel.FALCON_512: "Falcon-512",
                 FalconSecurityLevel.FALCON_1024: "Falcon-1024",
@@ -223,10 +227,8 @@ class FalconEngine:
             signature = FalconSignature(self.level, signature_bytes)
         else:
             import secrets
-            signature = FalconSignature(
-                self.level,
-                secrets.token_bytes(self.level.signature_size_typical)
-            )
+
+            signature = FalconSignature(self.level, secrets.token_bytes(self.level.signature_size_typical))
 
         elapsed = time.time() - start
         logger.debug(f"Falcon sign: {signature.size} bytes in {elapsed:.3f}s")
@@ -257,6 +259,7 @@ class FalconEngine:
 
         if self.provider == "liboqs":
             import oqs
+
             sig_name = {
                 FalconSecurityLevel.FALCON_512: "Falcon-512",
                 FalconSecurityLevel.FALCON_1024: "Falcon-1024",
@@ -354,10 +357,7 @@ class FalconBatchVerifier:
         verified = sum(results)
         rate = len(results) / elapsed if elapsed > 0 else 0
 
-        logger.info(
-            f"Batch verified {len(results)} signatures in {elapsed:.3f}s "
-            f"({verified} valid, {rate:.0f}/sec)"
-        )
+        logger.info(f"Batch verified {len(results)} signatures in {elapsed:.3f}s " f"({verified} valid, {rate:.0f}/sec)")
 
         return list(results)
 

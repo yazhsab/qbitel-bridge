@@ -50,7 +50,6 @@ from ai_engine.automation.self_healing_orchestrator import (
     Incident,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -176,21 +175,15 @@ class AutomationEngine:
 
             # Start key lifecycle management
             if self._config.enable_key_lifecycle:
-                self._key_manager.start_rotation_scheduler(
-                    self._config.key_rotation_check_interval
-                )
+                self._key_manager.start_rotation_scheduler(self._config.key_rotation_check_interval)
 
             # Start certificate automation
             if self._config.enable_cert_automation:
-                self._cert_automation.start_renewal_scheduler(
-                    self._config.cert_renewal_check_interval
-                )
+                self._cert_automation.start_renewal_scheduler(self._config.cert_renewal_check_interval)
 
             # Start self-healing monitoring
             if self._config.enable_self_healing:
-                self._self_healing.start_monitoring(
-                    self._config.health_check_interval
-                )
+                self._self_healing.start_monitoring(self._config.health_check_interval)
 
             logger.info("Automation Engine started")
 
@@ -620,16 +613,20 @@ class AutomationEngine:
                         "Expiration sweep rotation",
                         automatic=True,
                     )
-                    result["keys_rotated"].append({
-                        "old_key": key.key_id,
-                        "new_key": event.new_key_id,
-                    })
+                    result["keys_rotated"].append(
+                        {
+                            "old_key": key.key_id,
+                            "new_key": event.new_key_id,
+                        }
+                    )
                 except Exception as e:
-                    result["errors"].append({
-                        "type": "key_rotation",
-                        "key_id": key.key_id,
-                        "error": str(e),
-                    })
+                    result["errors"].append(
+                        {
+                            "type": "key_rotation",
+                            "key_id": key.key_id,
+                            "error": str(e),
+                        }
+                    )
 
             # Renew expiring certificates
             for cert in self._cert_automation.get_expiring_certificates(cert_days):
@@ -639,23 +636,24 @@ class AutomationEngine:
                         "Expiration sweep renewal",
                         automatic=True,
                     )
-                    result["certs_renewed"].append({
-                        "old_cert": cert.cert_id,
-                        "new_cert": event.new_cert_id,
-                    })
+                    result["certs_renewed"].append(
+                        {
+                            "old_cert": cert.cert_id,
+                            "new_cert": event.new_cert_id,
+                        }
+                    )
                 except Exception as e:
-                    result["errors"].append({
-                        "type": "cert_renewal",
-                        "cert_id": cert.cert_id,
-                        "error": str(e),
-                    })
+                    result["errors"].append(
+                        {
+                            "type": "cert_renewal",
+                            "cert_id": cert.cert_id,
+                            "error": str(e),
+                        }
+                    )
 
             self._complete_task(task, result)
 
-            logger.info(
-                f"Rotation sweep: {len(result['keys_rotated'])} keys, "
-                f"{len(result['certs_renewed'])} certs"
-            )
+            logger.info(f"Rotation sweep: {len(result['keys_rotated'])} keys, " f"{len(result['certs_renewed'])} certs")
 
             return result
 
@@ -692,12 +690,14 @@ class AutomationEngine:
             result["summary"]["classical_keys"] = len(classical_keys)
 
             if classical_keys:
-                result["findings"].append({
-                    "severity": "medium",
-                    "type": "pqc_migration",
-                    "message": f"{len(classical_keys)} keys using classical algorithms",
-                    "recommendation": "Migrate to ML-KEM or ML-DSA",
-                })
+                result["findings"].append(
+                    {
+                        "severity": "medium",
+                        "type": "pqc_migration",
+                        "message": f"{len(classical_keys)} keys using classical algorithms",
+                        "recommendation": "Migrate to ML-KEM or ML-DSA",
+                    }
+                )
 
             # Check certificate compliance
             certs = self._cert_automation.list_certificates()
@@ -709,24 +709,28 @@ class AutomationEngine:
             result["summary"]["expiring_soon"] = len(expiring)
 
             if expiring:
-                result["findings"].append({
-                    "severity": "high",
-                    "type": "cert_expiration",
-                    "message": f"{len(expiring)} certificates expiring within 30 days",
-                    "recommendation": "Renew certificates immediately",
-                })
+                result["findings"].append(
+                    {
+                        "severity": "high",
+                        "type": "cert_expiration",
+                        "message": f"{len(expiring)} certificates expiring within 30 days",
+                        "recommendation": "Renew certificates immediately",
+                    }
+                )
 
             # Check system health
             health = self._self_healing.get_system_health()
             result["summary"]["system_health"] = health["status"]
 
             if health["unhealthy"] > 0:
-                result["findings"].append({
-                    "severity": "critical",
-                    "type": "system_health",
-                    "message": f"{health['unhealthy']} components unhealthy",
-                    "recommendation": "Investigate and resolve incidents",
-                })
+                result["findings"].append(
+                    {
+                        "severity": "critical",
+                        "type": "system_health",
+                        "message": f"{health['unhealthy']} components unhealthy",
+                        "recommendation": "Investigate and resolve incidents",
+                    }
+                )
 
             open_incidents = self._self_healing.get_open_incidents()
             result["summary"]["open_incidents"] = len(open_incidents)
@@ -819,12 +823,8 @@ class AutomationEngine:
                 "total_keys": len(self._key_manager.list_keys()),
                 "total_certs": len(self._cert_automation.list_certificates()),
                 "open_incidents": len(self._self_healing.get_open_incidents()),
-                "tasks_completed": sum(
-                    1 for t in self._tasks.values() if t.status == "completed"
-                ),
-                "tasks_failed": sum(
-                    1 for t in self._tasks.values() if t.status == "failed"
-                ),
+                "tasks_completed": sum(1 for t in self._tasks.values() if t.status == "completed"),
+                "tasks_failed": sum(1 for t in self._tasks.values() if t.status == "failed"),
             },
         )
 

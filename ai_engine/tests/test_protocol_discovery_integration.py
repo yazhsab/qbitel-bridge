@@ -39,7 +39,6 @@ from ai_engine.discovery.protocol_classifier import ProtocolClassifier, Protocol
 from ai_engine.discovery.message_validator import MessageValidator, ValidationLevel
 from ai_engine.core.config import Config
 
-
 # ============================================================================
 # TEST FIXTURES
 # ============================================================================
@@ -84,9 +83,7 @@ async def enhanced_orchestrator(config):
 @pytest_asyncio.fixture
 async def distributed_cache():
     """Create distributed cache."""
-    cache = DistributedCache(
-        backend=CacheBackend.MEMORY, max_memory_size=100 * 1024 * 1024  # 100MB
-    )
+    cache = DistributedCache(backend=CacheBackend.MEMORY, max_memory_size=100 * 1024 * 1024)  # 100MB
     await cache.start_cleanup_task()
     yield cache
     await cache.shutdown()
@@ -150,9 +147,7 @@ class TestBasicIntegration:
         assert result.processing_time > 0
 
     @pytest.mark.asyncio
-    async def test_end_to_end_discovery_binary(
-        self, orchestrator, sample_binary_messages
-    ):
+    async def test_end_to_end_discovery_binary(self, orchestrator, sample_binary_messages):
         """Test complete discovery workflow with binary messages."""
         request = DiscoveryRequest(
             messages=sample_binary_messages,
@@ -188,9 +183,7 @@ class TestBasicIntegration:
         assert time2 <= time1 * 2  # Allow some variance
 
     @pytest.mark.asyncio
-    async def test_concurrent_discoveries(
-        self, orchestrator, sample_http_messages, sample_binary_messages
-    ):
+    async def test_concurrent_discoveries(self, orchestrator, sample_http_messages, sample_binary_messages):
         """Test concurrent discovery operations."""
         requests = [
             DiscoveryRequest(messages=sample_http_messages),
@@ -199,9 +192,7 @@ class TestBasicIntegration:
         ]
 
         # Execute concurrently
-        results = await asyncio.gather(
-            *[orchestrator.discover_protocol(req) for req in requests]
-        )
+        results = await asyncio.gather(*[orchestrator.discover_protocol(req) for req in requests])
 
         assert len(results) == 3
         assert all(r is not None for r in results)
@@ -217,9 +208,7 @@ class TestEnhancedIntegration:
     """Integration tests for enhanced discovery with LLM."""
 
     @pytest.mark.asyncio
-    async def test_enhanced_discovery_with_llm(
-        self, enhanced_orchestrator, sample_http_messages
-    ):
+    async def test_enhanced_discovery_with_llm(self, enhanced_orchestrator, sample_http_messages):
         """Test enhanced discovery with LLM analysis."""
         request = EnhancedDiscoveryRequest(
             messages=sample_http_messages,
@@ -240,9 +229,7 @@ class TestEnhancedIntegration:
         assert result.processing_time > 0
 
     @pytest.mark.asyncio
-    async def test_enhanced_discovery_without_llm(
-        self, enhanced_orchestrator, sample_binary_messages
-    ):
+    async def test_enhanced_discovery_without_llm(self, enhanced_orchestrator, sample_binary_messages):
         """Test enhanced discovery without LLM (fallback to traditional)."""
         request = EnhancedDiscoveryRequest(
             messages=sample_binary_messages,
@@ -292,9 +279,7 @@ class TestComponentIntegration:
         grammar = await learner.learn_grammar(sample_http_messages)
 
         # Generate parser
-        parser = await generator.generate_parser(
-            grammar, parser_id="test_http", protocol_name="HTTP"
-        )
+        parser = await generator.generate_parser(grammar, parser_id="test_http", protocol_name="HTTP")
 
         assert parser is not None
         assert parser.parse_function is not None
@@ -417,13 +402,9 @@ class TestProductionFeatures:
         metrics = DiscoveryMetrics()
 
         # Record some metrics
-        metrics.discovery_requests_total.labels(
-            protocol_type="http", status="success", cache_hit="false"
-        ).inc()
+        metrics.discovery_requests_total.labels(protocol_type="http", status="success", cache_hit="false").inc()
 
-        metrics.discovery_duration_seconds.labels(
-            protocol_type="http", phase="statistical_analysis"
-        ).observe(0.05)
+        metrics.discovery_duration_seconds.labels(protocol_type="http", phase="statistical_analysis").observe(0.05)
 
         metrics.discovery_confidence_score.labels(protocol_type="http").observe(0.85)
 
@@ -466,15 +447,10 @@ class TestPerformance:
     async def test_concurrent_load(self, orchestrator, sample_http_messages):
         """Test system under concurrent load."""
         num_concurrent = 20
-        requests = [
-            DiscoveryRequest(messages=sample_http_messages)
-            for _ in range(num_concurrent)
-        ]
+        requests = [DiscoveryRequest(messages=sample_http_messages) for _ in range(num_concurrent)]
 
         start = time.time()
-        results = await asyncio.gather(
-            *[orchestrator.discover_protocol(req) for req in requests]
-        )
+        results = await asyncio.gather(*[orchestrator.discover_protocol(req) for req in requests])
         total_time = time.time() - start
 
         assert len(results) == num_concurrent
@@ -482,9 +458,7 @@ class TestPerformance:
 
         # Should handle concurrent requests efficiently
         avg_time_per_request = total_time / num_concurrent
-        assert (
-            avg_time_per_request < 2.0
-        ), f"Average time per request {avg_time_per_request:.3f}s too high"
+        assert avg_time_per_request < 2.0, f"Average time per request {avg_time_per_request:.3f}s too high"
 
     @pytest.mark.asyncio
     @pytest.mark.slow

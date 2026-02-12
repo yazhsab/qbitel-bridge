@@ -59,7 +59,6 @@ __all__ = [
     "FieldStatistics",
     "PatternExtractor",
     "PatternResult",
-
     # Transformer classifier (new)
     "ProtocolTransformerClassifier",
     "ProtocolTransformer",
@@ -67,7 +66,6 @@ __all__ = [
     "TransformerClassificationResult",
     "ProtocolSample",
     "create_transformer_classifier",
-
     # Hybrid classifier (recommended)
     "HybridProtocolClassifier",
     "HybridClassifierConfig",

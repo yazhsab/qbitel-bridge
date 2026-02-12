@@ -65,10 +65,7 @@ class ModelDriftMonitor:
         # Cache for baseline metrics
         self._baseline_cache: Dict[str, Dict[str, Any]] = {}
 
-        logger.info(
-            f"Initialized ModelDriftMonitor with threshold={drift_threshold}, "
-            f"min_samples={min_sample_size}"
-        )
+        logger.info(f"Initialized ModelDriftMonitor with threshold={drift_threshold}, " f"min_samples={min_sample_size}")
 
     async def check_drift(
         self,
@@ -97,9 +94,7 @@ class ModelDriftMonitor:
         )
 
         if not baseline:
-            logger.warning(
-                f"No baseline metrics for {model_name}, skipping drift check"
-            )
+            logger.warning(f"No baseline metrics for {model_name}, skipping drift check")
             return {
                 "drift_detected": False,
                 "reason": "no_baseline",
@@ -107,9 +102,7 @@ class ModelDriftMonitor:
             }
 
         # Get recent metrics
-        recent_start = datetime.now(timezone.utc) - timedelta(
-            hours=self.comparison_window_hours
-        )
+        recent_start = datetime.now(timezone.utc) - timedelta(hours=self.comparison_window_hours)
         recent_metrics = await self._calculate_recent_metrics(
             model_name,
             model_version,
@@ -117,10 +110,7 @@ class ModelDriftMonitor:
         )
 
         if recent_metrics["sample_size"] < self.min_sample_size:
-            logger.warning(
-                f"Insufficient recent samples ({recent_metrics['sample_size']}) "
-                f"for drift detection"
-            )
+            logger.warning(f"Insufficient recent samples ({recent_metrics['sample_size']}) " f"for drift detection")
             return {
                 "drift_detected": False,
                 "reason": "insufficient_samples",
@@ -147,9 +137,7 @@ class ModelDriftMonitor:
             "metrics": {
                 "accuracy_drift": drift_scores.get("accuracy_drift", 0),
                 "confidence_drift": drift_scores.get("confidence_drift", 0),
-                "prediction_distribution_drift": drift_scores.get(
-                    "distribution_drift", 0
-                ),
+                "prediction_distribution_drift": drift_scores.get("distribution_drift", 0),
             },
             "baseline_metrics": {
                 "accuracy": baseline.get("accuracy"),
@@ -243,9 +231,7 @@ class ModelDriftMonitor:
                 return None
 
             # Calculate baseline metrics
-            baseline_metrics = self._calculate_metrics_from_decisions(
-                baseline_decisions
-            )
+            baseline_metrics = self._calculate_metrics_from_decisions(baseline_decisions)
             baseline_metrics["timestamp"] = baseline_start
 
             # Cache baseline
@@ -290,9 +276,7 @@ class ModelDriftMonitor:
         # Calculate accuracy (using human review as ground truth)
         reviewed_decisions = [d for d in decisions if d.human_reviewed]
         if reviewed_decisions:
-            correct_decisions = sum(
-                1 for d in reviewed_decisions if not d.human_override
-            )
+            correct_decisions = sum(1 for d in reviewed_decisions if not d.human_override)
             accuracy = correct_decisions / len(reviewed_decisions)
         else:
             accuracy = None  # No ground truth available
@@ -318,9 +302,7 @@ class ModelDriftMonitor:
             output = d.decision_output.get("result", "unknown")
             prediction_counts[str(output)] += 1
 
-        prediction_distribution = {
-            k: v / len(decisions) for k, v in prediction_counts.items()
-        }
+        prediction_distribution = {k: v / len(decisions) for k, v in prediction_counts.items()}
 
         return {
             "sample_size": len(decisions),
@@ -426,12 +408,8 @@ class ModelDriftMonitor:
                 recall=None,  # Not calculated yet
                 f1_score=None,  # Not calculated yet
                 average_confidence=drift_details["recent_metrics"]["avg_confidence"],
-                prediction_distribution=drift_details["recent_metrics"].get(
-                    "prediction_distribution"
-                ),
-                confidence_distribution=drift_details["recent_metrics"].get(
-                    "confidence_distribution"
-                ),
+                prediction_distribution=drift_details["recent_metrics"].get("prediction_distribution"),
+                confidence_distribution=drift_details["recent_metrics"].get("confidence_distribution"),
                 drift_score=drift_score,
                 drift_detected=drift_detected,
                 drift_details=drift_details,
@@ -445,9 +423,7 @@ class ModelDriftMonitor:
             session.add(drift_metric)
             await session.commit()
 
-            logger.info(
-                f"Logged drift metric for {model_name} (drift_score={drift_score:.3f})"
-            )
+            logger.info(f"Logged drift metric for {model_name} (drift_score={drift_score:.3f})")
 
     async def _trigger_drift_alert(
         self,
@@ -456,8 +432,7 @@ class ModelDriftMonitor:
     ):
         """Trigger alert for detected drift."""
         logger.warning(
-            f"DRIFT ALERT: {model_name} - drift_score={drift_report['drift_score']:.3f} "
-            f"(threshold={self.drift_threshold})"
+            f"DRIFT ALERT: {model_name} - drift_score={drift_report['drift_score']:.3f} " f"(threshold={self.drift_threshold})"
         )
 
         # Record Prometheus metric
@@ -526,9 +501,7 @@ class ModelDriftMonitor:
         """
         return self._calculate_kl_divergence(p, q)
 
-    def _calculate_drift_score(
-        self, baseline: Dict[str, Any], recent: Dict[str, Any]
-    ) -> float:
+    def _calculate_drift_score(self, baseline: Dict[str, Any], recent: Dict[str, Any]) -> float:
         """
         Calculate overall drift score. Alias for _calculate_drift_scores.
         Helper method for testing and external use.
@@ -547,10 +520,7 @@ class ModelDriftMonitor:
         Helper method for testing and external use.
         """
         if not drift_detected:
-            return (
-                f"No significant drift detected (score={drift_score:.3f}). "
-                f"Model performance is stable."
-            )
+            return f"No significant drift detected (score={drift_score:.3f}). " f"Model performance is stable."
 
         return (
             f"DRIFT DETECTED: drift_score={drift_score:.3f} exceeds threshold. "

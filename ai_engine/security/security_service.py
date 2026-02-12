@@ -35,7 +35,6 @@ from .threat_analyzer import ThreatAnalyzer
 
 from prometheus_client import Counter, Histogram, Gauge, Summary
 
-
 _METRIC_CACHE = {}
 
 
@@ -65,9 +64,7 @@ RESPONSE_TIME_HISTOGRAM = _get_metric(
     "Security response time",
     ["response_type"],
 )
-ACTIVE_INCIDENTS_GAUGE = _get_metric(
-    Gauge, "qbitel_security_active_incidents", "Number of active security incidents"
-)
+ACTIVE_INCIDENTS_GAUGE = _get_metric(Gauge, "qbitel_security_active_incidents", "Number of active security incidents")
 AUTONOMOUS_DECISIONS_COUNTER = _get_metric(
     Counter,
     "qbitel_security_autonomous_decisions_total",
@@ -166,9 +163,7 @@ class SecurityOrchestratorService:
             self.logger.info("Security Orchestrator Service initialized successfully")
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to initialize Security Orchestrator Service: {e}"
-            )
+            self.logger.error(f"Failed to initialize Security Orchestrator Service: {e}")
             raise SecurityException(f"Service initialization failed: {e}")
 
     async def process_security_event(
@@ -196,9 +191,7 @@ class SecurityOrchestratorService:
         incident_id = str(uuid.uuid4())
 
         try:
-            self.logger.info(
-                f"Processing security event {security_event.event_id} as incident {incident_id}"
-            )
+            self.logger.info(f"Processing security event {security_event.event_id} as incident {incident_id}")
 
             # Update metrics
             SECURITY_EVENTS_COUNTER.labels(
@@ -233,9 +226,7 @@ class SecurityOrchestratorService:
             self.logger.info(f"Starting threat analysis for incident {incident_id}")
             incident_data["stages"]["threat_analysis"]["status"] = "running"
 
-            threat_analysis = await self.threat_analyzer.analyze_threat(
-                security_event, self.security_context, legacy_systems
-            )
+            threat_analysis = await self.threat_analyzer.analyze_threat(security_event, self.security_context, legacy_systems)
 
             incident_data["stages"]["threat_analysis"].update(
                 {
@@ -264,16 +255,10 @@ class SecurityOrchestratorService:
 
             # Record decision outcome
             if automated_response.auto_execute:
-                AUTONOMOUS_DECISIONS_COUNTER.labels(
-                    decision_outcome="auto_execute"
-                ).inc()
+                AUTONOMOUS_DECISIONS_COUNTER.labels(decision_outcome="auto_execute").inc()
             elif automated_response.requires_human_approval:
-                AUTONOMOUS_DECISIONS_COUNTER.labels(
-                    decision_outcome="human_approval"
-                ).inc()
-                HUMAN_ESCALATIONS_COUNTER.labels(
-                    escalation_reason="requires_approval"
-                ).inc()
+                AUTONOMOUS_DECISIONS_COUNTER.labels(decision_outcome="human_approval").inc()
+                HUMAN_ESCALATIONS_COUNTER.labels(escalation_reason="requires_approval").inc()
             else:
                 AUTONOMOUS_DECISIONS_COUNTER.labels(decision_outcome="deferred").inc()
 
@@ -283,9 +268,7 @@ class SecurityOrchestratorService:
                 automated_response.auto_execute = auto_execute
 
             if automated_response.auto_execute or (auto_execute is True):
-                self.logger.info(
-                    f"Executing automated response for incident {incident_id}"
-                )
+                self.logger.info(f"Executing automated response for incident {incident_id}")
                 response_start = time.time()
                 incident_data["stages"]["response_execution"]["status"] = "running"
 
@@ -303,9 +286,7 @@ class SecurityOrchestratorService:
                     )
 
                     # Update metrics
-                    with RESPONSE_TIME_HISTOGRAM.labels(
-                        response_type="automated"
-                    ).time():
+                    with RESPONSE_TIME_HISTOGRAM.labels(response_type="automated").time():
                         pass
 
                 except Exception as e:
@@ -374,20 +355,14 @@ class SecurityOrchestratorService:
                     }
                 )
 
-            self.logger.error(
-                f"Security event processing failed for incident {incident_id}: {e}"
-            )
+            self.logger.error(f"Security event processing failed for incident {incident_id}: {e}")
 
             # Record escalation due to processing failure
-            HUMAN_ESCALATIONS_COUNTER.labels(
-                escalation_reason="processing_failure"
-            ).inc()
+            HUMAN_ESCALATIONS_COUNTER.labels(escalation_reason="processing_failure").inc()
 
             raise SecurityException(f"Security event processing failed: {e}")
 
-    async def execute_response_by_id(
-        self, response_id: str, approved_by: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def execute_response_by_id(self, response_id: str, approved_by: Optional[str] = None) -> Dict[str, Any]:
         """
         Execute a previously created automated response.
 
@@ -405,17 +380,13 @@ class SecurityOrchestratorService:
         # Find the incident with this response
         incident_data = None
         for incident in self.active_incidents.values():
-            response = (
-                incident.get("stages", {}).get("decision_making", {}).get("result")
-            )
+            response = incident.get("stages", {}).get("decision_making", {}).get("result")
             if response and getattr(response, "response_id", None) == response_id:
                 incident_data = incident
                 break
 
         if not incident_data:
-            raise SecurityException(
-                f"No active incident found with response ID: {response_id}"
-            )
+            raise SecurityException(f"No active incident found with response ID: {response_id}")
 
         automated_response = incident_data["stages"]["decision_making"]["result"]
         security_event = incident_data["event"]
@@ -497,9 +468,7 @@ class SecurityOrchestratorService:
         threat_level_enum = ThreatLevel(threat_level.lower())
 
         try:
-            self.logger.info(
-                f"Quarantining system {system_id} at threat level {threat_level}"
-            )
+            self.logger.info(f"Quarantining system {system_id} at threat level {threat_level}")
 
             quarantine_result = await self.response_manager.quarantine_legacy_system(
                 legacy_system, threat_level_enum, self.security_context
@@ -536,9 +505,7 @@ class SecurityOrchestratorService:
                 SYSTEM_QUARANTINES_GAUGE.dec()
                 self.logger.info(f"System {system_id} released from quarantine")
             else:
-                self.logger.warning(
-                    f"Failed to release system {system_id} from quarantine"
-                )
+                self.logger.warning(f"Failed to release system {system_id} from quarantine")
 
             return success
 
@@ -557,9 +524,7 @@ class SecurityOrchestratorService:
             "incident_id": incident_id,
             "status": incident_data.get("status"),
             "event_id": (
-                incident_data.get("event", {}).event_id
-                if hasattr(incident_data.get("event", {}), "event_id")
-                else None
+                incident_data.get("event", {}).event_id if hasattr(incident_data.get("event", {}), "event_id") else None
             ),
             "start_time": incident_data.get("start_time"),
             "duration": time.time() - incident_data.get("start_time", time.time()),
@@ -583,15 +548,12 @@ class SecurityOrchestratorService:
                             else "unknown"
                         ),
                         "threat_level": (
-                            getattr(
-                                incident_data.get("event"), "threat_level", {}
-                            ).value
+                            getattr(incident_data.get("event"), "threat_level", {}).value
                             if hasattr(incident_data.get("event", {}), "threat_level")
                             else "unknown"
                         ),
                         "start_time": incident_data.get("start_time"),
-                        "duration": time.time()
-                        - incident_data.get("start_time", time.time()),
+                        "duration": time.time() - incident_data.get("start_time", time.time()),
                     }
                 )
 
@@ -617,9 +579,7 @@ class SecurityOrchestratorService:
             return True
         return False
 
-    async def update_threat_intelligence(
-        self, intelligence: ThreatIntelligence
-    ) -> None:
+    async def update_threat_intelligence(self, intelligence: ThreatIntelligence) -> None:
         """Update threat intelligence information."""
         if self.threat_analyzer:
             await self.threat_analyzer.update_threat_intelligence(intelligence)
@@ -639,13 +599,7 @@ class SecurityOrchestratorService:
             },
             "incidents": {
                 "active_count": len(self.active_incidents),
-                "total_processed": len(
-                    [
-                        i
-                        for i in self.active_incidents.values()
-                        if i.get("status") == "completed"
-                    ]
-                ),
+                "total_processed": len([i for i in self.active_incidents.values() if i.get("status") == "completed"]),
             },
             "systems": {
                 "legacy_systems_tracked": len(self.legacy_systems),
@@ -740,10 +694,7 @@ class SecurityOrchestratorService:
         incidents_to_remove = []
 
         for incident_id, incident_data in self.active_incidents.items():
-            if (
-                incident_data.get("status") in ["completed", "failed"]
-                and incident_data.get("start_time", 0) < cutoff_time
-            ):
+            if incident_data.get("status") in ["completed", "failed"] and incident_data.get("start_time", 0) < cutoff_time:
                 incidents_to_remove.append(incident_id)
 
         for incident_id in incidents_to_remove:
@@ -753,9 +704,7 @@ class SecurityOrchestratorService:
             ACTIVE_INCIDENTS_GAUGE.set(len(self.active_incidents))
             self.logger.info(f"Cleaned up {len(incidents_to_remove)} old incidents")
 
-    async def _schedule_incident_cleanup(
-        self, incident_id: str, delay_hours: int = 1
-    ) -> None:
+    async def _schedule_incident_cleanup(self, incident_id: str, delay_hours: int = 1) -> None:
         """Schedule cleanup of a specific incident."""
 
         async def delayed_cleanup():
@@ -804,9 +753,7 @@ class SecurityOrchestratorService:
 
         # Update active incidents list
         active_incident_ids = [
-            iid
-            for iid, data in self.active_incidents.items()
-            if data.get("status") in ["processing", "pending_approval"]
+            iid for iid, data in self.active_incidents.items() if data.get("status") in ["processing", "pending_approval"]
         ]
         self.security_context.active_incidents = active_incident_ids
 
@@ -864,19 +811,13 @@ class SecurityOrchestratorService:
 
         # Update threat indicators
         if security_event.indicators_of_compromise:
-            self.security_context.threat_indicators.extend(
-                security_event.indicators_of_compromise
-            )
+            self.security_context.threat_indicators.extend(security_event.indicators_of_compromise)
             # Keep unique indicators only
-            self.security_context.threat_indicators = list(
-                set(self.security_context.threat_indicators)
-            )
+            self.security_context.threat_indicators = list(set(self.security_context.threat_indicators))
 
         self.security_context.updated_at = datetime.now()
 
-    async def _get_legacy_systems_context(
-        self, security_event: SecurityEvent
-    ) -> List[LegacySystem]:
+    async def _get_legacy_systems_context(self, security_event: SecurityEvent) -> List[LegacySystem]:
         """Get legacy systems context for the security event."""
 
         affected_systems = []
@@ -899,9 +840,7 @@ class SecurityOrchestratorService:
 
         # Based on threat analysis
         if threat_analysis.confidence_score < 0.7:
-            recommendations.append(
-                "Consider additional validation due to low confidence score"
-            )
+            recommendations.append("Consider additional validation due to low confidence score")
 
         if threat_analysis.threat_level.value in ["critical", "high"]:
             recommendations.append("Conduct immediate forensic analysis")
@@ -909,14 +848,10 @@ class SecurityOrchestratorService:
 
         # Based on response execution
         if response_result and response_result.get("status") == "failed":
-            recommendations.append(
-                "Review response execution failures and update procedures"
-            )
+            recommendations.append("Review response execution failures and update procedures")
 
         if automated_response.requires_human_approval:
-            recommendations.append(
-                "Consider automating similar low-risk responses in the future"
-            )
+            recommendations.append("Consider automating similar low-risk responses in the future")
 
         # General recommendations
         recommendations.extend(

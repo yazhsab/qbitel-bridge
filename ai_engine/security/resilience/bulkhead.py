@@ -109,9 +109,7 @@ class ResourcePool:
         self._lock = asyncio.Lock()
 
         # Metrics
-        self._metrics = ResourceMetrics(
-            total_capacity=capacity, available_capacity=capacity
-        )
+        self._metrics = ResourceMetrics(total_capacity=capacity, available_capacity=capacity)
         self._allocation_times: List[float] = []
 
         self.logger.log_security_event(
@@ -219,9 +217,7 @@ class ResourcePool:
 
             # Wait for semaphore with timeout
             try:
-                await asyncio.wait_for(
-                    self._semaphore.acquire(), timeout=request_timeout
-                )
+                await asyncio.wait_for(self._semaphore.acquire(), timeout=request_timeout)
             except asyncio.TimeoutError:
                 async with self._lock:
                     self._metrics.timeout_allocations += 1
@@ -257,9 +253,7 @@ class ResourcePool:
 
                     # Update wait time metrics
                     if len(self._allocation_times) > 0:
-                        self._metrics.average_wait_time = sum(
-                            self._allocation_times
-                        ) / len(self._allocation_times)
+                        self._metrics.average_wait_time = sum(self._allocation_times) / len(self._allocation_times)
                         self._metrics.max_wait_time = max(self._allocation_times)
 
                         # Keep only recent allocation times for rolling average
@@ -531,13 +525,9 @@ class BulkheadManager:
     def get_global_metrics(self) -> Dict[str, Any]:
         """Get global bulkhead metrics."""
 
-        total_allocated = sum(
-            pool._metrics.allocated_capacity for pool in self.resource_pools.values()
-        )
+        total_allocated = sum(pool._metrics.allocated_capacity for pool in self.resource_pools.values())
 
-        total_available = sum(
-            pool._metrics.available_capacity for pool in self.resource_pools.values()
-        )
+        total_available = sum(pool._metrics.available_capacity for pool in self.resource_pools.values())
 
         pool_states = {}
         for name, pool in self.resource_pools.items():
@@ -548,20 +538,12 @@ class BulkheadManager:
             "total_capacity": self._total_capacity,
             "total_allocated": total_allocated,
             "total_available": total_available,
-            "global_utilization": (
-                total_allocated / self._total_capacity
-                if self._total_capacity > 0
-                else 0
-            ),
+            "global_utilization": (total_allocated / self._total_capacity if self._total_capacity > 0 else 0),
             "pool_states": pool_states,
-            "pool_metrics": {
-                name: pool.get_metrics() for name, pool in self.resource_pools.items()
-            },
+            "pool_metrics": {name: pool.get_metrics() for name, pool in self.resource_pools.items()},
         }
 
-    async def acquire_from_pool(
-        self, pool_name: str, request_id: str, **kwargs
-    ) -> Optional[int]:
+    async def acquire_from_pool(self, pool_name: str, request_id: str, **kwargs) -> Optional[int]:
         """Acquire resource from specified pool."""
 
         pool = self.get_pool(pool_name)

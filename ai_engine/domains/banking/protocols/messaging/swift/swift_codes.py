@@ -280,6 +280,7 @@ class SwiftCharacterSet(Enum):
 @dataclass
 class FieldDefinition:
     """Definition of a SWIFT field."""
+
     tag: str
     name: str
     format: str
@@ -441,11 +442,17 @@ MT103_FIELDS: Dict[str, FieldDefinition] = {
     "53A": FieldDefinition("53A", "Sender's Correspondent", "[/1!a][/34x]4!a2!a2!c[3!c]", "Sender correspondent BIC", False),
     "53B": FieldDefinition("53B", "Sender's Correspondent", "[/1!a][/34x][35x]", "Sender correspondent location", False),
     "53D": FieldDefinition("53D", "Sender's Correspondent", "[/1!a][/34x]4*35x", "Sender correspondent name", False),
-    "54A": FieldDefinition("54A", "Receiver's Correspondent", "[/1!a][/34x]4!a2!a2!c[3!c]", "Receiver correspondent BIC", False),
+    "54A": FieldDefinition(
+        "54A", "Receiver's Correspondent", "[/1!a][/34x]4!a2!a2!c[3!c]", "Receiver correspondent BIC", False
+    ),
     "54B": FieldDefinition("54B", "Receiver's Correspondent", "[/1!a][/34x][35x]", "Receiver correspondent location", False),
     "54D": FieldDefinition("54D", "Receiver's Correspondent", "[/1!a][/34x]4*35x", "Receiver correspondent name", False),
-    "55A": FieldDefinition("55A", "Third Reimbursement Institution", "[/1!a][/34x]4!a2!a2!c[3!c]", "Third reimbursement BIC", False),
-    "55B": FieldDefinition("55B", "Third Reimbursement Institution", "[/1!a][/34x][35x]", "Third reimbursement location", False),
+    "55A": FieldDefinition(
+        "55A", "Third Reimbursement Institution", "[/1!a][/34x]4!a2!a2!c[3!c]", "Third reimbursement BIC", False
+    ),
+    "55B": FieldDefinition(
+        "55B", "Third Reimbursement Institution", "[/1!a][/34x][35x]", "Third reimbursement location", False
+    ),
     "55D": FieldDefinition("55D", "Third Reimbursement Institution", "[/1!a][/34x]4*35x", "Third reimbursement name", False),
     "56A": FieldDefinition("56A", "Intermediary Institution", "[/1!a][/34x]4!a2!a2!c[3!c]", "Intermediary BIC", False),
     "56C": FieldDefinition("56C", "Intermediary Institution", "/34x", "Intermediary account", False),
@@ -476,7 +483,9 @@ MT202_FIELDS: Dict[str, FieldDefinition] = {
     "53A": FieldDefinition("53A", "Sender's Correspondent", "[/1!a][/34x]4!a2!a2!c[3!c]", "Sender correspondent BIC", False),
     "53B": FieldDefinition("53B", "Sender's Correspondent", "[/1!a][/34x][35x]", "Sender correspondent location", False),
     "53D": FieldDefinition("53D", "Sender's Correspondent", "[/1!a][/34x]4*35x", "Sender correspondent name", False),
-    "54A": FieldDefinition("54A", "Receiver's Correspondent", "[/1!a][/34x]4!a2!a2!c[3!c]", "Receiver correspondent BIC", False),
+    "54A": FieldDefinition(
+        "54A", "Receiver's Correspondent", "[/1!a][/34x]4!a2!a2!c[3!c]", "Receiver correspondent BIC", False
+    ),
     "54B": FieldDefinition("54B", "Receiver's Correspondent", "[/1!a][/34x][35x]", "Receiver correspondent location", False),
     "54D": FieldDefinition("54D", "Receiver's Correspondent", "[/1!a][/34x]4*35x", "Receiver correspondent name", False),
     "56A": FieldDefinition("56A", "Intermediary", "[/1!a][/34x]4!a2!a2!c[3!c]", "Intermediary BIC", False),

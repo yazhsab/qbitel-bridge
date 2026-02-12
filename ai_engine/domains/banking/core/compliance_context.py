@@ -43,12 +43,12 @@ class ComplianceFramework(Enum):
 class ComplianceStatus(Enum):
     """Compliance status for requirements."""
 
-    COMPLIANT = auto()           # Fully compliant
-    PARTIALLY_COMPLIANT = auto() # Some gaps exist
-    NON_COMPLIANT = auto()       # Not compliant
-    NOT_APPLICABLE = auto()      # Requirement doesn't apply
-    UNDER_REVIEW = auto()        # Being assessed
-    REMEDIATION = auto()         # Remediation in progress
+    COMPLIANT = auto()  # Fully compliant
+    PARTIALLY_COMPLIANT = auto()  # Some gaps exist
+    NON_COMPLIANT = auto()  # Not compliant
+    NOT_APPLICABLE = auto()  # Requirement doesn't apply
+    UNDER_REVIEW = auto()  # Being assessed
+    REMEDIATION = auto()  # Remediation in progress
 
 
 class ControlCategory(Enum):
@@ -214,10 +214,7 @@ class ComplianceContext:
         # Initialize standard controls
         self._initialize_controls()
 
-        logger.info(
-            f"Compliance context initialized for frameworks: "
-            f"{[f.full_name for f in self.frameworks]}"
-        )
+        logger.info(f"Compliance context initialized for frameworks: " f"{[f.full_name for f in self.frameworks]}")
 
     def _initialize_controls(self):
         """Initialize standard compliance controls."""

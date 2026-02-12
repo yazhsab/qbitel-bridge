@@ -113,10 +113,7 @@ class TaskPlan:
 
     def get_ready_subtasks(self) -> List[SubTask]:
         """Get subtasks that are ready to execute (dependencies satisfied)."""
-        completed_ids = {
-            st.subtask_id for st in self.subtasks
-            if st.status == SubTaskStatus.COMPLETED
-        }
+        completed_ids = {st.subtask_id for st in self.subtasks if st.status == SubTaskStatus.COMPLETED}
         ready = []
         for subtask in self.subtasks:
             if subtask.status == SubTaskStatus.PENDING:
@@ -129,10 +126,7 @@ class TaskPlan:
         if not self.subtasks:
             self.progress = 0.0
             return
-        completed = sum(
-            1 for st in self.subtasks
-            if st.status in [SubTaskStatus.COMPLETED, SubTaskStatus.SKIPPED]
-        )
+        completed = sum(1 for st in self.subtasks if st.status in [SubTaskStatus.COMPLETED, SubTaskStatus.SKIPPED])
         self.progress = completed / len(self.subtasks)
 
 
@@ -259,7 +253,7 @@ class PlanningAgent(BaseAgent):
                     "system_load": context.system_load,
                     "available_agents": len(context.available_agents),
                 }
-            }
+            },
         )
 
         self.active_plans[plan.plan_id] = plan
@@ -394,9 +388,7 @@ class PlanningAgent(BaseAgent):
         historical_performance = {}
         if self.memory:
             perf_data = await self.memory.retrieve_semantic(
-                query="agent performance statistics",
-                agent_id=self.agent_id,
-                limit=10
+                query="agent performance statistics", agent_id=self.agent_id, limit=10
             )
             for entry in perf_data:
                 agent_type = entry.get("agent_type")
@@ -411,11 +403,7 @@ class PlanningAgent(BaseAgent):
             historical_performance=historical_performance,
         )
 
-    async def _decompose_task(
-        self,
-        task: AgentTask,
-        context: PlanningContext
-    ) -> List[SubTask]:
+    async def _decompose_task(self, task: AgentTask, context: PlanningContext) -> List[SubTask]:
         """Use LLM to decompose a task into sub-tasks."""
         if not self.llm_service:
             # Fallback: create a single subtask
@@ -480,6 +468,7 @@ Important:
 
         # Parse LLM response
         import json
+
         try:
             subtask_data = json.loads(response.content)
         except json.JSONDecodeError:
@@ -531,18 +520,12 @@ Important:
         # Resolve dependencies
         for i, st_data in enumerate(subtask_data):
             dep_names = st_data.get("dependencies", [])
-            subtasks[i].dependencies = [
-                name_to_id[name] for name in dep_names
-                if name in name_to_id
-            ]
+            subtasks[i].dependencies = [name_to_id[name] for name in dep_names if name in name_to_id]
 
         return subtasks
 
     async def _determine_strategy(
-        self,
-        task: AgentTask,
-        subtasks: List[SubTask],
-        context: PlanningContext
+        self, task: AgentTask, subtasks: List[SubTask], context: PlanningContext
     ) -> ExecutionStrategy:
         """Determine the best execution strategy for the plan."""
         # Check for dependencies
@@ -570,7 +553,7 @@ Important:
         # Check if it's a pipeline (linear dependencies)
         is_pipeline = True
         for i, st in enumerate(subtasks):
-            if i > 0 and subtasks[i-1].subtask_id not in st.dependencies:
+            if i > 0 and subtasks[i - 1].subtask_id not in st.dependencies:
                 is_pipeline = False
                 break
             if len(st.dependencies) > 1:
@@ -602,9 +585,7 @@ Important:
         results = {}
 
         for subtask in plan.subtasks:
-            task = asyncio.create_task(
-                self._execute_subtask(plan, subtask, results)
-            )
+            task = asyncio.create_task(self._execute_subtask(plan, subtask, results))
             tasks.append((subtask.subtask_id, task))
 
         # Wait for all tasks
@@ -654,9 +635,7 @@ Important:
             # Find ready subtasks
             ready = []
             for subtask_id, subtask in list(pending.items()):
-                deps_satisfied = all(
-                    dep_id in results for dep_id in subtask.dependencies
-                )
+                deps_satisfied = all(dep_id in results for dep_id in subtask.dependencies)
                 if deps_satisfied:
                     ready.append(subtask)
                     del pending[subtask_id]
@@ -670,9 +649,7 @@ Important:
                         if dep_id in results and isinstance(results[dep_id], dict):
                             subtask.input_data.update(results[dep_id])
 
-                    task = asyncio.create_task(
-                        self._execute_subtask(plan, subtask, results)
-                    )
+                    task = asyncio.create_task(self._execute_subtask(plan, subtask, results))
                     executing[subtask.subtask_id] = task
                 else:
                     # Put back in pending
@@ -685,10 +662,7 @@ Important:
                 break
 
             # Wait for at least one task to complete
-            done, _ = await asyncio.wait(
-                executing.values(),
-                return_when=asyncio.FIRST_COMPLETED
-            )
+            done, _ = await asyncio.wait(executing.values(), return_when=asyncio.FIRST_COMPLETED)
 
             # Process completed tasks
             for completed_task in done:
@@ -732,12 +706,7 @@ Important:
 
         return results
 
-    async def _execute_subtask(
-        self,
-        plan: TaskPlan,
-        subtask: SubTask,
-        results: Dict[str, Any]
-    ) -> Any:
+    async def _execute_subtask(self, plan: TaskPlan, subtask: SubTask, results: Dict[str, Any]) -> Any:
         """Execute a single subtask by assigning it to an appropriate agent."""
         subtask.status = SubTaskStatus.EXECUTING
         subtask.started_at = datetime.utcnow()
@@ -763,16 +732,13 @@ Important:
 
             # Submit to agent via pool or communication
             if self.agent_pool:
-                result = await self.agent_pool.submit_task(
-                    agent_task,
-                    required_capabilities=subtask.required_capabilities
-                )
+                result = await self.agent_pool.submit_task(agent_task, required_capabilities=subtask.required_capabilities)
             elif self.communication:
                 result = await self.communication.request(
                     target_agent_id=subtask.assigned_agent_id,
                     message_type="execute_task",
                     payload={"task": agent_task},
-                    timeout=subtask.timeout_seconds
+                    timeout=subtask.timeout_seconds,
                 )
             else:
                 raise RuntimeError("No agent pool or communication available")
@@ -793,9 +759,7 @@ Important:
 
             # Retry if possible
             if subtask.retry_count < subtask.max_retries:
-                self.logger.warning(
-                    f"Subtask {subtask.name} failed, retrying ({subtask.retry_count}/{subtask.max_retries})"
-                )
+                self.logger.warning(f"Subtask {subtask.name} failed, retrying ({subtask.retry_count}/{subtask.max_retries})")
                 subtask.status = SubTaskStatus.PENDING
                 return await self._execute_subtask(plan, subtask, results)
 
@@ -808,26 +772,17 @@ Important:
             return {"agent_id": "default"}
 
         # Get available agents with required capabilities
-        agents = await self.agent_pool.get_agents_with_capabilities(
-            subtask.required_capabilities
-        )
+        agents = await self.agent_pool.get_agents_with_capabilities(subtask.required_capabilities)
 
         if not agents:
             return None
 
         # Sort by availability and performance
-        best_agent = min(
-            agents,
-            key=lambda a: (a.get("queue_size", 0), -a.get("success_rate", 0.8))
-        )
+        best_agent = min(agents, key=lambda a: (a.get("queue_size", 0), -a.get("success_rate", 0.8)))
 
         return best_agent
 
-    def _aggregate_results(
-        self,
-        plan: TaskPlan,
-        results: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _aggregate_results(self, plan: TaskPlan, results: Dict[str, Any]) -> Dict[str, Any]:
         """Aggregate results from all subtasks."""
         aggregated = {
             "plan_id": plan.plan_id,
@@ -850,9 +805,7 @@ Important:
             "successful": successful,
             "failed": len(plan.subtasks) - successful,
             "execution_time": (
-                (plan.completed_at - plan.started_at).total_seconds()
-                if plan.completed_at and plan.started_at
-                else None
+                (plan.completed_at - plan.started_at).total_seconds() if plan.completed_at and plan.started_at else None
             ),
         }
 

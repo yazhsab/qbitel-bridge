@@ -189,17 +189,11 @@ class InMemoryBackend(MemoryBackend):
             type_entries = self.type_index.get(memory_type, set())
             matching_ids = agent_entries & type_entries
 
-            entries = [
-                self.entries[eid] for eid in matching_ids
-                if eid in self.entries and not self.entries[eid].is_expired()
-            ]
+            entries = [self.entries[eid] for eid in matching_ids if eid in self.entries and not self.entries[eid].is_expired()]
 
             # Apply query filter if provided
             if query:
-                entries = [
-                    e for e in entries
-                    if self._matches_query(e, query)
-                ]
+                entries = [e for e in entries if self._matches_query(e, query)]
 
             # Sort by recency and return limit
             entries.sort(key=lambda e: e.last_accessed, reverse=True)
@@ -240,10 +234,7 @@ class InMemoryBackend(MemoryBackend):
                     results.append(entry)
 
             # Sort by relevance (access count as proxy) and recency
-            results.sort(
-                key=lambda e: (e.access_count, e.last_accessed),
-                reverse=True
-            )
+            results.sort(key=lambda e: (e.access_count, e.last_accessed), reverse=True)
             return results[:limit]
 
     def _matches_query(self, entry: MemoryEntry, query: Dict[str, Any]) -> bool:
@@ -333,21 +324,19 @@ class AgentMemoryManager:
         content: Dict[str, Any],
     ) -> None:
         """Store in working memory."""
-        self.working_memory[agent_id].append({
-            "content": content,
-            "timestamp": datetime.utcnow().isoformat(),
-        })
+        self.working_memory[agent_id].append(
+            {
+                "content": content,
+                "timestamp": datetime.utcnow().isoformat(),
+            }
+        )
 
         # Limit working memory size
         if len(self.working_memory[agent_id]) > self.working_memory_limit:
             # Move oldest to episodic if important
             oldest = self.working_memory[agent_id].pop(0)
             if oldest.get("important"):
-                await self.store_episodic(
-                    agent_id=agent_id,
-                    event_type="working_memory_overflow",
-                    content=oldest["content"]
-                )
+                await self.store_episodic(agent_id=agent_id, event_type="working_memory_overflow", content=oldest["content"])
 
         MEMORY_OPERATIONS.labels(operation="store", memory_type="working").inc()
 
@@ -439,10 +428,7 @@ class AgentMemoryManager:
         # Filter by time range if specified
         if time_range:
             start, end = time_range
-            entries = [
-                e for e in entries
-                if start <= e.created_at <= end
-            ]
+            entries = [e for e in entries if start <= e.created_at <= end]
 
         # Convert to EpisodicMemory objects
         episodes = []
@@ -465,9 +451,7 @@ class AgentMemoryManager:
 
         self.stats["total_retrievals"] += 1
         MEMORY_OPERATIONS.labels(operation="retrieve", memory_type="episodic").inc()
-        MEMORY_RETRIEVAL_TIME.labels(memory_type="episodic").observe(
-            time.time() - start_time
-        )
+        MEMORY_RETRIEVAL_TIME.labels(memory_type="episodic").observe(time.time() - start_time)
 
         return episodes
 
@@ -484,9 +468,7 @@ class AgentMemoryManager:
     ) -> str:
         """Store a semantic fact."""
         # Create unique ID based on triple
-        fact_hash = hashlib.md5(
-            f"{subject}:{predicate}:{object_value}".encode()
-        ).hexdigest()[:16]
+        fact_hash = hashlib.md5(f"{subject}:{predicate}:{object_value}".encode()).hexdigest()[:16]
 
         fact = SemanticMemory(
             fact_id=fact_hash,
@@ -550,21 +532,21 @@ class AgentMemoryManager:
         for entry in entries:
             if entry.entry_id in self.semantic_memories:
                 fact = self.semantic_memories[entry.entry_id]
-                results.append({
-                    "subject": fact.subject,
-                    "predicate": fact.predicate,
-                    "object": fact.object,
-                    "confidence": fact.confidence,
-                    "source": fact.source,
-                })
+                results.append(
+                    {
+                        "subject": fact.subject,
+                        "predicate": fact.predicate,
+                        "object": fact.object,
+                        "confidence": fact.confidence,
+                        "source": fact.source,
+                    }
+                )
             else:
                 results.append(entry.content)
 
         self.stats["total_retrievals"] += 1
         MEMORY_OPERATIONS.labels(operation="retrieve", memory_type="semantic").inc()
-        MEMORY_RETRIEVAL_TIME.labels(memory_type="semantic").observe(
-            time.time() - start_time
-        )
+        MEMORY_RETRIEVAL_TIME.labels(memory_type="semantic").observe(time.time() - start_time)
 
         return results
 
@@ -633,10 +615,7 @@ class AgentMemoryManager:
             await self.backend.store(shared_entry)
             shared_count += 1
 
-        self.logger.info(
-            f"Shared {shared_count} memories from {source_agent_id[:8]} "
-            f"to {target_agent_id[:8]}"
-        )
+        self.logger.info(f"Shared {shared_count} memories from {source_agent_id[:8]} " f"to {target_agent_id[:8]}")
 
         return shared_count
 
@@ -674,10 +653,7 @@ class AgentMemoryManager:
             try:
                 # Process consolidation requests
                 try:
-                    agent_id = await asyncio.wait_for(
-                        self.consolidation_queue.get(),
-                        timeout=60.0
-                    )
+                    agent_id = await asyncio.wait_for(self.consolidation_queue.get(), timeout=60.0)
                     await self.consolidate(agent_id)
                 except asyncio.TimeoutError:
                     pass
@@ -697,7 +673,7 @@ class AgentMemoryManager:
             try:
                 all_entries = await backend.retrieve(limit=1000)
                 for entry in all_entries:
-                    if hasattr(entry, 'is_expired') and entry.is_expired():
+                    if hasattr(entry, "is_expired") and entry.is_expired():
                         await backend.delete(entry.id)
             except Exception as e:
                 self.logger.warning(f"Cleanup error for backend: {e}")

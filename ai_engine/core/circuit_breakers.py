@@ -108,9 +108,7 @@ class CircuitOpenError(CircuitBreakerError):
     def __init__(self, circuit_name: str, time_until_retry: float):
         self.circuit_name = circuit_name
         self.time_until_retry = time_until_retry
-        super().__init__(
-            f"Circuit '{circuit_name}' is open. Retry in {time_until_retry:.1f}s"
-        )
+        super().__init__(f"Circuit '{circuit_name}' is open. Retry in {time_until_retry:.1f}s")
 
 
 # =============================================================================
@@ -226,17 +224,13 @@ class CircuitBreaker:
 
             await self._on_success()
             duration = time.time() - start_time
-            CIRCUIT_CALL_DURATION.labels(name=self.name, status="success").observe(
-                duration
-            )
+            CIRCUIT_CALL_DURATION.labels(name=self.name, status="success").observe(duration)
             return result
 
         except Exception as e:
             await self._on_failure(e)
             duration = time.time() - start_time
-            CIRCUIT_CALL_DURATION.labels(name=self.name, status="failure").observe(
-                duration
-            )
+            CIRCUIT_CALL_DURATION.labels(name=self.name, status="failure").observe(duration)
             raise
 
     async def _before_call(self) -> None:
@@ -255,10 +249,7 @@ class CircuitBreaker:
                         return
 
                 # Still open, reject the call
-                time_until_retry = (
-                    self.config.recovery_timeout
-                    - (time.time() - (self._last_failure_time or time.time()))
-                )
+                time_until_retry = self.config.recovery_timeout - (time.time() - (self._last_failure_time or time.time()))
                 CIRCUIT_REJECTIONS.labels(name=self.name).inc()
                 raise CircuitOpenError(self.name, max(0, time_until_retry))
 
@@ -295,9 +286,7 @@ class CircuitBreaker:
             if not self._should_count_exception(exception):
                 return
 
-            CIRCUIT_FAILURES.labels(
-                name=self.name, exception_type=type(exception).__name__
-            ).inc()
+            CIRCUIT_FAILURES.labels(name=self.name, exception_type=type(exception).__name__).inc()
 
             # Record failure
             self._failure_count += 1
@@ -347,9 +336,7 @@ class CircuitBreaker:
             CircuitState.HALF_OPEN: 2,
         }
         CIRCUIT_STATE.labels(name=self.name).set(state_values[new_state])
-        CIRCUIT_STATE_CHANGES.labels(
-            name=self.name, from_state=old_state.value, to_state=new_state.value
-        ).inc()
+        CIRCUIT_STATE_CHANGES.labels(name=self.name, from_state=old_state.value, to_state=new_state.value).inc()
 
         # Reset counters based on new state
         if new_state == CircuitState.CLOSED:
@@ -362,9 +349,7 @@ class CircuitBreaker:
         elif new_state == CircuitState.OPEN:
             self._last_failure_time = time.time()
 
-        logger.info(
-            f"Circuit breaker '{self.name}' transitioned: {old_state.value} -> {new_state.value}"
-        )
+        logger.info(f"Circuit breaker '{self.name}' transitioned: {old_state.value} -> {new_state.value}")
 
     def _record_failure(self, exception: Exception) -> None:
         """Record failure in history."""
@@ -387,9 +372,7 @@ class CircuitBreaker:
             "failure_count": self._failure_count,
             "success_count": self._success_count,
             "last_failure_time": (
-                datetime.fromtimestamp(self._last_failure_time, timezone.utc).isoformat()
-                if self._last_failure_time
-                else None
+                datetime.fromtimestamp(self._last_failure_time, timezone.utc).isoformat() if self._last_failure_time else None
             ),
             "config": {
                 "failure_threshold": self.config.failure_threshold,

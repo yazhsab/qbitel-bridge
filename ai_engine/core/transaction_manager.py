@@ -88,15 +88,11 @@ def transactional(
 
             if db is None:
                 raise ValueError(
-                    f"@transactional decorator requires 'db: AsyncSession' parameter. "
-                    f"Function: {func.__name__}"
+                    f"@transactional decorator requires 'db: AsyncSession' parameter. " f"Function: {func.__name__}"
                 )
 
             if not isinstance(db, AsyncSession):
-                raise ValueError(
-                    f"db parameter must be AsyncSession, got {type(db)}. "
-                    f"Function: {func.__name__}"
-                )
+                raise ValueError(f"db parameter must be AsyncSession, got {type(db)}. " f"Function: {func.__name__}")
 
             # Execute with retry logic
             last_exception = None
@@ -105,13 +101,8 @@ def transactional(
                 try:
                     # Set isolation level if specified
                     if isolation_level:
-                        await db.execute(
-                            text(f"SET TRANSACTION ISOLATION LEVEL {isolation_level}")
-                        )
-                        logger.debug(
-                            f"Transaction isolation level set to {isolation_level} "
-                            f"for {func.__name__}"
-                        )
+                        await db.execute(text(f"SET TRANSACTION ISOLATION LEVEL {isolation_level}"))
+                        logger.debug(f"Transaction isolation level set to {isolation_level} " f"for {func.__name__}")
 
                     # Execute the function
                     result = await func(*args, **kwargs)
@@ -125,14 +116,9 @@ def transactional(
 
                 except IntegrityError as e:
                     # Database constraint violation - don't retry
-                    logger.warning(
-                        f"Integrity error in {func.__name__}: {e}. "
-                        f"Rolling back transaction."
-                    )
+                    logger.warning(f"Integrity error in {func.__name__}: {e}. " f"Rolling back transaction.")
                     # Rollback is handled by session context manager
-                    raise TransactionError(
-                        f"Database constraint violation in {func.__name__}: {e}"
-                    ) from e
+                    raise TransactionError(f"Database constraint violation in {func.__name__}: {e}") from e
 
                 except OperationalError as e:
                     last_exception = e
@@ -142,16 +128,10 @@ def transactional(
                     is_deadlock = "deadlock" in error_str
 
                     if is_deadlock:
-                        logger.warning(
-                            f"Deadlock detected in {func.__name__} "
-                            f"(attempt {attempt + 1}/{max_retries}): {e}"
-                        )
+                        logger.warning(f"Deadlock detected in {func.__name__} " f"(attempt {attempt + 1}/{max_retries}): {e}")
 
                         if not retry_on_deadlock or attempt == max_retries - 1:
-                            raise TransactionError(
-                                f"Deadlock in {func.__name__} after "
-                                f"{attempt + 1} attempts: {e}"
-                            ) from e
+                            raise TransactionError(f"Deadlock in {func.__name__} after " f"{attempt + 1} attempts: {e}") from e
 
                         # Exponential backoff
                         delay = retry_delay * (2**attempt)
@@ -164,36 +144,21 @@ def transactional(
 
                     else:
                         # Other operational errors - don't retry
-                        logger.error(
-                            f"Operational error in {func.__name__}: {e}. "
-                            f"Rolling back transaction."
-                        )
-                        raise TransactionError(
-                            f"Database operational error in {func.__name__}: {e}"
-                        ) from e
+                        logger.error(f"Operational error in {func.__name__}: {e}. " f"Rolling back transaction.")
+                        raise TransactionError(f"Database operational error in {func.__name__}: {e}") from e
 
                 except (DBAPIError, SQLAlchemyDatabaseError) as e:
                     # Other database errors - don't retry
-                    logger.error(
-                        f"Database error in {func.__name__}: {e}. "
-                        f"Rolling back transaction."
-                    )
-                    raise TransactionError(
-                        f"Database error in {func.__name__}: {e}"
-                    ) from e
+                    logger.error(f"Database error in {func.__name__}: {e}. " f"Rolling back transaction.")
+                    raise TransactionError(f"Database error in {func.__name__}: {e}") from e
 
                 except Exception as e:
                     # Any other exception - don't retry
-                    logger.error(
-                        f"Unexpected error in {func.__name__}: {e}. "
-                        f"Rolling back transaction."
-                    )
+                    logger.error(f"Unexpected error in {func.__name__}: {e}. " f"Rolling back transaction.")
                     raise
 
             # Should never reach here, but just in case
-            raise TransactionError(
-                f"Transaction failed in {func.__name__} after {max_retries} attempts"
-            ) from last_exception
+            raise TransactionError(f"Transaction failed in {func.__name__} after {max_retries} attempts") from last_exception
 
         return wrapper
 
@@ -230,10 +195,7 @@ def readonly_transaction(func: Callable[P, T]) -> Callable[P, T]:
         db = kwargs.get("db") or _find_session_in_args(args)
 
         if db is None:
-            raise ValueError(
-                f"@readonly_transaction requires 'db: AsyncSession' parameter. "
-                f"Function: {func.__name__}"
-            )
+            raise ValueError(f"@readonly_transaction requires 'db: AsyncSession' parameter. " f"Function: {func.__name__}")
 
         try:
             # Set transaction to read-only
@@ -320,9 +282,7 @@ def _find_session_in_args(args: tuple) -> Optional[AsyncSession]:
     return None
 
 
-async def execute_in_transaction(
-    db: AsyncSession, operations: list[Callable], *args, **kwargs
-) -> list[Any]:
+async def execute_in_transaction(db: AsyncSession, operations: list[Callable], *args, **kwargs) -> list[Any]:
     """
     Execute multiple operations in a single transaction.
 
@@ -362,12 +322,8 @@ async def execute_in_transaction(
         return results
 
     except Exception as e:
-        logger.error(
-            f"Transaction failed at operation {len(results) + 1}/{len(operations)}: {e}"
-        )
-        raise TransactionError(
-            f"Transaction failed at operation {len(results) + 1}: {e}"
-        ) from e
+        logger.error(f"Transaction failed at operation {len(results) + 1}/{len(operations)}: {e}")
+        raise TransactionError(f"Transaction failed at operation {len(results) + 1}: {e}") from e
 
 
 class TransactionContext:
@@ -413,9 +369,7 @@ class TransactionContext:
             return False  # Re-raise exception
 
         if not self._committed and not self._rolled_back:
-            logger.debug(
-                "Transaction context exiting without commit/rollback, committing"
-            )
+            logger.debug("Transaction context exiting without commit/rollback, committing")
             await self.commit()
 
         return False

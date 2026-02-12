@@ -70,18 +70,12 @@ LONDON
         message = parser.parse(raw_message)
 
         # Check field 20 (reference)
-        field_20 = next(
-            (f for f in message.text_block.fields if f.tag == "20"),
-            None
-        )
+        field_20 = next((f for f in message.text_block.fields if f.tag == "20"), None)
         assert field_20 is not None
         assert field_20.value == "REF123"
 
         # Check field 32A (value date/amount)
-        field_32a = next(
-            (f for f in message.text_block.fields if f.tag == "32A"),
-            None
-        )
+        field_32a = next((f for f in message.text_block.fields if f.tag == "32A"), None)
         assert field_32a is not None
         assert "EUR" in field_32a.value
 

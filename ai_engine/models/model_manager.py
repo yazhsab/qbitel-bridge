@@ -142,9 +142,7 @@ class ModelMetadata:
         data["status"] = ModelStatus(data["status"])
         data["model_type"] = ModelType(data["model_type"])
         if data.get("deployment_strategy"):
-            data["deployment_strategy"] = DeploymentStrategy(
-                data["deployment_strategy"]
-            )
+            data["deployment_strategy"] = DeploymentStrategy(data["deployment_strategy"])
         return cls(**data)
 
 
@@ -187,19 +185,13 @@ class ModelRegistry:
         self.logger = get_logger(__name__)
 
         # Storage configuration
-        self.registry_path = Path(
-            getattr(config, "model_registry_path", "./model_registry")
-        )
+        self.registry_path = Path(getattr(config, "model_registry_path", "./model_registry"))
         self.artifact_storage = getattr(config, "artifact_storage_type", "local")
         self.max_versions_per_model = getattr(config, "max_model_versions", 10)
 
         # MLflow configuration
-        self.mlflow_tracking_uri = getattr(
-            config, "mlflow_tracking_uri", "sqlite:///mlflow.db"
-        )
-        self.mlflow_experiment_name = getattr(
-            config, "mlflow_experiment_name", "qbitel_models"
-        )
+        self.mlflow_tracking_uri = getattr(config, "mlflow_tracking_uri", "sqlite:///mlflow.db")
+        self.mlflow_experiment_name = getattr(config, "mlflow_experiment_name", "qbitel_models")
 
         # Thread safety
         self._registry_lock = threading.RLock()
@@ -231,9 +223,7 @@ class ModelRegistry:
                 experiment_id = experiment.experiment_id
 
             mlflow.set_experiment(experiment_id=experiment_id)
-            self.logger.info(
-                f"MLflow initialized with experiment: {self.mlflow_experiment_name}"
-            )
+            self.logger.info(f"MLflow initialized with experiment: {self.mlflow_experiment_name}")
 
         except Exception as e:
             self.logger.warning(f"MLflow initialization failed: {e}")
@@ -313,9 +303,7 @@ class ModelRegistry:
             self.logger.error(f"Failed to get model {model_id}: {e}")
             return None
 
-    async def get_model_by_name_version(
-        self, name: str, version: str
-    ) -> Optional[ModelMetadata]:
+    async def get_model_by_name_version(self, name: str, version: str) -> Optional[ModelMetadata]:
         """Get model by name and version."""
         models = await self.list_models(name)
         for model in models:
@@ -333,9 +321,7 @@ class ModelRegistry:
         models.sort(key=lambda m: m.created_at, reverse=True)
         return models[0]
 
-    async def list_models(
-        self, name_filter: Optional[str] = None
-    ) -> List[ModelMetadata]:
+    async def list_models(self, name_filter: Optional[str] = None) -> List[ModelMetadata]:
         """List all models with optional name filtering."""
         models = []
         metadata_dir = self.registry_path / "metadata"
@@ -352,9 +338,7 @@ class ModelRegistry:
                         models.append(metadata)
 
                 except Exception as e:
-                    self.logger.warning(
-                        f"Failed to load metadata from {metadata_file}: {e}"
-                    )
+                    self.logger.warning(f"Failed to load metadata from {metadata_file}: {e}")
 
             return models
 
@@ -514,9 +498,7 @@ class TrainingPipeline:
     model training, validation, and automated hyperparameter optimization.
     """
 
-    def __init__(
-        self, config: Config, model_registry: ModelRegistry, metrics: AIEngineMetrics
-    ):
+    def __init__(self, config: Config, model_registry: ModelRegistry, metrics: AIEngineMetrics):
         """Initialize training pipeline."""
         self.config = config
         self.model_registry = model_registry
@@ -525,9 +507,7 @@ class TrainingPipeline:
 
         # Training configuration
         self.max_concurrent_jobs = getattr(config, "max_training_jobs", 3)
-        self.default_training_timeout = (
-            getattr(config, "training_timeout_hours", 24) * 3600
-        )
+        self.default_training_timeout = getattr(config, "training_timeout_hours", 24) * 3600
 
         # Active training jobs
         self.active_jobs: Dict[str, TrainingJob] = {}
@@ -569,13 +549,9 @@ class TrainingPipeline:
                 self.active_jobs[job_id] = job
 
             # Start training task
-            task = asyncio.create_task(
-                self._run_training_job(job, training_data, validation_data)
-            )
+            task = asyncio.create_task(self._run_training_job(job, training_data, validation_data))
 
-            self.logger.info(
-                f"Started training job: {job_id} for {model_name}:{model_version}"
-            )
+            self.logger.info(f"Started training job: {job_id} for {model_name}:{model_version}")
             return job_id
 
         except Exception as e:
@@ -627,9 +603,7 @@ class TrainingPipeline:
                 model = await self._create_model(job.training_config)
 
                 # Setup training
-                optimizer, scheduler, criterion = await self._setup_training(
-                    model, job.training_config
-                )
+                optimizer, scheduler, criterion = await self._setup_training(model, job.training_config)
 
                 # Training loop
                 await self._train_model(
@@ -687,9 +661,7 @@ class TrainingPipeline:
         else:
             raise TrainingException(f"Unsupported model type: {model_type}")
 
-    async def _setup_training(
-        self, model: nn.Module, config: Dict[str, Any]
-    ) -> Tuple[torch.optim.Optimizer, Any, nn.Module]:
+    async def _setup_training(self, model: nn.Module, config: Dict[str, Any]) -> Tuple[torch.optim.Optimizer, Any, nn.Module]:
         """Setup training components."""
 
         # Optimizer
@@ -772,19 +744,14 @@ class TrainingPipeline:
 
             # Validation
             if validation_data:
-                val_loss, val_accuracy = await self._validate_model(
-                    model, validation_data, criterion, device
-                )
+                val_loss, val_accuracy = await self._validate_model(model, validation_data, criterion, device)
                 job.metrics[f"epoch_{epoch}_val_loss"] = val_loss
                 job.metrics[f"epoch_{epoch}_val_accuracy"] = val_accuracy
 
             # Step scheduler
             scheduler.step()
 
-            self.logger.info(
-                f"Epoch {epoch}/{num_epochs}: "
-                f"Loss={avg_loss:.4f}, Acc={avg_accuracy:.4f}"
-            )
+            self.logger.info(f"Epoch {epoch}/{num_epochs}: " f"Loss={avg_loss:.4f}, Acc={avg_accuracy:.4f}")
 
     async def _validate_model(
         self,
@@ -866,9 +833,7 @@ class ModelDeploymentManager:
     blue-green deployments, and automated rollback mechanisms.
     """
 
-    def __init__(
-        self, config: Config, model_registry: ModelRegistry, metrics: AIEngineMetrics
-    ):
+    def __init__(self, config: Config, model_registry: ModelRegistry, metrics: AIEngineMetrics):
         """Initialize deployment manager."""
         self.config = config
         self.model_registry = model_registry
@@ -900,28 +865,20 @@ class ModelDeploymentManager:
                 raise DeploymentException(f"Model {model_id} not found")
 
             # Update model status
-            await self.model_registry.update_model_status(
-                model_id, ModelStatus.DEPLOYING
-            )
+            await self.model_registry.update_model_status(model_id, ModelStatus.DEPLOYING)
 
             # Execute deployment strategy
             if deployment_strategy == DeploymentStrategy.BLUE_GREEN:
-                await self._deploy_blue_green(
-                    deployment_id, metadata, deployment_config
-                )
+                await self._deploy_blue_green(deployment_id, metadata, deployment_config)
             elif deployment_strategy == DeploymentStrategy.CANARY:
                 await self._deploy_canary(deployment_id, metadata, deployment_config)
             elif deployment_strategy == DeploymentStrategy.A_B_TEST:
                 await self._deploy_ab_test(deployment_id, metadata, deployment_config)
             else:
-                raise DeploymentException(
-                    f"Unsupported deployment strategy: {deployment_strategy}"
-                )
+                raise DeploymentException(f"Unsupported deployment strategy: {deployment_strategy}")
 
             # Update model status
-            await self.model_registry.update_model_status(
-                model_id, ModelStatus.DEPLOYED
-            )
+            await self.model_registry.update_model_status(model_id, ModelStatus.DEPLOYED)
 
             # Track deployment
             with self.deployment_lock:
@@ -933,9 +890,7 @@ class ModelDeploymentManager:
                     "status": "active",
                 }
 
-            self.logger.info(
-                f"Successfully deployed model {model_id} using {deployment_strategy.value}"
-            )
+            self.logger.info(f"Successfully deployed model {model_id} using {deployment_strategy.value}")
             return deployment_id
 
         except Exception as e:
@@ -944,18 +899,14 @@ class ModelDeploymentManager:
             self.logger.error(f"Model deployment failed: {e}")
             raise DeploymentException(f"Deployment failed: {e}")
 
-    async def _deploy_blue_green(
-        self, deployment_id: str, metadata: ModelMetadata, config: Dict[str, Any]
-    ):
+    async def _deploy_blue_green(self, deployment_id: str, metadata: ModelMetadata, config: Dict[str, Any]):
         """Deploy using blue-green strategy."""
         # Implementation would manage blue/green environments
         # For now, simulate deployment
         await asyncio.sleep(1)  # Simulate deployment time
         self.logger.info(f"Blue-green deployment completed for {metadata.model_id}")
 
-    async def _deploy_canary(
-        self, deployment_id: str, metadata: ModelMetadata, config: Dict[str, Any]
-    ):
+    async def _deploy_canary(self, deployment_id: str, metadata: ModelMetadata, config: Dict[str, Any]):
         """Deploy using canary strategy."""
         traffic_percentage = config.get("canary_percentage", 5)
 
@@ -963,14 +914,9 @@ class ModelDeploymentManager:
         # For now, simulate canary deployment
         await asyncio.sleep(1)
 
-        self.logger.info(
-            f"Canary deployment started for {metadata.model_id} "
-            f"with {traffic_percentage}% traffic"
-        )
+        self.logger.info(f"Canary deployment started for {metadata.model_id} " f"with {traffic_percentage}% traffic")
 
-    async def _deploy_ab_test(
-        self, deployment_id: str, metadata: ModelMetadata, config: Dict[str, Any]
-    ):
+    async def _deploy_ab_test(self, deployment_id: str, metadata: ModelMetadata, config: Dict[str, Any]):
         """Deploy using A/B test strategy."""
         test_duration_hours = config.get("test_duration_hours", 24)
         test_traffic_split = config.get("traffic_split", 0.5)
@@ -985,10 +931,7 @@ class ModelDeploymentManager:
             "metrics_to_track": config.get("metrics", ["accuracy", "latency"]),
         }
 
-        self.logger.info(
-            f"A/B test deployment started for {metadata.model_id} "
-            f"with {test_traffic_split} traffic split"
-        )
+        self.logger.info(f"A/B test deployment started for {metadata.model_id} " f"with {test_traffic_split} traffic split")
 
     async def rollback_deployment(self, deployment_id: str) -> bool:
         """Rollback a deployment."""
@@ -1003,9 +946,7 @@ class ModelDeploymentManager:
 
             # Update model status
             model_id = deployment["model_id"]
-            await self.model_registry.update_model_status(
-                model_id, ModelStatus.DEPRECATED
-            )
+            await self.model_registry.update_model_status(model_id, ModelStatus.DEPRECATED)
 
             self.logger.info(f"Rolled back deployment {deployment_id}")
             return True
@@ -1014,9 +955,7 @@ class ModelDeploymentManager:
             self.logger.error(f"Rollback failed for deployment {deployment_id}: {e}")
             return False
 
-    async def get_deployment_status(
-        self, deployment_id: str
-    ) -> Optional[Dict[str, Any]]:
+    async def get_deployment_status(self, deployment_id: str) -> Optional[Dict[str, Any]]:
         """Get deployment status."""
         with self.deployment_lock:
             return self.active_deployments.get(deployment_id)
@@ -1048,9 +987,7 @@ class ModelManager:
         # Initialize components
         self.model_registry = ModelRegistry(config)
         self.training_pipeline = TrainingPipeline(config, self.model_registry, metrics)
-        self.deployment_manager = ModelDeploymentManager(
-            config, self.model_registry, metrics
-        )
+        self.deployment_manager = ModelDeploymentManager(config, self.model_registry, metrics)
 
         # Performance monitoring
         self.model_performance: Dict[str, Dict[str, float]] = {}
@@ -1112,9 +1049,7 @@ class ModelManager:
 _model_manager: Optional[ModelManager] = None
 
 
-async def initialize_model_manager(
-    config: Config, metrics: AIEngineMetrics
-) -> ModelManager:
+async def initialize_model_manager(config: Config, metrics: AIEngineMetrics) -> ModelManager:
     """Initialize global model manager."""
     global _model_manager
 

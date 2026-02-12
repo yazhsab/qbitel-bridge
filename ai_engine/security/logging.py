@@ -311,9 +311,7 @@ class SecurityLogger:
             Log entry ID
         """
 
-        log_entry = self._create_log_entry(
-            log_type=log_type, message=message, log_level=level, **kwargs
-        )
+        log_entry = self._create_log_entry(log_type=log_type, message=message, log_level=level, **kwargs)
 
         # Apply sensitive data masking if enabled
         if self.config.security.privacy.get("data_masking", True):
@@ -418,11 +416,7 @@ class SecurityLogger:
                 "actions_count": len(automated_response.actions),
                 "overall_risk_score": automated_response.overall_risk_score,
                 "approved_by": automated_response.approved_by,
-                "approved_at": (
-                    automated_response.approved_at.isoformat()
-                    if automated_response.approved_at
-                    else None
-                ),
+                "approved_at": (automated_response.approved_at.isoformat() if automated_response.approved_at else None),
                 "actions": [
                     {
                         "action_id": action.action_id,
@@ -439,9 +433,7 @@ class SecurityLogger:
         if additional_context:
             context["metadata"].update(additional_context)
 
-        log_level = (
-            LogLevel.WARNING if automated_response.auto_execute else LogLevel.INFO
-        )
+        log_level = LogLevel.WARNING if automated_response.auto_execute else LogLevel.INFO
 
         return self.log_security_event(
             log_type=SecurityLogType.DECISION_MAKING,
@@ -482,9 +474,7 @@ class SecurityLogger:
             **context,
         )
 
-    def _create_log_entry(
-        self, log_type: SecurityLogType, message: str, log_level: LogLevel, **kwargs
-    ) -> SecurityLogEntry:
+    def _create_log_entry(self, log_type: SecurityLogType, message: str, log_level: LogLevel, **kwargs) -> SecurityLogEntry:
         """Create structured log entry."""
 
         return SecurityLogEntry(
@@ -584,9 +574,7 @@ class SecurityLogger:
             "configuration": {
                 "log_level": self.logger.level,
                 "handlers_count": len(self.logger.handlers),
-                "sensitive_data_masking": self.config.security.privacy.get(
-                    "data_masking", True
-                ),
+                "sensitive_data_masking": self.config.security.privacy.get("data_masking", True),
                 "audit_enabled": self.config.security.audit.get("enabled", False),
             },
         }

@@ -22,7 +22,6 @@ from ..threat_intelligence import (
 )
 from .middleware import get_current_user, get_config
 
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/threat-intel", tags=["Threat Intelligence"])
@@ -44,9 +43,7 @@ class EnrichEventRequest(BaseModel):
     destination_port: Optional[int] = Field(None, description="Destination port")
     protocol: Optional[str] = Field(None, description="Network protocol")
     user_id: Optional[str] = Field(None, description="User ID if available")
-    additional_context: Optional[Dict[str, Any]] = Field(
-        None, description="Additional event context"
-    )
+    additional_context: Optional[Dict[str, Any]] = Field(None, description="Additional event context")
 
 
 class EnrichEventResponse(BaseModel):
@@ -56,9 +53,7 @@ class EnrichEventResponse(BaseModel):
     timestamp: str
     ioc_matches: List[Dict[str, Any]]
     ttp_mapping: Optional[Dict[str, Any]]
-    threat_score: float = Field(
-        ..., ge=0.0, le=1.0, description="Normalized threat score 0-1"
-    )
+    threat_score: float = Field(..., ge=0.0, le=1.0, description="Normalized threat score 0-1")
     recommendations: List[str]
     processing_time_ms: float
 
@@ -66,9 +61,7 @@ class EnrichEventResponse(BaseModel):
 class QueryIOCsRequest(BaseModel):
     """Request to query IOCs."""
 
-    indicator_type: Optional[str] = Field(
-        None, description="Type of indicator (ipv4-addr, domain-name, etc)"
-    )
+    indicator_type: Optional[str] = Field(None, description="Type of indicator (ipv4-addr, domain-name, etc)")
     labels: Optional[List[str]] = Field(None, description="Filter by labels")
     min_confidence: int = Field(0, ge=0, le=100, description="Minimum confidence score")
     limit: int = Field(100, ge=1, le=1000, description="Maximum results to return")
@@ -85,9 +78,7 @@ class QueryIOCsResponse(BaseModel):
 class QueryTechniquesRequest(BaseModel):
     """Request to query MITRE ATT&CK techniques."""
 
-    query: Optional[str] = Field(
-        None, description="Search query (technique name, ID, or description)"
-    )
+    query: Optional[str] = Field(None, description="Search query (technique name, ID, or description)")
     tactic: Optional[str] = Field(None, description="Filter by tactic")
     limit: int = Field(10, ge=1, le=100, description="Maximum results to return")
 
@@ -103,12 +94,8 @@ class QueryTechniquesResponse(BaseModel):
 class ExecuteHuntRequest(BaseModel):
     """Request to execute threat hunting campaign."""
 
-    hypotheses: Optional[List[str]] = Field(
-        None, description="Specific hypothesis IDs to hunt (None = all)"
-    )
-    time_range_hours: int = Field(
-        24, ge=1, le=168, description="Time range to hunt in hours"
-    )
+    hypotheses: Optional[List[str]] = Field(None, description="Specific hypothesis IDs to hunt (None = all)")
+    time_range_hours: int = Field(24, ge=1, le=168, description="Time range to hunt in hours")
     description: Optional[str] = Field(None, description="Campaign description")
 
 
@@ -375,22 +362,14 @@ async def execute_threat_hunt(
         )
 
         # Count high severity findings
-        high_severity = sum(
-            1
-            for finding in campaign.findings
-            if finding.severity in ["high", "critical"]
-        )
+        high_severity = sum(1 for finding in campaign.findings if finding.severity in ["high", "critical"])
 
         execution_time = (datetime.utcnow() - start_time).total_seconds() * 1000
 
         return ExecuteHuntResponse(
             campaign_id=campaign.campaign_id,
             start_time=campaign.start_time.isoformat(),
-            end_time=(
-                campaign.end_time.isoformat()
-                if campaign.end_time
-                else datetime.utcnow().isoformat()
-            ),
+            end_time=(campaign.end_time.isoformat() if campaign.end_time else datetime.utcnow().isoformat()),
             hypotheses_tested=len(campaign.hypotheses_tested),
             findings_count=len(campaign.findings),
             high_severity_findings=high_severity,
@@ -447,9 +426,7 @@ async def get_feed_status(
                         "source": feed.source,
                         "feed_type": feed.feed_type,
                         "enabled": feed.enabled,
-                        "last_update": (
-                            feed.last_update.isoformat() if feed.last_update else None
-                        ),
+                        "last_update": (feed.last_update.isoformat() if feed.last_update else None),
                         "update_interval_hours": feed.update_interval_hours,
                         "indicators_count": feed.indicators_count,
                     }

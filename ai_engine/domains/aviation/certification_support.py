@@ -30,45 +30,39 @@ logger = logging.getLogger(__name__)
 
 # Metrics
 CERTIFICATION_TESTS_RUN = Counter(
-    'aviation_certification_tests_total',
-    'Total certification tests executed',
-    ['test_type', 'result']
+    "aviation_certification_tests_total", "Total certification tests executed", ["test_type", "result"]
 )
 
-CERTIFICATION_COVERAGE = Gauge(
-    'aviation_certification_coverage_percent',
-    'Test coverage percentage',
-    ['category']
-)
+CERTIFICATION_COVERAGE = Gauge("aviation_certification_coverage_percent", "Test coverage percentage", ["category"])
 
 
 class CertificationStandard(Enum):
     """Aviation certification standards."""
 
-    DO_178C = "DO-178C"          # Software
-    DO_326A = "DO-326A"          # Security
-    DO_356A = "DO-356A"          # Airworthiness Security
-    ED_202A = "ED-202A"          # European equivalent of DO-326A
-    ED_203A = "ED-203A"          # European equivalent of DO-356A
+    DO_178C = "DO-178C"  # Software
+    DO_326A = "DO-326A"  # Security
+    DO_356A = "DO-356A"  # Airworthiness Security
+    ED_202A = "ED-202A"  # European equivalent of DO-326A
+    ED_203A = "ED-203A"  # European equivalent of DO-356A
 
 
 class DesignAssuranceLevel(Enum):
     """DO-178C Design Assurance Levels."""
 
-    LEVEL_A = "A"    # Catastrophic - most rigorous
-    LEVEL_B = "B"    # Hazardous
-    LEVEL_C = "C"    # Major
-    LEVEL_D = "D"    # Minor
-    LEVEL_E = "E"    # No effect
+    LEVEL_A = "A"  # Catastrophic - most rigorous
+    LEVEL_B = "B"  # Hazardous
+    LEVEL_C = "C"  # Major
+    LEVEL_D = "D"  # Minor
+    LEVEL_E = "E"  # No effect
 
 
 class SecurityAssuranceLevel(Enum):
     """DO-326A/DO-356A Security Assurance Levels."""
 
-    SAL_1 = 1    # Highest assurance
+    SAL_1 = 1  # Highest assurance
     SAL_2 = 2
     SAL_3 = 3
-    SAL_4 = 4    # Lowest assurance
+    SAL_4 = 4  # Lowest assurance
 
 
 class RequirementType(Enum):
@@ -190,10 +184,7 @@ class PQCCertificationManager:
         self._test_cases: Dict[str, TestCase] = {}
         self._validations: Dict[str, AlgorithmValidation] = {}
 
-        logger.info(
-            f"Certification manager initialized: {project_name} "
-            f"(DAL-{dal_level.value}, SAL-{sal_level.value})"
-        )
+        logger.info(f"Certification manager initialized: {project_name} " f"(DAL-{dal_level.value}, SAL-{sal_level.value})")
 
     def add_requirement(
         self,
@@ -246,8 +237,7 @@ class PQCCertificationManager:
         self._validations[algorithm_name] = validation
 
         CERTIFICATION_TESTS_RUN.labels(
-            test_type="algorithm_validation",
-            result="pass" if validation.validated else "fail"
+            test_type="algorithm_validation", result="pass" if validation.validated else "fail"
         ).inc()
 
         return validation
@@ -262,9 +252,7 @@ class PQCCertificationManager:
         latencies = []
 
         # Test all security levels
-        for level in [MlKemSecurityLevel.MLKEM_512,
-                      MlKemSecurityLevel.MLKEM_768,
-                      MlKemSecurityLevel.MLKEM_1024]:
+        for level in [MlKemSecurityLevel.MLKEM_512, MlKemSecurityLevel.MLKEM_768, MlKemSecurityLevel.MLKEM_1024]:
             engine = MlKemEngine(level)
 
             # Run test vectors
@@ -288,14 +276,11 @@ class PQCCertificationManager:
         validation.max_latency_us = max(latencies)
         validation.avg_latency_us = sum(latencies) / len(latencies)
 
-        validation.validated = (
-            validation.kat_vectors_passed == validation.kat_vectors_tested
-        )
+        validation.validated = validation.kat_vectors_passed == validation.kat_vectors_tested
         validation.validation_date = datetime.now().isoformat()
 
         logger.info(
-            f"ML-KEM validation: {validation.kat_vectors_passed}/"
-            f"{validation.kat_vectors_tested} KAT vectors passed"
+            f"ML-KEM validation: {validation.kat_vectors_passed}/" f"{validation.kat_vectors_tested} KAT vectors passed"
         )
 
         return validation
@@ -309,8 +294,7 @@ class PQCCertificationManager:
 
         latencies = []
 
-        for level in [FalconSecurityLevel.FALCON_512,
-                      FalconSecurityLevel.FALCON_1024]:
+        for level in [FalconSecurityLevel.FALCON_512, FalconSecurityLevel.FALCON_1024]:
             engine = FalconEngine(level)
 
             for i in range(10):
@@ -333,9 +317,7 @@ class PQCCertificationManager:
         validation.max_latency_us = max(latencies)
         validation.avg_latency_us = sum(latencies) / len(latencies)
 
-        validation.validated = (
-            validation.kat_vectors_passed == validation.kat_vectors_tested
-        )
+        validation.validated = validation.kat_vectors_passed == validation.kat_vectors_tested
         validation.validation_date = datetime.now().isoformat()
 
         return validation
@@ -349,9 +331,7 @@ class PQCCertificationManager:
 
         latencies = []
 
-        for level in [DilithiumSecurityLevel.LEVEL2,
-                      DilithiumSecurityLevel.LEVEL3,
-                      DilithiumSecurityLevel.LEVEL5]:
+        for level in [DilithiumSecurityLevel.LEVEL2, DilithiumSecurityLevel.LEVEL3, DilithiumSecurityLevel.LEVEL5]:
             engine = DilithiumEngine(level)
 
             for i in range(10):
@@ -374,9 +354,7 @@ class PQCCertificationManager:
         validation.max_latency_us = max(latencies)
         validation.avg_latency_us = sum(latencies) / len(latencies)
 
-        validation.validated = (
-            validation.kat_vectors_passed == validation.kat_vectors_tested
-        )
+        validation.validated = validation.kat_vectors_passed == validation.kat_vectors_tested
         validation.validation_date = datetime.now().isoformat()
 
         return validation
@@ -420,10 +398,7 @@ class PQCCertificationManager:
                     if all_tests_passed and len(req.test_cases) > 0:
                         req.verified = True
 
-        CERTIFICATION_TESTS_RUN.labels(
-            test_type="requirement_verification",
-            result="pass" if test.passed else "fail"
-        ).inc()
+        CERTIFICATION_TESTS_RUN.labels(test_type="requirement_verification", result="pass" if test.passed else "fail").inc()
 
         return test
 
@@ -440,7 +415,7 @@ class PQCCertificationManager:
                 "verified_requirements": 0,
                 "total_tests": len(self._test_cases),
                 "passed_tests": 0,
-            }
+            },
         }
 
         for req_id, req in self._requirements.items():
@@ -458,29 +433,25 @@ class PQCCertificationManager:
             for test_id in req.test_cases:
                 if test_id in self._test_cases:
                     test = self._test_cases[test_id]
-                    req_entry["test_cases"].append({
-                        "id": test_id,
-                        "name": test.name,
-                        "executed": test.executed,
-                        "passed": test.passed,
-                    })
+                    req_entry["test_cases"].append(
+                        {
+                            "id": test_id,
+                            "name": test.name,
+                            "executed": test.executed,
+                            "passed": test.passed,
+                        }
+                    )
 
             matrix["requirements"].append(req_entry)
 
             if req.verified:
                 matrix["summary"]["verified_requirements"] += 1
 
-        matrix["summary"]["passed_tests"] = sum(
-            1 for t in self._test_cases.values()
-            if t.executed and t.passed
-        )
+        matrix["summary"]["passed_tests"] = sum(1 for t in self._test_cases.values() if t.executed and t.passed)
 
         # Update coverage metric
         if matrix["summary"]["total_requirements"] > 0:
-            coverage = (
-                matrix["summary"]["verified_requirements"] /
-                matrix["summary"]["total_requirements"]
-            ) * 100
+            coverage = (matrix["summary"]["verified_requirements"] / matrix["summary"]["total_requirements"]) * 100
             CERTIFICATION_COVERAGE.labels(category="requirements").set(coverage)
 
         return matrix
@@ -535,17 +506,14 @@ class PQCCertificationManager:
                     "algorithm": v.algorithm_name,
                     "standard": v.standard_reference,
                     "validated": v.validated,
-                    "kat_pass_rate": (
-                        v.kat_vectors_passed / v.kat_vectors_tested
-                        if v.kat_vectors_tested > 0 else 0
-                    ),
+                    "kat_pass_rate": (v.kat_vectors_passed / v.kat_vectors_tested if v.kat_vectors_tested > 0 else 0),
                     "avg_latency_us": v.avg_latency_us,
                 }
                 for v in evidence.algorithm_validations
             ],
         }
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.info(f"Evidence exported to {filepath}")
@@ -583,7 +551,6 @@ def create_pqc_aviation_requirements() -> List[CertificationRequirement]:
             dal_level=DesignAssuranceLevel.LEVEL_A,
             sal_level=SecurityAssuranceLevel.SAL_1,
         ),
-
         # Authentication Requirements
         CertificationRequirement(
             requirement_id="SEC-AUTH-001",
@@ -601,7 +568,6 @@ def create_pqc_aviation_requirements() -> List[CertificationRequirement]:
             dal_level=DesignAssuranceLevel.LEVEL_B,
             sal_level=SecurityAssuranceLevel.SAL_2,
         ),
-
         # Performance Requirements
         CertificationRequirement(
             requirement_id="PERF-001",
@@ -617,7 +583,6 @@ def create_pqc_aviation_requirements() -> List[CertificationRequirement]:
             standard=CertificationStandard.DO_178C,
             dal_level=DesignAssuranceLevel.LEVEL_A,
         ),
-
         # Communication Requirements
         CertificationRequirement(
             requirement_id="SEC-COMM-001",
@@ -635,7 +600,6 @@ def create_pqc_aviation_requirements() -> List[CertificationRequirement]:
             dal_level=DesignAssuranceLevel.LEVEL_C,
             sal_level=SecurityAssuranceLevel.SAL_3,
         ),
-
         # Robustness Requirements
         CertificationRequirement(
             requirement_id="ROB-001",

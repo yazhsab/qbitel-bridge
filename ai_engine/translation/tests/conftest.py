@@ -150,20 +150,12 @@ def sample_api_specification():
                 description="Send a message using the test protocol",
                 request_body={
                     "required": True,
-                    "content": {
-                        "application/json": {
-                            "schema": {"$ref": "#/components/schemas/Message"}
-                        }
-                    },
+                    "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Message"}}},
                 },
                 responses={
                     "201": {
                         "description": "Message created",
-                        "content": {
-                            "application/json": {
-                                "schema": {"$ref": "#/components/schemas/Message"}
-                            }
-                        },
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Message"}}},
                     }
                 },
             ),
@@ -183,11 +175,7 @@ def sample_api_specification():
                 responses={
                     "200": {
                         "description": "Message details",
-                        "content": {
-                            "application/json": {
-                                "schema": {"$ref": "#/components/schemas/Message"}
-                            }
-                        },
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Message"}}},
                     }
                 },
             ),
@@ -286,11 +274,7 @@ def mock_llm_service():
     mock_service.generate_api_specification.return_value = {
         "openapi": "3.0.0",
         "info": {"title": "Test API", "version": "1.0.0"},
-        "paths": {
-            "/messages": {
-                "post": {"summary": "Send message", "operationId": "sendMessage"}
-            }
-        },
+        "paths": {"/messages": {"post": {"summary": "Send message", "operationId": "sendMessage"}}},
     }
 
     # Mock code generation response
@@ -311,9 +295,7 @@ def mock_rag_engine():
     # Mock pattern search results
     mock_engine.query_protocol_patterns.return_value = Mock(
         documents=[
-            Mock(
-                id="pattern1", content="HTTP pattern example", metadata={"type": "http"}
-            ),
+            Mock(id="pattern1", content="HTTP pattern example", metadata={"type": "http"}),
             Mock(
                 id="pattern2",
                 content="WebSocket pattern example",
@@ -501,9 +483,7 @@ def mock_cache():
 
     mock_cache = Mock()
     mock_cache.get.side_effect = lambda key: cache_data.get(key)
-    mock_cache.set.side_effect = lambda key, value, ttl=None: cache_data.update(
-        {key: value}
-    )
+    mock_cache.set.side_effect = lambda key, value, ttl=None: cache_data.update({key: value})
     mock_cache.delete.side_effect = lambda key: cache_data.pop(key, None)
     mock_cache.exists.side_effect = lambda key: key in cache_data
     mock_cache.clear.side_effect = lambda: cache_data.clear()
@@ -581,9 +561,7 @@ def create_test_openapi_spec() -> Dict[str, Any]:
             "version": "1.0.0",
             "description": "Generated API for test protocol",
         },
-        "servers": [
-            {"url": "https://api.test.com/v1", "description": "Production server"}
-        ],
+        "servers": [{"url": "https://api.test.com/v1", "description": "Production server"}],
         "paths": {
             "/messages": {
                 "post": {
@@ -591,22 +569,12 @@ def create_test_openapi_spec() -> Dict[str, Any]:
                     "operationId": "sendMessage",
                     "requestBody": {
                         "required": True,
-                        "content": {
-                            "application/json": {
-                                "schema": {"$ref": "#/components/schemas/Message"}
-                            }
-                        },
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Message"}}},
                     },
                     "responses": {
                         "200": {
                             "description": "Message sent successfully",
-                            "content": {
-                                "application/json": {
-                                    "schema": {
-                                        "$ref": "#/components/schemas/MessageResponse"
-                                    }
-                                }
-                            },
+                            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/MessageResponse"}}},
                         }
                     },
                 }

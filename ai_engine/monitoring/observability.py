@@ -90,9 +90,7 @@ class Span:
         event = SpanEvent(timestamp=time.time(), name=name, attributes=attributes or {})
         self.logs.append(event)
 
-    def add_link(
-        self, trace_id: str, span_id: str, attributes: Optional[Dict[str, Any]] = None
-    ) -> None:
+    def add_link(self, trace_id: str, span_id: str, attributes: Optional[Dict[str, Any]] = None) -> None:
         """Add a link to another span."""
         link = SpanLink(trace_id=trace_id, span_id=span_id, attributes=attributes or {})
         self.links.append(link)
@@ -260,9 +258,7 @@ class InMemoryTracingProvider(TracingProvider):
 
             # Limit memory usage
             if len(self.traces) > self.max_traces:
-                oldest_trace_id = min(
-                    self.traces.keys(), key=lambda tid: self.traces[tid].start_time or 0
-                )
+                oldest_trace_id = min(self.traces.keys(), key=lambda tid: self.traces[tid].start_time or 0)
                 self._remove_trace(oldest_trace_id)
 
     async def export_trace(self, trace: Trace) -> None:
@@ -324,10 +320,7 @@ class InMemoryTracingProvider(TracingProvider):
                 if tags and trace.root_span:
                     match = True
                     for key, value in tags.items():
-                        if (
-                            key not in trace.root_span.tags
-                            or trace.root_span.tags[key] != value
-                        ):
+                        if key not in trace.root_span.tags or trace.root_span.tags[key] != value:
                             match = False
                             break
                     if not match:
@@ -349,9 +342,7 @@ class InMemoryTracingProvider(TracingProvider):
             stats = {
                 "total_traces": len(self.traces),
                 "total_spans": len(self.spans),
-                "avg_spans_per_trace": (
-                    sum(span_counts) / len(span_counts) if span_counts else 0
-                ),
+                "avg_spans_per_trace": (sum(span_counts) / len(span_counts) if span_counts else 0),
                 "operations": {},
             }
 
@@ -409,18 +400,14 @@ class DistributedTracing:
         self._spans_lock = threading.RLock()
 
         # Sampling configuration
-        self.sampling_rate = getattr(
-            config, "tracing_sampling_rate", 1.0
-        )  # 100% by default
+        self.sampling_rate = getattr(config, "tracing_sampling_rate", 1.0)  # 100% by default
         self.enabled = getattr(config, "enable_tracing", True)
 
         # Performance tracking
         self.trace_count = 0
         self.span_count = 0
 
-        self.logger.info(
-            f"DistributedTracing initialized (enabled: {self.enabled}, sampling: {self.sampling_rate})"
-        )
+        self.logger.info(f"DistributedTracing initialized (enabled: {self.enabled}, sampling: {self.sampling_rate})")
 
     def should_sample(self) -> bool:
         """Determine if trace should be sampled."""
@@ -473,9 +460,7 @@ class DistributedTracing:
         if parent_span is None:
             self.trace_count += 1
 
-        self.logger.debug(
-            f"Created span: {operation_name} (trace: {trace_id}, span: {span_id})"
-        )
+        self.logger.debug(f"Created span: {operation_name} (trace: {trace_id}, span: {span_id})")
 
         return span
 
@@ -492,9 +477,7 @@ class DistributedTracing:
         # Export to provider
         asyncio.create_task(self.provider.export_span(span))
 
-        self.logger.debug(
-            f"Finished span: {span.operation_name} (duration: {span.duration_ms:.2f}ms)"
-        )
+        self.logger.debug(f"Finished span: {span.operation_name} (duration: {span.duration_ms:.2f}ms)")
 
     def get_active_span(self) -> Optional[Span]:
         """Get current active span for this thread."""
@@ -591,9 +574,7 @@ class DistributedTracing:
     def get_tracing_statistics(self) -> Dict[str, Any]:
         """Get tracing statistics."""
         with self._spans_lock:
-            active_spans_count = sum(
-                len(spans) for spans in self._active_spans.values()
-            )
+            active_spans_count = sum(len(spans) for spans in self._active_spans.values())
 
         stats = {
             "enabled": self.enabled,
@@ -720,9 +701,7 @@ class ObservabilityManager:
 
         return status
 
-    def create_trace_context(
-        self, operation_name: str, **tags
-    ) -> Optional[TraceContext]:
+    def create_trace_context(self, operation_name: str, **tags) -> Optional[TraceContext]:
         """Create trace context for operation."""
         if not self.tracing:
             return None

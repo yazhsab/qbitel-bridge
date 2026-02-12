@@ -108,9 +108,7 @@ class TestEnhancedLegacySystemDetector:
         assert detector.expert_knowledge_base is None
 
     @pytest.mark.unit
-    async def test_detector_initialization(
-        self, detector, mock_llm_service, mock_metrics
-    ):
+    async def test_detector_initialization(self, detector, mock_llm_service, mock_metrics):
         """Test detector enhanced initialization."""
         await detector.initialize_enhanced(mock_llm_service, mock_metrics)
 
@@ -124,9 +122,7 @@ class TestEnhancedLegacySystemDetector:
         assert detector.analysis_history == {}
 
     @pytest.mark.unit
-    async def test_double_initialization_warning(
-        self, detector, mock_llm_service, mock_metrics, caplog
-    ):
+    async def test_double_initialization_warning(self, detector, mock_llm_service, mock_metrics, caplog):
         """Test that double initialization shows warning."""
         await detector.initialize_enhanced(mock_llm_service, mock_metrics)
         await detector.initialize_enhanced(mock_llm_service, mock_metrics)
@@ -134,24 +130,18 @@ class TestEnhancedLegacySystemDetector:
         assert "Enhanced detector already initialized" in caplog.text
 
     @pytest.mark.unit
-    async def test_add_system_context(
-        self, initialized_detector, sample_system_context
-    ):
+    async def test_add_system_context(self, initialized_detector, sample_system_context):
         """Test adding system context."""
         initialized_detector.add_system_context(sample_system_context)
 
         assert sample_system_context.system_id in initialized_detector.system_contexts
-        stored_context = initialized_detector.system_contexts[
-            sample_system_context.system_id
-        ]
+        stored_context = initialized_detector.system_contexts[sample_system_context.system_id]
         assert stored_context.system_name == sample_system_context.system_name
         assert stored_context.system_type == sample_system_context.system_type
         assert stored_context.criticality == sample_system_context.criticality
 
     @pytest.mark.unit
-    async def test_predict_system_failure_success(
-        self, initialized_detector, sample_system_context, sample_system_data
-    ):
+    async def test_predict_system_failure_success(self, initialized_detector, sample_system_context, sample_system_data):
         """Test successful system failure prediction."""
         # Add system context
         initialized_detector.add_system_context(sample_system_context)
@@ -174,9 +164,7 @@ class TestEnhancedLegacySystemDetector:
                 ],
             }
 
-            initialized_detector.llm_analyzer.analyze_patterns = AsyncMock(
-                return_value=mock_llm_analysis
-            )
+            initialized_detector.llm_analyzer.analyze_patterns = AsyncMock(return_value=mock_llm_analysis)
 
             # Perform prediction
             prediction = await initialized_detector.predict_system_failure(
@@ -193,9 +181,7 @@ class TestEnhancedLegacySystemDetector:
             assert len(prediction.recommended_actions) > 0
 
     @pytest.mark.unit
-    async def test_predict_system_failure_no_context(
-        self, initialized_detector, sample_system_data
-    ):
+    async def test_predict_system_failure_no_context(self, initialized_detector, sample_system_data):
         """Test failure prediction without system context."""
         with pytest.raises(AnomalyDetectionException, match="System context not found"):
             await initialized_detector.predict_system_failure(
@@ -216,17 +202,13 @@ class TestEnhancedLegacySystemDetector:
         with patch.object(initialized_detector, "detect_anomaly") as mock_detect:
             mock_detect.side_effect = Exception("Detector error")
 
-            with pytest.raises(
-                AnomalyDetectionException, match="Enhanced anomaly detection failed"
-            ):
+            with pytest.raises(AnomalyDetectionException, match="Enhanced anomaly detection failed"):
                 await initialized_detector.predict_system_failure(
                     sample_system_data, sample_system_context, prediction_horizon=30
                 )
 
     @pytest.mark.unit
-    async def test_enhanced_analysis_integration(
-        self, initialized_detector, sample_system_context, sample_system_data
-    ):
+    async def test_enhanced_analysis_integration(self, initialized_detector, sample_system_context, sample_system_data):
         """Test integration between anomaly detection and LLM analysis."""
         # Add system context
         initialized_detector.add_system_context(sample_system_context)
@@ -241,9 +223,7 @@ class TestEnhancedLegacySystemDetector:
                 confidence=0.9,
             )
         ]
-        initialized_detector.historical_patterns.get_patterns.return_value = (
-            mock_patterns
-        )
+        initialized_detector.historical_patterns.get_patterns.return_value = mock_patterns
 
         # Mock expert knowledge
         mock_knowledge = {
@@ -267,9 +247,7 @@ class TestEnhancedLegacySystemDetector:
                 "severity": "medium",
             }
 
-            initialized_detector.llm_analyzer.analyze_patterns = AsyncMock(
-                return_value=mock_llm_response
-            )
+            initialized_detector.llm_analyzer.analyze_patterns = AsyncMock(return_value=mock_llm_response)
 
             # Perform enhanced analysis
             prediction = await initialized_detector.predict_system_failure(
@@ -289,9 +267,7 @@ class TestEnhancedLegacySystemDetector:
             assert prediction.confidence == 0.82
 
     @pytest.mark.unit
-    def test_get_system_health_summary(
-        self, initialized_detector, sample_system_context
-    ):
+    def test_get_system_health_summary(self, initialized_detector, sample_system_context):
         """Test system health summary retrieval."""
         system_id = sample_system_context.system_id
 
@@ -466,9 +442,7 @@ class TestLegacySystemLLMAnalyzer:
     ):
         """Test pattern analysis with LLM service failure."""
         # Mock LLM service failure
-        analyzer.llm_service.process_request.side_effect = Exception(
-            "LLM service error"
-        )
+        analyzer.llm_service.process_request.side_effect = Exception("LLM service error")
 
         with pytest.raises(LegacySystemWhispererException, match="LLM analysis failed"):
             await analyzer.analyze_patterns(
@@ -492,9 +466,7 @@ class TestLegacySystemLLMAnalyzer:
 
         analyzer.llm_service.process_request.return_value = mock_llm_response
 
-        with pytest.raises(
-            LegacySystemWhispererException, match="Failed to parse LLM response"
-        ):
+        with pytest.raises(LegacySystemWhispererException, match="Failed to parse LLM response"):
             await analyzer.analyze_patterns(
                 current_data=sample_current_data,
                 historical_patterns=sample_historical_patterns,
@@ -510,9 +482,7 @@ class TestLegacySystemLLMAnalyzer:
         sample_expert_knowledge,
     ):
         """Test analysis prompt building."""
-        prompt = analyzer._build_analysis_prompt(
-            sample_current_data, sample_historical_patterns, sample_expert_knowledge
-        )
+        prompt = analyzer._build_analysis_prompt(sample_current_data, sample_historical_patterns, sample_expert_knowledge)
 
         # Verify prompt contains key elements
         assert "legacy system analysis" in prompt.lower()
@@ -726,14 +696,10 @@ class TestExpertKnowledgeBase:
         """Test adding knowledge item."""
         knowledge_base = ExpertKnowledgeBase()
 
-        knowledge_base.add_knowledge_item(
-            "custom_category", "custom_key", "custom_value"
-        )
+        knowledge_base.add_knowledge_item("custom_category", "custom_key", "custom_value")
 
         assert "custom_category" in knowledge_base.knowledge
-        assert (
-            knowledge_base.knowledge["custom_category"]["custom_key"] == "custom_value"
-        )
+        assert knowledge_base.knowledge["custom_category"]["custom_key"] == "custom_value"
 
     @pytest.mark.unit
     def test_get_knowledge_by_category(self):
@@ -837,9 +803,7 @@ class TestIntegrationScenarios:
                 "error_rate": 0.03,
             }
 
-            prediction = await detector.predict_system_failure(
-                system_data, system_context, prediction_horizon=30
-            )
+            prediction = await detector.predict_system_failure(system_data, system_context, prediction_horizon=30)
 
             # Verify complete prediction
             assert prediction.system_id == system_context.system_id
@@ -900,9 +864,7 @@ class TestIntegrationScenarios:
             # Perform predictions for all systems
             predictions = []
             for system in systems:
-                prediction = await detector.predict_system_failure(
-                    system_data, system, prediction_horizon=30
-                )
+                prediction = await detector.predict_system_failure(system_data, system, prediction_horizon=30)
                 predictions.append(prediction)
 
             total_time = time.time() - start_time

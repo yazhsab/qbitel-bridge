@@ -22,7 +22,6 @@ from prometheus_client import Counter, Histogram, Gauge
 from ..core.config import Config
 from ..core.exceptions import QbitelAIException
 
-
 # Prometheus metrics
 STIX_OBJECTS_INGESTED = Counter(
     "qbitel_stix_objects_ingested_total",
@@ -219,9 +218,7 @@ class STIXTAXIIClient:
         self._start_background_updates()
 
         self.logger.info(
-            f"STIX/TAXII client initialized: "
-            f"{len(self.taxii_servers)} servers, "
-            f"{len(self.ioc_feeds)} feeds"
+            f"STIX/TAXII client initialized: " f"{len(self.taxii_servers)} servers, " f"{len(self.ioc_feeds)} feeds"
         )
 
     async def shutdown(self):
@@ -371,10 +368,7 @@ class STIXTAXIIClient:
             IOC_FEED_UPDATES.labels(feed_name=feed.name, status="success").inc()
             THREAT_INTEL_AGE.labels(source=feed.source).set(0)
 
-            self.logger.info(
-                f"Feed {feed.name} updated: {count} indicators "
-                f"in {time.time() - start_time:.2f}s"
-            )
+            self.logger.info(f"Feed {feed.name} updated: {count} indicators " f"in {time.time() - start_time:.2f}s")
 
             return count
 
@@ -392,9 +386,7 @@ class STIXTAXIIClient:
 
         async with self.session.get(feed.url, headers=headers) as response:
             if response.status != 200:
-                raise QbitelAIException(
-                    f"Failed to fetch STIX feed: HTTP {response.status}"
-                )
+                raise QbitelAIException(f"Failed to fetch STIX feed: HTTP {response.status}")
 
             data = await response.json()
 
@@ -432,9 +424,7 @@ class STIXTAXIIClient:
             auth = aiohttp.BasicAuth(server.username, server.password)
 
         # Fetch objects
-        async with self.session.get(
-            url, headers=headers, auth=auth, ssl=server.verify_ssl
-        ) as response:
+        async with self.session.get(url, headers=headers, auth=auth, ssl=server.verify_ssl) as response:
             TAXII_REQUESTS.labels(
                 server=server.name,
                 endpoint="objects",
@@ -461,9 +451,7 @@ class STIXTAXIIClient:
         """Fetch CSV-based IOC feed."""
         async with self.session.get(feed.url) as response:
             if response.status != 200:
-                raise QbitelAIException(
-                    f"Failed to fetch CSV feed: HTTP {response.status}"
-                )
+                raise QbitelAIException(f"Failed to fetch CSV feed: HTTP {response.status}")
 
             text = await response.text()
 
@@ -484,9 +472,7 @@ class STIXTAXIIClient:
                 value = parts[0].strip()
 
                 # Create indicator
-                indicator_id = (
-                    f"indicator--{hashlib.sha256(value.encode()).hexdigest()}"
-                )
+                indicator_id = f"indicator--{hashlib.sha256(value.encode()).hexdigest()}"
 
                 # Determine type
                 if "." in value and all(p.isdigit() for p in value.split(".")):
@@ -516,9 +502,7 @@ class STIXTAXIIClient:
         """Fetch JSON-based IOC feed."""
         async with self.session.get(feed.url) as response:
             if response.status != 200:
-                raise QbitelAIException(
-                    f"Failed to fetch JSON feed: HTTP {response.status}"
-                )
+                raise QbitelAIException(f"Failed to fetch JSON feed: HTTP {response.status}")
 
             data = await response.json()
 
@@ -544,19 +528,11 @@ class STIXTAXIIClient:
 
     def _parse_stix_indicator(self, stix_obj: Dict[str, Any]) -> STIXIndicator:
         """Parse STIX indicator object."""
-        indicator_id = stix_obj.get(
-            "id", f"indicator--{hashlib.sha256(str(stix_obj).encode()).hexdigest()}"
-        )
+        indicator_id = stix_obj.get("id", f"indicator--{hashlib.sha256(str(stix_obj).encode()).hexdigest()}")
 
-        created = datetime.fromisoformat(
-            stix_obj.get("created", datetime.utcnow().isoformat()).rstrip("Z")
-        )
-        modified = datetime.fromisoformat(
-            stix_obj.get("modified", datetime.utcnow().isoformat()).rstrip("Z")
-        )
-        valid_from = datetime.fromisoformat(
-            stix_obj.get("valid_from", datetime.utcnow().isoformat()).rstrip("Z")
-        )
+        created = datetime.fromisoformat(stix_obj.get("created", datetime.utcnow().isoformat()).rstrip("Z"))
+        modified = datetime.fromisoformat(stix_obj.get("modified", datetime.utcnow().isoformat()).rstrip("Z"))
+        valid_from = datetime.fromisoformat(stix_obj.get("valid_from", datetime.utcnow().isoformat()).rstrip("Z"))
 
         valid_until = None
         if "valid_until" in stix_obj:
@@ -581,9 +557,7 @@ class STIXTAXIIClient:
 
         return indicator
 
-    def _parse_json_indicator(
-        self, json_obj: Dict[str, Any], feed: IOCFeed
-    ) -> Optional[STIXIndicator]:
+    def _parse_json_indicator(self, json_obj: Dict[str, Any], feed: IOCFeed) -> Optional[STIXIndicator]:
         """Parse generic JSON indicator."""
         # Extract value (flexible field names)
         value = (
@@ -616,9 +590,7 @@ class STIXTAXIIClient:
 
         return indicator
 
-    async def _store_indicators(
-        self, indicators: List[STIXIndicator], source: str
-    ) -> int:
+    async def _store_indicators(self, indicators: List[STIXIndicator], source: str) -> int:
         """Store indicators in cache."""
         count = 0
 
@@ -694,9 +666,7 @@ class STIXTAXIIClient:
 
         return results
 
-    async def check_ioc(
-        self, value: str, ioc_type: Optional[str] = None
-    ) -> Optional[STIXIndicator]:
+    async def check_ioc(self, value: str, ioc_type: Optional[str] = None) -> Optional[STIXIndicator]:
         """
         Check if a value matches any known IOC.
 

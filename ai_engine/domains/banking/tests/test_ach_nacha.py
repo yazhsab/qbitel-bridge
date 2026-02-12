@@ -133,13 +133,15 @@ class TestNACHAParser:
         # File Control
         file_control = "9000001000001000000010009100001900000000000000000001000                                       "
 
-        return "\n".join([
-            file_header,
-            batch_header,
-            entry,
-            batch_control,
-            file_control,
-        ])
+        return "\n".join(
+            [
+                file_header,
+                batch_header,
+                entry,
+                batch_control,
+                file_control,
+            ]
+        )
 
     def test_parser_initialization(self):
         """Test parser initialization."""
@@ -256,14 +258,16 @@ class TestNACHABuilder:
         )
 
         # Add entry
-        batch.entries.append(ACHEntry(
-            transaction_code=TransactionCode.CHECKING_CREDIT,
-            routing_number="091000019",
-            account_number="123456789",
-            amount=10000,
-            individual_name="JOHN DOE",
-            individual_id="ID123",
-        ))
+        batch.entries.append(
+            ACHEntry(
+                transaction_code=TransactionCode.CHECKING_CREDIT,
+                routing_number="091000019",
+                account_number="123456789",
+                amount=10000,
+                individual_name="JOHN DOE",
+                individual_id="ID123",
+            )
+        )
 
         builder.add_batch(batch)
         content = builder.build()
@@ -286,22 +290,26 @@ class TestNACHABuilder:
         )
 
         # Add entries with known routing numbers
-        batch.entries.append(ACHEntry(
-            transaction_code=TransactionCode.CHECKING_CREDIT,
-            routing_number="091000019",
-            account_number="123456789",
-            amount=10000,
-            individual_name="JOHN DOE",
-            individual_id="ID123",
-        ))
-        batch.entries.append(ACHEntry(
-            transaction_code=TransactionCode.CHECKING_CREDIT,
-            routing_number="091000019",
-            account_number="987654321",
-            amount=20000,
-            individual_name="JANE DOE",
-            individual_id="ID456",
-        ))
+        batch.entries.append(
+            ACHEntry(
+                transaction_code=TransactionCode.CHECKING_CREDIT,
+                routing_number="091000019",
+                account_number="123456789",
+                amount=10000,
+                individual_name="JOHN DOE",
+                individual_id="ID123",
+            )
+        )
+        batch.entries.append(
+            ACHEntry(
+                transaction_code=TransactionCode.CHECKING_CREDIT,
+                routing_number="091000019",
+                account_number="987654321",
+                amount=20000,
+                individual_name="JANE DOE",
+                individual_id="ID456",
+            )
+        )
 
         # Calculate expected hash (sum of first 8 digits of routing numbers)
         expected_hash = 9100001 + 9100001  # Two entries with same routing
@@ -416,34 +424,32 @@ class TestACHBatch:
         )
 
         # Add credit entry
-        batch.entries.append(ACHEntry(
-            transaction_code=TransactionCode.CHECKING_CREDIT,
-            routing_number="091000019",
-            account_number="123456789",
-            amount=10000,
-            individual_name="JOHN DOE",
-            individual_id="ID123",
-        ))
+        batch.entries.append(
+            ACHEntry(
+                transaction_code=TransactionCode.CHECKING_CREDIT,
+                routing_number="091000019",
+                account_number="123456789",
+                amount=10000,
+                individual_name="JOHN DOE",
+                individual_id="ID123",
+            )
+        )
 
         # Add debit entry
-        batch.entries.append(ACHEntry(
-            transaction_code=TransactionCode.CHECKING_DEBIT,
-            routing_number="091000019",
-            account_number="987654321",
-            amount=5000,
-            individual_name="JANE DOE",
-            individual_id="ID456",
-        ))
+        batch.entries.append(
+            ACHEntry(
+                transaction_code=TransactionCode.CHECKING_DEBIT,
+                routing_number="091000019",
+                account_number="987654321",
+                amount=5000,
+                individual_name="JANE DOE",
+                individual_id="ID456",
+            )
+        )
 
         # Calculate totals
-        total_credits = sum(
-            e.amount for e in batch.entries
-            if e.transaction_code.is_credit
-        )
-        total_debits = sum(
-            e.amount for e in batch.entries
-            if e.transaction_code.is_debit
-        )
+        total_credits = sum(e.amount for e in batch.entries if e.transaction_code.is_credit)
+        total_debits = sum(e.amount for e in batch.entries if e.transaction_code.is_debit)
 
         assert total_credits == 10000
         assert total_debits == 5000

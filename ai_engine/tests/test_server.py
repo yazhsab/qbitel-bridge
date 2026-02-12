@@ -44,9 +44,7 @@ class TestAIEngineServer:
     @patch("ai_engine.api.server.initialize_auth")
     @patch("ai_engine.api.server.create_app")
     @patch("ai_engine.api.server.GRPCServer")
-    async def test_server_initialize(
-        self, mock_grpc, mock_create_app, mock_init_auth, server
-    ):
+    async def test_server_initialize(self, mock_grpc, mock_create_app, mock_init_auth, server):
         """Test server initialization."""
         mock_app = Mock()
         mock_create_app.return_value = mock_app
@@ -261,9 +259,7 @@ class TestDevelopmentServer:
     @pytest.mark.asyncio
     @patch("ai_engine.api.server.AIEngineServer")
     @patch("asyncio.run")
-    def test_run_development_server_with_grpc(
-        self, mock_asyncio_run, mock_server_class
-    ):
+    def test_run_development_server_with_grpc(self, mock_asyncio_run, mock_server_class):
         """Test running development server with gRPC."""
         from ai_engine.api.server import run_development_server
 

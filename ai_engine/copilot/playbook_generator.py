@@ -22,7 +22,6 @@ from ..security.models import SecurityEvent, ThreatLevel, SecurityEventType
 from ..core.config import Config
 from ..core.exceptions import QbitelAIException
 
-
 # Prometheus metrics
 PLAYBOOK_GENERATION_COUNTER = Counter(
     "qbitel_playbook_generations_total",
@@ -175,11 +174,7 @@ class IncidentPlaybook:
 
     def get_critical_actions(self) -> List[PlaybookAction]:
         """Get all critical priority actions."""
-        return [
-            action
-            for action in self.actions
-            if action.priority == ActionPriority.CRITICAL
-        ]
+        return [action for action in self.actions if action.priority == ActionPriority.CRITICAL]
 
 
 class PlaybookGenerator:
@@ -196,12 +191,8 @@ class PlaybookGenerator:
 
         # Standard contact information (configurable)
         self.contact_info = {
-            "security_team": getattr(
-                config, "security_team_email", "security@company.com"
-            ),
-            "incident_commander": getattr(
-                config, "incident_commander_email", "incident-response@company.com"
-            ),
+            "security_team": getattr(config, "security_team_email", "security@company.com"),
+            "incident_commander": getattr(config, "incident_commander_email", "incident-response@company.com"),
             "on_call": getattr(config, "on_call_phone", "+1-XXX-XXX-XXXX"),
             "escalation": getattr(config, "escalation_email", "ciso@company.com"),
         }
@@ -301,13 +292,11 @@ class PlaybookGenerator:
             template = self.playbook_templates.get(incident_type, {})
 
             # Generate playbook using LLM
-            llm_response = await self._generate_llm_playbook(
-                incident, incident_type, template, context
-            )
+            llm_response = await self._generate_llm_playbook(incident, incident_type, template, context)
 
             # Parse LLM response
-            actions, success_criteria, escalation_triggers, references, confidence = (
-                self._parse_llm_response(llm_response, incident, template)
+            actions, success_criteria, escalation_triggers, references, confidence = self._parse_llm_response(
+                llm_response, incident, template
             )
 
             # Build metadata
@@ -350,11 +339,7 @@ class PlaybookGenerator:
             ).inc()
             PLAYBOOK_GENERATION_DURATION.observe(time.time() - start_time)
 
-            self.logger.info(
-                f"Playbook generated: {playbook_id}, "
-                f"actions={len(actions)}, "
-                f"confidence={confidence:.2f}"
-            )
+            self.logger.info(f"Playbook generated: {playbook_id}, " f"actions={len(actions)}, " f"confidence={confidence:.2f}")
 
             return playbook
 
@@ -388,9 +373,7 @@ class PlaybookGenerator:
         context: Optional[Dict[str, Any]],
     ) -> str:
         """Generate playbook content using LLM."""
-        context_str = (
-            json.dumps(context, indent=2) if context else "No additional context"
-        )
+        context_str = json.dumps(context, indent=2) if context else "No additional context"
 
         prompt = f"""
 Generate a detailed incident response playbook for the following security incident.
@@ -489,9 +472,7 @@ Format as JSON:
                     description=action_data.get("description", ""),
                     commands=action_data.get("commands", []),
                     prerequisites=action_data.get("prerequisites", []),
-                    estimated_duration_minutes=int(
-                        action_data.get("estimated_duration_minutes", 10)
-                    ),
+                    estimated_duration_minutes=int(action_data.get("estimated_duration_minutes", 10)),
                     requires_approval=action_data.get("requires_approval", False),
                     automation_available=bool(action_data.get("commands")),
                     validation_criteria=action_data.get("validation_criteria", []),
@@ -513,13 +494,9 @@ Format as JSON:
                 ActionPriority.MEDIUM: 2,
                 ActionPriority.LOW: 3,
             }
-            actions.sort(
-                key=lambda a: (phase_order[a.phase], priority_order[a.priority])
-            )
+            actions.sort(key=lambda a: (phase_order[a.phase], priority_order[a.priority]))
 
-            success_criteria = data.get(
-                "success_criteria", ["Incident resolved", "Systems restored"]
-            )
+            success_criteria = data.get("success_criteria", ["Incident resolved", "Systems restored"])
             escalation_triggers = data.get(
                 "escalation_triggers",
                 ["Incident persists >4 hours", "Critical data compromised"],
@@ -544,29 +521,17 @@ Format as JSON:
         """Infer action type from title."""
         title_lower = title.lower()
 
-        if any(
-            word in title_lower
-            for word in ["investigate", "analyze", "review", "check"]
-        ):
+        if any(word in title_lower for word in ["investigate", "analyze", "review", "check"]):
             return ActionType.INVESTIGATION
-        elif any(
-            word in title_lower
-            for word in ["contain", "isolate", "block", "disconnect"]
-        ):
+        elif any(word in title_lower for word in ["contain", "isolate", "block", "disconnect"]):
             return ActionType.CONTAINMENT
-        elif any(
-            word in title_lower for word in ["remove", "remediate", "patch", "fix"]
-        ):
+        elif any(word in title_lower for word in ["remove", "remediate", "patch", "fix"]):
             return ActionType.REMEDIATION
-        elif any(
-            word in title_lower for word in ["notify", "communicate", "inform", "alert"]
-        ):
+        elif any(word in title_lower for word in ["notify", "communicate", "inform", "alert"]):
             return ActionType.COMMUNICATION
         elif any(word in title_lower for word in ["document", "record", "log"]):
             return ActionType.DOCUMENTATION
-        elif any(
-            word in title_lower for word in ["verify", "validate", "test", "confirm"]
-        ):
+        elif any(word in title_lower for word in ["verify", "validate", "test", "confirm"]):
             return ActionType.VALIDATION
         else:
             return ActionType.INVESTIGATION
@@ -639,8 +604,6 @@ Format as JSON:
 
 
 # Factory function
-def get_playbook_generator(
-    config: Config, llm_service: Optional[UnifiedLLMService] = None
-) -> PlaybookGenerator:
+def get_playbook_generator(config: Config, llm_service: Optional[UnifiedLLMService] = None) -> PlaybookGenerator:
     """Factory function to get PlaybookGenerator instance."""
     return PlaybookGenerator(config, llm_service)

@@ -13,11 +13,7 @@ from unittest.mock import Mock, patch, MagicMock
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 
-from ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor import (
-    eBPFMonitor,
-    RuntimeEvent,
-    EventType
-)
+from ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor import eBPFMonitor, RuntimeEvent, EventType
 
 
 class TestEBPFMonitor:
@@ -51,7 +47,7 @@ class TestEBPFMonitor:
             container_id="test-container",
             process_name="nc",
             timestamp=time.time(),
-            details={"filename": "/usr/bin/nc"}
+            details={"filename": "/usr/bin/nc"},
         )
 
         is_threat = ebpf_monitor.detect_threats(event)
@@ -66,7 +62,7 @@ class TestEBPFMonitor:
             container_id="test-container",
             process_name="nginx",
             timestamp=time.time(),
-            details={"filename": "/usr/sbin/nginx"}
+            details={"filename": "/usr/sbin/nginx"},
         )
 
         is_threat = ebpf_monitor.detect_threats(event)
@@ -81,7 +77,7 @@ class TestEBPFMonitor:
             container_id="test-container",
             process_name="nginx",
             timestamp=time.time(),
-            details={}
+            details={},
         )
         event1.threat_score = 0.0
 
@@ -90,7 +86,7 @@ class TestEBPFMonitor:
             container_id="test-container",
             process_name="nc",
             timestamp=time.time(),
-            details={}
+            details={},
         )
         event2.threat_score = 0.8
 
@@ -102,13 +98,10 @@ class TestEBPFMonitor:
         assert stats["threats_detected"] == 1
         assert stats["cpu_overhead_percent"] < 1.0
 
-    @pytest.mark.skipif(
-        not hasattr(eBPFMonitor, '_bpf'),
-        reason="BCC not available"
-    )
+    @pytest.mark.skipif(not hasattr(eBPFMonitor, "_bpf"), reason="BCC not available")
     def test_monitor_container_without_bcc(self):
         """Test monitor_container when BCC is not available"""
-        with patch('ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor.BCC_AVAILABLE', False):
+        with patch("ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor.BCC_AVAILABLE", False):
             monitor = eBPFMonitor()
             result = monitor.monitor_container("test-container")
 
@@ -116,14 +109,11 @@ class TestEBPFMonitor:
             assert "error" in result
             assert "BCC not installed" in result["error"]
 
-    @pytest.mark.skipif(
-        sys.platform != "linux",
-        reason="eBPF only supported on Linux"
-    )
+    @pytest.mark.skipif(sys.platform != "linux", reason="eBPF only supported on Linux")
     def test_monitor_container_with_bcc(self):
         """Test monitor_container with BCC available (Linux only)"""
-        with patch('ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor.BCC_AVAILABLE', True):
-            with patch('ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor.BPF') as mock_bpf:
+        with patch("ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor.BCC_AVAILABLE", True):
+            with patch("ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor.BPF") as mock_bpf:
                 monitor = eBPFMonitor()
 
                 # Mock BPF instance
@@ -142,10 +132,7 @@ class TestEBPFMonitor:
 
         # Simulate active monitoring
         ebpf_monitor._monitoring_active[container_id] = True
-        ebpf_monitor._monitored_containers[container_id] = {
-            "container_id": container_id,
-            "monitoring": True
-        }
+        ebpf_monitor._monitored_containers[container_id] = {"container_id": container_id, "monitoring": True}
 
         # Stop monitoring
         ebpf_monitor.stop_monitoring(container_id)
@@ -174,7 +161,7 @@ class TestEBPFMonitor:
             pid=1234,
             uid=0,
             comm="test",
-            details={}
+            details={},
         )
 
         # Simulate event processing
@@ -184,13 +171,10 @@ class TestEBPFMonitor:
         assert callback_called is True
         assert received_event == event
 
-    @pytest.mark.skipif(
-        sys.platform != "linux",
-        reason="eBPF only supported on Linux"
-    )
+    @pytest.mark.skipif(sys.platform != "linux", reason="eBPF only supported on Linux")
     def test_process_exec_event(self):
         """Test processing execution events"""
-        with patch('ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor.BCC_AVAILABLE', True):
+        with patch("ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor.BCC_AVAILABLE", True):
             monitor = eBPFMonitor()
             container_id = "test-container"
 
@@ -209,13 +193,10 @@ class TestEBPFMonitor:
             assert last_event.event_type == EventType.PROCESS_EXEC
             assert last_event.container_id == container_id
 
-    @pytest.mark.skipif(
-        sys.platform != "linux",
-        reason="eBPF only supported on Linux"
-    )
+    @pytest.mark.skipif(sys.platform != "linux", reason="eBPF only supported on Linux")
     def test_process_file_event(self):
         """Test processing file access events"""
-        with patch('ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor.BCC_AVAILABLE', True):
+        with patch("ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor.BCC_AVAILABLE", True):
             monitor = eBPFMonitor()
             container_id = "test-container"
 
@@ -234,13 +215,10 @@ class TestEBPFMonitor:
             assert last_event.event_type == EventType.FILE_ACCESS
             assert last_event.threat_score > 0.0  # Should detect sensitive file
 
-    @pytest.mark.skipif(
-        sys.platform != "linux",
-        reason="eBPF only supported on Linux"
-    )
+    @pytest.mark.skipif(sys.platform != "linux", reason="eBPF only supported on Linux")
     def test_process_connect_event(self):
         """Test processing network connection events"""
-        with patch('ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor.BCC_AVAILABLE', True):
+        with patch("ai_engine.cloud_native.container_security.runtime_protection.ebpf_monitor.BCC_AVAILABLE", True):
             monitor = eBPFMonitor()
             container_id = "test-container"
 
@@ -249,7 +227,7 @@ class TestEBPFMonitor:
             mock_event.pid = 1234
             mock_event.uid = 0
             mock_event.comm = b"curl"
-            mock_event.daddr = int.from_bytes(bytes([192, 168, 1, 1]), byteorder='little')
+            mock_event.daddr = int.from_bytes(bytes([192, 168, 1, 1]), byteorder="little")
             mock_event.dport = 443
 
             monitor._process_connect_event(container_id, mock_event)
@@ -271,7 +249,7 @@ class TestRuntimeEvent:
             timestamp=time.time(),
             details={"filename": "/usr/sbin/nginx"},
             pid=1234,
-            uid=0
+            uid=0,
         )
 
         assert event.event_type == EventType.PROCESS_EXEC
@@ -288,7 +266,7 @@ class TestRuntimeEvent:
             process_name="nc",
             timestamp=time.time(),
             details={},
-            threat_score=0.9
+            threat_score=0.9,
         )
 
         assert event.threat_score == 0.9

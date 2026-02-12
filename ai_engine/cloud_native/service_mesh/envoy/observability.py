@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class MetricType(Enum):
     """Metric types"""
+
     COUNTER = "counter"
     GAUGE = "gauge"
     HISTOGRAM = "histogram"
@@ -25,6 +26,7 @@ class MetricType(Enum):
 @dataclass
 class Metric:
     """Represents a metric"""
+
     name: str
     metric_type: MetricType
     value: float
@@ -37,12 +39,7 @@ class EnvoyObservability:
     Manages observability for Envoy proxies including metrics, tracing, and logging.
     """
 
-    def __init__(
-        self,
-        enable_prometheus: bool = True,
-        enable_jaeger: bool = True,
-        enable_access_logs: bool = True
-    ):
+    def __init__(self, enable_prometheus: bool = True, enable_jaeger: bool = True, enable_access_logs: bool = True):
         """Initialize observability manager"""
         self.enable_prometheus = enable_prometheus
         self.enable_jaeger = enable_jaeger
@@ -59,18 +56,11 @@ class EnvoyObservability:
             "typed_config": {
                 "@type": "type.googleapis.com/envoy.config.metrics.v3.MetricsServiceConfig",
                 "transport_api_version": "V3",
-                "grpc_service": {
-                    "envoy_grpc": {
-                        "cluster_name": "prometheus_cluster"
-                    }
-                }
-            }
+                "grpc_service": {"envoy_grpc": {"cluster_name": "prometheus_cluster"}},
+            },
         }
 
-    def create_jaeger_config(
-        self,
-        collector_endpoint: str = "jaeger-collector:14250"
-    ) -> Dict[str, Any]:
+    def create_jaeger_config(self, collector_endpoint: str = "jaeger-collector:14250") -> Dict[str, Any]:
         """Create Jaeger tracing configuration"""
         return {
             "http": {
@@ -80,8 +70,8 @@ class EnvoyObservability:
                     "collector_cluster": "jaeger",
                     "collector_endpoint": "/api/v2/spans",
                     "collector_endpoint_version": "HTTP_JSON",
-                    "shared_span_context": False
-                }
+                    "shared_span_context": False,
+                },
             }
         }
 
@@ -110,10 +100,10 @@ class EnvoyObservability:
                             "request_id": "%REQ(X-REQUEST-ID)%",
                             "authority": "%REQ(:AUTHORITY)%",
                             "upstream_host": "%UPSTREAM_HOST%",
-                            "quantum_encrypted": "%REQ(X-QBITEL-QUANTUM-ENCRYPTED)%"
+                            "quantum_encrypted": "%REQ(X-QBITEL-QUANTUM-ENCRYPTED)%",
                         }
-                    }
-                }
+                    },
+                },
             }
         ]
 
@@ -123,5 +113,5 @@ class EnvoyObservability:
             "prometheus_enabled": self.enable_prometheus,
             "jaeger_enabled": self.enable_jaeger,
             "access_logs_enabled": self.enable_access_logs,
-            "total_metrics": len(self._metrics)
+            "total_metrics": len(self._metrics),
         }

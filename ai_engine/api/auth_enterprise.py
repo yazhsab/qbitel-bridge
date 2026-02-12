@@ -116,9 +116,7 @@ class EnterpriseAuthenticationService:
 
         return True, None
 
-    async def change_password(
-        self, db: AsyncSession, user_id: str, old_password: str, new_password: str
-    ) -> bool:
+    async def change_password(self, db: AsyncSession, user_id: str, old_password: str, new_password: str) -> bool:
         """Change user password with validation."""
         # Get user
         result = await db.execute(select(User).where(User.id == user_id))
@@ -162,9 +160,7 @@ class EnterpriseAuthenticationService:
 
     def generate_totp_qr_code(self, username: str, secret: str) -> str:
         """Generate QR code for TOTP setup."""
-        totp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
-            name=username, issuer_name="QBITEL"
-        )
+        totp_uri = pyotp.totp.TOTP(secret).provisioning_uri(name=username, issuer_name="QBITEL")
 
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
         qr.add_data(totp_uri)
@@ -228,13 +224,9 @@ class EnterpriseAuthenticationService:
 
             return {"qr_code": qr_code, "secret": secret, "backup_codes": backup_codes}
 
-        raise HTTPException(
-            status_code=400, detail=f"MFA method {method} not implemented"
-        )
+        raise HTTPException(status_code=400, detail=f"MFA method {method} not implemented")
 
-    async def verify_mfa_token(
-        self, db: AsyncSession, user_id: str, token: str
-    ) -> bool:
+    async def verify_mfa_token(self, db: AsyncSession, user_id: str, token: str) -> bool:
         """Verify MFA token."""
         result = await db.execute(select(User).where(User.id == user_id))
         user = result.scalar_one_or_none()
@@ -435,9 +427,7 @@ class EnterpriseAuthenticationService:
 
     async def revoke_session(self, db: AsyncSession, session_token: str) -> bool:
         """Revoke user session."""
-        result = await db.execute(
-            select(UserSession).where(UserSession.session_token == session_token)
-        )
+        result = await db.execute(select(UserSession).where(UserSession.session_token == session_token))
         session = result.scalar_one_or_none()
 
         if session:
@@ -485,9 +475,7 @@ class EnterpriseAuthenticationService:
         mfa_token: Optional[str] = None,
     ) -> Optional[User]:
         """Authenticate user with username, password, and optional MFA."""
-        result = await db.execute(
-            select(User).where(and_(User.username == username, User.is_active == True))
-        )
+        result = await db.execute(select(User).where(and_(User.username == username, User.is_active == True)))
         user = result.scalar_one_or_none()
 
         if not user:
@@ -500,9 +488,7 @@ class EnterpriseAuthenticationService:
                 details={"username": username},
                 ip_address=ip_address,
             )
-            self.audit_logger.log_login_failed(
-                username=username, reason="User not found", ip_address=ip_address
-            )
+            self.audit_logger.log_login_failed(username=username, reason="User not found", ip_address=ip_address)
             return None
 
         # Check account lockout
@@ -515,18 +501,14 @@ class EnterpriseAuthenticationService:
                 error_message="Account locked",
                 ip_address=ip_address,
             )
-            self.audit_logger.log_login_failed(
-                username=username, reason="Account locked", ip_address=ip_address
-            )
+            self.audit_logger.log_login_failed(username=username, reason="Account locked", ip_address=ip_address)
             raise HTTPException(
                 status_code=403,
                 detail=f"Account locked until {user.account_locked_until.isoformat()}",
             )
 
         # Verify password
-        if not user.password_hash or not self.verify_password(
-            password, user.password_hash
-        ):
+        if not user.password_hash or not self.verify_password(password, user.password_hash):
             user.failed_login_attempts += 1
 
             # Lock account after 5 failed attempts
@@ -614,9 +596,7 @@ class EnterpriseAuthenticationService:
         """Check if user requires MFA based on policy."""
         # Check if user is in grace period
         if user.created_at:
-            grace_period_end = user.created_at + timedelta(
-                days=self.mfa_grace_period_days
-            )
+            grace_period_end = user.created_at + timedelta(days=self.mfa_grace_period_days)
             if datetime.utcnow() < grace_period_end:
                 return False
 

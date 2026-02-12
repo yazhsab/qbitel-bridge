@@ -54,8 +54,10 @@ PROMPT_PERFORMANCE = Histogram(
 # Data Classes
 # =============================================================================
 
+
 class PromptStatus(str, Enum):
     """Prompt version status."""
+
     DRAFT = "draft"
     ACTIVE = "active"
     TESTING = "testing"  # A/B test
@@ -102,7 +104,7 @@ class PromptVersion:
 
     def _extract_variables(self) -> List[str]:
         """Extract variable names from template."""
-        pattern = r'\{(\w+)\}'
+        pattern = r"\{(\w+)\}"
         all_vars = set()
         if self.system_prompt:
             all_vars.update(re.findall(pattern, self.system_prompt))
@@ -227,6 +229,7 @@ class PromptTemplate:
 # =============================================================================
 # Prompt Registry
 # =============================================================================
+
 
 class PromptRegistry:
     """
@@ -501,25 +504,17 @@ class PromptRegistry:
             # Running average for latency
             n = version.usage_count
             if n > 0:
-                version.average_latency_ms = (
-                    (version.average_latency_ms * (n - 1) + latency_ms) / n
-                )
+                version.average_latency_ms = (version.average_latency_ms * (n - 1) + latency_ms) / n
 
             # Success rate
             if success:
-                version.success_rate = (
-                    (version.success_rate * (n - 1) + 1.0) / n
-                )
+                version.success_rate = (version.success_rate * (n - 1) + 1.0) / n
             else:
-                version.success_rate = (
-                    (version.success_rate * (n - 1)) / n
-                )
+                version.success_rate = (version.success_rate * (n - 1)) / n
 
             # Quality score
             if quality_score is not None:
-                version.average_quality_score = (
-                    (version.average_quality_score * (n - 1) + quality_score) / n
-                )
+                version.average_quality_score = (version.average_quality_score * (n - 1) + quality_score) / n
 
                 PROMPT_PERFORMANCE.labels(
                     prompt_name=prompt_name,

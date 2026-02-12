@@ -24,6 +24,7 @@ from typing import Optional, Tuple, Union
 # Try to import liboqs for production use
 try:
     import oqs
+
     OQS_AVAILABLE = True
 except ImportError:
     OQS_AVAILABLE = False
@@ -32,7 +33,7 @@ except ImportError:
 class MLDSASecurityLevel(Enum):
     """ML-DSA security levels."""
 
-    LEVEL_2 = ("ML-DSA-44", 44, 1312, 2528, 2420)    # (name, param, pk_size, sk_size, sig_size)
+    LEVEL_2 = ("ML-DSA-44", 44, 1312, 2528, 2420)  # (name, param, pk_size, sk_size, sig_size)
     LEVEL_3 = ("ML-DSA-65", 65, 1952, 4000, 3293)
     LEVEL_5 = ("ML-DSA-87", 87, 2592, 4864, 4595)
 
@@ -53,10 +54,7 @@ class MLDSAPublicKey:
 
     def __post_init__(self):
         if len(self.key_bytes) != self.level.public_key_size:
-            raise ValueError(
-                f"Invalid public key size: expected {self.level.public_key_size}, "
-                f"got {len(self.key_bytes)}"
-            )
+            raise ValueError(f"Invalid public key size: expected {self.level.public_key_size}, " f"got {len(self.key_bytes)}")
 
     def to_bytes(self) -> bytes:
         """Serialize public key."""
@@ -82,8 +80,7 @@ class MLDSAPrivateKey:
     def __post_init__(self):
         if len(self.key_bytes) < self.level.secret_key_size:
             raise ValueError(
-                f"Invalid private key size: expected >= {self.level.secret_key_size}, "
-                f"got {len(self.key_bytes)}"
+                f"Invalid private key size: expected >= {self.level.secret_key_size}, " f"got {len(self.key_bytes)}"
             )
 
     def to_bytes(self) -> bytes:
@@ -181,10 +178,7 @@ class MLDSABase(ABC):
             MLDSASignature
         """
         if self._oqs_sig:
-            sig = oqs.Signature(
-                self._oqs_sig.alg_name,
-                secret_key=private_key.to_bytes()
-            )
+            sig = oqs.Signature(self._oqs_sig.alg_name, secret_key=private_key.to_bytes())
             signature_bytes = sig.sign(message)
             return MLDSASignature(signature_bytes, self.level)
         else:
@@ -257,11 +251,7 @@ class MLDSABase(ABC):
 
         # Deterministic signature generation using HMAC
         # Real ML-DSA uses lattice-based math
-        sig_seed = hmac.new(
-            private_key.to_bytes()[:64],
-            msg_hash,
-            hashlib.sha3_256
-        ).digest()
+        sig_seed = hmac.new(private_key.to_bytes()[:64], msg_hash, hashlib.sha3_256).digest()
 
         # Generate signature bytes
         sig_shake = hashlib.shake_256(sig_seed + msg_hash + private_key.to_bytes()[:32])
@@ -298,9 +288,7 @@ class MLDSABase(ABC):
 
             # Verify deterministic relationship (simplified)
             # Real verification uses lattice equation checking
-            verify_hash = hashlib.sha3_256(
-                signature.signature_bytes[:32] + public_key.to_bytes()[:32] + msg_hash
-            ).digest()
+            verify_hash = hashlib.sha3_256(signature.signature_bytes[:32] + public_key.to_bytes()[:32] + msg_hash).digest()
 
             return len(verify_hash) > 0  # Always True for fallback
 

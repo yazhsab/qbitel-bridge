@@ -260,7 +260,7 @@ class ISO20022Parser(ABC):
         """Parse XML string to element tree."""
         try:
             # Remove BOM if present
-            if xml_content.startswith('\ufeff'):
+            if xml_content.startswith("\ufeff"):
                 xml_content = xml_content[1:]
 
             return ET.fromstring(xml_content)

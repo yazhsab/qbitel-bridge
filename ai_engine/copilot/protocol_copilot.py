@@ -26,15 +26,9 @@ from .protocol_behavior_explainer import (
 from ..discovery.protocol_discovery_orchestrator import ProtocolDiscoveryOrchestrator
 
 # Metrics
-COPILOT_QUERY_COUNTER = Counter(
-    "qbitel_copilot_queries_total", "Total copilot queries", ["query_type", "status"]
-)
-COPILOT_QUERY_DURATION = Histogram(
-    "qbitel_copilot_query_duration_seconds", "Copilot query duration", ["query_type"]
-)
-COPILOT_CONFIDENCE_SCORE = Histogram(
-    "qbitel_copilot_confidence_score", "Copilot confidence scores"
-)
+COPILOT_QUERY_COUNTER = Counter("qbitel_copilot_queries_total", "Total copilot queries", ["query_type", "status"])
+COPILOT_QUERY_DURATION = Histogram("qbitel_copilot_query_duration_seconds", "Copilot query duration", ["query_type"])
+COPILOT_CONFIDENCE_SCORE = Histogram("qbitel_copilot_confidence_score", "Copilot confidence scores")
 
 logger = logging.getLogger(__name__)
 
@@ -202,9 +196,7 @@ Security Assessment:
             # Get LLM service - it must be initialized first
             self.llm_service = get_llm_service()
             if self.llm_service is None:
-                raise CopilotException(
-                    "LLM service not initialized. Call initialize_llm_service() before creating copilot."
-                )
+                raise CopilotException("LLM service not initialized. Call initialize_llm_service() before creating copilot.")
 
             # Initialize all components
             await self.rag_engine.initialize()
@@ -216,20 +208,14 @@ Security Assessment:
                 await self.discovery_orchestrator.initialize()
 
             # Initialize enhancement components
-            self.parser_improvement_engine = ParserImprovementEngine(
-                self.llm_service, self.rag_engine
-            )
+            self.parser_improvement_engine = ParserImprovementEngine(self.llm_service, self.rag_engine)
 
-            self.behavior_explainer = ProtocolBehaviorExplainer(
-                self.llm_service, self.rag_engine
-            )
+            self.behavior_explainer = ProtocolBehaviorExplainer(self.llm_service, self.rag_engine)
 
             self.logger.info("Protocol Intelligence Copilot initialized successfully")
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to initialize Protocol Intelligence Copilot: {e}"
-            )
+            self.logger.error(f"Failed to initialize Protocol Intelligence Copilot: {e}")
             raise CopilotException(f"Copilot initialization failed: {e}")
 
     async def process_query(self, query: CopilotQuery) -> CopilotResponse:
@@ -254,9 +240,7 @@ Security Assessment:
             query.query_type = query_type
 
             # Get conversation context
-            conversation_context = await self.context_manager.get_context(
-                query.user_id, query.session_id
-            )
+            conversation_context = await self.context_manager.get_context(query.user_id, query.session_id)
 
             # Enhance with RAG knowledge
             enhanced_context = await self.rag_engine.enhance_query_context(
@@ -273,9 +257,7 @@ Security Assessment:
             elif query_type == "compliance_check":
                 response = await self._handle_compliance_check(query, enhanced_context)
             elif query_type == "performance_analysis":
-                response = await self._handle_performance_analysis(
-                    query, enhanced_context
-                )
+                response = await self._handle_performance_analysis(query, enhanced_context)
             else:
                 response = await self._handle_general_query(query, enhanced_context)
 
@@ -292,9 +274,7 @@ Security Assessment:
 
             # Update metrics
             COPILOT_QUERY_COUNTER.labels(query_type=query_type, status="success").inc()
-            COPILOT_QUERY_DURATION.labels(query_type=query_type).observe(
-                time.time() - start_time
-            )
+            COPILOT_QUERY_DURATION.labels(query_type=query_type).observe(time.time() - start_time)
             COPILOT_CONFIDENCE_SCORE.observe(response.confidence)
 
             response.processing_time = time.time() - start_time
@@ -302,9 +282,7 @@ Security Assessment:
 
         except Exception as e:
             self.logger.error(f"Copilot query processing failed: {e}")
-            COPILOT_QUERY_COUNTER.labels(
-                query_type=query.query_type or "unknown", status="error"
-            ).inc()
+            COPILOT_QUERY_COUNTER.labels(query_type=query.query_type or "unknown", status="error").inc()
 
             return CopilotResponse(
                 response="I apologize, but I encountered an error processing your query. Please try again or rephrase your question.",
@@ -331,9 +309,7 @@ Security Assessment:
 
         return "general"
 
-    async def _handle_protocol_analysis(
-        self, query: CopilotQuery, context: Dict[str, Any]
-    ) -> CopilotResponse:
+    async def _handle_protocol_analysis(self, query: CopilotQuery, context: Dict[str, Any]) -> CopilotResponse:
         """Handle protocol analysis queries."""
         try:
             # Analyze packet data if provided
@@ -384,26 +360,20 @@ Security Assessment:
                 source_data=source_data,
                 processing_time=0,  # Set by caller
                 query_type="protocol_analysis",
-                suggestions=self._generate_followup_suggestions(
-                    "protocol_analysis", query.query
-                ),
+                suggestions=self._generate_followup_suggestions("protocol_analysis", query.query),
                 metadata={
                     "llm_provider": llm_response.provider,
                     "tokens_used": llm_response.tokens_used,
                     "protocol_analysis_performed": protocol_analysis is not None,
                 },
-                visualizations=self._generate_visualizations(
-                    "protocol_analysis", protocol_analysis
-                ),
+                visualizations=self._generate_visualizations("protocol_analysis", protocol_analysis),
             )
 
         except Exception as e:
             self.logger.error(f"Protocol analysis failed: {e}")
             raise
 
-    async def _handle_field_detection(
-        self, query: CopilotQuery, context: Dict[str, Any]
-    ) -> CopilotResponse:
+    async def _handle_field_detection(self, query: CopilotQuery, context: Dict[str, Any]) -> CopilotResponse:
         """Handle field detection queries."""
         try:
             field_analysis = None
@@ -446,35 +416,27 @@ Security Assessment:
                 source_data=source_data,
                 processing_time=0,
                 query_type="field_detection",
-                suggestions=self._generate_followup_suggestions(
-                    "field_detection", query.query
-                ),
+                suggestions=self._generate_followup_suggestions("field_detection", query.query),
                 metadata={
                     "llm_provider": llm_response.provider,
                     "tokens_used": llm_response.tokens_used,
                     "field_analysis_performed": field_analysis is not None,
                 },
-                visualizations=self._generate_visualizations(
-                    "field_detection", field_analysis
-                ),
+                visualizations=self._generate_visualizations("field_detection", field_analysis),
             )
 
         except Exception as e:
             self.logger.error(f"Field detection failed: {e}")
             raise
 
-    async def _handle_threat_assessment(
-        self, query: CopilotQuery, context: Dict[str, Any]
-    ) -> CopilotResponse:
+    async def _handle_threat_assessment(self, query: CopilotQuery, context: Dict[str, Any]) -> CopilotResponse:
         """Handle threat assessment queries."""
         try:
             threat_analysis = None
 
             # Perform threat assessment if data provided
             if query.packet_data or query.context:
-                threat_analysis = await self._assess_security_threats(
-                    query.packet_data, query.context or {}
-                )
+                threat_analysis = await self._assess_security_threats(query.packet_data, query.context or {})
 
             llm_request = LLMRequest(
                 prompt=f"""
@@ -502,9 +464,7 @@ Security Assessment:
 
             source_data = self._extract_source_data(context)
             if threat_analysis:
-                source_data.append(
-                    {"type": "threat_assessment", "data": threat_analysis}
-                )
+                source_data.append({"type": "threat_assessment", "data": threat_analysis})
 
             return CopilotResponse(
                 response=llm_response.content,
@@ -512,17 +472,11 @@ Security Assessment:
                 source_data=source_data,
                 processing_time=0,
                 query_type="threat_assessment",
-                suggestions=self._generate_followup_suggestions(
-                    "threat_assessment", query.query
-                ),
+                suggestions=self._generate_followup_suggestions("threat_assessment", query.query),
                 metadata={
                     "llm_provider": llm_response.provider,
                     "tokens_used": llm_response.tokens_used,
-                    "threat_level": (
-                        threat_analysis.get("threat_level", "unknown")
-                        if threat_analysis
-                        else "unknown"
-                    ),
+                    "threat_level": (threat_analysis.get("threat_level", "unknown") if threat_analysis else "unknown"),
                 },
             )
 
@@ -530,9 +484,7 @@ Security Assessment:
             self.logger.error(f"Threat assessment failed: {e}")
             raise
 
-    async def _handle_compliance_check(
-        self, query: CopilotQuery, context: Dict[str, Any]
-    ) -> CopilotResponse:
+    async def _handle_compliance_check(self, query: CopilotQuery, context: Dict[str, Any]) -> CopilotResponse:
         """Handle compliance check queries."""
         try:
             # Extract compliance framework from query
@@ -568,9 +520,7 @@ Security Assessment:
                 source_data=self._extract_source_data(context),
                 processing_time=0,
                 query_type="compliance_check",
-                suggestions=self._generate_followup_suggestions(
-                    "compliance_check", query.query
-                ),
+                suggestions=self._generate_followup_suggestions("compliance_check", query.query),
                 metadata={
                     "llm_provider": llm_response.provider,
                     "tokens_used": llm_response.tokens_used,
@@ -582,9 +532,7 @@ Security Assessment:
             self.logger.error(f"Compliance check failed: {e}")
             raise
 
-    async def _handle_performance_analysis(
-        self, query: CopilotQuery, context: Dict[str, Any]
-    ) -> CopilotResponse:
+    async def _handle_performance_analysis(self, query: CopilotQuery, context: Dict[str, Any]) -> CopilotResponse:
         """Handle performance analysis queries."""
         try:
             llm_request = LLMRequest(
@@ -614,9 +562,7 @@ Security Assessment:
                 source_data=self._extract_source_data(context),
                 processing_time=0,
                 query_type="performance_analysis",
-                suggestions=self._generate_followup_suggestions(
-                    "performance_analysis", query.query
-                ),
+                suggestions=self._generate_followup_suggestions("performance_analysis", query.query),
                 metadata={
                     "llm_provider": llm_response.provider,
                     "tokens_used": llm_response.tokens_used,
@@ -627,9 +573,7 @@ Security Assessment:
             self.logger.error(f"Performance analysis failed: {e}")
             raise
 
-    async def _handle_general_query(
-        self, query: CopilotQuery, context: Dict[str, Any]
-    ) -> CopilotResponse:
+    async def _handle_general_query(self, query: CopilotQuery, context: Dict[str, Any]) -> CopilotResponse:
         """Handle general protocol-related queries."""
         try:
             llm_request = LLMRequest(
@@ -652,8 +596,7 @@ Security Assessment:
 
             return CopilotResponse(
                 response=llm_response.content,
-                confidence=llm_response.confidence
-                * 0.8,  # Lower confidence for general queries
+                confidence=llm_response.confidence * 0.8,  # Lower confidence for general queries
                 source_data=self._extract_source_data(context),
                 processing_time=0,
                 query_type="general",
@@ -682,9 +625,7 @@ Security Assessment:
                 validate_results=True,
             )
 
-            result = await self.discovery_orchestrator.discover_protocol(
-                discovery_request
-            )
+            result = await self.discovery_orchestrator.discover_protocol(discovery_request)
 
             return {
                 "protocol_type": result.protocol_type,
@@ -692,11 +633,7 @@ Security Assessment:
                 "processing_time": result.processing_time,
                 "grammar_rules": len(result.grammar.rules) if result.grammar else 0,
                 "parser_available": result.parser is not None,
-                "validation_result": (
-                    result.validation_result.is_valid
-                    if result.validation_result
-                    else None
-                ),
+                "validation_result": (result.validation_result.is_valid if result.validation_result else None),
             }
 
         except Exception as e:
@@ -708,9 +645,7 @@ Security Assessment:
         try:
             from ..detection.field_detector import FieldDetector
 
-            field_detector = FieldDetector(
-                vocab_size=256, embedding_dim=128, hidden_dim=256, num_tags=5
-            )
+            field_detector = FieldDetector(vocab_size=256, embedding_dim=128, hidden_dim=256, num_tags=5)
 
             data_sequence = list(message_data[:512])
             fields = field_detector.detect_fields(data_sequence)
@@ -719,20 +654,14 @@ Security Assessment:
                 "message_size": len(message_data),
                 "detected_fields": len(fields),
                 "field_details": fields[:10],  # First 10 fields
-                "confidence": (
-                    sum(f.get("confidence", 0) for f in fields) / len(fields)
-                    if fields
-                    else 0
-                ),
+                "confidence": (sum(f.get("confidence", 0) for f in fields) / len(fields) if fields else 0),
             }
 
         except Exception as e:
             self.logger.error(f"Field detection failed: {e}")
             return {"error": str(e)}
 
-    async def _assess_security_threats(
-        self, packet_data: Optional[bytes], context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def _assess_security_threats(self, packet_data: Optional[bytes], context: Dict[str, Any]) -> Dict[str, Any]:
         """Assess security threats in the data."""
         try:
             threat_indicators = []
@@ -747,9 +676,7 @@ Security Assessment:
 
                 # Check for suspicious patterns (simplified)
                 suspicious_bytes = [0x00, 0xFF, 0x90, 0xCC]  # NOP, padding, etc.
-                suspicious_count = sum(
-                    1 for byte in packet_data if byte in suspicious_bytes
-                )
+                suspicious_count = sum(1 for byte in packet_data if byte in suspicious_bytes)
 
                 if suspicious_count > len(packet_data) * 0.5:
                     threat_indicators.append("High concentration of suspicious bytes")
@@ -819,11 +746,7 @@ Security Assessment:
             for pattern in context["security_context"][:2]:
                 security_context.append(f"- {pattern.get('content', '')[:150]}...")
 
-        return (
-            "\n".join(security_context)
-            if security_context
-            else "No security context available."
-        )
+        return "\n".join(security_context) if security_context else "No security context available."
 
     def _format_compliance_context(self, context: Dict[str, Any]) -> str:
         """Format compliance-specific context."""
@@ -834,11 +757,7 @@ Security Assessment:
             for rule in context["compliance_context"][:2]:
                 compliance_context.append(f"- {rule.get('content', '')[:150]}...")
 
-        return (
-            "\n".join(compliance_context)
-            if compliance_context
-            else "No compliance context available."
-        )
+        return "\n".join(compliance_context) if compliance_context else "No compliance context available."
 
     def _extract_source_data(self, context: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Extract source data references for transparency."""
@@ -860,18 +779,14 @@ Security Assessment:
                 {
                     "type": "rag_search",
                     "total_results": context["rag_metadata"].get("total_results", 0),
-                    "avg_similarity": context["rag_metadata"].get(
-                        "avg_similarity", 0.0
-                    ),
+                    "avg_similarity": context["rag_metadata"].get("avg_similarity", 0.0),
                     "source": "vector_database",
                 }
             )
 
         return source_data
 
-    def _generate_followup_suggestions(
-        self, query_type: str, original_query: str
-    ) -> List[str]:
+    def _generate_followup_suggestions(self, query_type: str, original_query: str) -> List[str]:
         """Generate contextual follow-up suggestions."""
         base_suggestions = {
             "protocol_analysis": [
@@ -918,9 +833,7 @@ Security Assessment:
 
         return suggestions[:3]  # Return top 3 suggestions
 
-    def _generate_visualizations(
-        self, query_type: str, analysis_data: Dict[str, Any] = None
-    ) -> List[Dict[str, Any]]:
+    def _generate_visualizations(self, query_type: str, analysis_data: Dict[str, Any] = None) -> List[Dict[str, Any]]:
         """Generate visualization suggestions for the response."""
         visualizations = []
 
@@ -970,11 +883,7 @@ Security Assessment:
             if not self.parser_improvement_engine:
                 raise CopilotException("Parser improvement engine not initialized")
 
-            improvements = (
-                await self.parser_improvement_engine.suggest_parser_improvements(
-                    parser_code, errors, context
-                )
-            )
+            improvements = await self.parser_improvement_engine.suggest_parser_improvements(parser_code, errors, context)
 
             # Convert to dict format
             return [
@@ -1057,16 +966,10 @@ Security Assessment:
             "copilot": "healthy",
             "llm_service": self.llm_service.get_health_status(),
             "rag_engine": self.rag_engine.get_collection_stats(),
-            "discovery_orchestrator": (
-                "connected" if self.discovery_orchestrator else "not_connected"
-            ),
+            "discovery_orchestrator": ("connected" if self.discovery_orchestrator else "not_connected"),
             "context_manager": "active",
-            "parser_improvement_engine": (
-                "active" if self.parser_improvement_engine else "not_initialized"
-            ),
-            "behavior_explainer": (
-                "active" if self.behavior_explainer else "not_initialized"
-            ),
+            "parser_improvement_engine": ("active" if self.parser_improvement_engine else "not_initialized"),
+            "behavior_explainer": ("active" if self.behavior_explainer else "not_initialized"),
             "query_patterns": len(self.query_patterns),
             "response_templates": len(self.response_templates),
         }

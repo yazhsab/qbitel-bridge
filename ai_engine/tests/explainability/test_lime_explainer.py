@@ -262,10 +262,7 @@ class TestLIMESecurityDecisionExplainer:
         assert explanation.model_output == "BLOCK"
         # Check that regulatory justification includes security policy context
         assert "Security Policy Context" in explanation.regulatory_justification
-        assert (
-            "Zero Trust" in explanation.regulatory_justification
-            or "threat" in explanation.regulatory_justification.lower()
-        )
+        assert "Zero Trust" in explanation.regulatory_justification or "threat" in explanation.regulatory_justification.lower()
 
     def test_security_policy_mapping_allow(self, mock_security_predict_fn):
         """Test security policy mapping for ALLOW decision."""
@@ -283,8 +280,7 @@ class TestLIMESecurityDecisionExplainer:
         assert explanation.model_output == "ALLOW"
         assert "Security Policy Context" in explanation.regulatory_justification
         assert (
-            "whitelist" in explanation.regulatory_justification.lower()
-            or "no" in explanation.regulatory_justification.lower()
+            "whitelist" in explanation.regulatory_justification.lower() or "no" in explanation.regulatory_justification.lower()
         )
 
     def test_security_policy_mapping_escalate(self, mock_security_predict_fn):

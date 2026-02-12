@@ -110,9 +110,7 @@ def create_error_response(
     return response
 
 
-async def qbitel_exception_handler(
-    request: Request, exc: QbitelAIException
-) -> JSONResponse:
+async def qbitel_exception_handler(request: Request, exc: QbitelAIException) -> JSONResponse:
     """Handle QbitelAIException and its subclasses."""
     correlation_id = getattr(request.state, "correlation_id", None)
     error_code = get_error_code_for_exception(exc)
@@ -151,9 +149,7 @@ async def qbitel_exception_handler(
     )
 
 
-async def http_exception_handler(
-    request: Request, exc: HTTPException
-) -> JSONResponse:
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
     """Handle FastAPI/Starlette HTTPException."""
     correlation_id = getattr(request.state, "correlation_id", None)
 
@@ -205,20 +201,20 @@ async def http_exception_handler(
     )
 
 
-async def validation_exception_handler(
-    request: Request, exc: RequestValidationError
-) -> JSONResponse:
+async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     """Handle Pydantic validation errors."""
     correlation_id = getattr(request.state, "correlation_id", None)
 
     # Extract validation error details
     errors = []
     for error in exc.errors():
-        errors.append({
-            "field": ".".join(str(loc) for loc in error.get("loc", [])),
-            "message": error.get("msg", "Validation error"),
-            "type": error.get("type", "unknown"),
-        })
+        errors.append(
+            {
+                "field": ".".join(str(loc) for loc in error.get("loc", [])),
+                "message": error.get("msg", "Validation error"),
+                "type": error.get("type", "unknown"),
+            }
+        )
 
     logger.warning(
         f"Validation error: {len(errors)} field(s) invalid",
@@ -248,9 +244,7 @@ async def validation_exception_handler(
     )
 
 
-async def generic_exception_handler(
-    request: Request, exc: Exception
-) -> JSONResponse:
+async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions."""
     correlation_id = getattr(request.state, "correlation_id", None)
 
@@ -284,9 +278,7 @@ async def generic_exception_handler(
     )
 
 
-async def timeout_exception_handler(
-    request: Request, exc: TimeoutError
-) -> JSONResponse:
+async def timeout_exception_handler(request: Request, exc: TimeoutError) -> JSONResponse:
     """Handle timeout errors."""
     correlation_id = getattr(request.state, "correlation_id", None)
 
@@ -318,9 +310,7 @@ async def timeout_exception_handler(
     )
 
 
-async def connection_exception_handler(
-    request: Request, exc: ConnectionError
-) -> JSONResponse:
+async def connection_exception_handler(request: Request, exc: ConnectionError) -> JSONResponse:
     """Handle connection errors."""
     correlation_id = getattr(request.state, "correlation_id", None)
 
@@ -352,9 +342,7 @@ async def connection_exception_handler(
     )
 
 
-async def circuit_breaker_exception_handler(
-    request: Request, exc: CircuitOpenError
-) -> JSONResponse:
+async def circuit_breaker_exception_handler(request: Request, exc: CircuitOpenError) -> JSONResponse:
     """Handle circuit breaker open errors."""
     correlation_id = getattr(request.state, "correlation_id", None)
 

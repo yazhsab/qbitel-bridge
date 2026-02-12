@@ -45,6 +45,7 @@ try:
         ProtocolPurchaseRequest,
         ReviewSubmitRequest,
     )
+
     _marketplace_available = True
 except ImportError:
     _marketplace_available = False
@@ -90,10 +91,12 @@ __all__ = [
 
 # Add marketplace exports if available
 if _marketplace_available:
-    __all__.extend([
-        "marketplace_router",
-        "ProtocolSearchRequest",
-        "ProtocolSubmitRequest",
-        "ProtocolPurchaseRequest",
-        "ReviewSubmitRequest",
-    ])
+    __all__.extend(
+        [
+            "marketplace_router",
+            "ProtocolSearchRequest",
+            "ProtocolSubmitRequest",
+            "ProtocolPurchaseRequest",
+            "ReviewSubmitRequest",
+        ]
+    )

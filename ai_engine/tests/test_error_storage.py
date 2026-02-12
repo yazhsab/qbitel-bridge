@@ -122,10 +122,7 @@ class TestPersistentErrorStorage:
         """Test PersistentErrorStorage initialization."""
         assert error_storage is not None
         assert error_storage.redis_url == "redis://localhost:6379/0"
-        assert (
-            error_storage.postgres_url
-            == "postgresql+asyncpg://user:pass@localhost/qbitel"
-        )
+        assert error_storage.postgres_url == "postgresql+asyncpg://user:pass@localhost/qbitel"
         assert error_storage.redis_ttl == 86400
         assert error_storage.postgres_retention_days == 90
 
@@ -139,10 +136,7 @@ class TestPersistentErrorStorage:
         )
 
         assert storage.redis_url == "redis://custom:6379/1"
-        assert (
-            storage.postgres_url
-            == "postgresql+asyncpg://custom:pass@localhost/custom_db"
-        )
+        assert storage.postgres_url == "postgresql+asyncpg://custom:pass@localhost/custom_db"
         assert storage.redis_ttl == 3600
         assert storage.postgres_retention_days == 30
 
@@ -154,9 +148,7 @@ class TestPersistentErrorStorage:
             mock_redis.from_url = AsyncMock(return_value=mock_redis_instance)
             mock_redis_instance.ping = AsyncMock()
 
-            with patch(
-                "ai_engine.core.error_storage.create_async_engine"
-            ) as mock_engine:
+            with patch("ai_engine.core.error_storage.create_async_engine") as mock_engine:
                 mock_db_engine = AsyncMock()
                 mock_engine.return_value = mock_db_engine
                 mock_conn = AsyncMock()
@@ -327,9 +319,7 @@ class TestGetErrorStorage:
     async def test_get_error_storage_creates_instance(self):
         """Test that get_error_storage creates a new instance."""
         with patch("ai_engine.core.error_storage._error_storage", None):
-            with patch.object(
-                PersistentErrorStorage, "initialize", new_callable=AsyncMock
-            ):
+            with patch.object(PersistentErrorStorage, "initialize", new_callable=AsyncMock):
                 storage = await get_error_storage(
                     redis_url="redis://localhost:6379",
                     postgres_url="postgresql+asyncpg://user:pass@localhost/db",

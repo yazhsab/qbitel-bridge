@@ -195,9 +195,7 @@ class ModelTrainer:
                 best_model_path = await self._save_best_model(model, job)
 
                 # Log model to MLflow
-                mlflow.pytorch.log_model(
-                    model, artifact_path="model", registered_model_name=model_name
-                )
+                mlflow.pytorch.log_model(model, artifact_path="model", registered_model_name=model_name)
 
                 # Update job status
                 job.status = "completed"
@@ -265,9 +263,7 @@ class ModelTrainer:
         )
 
         # MLflow callback for Optuna
-        mlflow_callback = MLflowCallback(
-            tracking_uri=self.config.mlflow.tracking_uri, metric_name="val_loss"
-        )
+        mlflow_callback = MLflowCallback(tracking_uri=self.config.mlflow.tracking_uri, metric_name="val_loss")
 
         def objective(trial):
             """Objective function for optimization."""
@@ -275,21 +271,13 @@ class ModelTrainer:
             params = {}
             for param_name, param_config in search_space.items():
                 if param_config["type"] == "categorical":
-                    params[param_name] = trial.suggest_categorical(
-                        param_name, param_config["choices"]
-                    )
+                    params[param_name] = trial.suggest_categorical(param_name, param_config["choices"])
                 elif param_config["type"] == "uniform":
-                    params[param_name] = trial.suggest_uniform(
-                        param_name, param_config["low"], param_config["high"]
-                    )
+                    params[param_name] = trial.suggest_uniform(param_name, param_config["low"], param_config["high"])
                 elif param_config["type"] == "int":
-                    params[param_name] = trial.suggest_int(
-                        param_name, param_config["low"], param_config["high"]
-                    )
+                    params[param_name] = trial.suggest_int(param_name, param_config["low"], param_config["high"])
                 elif param_config["type"] == "loguniform":
-                    params[param_name] = trial.suggest_loguniform(
-                        param_name, param_config["low"], param_config["high"]
-                    )
+                    params[param_name] = trial.suggest_loguniform(param_name, param_config["low"], param_config["high"])
 
             # Create model with sampled parameters
             model = model_factory(**params)
@@ -359,16 +347,10 @@ class ModelTrainer:
             Training job results
         """
         if not torch.distributed.is_available() or self.world_size == 1:
-            self.logger.warning(
-                "Distributed training not available, falling back to single GPU"
-            )
-            return await self.train_model(
-                model, train_dataloader, val_dataloader, config, model_name
-            )
+            self.logger.warning("Distributed training not available, falling back to single GPU")
+            return await self.train_model(model, train_dataloader, val_dataloader, config, model_name)
 
-        self.logger.info(
-            f"Starting distributed training on {self.world_size} processes"
-        )
+        self.logger.info(f"Starting distributed training on {self.world_size} processes")
 
         # Wrap model for distributed training
         if torch.cuda.is_available():
@@ -383,9 +365,7 @@ class ModelTrainer:
             pass
         else:
             # Create distributed sampler
-            train_sampler = DistributedSampler(
-                train_dataloader.dataset, num_replicas=self.world_size, rank=self.rank
-            )
+            train_sampler = DistributedSampler(train_dataloader.dataset, num_replicas=self.world_size, rank=self.rank)
 
             train_dataloader = DataLoader(
                 train_dataloader.dataset,
@@ -397,9 +377,7 @@ class ModelTrainer:
 
         # Train model (only log on rank 0)
         if self.rank == 0:
-            return await self.train_model(
-                model, train_dataloader, val_dataloader, config, model_name
-            )
+            return await self.train_model(model, train_dataloader, val_dataloader, config, model_name)
         else:
             # Non-master ranks just participate in training
             job = TrainingJob(
@@ -469,9 +447,7 @@ class ModelTrainer:
 
         return job
 
-    def get_training_status(
-        self, job_id: Optional[str] = None
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    def get_training_status(self, job_id: Optional[str] = None) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """Get status of training jobs."""
         if job_id:
             if job_id in self.active_jobs:
@@ -512,9 +488,7 @@ class ModelTrainer:
 
             self.mlflow_client = MlflowClient(self.config.mlflow.tracking_uri)
 
-            self.logger.info(
-                f"MLflow initialized with experiment: {self.experiment_name}"
-            )
+            self.logger.info(f"MLflow initialized with experiment: {self.experiment_name}")
 
         except Exception as e:
             self.logger.warning(f"MLflow initialization failed: {e}")
@@ -538,9 +512,7 @@ class ModelTrainer:
                 self.rank = torch.distributed.get_rank()
                 self.local_rank = int(os.environ.get("LOCAL_RANK", 0))
 
-                self.logger.info(
-                    f"Distributed training initialized: world_size={self.world_size}, rank={self.rank}"
-                )
+                self.logger.info(f"Distributed training initialized: world_size={self.world_size}, rank={self.rank}")
 
         except Exception as e:
             self.logger.warning(f"Distributed training initialization failed: {e}")
@@ -556,9 +528,7 @@ class ModelTrainer:
 
         return model
 
-    def _create_optimizer(
-        self, model: nn.Module, config: TrainingConfig
-    ) -> torch.optim.Optimizer:
+    def _create_optimizer(self, model: nn.Module, config: TrainingConfig) -> torch.optim.Optimizer:
         """Create optimizer based on configuration."""
         if config.optimizer.lower() == "adamw":
             return torch.optim.AdamW(
@@ -587,17 +557,11 @@ class ModelTrainer:
     ) -> torch.optim.lr_scheduler._LRScheduler:
         """Create learning rate scheduler."""
         if config.lr_scheduler.lower() == "linear":
-            return torch.optim.lr_scheduler.LinearLR(
-                optimizer, start_factor=1.0, end_factor=0.1, total_iters=config.epochs
-            )
+            return torch.optim.lr_scheduler.LinearLR(optimizer, start_factor=1.0, end_factor=0.1, total_iters=config.epochs)
         elif config.lr_scheduler.lower() == "cosine":
-            return torch.optim.lr_scheduler.CosineAnnealingLR(
-                optimizer, T_max=config.epochs
-            )
+            return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=config.epochs)
         elif config.lr_scheduler.lower() == "step":
-            return torch.optim.lr_scheduler.StepLR(
-                optimizer, step_size=config.epochs // 3, gamma=0.1
-            )
+            return torch.optim.lr_scheduler.StepLR(optimizer, step_size=config.epochs // 3, gamma=0.1)
         else:
             return torch.optim.lr_scheduler.ConstantLR(optimizer, factor=1.0)
 
@@ -639,9 +603,7 @@ class ModelTrainer:
 
                 # Gradient clipping
                 if config.gradient_clip_norm > 0:
-                    torch.nn.utils.clip_grad_norm_(
-                        model.parameters(), config.gradient_clip_norm
-                    )
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), config.gradient_clip_norm)
 
                 optimizer.step()
 
@@ -711,9 +673,7 @@ class ModelTrainer:
 
         return history
 
-    async def _validate(
-        self, model: nn.Module, val_dataloader: DataLoader, criterion: nn.Module
-    ) -> float:
+    async def _validate(self, model: nn.Module, val_dataloader: DataLoader, criterion: nn.Module) -> float:
         """Validation loop."""
         model.eval()
         val_loss = 0.0

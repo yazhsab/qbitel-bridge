@@ -329,9 +329,7 @@ class TestProductionModeDetector:
         detector.add_network_indicator("production.example.com", 443)
 
         with patch("socket.socket") as mock_socket:
-            mock_socket.return_value.connect.side_effect = Exception(
-                "Connection failed"
-            )
+            mock_socket.return_value.connect.side_effect = Exception("Connection failed")
             result = detector.is_production_mode()
 
         assert result is False

@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 class FedNowBuildError(Exception):
     """Exception raised when FedNow message building fails."""
+
     pass
 
 
@@ -290,16 +291,12 @@ class FedNowBuilder:
         if self._instructing_agent:
             msg.instructing_agent = self._instructing_agent
         elif self._debtor:
-            msg.instructing_agent = FedNowParticipant(
-                routing_number=self._debtor.account.routing_number
-            )
+            msg.instructing_agent = FedNowParticipant(routing_number=self._debtor.account.routing_number)
 
         if self._instructed_agent:
             msg.instructed_agent = self._instructed_agent
         elif self._creditor:
-            msg.instructed_agent = FedNowParticipant(
-                routing_number=self._creditor.account.routing_number
-            )
+            msg.instructed_agent = FedNowParticipant(routing_number=self._creditor.account.routing_number)
 
         if validate:
             errors = msg.validate()

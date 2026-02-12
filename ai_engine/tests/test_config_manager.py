@@ -289,9 +289,7 @@ class TestConfigManager:
         }
         manager = ConfigManager()
 
-        with pytest.raises(
-            ConfigValidationError, match="Authentication must be enabled"
-        ):
+        with pytest.raises(ConfigValidationError, match="Authentication must be enabled"):
             manager.load_config(config_dict=config_dict)
 
     def test_get_config(self):

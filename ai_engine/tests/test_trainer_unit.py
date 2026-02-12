@@ -127,15 +127,9 @@ class TestModelTrainerInitialize:
     @pytest.mark.asyncio
     async def test_initialize_success(self, trainer):
         """Test successful initialization."""
-        with patch.object(
-            trainer, "_initialize_mlflow", new_callable=AsyncMock
-        ) as mock_mlflow:
-            with patch.object(
-                trainer, "_initialize_distributed", new_callable=AsyncMock
-            ) as mock_dist:
-                with patch.object(
-                    trainer, "_initialize_model_registry", new_callable=AsyncMock
-                ) as mock_registry:
+        with patch.object(trainer, "_initialize_mlflow", new_callable=AsyncMock) as mock_mlflow:
+            with patch.object(trainer, "_initialize_distributed", new_callable=AsyncMock) as mock_dist:
+                with patch.object(trainer, "_initialize_model_registry", new_callable=AsyncMock) as mock_registry:
                     await trainer.initialize()
 
                     mock_mlflow.assert_called_once()
@@ -193,9 +187,7 @@ class TestModelTrainerTraining:
         train_loader = Mock(spec=torch.utils.data.DataLoader)
         val_loader = Mock(spec=torch.utils.data.DataLoader)
 
-        with patch.object(
-            trainer, "_training_loop", new_callable=AsyncMock
-        ) as mock_loop:
+        with patch.object(trainer, "_training_loop", new_callable=AsyncMock) as mock_loop:
             with patch("uuid.uuid4", return_value=Mock(hex="test-job-id")):
                 mock_loop.return_value = {"best_metric": 0.95, "final_loss": 0.05}
 
@@ -448,9 +440,7 @@ class TestModelTrainerCheckpointing:
         )
 
         with patch("torch.save") as mock_save:
-            checkpoint_path = await trainer._save_checkpoint(
-                model=model, optimizer=optimizer, epoch=5, loss=0.123, job=job
-            )
+            checkpoint_path = await trainer._save_checkpoint(model=model, optimizer=optimizer, epoch=5, loss=0.123, job=job)
 
             assert checkpoint_path is not None
             mock_save.assert_called_once()

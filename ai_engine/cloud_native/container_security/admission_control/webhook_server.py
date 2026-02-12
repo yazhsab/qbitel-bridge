@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 class AdmissionAction(Enum):
     """Admission webhook actions"""
+
     ALLOW = "allow"
     DENY = "deny"
     PATCH = "patch"
@@ -30,6 +31,7 @@ class AdmissionAction(Enum):
 @dataclass
 class AdmissionRequest:
     """Kubernetes admission request"""
+
     uid: str
     kind: str
     operation: str
@@ -42,6 +44,7 @@ class AdmissionRequest:
 @dataclass
 class SecurityPolicy:
     """Container security policy"""
+
     name: str
     enabled: bool = True
     enforce: bool = True
@@ -76,12 +79,7 @@ class AdmissionWebhookServer:
     Kubernetes admission webhook server for container security.
     """
 
-    def __init__(
-        self,
-        port: int = 8443,
-        tls_cert_path: Optional[str] = None,
-        tls_key_path: Optional[str] = None
-    ):
+    def __init__(self, port: int = 8443, tls_cert_path: Optional[str] = None, tls_key_path: Optional[str] = None):
         """Initialize admission webhook server"""
         self.port = port
         self.tls_cert_path = tls_cert_path
@@ -95,12 +93,12 @@ class AdmissionWebhookServer:
 
         # Vulnerable library patterns
         self._quantum_vulnerable_libs = [
-            r'openssl.*1\.0\.',  # Old OpenSSL versions
-            r'libssl.*1\.0\.',
-            r'crypto.*[^q]',  # Non-quantum crypto libs
-            r'rsa-.*',
-            r'dsa-.*',
-            r'ecdsa-.*',
+            r"openssl.*1\.0\.",  # Old OpenSSL versions
+            r"libssl.*1\.0\.",
+            r"crypto.*[^q]",  # Non-quantum crypto libs
+            r"rsa-.*",
+            r"dsa-.*",
+            r"ecdsa-.*",
         ]
 
         logger.info(f"Initialized AdmissionWebhookServer on port {port}")
@@ -110,21 +108,14 @@ class AdmissionWebhookServer:
         default_policy = SecurityPolicy(
             name="default",
             require_image_signature=True,
-            allowed_registries=[
-                "gcr.io",
-                "docker.io",
-                "quay.io",
-                "registry.k8s.io"
-            ],
-            blocked_registries=[
-                "untrusted.io"
-            ],
+            allowed_registries=["gcr.io", "docker.io", "quay.io", "registry.k8s.io"],
+            blocked_registries=["untrusted.io"],
             max_critical_vulnerabilities=0,
             max_high_vulnerabilities=5,
             disallow_privileged=True,
             disallow_host_network=True,
             disallow_host_pid=True,
-            require_quantum_safe_crypto=True
+            require_quantum_safe_crypto=True,
         )
         self._policies["default"] = default_policy
         logger.info("Loaded default security policy")
@@ -156,16 +147,12 @@ class AdmissionWebhookServer:
             # 1. Validate image registry
             image = container.get("image", "")
             if not self._validate_image_registry(image, policy):
-                violations.append(
-                    f"Container '{container_name}' uses disallowed registry: {image}"
-                )
+                violations.append(f"Container '{container_name}' uses disallowed registry: {image}")
 
             # 2. Validate image signature
             if policy.require_image_signature:
                 if not self._verify_image_signature(image):
-                    violations.append(
-                        f"Container '{container_name}' image not signed or signature invalid: {image}"
-                    )
+                    violations.append(f"Container '{container_name}' image not signed or signature invalid: {image}")
 
             # 3. Check for quantum-vulnerable libraries
             if policy.require_quantum_safe_crypto:
@@ -179,14 +166,10 @@ class AdmissionWebhookServer:
             security_context = container.get("securityContext", {})
 
             if policy.disallow_privileged and security_context.get("privileged", False):
-                violations.append(
-                    f"Container '{container_name}' runs in privileged mode"
-                )
+                violations.append(f"Container '{container_name}' runs in privileged mode")
 
             if policy.require_read_only_root and not security_context.get("readOnlyRootFilesystem", False):
-                violations.append(
-                    f"Container '{container_name}' does not have read-only root filesystem"
-                )
+                violations.append(f"Container '{container_name}' does not have read-only root filesystem")
 
         # 5. Check pod-level security
         if policy.disallow_host_network and spec.get("hostNetwork", False):
@@ -207,14 +190,7 @@ class AdmissionWebhookServer:
             message = "Pod meets all security requirements"
             logger.info("Pod validation passed")
 
-        return {
-            "allowed": allowed,
-            "status": {
-                "code": status_code,
-                "message": message
-            },
-            "violations": violations
-        }
+        return {"allowed": allowed, "status": {"code": status_code, "message": message}, "violations": violations}
 
     def _validate_image_registry(self, image: str, policy: SecurityPolicy) -> bool:
         """
@@ -340,21 +316,14 @@ class AdmissionWebhookServer:
                 # Allow other resources
                 validation_result = {
                     "allowed": True,
-                    "status": {
-                        "code": 200,
-                        "message": f"Resource type {kind} not validated"
-                    }
+                    "status": {"code": 200, "message": f"Resource type {kind} not validated"},
                 }
 
             # Build admission review response
             admission_response = {
                 "apiVersion": "admission.k8s.io/v1",
                 "kind": "AdmissionReview",
-                "response": {
-                    "uid": uid,
-                    "allowed": validation_result["allowed"],
-                    "status": validation_result["status"]
-                }
+                "response": {"uid": uid, "allowed": validation_result["allowed"], "status": validation_result["status"]},
             }
 
             return web.json_response(admission_response)
@@ -368,13 +337,10 @@ class AdmissionWebhookServer:
                     "response": {
                         "uid": admission_request.get("uid", "unknown"),
                         "allowed": False,
-                        "status": {
-                            "code": 500,
-                            "message": f"Internal error: {str(e)}"
-                        }
-                    }
+                        "status": {"code": 500, "message": f"Internal error: {str(e)}"},
+                    },
                 },
-                status=500
+                status=500,
             )
 
     async def handle_health(self, request: web.Request) -> web.Response:
@@ -389,9 +355,9 @@ class AdmissionWebhookServer:
         self._app = web.Application()
 
         # Add routes
-        self._app.router.add_post('/validate', self.handle_validate)
-        self._app.router.add_get('/health', self.handle_health)
-        self._app.router.add_get('/healthz', self.handle_health)
+        self._app.router.add_post("/validate", self.handle_validate)
+        self._app.router.add_get("/health", self.handle_health)
+        self._app.router.add_get("/healthz", self.handle_health)
 
         # Create runner
         self._runner = web.AppRunner(self._app)
@@ -405,12 +371,7 @@ class AdmissionWebhookServer:
             logger.info("TLS enabled for webhook server")
 
         # Create and start site
-        site = web.TCPSite(
-            self._runner,
-            host='0.0.0.0',
-            port=self.port,
-            ssl_context=ssl_context
-        )
+        site = web.TCPSite(self._runner, host="0.0.0.0", port=self.port, ssl_context=ssl_context)
         await site.start()
 
         logger.info(f"Admission webhook server started on port {self.port}")
@@ -449,24 +410,15 @@ class AdmissionWebhookServer:
         return {
             "apiVersion": "admissionregistration.k8s.io/v1",
             "kind": "ValidatingWebhookConfiguration",
-            "metadata": {
-                "name": "qbitel-container-security"
-            },
-            "webhooks": [{
-                "name": "validate.qbitel.io",
-                "clientConfig": {
-                    "service": {
-                        "name": "qbitel-webhook",
-                        "namespace": "qbitel-system",
-                        "path": "/validate"
-                    }
-                },
-                "rules": [{
-                    "operations": ["CREATE", "UPDATE"],
-                    "apiGroups": [""],
-                    "apiVersions": ["v1"],
-                    "resources": ["pods"]
-                }],
-                "admissionReviewVersions": ["v1"]
-            }]
+            "metadata": {"name": "qbitel-container-security"},
+            "webhooks": [
+                {
+                    "name": "validate.qbitel.io",
+                    "clientConfig": {"service": {"name": "qbitel-webhook", "namespace": "qbitel-system", "path": "/validate"}},
+                    "rules": [
+                        {"operations": ["CREATE", "UPDATE"], "apiGroups": [""], "apiVersions": ["v1"], "resources": ["pods"]}
+                    ],
+                    "admissionReviewVersions": ["v1"],
+                }
+            ],
         }

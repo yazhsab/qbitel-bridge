@@ -21,7 +21,6 @@ from ..exceptions import LegacySystemWhispererException
 from ..monitoring import LegacySystemMonitor
 from .auth import User, get_auth, log_security_event
 
-
 # Request context storage
 request_context: ContextVar[Dict[str, Any]] = ContextVar("request_context", default={})
 
@@ -81,9 +80,7 @@ def set_request_context(ctx: RequestContext) -> None:
 class LegacySystemMiddleware(BaseHTTPMiddleware):
     """Main middleware for Legacy System Whisperer API."""
 
-    def __init__(
-        self, app, config: Config, monitor: Optional[LegacySystemMonitor] = None
-    ):
+    def __init__(self, app, config: Config, monitor: Optional[LegacySystemMonitor] = None):
         super().__init__(app)
         self.config = config
         self.monitor = monitor
@@ -97,9 +94,7 @@ class LegacySystemMiddleware(BaseHTTPMiddleware):
 
         self.logger.info("Legacy System Whisperer middleware initialized")
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         """Process request through middleware pipeline."""
 
         # Create request context
@@ -165,9 +160,7 @@ class LegacySystemMiddleware(BaseHTTPMiddleware):
             # Would record request start metrics
             pass
 
-    async def _post_process(
-        self, request: Request, response: Response, ctx: RequestContext
-    ) -> None:
+    async def _post_process(self, request: Request, response: Response, ctx: RequestContext) -> None:
         """Post-process response."""
 
         processing_time = time.time() - ctx.start_time
@@ -208,9 +201,7 @@ class LegacySystemMiddleware(BaseHTTPMiddleware):
                 duration_seconds=processing_time,
             )
 
-    async def _handle_error(
-        self, request: Request, error: Exception, ctx: RequestContext
-    ) -> Response:
+    async def _handle_error(self, request: Request, error: Exception, ctx: RequestContext) -> Response:
         """Handle request errors."""
 
         processing_time = time.time() - ctx.start_time
@@ -323,9 +314,7 @@ class LegacySystemMiddleware(BaseHTTPMiddleware):
 
         # Clean old requests
         self.rate_limit_cache[client_id] = [
-            timestamp
-            for timestamp in self.rate_limit_cache[client_id]
-            if timestamp > cutoff_time
+            timestamp for timestamp in self.rate_limit_cache[client_id] if timestamp > cutoff_time
         ]
 
         # Check limit
@@ -351,9 +340,7 @@ class LegacySystemMiddleware(BaseHTTPMiddleware):
         # Add current request
         self.rate_limit_cache[client_id].append(current_time)
 
-    async def _validate_security_headers(
-        self, request: Request, ctx: RequestContext
-    ) -> None:
+    async def _validate_security_headers(self, request: Request, ctx: RequestContext) -> None:
         """Validate security-related headers."""
 
         # Check for required headers in production
@@ -367,9 +354,7 @@ class LegacySystemMiddleware(BaseHTTPMiddleware):
             if not content_type.startswith("application/json"):
                 self.logger.warning(
                     f"Invalid content-type: {content_type}",
-                    context=LogContext(
-                        request_id=ctx.request_id, category=LogCategory.SECURITY_EVENT
-                    ),
+                    context=LogContext(request_id=ctx.request_id, category=LogCategory.SECURITY_EVENT),
                 )
 
     async def _create_error_response(
@@ -411,9 +396,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.logger = get_legacy_logger("request_logger")
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         """Log request details."""
 
         ctx = get_request_context()
@@ -432,9 +415,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
 
         # Log response details
-        ctx.metadata["response_size"] = response.headers.get(
-            "content-length", "unknown"
-        )
+        ctx.metadata["response_size"] = response.headers.get("content-length", "unknown")
 
         return response
 
@@ -451,9 +432,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         self.suspicious_ips: Dict[str, int] = {}
         self.blocked_ips: set = set()
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         """Apply security checks."""
 
         ctx = get_request_context()
@@ -462,9 +441,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         if ctx.client_ip in self.blocked_ips:
             self.logger.warning(
                 f"Request from blocked IP: {ctx.client_ip}",
-                context=LogContext(
-                    request_id=ctx.request_id, category=LogCategory.SECURITY_EVENT
-                ),
+                context=LogContext(request_id=ctx.request_id, category=LogCategory.SECURITY_EVENT),
             )
             raise HTTPException(status_code=403, detail="Access denied")
 
@@ -475,16 +452,12 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
 
         # Add security headers
-        response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains"
-        )
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         response.headers["Content-Security-Policy"] = "default-src 'self'"
 
         return response
 
-    async def _check_suspicious_activity(
-        self, request: Request, ctx: RequestContext
-    ) -> None:
+    async def _check_suspicious_activity(self, request: Request, ctx: RequestContext) -> None:
         """Check for suspicious request patterns."""
 
         suspicious_patterns = [
@@ -503,9 +476,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         url_path = str(request.url.path).lower()
         for pattern in suspicious_patterns:
             if pattern in url_path:
-                self._flag_suspicious_activity(
-                    ctx.client_ip, f"Suspicious URL pattern: {pattern}"
-                )
+                self._flag_suspicious_activity(ctx.client_ip, f"Suspicious URL pattern: {pattern}")
                 break
 
         # Check headers
@@ -513,9 +484,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             header_value_lower = header_value.lower()
             for pattern in suspicious_patterns:
                 if pattern in header_value_lower:
-                    self._flag_suspicious_activity(
-                        ctx.client_ip, f"Suspicious header: {header_name}"
-                    )
+                    self._flag_suspicious_activity(ctx.client_ip, f"Suspicious header: {header_name}")
                     break
 
     def _flag_suspicious_activity(self, client_ip: str, reason: str) -> None:
@@ -555,9 +524,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         self.request_counts: Dict[str, int] = {}
         self.error_counts: Dict[str, int] = {}
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         """Collect request metrics."""
 
         ctx = get_request_context()
@@ -636,9 +603,7 @@ class CORSMiddleware(BaseHTTPMiddleware):
         self.allowed_headers = allowed_headers or ["*"]
         self.allow_credentials = allow_credentials
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         """Handle CORS."""
 
         origin = request.headers.get("origin")
@@ -653,12 +618,8 @@ class CORSMiddleware(BaseHTTPMiddleware):
         if origin and (origin in self.allowed_origins or "*" in self.allowed_origins):
             response.headers["Access-Control-Allow-Origin"] = origin
 
-        response.headers["Access-Control-Allow-Methods"] = ", ".join(
-            self.allowed_methods
-        )
-        response.headers["Access-Control-Allow-Headers"] = ", ".join(
-            self.allowed_headers
-        )
+        response.headers["Access-Control-Allow-Methods"] = ", ".join(self.allowed_methods)
+        response.headers["Access-Control-Allow-Headers"] = ", ".join(self.allowed_headers)
 
         if self.allow_credentials:
             response.headers["Access-Control-Allow-Credentials"] = "true"
@@ -667,9 +628,7 @@ class CORSMiddleware(BaseHTTPMiddleware):
 
 
 # Middleware factory functions
-def create_legacy_middleware(
-    config: Config, monitor: Optional[LegacySystemMonitor] = None
-) -> LegacySystemMiddleware:
+def create_legacy_middleware(config: Config, monitor: Optional[LegacySystemMonitor] = None) -> LegacySystemMiddleware:
     """Create Legacy System Whisperer middleware instance."""
     return LegacySystemMiddleware(None, config, monitor)
 

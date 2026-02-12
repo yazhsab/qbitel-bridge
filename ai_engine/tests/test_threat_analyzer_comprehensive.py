@@ -270,9 +270,7 @@ class TestThreatAnalyzer:
             mock_llm_instance._initialized = False
             mock_llm.return_value = mock_llm_instance
 
-            with patch.object(
-                analyzer, "_load_threat_intelligence", new_callable=AsyncMock
-            ):
+            with patch.object(analyzer, "_load_threat_intelligence", new_callable=AsyncMock):
                 await analyzer.initialize()
 
                 assert analyzer._initialized is True
@@ -295,9 +293,7 @@ class TestThreatAnalyzer:
         # Setup
         analyzer._initialized = True
         analyzer.llm_service = AsyncMock()
-        analyzer.llm_service.process_request = AsyncMock(
-            return_value=Mock(content="Analysis complete")
-        )
+        analyzer.llm_service.process_request = AsyncMock(return_value=Mock(content="Analysis complete"))
         analyzer.classification_model = Mock()
 
         event = SecurityEvent(
@@ -312,18 +308,14 @@ class TestThreatAnalyzer:
             attack_vectors=["exploit"],
         )
 
-        with patch.object(
-            analyzer, "_perform_ml_classification", new_callable=AsyncMock
-        ) as mock_ml:
+        with patch.object(analyzer, "_perform_ml_classification", new_callable=AsyncMock) as mock_ml:
             mock_ml.return_value = {
                 "predicted_type": SecurityEventType.MALWARE_DETECTION,
                 "confidence": 0.9,
                 "ml_confidence": 0.9,
             }
 
-            with patch.object(
-                analyzer, "_assess_threat_severity", new_callable=AsyncMock
-            ) as mock_severity:
+            with patch.object(analyzer, "_assess_threat_severity", new_callable=AsyncMock) as mock_severity:
                 mock_severity.return_value = {
                     "threat_level": ThreatLevel.HIGH,
                     "severity_score": 0.8,
@@ -331,9 +323,7 @@ class TestThreatAnalyzer:
                     "adjustments": {},
                 }
 
-                with patch.object(
-                    analyzer, "_analyze_context", new_callable=AsyncMock
-                ) as mock_context:
+                with patch.object(analyzer, "_analyze_context", new_callable=AsyncMock) as mock_context:
                     mock_context.return_value = {
                         "llm_analysis": "Context analysis",
                         "context_score": 0.7,
@@ -354,9 +344,7 @@ class TestThreatAnalyzer:
                             "associated_campaigns": [],
                         }
 
-                        with patch.object(
-                            analyzer, "_assess_business_impact", new_callable=AsyncMock
-                        ) as mock_impact:
+                        with patch.object(analyzer, "_assess_business_impact", new_callable=AsyncMock) as mock_impact:
                             mock_impact.return_value = {
                                 "business_impact_score": 0.6,
                                 "impact_factors": [],
@@ -414,9 +402,7 @@ class TestThreatAnalyzer:
         )
 
         with patch.object(analyzer, "initialize", new_callable=AsyncMock):
-            with patch.object(
-                analyzer, "_perform_ml_classification", side_effect=Exception("Failed")
-            ):
+            with patch.object(analyzer, "_perform_ml_classification", side_effect=Exception("Failed")):
                 with pytest.raises(ThreatAnalysisException):
                     await analyzer.analyze_threat(event)
 

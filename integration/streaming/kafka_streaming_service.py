@@ -171,9 +171,7 @@ class KafkaStreamingService:
         self.message_handlers: Dict[str, Callable] = {}
 
         # Thread pool for processing
-        self.processing_executor = ThreadPoolExecutor(
-            max_workers=20, thread_name_prefix="stream_"
-        )
+        self.processing_executor = ThreadPoolExecutor(max_workers=20, thread_name_prefix="stream_")
 
         # Avro schemas for serialization
         self.avro_schemas = {}
@@ -208,9 +206,7 @@ class KafkaStreamingService:
         """Initialize Kafka producer"""
         try:
             kafka_config = {
-                "bootstrap_servers": self.config.get(
-                    "bootstrap_servers", ["localhost:9092"]
-                ),
+                "bootstrap_servers": self.config.get("bootstrap_servers", ["localhost:9092"]),
                 "security_protocol": self.config.get("security_protocol", "PLAINTEXT"),
                 "compression_type": "snappy",
                 "max_batch_size": 32768,
@@ -260,9 +256,7 @@ class KafkaStreamingService:
 
             # Create admin client
             admin_config = {
-                "bootstrap_servers": self.config.get(
-                    "bootstrap_servers", ["localhost:9092"]
-                ),
+                "bootstrap_servers": self.config.get("bootstrap_servers", ["localhost:9092"]),
             }
 
             if self.config.get("security_protocol") != "PLAINTEXT":
@@ -338,9 +332,7 @@ class KafkaStreamingService:
                 ],
             }
 
-            self.avro_schemas["stream_event"] = avro.schema.parse(
-                json.dumps(stream_event_schema)
-            )
+            self.avro_schemas["stream_event"] = avro.schema.parse(json.dumps(stream_event_schema))
             logger.info("Avro schemas initialized")
 
         except Exception as e:
@@ -408,9 +400,7 @@ class KafkaStreamingService:
             tasks = []
             for processor_name, topology in self.stream_processors.items():
                 for i in range(topology.parallelism):
-                    task = asyncio.create_task(
-                        self._run_stream_processor(processor_name, topology, i)
-                    )
+                    task = asyncio.create_task(self._run_stream_processor(processor_name, topology, i))
                     tasks.append(task)
 
             # Start metrics collector
@@ -429,22 +419,16 @@ class KafkaStreamingService:
         finally:
             await self.shutdown()
 
-    async def _run_stream_processor(
-        self, processor_name: str, topology: StreamTopology, instance_id: int
-    ):
+    async def _run_stream_processor(self, processor_name: str, topology: StreamTopology, instance_id: int):
         """Run a stream processor instance"""
         consumer_group = f"{topology.name}-processor-{instance_id}"
         consumer = None
 
         try:
             # Create consumer for this processor
-            consumer = await self._create_consumer(
-                consumer_group, topology.input_topics
-            )
+            consumer = await self._create_consumer(consumer_group, topology.input_topics)
 
-            logger.info(
-                f"Started stream processor {processor_name} instance {instance_id}"
-            )
+            logger.info(f"Started stream processor {processor_name} instance {instance_id}")
 
             # Process messages
             async for message in consumer:
@@ -457,9 +441,7 @@ class KafkaStreamingService:
 
                     # Send results to output topics if any
                     if result and topology.output_topics:
-                        await self._send_processed_result(
-                            result, topology.output_topics
-                        )
+                        await self._send_processed_result(result, topology.output_topics)
 
                     # Update metrics
                     self.metrics.messages_consumed += 1
@@ -471,9 +453,7 @@ class KafkaStreamingService:
 
                     # Send to error topic if configured
                     if topology.error_topic:
-                        await self._send_to_error_topic(
-                            message, topology.error_topic, str(e)
-                        )
+                        await self._send_to_error_topic(message, topology.error_topic, str(e))
 
         except Exception as e:
             logger.error(f"Error in stream processor {processor_name}: {e}")
@@ -481,14 +461,10 @@ class KafkaStreamingService:
             if consumer:
                 await consumer.stop()
 
-    async def _create_consumer(
-        self, consumer_group: str, topics: List[str]
-    ) -> AIOKafkaConsumer:
+    async def _create_consumer(self, consumer_group: str, topics: List[str]) -> AIOKafkaConsumer:
         """Create Kafka consumer"""
         kafka_config = {
-            "bootstrap_servers": self.config.get(
-                "bootstrap_servers", ["localhost:9092"]
-            ),
+            "bootstrap_servers": self.config.get("bootstrap_servers", ["localhost:9092"]),
             "group_id": consumer_group,
             "auto_offset_reset": self.config.get("auto_offset_reset", "latest"),
             "enable_auto_commit": True,
@@ -519,9 +495,7 @@ class KafkaStreamingService:
         return consumer
 
     # Stream processing functions
-    async def _process_packet_stream(
-        self, event: StreamEvent, message
-    ) -> Optional[StreamEvent]:
+    async def _process_packet_stream(self, event: StreamEvent, message) -> Optional[StreamEvent]:
         """Process packet capture events"""
         try:
             if event.event_type != StreamEventType.PACKET_CAPTURED:
@@ -552,9 +526,7 @@ class KafkaStreamingService:
             logger.error(f"Error processing packet stream: {e}")
             return None
 
-    async def _process_ai_analysis_stream(
-        self, event: StreamEvent, message
-    ) -> Optional[StreamEvent]:
+    async def _process_ai_analysis_stream(self, event: StreamEvent, message) -> Optional[StreamEvent]:
         """Process AI analysis results"""
         try:
             if event.event_type != StreamEventType.AI_ANALYSIS:
@@ -589,9 +561,7 @@ class KafkaStreamingService:
             logger.error(f"Error processing AI analysis stream: {e}")
             return None
 
-    async def _process_security_events_stream(
-        self, event: StreamEvent, message
-    ) -> List[StreamEvent]:
+    async def _process_security_events_stream(self, event: StreamEvent, message) -> List[StreamEvent]:
         """Process security events"""
         try:
             if event.event_type != StreamEventType.SECURITY_EVENT:
@@ -623,13 +593,9 @@ class KafkaStreamingService:
                     timestamp=time.time(),
                     source_component="security-processor",
                     data={
-                        "threat_indicators": event.data.get("analysis_result", {}).get(
-                            "indicators", []
-                        ),
+                        "threat_indicators": event.data.get("analysis_result", {}).get("indicators", []),
                         "threat_level": threat_level,
-                        "confidence": event.data.get("analysis_result", {}).get(
-                            "confidence", 0.0
-                        ),
+                        "confidence": event.data.get("analysis_result", {}).get("confidence", 0.0),
                     },
                     correlation_id=event.correlation_id,
                 )
@@ -714,10 +680,7 @@ class KafkaStreamingService:
 
             # Convert data dict values to strings for Avro map type
             if obj_dict["data"]:
-                obj_dict["data"] = {
-                    k: json.dumps(v) if not isinstance(v, str) else v
-                    for k, v in obj_dict["data"].items()
-                }
+                obj_dict["data"] = {k: json.dumps(v) if not isinstance(v, str) else v for k, v in obj_dict["data"].items()}
 
             # Serialize
             bytes_writer = io.BytesIO()
@@ -731,9 +694,7 @@ class KafkaStreamingService:
             logger.error(f"Error serializing with Avro: {e}")
             return json.dumps(asdict(obj), default=str).encode("utf-8")
 
-    def _deserialize_with_avro(
-        self, message_bytes: bytes, schema_name: str
-    ) -> StreamEvent:
+    def _deserialize_with_avro(self, message_bytes: bytes, schema_name: str) -> StreamEvent:
         """Deserialize object with Avro"""
         schema = self.avro_schemas[schema_name]
 
@@ -773,9 +734,7 @@ class KafkaStreamingService:
         except Exception as e:
             logger.error(f"Error sending processed result: {e}")
 
-    async def _send_to_error_topic(
-        self, original_message, error_topic: str, error_msg: str
-    ):
+    async def _send_to_error_topic(self, original_message, error_topic: str, error_msg: str):
         """Send failed message to error topic"""
         try:
             error_event = StreamEvent(
@@ -818,8 +777,7 @@ class KafkaStreamingService:
                         "messages_consumed": self.metrics.messages_consumed,
                         "processing_errors": self.metrics.processing_errors,
                         "throughput_per_second": throughput,
-                        "error_rate": self.metrics.processing_errors
-                        / max(self.metrics.messages_consumed, 1),
+                        "error_rate": self.metrics.processing_errors / max(self.metrics.messages_consumed, 1),
                         "uptime_seconds": uptime,
                         "active_processors": len(self.stream_processors),
                     },
@@ -844,13 +802,9 @@ class KafkaStreamingService:
                 consumer_count = len(self.consumers)
 
                 # Check processing health
-                recent_activity = (
-                    time.time() - self.metrics.last_processed_time
-                ) < 300  # 5 minutes
+                recent_activity = (time.time() - self.metrics.last_processed_time) < 300  # 5 minutes
 
-                health_status = (
-                    "healthy" if (producer_healthy and recent_activity) else "degraded"
-                )
+                health_status = "healthy" if (producer_healthy and recent_activity) else "degraded"
 
                 health_event = StreamEvent(
                     event_id=str(uuid.uuid4()),
@@ -887,9 +841,7 @@ class KafkaStreamingService:
                 await asyncio.sleep(60)
 
     # Public API
-    async def send_event(
-        self, topic: str, event: StreamEvent, partition_key: Optional[str] = None
-    ):
+    async def send_event(self, topic: str, event: StreamEvent, partition_key: Optional[str] = None):
         """Send event to Kafka topic"""
         try:
             if not self.producer:
@@ -905,9 +857,7 @@ class KafkaStreamingService:
         except Exception as e:
             logger.error(f"Error sending event to topic {topic}: {e}")
 
-    async def send_raw_message(
-        self, topic: str, message: Dict[str, Any], key: Optional[str] = None
-    ):
+    async def send_raw_message(self, topic: str, message: Dict[str, Any], key: Optional[str] = None):
         """Send raw message to Kafka topic"""
         try:
             if not self.producer:
@@ -932,8 +882,7 @@ class KafkaStreamingService:
             "messages_produced": self.metrics.messages_produced,
             "messages_consumed": self.metrics.messages_consumed,
             "processing_errors": self.metrics.processing_errors,
-            "error_rate": self.metrics.processing_errors
-            / max(self.metrics.messages_consumed, 1),
+            "error_rate": self.metrics.processing_errors / max(self.metrics.messages_consumed, 1),
             "throughput_per_second": self.metrics.messages_consumed / max(uptime, 1),
             "uptime_seconds": uptime,
             "active_processors": len(self.stream_processors),

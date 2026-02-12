@@ -31,7 +31,6 @@ from ai_engine.domains.banking.protocols.trading.fix import (
     get_tag_name,
 )
 
-
 # FIX message delimiter
 SOH = "\x01"
 
@@ -121,8 +120,7 @@ class TestFixBuilder:
         """Test building New Order Single."""
         builder = FixBuilder()
         message = (
-            builder
-            .set_version(FixVersion.FIX_44)
+            builder.set_version(FixVersion.FIX_44)
             .set_msg_type(FixMsgType.NEW_ORDER_SINGLE)
             .set_sender("TRADER")
             .set_target("EXCHANGE")
@@ -146,8 +144,7 @@ class TestFixBuilder:
         """Test building Order Cancel Request."""
         builder = FixBuilder()
         message = (
-            builder
-            .set_version(FixVersion.FIX_44)
+            builder.set_version(FixVersion.FIX_44)
             .set_msg_type(FixMsgType.ORDER_CANCEL_REQUEST)
             .set_sender("TRADER")
             .set_target("EXCHANGE")
@@ -166,8 +163,7 @@ class TestFixBuilder:
         """Test converting message to FIX string."""
         builder = FixBuilder()
         message = (
-            builder
-            .set_version(FixVersion.FIX_44)
+            builder.set_version(FixVersion.FIX_44)
             .set_msg_type(FixMsgType.HEARTBEAT)
             .set_sender("A")
             .set_target("B")
@@ -274,8 +270,7 @@ class TestFixValidator:
         # Create message missing ClOrdID
         builder = FixBuilder()
         message = (
-            builder
-            .set_version(FixVersion.FIX_44)
+            builder.set_version(FixVersion.FIX_44)
             .set_msg_type(FixMsgType.NEW_ORDER_SINGLE)
             .set_sender("TRADER")
             .set_target("EXCHANGE")

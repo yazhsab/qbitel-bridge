@@ -74,9 +74,7 @@ class TestConfigurationService:
     async def test_initialization_file_backend(self):
         """Test ConfigurationService initialization with file backend."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            service = ConfigurationService(
-                backend_type="file", config_file=os.path.join(tmpdir, "config.yaml")
-            )
+            service = ConfigurationService(backend_type="file", config_file=os.path.join(tmpdir, "config.yaml"))
 
             assert service.backend_type == "file"
             assert service.config_file == os.path.join(tmpdir, "config.yaml")
@@ -114,9 +112,7 @@ class TestConfigurationService:
         """Test config retrieval with default value."""
         mock_etcd_client.get.return_value = (None, None)
 
-        result = await config_service.get_config(
-            "nonexistent.key", default="default_value"
-        )
+        result = await config_service.get_config("nonexistent.key", default="default_value")
 
         assert result == "default_value"
 
@@ -128,9 +124,7 @@ class TestConfigurationService:
         result = await config_service.set_config("database.host", "newhost")
 
         assert result is True
-        mock_etcd_client.put.assert_called_once_with(
-            "/qbitel/config/database/host", "newhost"
-        )
+        mock_etcd_client.put.assert_called_once_with("/qbitel/config/database/host", "newhost")
 
     @pytest.mark.asyncio
     async def test_set_config_failure(self, config_service, mock_etcd_client):
@@ -176,9 +170,7 @@ class TestConfigurationService:
     @pytest.mark.asyncio
     async def test_watch_config(self, config_service, mock_etcd_client):
         """Test config watching functionality."""
-        mock_etcd_client.watch_prefix.return_value = [
-            (b'{"new_value": "updated"}', None)
-        ]
+        mock_etcd_client.watch_prefix.return_value = [(b'{"new_value": "updated"}', None)]
 
         callback_called = False
 
@@ -191,9 +183,7 @@ class TestConfigurationService:
         await config_service.watch_config("database.host", callback)
 
         # Simulate watch event
-        mock_etcd_client.watch_prefix.assert_called_once_with(
-            "/qbitel/config/database/host"
-        )
+        mock_etcd_client.watch_prefix.assert_called_once_with("/qbitel/config/database/host")
 
     @pytest.mark.asyncio
     async def test_validate_config_structure(self, config_service):
@@ -447,9 +437,7 @@ class TestConfigWatcher:
         watcher = ConfigWatcher()
 
         # Mock file system events
-        with patch(
-            "ai_engine.core.config_service.watchdog.observers.Observer"
-        ) as mock_observer:
+        with patch("ai_engine.core.config_service.watchdog.observers.Observer") as mock_observer:
             mock_observer_instance = Mock()
             mock_observer.return_value = mock_observer_instance
 
@@ -469,9 +457,7 @@ class TestConfigWatcher:
         """Test stopping config watching."""
         watcher = ConfigWatcher()
 
-        with patch(
-            "ai_engine.core.config_service.watchdog.observers.Observer"
-        ) as mock_observer:
+        with patch("ai_engine.core.config_service.watchdog.observers.Observer") as mock_observer:
             mock_observer_instance = Mock()
             mock_observer.return_value = mock_observer_instance
 

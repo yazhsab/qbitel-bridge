@@ -395,8 +395,8 @@ class TestFedWireBuilder:
         """Test building bank transfer message."""
         builder = FedWireBuilder()
 
-        content = (builder
-            .set_type(TypeCode.BASIC_FUNDS_TRANSFER, TypeSubCode.BASIC_TRANSFER)
+        content = (
+            builder.set_type(TypeCode.BASIC_FUNDS_TRANSFER, TypeSubCode.BASIC_TRANSFER)
             .set_imad("CITI1234")
             .set_amount(Decimal("10000.00"))
             .set_sender("021000089", "CITIBANK NA")
@@ -415,8 +415,8 @@ class TestFedWireBuilder:
         """Test building customer transfer message."""
         builder = FedWireBuilder()
 
-        content = (builder
-            .set_type(TypeCode.BASIC_FUNDS_TRANSFER)
+        content = (
+            builder.set_type(TypeCode.BASIC_FUNDS_TRANSFER)
             .set_imad("CITI1234")
             .set_amount(Decimal("25000.00"))
             .set_sender("021000089", "CITIBANK NA")
@@ -447,8 +447,8 @@ class TestFedWireBuilder:
         """Test building FedWireMessage object."""
         builder = FedWireBuilder()
 
-        msg = (builder
-            .set_type(TypeCode.BASIC_FUNDS_TRANSFER)
+        msg = (
+            builder.set_type(TypeCode.BASIC_FUNDS_TRANSFER)
             .set_imad("CITI1234")
             .set_amount(Decimal("10000.00"))
             .set_sender("021000089", "CITIBANK NA")

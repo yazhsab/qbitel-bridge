@@ -212,9 +212,7 @@ class ParserGenerator:
 
         # Performance settings
         self.use_parallel_generation = True
-        self.max_workers = (
-            config.inference.num_workers if hasattr(config, "inference") else 4
-        )
+        self.max_workers = config.inference.num_workers if hasattr(config, "inference") else 4
         self.executor = ThreadPoolExecutor(max_workers=self.max_workers)
 
         # Parser cache and registry
@@ -255,9 +253,7 @@ class ParserGenerator:
             self.logger.info(f"Returning cached parser {parser_id}")
             return self._parser_cache[parser_id]
 
-        self.logger.info(
-            f"Generating parser {parser_id} from grammar with {len(grammar.rules)} rules"
-        )
+        self.logger.info(f"Generating parser {parser_id} from grammar with {len(grammar.rules)} rules")
 
         try:
             # Validate grammar
@@ -267,18 +263,14 @@ class ParserGenerator:
             grammar_analysis = await self._analyze_grammar(grammar)
 
             # Generate parser code
-            parser_code = await self._generate_parser_code(
-                grammar, parser_id, protocol_name or "unknown", grammar_analysis
-            )
+            parser_code = await self._generate_parser_code(grammar, parser_id, protocol_name or "unknown", grammar_analysis)
 
             # Compile parser
             compiled_parser = await self._compile_parser(parser_code, parser_id)
 
             # Create parser functions
             parse_function = self._create_parse_function(compiled_parser, parser_id)
-            validate_function = self._create_validate_function(
-                compiled_parser, parser_id
-            )
+            validate_function = self._create_validate_function(compiled_parser, parser_id)
 
             # Create generated parser object
             generated_parser = GeneratedParser(
@@ -299,9 +291,7 @@ class ParserGenerator:
             # Cache result
             self._parser_cache[parser_id] = generated_parser
 
-            self.logger.info(
-                f"Parser generation completed in {time.time() - start_time:.2f}s"
-            )
+            self.logger.info(f"Parser generation completed in {time.time() - start_time:.2f}s")
             return generated_parser
 
         except Exception as e:
@@ -312,9 +302,7 @@ class ParserGenerator:
         """Validate that grammar is suitable for parser generation."""
         # Check for start symbol
         if grammar.start_symbol not in grammar.symbols:
-            raise ProtocolException(
-                f"Start symbol {grammar.start_symbol} not found in grammar"
-            )
+            raise ProtocolException(f"Start symbol {grammar.start_symbol} not found in grammar")
 
         # Check for unreachable symbols
         reachable_symbols = await self._find_reachable_symbols(grammar)
@@ -358,9 +346,7 @@ class ParserGenerator:
 
         return left_recursive
 
-    async def _is_left_recursive(
-        self, grammar: Grammar, symbol: str, visited: Set[str]
-    ) -> bool:
+    async def _is_left_recursive(self, grammar: Grammar, symbol: str, visited: Set[str]) -> bool:
         """Check if symbol is left recursive."""
         if symbol in visited:
             return True
@@ -372,9 +358,7 @@ class ParserGenerator:
                 first_symbol = rule.right_hand_side[0].name
                 if first_symbol == symbol:
                     return True
-                elif await self._is_left_recursive(
-                    grammar, first_symbol, visited.copy()
-                ):
+                elif await self._is_left_recursive(grammar, first_symbol, visited.copy()):
                     return True
 
         return False
@@ -480,9 +464,7 @@ class ParserGenerator:
 
         return method_code
 
-    async def _generate_rule_parsing_logic(
-        self, rules: List[ProductionRule], symbol_name: str
-    ) -> str:
+    async def _generate_rule_parsing_logic(self, rules: List[ProductionRule], symbol_name: str) -> str:
         """Generate parsing logic for a set of rules."""
         if len(rules) == 1:
             # Single rule - no alternatives
@@ -491,9 +473,7 @@ class ParserGenerator:
             # Multiple rules - try alternatives
             return await self._generate_alternative_rules_logic(rules, symbol_name)
 
-    async def _generate_single_rule_logic(
-        self, rule: ProductionRule, symbol_name: str
-    ) -> str:
+    async def _generate_single_rule_logic(self, rule: ProductionRule, symbol_name: str) -> str:
         """Generate logic for parsing a single rule."""
         if rule.is_terminal_rule():
             # Terminal rule - match literal
@@ -521,9 +501,7 @@ class ParserGenerator:
             # Non-terminal rule - parse sequence
             return await self._generate_sequence_parsing_logic(rule, symbol_name)
 
-    async def _generate_sequence_parsing_logic(
-        self, rule: ProductionRule, symbol_name: str
-    ) -> str:
+    async def _generate_sequence_parsing_logic(self, rule: ProductionRule, symbol_name: str) -> str:
         """Generate logic for parsing a sequence of symbols."""
         parsing_steps = []
 
@@ -531,8 +509,7 @@ class ParserGenerator:
             var_name = f"child_{i}"
 
             if symbol.is_terminal:
-                parsing_steps.append(
-                    f"""
+                parsing_steps.append(f"""
         # Parse terminal: {symbol.name}
         if not self._match_terminal("{symbol.name}"):
             self.position = start_pos  # Backtrack
@@ -546,24 +523,19 @@ class ParserGenerator:
             confidence=1.0,
             semantic_type="{symbol.semantic_type}"
         )
-"""
-                )
+""")
             else:
                 method_name = self._sanitize_symbol_name(symbol.name)
-                parsing_steps.append(
-                    f"""
+                parsing_steps.append(f"""
         # Parse non-terminal: {symbol.name}
         {var_name} = await self.parse_{method_name}()
         if {var_name} is None:
             self.position = start_pos  # Backtrack
             return None
-"""
-                )
+""")
 
         # Build result node
-        children_list = ", ".join(
-            [f"child_{i}" for i in range(len(rule.right_hand_side))]
-        )
+        children_list = ", ".join([f"child_{i}" for i in range(len(rule.right_hand_side))])
 
         result_logic = f"""
         # Build result node
@@ -587,9 +559,7 @@ class ParserGenerator:
 
         return "\n".join(parsing_steps) + result_logic
 
-    async def _generate_alternative_rules_logic(
-        self, rules: List[ProductionRule], symbol_name: str
-    ) -> str:
+    async def _generate_alternative_rules_logic(self, rules: List[ProductionRule], symbol_name: str) -> str:
         """Generate logic for trying alternative rules."""
         alternatives = []
 
@@ -622,9 +592,7 @@ class ParserGenerator:
 """
             else:
                 # Generate sequence parsing for this alternative
-                sequence_logic = await self._generate_sequence_parsing_logic(
-                    rule, symbol_name
-                )
+                sequence_logic = await self._generate_sequence_parsing_logic(rule, symbol_name)
                 alt_logic = f"""
         # Try alternative: {rule}
         save_pos = self.position
@@ -650,9 +618,7 @@ class ParserGenerator:
         sanitized = "".join(c if c.isalnum() or c == "_" else "_" for c in sanitized)
         return sanitized.lower()
 
-    async def _compile_parser(
-        self, parser_code: str, parser_id: str
-    ) -> types.ModuleType:
+    async def _compile_parser(self, parser_code: str, parser_id: str) -> types.ModuleType:
         """Compile generated parser code into executable module."""
         self.logger.debug(f"Compiling parser code for {parser_id}")
 
@@ -724,9 +690,7 @@ def _patch_parser_class(cls):
     return cls
 '''
 
-    def _create_parse_function(
-        self, compiled_parser: types.ModuleType, parser_id: str
-    ) -> Callable[[bytes], ParseResult]:
+    def _create_parse_function(self, compiled_parser: types.ModuleType, parser_id: str) -> Callable[[bytes], ParseResult]:
         """Create parse function from compiled parser."""
         parse_func_name = f"parse_{parser_id}"
 
@@ -745,9 +709,7 @@ def _patch_parser_class(cls):
 
             return fallback_parse
 
-    def _create_validate_function(
-        self, compiled_parser: types.ModuleType, parser_id: str
-    ) -> Callable[[bytes], bool]:
+    def _create_validate_function(self, compiled_parser: types.ModuleType, parser_id: str) -> Callable[[bytes], bool]:
         """Create validation function from compiled parser."""
         parse_func_name = f"parse_{parser_id}"
 
@@ -817,13 +779,9 @@ def _patch_parser_class(cls):
 
         return removed
 
-    async def benchmark_parser(
-        self, parser: GeneratedParser, test_data: List[bytes], iterations: int = 100
-    ) -> Dict[str, Any]:
+    async def benchmark_parser(self, parser: GeneratedParser, test_data: List[bytes], iterations: int = 100) -> Dict[str, Any]:
         """Benchmark parser performance."""
-        self.logger.info(
-            f"Benchmarking parser {parser.parser_id} with {len(test_data)} samples"
-        )
+        self.logger.info(f"Benchmarking parser {parser.parser_id} with {len(test_data)} samples")
 
         total_time = 0.0
         successful_parses = 0
@@ -852,18 +810,10 @@ def _patch_parser_class(cls):
             "parser_id": parser.parser_id,
             "total_operations": total_operations,
             "total_time": total_time,
-            "average_time": (
-                total_time / total_operations if total_operations > 0 else 0.0
-            ),
-            "operations_per_second": (
-                total_operations / total_time if total_time > 0 else 0.0
-            ),
-            "success_rate": (
-                successful_parses / total_operations if total_operations > 0 else 0.0
-            ),
-            "average_confidence": (
-                total_confidence / successful_parses if successful_parses > 0 else 0.0
-            ),
+            "average_time": (total_time / total_operations if total_operations > 0 else 0.0),
+            "operations_per_second": (total_operations / total_time if total_time > 0 else 0.0),
+            "success_rate": (successful_parses / total_operations if total_operations > 0 else 0.0),
+            "average_confidence": (total_confidence / successful_parses if successful_parses > 0 else 0.0),
             "successful_parses": successful_parses,
         }
 

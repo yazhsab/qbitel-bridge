@@ -55,9 +55,7 @@ class StartupValidator:
     - Security requirements
     """
 
-    def __init__(
-        self, config: Optional[Dict[str, Any]] = None, environment: str = "development"
-    ):
+    def __init__(self, config: Optional[Dict[str, Any]] = None, environment: str = "development"):
         """Initialize startup validator."""
         self.config = config or {}
         self.environment = environment
@@ -235,11 +233,7 @@ class StartupValidator:
         for var in required_vars:
             value = os.getenv(var)
             if not value:
-                severity = (
-                    ValidationSeverity.ERROR
-                    if self.environment == "production"
-                    else ValidationSeverity.WARNING
-                )
+                severity = ValidationSeverity.ERROR if self.environment == "production" else ValidationSeverity.WARNING
                 self.add_result(
                     ValidationResult(
                         check_name=f"Database Config: {var}",
@@ -444,9 +438,7 @@ class StartupValidator:
                         details={"value": cors_origins},
                     )
                 )
-            elif not all(
-                origin.startswith("https://") for origin in cors_origins.split(",")
-            ):
+            elif not all(origin.startswith("https://") for origin in cors_origins.split(",")):
                 self.add_result(
                     ValidationResult(
                         check_name="Security: CORS Origins",
@@ -672,21 +664,15 @@ class StartupValidator:
         has_error_failures = len(failed_errors) > 0
 
         if has_critical_failures:
-            logger.critical(
-                "❌ VALIDATION FAILED: Critical issues must be resolved before starting!"
-            )
+            logger.critical("❌ VALIDATION FAILED: Critical issues must be resolved before starting!")
             logger.critical("   Application will NOT start.")
             return False
         elif has_error_failures and self.environment == "production":
-            logger.error(
-                "❌ VALIDATION FAILED: Errors found in production environment!"
-            )
+            logger.error("❌ VALIDATION FAILED: Errors found in production environment!")
             logger.error("   Fix errors before deploying to production.")
             return False
         elif has_error_failures:
-            logger.warning(
-                "⚠️  VALIDATION WARNING: Errors found but allowed in non-production environment"
-            )
+            logger.warning("⚠️  VALIDATION WARNING: Errors found but allowed in non-production environment")
             logger.warning("   Application will start, but errors should be fixed.")
             return True
         else:
@@ -721,8 +707,6 @@ def validate_startup(config: Optional[Dict[str, Any]] = None) -> bool:
 
 if __name__ == "__main__":
     # Allow running as standalone script
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-    )
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
     validate_startup()

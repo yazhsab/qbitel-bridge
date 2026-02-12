@@ -22,6 +22,7 @@ from ai_engine.domains.banking.security.pki.certificate_types import (
 
 class CertificateManagerError(Exception):
     """Exception for certificate management operations."""
+
     pass
 
 
@@ -111,17 +112,18 @@ class CertificateManager:
         )
 
         # Generate fingerprints (placeholder - would use actual cert)
-        cert_info.fingerprint_sha256 = hashlib.sha256(
-            f"{cert_id}{serial}".encode()
-        ).hexdigest()
+        cert_info.fingerprint_sha256 = hashlib.sha256(f"{cert_id}{serial}".encode()).hexdigest()
 
         self._certificates[cert_id] = cert_info
 
-        self._audit("ca_certificate_generated", {
-            "certificate_id": cert_id,
-            "subject": subject.common_name,
-            "validity_years": validity_years,
-        })
+        self._audit(
+            "ca_certificate_generated",
+            {
+                "certificate_id": cert_id,
+                "subject": subject.common_name,
+                "validity_years": validity_years,
+            },
+        )
 
         return cert_info
 
@@ -194,9 +196,7 @@ class CertificateManager:
             not_after=now + timedelta(days=validity_days),
             public_key_algorithm=self._get_algorithm_name(key_type),
             key_size=key_type.key_size,
-            signature_algorithm=self._get_signature_algorithm(
-                self._get_key_type_from_size(issuer_cert.key_size)
-            ),
+            signature_algorithm=self._get_signature_algorithm(self._get_key_type_from_size(issuer_cert.key_size)),
             key_usage=key_usage,
             extended_key_usage=extended_key_usage,
             san_dns_names=san_dns_names or [],
@@ -206,18 +206,19 @@ class CertificateManager:
             created_at=now,
         )
 
-        cert_info.fingerprint_sha256 = hashlib.sha256(
-            f"{cert_id}{serial}".encode()
-        ).hexdigest()
+        cert_info.fingerprint_sha256 = hashlib.sha256(f"{cert_id}{serial}".encode()).hexdigest()
 
         self._certificates[cert_id] = cert_info
 
-        self._audit("certificate_generated", {
-            "certificate_id": cert_id,
-            "subject": subject.common_name,
-            "cert_type": cert_type.value,
-            "issuer": issuer_cert.subject.common_name,
-        })
+        self._audit(
+            "certificate_generated",
+            {
+                "certificate_id": cert_id,
+                "subject": subject.common_name,
+                "cert_type": cert_type.value,
+                "issuer": issuer_cert.subject.common_name,
+            },
+        )
 
         return cert_info
 
@@ -257,10 +258,12 @@ class CertificateManager:
 
         extended_key_usage = list(psp_roles)
         if cert_type == CertificateType.PSD2_QWAC:
-            extended_key_usage.extend([
-                ExtendedKeyUsage.SERVER_AUTH,
-                ExtendedKeyUsage.CLIENT_AUTH,
-            ])
+            extended_key_usage.extend(
+                [
+                    ExtendedKeyUsage.SERVER_AUTH,
+                    ExtendedKeyUsage.CLIENT_AUTH,
+                ]
+            )
 
         return self.generate_certificate(
             subject=subject,
@@ -350,11 +353,14 @@ class CertificateManager:
             "serial_number": cert.serial_number,
         }
 
-        self._audit("certificate_revoked", {
-            "certificate_id": cert_id,
-            "subject": cert.subject.common_name,
-            "reason": reason,
-        })
+        self._audit(
+            "certificate_revoked",
+            {
+                "certificate_id": cert_id,
+                "subject": cert.subject.common_name,
+                "reason": reason,
+            },
+        )
 
     def is_revoked(self, cert_id: str) -> bool:
         """Check if certificate is revoked."""
@@ -383,6 +389,7 @@ class CertificateManager:
     def _generate_serial_number(self) -> str:
         """Generate unique serial number."""
         import secrets
+
         return secrets.token_hex(20)
 
     def _get_algorithm_name(self, key_type: HSMKeyType) -> str:

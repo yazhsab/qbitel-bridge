@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class FindingImportError(Exception):
     """Raised when Security Hub fails to import a finding"""
+
     pass
 
 
@@ -50,7 +51,7 @@ class AWSSecurityHubIntegration:
         """
         if self._client is None:
             try:
-                self._client = boto3.client('securityhub', region_name=self.region)
+                self._client = boto3.client("securityhub", region_name=self.region)
                 logger.info(f"Created boto3 SecurityHub client for region {self.region}")
             except Exception as e:
                 logger.error(f"Failed to create boto3 client: {e}")
@@ -64,7 +65,7 @@ class AWSSecurityHubIntegration:
         severity: str,
         resource_id: str,
         finding_type: str = "Software and Configuration Checks",
-        resource_type: str = "Container"
+        resource_type: str = "Container",
     ) -> Dict[str, Any]:
         """
         Publish a finding to AWS Security Hub.
@@ -102,18 +103,11 @@ class AWSSecurityHubIntegration:
             "Types": [finding_type],
             "CreatedAt": timestamp,
             "UpdatedAt": timestamp,
-            "Severity": {
-                "Label": severity
-            },
+            "Severity": {"Label": severity},
             "Title": title,
             "Description": description,
-            "Resources": [{
-                "Type": resource_type,
-                "Id": resource_id
-            }],
-            "Compliance": {
-                "Status": "FAILED" if severity in ["CRITICAL", "HIGH"] else "WARNING"
-            }
+            "Resources": [{"Type": resource_type, "Id": resource_id}],
+            "Compliance": {"Status": "FAILED" if severity in ["CRITICAL", "HIGH"] else "WARNING"},
         }
 
         # Publish to AWS Security Hub with retry logic
@@ -123,33 +117,28 @@ class AWSSecurityHubIntegration:
                 response = client.batch_import_findings(Findings=[finding])
 
                 # Check for failures
-                if response.get('FailedCount', 0) > 0:
-                    failed_findings = response.get('FailedFindings', [])
+                if response.get("FailedCount", 0) > 0:
+                    failed_findings = response.get("FailedFindings", [])
                     error_msg = f"Failed to import finding: {failed_findings}"
                     logger.error(error_msg)
                     raise FindingImportError(error_msg)
 
                 logger.info(f"Successfully published finding to Security Hub: {title} (Severity: {severity})")
-                return {
-                    "success": True,
-                    "finding_id": finding["Id"],
-                    "response": response,
-                    "timestamp": timestamp
-                }
+                return {"success": True, "finding_id": finding["Id"], "response": response, "timestamp": timestamp}
 
             except FindingImportError:
                 # Finding import failed - don't retry, re-raise immediately
                 raise
 
             except ClientError as e:
-                error_code = e.response.get('Error', {}).get('Code', 'Unknown')
-                error_message = e.response.get('Error', {}).get('Message', str(e))
+                error_code = e.response.get("Error", {}).get("Code", "Unknown")
+                error_message = e.response.get("Error", {}).get("Message", str(e))
 
                 logger.warning(f"AWS API error on attempt {attempt + 1}/{self.max_retries}: {error_code} - {error_message}")
 
                 if attempt < self.max_retries - 1:
                     # Exponential backoff
-                    wait_time = 2 ** attempt
+                    wait_time = 2**attempt
                     logger.info(f"Retrying in {wait_time} seconds...")
                     time.sleep(wait_time)
                 else:
@@ -159,7 +148,7 @@ class AWSSecurityHubIntegration:
             except BotoCoreError as e:
                 logger.error(f"BotoCore error on attempt {attempt + 1}/{self.max_retries}: {e}")
                 if attempt < self.max_retries - 1:
-                    wait_time = 2 ** attempt
+                    wait_time = 2**attempt
                     time.sleep(wait_time)
                 else:
                     raise
@@ -198,41 +187,39 @@ class AWSSecurityHubIntegration:
 
         # Process in batches of 100
         for i in range(0, len(findings), batch_size):
-            batch = findings[i:i + batch_size]
+            batch = findings[i : i + batch_size]
 
             try:
                 client = self._get_client()
                 response = client.batch_import_findings(Findings=batch)
 
-                success_count = response.get('SuccessCount', 0)
-                failed_count = response.get('FailedCount', 0)
+                success_count = response.get("SuccessCount", 0)
+                failed_count = response.get("FailedCount", 0)
 
                 total_processed += success_count
                 total_failed += failed_count
 
-                results.append({
-                    "batch_index": i // batch_size,
-                    "success_count": success_count,
-                    "failed_count": failed_count,
-                    "failed_findings": response.get('FailedFindings', [])
-                })
+                results.append(
+                    {
+                        "batch_index": i // batch_size,
+                        "success_count": success_count,
+                        "failed_count": failed_count,
+                        "failed_findings": response.get("FailedFindings", []),
+                    }
+                )
 
                 logger.info(f"Batch {i // batch_size + 1}: {success_count} succeeded, {failed_count} failed")
 
             except Exception as e:
                 logger.error(f"Error processing batch {i // batch_size + 1}: {e}")
                 total_failed += len(batch)
-                results.append({
-                    "batch_index": i // batch_size,
-                    "error": str(e),
-                    "failed_count": len(batch)
-                })
+                results.append({"batch_index": i // batch_size, "error": str(e), "failed_count": len(batch)})
 
         return {
             "success": total_failed == 0,
             "total_processed": total_processed,
             "total_failed": total_failed,
-            "batches": results
+            "batches": results,
         }
 
     def close(self):
@@ -249,9 +236,7 @@ class AWSSecurityHubIntegration:
             "Resources": {
                 "QbitelSecurityHubIntegration": {
                     "Type": "AWS::SecurityHub::ProductSubscription",
-                    "Properties": {
-                        "ProductArn": f"arn:aws:securityhub:{self.region}::product/qbitel/quantum-security"
-                    }
+                    "Properties": {"ProductArn": f"arn:aws:securityhub:{self.region}::product/qbitel/quantum-security"},
                 }
-            }
+            },
         }

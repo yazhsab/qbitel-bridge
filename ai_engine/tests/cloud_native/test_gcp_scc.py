@@ -1,6 +1,7 @@
 """
 Unit tests for GCP Security Command Center Integration.
 """
+
 import pytest
 import json
 from unittest.mock import Mock, patch
@@ -10,9 +11,7 @@ from pathlib import Path
 # Add ai_engine to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from cloud_native.cloud_integrations.gcp.security_command_center import (
-    GCPSecurityCommandCenterIntegration
-)
+from cloud_native.cloud_integrations.gcp.security_command_center import GCPSecurityCommandCenterIntegration
 
 
 class TestGCPSecurityCommandCenterIntegration:
@@ -21,10 +20,7 @@ class TestGCPSecurityCommandCenterIntegration:
     @pytest.fixture
     def scc(self):
         """Create SCC integration instance"""
-        return GCPSecurityCommandCenterIntegration(
-            project_id="my-gcp-project",
-            organization_id="123456789012"
-        )
+        return GCPSecurityCommandCenterIntegration(project_id="my-gcp-project", organization_id="123456789012")
 
     def test_initialization(self, scc):
         """Test initialization"""
@@ -37,7 +33,7 @@ class TestGCPSecurityCommandCenterIntegration:
             finding_id="test-finding-001",
             category="VULNERABILITY",
             severity="HIGH",
-            resource_name="//container.googleapis.com/projects/my-project/zones/us-central1-a/clusters/my-cluster"
+            resource_name="//container.googleapis.com/projects/my-project/zones/us-central1-a/clusters/my-cluster",
         )
 
         assert isinstance(result, dict)
@@ -51,7 +47,7 @@ class TestGCPSecurityCommandCenterIntegration:
                 finding_id=f"test-{severity.lower()}",
                 category="VULNERABILITY",
                 severity=severity,
-                resource_name="//compute.googleapis.com/projects/test/zones/us-central1-a/instances/vm1"
+                resource_name="//compute.googleapis.com/projects/test/zones/us-central1-a/instances/vm1",
             )
 
             assert isinstance(result, dict)
@@ -68,8 +64,8 @@ class TestGCPSecurityCommandCenterIntegration:
             additional_properties={
                 "vulnerable_algorithm": "RSA-2048",
                 "recommended_alternative": "Kyber-1024",
-                "affected_containers": ["app:v1.0", "api:v2.0"]
-            }
+                "affected_containers": ["app:v1.0", "api:v2.0"],
+            },
         )
 
         assert isinstance(result, dict)
@@ -85,8 +81,8 @@ class TestGCPSecurityCommandCenterIntegration:
                 "violation_type": "privileged_container",
                 "container_name": "nginx",
                 "namespace": "production",
-                "image": "nginx:1.21"
-            }
+                "image": "nginx:1.21",
+            },
         )
 
         assert isinstance(result, dict)
@@ -101,8 +97,8 @@ class TestGCPSecurityCommandCenterIntegration:
             additional_properties={
                 "mesh_type": "Istio",
                 "issue": "mTLS not enforced",
-                "affected_services": ["api", "backend", "frontend"]
-            }
+                "affected_services": ["api", "backend", "frontend"],
+            },
         )
 
         assert isinstance(result, dict)
@@ -130,8 +126,8 @@ class TestGCPSecurityCommandCenterIntegration:
                 "cve": "CVE-2024-1234",
                 "cvss_score": 8.5,
                 "affected_package": "openssl",
-                "fixed_version": "1.1.1w"
-            }
+                "fixed_version": "1.1.1w",
+            },
         )
 
         assert isinstance(result, dict)
@@ -142,32 +138,18 @@ class TestGCPSecurityCommandCenterIntegration:
 
         results = []
         for fid in finding_ids:
-            result = scc.create_finding(
-                finding_id=fid,
-                category="VULNERABILITY",
-                severity="MEDIUM",
-                resource_name="//test"
-            )
+            result = scc.create_finding(finding_id=fid, category="VULNERABILITY", severity="MEDIUM", resource_name="//test")
             results.append(result)
 
         assert len(results) == 3
 
     def test_finding_categories(self, scc):
         """Test different finding categories"""
-        categories = [
-            "VULNERABILITY",
-            "MISCONFIGURATION",
-            "THREAT",
-            "COMPLIANCE",
-            "ANOMALY"
-        ]
+        categories = ["VULNERABILITY", "MISCONFIGURATION", "THREAT", "COMPLIANCE", "ANOMALY"]
 
         for category in categories:
             result = scc.create_finding(
-                finding_id=f"test-{category.lower()}",
-                category=category,
-                severity="MEDIUM",
-                resource_name="//test"
+                finding_id=f"test-{category.lower()}", category=category, severity="MEDIUM", resource_name="//test"
             )
 
             assert isinstance(result, dict)
@@ -178,15 +160,12 @@ class TestGCPSecurityCommandCenterIntegration:
             "//compute.googleapis.com/projects/test/zones/us-central1-a/instances/vm1",
             "//container.googleapis.com/projects/test/zones/us-central1-a/clusters/cluster1",
             "//storage.googleapis.com/projects/test/buckets/my-bucket",
-            "//cloudkms.googleapis.com/projects/test/locations/global/keyRings/ring1"
+            "//cloudkms.googleapis.com/projects/test/locations/global/keyRings/ring1",
         ]
 
         for resource_name in resource_names:
             result = scc.create_finding(
-                finding_id=f"test-{len(resource_name)}",
-                category="VULNERABILITY",
-                severity="LOW",
-                resource_name=resource_name
+                finding_id=f"test-{len(resource_name)}", category="VULNERABILITY", severity="LOW", resource_name=resource_name
             )
 
             assert isinstance(result, dict)
@@ -208,10 +187,7 @@ class TestGCPSecurityCommandCenterIntegration:
             category="THREAT",
             severity="HIGH",
             resource_name="//test",
-            additional_properties={
-                "event_time": "2024-01-01T00:00:00Z",
-                "create_time": "2024-01-01T00:01:00Z"
-            }
+            additional_properties={"event_time": "2024-01-01T00:00:00Z", "create_time": "2024-01-01T00:01:00Z"},
         )
 
         assert isinstance(result, dict)

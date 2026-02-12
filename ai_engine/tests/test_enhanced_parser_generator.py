@@ -59,12 +59,8 @@ def simple_grammar():
     data_symbol = Symbol(name="<DATA>", is_terminal=False, frequency=10)
 
     # Terminal symbols
-    byte_0x01 = Symbol(
-        name="0x01", is_terminal=True, frequency=10, semantic_type="binary"
-    )
-    byte_0x02 = Symbol(
-        name="0x02", is_terminal=True, frequency=10, semantic_type="binary"
-    )
+    byte_0x01 = Symbol(name="0x01", is_terminal=True, frequency=10, semantic_type="binary")
+    byte_0x02 = Symbol(name="0x02", is_terminal=True, frequency=10, semantic_type="binary")
 
     symbols = {
         "<START>": start_symbol,
@@ -107,9 +103,7 @@ def simple_grammar():
         ),
     ]
 
-    return Grammar(
-        rules=rules, symbols=symbols, start_symbol="<START>", metadata={"test": True}
-    )
+    return Grammar(rules=rules, symbols=symbols, start_symbol="<START>", metadata={"test": True})
 
 
 @pytest.fixture
@@ -177,18 +171,12 @@ class TestOptimizedParserGeneration:
     async def test_invalid_optimization_level(self, enhanced_generator, simple_grammar):
         """Test invalid optimization level raises error."""
         with pytest.raises(ValueError, match="Invalid optimization level"):
-            await enhanced_generator.generate_optimized_parser(
-                grammar=simple_grammar, optimization_level=4
-            )
+            await enhanced_generator.generate_optimized_parser(grammar=simple_grammar, optimization_level=4)
 
     @pytest.mark.asyncio
-    async def test_optimization_metrics_tracking(
-        self, enhanced_generator, simple_grammar
-    ):
+    async def test_optimization_metrics_tracking(self, enhanced_generator, simple_grammar):
         """Test that optimization metrics are properly tracked."""
-        parser = await enhanced_generator.generate_optimized_parser(
-            grammar=simple_grammar, optimization_level=3
-        )
+        parser = await enhanced_generator.generate_optimized_parser(grammar=simple_grammar, optimization_level=3)
 
         metrics = await enhanced_generator.get_optimization_metrics(parser.parser_id)
         assert metrics is not None
@@ -201,9 +189,7 @@ class TestStreamingParser:
     @pytest.mark.asyncio
     async def test_generate_streaming_parser(self, enhanced_generator, simple_grammar):
         """Test streaming parser generation."""
-        parser = await enhanced_generator.generate_streaming_parser(
-            grammar=simple_grammar, protocol_name="test_protocol"
-        )
+        parser = await enhanced_generator.generate_streaming_parser(grammar=simple_grammar, protocol_name="test_protocol")
 
         assert isinstance(parser, StreamingParser)
         assert parser.parser_id.startswith("stream_")
@@ -212,13 +198,9 @@ class TestStreamingParser:
         assert callable(parser.reset_function)
 
     @pytest.mark.asyncio
-    async def test_streaming_parse_single_chunk(
-        self, enhanced_generator, simple_grammar
-    ):
+    async def test_streaming_parse_single_chunk(self, enhanced_generator, simple_grammar):
         """Test parsing a single data chunk."""
-        parser = await enhanced_generator.generate_streaming_parser(
-            grammar=simple_grammar
-        )
+        parser = await enhanced_generator.generate_streaming_parser(grammar=simple_grammar)
 
         state = parser.reset_function()
         data_chunk = b"\x01\x02"
@@ -229,13 +211,9 @@ class TestStreamingParser:
         assert len(new_state.buffer) >= 0
 
     @pytest.mark.asyncio
-    async def test_streaming_parse_multiple_chunks(
-        self, enhanced_generator, simple_grammar, test_messages
-    ):
+    async def test_streaming_parse_multiple_chunks(self, enhanced_generator, simple_grammar, test_messages):
         """Test parsing multiple data chunks."""
-        parser = await enhanced_generator.generate_streaming_parser(
-            grammar=simple_grammar
-        )
+        parser = await enhanced_generator.generate_streaming_parser(grammar=simple_grammar)
 
         state = parser.reset_function()
         total_nodes = []
@@ -250,9 +228,7 @@ class TestStreamingParser:
     @pytest.mark.asyncio
     async def test_streaming_state_reset(self, enhanced_generator, simple_grammar):
         """Test streaming state reset functionality."""
-        parser = await enhanced_generator.generate_streaming_parser(
-            grammar=simple_grammar
-        )
+        parser = await enhanced_generator.generate_streaming_parser(grammar=simple_grammar)
 
         state1 = parser.reset_function()
         state1.buffer = b"test"
@@ -267,13 +243,9 @@ class TestStreamingParser:
     @pytest.mark.asyncio
     async def test_list_streaming_parsers(self, enhanced_generator, simple_grammar):
         """Test listing streaming parsers."""
-        parser1 = await enhanced_generator.generate_streaming_parser(
-            grammar=simple_grammar, parser_id="stream_test_1"
-        )
+        parser1 = await enhanced_generator.generate_streaming_parser(grammar=simple_grammar, parser_id="stream_test_1")
 
-        parser2 = await enhanced_generator.generate_streaming_parser(
-            grammar=simple_grammar, parser_id="stream_test_2"
-        )
+        parser2 = await enhanced_generator.generate_streaming_parser(grammar=simple_grammar, parser_id="stream_test_2")
 
         parsers = await enhanced_generator.list_streaming_parsers()
 
@@ -302,9 +274,7 @@ class TestErrorRecovery:
     @pytest.mark.asyncio
     async def test_parse_with_errors(self, enhanced_generator, simple_grammar):
         """Test parsing data with errors."""
-        parser = await enhanced_generator.generate_error_recovering_parser(
-            grammar=simple_grammar
-        )
+        parser = await enhanced_generator.generate_error_recovering_parser(grammar=simple_grammar)
 
         # Data with potential errors
         corrupted_data = b"\x01\xff\x02\x03\x01\x02"
@@ -318,16 +288,12 @@ class TestErrorRecovery:
     @pytest.mark.asyncio
     async def test_error_recovery_function(self, enhanced_generator, simple_grammar):
         """Test error recovery function directly."""
-        parser = await enhanced_generator.generate_error_recovering_parser(
-            grammar=simple_grammar
-        )
+        parser = await enhanced_generator.generate_error_recovering_parser(grammar=simple_grammar)
 
         data = b"\x01\xff\x02"
         error_position = 1
 
-        recovered_node, new_position = await parser.recover_function(
-            data, error_position, "parse_error"
-        )
+        recovered_node, new_position = await parser.recover_function(data, error_position, "parse_error")
 
         # Recovery should either succeed or advance position
         assert new_position > error_position or recovered_node is not None
@@ -335,9 +301,7 @@ class TestErrorRecovery:
     @pytest.mark.asyncio
     async def test_partial_parse_success(self, enhanced_generator, simple_grammar):
         """Test partial parsing success with errors."""
-        parser = await enhanced_generator.generate_error_recovering_parser(
-            grammar=simple_grammar
-        )
+        parser = await enhanced_generator.generate_error_recovering_parser(grammar=simple_grammar)
 
         # Mix of valid and invalid data
         mixed_data = b"\x01\x02\xff\xff\x01\x02"
@@ -351,9 +315,7 @@ class TestErrorRecovery:
     @pytest.mark.asyncio
     async def test_list_robust_parsers(self, enhanced_generator, simple_grammar):
         """Test listing robust parsers."""
-        parser1 = await enhanced_generator.generate_error_recovering_parser(
-            grammar=simple_grammar, parser_id="robust_test_1"
-        )
+        parser1 = await enhanced_generator.generate_error_recovering_parser(grammar=simple_grammar, parser_id="robust_test_1")
 
         parsers = await enhanced_generator.list_robust_parsers()
 
@@ -365,17 +327,11 @@ class TestPerformanceProfiling:
     """Test performance profiling functionality."""
 
     @pytest.mark.asyncio
-    async def test_profile_parser(
-        self, enhanced_generator, simple_grammar, test_messages
-    ):
+    async def test_profile_parser(self, enhanced_generator, simple_grammar, test_messages):
         """Test parser profiling."""
-        parser = await enhanced_generator.generate_optimized_parser(
-            grammar=simple_grammar, optimization_level=2
-        )
+        parser = await enhanced_generator.generate_optimized_parser(grammar=simple_grammar, optimization_level=2)
 
-        profile = await enhanced_generator.profile_parser(
-            parser=parser, test_data=test_messages, iterations=10
-        )
+        profile = await enhanced_generator.profile_parser(parser=parser, test_data=test_messages, iterations=10)
 
         assert isinstance(profile, ParserProfile)
         assert profile.parser_id == parser.parser_id
@@ -386,45 +342,29 @@ class TestPerformanceProfiling:
         assert 0 <= profile.success_rate <= 1.0
 
     @pytest.mark.asyncio
-    async def test_profile_streaming_parser(
-        self, enhanced_generator, simple_grammar, test_messages
-    ):
+    async def test_profile_streaming_parser(self, enhanced_generator, simple_grammar, test_messages):
         """Test streaming parser profiling."""
-        parser = await enhanced_generator.generate_streaming_parser(
-            grammar=simple_grammar
-        )
+        parser = await enhanced_generator.generate_streaming_parser(grammar=simple_grammar)
 
-        profile = await enhanced_generator.profile_parser(
-            parser=parser, test_data=test_messages, iterations=5
-        )
+        profile = await enhanced_generator.profile_parser(parser=parser, test_data=test_messages, iterations=5)
 
         assert isinstance(profile, ParserProfile)
         assert profile.throughput >= 0
 
     @pytest.mark.asyncio
-    async def test_profile_robust_parser(
-        self, enhanced_generator, simple_grammar, test_messages
-    ):
+    async def test_profile_robust_parser(self, enhanced_generator, simple_grammar, test_messages):
         """Test robust parser profiling."""
-        parser = await enhanced_generator.generate_error_recovering_parser(
-            grammar=simple_grammar
-        )
+        parser = await enhanced_generator.generate_error_recovering_parser(grammar=simple_grammar)
 
-        profile = await enhanced_generator.profile_parser(
-            parser=parser, test_data=test_messages, iterations=5
-        )
+        profile = await enhanced_generator.profile_parser(parser=parser, test_data=test_messages, iterations=5)
 
         assert isinstance(profile, ParserProfile)
         assert profile.error_recovery_rate >= 0
 
     @pytest.mark.asyncio
-    async def test_get_parser_profile(
-        self, enhanced_generator, simple_grammar, test_messages
-    ):
+    async def test_get_parser_profile(self, enhanced_generator, simple_grammar, test_messages):
         """Test retrieving cached parser profile."""
-        parser = await enhanced_generator.generate_optimized_parser(
-            grammar=simple_grammar, optimization_level=1
-        )
+        parser = await enhanced_generator.generate_optimized_parser(grammar=simple_grammar, optimization_level=1)
 
         # Profile the parser
         await enhanced_generator.profile_parser(parser, test_messages, iterations=5)
@@ -440,17 +380,11 @@ class TestBenchmarkingSuite:
     """Test comprehensive benchmarking suite."""
 
     @pytest.mark.asyncio
-    async def test_benchmark_single_parser(
-        self, enhanced_generator, simple_grammar, test_messages
-    ):
+    async def test_benchmark_single_parser(self, enhanced_generator, simple_grammar, test_messages):
         """Test benchmarking a single parser."""
-        parser = await enhanced_generator.generate_optimized_parser(
-            grammar=simple_grammar, optimization_level=2
-        )
+        parser = await enhanced_generator.generate_optimized_parser(grammar=simple_grammar, optimization_level=2)
 
-        results = await enhanced_generator.benchmark_parser_suite(
-            parsers=[parser], test_data=test_messages, iterations=10
-        )
+        results = await enhanced_generator.benchmark_parser_suite(parsers=[parser], test_data=test_messages, iterations=10)
 
         assert "parser_results" in results
         assert "comparisons" in results
@@ -458,9 +392,7 @@ class TestBenchmarkingSuite:
         assert parser.parser_id in results["parser_results"]
 
     @pytest.mark.asyncio
-    async def test_benchmark_multiple_parsers(
-        self, enhanced_generator, simple_grammar, test_messages
-    ):
+    async def test_benchmark_multiple_parsers(self, enhanced_generator, simple_grammar, test_messages):
         """Test benchmarking multiple parsers."""
         parser_o1 = await enhanced_generator.generate_optimized_parser(
             grammar=simple_grammar, optimization_level=1, parser_id="bench_o1"
@@ -485,9 +417,7 @@ class TestBenchmarkingSuite:
         assert "average_throughput" in results["summary"]
 
     @pytest.mark.asyncio
-    async def test_benchmark_comparisons(
-        self, enhanced_generator, simple_grammar, test_messages
-    ):
+    async def test_benchmark_comparisons(self, enhanced_generator, simple_grammar, test_messages):
         """Test benchmark comparison metrics."""
         parser1 = await enhanced_generator.generate_optimized_parser(
             grammar=simple_grammar, optimization_level=1, parser_id="comp_1"
@@ -506,22 +436,14 @@ class TestBenchmarkingSuite:
         assert "throughput_vs_best" in results["comparisons"]["comp_1"]
 
     @pytest.mark.asyncio
-    async def test_export_benchmark_json(
-        self, enhanced_generator, simple_grammar, test_messages, tmp_path
-    ):
+    async def test_export_benchmark_json(self, enhanced_generator, simple_grammar, test_messages, tmp_path):
         """Test exporting benchmark results to JSON."""
-        parser = await enhanced_generator.generate_optimized_parser(
-            grammar=simple_grammar, optimization_level=2
-        )
+        parser = await enhanced_generator.generate_optimized_parser(grammar=simple_grammar, optimization_level=2)
 
-        results = await enhanced_generator.benchmark_parser_suite(
-            parsers=[parser], test_data=test_messages, iterations=5
-        )
+        results = await enhanced_generator.benchmark_parser_suite(parsers=[parser], test_data=test_messages, iterations=5)
 
         output_file = tmp_path / "benchmark.json"
-        await enhanced_generator.export_benchmark_report(
-            benchmark_results=results, filepath=str(output_file), format="json"
-        )
+        await enhanced_generator.export_benchmark_report(benchmark_results=results, filepath=str(output_file), format="json")
 
         assert output_file.exists()
 
@@ -533,42 +455,26 @@ class TestBenchmarkingSuite:
         assert "parser_results" in exported_data
 
     @pytest.mark.asyncio
-    async def test_export_benchmark_csv(
-        self, enhanced_generator, simple_grammar, test_messages, tmp_path
-    ):
+    async def test_export_benchmark_csv(self, enhanced_generator, simple_grammar, test_messages, tmp_path):
         """Test exporting benchmark results to CSV."""
-        parser = await enhanced_generator.generate_optimized_parser(
-            grammar=simple_grammar, optimization_level=2
-        )
+        parser = await enhanced_generator.generate_optimized_parser(grammar=simple_grammar, optimization_level=2)
 
-        results = await enhanced_generator.benchmark_parser_suite(
-            parsers=[parser], test_data=test_messages, iterations=5
-        )
+        results = await enhanced_generator.benchmark_parser_suite(parsers=[parser], test_data=test_messages, iterations=5)
 
         output_file = tmp_path / "benchmark.csv"
-        await enhanced_generator.export_benchmark_report(
-            benchmark_results=results, filepath=str(output_file), format="csv"
-        )
+        await enhanced_generator.export_benchmark_report(benchmark_results=results, filepath=str(output_file), format="csv")
 
         assert output_file.exists()
 
     @pytest.mark.asyncio
-    async def test_export_benchmark_html(
-        self, enhanced_generator, simple_grammar, test_messages, tmp_path
-    ):
+    async def test_export_benchmark_html(self, enhanced_generator, simple_grammar, test_messages, tmp_path):
         """Test exporting benchmark results to HTML."""
-        parser = await enhanced_generator.generate_optimized_parser(
-            grammar=simple_grammar, optimization_level=2
-        )
+        parser = await enhanced_generator.generate_optimized_parser(grammar=simple_grammar, optimization_level=2)
 
-        results = await enhanced_generator.benchmark_parser_suite(
-            parsers=[parser], test_data=test_messages, iterations=5
-        )
+        results = await enhanced_generator.benchmark_parser_suite(parsers=[parser], test_data=test_messages, iterations=5)
 
         output_file = tmp_path / "benchmark.html"
-        await enhanced_generator.export_benchmark_report(
-            benchmark_results=results, filepath=str(output_file), format="html"
-        )
+        await enhanced_generator.export_benchmark_report(benchmark_results=results, filepath=str(output_file), format="html")
 
         assert output_file.exists()
 
@@ -585,16 +491,12 @@ class TestPerformanceMetrics:
     @pytest.mark.asyncio
     async def test_parsing_speed_target(self, enhanced_generator, simple_grammar):
         """Test that parsing speed meets 100K+ messages/second target."""
-        parser = await enhanced_generator.generate_optimized_parser(
-            grammar=simple_grammar, optimization_level=3
-        )
+        parser = await enhanced_generator.generate_optimized_parser(grammar=simple_grammar, optimization_level=3)
 
         # Generate test data
         test_data = [b"\x01\x02" for _ in range(1000)]
 
-        profile = await enhanced_generator.profile_parser(
-            parser=parser, test_data=test_data, iterations=100
-        )
+        profile = await enhanced_generator.profile_parser(parser=parser, test_data=test_data, iterations=100)
 
         # Target: 100K+ messages/second
         # Note: This may not be achievable in test environment
@@ -603,17 +505,11 @@ class TestPerformanceMetrics:
         assert profile.average_time > 0
 
     @pytest.mark.asyncio
-    async def test_memory_efficiency_target(
-        self, enhanced_generator, simple_grammar, test_messages
-    ):
+    async def test_memory_efficiency_target(self, enhanced_generator, simple_grammar, test_messages):
         """Test that memory usage is under 10MB per parser target."""
-        parser = await enhanced_generator.generate_optimized_parser(
-            grammar=simple_grammar, optimization_level=3
-        )
+        parser = await enhanced_generator.generate_optimized_parser(grammar=simple_grammar, optimization_level=3)
 
-        profile = await enhanced_generator.profile_parser(
-            parser=parser, test_data=test_messages, iterations=10
-        )
+        profile = await enhanced_generator.profile_parser(parser=parser, test_data=test_messages, iterations=10)
 
         # Target: <10MB per parser
         memory_mb = profile.memory_usage / (1024 * 1024)
@@ -623,9 +519,7 @@ class TestPerformanceMetrics:
     @pytest.mark.asyncio
     async def test_error_recovery_target(self, enhanced_generator, simple_grammar):
         """Test that error recovery achieves 90%+ partial parse success target."""
-        parser = await enhanced_generator.generate_error_recovering_parser(
-            grammar=simple_grammar
-        )
+        parser = await enhanced_generator.generate_error_recovering_parser(grammar=simple_grammar)
 
         # Create test data with some errors
         test_data = [
@@ -636,9 +530,7 @@ class TestPerformanceMetrics:
             b"\x01\x02",  # Valid
         ]
 
-        profile = await enhanced_generator.profile_parser(
-            parser=parser, test_data=test_data, iterations=10
-        )
+        profile = await enhanced_generator.profile_parser(parser=parser, test_data=test_data, iterations=10)
 
         # Target: 90%+ partial parse success
         # Verify metrics are tracked
@@ -650,9 +542,7 @@ class TestIntegration:
     """Integration tests for enhanced parser generator."""
 
     @pytest.mark.asyncio
-    async def test_end_to_end_workflow(
-        self, enhanced_generator, simple_grammar, test_messages
-    ):
+    async def test_end_to_end_workflow(self, enhanced_generator, simple_grammar, test_messages):
         """Test complete workflow from generation to benchmarking."""
         # 1. Generate optimized parser
         parser = await enhanced_generator.generate_optimized_parser(
@@ -664,16 +554,12 @@ class TestIntegration:
         assert parser is not None
 
         # 2. Profile the parser
-        profile = await enhanced_generator.profile_parser(
-            parser=parser, test_data=test_messages, iterations=10
-        )
+        profile = await enhanced_generator.profile_parser(parser=parser, test_data=test_messages, iterations=10)
 
         assert profile.throughput > 0
 
         # 3. Run benchmark
-        results = await enhanced_generator.benchmark_parser_suite(
-            parsers=[parser], test_data=test_messages, iterations=5
-        )
+        results = await enhanced_generator.benchmark_parser_suite(parsers=[parser], test_data=test_messages, iterations=5)
 
         assert parser.parser_id in results["parser_results"]
 
@@ -681,9 +567,7 @@ class TestIntegration:
     async def test_shutdown_cleanup(self, enhanced_generator, simple_grammar):
         """Test proper cleanup on shutdown."""
         # Generate some parsers
-        await enhanced_generator.generate_optimized_parser(
-            grammar=simple_grammar, optimization_level=1
-        )
+        await enhanced_generator.generate_optimized_parser(grammar=simple_grammar, optimization_level=1)
 
         await enhanced_generator.generate_streaming_parser(grammar=simple_grammar)
 

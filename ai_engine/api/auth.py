@@ -78,10 +78,7 @@ class AuthenticationService:
             return secret
 
         # Check if production mode
-        if (
-            hasattr(self.config, "environment")
-            and self.config.environment.value == "production"
-        ):
+        if hasattr(self.config, "environment") and self.config.environment.value == "production":
             raise AuthenticationError(
                 "JWT secret not configured in production mode!\n"
                 "REQUIRED: Configure JWT secret in secrets manager or set QBITEL_AI_JWT_SECRET.\n"
@@ -171,9 +168,7 @@ class AuthenticationService:
     async def revoke_token(self, token: str):
         """Add token to blacklist."""
         try:
-            payload = jwt.decode(
-                token, self.secret_key, algorithms=[self.algorithm], verify=False
-            )
+            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm], verify=False)
             exp_ts = payload.get("exp", 0)
             expiry = datetime.utcfromtimestamp(exp_ts) if exp_ts else datetime.utcnow()
         except Exception:
@@ -189,9 +184,7 @@ class AuthenticationService:
             self._prune_blacklist()
             self._token_blacklist[token] = expiry
 
-    async def store_session(
-        self, user_id: str, session_data: Dict[str, Any], ttl: int = 3600
-    ):
+    async def store_session(self, user_id: str, session_data: Dict[str, Any], ttl: int = 3600):
         """Store user session data."""
         if self.redis_client:
             try:
@@ -214,9 +207,7 @@ class AuthenticationService:
                     try:
                         return json.loads(session_data)
                     except json.JSONDecodeError:
-                        logger.warning(
-                            "Failed to decode session JSON; discarding session data"
-                        )
+                        logger.warning("Failed to decode session JSON; discarding session data")
             except Exception as e:
                 logger.warning(f"Failed to get session: {e}")
         else:
@@ -226,9 +217,7 @@ class AuthenticationService:
                 return session
         return None
 
-    async def authenticate_user(
-        self, username: str, password: str
-    ) -> Optional[Dict[str, Any]]:
+    async def authenticate_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
         """
         Authenticate user credentials.
 
@@ -238,10 +227,7 @@ class AuthenticationService:
         This method is DEPRECATED and will be removed in a future version.
         """
         # Check if we're in production mode
-        if (
-            hasattr(self.config, "environment")
-            and self.config.environment.value == "production"
-        ):
+        if hasattr(self.config, "environment") and self.config.environment.value == "production":
             logger.error(
                 "Legacy authentication called in production mode! "
                 "Use EnterpriseAuthenticationService from auth_enterprise.py instead."
@@ -264,9 +250,7 @@ class AuthenticationService:
             "admin": {
                 "user_id": "admin_001",
                 "username": "admin",
-                "password_hash": self.hash_password(
-                    os.getenv("DEMO_ADMIN_PASSWORD", "DemoOnly_NotForProduction_123!")
-                ),
+                "password_hash": self.hash_password(os.getenv("DEMO_ADMIN_PASSWORD", "DemoOnly_NotForProduction_123!")),
                 "role": "administrator",
                 "permissions": [
                     "protocol_discovery",
@@ -279,9 +263,7 @@ class AuthenticationService:
             "analyst": {
                 "user_id": "analyst_001",
                 "username": "analyst",
-                "password_hash": self.hash_password(
-                    os.getenv("DEMO_ANALYST_PASSWORD", "DemoOnly_NotForProduction_456!")
-                ),
+                "password_hash": self.hash_password(os.getenv("DEMO_ANALYST_PASSWORD", "DemoOnly_NotForProduction_456!")),
                 "role": "security_analyst",
                 "permissions": [
                     "protocol_discovery",
@@ -305,17 +287,13 @@ class AuthenticationService:
 
     def _prune_blacklist(self) -> None:
         now = datetime.utcnow()
-        expired = [
-            token for token, expiry in self._token_blacklist.items() if expiry <= now
-        ]
+        expired = [token for token, expiry in self._token_blacklist.items() if expiry <= now]
         for token in expired:
             self._token_blacklist.pop(token, None)
 
     def _prune_sessions(self) -> None:
         now = datetime.utcnow()
-        expired = [
-            user_id for user_id, expiry in self._session_expiry.items() if expiry <= now
-        ]
+        expired = [user_id for user_id, expiry in self._session_expiry.items() if expiry <= now]
         for user_id in expired:
             self._session_store.pop(user_id, None)
             self._session_expiry.pop(user_id, None)
@@ -397,9 +375,7 @@ def require_permission(permission: str):
     ):
         permissions = current_user.get("permissions", [])
         if permission not in permissions:
-            raise HTTPException(
-                status_code=403, detail=f"Permission '{permission}' required"
-            )
+            raise HTTPException(status_code=403, detail=f"Permission '{permission}' required")
         return current_user
 
     return check_permission
@@ -568,17 +544,12 @@ def initialize_auth(config: Optional[Any] = None) -> str:
     if candidate:
         if len(candidate) < 32:
             logger.warning(
-                f"API key is too short ({len(candidate)} chars). "
-                "Minimum 32 characters recommended for production."
+                f"API key is too short ({len(candidate)} chars). " "Minimum 32 characters recommended for production."
             )
         _api_key = candidate
     else:
         # In production, this should fail
-        if (
-            cfg
-            and hasattr(cfg, "environment")
-            and cfg.environment.value == "production"
-        ):
+        if cfg and hasattr(cfg, "environment") and cfg.environment.value == "production":
             raise AuthenticationError(
                 "API key not configured in production mode!\n"
                 "REQUIRED: Configure API key in secrets manager or set QBITEL_AI_API_KEY.\n"

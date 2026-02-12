@@ -13,7 +13,7 @@ from unittest.mock import Mock, patch, AsyncMock, MagicMock
 import sys
 
 # Mock problematic imports before importing models
-sys.modules['ai_engine.security.field_encryption'] = Mock()
+sys.modules["ai_engine.security.field_encryption"] = Mock()
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -260,7 +260,10 @@ class TestProtocolValidator:
         """Test successful syntax validation."""
         validator = ProtocolValidator()
 
-        with patch.object(validator, '_download_spec_file', return_value="""
+        with patch.object(
+            validator,
+            "_download_spec_file",
+            return_value="""
 protocol_metadata:
   name: test-protocol
   version: 1.0.0
@@ -272,7 +275,8 @@ protocol_spec:
     - id: 1
       name: field1
       type: string
-"""):
+""",
+        ):
             result = await validator.validate_syntax(sample_protocol)
 
         assert result.status == "passed"
@@ -285,7 +289,7 @@ protocol_spec:
         """Test syntax validation with invalid YAML."""
         validator = ProtocolValidator()
 
-        with patch.object(validator, '_download_spec_file', return_value="invalid: yaml: content:"):
+        with patch.object(validator, "_download_spec_file", return_value="invalid: yaml: content:"):
             result = await validator.validate_syntax(sample_protocol)
 
         assert result.status == "failed"
@@ -296,8 +300,8 @@ protocol_spec:
         """Test successful parser testing."""
         validator = ProtocolValidator()
 
-        with patch.object(validator, '_download_parser_code', return_value="def parse(): pass"):
-            with patch.object(validator, '_download_test_data', return_value=b"test"):
+        with patch.object(validator, "_download_parser_code", return_value="def parse(): pass"):
+            with patch.object(validator, "_download_test_data", return_value=b"test"):
                 result = await validator.test_parser(sample_protocol)
 
         assert result.validation_type == "parser_testing"
@@ -313,7 +317,7 @@ def parse_packet(data):
     return {"field": data.decode()}
 """
 
-        with patch.object(validator, '_download_parser_code', return_value=safe_code):
+        with patch.object(validator, "_download_parser_code", return_value=safe_code):
             result = await validator.security_scan(sample_protocol)
 
         assert result.validation_type == "security_scan"
@@ -331,7 +335,7 @@ def parse_packet(data):
     return {}
 """
 
-        with patch.object(validator, '_download_parser_code', return_value=dangerous_code):
+        with patch.object(validator, "_download_parser_code", return_value=dangerous_code):
             result = await validator.security_scan(sample_protocol)
 
         assert result.validation_type == "security_scan"
@@ -363,7 +367,7 @@ class TestMarketplaceKnowledgeBaseIntegration:
 
         integration = MarketplaceKnowledgeBaseIntegration(knowledge_base=mock_kb)
 
-        with patch.object(integration, 'db_manager') as mock_db:
+        with patch.object(integration, "db_manager") as mock_db:
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.side_effect = [
                 sample_protocol,
@@ -371,15 +375,19 @@ class TestMarketplaceKnowledgeBaseIntegration:
             ]
             mock_db.get_session.return_value = mock_session
 
-            with patch.object(integration, '_download_protocol_spec', new=AsyncMock(return_value="""
+            with patch.object(
+                integration,
+                "_download_protocol_spec",
+                new=AsyncMock(return_value="""
 protocol_metadata:
   name: test
   version: 1.0.0
   category: finance
 protocol_spec:
   fields: []
-""")):
-                with patch.object(integration, '_download_parser', new=AsyncMock(return_value="def parse(): pass")):
+"""),
+            ):
+                with patch.object(integration, "_download_parser", new=AsyncMock(return_value="def parse(): pass")):
                     knowledge = await integration.import_marketplace_protocol(
                         protocol_id=sample_protocol.protocol_id,
                         installation_id=sample_installation.installation_id,
@@ -433,12 +441,12 @@ class TestMarketplaceProtocolDeployer:
         """Test deploying protocol to Translation Studio."""
         deployer = MarketplaceProtocolDeployer()
 
-        with patch.object(deployer, 'db_manager') as mock_db:
+        with patch.object(deployer, "db_manager") as mock_db:
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = sample_installation
             mock_db.get_session.return_value = mock_session
 
-            with patch.object(deployer, '_generate_api_spec', new=AsyncMock(return_value={})):
+            with patch.object(deployer, "_generate_api_spec", new=AsyncMock(return_value={})):
                 # Should not raise exception
                 await deployer.deploy_protocol(
                     installation_id=sample_installation.installation_id,
@@ -450,7 +458,7 @@ class TestMarketplaceProtocolDeployer:
         """Test deploying with invalid installation."""
         deployer = MarketplaceProtocolDeployer()
 
-        with patch.object(deployer, 'db_manager') as mock_db:
+        with patch.object(deployer, "db_manager") as mock_db:
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = None
             mock_db.get_session.return_value = mock_session
@@ -516,9 +524,7 @@ class TestMarketplaceIntegration:
     """Integration tests for marketplace components."""
 
     @pytest.mark.asyncio
-    async def test_end_to_end_protocol_submission_flow(
-        self, sample_marketplace_user, db_session
-    ):
+    async def test_end_to_end_protocol_submission_flow(self, sample_marketplace_user, db_session):
         """Test complete protocol submission and validation flow."""
         # This would test the full flow:
         # 1. User submits protocol
@@ -583,9 +589,7 @@ class TestMarketplacePerformance:
         db_session.commit()
 
         # Query protocols
-        results = db_session.query(MarketplaceProtocol).filter(
-            MarketplaceProtocol.status == ProtocolStatus.PUBLISHED
-        ).all()
+        results = db_session.query(MarketplaceProtocol).filter(MarketplaceProtocol.status == ProtocolStatus.PUBLISHED).all()
 
         assert len(results) >= 100
 

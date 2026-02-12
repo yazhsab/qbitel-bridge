@@ -102,9 +102,7 @@ class FeatureExtractor:
 
         self.logger.info("FeatureExtractor initialized")
 
-    async def extract(
-        self, data: bytes, context: str = "general", cache_key: Optional[str] = None
-    ) -> np.ndarray:
+    async def extract(self, data: bytes, context: str = "general", cache_key: Optional[str] = None) -> np.ndarray:
         """
         Extract comprehensive features from protocol data.
 
@@ -446,9 +444,7 @@ class FeatureExtractor:
 
         return np.array(features, dtype=np.float32)
 
-    def _vectorize_statistical_features(
-        self, features: StatisticalFeatures
-    ) -> np.ndarray:
+    def _vectorize_statistical_features(self, features: StatisticalFeatures) -> np.ndarray:
         """Convert statistical features to vector."""
         return np.array(
             [
@@ -458,22 +454,15 @@ class FeatureExtractor:
                 features.entropy / 8.0,  # Normalized entropy
                 features.skewness,
                 features.kurtosis,
-                features.unique_count
-                / min(features.length, 256),  # Normalized uniqueness
+                features.unique_count / min(features.length, 256),  # Normalized uniqueness
                 features.zero_count / features.length if features.length > 0 else 0,
                 features.iqr / 255.0,  # Normalized IQR
-                (
-                    features.most_frequent_count / features.length
-                    if features.length > 0
-                    else 0
-                ),
+                (features.most_frequent_count / features.length if features.length > 0 else 0),
             ],
             dtype=np.float32,
         )
 
-    def _vectorize_structural_features(
-        self, features: StructuralFeatures
-    ) -> np.ndarray:
+    def _vectorize_structural_features(self, features: StructuralFeatures) -> np.ndarray:
         """Convert structural features to vector."""
         return np.array(
             [
@@ -568,11 +557,7 @@ class FeatureExtractor:
                 patterns[pattern] += 1
 
         # Filter by minimum frequency and sort by count
-        frequent_patterns = [
-            (pattern, count)
-            for pattern, count in patterns.items()
-            if count >= 3 and len(pattern) >= 2
-        ]
+        frequent_patterns = [(pattern, count) for pattern, count in patterns.items() if count >= 3 and len(pattern) >= 2]
 
         # Sort by frequency (descending)
         frequent_patterns.sort(key=lambda x: x[1], reverse=True)
@@ -603,9 +588,7 @@ class FeatureExtractor:
         boundaries.append(len(data))  # End boundary
         return sorted(list(set(boundaries)))
 
-    def _calculate_field_lengths(
-        self, boundaries: List[int], total_length: int
-    ) -> List[int]:
+    def _calculate_field_lengths(self, boundaries: List[int], total_length: int) -> List[int]:
         """Calculate field lengths from boundaries."""
         if len(boundaries) < 2:
             return [total_length] if total_length > 0 else []

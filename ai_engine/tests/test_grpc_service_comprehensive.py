@@ -61,9 +61,7 @@ class TestAIEngineGRPCService:
     @pytest.mark.asyncio
     async def test_initialize_service_failure(self, service):
         """Test service initialization failure."""
-        with patch(
-            "ai_engine.api.grpc.QbitelAIEngine", side_effect=Exception("Init failed")
-        ):
+        with patch("ai_engine.api.grpc.QbitelAIEngine", side_effect=Exception("Init failed")):
             with pytest.raises(Exception):
                 await service.initialize()
 
@@ -114,9 +112,7 @@ class TestAIEngineGRPCService:
     async def test_discover_protocol_failure(self, service):
         """Test protocol discovery failure handling."""
         service.ai_engine = AsyncMock()
-        service.ai_engine.discover_protocol = AsyncMock(
-            side_effect=Exception("Discovery failed")
-        )
+        service.ai_engine.discover_protocol = AsyncMock(side_effect=Exception("Discovery failed"))
 
         request = Mock()
         request.data = base64.b64encode(b"test data").decode()
@@ -134,9 +130,7 @@ class TestAIEngineGRPCService:
     async def test_discover_protocol_stream(self, service):
         """Test streaming protocol discovery."""
         service.ai_engine = AsyncMock()
-        service.ai_engine.discover_protocol = AsyncMock(
-            return_value={"protocol_type": "http", "confidence": 0.95}
-        )
+        service.ai_engine.discover_protocol = AsyncMock(return_value={"protocol_type": "http", "confidence": 0.95})
 
         async def request_generator():
             for i in range(3):
@@ -148,9 +142,7 @@ class TestAIEngineGRPCService:
         context = Mock()
 
         responses = []
-        async for response in service.DiscoverProtocolStream(
-            request_generator(), context
-        ):
+        async for response in service.DiscoverProtocolStream(request_generator(), context):
             responses.append(response)
 
         assert len(responses) == 3
@@ -318,9 +310,7 @@ class TestAIEngineGRPCService:
     async def test_batch_process_discovery(self, service):
         """Test batch processing for discovery."""
         service.ai_engine = AsyncMock()
-        service.ai_engine.discover_protocol = AsyncMock(
-            return_value={"protocol_type": "http", "confidence": 0.9}
-        )
+        service.ai_engine.discover_protocol = AsyncMock(return_value={"protocol_type": "http", "confidence": 0.9})
 
         request = Mock()
         request.operation = "discovery"
@@ -531,9 +521,7 @@ class TestAIEngineGRPCClient:
     @pytest.mark.asyncio
     async def test_connect_client_failure(self, client):
         """Test client connection failure."""
-        with patch(
-            "grpc.aio.insecure_channel", side_effect=Exception("Connection failed")
-        ):
+        with patch("grpc.aio.insecure_channel", side_effect=Exception("Connection failed")):
             with pytest.raises(Exception):
                 await client.connect()
 

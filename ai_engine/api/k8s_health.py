@@ -286,9 +286,7 @@ class KubernetesHealthProbes:
             health_ratio = healthy_count / total_count if total_count > 0 else 0
 
             checks["system_health"] = {
-                "status": (
-                    "pass" if health_ratio >= self.readiness_threshold else "fail"
-                ),
+                "status": ("pass" if health_ratio >= self.readiness_threshold else "fail"),
                 "healthy_components": healthy_count,
                 "total_components": total_count,
                 "health_ratio": health_ratio,
@@ -304,10 +302,7 @@ class KubernetesHealthProbes:
                 elif isinstance(check_data, dict):
                     # Check nested dependencies
                     for dep_name, dep_data in check_data.items():
-                        if (
-                            isinstance(dep_data, dict)
-                            and dep_data.get("status") == "fail"
-                        ):
+                        if isinstance(dep_data, dict) and dep_data.get("status") == "fail":
                             failed_checks.append(f"{check_name}.{dep_name}")
 
             if not failed_checks:
@@ -377,11 +372,7 @@ class KubernetesHealthProbes:
             # Check startup criteria
             checks["health_checker"] = {
                 "status": "pass" if self.health_checker else "fail",
-                "message": (
-                    "Health checker initialized"
-                    if self.health_checker
-                    else "Health checker not initialized"
-                ),
+                "message": ("Health checker initialized" if self.health_checker else "Health checker not initialized"),
             }
 
             # Check if minimum startup time elapsed (prevent premature ready state)
@@ -401,24 +392,16 @@ class KubernetesHealthProbes:
             # Check critical dependencies
             dependency_result = await self.check_dependencies()
             critical_deps_ok = all(
-                dep.get("status") == "pass"
-                for dep in dependency_result.checks.values()
-                if dep.get("critical", False)
+                dep.get("status") == "pass" for dep in dependency_result.checks.values() if dep.get("critical", False)
             )
 
             checks["critical_dependencies"] = {
                 "status": "pass" if critical_deps_ok else "fail",
-                "message": (
-                    "Critical dependencies ready"
-                    if critical_deps_ok
-                    else "Critical dependencies not ready"
-                ),
+                "message": ("Critical dependencies ready" if critical_deps_ok else "Critical dependencies not ready"),
             }
 
             # Determine if startup is complete
-            all_checks_pass = all(
-                check.get("status") == "pass" for check in checks.values()
-            )
+            all_checks_pass = all(check.get("status") == "pass" for check in checks.values())
 
             if all_checks_pass:
                 self.startup_complete = True
@@ -490,6 +473,7 @@ class KubernetesHealthProbes:
             start = time.time()
             try:
                 from ..core.database_manager import get_database_manager
+
                 db_manager = get_database_manager()
                 if db_manager is None:
                     return {
@@ -500,6 +484,7 @@ class KubernetesHealthProbes:
                 # Execute a real connectivity check
                 async with db_manager.get_session() as session:
                     from sqlalchemy import text
+
                     result = await session.execute(text("SELECT 1"))
                     result.scalar()
                 elapsed = (time.time() - start) * 1000
@@ -525,6 +510,7 @@ class KubernetesHealthProbes:
             try:
                 import redis.asyncio as aioredis
                 import os
+
                 redis_url = os.getenv("REDIS_URL", os.getenv("QBITEL_REDIS_URL", ""))
                 if not redis_url:
                     return {
@@ -558,6 +544,7 @@ class KubernetesHealthProbes:
             """Check model registry availability by verifying models are loaded."""
             try:
                 from ..models.model_manager import get_model_manager
+
                 manager = get_model_manager()
                 if manager is None:
                     return {
@@ -566,7 +553,7 @@ class KubernetesHealthProbes:
                         "critical": True,
                         "models_loaded": False,
                     }
-                models_loaded = hasattr(manager, 'is_ready') and manager.is_ready()
+                models_loaded = hasattr(manager, "is_ready") and manager.is_ready()
                 return {
                     "status": "pass" if models_loaded else "warn",
                     "message": "Model registry available" if models_loaded else "Models not yet loaded",
@@ -593,6 +580,7 @@ class KubernetesHealthProbes:
             start = time.time()
             try:
                 import httpx
+
                 llm_endpoint = os.getenv("LLM_ENDPOINT", "")
                 if not llm_endpoint:
                     return {

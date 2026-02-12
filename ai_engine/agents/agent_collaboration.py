@@ -260,18 +260,12 @@ class CollaborationFramework:
         self.sessions[session.session_id] = session
         self.stats["total_sessions"] += 1
 
-        self.logger.info(
-            f"Initiated consensus session: {session.session_id[:8]} "
-            f"with {len(participants)} participants"
-        )
+        self.logger.info(f"Initiated consensus session: {session.session_id[:8]} " f"with {len(participants)} participants")
 
         # Notify participants
         await self._notify_participants(session)
 
-        COLLABORATION_SESSIONS.labels(
-            session_type="consensus",
-            status="initiated"
-        ).inc()
+        COLLABORATION_SESSIONS.labels(session_type="consensus", status="initiated").inc()
 
         return session
 
@@ -301,10 +295,7 @@ class CollaborationFramework:
             self.logger.warning(f"Session not found: {session_id}")
             return False
 
-        if session.status not in [
-            CollaborationStatus.GATHERING,
-            CollaborationStatus.VOTING
-        ]:
+        if session.status not in [CollaborationStatus.GATHERING, CollaborationStatus.VOTING]:
             self.logger.warning(f"Session not accepting votes: {session_id}")
             return False
 
@@ -328,10 +319,7 @@ class CollaborationFramework:
         session.votes[agent.agent_id] = vote
         session.status = CollaborationStatus.VOTING
 
-        self.logger.debug(
-            f"Vote submitted: {agent.agent_id[:8]} voted {vote_type.value} "
-            f"in session {session_id[:8]}"
-        )
+        self.logger.debug(f"Vote submitted: {agent.agent_id[:8]} voted {vote_type.value} " f"in session {session_id[:8]}")
 
         # Check if consensus is reached
         await self._check_consensus(session)
@@ -352,27 +340,18 @@ class CollaborationFramework:
             session.result = result
 
             self.stats["successful_consensus"] += 1
-            CONSENSUS_ROUNDS.labels(
-                protocol=session.protocol.value,
-                outcome="success"
-            ).inc()
+            CONSENSUS_ROUNDS.labels(protocol=session.protocol.value, outcome="success").inc()
 
             # Move to completed
             self.completed_sessions.append(session)
             del self.sessions[session.session_id]
 
-            self.logger.info(
-                f"Consensus reached in session {session.session_id[:8]}: "
-                f"{result['outcome']}"
-            )
+            self.logger.info(f"Consensus reached in session {session.session_id[:8]}: " f"{result['outcome']}")
 
             # Notify participants of result
             await self._notify_result(session)
 
-    async def _calculate_consensus_result(
-        self,
-        session: CollaborationSession
-    ) -> Dict[str, Any]:
+    async def _calculate_consensus_result(self, session: CollaborationSession) -> Dict[str, Any]:
         """Calculate consensus result based on protocol."""
         votes = list(session.votes.values())
 
@@ -384,14 +363,8 @@ class CollaborationFramework:
         abstain_count = sum(1 for v in votes if v.vote == VoteType.ABSTAIN)
 
         # Weighted counts
-        approve_weighted = sum(
-            v.weight * v.confidence for v in votes
-            if v.vote == VoteType.APPROVE
-        )
-        reject_weighted = sum(
-            v.weight * v.confidence for v in votes
-            if v.vote == VoteType.REJECT
-        )
+        approve_weighted = sum(v.weight * v.confidence for v in votes if v.vote == VoteType.APPROVE)
+        reject_weighted = sum(v.weight * v.confidence for v in votes if v.vote == VoteType.REJECT)
 
         total_votes = len(votes)
         total_weighted = approve_weighted + reject_weighted
@@ -510,7 +483,7 @@ class CollaborationFramework:
                 "strategy": strategy.value,
                 "max_rounds": max_rounds,
                 "current_round": 1,
-            }
+            },
         )
 
         # Add initial offer
@@ -528,17 +501,13 @@ class CollaborationFramework:
         self.stats["total_sessions"] += 1
 
         self.logger.info(
-            f"Initiated negotiation: {session.session_id[:8]} "
-            f"between {initiator.agent_id[:8]} and {counterpart_id[:8]}"
+            f"Initiated negotiation: {session.session_id[:8]} " f"between {initiator.agent_id[:8]} and {counterpart_id[:8]}"
         )
 
         # Notify counterpart
         await self._notify_negotiation(session, counterpart_id)
 
-        COLLABORATION_SESSIONS.labels(
-            session_type="negotiation",
-            status="initiated"
-        ).inc()
+        COLLABORATION_SESSIONS.labels(session_type="negotiation", status="initiated").inc()
 
         return session
 
@@ -591,10 +560,7 @@ class CollaborationFramework:
         session.offers.append(offer)
         session.metadata["current_round"] = current_round + 1
 
-        self.logger.debug(
-            f"Counter-offer in session {session_id[:8]}: "
-            f"round {current_round}, final={is_final}"
-        )
+        self.logger.debug(f"Counter-offer in session {session_id[:8]}: " f"round {current_round}, final={is_final}")
 
         # Check for agreement
         await self._check_negotiation_outcome(session)
@@ -629,9 +595,7 @@ class CollaborationFramework:
         self.completed_sessions.append(session)
         del self.sessions[session_id]
 
-        self.logger.info(
-            f"Negotiation completed: {session_id[:8]} - agreement reached"
-        )
+        self.logger.info(f"Negotiation completed: {session_id[:8]} - agreement reached")
 
         return True
 
@@ -649,10 +613,7 @@ class CollaborationFramework:
         await self._fail_negotiation(session, f"rejected: {reason}")
         return True
 
-    async def _check_negotiation_outcome(
-        self,
-        session: CollaborationSession
-    ) -> None:
+    async def _check_negotiation_outcome(self, session: CollaborationSession) -> None:
         """Check if negotiation should conclude."""
         if len(session.offers) < 2:
             return
@@ -675,11 +636,7 @@ class CollaborationFramework:
             else:
                 await self._fail_negotiation(session, "incompatible_final_offers")
 
-    async def _fail_negotiation(
-        self,
-        session: CollaborationSession,
-        reason: str
-    ) -> None:
+    async def _fail_negotiation(self, session: CollaborationSession, reason: str) -> None:
         """Mark negotiation as failed."""
         session.status = CollaborationStatus.FAILED
         session.completed_at = datetime.utcnow()
@@ -693,44 +650,23 @@ class CollaborationFramework:
         if session.session_id in self.sessions:
             del self.sessions[session.session_id]
 
-        self.logger.info(
-            f"Negotiation failed: {session.session_id[:8]} - {reason}"
-        )
+        self.logger.info(f"Negotiation failed: {session.session_id[:8]} - {reason}")
 
-    def _calculate_utility(
-        self,
-        terms: Dict[str, Any],
-        agent_id: str
-    ) -> float:
+    def _calculate_utility(self, terms: Dict[str, Any], agent_id: str) -> float:
         """Calculate utility of terms for an agent."""
         # Simplified utility calculation
         # In practice, this would be agent-specific
-        return 0.5 + sum(
-            0.1 for v in terms.values()
-            if isinstance(v, (int, float)) and v > 0
-        )
+        return 0.5 + sum(0.1 for v in terms.values() if isinstance(v, (int, float)) and v > 0)
 
-    def _estimate_other_utility(
-        self,
-        terms: Dict[str, Any],
-        session: CollaborationSession,
-        my_agent_id: str
-    ) -> float:
+    def _estimate_other_utility(self, terms: Dict[str, Any], session: CollaborationSession, my_agent_id: str) -> float:
         """Estimate utility for the other party."""
         # Look at previous offers to estimate
-        other_offers = [
-            o for o in session.offers
-            if o.agent_id != my_agent_id
-        ]
+        other_offers = [o for o in session.offers if o.agent_id != my_agent_id]
         if not other_offers:
             return 0.5
         return other_offers[-1].utility_self
 
-    def _offers_compatible(
-        self,
-        terms1: Dict[str, Any],
-        terms2: Dict[str, Any]
-    ) -> bool:
+    def _offers_compatible(self, terms1: Dict[str, Any], terms2: Dict[str, Any]) -> bool:
         """Check if two offers are compatible."""
         # Simplified compatibility check
         common_keys = set(terms1.keys()) & set(terms2.keys())
@@ -747,11 +683,7 @@ class CollaborationFramework:
 
         return True
 
-    def _merge_offers(
-        self,
-        terms1: Dict[str, Any],
-        terms2: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _merge_offers(self, terms1: Dict[str, Any], terms2: Dict[str, Any]) -> Dict[str, Any]:
         """Merge two offers into a compromise."""
         merged = {}
         all_keys = set(terms1.keys()) | set(terms2.keys())
@@ -773,12 +705,7 @@ class CollaborationFramework:
 
     # Agent Weights
 
-    def set_agent_weight(
-        self,
-        agent_id: str,
-        topic: str,
-        weight: float
-    ) -> None:
+    def set_agent_weight(self, agent_id: str, topic: str, weight: float) -> None:
         """Set an agent's expertise weight for a topic."""
         if agent_id not in self.agent_weights:
             self.agent_weights[agent_id] = {}
@@ -806,25 +733,27 @@ class CollaborationFramework:
                         message_type="PROPOSAL",
                         payload={
                             "session_id": session.session_id,
-                            "proposal": {
-                                "title": session.proposal.title,
-                                "description": session.proposal.description,
-                                "options": session.proposal.options,
-                            } if session.proposal else {},
+                            "proposal": (
+                                {
+                                    "title": session.proposal.title,
+                                    "description": session.proposal.description,
+                                    "options": session.proposal.options,
+                                }
+                                if session.proposal
+                                else {}
+                            ),
                             "protocol": session.protocol.value,
-                            "deadline": session.proposal.deadline.isoformat()
-                            if session.proposal and session.proposal.deadline
-                            else None,
-                        }
+                            "deadline": (
+                                session.proposal.deadline.isoformat()
+                                if session.proposal and session.proposal.deadline
+                                else None
+                            ),
+                        },
                     )
                 except Exception as e:
                     self.logger.error(f"Failed to notify {participant_id[:8]}: {e}")
 
-    async def _notify_negotiation(
-        self,
-        session: CollaborationSession,
-        counterpart_id: str
-    ) -> None:
+    async def _notify_negotiation(self, session: CollaborationSession, counterpart_id: str) -> None:
         """Notify counterpart of negotiation initiation."""
         if not self.communication:
             return
@@ -839,7 +768,7 @@ class CollaborationFramework:
                     "topic": session.metadata.get("topic"),
                     "initial_offer": session.offers[0].terms if session.offers else {},
                     "strategy": session.metadata.get("strategy"),
-                }
+                },
             )
         except Exception as e:
             self.logger.error(f"Failed to notify counterpart: {e}")
@@ -858,7 +787,7 @@ class CollaborationFramework:
                     payload={
                         "session_id": session.session_id,
                         "result": session.result,
-                    }
+                    },
                 )
             except Exception as e:
                 self.logger.error(f"Failed to notify {participant_id[:8]}: {e}")
@@ -882,10 +811,7 @@ class CollaborationFramework:
                     del self.sessions[session_id]
 
                     self.logger.warning(f"Session timed out: {session_id[:8]}")
-                    COLLABORATION_SESSIONS.labels(
-                        session_type=session.session_type,
-                        status="timeout"
-                    ).inc()
+                    COLLABORATION_SESSIONS.labels(session_type=session.session_type, status="timeout").inc()
 
                 await asyncio.sleep(10)
 

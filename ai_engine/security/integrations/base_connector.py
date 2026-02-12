@@ -135,9 +135,7 @@ class BaseIntegrationConnector(ABC):
         pass
 
     @abstractmethod
-    async def send_security_event(
-        self, security_event: SecurityEvent
-    ) -> IntegrationResult:
+    async def send_security_event(self, security_event: SecurityEvent) -> IntegrationResult:
         """
         Send a security event to the external system.
 
@@ -149,9 +147,7 @@ class BaseIntegrationConnector(ABC):
         """
         pass
 
-    async def send_threat_analysis(
-        self, threat_analysis: ThreatAnalysis
-    ) -> IntegrationResult:
+    async def send_threat_analysis(self, threat_analysis: ThreatAnalysis) -> IntegrationResult:
         """
         Send threat analysis results to the external system.
 
@@ -169,9 +165,7 @@ class BaseIntegrationConnector(ABC):
             error_code="NOT_IMPLEMENTED",
         )
 
-    async def send_response_execution(
-        self, response: AutomatedResponse
-    ) -> IntegrationResult:
+    async def send_response_execution(self, response: AutomatedResponse) -> IntegrationResult:
         """
         Send automated response execution details to the external system.
 
@@ -189,9 +183,7 @@ class BaseIntegrationConnector(ABC):
             error_code="NOT_IMPLEMENTED",
         )
 
-    async def execute_with_retry(
-        self, operation_func, operation_name: str, *args, **kwargs
-    ) -> IntegrationResult:
+    async def execute_with_retry(self, operation_func, operation_name: str, *args, **kwargs) -> IntegrationResult:
         """
         Execute an operation with retry logic and error handling.
 
@@ -219,9 +211,7 @@ class BaseIntegrationConnector(ABC):
                     )
 
                 # Execute operation with timeout
-                result = await asyncio.wait_for(
-                    operation_func(*args, **kwargs), timeout=self.config.timeout_seconds
-                )
+                result = await asyncio.wait_for(operation_func(*args, **kwargs), timeout=self.config.timeout_seconds)
 
                 # Calculate execution time
                 execution_time = (asyncio.get_event_loop().time() - start_time) * 1000
@@ -261,16 +251,12 @@ class BaseIntegrationConnector(ABC):
                     return IntegrationResult(
                         success=True,
                         message=f"{operation_name} completed",
-                        response_data=(
-                            result if isinstance(result, dict) else {"result": result}
-                        ),
+                        response_data=(result if isinstance(result, dict) else {"result": result}),
                         execution_time_ms=execution_time,
                     )
 
             except asyncio.TimeoutError:
-                error_msg = (
-                    f"{operation_name} timed out after {self.config.timeout_seconds}s"
-                )
+                error_msg = f"{operation_name} timed out after {self.config.timeout_seconds}s"
                 self.logger.log_security_event(
                     SecurityLogType.PERFORMANCE_METRIC,
                     f"Attempt {attempt}/{self.config.retry_attempts}: {error_msg}",
@@ -289,8 +275,7 @@ class BaseIntegrationConnector(ABC):
                         success=False,
                         message=error_msg,
                         error_code="TIMEOUT",
-                        execution_time_ms=(asyncio.get_event_loop().time() - start_time)
-                        * 1000,
+                        execution_time_ms=(asyncio.get_event_loop().time() - start_time) * 1000,
                     )
 
             except Exception as e:
@@ -316,8 +301,7 @@ class BaseIntegrationConnector(ABC):
                         success=False,
                         message=error_msg,
                         error_code="INTEGRATION_ERROR",
-                        execution_time_ms=(asyncio.get_event_loop().time() - start_time)
-                        * 1000,
+                        execution_time_ms=(asyncio.get_event_loop().time() - start_time) * 1000,
                         metadata={"exception": str(e)},
                     )
 
@@ -355,9 +339,7 @@ class BaseIntegrationConnector(ABC):
         else:
             # Exponential moving average
             alpha = 0.1
-            self.average_response_time = (
-                alpha * response_time_ms + (1 - alpha) * self.average_response_time
-            )
+            self.average_response_time = alpha * response_time_ms + (1 - alpha) * self.average_response_time
 
     def get_connection_status(self) -> Dict[str, Any]:
         """Get current connection status and metrics."""
@@ -368,11 +350,7 @@ class BaseIntegrationConnector(ABC):
             "type": self.config.integration_type.value,
             "status": self.status.value,
             "enabled": self.config.enabled,
-            "last_connection_attempt": (
-                self.last_connection_attempt.isoformat()
-                if self.last_connection_attempt
-                else None
-            ),
+            "last_connection_attempt": (self.last_connection_attempt.isoformat() if self.last_connection_attempt else None),
             "metrics": {
                 "total_requests": self.total_requests,
                 "successful_requests": self.successful_requests,
@@ -386,9 +364,7 @@ class BaseIntegrationConnector(ABC):
                 "retry_attempts": self.config.retry_attempts,
                 "rate_limit": self.config.rate_limit_requests_per_minute,
             },
-            "recent_errors": (
-                self.connection_errors[-5:] if self.connection_errors else []
-            ),
+            "recent_errors": (self.connection_errors[-5:] if self.connection_errors else []),
         }
 
     def reset_metrics(self):
@@ -421,11 +397,7 @@ class BaseIntegrationConnector(ABC):
                 health_status = "healthy"
                 message = "Integration is healthy"
             else:
-                health_status = (
-                    "unhealthy"
-                    if self.status == IntegrationStatus.ERROR
-                    else "degraded"
-                )
+                health_status = "unhealthy" if self.status == IntegrationStatus.ERROR else "degraded"
                 message = test_result.message
 
             return {
@@ -434,9 +406,7 @@ class BaseIntegrationConnector(ABC):
                 "details": {
                     "integration_status": self.status.value,
                     "response_time_ms": test_result.execution_time_ms,
-                    "last_error": (
-                        self.connection_errors[-1] if self.connection_errors else None
-                    ),
+                    "last_error": (self.connection_errors[-1] if self.connection_errors else None),
                 },
             }
 
@@ -534,9 +504,7 @@ class HTTPIntegrationConnector(BaseIntegrationConnector):
             if username and password:
                 import base64
 
-                credentials = base64.b64encode(
-                    f"{username}:{password}".encode()
-                ).decode()
+                credentials = base64.b64encode(f"{username}:{password}".encode()).decode()
                 self.auth_headers["Authorization"] = f"Basic {credentials}"
 
     async def make_request(
@@ -575,9 +543,7 @@ class HTTPIntegrationConnector(BaseIntegrationConnector):
             request_headers.update(headers)
 
         # Make request
-        async with self.session.request(
-            method=method.upper(), url=full_url, json=data, headers=request_headers
-        ) as response:
+        async with self.session.request(method=method.upper(), url=full_url, json=data, headers=request_headers) as response:
 
             # Check response status
             if response.status >= 400:
@@ -597,9 +563,7 @@ class HTTPIntegrationConnector(BaseIntegrationConnector):
                 await self.initialize()
 
             # Try to make a simple request (usually a health check endpoint)
-            health_endpoint = self.config.custom_config.get(
-                "health_endpoint", "/health"
-            )
+            health_endpoint = self.config.custom_config.get("health_endpoint", "/health")
 
             response_data = await self.make_request("GET", health_endpoint)
 

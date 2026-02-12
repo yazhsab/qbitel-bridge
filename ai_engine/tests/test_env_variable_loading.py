@@ -52,18 +52,14 @@ class TestDatabaseConfigEnvLoading:
 
     def test_production_mode_requires_password(self):
         """Test that production mode requires a password."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException) as exc_info:
                 DatabaseConfig()
             assert "Database password not configured" in str(exc_info.value)
 
     def test_development_mode_allows_missing_password(self):
         """Test that development mode allows missing password with warning."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True):
             config = DatabaseConfig()
             assert config.password == ""
 
@@ -167,9 +163,7 @@ class TestRedisConfigEnvLoading:
 
     def test_production_mode_requires_password(self):
         """Test that production mode requires Redis authentication."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException) as exc_info:
                 RedisConfig()
             assert "Redis password not configured" in str(exc_info.value)
@@ -177,9 +171,7 @@ class TestRedisConfigEnvLoading:
 
     def test_development_mode_allows_missing_password(self):
         """Test that development mode allows missing password."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True):
             config = RedisConfig()
             assert config.password is None
 
@@ -235,9 +227,7 @@ class TestRedisConfigEnvLoading:
 
     def test_redis_url_generation_without_auth(self):
         """Test Redis URL generation without authentication."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True):
             config = RedisConfig()
             url = config.url
             assert "redis://" in url
@@ -291,9 +281,7 @@ class TestSecurityConfigEnvLoading:
 
     def test_production_mode_requires_jwt_secret(self):
         """Test that production mode requires JWT secret."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException) as exc_info:
                 SecurityConfig()
             assert "JWT secret not configured" in str(exc_info.value)
@@ -463,17 +451,13 @@ class TestConfigIntegration:
 
     def test_production_mode_validation(self):
         """Test that production mode enforces all security requirements."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException):
                 Config.load_from_env()
 
     def test_development_mode_allows_defaults(self):
         """Test that development mode allows default values."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True):
             config = Config.load_from_env()
             assert config.environment.value == "development"
 
@@ -483,9 +467,7 @@ class TestErrorMessages:
 
     def test_database_password_error_includes_remediation(self):
         """Test that database password error includes remediation steps."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException) as exc_info:
                 DatabaseConfig()
             error_msg = str(exc_info.value)
@@ -496,9 +478,7 @@ class TestErrorMessages:
 
     def test_redis_password_error_includes_remediation(self):
         """Test that Redis password error includes remediation steps."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException) as exc_info:
                 RedisConfig()
             error_msg = str(exc_info.value)
@@ -508,9 +488,7 @@ class TestErrorMessages:
 
     def test_jwt_secret_error_includes_remediation(self):
         """Test that JWT secret error includes remediation steps."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException) as exc_info:
                 SecurityConfig()
             error_msg = str(exc_info.value)

@@ -155,9 +155,9 @@ class TR31KeyBlock:
         for _ in range(num_opt_blocks):
             if pos + 4 > len(block_string):
                 break
-            block_id = block_string[pos:pos+2]
-            block_len = int(block_string[pos+2:pos+4])
-            block_value = block_string[pos+4:pos+4+block_len]
+            block_id = block_string[pos : pos + 2]
+            block_len = int(block_string[pos + 2 : pos + 4])
+            block_value = block_string[pos + 4 : pos + 4 + block_len]
             optional_blocks[block_id] = block_value
             pos += 4 + block_len
 
@@ -222,6 +222,7 @@ class KeyWrapping:
             raise ValueError("Key to wrap must be multiple of 8 bytes")
 
         from ai_engine.domains.banking.security.hsm.soft_hsm import CRYPTO_AVAILABLE
+
         if not CRYPTO_AVAILABLE:
             raise ValueError("cryptography library required")
 
@@ -246,6 +247,7 @@ class KeyWrapping:
             Unwrapped key
         """
         from ai_engine.domains.banking.security.hsm.soft_hsm import CRYPTO_AVAILABLE
+
         if not CRYPTO_AVAILABLE:
             raise ValueError("cryptography library required")
 
@@ -298,11 +300,7 @@ class KeyWrapping:
 
         # Add random padding for security
         random_padding = secrets.token_bytes(16)
-        key_data = (
-            len(key_to_wrap).to_bytes(2, "big") +
-            padded_key +
-            random_padding
-        )
+        key_data = len(key_to_wrap).to_bytes(2, "big") + padded_key + random_padding
 
         # Encrypt key data
         encrypted_key = self._encrypt_tr31(enc_key, key_data, version)
@@ -388,7 +386,7 @@ class KeyWrapping:
 
         # Extract key
         key_length = int.from_bytes(key_data[:2], "big")
-        return key_data[2:2+key_length]
+        return key_data[2 : 2 + key_length]
 
     def _derive_tr31_keys(
         self,
@@ -399,6 +397,7 @@ class KeyWrapping:
         if version in (KeyBlockVersion.D, KeyBlockVersion.E):
             # AES-based derivation
             from ai_engine.domains.banking.security.key_management.key_derivation import KeyDerivation
+
             kdf = KeyDerivation()
 
             enc_key = kdf.derive_sp800_108_counter(
@@ -430,6 +429,7 @@ class KeyWrapping:
     ) -> bytes:
         """Encrypt data for TR-31 key block."""
         from ai_engine.domains.banking.security.hsm.soft_hsm import CRYPTO_AVAILABLE
+
         if not CRYPTO_AVAILABLE:
             raise ValueError("cryptography library required")
 
@@ -468,6 +468,7 @@ class KeyWrapping:
     ) -> bytes:
         """Decrypt TR-31 encrypted data."""
         from ai_engine.domains.banking.security.hsm.soft_hsm import CRYPTO_AVAILABLE
+
         if not CRYPTO_AVAILABLE:
             raise ValueError("cryptography library required")
 

@@ -19,7 +19,6 @@ from .stix_taxii_client import STIXTAXIIClient, STIXIndicator, get_stix_taxii_cl
 from .mitre_attack_mapper import MITREATTACKMapper, TTPMapping, get_mitre_attack_mapper
 from .threat_hunter import ThreatHunter, HuntCampaign, get_threat_hunter
 
-
 # Prometheus metrics
 TIP_HEALTH_STATUS = Gauge(
     "qbitel_tip_health_status",
@@ -297,9 +296,7 @@ class ThreatIntelligenceManager:
             "total": len(campaigns),
         }
 
-    async def update_ioc_feeds(
-        self, feed_ids: Optional[List[str]] = None
-    ) -> Dict[str, int]:
+    async def update_ioc_feeds(self, feed_ids: Optional[List[str]] = None) -> Dict[str, int]:
         """
         Update IOC feeds.
 
@@ -337,15 +334,9 @@ class ThreatIntelligenceManager:
                 "threat_hunter": self.threat_hunter is not None,
             },
             "ioc_feeds": len(self.stix_client.ioc_feeds) if self.stix_client else 0,
-            "indicators_cached": (
-                len(self.stix_client.indicators_cache) if self.stix_client else 0
-            ),
-            "attack_techniques": (
-                len(self.attack_mapper.techniques) if self.attack_mapper else 0
-            ),
-            "hunt_hypotheses": (
-                len(self.threat_hunter.hypotheses) if self.threat_hunter else 0
-            ),
+            "indicators_cached": (len(self.stix_client.indicators_cache) if self.stix_client else 0),
+            "attack_techniques": (len(self.attack_mapper.techniques) if self.attack_mapper else 0),
+            "hunt_hypotheses": (len(self.threat_hunter.hypotheses) if self.threat_hunter else 0),
         }
 
     def get_coverage_report(self) -> Dict[str, Any]:
@@ -358,9 +349,7 @@ class ThreatIntelligenceManager:
 
         # MITRE ATT&CK coverage
         if self.attack_mapper:
-            report["mitre_attack_coverage"] = (
-                self.attack_mapper.get_detection_coverage_report()
-            )
+            report["mitre_attack_coverage"] = self.attack_mapper.get_detection_coverage_report()
 
         # IOC feed status
         if self.stix_client:
@@ -370,9 +359,7 @@ class ThreatIntelligenceManager:
                         "feed_id": feed_id,
                         "name": feed.name,
                         "enabled": feed.enabled,
-                        "last_update": (
-                            feed.last_update.isoformat() if feed.last_update else None
-                        ),
+                        "last_update": (feed.last_update.isoformat() if feed.last_update else None),
                         "indicators_count": feed.indicators_count,
                     }
                 )

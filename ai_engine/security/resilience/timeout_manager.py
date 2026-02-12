@@ -123,9 +123,7 @@ class TimeoutPolicy:
 
     def __init__(self, config: TimeoutConfig):
         self.config = config
-        self.logger = get_security_logger(
-            f"qbitel.security.resilience.timeout.{config.name}"
-        )
+        self.logger = get_security_logger(f"qbitel.security.resilience.timeout.{config.name}")
 
         # History tracking
         self.history = TimeoutHistory(config.history_size)
@@ -155,9 +153,7 @@ class TimeoutPolicy:
         """Calculate timeout value based on strategy and history."""
 
         if override_timeout is not None:
-            return max(
-                self.config.min_timeout, min(override_timeout, self.config.max_timeout)
-            )
+            return max(self.config.min_timeout, min(override_timeout, self.config.max_timeout))
 
         if not self.config.enabled:
             return self.config.max_timeout
@@ -194,16 +190,12 @@ class TimeoutPolicy:
             adaptive_timeout *= 1.5
 
         # Bound the timeout
-        return max(
-            self.config.min_timeout, min(adaptive_timeout, self.config.max_timeout)
-        )
+        return max(self.config.min_timeout, min(adaptive_timeout, self.config.max_timeout))
 
     def _calculate_percentile_timeout(self) -> float:
         """Calculate timeout based on response time percentile."""
 
-        percentile_duration = self.history.get_percentile_duration(
-            self.config.percentile
-        )
+        percentile_duration = self.history.get_percentile_duration(self.config.percentile)
 
         if percentile_duration is None:
             return self.config.default_timeout
@@ -255,9 +247,7 @@ class TimeoutPolicy:
 
         try:
             if asyncio.iscoroutinefunction(operation):
-                result = await asyncio.wait_for(
-                    operation(*args, **kwargs), timeout=timeout
-                )
+                result = await asyncio.wait_for(operation(*args, **kwargs), timeout=timeout)
             else:
                 # Execute sync function in thread pool with timeout
                 loop = asyncio.get_event_loop()
@@ -272,9 +262,7 @@ class TimeoutPolicy:
             self.history.add_result(duration, timeout, True)
             self._successful_operations += 1
 
-            timeout_result = TimeoutResult(
-                success=True, duration=duration, timeout_used=timeout
-            )
+            timeout_result = TimeoutResult(success=True, duration=duration, timeout_used=timeout)
 
             self.logger.log_security_event(
                 SecurityLogType.PERFORMANCE_METRIC,
@@ -364,27 +352,13 @@ class TimeoutPolicy:
                 "successful_operations": self._successful_operations,
                 "timeout_operations": self._timeout_operations,
                 "failed_operations": self._failed_operations,
-                "success_rate": (
-                    self._successful_operations / self._total_operations
-                    if self._total_operations > 0
-                    else 0
-                ),
-                "timeout_rate": (
-                    self._timeout_operations / self._total_operations
-                    if self._total_operations > 0
-                    else 0
-                ),
-                "failure_rate": (
-                    self._failed_operations / self._total_operations
-                    if self._total_operations > 0
-                    else 0
-                ),
+                "success_rate": (self._successful_operations / self._total_operations if self._total_operations > 0 else 0),
+                "timeout_rate": (self._timeout_operations / self._total_operations if self._total_operations > 0 else 0),
+                "failure_rate": (self._failed_operations / self._total_operations if self._total_operations > 0 else 0),
             },
             "history_metrics": {
                 "average_duration": self.history.get_average_duration(),
-                "percentile_duration": self.history.get_percentile_duration(
-                    self.config.percentile
-                ),
+                "percentile_duration": self.history.get_percentile_duration(self.config.percentile),
                 "historical_success_rate": self.history.get_success_rate(),
                 "historical_timeout_rate": self.history.get_timeout_rate(),
                 "history_size": len(self.history.durations),
@@ -502,9 +476,7 @@ class TimeoutManager:
     ) -> TimeoutPolicy:
         """Create a new timeout policy."""
 
-        config = TimeoutConfig(
-            name=name, default_timeout=default_timeout, strategy=strategy, **kwargs
-        )
+        config = TimeoutConfig(name=name, default_timeout=default_timeout, strategy=strategy, **kwargs)
 
         policy = TimeoutPolicy(config)
         self.policies[name] = policy
@@ -559,9 +531,7 @@ class TimeoutManager:
             policy = self.get_policy("standard")
 
             if not policy:
-                raise ValueError(
-                    f"Timeout policy '{policy_name}' not found and no default available"
-                )
+                raise ValueError(f"Timeout policy '{policy_name}' not found and no default available")
 
             self.logger.log_security_event(
                 SecurityLogType.CONFIGURATION_CHANGE,
@@ -569,9 +539,7 @@ class TimeoutManager:
                 level=LogLevel.WARNING,
             )
 
-        return await policy.execute_with_timeout(
-            operation, *args, timeout_override=timeout_override, **kwargs
-        )
+        return await policy.execute_with_timeout(operation, *args, timeout_override=timeout_override, **kwargs)
 
     def get_all_metrics(self) -> Dict[str, Dict[str, Any]]:
         """Get metrics for all timeout policies."""
@@ -582,9 +550,7 @@ class TimeoutManager:
         """Get global timeout manager metrics."""
 
         total_operations = sum(p._total_operations for p in self.policies.values())
-        successful_operations = sum(
-            p._successful_operations for p in self.policies.values()
-        )
+        successful_operations = sum(p._successful_operations for p in self.policies.values())
         timeout_operations = sum(p._timeout_operations for p in self.policies.values())
         failed_operations = sum(p._failed_operations for p in self.policies.values())
 
@@ -596,17 +562,9 @@ class TimeoutManager:
                 "successful_operations": successful_operations,
                 "timeout_operations": timeout_operations,
                 "failed_operations": failed_operations,
-                "global_success_rate": (
-                    successful_operations / total_operations
-                    if total_operations > 0
-                    else 0
-                ),
-                "global_timeout_rate": (
-                    timeout_operations / total_operations if total_operations > 0 else 0
-                ),
-                "global_failure_rate": (
-                    failed_operations / total_operations if total_operations > 0 else 0
-                ),
+                "global_success_rate": (successful_operations / total_operations if total_operations > 0 else 0),
+                "global_timeout_rate": (timeout_operations / total_operations if total_operations > 0 else 0),
+                "global_failure_rate": (failed_operations / total_operations if total_operations > 0 else 0),
             },
             "policies": self.get_all_metrics(),
         }
@@ -667,9 +625,7 @@ class TimeoutContext:
 
             if exc_type == asyncio.TimeoutError:
                 # Log timeout
-                logger = get_security_logger(
-                    "qbitel.security.resilience.timeout_context"
-                )
+                logger = get_security_logger("qbitel.security.resilience.timeout_context")
                 logger.log_security_event(
                     SecurityLogType.PERFORMANCE_METRIC,
                     f"Operation '{self.operation_name}' timed out",

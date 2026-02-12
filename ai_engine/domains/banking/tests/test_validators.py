@@ -163,8 +163,8 @@ class TestUtilityValidators:
     def test_validate_bic_valid(self):
         """Test valid BIC codes."""
         valid_bics = [
-            "CITIUS33",     # 8 char BIC
-            "DEUTDEFF",     # 8 char BIC
+            "CITIUS33",  # 8 char BIC
+            "DEUTDEFF",  # 8 char BIC
             "BNPAFRPHXXX",  # 11 char BIC
         ]
 
@@ -263,8 +263,7 @@ class TestISO20022Validator:
         result = validator.validate(sample_pain001_xml)
 
         # Should have no critical errors
-        critical_errors = [e for e in result.errors
-                          if e.severity == ValidationSeverity.CRITICAL]
+        critical_errors = [e for e in result.errors if e.severity == ValidationSeverity.CRITICAL]
         assert len(critical_errors) == 0
 
     def test_validate_invalid_xml(self, validator):
@@ -494,7 +493,7 @@ class TestAMLValidator:
 
         result = validator.validate(current_tx, transaction_history=history)
         # Aggregate may exceed threshold
-        if sum(tx.get('amount', 0) for tx in history) + 5000 >= 10000:
+        if sum(tx.get("amount", 0) for tx in history) + 5000 >= 10000:
             assert result.metadata.get("velocity_ctr_exceeded") is True
 
 

@@ -65,18 +65,14 @@ class RedisRateLimiter:
     async def initialize(self):
         """Initialize Redis connection."""
         try:
-            self.redis_client = await redis.from_url(
-                self.redis_url, encoding="utf-8", decode_responses=True
-            )
+            self.redis_client = await redis.from_url(self.redis_url, encoding="utf-8", decode_responses=True)
             await self.redis_client.ping()
             self.logger.info("Rate limiter Redis connection established")
         except Exception as e:
             self.logger.error(f"Failed to initialize rate limiter: {e}")
             raise
 
-    async def check_rate_limit(
-        self, identifier: str, limit: int, window_seconds: int
-    ) -> Tuple[bool, Dict[str, Any]]:
+    async def check_rate_limit(self, identifier: str, limit: int, window_seconds: int) -> Tuple[bool, Dict[str, Any]]:
         """
         Check if request is within rate limit.
 
@@ -95,9 +91,7 @@ class RedisRateLimiter:
 
         try:
             if self.config.strategy == RateLimitStrategy.SLIDING_WINDOW:
-                return await self._sliding_window_check(
-                    identifier, limit, window_seconds
-                )
+                return await self._sliding_window_check(identifier, limit, window_seconds)
             elif self.config.strategy == RateLimitStrategy.TOKEN_BUCKET:
                 return await self._token_bucket_check(identifier, limit, window_seconds)
             elif self.config.strategy == RateLimitStrategy.LEAKY_BUCKET:
@@ -110,9 +104,7 @@ class RedisRateLimiter:
             # Fail open - allow request on error
             return True, {}
 
-    async def _sliding_window_check(
-        self, identifier: str, limit: int, window_seconds: int
-    ) -> Tuple[bool, Dict[str, Any]]:
+    async def _sliding_window_check(self, identifier: str, limit: int, window_seconds: int) -> Tuple[bool, Dict[str, Any]]:
         """Sliding window rate limit check."""
         key = f"rate_limit:sliding:{identifier}"
         current_time = time.time()
@@ -148,9 +140,7 @@ class RedisRateLimiter:
 
         return is_allowed, metadata
 
-    async def _fixed_window_check(
-        self, identifier: str, limit: int, window_seconds: int
-    ) -> Tuple[bool, Dict[str, Any]]:
+    async def _fixed_window_check(self, identifier: str, limit: int, window_seconds: int) -> Tuple[bool, Dict[str, Any]]:
         """Fixed window rate limit check."""
         current_window = int(time.time() / window_seconds)
         key = f"rate_limit:fixed:{identifier}:{current_window}"
@@ -175,9 +165,7 @@ class RedisRateLimiter:
 
         return is_allowed, metadata
 
-    async def _token_bucket_check(
-        self, identifier: str, limit: int, window_seconds: int
-    ) -> Tuple[bool, Dict[str, Any]]:
+    async def _token_bucket_check(self, identifier: str, limit: int, window_seconds: int) -> Tuple[bool, Dict[str, Any]]:
         """Token bucket rate limit check."""
         key = f"rate_limit:token:{identifier}"
         current_time = time.time()
@@ -206,9 +194,7 @@ class RedisRateLimiter:
             tokens -= 1
 
         # Update bucket state
-        await self.redis_client.hset(
-            key, mapping={"tokens": str(tokens), "last_refill": str(last_refill)}
-        )
+        await self.redis_client.hset(key, mapping={"tokens": str(tokens), "last_refill": str(last_refill)})
         await self.redis_client.expire(key, window_seconds * 2)
 
         metadata = {
@@ -220,9 +206,7 @@ class RedisRateLimiter:
 
         return is_allowed, metadata
 
-    async def _leaky_bucket_check(
-        self, identifier: str, limit: int, window_seconds: int
-    ) -> Tuple[bool, Dict[str, Any]]:
+    async def _leaky_bucket_check(self, identifier: str, limit: int, window_seconds: int) -> Tuple[bool, Dict[str, Any]]:
         """Leaky bucket rate limit check."""
         key = f"rate_limit:leaky:{identifier}"
         current_time = time.time()
@@ -251,9 +235,7 @@ class RedisRateLimiter:
         is_allowed = water_level <= limit
 
         # Update bucket state
-        await self.redis_client.hset(
-            key, mapping={"water_level": str(water_level), "last_leak": str(last_leak)}
-        )
+        await self.redis_client.hset(key, mapping={"water_level": str(water_level), "last_leak": str(last_leak)})
         await self.redis_client.expire(key, window_seconds * 2)
 
         metadata = {
@@ -307,9 +289,7 @@ class RateLimiter:
             return
 
         try:
-            self.redis_client = await redis.from_url(
-                "redis://localhost:6379/0", encoding="utf-8", decode_responses=True
-            )
+            self.redis_client = await redis.from_url("redis://localhost:6379/0", encoding="utf-8", decode_responses=True)
             self._owns_client = True
             await self.redis_client.ping()
         except Exception as exc:  # noqa: BLE001 - fail open intentionally
@@ -363,9 +343,7 @@ class RateLimiter:
         try:
             await self.redis_client.delete(self._build_key(identifier))
         except Exception as exc:  # noqa: BLE001
-            self.logger.warning(
-                "Failed to reset rate limit for %s: %s", identifier, exc
-            )
+            self.logger.warning("Failed to reset rate limit for %s: %s", identifier, exc)
 
     async def _get_count(self, key: str) -> int:
         value = await self.redis_client.get(key)
@@ -419,34 +397,22 @@ class AdvancedRateLimitMiddleware(BaseHTTPMiddleware):
 
         # Per-IP rate limit
         if self.config.enable_per_ip:
-            rate_limit_checks.append(
-                ("ip", client_ip, self.config.requests_per_minute, 60)
-            )
-            rate_limit_checks.append(
-                ("ip_hour", client_ip, self.config.requests_per_hour, 3600)
-            )
+            rate_limit_checks.append(("ip", client_ip, self.config.requests_per_minute, 60))
+            rate_limit_checks.append(("ip_hour", client_ip, self.config.requests_per_hour, 3600))
 
         # Per-user rate limit
         if self.config.enable_per_user and user_id:
-            rate_limit_checks.append(
-                ("user", user_id, self.config.requests_per_minute * 10, 60)
-            )
-            rate_limit_checks.append(
-                ("user_hour", user_id, self.config.requests_per_hour * 10, 3600)
-            )
+            rate_limit_checks.append(("user", user_id, self.config.requests_per_minute * 10, 60))
+            rate_limit_checks.append(("user_hour", user_id, self.config.requests_per_hour * 10, 3600))
 
         # Per-endpoint rate limit
         if self.config.enable_per_endpoint:
             endpoint_key = f"{client_ip}:{endpoint}"
-            rate_limit_checks.append(
-                ("endpoint", endpoint_key, self.config.requests_per_minute, 60)
-            )
+            rate_limit_checks.append(("endpoint", endpoint_key, self.config.requests_per_minute, 60))
 
         # Check all rate limits
         for check_type, identifier, limit, window in rate_limit_checks:
-            is_allowed, metadata = await self.rate_limiter.check_rate_limit(
-                identifier, limit, window
-            )
+            is_allowed, metadata = await self.rate_limiter.check_rate_limit(identifier, limit, window)
 
             if not is_allowed:
                 self.logger.warning(
@@ -477,14 +443,10 @@ class AdvancedRateLimitMiddleware(BaseHTTPMiddleware):
         # Add rate limit headers to response
         if rate_limit_checks:
             _, identifier, limit, window = rate_limit_checks[0]
-            _, metadata = await self.rate_limiter.check_rate_limit(
-                identifier, limit, window
-            )
+            _, metadata = await self.rate_limiter.check_rate_limit(identifier, limit, window)
 
             response.headers["X-RateLimit-Limit"] = str(metadata.get("limit", limit))
-            response.headers["X-RateLimit-Remaining"] = str(
-                metadata.get("remaining", 0)
-            )
+            response.headers["X-RateLimit-Remaining"] = str(metadata.get("remaining", 0))
             response.headers["X-RateLimit-Reset"] = str(metadata.get("reset", 0))
 
         return response
@@ -523,16 +485,12 @@ class AdvancedRateLimitMiddleware(BaseHTTPMiddleware):
 _rate_limiter: Optional[RedisRateLimiter] = None
 
 
-async def get_rate_limiter(
-    redis_url: Optional[str] = None, config: Optional[RateLimitConfig] = None
-) -> RedisRateLimiter:
+async def get_rate_limiter(redis_url: Optional[str] = None, config: Optional[RateLimitConfig] = None) -> RedisRateLimiter:
     """Get or create global rate limiter instance."""
     global _rate_limiter
 
     if _rate_limiter is None:
-        _rate_limiter = RedisRateLimiter(
-            redis_url=redis_url or "redis://localhost:6379/0", config=config
-        )
+        _rate_limiter = RedisRateLimiter(redis_url=redis_url or "redis://localhost:6379/0", config=config)
         await _rate_limiter.initialize()
 
     return _rate_limiter

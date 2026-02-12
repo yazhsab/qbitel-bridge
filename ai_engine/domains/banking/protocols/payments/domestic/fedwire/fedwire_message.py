@@ -424,10 +424,12 @@ class SenderSuppliedInfo:
 
     def to_string(self) -> str:
         """Convert to tag value string."""
-        return (f"{self.format_version:2}"
-                f"{self.user_request_correlation:4}"
-                f"{self.test_production:1}"
-                f"{self.message_dup_code:1}")
+        return (
+            f"{self.format_version:2}"
+            f"{self.user_request_correlation:4}"
+            f"{self.test_production:1}"
+            f"{self.message_dup_code:1}"
+        )
 
 
 @dataclass
@@ -570,8 +572,7 @@ class FedWireMessage:
 
         # Validate business function code requirements
         bfc = self.business_function_code
-        if bfc in [BusinessFunctionCode.CUSTOMER_TRANSFER,
-                   BusinessFunctionCode.CUSTOMER_TRANSFER_PLUS]:
+        if bfc in [BusinessFunctionCode.CUSTOMER_TRANSFER, BusinessFunctionCode.CUSTOMER_TRANSFER_PLUS]:
             if not self.beneficiary:
                 errors.append(f"{bfc.short_name} requires beneficiary information")
 
@@ -579,8 +580,7 @@ class FedWireMessage:
             if not self.originator:
                 errors.append("CTP requires originator information")
 
-        if bfc in [BusinessFunctionCode.DRAWDOWN_REQUEST,
-                   BusinessFunctionCode.DRAWDOWN_TRANSFER]:
+        if bfc in [BusinessFunctionCode.DRAWDOWN_REQUEST, BusinessFunctionCode.DRAWDOWN_TRANSFER]:
             if not self.originator:
                 errors.append(f"{bfc.short_name} requires originator information")
             if not self.originator_fi:

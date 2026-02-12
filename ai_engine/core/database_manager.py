@@ -263,9 +263,7 @@ class DatabaseManager:
             ConnectionPoolExhausted: If connection pool is full
         """
         if not self._initialized:
-            raise DatabaseError(
-                "DatabaseManager not initialized. Call initialize() first."
-            )
+            raise DatabaseError("DatabaseManager not initialized. Call initialize() first.")
 
         if self._shutdown_event.is_set():
             raise DatabaseError("DatabaseManager is shutting down")
@@ -338,10 +336,7 @@ class DatabaseManager:
 
             # Warn on long-held sessions
             if duration > 30:
-                logger.warning(
-                    f"Long-held database session: {duration:.2f}s "
-                    f"(session_id={session_id})"
-                )
+                logger.warning(f"Long-held database session: {duration:.2f}s " f"(session_id={session_id})")
 
             # Remove from tracking
             self._active_sessions.pop(session_id, None)
@@ -380,28 +375,20 @@ class DatabaseManager:
 
                 # Check if error is retryable
                 error_str = str(e).lower()
-                is_retryable = any(
-                    keyword in error_str
-                    for keyword in ["deadlock", "timeout", "connection", "lock"]
-                )
+                is_retryable = any(keyword in error_str for keyword in ["deadlock", "timeout", "connection", "lock"])
 
                 if not is_retryable or attempt == max_retries - 1:
-                    raise TransactionError(
-                        f"Database operation failed after {attempt + 1} attempts: {e}"
-                    ) from e
+                    raise TransactionError(f"Database operation failed after {attempt + 1} attempts: {e}") from e
 
                 # Exponential backoff
                 delay = retry_delay * (2**attempt)
                 logger.warning(
-                    f"Database operation failed (attempt {attempt + 1}/{max_retries}), "
-                    f"retrying in {delay:.2f}s: {e}"
+                    f"Database operation failed (attempt {attempt + 1}/{max_retries}), " f"retrying in {delay:.2f}s: {e}"
                 )
                 await asyncio.sleep(delay)
 
         # Should never reach here, but just in case
-        raise TransactionError(
-            f"Database operation failed after {max_retries} attempts"
-        ) from last_exception
+        raise TransactionError(f"Database operation failed after {max_retries} attempts") from last_exception
 
     async def get_pool_status(self) -> Dict[str, Any]:
         """
@@ -435,20 +422,14 @@ class DatabaseManager:
         Raises:
             TimeoutError: If timeout is exceeded
         """
-        logger.info(
-            f"Waiting for {len(self._active_sessions)} active sessions to complete..."
-        )
+        logger.info(f"Waiting for {len(self._active_sessions)} active sessions to complete...")
 
         start_time = time.time()
         while self._active_sessions:
             if time.time() - start_time > timeout:
-                logger.error(
-                    f"Timeout waiting for active sessions. "
-                    f"Remaining: {len(self._active_sessions)}"
-                )
+                logger.error(f"Timeout waiting for active sessions. " f"Remaining: {len(self._active_sessions)}")
                 raise TimeoutError(
-                    f"Timeout waiting for active database sessions. "
-                    f"Remaining: {len(self._active_sessions)}"
+                    f"Timeout waiting for active database sessions. " f"Remaining: {len(self._active_sessions)}"
                 )
 
             # Check for stuck sessions
@@ -456,10 +437,7 @@ class DatabaseManager:
             for session_id, start_time in list(self._session_start_times.items()):
                 duration = now - start_time
                 if duration > 60:
-                    logger.warning(
-                        f"Long-running session detected: {session_id} "
-                        f"({duration:.2f}s)"
-                    )
+                    logger.warning(f"Long-running session detected: {session_id} " f"({duration:.2f}s)")
 
             await asyncio.sleep(0.5)
 
@@ -510,16 +488,11 @@ def get_database_manager() -> DatabaseManager:
     """
     global _db_manager
     if _db_manager is None:
-        raise RuntimeError(
-            "Database manager not initialized. "
-            "Call initialize_database_manager() during app startup."
-        )
+        raise RuntimeError("Database manager not initialized. " "Call initialize_database_manager() during app startup.")
     return _db_manager
 
 
-async def initialize_database_manager(
-    config: DatabaseConfig, environment: str = "production"
-) -> DatabaseManager:
+async def initialize_database_manager(config: DatabaseConfig, environment: str = "production") -> DatabaseManager:
     """
     Initialize the global database manager.
 

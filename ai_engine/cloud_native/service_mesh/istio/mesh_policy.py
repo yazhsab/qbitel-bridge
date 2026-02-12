@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class TrafficDirection(Enum):
     """Traffic direction for policies"""
+
     INBOUND = "INBOUND"
     OUTBOUND = "OUTBOUND"
     BOTH = "BOTH"
@@ -22,6 +23,7 @@ class TrafficDirection(Enum):
 
 class PolicyAction(Enum):
     """Policy enforcement actions"""
+
     ALLOW = "ALLOW"
     DENY = "DENY"
     AUDIT = "AUDIT"
@@ -31,6 +33,7 @@ class PolicyAction(Enum):
 @dataclass
 class ServicePolicy:
     """Service-level security policy"""
+
     service_name: str
     namespace: str
     allowed_sources: List[str]
@@ -66,7 +69,7 @@ class MeshPolicyManager:
         namespace: str = "default",
         load_balancer: str = "ROUND_ROBIN",
         enable_circuit_breaker: bool = True,
-        enable_retry: bool = True
+        enable_retry: bool = True,
     ) -> Dict[str, Any]:
         """
         Create traffic management policy (DestinationRule).
@@ -88,19 +91,9 @@ class MeshPolicyManager:
             "metadata": {
                 "name": name,
                 "namespace": namespace,
-                "labels": {
-                    "app": "qbitel",
-                    "managed-by": "mesh-policy-manager"
-                }
+                "labels": {"app": "qbitel", "managed-by": "mesh-policy-manager"},
             },
-            "spec": {
-                "host": target_host,
-                "trafficPolicy": {
-                    "loadBalancer": {
-                        "simple": load_balancer
-                    }
-                }
-            }
+            "spec": {"host": target_host, "trafficPolicy": {"loadBalancer": {"simple": load_balancer}}},
         }
 
         # Add circuit breaker if enabled
@@ -110,7 +103,7 @@ class MeshPolicyManager:
                 "interval": "30s",
                 "baseEjectionTime": "30s",
                 "maxEjectionPercent": 50,
-                "minHealthPercent": 40
+                "minHealthPercent": 40,
             }
 
         # Add retry policy if enabled
@@ -120,7 +113,7 @@ class MeshPolicyManager:
                     "http1MaxPendingRequests": 100,
                     "http2MaxRequests": 100,
                     "maxRequestsPerConnection": 2,
-                    "maxRetries": 3
+                    "maxRetries": 3,
                 }
             }
 
@@ -128,12 +121,7 @@ class MeshPolicyManager:
         return dest_rule
 
     def create_rate_limit_policy(
-        self,
-        name: str,
-        namespace: str,
-        selector: Dict[str, str],
-        requests_per_second: int,
-        burst: Optional[int] = None
+        self, name: str, namespace: str, selector: Dict[str, str], requests_per_second: int, burst: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         Create rate limiting policy using Envoy filter.
@@ -157,27 +145,16 @@ class MeshPolicyManager:
             "metadata": {
                 "name": f"{name}-rate-limit",
                 "namespace": namespace,
-                "labels": {
-                    "app": "qbitel",
-                    "component": "rate-limiter"
-                }
+                "labels": {"app": "qbitel", "component": "rate-limiter"},
             },
             "spec": {
-                "workloadSelector": {
-                    "labels": selector
-                },
+                "workloadSelector": {"labels": selector},
                 "configPatches": [
                     {
                         "applyTo": "HTTP_FILTER",
                         "match": {
                             "context": "SIDECAR_INBOUND",
-                            "listener": {
-                                "filterChain": {
-                                    "filter": {
-                                        "name": "envoy.filters.network.http_connection_manager"
-                                    }
-                                }
-                            }
+                            "listener": {"filterChain": {"filter": {"name": "envoy.filters.network.http_connection_manager"}}},
                         },
                         "patch": {
                             "operation": "INSERT_BEFORE",
@@ -189,40 +166,28 @@ class MeshPolicyManager:
                                     "token_bucket": {
                                         "max_tokens": burst,
                                         "tokens_per_fill": requests_per_second,
-                                        "fill_interval": "1s"
+                                        "fill_interval": "1s",
                                     },
                                     "filter_enabled": {
                                         "runtime_key": "local_rate_limit_enabled",
-                                        "default_value": {
-                                            "numerator": 100,
-                                            "denominator": "HUNDRED"
-                                        }
+                                        "default_value": {"numerator": 100, "denominator": "HUNDRED"},
                                     },
                                     "filter_enforced": {
                                         "runtime_key": "local_rate_limit_enforced",
-                                        "default_value": {
-                                            "numerator": 100,
-                                            "denominator": "HUNDRED"
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                        "default_value": {"numerator": 100, "denominator": "HUNDRED"},
+                                    },
+                                },
+                            },
+                        },
                     }
-                ]
-            }
+                ],
+            },
         }
 
-        logger.info(
-            f"Created rate limit policy {name}: "
-            f"{requests_per_second} req/s, burst {burst}"
-        )
+        logger.info(f"Created rate limit policy {name}: " f"{requests_per_second} req/s, burst {burst}")
         return envoy_filter
 
-    def create_service_authorization(
-        self,
-        service: ServicePolicy
-    ) -> Dict[str, Any]:
+    def create_service_authorization(self, service: ServicePolicy) -> Dict[str, Any]:
         """
         Create authorization policy for a service.
 
@@ -236,27 +201,11 @@ class MeshPolicyManager:
 
         # Create rules for each allowed source
         for source in service.allowed_sources:
-            rule = {
-                "from": [
-                    {
-                        "source": {
-                            "principals": [
-                                f"cluster.local/ns/{service.namespace}/sa/{source}"
-                            ]
-                        }
-                    }
-                ]
-            }
+            rule = {"from": [{"source": {"principals": [f"cluster.local/ns/{service.namespace}/sa/{source}"]}}]}
 
             # Add operation restrictions if specified
             if service.allowed_operations:
-                rule["to"] = [
-                    {
-                        "operation": {
-                            "methods": service.allowed_operations
-                        }
-                    }
-                ]
+                rule["to"] = [{"operation": {"methods": service.allowed_operations}}]
 
             rules.append(rule)
 
@@ -266,20 +215,9 @@ class MeshPolicyManager:
             "metadata": {
                 "name": f"{service.service_name}-authz",
                 "namespace": service.namespace,
-                "labels": {
-                    "app": "qbitel",
-                    "service": service.service_name
-                }
+                "labels": {"app": "qbitel", "service": service.service_name},
             },
-            "spec": {
-                "selector": {
-                    "matchLabels": {
-                        "app": service.service_name
-                    }
-                },
-                "action": "ALLOW",
-                "rules": rules
-            }
+            "spec": {"selector": {"matchLabels": {"app": service.service_name}}, "action": "ALLOW", "rules": rules},
         }
 
         logger.info(f"Created authorization policy for {service.service_name}")
@@ -292,7 +230,7 @@ class MeshPolicyManager:
         issuer: str,
         jwks_uri: str,
         selector: Optional[Dict[str, str]] = None,
-        audiences: Optional[List[str]] = None
+        audiences: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Create JWT authentication policy.
@@ -311,29 +249,13 @@ class MeshPolicyManager:
         req_auth = {
             "apiVersion": "security.istio.io/v1beta1",
             "kind": "RequestAuthentication",
-            "metadata": {
-                "name": name,
-                "namespace": namespace,
-                "labels": {
-                    "app": "qbitel",
-                    "component": "jwt-auth"
-                }
-            },
-            "spec": {
-                "jwtRules": [
-                    {
-                        "issuer": issuer,
-                        "jwksUri": jwks_uri
-                    }
-                ]
-            }
+            "metadata": {"name": name, "namespace": namespace, "labels": {"app": "qbitel", "component": "jwt-auth"}},
+            "spec": {"jwtRules": [{"issuer": issuer, "jwksUri": jwks_uri}]},
         }
 
         # Add selector if provided
         if selector:
-            req_auth["spec"]["selector"] = {
-                "matchLabels": selector
-            }
+            req_auth["spec"]["selector"] = {"matchLabels": selector}
 
         # Add audiences if provided
         if audiences:
@@ -343,11 +265,7 @@ class MeshPolicyManager:
         return req_auth
 
     def create_egress_policy(
-        self,
-        name: str,
-        namespace: str,
-        hosts: List[str],
-        ports: Optional[List[int]] = None
+        self, name: str, namespace: str, hosts: List[str], ports: Optional[List[int]] = None
     ) -> Dict[str, Any]:
         """
         Create egress traffic policy (ServiceEntry).
@@ -364,31 +282,13 @@ class MeshPolicyManager:
         service_entry = {
             "apiVersion": "networking.istio.io/v1beta1",
             "kind": "ServiceEntry",
-            "metadata": {
-                "name": name,
-                "namespace": namespace,
-                "labels": {
-                    "app": "qbitel",
-                    "component": "egress-policy"
-                }
-            },
-            "spec": {
-                "hosts": hosts,
-                "location": "MESH_EXTERNAL",
-                "resolution": "DNS"
-            }
+            "metadata": {"name": name, "namespace": namespace, "labels": {"app": "qbitel", "component": "egress-policy"}},
+            "spec": {"hosts": hosts, "location": "MESH_EXTERNAL", "resolution": "DNS"},
         }
 
         # Add ports if specified
         if ports:
-            service_entry["spec"]["ports"] = [
-                {
-                    "number": port,
-                    "name": f"https-{port}",
-                    "protocol": "HTTPS"
-                }
-                for port in ports
-            ]
+            service_entry["spec"]["ports"] = [{"number": port, "name": f"https-{port}", "protocol": "HTTPS"} for port in ports]
 
         logger.info(f"Created egress policy {name} for hosts: {hosts}")
         return service_entry
@@ -398,7 +298,7 @@ class MeshPolicyManager:
         name: str,
         namespace: str,
         egress_hosts: Optional[List[str]] = None,
-        ingress_listeners: Optional[List[Dict[str, Any]]] = None
+        ingress_listeners: Optional[List[Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
         """
         Create Sidecar configuration for fine-grained traffic control.
@@ -415,24 +315,10 @@ class MeshPolicyManager:
         sidecar = {
             "apiVersion": "networking.istio.io/v1beta1",
             "kind": "Sidecar",
-            "metadata": {
-                "name": name,
-                "namespace": namespace,
-                "labels": {
-                    "app": "qbitel",
-                    "component": "sidecar-config"
-                }
-            },
+            "metadata": {"name": name, "namespace": namespace, "labels": {"app": "qbitel", "component": "sidecar-config"}},
             "spec": {
-                "egress": [
-                    {
-                        "hosts": egress_hosts or [
-                            "./*",  # Current namespace
-                            "istio-system/*"  # Istio system services
-                        ]
-                    }
-                ]
-            }
+                "egress": [{"hosts": egress_hosts or ["./*", "istio-system/*"]}]  # Current namespace  # Istio system services
+            },
         }
 
         # Add custom ingress listeners if provided
@@ -448,7 +334,7 @@ class MeshPolicyManager:
         namespace: str,
         pod_selector: Dict[str, str],
         ingress_rules: Optional[List[Dict[str, Any]]] = None,
-        egress_rules: Optional[List[Dict[str, Any]]] = None
+        egress_rules: Optional[List[Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
         """
         Create Kubernetes NetworkPolicy for additional security layer.
@@ -469,17 +355,9 @@ class MeshPolicyManager:
             "metadata": {
                 "name": name,
                 "namespace": namespace,
-                "labels": {
-                    "app": "qbitel",
-                    "managed-by": "mesh-policy-manager"
-                }
+                "labels": {"app": "qbitel", "managed-by": "mesh-policy-manager"},
             },
-            "spec": {
-                "podSelector": {
-                    "matchLabels": pod_selector
-                },
-                "policyTypes": []
-            }
+            "spec": {"podSelector": {"matchLabels": pod_selector}, "policyTypes": []},
         }
 
         # Add ingress rules
@@ -506,11 +384,7 @@ class MeshPolicyManager:
         self._policies[key] = policy
         logger.info(f"Registered service policy: {key}")
 
-    def get_service_policy(
-        self,
-        service_name: str,
-        namespace: str
-    ) -> Optional[ServicePolicy]:
+    def get_service_policy(self, service_name: str, namespace: str) -> Optional[ServicePolicy]:
         """
         Retrieve registered service policy.
 
@@ -524,10 +398,7 @@ class MeshPolicyManager:
         key = f"{namespace}/{service_name}"
         return self._policies.get(key)
 
-    def create_complete_service_policies(
-        self,
-        policy: ServicePolicy
-    ) -> List[Dict[str, Any]]:
+    def create_complete_service_policies(self, policy: ServicePolicy) -> List[Dict[str, Any]]:
         """
         Create all necessary policies for a service.
 
@@ -549,7 +420,7 @@ class MeshPolicyManager:
                 name=policy.service_name,
                 namespace=policy.namespace,
                 selector={"app": policy.service_name},
-                requests_per_second=policy.rate_limit
+                requests_per_second=policy.rate_limit,
             )
             manifests.append(rate_limit)
 
@@ -557,14 +428,12 @@ class MeshPolicyManager:
         traffic_policy = self.create_traffic_policy(
             name=f"{policy.service_name}-traffic",
             target_host=f"{policy.service_name}.{policy.namespace}.svc.cluster.local",
-            namespace=policy.namespace
+            namespace=policy.namespace,
         )
         manifests.append(traffic_policy)
 
         # Register the policy
         self.register_service_policy(policy)
 
-        logger.info(
-            f"Created {len(manifests)} policies for service {policy.service_name}"
-        )
+        logger.info(f"Created {len(manifests)} policies for service {policy.service_name}")
         return manifests

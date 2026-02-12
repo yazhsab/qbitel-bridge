@@ -79,24 +79,18 @@ class PersistentErrorStorage:
         """Initialize storage connections."""
         try:
             # Initialize Redis
-            self.redis_client = await redis.from_url(
-                self.redis_url, encoding="utf-8", decode_responses=True
-            )
+            self.redis_client = await redis.from_url(self.redis_url, encoding="utf-8", decode_responses=True)
             await self.redis_client.ping()
             self.logger.info("Redis connection established")
 
             # Initialize PostgreSQL
-            self.db_engine = create_async_engine(
-                self.postgres_url, echo=False, pool_size=10, max_overflow=20
-            )
+            self.db_engine = create_async_engine(self.postgres_url, echo=False, pool_size=10, max_overflow=20)
 
             # Create tables
             async with self.db_engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
 
-            self.async_session_maker = async_sessionmaker(
-                self.db_engine, class_=AsyncSession, expire_on_commit=False
-            )
+            self.async_session_maker = async_sessionmaker(self.db_engine, class_=AsyncSession, expire_on_commit=False)
 
             self.logger.info("PostgreSQL connection established")
 
@@ -125,16 +119,12 @@ class PersistentErrorStorage:
 
                 # Add to component-specific sorted set
                 component_key = f"errors:component:{error_record.component}"
-                await self.redis_client.zadd(
-                    component_key, {error_record.error_id: error_record.timestamp}
-                )
+                await self.redis_client.zadd(component_key, {error_record.error_id: error_record.timestamp})
                 await self.redis_client.expire(component_key, self.redis_ttl)
 
                 # Add to severity-specific sorted set
                 severity_key = f"errors:severity:{error_record.severity.value}"
-                await self.redis_client.zadd(
-                    severity_key, {error_record.error_id: error_record.timestamp}
-                )
+                await self.redis_client.zadd(severity_key, {error_record.error_id: error_record.timestamp})
                 await self.redis_client.expire(severity_key, self.redis_ttl)
 
             # Store in PostgreSQL for long-term storage
@@ -153,11 +143,7 @@ class PersistentErrorStorage:
                         context=error_dict["context"],
                         recovery_attempted=error_record.recovery_attempted,
                         recovery_successful=error_record.recovery_successful,
-                        recovery_strategy=(
-                            error_record.recovery_strategy.value
-                            if error_record.recovery_strategy
-                            else None
-                        ),
+                        recovery_strategy=(error_record.recovery_strategy.value if error_record.recovery_strategy else None),
                         retry_count=error_record.retry_count,
                         extra_metadata=error_record.metadata,
                     )
@@ -167,9 +153,7 @@ class PersistentErrorStorage:
             return True
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to store error record {error_record.error_id}: {e}"
-            )
+            self.logger.error(f"Failed to store error record {error_record.error_id}: {e}")
             return False
 
     async def get_error(self, error_id: str) -> Optional[Dict[str, Any]]:
@@ -222,9 +206,7 @@ class PersistentErrorStorage:
             if self.redis_client:
                 component_key = f"errors:component:{component}"
                 min_score = since if since else 0
-                error_ids = await self.redis_client.zrangebyscore(
-                    component_key, min_score, "+inf", start=0, num=limit
-                )
+                error_ids = await self.redis_client.zrangebyscore(component_key, min_score, "+inf", start=0, num=limit)
 
                 for error_id in error_ids:
                     error = await self.get_error(error_id)
@@ -236,16 +218,12 @@ class PersistentErrorStorage:
                 async with self.async_session_maker() as session:
                     from sqlalchemy import select
 
-                    query = select(ErrorRecordModel).where(
-                        ErrorRecordModel.component == component
-                    )
+                    query = select(ErrorRecordModel).where(ErrorRecordModel.component == component)
 
                     if since:
                         query = query.where(ErrorRecordModel.timestamp >= since)
 
-                    query = query.order_by(ErrorRecordModel.timestamp.desc()).limit(
-                        limit
-                    )
+                    query = query.order_by(ErrorRecordModel.timestamp.desc()).limit(limit)
 
                     result = await session.execute(query)
                     db_errors = result.scalars().all()
@@ -345,12 +323,8 @@ class PersistentErrorStorage:
 
                     # Recovery rate
                     recovery_query = select(
-                        func.count(ErrorRecordModel.error_id).filter(
-                            ErrorRecordModel.recovery_attempted == True
-                        ),
-                        func.count(ErrorRecordModel.error_id).filter(
-                            ErrorRecordModel.recovery_successful == True
-                        ),
+                        func.count(ErrorRecordModel.error_id).filter(ErrorRecordModel.recovery_attempted == True),
+                        func.count(ErrorRecordModel.error_id).filter(ErrorRecordModel.recovery_successful == True),
                     ).where(ErrorRecordModel.timestamp >= cutoff_time)
 
                     result = await session.execute(recovery_query)
@@ -373,9 +347,7 @@ class PersistentErrorStorage:
                 async with self.async_session_maker() as session:
                     from sqlalchemy import delete
 
-                    delete_query = delete(ErrorRecordModel).where(
-                        ErrorRecordModel.timestamp < cutoff_time
-                    )
+                    delete_query = delete(ErrorRecordModel).where(ErrorRecordModel.timestamp < cutoff_time)
 
                     result = await session.execute(delete_query)
                     await session.commit()
@@ -410,17 +382,14 @@ class PersistentErrorStorage:
 _error_storage: Optional[PersistentErrorStorage] = None
 
 
-async def get_error_storage(
-    redis_url: Optional[str] = None, postgres_url: Optional[str] = None
-) -> PersistentErrorStorage:
+async def get_error_storage(redis_url: Optional[str] = None, postgres_url: Optional[str] = None) -> PersistentErrorStorage:
     """Get or create global error storage instance."""
     global _error_storage
 
     if _error_storage is None:
         _error_storage = PersistentErrorStorage(
             redis_url=redis_url or "redis://localhost:6379/0",
-            postgres_url=postgres_url
-            or "postgresql+asyncpg://user:pass@localhost/qbitel",
+            postgres_url=postgres_url or "postgresql+asyncpg://user:pass@localhost/qbitel",
         )
         await _error_storage.initialize()
 

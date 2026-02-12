@@ -80,7 +80,7 @@ class FedWireValidator(BaseValidator):
 
         if isinstance(data, str):
             result = self._validate_wire_format(data, result)
-        elif hasattr(data, 'type_code') and hasattr(data, 'business_function_code'):
+        elif hasattr(data, "type_code") and hasattr(data, "business_function_code"):
             result = self._validate_message_object(data, result)
         elif isinstance(data, dict):
             result = self._validate_dict(data, result)
@@ -106,6 +106,7 @@ class FedWireValidator(BaseValidator):
 
         # Extract tags
         import re
+
         tag_pattern = re.compile(r"\{(\d{4})\}([^{]*)")
         tags = {}
         for match in tag_pattern.finditer(content):
@@ -142,7 +143,7 @@ class FedWireValidator(BaseValidator):
     def _validate_message_object(self, msg: Any, result: ValidationResult) -> ValidationResult:
         """Validate a FedWireMessage object."""
         # Call message's own validation first
-        if hasattr(msg, 'validate'):
+        if hasattr(msg, "validate"):
             errors = msg.validate()
             for error in errors:
                 result.add_error("FEDWIRE_VALIDATION", error)
@@ -255,6 +256,7 @@ class FedWireValidator(BaseValidator):
         # Beneficiary FI BIC validation
         if msg.beneficiary_fi and msg.beneficiary_fi.id_code:
             from ai_engine.domains.banking.protocols.payments.domestic.fedwire.fedwire_codes import IDCode
+
             if msg.beneficiary_fi.id_code == IDCode.SWIFT_BIC:
                 error = validate_bic(msg.beneficiary_fi.identifier)
                 if error:
@@ -267,6 +269,7 @@ class FedWireValidator(BaseValidator):
         # Originator FI BIC validation
         if msg.originator_fi and msg.originator_fi.id_code:
             from ai_engine.domains.banking.protocols.payments.domestic.fedwire.fedwire_codes import IDCode
+
             if msg.originator_fi.id_code == IDCode.SWIFT_BIC:
                 error = validate_bic(msg.originator_fi.identifier)
                 if error:
@@ -281,8 +284,8 @@ class FedWireValidator(BaseValidator):
     def _validate_dict(self, data: Dict, result: ValidationResult) -> ValidationResult:
         """Validate FedWire data from dictionary."""
         # Amount
-        if 'amount' in data:
-            error = validate_amount(data['amount'], max_value=self.max_amount)
+        if "amount" in data:
+            error = validate_amount(data["amount"], max_value=self.max_amount)
             if error:
                 result.add_error(
                     "FEDWIRE_INVALID_AMOUNT",
@@ -291,8 +294,8 @@ class FedWireValidator(BaseValidator):
                 )
 
         # Sender routing
-        if 'sender_routing' in data:
-            error = validate_routing_number(data['sender_routing'])
+        if "sender_routing" in data:
+            error = validate_routing_number(data["sender_routing"])
             if error:
                 result.add_error(
                     "FEDWIRE_INVALID_SENDER_ROUTING",
@@ -301,8 +304,8 @@ class FedWireValidator(BaseValidator):
                 )
 
         # Receiver routing
-        if 'receiver_routing' in data:
-            error = validate_routing_number(data['receiver_routing'])
+        if "receiver_routing" in data:
+            error = validate_routing_number(data["receiver_routing"])
             if error:
                 result.add_error(
                     "FEDWIRE_INVALID_RECEIVER_ROUTING",
@@ -311,8 +314,8 @@ class FedWireValidator(BaseValidator):
                 )
 
         # Business function code
-        if 'business_function_code' in data:
-            bfc = BusinessFunctionCode.from_code(data['business_function_code'])
+        if "business_function_code" in data:
+            bfc = BusinessFunctionCode.from_code(data["business_function_code"])
             if not bfc:
                 result.add_error(
                     "FEDWIRE_INVALID_BFC",
@@ -421,8 +424,7 @@ class FedWireValidator(BaseValidator):
                     field_name="tag_3600",
                 )
 
-    def _validate_bfc_requirements(self, bfc: BusinessFunctionCode, tags: Dict[str, str],
-                                    result: ValidationResult) -> None:
+    def _validate_bfc_requirements(self, bfc: BusinessFunctionCode, tags: Dict[str, str], result: ValidationResult) -> None:
         """Validate business function code requirements against tags."""
         requirements = BFC_REQUIREMENTS.get(bfc, {})
 
@@ -450,8 +452,7 @@ class FedWireValidator(BaseValidator):
                 field_name="tag_5100",
             )
 
-    def _validate_bfc_requirements_object(self, bfc: BusinessFunctionCode, msg: Any,
-                                           result: ValidationResult) -> None:
+    def _validate_bfc_requirements_object(self, bfc: BusinessFunctionCode, msg: Any, result: ValidationResult) -> None:
         """Validate business function code requirements against message object."""
         requirements = BFC_REQUIREMENTS.get(bfc, {})
 

@@ -20,7 +20,6 @@ from ..core.config import Config
 from ..core.exceptions import QbitelAIException
 from ..security.models import SecurityEvent, ThreatLevel
 
-
 # Prometheus metrics
 ATTACK_TECHNIQUE_DETECTIONS = Counter(
     "qbitel_mitre_attack_technique_detections_total",
@@ -155,10 +154,7 @@ class MITREATTACKMapper:
         # Calculate coverage
         self._calculate_coverage()
 
-        self.logger.info(
-            f"MITRE ATT&CK mapper initialized: "
-            f"{len(self.techniques)} techniques loaded"
-        )
+        self.logger.info(f"MITRE ATT&CK mapper initialized: " f"{len(self.techniques)} techniques loaded")
 
     async def shutdown(self):
         """Shutdown mapper."""
@@ -432,17 +428,9 @@ class MITREATTACKMapper:
     def _calculate_coverage(self):
         """Calculate detection coverage."""
         total_techniques = len(self.techniques)
-        covered_techniques = len(
-            set(
-                tech_id
-                for tech_ids in self.detection_signatures.values()
-                for tech_id in tech_ids
-            )
-        )
+        covered_techniques = len(set(tech_id for tech_ids in self.detection_signatures.values() for tech_id in tech_ids))
 
-        coverage = (
-            (covered_techniques / total_techniques * 100) if total_techniques > 0 else 0
-        )
+        coverage = (covered_techniques / total_techniques * 100) if total_techniques > 0 else 0
         ATTACK_COVERAGE.set(coverage)
 
     async def map_event_to_techniques(self, event: SecurityEvent) -> TTPMapping:
@@ -503,9 +491,7 @@ class MITREATTACKMapper:
 
         return mapping
 
-    def _determine_kill_chain_phase(
-        self, techniques: List[ATTACKTechnique]
-    ) -> Optional[str]:
+    def _determine_kill_chain_phase(self, techniques: List[ATTACKTechnique]) -> Optional[str]:
         """Determine primary kill chain phase from techniques."""
         if not techniques:
             return None
@@ -522,19 +508,14 @@ class MITREATTACKMapper:
 
         return None
 
-    def _generate_detection_rationale(
-        self, event: SecurityEvent, techniques: List[ATTACKTechnique]
-    ) -> str:
+    def _generate_detection_rationale(self, event: SecurityEvent, techniques: List[ATTACKTechnique]) -> str:
         """Generate human-readable detection rationale."""
         if not techniques:
             return "No MITRE ATT&CK techniques matched"
 
         tech_names = ", ".join([f"{t.technique_id} ({t.name})" for t in techniques[:3]])
 
-        rationale = (
-            f"Event '{event.description}' matched {len(techniques)} MITRE ATT&CK technique(s): "
-            f"{tech_names}"
-        )
+        rationale = f"Event '{event.description}' matched {len(techniques)} MITRE ATT&CK technique(s): " f"{tech_names}"
 
         if len(techniques) > 3:
             rationale += f" and {len(techniques) - 3} more"
@@ -545,25 +526,18 @@ class MITREATTACKMapper:
         """Get technique by ID."""
         return self.techniques.get(technique_id)
 
-    async def get_techniques_by_tactic(
-        self, tactic: MITRETactic
-    ) -> List[ATTACKTechnique]:
+    async def get_techniques_by_tactic(self, tactic: MITRETactic) -> List[ATTACKTechnique]:
         """Get all techniques for a tactic."""
         technique_ids = self.tactics.get(tactic.value, [])
         return [self.techniques[tid] for tid in technique_ids if tid in self.techniques]
 
-    async def search_techniques(
-        self, query: str, limit: int = 10
-    ) -> List[ATTACKTechnique]:
+    async def search_techniques(self, query: str, limit: int = 10) -> List[ATTACKTechnique]:
         """Search techniques by name or description."""
         query_lower = query.lower()
         results = []
 
         for technique in self.techniques.values():
-            if (
-                query_lower in technique.name.lower()
-                or query_lower in technique.description.lower()
-            ):
+            if query_lower in technique.name.lower() or query_lower in technique.description.lower():
                 results.append(technique)
 
                 if len(results) >= limit:
@@ -592,11 +566,7 @@ class MITREATTACKMapper:
         return {
             "total_techniques": total_techniques,
             "covered_techniques": len(covered_techniques),
-            "coverage_percentage": (
-                len(covered_techniques) / total_techniques * 100
-                if total_techniques > 0
-                else 0
-            ),
+            "coverage_percentage": (len(covered_techniques) / total_techniques * 100 if total_techniques > 0 else 0),
             "coverage_by_tactic": coverage_by_tactic,
         }
 

@@ -160,12 +160,8 @@ class PacketMLConnector:
         self.cache_hit_count = 0
 
         # Thread pools
-        self.packet_processor = ThreadPoolExecutor(
-            max_workers=8, thread_name_prefix="packet_proc_"
-        )
-        self.analysis_executor = ThreadPoolExecutor(
-            max_workers=4, thread_name_prefix="packet_analysis_"
-        )
+        self.packet_processor = ThreadPoolExecutor(max_workers=8, thread_name_prefix="packet_proc_")
+        self.analysis_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="packet_analysis_")
 
         # Load Rust library if available
         self._load_rust_library()
@@ -174,9 +170,7 @@ class PacketMLConnector:
         """Load Rust dataplane library for FFI"""
         try:
             # Try to load the compiled Rust library
-            rust_lib_path = (
-                project_root / "rust/dataplane/target/release/libdpi_engine.so"
-            )
+            rust_lib_path = project_root / "rust/dataplane/target/release/libdpi_engine.so"
             if rust_lib_path.exists():
                 self.rust_lib = ctypes.CDLL(str(rust_lib_path))
 
@@ -236,8 +230,7 @@ class PacketMLConnector:
                 },
                 {
                     "name": "size_filter",
-                    "condition": lambda pkt: pkt.packet_size
-                    >= 64,  # Skip too small packets
+                    "condition": lambda pkt: pkt.packet_size >= 64,  # Skip too small packets
                     "enabled": True,
                 },
                 {
@@ -250,11 +243,7 @@ class PacketMLConnector:
             ]
 
             # Load sampling rate from config
-            self.sampling_rate = (
-                self.config.ai_engine.get("sampling_rate", 1.0)
-                if self.config.ai_engine
-                else 1.0
-            )
+            self.sampling_rate = self.config.ai_engine.get("sampling_rate", 1.0) if self.config.ai_engine else 1.0
 
             logger.info(f"Initialized {len(self.packet_filters)} packet filters")
 
@@ -276,9 +265,7 @@ class PacketMLConnector:
                 if result == 0:
                     logger.info("Started packet capture from Rust dataplane")
                     # Start interface thread
-                    self.interface_thread = threading.Thread(
-                        target=self._packet_capture_loop, daemon=True
-                    )
+                    self.interface_thread = threading.Thread(target=self._packet_capture_loop, daemon=True)
                     self.interface_thread.start()
                 else:
                     logger.error("Failed to start packet capture")
@@ -361,9 +348,7 @@ class PacketMLConnector:
 
             # Extract payload (skip headers - simplified)
             payload_offset = self._calculate_payload_offset(protocol, raw_data)
-            extracted_payload = (
-                raw_data[payload_offset:] if payload_offset < len(raw_data) else b""
-            )
+            extracted_payload = raw_data[payload_offset:] if payload_offset < len(raw_data) else b""
 
             # Create processed packet
             processed_packet = ProcessedPacket(
@@ -446,9 +431,7 @@ class PacketMLConnector:
 
                     # Generate mock HTTP request
                     mock_payload = b"GET / HTTP/1.1\r\nHost: example.com\r\nUser-Agent: Mozilla/5.0\r\n\r\n"
-                    mock_raw = (
-                        b"\x45\x00" + b"\x00" * 18 + mock_payload
-                    )  # Simplified packet
+                    mock_raw = b"\x45\x00" + b"\x00" * 18 + mock_payload  # Simplified packet
 
                     mock_packet = ProcessedPacket(
                         metadata=mock_metadata,
@@ -548,9 +531,7 @@ class PacketMLConnector:
                 )
 
                 # Queue for ML analysis
-                await self.ml_bridge.queue_analysis(
-                    protocol_data, correlation_id=packet.metadata.packet_id
-                )
+                await self.ml_bridge.queue_analysis(protocol_data, correlation_id=packet.metadata.packet_id)
 
                 # Create stream event for Kafka
                 stream_event = StreamEvent(
@@ -569,9 +550,7 @@ class PacketMLConnector:
                 )
 
                 # Send to Kafka
-                await self.streaming_service.send_event(
-                    "qbitel-packet-processing", stream_event
-                )
+                await self.streaming_service.send_event("qbitel-packet-processing", stream_event)
 
                 self.packets_analyzed += 1
 
@@ -593,8 +572,7 @@ class PacketMLConnector:
 
                 current_time = time.time()
                 batch_ready = len(packet_batch) >= self.batch_size or (
-                    len(packet_batch) > 0
-                    and (current_time - last_batch_time) > self.batch_timeout
+                    len(packet_batch) > 0 and (current_time - last_batch_time) > self.batch_timeout
                 )
 
                 if batch_ready and packet_batch:
@@ -625,9 +603,7 @@ class PacketMLConnector:
         except Exception as e:
             logger.error(f"Error processing packet batch: {e}")
 
-    async def _process_protocol_group(
-        self, protocol: str, packets: List[ProcessedPacket]
-    ):
+    async def _process_protocol_group(self, protocol: str, packets: List[ProcessedPacket]):
         """Process a group of packets with the same protocol"""
         try:
             # Optimize processing for specific protocols
@@ -651,15 +627,9 @@ class PacketMLConnector:
                 http_data = packet.extracted_payload.decode("utf-8", errors="ignore")
                 if "HTTP" in http_data:
                     # Quick HTTP analysis
-                    packet.protocol_hints["http_method"] = self._extract_http_method(
-                        http_data
-                    )
-                    packet.protocol_hints["http_host"] = self._extract_http_host(
-                        http_data
-                    )
-                    packet.processing_flags["high_priority"] = (
-                        "admin" in http_data.lower()
-                    )
+                    packet.protocol_hints["http_method"] = self._extract_http_method(http_data)
+                    packet.protocol_hints["http_host"] = self._extract_http_host(http_data)
+                    packet.processing_flags["high_priority"] = "admin" in http_data.lower()
 
             except Exception as e:
                 logger.error(f"Error processing HTTP packet: {e}")
@@ -669,12 +639,8 @@ class PacketMLConnector:
         for packet in packets:
             try:
                 # TCP-specific analysis
-                packet.protocol_hints["payload_entropy"] = self._calculate_entropy(
-                    packet.extracted_payload
-                )
-                packet.processing_flags["encrypted"] = (
-                    packet.protocol_hints["payload_entropy"] > 7.0
-                )
+                packet.protocol_hints["payload_entropy"] = self._calculate_entropy(packet.extracted_payload)
+                packet.processing_flags["encrypted"] = packet.protocol_hints["payload_entropy"] > 7.0
 
             except Exception as e:
                 logger.error(f"Error processing TCP packet: {e}")
@@ -735,8 +701,7 @@ class PacketMLConnector:
                         "processing_errors": self.processing_errors,
                         "error_rate": error_rate,
                         "throughput_pps": self.throughput_pps,
-                        "cache_hit_rate": self.cache_hit_count
-                        / max(self.packets_processed, 1),
+                        "cache_hit_rate": self.cache_hit_count / max(self.packets_processed, 1),
                         "queue_sizes": {
                             "packet_queue": self.packet_queue.qsize(),
                             "analysis_queue": self.analysis_queue.qsize(),
@@ -744,9 +709,7 @@ class PacketMLConnector:
                     },
                 )
 
-                await self.streaming_service.send_event(
-                    "qbitel-metrics", metrics_event
-                )
+                await self.streaming_service.send_event("qbitel-metrics", metrics_event)
 
                 # Update for next iteration
                 last_packet_count = current_packets
@@ -845,8 +808,7 @@ class PacketMLConnector:
             "cache_hit_rate": self.cache_hit_count / max(self.packets_processed, 1),
             "queue_utilization": {
                 "packet_queue": self.packet_queue.qsize() / self.packet_queue.maxsize,
-                "analysis_queue": self.analysis_queue.qsize()
-                / self.analysis_queue.maxsize,
+                "analysis_queue": self.analysis_queue.qsize() / self.analysis_queue.maxsize,
             },
         }
 

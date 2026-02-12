@@ -70,9 +70,7 @@ class SOC2ControlsManager:
     - Privacy (P1.1-P8.1)
     """
 
-    def __init__(
-        self, config: Config, audit_manager: Optional[AuditTrailManager] = None
-    ):
+    def __init__(self, config: Config, audit_manager: Optional[AuditTrailManager] = None):
         """Initialize SOC2 controls manager."""
         self.config = config
         self.logger = logging.getLogger(__name__)
@@ -371,13 +369,9 @@ class SOC2ControlsManager:
 
         # Check each criteria
         for criteria in TrustServiceCriteria:
-            criteria_controls = [
-                c for c in self.controls.values() if c.criteria == criteria
-            ]
+            criteria_controls = [c for c in self.controls.values() if c.criteria == criteria]
 
-            implemented = len(
-                [c for c in criteria_controls if c.status == ControlStatus.IMPLEMENTED]
-            )
+            implemented = len([c for c in criteria_controls if c.status == ControlStatus.IMPLEMENTED])
 
             total = len(criteria_controls)
 
@@ -389,15 +383,11 @@ class SOC2ControlsManager:
 
             if implemented < total:
                 compliance_status["compliant"] = False
-                compliance_status["issues"].append(
-                    f"{criteria.value}: {total - implemented} controls not fully implemented"
-                )
+                compliance_status["issues"].append(f"{criteria.value}: {total - implemented} controls not fully implemented")
 
         # Check for untested controls
         untested_controls = [
-            c
-            for c in self.controls.values()
-            if not c.last_tested or (datetime.utcnow() - c.last_tested).days > 90
+            c for c in self.controls.values() if not c.last_tested or (datetime.utcnow() - c.last_tested).days > 90
         ]
 
         if untested_controls:
@@ -411,9 +401,7 @@ class SOC2ControlsManager:
         """Get specific control."""
         return self.controls.get(control_id)
 
-    def get_controls_by_criteria(
-        self, criteria: TrustServiceCriteria
-    ) -> List[SOC2Control]:
+    def get_controls_by_criteria(self, criteria: TrustServiceCriteria) -> List[SOC2Control]:
         """Get all controls for a specific criteria."""
         return [c for c in self.controls.values() if c.criteria == criteria]
 
@@ -432,15 +420,11 @@ class SOC2ControlsManager:
 
         # Count by status
         for status in ControlStatus:
-            stats["by_status"][status.value] = len(
-                [c for c in self.controls.values() if c.status == status]
-            )
+            stats["by_status"][status.value] = len([c for c in self.controls.values() if c.status == status])
 
         # Count by criteria
         for criteria in TrustServiceCriteria:
-            stats["by_criteria"][criteria.value] = len(
-                [c for c in self.controls.values() if c.criteria == criteria]
-            )
+            stats["by_criteria"][criteria.value] = len([c for c in self.controls.values() if c.criteria == criteria])
 
         # Testing status
         now = datetime.utcnow()
@@ -471,19 +455,13 @@ class SOC2ControlsManager:
 
         # Executive summary
         total_controls = len(self.controls)
-        implemented = len(
-            [c for c in self.controls.values() if c.status == ControlStatus.IMPLEMENTED]
-        )
+        implemented = len([c for c in self.controls.values() if c.status == ControlStatus.IMPLEMENTED])
 
         report["executive_summary"] = {
             "total_controls": total_controls,
             "implemented_controls": implemented,
-            "compliance_percentage": (
-                (implemented / total_controls * 100) if total_controls > 0 else 0
-            ),
-            "overall_status": (
-                "Compliant" if implemented == total_controls else "Partially Compliant"
-            ),
+            "compliance_percentage": ((implemented / total_controls * 100) if total_controls > 0 else 0),
+            "overall_status": ("Compliant" if implemented == total_controls else "Partially Compliant"),
         }
 
         # Controls assessment
@@ -494,9 +472,7 @@ class SOC2ControlsManager:
                     "criteria": control.criteria.value,
                     "title": control.title,
                     "status": control.status.value,
-                    "last_tested": (
-                        control.last_tested.isoformat() if control.last_tested else None
-                    ),
+                    "last_tested": (control.last_tested.isoformat() if control.last_tested else None),
                     "evidence_count": len(control.evidence),
                 }
             )

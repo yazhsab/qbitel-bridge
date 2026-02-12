@@ -2,6 +2,7 @@
 Integration tests for Service Mesh components.
 Tests the integration between Istio and Envoy components.
 """
+
 import pytest
 import asyncio
 import sys
@@ -22,10 +23,7 @@ class TestServiceMeshIntegration:
     @pytest.fixture
     def mtls_configurator(self):
         """Create mTLS configurator"""
-        return MutualTLSConfigurator(
-            default_mode=MTLSMode.STRICT,
-            namespace="istio-system"
-        )
+        return MutualTLSConfigurator(default_mode=MTLSMode.STRICT, namespace="istio-system")
 
     @pytest.fixture
     def xds_server(self):
@@ -41,16 +39,11 @@ class TestServiceMeshIntegration:
         """Test mTLS configuration with traffic policies"""
         # Create mTLS policy
         peer_auth = mtls_configurator.create_peer_authentication(
-            name="strict-mtls",
-            namespace="production",
-            mode=MTLSMode.STRICT
+            name="strict-mtls", namespace="production", mode=MTLSMode.STRICT
         )
 
         # Create traffic policy for the same service
-        rate_limit = policy_engine.create_rate_limit_policy(
-            service_name="api-service",
-            requests_per_second=100
-        )
+        rate_limit = policy_engine.create_rate_limit_policy(service_name="api-service", requests_per_second=100)
 
         # Both should be configured for the same service
         assert peer_auth is not None
@@ -61,18 +54,12 @@ class TestServiceMeshIntegration:
         """Test xDS server with Istio mTLS configuration"""
         # Create Istio destination rule
         dest_rule = mtls_configurator.create_destination_rule(
-            name="backend-mtls",
-            host="backend.default.svc.cluster.local",
-            namespace="default",
-            enable_quantum_tls=True
+            name="backend-mtls", host="backend.default.svc.cluster.local", namespace="default", enable_quantum_tls=True
         )
 
         # Create corresponding Envoy cluster
         cluster = await xds_server.create_cluster(
-            name="backend_cluster",
-            endpoints=["10.0.1.1:8080"],
-            lb_policy="ROUND_ROBIN",
-            enable_quantum_tls=True
+            name="backend_cluster", endpoints=["10.0.1.1:8080"], lb_policy="ROUND_ROBIN", enable_quantum_tls=True
         )
 
         # Both should have quantum TLS enabled
@@ -86,9 +73,7 @@ class TestServiceMeshIntegration:
 
         # 1. Configure mTLS
         peer_auth = mtls_configurator.create_peer_authentication(
-            name=f"{service_name}-mtls",
-            namespace="production",
-            mode=MTLSMode.STRICT
+            name=f"{service_name}-mtls", namespace="production", mode=MTLSMode.STRICT
         )
 
         # 2. Create destination rule
@@ -96,35 +81,26 @@ class TestServiceMeshIntegration:
             name=f"{service_name}-dest",
             host=f"{service_name}.production.svc.cluster.local",
             namespace="production",
-            enable_quantum_tls=True
+            enable_quantum_tls=True,
         )
 
         # 3. Configure traffic policies
-        rate_limit = policy_engine.create_rate_limit_policy(
-            service_name=service_name,
-            requests_per_second=1000,
-            burst=500
-        )
+        rate_limit = policy_engine.create_rate_limit_policy(service_name=service_name, requests_per_second=1000, burst=500)
 
         circuit_breaker = policy_engine.create_circuit_breaker_policy(
-            service_name=service_name,
-            max_connections=100,
-            max_pending_requests=50
+            service_name=service_name, max_connections=100, max_pending_requests=50
         )
 
         # 4. Create Envoy resources
         listener = await xds_server.create_listener(
-            name=f"{service_name}_listener",
-            address="0.0.0.0",
-            port=8080,
-            enable_quantum_filter=True
+            name=f"{service_name}_listener", address="0.0.0.0", port=8080, enable_quantum_filter=True
         )
 
         cluster = await xds_server.create_cluster(
             name=f"{service_name}_cluster",
             endpoints=["10.0.1.1:8080", "10.0.1.2:8080"],
             lb_policy="ROUND_ROBIN",
-            enable_quantum_tls=True
+            enable_quantum_tls=True,
         )
 
         # Verify all components created
@@ -138,8 +114,7 @@ class TestServiceMeshIntegration:
     def test_zero_trust_configuration(self, mtls_configurator):
         """Test zero-trust policy setup"""
         zero_trust = mtls_configurator.create_zero_trust_policy(
-            namespace="production",
-            allowed_services=["frontend", "api-gateway"]
+            namespace="production", allowed_services=["frontend", "api-gateway"]
         )
 
         assert "peer_authentication" in zero_trust
@@ -155,24 +130,15 @@ class TestServiceMeshIntegration:
 
         for service in services:
             # Create listener
-            listener = await xds_server.create_listener(
-                name=f"{service}_listener",
-                address="0.0.0.0",
-                port=8080
-            )
+            listener = await xds_server.create_listener(name=f"{service}_listener", address="0.0.0.0", port=8080)
 
             # Create cluster
             cluster = await xds_server.create_cluster(
-                name=f"{service}_cluster",
-                endpoints=[f"10.0.1.1:8080"],
-                lb_policy="ROUND_ROBIN"
+                name=f"{service}_cluster", endpoints=[f"10.0.1.1:8080"], lb_policy="ROUND_ROBIN"
             )
 
             # Create policy
-            policy = policy_engine.create_timeout_policy(
-                service_name=service,
-                request_timeout="30s"
-            )
+            policy = policy_engine.create_timeout_policy(service_name=service, request_timeout="30s")
 
             assert listener is not None
             assert cluster is not None
@@ -183,18 +149,12 @@ class TestServiceMeshIntegration:
         """Test quantum-safe cryptography integration"""
         # Istio side: enable quantum TLS
         dest_rule = mtls_configurator.create_destination_rule(
-            name="quantum-service",
-            host="secure.local",
-            namespace="default",
-            enable_quantum_tls=True
+            name="quantum-service", host="secure.local", namespace="default", enable_quantum_tls=True
         )
 
         # Envoy side: enable quantum filter
         listener = await xds_server.create_listener(
-            name="quantum_listener",
-            address="0.0.0.0",
-            port=8443,
-            enable_quantum_filter=True
+            name="quantum_listener", address="0.0.0.0", port=8443, enable_quantum_filter=True
         )
 
         # Both should support quantum-safe crypto
@@ -211,33 +171,18 @@ class TestServiceMeshIntegration:
             name=f"{service_name}-canary",
             host=f"{service_name}.default.svc.cluster.local",
             namespace="default",
-            subset_configs=[
-                {"name": "v1", "labels": {"version": "v1"}},
-                {"name": "v2", "labels": {"version": "v2"}}
-            ]
+            subset_configs=[{"name": "v1", "labels": {"version": "v1"}}, {"name": "v2", "labels": {"version": "v2"}}],
         )
 
         # Create canary traffic policy
         canary_policy = policy_engine.create_canary_policy(
-            name="api-canary",
-            service="api",
-            stable_version="v1",
-            canary_version="v2",
-            canary_weight=10
+            name="api-canary", service="api", stable_version="v1", canary_version="v2", canary_weight=10
         )
 
         # Create Envoy clusters for both versions
-        cluster_v1 = await xds_server.create_cluster(
-            name="api_v1",
-            endpoints=["10.0.1.1:8080"],
-            lb_policy="ROUND_ROBIN"
-        )
+        cluster_v1 = await xds_server.create_cluster(name="api_v1", endpoints=["10.0.1.1:8080"], lb_policy="ROUND_ROBIN")
 
-        cluster_v2 = await xds_server.create_cluster(
-            name="api_v2",
-            endpoints=["10.0.2.1:8080"],
-            lb_policy="ROUND_ROBIN"
-        )
+        cluster_v2 = await xds_server.create_cluster(name="api_v2", endpoints=["10.0.2.1:8080"], lb_policy="ROUND_ROBIN")
 
         assert dest_rule is not None
         assert canary_policy is not None

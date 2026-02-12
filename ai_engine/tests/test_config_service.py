@@ -188,9 +188,7 @@ class TestFileConfigurationStore:
         )
 
         # Set value
-        success = await store.set(
-            "app.name", "test-app", ConfigEnvironment.DEVELOPMENT, metadata
-        )
+        success = await store.set("app.name", "test-app", ConfigEnvironment.DEVELOPMENT, metadata)
         assert success is True
 
         # Get value
@@ -210,9 +208,7 @@ class TestFileConfigurationStore:
             checksum="",
         )
 
-        await store.set(
-            "database.host", "localhost", ConfigEnvironment.DEVELOPMENT, metadata
-        )
+        await store.set("database.host", "localhost", ConfigEnvironment.DEVELOPMENT, metadata)
 
         value = await store.get("database.host", ConfigEnvironment.DEVELOPMENT)
         assert value == "localhost"
@@ -231,9 +227,7 @@ class TestFileConfigurationStore:
         )
 
         # Set and then delete
-        await store.set(
-            "temp.key", "temp_value", ConfigEnvironment.DEVELOPMENT, metadata
-        )
+        await store.set("temp.key", "temp_value", ConfigEnvironment.DEVELOPMENT, metadata)
         success = await store.delete("temp.key", ConfigEnvironment.DEVELOPMENT)
         assert success is True
 

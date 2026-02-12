@@ -54,11 +54,7 @@ class ProductionRule:
 
     def is_recursive(self) -> bool:
         """Check if this rule is recursive."""
-        return any(
-            s.name == self.left_hand_side.name
-            for s in self.right_hand_side
-            if not s.is_terminal
-        )
+        return any(s.name == self.left_hand_side.name for s in self.right_hand_side if not s.is_terminal)
 
     def is_terminal_rule(self) -> bool:
         """Check if this rule produces only terminals."""
@@ -164,9 +160,7 @@ class GrammarLearner:
 
         # Performance settings
         self.use_parallel_processing = True
-        self.max_workers = (
-            config.inference.num_workers if hasattr(config, "inference") else 4
-        )
+        self.max_workers = config.inference.num_workers if hasattr(config, "inference") else 4
         self.executor = ThreadPoolExecutor(max_workers=self.max_workers)
 
         # Components
@@ -179,9 +173,7 @@ class GrammarLearner:
 
         self.logger.info("Grammar Learner initialized")
 
-    async def learn_grammar(
-        self, messages: List[bytes], protocol_hint: Optional[str] = None
-    ) -> Grammar:
+    async def learn_grammar(self, messages: List[bytes], protocol_hint: Optional[str] = None) -> Grammar:
         """
         Learn a probabilistic context-free grammar from message samples.
 
@@ -215,27 +207,19 @@ class GrammarLearner:
 
             # Step 3: Extract structural patterns
             self.logger.debug("Extracting structural patterns")
-            structural_patterns = await self._extract_structural_patterns(
-                tokenized_messages, stats_result
-            )
+            structural_patterns = await self._extract_structural_patterns(tokenized_messages, stats_result)
 
             # Step 4: Identify symbols
             self.logger.debug("Identifying grammar symbols")
-            symbols = await self._identify_symbols(
-                tokenized_messages, structural_patterns, stats_result
-            )
+            symbols = await self._identify_symbols(tokenized_messages, structural_patterns, stats_result)
 
             # Step 5: Generate initial rules
             self.logger.debug("Generating initial production rules")
-            initial_rules = await self._generate_initial_rules(
-                tokenized_messages, symbols, structural_patterns
-            )
+            initial_rules = await self._generate_initial_rules(tokenized_messages, symbols, structural_patterns)
 
             # Step 6: Refine grammar using advanced techniques
             self.logger.debug("Refining grammar with EM and semantic analysis")
-            refined_rules = await self._refine_grammar(
-                initial_rules, tokenized_messages, symbols, stats_result
-            )
+            refined_rules = await self._refine_grammar(initial_rules, tokenized_messages, symbols, stats_result)
 
             # Step 7: Post-process and optimize
             self.logger.debug("Post-processing grammar")
@@ -270,9 +254,7 @@ class GrammarLearner:
             self.logger.error(f"Grammar learning failed: {e}")
             raise ModelException(f"Grammar learning error: {e}")
 
-    async def _tokenize_messages(
-        self, messages: List[bytes], stats_result: Dict[str, Any]
-    ) -> List[List[str]]:
+    async def _tokenize_messages(self, messages: List[bytes], stats_result: Dict[str, Any]) -> List[List[str]]:
         """Advanced message tokenization using statistical insights."""
         tokenized_messages = []
 
@@ -286,9 +268,7 @@ class GrammarLearner:
 
         return tokenized_messages
 
-    async def _tokenize_single_message(
-        self, message: bytes, patterns: List[PatternInfo], boundaries: List[Any]
-    ) -> List[str]:
+    async def _tokenize_single_message(self, message: bytes, patterns: List[PatternInfo], boundaries: List[Any]) -> List[str]:
         """Tokenize a single message using multiple strategies."""
         if not message:
             return []
@@ -306,15 +286,11 @@ class GrammarLearner:
         semantic_tokens = self._tokenize_semantically(message)
 
         # Select best tokenization strategy
-        best_tokens = self._select_best_tokenization(
-            [pattern_tokens, boundary_tokens, entropy_tokens, semantic_tokens]
-        )
+        best_tokens = self._select_best_tokenization([pattern_tokens, boundary_tokens, entropy_tokens, semantic_tokens])
 
         return best_tokens
 
-    def _tokenize_by_patterns(
-        self, message: bytes, patterns: List[PatternInfo]
-    ) -> List[str]:
+    def _tokenize_by_patterns(self, message: bytes, patterns: List[PatternInfo]) -> List[str]:
         """Tokenize based on detected patterns."""
         tokens = []
         pos = 0
@@ -338,10 +314,7 @@ class GrammarLearner:
                 # Add pattern as token
                 pattern_bytes = pattern.pattern
                 if position + len(pattern_bytes) <= len(message):
-                    if (
-                        message[position : position + len(pattern_bytes)]
-                        == pattern_bytes
-                    ):
+                    if message[position : position + len(pattern_bytes)] == pattern_bytes:
                         tokens.append(f"<PATTERN_{pattern.pattern.hex()[:8]}>")
                         pos = position + len(pattern_bytes)
 
@@ -351,18 +324,14 @@ class GrammarLearner:
 
         return tokens if tokens else self._simple_tokenize(message)
 
-    def _tokenize_by_boundaries(
-        self, message: bytes, boundaries: List[Any]
-    ) -> List[str]:
+    def _tokenize_by_boundaries(self, message: bytes, boundaries: List[Any]) -> List[str]:
         """Tokenize based on detected field boundaries."""
         if not boundaries:
             return self._simple_tokenize(message)
 
         tokens = []
         positions = sorted([b.position for b in boundaries if hasattr(b, "position")])
-        positions = (
-            [0] + [p for p in positions if 0 < p < len(message)] + [len(message)]
-        )
+        positions = [0] + [p for p in positions if 0 < p < len(message)] + [len(message)]
 
         for i in range(len(positions) - 1):
             start, end = positions[i], positions[i + 1]
@@ -514,9 +483,7 @@ class GrammarLearner:
                 score = 0
             else:
                 diversity_score = unique_tokens / total_tokens
-                length_penalty = 1.0 / (
-                    1.0 + abs(total_tokens - 10)
-                )  # Prefer ~10 tokens
+                length_penalty = 1.0 / (1.0 + abs(total_tokens - 10))  # Prefer ~10 tokens
                 score = diversity_score * length_penalty
 
             if score > best_score:
@@ -549,16 +516,12 @@ class GrammarLearner:
         patterns["positional_patterns"] = positional
 
         # Extract semantic structure
-        semantic = await self._extract_semantic_structure(
-            tokenized_messages, stats_result
-        )
+        semantic = await self._extract_semantic_structure(tokenized_messages, stats_result)
         patterns["semantic_structure"] = semantic
 
         return patterns
 
-    async def _extract_message_templates(
-        self, tokenized_messages: List[List[str]]
-    ) -> List[Dict[str, Any]]:
+    async def _extract_message_templates(self, tokenized_messages: List[List[str]]) -> List[Dict[str, Any]]:
         """Extract common message structure templates."""
         if not tokenized_messages:
             return []
@@ -609,9 +572,7 @@ class GrammarLearner:
         templates.sort(key=lambda t: t["significance"], reverse=True)
         return templates[:10]  # Return top 10 templates
 
-    async def _extract_common_sequences(
-        self, tokenized_messages: List[List[str]]
-    ) -> Dict[Tuple[str, ...], int]:
+    async def _extract_common_sequences(self, tokenized_messages: List[List[str]]) -> Dict[Tuple[str, ...], int]:
         """Extract common token sequences across messages."""
         sequence_counts = defaultdict(int)
 
@@ -624,17 +585,11 @@ class GrammarLearner:
 
         # Filter significant sequences
         min_frequency = max(2, len(tokenized_messages) * 0.1)
-        significant_sequences = {
-            seq: count
-            for seq, count in sequence_counts.items()
-            if count >= min_frequency
-        }
+        significant_sequences = {seq: count for seq, count in sequence_counts.items() if count >= min_frequency}
 
         return significant_sequences
 
-    async def _extract_positional_patterns(
-        self, tokenized_messages: List[List[str]]
-    ) -> Dict[int, Dict[str, int]]:
+    async def _extract_positional_patterns(self, tokenized_messages: List[List[str]]) -> Dict[int, Dict[str, int]]:
         """Extract patterns based on token positions."""
         positional_patterns = defaultdict(Counter)
 
@@ -688,11 +643,7 @@ class GrammarLearner:
 
         for tokens in tokenized_messages:
             if len(tokens) > header_len + footer_len:
-                body = (
-                    tokens[header_len : len(tokens) - footer_len]
-                    if footer_len
-                    else tokens[header_len:]
-                )
+                body = tokens[header_len : len(tokens) - footer_len] if footer_len else tokens[header_len:]
                 body_patterns.append(tuple(body))
 
         unique_bodies = len(set(body_patterns))
@@ -717,9 +668,7 @@ class GrammarLearner:
 
         # Create terminal symbols
         for token, frequency in token_counts.items():
-            semantic_type = self._infer_semantic_type(
-                token, frequency, tokenized_messages
-            )
+            semantic_type = self._infer_semantic_type(token, frequency, tokenized_messages)
 
             symbol = Symbol(
                 name=token,
@@ -730,9 +679,7 @@ class GrammarLearner:
             symbols[token] = symbol
 
         # Create non-terminal symbols based on patterns
-        non_terminals = await self._create_non_terminal_symbols(
-            tokenized_messages, structural_patterns, stats_result
-        )
+        non_terminals = await self._create_non_terminal_symbols(tokenized_messages, structural_patterns, stats_result)
 
         symbols.update(non_terminals)
 
@@ -760,9 +707,7 @@ class GrammarLearner:
 
         return symbols
 
-    def _infer_semantic_type(
-        self, token: str, frequency: int, messages: List[List[str]]
-    ) -> str:
+    def _infer_semantic_type(self, token: str, frequency: int, messages: List[List[str]]) -> str:
         """Infer semantic type of a terminal symbol."""
         if token.startswith("0x") and len(token) == 4:  # Single byte
             byte_val = int(token[2:], 16)
@@ -847,21 +792,15 @@ class GrammarLearner:
         rules.append(start_rule)
 
         # Structure-based rules
-        structure_rules = await self._generate_structure_rules(
-            tokenized_messages, symbols, structural_patterns
-        )
+        structure_rules = await self._generate_structure_rules(tokenized_messages, symbols, structural_patterns)
         rules.extend(structure_rules)
 
         # Pattern-based rules
-        pattern_rules = await self._generate_pattern_rules(
-            tokenized_messages, symbols, structural_patterns
-        )
+        pattern_rules = await self._generate_pattern_rules(tokenized_messages, symbols, structural_patterns)
         rules.extend(pattern_rules)
 
         # Terminal rules
-        terminal_rules = await self._generate_terminal_rules(
-            tokenized_messages, symbols
-        )
+        terminal_rules = await self._generate_terminal_rules(tokenized_messages, symbols)
         rules.extend(terminal_rules)
 
         return rules
@@ -878,9 +817,7 @@ class GrammarLearner:
         semantic_structure = structural_patterns.get("semantic_structure", {})
         message_symbol = symbols["<MESSAGE>"]
 
-        if semantic_structure.get("has_header") and semantic_structure.get(
-            "has_footer"
-        ):
+        if semantic_structure.get("has_header") and semantic_structure.get("has_footer"):
             # MESSAGE -> HEADER BODY FOOTER
             rule = ProductionRule(
                 left_hand_side=message_symbol,
@@ -945,9 +882,7 @@ class GrammarLearner:
                 nt_name = f"<SEQ_{len(sequence)}_{hash(sequence) % 10000}>"
                 if nt_name in symbols:
                     lhs_symbol = symbols[nt_name]
-                    rhs_symbols = [
-                        symbols[token] for token in sequence if token in symbols
-                    ]
+                    rhs_symbols = [symbols[token] for token in sequence if token in symbols]
 
                     if len(rhs_symbols) == len(sequence):
                         rule = ProductionRule(
@@ -1013,14 +948,10 @@ class GrammarLearner:
             self.logger.debug(f"EM iteration {iteration + 1}/{self.max_em_iterations}")
 
             # E-step: Calculate expected counts
-            expected_counts = await self._calculate_expected_counts(
-                current_rules, tokenized_messages
-            )
+            expected_counts = await self._calculate_expected_counts(current_rules, tokenized_messages)
 
             # M-step: Update probabilities
-            new_rules = await self._update_rule_probabilities(
-                current_rules, expected_counts
-            )
+            new_rules = await self._update_rule_probabilities(current_rules, expected_counts)
 
             # Check convergence
             if await self._has_converged(current_rules, new_rules):
@@ -1031,9 +962,7 @@ class GrammarLearner:
 
         # Additional refinement with semantic analysis
         if self.semantic_analysis_enabled:
-            current_rules = await self._semantic_refinement(
-                current_rules, tokenized_messages, stats_result
-            )
+            current_rules = await self._semantic_refinement(current_rules, tokenized_messages, stats_result)
 
         return current_rules
 
@@ -1050,9 +979,7 @@ class GrammarLearner:
 
         return dict(expected_counts)
 
-    async def _count_rule_usage_in_message(
-        self, rules: List[ProductionRule], tokens: List[str]
-    ) -> Dict[str, float]:
+    async def _count_rule_usage_in_message(self, rules: List[ProductionRule], tokens: List[str]) -> Dict[str, float]:
         """Count how many times each rule is used to generate a message."""
         rule_usage = defaultdict(float)
 
@@ -1071,9 +998,7 @@ class GrammarLearner:
 
         return dict(rule_usage)
 
-    def _count_subsequence_in_tokens(
-        self, tokens: List[str], pattern: List[str]
-    ) -> int:
+    def _count_subsequence_in_tokens(self, tokens: List[str], pattern: List[str]) -> int:
         """Count occurrences of pattern in token sequence."""
         count = 0
         for i in range(len(tokens) - len(pattern) + 1):
@@ -1118,9 +1043,7 @@ class GrammarLearner:
 
         return updated_rules
 
-    async def _has_converged(
-        self, old_rules: List[ProductionRule], new_rules: List[ProductionRule]
-    ) -> bool:
+    async def _has_converged(self, old_rules: List[ProductionRule], new_rules: List[ProductionRule]) -> bool:
         """Check if EM algorithm has converged."""
         if len(old_rules) != len(new_rules):
             return False
@@ -1149,9 +1072,7 @@ class GrammarLearner:
 
         for rule in rules:
             # Calculate confidence based on semantic consistency
-            confidence = await self._calculate_semantic_confidence(
-                rule, tokenized_messages, stats_result
-            )
+            confidence = await self._calculate_semantic_confidence(rule, tokenized_messages, stats_result)
 
             # Update rule with confidence
             refined_rule = ProductionRule(
@@ -1197,9 +1118,7 @@ class GrammarLearner:
 
         return min(1.0, max(0.0, confidence))
 
-    async def _optimize_grammar(
-        self, rules: List[ProductionRule], symbols: Dict[str, Symbol]
-    ) -> List[ProductionRule]:
+    async def _optimize_grammar(self, rules: List[ProductionRule], symbols: Dict[str, Symbol]) -> List[ProductionRule]:
         """Optimize grammar by removing redundant rules and merging similar ones."""
         optimized_rules = []
 
@@ -1217,9 +1136,7 @@ class GrammarLearner:
 
         return optimized_rules
 
-    def _generate_cache_key(
-        self, messages: List[bytes], protocol_hint: Optional[str]
-    ) -> str:
+    def _generate_cache_key(self, messages: List[bytes], protocol_hint: Optional[str]) -> str:
         """Generate cache key for memoization."""
         # Use hash of first few messages and protocol hint
         content = b"".join(messages[:5])  # First 5 messages

@@ -114,9 +114,24 @@ class SensitiveDataMasker:
 
     # Keys to mask in dictionaries
     SENSITIVE_KEYS = {
-        "password", "passwd", "secret", "token", "api_key", "apikey",
-        "auth", "authorization", "bearer", "credentials", "private_key",
-        "pan", "card_number", "cvv", "cvc", "pin", "ssn", "social_security",
+        "password",
+        "passwd",
+        "secret",
+        "token",
+        "api_key",
+        "apikey",
+        "auth",
+        "authorization",
+        "bearer",
+        "credentials",
+        "private_key",
+        "pan",
+        "card_number",
+        "cvv",
+        "cvc",
+        "pin",
+        "ssn",
+        "social_security",
     }
 
     @classmethod
@@ -284,7 +299,7 @@ class StructuredLogger:
             self.name,
             level.level,
             "",  # pathname (will be overwritten)
-            0,   # lineno (will be overwritten)
+            0,  # lineno (will be overwritten)
             message,
             (),
             exc_info,
@@ -443,9 +458,7 @@ def configure_logging(
     if format_json:
         formatter = JsonFormatter(service_name, environment, mask_sensitive)
     else:
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
     handler.setFormatter(formatter)
     handler.setLevel(level.level)

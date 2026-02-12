@@ -211,9 +211,7 @@ DISCOVERY_COUNTER = PrometheusCounter(
     "Total protocol discoveries",
     ["protocol", "status"],
 )
-DISCOVERY_DURATION = Histogram(
-    "qbitel_protocol_discovery_duration_seconds", "Discovery duration", ["phase"]
-)
+DISCOVERY_DURATION = Histogram("qbitel_protocol_discovery_duration_seconds", "Discovery duration", ["phase"])
 ACTIVE_PROTOCOLS = Gauge("qbitel_active_protocols", "Number of active protocols")
 CACHE_HIT_RATE = Gauge("qbitel_discovery_cache_hit_rate", "Cache hit rate")
 
@@ -249,9 +247,7 @@ class ProtocolDiscoveryOrchestrator:
         self.max_concurrent_discoveries = 10
 
         # Performance settings
-        self.max_workers = (
-            config.inference.num_workers if hasattr(config, "inference") else 8
-        )
+        self.max_workers = config.inference.num_workers if hasattr(config, "inference") else 8
         self.executor = ThreadPoolExecutor(max_workers=self.max_workers)
         self.semaphore = asyncio.Semaphore(self.max_concurrent_discoveries)
 
@@ -295,26 +291,14 @@ class ProtocolDiscoveryOrchestrator:
                     if hasattr(self.statistical_analyzer, "initialize")
                     else self._dummy_init()
                 ),
-                (
-                    self.grammar_learner.initialize()
-                    if hasattr(self.grammar_learner, "initialize")
-                    else self._dummy_init()
-                ),
-                (
-                    self.parser_generator.initialize()
-                    if hasattr(self.parser_generator, "initialize")
-                    else self._dummy_init()
-                ),
+                (self.grammar_learner.initialize() if hasattr(self.grammar_learner, "initialize") else self._dummy_init()),
+                (self.parser_generator.initialize() if hasattr(self.parser_generator, "initialize") else self._dummy_init()),
                 (
                     self.protocol_classifier.initialize()
                     if hasattr(self.protocol_classifier, "initialize")
                     else self._dummy_init()
                 ),
-                (
-                    self.message_validator.initialize()
-                    if hasattr(self.message_validator, "initialize")
-                    else self._dummy_init()
-                ),
+                (self.message_validator.initialize() if hasattr(self.message_validator, "initialize") else self._dummy_init()),
             ]
 
             await asyncio.gather(*initialization_tasks, return_exceptions=True)
@@ -328,9 +312,7 @@ class ProtocolDiscoveryOrchestrator:
             self.is_initialized = True
             initialization_time = time.time() - start_time
 
-            self.logger.info(
-                f"Protocol Discovery Orchestrator initialized in {initialization_time:.2f}s"
-            )
+            self.logger.info(f"Protocol Discovery Orchestrator initialized in {initialization_time:.2f}s")
             ACTIVE_PROTOCOLS.set(len(self.protocol_profiles))
 
         except Exception as e:
@@ -357,9 +339,7 @@ class ProtocolDiscoveryOrchestrator:
         async with self.semaphore:  # Limit concurrent discoveries
             return await self._execute_discovery(request)
 
-    async def _execute_discovery(
-        self, request: DiscoveryRequest
-    ) -> Union[DiscoveryResult, PartialDiscoveryResult]:
+    async def _execute_discovery(self, request: DiscoveryRequest) -> Union[DiscoveryResult, PartialDiscoveryResult]:
         """
         Execute the complete discovery pipeline with circuit breaker protection.
 
@@ -389,10 +369,7 @@ class ProtocolDiscoveryOrchestrator:
             cache_key = self._generate_cache_key(request)
             if self.enable_caching and cache_key in self.discovery_cache:
                 self.discovery_stats["cache_hits"] += 1
-                CACHE_HIT_RATE.set(
-                    self.discovery_stats["cache_hits"]
-                    / self.discovery_stats["total_discoveries"]
-                )
+                CACHE_HIT_RATE.set(self.discovery_stats["cache_hits"] / self.discovery_stats["total_discoveries"])
                 cached_result = self.discovery_cache[cache_key]
                 self.logger.debug("Cache hit for discovery request")
                 return cached_result
@@ -469,20 +446,14 @@ class ProtocolDiscoveryOrchestrator:
                 learned_grammar = await self._execute_with_circuit_breaker(
                     self.grammar_learner.learn_grammar,
                     request.messages,
-                    protocol_hint=(
-                        result.protocol_type
-                        if result.protocol_type != "unknown"
-                        else None
-                    ),
+                    protocol_hint=(result.protocol_type if result.protocol_type != "unknown" else None),
                 )
                 result.grammar = learned_grammar
                 partial_data["grammar"] = learned_grammar
 
                 # Update protocol type if it was unknown
                 if result.protocol_type == "unknown":
-                    inferred_protocol = await self._infer_protocol_from_grammar(
-                        learned_grammar
-                    )
+                    inferred_protocol = await self._infer_protocol_from_grammar(learned_grammar)
                     result.protocol_type = inferred_protocol
                     result.confidence = 0.6
                     partial_data["protocol_type"] = inferred_protocol
@@ -497,9 +468,7 @@ class ProtocolDiscoveryOrchestrator:
             # =================================================================
             # Phase 3: Artifact Generation (Parser Generation + Validation)
             # =================================================================
-            if (request.generate_parser and result.grammar) or (
-                request.validate_results and request.messages
-            ):
+            if (request.generate_parser and result.grammar) or (request.validate_results and request.messages):
                 current_phase = DiscoveryPhase.ARTIFACT_GENERATION
                 phase_start = time.time()
 
@@ -519,14 +488,10 @@ class ProtocolDiscoveryOrchestrator:
                 # Step 3b: Validation
                 if request.validate_results and request.messages:
                     if result.parser:
-                        self.message_validator.register_parser(
-                            result.protocol_type, result.parser
-                        )
+                        self.message_validator.register_parser(result.protocol_type, result.parser)
 
                     if result.grammar:
-                        self.message_validator.register_grammar(
-                            result.protocol_type, result.grammar
-                        )
+                        self.message_validator.register_grammar(result.protocol_type, result.grammar)
 
                     validation_result = await self._execute_with_circuit_breaker(
                         self.message_validator.validate,
@@ -546,9 +511,7 @@ class ProtocolDiscoveryOrchestrator:
                 phases_completed.append(DiscoveryPhase.ARTIFACT_GENERATION)
 
                 phase_time = time.time() - phase_start
-                self.discovery_stats["phase_timings"]["artifact_generation"].append(
-                    phase_time
-                )
+                self.discovery_stats["phase_timings"]["artifact_generation"].append(phase_time)
                 DISCOVERY_DURATION.labels(phase="artifact_generation").observe(phase_time)
 
             # =================================================================
@@ -563,9 +526,7 @@ class ProtocolDiscoveryOrchestrator:
             if result.confidence >= request.confidence_threshold:
                 await self._update_protocol_profile(result, request.messages)
                 self.discovery_stats["successful_discoveries"] += 1
-                DISCOVERY_COUNTER.labels(
-                    protocol=result.protocol_type, status="success"
-                ).inc()
+                DISCOVERY_COUNTER.labels(protocol=result.protocol_type, status="success").inc()
             else:
                 DISCOVERY_COUNTER.labels(protocol="unknown", status="failure").inc()
 
@@ -576,9 +537,7 @@ class ProtocolDiscoveryOrchestrator:
             # Update average discovery time
             total = self.discovery_stats["total_discoveries"]
             avg_time = self.discovery_stats["average_discovery_time"]
-            self.discovery_stats["average_discovery_time"] = (
-                avg_time * (total - 1) + result.processing_time
-            ) / total
+            self.discovery_stats["average_discovery_time"] = (avg_time * (total - 1) + result.processing_time) / total
 
             self.logger.info(
                 f"Protocol discovery completed: {result.protocol_type} "
@@ -627,9 +586,7 @@ class ProtocolDiscoveryOrchestrator:
                 retry_after_seconds=60.0 if self._is_retryable_error(e) else None,
             )
 
-    async def _execute_with_circuit_breaker(
-        self, func: Callable, *args, **kwargs
-    ) -> Any:
+    async def _execute_with_circuit_breaker(self, func: Callable, *args, **kwargs) -> Any:
         """Execute a function with circuit breaker protection."""
         discovery_breaker = circuit_breakers.get("discovery")
         if discovery_breaker:
@@ -663,9 +620,7 @@ class ProtocolDiscoveryOrchestrator:
         for rule in grammar.rules:
             for symbol in rule.right_hand_side:
                 if symbol.semantic_type:
-                    rule_analysis[symbol.semantic_type] = (
-                        rule_analysis.get(symbol.semantic_type, 0) + 1
-                    )
+                    rule_analysis[symbol.semantic_type] = rule_analysis.get(symbol.semantic_type, 0) + 1
 
         # Simple heuristics
         if "text" in rule_analysis and rule_analysis["text"] > 5:
@@ -682,9 +637,7 @@ class ProtocolDiscoveryOrchestrator:
         else:
             return f"unknown_protocol_{int(time.time())}"
 
-    async def _update_protocol_profile(
-        self, result: DiscoveryResult, messages: List[bytes]
-    ) -> None:
+    async def _update_protocol_profile(self, result: DiscoveryResult, messages: List[bytes]) -> None:
         """Update or create protocol profile."""
         protocol_name = result.protocol_type
 
@@ -741,16 +694,12 @@ class ProtocolDiscoveryOrchestrator:
         self.discovery_cache[cache_key] = result
         self.logger.debug(f"Cached discovery result for key: {cache_key}")
 
-    async def train_classifier(
-        self, training_samples: List[ProtocolSample], validation_split: float = 0.2
-    ) -> Dict[str, Any]:
+    async def train_classifier(self, training_samples: List[ProtocolSample], validation_split: float = 0.2) -> Dict[str, Any]:
         """Train the protocol classifier with new samples."""
         self.logger.info(f"Training classifier with {len(training_samples)} samples")
 
         try:
-            training_result = await self.protocol_classifier.train(
-                training_samples, validation_split=validation_split
-            )
+            training_result = await self.protocol_classifier.train(training_samples, validation_split=validation_split)
 
             self.logger.info("Classifier training completed successfully")
             return training_result
@@ -772,9 +721,7 @@ class ProtocolDiscoveryOrchestrator:
             batch.append(message)
 
             if len(batch) >= batch_size:
-                request = DiscoveryRequest(
-                    messages=batch, known_protocol=protocol_hint, training_mode=False
-                )
+                request = DiscoveryRequest(messages=batch, known_protocol=protocol_hint, training_mode=False)
 
                 result = await self.discover_protocol(request)
                 yield result
@@ -783,9 +730,7 @@ class ProtocolDiscoveryOrchestrator:
 
         # Process remaining messages
         if batch:
-            request = DiscoveryRequest(
-                messages=batch, known_protocol=protocol_hint, training_mode=False
-            )
+            request = DiscoveryRequest(messages=batch, known_protocol=protocol_hint, training_mode=False)
 
             result = await self.discover_protocol(request)
             yield result
@@ -796,9 +741,7 @@ class ProtocolDiscoveryOrchestrator:
 
         for name, profile in self.protocol_profiles.items():
             avg_confidence = (
-                sum(profile.confidence_scores) / len(profile.confidence_scores)
-                if profile.confidence_scores
-                else 0.0
+                sum(profile.confidence_scores) / len(profile.confidence_scores) if profile.confidence_scores else 0.0
             )
 
             profiles[name] = {
@@ -821,9 +764,7 @@ class ProtocolDiscoveryOrchestrator:
 
         # Calculate additional metrics
         if stats["total_discoveries"] > 0:
-            stats["success_rate"] = (
-                stats["successful_discoveries"] / stats["total_discoveries"]
-            )
+            stats["success_rate"] = stats["successful_discoveries"] / stats["total_discoveries"]
             stats["cache_hit_rate"] = stats["cache_hits"] / stats["total_discoveries"]
         else:
             stats["success_rate"] = 0.0
@@ -940,17 +881,13 @@ class ProtocolDiscoveryOrchestrator:
                     "created_at": profile.created_at,
                     "last_updated": profile.last_updated,
                     "usage_count": profile.usage_count,
-                    "confidence_scores": profile.confidence_scores[
-                        -10:
-                    ],  # Last 10 scores
+                    "confidence_scores": profile.confidence_scores[-10:],  # Last 10 scores
                 }
 
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(profiles_data, f, indent=2, default=str)
 
-            self.logger.info(
-                f"Saved {len(profiles_data)} protocol profiles to {filepath}"
-            )
+            self.logger.info(f"Saved {len(profiles_data)} protocol profiles to {filepath}")
 
         except Exception as e:
             self.logger.error(f"Failed to save protocol profiles: {e}")

@@ -25,9 +25,7 @@ class TestProductionModeDetection:
 
     def test_production_mode_detected_from_qbitel_environment(self):
         """Test production mode detection from QBITEL_AI_ENVIRONMENT."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             config = DatabaseConfig.__new__(DatabaseConfig)
             assert config._is_production_mode() is True
 
@@ -46,9 +44,7 @@ class TestProductionModeDetection:
     def test_production_mode_case_insensitive(self):
         """Test production mode detection is case-insensitive."""
         for env_value in ["PRODUCTION", "Production", "PROD", "Prod"]:
-            with patch.dict(
-                os.environ, {"QBITEL_AI_ENVIRONMENT": env_value}, clear=True
-            ):
+            with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": env_value}, clear=True):
                 config = DatabaseConfig.__new__(DatabaseConfig)
                 assert config._is_production_mode() is True
 
@@ -60,9 +56,7 @@ class TestProductionModeDetection:
 
     def test_development_mode_explicit(self):
         """Test development mode when explicitly set."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True):
             config = DatabaseConfig.__new__(DatabaseConfig)
             assert config._is_production_mode() is False
 
@@ -93,9 +87,7 @@ class TestProductionDatabaseRequirements:
 
     def test_production_requires_database_password(self):
         """Test production mode requires database password."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException) as exc_info:
                 DatabaseConfig()
             assert "Database password not configured" in str(exc_info.value)
@@ -139,9 +131,7 @@ class TestProductionDatabaseRequirements:
 
     def test_development_allows_missing_database_password(self):
         """Test development mode allows missing database password."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True):
             config = DatabaseConfig()
             assert config.password == ""
 
@@ -164,9 +154,7 @@ class TestProductionRedisRequirements:
 
     def test_production_requires_redis_password(self):
         """Test production mode requires Redis password."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException) as exc_info:
                 RedisConfig()
             assert "Redis password not configured" in str(exc_info.value)
@@ -214,9 +202,7 @@ class TestProductionRedisRequirements:
 
     def test_development_allows_missing_redis_password(self):
         """Test development mode allows missing Redis password."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True):
             config = RedisConfig()
             assert config.password is None
 
@@ -226,9 +212,7 @@ class TestProductionSecurityRequirements:
 
     def test_production_requires_jwt_secret(self):
         """Test production mode requires JWT secret."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException) as exc_info:
                 SecurityConfig()
             assert "JWT secret not configured" in str(exc_info.value)
@@ -314,18 +298,14 @@ class TestProductionSecurityRequirements:
 
     def test_development_allows_cors_wildcard(self):
         """Test development mode allows CORS wildcard."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True):
             # Should not raise
             config = SecurityConfig(cors_origins=["*"])
             assert "*" in config.cors_origins
 
     def test_development_allows_missing_secrets(self):
         """Test development mode allows missing secrets with warnings."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True):
             # Should not raise, just warn
             config = SecurityConfig()
             assert config.jwt_secret is None
@@ -336,9 +316,7 @@ class TestProductionConfigValidation:
 
     def test_production_config_requires_all_secrets(self):
         """Test production Config requires all secrets."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException):
                 Config.load_from_env()
 
@@ -377,9 +355,7 @@ class TestProductionConfigValidation:
 
     def test_development_config_allows_defaults(self):
         """Test development Config allows default values."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "development"}, clear=True):
             config = Config.load_from_env()
             assert config.environment == Environment.DEVELOPMENT
 
@@ -389,9 +365,7 @@ class TestProductionErrorMessages:
 
     def test_database_password_error_is_actionable(self):
         """Test database password error provides clear remediation."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException) as exc_info:
                 DatabaseConfig()
             error_msg = str(exc_info.value)
@@ -403,9 +377,7 @@ class TestProductionErrorMessages:
 
     def test_redis_password_error_is_actionable(self):
         """Test Redis password error provides clear remediation."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException) as exc_info:
                 RedisConfig()
             error_msg = str(exc_info.value)
@@ -415,9 +387,7 @@ class TestProductionErrorMessages:
 
     def test_jwt_secret_error_is_actionable(self):
         """Test JWT secret error provides clear remediation."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             with pytest.raises(ConfigurationException) as exc_info:
                 SecurityConfig()
             error_msg = str(exc_info.value)
@@ -451,9 +421,7 @@ class TestProductionModeConsistency:
 
     def test_all_configs_use_same_production_detection(self):
         """Test all config classes detect production mode consistently."""
-        with patch.dict(
-            os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True
-        ):
+        with patch.dict(os.environ, {"QBITEL_AI_ENVIRONMENT": "production"}, clear=True):
             db_config = DatabaseConfig.__new__(DatabaseConfig)
             redis_config = RedisConfig.__new__(RedisConfig)
             security_config = SecurityConfig.__new__(SecurityConfig)

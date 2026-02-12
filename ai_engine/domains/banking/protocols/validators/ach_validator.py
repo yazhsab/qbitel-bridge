@@ -76,10 +76,10 @@ class ACHValidator(BaseValidator):
 
         if isinstance(data, dict):
             self._validate_dict(data, result)
-        elif hasattr(data, 'transaction_code'):
+        elif hasattr(data, "transaction_code"):
             # Entry detail object
             self._validate_entry(data, result)
-        elif hasattr(data, 'entries'):
+        elif hasattr(data, "entries"):
             # Batch object
             self._validate_batch(data, result)
         else:
@@ -94,8 +94,8 @@ class ACHValidator(BaseValidator):
     def _validate_dict(self, data: Dict, result: ValidationResult) -> None:
         """Validate ACH data from dictionary."""
         # Routing number
-        if 'routing_number' in data:
-            error = validate_routing_number(data['routing_number'])
+        if "routing_number" in data:
+            error = validate_routing_number(data["routing_number"])
             if error:
                 result.add_error(
                     "ACH_INVALID_ROUTING",
@@ -104,8 +104,8 @@ class ACHValidator(BaseValidator):
                 )
 
         # Transaction code
-        if 'transaction_code' in data:
-            tc = data['transaction_code']
+        if "transaction_code" in data:
+            tc = data["transaction_code"]
             if not TransactionCode.from_code(tc):
                 result.add_error(
                     "ACH_INVALID_TX_CODE",
@@ -114,8 +114,8 @@ class ACHValidator(BaseValidator):
                 )
 
         # Amount
-        if 'amount' in data:
-            error = validate_amount(data['amount'], max_value=self.max_single_entry)
+        if "amount" in data:
+            error = validate_amount(data["amount"], max_value=self.max_single_entry)
             if error:
                 result.add_error(
                     "ACH_INVALID_AMOUNT",
@@ -124,8 +124,8 @@ class ACHValidator(BaseValidator):
                 )
 
         # Account number
-        if 'account_number' in data:
-            acct = data['account_number']
+        if "account_number" in data:
+            acct = data["account_number"]
             if not acct or len(acct) > 17:
                 result.add_error(
                     "ACH_INVALID_ACCOUNT",
@@ -134,8 +134,8 @@ class ACHValidator(BaseValidator):
                 )
 
         # Individual name
-        if 'individual_name' in data:
-            name = data['individual_name']
+        if "individual_name" in data:
+            name = data["individual_name"]
             if not name:
                 result.add_error(
                     "ACH_MISSING_NAME",
@@ -289,7 +289,7 @@ class NACHAFileValidator(BaseValidator):
 
         if isinstance(data, str):
             result = self._validate_file_content(data, result)
-        elif hasattr(data, 'file_header') and hasattr(data, 'batches'):
+        elif hasattr(data, "file_header") and hasattr(data, "batches"):
             result = self._validate_nacha_file(data, result)
         else:
             result.add_error(
@@ -302,7 +302,7 @@ class NACHAFileValidator(BaseValidator):
 
     def _validate_file_content(self, content: str, result: ValidationResult) -> ValidationResult:
         """Validate NACHA file from raw content."""
-        lines = content.strip().split('\n')
+        lines = content.strip().split("\n")
 
         if not lines:
             result.add_error(
@@ -332,7 +332,7 @@ class NACHAFileValidator(BaseValidator):
 
         # Validate file header (first record)
         first_line = lines[0]
-        if not first_line.startswith('1'):
+        if not first_line.startswith("1"):
             result.add_error(
                 "NACHA_INVALID_FILE_HEADER",
                 "File must start with File Header record (type 1)",
@@ -343,7 +343,7 @@ class NACHAFileValidator(BaseValidator):
 
         # Validate file control (last record, excluding padding)
         last_line = lines[-1]
-        if not last_line.startswith('9'):
+        if not last_line.startswith("9"):
             result.add_error(
                 "NACHA_INVALID_FILE_CONTROL",
                 "File must end with File Control record (type 9)",
@@ -364,9 +364,9 @@ class NACHAFileValidator(BaseValidator):
         current_batch_entries = 0
 
         for i, line in enumerate(lines[1:-1], start=2):  # Skip header and control
-            record_type = line[0] if line else ''
+            record_type = line[0] if line else ""
 
-            if record_type == '5':  # Batch header
+            if record_type == "5":  # Batch header
                 if in_batch:
                     result.add_error(
                         "NACHA_NESTED_BATCH",
@@ -377,7 +377,7 @@ class NACHAFileValidator(BaseValidator):
                 current_batch_entries = 0
                 self._validate_batch_header_record(line, result, i)
 
-            elif record_type == '6':  # Entry detail
+            elif record_type == "6":  # Entry detail
                 if not in_batch:
                     result.add_error(
                         "NACHA_ENTRY_OUTSIDE_BATCH",
@@ -396,14 +396,14 @@ class NACHAFileValidator(BaseValidator):
                 amount = line[29:39]
                 if amount.isdigit():
                     tc = line[1:3]
-                    if tc in ('22', '23', '24', '32', '33', '34', '42', '43', '44', '52', '53', '54'):
+                    if tc in ("22", "23", "24", "32", "33", "34", "42", "43", "44", "52", "53", "54"):
                         total_credit += int(amount)
                     else:
                         total_debit += int(amount)
 
                 self._validate_entry_record(line, result, i)
 
-            elif record_type == '7':  # Addenda
+            elif record_type == "7":  # Addenda
                 if not in_batch:
                     result.add_error(
                         "NACHA_ADDENDA_OUTSIDE_BATCH",
@@ -411,7 +411,7 @@ class NACHAFileValidator(BaseValidator):
                         field=f"line[{i}]",
                     )
 
-            elif record_type == '8':  # Batch control
+            elif record_type == "8":  # Batch control
                 if not in_batch:
                     result.add_error(
                         "NACHA_CONTROL_OUTSIDE_BATCH",
@@ -423,7 +423,7 @@ class NACHAFileValidator(BaseValidator):
                     self._validate_batch_control_record(line, result, i, current_batch_entries)
                 in_batch = False
 
-            elif record_type == '9':
+            elif record_type == "9":
                 # File control or padding - skip
                 pass
 
@@ -586,8 +586,7 @@ class NACHAFileValidator(BaseValidator):
                 field_name="file_header/format_code",
             )
 
-    def _validate_batch_header_record(self, line: str, result: ValidationResult,
-                                       line_num: int) -> None:
+    def _validate_batch_header_record(self, line: str, result: ValidationResult, line_num: int) -> None:
         """Validate batch header record."""
         if len(line) < 94:
             return
@@ -640,8 +639,7 @@ class NACHAFileValidator(BaseValidator):
                 field=f"{prefix}/odfi_identification",
             )
 
-    def _validate_entry_record(self, line: str, result: ValidationResult,
-                                line_num: int) -> None:
+    def _validate_entry_record(self, line: str, result: ValidationResult, line_num: int) -> None:
         """Validate entry detail record."""
         if len(line) < 94:
             return
@@ -694,8 +692,7 @@ class NACHAFileValidator(BaseValidator):
                 field=f"{prefix}/individual_name",
             )
 
-    def _validate_batch_control_record(self, line: str, result: ValidationResult,
-                                        line_num: int, entry_count: int) -> None:
+    def _validate_batch_control_record(self, line: str, result: ValidationResult, line_num: int, entry_count: int) -> None:
         """Validate batch control record."""
         if len(line) < 94:
             return
@@ -719,8 +716,7 @@ class NACHAFileValidator(BaseValidator):
                 field=f"{prefix}/entry_addenda_count",
             )
 
-    def _validate_file_control_record(self, line: str, content: str,
-                                       result: ValidationResult) -> None:
+    def _validate_file_control_record(self, line: str, content: str, result: ValidationResult) -> None:
         """Validate file control record."""
         if len(line) < 94:
             return

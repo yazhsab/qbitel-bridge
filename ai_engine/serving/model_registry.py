@@ -140,10 +140,7 @@ class ModelVersion:
         if not self.version_id:
             self.version_id = self._generate_version_id()
         if not self.metadata.name:
-            self.metadata = ModelMetadata(
-                name=self.model_name,
-                version=self.version
-            )
+            self.metadata = ModelMetadata(name=self.model_name, version=self.version)
 
     def _generate_version_id(self) -> str:
         """Generate unique version ID."""
@@ -398,9 +395,7 @@ class ModelRegistry:
 
         # Validate state transition
         if not self._validate_state_transition(model.state, target_state):
-            raise ValueError(
-                f"Invalid state transition: {model.state.value} -> {target_state.value}"
-            )
+            raise ValueError(f"Invalid state transition: {model.state.value} -> {target_state.value}")
 
         # Update state
         model.state = target_state
@@ -502,9 +497,7 @@ class ModelRegistry:
 
         # Check if deployed
         if model.deployed_endpoints and not force:
-            raise ValueError(
-                f"Cannot delete deployed model. Use force=True or undeploy first."
-            )
+            raise ValueError(f"Cannot delete deployed model. Use force=True or undeploy first.")
 
         async with self._lock:
             if name in self._models and version in self._models[name]:

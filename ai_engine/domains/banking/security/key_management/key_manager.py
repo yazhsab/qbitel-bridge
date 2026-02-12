@@ -24,6 +24,7 @@ from ai_engine.domains.banking.security.key_management.key_types import (
 
 class KeyManagerError(Exception):
     """Exception for key management operations."""
+
     pass
 
 
@@ -140,13 +141,16 @@ class KeyManager:
             key_info.activate()
 
         # Audit log
-        self._audit("key_generated", {
-            "key_id": key_id,
-            "alias": alias,
-            "key_type": key_type.algorithm_name,
-            "purpose": purpose.value,
-            "owner": owner,
-        })
+        self._audit(
+            "key_generated",
+            {
+                "key_id": key_id,
+                "alias": alias,
+                "key_type": key_type.algorithm_name,
+                "purpose": purpose.value,
+                "owner": owner,
+            },
+        )
 
         return key_info
 
@@ -211,10 +215,13 @@ class KeyManager:
 
         key_info.activate()
 
-        self._audit("key_activated", {
-            "key_id": key_info.key_id,
-            "alias": key_info.alias,
-        })
+        self._audit(
+            "key_activated",
+            {
+                "key_id": key_info.key_id,
+                "alias": key_info.alias,
+            },
+        )
 
         return key_info
 
@@ -226,10 +233,13 @@ class KeyManager:
 
         key_info.deactivate()
 
-        self._audit("key_deactivated", {
-            "key_id": key_info.key_id,
-            "alias": key_info.alias,
-        })
+        self._audit(
+            "key_deactivated",
+            {
+                "key_id": key_info.key_id,
+                "alias": key_info.alias,
+            },
+        )
 
         return key_info
 
@@ -279,11 +289,14 @@ class KeyManager:
         if old_key.rotation_policy and old_key.rotation_policy.deactivate_old_key:
             old_key.deactivate()
 
-        self._audit("key_rotated", {
-            "old_key_id": old_key.key_id,
-            "new_key_id": new_key.key_id,
-            "reason": reason,
-        })
+        self._audit(
+            "key_rotated",
+            {
+                "old_key_id": old_key.key_id,
+                "new_key_id": new_key.key_id,
+                "reason": reason,
+            },
+        )
 
         return new_key
 
@@ -315,11 +328,14 @@ class KeyManager:
         # Mark as destroyed
         key_info.destroy()
 
-        self._audit("key_destroyed", {
-            "key_id": key_info.key_id,
-            "alias": key_info.alias,
-            "reason": reason,
-        })
+        self._audit(
+            "key_destroyed",
+            {
+                "key_id": key_info.key_id,
+                "alias": key_info.alias,
+                "reason": reason,
+            },
+        )
 
     def mark_compromised(
         self,
@@ -337,18 +353,18 @@ class KeyManager:
         if key_info.rotation_policy and key_info.rotation_policy.rotate_on_compromise:
             self.rotate_key(key_id_or_alias, reason="compromise")
 
-        self._audit("key_compromised", {
-            "key_id": key_info.key_id,
-            "alias": key_info.alias,
-            "reason": reason,
-        })
+        self._audit(
+            "key_compromised",
+            {
+                "key_id": key_info.key_id,
+                "alias": key_info.alias,
+                "reason": reason,
+            },
+        )
 
     def get_keys_needing_rotation(self) -> List[KeyInfo]:
         """Get list of keys that need rotation."""
-        return [
-            key for key in self._keys.values()
-            if key.state == KeyState.ACTIVE and key.needs_rotation
-        ]
+        return [key for key in self._keys.values() if key.state == KeyState.ACTIVE and key.needs_rotation]
 
     def get_expiring_keys(self, days: int = 30) -> List[KeyInfo]:
         """Get list of keys expiring within specified days."""
@@ -376,11 +392,14 @@ class KeyManager:
 
         key_info.record_usage(bytes_processed)
 
-        self._audit("key_used", {
-            "key_id": key_info.key_id,
-            "operation": operation,
-            "bytes_processed": bytes_processed,
-        })
+        self._audit(
+            "key_used",
+            {
+                "key_id": key_info.key_id,
+                "operation": operation,
+                "bytes_processed": bytes_processed,
+            },
+        )
 
     def export_key_inventory(self) -> List[Dict[str, Any]]:
         """Export key inventory for reporting."""

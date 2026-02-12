@@ -391,9 +391,7 @@ class ResilienceManager:
             "max_timeout": 180.0,
         }
 
-        self.timeout_manager.create_policy(
-            name="security_operations", **security_timeout_config
-        )
+        self.timeout_manager.create_policy(name="security_operations", **security_timeout_config)
 
         self.logger.log_security_event(
             SecurityLogType.CONFIGURATION_CHANGE,
@@ -422,9 +420,7 @@ class ResilienceManager:
         )
 
         self.error_recovery_manager.register_recovery_plan(security_recovery_plan)
-        self.error_recovery_manager.register_error_pattern(
-            "SecurityOperationError", "security_operations"
-        )
+        self.error_recovery_manager.register_error_pattern("SecurityOperationError", "security_operations")
 
         self.logger.log_security_event(
             SecurityLogType.CONFIGURATION_CHANGE,
@@ -440,9 +436,7 @@ class ResilienceManager:
         self._background_tasks.append(metrics_task)
 
         # Component health monitoring task
-        health_task = asyncio.create_task(
-            self._background_component_health_monitoring()
-        )
+        health_task = asyncio.create_task(self._background_component_health_monitoring())
         self._background_tasks.append(health_task)
 
         self.logger.log_security_event(
@@ -502,9 +496,7 @@ class ResilienceManager:
         if resource_pool_name and self.config.enable_bulkhead_isolation:
             pool = self.bulkhead_manager.get_pool(resource_pool_name)
             if pool:
-                resource_context = ResourceContext(
-                    pool, f"{operation_name}_{start_time}"
-                )
+                resource_context = ResourceContext(pool, f"{operation_name}_{start_time}")
 
         try:
             # Wrap the operation with resilience patterns
@@ -514,9 +506,7 @@ class ResilienceManager:
             if timeout_policy_name and self.config.enable_timeout_management:
 
                 async def timeout_wrapped_operation():
-                    return await self.timeout_manager.execute_with_policy(
-                        timeout_policy_name, operation, *args, **kwargs
-                    )
+                    return await self.timeout_manager.execute_with_policy(timeout_policy_name, operation, *args, **kwargs)
 
                 resilient_operation = timeout_wrapped_operation
 
@@ -526,27 +516,17 @@ class ResilienceManager:
                 if policy:
 
                     async def retry_wrapped_operation():
-                        result = await policy.execute(
-                            resilient_operation, *args, **kwargs
-                        )
-                        return (
-                            result.recovered_data
-                            if hasattr(result, "recovered_data")
-                            else result
-                        )
+                        result = await policy.execute(resilient_operation, *args, **kwargs)
+                        return result.recovered_data if hasattr(result, "recovered_data") else result
 
                     resilient_operation = retry_wrapped_operation
 
             # Apply circuit breaker
             if circuit_breaker_name and self.config.enable_circuit_breakers:
-                circuit_breaker = self.circuit_breaker_manager.get_circuit_breaker(
-                    circuit_breaker_name
-                )
+                circuit_breaker = self.circuit_breaker_manager.get_circuit_breaker(circuit_breaker_name)
 
                 async def circuit_breaker_wrapped_operation():
-                    return await circuit_breaker.call(
-                        resilient_operation, *args, **kwargs
-                    )
+                    return await circuit_breaker.call(resilient_operation, *args, **kwargs)
 
                 resilient_operation = circuit_breaker_wrapped_operation
 
@@ -556,9 +536,7 @@ class ResilienceManager:
                     if resource_id is not None:
                         result = await resilient_operation()
                     else:
-                        raise RuntimeError(
-                            f"Failed to acquire resource from pool: {resource_pool_name}"
-                        )
+                        raise RuntimeError(f"Failed to acquire resource from pool: {resource_pool_name}")
             else:
                 result = await resilient_operation()
 
@@ -585,12 +563,10 @@ class ResilienceManager:
             # Attempt error recovery if enabled
             if enable_error_recovery and self.config.enable_error_recovery:
                 try:
-                    recovery_result = (
-                        await self.error_recovery_manager.recover_from_error(
-                            error=e,
-                            operation_name=operation_name,
-                            severity=ErrorSeverity.MEDIUM,
-                        )
+                    recovery_result = await self.error_recovery_manager.recover_from_error(
+                        error=e,
+                        operation_name=operation_name,
+                        severity=ErrorSeverity.MEDIUM,
                     )
 
                     if recovery_result.success:
@@ -604,9 +580,7 @@ class ResilienceManager:
                                 "operation_name": operation_name,
                                 "execution_time": execution_time,
                                 "recovery_strategy": (
-                                    recovery_result.strategy_used.value
-                                    if recovery_result.strategy_used
-                                    else None
+                                    recovery_result.strategy_used.value if recovery_result.strategy_used else None
                                 ),
                             },
                         )
@@ -684,9 +658,7 @@ class ResilienceManager:
             if self.config.enable_circuit_breakers:
                 total_components += 1
                 cb_metrics = self.circuit_breaker_manager.get_all_metrics()
-                open_breakers = sum(
-                    1 for cb in cb_metrics.values() if cb["state"] == "open"
-                )
+                open_breakers = sum(1 for cb in cb_metrics.values() if cb["state"] == "open")
                 if open_breakers == 0:
                     healthy_components += 1
 
@@ -755,11 +727,7 @@ class ResilienceManager:
                 # Check circuit breakers
                 if self.config.enable_circuit_breakers:
                     cb_metrics = self.circuit_breaker_manager.get_all_metrics()
-                    open_breakers = [
-                        name
-                        for name, metrics in cb_metrics.items()
-                        if metrics["state"] == "open"
-                    ]
+                    open_breakers = [name for name, metrics in cb_metrics.items() if metrics["state"] == "open"]
 
                     if open_breakers:
                         self.logger.log_security_event(
@@ -777,9 +745,7 @@ class ResilienceManager:
                             SecurityLogType.PERFORMANCE_METRIC,
                             "High resource pool utilization detected",
                             level=LogLevel.WARNING,
-                            metadata={
-                                "utilization": pool_metrics["global_utilization"]
-                            },
+                            metadata={"utilization": pool_metrics["global_utilization"]},
                         )
 
                 await asyncio.sleep(60)  # Every minute
@@ -808,16 +774,8 @@ class ResilienceManager:
             "successful_operations": self._successful_operations,
             "failed_operations": self._failed_operations,
             "recovered_operations": self._recovered_operations,
-            "success_rate": (
-                self._successful_operations / self._total_operations
-                if self._total_operations > 0
-                else 0
-            ),
-            "recovery_rate": (
-                self._recovered_operations / self._failed_operations
-                if self._failed_operations > 0
-                else 0
-            ),
+            "success_rate": (self._successful_operations / self._total_operations if self._total_operations > 0 else 0),
+            "recovery_rate": (self._recovered_operations / self._failed_operations if self._failed_operations > 0 else 0),
             "enabled_components": {
                 "circuit_breakers": self.config.enable_circuit_breakers,
                 "retry_policies": self.config.enable_retry_policies,
@@ -830,9 +788,7 @@ class ResilienceManager:
 
         # Add component-specific metrics
         if self.config.enable_circuit_breakers:
-            base_metrics["circuit_breakers"] = (
-                self.circuit_breaker_manager.get_all_metrics()
-            )
+            base_metrics["circuit_breakers"] = self.circuit_breaker_manager.get_all_metrics()
 
         if self.config.enable_retry_policies:
             base_metrics["retry_policies"] = self.retry_manager.get_all_stats()
@@ -844,14 +800,10 @@ class ResilienceManager:
             base_metrics["health_checks"] = self.health_checker.get_health_summary()
 
         if self.config.enable_timeout_management:
-            base_metrics["timeout_management"] = (
-                self.timeout_manager.get_global_metrics()
-            )
+            base_metrics["timeout_management"] = self.timeout_manager.get_global_metrics()
 
         if self.config.enable_error_recovery:
-            base_metrics["error_recovery"] = (
-                self.error_recovery_manager.get_recovery_metrics()
-            )
+            base_metrics["error_recovery"] = self.error_recovery_manager.get_recovery_metrics()
 
         return base_metrics
 

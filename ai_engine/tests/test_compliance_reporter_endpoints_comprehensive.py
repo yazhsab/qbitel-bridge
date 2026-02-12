@@ -48,7 +48,6 @@ from ai_engine.compliance.compliance_reporter import (
 )
 from ai_engine.compliance.report_generator import ReportFormat, ReportType
 
-
 # Fixtures
 
 
@@ -127,9 +126,7 @@ def sample_compliance_alert():
 
 
 @pytest.mark.asyncio
-async def test_generate_compliance_report_success(
-    mock_compliance_reporter, mock_background_tasks, sample_compliance_report
-):
+async def test_generate_compliance_report_success(mock_compliance_reporter, mock_background_tasks, sample_compliance_report):
     """Test successful compliance report generation."""
     request = ComplianceReportRequest(
         protocol="test_protocol",
@@ -139,17 +136,13 @@ async def test_generate_compliance_report_success(
         format="pdf",
     )
 
-    mock_compliance_reporter.generate_compliance_report.return_value = (
-        sample_compliance_report
-    )
+    mock_compliance_reporter.generate_compliance_report.return_value = sample_compliance_report
 
     with patch(
         "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
         return_value=mock_compliance_reporter,
     ):
-        with patch(
-            "ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"
-        ):
+        with patch("ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"):
             response = await generate_compliance_report(request, mock_background_tasks)
 
             assert isinstance(response, ComplianceReportResponse)
@@ -161,26 +154,20 @@ async def test_generate_compliance_report_success(
 
 
 @pytest.mark.asyncio
-async def test_generate_compliance_report_failure(
-    mock_compliance_reporter, mock_background_tasks
-):
+async def test_generate_compliance_report_failure(mock_compliance_reporter, mock_background_tasks):
     """Test compliance report generation failure."""
     request = ComplianceReportRequest(
         protocol="test_protocol",
         standard="SOC2",
     )
 
-    mock_compliance_reporter.generate_compliance_report.side_effect = Exception(
-        "Generation failed"
-    )
+    mock_compliance_reporter.generate_compliance_report.side_effect = Exception("Generation failed")
 
     with patch(
         "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
         return_value=mock_compliance_reporter,
     ):
-        with patch(
-            "ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"
-        ):
+        with patch("ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"):
             with pytest.raises(HTTPException) as exc_info:
                 await generate_compliance_report(request, mock_background_tasks)
 
@@ -213,12 +200,8 @@ async def test_generate_compliance_report_all_formats():
             "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
             return_value=mock_reporter,
         ):
-            with patch(
-                "ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"
-            ):
-                response = await generate_compliance_report(
-                    request, Mock(spec=BackgroundTasks)
-                )
+            with patch("ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"):
+                response = await generate_compliance_report(request, Mock(spec=BackgroundTasks))
 
                 assert response.format == fmt
 
@@ -241,9 +224,7 @@ async def test_download_compliance_report_not_implemented():
 
 
 @pytest.mark.asyncio
-async def test_start_continuous_monitoring_success(
-    mock_compliance_reporter, mock_background_tasks
-):
+async def test_start_continuous_monitoring_success(mock_compliance_reporter, mock_background_tasks):
     """Test starting continuous monitoring."""
     config = MonitoringConfigRequest(
         enabled=True,
@@ -269,9 +250,7 @@ async def test_start_continuous_monitoring_success(
             protocol="test",
         )
 
-    mock_compliance_reporter.continuous_compliance_monitoring = (
-        mock_monitoring_generator
-    )
+    mock_compliance_reporter.continuous_compliance_monitoring = mock_monitoring_generator
 
     with patch(
         "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
@@ -287,13 +266,9 @@ async def test_start_continuous_monitoring_success(
 
 
 @pytest.mark.asyncio
-async def test_start_continuous_monitoring_failure(
-    mock_compliance_reporter, mock_background_tasks
-):
+async def test_start_continuous_monitoring_failure(mock_compliance_reporter, mock_background_tasks):
     """Test monitoring start failure."""
-    config = MonitoringConfigRequest(
-        enabled=True, frequency="hourly", frameworks=["SOC2"]
-    )
+    config = MonitoringConfigRequest(enabled=True, frequency="hourly", frameworks=["SOC2"])
 
     with patch(
         "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
@@ -325,9 +300,7 @@ async def test_start_monitoring_all_frequencies():
             "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
             return_value=mock_reporter,
         ):
-            response = await start_continuous_monitoring(
-                config, Mock(spec=BackgroundTasks)
-            )
+            response = await start_continuous_monitoring(config, Mock(spec=BackgroundTasks))
 
             assert response["frequency"] == freq
 
@@ -379,9 +352,7 @@ async def test_get_monitoring_status_failure(mock_compliance_reporter):
 
 
 @pytest.mark.asyncio
-async def test_get_compliance_alerts_success(
-    mock_compliance_reporter, sample_compliance_alert
-):
+async def test_get_compliance_alerts_success(mock_compliance_reporter, sample_compliance_alert):
     """Test retrieving compliance alerts."""
     # Add alerts to queue
     await mock_compliance_reporter.alert_queue.put(sample_compliance_alert)
@@ -495,9 +466,7 @@ async def test_get_compliance_alerts_limit(mock_compliance_reporter):
 
 
 @pytest.mark.asyncio
-async def test_generate_audit_evidence_success(
-    mock_compliance_reporter, sample_audit_evidence
-):
+async def test_generate_audit_evidence_success(mock_compliance_reporter, sample_audit_evidence):
     """Test audit evidence generation."""
     request = AuditRequestModel(
         auditor="external_auditor",
@@ -509,17 +478,13 @@ async def test_generate_audit_evidence_success(
         format="comprehensive",
     )
 
-    mock_compliance_reporter.generate_audit_evidence.return_value = (
-        sample_audit_evidence
-    )
+    mock_compliance_reporter.generate_audit_evidence.return_value = sample_audit_evidence
 
     with patch(
         "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
         return_value=mock_compliance_reporter,
     ):
-        with patch(
-            "ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"
-        ):
+        with patch("ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"):
             response = await generate_audit_evidence(request)
 
             assert isinstance(response, AuditEvidenceResponse)
@@ -533,9 +498,7 @@ async def test_generate_audit_evidence_success(
 @pytest.mark.asyncio
 async def test_generate_audit_evidence_default_dates(mock_compliance_reporter):
     """Test audit evidence with default date range."""
-    request = AuditRequestModel(
-        auditor="auditor", framework="SOC2", start_date=None, end_date=None
-    )
+    request = AuditRequestModel(auditor="auditor", framework="SOC2", start_date=None, end_date=None)
 
     mock_evidence = Mock(
         evidence_id="evidence-123",
@@ -552,9 +515,7 @@ async def test_generate_audit_evidence_default_dates(mock_compliance_reporter):
         "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
         return_value=mock_compliance_reporter,
     ):
-        with patch(
-            "ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"
-        ):
+        with patch("ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"):
             response = await generate_audit_evidence(request)
 
             # Verify call was made with default date range (30 days)
@@ -568,17 +529,13 @@ async def test_generate_audit_evidence_failure(mock_compliance_reporter):
     """Test audit evidence generation failure."""
     request = AuditRequestModel(auditor="auditor", framework="SOC2")
 
-    mock_compliance_reporter.generate_audit_evidence.side_effect = Exception(
-        "Evidence generation failed"
-    )
+    mock_compliance_reporter.generate_audit_evidence.side_effect = Exception("Evidence generation failed")
 
     with patch(
         "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
         return_value=mock_compliance_reporter,
     ):
-        with patch(
-            "ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"
-        ):
+        with patch("ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"):
             with pytest.raises(HTTPException) as exc_info:
                 await generate_audit_evidence(request)
 
@@ -639,9 +596,7 @@ async def test_list_compliance_frameworks_success(mock_compliance_reporter):
 @pytest.mark.asyncio
 async def test_list_compliance_frameworks_failure(mock_compliance_reporter):
     """Test framework listing failure."""
-    mock_compliance_reporter.regulatory_kb.get_available_frameworks.side_effect = (
-        Exception("KB error")
-    )
+    mock_compliance_reporter.regulatory_kb.get_available_frameworks.side_effect = Exception("KB error")
 
     with patch(
         "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
@@ -704,9 +659,7 @@ async def test_get_performance_metrics_success():
 @pytest.mark.asyncio
 async def test_get_performance_metrics_failure(mock_compliance_reporter):
     """Test performance metrics retrieval failure."""
-    mock_compliance_reporter.get_performance_metrics.side_effect = Exception(
-        "Metrics error"
-    )
+    mock_compliance_reporter.get_performance_metrics.side_effect = Exception("Metrics error")
 
     with patch(
         "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
@@ -834,13 +787,9 @@ async def test_full_compliance_workflow():
         )
         mock_reporter.generate_compliance_report.return_value = mock_report
 
-        with patch(
-            "ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"
-        ):
+        with patch("ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"):
             request = ComplianceReportRequest(protocol="workflow_test", standard="SOC2")
-            report = await generate_compliance_report(
-                request, Mock(spec=BackgroundTasks)
-            )
+            report = await generate_compliance_report(request, Mock(spec=BackgroundTasks))
             assert report.report_id == "report-workflow"
 
         # 4. Start monitoring
@@ -850,12 +799,8 @@ async def test_full_compliance_workflow():
 
         mock_reporter.continuous_compliance_monitoring = mock_gen
 
-        config = MonitoringConfigRequest(
-            enabled=True, frequency="hourly", frameworks=["SOC2"]
-        )
-        monitoring_result = await start_continuous_monitoring(
-            config, Mock(spec=BackgroundTasks)
-        )
+        config = MonitoringConfigRequest(enabled=True, frequency="hourly", frameworks=["SOC2"])
+        monitoring_result = await start_continuous_monitoring(config, Mock(spec=BackgroundTasks))
         assert monitoring_result["status"] == "monitoring_started"
 
         # 5. Generate audit evidence
@@ -898,14 +843,10 @@ async def test_concurrent_report_generation(mock_compliance_reporter):
         "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
         return_value=mock_compliance_reporter,
     ):
-        with patch(
-            "ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"
-        ):
+        with patch("ai_engine.api.compliance_reporter_endpoints.get_enterprise_metrics"):
             tasks = []
             for i in range(5):
-                request = ComplianceReportRequest(
-                    protocol=f"protocol-{i}", standard="SOC2"
-                )
+                request = ComplianceReportRequest(protocol=f"protocol-{i}", standard="SOC2")
                 task = generate_compliance_report(request, Mock(spec=BackgroundTasks))
                 tasks.append(task)
 
@@ -935,9 +876,7 @@ def test_compliance_report_request_validation():
 
 def test_monitoring_config_request_defaults():
     """Test MonitoringConfigRequest default values."""
-    config = MonitoringConfigRequest(
-        enabled=True, frequency="hourly", frameworks=["SOC2"]
-    )
+    config = MonitoringConfigRequest(enabled=True, frequency="hourly", frameworks=["SOC2"])
 
     assert config.enabled is True
     assert config.auto_remediation is False

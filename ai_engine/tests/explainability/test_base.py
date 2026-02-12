@@ -40,10 +40,7 @@ class MockExplainer(BaseExplainer):
         )
 
     def batch_explain(self, input_batch, decision_ids, top_k=10):
-        return [
-            self.explain(inp, dec_id, top_k)
-            for inp, dec_id in zip(input_batch, decision_ids)
-        ]
+        return [self.explain(inp, dec_id, top_k) for inp, dec_id in zip(input_batch, decision_ids)]
 
 
 class TestFeatureImportance:

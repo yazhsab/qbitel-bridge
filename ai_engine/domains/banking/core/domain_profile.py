@@ -17,47 +17,47 @@ class BankingSubdomain(Enum):
     """Banking system subdomains with specific requirements."""
 
     # Payment Systems
-    CARD_PAYMENTS = auto()          # ISO 8583, EMV, tokenization
-    WIRE_TRANSFERS = auto()         # SWIFT, ISO 20022
-    DOMESTIC_CLEARING = auto()      # ACH, FedWire, CHIPS
-    REAL_TIME_PAYMENTS = auto()     # FedNow, RTP, SCT Inst
-    CROSS_BORDER = auto()           # Correspondent banking
+    CARD_PAYMENTS = auto()  # ISO 8583, EMV, tokenization
+    WIRE_TRANSFERS = auto()  # SWIFT, ISO 20022
+    DOMESTIC_CLEARING = auto()  # ACH, FedWire, CHIPS
+    REAL_TIME_PAYMENTS = auto()  # FedNow, RTP, SCT Inst
+    CROSS_BORDER = auto()  # Correspondent banking
 
     # Capital Markets
-    TRADING = auto()                # FIX protocol, order execution
-    MARKET_DATA = auto()            # FAST, ITCH, real-time feeds
-    POST_TRADE = auto()             # Settlement, clearing
+    TRADING = auto()  # FIX protocol, order execution
+    MARKET_DATA = auto()  # FAST, ITCH, real-time feeds
+    POST_TRADE = auto()  # Settlement, clearing
 
     # Core Banking
-    ACCOUNT_MANAGEMENT = auto()     # Core banking APIs
-    LENDING = auto()                # Loan origination, servicing
-    TREASURY = auto()               # Cash management, FX
+    ACCOUNT_MANAGEMENT = auto()  # Core banking APIs
+    LENDING = auto()  # Loan origination, servicing
+    TREASURY = auto()  # Cash management, FX
 
     # Legacy Systems
-    LEGACY_MAINFRAME = auto()       # z/OS, CICS, IMS
-    LEGACY_MIDRANGE = auto()        # AS/400, iSeries
+    LEGACY_MAINFRAME = auto()  # z/OS, CICS, IMS
+    LEGACY_MIDRANGE = auto()  # AS/400, iSeries
 
     # Security Infrastructure
-    HSM_OPERATIONS = auto()         # Hardware security modules
-    PKI_INFRASTRUCTURE = auto()     # Certificate management
-    KEY_MANAGEMENT = auto()         # Key lifecycle
+    HSM_OPERATIONS = auto()  # Hardware security modules
+    PKI_INFRASTRUCTURE = auto()  # Certificate management
+    KEY_MANAGEMENT = auto()  # Key lifecycle
 
     # Customer Channels
-    DIGITAL_BANKING = auto()        # Web, Mobile APIs
-    ATM_NETWORK = auto()            # ATM encryption, PIN
-    OPEN_BANKING = auto()           # PSD2, API banking
+    DIGITAL_BANKING = auto()  # Web, Mobile APIs
+    ATM_NETWORK = auto()  # ATM encryption, PIN
+    OPEN_BANKING = auto()  # PSD2, API banking
 
 
 class PQCAlgorithm(Enum):
     """Post-quantum cryptographic algorithms."""
 
     # Key Encapsulation Mechanisms (NIST FIPS 203)
-    ML_KEM_512 = ("ML-KEM-512", "kem", 128, 800, 768)      # name, type, security_bits, pk_size, ct_size
+    ML_KEM_512 = ("ML-KEM-512", "kem", 128, 800, 768)  # name, type, security_bits, pk_size, ct_size
     ML_KEM_768 = ("ML-KEM-768", "kem", 192, 1184, 1088)
     ML_KEM_1024 = ("ML-KEM-1024", "kem", 256, 1568, 1568)
 
     # Digital Signatures (NIST FIPS 204 - Dilithium)
-    ML_DSA_44 = ("ML-DSA-44", "signature", 128, 1312, 2420)   # pk_size, sig_size
+    ML_DSA_44 = ("ML-DSA-44", "signature", 128, 1312, 2420)  # pk_size, sig_size
     ML_DSA_65 = ("ML-DSA-65", "signature", 192, 1952, 3293)
     ML_DSA_87 = ("ML-DSA-87", "signature", 256, 2592, 4595)
 
@@ -74,8 +74,7 @@ class PQCAlgorithm(Enum):
     P384_ML_KEM_1024 = ("P384-ML-KEM-1024", "hybrid_kem", 256, 1665, 1665)
     ED25519_ML_DSA_65 = ("Ed25519-ML-DSA-65", "hybrid_sig", 192, 1984, 3357)
 
-    def __init__(self, name: str, algo_type: str, security_bits: int,
-                 pk_size: int, secondary_size: int):
+    def __init__(self, name: str, algo_type: str, security_bits: int, pk_size: int, secondary_size: int):
         self.algo_name = name
         self.algo_type = algo_type
         self.security_bits = security_bits
@@ -100,29 +99,29 @@ class BankingSecurityConstraints:
     """Security constraints for banking subdomain."""
 
     # Performance constraints
-    max_latency_ms: float = 100.0           # Maximum acceptable latency
-    target_latency_ms: float = 10.0         # Target latency for optimization
-    throughput_tps: int = 1000              # Target transactions per second
-    max_message_size_kb: int = 64           # Maximum message size
+    max_latency_ms: float = 100.0  # Maximum acceptable latency
+    target_latency_ms: float = 10.0  # Target latency for optimization
+    throughput_tps: int = 1000  # Target transactions per second
+    max_message_size_kb: int = 64  # Maximum message size
 
     # Cryptographic constraints
-    require_fips: bool = True               # FIPS 140-3 required
-    require_pqc: bool = True                # PQC mandatory
-    allow_hybrid: bool = True               # Classical + PQC hybrid allowed
-    min_security_bits: int = 128            # Minimum security level
-    allow_software_crypto: bool = False     # Allow software-only crypto
+    require_fips: bool = True  # FIPS 140-3 required
+    require_pqc: bool = True  # PQC mandatory
+    allow_hybrid: bool = True  # Classical + PQC hybrid allowed
+    min_security_bits: int = 128  # Minimum security level
+    allow_software_crypto: bool = False  # Allow software-only crypto
 
     # Compliance constraints
-    pci_dss_level: int = 1                  # PCI-DSS SAQ level (1-4)
-    require_hsm: bool = True                # HSM mandatory for key operations
-    require_audit: bool = True              # Audit trail required
-    data_residency: Optional[str] = None    # Data sovereignty requirements
-    retention_years: int = 7                # Data retention period
+    pci_dss_level: int = 1  # PCI-DSS SAQ level (1-4)
+    require_hsm: bool = True  # HSM mandatory for key operations
+    require_audit: bool = True  # Audit trail required
+    data_residency: Optional[str] = None  # Data sovereignty requirements
+    retention_years: int = 7  # Data retention period
 
     # Availability constraints
-    availability_target: float = 0.9999     # Four nines
-    max_recovery_time_minutes: int = 15     # RTO
-    max_data_loss_seconds: int = 0          # RPO (zero for payment systems)
+    availability_target: float = 0.9999  # Four nines
+    max_recovery_time_minutes: int = 15  # RTO
+    max_data_loss_seconds: int = 0  # RPO (zero for payment systems)
 
     def validate(self) -> List[str]:
         """Validate constraints consistency."""
@@ -196,11 +195,10 @@ class BankingPQCProfile:
                     max_recovery_time_minutes=1,
                 ),
                 kem_algorithm=PQCAlgorithm.ML_KEM_512,  # Faster
-                sig_algorithm=PQCAlgorithm.FALCON_512,   # Compact, fast verify
+                sig_algorithm=PQCAlgorithm.FALCON_512,  # Compact, fast verify
                 use_hybrid_mode=True,
                 key_rotation_hours=1,  # Frequent rotation
             ),
-
             # Wire transfers - high security, batch tolerant
             BankingSubdomain.WIRE_TRANSFERS: cls(
                 subdomain=subdomain,
@@ -218,7 +216,6 @@ class BankingPQCProfile:
                 use_hybrid_mode=True,
                 strict_mode=True,
             ),
-
             # Card payments - balanced latency/security
             BankingSubdomain.CARD_PAYMENTS: cls(
                 subdomain=subdomain,
@@ -233,7 +230,6 @@ class BankingPQCProfile:
                 sig_algorithm=PQCAlgorithm.ML_DSA_65,
                 use_hybrid_mode=True,
             ),
-
             # Trading - extreme low latency
             BankingSubdomain.TRADING: cls(
                 subdomain=subdomain,
@@ -249,7 +245,6 @@ class BankingPQCProfile:
                 key_rotation_hours=1,
                 allow_algorithm_negotiation=False,  # Pre-configured
             ),
-
             # HSM operations - maximum security
             BankingSubdomain.HSM_OPERATIONS: cls(
                 subdomain=subdomain,
@@ -267,7 +262,6 @@ class BankingPQCProfile:
                 strict_mode=True,
                 key_rotation_hours=168,  # Weekly for HSM keys
             ),
-
             # ATM network - HSM-backed PIN security
             BankingSubdomain.ATM_NETWORK: cls(
                 subdomain=subdomain,
@@ -282,7 +276,6 @@ class BankingPQCProfile:
                 sig_algorithm=PQCAlgorithm.ML_DSA_65,
                 use_hybrid_mode=True,
             ),
-
             # Domestic clearing - batch processing
             BankingSubdomain.DOMESTIC_CLEARING: cls(
                 subdomain=subdomain,
@@ -296,7 +289,6 @@ class BankingPQCProfile:
                 sig_algorithm=PQCAlgorithm.ML_DSA_65,
                 use_hybrid_mode=True,
             ),
-
             # Open Banking - API security
             BankingSubdomain.OPEN_BANKING: cls(
                 subdomain=subdomain,
@@ -312,7 +304,6 @@ class BankingPQCProfile:
                 hybrid_kem=PQCAlgorithm.X25519_ML_KEM_768,
                 use_hybrid_mode=True,
             ),
-
             # Digital banking - web/mobile
             BankingSubdomain.DIGITAL_BANKING: cls(
                 subdomain=subdomain,
@@ -326,7 +317,6 @@ class BankingPQCProfile:
                 sig_algorithm=PQCAlgorithm.ML_DSA_65,
                 use_hybrid_mode=True,
             ),
-
             # Legacy mainframe
             BankingSubdomain.LEGACY_MAINFRAME: cls(
                 subdomain=subdomain,
@@ -339,7 +329,6 @@ class BankingPQCProfile:
                 sig_algorithm=PQCAlgorithm.ML_DSA_65,
                 use_hybrid_mode=True,  # Bridge to modern systems
             ),
-
             # Market data - high throughput, integrity focus
             BankingSubdomain.MARKET_DATA: cls(
                 subdomain=subdomain,
@@ -357,10 +346,13 @@ class BankingPQCProfile:
         }
 
         # Return specific profile or default
-        return profiles.get(subdomain, cls(
-            subdomain=subdomain,
-            constraints=BankingSecurityConstraints(),
-        ))
+        return profiles.get(
+            subdomain,
+            cls(
+                subdomain=subdomain,
+                constraints=BankingSecurityConstraints(),
+            ),
+        )
 
     def get_kem_for_security_level(self, min_bits: int) -> PQCAlgorithm:
         """Get appropriate KEM for security level."""

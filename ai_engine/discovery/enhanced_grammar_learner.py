@@ -76,9 +76,7 @@ class HierarchicalGrammar:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         return {
-            "layers": {
-                name: grammar.to_dict() for name, grammar in self.layers.items()
-            },
+            "layers": {name: grammar.to_dict() for name, grammar in self.layers.items()},
             "layer_order": self.layer_order,
             "inter_layer_rules": [
                 {
@@ -165,9 +163,7 @@ class TransformerGrammarEncoder(nn.Module):
         self.boundary_head = nn.Linear(d_model, 2)  # Field boundary detection
         self.symbol_head = nn.Linear(d_model, 64)  # Symbol classification
 
-    def forward(
-        self, x: torch.Tensor, mask: Optional[torch.Tensor] = None
-    ) -> Dict[str, torch.Tensor]:
+    def forward(self, x: torch.Tensor, mask: Optional[torch.Tensor] = None) -> Dict[str, torch.Tensor]:
         """Forward pass through transformer."""
         # x shape: (batch, seq_len)
         x = self.embedding(x) * np.sqrt(self.d_model)
@@ -311,9 +307,7 @@ class EnhancedGrammarLearner:
             Learned grammar with high accuracy
         """
         start_time = time.time()
-        self.logger.info(
-            f"Learning grammar with transformer on {len(messages)} messages"
-        )
+        self.logger.info(f"Learning grammar with transformer on {len(messages)} messages")
 
         try:
             # Step 1: Prepare dataset
@@ -345,14 +339,10 @@ class EnhancedGrammarLearner:
             structure_info = await self._analyze_attention_patterns(encodings, messages)
 
             # Step 5: Combine with traditional grammar learning
-            base_grammar = await self.base_learner.learn_grammar(
-                messages, protocol_hint
-            )
+            base_grammar = await self.base_learner.learn_grammar(messages, protocol_hint)
 
             # Step 6: Enhance grammar with transformer insights
-            enhanced_grammar = await self._enhance_grammar_with_transformer(
-                base_grammar, structure_info, boundaries, symbols
-            )
+            enhanced_grammar = await self._enhance_grammar_with_transformer(base_grammar, structure_info, boundaries, symbols)
 
             # Step 7: Validate and refine
             validated_grammar = await self._validate_grammar(enhanced_grammar, messages)
@@ -360,9 +350,7 @@ class EnhancedGrammarLearner:
             learning_time = time.time() - start_time
             self.metrics["learning_time"].append(learning_time)
 
-            self.logger.info(
-                f"Transformer-based learning completed in {learning_time:.2f}s"
-            )
+            self.logger.info(f"Transformer-based learning completed in {learning_time:.2f}s")
             return validated_grammar
 
         except Exception as e:
@@ -393,15 +381,11 @@ class EnhancedGrammarLearner:
             layer_grammars = {}
             for layer_name, layer_messages in layers.items():
                 self.logger.debug(f"Learning grammar for layer: {layer_name}")
-                layer_grammar = await self.learn_with_transformer(
-                    layer_messages, protocol_hint=layer_name
-                )
+                layer_grammar = await self.learn_with_transformer(layer_messages, protocol_hint=layer_name)
                 layer_grammars[layer_name] = layer_grammar
 
             # Step 3: Learn inter-layer relationships
-            inter_layer_rules = await self._learn_inter_layer_rules(
-                layers, layer_grammars
-            )
+            inter_layer_rules = await self._learn_inter_layer_rules(layers, layer_grammars)
 
             # Step 4: Build hierarchical grammar
             hierarchical_grammar = HierarchicalGrammar(
@@ -456,14 +440,10 @@ class EnhancedGrammarLearner:
                     break
 
                 # Select most uncertain sample
-                query = await self._select_uncertain_sample(
-                    unlabeled_messages, current_grammar
-                )
+                query = await self._select_uncertain_sample(unlabeled_messages, current_grammar)
 
                 # Query oracle (human expert)
-                self.logger.info(
-                    f"Query {query_num + 1}/{max_queries}: {query.query_type}"
-                )
+                self.logger.info(f"Query {query_num + 1}/{max_queries}: {query.query_type}")
                 response = oracle(query)
 
                 # Update with feedback
@@ -477,18 +457,14 @@ class EnhancedGrammarLearner:
 
                 # Check if confidence is sufficient
                 if await self._check_learning_confidence(current_grammar, messages):
-                    self.logger.info(
-                        f"Sufficient confidence reached after {query_num + 1} queries"
-                    )
+                    self.logger.info(f"Sufficient confidence reached after {query_num + 1} queries")
                     break
 
             # Calculate sample efficiency
             efficiency = len(messages) / len(labeled_messages)
             self.metrics["sample_efficiency"].append(efficiency)
 
-            self.logger.info(
-                f"Active learning completed with {len(labeled_messages)} labeled samples"
-            )
+            self.logger.info(f"Active learning completed with {len(labeled_messages)} labeled samples")
             self.logger.info(f"Sample efficiency: {efficiency:.2f}x")
 
             return current_grammar
@@ -525,14 +501,10 @@ class EnhancedGrammarLearner:
             self.logger.info(f"Protocol similarity: {similarity:.3f}")
 
             if similarity < transfer_model.similarity_threshold:
-                self.logger.warning(
-                    f"Low similarity ({similarity:.3f}), transfer may not be effective"
-                )
+                self.logger.warning(f"Low similarity ({similarity:.3f}), transfer may not be effective")
 
             # Step 3: Adapt source grammar
-            adapted_grammar = await self._adapt_grammar(
-                transfer_model.source_grammar, messages[:adaptation_samples]
-            )
+            adapted_grammar = await self._adapt_grammar(transfer_model.source_grammar, messages[:adaptation_samples])
 
             # Step 4: Fine-tune with target samples
             final_grammar = await self._fine_tune_grammar(adapted_grammar, messages)
@@ -566,9 +538,7 @@ class EnhancedGrammarLearner:
 
         try:
             if isinstance(grammar, HierarchicalGrammar):
-                return await self._visualize_hierarchical_grammar(
-                    grammar, output_path, format
-                )
+                return await self._visualize_hierarchical_grammar(grammar, output_path, format)
             else:
                 return await self._visualize_flat_grammar(grammar, output_path, format)
 
@@ -621,9 +591,7 @@ class EnhancedGrammarLearner:
                     predictions.append(pred)
 
                 metrics["accuracy"] = accuracy_score(ground_truth, predictions)
-                precision, recall, f1, _ = precision_recall_fscore_support(
-                    ground_truth, predictions, average="weighted"
-                )
+                precision, recall, f1, _ = precision_recall_fscore_support(ground_truth, predictions, average="weighted")
                 metrics["precision"] = precision
                 metrics["recall"] = recall
                 metrics["f1_score"] = f1
@@ -635,8 +603,7 @@ class EnhancedGrammarLearner:
             self.metrics["f1_score"].append(metrics["f1_score"])
 
             self.logger.info(
-                f"Evaluation complete: Accuracy={metrics['accuracy']:.3f}, "
-                f"Coverage={metrics['coverage']:.3f}"
+                f"Evaluation complete: Accuracy={metrics['accuracy']:.3f}, " f"Coverage={metrics['coverage']:.3f}"
             )
 
             return metrics
@@ -647,9 +614,7 @@ class EnhancedGrammarLearner:
 
     # Private helper methods
 
-    async def _analyze_attention_patterns(
-        self, encodings: torch.Tensor, messages: List[bytes]
-    ) -> Dict[str, Any]:
+    async def _analyze_attention_patterns(self, encodings: torch.Tensor, messages: List[bytes]) -> Dict[str, Any]:
         """Analyze transformer attention patterns for structure discovery."""
         # Extract attention-based structural information
         structure_info = {
@@ -662,9 +627,7 @@ class EnhancedGrammarLearner:
         for i, encoding in enumerate(encodings):
             # Detect high-attention regions (potential field boundaries)
             attention_scores = torch.norm(encoding, dim=-1)
-            peaks = torch.where(
-                attention_scores > attention_scores.mean() + attention_scores.std()
-            )[0]
+            peaks = torch.where(attention_scores > attention_scores.mean() + attention_scores.std())[0]
             structure_info["field_boundaries"].append(peaks.tolist())
 
         return structure_info
@@ -700,9 +663,7 @@ class EnhancedGrammarLearner:
 
         return enhanced_grammar
 
-    async def _validate_grammar(
-        self, grammar: Grammar, messages: List[bytes]
-    ) -> Grammar:
+    async def _validate_grammar(self, grammar: Grammar, messages: List[bytes]) -> Grammar:
         """Validate and refine grammar."""
         # Test grammar on messages
         valid_rules = []
@@ -773,9 +734,7 @@ class EnhancedGrammarLearner:
 
         return inter_layer_rules
 
-    async def _select_uncertain_sample(
-        self, unlabeled_messages: List[bytes], current_grammar: Grammar
-    ) -> ActiveLearningQuery:
+    async def _select_uncertain_sample(self, unlabeled_messages: List[bytes], current_grammar: Grammar) -> ActiveLearningQuery:
         """Select most uncertain sample for active learning."""
         max_uncertainty = 0.0
         most_uncertain_msg = unlabeled_messages[0]
@@ -804,24 +763,18 @@ class EnhancedGrammarLearner:
         can_parse = await self._can_parse_message(grammar, message)
         return 0.0 if can_parse else 1.0
 
-    async def _check_learning_confidence(
-        self, grammar: Grammar, messages: List[bytes]
-    ) -> bool:
+    async def _check_learning_confidence(self, grammar: Grammar, messages: List[bytes]) -> bool:
         """Check if learning confidence is sufficient."""
         # Test on sample of messages
         sample_size = min(50, len(messages))
         sample_messages = messages[:sample_size]
 
-        parsed_count = sum(
-            1 for msg in sample_messages if await self._can_parse_message(grammar, msg)
-        )
+        parsed_count = sum(1 for msg in sample_messages if await self._can_parse_message(grammar, msg))
 
         confidence = parsed_count / sample_size
         return confidence >= 0.95  # 95% confidence threshold
 
-    async def _adapt_grammar(
-        self, source_grammar: Grammar, target_samples: List[bytes]
-    ) -> Grammar:
+    async def _adapt_grammar(self, source_grammar: Grammar, target_samples: List[bytes]) -> Grammar:
         """Adapt source grammar to target protocol."""
         # Create adapted grammar with modified rules
         adapted_rules = []
@@ -852,16 +805,12 @@ class EnhancedGrammarLearner:
 
         return adapted_grammar
 
-    async def _fine_tune_grammar(
-        self, adapted_grammar: Grammar, target_messages: List[bytes]
-    ) -> Grammar:
+    async def _fine_tune_grammar(self, adapted_grammar: Grammar, target_messages: List[bytes]) -> Grammar:
         """Fine-tune adapted grammar on target messages."""
         # Use base learner to refine
         return await self.base_learner.learn_grammar(target_messages)
 
-    async def _visualize_hierarchical_grammar(
-        self, grammar: HierarchicalGrammar, output_path: str, format: str
-    ) -> str:
+    async def _visualize_hierarchical_grammar(self, grammar: HierarchicalGrammar, output_path: str, format: str) -> str:
         """Visualize hierarchical grammar."""
         if format == "json":
             output_file = f"{output_path}.json"
@@ -896,9 +845,7 @@ class EnhancedGrammarLearner:
         else:
             raise ValueError(f"Unsupported format: {format}")
 
-    async def _visualize_flat_grammar(
-        self, grammar: Grammar, output_path: str, format: str
-    ) -> str:
+    async def _visualize_flat_grammar(self, grammar: Grammar, output_path: str, format: str) -> str:
         """Visualize flat grammar."""
         if format == "json":
             output_file = f"{output_path}.json"
@@ -958,9 +905,7 @@ class EnhancedGrammarLearner:
 """
 
         for rule in grammar.rules[:100]:  # Limit for performance
-            rhs_str = " ".join(
-                [f'<span class="symbol">{s.name}</span>' for s in rule.right_hand_side]
-            )
+            rhs_str = " ".join([f'<span class="symbol">{s.name}</span>' for s in rule.right_hand_side])
             html += f"""
     <div class="rule">
         <span class="symbol">{rule.left_hand_side.name}</span> → {rhs_str}
@@ -1073,28 +1018,14 @@ class EnhancedGrammarLearner:
     def get_metrics_summary(self) -> Dict[str, Any]:
         """Get summary of learning metrics."""
         summary = {
-            "average_accuracy": (
-                np.mean(self.metrics["accuracy"]) if self.metrics["accuracy"] else 0.0
-            ),
-            "average_precision": (
-                np.mean(self.metrics["precision"]) if self.metrics["precision"] else 0.0
-            ),
-            "average_recall": (
-                np.mean(self.metrics["recall"]) if self.metrics["recall"] else 0.0
-            ),
-            "average_f1_score": (
-                np.mean(self.metrics["f1_score"]) if self.metrics["f1_score"] else 0.0
-            ),
+            "average_accuracy": (np.mean(self.metrics["accuracy"]) if self.metrics["accuracy"] else 0.0),
+            "average_precision": (np.mean(self.metrics["precision"]) if self.metrics["precision"] else 0.0),
+            "average_recall": (np.mean(self.metrics["recall"]) if self.metrics["recall"] else 0.0),
+            "average_f1_score": (np.mean(self.metrics["f1_score"]) if self.metrics["f1_score"] else 0.0),
             "average_sample_efficiency": (
-                np.mean(self.metrics["sample_efficiency"])
-                if self.metrics["sample_efficiency"]
-                else 0.0
+                np.mean(self.metrics["sample_efficiency"]) if self.metrics["sample_efficiency"] else 0.0
             ),
-            "average_learning_time": (
-                np.mean(self.metrics["learning_time"])
-                if self.metrics["learning_time"]
-                else 0.0
-            ),
+            "average_learning_time": (np.mean(self.metrics["learning_time"]) if self.metrics["learning_time"] else 0.0),
             "total_evaluations": len(self.metrics["accuracy"]),
         }
 
@@ -1134,9 +1065,7 @@ def compute_grammar_similarity(grammar1: Grammar, grammar2: Grammar) -> float:
     return intersection / union if union > 0 else 0.0
 
 
-def merge_grammars(
-    grammars: List[Grammar], weights: Optional[List[float]] = None
-) -> Grammar:
+def merge_grammars(grammars: List[Grammar], weights: Optional[List[float]] = None) -> Grammar:
     """Merge multiple grammars with optional weights."""
     if not grammars:
         raise ValueError("No grammars to merge")
@@ -1162,9 +1091,7 @@ def merge_grammars(
     merged_rules = []
     for rule_key, rule_weight_pairs in rule_map.items():
         # Average weighted probabilities
-        avg_prob = sum(
-            rule.probability * weight for rule, weight in rule_weight_pairs
-        ) / len(rule_weight_pairs)
+        avg_prob = sum(rule.probability * weight for rule, weight in rule_weight_pairs) / len(rule_weight_pairs)
 
         # Use first rule as template
         template_rule = rule_weight_pairs[0][0]
@@ -1189,9 +1116,7 @@ def merge_grammars(
 
 def simplify_grammar(grammar: Grammar, min_probability: float = 0.01) -> Grammar:
     """Simplify grammar by removing low-probability rules."""
-    simplified_rules = [
-        rule for rule in grammar.rules if rule.probability >= min_probability
-    ]
+    simplified_rules = [rule for rule in grammar.rules if rule.probability >= min_probability]
 
     # Remove unused symbols
     used_symbols = set()
@@ -1200,9 +1125,7 @@ def simplify_grammar(grammar: Grammar, min_probability: float = 0.01) -> Grammar
         for symbol in rule.right_hand_side:
             used_symbols.add(symbol.name)
 
-    simplified_symbols = {
-        name: symbol for name, symbol in grammar.symbols.items() if name in used_symbols
-    }
+    simplified_symbols = {name: symbol for name, symbol in grammar.symbols.items() if name in used_symbols}
 
     simplified_grammar = Grammar(
         rules=simplified_rules,

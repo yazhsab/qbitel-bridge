@@ -93,9 +93,7 @@ class SwiftParser:
                 if block.block_type == "1":
                     message.basic_header = SwiftBasicHeader.from_content(block.content)
                 elif block.block_type == "2":
-                    message.application_header = SwiftApplicationHeader.from_content(
-                        block.content
-                    )
+                    message.application_header = SwiftApplicationHeader.from_content(block.content)
                 elif block.block_type == "3":
                     message.user_header = SwiftUserHeader.from_content(block.content)
                 elif block.block_type == "4":
@@ -117,9 +115,7 @@ class SwiftParser:
             message.parse_errors.append("Missing or empty text block (block 4)")
 
         if self.strict and message.parse_errors:
-            raise SwiftParseError(
-                f"Parse errors: {'; '.join(message.parse_errors)}", 0, raw_message
-            )
+            raise SwiftParseError(f"Parse errors: {'; '.join(message.parse_errors)}", 0, raw_message)
 
         return message
 
@@ -145,9 +141,7 @@ class SwiftParser:
             end = self._find_block_end(raw_message, start)
             if end == -1:
                 if self.strict:
-                    raise SwiftParseError(
-                        f"Unclosed block {block_type}", start, raw_message
-                    )
+                    raise SwiftParseError(f"Unclosed block {block_type}", start, raw_message)
                 break
 
             # Extract content (after block_type:)

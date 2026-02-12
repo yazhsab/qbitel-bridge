@@ -27,21 +27,23 @@ try:
     from envoy.config.endpoint.v3 import endpoint_pb2
     from envoy.extensions.transport_sockets.tls.v3 import secret_pb2
     from google.protobuf import any_pb2
+
     ENVOY_PROTOS_AVAILABLE = True
 except ImportError:
     ENVOY_PROTOS_AVAILABLE = False
+
     # Create mock classes for when protos are not available
     class MockServicer:
         pass
-    discovery_pb2_grpc = type('discovery_pb2_grpc', (), {
-        'AggregatedDiscoveryServiceServicer': MockServicer
-    })()
-    any_pb2 = type('any_pb2', (), {'Any': dict})()
+
+    discovery_pb2_grpc = type("discovery_pb2_grpc", (), {"AggregatedDiscoveryServiceServicer": MockServicer})()
+    any_pb2 = type("any_pb2", (), {"Any": dict})()
     logger.warning("Envoy protobuf packages not available. Install with: pip install xds-protos grpcio-tools")
 
 
 class XDSResourceType(Enum):
     """Envoy xDS resource types"""
+
     LISTENER = "type.googleapis.com/envoy.config.listener.v3.Listener"
     CLUSTER = "type.googleapis.com/envoy.config.cluster.v3.Cluster"
     ROUTE = "type.googleapis.com/envoy.config.route.v3.RouteConfiguration"
@@ -52,6 +54,7 @@ class XDSResourceType(Enum):
 @dataclass
 class XDSResource:
     """Represents an xDS resource"""
+
     name: str
     version: str
     resource_type: XDSResourceType
@@ -62,6 +65,7 @@ class XDSResource:
 @dataclass
 class EnvoyNode:
     """Represents an Envoy proxy node"""
+
     id: str
     cluster: str
     metadata: Dict[str, Any]
@@ -77,12 +81,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
     quantum-safe encryption filters, traffic policies, and service discovery.
     """
 
-    def __init__(
-        self,
-        port: int = 18000,
-        enable_ads: bool = True,
-        cache_ttl: int = 300
-    ):
+    def __init__(self, port: int = 18000, enable_ads: bool = True, cache_ttl: int = 300):
         """
         Initialize the Envoy xDS server.
 
@@ -132,22 +131,20 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
         self._server = grpc.aio.server(
             futures.ThreadPoolExecutor(max_workers=10),
             options=[
-                ('grpc.max_send_message_length', 50 * 1024 * 1024),  # 50MB
-                ('grpc.max_receive_message_length', 50 * 1024 * 1024),  # 50MB
-                ('grpc.keepalive_time_ms', 30000),
-                ('grpc.keepalive_timeout_ms', 10000),
-                ('grpc.keepalive_permit_without_calls', True),
-                ('grpc.http2.max_pings_without_data', 0),
-            ]
+                ("grpc.max_send_message_length", 50 * 1024 * 1024),  # 50MB
+                ("grpc.max_receive_message_length", 50 * 1024 * 1024),  # 50MB
+                ("grpc.keepalive_time_ms", 30000),
+                ("grpc.keepalive_timeout_ms", 10000),
+                ("grpc.keepalive_permit_without_calls", True),
+                ("grpc.http2.max_pings_without_data", 0),
+            ],
         )
 
         # Register ADS service
-        discovery_pb2_grpc.add_AggregatedDiscoveryServiceServicer_to_server(
-            self, self._server
-        )
+        discovery_pb2_grpc.add_AggregatedDiscoveryServiceServicer_to_server(self, self._server)
 
         # Add insecure port (in production, use TLS)
-        self._server.add_insecure_port(f'[::]:{self.port}')
+        self._server.add_insecure_port(f"[::]:{self.port}")
 
         # Start server
         await self._server.start()
@@ -171,11 +168,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
             self._running = False
             logger.info("xDS server stopped")
 
-    async def StreamAggregatedResources(
-        self,
-        request_iterator,
-        context: grpc.aio.ServicerContext
-    ):
+    async def StreamAggregatedResources(self, request_iterator, context: grpc.aio.ServicerContext):
         """
         Handle bidirectional streaming for ADS (Aggregated Discovery Service).
 
@@ -195,7 +188,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                             id=node_id,
                             cluster=request.node.cluster or "unknown",
                             metadata=dict(request.node.metadata) if request.node.metadata else {},
-                            build_version=request.node.user_agent_version or ""
+                            build_version=request.node.user_agent_version or "",
                         )
                         self.register_node(node)
 
@@ -213,7 +206,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                     version_info=str(self._version_counter),
                     resources=resources,
                     type_url=type_url,
-                    nonce=self._generate_nonce()
+                    nonce=self._generate_nonce(),
                 )
 
                 # Send response
@@ -226,12 +219,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
 
-    def _get_resources_by_type_url(
-        self,
-        type_url: str,
-        node_id: Optional[str],
-        resource_names: List[str]
-    ) -> List[Any]:
+    def _get_resources_by_type_url(self, type_url: str, node_id: Optional[str], resource_names: List[str]) -> List[Any]:
         """
         Get resources by type URL and serialize them.
 
@@ -258,10 +246,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
 
         # Filter by requested names or return all
         if resource_names:
-            selected_resources = [
-                res for name, res in resource_store.items()
-                if name in resource_names
-            ]
+            selected_resources = [res for name, res in resource_store.items() if name in resource_names]
         else:
             selected_resources = list(resource_store.values())
 
@@ -271,7 +256,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
             # In production, you would serialize the actual protobuf message
             # For now, we'll pack the JSON config
             any_resource.type_url = type_url
-            any_resource.value = json.dumps(resource.config).encode('utf-8')
+            any_resource.value = json.dumps(resource.config).encode("utf-8")
             resources.append(any_resource)
 
         return resources
@@ -279,17 +264,13 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
     def _generate_nonce(self) -> str:
         """Generate a unique nonce for xDS response"""
         import uuid
+
         return str(uuid.uuid4())
 
     async def _initialize_default_resources(self):
         """Initialize default xDS resources"""
         # Create default listener with quantum-safe filter
-        await self.create_listener(
-            name="quantum_listener",
-            address="0.0.0.0",
-            port=15001,
-            enable_quantum_filter=True
-        )
+        await self.create_listener(name="quantum_listener", address="0.0.0.0", port=15001, enable_quantum_filter=True)
 
         logger.info("Default xDS resources initialized")
 
@@ -299,7 +280,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
         address: str,
         port: int,
         enable_quantum_filter: bool = True,
-        filter_chains: Optional[List[Dict[str, Any]]] = None
+        filter_chains: Optional[List[Dict[str, Any]]] = None,
     ) -> XDSResource:
         """
         Create an Envoy listener resource.
@@ -316,22 +297,12 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
         """
         listener_config = {
             "name": name,
-            "address": {
-                "socket_address": {
-                    "address": address,
-                    "port_value": port
-                }
-            },
-            "filter_chains": filter_chains or self._create_quantum_filter_chain()
+            "address": {"socket_address": {"address": address, "port_value": port}},
+            "filter_chains": filter_chains or self._create_quantum_filter_chain(),
         }
 
         version = self._get_next_version()
-        resource = XDSResource(
-            name=name,
-            version=version,
-            resource_type=XDSResourceType.LISTENER,
-            config=listener_config
-        )
+        resource = XDSResource(name=name, version=version, resource_type=XDSResourceType.LISTENER, config=listener_config)
 
         self._listeners[name] = resource
         logger.info(f"Created listener {name} on {address}:{port} (v{version})")
@@ -355,14 +326,9 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                                     {
                                         "name": "local_service",
                                         "domains": ["*"],
-                                        "routes": [
-                                            {
-                                                "match": {"prefix": "/"},
-                                                "route": {"cluster": "local_service"}
-                                            }
-                                        ]
+                                        "routes": [{"match": {"prefix": "/"}, "route": {"cluster": "local_service"}}],
                                     }
-                                ]
+                                ],
                             },
                             "http_filters": [
                                 {
@@ -372,17 +338,17 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                                         "key_algorithm": "kyber-1024",
                                         "signature_algorithm": "dilithium-5",
                                         "enable_metrics": True,
-                                        "metrics_prefix": "quantum_encryption"
-                                    }
+                                        "metrics_prefix": "quantum_encryption",
+                                    },
                                 },
                                 {
                                     "name": "envoy.filters.http.router",
                                     "typed_config": {
                                         "@type": "type.googleapis.com/envoy.extensions.filters.http.router.v3.Router"
-                                    }
-                                }
-                            ]
-                        }
+                                    },
+                                },
+                            ],
+                        },
                     }
                 ],
                 "transport_socket": {
@@ -393,10 +359,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                             "tls_params": {
                                 "tls_minimum_protocol_version": "TLSv1_3",
                                 "tls_maximum_protocol_version": "TLSv1_3",
-                                "cipher_suites": [
-                                    "TLS_AES_256_GCM_SHA384",
-                                    "TLS_CHACHA20_POLY1305_SHA256"
-                                ]
+                                "cipher_suites": ["TLS_AES_256_GCM_SHA384", "TLS_CHACHA20_POLY1305_SHA256"],
                             },
                             "tls_certificate_sds_secret_configs": [
                                 {
@@ -404,20 +367,14 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                                     "sds_config": {
                                         "api_config_source": {
                                             "api_type": "GRPC",
-                                            "grpc_services": [
-                                                {
-                                                    "envoy_grpc": {
-                                                        "cluster_name": "sds_cluster"
-                                                    }
-                                                }
-                                            ]
+                                            "grpc_services": [{"envoy_grpc": {"cluster_name": "sds_cluster"}}],
                                         }
-                                    }
+                                    },
                                 }
-                            ]
-                        }
-                    }
-                }
+                            ],
+                        },
+                    },
+                },
             }
         ]
 
@@ -427,7 +384,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
         endpoints: List[Dict[str, Any]],
         lb_policy: str = "ROUND_ROBIN",
         enable_quantum_tls: bool = True,
-        circuit_breaker: Optional[Dict[str, Any]] = None
+        circuit_breaker: Optional[Dict[str, Any]] = None,
     ) -> XDSResource:
         """
         Create an Envoy cluster resource.
@@ -448,22 +405,9 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
             "lb_policy": lb_policy,
             "load_assignment": {
                 "cluster_name": name,
-                "endpoints": [
-                    {
-                        "lb_endpoints": [
-                            {
-                                "endpoint": {
-                                    "address": {
-                                        "socket_address": ep
-                                    }
-                                }
-                            }
-                            for ep in endpoints
-                        ]
-                    }
-                ]
+                "endpoints": [{"lb_endpoints": [{"endpoint": {"address": {"socket_address": ep}}} for ep in endpoints]}],
             },
-            "connect_timeout": "5s"
+            "connect_timeout": "5s",
         }
 
         # Add circuit breaker if specified
@@ -477,7 +421,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                         "max_connections": 10000,
                         "max_pending_requests": 10000,
                         "max_requests": 10000,
-                        "max_retries": 3
+                        "max_retries": 3,
                     }
                 ]
             }
@@ -487,12 +431,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
             cluster_config["transport_socket"] = self._create_quantum_transport_socket()
 
         version = self._get_next_version()
-        resource = XDSResource(
-            name=name,
-            version=version,
-            resource_type=XDSResourceType.CLUSTER,
-            config=cluster_config
-        )
+        resource = XDSResource(name=name, version=version, resource_type=XDSResourceType.CLUSTER, config=cluster_config)
 
         self._clusters[name] = resource
         logger.info(f"Created cluster {name} with {len(endpoints)} endpoints (v{version})")
@@ -509,10 +448,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                     "tls_params": {
                         "tls_minimum_protocol_version": "TLSv1_3",
                         "tls_maximum_protocol_version": "TLSv1_3",
-                        "cipher_suites": [
-                            "TLS_AES_256_GCM_SHA384",
-                            "TLS_CHACHA20_POLY1305_SHA256"
-                        ]
+                        "cipher_suites": ["TLS_AES_256_GCM_SHA384", "TLS_CHACHA20_POLY1305_SHA256"],
                     },
                     "tls_certificate_sds_secret_configs": [
                         {
@@ -520,15 +456,9 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                             "sds_config": {
                                 "api_config_source": {
                                     "api_type": "GRPC",
-                                    "grpc_services": [
-                                        {
-                                            "envoy_grpc": {
-                                                "cluster_name": "sds_cluster"
-                                            }
-                                        }
-                                    ]
+                                    "grpc_services": [{"envoy_grpc": {"cluster_name": "sds_cluster"}}],
                                 }
-                            }
+                            },
                         }
                     ],
                     "validation_context_sds_secret_config": {
@@ -536,25 +466,15 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
                         "sds_config": {
                             "api_config_source": {
                                 "api_type": "GRPC",
-                                "grpc_services": [
-                                    {
-                                        "envoy_grpc": {
-                                            "cluster_name": "sds_cluster"
-                                        }
-                                    }
-                                ]
+                                "grpc_services": [{"envoy_grpc": {"cluster_name": "sds_cluster"}}],
                             }
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
 
-    async def create_route(
-        self,
-        name: str,
-        virtual_hosts: List[Dict[str, Any]]
-    ) -> XDSResource:
+    async def create_route(self, name: str, virtual_hosts: List[Dict[str, Any]]) -> XDSResource:
         """
         Create an Envoy route configuration.
 
@@ -565,18 +485,10 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
         Returns:
             XDSResource for the route
         """
-        route_config = {
-            "name": name,
-            "virtual_hosts": virtual_hosts
-        }
+        route_config = {"name": name, "virtual_hosts": virtual_hosts}
 
         version = self._get_next_version()
-        resource = XDSResource(
-            name=name,
-            version=version,
-            resource_type=XDSResourceType.ROUTE,
-            config=route_config
-        )
+        resource = XDSResource(name=name, version=version, resource_type=XDSResourceType.ROUTE, config=route_config)
 
         self._routes[name] = resource
         logger.info(f"Created route {name} with {len(virtual_hosts)} virtual hosts (v{version})")
@@ -584,11 +496,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
         return resource
 
     async def create_secret(
-        self,
-        name: str,
-        certificate: str,
-        private_key: str,
-        certificate_chain: Optional[str] = None
+        self, name: str, certificate: str, private_key: str, certificate_chain: Optional[str] = None
     ) -> XDSResource:
         """
         Create an Envoy secret resource for quantum-safe certificates.
@@ -605,22 +513,13 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
         secret_config = {
             "name": name,
             "tls_certificate": {
-                "certificate_chain": {
-                    "inline_string": certificate_chain or certificate
-                },
-                "private_key": {
-                    "inline_string": private_key
-                }
-            }
+                "certificate_chain": {"inline_string": certificate_chain or certificate},
+                "private_key": {"inline_string": private_key},
+            },
         }
 
         version = self._get_next_version()
-        resource = XDSResource(
-            name=name,
-            version=version,
-            resource_type=XDSResourceType.SECRET,
-            config=secret_config
-        )
+        resource = XDSResource(name=name, version=version, resource_type=XDSResourceType.SECRET, config=secret_config)
 
         self._secrets[name] = resource
         logger.info(f"Created secret {name} (v{version})")
@@ -652,11 +551,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
         self._subscriptions[node_id].update(resource_names)
         logger.info(f"Node {node_id} subscribed to {len(resource_names)} resources")
 
-    def get_resources_for_node(
-        self,
-        node_id: str,
-        resource_type: XDSResourceType
-    ) -> List[XDSResource]:
+    def get_resources_for_node(self, node_id: str, resource_type: XDSResourceType) -> List[XDSResource]:
         """
         Get resources for a specific node and type.
 
@@ -676,7 +571,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
             XDSResourceType.CLUSTER: self._clusters,
             XDSResourceType.ROUTE: self._routes,
             XDSResourceType.ENDPOINT: self._endpoints,
-            XDSResourceType.SECRET: self._secrets
+            XDSResourceType.SECRET: self._secrets,
         }.get(resource_type, {})
 
         # Filter by subscriptions
@@ -685,10 +580,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
             # If no specific subscriptions, return all
             return list(resource_store.values())
 
-        return [
-            resource for name, resource in resource_store.items()
-            if name in subscribed_names
-        ]
+        return [resource for name, resource in resource_store.items() if name in subscribed_names]
 
     def _get_next_version(self) -> str:
         """Generate next version number"""
@@ -709,14 +601,10 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
             "endpoints": {name: res.config for name, res in self._endpoints.items()},
             "secrets": {name: res.config for name, res in self._secrets.items()},
             "version": str(self._version_counter),
-            "nodes": len(self._nodes)
+            "nodes": len(self._nodes),
         }
 
-    async def update_listener(
-        self,
-        name: str,
-        config_updates: Dict[str, Any]
-    ) -> Optional[XDSResource]:
+    async def update_listener(self, name: str, config_updates: Dict[str, Any]) -> Optional[XDSResource]:
         """
         Update an existing listener configuration.
 
@@ -739,11 +627,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
         logger.info(f"Updated listener {name} to version {listener.version}")
         return listener
 
-    async def delete_resource(
-        self,
-        resource_type: XDSResourceType,
-        name: str
-    ) -> bool:
+    async def delete_resource(self, resource_type: XDSResourceType, name: str) -> bool:
         """
         Delete a resource.
 
@@ -759,7 +643,7 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
             XDSResourceType.CLUSTER: self._clusters,
             XDSResourceType.ROUTE: self._routes,
             XDSResourceType.ENDPOINT: self._endpoints,
-            XDSResourceType.SECRET: self._secrets
+            XDSResourceType.SECRET: self._secrets,
         }.get(resource_type)
 
         if resource_store and name in resource_store:
@@ -785,5 +669,5 @@ class EnvoyXDSServer(discovery_pb2_grpc.AggregatedDiscoveryServiceServicer if EN
             "connected_nodes": len(self._nodes),
             "total_subscriptions": sum(len(subs) for subs in self._subscriptions.values()),
             "version": self._version_counter,
-            "uptime_seconds": time.time()  # Would need actual start time
+            "uptime_seconds": time.time(),  # Would need actual start time
         }

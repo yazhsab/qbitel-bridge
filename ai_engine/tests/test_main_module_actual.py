@@ -55,9 +55,7 @@ class TestMainModuleActual:
 
     def test_main_function_with_grpc(self):
         """Test main function with gRPC enabled."""
-        with patch(
-            "sys.argv", ["__main__.py", "--enable-grpc", "--grpc-port", "50052"]
-        ):
+        with patch("sys.argv", ["__main__.py", "--enable-grpc", "--grpc-port", "50052"]):
             with patch("ai_engine.__main__.run_development_server") as mock_dev_server:
                 with patch("ai_engine.__main__.Config") as mock_config_class:
                     mock_config = Mock()
@@ -113,9 +111,7 @@ class TestMainModuleActual:
                     mock_config = Mock()
                     mock_config_class.return_value = mock_config
 
-                    with patch(
-                        "ai_engine.__main__.logging.basicConfig"
-                    ) as mock_logging:
+                    with patch("ai_engine.__main__.logging.basicConfig") as mock_logging:
                         __main__.main()
 
                         # Check that logging was configured with DEBUG level
@@ -176,20 +172,14 @@ class TestMainModuleActual:
                     mock_config = Mock()
                     mock_config_class.return_value = mock_config
 
-                    with patch(
-                        "ai_engine.__main__.logging.basicConfig"
-                    ) as mock_logging:
-                        with patch(
-                            "ai_engine.__main__.logging.FileHandler"
-                        ) as mock_file_handler:
+                    with patch("ai_engine.__main__.logging.basicConfig") as mock_logging:
+                        with patch("ai_engine.__main__.logging.FileHandler") as mock_file_handler:
                             __main__.main()
 
                             # Check that logging was configured
                             mock_logging.assert_called_once()
                             # In development mode, should have file handler
-                            mock_file_handler.assert_called_once_with(
-                                "qbitel_engine.log"
-                            )
+                            mock_file_handler.assert_called_once_with("qbitel_engine.log")
 
     def test_main_function_production_logging(self):
         """Test logging setup in production mode."""
@@ -199,12 +189,8 @@ class TestMainModuleActual:
                     mock_config = Mock()
                     mock_config_class.return_value = mock_config
 
-                    with patch(
-                        "ai_engine.__main__.logging.basicConfig"
-                    ) as mock_logging:
-                        with patch(
-                            "ai_engine.__main__.logging.FileHandler"
-                        ) as mock_file_handler:
+                    with patch("ai_engine.__main__.logging.basicConfig") as mock_logging:
+                        with patch("ai_engine.__main__.logging.FileHandler") as mock_file_handler:
                             __main__.main()
 
                             # Check that logging was configured
@@ -220,9 +206,7 @@ class TestMainModuleActual:
                     mock_config = Mock()
                     mock_config_class.return_value = mock_config
 
-                    with patch(
-                        "ai_engine.__main__.logging.getLogger"
-                    ) as mock_get_logger:
+                    with patch("ai_engine.__main__.logging.getLogger") as mock_get_logger:
                         mock_logger = Mock()
                         mock_get_logger.return_value = mock_logger
 
@@ -240,9 +224,7 @@ class TestMainModuleActual:
                     mock_config = Mock()
                     mock_config_class.return_value = mock_config
 
-                    with patch(
-                        "ai_engine.__main__.logging.getLogger"
-                    ) as mock_get_logger:
+                    with patch("ai_engine.__main__.logging.getLogger") as mock_get_logger:
                         mock_logger = Mock()
                         mock_get_logger.return_value = mock_logger
 
@@ -259,9 +241,7 @@ class TestMainModuleActual:
                     mock_config = Mock()
                     mock_config_class.return_value = mock_config
 
-                    with patch(
-                        "ai_engine.__main__.logging.getLogger"
-                    ) as mock_get_logger:
+                    with patch("ai_engine.__main__.logging.getLogger") as mock_get_logger:
                         mock_logger = Mock()
                         mock_get_logger.return_value = mock_logger
 

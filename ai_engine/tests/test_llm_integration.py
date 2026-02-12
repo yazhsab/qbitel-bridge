@@ -185,9 +185,7 @@ class TestUnifiedLLMServiceInitialization:
 
         service = UnifiedLLMService(config)
 
-        with patch(
-            "ai_engine.llm.unified_llm_service.AsyncAnthropic"
-        ) as mock_anthropic:
+        with patch("ai_engine.llm.unified_llm_service.AsyncAnthropic") as mock_anthropic:
             mock_anthropic.return_value = AsyncMock()
             await service.initialize()
 
@@ -230,9 +228,7 @@ class TestLLMServiceGeneration:
         mock_response.choices = [Mock(message=Mock(content="Generated text"))]
         mock_response.usage = Mock(total_tokens=100)
 
-        service.openai_client.chat.completions.create = AsyncMock(
-            return_value=mock_response
-        )
+        service.openai_client.chat.completions.create = AsyncMock(return_value=mock_response)
 
         request = LLMRequest(
             prompt="Test prompt",
@@ -254,9 +250,7 @@ class TestLLMServiceGeneration:
         mock_response.choices = [Mock(message=Mock(content="Response with system"))]
         mock_response.usage = Mock(total_tokens=150)
 
-        service.openai_client.chat.completions.create = AsyncMock(
-            return_value=mock_response
-        )
+        service.openai_client.chat.completions.create = AsyncMock(return_value=mock_response)
 
         request = LLMRequest(
             prompt="User query",
@@ -279,9 +273,7 @@ class TestLLMServiceGeneration:
         mock_response.choices = [Mock(message=Mock(content="Context-aware response"))]
         mock_response.usage = Mock(total_tokens=200)
 
-        service.openai_client.chat.completions.create = AsyncMock(
-            return_value=mock_response
-        )
+        service.openai_client.chat.completions.create = AsyncMock(return_value=mock_response)
 
         request = LLMRequest(
             prompt="Analyze this",
@@ -314,9 +306,7 @@ class TestLLMServiceFallback:
     async def test_fallback_on_primary_failure(self, service):
         """Test fallback when primary provider fails."""
         # Primary fails
-        service.openai_client.chat.completions.create = AsyncMock(
-            side_effect=Exception("OpenAI error")
-        )
+        service.openai_client.chat.completions.create = AsyncMock(side_effect=Exception("OpenAI error"))
 
         # Fallback succeeds
         mock_response = Mock()
@@ -362,9 +352,7 @@ class TestLLMServiceStreaming:
             for chunk in chunks:
                 yield Mock(choices=[Mock(delta=Mock(content=chunk))])
 
-        service.openai_client.chat.completions.create = AsyncMock(
-            return_value=mock_stream()
-        )
+        service.openai_client.chat.completions.create = AsyncMock(return_value=mock_stream())
 
         request = LLMRequest(
             prompt="Generate stream",
@@ -398,19 +386,13 @@ class TestLLMServiceMetrics:
         mock_response.choices = [Mock(message=Mock(content="Test"))]
         mock_response.usage = Mock(total_tokens=50)
 
-        service.openai_client.chat.completions.create = AsyncMock(
-            return_value=mock_response
-        )
+        service.openai_client.chat.completions.create = AsyncMock(return_value=mock_response)
 
         request = LLMRequest(prompt="Test", feature_domain="test")
 
         with patch("time.time", side_effect=[0, 0.5]):
-            with patch(
-                "ai_engine.llm.unified_llm_service.LLM_REQUEST_COUNTER"
-            ) as mock_counter:
-                with patch(
-                    "ai_engine.llm.unified_llm_service.LLM_TOKEN_USAGE"
-                ) as mock_token_counter:
+            with patch("ai_engine.llm.unified_llm_service.LLM_REQUEST_COUNTER") as mock_counter:
+                with patch("ai_engine.llm.unified_llm_service.LLM_TOKEN_USAGE") as mock_token_counter:
                     await service.generate(request)
 
                     # Verify metrics were incremented
@@ -433,9 +415,7 @@ class TestLLMServiceErrorHandling:
     @pytest.mark.asyncio
     async def test_generation_api_error(self, service):
         """Test handling API errors."""
-        service.openai_client.chat.completions.create = AsyncMock(
-            side_effect=Exception("API Error")
-        )
+        service.openai_client.chat.completions.create = AsyncMock(side_effect=Exception("API Error"))
 
         request = LLMRequest(prompt="Test", feature_domain="test")
 
@@ -478,9 +458,7 @@ class TestLLMServiceEdgeCases:
         mock_response.choices = [Mock(message=Mock(content=""))]
         mock_response.usage = Mock(total_tokens=10)
 
-        service.openai_client.chat.completions.create = AsyncMock(
-            return_value=mock_response
-        )
+        service.openai_client.chat.completions.create = AsyncMock(return_value=mock_response)
 
         request = LLMRequest(prompt="Test", feature_domain="test")
 
@@ -499,9 +477,7 @@ class TestLLMServiceEdgeCases:
         mock_response.choices = [Mock(message=Mock(content="Response"))]
         mock_response.usage = Mock(total_tokens=5000)
 
-        service.openai_client.chat.completions.create = AsyncMock(
-            return_value=mock_response
-        )
+        service.openai_client.chat.completions.create = AsyncMock(return_value=mock_response)
 
         request = LLMRequest(
             prompt=long_prompt,

@@ -35,7 +35,6 @@ from .documentation_agent import DocumentationAgent
 from .risk_assessor import RiskAssessorAgent
 from .code_generator import CodeGeneratorAgent
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -44,29 +43,17 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 ORCHESTRATOR_TASKS = Counter(
-    "qbitel_orchestrator_tasks_total",
-    "Total tasks processed by orchestrator",
-    ["task_type", "status"]
+    "qbitel_orchestrator_tasks_total", "Total tasks processed by orchestrator", ["task_type", "status"]
 )
-ORCHESTRATOR_DELEGATIONS = Counter(
-    "qbitel_orchestrator_delegations_total",
-    "Total task delegations",
-    ["target_agent"]
-)
-ORCHESTRATOR_DURATION = Histogram(
-    "qbitel_orchestrator_task_duration_seconds",
-    "Task processing duration",
-    ["task_type"]
-)
-ACTIVE_AGENTS = Gauge(
-    "qbitel_multi_agent_active_agents",
-    "Number of active agents"
-)
+ORCHESTRATOR_DELEGATIONS = Counter("qbitel_orchestrator_delegations_total", "Total task delegations", ["target_agent"])
+ORCHESTRATOR_DURATION = Histogram("qbitel_orchestrator_task_duration_seconds", "Task processing duration", ["task_type"])
+ACTIVE_AGENTS = Gauge("qbitel_multi_agent_active_agents", "Number of active agents")
 
 
 # =============================================================================
 # Task Types
 # =============================================================================
+
 
 @dataclass
 class OrchestratorTask:
@@ -89,6 +76,7 @@ class OrchestratorTask:
 # Orchestrator Agent
 # =============================================================================
 
+
 class OrchestratorAgent(BaseAgent):
     """
     Orchestrator agent that coordinates multi-agent collaboration.
@@ -101,12 +89,7 @@ class OrchestratorAgent(BaseAgent):
     - Error recovery
     """
 
-    def __init__(
-        self,
-        llm_service: Any,
-        agents: Dict[AgentRole, BaseAgent],
-        config: Optional[AgentConfig] = None
-    ):
+    def __init__(self, llm_service: Any, agents: Dict[AgentRole, BaseAgent], config: Optional[AgentConfig] = None):
         config = config or AgentConfig(
             role=AgentRole.ORCHESTRATOR,
             name="Task Orchestrator",
@@ -131,10 +114,7 @@ class OrchestratorAgent(BaseAgent):
     @property
     def system_prompt(self) -> str:
         """Orchestrator specific system prompt."""
-        agent_list = "\n".join([
-            f"- {role.value}: {agent.config.description[:100]}..."
-            for role, agent in self.agents.items()
-        ])
+        agent_list = "\n".join([f"- {role.value}: {agent.config.description[:100]}..." for role, agent in self.agents.items()])
 
         return f"""You are the Task Orchestrator for the QBITEL Legacy Whisperer system.
 
@@ -197,12 +177,7 @@ Success Criteria:
 ```
 """
 
-    async def execute_task(
-        self,
-        task_type: str,
-        description: str,
-        input_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def execute_task(self, task_type: str, description: str, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Execute a high-level task by coordinating agents.
 
@@ -217,12 +192,7 @@ Success Criteria:
         start_time = time.time()
         ORCHESTRATOR_TASKS.labels(task_type=task_type, status="started").inc()
 
-        task = OrchestratorTask(
-            task_type=task_type,
-            description=description,
-            input_data=input_data,
-            status="in_progress"
-        )
+        task = OrchestratorTask(task_type=task_type, description=description, input_data=input_data, status="in_progress")
         self.tasks[task.task_id] = task
 
         try:
@@ -242,9 +212,7 @@ Success Criteria:
             task.completed_at = datetime.now(timezone.utc)
 
             ORCHESTRATOR_TASKS.labels(task_type=task_type, status="completed").inc()
-            ORCHESTRATOR_DURATION.labels(task_type=task_type).observe(
-                time.time() - start_time
-            )
+            ORCHESTRATOR_DURATION.labels(task_type=task_type).observe(time.time() - start_time)
 
             logger.info(f"Task {task.task_id} completed successfully")
 
@@ -260,10 +228,7 @@ Success Criteria:
         finally:
             self.task_history.append(task)
 
-    async def _decompose_task(
-        self,
-        task: OrchestratorTask
-    ) -> List[OrchestratorTask]:
+    async def _decompose_task(self, task: OrchestratorTask) -> List[OrchestratorTask]:
         """Decompose a task into subtasks."""
         task_type = task.task_type
 
@@ -277,88 +242,76 @@ Success Criteria:
             # Use LLM for generic decomposition
             return await self._llm_decompose(task)
 
-    def _decompose_reverse_engineer(
-        self,
-        task: OrchestratorTask
-    ) -> List[OrchestratorTask]:
+    def _decompose_reverse_engineer(self, task: OrchestratorTask) -> List[OrchestratorTask]:
         """Decompose reverse engineering task."""
         return [
             OrchestratorTask(
                 task_type="analyze_traffic",
                 description="Analyze traffic patterns and structure",
                 input_data=task.input_data,
-                assigned_agents={AgentRole.PROTOCOL_ANALYST}
+                assigned_agents={AgentRole.PROTOCOL_ANALYST},
             ),
             OrchestratorTask(
                 task_type="generate_documentation",
                 description="Generate protocol documentation",
                 input_data=task.input_data,
-                assigned_agents={AgentRole.DOCUMENTATION}
+                assigned_agents={AgentRole.DOCUMENTATION},
             ),
             OrchestratorTask(
                 task_type="assess_risks",
                 description="Assess modernization risks",
                 input_data=task.input_data,
-                assigned_agents={AgentRole.RISK_ASSESSOR}
+                assigned_agents={AgentRole.RISK_ASSESSOR},
             ),
         ]
 
-    def _decompose_generate_adapter(
-        self,
-        task: OrchestratorTask
-    ) -> List[OrchestratorTask]:
+    def _decompose_generate_adapter(self, task: OrchestratorTask) -> List[OrchestratorTask]:
         """Decompose adapter generation task."""
         return [
             OrchestratorTask(
                 task_type="assess_risks",
                 description="Assess adapter generation risks",
                 input_data=task.input_data,
-                assigned_agents={AgentRole.RISK_ASSESSOR}
+                assigned_agents={AgentRole.RISK_ASSESSOR},
             ),
             OrchestratorTask(
                 task_type="generate_code",
                 description="Generate adapter code",
                 input_data=task.input_data,
-                assigned_agents={AgentRole.CODE_GENERATOR}
+                assigned_agents={AgentRole.CODE_GENERATOR},
             ),
             OrchestratorTask(
                 task_type="generate_tests",
                 description="Generate test suite",
                 input_data=task.input_data,
-                assigned_agents={AgentRole.CODE_GENERATOR}
+                assigned_agents={AgentRole.CODE_GENERATOR},
             ),
             OrchestratorTask(
                 task_type="generate_documentation",
                 description="Generate integration guide",
                 input_data=task.input_data,
-                assigned_agents={AgentRole.DOCUMENTATION}
+                assigned_agents={AgentRole.DOCUMENTATION},
             ),
         ]
 
-    def _decompose_explain_behavior(
-        self,
-        task: OrchestratorTask
-    ) -> List[OrchestratorTask]:
+    def _decompose_explain_behavior(self, task: OrchestratorTask) -> List[OrchestratorTask]:
         """Decompose behavior explanation task."""
         return [
             OrchestratorTask(
                 task_type="explain_behavior",
                 description="Explain legacy behavior",
                 input_data=task.input_data,
-                assigned_agents={AgentRole.DOCUMENTATION}
+                assigned_agents={AgentRole.DOCUMENTATION},
             ),
             OrchestratorTask(
                 task_type="assess_risks",
                 description="Assess risks of addressing behavior",
                 input_data=task.input_data,
-                assigned_agents={AgentRole.RISK_ASSESSOR}
+                assigned_agents={AgentRole.RISK_ASSESSOR},
             ),
         ]
 
-    async def _llm_decompose(
-        self,
-        task: OrchestratorTask
-    ) -> List[OrchestratorTask]:
+    async def _llm_decompose(self, task: OrchestratorTask) -> List[OrchestratorTask]:
         """Use LLM to decompose unknown task types."""
         prompt = f"""Decompose this task into subtasks for the agent team.
 
@@ -383,20 +336,18 @@ DESCRIPTION: [what to do]
         # Parse response into subtasks (simplified parsing)
         subtasks = []
         # In production, use proper parsing
-        subtasks.append(OrchestratorTask(
-            task_type="generic",
-            description=task.description,
-            input_data=task.input_data,
-            assigned_agents={AgentRole.PROTOCOL_ANALYST}
-        ))
+        subtasks.append(
+            OrchestratorTask(
+                task_type="generic",
+                description=task.description,
+                input_data=task.input_data,
+                assigned_agents={AgentRole.PROTOCOL_ANALYST},
+            )
+        )
 
         return subtasks
 
-    async def _execute_subtasks(
-        self,
-        subtasks: List[OrchestratorTask],
-        parent_task: OrchestratorTask
-    ) -> Dict[str, Any]:
+    async def _execute_subtasks(self, subtasks: List[OrchestratorTask], parent_task: OrchestratorTask) -> Dict[str, Any]:
         """Execute subtasks, parallelizing where possible."""
         results = {}
 
@@ -411,19 +362,12 @@ DESCRIPTION: [what to do]
         for subtask in subtasks:
             for agent_role in subtask.assigned_agents:
                 if agent_role in self.agents:
-                    ORCHESTRATOR_DELEGATIONS.labels(
-                        target_agent=agent_role.value
-                    ).inc()
-                    execution_tasks.append(
-                        self._delegate_to_agent(agent_role, subtask)
-                    )
+                    ORCHESTRATOR_DELEGATIONS.labels(target_agent=agent_role.value).inc()
+                    execution_tasks.append(self._delegate_to_agent(agent_role, subtask))
 
         # Wait for all subtasks
         if execution_tasks:
-            subtask_results = await asyncio.gather(
-                *execution_tasks,
-                return_exceptions=True
-            )
+            subtask_results = await asyncio.gather(*execution_tasks, return_exceptions=True)
 
             for i, result in enumerate(subtask_results):
                 if isinstance(result, Exception):
@@ -434,11 +378,7 @@ DESCRIPTION: [what to do]
 
         return results
 
-    async def _delegate_to_agent(
-        self,
-        agent_role: AgentRole,
-        subtask: OrchestratorTask
-    ) -> Dict[str, Any]:
+    async def _delegate_to_agent(self, agent_role: AgentRole, subtask: OrchestratorTask) -> Dict[str, Any]:
         """Delegate a subtask to an agent."""
         agent = self.agents.get(agent_role)
         if not agent:
@@ -449,7 +389,7 @@ DESCRIPTION: [what to do]
             sender=AgentRole.ORCHESTRATOR,
             recipient=agent_role,
             content=subtask.description,
-            data=subtask.input_data
+            data=subtask.input_data,
         )
 
         response = await agent.process_message(message)
@@ -459,18 +399,9 @@ DESCRIPTION: [what to do]
 
         return response.data
 
-    async def _aggregate_results(
-        self,
-        task_type: str,
-        results: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def _aggregate_results(self, task_type: str, results: Dict[str, Any]) -> Dict[str, Any]:
         """Aggregate results from multiple agents."""
-        aggregated = {
-            "task_type": task_type,
-            "subtask_results": results,
-            "summary": "",
-            "recommendations": []
-        }
+        aggregated = {"task_type": task_type, "subtask_results": results, "summary": "", "recommendations": []}
 
         # Generate summary using LLM
         summary_prompt = f"""Summarize these results from a multi-agent analysis:
@@ -492,6 +423,7 @@ Provide:
 # =============================================================================
 # Multi-Agent Orchestrator (High-Level API)
 # =============================================================================
+
 
 class MultiAgentOrchestrator:
     """
@@ -526,36 +458,20 @@ class MultiAgentOrchestrator:
         self.semantic_memory.preload_protocol_knowledge()
 
         # Create specialized agents
-        self.agents[AgentRole.PROTOCOL_ANALYST] = ProtocolAnalystAgent(
-            self.llm_service
-        )
-        self.agents[AgentRole.DOCUMENTATION] = DocumentationAgent(
-            self.llm_service, self.rag_engine
-        )
-        self.agents[AgentRole.RISK_ASSESSOR] = RiskAssessorAgent(
-            self.llm_service
-        )
-        self.agents[AgentRole.CODE_GENERATOR] = CodeGeneratorAgent(
-            self.llm_service
-        )
+        self.agents[AgentRole.PROTOCOL_ANALYST] = ProtocolAnalystAgent(self.llm_service)
+        self.agents[AgentRole.DOCUMENTATION] = DocumentationAgent(self.llm_service, self.rag_engine)
+        self.agents[AgentRole.RISK_ASSESSOR] = RiskAssessorAgent(self.llm_service)
+        self.agents[AgentRole.CODE_GENERATOR] = CodeGeneratorAgent(self.llm_service)
 
         # Create orchestrator
-        self.orchestrator = OrchestratorAgent(
-            self.llm_service, self.agents
-        )
+        self.orchestrator = OrchestratorAgent(self.llm_service, self.agents)
 
         ACTIVE_AGENTS.set(len(self.agents) + 1)  # +1 for orchestrator
 
         self._initialized = True
-        self.logger.info(
-            f"Multi-Agent Orchestrator initialized with {len(self.agents)} agents"
-        )
+        self.logger.info(f"Multi-Agent Orchestrator initialized with {len(self.agents)} agents")
 
-    async def reverse_engineer_protocol(
-        self,
-        traffic_samples: List[bytes],
-        context: str = ""
-    ) -> Dict[str, Any]:
+    async def reverse_engineer_protocol(self, traffic_samples: List[bytes], context: str = "") -> Dict[str, Any]:
         """
         Reverse engineer a protocol from traffic samples.
 
@@ -567,17 +483,14 @@ class MultiAgentOrchestrator:
         # Start episodic memory
         episode_id = await self.episodic_memory.start_episode(
             f"Reverse engineering protocol from {len(traffic_samples)} samples",
-            {AgentRole.PROTOCOL_ANALYST, AgentRole.DOCUMENTATION, AgentRole.RISK_ASSESSOR}
+            {AgentRole.PROTOCOL_ANALYST, AgentRole.DOCUMENTATION, AgentRole.RISK_ASSESSOR},
         )
 
         try:
             result = await self.orchestrator.execute_task(
                 task_type="reverse_engineer",
                 description="Reverse engineer legacy protocol from traffic samples",
-                input_data={
-                    "traffic_samples": traffic_samples,
-                    "context": context
-                }
+                input_data={"traffic_samples": traffic_samples, "context": context},
             )
 
             # Store in shared memory
@@ -585,7 +498,7 @@ class MultiAgentOrchestrator:
                 f"Protocol analysis completed: {result.get('summary', '')[:200]}",
                 MemoryType.EPISODIC,
                 AgentRole.ORCHESTRATOR,
-                importance=0.8
+                importance=0.8,
             )
 
             # End episode
@@ -593,25 +506,19 @@ class MultiAgentOrchestrator:
                 episode_id,
                 "Protocol reverse engineering completed successfully",
                 success=True,
-                lessons_learned=["Successfully analyzed traffic patterns"]
+                lessons_learned=["Successfully analyzed traffic patterns"],
             )
 
             return result
 
         except Exception as e:
             await self.episodic_memory.end_episode(
-                episode_id,
-                f"Failed: {str(e)}",
-                success=False,
-                lessons_learned=[f"Error during reverse engineering: {str(e)}"]
+                episode_id, f"Failed: {str(e)}", success=False, lessons_learned=[f"Error during reverse engineering: {str(e)}"]
             )
             raise
 
     async def generate_adapter(
-        self,
-        protocol_spec: Dict[str, Any],
-        target_protocol: str,
-        language: str = "python"
+        self, protocol_spec: Dict[str, Any], target_protocol: str, language: str = "python"
     ) -> Dict[str, Any]:
         """
         Generate a protocol adapter.
@@ -623,41 +530,25 @@ class MultiAgentOrchestrator:
 
         episode_id = await self.episodic_memory.start_episode(
             f"Generating {language} adapter for {target_protocol}",
-            {AgentRole.RISK_ASSESSOR, AgentRole.CODE_GENERATOR, AgentRole.DOCUMENTATION}
+            {AgentRole.RISK_ASSESSOR, AgentRole.CODE_GENERATOR, AgentRole.DOCUMENTATION},
         )
 
         try:
             result = await self.orchestrator.execute_task(
                 task_type="generate_adapter",
                 description=f"Generate {language} adapter to {target_protocol}",
-                input_data={
-                    "protocol_spec": protocol_spec,
-                    "target_protocol": target_protocol,
-                    "language": language
-                }
+                input_data={"protocol_spec": protocol_spec, "target_protocol": target_protocol, "language": language},
             )
 
-            await self.episodic_memory.end_episode(
-                episode_id,
-                "Adapter generation completed successfully",
-                success=True
-            )
+            await self.episodic_memory.end_episode(episode_id, "Adapter generation completed successfully", success=True)
 
             return result
 
         except Exception as e:
-            await self.episodic_memory.end_episode(
-                episode_id,
-                f"Failed: {str(e)}",
-                success=False
-            )
+            await self.episodic_memory.end_episode(episode_id, f"Failed: {str(e)}", success=False)
             raise
 
-    async def explain_behavior(
-        self,
-        behavior: str,
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def explain_behavior(self, behavior: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Explain legacy system behavior.
 
@@ -669,10 +560,7 @@ class MultiAgentOrchestrator:
         result = await self.orchestrator.execute_task(
             task_type="explain_behavior",
             description="Explain legacy system behavior",
-            input_data={
-                "behavior": behavior,
-                "context": context
-            }
+            input_data={"behavior": behavior, "context": context},
         )
 
         return result
@@ -714,10 +602,8 @@ class MultiAgentOrchestrator:
 # Factory Function
 # =============================================================================
 
-async def create_multi_agent_orchestrator(
-    llm_service: Any,
-    rag_engine: Any = None
-) -> MultiAgentOrchestrator:
+
+async def create_multi_agent_orchestrator(llm_service: Any, rag_engine: Any = None) -> MultiAgentOrchestrator:
     """Create and initialize a Multi-Agent Orchestrator."""
     orchestrator = MultiAgentOrchestrator(llm_service, rag_engine)
     await orchestrator.initialize()

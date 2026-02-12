@@ -16,11 +16,13 @@ from ...core.exceptions import QbitelAIException
 
 class LegacyWhispererException(QbitelAIException):
     """Legacy Whisperer-specific exception."""
+
     pass
 
 
 class ProtocolComplexity(str, Enum):
     """Protocol complexity levels."""
+
     SIMPLE = "simple"
     MODERATE = "moderate"
     COMPLEX = "complex"
@@ -29,6 +31,7 @@ class ProtocolComplexity(str, Enum):
 
 class ModernizationRisk(str, Enum):
     """Modernization risk levels."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -37,6 +40,7 @@ class ModernizationRisk(str, Enum):
 
 class AdapterLanguage(str, Enum):
     """Supported adapter code languages."""
+
     PYTHON = "python"
     JAVA = "java"
     GO = "go"
@@ -48,6 +52,7 @@ class AdapterLanguage(str, Enum):
 @dataclass
 class ProtocolPattern:
     """Identified protocol pattern."""
+
     pattern_type: str
     description: str
     frequency: int
@@ -59,6 +64,7 @@ class ProtocolPattern:
 @dataclass
 class ProtocolField:
     """Reverse-engineered protocol field."""
+
     name: str
     offset: int
     length: int
@@ -72,6 +78,7 @@ class ProtocolField:
 @dataclass
 class ProtocolSpecification:
     """Complete protocol specification from reverse engineering."""
+
     protocol_name: str
     version: str
     description: str
@@ -104,9 +111,7 @@ class ProtocolSpecification:
     security_concerns: List[str] = field(default_factory=list)
 
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    spec_id: str = field(
-        default_factory=lambda: hashlib.sha256(str(time.time()).encode()).hexdigest()[:16]
-    )
+    spec_id: str = field(default_factory=lambda: hashlib.sha256(str(time.time()).encode()).hexdigest()[:16])
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
@@ -119,6 +124,7 @@ class ProtocolSpecification:
 @dataclass
 class AdapterCode:
     """Generated protocol adapter code."""
+
     source_protocol: str
     target_protocol: str
     language: AdapterLanguage
@@ -147,9 +153,7 @@ class AdapterCode:
     llm_provider: str = ""
 
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    adapter_id: str = field(
-        default_factory=lambda: hashlib.sha256(str(time.time()).encode()).hexdigest()[:16]
-    )
+    adapter_id: str = field(default_factory=lambda: hashlib.sha256(str(time.time()).encode()).hexdigest()[:16])
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
@@ -162,6 +166,7 @@ class AdapterCode:
 @dataclass
 class Explanation:
     """Explanation of legacy system behavior."""
+
     behavior_description: str
     technical_explanation: str
     historical_context: str
@@ -188,9 +193,7 @@ class Explanation:
     completeness: float = 0.0
 
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    explanation_id: str = field(
-        default_factory=lambda: hashlib.sha256(str(time.time()).encode()).hexdigest()[:16]
-    )
+    explanation_id: str = field(default_factory=lambda: hashlib.sha256(str(time.time()).encode()).hexdigest()[:16])
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""

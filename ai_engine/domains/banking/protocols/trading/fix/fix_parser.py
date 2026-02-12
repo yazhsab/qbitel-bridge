@@ -44,15 +44,182 @@ GROUP_TAGS: Dict[int, List[int]] = {
     # NoMDEntryTypes group
     267: [269],
     # NoMDEntries group
-    268: [269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292],
+    268: [
+        269,
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+    ],
     # NoRelatedSym group
-    146: [55, 65, 48, 22, 167, 461, 460, 541, 200, 201, 202, 206, 231, 223, 207, 106, 348, 349, 107, 350, 351, 691, 667, 875, 876, 873, 874],
+    146: [
+        55,
+        65,
+        48,
+        22,
+        167,
+        461,
+        460,
+        541,
+        200,
+        201,
+        202,
+        206,
+        231,
+        223,
+        207,
+        106,
+        348,
+        349,
+        107,
+        350,
+        351,
+        691,
+        667,
+        875,
+        876,
+        873,
+        874,
+    ],
     # NoSides group
-    552: [54, 37, 198, 11, 526, 66, 756, 453, 229, 1, 660, 581, 589, 590, 591, 70, 78, 79, 80, 467, 81, 575, 576, 577, 578, 579, 376, 377, 528, 529, 582, 583, 336, 625],
+    552: [
+        54,
+        37,
+        198,
+        11,
+        526,
+        66,
+        756,
+        453,
+        229,
+        1,
+        660,
+        581,
+        589,
+        590,
+        591,
+        70,
+        78,
+        79,
+        80,
+        467,
+        81,
+        575,
+        576,
+        577,
+        578,
+        579,
+        376,
+        377,
+        528,
+        529,
+        582,
+        583,
+        336,
+        625,
+    ],
     # NoLegs group
-    555: [600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 624, 556, 740, 739, 955, 956, 687, 690],
+    555: [
+        600,
+        601,
+        602,
+        603,
+        604,
+        605,
+        606,
+        607,
+        608,
+        609,
+        610,
+        611,
+        612,
+        613,
+        614,
+        615,
+        616,
+        617,
+        618,
+        619,
+        620,
+        621,
+        622,
+        623,
+        624,
+        556,
+        740,
+        739,
+        955,
+        956,
+        687,
+        690,
+    ],
     # NoUnderlyings group
-    711: [311, 312, 309, 305, 457, 462, 463, 310, 763, 313, 542, 241, 242, 243, 244, 245, 246, 256, 595, 592, 593, 594, 247, 316, 941, 317, 436, 435, 308, 306, 362, 363, 364, 365, 877, 878, 879, 318, 879, 810, 882, 883, 884, 885, 886],
+    711: [
+        311,
+        312,
+        309,
+        305,
+        457,
+        462,
+        463,
+        310,
+        763,
+        313,
+        542,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        256,
+        595,
+        592,
+        593,
+        594,
+        247,
+        316,
+        941,
+        317,
+        436,
+        435,
+        308,
+        306,
+        362,
+        363,
+        364,
+        365,
+        877,
+        878,
+        879,
+        318,
+        879,
+        810,
+        882,
+        883,
+        884,
+        885,
+        886,
+    ],
     # NoPositions group
     702: [703, 704, 705, 706],
     # NoSecurityAltID group
@@ -153,16 +320,14 @@ class FixParser:
             try:
                 eq_pos = part.index("=")
                 tag = int(part[:eq_pos])
-                value = part[eq_pos + 1:]
+                value = part[eq_pos + 1 :]
                 fields.append((tag, value))
             except (ValueError, IndexError):
                 continue
 
         return fields
 
-    def _parse_header(
-        self, fields: List[Tuple[int, str]], message: FixMessage
-    ) -> None:
+    def _parse_header(self, fields: List[Tuple[int, str]], message: FixMessage) -> None:
         """Parse standard header fields."""
         header_tags = {8, 9, 35, 49, 56, 34, 52, 43, 97, 122, 115, 116, 128, 129, 50, 142, 57, 143}
 
@@ -213,9 +378,7 @@ class FixParser:
             elif tag == 143:
                 message.header.target_location_id = value
 
-    def _parse_body(
-        self, fields: List[Tuple[int, str]], message: FixMessage
-    ) -> None:
+    def _parse_body(self, fields: List[Tuple[int, str]], message: FixMessage) -> None:
         """Parse body fields and groups."""
         header_tags = {8, 9, 35, 49, 56, 34, 52, 43, 97, 122, 115, 116, 128, 129, 50, 142, 57, 143}
         trailer_tags = {10, 89, 93}
@@ -241,9 +404,7 @@ class FixParser:
             message.body.append(FixField(tag=tag, value=value))
             i += 1
 
-    def _parse_group(
-        self, fields: List[Tuple[int, str]], start_index: int, count_tag: int
-    ) -> Tuple[Optional[FixGroup], int]:
+    def _parse_group(self, fields: List[Tuple[int, str]], start_index: int, count_tag: int) -> Tuple[Optional[FixGroup], int]:
         """Parse a repeating group."""
         try:
             count = int(fields[start_index][1])
@@ -292,9 +453,7 @@ class FixParser:
 
         return group, consumed
 
-    def _parse_trailer(
-        self, fields: List[Tuple[int, str]], message: FixMessage
-    ) -> None:
+    def _parse_trailer(self, fields: List[Tuple[int, str]], message: FixMessage) -> None:
         """Parse trailer fields."""
         for tag, value in fields:
             if tag == 10:

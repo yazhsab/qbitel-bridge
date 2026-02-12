@@ -51,9 +51,7 @@ class TestDependencyDefinition:
 
     def test_initialization_with_defaults(self):
         """Test DependencyDefinition initialization with defaults."""
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "test_instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "test_instance")
 
         assert definition.name == "test_service"
         assert definition.factory() == "test_instance"
@@ -64,9 +62,7 @@ class TestDependencyDefinition:
     def test_validation(self):
         """Test DependencyDefinition validation."""
         # Valid definition
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "test_instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "test_instance")
         assert definition.validate() is True
 
         # Invalid definition - no factory
@@ -127,9 +123,7 @@ class TestDependencyContainer:
 
     def test_register_dependency(self, container):
         """Test registering dependency."""
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "test_instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "test_instance")
 
         container.register_dependency(definition)
 
@@ -138,18 +132,12 @@ class TestDependencyContainer:
 
     def test_register_dependency_duplicate(self, container):
         """Test registering duplicate dependency."""
-        definition1 = DependencyDefinition(
-            name="test_service", factory=lambda: "test_instance1"
-        )
-        definition2 = DependencyDefinition(
-            name="test_service", factory=lambda: "test_instance2"
-        )
+        definition1 = DependencyDefinition(name="test_service", factory=lambda: "test_instance1")
+        definition2 = DependencyDefinition(name="test_service", factory=lambda: "test_instance2")
 
         container.register_dependency(definition1)
 
-        with pytest.raises(
-            DependencyInjectionError, match="Dependency already registered"
-        ):
+        with pytest.raises(DependencyInjectionError, match="Dependency already registered"):
             container.register_dependency(definition2)
 
     def test_resolve_dependency_singleton(self, container):
@@ -215,18 +203,14 @@ class TestDependencyContainer:
     def test_resolve_dependency_with_dependencies(self, container):
         """Test resolving dependency with dependencies."""
         # Register dependency
-        dep_definition = DependencyDefinition(
-            name="dependency", factory=lambda: "dependency_instance"
-        )
+        dep_definition = DependencyDefinition(name="dependency", factory=lambda: "dependency_instance")
         container.register_dependency(dep_definition)
 
         # Register service with dependency
         def service_factory(dependency):
             return f"service_with_{dependency}"
 
-        service_definition = DependencyDefinition(
-            name="service", factory=service_factory, dependencies=["dependency"]
-        )
+        service_definition = DependencyDefinition(name="service", factory=service_factory, dependencies=["dependency"])
         container.register_dependency(service_definition)
 
         instance = container.resolve("service")
@@ -240,23 +224,17 @@ class TestDependencyContainer:
         def service_a_factory(service_b):
             return f"service_a_with_{service_b}"
 
-        service_a_definition = DependencyDefinition(
-            name="service_a", factory=service_a_factory, dependencies=["service_b"]
-        )
+        service_a_definition = DependencyDefinition(name="service_a", factory=service_a_factory, dependencies=["service_b"])
         container.register_dependency(service_a_definition)
 
         # Register service B that depends on A
         def service_b_factory(service_a):
             return f"service_b_with_{service_a}"
 
-        service_b_definition = DependencyDefinition(
-            name="service_b", factory=service_b_factory, dependencies=["service_a"]
-        )
+        service_b_definition = DependencyDefinition(name="service_b", factory=service_b_factory, dependencies=["service_a"])
         container.register_dependency(service_b_definition)
 
-        with pytest.raises(
-            DependencyCircularReferenceError, match="Circular dependency detected"
-        ):
+        with pytest.raises(DependencyCircularReferenceError, match="Circular dependency detected"):
             container.resolve("service_a")
 
     def test_create_scope(self, container):
@@ -337,9 +315,7 @@ class TestDependencyContainer:
     def test_validate_dependencies(self, container):
         """Test validating all dependencies."""
         # Register valid dependency
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "test_instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "test_instance")
         container.register_dependency(definition)
 
         # Should not raise exception
@@ -351,9 +327,7 @@ class TestDependencyContainer:
         definition = DependencyDefinition(name="test_service", factory=None)
         container._definitions["test_service"] = definition
 
-        with pytest.raises(
-            DependencyInjectionError, match="Invalid dependency definition"
-        ):
+        with pytest.raises(DependencyInjectionError, match="Invalid dependency definition"):
             container.validate_dependencies()
 
 
@@ -451,9 +425,7 @@ class TestDependencyManager:
         def service_factory(dependency):
             return f"service_with_{dependency}"
 
-        dependency_manager.register_service(
-            "service", service_factory, dependencies=["dependency"]
-        )
+        dependency_manager.register_service("service", service_factory, dependencies=["dependency"])
 
         instance = dependency_manager.resolve("service")
 
@@ -559,9 +531,7 @@ class TestServiceLocator:
     def test_get_service(self, service_locator):
         """Test getting service."""
         container = DependencyContainer()
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "instance")
         container.register_dependency(definition)
         service_locator.set_container(container)
 
@@ -577,9 +547,7 @@ class TestServiceLocator:
     def test_get_optional_service(self, service_locator):
         """Test getting optional service."""
         container = DependencyContainer()
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "instance")
         container.register_dependency(definition)
         service_locator.set_container(container)
 
@@ -594,13 +562,9 @@ class TestServiceLocator:
         container = DependencyContainer()
 
         # Register services of different types
-        definition1 = DependencyDefinition(
-            name="service1", factory=lambda: "string_instance"
-        )
+        definition1 = DependencyDefinition(name="service1", factory=lambda: "string_instance")
         definition2 = DependencyDefinition(name="service2", factory=lambda: 42)
-        definition3 = DependencyDefinition(
-            name="service3", factory=lambda: "another_string"
-        )
+        definition3 = DependencyDefinition(name="service3", factory=lambda: "another_string")
 
         container.register_dependency(definition1)
         container.register_dependency(definition2)
@@ -645,9 +609,7 @@ class TestDependencyRegistry:
 
     def test_register(self, registry):
         """Test registering dependency."""
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "instance")
 
         registry.register(definition)
 
@@ -656,9 +618,7 @@ class TestDependencyRegistry:
 
     def test_register_with_metadata(self, registry):
         """Test registering dependency with metadata."""
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "instance")
         metadata = {"version": "1.0", "description": "Test service"}
 
         registry.register(definition, metadata=metadata)
@@ -668,9 +628,7 @@ class TestDependencyRegistry:
 
     def test_unregister(self, registry):
         """Test unregistering dependency."""
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "instance")
         registry.register(definition)
 
         registry.unregister("test_service")
@@ -679,9 +637,7 @@ class TestDependencyRegistry:
 
     def test_get_definition(self, registry):
         """Test getting dependency definition."""
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "instance")
         registry.register(definition)
 
         retrieved = registry.get_definition("test_service")
@@ -695,9 +651,7 @@ class TestDependencyRegistry:
 
     def test_get_metadata(self, registry):
         """Test getting dependency metadata."""
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "instance")
         metadata = {"version": "1.0"}
         registry.register(definition, metadata=metadata)
 
@@ -721,9 +675,7 @@ class TestDependencyRegistry:
 
     def test_clear(self, registry):
         """Test clearing registry."""
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "instance")
         registry.register(definition)
 
         registry.clear()
@@ -767,9 +719,7 @@ class TestDependencyResolver:
         """Test resolving dependencies with no dependencies."""
         container = Mock()
 
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "service_instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "service_instance")
 
         result = resolver.resolve_dependencies(definition, container)
 
@@ -786,9 +736,7 @@ class TestDependencyResolver:
             dependencies=["test_service"],  # Circular dependency
         )
 
-        with pytest.raises(
-            DependencyCircularReferenceError, match="Circular dependency detected"
-        ):
+        with pytest.raises(DependencyCircularReferenceError, match="Circular dependency detected"):
             resolver.resolve_dependencies(definition, container)
 
     def test_validate_dependencies(self, resolver):
@@ -842,18 +790,14 @@ class TestDependencyValidator:
 
     def test_validate_definition(self, validator):
         """Test validating dependency definition."""
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "instance")
 
         # Should not raise exception
         validator.validate_definition(definition)
 
     def test_validate_definition_invalid_name(self, validator):
         """Test validating dependency definition with invalid name."""
-        definition = DependencyDefinition(
-            name="", factory=lambda: "instance"  # Invalid empty name
-        )
+        definition = DependencyDefinition(name="", factory=lambda: "instance")  # Invalid empty name
 
         with pytest.raises(DependencyInjectionError, match="Invalid dependency name"):
             validator.validate_definition(definition)
@@ -875,9 +819,7 @@ class TestDependencyValidator:
     def test_validate_container(self, validator):
         """Test validating dependency container."""
         container = DependencyContainer()
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "instance")
         container.register_dependency(definition)
 
         # Should not raise exception
@@ -894,19 +836,13 @@ class TestDependencyValidator:
         def service_b_factory(service_a):
             return f"service_b_with_{service_a}"
 
-        definition_a = DependencyDefinition(
-            name="service_a", factory=service_a_factory, dependencies=["service_b"]
-        )
-        definition_b = DependencyDefinition(
-            name="service_b", factory=service_b_factory, dependencies=["service_a"]
-        )
+        definition_a = DependencyDefinition(name="service_a", factory=service_a_factory, dependencies=["service_b"])
+        definition_b = DependencyDefinition(name="service_b", factory=service_b_factory, dependencies=["service_a"])
 
         container.register_dependency(definition_a)
         container.register_dependency(definition_b)
 
-        with pytest.raises(
-            DependencyCircularReferenceError, match="Circular dependency detected"
-        ):
+        with pytest.raises(DependencyCircularReferenceError, match="Circular dependency detected"):
             validator.validate_container(container)
 
     def test_add_validation_rule(self, validator):
@@ -918,13 +854,9 @@ class TestDependencyValidator:
 
         validator.add_validation_rule("custom_rule", custom_rule)
 
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "instance")
 
-        with pytest.raises(
-            DependencyInjectionError, match="Name cannot start with 'test_'"
-        ):
+        with pytest.raises(DependencyInjectionError, match="Name cannot start with 'test_'"):
             validator.validate_definition(definition)
 
     def test_remove_validation_rule(self, validator):
@@ -937,9 +869,7 @@ class TestDependencyValidator:
         validator.add_validation_rule("custom_rule", custom_rule)
         validator.remove_validation_rule("custom_rule")
 
-        definition = DependencyDefinition(
-            name="test_service", factory=lambda: "instance"
-        )
+        definition = DependencyDefinition(name="test_service", factory=lambda: "instance")
 
         # Should not raise exception now
         validator.validate_definition(definition)
@@ -1143,9 +1073,7 @@ class TestDependencyHealthCheck:
 
         result = health_check.get_overall_health()
 
-        assert (
-            result["status"] == "unhealthy"
-        )  # Any unhealthy service makes overall unhealthy
+        assert result["status"] == "unhealthy"  # Any unhealthy service makes overall unhealthy
         assert result["total_services"] == 2
         assert result["healthy_services"] == 1
         assert result["unhealthy_services"] == 1
@@ -1215,9 +1143,7 @@ class TestDependencyManagerIntegration:
         def api_service_factory(database, cache):
             return f"api_service_with_{database}_{cache}"
 
-        manager.register_service(
-            "api_service", api_service_factory, dependencies=["database", "cache"]
-        )
+        manager.register_service("api_service", api_service_factory, dependencies=["database", "cache"])
 
         # Resolve service
         api_service = manager.resolve("api_service")
@@ -1297,12 +1223,8 @@ class TestDependencyManagerIntegration:
         def service_b_factory(service_a):
             return f"service_b_with_{service_a}"
 
-        manager.register_service(
-            "service_a", service_a_factory, dependencies=["service_b"]
-        )
-        manager.register_service(
-            "service_b", service_b_factory, dependencies=["service_a"]
-        )
+        manager.register_service("service_a", service_a_factory, dependencies=["service_b"])
+        manager.register_service("service_b", service_b_factory, dependencies=["service_a"])
 
         # Should raise exception when resolving
         with pytest.raises(DependencyCircularReferenceError):

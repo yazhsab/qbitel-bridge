@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class EncryptionMode(Enum):
     """Encryption modes for east-west traffic"""
+
     QUANTUM_ONLY = "quantum_only"  # Pure quantum-safe
     HYBRID = "hybrid"  # Quantum + classical
     CLASSICAL = "classical"  # Classical only (fallback)
@@ -29,6 +30,7 @@ class EncryptionMode(Enum):
 @dataclass
 class EncryptionSession:
     """Represents an active encryption session between services"""
+
     session_id: str
     source_service: str
     dest_service: str
@@ -48,10 +50,7 @@ class EastWestEncryption:
     """
 
     def __init__(
-        self,
-        mode: EncryptionMode = EncryptionMode.QUANTUM_ONLY,
-        session_timeout: int = 3600,
-        key_rotation_interval: int = 300
+        self, mode: EncryptionMode = EncryptionMode.QUANTUM_ONLY, session_timeout: int = 3600, key_rotation_interval: int = 300
     ):
         """
         Initialize East-West encryption manager.
@@ -78,17 +77,12 @@ class EastWestEncryption:
             "keys_rotated": 0,
             "bytes_encrypted": 0,
             "bytes_decrypted": 0,
-            "encryption_latency_ms": []
+            "encryption_latency_ms": [],
         }
 
         logger.info(f"Initialized EastWestEncryption in {mode.value} mode")
 
-    def create_session(
-        self,
-        source_service: str,
-        dest_service: str,
-        public_key: Optional[bytes] = None
-    ) -> EncryptionSession:
+    def create_session(self, source_service: str, dest_service: str, public_key: Optional[bytes] = None) -> EncryptionSession:
         """
         Create a new encryption session between two services.
 
@@ -111,16 +105,13 @@ class EastWestEncryption:
             dest_service=dest_service,
             shared_secret=shared_secret,
             created_at=time.time(),
-            last_used=time.time()
+            last_used=time.time(),
         )
 
         self._sessions[session_id] = session
         self._metrics["sessions_created"] += 1
 
-        logger.info(
-            f"Created encryption session {session_id}: "
-            f"{source_service} -> {dest_service}"
-        )
+        logger.info(f"Created encryption session {session_id}: " f"{source_service} -> {dest_service}")
 
         return session
 
@@ -163,12 +154,7 @@ class EastWestEncryption:
 
         return shared_secret
 
-    def encrypt_packet(
-        self,
-        session_id: str,
-        plaintext: bytes,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    def encrypt_packet(self, session_id: str, plaintext: bytes, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Encrypt a packet for transmission.
 
@@ -191,10 +177,7 @@ class EastWestEncryption:
             self._rotate_session_key(session)
 
         # Encrypt using AES-256-GCM with quantum-derived key
-        ciphertext, tag, nonce = self._encrypt_data(
-            plaintext,
-            session.shared_secret
-        )
+        ciphertext, tag, nonce = self._encrypt_data(plaintext, session.shared_secret)
 
         # Update session statistics
         session.packet_count += 1
@@ -213,19 +196,14 @@ class EastWestEncryption:
             "nonce": base64.b64encode(nonce).decode(),
             "algorithm": "aes-256-gcm",
             "key_derivation": self.mode.value,
-            "metadata": metadata or {}
+            "metadata": metadata or {},
         }
 
-        logger.debug(
-            f"Encrypted packet ({len(plaintext)} bytes) in {encryption_time:.2f}ms"
-        )
+        logger.debug(f"Encrypted packet ({len(plaintext)} bytes) in {encryption_time:.2f}ms")
 
         return encrypted_packet
 
-    def decrypt_packet(
-        self,
-        encrypted_packet: Dict[str, Any]
-    ) -> bytes:
+    def decrypt_packet(self, encrypted_packet: Dict[str, Any]) -> bytes:
         """
         Decrypt a received packet.
 
@@ -249,28 +227,17 @@ class EastWestEncryption:
         nonce = base64.b64decode(encrypted_packet["nonce"])
 
         # Decrypt
-        plaintext = self._decrypt_data(
-            ciphertext,
-            tag,
-            nonce,
-            session.shared_secret
-        )
+        plaintext = self._decrypt_data(ciphertext, tag, nonce, session.shared_secret)
 
         # Update metrics
         self._metrics["bytes_decrypted"] += len(plaintext)
         decryption_time = (time.time() - start_time) * 1000
 
-        logger.debug(
-            f"Decrypted packet ({len(plaintext)} bytes) in {decryption_time:.2f}ms"
-        )
+        logger.debug(f"Decrypted packet ({len(plaintext)} bytes) in {decryption_time:.2f}ms")
 
         return plaintext
 
-    def _encrypt_data(
-        self,
-        plaintext: bytes,
-        key: bytes
-    ) -> Tuple[bytes, bytes, bytes]:
+    def _encrypt_data(self, plaintext: bytes, key: bytes) -> Tuple[bytes, bytes, bytes]:
         """
         Encrypt data using production-grade AES-256-GCM with authenticated encryption.
 
@@ -305,13 +272,7 @@ class EastWestEncryption:
 
         return ciphertext, tag, nonce
 
-    def _decrypt_data(
-        self,
-        ciphertext: bytes,
-        tag: bytes,
-        nonce: bytes,
-        key: bytes
-    ) -> bytes:
+    def _decrypt_data(self, ciphertext: bytes, tag: bytes, nonce: bytes, key: bytes) -> bytes:
         """
         Decrypt data using production-grade AES-256-GCM with authenticated decryption.
 
@@ -370,10 +331,7 @@ class EastWestEncryption:
             session: Session to rotate keys for
         """
         # Derive new key from current key
-        new_secret = hashlib.sha3_256(
-            session.shared_secret +
-            str(time.time()).encode()
-        ).digest()
+        new_secret = hashlib.sha3_256(session.shared_secret + str(time.time()).encode()).digest()
 
         session.shared_secret = new_secret
         session.created_at = time.time()
@@ -438,7 +396,7 @@ class EastWestEncryption:
             "idle_seconds": time.time() - session.last_used,
             "packet_count": session.packet_count,
             "byte_count": session.byte_count,
-            "encryption_mode": self.mode.value
+            "encryption_mode": self.mode.value,
         }
 
     def get_metrics(self) -> Dict[str, Any]:
@@ -461,7 +419,7 @@ class EastWestEncryption:
             "avg_encryption_latency_ms": round(avg_latency, 2),
             "encryption_mode": self.mode.value,
             "session_timeout_seconds": self.session_timeout,
-            "key_rotation_interval_seconds": self.key_rotation_interval
+            "key_rotation_interval_seconds": self.key_rotation_interval,
         }
 
     def create_envoy_filter_config(self) -> Dict[str, Any]:
@@ -487,12 +445,8 @@ class EastWestEncryption:
                 "enable_request_encryption": True,
                 "enable_response_encryption": True,
                 "minimum_body_size": 0,  # Encrypt all bodies
-                "metadata": {
-                    "provider": "QBITEL",
-                    "security_level": "NIST Level 5",
-                    "forward_secrecy": True
-                }
-            }
+                "metadata": {"provider": "QBITEL", "security_level": "NIST Level 5", "forward_secrecy": True},
+            },
         }
 
     def create_wasm_config(self) -> Dict[str, Any]:
@@ -513,17 +467,13 @@ class EastWestEncryption:
                         "root_id": "qbitel_quantum_encryption_root",
                         "vm_config": {
                             "runtime": "envoy.wasm.runtime.v8",
-                            "code": {
-                                "local": {
-                                    "filename": "/etc/qbitel/filters/quantum_encryption.wasm"
-                                }
-                            }
+                            "code": {"local": {"filename": "/etc/qbitel/filters/quantum_encryption.wasm"}},
                         },
                         "configuration": {
                             "@type": "type.googleapis.com/google.protobuf.StringValue",
-                            "value": f'{{"mode": "{self.mode.value}", "key_rotation": {self.key_rotation_interval}}}'
-                        }
+                            "value": f'{{"mode": "{self.mode.value}", "key_rotation": {self.key_rotation_interval}}}',
+                        },
                     }
-                }
-            }
+                },
+            },
         }

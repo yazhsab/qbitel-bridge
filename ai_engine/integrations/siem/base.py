@@ -30,16 +30,7 @@ class SIEMCapability(Flag):
     # Common combinations
     READ_ONLY = QUERY_EVENTS | QUERY_ALERTS
     WRITE_ONLY = SEND_EVENTS | CREATE_ALERTS
-    FULL = (
-        SEND_EVENTS
-        | QUERY_EVENTS
-        | QUERY_ALERTS
-        | CREATE_ALERTS
-        | STREAM_EVENTS
-        | THREAT_INTEL
-        | CORRELATION_RULES
-        | CASES
-    )
+    FULL = SEND_EVENTS | QUERY_EVENTS | QUERY_ALERTS | CREATE_ALERTS | STREAM_EVENTS | THREAT_INTEL | CORRELATION_RULES | CASES
 
 
 class ConnectionStatus(Enum):
@@ -579,9 +570,7 @@ class BaseSIEMConnector(ABC):
     async def _collect_batch(self) -> List[SIEMEvent]:
         """Collect events into a batch."""
         batch = []
-        deadline = asyncio.get_event_loop().time() + (
-            self.config.batch_timeout_ms / 1000
-        )
+        deadline = asyncio.get_event_loop().time() + (self.config.batch_timeout_ms / 1000)
 
         while len(batch) < self.config.batch_size:
             try:
@@ -645,9 +634,7 @@ class BaseSIEMConnector(ABC):
                 return await operation(*args, **kwargs)
             except Exception as e:
                 last_error = e
-                logger.warning(
-                    f"Operation failed (attempt {attempt + 1}/{self.config.max_retries}): {e}"
-                )
+                logger.warning(f"Operation failed (attempt {attempt + 1}/{self.config.max_retries}): {e}")
                 if attempt < self.config.max_retries - 1:
                     await asyncio.sleep(self.config.retry_delay * (attempt + 1))
 

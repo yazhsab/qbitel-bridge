@@ -21,9 +21,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         """Create mock config with all security settings."""
         config = Mock()
         config.security = Mock()
-        config.security.jwt_secret = (
-            "test_secret_key_with_at_least_32_characters_long_for_security"
-        )
+        config.security.jwt_secret = "test_secret_key_with_at_least_32_characters_long_for_security"
         return config
 
     @pytest.fixture
@@ -125,9 +123,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         assert is_valid is True
         assert error is None
 
-    def test_validate_password_strength_common_patterns_case_insensitive(
-        self, auth_service
-    ):
+    def test_validate_password_strength_common_patterns_case_insensitive(self, auth_service):
         """Test common pattern detection is case insensitive."""
         weak_passwords = [
             "PASSWORD123!Abc",
@@ -160,9 +156,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
 
-        await auth_service.change_password(
-            mock_db, "user123", "OldPassword123!", "NewPassword456!"
-        )
+        await auth_service.change_password(mock_db, "user123", "OldPassword123!", "NewPassword456!")
 
         assert user.password_changed_at > old_time
         assert user.must_change_password is False
@@ -183,12 +177,8 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
 
-        with patch.object(
-            auth_service, "_log_audit", new_callable=AsyncMock
-        ) as mock_audit:
-            await auth_service.change_password(
-                mock_db, "user123", "OldPassword123!", "NewPassword456!"
-            )
+        with patch.object(auth_service, "_log_audit", new_callable=AsyncMock) as mock_audit:
+            await auth_service.change_password(mock_db, "user123", "OldPassword123!", "NewPassword456!")
 
             # Should log success
             assert mock_audit.call_count >= 1
@@ -262,9 +252,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         mock_db.execute.return_value = mock_result
 
         custom_secret = "CUSTOMSECRET1234"
-        result = await auth_service.enable_mfa(
-            mock_db, "user123", MFAMethod.TOTP, secret=custom_secret
-        )
+        result = await auth_service.enable_mfa(mock_db, "user123", MFAMethod.TOTP, secret=custom_secret)
 
         assert result["secret"] == custom_secret
         assert user.mfa_secret == custom_secret
@@ -374,9 +362,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         mock_db.execute.return_value = mock_result
 
         reason = "Security audit"
-        result = await auth_service.revoke_api_key(
-            mock_db, "key123", "admin", reason=reason
-        )
+        result = await auth_service.revoke_api_key(mock_db, "key123", "admin", reason=reason)
 
         assert result is True
         assert api_key.revoked_reason == reason
@@ -557,9 +543,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
 
-        result = await auth_service.authenticate_user(
-            mock_db, "admin", password, mfa_token=valid_token
-        )
+        result = await auth_service.authenticate_user(mock_db, "admin", password, mfa_token=valid_token)
 
         assert result == user
         assert user.failed_login_attempts == 0
@@ -605,9 +589,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
 
-        result = await auth_service.authenticate_user(
-            mock_db, "testuser", "WrongPassword"
-        )
+        result = await auth_service.authenticate_user(mock_db, "testuser", "WrongPassword")
 
         assert result is None
         assert user.failed_login_attempts == 3
@@ -636,9 +618,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         mock_result.scalar_one_or_none.return_value = user
         mock_db.execute.return_value = mock_result
 
-        result = await auth_service.authenticate_user(
-            mock_db, "testuser", password, ip_address=ip_address
-        )
+        result = await auth_service.authenticate_user(mock_db, "testuser", password, ip_address=ip_address)
 
         assert result == user
         assert user.last_login is not None
@@ -767,9 +747,7 @@ class TestEnterpriseAuthenticationServiceComprehensive:
         mock_db.execute.return_value = mock_result
 
         # Should succeed even if same password
-        result = await auth_service.change_password(
-            mock_db, "user123", password, password
-        )
+        result = await auth_service.change_password(mock_db, "user123", password, password)
         assert result is True
 
     @pytest.mark.asyncio
@@ -813,9 +791,7 @@ class TestGetAuthServiceSingleton:
         with patch("ai_engine.api.auth_enterprise.get_config") as mock_config:
             mock_config.return_value = Mock()
             mock_config.return_value.security = Mock()
-            mock_config.return_value.security.jwt_secret = (
-                "test_secret_key_with_at_least_32_characters_long"
-            )
+            mock_config.return_value.security.jwt_secret = "test_secret_key_with_at_least_32_characters_long"
 
             service = await auth_enterprise.get_auth_service()
             assert service is not None
@@ -832,9 +808,7 @@ class TestGetAuthServiceSingleton:
         with patch("ai_engine.api.auth_enterprise.get_config") as mock_config:
             mock_config.return_value = Mock()
             mock_config.return_value.security = Mock()
-            mock_config.return_value.security.jwt_secret = (
-                "test_secret_key_with_at_least_32_characters_long"
-            )
+            mock_config.return_value.security.jwt_secret = "test_secret_key_with_at_least_32_characters_long"
 
             service1 = await auth_enterprise.get_auth_service()
             service2 = await auth_enterprise.get_auth_service()

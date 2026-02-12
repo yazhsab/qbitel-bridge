@@ -67,9 +67,7 @@ class KnowledgeExtractionSession:
     session_id: str
     expert_id: str
     system_id: Optional[str]
-    session_type: (
-        str  # "structured_interview", "incident_debrief", "maintenance_review"
-    )
+    session_type: str  # "structured_interview", "incident_debrief", "maintenance_review"
     start_time: datetime
     end_time: Optional[datetime] = None
     raw_input: List[str] = field(default_factory=list)
@@ -365,9 +363,7 @@ class TribalKnowledgeCapture:
 
         self.active_sessions[session_id] = session
 
-        self.logger.info(
-            f"Started knowledge extraction session {session_id} with expert {expert_id}"
-        )
+        self.logger.info(f"Started knowledge extraction session {session_id} with expert {expert_id}")
         return session_id
 
     async def capture_expert_input(
@@ -416,9 +412,7 @@ class TribalKnowledgeCapture:
             }
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to process expert input in session {session_id}: {e}"
-            )
+            self.logger.error(f"Failed to process expert input in session {session_id}: {e}")
             return {"session_id": session_id, "error": str(e), "status": "error"}
 
     async def _extract_knowledge_from_input(
@@ -431,9 +425,7 @@ class TribalKnowledgeCapture:
         """Extract structured knowledge from expert input using LLM."""
 
         # Select appropriate extraction prompt
-        prompt_template = self.extraction_prompts.get(
-            session.session_type, self.extraction_prompts["general_formalization"]
-        )
+        prompt_template = self.extraction_prompts.get(session.session_type, self.extraction_prompts["general_formalization"])
 
         # Prepare context for the prompt
         system_context = ""
@@ -452,27 +444,13 @@ class TribalKnowledgeCapture:
                 expert_input=expert_input,
             )
         elif session.session_type == "incident_debrief":
-            incident_context = (
-                context.get("incident_context", "No incident context provided")
-                if context
-                else ""
-            )
-            prompt = prompt_template.format(
-                incident_context=incident_context, expert_input=expert_input
-            )
+            incident_context = context.get("incident_context", "No incident context provided") if context else ""
+            prompt = prompt_template.format(incident_context=incident_context, expert_input=expert_input)
         elif session.session_type == "maintenance_review":
-            maintenance_context = (
-                context.get("maintenance_context", "No maintenance context provided")
-                if context
-                else ""
-            )
-            prompt = prompt_template.format(
-                maintenance_context=maintenance_context, expert_input=expert_input
-            )
+            maintenance_context = context.get("maintenance_context", "No maintenance context provided") if context else ""
+            prompt = prompt_template.format(maintenance_context=maintenance_context, expert_input=expert_input)
         else:
-            system_type = (
-                context.get("system_type", "unknown") if context else "unknown"
-            )
+            system_type = context.get("system_type", "unknown") if context else "unknown"
             knowledge_source = session.session_type
             prompt = prompt_template.format(
                 system_type=system_type,
@@ -492,9 +470,7 @@ class TribalKnowledgeCapture:
         response = await self.llm_service.process_request(llm_request)
 
         # Parse the structured response
-        structured_knowledge = self._parse_knowledge_extraction_response(
-            response.content, session, expert
-        )
+        structured_knowledge = self._parse_knowledge_extraction_response(response.content, session, expert)
 
         # Create formalized knowledge object
         knowledge = FormalizedKnowledge(
@@ -506,9 +482,7 @@ class TribalKnowledgeCapture:
             detailed_explanation=response.content,
             behaviors=structured_knowledge.get("behaviors", {}),
             failure_indicators=structured_knowledge.get("failure_indicators", []),
-            maintenance_procedures=structured_knowledge.get(
-                "maintenance_procedures", []
-            ),
+            maintenance_procedures=structured_knowledge.get("maintenance_procedures", []),
             dependencies=structured_knowledge.get("dependencies", []),
             conditions=structured_knowledge.get("conditions", []),
             triggers=structured_knowledge.get("triggers", []),
@@ -534,9 +508,7 @@ class TribalKnowledgeCapture:
         # Update expert profile
         expert.contributions_count += 1
 
-        self.logger.info(
-            f"Extracted knowledge {knowledge.knowledge_id} from expert {expert.expert_id}"
-        )
+        self.logger.info(f"Extracted knowledge {knowledge.knowledge_id} from expert {expert.expert_id}")
 
         return {
             "knowledge_id": knowledge.knowledge_id,
@@ -620,17 +592,12 @@ class TribalKnowledgeCapture:
                                 # For behaviors, try to extract key-value pairs
                                 if ":" in item:
                                     key, value = item.split(":", 1)
-                                    structured[current_section][
-                                        key.strip()
-                                    ] = value.strip()
+                                    structured[current_section][key.strip()] = value.strip()
 
         # Extract title and description from the beginning of the response
         first_lines = response_content.split("\n")[:5]
         for line in first_lines:
-            if line.strip() and not any(
-                keyword in line.upper()
-                for keyword in ["SYSTEM", "FAILURE", "MAINTENANCE"]
-            ):
+            if line.strip() and not any(keyword in line.upper() for keyword in ["SYSTEM", "FAILURE", "MAINTENANCE"]):
                 if not structured["description"]:
                     structured["description"] = line.strip()
                 break
@@ -651,9 +618,7 @@ class TribalKnowledgeCapture:
         else:
             return "general"
 
-    def _extract_tags_from_knowledge(
-        self, structured_knowledge: Dict[str, Any]
-    ) -> List[str]:
+    def _extract_tags_from_knowledge(self, structured_knowledge: Dict[str, Any]) -> List[str]:
         """Extract relevant tags from structured knowledge."""
         tags = set()
 
@@ -668,13 +633,7 @@ class TribalKnowledgeCapture:
             tags.add("troubleshooting")
 
         # Add tags from common keywords in content
-        all_text = " ".join(
-            [
-                str(v)
-                for v in structured_knowledge.values()
-                if isinstance(v, (str, list))
-            ]
-        ).lower()
+        all_text = " ".join([str(v) for v in structured_knowledge.values() if isinstance(v, (str, list))]).lower()
 
         keyword_tags = {
             "performance": "performance",
@@ -695,9 +654,7 @@ class TribalKnowledgeCapture:
 
         return list(tags)
 
-    def _calculate_session_confidence(
-        self, session: KnowledgeExtractionSession
-    ) -> float:
+    def _calculate_session_confidence(self, session: KnowledgeExtractionSession) -> float:
         """Calculate overall confidence for a session."""
         if not session.extracted_knowledge:
             return 0.0
@@ -719,9 +676,7 @@ class TribalKnowledgeCapture:
 
         return weighted_sum / weight_sum if weight_sum > 0 else 0.0
 
-    async def finalize_session(
-        self, session_id: str, validation_notes: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def finalize_session(self, session_id: str, validation_notes: Optional[str] = None) -> Dict[str, Any]:
         """Finalize a knowledge extraction session."""
 
         if session_id not in self.active_sessions:
@@ -750,9 +705,7 @@ class TribalKnowledgeCapture:
         # Remove from active sessions
         del self.active_sessions[session_id]
 
-        self.logger.info(
-            f"Finalized session {session_id}: {knowledge_count} knowledge items extracted"
-        )
+        self.logger.info(f"Finalized session {session_id}: {knowledge_count} knowledge items extracted")
 
         return {
             "session_id": session_id,
@@ -784,16 +737,12 @@ class TribalKnowledgeCapture:
 
             # Cross-validate with other experts if specified
             if cross_reference_experts:
-                cross_validation = await self._cross_validate_with_experts(
-                    knowledge, cross_reference_experts
-                )
+                cross_validation = await self._cross_validate_with_experts(knowledge, cross_reference_experts)
                 validation_result.update(cross_validation)
 
             # Validate against system data if provided
             if validation_data:
-                practical_validation = await self._validate_against_system_data(
-                    knowledge, validation_data
-                )
+                practical_validation = await self._validate_against_system_data(knowledge, validation_data)
                 validation_result.update(practical_validation)
 
             # Update knowledge with validation results
@@ -805,9 +754,7 @@ class TribalKnowledgeCapture:
             elif validation_result["validation_score"] < 0.4:
                 knowledge.confidence_score = max(knowledge.confidence_score - 0.1, 0.0)
 
-            self.logger.info(
-                f"Validated knowledge {knowledge_id} with score {validation_result['validation_score']:.2f}"
-            )
+            self.logger.info(f"Validated knowledge {knowledge_id} with score {validation_result['validation_score']:.2f}")
 
             return validation_result
 
@@ -819,9 +766,7 @@ class TribalKnowledgeCapture:
                 "status": "error",
             }
 
-    async def _cross_validate_with_experts(
-        self, knowledge: FormalizedKnowledge, expert_ids: List[str]
-    ) -> Dict[str, Any]:
+    async def _cross_validate_with_experts(self, knowledge: FormalizedKnowledge, expert_ids: List[str]) -> Dict[str, Any]:
         """Cross-validate knowledge with multiple experts."""
 
         # Collect expert opinions (in production, this would involve actual expert consultation)
@@ -929,12 +874,8 @@ class TribalKnowledgeCapture:
         ]
 
         content_lower = content.lower()
-        positive_count = sum(
-            1 for keyword in positive_keywords if keyword in content_lower
-        )
-        negative_count = sum(
-            1 for keyword in negative_keywords if keyword in content_lower
-        )
+        positive_count = sum(1 for keyword in positive_keywords if keyword in content_lower)
+        negative_count = sum(1 for keyword in negative_keywords if keyword in content_lower)
 
         if positive_count > negative_count:
             return 0.7
@@ -1000,15 +941,9 @@ class TribalKnowledgeCapture:
             return {}
 
         # Count expert's contributions
-        contributions = [
-            k for k in self.knowledge_base.values() if k.source_expert == expert_id
-        ]
+        contributions = [k for k in self.knowledge_base.values() if k.source_expert == expert_id]
 
-        avg_confidence = (
-            sum(k.confidence_score for k in contributions) / len(contributions)
-            if contributions
-            else 0.0
-        )
+        avg_confidence = sum(k.confidence_score for k in contributions) / len(contributions) if contributions else 0.0
 
         return {
             "expert_id": expert_id,
@@ -1024,9 +959,7 @@ class TribalKnowledgeCapture:
 
     def _calculate_contribution_trend(self, expert_id: str) -> str:
         """Calculate the trend of expert contributions."""
-        contributions = [
-            k for k in self.knowledge_base.values() if k.source_expert == expert_id
-        ]
+        contributions = [k for k in self.knowledge_base.values() if k.source_expert == expert_id]
 
         if len(contributions) < 2:
             return "insufficient_data"
@@ -1036,12 +969,8 @@ class TribalKnowledgeCapture:
 
         # Compare recent vs older contributions
         mid_point = len(contributions) // 2
-        older_avg = (
-            sum(k.confidence_score for k in contributions[:mid_point]) / mid_point
-        )
-        recent_avg = sum(k.confidence_score for k in contributions[mid_point:]) / (
-            len(contributions) - mid_point
-        )
+        older_avg = sum(k.confidence_score for k in contributions[:mid_point]) / mid_point
+        recent_avg = sum(k.confidence_score for k in contributions[mid_point:]) / (len(contributions) - mid_point)
 
         if recent_avg > older_avg + 0.1:
             return "improving"
@@ -1062,26 +991,16 @@ class TribalKnowledgeCapture:
         # Knowledge by type
         type_counts = {}
         for knowledge in self.knowledge_base.values():
-            type_counts[knowledge.knowledge_type] = (
-                type_counts.get(knowledge.knowledge_type, 0) + 1
-            )
+            type_counts[knowledge.knowledge_type] = type_counts.get(knowledge.knowledge_type, 0) + 1
 
         # Confidence distribution
-        high_confidence = sum(
-            1 for k in self.knowledge_base.values() if k.confidence_score > 0.8
-        )
-        medium_confidence = sum(
-            1 for k in self.knowledge_base.values() if 0.5 < k.confidence_score <= 0.8
-        )
-        low_confidence = sum(
-            1 for k in self.knowledge_base.values() if k.confidence_score <= 0.5
-        )
+        high_confidence = sum(1 for k in self.knowledge_base.values() if k.confidence_score > 0.8)
+        medium_confidence = sum(1 for k in self.knowledge_base.values() if 0.5 < k.confidence_score <= 0.8)
+        low_confidence = sum(1 for k in self.knowledge_base.values() if k.confidence_score <= 0.5)
 
         # Recent activity
         recent_cutoff = datetime.now() - timedelta(days=30)
-        recent_additions = sum(
-            1 for k in self.knowledge_base.values() if k.created_at > recent_cutoff
-        )
+        recent_additions = sum(1 for k in self.knowledge_base.values() if k.created_at > recent_cutoff)
 
         return {
             "total_knowledge_items": total_knowledge,

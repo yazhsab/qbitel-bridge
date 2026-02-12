@@ -44,8 +44,8 @@ class CryptogramType(Enum):
     """EMV cryptogram types."""
 
     ARQC = "arqc"  # Authorization Request Cryptogram
-    AAC = "aac"    # Application Authentication Cryptogram
-    TC = "tc"      # Transaction Certificate
+    AAC = "aac"  # Application Authentication Cryptogram
+    TC = "tc"  # Transaction Certificate
     ARPC = "arpc"  # Authorization Response Cryptogram
 
 
@@ -54,7 +54,7 @@ class KeyDerivationType(Enum):
 
     EMV_OPTION_A = "emv_option_a"  # PAN-based derivation
     EMV_OPTION_B = "emv_option_b"  # Session key derivation
-    DUKPT = "dukpt"                # Derived Unique Key Per Transaction
+    DUKPT = "dukpt"  # Derived Unique Key Per Transaction
 
 
 @dataclass
@@ -201,9 +201,7 @@ class EMVCryptogramVerifier:
             # Get master key
             mk = issuer_master_key
             if not mk and self._master_key_provider:
-                mk = self._master_key_provider.get_master_key(
-                    data.pan, "IMK-AC"
-                )
+                mk = self._master_key_provider.get_master_key(data.pan, "IMK-AC")
 
             if not mk:
                 return VerificationResult(
@@ -213,17 +211,13 @@ class EMVCryptogramVerifier:
                 )
 
             # Derive session key
-            session_key = self._derive_session_key(
-                mk, data.pan, data.pan_sequence, data.atc, derivation_type
-            )
+            session_key = self._derive_session_key(mk, data.pan, data.pan_sequence, data.atc, derivation_type)
 
             # Build cryptogram input data (CDOL1)
             cryptogram_input = self._build_cdol_data(data)
 
             # Calculate expected cryptogram
-            expected_cryptogram = self._calculate_cryptogram(
-                session_key, cryptogram_input
-            )
+            expected_cryptogram = self._calculate_cryptogram(session_key, cryptogram_input)
 
             # Constant-time comparison
             if secure_compare(expected_cryptogram, data.cryptogram):
@@ -294,9 +288,7 @@ class EMVCryptogramVerifier:
                 )
 
             # Derive session key
-            session_key = self._derive_session_key(
-                mk, pan, pan_sequence, atc, KeyDerivationType.EMV_OPTION_A
-            )
+            session_key = self._derive_session_key(mk, pan, pan_sequence, atc, KeyDerivationType.EMV_OPTION_A)
 
             if method == 1:
                 # Method 1: XOR ARQC with ARC padded to 8 bytes
@@ -447,7 +439,7 @@ class EMVCryptogramVerifier:
         intermediate = iv
 
         for i in range(0, len(padded), 8):
-            block = padded[i:i+8]
+            block = padded[i : i + 8]
             xor_block = bytes(a ^ b for a, b in zip(intermediate, block))
             intermediate = self._des_encrypt(k1, xor_block)
 
@@ -681,10 +673,7 @@ class ThreeDSVerifier:
         if key:
             # Build HMAC input including transaction data
             hmac_input = (
-                data.pan.encode() +
-                bytes([algorithm_indicator, second_factor]) +
-                aav_message +
-                data.acs_trans_id.encode()
+                data.pan.encode() + bytes([algorithm_indicator, second_factor]) + aav_message + data.acs_trans_id.encode()
             )
 
             expected_hmac = hmac.new(key, hmac_input, hashlib.sha256).digest()[:22]
@@ -732,7 +721,7 @@ class ThreeDSVerifier:
                 "A": ("06",),  # Attempted
                 "N": ("07",),  # Failed
                 "U": ("07",),  # Unavailable
-                "C": (),      # Challenge (no ECI yet)
+                "C": (),  # Challenge (no ECI yet)
             },
             "mastercard": {
                 "Y": ("02",),
@@ -987,14 +976,14 @@ class SignatureVerifier:
             )
 
         classical_len = struct.unpack(">H", data.signature[:2])[0]
-        classical_sig = data.signature[2:2+classical_len]
-        pqc_sig = data.signature[2+classical_len:]
+        classical_sig = data.signature[2 : 2 + classical_len]
+        pqc_sig = data.signature[2 + classical_len :]
 
         # Verify classical signature
         classical_data = SignatureVerificationData(
             signature=classical_sig,
             message=data.message,
-            public_key=data.public_key[:len(data.public_key)//2],  # First half
+            public_key=data.public_key[: len(data.public_key) // 2],  # First half
             algorithm=classical_algo,
         )
 
@@ -1010,7 +999,7 @@ class SignatureVerifier:
         pqc_data = SignatureVerificationData(
             signature=pqc_sig,
             message=data.message,
-            public_key=data.public_key[len(data.public_key)//2:],  # Second half
+            public_key=data.public_key[len(data.public_key) // 2 :],  # Second half
             algorithm=pqc_algo,
         )
 
@@ -1045,7 +1034,7 @@ class SignatureVerifier:
             hashlib.sha256,
         ).digest()
 
-        if secure_compare(expected[:len(data.signature)], data.signature[:len(expected)]):
+        if secure_compare(expected[: len(data.signature)], data.signature[: len(expected)]):
             return VerificationResult(
                 status=VerificationStatus.VALID,
                 algorithm=data.algorithm,
@@ -1109,7 +1098,7 @@ class MACVerifier:
 
             # Truncate expected to match provided MAC length
             if len(mac_value) < len(expected_mac):
-                expected_mac = expected_mac[:len(mac_value)]
+                expected_mac = expected_mac[: len(mac_value)]
 
             if secure_compare(expected_mac, mac_value):
                 return VerificationResult(

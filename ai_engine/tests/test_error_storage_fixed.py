@@ -85,9 +85,7 @@ class TestPersistentErrorStorage:
         )
 
     @pytest.mark.asyncio
-    async def test_initialization_success(
-        self, mock_redis, mock_db_engine, mock_session_maker
-    ):
+    async def test_initialization_success(self, mock_redis, mock_db_engine, mock_session_maker):
         """Test successful initialization."""
         with (
             patch("redis.asyncio.from_url", return_value=mock_redis),
@@ -111,18 +109,14 @@ class TestPersistentErrorStorage:
     @pytest.mark.asyncio
     async def test_initialization_failure(self):
         """Test initialization failure."""
-        with patch(
-            "redis.asyncio.from_url", side_effect=Exception("Redis connection failed")
-        ):
+        with patch("redis.asyncio.from_url", side_effect=Exception("Redis connection failed")):
             storage = PersistentErrorStorage()
 
             with pytest.raises(Exception):
                 await storage.initialize()
 
     @pytest.mark.asyncio
-    async def test_store_error_success(
-        self, mock_redis, mock_session, mock_session_maker, error_record
-    ):
+    async def test_store_error_success(self, mock_redis, mock_session, mock_session_maker, error_record):
         """Test successful error storage."""
         storage = PersistentErrorStorage()
         storage.redis_client = mock_redis
@@ -209,9 +203,7 @@ class TestPersistentErrorStorage:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_get_errors_by_component(
-        self, mock_redis, mock_session, mock_session_maker
-    ):
+    async def test_get_errors_by_component(self, mock_redis, mock_session, mock_session_maker):
         """Test getting errors by component."""
         mock_redis.zrangebyscore.return_value = ["error1", "error2"]
 

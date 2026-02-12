@@ -44,7 +44,6 @@ from ai_engine.domains.banking.security.hsm.hsm_provider import (
     KEMEncapsulationResult,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -168,9 +167,7 @@ class GCPCloudHSMProvider(HSMProvider):
 
         with self._lock:
             try:
-                logger.info(
-                    f"Connecting to GCP Cloud HSM: {self._gcp_config.project_id}"
-                )
+                logger.info(f"Connecting to GCP Cloud HSM: {self._gcp_config.project_id}")
 
                 # Authenticate
                 self._authenticate()
@@ -233,9 +230,7 @@ class GCPCloudHSMProvider(HSMProvider):
         try:
             from google.cloud import kms
 
-            self._kms_client = kms.KeyManagementServiceClient(
-                credentials=self._credentials
-            )
+            self._kms_client = kms.KeyManagementServiceClient(credentials=self._credentials)
 
             # Build key ring path
             self._key_ring_path = self._kms_client.key_ring_path(
@@ -381,9 +376,7 @@ class GCPCloudHSMProvider(HSMProvider):
                 self._key_cache[key_id] = key_handle
 
                 duration_ms = (time.time() - start_time) * 1000
-                logger.info(
-                    f"Generated key: {label} in {duration_ms:.2f}ms"
-                )
+                logger.info(f"Generated key: {label} in {duration_ms:.2f}ms")
 
                 return key_handle
 
@@ -532,9 +525,7 @@ class GCPCloudHSMProvider(HSMProvider):
 
             if hasattr(self._kms_client, "get_public_key"):
                 # Get primary version path
-                key_version_path = (
-                    f"{self._key_ring_path}/cryptoKeys/{crypto_key_id}/cryptoKeyVersions/1"
-                )
+                key_version_path = f"{self._key_ring_path}/cryptoKeys/{crypto_key_id}/cryptoKeyVersions/1"
 
                 public_key = self._kms_client.get_public_key(name=key_version_path)
                 return public_key.pem.encode()
@@ -556,9 +547,7 @@ class GCPCloudHSMProvider(HSMProvider):
 
                 # In production, schedule key version destruction
                 if hasattr(self._kms_client, "destroy_crypto_key_version"):
-                    key_version_path = (
-                        f"{self._key_ring_path}/cryptoKeys/{crypto_key_id}/cryptoKeyVersions/1"
-                    )
+                    key_version_path = f"{self._key_ring_path}/cryptoKeys/{crypto_key_id}/cryptoKeyVersions/1"
                     self._kms_client.destroy_crypto_key_version(name=key_version_path)
 
                 if key_handle.key_id in self._key_cache:
@@ -735,9 +724,7 @@ class GCPCloudHSMProvider(HSMProvider):
             if hasattr(self._kms_client, "asymmetric_sign"):
                 from google.cloud import kms
 
-                key_version_path = (
-                    f"{self._key_ring_path}/cryptoKeys/{crypto_key_id}/cryptoKeyVersions/1"
-                )
+                key_version_path = f"{self._key_ring_path}/cryptoKeys/{crypto_key_id}/cryptoKeyVersions/1"
 
                 response = self._kms_client.asymmetric_sign(
                     name=key_version_path,
@@ -785,9 +772,7 @@ class GCPCloudHSMProvider(HSMProvider):
             if hasattr(self._kms_client, "asymmetric_verify"):
                 from google.cloud import kms
 
-                key_version_path = (
-                    f"{self._key_ring_path}/cryptoKeys/{crypto_key_id}/cryptoKeyVersions/1"
-                )
+                key_version_path = f"{self._key_ring_path}/cryptoKeys/{crypto_key_id}/cryptoKeyVersions/1"
 
                 # Note: GCP KMS doesn't have direct asymmetric_verify
                 # Verification is typically done by fetching public key and verifying locally
@@ -887,9 +872,7 @@ class GCPCloudHSMProvider(HSMProvider):
             crypto_key_id = key_handle.metadata.get("crypto_key_id")
 
             if hasattr(self._kms_client, "mac_sign"):
-                key_version_path = (
-                    f"{self._key_ring_path}/cryptoKeys/{crypto_key_id}/cryptoKeyVersions/1"
-                )
+                key_version_path = f"{self._key_ring_path}/cryptoKeys/{crypto_key_id}/cryptoKeyVersions/1"
 
                 response = self._kms_client.mac_sign(
                     name=key_version_path,
@@ -923,9 +906,7 @@ class GCPCloudHSMProvider(HSMProvider):
             crypto_key_id = key_handle.metadata.get("crypto_key_id")
 
             if hasattr(self._kms_client, "mac_verify"):
-                key_version_path = (
-                    f"{self._key_ring_path}/cryptoKeys/{crypto_key_id}/cryptoKeyVersions/1"
-                )
+                key_version_path = f"{self._key_ring_path}/cryptoKeys/{crypto_key_id}/cryptoKeyVersions/1"
 
                 response = self._kms_client.mac_verify(
                     name=key_version_path,

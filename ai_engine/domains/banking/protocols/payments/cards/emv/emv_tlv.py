@@ -150,9 +150,7 @@ class TlvParser:
 
             if offset + length > end:
                 if self.strict:
-                    raise ValueError(
-                        f"Length {length} exceeds remaining data for tag {tag.hex}"
-                    )
+                    raise ValueError(f"Length {length} exceeds remaining data for tag {tag.hex}")
                 length = end - offset
 
             # Extract value
@@ -358,12 +356,14 @@ class TlvBuilder:
         elif length < 0x10000:
             return bytes([0x82, (length >> 8) & 0xFF, length & 0xFF])
         else:
-            return bytes([
-                0x83,
-                (length >> 16) & 0xFF,
-                (length >> 8) & 0xFF,
-                length & 0xFF,
-            ])
+            return bytes(
+                [
+                    0x83,
+                    (length >> 16) & 0xFF,
+                    (length >> 8) & 0xFF,
+                    length & 0xFF,
+                ]
+            )
 
     def reset(self) -> "TlvBuilder":
         """Reset the builder."""

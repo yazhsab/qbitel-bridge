@@ -68,18 +68,14 @@ class BaseRequest(BaseModel):
     """Base request model with common fields."""
 
     correlation_id: Optional[str] = Field(None, description="Request correlation ID")
-    timestamp: Optional[datetime] = Field(
-        default_factory=datetime.now, description="Request timestamp"
-    )
+    timestamp: Optional[datetime] = Field(default_factory=datetime.now, description="Request timestamp")
 
 
 class BaseResponse(BaseModel):
     """Base response model with common fields."""
 
     success: bool = Field(True, description="Operation success status")
-    timestamp: datetime = Field(
-        default_factory=datetime.now, description="Response timestamp"
-    )
+    timestamp: datetime = Field(default_factory=datetime.now, description="Response timestamp")
     correlation_id: Optional[str] = Field(None, description="Request correlation ID")
 
 
@@ -114,33 +110,21 @@ class ChatMessage(BaseModel):
     id: str = Field(..., description="Message ID")
     role: MessageRole = Field(..., description="Message role")
     content: str = Field(..., description="Message content")
-    timestamp: datetime = Field(
-        default_factory=datetime.now, description="Message timestamp"
-    )
-    metadata: Optional[Dict[str, Any]] = Field(
-        None, description="Additional message metadata"
-    )
+    timestamp: datetime = Field(default_factory=datetime.now, description="Message timestamp")
+    metadata: Optional[Dict[str, Any]] = Field(None, description="Additional message metadata")
 
 
 class CopilotQuery(BaseModel):
     """Protocol Intelligence Copilot query request."""
 
-    query: str = Field(
-        ..., min_length=1, max_length=2000, description="Natural language query"
-    )
+    query: str = Field(..., min_length=1, max_length=2000, description="Natural language query")
     query_type: Optional[QueryType] = Field(None, description="Query type for routing")
     user_id: str = Field(..., description="User ID")
     session_id: Optional[str] = Field(None, description="Conversation session ID")
     context: Optional[Dict[str, Any]] = Field(None, description="Additional context")
-    packet_data: Optional[bytes] = Field(
-        None, description="Optional packet data for analysis"
-    )
-    enable_learning: bool = Field(
-        True, description="Enable learning from this interaction"
-    )
-    preferred_provider: Optional[LLMProvider] = Field(
-        None, description="Preferred LLM provider"
-    )
+    packet_data: Optional[bytes] = Field(None, description="Optional packet data for analysis")
+    enable_learning: bool = Field(True, description="Enable learning from this interaction")
+    preferred_provider: Optional[LLMProvider] = Field(None, description="Preferred LLM provider")
 
     class Config:
         json_encoders = {bytes: lambda v: v.hex() if v else None}
@@ -152,18 +136,12 @@ class CopilotResponse(BaseResponse):
     response: str = Field(..., description="Natural language response")
     query_type: QueryType = Field(..., description="Detected or specified query type")
     confidence: float = Field(..., ge=0, le=1, description="Response confidence score")
-    sources: List[Dict[str, Any]] = Field(
-        default_factory=list, description="Information sources used"
-    )
-    suggestions: List[str] = Field(
-        default_factory=list, description="Follow-up suggestions"
-    )
+    sources: List[Dict[str, Any]] = Field(default_factory=list, description="Information sources used")
+    suggestions: List[str] = Field(default_factory=list, description="Follow-up suggestions")
     session_id: str = Field(..., description="Conversation session ID")
     processing_time: float = Field(..., ge=0, description="Processing time in seconds")
     llm_provider: Optional[str] = Field(None, description="LLM provider used")
-    metadata: Optional[Dict[str, Any]] = Field(
-        None, description="Additional response metadata"
-    )
+    metadata: Optional[Dict[str, Any]] = Field(None, description="Additional response metadata")
 
 
 class WebSocketMessage(BaseModel):
@@ -171,9 +149,7 @@ class WebSocketMessage(BaseModel):
 
     type: str = Field(..., description="Message type")
     data: Dict[str, Any] = Field(..., description="Message data")
-    timestamp: datetime = Field(
-        default_factory=datetime.now, description="Message timestamp"
-    )
+    timestamp: datetime = Field(default_factory=datetime.now, description="Message timestamp")
     session_id: Optional[str] = Field(None, description="Session ID")
 
 
@@ -185,9 +161,7 @@ class ProtocolDiscoveryRequest(BaseRequest):
     metadata: Optional[Dict[str, Any]] = Field(None, description="Additional metadata")
     enable_llm_analysis: bool = Field(False, description="Enable LLM-enhanced analysis")
     session_id: Optional[str] = Field(None, description="Session ID for context")
-    analysis_depth: Optional[str] = Field(
-        "standard", description="Analysis depth: basic, standard, deep"
-    )
+    analysis_depth: Optional[str] = Field("standard", description="Analysis depth: basic, standard, deep")
 
     class Config:
         json_encoders = {bytes: lambda v: v.hex() if v else None}
@@ -204,20 +178,12 @@ class ProtocolDiscoveryResponse(BaseResponse):
 
     protocol_type: str = Field(..., description="Detected protocol type")
     confidence: float = Field(..., ge=0, le=1, description="Detection confidence")
-    fields: List[Dict[str, Any]] = Field(
-        default_factory=list, description="Detected protocol fields"
-    )
+    fields: List[Dict[str, Any]] = Field(default_factory=list, description="Detected protocol fields")
     analysis_summary: str = Field(..., description="Analysis summary")
-    enhanced_analysis: Optional[Dict[str, Any]] = Field(
-        None, description="LLM-enhanced analysis"
-    )
-    anomalies: List[Dict[str, Any]] = Field(
-        default_factory=list, description="Detected anomalies"
-    )
+    enhanced_analysis: Optional[Dict[str, Any]] = Field(None, description="LLM-enhanced analysis")
+    anomalies: List[Dict[str, Any]] = Field(default_factory=list, description="Detected anomalies")
     security_implications: Optional[str] = Field(None, description="Security analysis")
-    compliance_notes: Optional[str] = Field(
-        None, description="Compliance considerations"
-    )
+    compliance_notes: Optional[str] = Field(None, description="Compliance considerations")
     processing_time: float = Field(..., ge=0, description="Processing time in seconds")
     llm_enabled: bool = Field(False, description="Whether LLM analysis was performed")
 
@@ -229,9 +195,7 @@ class FieldDetectionRequest(BaseRequest):
     protocol_type: Optional[str] = Field(None, description="Known protocol type")
     enable_llm_analysis: bool = Field(False, description="Enable LLM interpretation")
     session_id: Optional[str] = Field(None, description="Session ID for context")
-    field_types: Optional[List[str]] = Field(
-        None, description="Specific field types to detect"
-    )
+    field_types: Optional[List[str]] = Field(None, description="Specific field types to detect")
 
     class Config:
         json_encoders = {bytes: lambda v: v.hex() if v else None}
@@ -241,34 +205,24 @@ class FieldDetectionResponse(BaseResponse):
     """Enhanced field detection response."""
 
     fields: List[Dict[str, Any]] = Field(..., description="Detected fields")
-    llm_interpretation: Optional[Dict[str, Any]] = Field(
-        None, description="LLM field interpretation"
-    )
-    field_relationships: Optional[List[Dict[str, Any]]] = Field(
-        None, description="Field relationships"
-    )
+    llm_interpretation: Optional[Dict[str, Any]] = Field(None, description="LLM field interpretation")
+    field_relationships: Optional[List[Dict[str, Any]]] = Field(None, description="Field relationships")
     processing_time: float = Field(..., ge=0, description="Processing time in seconds")
-    confidence_scores: Optional[Dict[str, float]] = Field(
-        None, description="Per-field confidence scores"
-    )
+    confidence_scores: Optional[Dict[str, float]] = Field(None, description="Per-field confidence scores")
 
 
 class AnomalyDetectionRequest(BaseRequest):
     """Anomaly detection request payload."""
 
     packet_data: bytes = Field(..., description="Raw packet data for anomaly analysis")
-    protocol_type: Optional[str] = Field(
-        None, description="Optional protocol hint for improved analysis"
-    )
+    protocol_type: Optional[str] = Field(None, description="Optional protocol hint for improved analysis")
     sensitivity: float = Field(
         0.5,
         ge=0.0,
         le=1.0,
         description="Detection sensitivity threshold between 0 and 1",
     )
-    include_explanations: bool = Field(
-        False, description="Include model explanations for detected anomalies"
-    )
+    include_explanations: bool = Field(False, description="Include model explanations for detected anomalies")
     session_id: Optional[str] = Field(None, description="Session identifier")
 
     class Config:
@@ -278,16 +232,10 @@ class AnomalyDetectionRequest(BaseRequest):
 class AnomalyDetectionResponse(BaseResponse):
     """Anomaly detection response payload."""
 
-    anomalies: List[Dict[str, Any]] = Field(
-        default_factory=list, description="Detected anomalies and metadata"
-    )
-    overall_score: float = Field(
-        0.0, ge=0.0, le=1.0, description="Overall anomaly score"
-    )
+    anomalies: List[Dict[str, Any]] = Field(default_factory=list, description="Detected anomalies and metadata")
+    overall_score: float = Field(0.0, ge=0.0, le=1.0, description="Overall anomaly score")
     severity: Optional[str] = Field(None, description="Overall severity classification")
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Additional analysis metadata"
-    )
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional analysis metadata")
 
 
 # Knowledge Base schemas
@@ -298,12 +246,8 @@ class KnowledgeDocument(BaseModel):
     content: str = Field(..., description="Document content")
     metadata: Dict[str, Any] = Field(..., description="Document metadata")
     embeddings: Optional[List[float]] = Field(None, description="Document embeddings")
-    created_at: datetime = Field(
-        default_factory=datetime.now, description="Creation timestamp"
-    )
-    updated_at: datetime = Field(
-        default_factory=datetime.now, description="Update timestamp"
-    )
+    created_at: datetime = Field(default_factory=datetime.now, description="Creation timestamp")
+    updated_at: datetime = Field(default_factory=datetime.now, description="Update timestamp")
 
 
 class SearchQuery(BaseModel):
@@ -320,18 +264,14 @@ class SearchResult(BaseModel):
 
     document: KnowledgeDocument = Field(..., description="Matching document")
     similarity_score: float = Field(..., ge=0, le=1, description="Similarity score")
-    relevance_explanation: Optional[str] = Field(
-        None, description="Why this result is relevant"
-    )
+    relevance_explanation: Optional[str] = Field(None, description="Why this result is relevant")
 
 
 class SearchResponse(BaseResponse):
     """Knowledge base search response."""
 
     results: List[SearchResult] = Field(..., description="Search results")
-    total_results: int = Field(
-        ..., ge=0, description="Total number of matching results"
-    )
+    total_results: int = Field(..., ge=0, description="Total number of matching results")
     query_time: float = Field(..., ge=0, description="Query execution time")
 
 
@@ -341,12 +281,8 @@ class HealthStatus(BaseModel):
 
     service: str = Field(..., description="Service name")
     status: str = Field(..., description="Health status")
-    last_check: datetime = Field(
-        default_factory=datetime.now, description="Last health check"
-    )
-    details: Optional[Dict[str, Any]] = Field(
-        None, description="Additional health details"
-    )
+    last_check: datetime = Field(default_factory=datetime.now, description="Last health check")
+    details: Optional[Dict[str, Any]] = Field(None, description="Additional health details")
 
 
 class SystemHealthResponse(BaseResponse):
@@ -366,9 +302,7 @@ class MetricsResponse(BaseResponse):
     copilot_queries: int = Field(..., ge=0, description="Total copilot queries")
     llm_requests: int = Field(..., ge=0, description="Total LLM requests")
     error_rate: float = Field(..., ge=0, le=1, description="Error rate percentage")
-    avg_response_time: float = Field(
-        ..., ge=0, description="Average response time in seconds"
-    )
+    avg_response_time: float = Field(..., ge=0, description="Average response time in seconds")
 
 
 # Error schemas
@@ -386,12 +320,8 @@ class ErrorResponse(BaseModel):
     success: bool = Field(False, description="Operation success status")
     error: str = Field(..., description="Error type")
     message: str = Field(..., description="Error message")
-    details: Optional[List[ErrorDetail]] = Field(
-        None, description="Detailed error information"
-    )
-    timestamp: datetime = Field(
-        default_factory=datetime.now, description="Error timestamp"
-    )
+    details: Optional[List[ErrorDetail]] = Field(None, description="Detailed error information")
+    timestamp: datetime = Field(default_factory=datetime.now, description="Error timestamp")
     correlation_id: Optional[str] = Field(None, description="Request correlation ID")
 
 
@@ -399,9 +329,7 @@ class ErrorResponse(BaseModel):
 class BatchRequest(BaseModel):
     """Batch operation request."""
 
-    operations: List[Dict[str, Any]] = Field(
-        ..., min_items=1, max_items=100, description="Operations to perform"
-    )
+    operations: List[Dict[str, Any]] = Field(..., min_items=1, max_items=100, description="Operations to perform")
     parallel: bool = Field(False, description="Execute operations in parallel")
     stop_on_error: bool = Field(True, description="Stop execution on first error")
 
@@ -423,9 +351,7 @@ class FileUploadResponse(BaseResponse):
     filename: str = Field(..., description="Original filename")
     file_size: int = Field(..., ge=0, description="File size in bytes")
     content_type: str = Field(..., description="File content type")
-    upload_time: datetime = Field(
-        default_factory=datetime.now, description="Upload timestamp"
-    )
+    upload_time: datetime = Field(default_factory=datetime.now, description="Upload timestamp")
 
 
 # Pagination schemas

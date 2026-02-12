@@ -28,7 +28,6 @@ from ..policy.policy_engine import PolicyEngine
 from ..core.config import Config
 from ..core.exceptions import QbitelAIException
 
-
 # Prometheus metrics
 THREAT_MODEL_COUNTER = Counter(
     "qbitel_predictive_threat_models_total",
@@ -237,42 +236,30 @@ class PredictiveThreatModeler:
         start_time = time.time()
 
         try:
-            self.logger.info(
-                f"Generating threat model for scenario: {scenario.scenario_id}"
-            )
+            self.logger.info(f"Generating threat model for scenario: {scenario.scenario_id}")
 
             # Step 1: LLM-powered threat analysis
-            threat_vectors = await self._analyze_threat_vectors(
-                scenario, current_context
-            )
+            threat_vectors = await self._analyze_threat_vectors(scenario, current_context)
 
             # Step 2: Attack surface analysis
-            attack_surface_changes = await self._analyze_attack_surface_changes(
-                scenario, current_context
-            )
+            attack_surface_changes = await self._analyze_attack_surface_changes(scenario, current_context)
 
             # Step 3: Policy simulation
-            simulation_results = await self._simulate_policy_impact(
-                scenario, current_context
-            )
+            simulation_results = await self._simulate_policy_impact(scenario, current_context)
 
             # Step 4: Calculate overall risk score
-            overall_risk_score = self._calculate_risk_score(
-                threat_vectors, attack_surface_changes, simulation_results
-            )
+            overall_risk_score = self._calculate_risk_score(threat_vectors, attack_surface_changes, simulation_results)
 
             # Step 5: Determine risk impact
             risk_impact = self._determine_risk_impact(overall_risk_score)
 
             # Step 6: Generate LLM analysis and recommendations
-            llm_analysis, recommendations, confidence = (
-                await self._generate_llm_analysis(
-                    scenario,
-                    threat_vectors,
-                    attack_surface_changes,
-                    simulation_results,
-                    overall_risk_score,
-                )
+            llm_analysis, recommendations, confidence = await self._generate_llm_analysis(
+                scenario,
+                threat_vectors,
+                attack_surface_changes,
+                simulation_results,
+                overall_risk_score,
             )
 
             # Create model
@@ -302,9 +289,7 @@ class PredictiveThreatModeler:
             THREAT_MODEL_DURATION.observe(time.time() - start_time)
 
             self.logger.info(
-                f"Threat model generated: {model_id}, "
-                f"risk_score={overall_risk_score:.2f}, "
-                f"impact={risk_impact.value}"
+                f"Threat model generated: {model_id}, " f"risk_score={overall_risk_score:.2f}, " f"impact={risk_impact.value}"
             )
 
             return model
@@ -313,9 +298,7 @@ class PredictiveThreatModeler:
             self.logger.error(f"Error generating threat model: {e}", exc_info=True)
             raise QbitelAIException(f"Threat modeling failed: {e}")
 
-    async def _analyze_threat_vectors(
-        self, scenario: ThreatScenario, context: Optional[Dict[str, Any]]
-    ) -> List[ThreatVector]:
+    async def _analyze_threat_vectors(self, scenario: ThreatScenario, context: Optional[Dict[str, Any]]) -> List[ThreatVector]:
         """Analyze potential threat vectors using LLM."""
         prompt = self._build_threat_vector_prompt(scenario, context)
 
@@ -334,13 +317,9 @@ class PredictiveThreatModeler:
 
         return threat_vectors
 
-    def _build_threat_vector_prompt(
-        self, scenario: ThreatScenario, context: Optional[Dict[str, Any]]
-    ) -> str:
+    def _build_threat_vector_prompt(self, scenario: ThreatScenario, context: Optional[Dict[str, Any]]) -> str:
         """Build LLM prompt for threat vector analysis."""
-        context_str = (
-            json.dumps(context, indent=2) if context else "No context provided"
-        )
+        context_str = json.dumps(context, indent=2) if context else "No context provided"
 
         return f"""
 Analyze the following security scenario and identify potential threat vectors.
@@ -379,9 +358,7 @@ Format your response as JSON:
 }}
 """
 
-    def _parse_threat_vectors(
-        self, llm_response: str, scenario: ThreatScenario
-    ) -> List[ThreatVector]:
+    def _parse_threat_vectors(self, llm_response: str, scenario: ThreatScenario) -> List[ThreatVector]:
         """Parse LLM response to extract threat vectors."""
         try:
             # Extract JSON from response
@@ -400,9 +377,7 @@ Format your response as JSON:
                     likelihood=float(tv_data.get("likelihood", 0.5)),
                     impact=RiskImpact(tv_data.get("impact", "medium")),
                     attack_techniques=tv_data.get("attack_techniques", []),
-                    mitigation_recommendations=tv_data.get(
-                        "mitigation_recommendations", []
-                    ),
+                    mitigation_recommendations=tv_data.get("mitigation_recommendations", []),
                     cve_references=tv_data.get("cve_references", []),
                 )
                 threat_vectors.append(threat_vector)
@@ -410,9 +385,7 @@ Format your response as JSON:
             return threat_vectors
 
         except Exception as e:
-            self.logger.warning(
-                f"Failed to parse threat vectors from LLM response: {e}"
-            )
+            self.logger.warning(f"Failed to parse threat vectors from LLM response: {e}")
             # Return default threat vector
             return [
                 ThreatVector(
@@ -470,9 +443,7 @@ Format your response as JSON:
 
         return attack_surface
 
-    async def _simulate_policy_impact(
-        self, scenario: ThreatScenario, context: Optional[Dict[str, Any]]
-    ) -> SimulationResult:
+    async def _simulate_policy_impact(self, scenario: ThreatScenario, context: Optional[Dict[str, Any]]) -> SimulationResult:
         """Simulate the impact of the scenario on security policies."""
         simulation_id = f"sim_{scenario.scenario_id}_{int(time.time())}"
 
@@ -483,9 +454,7 @@ Format your response as JSON:
         proposed_state = {**current_state, **scenario.proposed_change}
 
         # Check for policy violations
-        policy_violations = await self._check_policy_violations(
-            proposed_state, scenario
-        )
+        policy_violations = await self._check_policy_violations(proposed_state, scenario)
 
         # Assess compliance impact
         compliance_impact = self._assess_compliance_impact(scenario, policy_violations)
@@ -494,9 +463,7 @@ Format your response as JSON:
         performance_impact = self._estimate_performance_impact(scenario)
 
         # Generate recommendation
-        recommendation = self._generate_recommendation(
-            policy_violations, compliance_impact, performance_impact
-        )
+        recommendation = self._generate_recommendation(policy_violations, compliance_impact, performance_impact)
 
         result = SimulationResult(
             simulation_id=simulation_id,
@@ -514,9 +481,7 @@ Format your response as JSON:
 
         return result
 
-    async def _check_policy_violations(
-        self, proposed_state: Dict[str, Any], scenario: ThreatScenario
-    ) -> List[str]:
+    async def _check_policy_violations(self, proposed_state: Dict[str, Any], scenario: ThreatScenario) -> List[str]:
         """Check for policy violations in proposed state."""
         violations = []
 
@@ -527,29 +492,21 @@ Format your response as JSON:
             prohibited_ports = {23, 21, 69, 135, 139, 445}  # Telnet, FTP, TFTP, RPC
             for port in ports:
                 if port in prohibited_ports:
-                    violations.append(
-                        f"Port {port} is prohibited by security policy (insecure protocol)"
-                    )
+                    violations.append(f"Port {port} is prohibited by security policy (insecure protocol)")
 
             # Check for high-risk port ranges
             for port in ports:
                 if 1024 <= port <= 49151:  # Registered ports
-                    violations.append(
-                        f"Port {port} requires security review (registered port range)"
-                    )
+                    violations.append(f"Port {port} requires security review (registered port range)")
 
         elif scenario.scenario_type == ScenarioType.ENCRYPTION_CHANGE:
             encryption = scenario.proposed_change.get("encryption", {})
             if encryption.get("algorithm") in ["DES", "3DES", "RC4"]:
-                violations.append(
-                    f"Encryption algorithm {encryption.get('algorithm')} is deprecated and prohibited"
-                )
+                violations.append(f"Encryption algorithm {encryption.get('algorithm')} is deprecated and prohibited")
 
         return violations
 
-    def _assess_compliance_impact(
-        self, scenario: ThreatScenario, policy_violations: List[str]
-    ) -> Dict[str, Any]:
+    def _assess_compliance_impact(self, scenario: ThreatScenario, policy_violations: List[str]) -> Dict[str, Any]:
         """Assess impact on compliance frameworks."""
         impact = {
             "frameworks_affected": [],
@@ -568,9 +525,7 @@ Format your response as JSON:
 
         return impact
 
-    def _estimate_performance_impact(
-        self, scenario: ThreatScenario
-    ) -> Dict[str, float]:
+    def _estimate_performance_impact(self, scenario: ThreatScenario) -> Dict[str, float]:
         """Estimate performance impact of the change."""
         impact = {
             "cpu_overhead_percent": 0.0,
@@ -642,9 +597,7 @@ Format your response as JSON:
         threat_score = threat_score / max(len(threat_vectors), 1)
 
         # Factor in attack surface changes
-        surface_multiplier = 1.0 + max(
-            attack_surface_changes.get("network_exposure_change", 0), 0
-        )
+        surface_multiplier = 1.0 + max(attack_surface_changes.get("network_exposure_change", 0), 0)
         threat_score *= surface_multiplier
 
         # Factor in policy violations

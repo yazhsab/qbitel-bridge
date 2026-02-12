@@ -37,16 +37,10 @@ def mock_health_checker():
     mock_system_health = Mock()
     mock_system_health.overall_status = HealthStatus.HEALTHY
     mock_system_health.component_health = {
-        "component1": ComponentHealth(
-            name="component1", status=HealthStatus.HEALTHY, message="OK"
-        ),
-        "component2": ComponentHealth(
-            name="component2", status=HealthStatus.HEALTHY, message="OK"
-        ),
+        "component1": ComponentHealth(name="component1", status=HealthStatus.HEALTHY, message="OK"),
+        "component2": ComponentHealth(name="component2", status=HealthStatus.HEALTHY, message="OK"),
     }
-    mock_system_health.get_healthy_components = Mock(
-        return_value=["component1", "component2"]
-    )
+    mock_system_health.get_healthy_components = Mock(return_value=["component1", "component2"])
 
     checker.check_all_components = AsyncMock(return_value=mock_system_health)
 
@@ -217,9 +211,7 @@ class TestReadinessProbe:
         assert result.checks["system_health"]["status"] == "pass"
 
     @pytest.mark.asyncio
-    async def test_readiness_check_low_health_ratio(
-        self, k8s_probes, mock_health_checker
-    ):
+    async def test_readiness_check_low_health_ratio(self, k8s_probes, mock_health_checker):
         """Test readiness check fails with low health ratio."""
         k8s_probes.startup_complete = True
 
@@ -227,20 +219,12 @@ class TestReadinessProbe:
         mock_system_health = Mock()
         mock_system_health.overall_status = HealthStatus.DEGRADED
         mock_system_health.component_health = {
-            "component1": ComponentHealth(
-                name="component1", status=HealthStatus.HEALTHY, message="OK"
-            ),
-            "component2": ComponentHealth(
-                name="component2", status=HealthStatus.UNHEALTHY, message="Failed"
-            ),
-            "component3": ComponentHealth(
-                name="component3", status=HealthStatus.UNHEALTHY, message="Failed"
-            ),
+            "component1": ComponentHealth(name="component1", status=HealthStatus.HEALTHY, message="OK"),
+            "component2": ComponentHealth(name="component2", status=HealthStatus.UNHEALTHY, message="Failed"),
+            "component3": ComponentHealth(name="component3", status=HealthStatus.UNHEALTHY, message="Failed"),
         }
         mock_system_health.get_healthy_components = Mock(return_value=["component1"])
-        mock_health_checker.check_all_components = AsyncMock(
-            return_value=mock_system_health
-        )
+        mock_health_checker.check_all_components = AsyncMock(return_value=mock_system_health)
 
         result = await k8s_probes.check_readiness()
 
@@ -252,9 +236,7 @@ class TestReadinessProbe:
     async def test_readiness_check_exception(self, k8s_probes, mock_health_checker):
         """Test readiness check handles exceptions."""
         k8s_probes.startup_complete = True
-        mock_health_checker.check_all_components = AsyncMock(
-            side_effect=Exception("Health check error")
-        )
+        mock_health_checker.check_all_components = AsyncMock(side_effect=Exception("Health check error"))
 
         result = await k8s_probes.check_readiness()
 

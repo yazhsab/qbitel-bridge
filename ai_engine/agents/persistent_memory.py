@@ -43,6 +43,7 @@ from .agent_memory import (
 # Redis async support (aioredis is deprecated; use redis.asyncio)
 try:
     import redis.asyncio as aioredis
+
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
@@ -55,28 +56,19 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 MEMORY_PERSIST_COUNTER = Counter(
-    "qbitel_memory_persist_total",
-    "Total memory persistence operations",
-    ["operation", "backend"]
+    "qbitel_memory_persist_total", "Total memory persistence operations", ["operation", "backend"]
 )
 MEMORY_COMPRESSION_RATIO = Histogram(
-    "qbitel_memory_compression_ratio",
-    "Memory compression ratio",
-    buckets=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    "qbitel_memory_compression_ratio", "Memory compression ratio", buckets=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 )
-MEMORY_DECAY_APPLIED = Counter(
-    "qbitel_memory_decay_applied_total",
-    "Total relevance decay applications"
-)
-MEMORY_CONSOLIDATED = Counter(
-    "qbitel_memory_consolidated_total",
-    "Total memories consolidated"
-)
+MEMORY_DECAY_APPLIED = Counter("qbitel_memory_decay_applied_total", "Total relevance decay applications")
+MEMORY_CONSOLIDATED = Counter("qbitel_memory_consolidated_total", "Total memories consolidated")
 
 
 # =============================================================================
 # Relevance Decay Configuration
 # =============================================================================
+
 
 @dataclass
 class RelevanceDecayConfig:
@@ -86,12 +78,14 @@ class RelevanceDecayConfig:
     base_decay_rate: float = 0.95
 
     # Priority-based decay multipliers
-    priority_multipliers: Dict[MemoryPriority, float] = field(default_factory=lambda: {
-        MemoryPriority.CRITICAL: 1.0,  # No decay
-        MemoryPriority.HIGH: 0.99,  # Very slow decay
-        MemoryPriority.NORMAL: 0.95,  # Normal decay
-        MemoryPriority.LOW: 0.85,  # Fast decay
-    })
+    priority_multipliers: Dict[MemoryPriority, float] = field(
+        default_factory=lambda: {
+            MemoryPriority.CRITICAL: 1.0,  # No decay
+            MemoryPriority.HIGH: 0.99,  # Very slow decay
+            MemoryPriority.NORMAL: 0.95,  # Normal decay
+            MemoryPriority.LOW: 0.85,  # Fast decay
+        }
+    )
 
     # Access boost (how much accessing a memory boosts relevance)
     access_boost: float = 0.1
@@ -123,6 +117,7 @@ class CompressionConfig:
 # =============================================================================
 # Memory Entry with Relevance
 # =============================================================================
+
 
 @dataclass
 class PersistentMemoryEntry:
@@ -166,10 +161,7 @@ class PersistentMemoryEntry:
         days_since_creation = (datetime.utcnow() - self.created_at).days
 
         # Get priority multiplier
-        priority_mult = config.priority_multipliers.get(
-            self.priority,
-            config.priority_multipliers[MemoryPriority.NORMAL]
-        )
+        priority_mult = config.priority_multipliers.get(self.priority, config.priority_multipliers[MemoryPriority.NORMAL])
 
         # Apply time decay
         decay_factor = math.pow(priority_mult, days_since_access)
@@ -215,6 +207,7 @@ class PersistentMemoryEntry:
 # Compression Utilities
 # =============================================================================
 
+
 class MemoryCompressor:
     """Handles memory compression and decompression."""
 
@@ -230,7 +223,7 @@ class MemoryCompressor:
         """
         # Serialize to JSON
         json_str = json.dumps(data, default=str)
-        original_bytes = json_str.encode('utf-8')
+        original_bytes = json_str.encode("utf-8")
         original_size = len(original_bytes)
 
         # Check if compression is enabled and worthwhile
@@ -252,14 +245,15 @@ class MemoryCompressor:
         """Decompress memory content."""
         if is_compressed:
             decompressed = zlib.decompress(data)
-            return json.loads(decompressed.decode('utf-8'))
+            return json.loads(decompressed.decode("utf-8"))
         else:
-            return json.loads(data.decode('utf-8'))
+            return json.loads(data.decode("utf-8"))
 
 
 # =============================================================================
 # SQLite Persistent Backend
 # =============================================================================
+
 
 class SQLitePersistentBackend(MemoryBackend):
     """SQLite-based persistent memory storage."""
@@ -268,7 +262,7 @@ class SQLitePersistentBackend(MemoryBackend):
         self,
         db_path: str = "./data/agent_memory.db",
         compression_config: CompressionConfig = None,
-        decay_config: RelevanceDecayConfig = None
+        decay_config: RelevanceDecayConfig = None,
     ):
         self.db_path = db_path
         self.compression_config = compression_config or CompressionConfig()
@@ -283,10 +277,7 @@ class SQLitePersistentBackend(MemoryBackend):
     def _get_connection(self) -> sqlite3.Connection:
         """Get or create database connection."""
         if self._connection is None:
-            self._connection = sqlite3.connect(
-                self.db_path,
-                check_same_thread=False
-            )
+            self._connection = sqlite3.connect(self.db_path, check_same_thread=False)
             self._connection.row_factory = sqlite3.Row
             self._init_schema()
         return self._connection
@@ -383,8 +374,7 @@ class SQLitePersistentBackend(MemoryBackend):
                 cursor = conn.cursor()
 
                 # Compress content
-                compressed_data, is_compressed, orig_size, comp_size = \
-                    self.compressor.compress(entry.content)
+                compressed_data, is_compressed, orig_size, comp_size = self.compressor.compress(entry.content)
 
                 # Serialize tags and metadata
                 tags_json = json.dumps(list(entry.tags)) if entry.tags else "[]"
@@ -393,31 +383,34 @@ class SQLitePersistentBackend(MemoryBackend):
                 # Serialize embedding
                 embedding_blob = pickle.dumps(entry.embedding) if entry.embedding else None
 
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT OR REPLACE INTO memories (
                         entry_id, agent_id, memory_type, content, is_compressed,
                         original_size, compressed_size, relevance_score, access_count,
                         priority, last_accessed, created_at, expires_at, tags,
                         metadata, embedding
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    entry.entry_id,
-                    entry.agent_id,
-                    entry.memory_type.value,
-                    compressed_data,
-                    1 if is_compressed else 0,
-                    orig_size,
-                    comp_size,
-                    1.0,  # Initial relevance
-                    entry.access_count,
-                    entry.priority.value,
-                    entry.last_accessed.isoformat(),
-                    entry.created_at.isoformat(),
-                    entry.expires_at.isoformat() if entry.expires_at else None,
-                    tags_json,
-                    metadata_json,
-                    embedding_blob
-                ))
+                """,
+                    (
+                        entry.entry_id,
+                        entry.agent_id,
+                        entry.memory_type.value,
+                        compressed_data,
+                        1 if is_compressed else 0,
+                        orig_size,
+                        comp_size,
+                        1.0,  # Initial relevance
+                        entry.access_count,
+                        entry.priority.value,
+                        entry.last_accessed.isoformat(),
+                        entry.created_at.isoformat(),
+                        entry.expires_at.isoformat() if entry.expires_at else None,
+                        tags_json,
+                        metadata_json,
+                        embedding_blob,
+                    ),
+                )
 
                 conn.commit()
                 MEMORY_PERSIST_COUNTER.labels(operation="store", backend="sqlite").inc()
@@ -448,12 +441,7 @@ class SQLitePersistentBackend(MemoryBackend):
                     ORDER BY relevance_score DESC, last_accessed DESC
                     LIMIT ?
                 """
-                params = [
-                    agent_id,
-                    memory_type.value,
-                    datetime.utcnow().isoformat(),
-                    limit
-                ]
+                params = [agent_id, memory_type.value, datetime.utcnow().isoformat(), limit]
 
                 cursor.execute(sql, params)
                 rows = cursor.fetchall()
@@ -554,35 +542,28 @@ class SQLitePersistentBackend(MemoryBackend):
 
                 updated = 0
                 for row in rows:
-                    entry_id = row['entry_id']
-                    current_relevance = row['relevance_score']
-                    access_count = row['access_count']
-                    priority = MemoryPriority(row['priority'])
-                    last_accessed = datetime.fromisoformat(row['last_accessed'])
+                    entry_id = row["entry_id"]
+                    current_relevance = row["relevance_score"]
+                    access_count = row["access_count"]
+                    priority = MemoryPriority(row["priority"])
+                    last_accessed = datetime.fromisoformat(row["last_accessed"])
 
                     # Calculate decay
                     days_since_access = (datetime.utcnow() - last_accessed).days
                     priority_mult = self.decay_config.priority_multipliers.get(
-                        priority,
-                        self.decay_config.priority_multipliers[MemoryPriority.NORMAL]
+                        priority, self.decay_config.priority_multipliers[MemoryPriority.NORMAL]
                     )
                     decay_factor = math.pow(priority_mult, days_since_access)
 
                     # Apply access frequency boost
-                    access_boost = min(
-                        self.decay_config.access_boost * math.log1p(access_count),
-                        0.5
-                    )
+                    access_boost = min(self.decay_config.access_boost * math.log1p(access_count), 0.5)
 
                     # Calculate new relevance
                     new_relevance = max(0.0, min(1.0, current_relevance * decay_factor + access_boost))
 
                     # Update if changed significantly
                     if abs(new_relevance - current_relevance) > 0.01:
-                        cursor.execute(
-                            "UPDATE memories SET relevance_score = ? WHERE entry_id = ?",
-                            (new_relevance, entry_id)
-                        )
+                        cursor.execute("UPDATE memories SET relevance_score = ? WHERE entry_id = ?", (new_relevance, entry_id))
                         updated += 1
 
                 conn.commit()
@@ -601,12 +582,15 @@ class SQLitePersistentBackend(MemoryBackend):
                 cursor = conn.cursor()
 
                 # Delete low relevance memories (except critical)
-                cursor.execute("""
+                cursor.execute(
+                    """
                     DELETE FROM memories
                     WHERE relevance_score < ?
                     AND priority != 'critical'
                     AND priority != 'high'
-                """, (self.decay_config.min_relevance,))
+                """,
+                    (self.decay_config.min_relevance,),
+                )
 
                 pruned = cursor.rowcount
                 conn.commit()
@@ -628,20 +612,20 @@ class SQLitePersistentBackend(MemoryBackend):
                 cursor = conn.cursor()
 
                 # Get current values
-                cursor.execute(
-                    "SELECT relevance_score, access_count FROM memories WHERE entry_id = ?",
-                    (entry_id,)
-                )
+                cursor.execute("SELECT relevance_score, access_count FROM memories WHERE entry_id = ?", (entry_id,))
                 row = cursor.fetchone()
                 if row:
-                    new_relevance = min(1.0, row['relevance_score'] + self.decay_config.access_boost)
-                    new_count = row['access_count'] + 1
+                    new_relevance = min(1.0, row["relevance_score"] + self.decay_config.access_boost)
+                    new_count = row["access_count"] + 1
 
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         UPDATE memories
                         SET relevance_score = ?, access_count = ?, last_accessed = ?
                         WHERE entry_id = ?
-                    """, (new_relevance, new_count, datetime.utcnow().isoformat(), entry_id))
+                    """,
+                        (new_relevance, new_count, datetime.utcnow().isoformat(), entry_id),
+                    )
 
                     conn.commit()
 
@@ -652,31 +636,28 @@ class SQLitePersistentBackend(MemoryBackend):
         """Convert database row to MemoryEntry."""
         try:
             # Decompress content
-            content = self.compressor.decompress(
-                row['content'],
-                bool(row['is_compressed'])
-            )
+            content = self.compressor.decompress(row["content"], bool(row["is_compressed"]))
 
             # Parse tags and metadata
-            tags = set(json.loads(row['tags'])) if row['tags'] else set()
-            metadata = json.loads(row['metadata']) if row['metadata'] else {}
+            tags = set(json.loads(row["tags"])) if row["tags"] else set()
+            metadata = json.loads(row["metadata"]) if row["metadata"] else {}
 
             # Parse embedding
-            embedding = pickle.loads(row['embedding']) if row['embedding'] else None
+            embedding = pickle.loads(row["embedding"]) if row["embedding"] else None
 
             return MemoryEntry(
-                entry_id=row['entry_id'],
-                agent_id=row['agent_id'],
-                memory_type=MemoryType(row['memory_type']),
+                entry_id=row["entry_id"],
+                agent_id=row["agent_id"],
+                memory_type=MemoryType(row["memory_type"]),
                 content=content,
                 embedding=embedding,
-                priority=MemoryPriority(row['priority']),
-                access_count=row['access_count'],
-                last_accessed=datetime.fromisoformat(row['last_accessed']),
-                created_at=datetime.fromisoformat(row['created_at']),
-                expires_at=datetime.fromisoformat(row['expires_at']) if row['expires_at'] else None,
+                priority=MemoryPriority(row["priority"]),
+                access_count=row["access_count"],
+                last_accessed=datetime.fromisoformat(row["last_accessed"]),
+                created_at=datetime.fromisoformat(row["created_at"]),
+                expires_at=datetime.fromisoformat(row["expires_at"]) if row["expires_at"] else None,
                 tags=tags,
-                metadata=metadata
+                metadata=metadata,
             )
         except Exception as e:
             logger.error(f"Failed to parse memory row: {e}")
@@ -704,13 +685,13 @@ class SQLitePersistentBackend(MemoryBackend):
                 cursor = conn.cursor()
 
                 cursor.execute("SELECT COUNT(*) as count FROM memories")
-                total_count = cursor.fetchone()['count']
+                total_count = cursor.fetchone()["count"]
 
                 cursor.execute("""
                     SELECT memory_type, COUNT(*) as count
                     FROM memories GROUP BY memory_type
                 """)
-                by_type = {row['memory_type']: row['count'] for row in cursor.fetchall()}
+                by_type = {row["memory_type"]: row["count"] for row in cursor.fetchall()}
 
                 cursor.execute("""
                     SELECT SUM(original_size) as orig, SUM(compressed_size) as comp
@@ -721,18 +702,17 @@ class SQLitePersistentBackend(MemoryBackend):
                 cursor.execute("""
                     SELECT AVG(relevance_score) as avg_relevance FROM memories
                 """)
-                avg_relevance = cursor.fetchone()['avg_relevance'] or 0
+                avg_relevance = cursor.fetchone()["avg_relevance"] or 0
 
                 return {
                     "total_memories": total_count,
                     "by_type": by_type,
                     "compression": {
-                        "original_bytes": compression['orig'] or 0,
-                        "compressed_bytes": compression['comp'] or 0,
-                        "ratio": (compression['comp'] / compression['orig'])
-                            if compression['orig'] else 1.0
+                        "original_bytes": compression["orig"] or 0,
+                        "compressed_bytes": compression["comp"] or 0,
+                        "ratio": (compression["comp"] / compression["orig"]) if compression["orig"] else 1.0,
                     },
-                    "average_relevance": avg_relevance
+                    "average_relevance": avg_relevance,
                 }
 
             except Exception as e:
@@ -750,6 +730,7 @@ class SQLitePersistentBackend(MemoryBackend):
 # Redis Distributed Backend (Optional)
 # =============================================================================
 
+
 class RedisPersistentBackend(MemoryBackend):
     """Redis-based distributed memory storage."""
 
@@ -759,7 +740,7 @@ class RedisPersistentBackend(MemoryBackend):
         prefix: str = "qbitel:memory:",
         compression_config: CompressionConfig = None,
         decay_config: RelevanceDecayConfig = None,
-        ttl_seconds: int = 86400 * 90  # 90 days default
+        ttl_seconds: int = 86400 * 90,  # 90 days default
     ):
         if not REDIS_AVAILABLE:
             raise RuntimeError("Redis not available. Install redis package.")
@@ -806,7 +787,7 @@ class RedisPersistentBackend(MemoryBackend):
                 "expires_at": entry.expires_at.isoformat() if entry.expires_at else None,
                 "tags": list(entry.tags),
                 "metadata": entry.metadata,
-                "relevance_score": 1.0
+                "relevance_score": 1.0,
             }
 
             # Compress
@@ -948,7 +929,7 @@ class RedisPersistentBackend(MemoryBackend):
                 created_at=datetime.fromisoformat(entry_dict["created_at"]),
                 expires_at=datetime.fromisoformat(entry_dict["expires_at"]) if entry_dict.get("expires_at") else None,
                 tags=set(entry_dict.get("tags", [])),
-                metadata=entry_dict.get("metadata", {})
+                metadata=entry_dict.get("metadata", {}),
             )
         except Exception as e:
             logger.error(f"Failed to deserialize entry: {e}")
@@ -976,6 +957,7 @@ class RedisPersistentBackend(MemoryBackend):
 # Memory Consolidation Service
 # =============================================================================
 
+
 class MemoryConsolidationService:
     """
     Service for consolidating and summarizing memories.
@@ -984,11 +966,7 @@ class MemoryConsolidationService:
     while preserving important information.
     """
 
-    def __init__(
-        self,
-        backend: MemoryBackend,
-        llm_service: Optional[Any] = None
-    ):
+    def __init__(self, backend: MemoryBackend, llm_service: Optional[Any] = None):
         self.backend = backend
         self.llm_service = llm_service
         self.logger = logging.getLogger(__name__)
@@ -999,7 +977,7 @@ class MemoryConsolidationService:
         memory_type: MemoryType,
         max_age_days: int = 7,
         min_count: int = 5,
-        similarity_threshold: float = 0.7
+        similarity_threshold: float = 0.7,
     ) -> Optional[MemoryEntry]:
         """
         Consolidate old memories into a summary.
@@ -1017,17 +995,10 @@ class MemoryConsolidationService:
         try:
             # Get old memories
             cutoff = datetime.utcnow() - timedelta(days=max_age_days)
-            memories = await self.backend.retrieve(
-                agent_id=agent_id,
-                memory_type=memory_type,
-                limit=100
-            )
+            memories = await self.backend.retrieve(agent_id=agent_id, memory_type=memory_type, limit=100)
 
             # Filter by age
-            old_memories = [
-                m for m in memories
-                if m.created_at < cutoff
-            ]
+            old_memories = [m for m in memories if m.created_at < cutoff]
 
             if len(old_memories) < min_count:
                 return None
@@ -1054,11 +1025,7 @@ class MemoryConsolidationService:
             self.logger.error(f"Failed to consolidate memories: {e}")
             return None
 
-    def _group_similar_memories(
-        self,
-        memories: List[MemoryEntry],
-        threshold: float
-    ) -> List[List[MemoryEntry]]:
+    def _group_similar_memories(self, memories: List[MemoryEntry], threshold: float) -> List[List[MemoryEntry]]:
         """Group similar memories together."""
         groups = []
         used = set()
@@ -1111,10 +1078,10 @@ class MemoryConsolidationService:
             "count": len(memories),
             "date_range": {
                 "start": min(m.created_at for m in memories).isoformat(),
-                "end": max(m.created_at for m in memories).isoformat()
+                "end": max(m.created_at for m in memories).isoformat(),
             },
             "common_tags": list(set.intersection(*[m.tags for m in memories]) if memories else set()),
-            "sample_contents": [m.content for m in memories[:3]]
+            "sample_contents": [m.content for m in memories[:3]],
         }
 
         summary_entry = MemoryEntry(
@@ -1124,11 +1091,7 @@ class MemoryConsolidationService:
             content=summary_content,
             priority=MemoryPriority.HIGH,  # Summaries are important
             tags=set.union(*[m.tags for m in memories]),
-            metadata={
-                "consolidated": True,
-                "source_count": len(memories),
-                "source_ids": [m.entry_id for m in memories]
-            }
+            metadata={"consolidated": True, "source_count": len(memories), "source_ids": [m.entry_id for m in memories]},
         )
 
         # Store the summary

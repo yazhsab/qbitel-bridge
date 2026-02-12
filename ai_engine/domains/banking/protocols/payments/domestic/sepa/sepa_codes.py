@@ -318,11 +318,42 @@ SDD_COR1_D_DAYS = 1  # D-1 for COR1 collection
 # SEPA Countries (ISO 3166-1 alpha-2)
 SEPA_COUNTRIES = {
     # EU Member States
-    "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
-    "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL",
-    "PL", "PT", "RO", "SK", "SI", "ES", "SE",
+    "AT",
+    "BE",
+    "BG",
+    "HR",
+    "CY",
+    "CZ",
+    "DK",
+    "EE",
+    "FI",
+    "FR",
+    "DE",
+    "GR",
+    "HU",
+    "IE",
+    "IT",
+    "LV",
+    "LT",
+    "LU",
+    "MT",
+    "NL",
+    "PL",
+    "PT",
+    "RO",
+    "SK",
+    "SI",
+    "ES",
+    "SE",
     # EEA Countries
-    "IS", "LI", "NO",
+    "IS",
+    "LI",
+    "NO",
     # Other SEPA Countries
-    "AD", "MC", "SM", "VA", "CH", "GB",  # UK still in SEPA
+    "AD",
+    "MC",
+    "SM",
+    "VA",
+    "CH",
+    "GB",  # UK still in SEPA
 }

@@ -26,42 +26,32 @@ from prometheus_client import Counter, Histogram
 logger = logging.getLogger(__name__)
 
 # Metrics
-ZKP_PROOFS_GENERATED = Counter(
-    'zkp_proofs_generated_total',
-    'Total ZKP proofs generated',
-    ['proof_type']
-)
+ZKP_PROOFS_GENERATED = Counter("zkp_proofs_generated_total", "Total ZKP proofs generated", ["proof_type"])
 
-ZKP_PROOFS_VERIFIED = Counter(
-    'zkp_proofs_verified_total',
-    'Total ZKP proofs verified',
-    ['proof_type', 'result']
-)
+ZKP_PROOFS_VERIFIED = Counter("zkp_proofs_verified_total", "Total ZKP proofs verified", ["proof_type", "result"])
 
 ZKP_PROOF_TIME = Histogram(
-    'zkp_proof_generation_seconds',
-    'Time to generate ZKP proof',
-    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0]
+    "zkp_proof_generation_seconds", "Time to generate ZKP proof", buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0]
 )
 
 
 class ZKPType(Enum):
     """Types of zero-knowledge proofs."""
 
-    KNOWLEDGE_OF_SECRET = auto()     # Prove knowledge of preimage
-    RANGE_PROOF = auto()             # Prove value in range
-    MEMBERSHIP = auto()              # Prove membership in set
-    EQUALITY = auto()                # Prove equality of commitments
-    IDENTITY = auto()                # Prove identity attributes
+    KNOWLEDGE_OF_SECRET = auto()  # Prove knowledge of preimage
+    RANGE_PROOF = auto()  # Prove value in range
+    MEMBERSHIP = auto()  # Prove membership in set
+    EQUALITY = auto()  # Prove equality of commitments
+    IDENTITY = auto()  # Prove identity attributes
 
 
 @dataclass
 class Commitment:
     """Cryptographic commitment."""
 
-    value: bytes           # Committed value hash
-    randomness: bytes      # Blinding factor
-    commitment: bytes      # The actual commitment
+    value: bytes  # Committed value hash
+    randomness: bytes  # Blinding factor
+    commitment: bytes  # The actual commitment
 
 
 @dataclass
@@ -130,7 +120,7 @@ class CommitmentScheme:
 
     def commit_integer(self, value: int, bits: int = 64) -> Commitment:
         """Commit to an integer value."""
-        value_bytes = value.to_bytes((bits + 7) // 8, 'big')
+        value_bytes = value.to_bytes((bits + 7) // 8, "big")
         return self.commit(value_bytes)
 
 
@@ -157,11 +147,12 @@ class SchnorrProtocol:
         Proves: "I know secret s such that public_value = f(s)"
         """
         import time
+
         start = time.time()
 
         # Commitment phase: choose random r, compute commitment
         r = secrets.token_bytes(32)
-        r_int = int.from_bytes(r, 'big') % self.modulus
+        r_int = int.from_bytes(r, "big") % self.modulus
 
         # Commitment = H(r)
         commitment = hashlib.sha3_256(r).digest()
@@ -169,12 +160,12 @@ class SchnorrProtocol:
         # Challenge: Fiat-Shamir transform
         challenge_input = commitment + public_value
         challenge = hashlib.sha3_256(challenge_input).digest()
-        c_int = int.from_bytes(challenge, 'big') % self.modulus
+        c_int = int.from_bytes(challenge, "big") % self.modulus
 
         # Response: s = r + c * secret (mod modulus)
-        secret_int = int.from_bytes(secret, 'big') % self.modulus
+        secret_int = int.from_bytes(secret, "big") % self.modulus
         response_int = (r_int + c_int * secret_int) % self.modulus
-        response = response_int.to_bytes(32, 'big')
+        response = response_int.to_bytes(32, "big")
 
         proof = ZKProof(
             proof_type=ZKPType.KNOWLEDGE_OF_SECRET,
@@ -201,19 +192,13 @@ class SchnorrProtocol:
         expected_challenge = hashlib.sha3_256(challenge_input).digest()
 
         if not secrets.compare_digest(proof.challenge, expected_challenge):
-            ZKP_PROOFS_VERIFIED.labels(
-                proof_type="knowledge_of_secret",
-                result="invalid_challenge"
-            ).inc()
+            ZKP_PROOFS_VERIFIED.labels(proof_type="knowledge_of_secret", result="invalid_challenge").inc()
             return False
 
         # Verify response (simplified)
         # In full implementation, would verify algebraic relation
 
-        ZKP_PROOFS_VERIFIED.labels(
-            proof_type="knowledge_of_secret",
-            result="valid"
-        ).inc()
+        ZKP_PROOFS_VERIFIED.labels(proof_type="knowledge_of_secret", result="valid").inc()
 
         return True
 
@@ -264,10 +249,7 @@ class RangeProofSystem:
             temp_value >>= 1
 
         # Generate proof data (simplified)
-        proof_data = hashlib.sha3_256(
-            value_commitment.commitment +
-            b''.join(bit_commitments)
-        ).digest()
+        proof_data = hashlib.sha3_256(value_commitment.commitment + b"".join(bit_commitments)).digest()
 
         ZKP_PROOFS_GENERATED.labels(proof_type="range").inc()
 
@@ -288,29 +270,17 @@ class RangeProofSystem:
         # (Simplified - full impl would use homomorphic properties)
 
         if len(proof.bit_commitments) != self.bit_length:
-            ZKP_PROOFS_VERIFIED.labels(
-                proof_type="range",
-                result="invalid_length"
-            ).inc()
+            ZKP_PROOFS_VERIFIED.labels(proof_type="range", result="invalid_length").inc()
             return False
 
         # Verify proof data
-        expected_proof = hashlib.sha3_256(
-            proof.value_commitment +
-            b''.join(proof.bit_commitments)
-        ).digest()
+        expected_proof = hashlib.sha3_256(proof.value_commitment + b"".join(proof.bit_commitments)).digest()
 
         if not secrets.compare_digest(proof.proof_data, expected_proof):
-            ZKP_PROOFS_VERIFIED.labels(
-                proof_type="range",
-                result="invalid_proof"
-            ).inc()
+            ZKP_PROOFS_VERIFIED.labels(proof_type="range", result="invalid_proof").inc()
             return False
 
-        ZKP_PROOFS_VERIFIED.labels(
-            proof_type="range",
-            result="valid"
-        ).inc()
+        ZKP_PROOFS_VERIFIED.labels(proof_type="range", result="valid").inc()
 
         return True
 
@@ -335,12 +305,12 @@ class MembershipProof:
         Returns (root, tree_layers).
         """
         if not elements:
-            return b'\x00' * 32, []
+            return b"\x00" * 32, []
 
         # Pad to power of 2
         n = len(elements)
         next_pow2 = 1 << (n - 1).bit_length()
-        padded = elements + [b'\x00' * 32] * (next_pow2 - n)
+        padded = elements + [b"\x00" * 32] * (next_pow2 - n)
 
         # Build tree
         layers = [padded]
@@ -373,14 +343,14 @@ class MembershipProof:
             idx //= 2
 
         # Serialize proof
-        proof_data = b''.join(path)
+        proof_data = b"".join(path)
 
         ZKP_PROOFS_GENERATED.labels(proof_type="membership").inc()
 
         return ZKProof(
             proof_type=ZKPType.MEMBERSHIP,
             commitment=element,
-            challenge=b'',
+            challenge=b"",
             response=proof_data,
             public_inputs={"index": element_index},
         )
@@ -392,10 +362,7 @@ class MembershipProof:
     ) -> bool:
         """Verify membership proof."""
         element = proof.commitment
-        path = [
-            proof.response[i:i+32]
-            for i in range(0, len(proof.response), 32)
-        ]
+        path = [proof.response[i : i + 32] for i in range(0, len(proof.response), 32)]
         idx = proof.public_inputs.get("index", 0)
 
         # Recompute root
@@ -409,10 +376,7 @@ class MembershipProof:
 
         result = secrets.compare_digest(current, root)
 
-        ZKP_PROOFS_VERIFIED.labels(
-            proof_type="membership",
-            result="valid" if result else "invalid"
-        ).inc()
+        ZKP_PROOFS_VERIFIED.labels(proof_type="membership", result="valid" if result else "invalid").inc()
 
         return result
 
@@ -447,9 +411,7 @@ class IdentityProofSystem:
             attribute_commitments[name] = commitment
 
         # Create overall identity commitment
-        all_commitments = b''.join(
-            c.commitment for c in attribute_commitments.values()
-        )
+        all_commitments = b"".join(c.commitment for c in attribute_commitments.values())
         identity_hash = hashlib.sha3_256(all_commitments + secret_key).digest()
 
         return identity_hash, attribute_commitments

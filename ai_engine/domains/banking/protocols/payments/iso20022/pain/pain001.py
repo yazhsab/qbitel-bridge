@@ -34,9 +34,9 @@ class CreditTransferTransaction:
     """Individual credit transfer transaction."""
 
     # Transaction identification
-    instruction_id: str = ""           # Unique instruction ID
-    end_to_end_id: str = ""            # End-to-end reference
-    uetr: Optional[str] = None         # Unique End-to-end Transaction Reference (SWIFT gpi)
+    instruction_id: str = ""  # Unique instruction ID
+    end_to_end_id: str = ""  # End-to-end reference
+    uetr: Optional[str] = None  # Unique End-to-end Transaction Reference (SWIFT gpi)
 
     # Amount
     amount: Optional[Amount] = None
@@ -192,15 +192,11 @@ class Pain001Message(ISO20022Message):
         # Validate totals
         if self.number_of_transactions != total_transactions:
             errors.append(
-                f"Number of transactions mismatch: header={self.number_of_transactions}, "
-                f"actual={total_transactions}"
+                f"Number of transactions mismatch: header={self.number_of_transactions}, " f"actual={total_transactions}"
             )
 
         if self.control_sum and self.control_sum != total_amount:
-            errors.append(
-                f"Control sum mismatch: header={self.control_sum}, "
-                f"actual={total_amount}"
-            )
+            errors.append(f"Control sum mismatch: header={self.control_sum}, " f"actual={total_amount}")
 
         return errors
 
@@ -212,12 +208,14 @@ class Pain001Message(ISO20022Message):
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         base = super().to_dict()
-        base.update({
-            "number_of_transactions": self.number_of_transactions,
-            "control_sum": str(self.control_sum) if self.control_sum else None,
-            "initiating_party": self.initiating_party.to_dict() if self.initiating_party else None,
-            "payment_instructions": [pi.to_dict() for pi in self.payment_instructions],
-        })
+        base.update(
+            {
+                "number_of_transactions": self.number_of_transactions,
+                "control_sum": str(self.control_sum) if self.control_sum else None,
+                "initiating_party": self.initiating_party.to_dict() if self.initiating_party else None,
+                "payment_instructions": [pi.to_dict() for pi in self.payment_instructions],
+            }
+        )
         return base
 
 
@@ -257,7 +255,7 @@ class Pain001Parser(ISO20022Parser):
         ns = {}
         tag = root.tag
         if "{" in tag:
-            namespace = tag[1:tag.index("}")]
+            namespace = tag[1 : tag.index("}")]
             ns["ns"] = namespace
         return ns
 
@@ -578,10 +576,7 @@ class Pain001Builder(ISO20022Builder):
 
             # Amount
             amt = self._add_element(cdt_trf_tx_inf, "Amt")
-            instd_amt = self._add_element(
-                amt, "InstdAmt",
-                f"{Decimal(str(txn['amount'])):.2f}"
-            )
+            instd_amt = self._add_element(amt, "InstdAmt", f"{Decimal(str(txn['amount'])):.2f}")
             instd_amt.set("Ccy", txn.get("currency", "EUR"))
 
             # Charge Bearer

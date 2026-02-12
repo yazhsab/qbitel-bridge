@@ -40,15 +40,19 @@ class ISO20022Validator(BaseValidator):
 
     # Supported message types
     SUPPORTED_TYPES = {
-        "pain.001", "pain.002", "pain.008",
-        "pacs.002", "pacs.008", "pacs.009",
-        "camt.052", "camt.053", "camt.054",
+        "pain.001",
+        "pain.002",
+        "pain.008",
+        "pacs.002",
+        "pacs.008",
+        "pacs.009",
+        "camt.052",
+        "camt.053",
+        "camt.054",
     }
 
     # ISO 20022 namespace patterns
-    NAMESPACE_PATTERN = re.compile(
-        r"urn:iso:std:iso:20022:tech:xsd:(pain|pacs|camt|head)\.\d{3}\.\d{3}\.\d{2}"
-    )
+    NAMESPACE_PATTERN = re.compile(r"urn:iso:std:iso:20022:tech:xsd:(pain|pacs|camt|head)\.\d{3}\.\d{3}\.\d{2}")
 
     def __init__(self, strict: bool = True, validate_schema: bool = True):
         """
@@ -86,7 +90,7 @@ class ISO20022Validator(BaseValidator):
             result = self._validate_xml_string(data, result)
         elif isinstance(data, ET.Element):
             result = self._validate_element(data, result)
-        elif hasattr(data, 'message_type'):
+        elif hasattr(data, "message_type"):
             # Parsed message object
             result = self._validate_message_object(data, result)
         else:
@@ -148,11 +152,11 @@ class ISO20022Validator(BaseValidator):
 
     def _validate_message_object(self, msg: Any, result: ValidationResult) -> ValidationResult:
         """Validate a parsed message object."""
-        msg_type = getattr(msg, 'message_type', None)
+        msg_type = getattr(msg, "message_type", None)
         result.metadata["message_type"] = str(msg_type) if msg_type else "unknown"
 
         # Call the message's own validation if available
-        if hasattr(msg, 'validate'):
+        if hasattr(msg, "validate"):
             errors = msg.validate()
             for error in errors:
                 result.add_error(
@@ -231,8 +235,7 @@ class ISO20022Validator(BaseValidator):
             for i, pmt_inf in enumerate(pmt_infs):
                 self._validate_pain001_payment(pmt_inf, ns_prefix, i, result)
 
-    def _validate_pain001_header(self, grp_hdr: ET.Element, ns: str,
-                                  result: ValidationResult) -> None:
+    def _validate_pain001_header(self, grp_hdr: ET.Element, ns: str, result: ValidationResult) -> None:
         """Validate pain.001 Group Header."""
         # Message ID
         msg_id = grp_hdr.find(f"{ns}MsgId")
@@ -305,8 +308,7 @@ class ISO20022Validator(BaseValidator):
                     field_name="GrpHdr/CtrlSum",
                 )
 
-    def _validate_pain001_payment(self, pmt_inf: ET.Element, ns: str, index: int,
-                                   result: ValidationResult) -> None:
+    def _validate_pain001_payment(self, pmt_inf: ET.Element, ns: str, index: int, result: ValidationResult) -> None:
         """Validate pain.001 Payment Information block."""
         prefix = f"PmtInf[{index}]"
 
@@ -386,8 +388,7 @@ class ISO20022Validator(BaseValidator):
             for j, tx in enumerate(txs):
                 self._validate_pain001_transaction(tx, ns, f"{prefix}/CdtTrfTxInf[{j}]", result)
 
-    def _validate_pain001_transaction(self, tx: ET.Element, ns: str, prefix: str,
-                                       result: ValidationResult) -> None:
+    def _validate_pain001_transaction(self, tx: ET.Element, ns: str, prefix: str, result: ValidationResult) -> None:
         """Validate pain.001 Credit Transfer Transaction."""
         # End-to-End ID
         e2e_id = tx.find(f".//{ns}EndToEndId")
@@ -524,8 +525,7 @@ class ISO20022Validator(BaseValidator):
             for i, stmt in enumerate(stmts):
                 self._validate_camt053_statement(stmt, ns_prefix, i, result)
 
-    def _validate_camt053_statement(self, stmt: ET.Element, ns: str, index: int,
-                                     result: ValidationResult) -> None:
+    def _validate_camt053_statement(self, stmt: ET.Element, ns: str, index: int, result: ValidationResult) -> None:
         """Validate camt.053 Statement."""
         prefix = f"Stmt[{index}]"
 

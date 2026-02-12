@@ -169,9 +169,7 @@ class TestAIEngineServerInitialize:
     @pytest.mark.asyncio
     async def test_initialize_failure(self, mock_config):
         """Test initialization failure."""
-        with patch(
-            "ai_engine.api.server.initialize_auth", side_effect=Exception("Init failed")
-        ):
+        with patch("ai_engine.api.server.initialize_auth", side_effect=Exception("Init failed")):
             server = AIEngineServer(mock_config)
 
             with pytest.raises(AIEngineException, match="Server initialization failed"):
@@ -462,9 +460,7 @@ class TestDevelopmentServer:
 
             mock_create_app.return_value = Mock(spec=FastAPI)
 
-            run_development_server(
-                host="127.0.0.1", port=8000, enable_grpc=False, reload=True
-            )
+            run_development_server(host="127.0.0.1", port=8000, enable_grpc=False, reload=True)
 
             mock_uvicorn_run.assert_called_once()
             call_args = mock_uvicorn_run.call_args
@@ -483,9 +479,7 @@ class TestDevelopmentServer:
 
             mock_create_app.return_value = Mock(spec=FastAPI)
 
-            run_development_server(
-                config=config, host="0.0.0.0", port=9000, enable_grpc=False
-            )
+            run_development_server(config=config, host="0.0.0.0", port=9000, enable_grpc=False)
 
             assert config.rest_host == "0.0.0.0"
             assert config.rest_port == 9000

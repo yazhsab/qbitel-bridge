@@ -101,9 +101,7 @@ class TestModelTrainer:
     async def test_initialize_trainer(self, trainer):
         """Test trainer initialization."""
         with patch.object(trainer, "_initialize_mlflow", new_callable=AsyncMock):
-            with patch.object(
-                trainer, "_initialize_distributed", new_callable=AsyncMock
-            ):
+            with patch.object(trainer, "_initialize_distributed", new_callable=AsyncMock):
                 with patch("ai_engine.training.trainer.ModelRegistry") as mock_registry:
                     mock_registry_instance = AsyncMock()
                     mock_registry.return_value = mock_registry_instance
@@ -117,9 +115,7 @@ class TestModelTrainer:
         """Test trainer initialization failure."""
         from ai_engine.core.exceptions import TrainingException
 
-        with patch.object(
-            trainer, "_initialize_mlflow", side_effect=Exception("MLflow error")
-        ):
+        with patch.object(trainer, "_initialize_mlflow", side_effect=Exception("MLflow error")):
             with pytest.raises(TrainingException):
                 await trainer.initialize()
 
@@ -138,9 +134,7 @@ class TestModelTrainer:
             with patch("mlflow.log_params"):
                 with patch("mlflow.log_metrics"):
                     with patch("mlflow.pytorch.log_model"):
-                        with patch.object(
-                            trainer, "_prepare_model_for_training", return_value=model
-                        ):
+                        with patch.object(trainer, "_prepare_model_for_training", return_value=model):
                             with patch.object(
                                 trainer,
                                 "_training_loop",
@@ -182,9 +176,7 @@ class TestModelTrainer:
             with patch("mlflow.log_params"):
                 with patch("mlflow.log_metrics"):
                     with patch("mlflow.pytorch.log_model"):
-                        with patch.object(
-                            trainer, "_prepare_model_for_training", return_value=model
-                        ):
+                        with patch.object(trainer, "_prepare_model_for_training", return_value=model):
                             with patch.object(
                                 trainer,
                                 "_training_loop",
@@ -492,9 +484,7 @@ class TestModelTrainer:
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=16)
 
         with patch("torch.distributed.is_available", return_value=False):
-            with patch.object(
-                trainer, "train_model", new_callable=AsyncMock
-            ) as mock_train:
+            with patch.object(trainer, "train_model", new_callable=AsyncMock) as mock_train:
                 await trainer.distributed_training(
                     model=model,
                     train_dataloader=train_loader,
@@ -685,9 +675,7 @@ class TestModelTrainerAdvanced:
         assert len(history["train_loss"]) == 1
 
     @pytest.mark.asyncio
-    async def test_training_loop_with_validation_and_early_stopping(
-        self, trainer, mock_config
-    ):
+    async def test_training_loop_with_validation_and_early_stopping(self, trainer, mock_config):
         """Test training loop with validation and early stopping."""
         model = SimpleModel()
         optimizer = torch.optim.Adam(model.parameters())
@@ -810,9 +798,7 @@ class TestModelTrainerAdvanced:
 
         with patch("torch.distributed.is_available", return_value=True):
             with patch("torch.cuda.is_available", return_value=False):
-                with patch.object(
-                    trainer, "train_model", new_callable=AsyncMock
-                ) as mock_train:
+                with patch.object(trainer, "train_model", new_callable=AsyncMock) as mock_train:
                     await trainer.distributed_training(
                         model=model,
                         train_dataloader=train_loader,
@@ -835,9 +821,7 @@ class TestModelTrainerAdvanced:
 
         with patch("torch.distributed.is_available", return_value=True):
             with patch("torch.cuda.is_available", return_value=False):
-                with patch.object(
-                    trainer, "_training_loop_distributed", new_callable=AsyncMock
-                ):
+                with patch.object(trainer, "_training_loop_distributed", new_callable=AsyncMock):
                     job = await trainer.distributed_training(
                         model=model,
                         train_dataloader=train_loader,
@@ -919,9 +903,7 @@ class TestModelTrainerAdvanced:
         mock_config.training.epochs = 1
 
         with patch("torch.distributed.barrier"):
-            await trainer._training_loop_distributed(
-                model, train_loader, None, mock_config.training, job
-            )
+            await trainer._training_loop_distributed(model, train_loader, None, mock_config.training, job)
 
     @pytest.mark.asyncio
     async def test_train_model_with_tags(self, trainer):

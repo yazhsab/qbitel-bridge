@@ -28,16 +28,12 @@ class CommunicationConnector(BaseIntegrationConnector, ABC):
         self.logger = get_security_logger("qbitel.security.integrations.communication")
 
     @abstractmethod
-    async def send_alert(
-        self, message: str, severity: str, recipients: List[str] = None
-    ) -> IntegrationResult:
+    async def send_alert(self, message: str, severity: str, recipients: List[str] = None) -> IntegrationResult:
         """Send an alert message."""
         pass
 
     @abstractmethod
-    async def send_notification(
-        self, title: str, message: str, recipients: List[str] = None
-    ) -> IntegrationResult:
+    async def send_notification(self, title: str, message: str, recipients: List[str] = None) -> IntegrationResult:
         """Send a notification message."""
         pass
 
@@ -49,9 +45,7 @@ class SlackConnector(CommunicationConnector):
         super().__init__(config)
         self.bot_token = None
         self.webhook_url = None
-        self.default_channel = config.custom_config.get(
-            "default_channel", "#security-alerts"
-        )
+        self.default_channel = config.custom_config.get("default_channel", "#security-alerts")
 
     async def initialize(self) -> bool:
         """Initialize Slack connection."""
@@ -152,9 +146,7 @@ class SlackConnector(CommunicationConnector):
 
         return False
 
-    async def send_security_event(
-        self, security_event: SecurityEvent
-    ) -> IntegrationResult:
+    async def send_security_event(self, security_event: SecurityEvent) -> IntegrationResult:
         """Send security event to Slack."""
 
         try:
@@ -179,9 +171,7 @@ class SlackConnector(CommunicationConnector):
                 error_code="SLACK_SEND_ERROR",
             )
 
-    async def send_threat_analysis(
-        self, threat_analysis: ThreatAnalysis
-    ) -> IntegrationResult:
+    async def send_threat_analysis(self, threat_analysis: ThreatAnalysis) -> IntegrationResult:
         """Send threat analysis to Slack."""
 
         try:
@@ -189,9 +179,7 @@ class SlackConnector(CommunicationConnector):
             message_blocks = self._create_threat_analysis_blocks(threat_analysis)
 
             # Send to security team channel
-            channel = self.config.custom_config.get(
-                "threat_analysis_channel", self.default_channel
-            )
+            channel = self.config.custom_config.get("threat_analysis_channel", self.default_channel)
 
             result = await self._send_slack_message(
                 channel=channel,
@@ -208,9 +196,7 @@ class SlackConnector(CommunicationConnector):
                 error_code="SLACK_THREAT_SEND_ERROR",
             )
 
-    async def send_response_execution(
-        self, automated_response: AutomatedResponse
-    ) -> IntegrationResult:
+    async def send_response_execution(self, automated_response: AutomatedResponse) -> IntegrationResult:
         """Send automated response execution to Slack."""
 
         try:
@@ -218,9 +204,7 @@ class SlackConnector(CommunicationConnector):
             message_blocks = self._create_response_execution_blocks(automated_response)
 
             # Send to operations channel
-            channel = self.config.custom_config.get(
-                "operations_channel", self.default_channel
-            )
+            channel = self.config.custom_config.get("operations_channel", self.default_channel)
 
             result = await self._send_slack_message(
                 channel=channel,
@@ -237,9 +221,7 @@ class SlackConnector(CommunicationConnector):
                 error_code="SLACK_RESPONSE_SEND_ERROR",
             )
 
-    async def send_alert(
-        self, message: str, severity: str, recipients: List[str] = None
-    ) -> IntegrationResult:
+    async def send_alert(self, message: str, severity: str, recipients: List[str] = None) -> IntegrationResult:
         """Send an alert message to Slack."""
 
         try:
@@ -291,9 +273,7 @@ class SlackConnector(CommunicationConnector):
                 error_code="SLACK_ALERT_ERROR",
             )
 
-    async def send_notification(
-        self, title: str, message: str, recipients: List[str] = None
-    ) -> IntegrationResult:
+    async def send_notification(self, title: str, message: str, recipients: List[str] = None) -> IntegrationResult:
         """Send a notification message to Slack."""
 
         try:
@@ -327,9 +307,7 @@ class SlackConnector(CommunicationConnector):
                     },
                 )
 
-            result = await self._send_slack_message(
-                channel=self.default_channel, blocks=blocks, text=title
-            )
+            result = await self._send_slack_message(channel=self.default_channel, blocks=blocks, text=title)
 
             return result
 
@@ -340,9 +318,7 @@ class SlackConnector(CommunicationConnector):
                 error_code="SLACK_NOTIFICATION_ERROR",
             )
 
-    async def _send_slack_message(
-        self, channel: str, blocks: List[Dict], text: str = None
-    ) -> IntegrationResult:
+    async def _send_slack_message(self, channel: str, blocks: List[Dict], text: str = None) -> IntegrationResult:
         """Send message to Slack using bot token or webhook."""
 
         if self.bot_token:
@@ -356,9 +332,7 @@ class SlackConnector(CommunicationConnector):
                 error_code="SLACK_NO_CREDENTIALS",
             )
 
-    async def _send_via_bot_token(
-        self, channel: str, blocks: List[Dict], text: str = None
-    ) -> IntegrationResult:
+    async def _send_via_bot_token(self, channel: str, blocks: List[Dict], text: str = None) -> IntegrationResult:
         """Send message via bot token."""
 
         url = "https://slack.com/api/chat.postMessage"
@@ -415,9 +389,7 @@ class SlackConnector(CommunicationConnector):
                 error_code="SLACK_SEND_ERROR",
             )
 
-    async def _send_via_webhook(
-        self, channel: str, blocks: List[Dict], text: str = None
-    ) -> IntegrationResult:
+    async def _send_via_webhook(self, channel: str, blocks: List[Dict], text: str = None) -> IntegrationResult:
         """Send message via webhook."""
 
         payload = {"channel": channel, "blocks": blocks}
@@ -454,9 +426,7 @@ class SlackConnector(CommunicationConnector):
                 error_code="SLACK_WEBHOOK_ERROR",
             )
 
-    def _create_security_event_blocks(
-        self, security_event: SecurityEvent
-    ) -> List[Dict]:
+    def _create_security_event_blocks(self, security_event: SecurityEvent) -> List[Dict]:
         """Create Slack blocks for security event."""
 
         severity_emoji = self._get_emoji_for_severity(security_event.threat_level.value)
@@ -525,9 +495,7 @@ class SlackConnector(CommunicationConnector):
                     }
                 )
             if security_event.port:
-                network_fields.append(
-                    {"type": "mrkdwn", "text": f"*Port:*\n{security_event.port}"}
-                )
+                network_fields.append({"type": "mrkdwn", "text": f"*Port:*\n{security_event.port}"})
 
             blocks.append({"type": "section", "fields": network_fields})
 
@@ -546,14 +514,10 @@ class SlackConnector(CommunicationConnector):
 
         return blocks
 
-    def _create_threat_analysis_blocks(
-        self, threat_analysis: ThreatAnalysis
-    ) -> List[Dict]:
+    def _create_threat_analysis_blocks(self, threat_analysis: ThreatAnalysis) -> List[Dict]:
         """Create Slack blocks for threat analysis."""
 
-        severity_emoji = self._get_emoji_for_severity(
-            threat_analysis.threat_level.value
-        )
+        severity_emoji = self._get_emoji_for_severity(threat_analysis.threat_level.value)
 
         blocks = [
             {
@@ -627,9 +591,7 @@ class SlackConnector(CommunicationConnector):
 
         return blocks
 
-    def _create_response_execution_blocks(
-        self, automated_response: AutomatedResponse
-    ) -> List[Dict]:
+    def _create_response_execution_blocks(self, automated_response: AutomatedResponse) -> List[Dict]:
         """Create Slack blocks for response execution."""
 
         status_emoji = (
@@ -673,18 +635,12 @@ class SlackConnector(CommunicationConnector):
         actions_text = []
         for action in automated_response.actions[:5]:  # Show first 5 actions
             status_icon = (
-                "✅"
-                if action.status.value == "completed"
-                else "⏳" if action.status.value == "in_progress" else "❌"
+                "✅" if action.status.value == "completed" else "⏳" if action.status.value == "in_progress" else "❌"
             )
-            actions_text.append(
-                f"{status_icon} {action.action_type.value} on {action.target_system}"
-            )
+            actions_text.append(f"{status_icon} {action.action_type.value} on {action.target_system}")
 
         if len(automated_response.actions) > 5:
-            actions_text.append(
-                f"... and {len(automated_response.actions) - 5} more actions"
-            )
+            actions_text.append(f"... and {len(automated_response.actions) - 5} more actions")
 
         blocks.append(
             {
@@ -731,9 +687,7 @@ class SlackConnector(CommunicationConnector):
 
         channel_mapping = self.config.custom_config.get("channel_mapping", {})
 
-        return channel_mapping.get(
-            severity, channel_mapping.get("default", self.default_channel)
-        )
+        return channel_mapping.get(severity, channel_mapping.get("default", self.default_channel))
 
     def _get_emoji_for_severity(self, severity: str) -> str:
         """Get emoji for severity level."""
@@ -889,9 +843,7 @@ class EmailConnector(CommunicationConnector):
         except Exception:
             return False
 
-    async def send_security_event(
-        self, security_event: SecurityEvent
-    ) -> IntegrationResult:
+    async def send_security_event(self, security_event: SecurityEvent) -> IntegrationResult:
         """Send security event via email."""
 
         try:
@@ -900,13 +852,9 @@ class EmailConnector(CommunicationConnector):
             body = self._create_security_event_email(security_event)
 
             # Get recipients based on severity
-            recipients = self._get_recipients_for_severity(
-                security_event.threat_level.value
-            )
+            recipients = self._get_recipients_for_severity(security_event.threat_level.value)
 
-            result = await self._send_email(
-                subject=subject, body=body, recipients=recipients, is_html=True
-            )
+            result = await self._send_email(subject=subject, body=body, recipients=recipients, is_html=True)
 
             return result
 
@@ -917,9 +865,7 @@ class EmailConnector(CommunicationConnector):
                 error_code="EMAIL_SEND_ERROR",
             )
 
-    async def send_threat_analysis(
-        self, threat_analysis: ThreatAnalysis
-    ) -> IntegrationResult:
+    async def send_threat_analysis(self, threat_analysis: ThreatAnalysis) -> IntegrationResult:
         """Send threat analysis via email."""
 
         try:
@@ -928,13 +874,9 @@ class EmailConnector(CommunicationConnector):
             body = self._create_threat_analysis_email(threat_analysis)
 
             # Send to security team
-            recipients = self.config.custom_config.get(
-                "security_team_recipients", self.default_recipients
-            )
+            recipients = self.config.custom_config.get("security_team_recipients", self.default_recipients)
 
-            result = await self._send_email(
-                subject=subject, body=body, recipients=recipients, is_html=True
-            )
+            result = await self._send_email(subject=subject, body=body, recipients=recipients, is_html=True)
 
             return result
 
@@ -945,24 +887,20 @@ class EmailConnector(CommunicationConnector):
                 error_code="EMAIL_THREAT_SEND_ERROR",
             )
 
-    async def send_response_execution(
-        self, automated_response: AutomatedResponse
-    ) -> IntegrationResult:
+    async def send_response_execution(self, automated_response: AutomatedResponse) -> IntegrationResult:
         """Send automated response execution via email."""
 
         try:
             # Create email for response execution
-            subject = f"QBITEL Automated Response: {automated_response.status.value.title()} - {automated_response.response_id}"
+            subject = (
+                f"QBITEL Automated Response: {automated_response.status.value.title()} - {automated_response.response_id}"
+            )
             body = self._create_response_execution_email(automated_response)
 
             # Send to operations team
-            recipients = self.config.custom_config.get(
-                "operations_team_recipients", self.default_recipients
-            )
+            recipients = self.config.custom_config.get("operations_team_recipients", self.default_recipients)
 
-            result = await self._send_email(
-                subject=subject, body=body, recipients=recipients, is_html=True
-            )
+            result = await self._send_email(subject=subject, body=body, recipients=recipients, is_html=True)
 
             return result
 
@@ -973,9 +911,7 @@ class EmailConnector(CommunicationConnector):
                 error_code="EMAIL_RESPONSE_SEND_ERROR",
             )
 
-    async def send_alert(
-        self, message: str, severity: str, recipients: List[str] = None
-    ) -> IntegrationResult:
+    async def send_alert(self, message: str, severity: str, recipients: List[str] = None) -> IntegrationResult:
         """Send an alert email."""
 
         try:
@@ -1010,13 +946,9 @@ class EmailConnector(CommunicationConnector):
             </html>
             """
 
-            target_recipients = recipients or self._get_recipients_for_severity(
-                severity
-            )
+            target_recipients = recipients or self._get_recipients_for_severity(severity)
 
-            result = await self._send_email(
-                subject=subject, body=body, recipients=target_recipients, is_html=True
-            )
+            result = await self._send_email(subject=subject, body=body, recipients=target_recipients, is_html=True)
 
             return result
 
@@ -1027,9 +959,7 @@ class EmailConnector(CommunicationConnector):
                 error_code="EMAIL_ALERT_ERROR",
             )
 
-    async def send_notification(
-        self, title: str, message: str, recipients: List[str] = None
-    ) -> IntegrationResult:
+    async def send_notification(self, title: str, message: str, recipients: List[str] = None) -> IntegrationResult:
         """Send a notification email."""
 
         try:
@@ -1064,9 +994,7 @@ class EmailConnector(CommunicationConnector):
 
             target_recipients = recipients or self.default_recipients
 
-            result = await self._send_email(
-                subject=subject, body=body, recipients=target_recipients, is_html=True
-            )
+            result = await self._send_email(subject=subject, body=body, recipients=target_recipients, is_html=True)
 
             return result
 
@@ -1109,9 +1037,7 @@ class EmailConnector(CommunicationConnector):
                         for attachment in attachments:
                             part = MIMEApplication(
                                 attachment["data"],
-                                attachment.get(
-                                    "content_type", "application/octet-stream"
-                                ),
+                                attachment.get("content_type", "application/octet-stream"),
                             )
                             part.add_header(
                                 "Content-Disposition",
@@ -1140,9 +1066,7 @@ class EmailConnector(CommunicationConnector):
                             successful_recipients.append(recipient)
                             del msg["To"]  # Remove for next iteration
                         except Exception as e:
-                            failed_recipients.append(
-                                {"email": recipient, "error": str(e)}
-                            )
+                            failed_recipients.append({"email": recipient, "error": str(e)})
 
                     server.quit()
 
@@ -1171,9 +1095,7 @@ class EmailConnector(CommunicationConnector):
                     success=False,
                     message=f"Email send failed: {result.get('error', 'Unknown error')}",
                     error_code="EMAIL_SMTP_ERROR",
-                    response_data={
-                        "failed_recipients": result.get("failed_recipients", [])
-                    },
+                    response_data={"failed_recipients": result.get("failed_recipients", [])},
                 )
 
         except Exception as e:
@@ -1256,17 +1178,13 @@ class EmailConnector(CommunicationConnector):
     def _create_threat_analysis_email(self, threat_analysis: ThreatAnalysis) -> str:
         """Create HTML email body for threat analysis."""
 
-        severity_color = self._get_color_for_severity(
-            threat_analysis.threat_level.value
-        )
+        severity_color = self._get_color_for_severity(threat_analysis.threat_level.value)
 
         iocs_html = ""
         if threat_analysis.iocs:
             iocs_list = []
             for ioc in threat_analysis.iocs[:10]:  # Show first 10 IOCs
-                iocs_list.append(
-                    f"<li><strong>{ioc.ioc_type.value}:</strong> {ioc.value} (confidence: {ioc.confidence})</li>"
-                )
+                iocs_list.append(f"<li><strong>{ioc.ioc_type.value}:</strong> {ioc.value} (confidence: {ioc.confidence})</li>")
 
             iocs_html = f"""
             <h4>Indicators of Compromise</h4>
@@ -1342,19 +1260,13 @@ class EmailConnector(CommunicationConnector):
         </html>
         """
 
-    def _create_response_execution_email(
-        self, automated_response: AutomatedResponse
-    ) -> str:
+    def _create_response_execution_email(self, automated_response: AutomatedResponse) -> str:
         """Create HTML email body for response execution."""
 
         status_color = (
             "#28a745"
             if automated_response.status.value == "completed"
-            else (
-                "#ffc107"
-                if automated_response.status.value == "in_progress"
-                else "#dc3545"
-            )
+            else ("#ffc107" if automated_response.status.value == "in_progress" else "#dc3545")
         )
 
         actions_html = ""
@@ -1362,9 +1274,7 @@ class EmailConnector(CommunicationConnector):
             actions_list = []
             for action in automated_response.actions:
                 status_icon = (
-                    "✅"
-                    if action.status.value == "completed"
-                    else "⏳" if action.status.value == "in_progress" else "❌"
+                    "✅" if action.status.value == "completed" else "⏳" if action.status.value == "in_progress" else "❌"
                 )
                 actions_list.append(
                     f"<li>{status_icon} <strong>{action.action_type.value}</strong> on {action.target_system} - {action.status.value}</li>"
@@ -1446,9 +1356,7 @@ class EmailConnector(CommunicationConnector):
 
         recipient_mapping = self.config.custom_config.get("recipient_mapping", {})
 
-        return recipient_mapping.get(
-            severity, recipient_mapping.get("default", self.default_recipients)
-        )
+        return recipient_mapping.get(severity, recipient_mapping.get("default", self.default_recipients))
 
     def _get_color_for_severity(self, severity: str) -> str:
         """Get color for severity level."""

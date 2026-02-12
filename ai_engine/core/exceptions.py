@@ -208,9 +208,7 @@ class FeatureExtractionException(QbitelAIException):
         if input_size is not None:
             context["input_size"] = input_size
 
-        super().__init__(
-            message, error_code="FEATURE_EXTRACTION_ERROR", context=context
-        )
+        super().__init__(message, error_code="FEATURE_EXTRACTION_ERROR", context=context)
 
 
 class ModelRegistryException(QbitelAIException):

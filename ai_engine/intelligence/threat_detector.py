@@ -15,7 +15,6 @@ import hashlib
 import statistics
 import uuid
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -287,9 +286,7 @@ class ThreatDetector:
 
         # Cleanup old hashes (older than 24 hours)
         cutoff = datetime.utcnow() - timedelta(hours=24)
-        self._seen_hashes = {
-            h: t for h, t in self._seen_hashes.items() if t > cutoff
-        }
+        self._seen_hashes = {h: t for h, t in self._seen_hashes.items() if t > cutoff}
 
         return None
 
@@ -309,9 +306,7 @@ class ThreatDetector:
 
         # Count messages in last minute
         one_minute_ago = datetime.utcnow() - timedelta(minutes=1)
-        recent_count = sum(
-            1 for t in self._rate_counters[source_id] if t > one_minute_ago
-        )
+        recent_count = sum(1 for t in self._rate_counters[source_id] if t > one_minute_ago)
 
         # Check against baseline or default threshold
         threshold = 100  # Default threshold
@@ -362,22 +357,24 @@ class ThreatDetector:
                     z_score = abs(amount_float - baseline.mean) / baseline.std_dev
 
                     if z_score > 4:  # 4 standard deviations
-                        alerts.append(ThreatAlert(
-                            alert_id=str(uuid.uuid4()),
-                            threat_level=ThreatLevel.MEDIUM,
-                            anomaly_type=AnomalyType.VALUE_ANOMALY,
-                            title="Unusual Transaction Amount",
-                            description=f"Amount {amount} is {z_score:.1f} standard deviations from mean",
-                            evidence=[
-                                {"amount": amount_float},
-                                {"baseline_mean": baseline.mean},
-                                {"z_score": z_score},
-                            ],
-                            recommended_actions=[
-                                "Verify transaction legitimacy",
-                                "Check for fraud indicators",
-                            ],
-                        ))
+                        alerts.append(
+                            ThreatAlert(
+                                alert_id=str(uuid.uuid4()),
+                                threat_level=ThreatLevel.MEDIUM,
+                                anomaly_type=AnomalyType.VALUE_ANOMALY,
+                                title="Unusual Transaction Amount",
+                                description=f"Amount {amount} is {z_score:.1f} standard deviations from mean",
+                                evidence=[
+                                    {"amount": amount_float},
+                                    {"baseline_mean": baseline.mean},
+                                    {"z_score": z_score},
+                                ],
+                                recommended_actions=[
+                                    "Verify transaction legitimacy",
+                                    "Check for fraud indicators",
+                                ],
+                            )
+                        )
             except (ValueError, TypeError):
                 pass
 
@@ -396,14 +393,16 @@ class ThreatDetector:
                         z_score = abs(interval - baseline.mean) / baseline.std_dev
 
                         if z_score > 4:
-                            alerts.append(ThreatAlert(
-                                alert_id=str(uuid.uuid4()),
-                                threat_level=ThreatLevel.LOW,
-                                anomaly_type=AnomalyType.TIMING_ANOMALY,
-                                title="Unusual Message Timing",
-                                description=f"Message interval {interval:.2f}s is unusual",
-                                evidence=[{"interval": interval}],
-                            ))
+                            alerts.append(
+                                ThreatAlert(
+                                    alert_id=str(uuid.uuid4()),
+                                    threat_level=ThreatLevel.LOW,
+                                    anomaly_type=AnomalyType.TIMING_ANOMALY,
+                                    title="Unusual Message Timing",
+                                    description=f"Message interval {interval:.2f}s is unusual",
+                                    evidence=[{"interval": interval}],
+                                )
+                            )
 
         return alerts
 
@@ -446,10 +445,7 @@ class ThreatDetector:
     def _hash_message(self, message: Dict[str, Any]) -> str:
         """Create hash of message for deduplication."""
         # Exclude timestamp fields for comparison
-        hashable = {
-            k: v for k, v in message.items()
-            if not k.startswith("_") and k not in ("timestamp", "created_at")
-        }
+        hashable = {k: v for k, v in message.items() if not k.startswith("_") and k not in ("timestamp", "created_at")}
 
         hash_input = str(sorted(hashable.items())).encode()
         return hashlib.sha256(hash_input).hexdigest()[:32]
@@ -485,7 +481,7 @@ class ThreatDetector:
         if n > 1:
             delta2 = value - baseline.mean
             # Update variance (M2 / (n-1) = variance)
-            m2 = (baseline.std_dev ** 2) * (n - 2) if n > 2 else 0
+            m2 = (baseline.std_dev**2) * (n - 2) if n > 2 else 0
             m2 += delta * delta2
             baseline.std_dev = (m2 / (n - 1)) ** 0.5 if n > 1 else 0
 
@@ -500,57 +496,65 @@ class ThreatDetector:
     def _initialize_default_rules(self) -> None:
         """Initialize default detection rules."""
         # Large transaction rule
-        self.add_rule(ThreatRule(
-            rule_id="large_transaction",
-            name="Large Transaction Detected",
-            description="Transaction amount exceeds threshold",
-            anomaly_type=AnomalyType.VALUE_ANOMALY,
-            threat_level=ThreatLevel.MEDIUM,
-            condition=lambda m: float(m.get("amount", 0) or 0) > 1000000,
-        ))
+        self.add_rule(
+            ThreatRule(
+                rule_id="large_transaction",
+                name="Large Transaction Detected",
+                description="Transaction amount exceeds threshold",
+                anomaly_type=AnomalyType.VALUE_ANOMALY,
+                threat_level=ThreatLevel.MEDIUM,
+                condition=lambda m: float(m.get("amount", 0) or 0) > 1000000,
+            )
+        )
 
         # Unusual hours rule
-        self.add_rule(ThreatRule(
-            rule_id="unusual_hours",
-            name="Off-Hours Activity",
-            description="Transaction during unusual hours (11PM-5AM)",
-            anomaly_type=AnomalyType.TIMING_ANOMALY,
-            threat_level=ThreatLevel.LOW,
-            condition=lambda m: datetime.utcnow().hour in (23, 0, 1, 2, 3, 4),
-        ))
+        self.add_rule(
+            ThreatRule(
+                rule_id="unusual_hours",
+                name="Off-Hours Activity",
+                description="Transaction during unusual hours (11PM-5AM)",
+                anomaly_type=AnomalyType.TIMING_ANOMALY,
+                threat_level=ThreatLevel.LOW,
+                condition=lambda m: datetime.utcnow().hour in (23, 0, 1, 2, 3, 4),
+            )
+        )
 
         # Protocol violation rule
-        self.add_rule(ThreatRule(
-            rule_id="missing_signature",
-            name="Missing Digital Signature",
-            description="Message lacks required digital signature",
-            anomaly_type=AnomalyType.PROTOCOL_VIOLATION,
-            threat_level=ThreatLevel.HIGH,
-            condition=lambda m: m.get("requires_signature") and not m.get("signature"),
-        ))
+        self.add_rule(
+            ThreatRule(
+                rule_id="missing_signature",
+                name="Missing Digital Signature",
+                description="Message lacks required digital signature",
+                anomaly_type=AnomalyType.PROTOCOL_VIOLATION,
+                threat_level=ThreatLevel.HIGH,
+                condition=lambda m: m.get("requires_signature") and not m.get("signature"),
+            )
+        )
 
         # Injection attempt rule
-        self.add_rule(ThreatRule(
-            rule_id="injection_chars",
-            name="Potential Injection Attempt",
-            description="Suspicious characters detected in input",
-            anomaly_type=AnomalyType.INJECTION_ATTEMPT,
-            threat_level=ThreatLevel.HIGH,
-            condition=lambda m: any(
-                c in str(m.get("payload", ""))
-                for c in ["<script>", "DROP TABLE", "'; --", "UNION SELECT"]
-            ),
-        ))
+        self.add_rule(
+            ThreatRule(
+                rule_id="injection_chars",
+                name="Potential Injection Attempt",
+                description="Suspicious characters detected in input",
+                anomaly_type=AnomalyType.INJECTION_ATTEMPT,
+                threat_level=ThreatLevel.HIGH,
+                condition=lambda m: any(
+                    c in str(m.get("payload", "")) for c in ["<script>", "DROP TABLE", "'; --", "UNION SELECT"]
+                ),
+            )
+        )
 
         # Cross-border high value
-        self.add_rule(ThreatRule(
-            rule_id="cross_border_high_value",
-            name="High-Value Cross-Border Transaction",
-            description="Large transaction crossing borders",
-            anomaly_type=AnomalyType.BEHAVIORAL_ANOMALY,
-            threat_level=ThreatLevel.MEDIUM,
-            condition=lambda m: (
-                float(m.get("amount", 0) or 0) > 100000 and
-                m.get("source_country") != m.get("target_country")
-            ),
-        ))
+        self.add_rule(
+            ThreatRule(
+                rule_id="cross_border_high_value",
+                name="High-Value Cross-Border Transaction",
+                description="Large transaction crossing borders",
+                anomaly_type=AnomalyType.BEHAVIORAL_ANOMALY,
+                threat_level=ThreatLevel.MEDIUM,
+                condition=lambda m: (
+                    float(m.get("amount", 0) or 0) > 100000 and m.get("source_country") != m.get("target_country")
+                ),
+            )
+        )

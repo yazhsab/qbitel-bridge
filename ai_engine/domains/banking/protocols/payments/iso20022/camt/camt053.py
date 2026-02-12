@@ -282,9 +282,11 @@ class Camt053Message(ISO20022Message):
 
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
-        base.update({
-            "statements": [s.to_dict() for s in self.statements],
-        })
+        base.update(
+            {
+                "statements": [s.to_dict() for s in self.statements],
+            }
+        )
         return base
 
 
@@ -324,7 +326,7 @@ class Camt053Parser(ISO20022Parser):
         ns = {}
         tag = root.tag
         if "{" in tag:
-            namespace = tag[1:tag.index("}")]
+            namespace = tag[1 : tag.index("}")]
             ns["ns"] = namespace
         return ns
 

@@ -21,41 +21,33 @@ from prometheus_client import Counter, Histogram
 logger = logging.getLogger(__name__)
 
 # Metrics
-LDACS_HANDSHAKES = Counter(
-    'ldacs_pqc_handshakes_total',
-    'Total LDACS PQC handshakes',
-    ['status']
-)
+LDACS_HANDSHAKES = Counter("ldacs_pqc_handshakes_total", "Total LDACS PQC handshakes", ["status"])
 
 LDACS_HANDSHAKE_TIME = Histogram(
-    'ldacs_pqc_handshake_seconds',
-    'LDACS PQC handshake duration',
-    buckets=[0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0]
+    "ldacs_pqc_handshake_seconds", "LDACS PQC handshake duration", buckets=[0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0]
 )
 
 LDACS_MESSAGES = Counter(
-    'ldacs_authenticated_messages_total',
-    'Total authenticated LDACS messages',
-    ['direction', 'message_type']
+    "ldacs_authenticated_messages_total", "Total authenticated LDACS messages", ["direction", "message_type"]
 )
 
 
 class LdacsChannelType(Enum):
     """LDACS logical channel types."""
 
-    DCCH = auto()   # Dedicated Control Channel
-    RACH = auto()   # Random Access Channel
-    DATA = auto()   # Data Channel
+    DCCH = auto()  # Dedicated Control Channel
+    RACH = auto()  # Random Access Channel
+    DATA = auto()  # Data Channel
     VOICE = auto()  # Voice Channel (digitized)
 
 
 class LdacsSecurityLevel(Enum):
     """LDACS security levels."""
 
-    STANDARD = "standard"           # Normal operations
-    ENHANCED = "enhanced"           # High-value flights
-    CRITICAL = "critical"           # Safety-critical
-    EMERGENCY = "emergency"         # Emergency operations
+    STANDARD = "standard"  # Normal operations
+    ENHANCED = "enhanced"  # High-value flights
+    CRITICAL = "critical"  # Safety-critical
+    EMERGENCY = "emergency"  # Emergency operations
 
 
 @dataclass
@@ -84,10 +76,7 @@ class LdacsSecurityContext:
     def needs_rekey(self) -> bool:
         """Check if session needs rekeying."""
         age = time.time() - self.created_at
-        return (
-            age > self.rekey_interval or
-            self.messages_until_rekey <= 0
-        )
+        return age > self.rekey_interval or self.messages_until_rekey <= 0
 
     def increment_sequence(self) -> int:
         """Get next sequence number."""
@@ -171,9 +160,7 @@ class LdacsKeyExchange:
         Returns:
             Tuple of (server_hello_message, security_context)
         """
-        from ai_engine.crypto.hybrid import (
-            HybridKemEngine, HybridKexVariant, HybridPublicKey
-        )
+        from ai_engine.crypto.hybrid import HybridKemEngine, HybridKexVariant, HybridPublicKey
 
         start = time.time()
 
@@ -222,10 +209,7 @@ class LdacsKeyExchange:
         LDACS_HANDSHAKE_TIME.observe(elapsed)
         LDACS_HANDSHAKES.labels(status="success").inc()
 
-        logger.info(
-            f"LDACS handshake completed: {aircraft_id} <-> {ground_station_id} "
-            f"in {elapsed*1000:.1f}ms"
-        )
+        logger.info(f"LDACS handshake completed: {aircraft_id} <-> {ground_station_id} " f"in {elapsed*1000:.1f}ms")
 
         return server_hello, context
 
@@ -242,9 +226,7 @@ class LdacsKeyExchange:
         Returns:
             Security context for the session
         """
-        from ai_engine.crypto.hybrid import (
-            HybridKemEngine, HybridKexVariant, HybridCiphertext, HybridPrivateKey
-        )
+        from ai_engine.crypto.hybrid import HybridKemEngine, HybridKexVariant, HybridCiphertext, HybridPrivateKey
 
         # Parse ServerHello
         session_id = server_hello[:16]
@@ -306,14 +288,10 @@ class LdacsKeyExchange:
         context = f"{aircraft_id}|{ground_station_id}".encode()
 
         # Encryption key
-        enc_material = hashlib.sha256(
-            b"ldacs-encryption" + shared_secret + session_id + context
-        ).digest()
+        enc_material = hashlib.sha256(b"ldacs-encryption" + shared_secret + session_id + context).digest()
 
         # Authentication key
-        auth_material = hashlib.sha256(
-            b"ldacs-authentication" + shared_secret + session_id + context
-        ).digest()
+        auth_material = hashlib.sha256(b"ldacs-authentication" + shared_secret + session_id + context).digest()
 
         return enc_material, auth_material
 
@@ -330,10 +308,7 @@ class LdacsSecureChannel:
         self.context = context
         self._message_buffer: List[LdacsAuthenticatedMessage] = []
 
-        logger.info(
-            f"LDACS secure channel established: "
-            f"{context.aircraft_id} <-> {context.ground_station_id}"
-        )
+        logger.info(f"LDACS secure channel established: " f"{context.aircraft_id} <-> {context.ground_station_id}")
 
     async def send_message(
         self,
@@ -418,18 +393,15 @@ class LdacsSecureChannel:
         """Compute HMAC for message."""
         import hmac
 
-        message = (
-            self.context.session_id +
-            sequence.to_bytes(8, 'big') +
-            int(timestamp * 1000).to_bytes(8, 'big') +
-            payload
-        )
+        message = self.context.session_id + sequence.to_bytes(8, "big") + int(timestamp * 1000).to_bytes(8, "big") + payload
 
         return hmac.new(
             self.context.authentication_key,
             message,
             hashlib.sha256,
-        ).digest()[:16]  # Truncate to 128 bits
+        ).digest()[
+            :16
+        ]  # Truncate to 128 bits
 
     async def _sign_message(
         self,
@@ -442,11 +414,7 @@ class LdacsSecureChannel:
         engine = FalconEngine(FalconSecurityLevel.FALCON_512)
         keypair = await engine.generate_keypair()
 
-        message = (
-            self.context.session_id +
-            sequence.to_bytes(8, 'big') +
-            payload
-        )
+        message = self.context.session_id + sequence.to_bytes(8, "big") + payload
 
         sig = await engine.sign(message, keypair.private_key)
         return sig.data
@@ -469,24 +437,24 @@ class LdacsSecureChannel:
         sig_bytes = msg.signature or b""
 
         header = bytes([msg.channel.value])
-        header += msg.sequence.to_bytes(8, 'big')
-        header += int(msg.timestamp * 1000).to_bytes(8, 'big')
+        header += msg.sequence.to_bytes(8, "big")
+        header += int(msg.timestamp * 1000).to_bytes(8, "big")
         header += msg.mac
-        header += len(sig_bytes).to_bytes(2, 'big')
+        header += len(sig_bytes).to_bytes(2, "big")
 
         return header + sig_bytes + msg.payload
 
     def _decode_message(self, data: bytes) -> LdacsAuthenticatedMessage:
         """Decode received message."""
         channel = LdacsChannelType(data[0])
-        sequence = int.from_bytes(data[1:9], 'big')
-        timestamp = int.from_bytes(data[9:17], 'big') / 1000.0
+        sequence = int.from_bytes(data[1:9], "big")
+        timestamp = int.from_bytes(data[9:17], "big") / 1000.0
         mac = data[17:33]
-        sig_len = int.from_bytes(data[33:35], 'big')
+        sig_len = int.from_bytes(data[33:35], "big")
 
         if sig_len > 0:
-            signature = data[35:35+sig_len]
-            payload = data[35+sig_len:]
+            signature = data[35 : 35 + sig_len]
+            payload = data[35 + sig_len :]
         else:
             signature = None
             payload = data[35:]

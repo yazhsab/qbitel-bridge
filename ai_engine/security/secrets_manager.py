@@ -100,9 +100,7 @@ class SecretsManager:
             logger.info("HashiCorp Vault client initialized")
 
         except ImportError:
-            raise SecretValidationError(
-                "hvac package not installed. Install with: pip install hvac"
-            )
+            raise SecretValidationError("hvac package not installed. Install with: pip install hvac")
         except Exception as e:
             raise SecretValidationError(f"Failed to initialize Vault: {e}")
 
@@ -117,13 +115,9 @@ class SecretsManager:
             logger.info("AWS Secrets Manager client initialized")
 
         except ImportError:
-            raise SecretValidationError(
-                "boto3 package not installed. Install with: pip install boto3"
-            )
+            raise SecretValidationError("boto3 package not installed. Install with: pip install boto3")
         except Exception as e:
-            raise SecretValidationError(
-                f"Failed to initialize AWS Secrets Manager: {e}"
-            )
+            raise SecretValidationError(f"Failed to initialize AWS Secrets Manager: {e}")
 
     def _init_azure(self):
         """Initialize Azure Key Vault client."""
@@ -237,9 +231,7 @@ class SecretsManager:
             path = self.config.get("vault_path", "qbitel")
 
             secret_path = f"{path}/{key}"
-            response = self.vault_client.secrets.kv.v2.read_secret_version(
-                path=secret_path, mount_point=mount_point
-            )
+            response = self.vault_client.secrets.kv.v2.read_secret_version(path=secret_path, mount_point=mount_point)
 
             return response["data"]["data"].get("value")
 
@@ -297,9 +289,7 @@ class SecretsManager:
             logger.error(f"Failed to read encrypted secrets file: {e}")
             return None
 
-    def set_secret(
-        self, key: str, value: str, metadata: Optional[SecretMetadata] = None
-    ):
+    def set_secret(self, key: str, value: str, metadata: Optional[SecretMetadata] = None):
         """
         Set secret value.
 
@@ -318,9 +308,7 @@ class SecretsManager:
             elif self.backend == SecretBackend.FILE:
                 self._set_in_file(key, value)
             else:
-                raise SecretValidationError(
-                    f"Setting secrets not supported for backend: {self.backend.value}"
-                )
+                raise SecretValidationError(f"Setting secrets not supported for backend: {self.backend.value}")
 
             # Update cache
             self.cache[key] = value
@@ -414,16 +402,12 @@ class SecretsManager:
         path = self.config.get("vault_path", "qbitel")
         secret_path = f"{path}/{key}"
 
-        self.vault_client.secrets.kv.v2.delete_metadata_and_all_versions(
-            path=secret_path, mount_point=mount_point
-        )
+        self.vault_client.secrets.kv.v2.delete_metadata_and_all_versions(path=secret_path, mount_point=mount_point)
 
     def _delete_from_aws(self, key: str):
         """Delete secret from AWS."""
         secret_name = f"qbitel/{key}"
-        self.aws_client.delete_secret(
-            SecretId=secret_name, ForceDeleteWithoutRecovery=True
-        )
+        self.aws_client.delete_secret(SecretId=secret_name, ForceDeleteWithoutRecovery=True)
 
     def _delete_from_azure(self, key: str):
         """Delete secret from Azure."""

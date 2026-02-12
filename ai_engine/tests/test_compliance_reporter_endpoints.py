@@ -38,9 +38,7 @@ class TestComplianceReportEndpoints:
             }
         )
         reporter.regulatory_kb = Mock()
-        reporter.regulatory_kb.get_available_frameworks = Mock(
-            return_value=["GDPR", "SOC2"]
-        )
+        reporter.regulatory_kb.get_available_frameworks = Mock(return_value=["GDPR", "SOC2"])
         reporter.regulatory_kb.get_framework_metadata = Mock(
             return_value={
                 "full_name": "General Data Protection Regulation",
@@ -103,9 +101,7 @@ class TestComplianceReportEndpoints:
         )
         from ai_engine.api.compliance_reporter_endpoints import ComplianceReportRequest
 
-        mock_reporter.generate_compliance_report.side_effect = Exception(
-            "Generation failed"
-        )
+        mock_reporter.generate_compliance_report.side_effect = Exception("Generation failed")
 
         request = ComplianceReportRequest(protocol="HTTP", standard="GDPR")
 
@@ -169,13 +165,9 @@ class TestComplianceReportEndpoints:
         )
         from ai_engine.api.compliance_reporter_endpoints import MonitoringConfigRequest
 
-        mock_reporter.continuous_compliance_monitoring.side_effect = Exception(
-            "Monitoring failed"
-        )
+        mock_reporter.continuous_compliance_monitoring.side_effect = Exception("Monitoring failed")
 
-        request = MonitoringConfigRequest(
-            enabled=True, frequency="hourly", frameworks=["GDPR"]
-        )
+        request = MonitoringConfigRequest(enabled=True, frequency="hourly", frameworks=["GDPR"])
 
         with patch(
             "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
@@ -278,9 +270,7 @@ class TestComplianceReportEndpoints:
             "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",
             return_value=mock_reporter,
         ):
-            result = await get_compliance_alerts(
-                limit=100, severity="high", framework="GDPR"
-            )
+            result = await get_compliance_alerts(limit=100, severity="high", framework="GDPR")
 
         assert len(result) == 1
 
@@ -380,9 +370,7 @@ class TestComplianceReportEndpoints:
         from ai_engine.api.compliance_reporter_endpoints import generate_audit_evidence
         from ai_engine.api.compliance_reporter_endpoints import AuditRequestModel
 
-        mock_reporter.generate_audit_evidence.side_effect = Exception(
-            "Evidence generation failed"
-        )
+        mock_reporter.generate_audit_evidence.side_effect = Exception("Evidence generation failed")
 
         request = AuditRequestModel(auditor="John Doe", framework="GDPR")
 
@@ -429,9 +417,7 @@ class TestComplianceReportEndpoints:
             list_compliance_frameworks,
         )
 
-        mock_reporter.regulatory_kb.get_available_frameworks.side_effect = Exception(
-            "KB error"
-        )
+        mock_reporter.regulatory_kb.get_available_frameworks.side_effect = Exception("KB error")
 
         with patch(
             "ai_engine.api.compliance_reporter_endpoints.get_compliance_reporter",

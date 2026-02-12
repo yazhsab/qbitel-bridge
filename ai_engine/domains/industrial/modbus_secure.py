@@ -34,21 +34,12 @@ logger = logging.getLogger(__name__)
 
 # Metrics
 MODBUS_AUTH_OPS = Counter(
-    'modbus_secure_auth_operations_total',
-    'Total Modbus secure operations',
-    ['operation', 'function_code']
+    "modbus_secure_auth_operations_total", "Total Modbus secure operations", ["operation", "function_code"]
 )
 
-MODBUS_AUTH_LATENCY = Histogram(
-    'modbus_secure_latency_ms',
-    'Modbus secure operation latency',
-    buckets=[0.1, 0.5, 1, 2, 5, 10]
-)
+MODBUS_AUTH_LATENCY = Histogram("modbus_secure_latency_ms", "Modbus secure operation latency", buckets=[0.1, 0.5, 1, 2, 5, 10])
 
-MODBUS_ACTIVE_SESSIONS = Gauge(
-    'modbus_secure_active_sessions',
-    'Number of active Modbus secure sessions'
-)
+MODBUS_ACTIVE_SESSIONS = Gauge("modbus_secure_active_sessions", "Number of active Modbus secure sessions")
 
 
 class ModbusFunctionCode(Enum):
@@ -72,10 +63,10 @@ class ModbusFunctionCode(Enum):
 class ModbusRole(Enum):
     """Modbus security roles."""
 
-    VIEWER = auto()      # Read-only access
-    OPERATOR = auto()    # Read + limited write
-    ENGINEER = auto()    # Full read/write
-    ADMIN = auto()       # Full access + config
+    VIEWER = auto()  # Read-only access
+    OPERATOR = auto()  # Read + limited write
+    ENGINEER = auto()  # Full read/write
+    ADMIN = auto()  # Full access + config
 
 
 @dataclass
@@ -117,10 +108,7 @@ class ModbusSecureSession:
     def is_valid(self) -> bool:
         """Check if session is still valid."""
         age = time.time() - self.created_at
-        return (
-            age < self.profile.max_session_age and
-            self.message_count < self.profile.max_messages_per_session
-        )
+        return age < self.profile.max_session_age and self.message_count < self.profile.max_messages_per_session
 
     def next_sequence(self) -> int:
         """Get next sequence number."""
@@ -232,23 +220,18 @@ class ModbusAuthenticator:
 
         # Build MAC input
         mac_input = (
-            session.session_id +
-            session.server_unit_id.to_bytes(1, 'big') +
-            function_code.value.to_bytes(1, 'big') +
-            sequence.to_bytes(4, 'big') +
-            data
+            session.session_id
+            + session.server_unit_id.to_bytes(1, "big")
+            + function_code.value.to_bytes(1, "big")
+            + sequence.to_bytes(4, "big")
+            + data
         )
 
-        mac = hmac.new(
-            session.authentication_key,
-            mac_input,
-            hashlib.sha256
-        ).digest()[:8]  # Truncate to 8 bytes for Modbus constraints
+        mac = hmac.new(session.authentication_key, mac_input, hashlib.sha256).digest()[
+            :8
+        ]  # Truncate to 8 bytes for Modbus constraints
 
-        MODBUS_AUTH_OPS.labels(
-            operation="authenticate_request",
-            function_code=function_code.name
-        ).inc()
+        MODBUS_AUTH_OPS.labels(operation="authenticate_request", function_code=function_code.name).inc()
 
         return ModbusSecureMessage(
             unit_id=session.server_unit_id,
@@ -275,27 +258,20 @@ class ModbusAuthenticator:
 
         # Verify MAC
         mac_input = (
-            message.session_id +
-            message.unit_id.to_bytes(1, 'big') +
-            message.function_code.value.to_bytes(1, 'big') +
-            message.sequence.to_bytes(4, 'big') +
-            message.data
+            message.session_id
+            + message.unit_id.to_bytes(1, "big")
+            + message.function_code.value.to_bytes(1, "big")
+            + message.sequence.to_bytes(4, "big")
+            + message.data
         )
 
-        expected_mac = hmac.new(
-            session.authentication_key,
-            mac_input,
-            hashlib.sha256
-        ).digest()[:8]
+        expected_mac = hmac.new(session.authentication_key, mac_input, hashlib.sha256).digest()[:8]
 
         if not secrets.compare_digest(message.mac, expected_mac):
             logger.warning("MAC verification failed")
             return False
 
-        MODBUS_AUTH_OPS.labels(
-            operation="verify_request",
-            function_code=message.function_code.name
-        ).inc()
+        MODBUS_AUTH_OPS.labels(operation="verify_request", function_code=message.function_code.name).inc()
 
         return True
 
@@ -374,7 +350,7 @@ class SecureModbusClient:
             raise RuntimeError("Not connected")
 
         # Build request data
-        data = struct.pack('>HH', address, count)
+        data = struct.pack(">HH", address, count)
 
         message = await self.authenticator.authenticate_request(
             self._session,
@@ -395,7 +371,7 @@ class SecureModbusClient:
         if not self._session:
             raise RuntimeError("Not connected")
 
-        data = struct.pack('>HH', address, value)
+        data = struct.pack(">HH", address, value)
 
         message = await self.authenticator.authenticate_request(
             self._session,
@@ -403,10 +379,7 @@ class SecureModbusClient:
             data,
         )
 
-        MODBUS_AUTH_OPS.labels(
-            operation="write",
-            function_code="WRITE_SINGLE_REGISTER"
-        ).inc()
+        MODBUS_AUTH_OPS.labels(operation="write", function_code="WRITE_SINGLE_REGISTER").inc()
 
         return True
 
@@ -487,31 +460,25 @@ class SecureModbusServer:
         fc = message.function_code
 
         if fc == ModbusFunctionCode.READ_HOLDING_REGISTERS:
-            address, count = struct.unpack('>HH', message.data[:4])
-            values = [
-                self._holding_registers.get(address + i, 0)
-                for i in range(count)
-            ]
-            return struct.pack('>' + 'H' * count, *values)
+            address, count = struct.unpack(">HH", message.data[:4])
+            values = [self._holding_registers.get(address + i, 0) for i in range(count)]
+            return struct.pack(">" + "H" * count, *values)
 
         elif fc == ModbusFunctionCode.WRITE_SINGLE_REGISTER:
-            address, value = struct.unpack('>HH', message.data[:4])
+            address, value = struct.unpack(">HH", message.data[:4])
             self._holding_registers[address] = value
             return message.data
 
         elif fc == ModbusFunctionCode.READ_COILS:
-            address, count = struct.unpack('>HH', message.data[:4])
+            address, count = struct.unpack(">HH", message.data[:4])
             # Pack coil values
-            values = [
-                self._coils.get(address + i, False)
-                for i in range(count)
-            ]
+            values = [self._coils.get(address + i, False) for i in range(count)]
             # Convert to bytes
             byte_count = (count + 7) // 8
             result = bytearray(byte_count)
             for i, v in enumerate(values):
                 if v:
-                    result[i // 8] |= (1 << (i % 8))
+                    result[i // 8] |= 1 << (i % 8)
             return bytes([byte_count]) + bytes(result)
 
         return b""
@@ -535,24 +502,30 @@ def create_modbus_security_profile(
     allowed_codes = []
 
     if role in (ModbusRole.VIEWER, ModbusRole.OPERATOR, ModbusRole.ENGINEER, ModbusRole.ADMIN):
-        allowed_codes.extend([
-            ModbusFunctionCode.READ_COILS,
-            ModbusFunctionCode.READ_DISCRETE_INPUTS,
-            ModbusFunctionCode.READ_HOLDING_REGISTERS,
-            ModbusFunctionCode.READ_INPUT_REGISTERS,
-        ])
+        allowed_codes.extend(
+            [
+                ModbusFunctionCode.READ_COILS,
+                ModbusFunctionCode.READ_DISCRETE_INPUTS,
+                ModbusFunctionCode.READ_HOLDING_REGISTERS,
+                ModbusFunctionCode.READ_INPUT_REGISTERS,
+            ]
+        )
 
     if role in (ModbusRole.OPERATOR, ModbusRole.ENGINEER, ModbusRole.ADMIN):
-        allowed_codes.extend([
-            ModbusFunctionCode.WRITE_SINGLE_COIL,
-            ModbusFunctionCode.WRITE_SINGLE_REGISTER,
-        ])
+        allowed_codes.extend(
+            [
+                ModbusFunctionCode.WRITE_SINGLE_COIL,
+                ModbusFunctionCode.WRITE_SINGLE_REGISTER,
+            ]
+        )
 
     if role in (ModbusRole.ENGINEER, ModbusRole.ADMIN):
-        allowed_codes.extend([
-            ModbusFunctionCode.WRITE_MULTIPLE_COILS,
-            ModbusFunctionCode.WRITE_MULTIPLE_REGISTERS,
-        ])
+        allowed_codes.extend(
+            [
+                ModbusFunctionCode.WRITE_MULTIPLE_COILS,
+                ModbusFunctionCode.WRITE_MULTIPLE_REGISTERS,
+            ]
+        )
 
     return ModbusSecurityProfile(
         device_id=device_id,

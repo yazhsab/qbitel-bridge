@@ -15,12 +15,12 @@ class TestQuantumCryptoSecurity:
     @pytest.fixture
     def kyber_instance(self):
         """Create Kyber768 instance for testing."""
-        return KeyEncapsulation('Kyber768')
+        return KeyEncapsulation("Kyber768")
 
     @pytest.fixture
     def dilithium_instance(self):
         """Create Dilithium3 instance for testing."""
-        return Signature('Dilithium3')
+        return Signature("Dilithium3")
 
     def test_kyber_shared_secret_uniqueness(self, kyber_instance):
         """Verify that each key encapsulation produces unique shared secrets."""
@@ -50,10 +50,10 @@ class TestQuantumCryptoSecurity:
 
     def test_kyber_key_recovery_impossible(self, kyber_instance):
         """Verify that private key cannot be recovered from public key."""
-        kem1 = KeyEncapsulation('Kyber768')
+        kem1 = KeyEncapsulation("Kyber768")
         public_key1 = kem1.generate_keypair()
 
-        kem2 = KeyEncapsulation('Kyber768')
+        kem2 = KeyEncapsulation("Kyber768")
         public_key2 = kem2.generate_keypair()
 
         # Generate shared secrets using both keys
@@ -90,9 +90,9 @@ class TestQuantumCryptoSecurity:
     def test_kyber_key_size_validation(self):
         """Verify correct key sizes for Kyber variants."""
         variants = {
-            'Kyber512': {'public': 800, 'secret': 1632, 'ciphertext': 768, 'shared': 32},
-            'Kyber768': {'public': 1184, 'secret': 2400, 'ciphertext': 1088, 'shared': 32},
-            'Kyber1024': {'public': 1568, 'secret': 3168, 'ciphertext': 1568, 'shared': 32}
+            "Kyber512": {"public": 800, "secret": 1632, "ciphertext": 768, "shared": 32},
+            "Kyber768": {"public": 1184, "secret": 2400, "ciphertext": 1088, "shared": 32},
+            "Kyber1024": {"public": 1568, "secret": 3168, "ciphertext": 1568, "shared": 32},
         }
 
         for algorithm, expected_sizes in variants.items():
@@ -100,12 +100,9 @@ class TestQuantumCryptoSecurity:
             public_key = kem.generate_keypair()
             ciphertext, shared_secret = kem.encap_secret(public_key)
 
-            assert len(public_key) == expected_sizes['public'], \
-                f"{algorithm} public key size mismatch"
-            assert len(ciphertext) == expected_sizes['ciphertext'], \
-                f"{algorithm} ciphertext size mismatch"
-            assert len(shared_secret) == expected_sizes['shared'], \
-                f"{algorithm} shared secret size mismatch"
+            assert len(public_key) == expected_sizes["public"], f"{algorithm} public key size mismatch"
+            assert len(ciphertext) == expected_sizes["ciphertext"], f"{algorithm} ciphertext size mismatch"
+            assert len(shared_secret) == expected_sizes["shared"], f"{algorithm} shared secret size mismatch"
 
     def test_dilithium_signature_determinism(self, dilithium_instance):
         """Verify that signatures are non-deterministic (use random nonce)."""
@@ -135,16 +132,18 @@ class TestQuantumCryptoSecurity:
 
         # Attempt forgery: modify message
         forged_message = b"Forged message"
-        assert not sig.verify(forged_message, valid_signature, public_key), \
-            "Signature forgery vulnerability: signature valid for different message"
+        assert not sig.verify(
+            forged_message, valid_signature, public_key
+        ), "Signature forgery vulnerability: signature valid for different message"
 
         # Attempt forgery: modify signature
         forged_signature = bytearray(valid_signature)
         forged_signature[0] ^= 0xFF
         forged_signature = bytes(forged_signature)
 
-        assert not sig.verify(message, forged_signature, public_key), \
-            "Signature forgery vulnerability: modified signature accepted"
+        assert not sig.verify(
+            message, forged_signature, public_key
+        ), "Signature forgery vulnerability: modified signature accepted"
 
     def test_dilithium_signature_replay_attack(self, dilithium_instance):
         """Test that signatures can be verified multiple times (replay should be handled at protocol level)."""
@@ -161,9 +160,9 @@ class TestQuantumCryptoSecurity:
     def test_dilithium_key_size_validation(self):
         """Verify correct key sizes for Dilithium variants."""
         variants = {
-            'Dilithium2': {'public': 1312, 'secret': 2528, 'signature': 2420},
-            'Dilithium3': {'public': 1952, 'secret': 4000, 'signature': 3293},
-            'Dilithium5': {'public': 2592, 'secret': 4864, 'signature': 4595}
+            "Dilithium2": {"public": 1312, "secret": 2528, "signature": 2420},
+            "Dilithium3": {"public": 1952, "secret": 4000, "signature": 3293},
+            "Dilithium5": {"public": 2592, "secret": 4864, "signature": 4595},
         }
 
         for algorithm, expected_sizes in variants.items():
@@ -171,10 +170,8 @@ class TestQuantumCryptoSecurity:
             public_key = sig.generate_keypair()
             signature = sig.sign(b"test")
 
-            assert len(public_key) == expected_sizes['public'], \
-                f"{algorithm} public key size mismatch"
-            assert len(signature) == expected_sizes['signature'], \
-                f"{algorithm} signature size mismatch"
+            assert len(public_key) == expected_sizes["public"], f"{algorithm} public key size mismatch"
+            assert len(signature) == expected_sizes["signature"], f"{algorithm} signature size mismatch"
 
     def test_random_oracle_model_properties(self, kyber_instance):
         """Test that cryptographic hash functions behave like random oracles."""
@@ -183,7 +180,7 @@ class TestQuantumCryptoSecurity:
         # Generate multiple key pairs
         public_keys = []
         for _ in range(20):
-            kem_temp = KeyEncapsulation('Kyber768')
+            kem_temp = KeyEncapsulation("Kyber768")
             public_key = kem_temp.generate_keypair()
             public_keys.append(public_key)
 
@@ -217,6 +214,7 @@ class TestQuantumCryptoSecurity:
 
         # Calculate coefficient of variation
         import statistics
+
         avg_time = statistics.mean(timings)
         std_dev = statistics.stdev(timings)
         cv = (std_dev / avg_time) * 100
@@ -264,12 +262,11 @@ class TestQuantumCryptoSecurity:
         # Verify all can be decapsulated correctly
         for i, ciphertext in enumerate(ciphertexts):
             decapsulated_secret = kem.decap_secret(ciphertext)
-            assert decapsulated_secret == secrets_sender[i], \
-                f"Key reuse safety violation at index {i}"
+            assert decapsulated_secret == secrets_sender[i], f"Key reuse safety violation at index {i}"
 
     def test_public_key_validation(self):
         """Test that invalid public keys are rejected."""
-        kem = KeyEncapsulation('Kyber768')
+        kem = KeyEncapsulation("Kyber768")
 
         invalid_public_keys = [
             b"",  # Empty
@@ -285,8 +282,7 @@ class TestQuantumCryptoSecurity:
                 # Security requirement: should not crash or expose secrets
             except Exception as e:
                 # Rejection is acceptable
-                assert isinstance(e, (ValueError, RuntimeError, TypeError)), \
-                    f"Unexpected exception type: {type(e)}"
+                assert isinstance(e, (ValueError, RuntimeError, TypeError)), f"Unexpected exception type: {type(e)}"
 
     def test_zero_knowledge_property(self, dilithium_instance):
         """Test that signatures don't leak information about private key."""
@@ -306,10 +302,9 @@ class TestQuantumCryptoSecurity:
                     similarity_ratio = 1 - (diff_bytes / len(sig1))
 
                     # Signatures should be very different (< 60% similar)
-                    assert similarity_ratio < 0.6, \
-                        f"Signatures too similar: {similarity_ratio:.2%}"
+                    assert similarity_ratio < 0.6, f"Signatures too similar: {similarity_ratio:.2%}"
 
-    @pytest.mark.parametrize("algorithm", ['Kyber512', 'Kyber768', 'Kyber1024'])
+    @pytest.mark.parametrize("algorithm", ["Kyber512", "Kyber768", "Kyber1024"])
     def test_kyber_kem_correctness(self, algorithm):
         """Test correctness of KEM for all Kyber variants."""
         kem = KeyEncapsulation(algorithm)
@@ -319,12 +314,10 @@ class TestQuantumCryptoSecurity:
             ciphertext, shared_secret_sender = kem.encap_secret(public_key)
             shared_secret_receiver = kem.decap_secret(ciphertext)
 
-            assert shared_secret_sender == shared_secret_receiver, \
-                f"{algorithm} KEM correctness failed"
-            assert len(shared_secret_sender) == 32, \
-                f"{algorithm} shared secret size incorrect"
+            assert shared_secret_sender == shared_secret_receiver, f"{algorithm} KEM correctness failed"
+            assert len(shared_secret_sender) == 32, f"{algorithm} shared secret size incorrect"
 
-    @pytest.mark.parametrize("algorithm", ['Dilithium2', 'Dilithium3', 'Dilithium5'])
+    @pytest.mark.parametrize("algorithm", ["Dilithium2", "Dilithium3", "Dilithium5"])
     def test_dilithium_signature_correctness(self, algorithm):
         """Test correctness of signatures for all Dilithium variants."""
         sig = Signature(algorithm)
@@ -339,16 +332,15 @@ class TestQuantumCryptoSecurity:
 
             # Wrong message should fail
             wrong_message = message + b"tampered"
-            assert not sig.verify(wrong_message, signature, public_key), \
-                f"{algorithm} accepted signature for wrong message"
+            assert not sig.verify(wrong_message, signature, public_key), f"{algorithm} accepted signature for wrong message"
 
     def test_entropy_of_generated_keys(self):
         """Test that generated keys have sufficient entropy."""
-        kem = KeyEncapsulation('Kyber768')
+        kem = KeyEncapsulation("Kyber768")
 
         public_keys = []
         for _ in range(10):
-            kem_temp = KeyEncapsulation('Kyber768')
+            kem_temp = KeyEncapsulation("Kyber768")
             pk = kem_temp.generate_keypair()
             public_keys.append(pk)
 
@@ -362,6 +354,7 @@ class TestQuantumCryptoSecurity:
 
         # Check variance in bytes (good entropy should show variation)
         import statistics
+
         low_entropy_positions = 0
         for pos, bytes_at_pos in byte_positions.items():
             unique_values = len(set(bytes_at_pos))
@@ -370,8 +363,7 @@ class TestQuantumCryptoSecurity:
 
         # Less than 10% of positions should have low entropy
         max_low_entropy = len(byte_positions) * 0.1
-        assert low_entropy_positions < max_low_entropy, \
-            f"Insufficient entropy: {low_entropy_positions} low-entropy positions"
+        assert low_entropy_positions < max_low_entropy, f"Insufficient entropy: {low_entropy_positions} low-entropy positions"
 
     def test_collision_resistance(self):
         """Test collision resistance of key generation."""
@@ -380,16 +372,16 @@ class TestQuantumCryptoSecurity:
         sig_keys = set()
 
         for _ in range(keys_generated):
-            kem = KeyEncapsulation('Kyber768')
+            kem = KeyEncapsulation("Kyber768")
             kem_pk = kem.generate_keypair()
             kem_keys.add(kem_pk)
 
-            sig = Signature('Dilithium3')
+            sig = Signature("Dilithium3")
             sig_pk = sig.generate_keypair()
             sig_keys.add(sig_pk)
 
         # All keys should be unique (no collisions)
-        assert len(kem_keys) == keys_generated, \
-            f"KEM key collision detected: {keys_generated - len(kem_keys)} collisions"
-        assert len(sig_keys) == keys_generated, \
-            f"Signature key collision detected: {keys_generated - len(sig_keys)} collisions"
+        assert len(kem_keys) == keys_generated, f"KEM key collision detected: {keys_generated - len(kem_keys)} collisions"
+        assert (
+            len(sig_keys) == keys_generated
+        ), f"Signature key collision detected: {keys_generated - len(sig_keys)} collisions"

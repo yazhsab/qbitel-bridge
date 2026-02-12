@@ -81,9 +81,7 @@ class ElasticAPMIntegration:
         self.logger = logging.getLogger(__name__)
 
         # Elastic APM configuration
-        self.apm_server_url = getattr(
-            config, "elastic_apm_server_url", "http://localhost:8200"
-        )
+        self.apm_server_url = getattr(config, "elastic_apm_server_url", "http://localhost:8200")
         self.apm_secret_token = getattr(config, "elastic_apm_secret_token", None)
         self.service_name = getattr(config, "service_name", "qbitel")
         self.environment = getattr(config.environment, "value", "development")
@@ -99,9 +97,7 @@ class ElasticAPMIntegration:
         self.transactions_sent = 0
         self.errors_sent = 0
 
-        self.logger.info(
-            f"ElasticAPMIntegration initialized (server: {self.apm_server_url})"
-        )
+        self.logger.info(f"ElasticAPMIntegration initialized (server: {self.apm_server_url})")
 
     async def initialize(self):
         """Initialize APM client."""
@@ -224,9 +220,7 @@ class ElasticAPMIntegration:
             async with self._session.post(endpoint, data=payload) as response:
                 if response.status == 202:
                     self.transactions_sent += len(batch)
-                    self.logger.debug(
-                        f"Flushed {len(batch)} transactions to Elastic APM"
-                    )
+                    self.logger.debug(f"Flushed {len(batch)} transactions to Elastic APM")
                 else:
                     self.logger.error(f"Elastic APM returned status {response.status}")
 
@@ -247,9 +241,7 @@ class DatadogAPMIntegration:
         self.logger = logging.getLogger(__name__)
 
         # Datadog configuration
-        self.dd_agent_url = getattr(
-            config, "datadog_agent_url", "http://localhost:8126"
-        )
+        self.dd_agent_url = getattr(config, "datadog_agent_url", "http://localhost:8126")
         self.dd_api_key = getattr(config, "datadog_api_key", None)
         self.service_name = getattr(config, "service_name", "qbitel")
         self.environment = getattr(config.environment, "value", "development")
@@ -264,9 +256,7 @@ class DatadogAPMIntegration:
         # Statistics
         self.transactions_sent = 0
 
-        self.logger.info(
-            f"DatadogAPMIntegration initialized (agent: {self.dd_agent_url})"
-        )
+        self.logger.info(f"DatadogAPMIntegration initialized (agent: {self.dd_agent_url})")
 
     async def initialize(self):
         """Initialize APM client."""
@@ -356,9 +346,7 @@ class DatadogAPMIntegration:
                     self.transactions_sent += len(batch)
                     self.logger.debug(f"Flushed {len(batch)} transactions to Datadog")
                 else:
-                    self.logger.error(
-                        f"Datadog agent returned status {response.status}"
-                    )
+                    self.logger.error(f"Datadog agent returned status {response.status}")
 
         except Exception as e:
             self.logger.error(f"Failed to flush batch to Datadog: {e}")
@@ -393,9 +381,7 @@ class APMManager:
         self._metrics_task: Optional[asyncio.Task] = None
         self._system_metrics: Dict[str, float] = {}
 
-        self.logger.info(
-            f"APMManager initialized with {len(self.integrations)} integrations"
-        )
+        self.logger.info(f"APMManager initialized with {len(self.integrations)} integrations")
 
     async def initialize(self):
         """Initialize all APM integrations."""
@@ -469,9 +455,7 @@ class APMManager:
                 # Memory metrics
                 memory = psutil.virtual_memory()
                 self._system_metrics["memory_percent"] = memory.percent
-                self._system_metrics["memory_available_mb"] = memory.available / (
-                    1024 * 1024
-                )
+                self._system_metrics["memory_available_mb"] = memory.available / (1024 * 1024)
 
                 # Disk metrics
                 disk = psutil.disk_usage("/")

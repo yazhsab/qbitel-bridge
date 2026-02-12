@@ -27,7 +27,6 @@ import structlog
 from ..core.config import Config
 from ..core.exceptions import ProtocolException, ModelException
 
-
 # ============================================================================
 # ENHANCED METRICS
 # ============================================================================
@@ -96,22 +95,14 @@ class DiscoveryMetrics:
             ["operation", "cache_type", "status"],
         )
 
-        self.cache_size_bytes = Gauge(
-            "qbitel_cache_size_bytes", "Current cache size in bytes", ["cache_type"]
-        )
+        self.cache_size_bytes = Gauge("qbitel_cache_size_bytes", "Current cache size in bytes", ["cache_type"])
 
-        self.cache_hit_rate = Gauge(
-            "qbitel_cache_hit_rate", "Cache hit rate", ["cache_type"]
-        )
+        self.cache_hit_rate = Gauge("qbitel_cache_hit_rate", "Cache hit rate", ["cache_type"])
 
         # Resource metrics
-        self.active_discoveries = Gauge(
-            "qbitel_active_discoveries", "Number of active discovery operations"
-        )
+        self.active_discoveries = Gauge("qbitel_active_discoveries", "Number of active discovery operations")
 
-        self.protocol_profiles_count = Gauge(
-            "qbitel_protocol_profiles_count", "Number of learned protocol profiles"
-        )
+        self.protocol_profiles_count = Gauge("qbitel_protocol_profiles_count", "Number of learned protocol profiles")
 
         self.model_memory_usage_bytes = Gauge(
             "qbitel_model_memory_usage_bytes",
@@ -225,9 +216,7 @@ class DistributedCache:
                 self.redis_client.ping()
                 self.logger.info("Redis cache connected", url=redis_url)
             except Exception as e:
-                self.logger.warning(
-                    "Redis connection failed, using memory only", error=str(e)
-                )
+                self.logger.warning("Redis connection failed, using memory only", error=str(e))
                 self.redis_client = None
 
         # Cache statistics
@@ -262,9 +251,7 @@ class DistributedCache:
                         self.access_order.append(key)
                         self.stats["hits"] += 1
 
-                        self.metrics.cache_operations_total.labels(
-                            operation="get", cache_type="memory", status="hit"
-                        ).inc()
+                        self.metrics.cache_operations_total.labels(operation="get", cache_type="memory", status="hit").inc()
 
                         self._update_cache_metrics()
                         return entry.value
@@ -280,9 +267,7 @@ class DistributedCache:
                         value = pickle.loads(value_bytes)
                         self.stats["hits"] += 1
 
-                        self.metrics.cache_operations_total.labels(
-                            operation="get", cache_type="redis", status="hit"
-                        ).inc()
+                        self.metrics.cache_operations_total.labels(operation="get", cache_type="redis", status="hit").inc()
 
                         # Promote to memory cache
                         await self._set_memory(key, value, self.default_ttl)
@@ -294,9 +279,7 @@ class DistributedCache:
 
             # Cache miss
             self.stats["misses"] += 1
-            self.metrics.cache_operations_total.labels(
-                operation="get", cache_type="all", status="miss"
-            ).inc()
+            self.metrics.cache_operations_total.labels(operation="get", cache_type="all", status="miss").inc()
 
             self._update_cache_metrics()
             return None
@@ -324,9 +307,7 @@ class DistributedCache:
                     value_bytes = pickle.dumps(value)
                     self.redis_client.setex(key, int(ttl), value_bytes)
 
-                    self.metrics.cache_operations_total.labels(
-                        operation="set", cache_type="redis", status="success"
-                    ).inc()
+                    self.metrics.cache_operations_total.labels(operation="set", cache_type="redis", status="success").inc()
                 except Exception as e:
                     self.logger.warning("Redis set failed", key=key, error=str(e))
                     success_redis = False
@@ -336,9 +317,7 @@ class DistributedCache:
 
         except Exception as e:
             self.logger.error("Cache set failed", key=key, error=str(e))
-            self.metrics.cache_operations_total.labels(
-                operation="set", cache_type="all", status="error"
-            ).inc()
+            self.metrics.cache_operations_total.labels(operation="set", cache_type="all", status="error").inc()
             return False
 
     async def _set_memory(self, key: str, value: Any, ttl: float) -> bool:
@@ -349,10 +328,7 @@ class DistributedCache:
 
             with self.memory_cache_lock:
                 # Evict if necessary
-                while (
-                    self.current_memory_size + size_bytes > self.max_memory_size
-                    and self.memory_cache
-                ):
+                while self.current_memory_size + size_bytes > self.max_memory_size and self.memory_cache:
                     await self._evict_lru()
 
                 # Create entry
@@ -375,13 +351,9 @@ class DistributedCache:
                 self.current_memory_size += size_bytes
                 self.access_order.append(key)
 
-                self.metrics.cache_operations_total.labels(
-                    operation="set", cache_type="memory", status="success"
-                ).inc()
+                self.metrics.cache_operations_total.labels(operation="set", cache_type="memory", status="success").inc()
 
-                self.metrics.cache_size_bytes.labels(cache_type="memory").set(
-                    self.current_memory_size
-                )
+                self.metrics.cache_size_bytes.labels(cache_type="memory").set(self.current_memory_size)
 
                 return True
 
@@ -411,9 +383,7 @@ class DistributedCache:
                 self.current_memory_size -= entry.size_bytes
                 self.stats["evictions"] += 1
 
-                self.metrics.cache_operations_total.labels(
-                    operation="evict", cache_type="memory", status="success"
-                ).inc()
+                self.metrics.cache_operations_total.labels(operation="evict", cache_type="memory", status="success").inc()
                 break
 
     async def delete(self, key: str) -> bool:
@@ -437,9 +407,7 @@ class DistributedCache:
 
         if deleted:
             self.stats["deletes"] += 1
-            self.metrics.cache_operations_total.labels(
-                operation="delete", cache_type="all", status="success"
-            ).inc()
+            self.metrics.cache_operations_total.labels(operation="delete", cache_type="all", status="success").inc()
 
         return deleted
 
@@ -477,20 +445,14 @@ class DistributedCache:
                 await asyncio.sleep(60)  # Run every minute
 
                 with self.memory_cache_lock:
-                    expired_keys = [
-                        key
-                        for key, entry in self.memory_cache.items()
-                        if entry.is_expired()
-                    ]
+                    expired_keys = [key for key, entry in self.memory_cache.items() if entry.is_expired()]
 
                     for key in expired_keys:
                         entry = self.memory_cache.pop(key)
                         self.current_memory_size -= entry.size_bytes
 
                     if expired_keys:
-                        self.logger.info(
-                            "Cleaned up expired cache entries", count=len(expired_keys)
-                        )
+                        self.logger.info("Cleaned up expired cache entries", count=len(expired_keys))
 
             except asyncio.CancelledError:
                 break
@@ -538,9 +500,7 @@ class DistributedCache:
 class DiscoveryError(Exception):
     """Base exception for discovery errors."""
 
-    def __init__(
-        self, message: str, component: str, recoverable: bool = True, **kwargs
-    ):
+    def __init__(self, message: str, component: str, recoverable: bool = True, **kwargs):
         super().__init__(message)
         self.component = component
         self.recoverable = recoverable
@@ -769,9 +729,7 @@ class HealthChecker:
     async def is_healthy(self) -> bool:
         """Check if system is healthy."""
         results = await self.check_all()
-        return all(
-            health.status != HealthStatus.UNHEALTHY for health in results.values()
-        )
+        return all(health.status != HealthStatus.UNHEALTHY for health in results.values())
 
     async def is_ready(self) -> bool:
         """Check if system is ready to serve requests."""
@@ -779,8 +737,7 @@ class HealthChecker:
         critical_components = ["cache", "models"]
 
         return all(
-            results.get(comp, ComponentHealth("", HealthStatus.UNHEALTHY, "")).status
-            != HealthStatus.UNHEALTHY
+            results.get(comp, ComponentHealth("", HealthStatus.UNHEALTHY, "")).status != HealthStatus.UNHEALTHY
             for comp in critical_components
             if comp in results
         )

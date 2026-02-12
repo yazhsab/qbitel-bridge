@@ -244,14 +244,10 @@ class ModelRegistry:
             # Try MLflow first
             if self.mlflow_client:
                 if stage:
-                    model_version = self.mlflow_client.get_latest_versions(
-                        model_name, stages=[stage]
-                    )[0]
+                    model_version = self.mlflow_client.get_latest_versions(model_name, stages=[stage])[0]
                     version = model_version.version
                 elif not version:
-                    model_version = self.mlflow_client.get_latest_versions(
-                        model_name, stages=["production", "staging"]
-                    )[0]
+                    model_version = self.mlflow_client.get_latest_versions(model_name, stages=["production", "staging"])[0]
                     version = model_version.version
 
                 return await self._get_model_version_from_mlflow(model_name, version)
@@ -323,18 +319,12 @@ class ModelRegistry:
                         archive_existing_versions=True,
                     )
                 elif status == ModelStatus.STAGING:
-                    self.mlflow_client.transition_model_version_stage(
-                        model_name, version, "staging"
-                    )
+                    self.mlflow_client.transition_model_version_stage(model_name, version, "staging")
                 elif status == ModelStatus.ARCHIVED:
-                    self.mlflow_client.transition_model_version_stage(
-                        model_name, version, "archived"
-                    )
+                    self.mlflow_client.transition_model_version_stage(model_name, version, "archived")
 
                 if description:
-                    self.mlflow_client.update_model_version(
-                        model_name, version, description=description
-                    )
+                    self.mlflow_client.update_model_version(model_name, version, description=description)
 
             # Update local metadata
             model_id = await self._get_model_id_by_name(model_name)
@@ -343,18 +333,14 @@ class ModelRegistry:
                 self._model_cache[model_id].updated_at = time.time()
                 await self._store_metadata(self._model_cache[model_id])
 
-            self.logger.info(
-                f"Model status updated: {model_name}:{version} -> {status}"
-            )
+            self.logger.info(f"Model status updated: {model_name}:{version} -> {status}")
             return True
 
         except Exception as e:
             self.logger.error(f"Failed to update model status: {e}")
             return False
 
-    async def delete_model(
-        self, model_name: str, version: Optional[str] = None
-    ) -> bool:
+    async def delete_model(self, model_name: str, version: Optional[str] = None) -> bool:
         """
         Delete a model or specific version.
 
@@ -382,9 +368,7 @@ class ModelRegistry:
             if version:
                 # Remove specific version
                 if model_id in self._version_cache:
-                    self._version_cache[model_id] = [
-                        v for v in self._version_cache[model_id] if v.version != version
-                    ]
+                    self._version_cache[model_id] = [v for v in self._version_cache[model_id] if v.version != version]
             else:
                 # Remove entire model
                 if model_id in self._model_cache:
@@ -399,9 +383,7 @@ class ModelRegistry:
             self.logger.error(f"Failed to delete model: {e}")
             return False
 
-    async def load_model(
-        self, model_name: str, version: Optional[str] = None
-    ) -> torch.nn.Module:
+    async def load_model(self, model_name: str, version: Optional[str] = None) -> torch.nn.Module:
         """
         Load a model for inference.
 
@@ -488,9 +470,7 @@ class ModelRegistry:
                         "model1": metrics1[metric],
                         "model2": metrics2[metric],
                         "difference": metrics1[metric] - metrics2[metric],
-                        "improvement": (metrics1[metric] - metrics2[metric])
-                        / metrics2[metric]
-                        * 100,
+                        "improvement": (metrics1[metric] - metrics2[metric]) / metrics2[metric] * 100,
                     }
 
             # Compare sizes
@@ -498,20 +478,15 @@ class ModelRegistry:
                 comparison["size_comparison"] = {
                     "model1_mb": model1.metadata.model_size_mb,
                     "model2_mb": model2.metadata.model_size_mb,
-                    "size_difference_mb": model1.metadata.model_size_mb
-                    - model2.metadata.model_size_mb,
+                    "size_difference_mb": model1.metadata.model_size_mb - model2.metadata.model_size_mb,
                 }
 
             # Compare inference latency
-            if (
-                model1.metadata.inference_latency_ms
-                and model2.metadata.inference_latency_ms
-            ):
+            if model1.metadata.inference_latency_ms and model2.metadata.inference_latency_ms:
                 comparison["performance_comparison"] = {
                     "model1_latency_ms": model1.metadata.inference_latency_ms,
                     "model2_latency_ms": model2.metadata.inference_latency_ms,
-                    "latency_difference_ms": model1.metadata.inference_latency_ms
-                    - model2.metadata.inference_latency_ms,
+                    "latency_difference_ms": model1.metadata.inference_latency_ms - model2.metadata.inference_latency_ms,
                 }
 
             return comparison
@@ -538,9 +513,7 @@ class ModelRegistry:
 
             # Find parent models
             if model_version.metadata.parent_model_id:
-                parent_metadata = self._model_cache.get(
-                    model_version.metadata.parent_model_id
-                )
+                parent_metadata = self._model_cache.get(model_version.metadata.parent_model_id)
                 if parent_metadata:
                     lineage["parent_models"].append(
                         {
@@ -589,14 +562,10 @@ class ModelRegistry:
                 self.s3_client = boto3.client("s3")
                 self.logger.info("S3 storage backend initialized")
             except Exception as e:
-                self.logger.warning(
-                    f"S3 initialization failed, falling back to local: {e}"
-                )
+                self.logger.warning(f"S3 initialization failed, falling back to local: {e}")
                 self.storage_backend = "local"
 
-    async def _store_model(
-        self, model: Union[torch.nn.Module, str], metadata: ModelMetadata
-    ) -> str:
+    async def _store_model(self, model: Union[torch.nn.Module, str], metadata: ModelMetadata) -> str:
         """Store model and return URI."""
         model_filename = f"{metadata.name}_{metadata.version}_{metadata.model_id}.pt"
 
@@ -623,18 +592,14 @@ class ModelRegistry:
 
                 with tempfile.NamedTemporaryFile(suffix=".pt") as tmp:
                     torch.save(model.state_dict(), tmp.name)
-                    self.s3_client.upload_file(
-                        tmp.name, self.storage_config["bucket"], s3_key
-                    )
+                    self.s3_client.upload_file(tmp.name, self.storage_config["bucket"], s3_key)
             else:
                 self.s3_client.upload_file(model, self.storage_config["bucket"], s3_key)
 
             return f"s3://{self.storage_config['bucket']}/{s3_key}"
 
         else:
-            raise ModelRegistryException(
-                f"Unsupported storage backend: {self.storage_backend}"
-            )
+            raise ModelRegistryException(f"Unsupported storage backend: {self.storage_backend}")
 
     async def _calculate_checksum(self, model_uri: str) -> str:
         """Calculate model checksum for integrity verification."""
@@ -648,9 +613,7 @@ class ModelRegistry:
         else:
             return "unknown"
 
-    async def _store_artifacts(
-        self, artifacts: Dict[str, Union[str, Path]], metadata: ModelMetadata
-    ) -> Dict[str, str]:
+    async def _store_artifacts(self, artifacts: Dict[str, Union[str, Path]], metadata: ModelMetadata) -> Dict[str, str]:
         """Store model artifacts and return URIs."""
         artifact_uris = {}
 
@@ -691,9 +654,7 @@ class ModelRegistry:
                 self._model_cache[metadata.model_id] = metadata
 
             except Exception as e:
-                self.logger.warning(
-                    f"Failed to load metadata from {metadata_file}: {e}"
-                )
+                self.logger.warning(f"Failed to load metadata from {metadata_file}: {e}")
 
     async def _register_with_mlflow(
         self,
@@ -708,9 +669,7 @@ class ModelRegistry:
         try:
             # Create or get registered model
             try:
-                self.mlflow_client.create_registered_model(
-                    metadata.name, tags=metadata.tags, description=metadata.description
-                )
+                self.mlflow_client.create_registered_model(metadata.name, tags=metadata.tags, description=metadata.description)
             except Exception:
                 # Model already exists
                 pass
@@ -754,9 +713,7 @@ class ModelRegistry:
 
         raise ModelRegistryException(f"Model not found: {model_name}")
 
-    async def _get_model_version_from_mlflow(
-        self, model_name: str, version: str
-    ) -> ModelVersion:
+    async def _get_model_version_from_mlflow(self, model_name: str, version: str) -> ModelVersion:
         """Get model version from MLflow."""
         try:
             import mlflow
@@ -786,9 +743,7 @@ class ModelRegistry:
             self.logger.error(f"Error fetching model from MLflow: {e}")
             raise ModelRegistryException(f"Failed to get model from MLflow: {e}")
 
-    async def _get_model_version_local(
-        self, model_name: str, version: Optional[str]
-    ) -> ModelVersion:
+    async def _get_model_version_local(self, model_name: str, version: Optional[str]) -> ModelVersion:
         """Get model version from local registry."""
         model_id = await self._get_model_id_by_name(model_name)
 
@@ -801,21 +756,15 @@ class ModelRegistry:
             for v in versions:
                 if v.version == version:
                     return v
-            raise ModelRegistryException(
-                f"Version {version} not found for model: {model_name}"
-            )
+            raise ModelRegistryException(f"Version {version} not found for model: {model_name}")
         else:
             # Return latest version
             if versions:
                 return sorted(versions, key=lambda v: v.metadata.created_at or 0)[-1]
             else:
-                raise ModelRegistryException(
-                    f"No versions available for model: {model_name}"
-                )
+                raise ModelRegistryException(f"No versions available for model: {model_name}")
 
-    async def _cleanup_local_storage(
-        self, model_name: str, version: Optional[str]
-    ) -> None:
+    async def _cleanup_local_storage(self, model_name: str, version: Optional[str]) -> None:
         """Clean up local storage for deleted models."""
         # Implementation would clean up model files and artifacts
         pass

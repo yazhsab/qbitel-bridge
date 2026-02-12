@@ -24,6 +24,7 @@ from pydantic import BaseModel
 
 class QueryExpansionStrategy(Enum):
     """Strategies for query expansion."""
+
     SYNONYMS = "synonyms"  # Add synonym terms
     HYPOTHETICAL_ANSWER = "hypothetical_answer"  # HyDE - generate hypothetical answer
     MULTI_PERSPECTIVE = "multi_perspective"  # Generate queries from different angles
@@ -33,6 +34,7 @@ class QueryExpansionStrategy(Enum):
 
 class CompressionStrategy(Enum):
     """Strategies for contextual compression."""
+
     EXTRACTIVE = "extractive"  # Extract relevant sentences
     ABSTRACTIVE = "abstractive"  # Summarize relevant content
     FILTER_ONLY = "filter_only"  # Remove irrelevant documents
@@ -42,6 +44,7 @@ class CompressionStrategy(Enum):
 @dataclass
 class ExpandedQuery:
     """Represents an expanded query with metadata."""
+
     original_query: str
     expanded_queries: List[str]
     expansion_strategy: QueryExpansionStrategy
@@ -52,6 +55,7 @@ class ExpandedQuery:
 @dataclass
 class CompressedContext:
     """Represents compressed context from retrieved documents."""
+
     original_documents: List[Dict[str, Any]]
     compressed_content: str
     compression_ratio: float
@@ -63,6 +67,7 @@ class CompressedContext:
 @dataclass
 class MultiQueryResult:
     """Result from multi-query retrieval."""
+
     queries_used: List[str]
     documents: List[Dict[str, Any]]
     fusion_scores: List[float]
@@ -99,12 +104,10 @@ class QueryExpander:
 Original query: {query}
 
 Return only the alternative queries, one per line. No numbering or extra text.""",
-
             QueryExpansionStrategy.HYPOTHETICAL_ANSWER: """Imagine you are an expert answering this question. Write a brief, hypothetical answer that a relevant document might contain.
 Question: {query}
 
 Write a 2-3 sentence hypothetical answer that would be found in a relevant document.""",
-
             QueryExpansionStrategy.MULTI_PERSPECTIVE: """Generate {n} different search queries for this question, each from a different perspective or angle.
 Original question: {query}
 
@@ -115,12 +118,10 @@ Consider different aspects like:
 - Broader context
 
 Return only the queries, one per line. No numbering or extra text.""",
-
             QueryExpansionStrategy.STEP_BACK: """Given this specific question, generate a more general/abstract question that captures the underlying concept.
 Specific question: {query}
 
 Return only the step-back question, no extra text.""",
-
             QueryExpansionStrategy.DECOMPOSITION: """Break this complex question into {n} simpler sub-questions that, when answered together, would answer the main question.
 Complex question: {query}
 
@@ -156,10 +157,7 @@ Return only the sub-questions, one per line. No numbering or extra text.""",
                 expanded_queries.extend(self._rule_based_expansion(query, num_expansions))
             else:
                 # LLM-based expansion
-                prompt = self.expansion_prompts[strategy].format(
-                    query=query,
-                    n=num_expansions
-                )
+                prompt = self.expansion_prompts[strategy].format(query=query, n=num_expansions)
 
                 response = await self.llm_generate(prompt)
 
@@ -175,7 +173,7 @@ Return only the sub-questions, one per line. No numbering or extra text.""",
                     "processing_time": time.time() - start_time,
                     "num_expansions": len(expanded_queries) - 1,
                     "llm_used": self.llm_generate is not None,
-                }
+                },
             )
 
         except Exception as e:
@@ -184,7 +182,7 @@ Return only the sub-questions, one per line. No numbering or extra text.""",
                 original_query=query,
                 expanded_queries=[query],
                 expansion_strategy=strategy,
-                expansion_metadata={"error": str(e)}
+                expansion_metadata={"error": str(e)},
             )
 
     def _rule_based_expansion(self, query: str, num_expansions: int) -> List[str]:
@@ -210,11 +208,7 @@ Return only the sub-questions, one per line. No numbering or extra text.""",
 
         return expansions[:num_expansions]
 
-    def _parse_expansion_response(
-        self,
-        response: str,
-        strategy: QueryExpansionStrategy
-    ) -> List[str]:
+    def _parse_expansion_response(self, response: str, strategy: QueryExpansionStrategy) -> List[str]:
         """Parse LLM response into individual queries."""
         # Split by newlines and clean up
         lines = [line.strip() for line in response.split("\n")]
@@ -232,20 +226,12 @@ Return only the sub-questions, one per line. No numbering or extra text.""",
 
         return queries
 
-    async def decompose_complex_query(
-        self,
-        query: str,
-        max_subqueries: int = 4
-    ) -> List[str]:
+    async def decompose_complex_query(self, query: str, max_subqueries: int = 4) -> List[str]:
         """
         Decompose a complex query into simpler sub-queries.
         Useful for multi-hop reasoning.
         """
-        expanded = await self.expand_query(
-            query,
-            strategy=QueryExpansionStrategy.DECOMPOSITION,
-            num_expansions=max_subqueries
-        )
+        expanded = await self.expand_query(query, strategy=QueryExpansionStrategy.DECOMPOSITION, num_expansions=max_subqueries)
         return expanded.expanded_queries
 
 
@@ -279,7 +265,6 @@ Context:
 {context}
 
 Return only the relevant sentences, preserving their original wording. If no sentences are relevant, respond with "NO_RELEVANT_CONTENT".""",
-
             CompressionStrategy.ABSTRACTIVE: """Given the following context and query, provide a concise summary of the information relevant to the query.
 
 Query: {query}
@@ -288,7 +273,6 @@ Context:
 {context}
 
 Provide a focused summary (max 3-4 sentences) containing only information relevant to the query. If no relevant information exists, respond with "NO_RELEVANT_CONTENT".""",
-
             CompressionStrategy.FILTER_ONLY: """Given the following documents and query, identify which documents are relevant to the query.
 
 Query: {query}
@@ -339,46 +323,32 @@ Return only the document IDs that are relevant, one per line. If none are releva
                 # First filter, then compress
                 filtered = await self._filter_documents(query, documents)
                 if filtered.compressed_content:
-                    return await self._compress_content(
-                        query,
-                        filtered.original_documents,
-                        CompressionStrategy.EXTRACTIVE
-                    )
+                    return await self._compress_content(query, filtered.original_documents, CompressionStrategy.EXTRACTIVE)
                 return filtered
             else:
                 return await self._compress_content(query, documents, strategy)
 
         except Exception as e:
             self.logger.warning(f"Compression failed: {e}, returning uncompressed")
-            combined = "\n\n".join(
-                doc.get("content", str(doc)) for doc in documents
-            )
+            combined = "\n\n".join(doc.get("content", str(doc)) for doc in documents)
             return CompressedContext(
                 original_documents=documents,
-                compressed_content=combined[:self.max_compressed_length],
+                compressed_content=combined[: self.max_compressed_length],
                 compression_ratio=1.0,
                 relevant_excerpts=[],
                 compression_strategy=strategy,
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
             )
 
     async def _compress_content(
-        self,
-        query: str,
-        documents: List[Dict[str, Any]],
-        strategy: CompressionStrategy
+        self, query: str, documents: List[Dict[str, Any]], strategy: CompressionStrategy
     ) -> CompressedContext:
         """Compress document content using LLM."""
         # Combine documents into context
-        context = "\n\n---\n\n".join(
-            doc.get("content", str(doc)) for doc in documents
-        )
+        context = "\n\n---\n\n".join(doc.get("content", str(doc)) for doc in documents)
         original_length = len(context)
 
-        prompt = self.compression_prompts[strategy].format(
-            query=query,
-            context=context
-        )
+        prompt = self.compression_prompts[strategy].format(query=query, context=context)
 
         response = await self.llm_generate(prompt)
 
@@ -389,39 +359,26 @@ Return only the document IDs that are relevant, one per line. If none are releva
                 compression_ratio=0.0,
                 relevant_excerpts=[],
                 compression_strategy=strategy,
-                metadata={"no_relevant_content": True}
+                metadata={"no_relevant_content": True},
             )
 
         # Parse excerpts (split by periods or newlines)
-        excerpts = [
-            s.strip() for s in re.split(r'[.\n]+', response)
-            if s.strip() and len(s.strip()) > 20
-        ]
+        excerpts = [s.strip() for s in re.split(r"[.\n]+", response) if s.strip() and len(s.strip()) > 20]
 
         return CompressedContext(
             original_documents=documents,
-            compressed_content=response[:self.max_compressed_length],
+            compressed_content=response[: self.max_compressed_length],
             compression_ratio=len(response) / max(original_length, 1),
             relevant_excerpts=excerpts,
             compression_strategy=strategy,
         )
 
-    async def _filter_documents(
-        self,
-        query: str,
-        documents: List[Dict[str, Any]]
-    ) -> CompressedContext:
+    async def _filter_documents(self, query: str, documents: List[Dict[str, Any]]) -> CompressedContext:
         """Filter documents by relevance."""
         # Format documents with IDs
-        doc_text = "\n\n".join(
-            f"[DOC_{i}]: {doc.get('content', str(doc))[:500]}"
-            for i, doc in enumerate(documents)
-        )
+        doc_text = "\n\n".join(f"[DOC_{i}]: {doc.get('content', str(doc))[:500]}" for i, doc in enumerate(documents))
 
-        prompt = self.compression_prompts[CompressionStrategy.FILTER_ONLY].format(
-            query=query,
-            documents=doc_text
-        )
+        prompt = self.compression_prompts[CompressionStrategy.FILTER_ONLY].format(query=query, documents=doc_text)
 
         response = await self.llm_generate(prompt)
 
@@ -432,38 +389,30 @@ Return only the document IDs that are relevant, one per line. If none are releva
                 compression_ratio=0.0,
                 relevant_excerpts=[],
                 compression_strategy=CompressionStrategy.FILTER_ONLY,
-                metadata={"no_relevant_documents": True}
+                metadata={"no_relevant_documents": True},
             )
 
         # Parse document IDs from response
         relevant_ids = set()
-        for match in re.finditer(r'DOC_(\d+)', response):
+        for match in re.finditer(r"DOC_(\d+)", response):
             relevant_ids.add(int(match.group(1)))
 
         # Filter documents
-        filtered_docs = [
-            doc for i, doc in enumerate(documents)
-            if i in relevant_ids
-        ]
+        filtered_docs = [doc for i, doc in enumerate(documents) if i in relevant_ids]
 
-        combined = "\n\n".join(
-            doc.get("content", str(doc)) for doc in filtered_docs
-        )
+        combined = "\n\n".join(doc.get("content", str(doc)) for doc in filtered_docs)
 
         return CompressedContext(
             original_documents=filtered_docs,
-            compressed_content=combined[:self.max_compressed_length],
+            compressed_content=combined[: self.max_compressed_length],
             compression_ratio=len(filtered_docs) / max(len(documents), 1),
             relevant_excerpts=[],
             compression_strategy=CompressionStrategy.FILTER_ONLY,
-            metadata={"filtered_count": len(filtered_docs)}
+            metadata={"filtered_count": len(filtered_docs)},
         )
 
     def _keyword_based_compression(
-        self,
-        query: str,
-        documents: List[Dict[str, Any]],
-        strategy: CompressionStrategy
+        self, query: str, documents: List[Dict[str, Any]], strategy: CompressionStrategy
     ) -> CompressedContext:
         """Fallback keyword-based compression."""
         query_words = set(query.lower().split())
@@ -486,27 +435,23 @@ Return only the document IDs that are relevant, one per line. If none are releva
             if score > 0 and total_length < self.max_compressed_length:
                 relevant_docs.append(doc)
                 # Extract sentences containing query words
-                sentences = re.split(r'[.!?]+', content)
+                sentences = re.split(r"[.!?]+", content)
                 for sentence in sentences:
                     if any(word in sentence.lower() for word in query_words):
                         relevant_excerpts.append(sentence.strip())
                 total_length += len(content)
 
-        combined = "\n\n".join(
-            doc.get("content", str(doc)) for doc in relevant_docs
-        )
+        combined = "\n\n".join(doc.get("content", str(doc)) for doc in relevant_docs)
 
-        original_length = sum(
-            len(doc.get("content", str(doc))) for doc in documents
-        )
+        original_length = sum(len(doc.get("content", str(doc))) for doc in documents)
 
         return CompressedContext(
             original_documents=relevant_docs,
-            compressed_content=combined[:self.max_compressed_length],
+            compressed_content=combined[: self.max_compressed_length],
             compression_ratio=len(combined) / max(original_length, 1),
             relevant_excerpts=relevant_excerpts[:10],
             compression_strategy=strategy,
-            metadata={"method": "keyword_based"}
+            metadata={"method": "keyword_based"},
         )
 
 
@@ -561,11 +506,7 @@ class FusionRetriever:
                     doc_scores[doc_id] = (rrf_score, doc)
 
         # Sort by fused score
-        sorted_docs = sorted(
-            doc_scores.items(),
-            key=lambda x: x[1][0],
-            reverse=True
-        )
+        sorted_docs = sorted(doc_scores.items(), key=lambda x: x[1][0], reverse=True)
 
         # Extract results
         documents = [doc for _, (score, doc) in sorted_docs]
@@ -577,7 +518,7 @@ class FusionRetriever:
             fusion_scores=scores,
             processing_time=time.time() - start_time,
             deduplication_applied=self.deduplication,
-            total_candidates=sum(len(r) for r in query_results)
+            total_candidates=sum(len(r) for r in query_results),
         )
 
     def _get_doc_id(self, doc: Dict[str, Any], id_field: str) -> str:
@@ -639,7 +580,7 @@ class AdvancedRAGPipeline:
         collection_name: Optional[str] = None,
         expansion_strategy: Optional[QueryExpansionStrategy] = None,
         num_expansions: int = 3,
-        **retrieval_kwargs
+        **retrieval_kwargs,
     ) -> MultiQueryResult:
         """
         Retrieve documents using query expansion and fusion.
@@ -659,9 +600,7 @@ class AdvancedRAGPipeline:
         # Step 1: Expand query
         if self.enable_expansion:
             expanded = await self.query_expander.expand_query(
-                query,
-                strategy=expansion_strategy,
-                num_expansions=num_expansions
+                query, strategy=expansion_strategy, num_expansions=num_expansions
             )
             queries = expanded.expanded_queries
         else:
@@ -671,20 +610,11 @@ class AdvancedRAGPipeline:
         all_results = []
         for q in queries:
             try:
-                results = await self.retrieve(
-                    query=q,
-                    collection_name=collection_name,
-                    **retrieval_kwargs
-                )
+                results = await self.retrieve(query=q, collection_name=collection_name, **retrieval_kwargs)
                 # Handle both list and RAGQueryResult
                 if hasattr(results, "documents"):
                     docs = [
-                        {
-                            "id": doc.id,
-                            "content": doc.content,
-                            "metadata": doc.metadata,
-                            "score": score
-                        }
+                        {"id": doc.id, "content": doc.content, "metadata": doc.metadata, "score": score}
                         for doc, score in zip(results.documents, results.similarity_scores)
                     ]
                 else:
@@ -700,8 +630,8 @@ class AdvancedRAGPipeline:
         fused.processing_time = time.time() - start_time
 
         # Limit results
-        fused.documents = fused.documents[:self.max_results]
-        fused.fusion_scores = fused.fusion_scores[:self.max_results]
+        fused.documents = fused.documents[: self.max_results]
+        fused.fusion_scores = fused.fusion_scores[: self.max_results]
 
         return fused
 
@@ -711,7 +641,7 @@ class AdvancedRAGPipeline:
         collection_name: Optional[str] = None,
         expansion_strategy: Optional[QueryExpansionStrategy] = None,
         compression_strategy: Optional[CompressionStrategy] = None,
-        **retrieval_kwargs
+        **retrieval_kwargs,
     ) -> Tuple[MultiQueryResult, CompressedContext]:
         """
         Full pipeline: expand, retrieve, fuse, and compress.
@@ -721,23 +651,16 @@ class AdvancedRAGPipeline:
         """
         # Retrieve with expansion
         fused_results = await self.retrieve_with_expansion(
-            query,
-            collection_name=collection_name,
-            expansion_strategy=expansion_strategy,
-            **retrieval_kwargs
+            query, collection_name=collection_name, expansion_strategy=expansion_strategy, **retrieval_kwargs
         )
 
         # Compress results
         if self.enable_compression and fused_results.documents:
             compressed = await self.contextual_compressor.compress(
-                query,
-                fused_results.documents,
-                strategy=compression_strategy
+                query, fused_results.documents, strategy=compression_strategy
             )
         else:
-            combined = "\n\n".join(
-                doc.get("content", str(doc)) for doc in fused_results.documents
-            )
+            combined = "\n\n".join(doc.get("content", str(doc)) for doc in fused_results.documents)
             compressed = CompressedContext(
                 original_documents=fused_results.documents,
                 compressed_content=combined,
@@ -749,11 +672,7 @@ class AdvancedRAGPipeline:
         return fused_results, compressed
 
     async def get_context_for_llm(
-        self,
-        query: str,
-        collection_name: Optional[str] = None,
-        max_context_length: int = 4000,
-        **kwargs
+        self, query: str, collection_name: Optional[str] = None, max_context_length: int = 4000, **kwargs
     ) -> str:
         """
         Get optimized context string for LLM consumption.
@@ -761,11 +680,7 @@ class AdvancedRAGPipeline:
         This is a convenience method that runs the full pipeline
         and returns a formatted context string.
         """
-        _, compressed = await self.retrieve_and_compress(
-            query,
-            collection_name=collection_name,
-            **kwargs
-        )
+        _, compressed = await self.retrieve_and_compress(query, collection_name=collection_name, **kwargs)
 
         context = compressed.compressed_content
         if len(context) > max_context_length:
@@ -775,11 +690,7 @@ class AdvancedRAGPipeline:
 
 
 # Factory function for creating pipeline
-def create_advanced_rag_pipeline(
-    rag_engine,
-    llm_service=None,
-    **config
-) -> AdvancedRAGPipeline:
+def create_advanced_rag_pipeline(rag_engine, llm_service=None, **config) -> AdvancedRAGPipeline:
     """
     Factory function to create an AdvancedRAGPipeline.
 
@@ -791,17 +702,16 @@ def create_advanced_rag_pipeline(
     Returns:
         Configured AdvancedRAGPipeline instance
     """
+
     async def retrieval_func(query, collection_name=None, **kwargs):
-        return await rag_engine.query_similar(
-            query,
-            collection_name=collection_name,
-            **kwargs
-        )
+        return await rag_engine.query_similar(query, collection_name=collection_name, **kwargs)
 
     llm_func = None
     if llm_service is not None:
+
         async def llm_func(prompt):
             from .unified_llm_service import LLMRequest
+
             request = LLMRequest(
                 prompt=prompt,
                 feature_domain="protocol_copilot",
@@ -811,8 +721,4 @@ def create_advanced_rag_pipeline(
             response = await llm_service.process_request(request)
             return response.content
 
-    return AdvancedRAGPipeline(
-        retrieval_func=retrieval_func,
-        llm_generate_func=llm_func,
-        **config
-    )
+    return AdvancedRAGPipeline(retrieval_func=retrieval_func, llm_generate_func=llm_func, **config)

@@ -160,9 +160,7 @@ class TestAuditLogger:
         config = {"enabled": False, "log_to_file": False}
         logger = AuditLogger(config)
 
-        event = AuditEvent(
-            event_type=AuditEventType.LOGIN_SUCCESS, timestamp=datetime.utcnow()
-        )
+        event = AuditEvent(event_type=AuditEventType.LOGIN_SUCCESS, timestamp=datetime.utcnow())
 
         # Should not raise error, just not log
         logger.log_event(event)
@@ -204,9 +202,7 @@ class TestAuditLogger:
         config = {"enabled": True, "log_to_file": False}
         logger = AuditLogger(config)
 
-        logger.log_login_failed(
-            username="testuser", reason="Invalid password", ip_address="192.168.1.1"
-        )
+        logger.log_login_failed(username="testuser", reason="Invalid password", ip_address="192.168.1.1")
 
         # Should not raise error
 
@@ -224,9 +220,7 @@ class TestAuditLogger:
         config = {"enabled": True, "log_to_file": False}
         logger = AuditLogger(config)
 
-        logger.log_password_changed(
-            user_id="user123", username="testuser", forced=False
-        )
+        logger.log_password_changed(user_id="user123", username="testuser", forced=False)
 
         # Should not raise error
 
@@ -235,9 +229,7 @@ class TestAuditLogger:
         config = {"enabled": True, "log_to_file": False}
         logger = AuditLogger(config)
 
-        logger.log_api_key_created(
-            user_id="user123", key_name="production-key", key_id="key-abc123"
-        )
+        logger.log_api_key_created(user_id="user123", key_name="production-key", key_id="key-abc123")
 
         # Should not raise error
 
@@ -255,9 +247,7 @@ class TestAuditLogger:
         config = {"enabled": True, "log_to_file": False}
         logger = AuditLogger(config)
 
-        logger.log_secret_rotated(
-            user_id="user123", secret_key="api_key", reason="scheduled_rotation"
-        )
+        logger.log_secret_rotated(user_id="user123", secret_key="api_key", reason="scheduled_rotation")
 
         # Should not raise error
 

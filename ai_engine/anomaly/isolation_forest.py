@@ -52,17 +52,13 @@ class IsolationForestDetector:
     ) -> IsolationForestResult:
         vector = np.asarray(list(features), dtype=np.float32)
         if vector.size == 0:
-            raise AnomalyDetectionException(
-                "Empty feature vector supplied to isolation forest"
-            )
+            raise AnomalyDetectionException("Empty feature vector supplied to isolation forest")
 
         window = min(self.settings.window_size, vector.size)
         sliding = vector[-window:]
         variance = float(np.var(sliding))
 
-        threshold = max(
-            self._baseline_variance * (1 + self.settings.contamination * 5), 1e-3
-        )
+        threshold = max(self._baseline_variance * (1 + self.settings.contamination * 5), 1e-3)
         is_anomalous = variance > threshold
         score = float(np.clip(variance / (threshold + 1e-9), 0.0, 2.0))
         score = min(score / 2.0, 1.0)

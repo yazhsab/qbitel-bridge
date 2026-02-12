@@ -65,6 +65,7 @@ VLLM_ACTIVE_REQUESTS = Gauge(
 # Configuration
 # =============================================================================
 
+
 @dataclass
 class VLLMModelConfig:
     """Configuration for a vLLM-served model."""
@@ -159,6 +160,7 @@ class VLLMProviderConfig:
 # Request/Response Models
 # =============================================================================
 
+
 @dataclass
 class VLLMRequest:
     """Request to vLLM server."""
@@ -251,6 +253,7 @@ class VLLMResponse:
 # vLLM Provider
 # =============================================================================
 
+
 class VLLMProvider:
     """
     High-performance LLM provider using vLLM.
@@ -296,9 +299,7 @@ class VLLMProvider:
 
         # Initialize semaphores for each model
         for model_id, model_config in self.config.models.items():
-            self._semaphores[model_id] = asyncio.Semaphore(
-                model_config.max_concurrent_requests
-            )
+            self._semaphores[model_id] = asyncio.Semaphore(model_config.max_concurrent_requests)
             self._model_health[model_id] = True  # Assume healthy initially
 
         # Start health check task
@@ -346,9 +347,7 @@ class VLLMProvider:
             # Try to find a fallback
             fallback = self._get_fallback_model(model_id)
             if fallback:
-                self.logger.warning(
-                    f"Model {model_id} unhealthy, using fallback {fallback}"
-                )
+                self.logger.warning(f"Model {model_id} unhealthy, using fallback {fallback}")
                 model_id = fallback
                 model_config = self.config.models[fallback]
             else:
@@ -366,9 +365,7 @@ class VLLMProvider:
             start_time = time.time()
 
             # Make request with retries
-            response = await self._make_request_with_retry(
-                request, model_config
-            )
+            response = await self._make_request_with_retry(request, model_config)
 
             latency_ms = (time.time() - start_time) * 1000
 
@@ -469,20 +466,14 @@ class VLLMProvider:
 
             except aiohttp.ClientError as e:
                 last_error = e
-                self.logger.warning(
-                    f"vLLM request failed (attempt {attempt + 1}): {e}"
-                )
+                self.logger.warning(f"vLLM request failed (attempt {attempt + 1}): {e}")
 
                 if attempt < model_config.retry_attempts - 1:
-                    await asyncio.sleep(
-                        model_config.retry_delay * (attempt + 1)
-                    )
+                    await asyncio.sleep(model_config.retry_delay * (attempt + 1))
 
             except asyncio.TimeoutError:
                 last_error = Exception("Request timeout")
-                self.logger.warning(
-                    f"vLLM request timeout (attempt {attempt + 1})"
-                )
+                self.logger.warning(f"vLLM request timeout (attempt {attempt + 1})")
 
                 if attempt < model_config.retry_attempts - 1:
                     await asyncio.sleep(model_config.retry_delay)
@@ -610,9 +601,7 @@ class VLLMProvider:
 
             async with self._session.get(
                 endpoint,
-                timeout=aiohttp.ClientTimeout(
-                    total=self.config.health_check_timeout
-                ),
+                timeout=aiohttp.ClientTimeout(total=self.config.health_check_timeout),
             ) as response:
                 return response.status == 200
 

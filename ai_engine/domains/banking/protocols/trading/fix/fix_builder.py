@@ -53,9 +53,7 @@ class FixBuilder:
         """Reset the builder."""
         current_version = self._message.header.begin_string
         self._message = FixMessage()
-        self._message.header.begin_string = (
-            version.begin_string if version else current_version
-        )
+        self._message.header.begin_string = version.begin_string if version else current_version
         self._message.header.sending_time = datetime.utcnow()
         return self
 
@@ -97,9 +95,7 @@ class FixBuilder:
         self._message.header.poss_dup_flag = poss_dup
         return self
 
-    def set_on_behalf_of(
-        self, comp_id: str, sub_id: str = None
-    ) -> "FixBuilder":
+    def set_on_behalf_of(self, comp_id: str, sub_id: str = None) -> "FixBuilder":
         """Set on behalf of CompID."""
         self._message.header.on_behalf_of_comp_id = comp_id
         if sub_id:
@@ -138,16 +134,12 @@ class FixBuilder:
         """Set Symbol (tag 55)."""
         return self.set_field(55, symbol)
 
-    def set_security_id(
-        self, security_id: str, id_source: str = "4"
-    ) -> "FixBuilder":
+    def set_security_id(self, security_id: str, id_source: str = "4") -> "FixBuilder":
         """Set SecurityID (tag 48) and SecurityIDSource (tag 22)."""
         self.set_field(48, security_id)
         return self.set_field(22, id_source)
 
-    def set_security_type(
-        self, security_type: Union[FixSecurityType, str]
-    ) -> "FixBuilder":
+    def set_security_type(self, security_type: Union[FixSecurityType, str]) -> "FixBuilder":
         """Set SecurityType (tag 167)."""
         if isinstance(security_type, FixSecurityType):
             return self.set_field(167, security_type.code)
@@ -177,17 +169,13 @@ class FixBuilder:
         """Set StopPx (tag 99)."""
         return self.set_field(99, stop_price)
 
-    def set_time_in_force(
-        self, tif: Union[FixTimeInForce, str]
-    ) -> "FixBuilder":
+    def set_time_in_force(self, tif: Union[FixTimeInForce, str]) -> "FixBuilder":
         """Set TimeInForce (tag 59)."""
         if isinstance(tif, FixTimeInForce):
             return self.set_field(59, tif.code)
         return self.set_field(59, tif)
 
-    def set_handl_inst(
-        self, handl_inst: Union[FixHandlInst, str]
-    ) -> "FixBuilder":
+    def set_handl_inst(self, handl_inst: Union[FixHandlInst, str]) -> "FixBuilder":
         """Set HandlInst (tag 21)."""
         if isinstance(handl_inst, FixHandlInst):
             return self.set_field(21, handl_inst.code)
@@ -197,9 +185,7 @@ class FixBuilder:
         """Set TransactTime (tag 60)."""
         if transact_time is None:
             transact_time = datetime.utcnow()
-        return self.set_field(
-            60, transact_time.strftime("%Y%m%d-%H:%M:%S.%f")[:-3]
-        )
+        return self.set_field(60, transact_time.strftime("%Y%m%d-%H:%M:%S.%f")[:-3])
 
     def set_currency(self, currency: str) -> "FixBuilder":
         """Set Currency (tag 15)."""
@@ -284,11 +270,13 @@ class FixBuilder:
             group = FixGroup(count_tag=453)
             self._message.add_group(group)
 
-        group.add_entry({
-            448: party_id,
-            447: party_id_source,
-            452: str(party_role),
-        })
+        group.add_entry(
+            {
+                448: party_id,
+                447: party_id_source,
+                452: str(party_role),
+            }
+        )
         return self
 
     # Build method

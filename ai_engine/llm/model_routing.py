@@ -23,6 +23,7 @@ from pydantic import BaseModel
 
 class ModelTier(Enum):
     """Model capability tiers."""
+
     PREMIUM = "premium"  # Most capable, highest cost (GPT-4o, Claude Opus)
     STANDARD = "standard"  # Good balance (GPT-4o-mini, Claude Sonnet)
     ECONOMY = "economy"  # Cost-effective (Haiku, local models)
@@ -31,6 +32,7 @@ class ModelTier(Enum):
 
 class TaskComplexity(Enum):
     """Task complexity levels."""
+
     SIMPLE = "simple"  # Basic Q&A, formatting
     MODERATE = "moderate"  # Analysis, summarization
     COMPLEX = "complex"  # Multi-step reasoning, code generation
@@ -40,6 +42,7 @@ class TaskComplexity(Enum):
 @dataclass
 class ModelSpec:
     """Specification for an LLM model."""
+
     model_id: str
     provider: str
     tier: ModelTier
@@ -56,6 +59,7 @@ class ModelSpec:
 @dataclass
 class RoutingDecision:
     """Result of a routing decision."""
+
     selected_model: ModelSpec
     fallback_chain: List[ModelSpec]
     routing_reason: str
@@ -67,6 +71,7 @@ class RoutingDecision:
 @dataclass
 class BudgetConfig:
     """Budget configuration for cost management."""
+
     daily_limit_usd: float = 100.0
     monthly_limit_usd: float = 2000.0
     per_request_limit_usd: float = 1.0
@@ -77,6 +82,7 @@ class BudgetConfig:
 @dataclass
 class BudgetStatus:
     """Current budget status."""
+
     daily_spent: float = 0.0
     monthly_spent: float = 0.0
     daily_remaining: float = 0.0
@@ -243,21 +249,17 @@ class ComplexityAssessor:
             return TaskComplexity.COMPLEX
 
         # Count complexity indicators
-        complex_count = sum(
-            1 for ind in self.complex_indicators if ind in query_lower
-        )
-        simple_count = sum(
-            1 for ind in self.simple_indicators if ind in query_lower
-        )
+        complex_count = sum(1 for ind in self.complex_indicators if ind in query_lower)
+        simple_count = sum(1 for ind in self.simple_indicators if ind in query_lower)
 
         # Length-based heuristics
         query_length = len(query)
         context_size = sum(len(str(v)) for v in context.values())
 
         # Multi-part queries (containing "and", numbered lists)
-        has_multiple_parts = (
-            " and " in query_lower and query_lower.count(" and ") >= 2
-        ) or any(f"{i}." in query or f"{i})" in query for i in range(1, 5))
+        has_multiple_parts = (" and " in query_lower and query_lower.count(" and ") >= 2) or any(
+            f"{i}." in query or f"{i})" in query for i in range(1, 5)
+        )
 
         # Scoring
         complexity_score = 0
@@ -376,12 +378,14 @@ class BudgetManager:
         self._daily_spent += cost
         self._monthly_spent += cost
 
-        self._request_history.append({
-            "timestamp": now,
-            "cost": cost,
-            "model_id": model_id,
-            "tokens_used": tokens_used,
-        })
+        self._request_history.append(
+            {
+                "timestamp": now,
+                "cost": cost,
+                "model_id": model_id,
+                "tokens_used": tokens_used,
+            }
+        )
 
         # Keep only last 1000 requests
         if len(self._request_history) > 1000:
@@ -393,15 +397,14 @@ class BudgetManager:
         monthly_remaining = self.config.monthly_limit_usd - self._monthly_spent
 
         is_within_budget = (
-            daily_remaining >= estimated_cost and
-            monthly_remaining >= estimated_cost and
-            estimated_cost <= self.config.per_request_limit_usd
+            daily_remaining >= estimated_cost
+            and monthly_remaining >= estimated_cost
+            and estimated_cost <= self.config.per_request_limit_usd
         )
 
-        alert_triggered = (
-            (self._daily_spent / self.config.daily_limit_usd * 100) >= self.config.alert_threshold_percent or
-            (self._monthly_spent / self.config.monthly_limit_usd * 100) >= self.config.alert_threshold_percent
-        )
+        alert_triggered = (self._daily_spent / self.config.daily_limit_usd * 100) >= self.config.alert_threshold_percent or (
+            self._monthly_spent / self.config.monthly_limit_usd * 100
+        ) >= self.config.alert_threshold_percent
 
         return BudgetStatus(
             daily_spent=self._daily_spent,
@@ -416,10 +419,7 @@ class BudgetManager:
         """Get cost analytics for the specified period."""
         cutoff = datetime.now() - timedelta(days=days)
 
-        recent_requests = [
-            r for r in self._request_history
-            if r["timestamp"] >= cutoff
-        ]
+        recent_requests = [r for r in self._request_history if r["timestamp"] >= cutoff]
 
         if not recent_requests:
             return {
@@ -545,17 +545,14 @@ class IntelligentRouter:
 
         # Estimate cost
         estimated_tokens = len(query.split()) * 1.5 + 500  # Rough estimate
-        estimated_cost = (
-            (estimated_tokens / 1000) * selected.cost_per_1k_input +
-            (estimated_tokens / 1000) * selected.cost_per_1k_output * 2
-        )
+        estimated_cost = (estimated_tokens / 1000) * selected.cost_per_1k_input + (
+            estimated_tokens / 1000
+        ) * selected.cost_per_1k_output * 2
 
         return RoutingDecision(
             selected_model=selected,
             fallback_chain=fallback_chain,
-            routing_reason=self._build_routing_reason(
-                selected, complexity, budget_status
-            ),
+            routing_reason=self._build_routing_reason(selected, complexity, budget_status),
             estimated_cost=estimated_cost,
             complexity_assessment=complexity,
         )
@@ -599,11 +596,7 @@ class IntelligentRouter:
 
         # Sort candidates
         def sort_key(m: ModelSpec) -> Tuple[int, float, float, float]:
-            tier_priority = (
-                preferred_tiers.index(m.tier)
-                if m.tier in preferred_tiers
-                else len(preferred_tiers)
-            )
+            tier_priority = preferred_tiers.index(m.tier) if m.tier in preferred_tiers else len(preferred_tiers)
             provider_priority = 0 if prefer_provider and m.provider == prefer_provider else 1
             cost = m.cost_per_1k_input + m.cost_per_1k_output
             quality = -m.quality_score  # Negative for descending order
@@ -703,8 +696,7 @@ class RoutedLLMService:
         )
 
         self.logger.debug(
-            f"Routing decision: {decision.selected_model.model_id} "
-            f"(complexity: {decision.complexity_assessment.value})"
+            f"Routing decision: {decision.selected_model.model_id} " f"(complexity: {decision.complexity_assessment.value})"
         )
 
         # Set model override on request
@@ -725,10 +717,7 @@ class RoutedLLMService:
                 # Track cost
                 if self.track_costs:
                     tokens = getattr(response, "tokens_used", 0)
-                    cost = (
-                        (tokens / 1000) * model.cost_per_1k_input +
-                        (tokens / 1000) * model.cost_per_1k_output
-                    )
+                    cost = (tokens / 1000) * model.cost_per_1k_input + (tokens / 1000) * model.cost_per_1k_output
                     self.router.budget_manager.record_cost(cost, model.model_id, tokens)
 
                 return response

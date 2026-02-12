@@ -293,15 +293,9 @@ class TestMainEntryPoint:
 
                     # Verify version and startup info was logged
                     assert mock_logger_instance.info.called
-                    assert (
-                        mock_logger_instance.info.call_count >= 3
-                    )  # Starting, Version, Mode
-                    info_calls = [
-                        call[0][0] for call in mock_logger_instance.info.call_args_list
-                    ]
-                    assert any(
-                        "Starting QBITEL Engine" in str(call) for call in info_calls
-                    )
+                    assert mock_logger_instance.info.call_count >= 3  # Starting, Version, Mode
+                    info_calls = [call[0][0] for call in mock_logger_instance.info.call_args_list]
+                    assert any("Starting QBITEL Engine" in str(call) for call in info_calls)
                     assert any("Version" in str(call) for call in info_calls)
 
     @patch("ai_engine.__main__.Config")

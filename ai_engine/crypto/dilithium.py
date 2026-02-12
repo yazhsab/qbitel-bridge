@@ -112,7 +112,7 @@ class DilithiumPrivateKey:
         return self.data
 
     def __del__(self):
-        if hasattr(self, 'data') and isinstance(self.data, bytearray):
+        if hasattr(self, "data") and isinstance(self.data, bytearray):
             for i in range(len(self.data)):
                 self.data[i] = 0
 
@@ -165,12 +165,14 @@ class DilithiumEngine:
     def _detect_provider(self) -> str:
         try:
             import dilithium
+
             return "dilithium-py"
         except ImportError:
             pass
 
         try:
             import oqs
+
             return "liboqs"
         except ImportError:
             pass
@@ -180,6 +182,7 @@ class DilithiumEngine:
     def _initialize_engine(self):
         if self.provider == "dilithium-py":
             from dilithium import Dilithium2, Dilithium3, Dilithium5
+
             engines = {
                 DilithiumSecurityLevel.DILITHIUM_2: Dilithium2,
                 DilithiumSecurityLevel.MLDSA_44: Dilithium2,
@@ -204,6 +207,7 @@ class DilithiumEngine:
             )
         elif self.provider == "liboqs":
             import oqs
+
             sig_name = {
                 DilithiumSecurityLevel.DILITHIUM_2: "Dilithium2",
                 DilithiumSecurityLevel.MLDSA_44: "Dilithium2",
@@ -224,6 +228,7 @@ class DilithiumEngine:
             )
         else:
             import secrets
+
             keypair = DilithiumKeyPair(
                 level=self.level,
                 public_key=DilithiumPublicKey(self.level, secrets.token_bytes(self.level.public_key_size)),
@@ -255,6 +260,7 @@ class DilithiumEngine:
             signature = DilithiumSignature(self.level, bytes(sig_bytes))
         elif self.provider == "liboqs":
             import oqs
+
             sig_name = {
                 DilithiumSecurityLevel.DILITHIUM_2: "Dilithium2",
                 DilithiumSecurityLevel.MLDSA_44: "Dilithium2",
@@ -270,10 +276,8 @@ class DilithiumEngine:
             signature = DilithiumSignature(self.level, sig_bytes)
         else:
             import secrets
-            signature = DilithiumSignature(
-                self.level,
-                secrets.token_bytes(self.level.signature_size)
-            )
+
+            signature = DilithiumSignature(self.level, secrets.token_bytes(self.level.signature_size))
 
         logger.debug(f"Dilithium sign: {signature.size} bytes in {time.time() - start:.3f}s")
         return signature
@@ -301,6 +305,7 @@ class DilithiumEngine:
             valid = self._engine.verify(public_key.data, message, signature.data)
         elif self.provider == "liboqs":
             import oqs
+
             sig_name = {
                 DilithiumSecurityLevel.DILITHIUM_2: "Dilithium2",
                 DilithiumSecurityLevel.MLDSA_44: "Dilithium2",

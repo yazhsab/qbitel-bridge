@@ -47,25 +47,19 @@ class DependencyManager:
 
     # LLM Provider SDKs (all optional)
     LLM_DEPENDENCIES = {
-        "openai": DependencyInfo(
-            name="OpenAI SDK", package="openai", required=False, min_version="1.10.0"
-        ),
+        "openai": DependencyInfo(name="OpenAI SDK", package="openai", required=False, min_version="1.10.0"),
         "anthropic": DependencyInfo(
             name="Anthropic SDK",
             package="anthropic",
             required=False,
             min_version="0.8.0",
         ),
-        "ollama": DependencyInfo(
-            name="Ollama SDK", package="ollama", required=False, min_version="0.1.0"
-        ),
+        "ollama": DependencyInfo(name="Ollama SDK", package="ollama", required=False, min_version="0.1.0"),
     }
 
     # ML/DL Dependencies
     ML_DEPENDENCIES = {
-        "torch": DependencyInfo(
-            name="PyTorch", package="torch", required=True, min_version="2.1.0"
-        ),
+        "torch": DependencyInfo(name="PyTorch", package="torch", required=True, min_version="2.1.0"),
         "torchcrf": DependencyInfo(
             name="TorchCRF",
             package="torchcrf",
@@ -77,9 +71,7 @@ class DependencyManager:
 
     # Monitoring Dependencies
     MONITORING_DEPENDENCIES = {
-        "psutil": DependencyInfo(
-            name="psutil", package="psutil", required=True, min_version="5.9.0"
-        ),
+        "psutil": DependencyInfo(name="psutil", package="psutil", required=True, min_version="5.9.0"),
         "prometheus_client": DependencyInfo(
             name="Prometheus Client",
             package="prometheus_client",
@@ -140,9 +132,7 @@ class DependencyManager:
                     logger.info(f"{dep_info.name} v{version} is available")
             else:
                 dep_info.status = DependencyStatus.AVAILABLE
-                logger.info(
-                    f"{dep_info.name} is available (version: {version or 'unknown'})"
-                )
+                logger.info(f"{dep_info.name} is available (version: {version or 'unknown'})")
 
         except ImportError as e:
             dep_info.status = DependencyStatus.MISSING
@@ -186,9 +176,7 @@ class DependencyManager:
         for fallback_pkg in fallback_packages[dep_info.package]:
             try:
                 module = importlib.import_module(fallback_pkg)
-                logger.info(
-                    f"Using fallback package {fallback_pkg} for {dep_info.name}"
-                )
+                logger.info(f"Using fallback package {fallback_pkg} for {dep_info.name}")
 
                 # Update dependency info with fallback
                 fallback_info = DependencyInfo(
@@ -268,11 +256,7 @@ class DependencyManager:
         Returns:
             List of missing required dependencies
         """
-        return [
-            dep
-            for dep in self.dependency_status.values()
-            if dep.required and dep.status != DependencyStatus.AVAILABLE
-        ]
+        return [dep for dep in self.dependency_status.values() if dep.required and dep.status != DependencyStatus.AVAILABLE]
 
     def get_missing_optional(self) -> List[DependencyInfo]:
         """
@@ -282,9 +266,7 @@ class DependencyManager:
             List of missing optional dependencies
         """
         return [
-            dep
-            for dep in self.dependency_status.values()
-            if not dep.required and dep.status != DependencyStatus.AVAILABLE
+            dep for dep in self.dependency_status.values() if not dep.required and dep.status != DependencyStatus.AVAILABLE
         ]
 
     def validate_installation(self) -> Tuple[bool, List[str]]:
@@ -299,10 +281,7 @@ class DependencyManager:
         if not missing:
             return True, []
 
-        errors = [
-            f"Missing required dependency: {dep.name} ({dep.package})"
-            for dep in missing
-        ]
+        errors = [f"Missing required dependency: {dep.name} ({dep.package})" for dep in missing]
 
         return False, errors
 
@@ -324,12 +303,8 @@ class DependencyManager:
         for dep in self.dependency_status.values():
             if dep.required:
                 status_symbol = "✓" if dep.status == DependencyStatus.AVAILABLE else "✗"
-                version_info = (
-                    f"v{dep.installed_version}" if dep.installed_version else "N/A"
-                )
-                lines.append(
-                    f"  {status_symbol} {dep.name:30} {version_info:15} [{dep.status.value}]"
-                )
+                version_info = f"v{dep.installed_version}" if dep.installed_version else "N/A"
+                lines.append(f"  {status_symbol} {dep.name:30} {version_info:15} [{dep.status.value}]")
                 if dep.error_message:
                     lines.append(f"     Error: {dep.error_message}")
 
@@ -341,12 +316,8 @@ class DependencyManager:
         for dep in self.dependency_status.values():
             if not dep.required:
                 status_symbol = "✓" if dep.status == DependencyStatus.AVAILABLE else "○"
-                version_info = (
-                    f"v{dep.installed_version}" if dep.installed_version else "N/A"
-                )
-                lines.append(
-                    f"  {status_symbol} {dep.name:30} {version_info:15} [{dep.status.value}]"
-                )
+                version_info = f"v{dep.installed_version}" if dep.installed_version else "N/A"
+                lines.append(f"  {status_symbol} {dep.name:30} {version_info:15} [{dep.status.value}]")
 
         lines.append("")
         lines.append("=" * 80)
@@ -502,9 +473,7 @@ class ServiceLocator:
         self._services = {}
         self._singletons = {}
 
-    def register(
-        self, service_type: type, instance: Any = None, singleton: bool = False
-    ):
+    def register(self, service_type: type, instance: Any = None, singleton: bool = False):
         """Register a service."""
         if singleton:
             self._singletons[service_type] = instance
@@ -556,9 +525,7 @@ class DependencyResolver:
     def resolve(self, name: str) -> Any:
         """Resolve a dependency."""
         if name in self._resolving:
-            raise DependencyCircularReferenceError(
-                f"Circular dependency detected: {name}"
-            )
+            raise DependencyCircularReferenceError(f"Circular dependency detected: {name}")
 
         self._resolving.add(name)
         try:

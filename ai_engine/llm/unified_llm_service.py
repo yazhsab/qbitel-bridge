@@ -46,6 +46,7 @@ try:
         VLLMModelConfig,
         VLLM_MODELS,
     )
+
     vllm_available = True
 except ImportError:
     vllm_available = False
@@ -55,10 +56,10 @@ from ..core.config import Config
 from ..core.exceptions import QbitelAIException, LLMException
 from ..monitoring.metrics import MetricsCollector
 
-
 # =============================================================================
 # Model Configuration - 2024-2025 Latest Models
 # =============================================================================
+
 
 class ModelConfig:
     """Centralized model configuration for easy updates."""
@@ -83,9 +84,11 @@ class ModelConfig:
 # Tool/Function Definitions
 # =============================================================================
 
+
 @dataclass
 class ToolParameter:
     """Parameter definition for a tool."""
+
     name: str
     type: str  # string, number, boolean, array, object
     description: str
@@ -97,6 +100,7 @@ class ToolParameter:
 @dataclass
 class ToolDefinition:
     """Definition of a tool/function that can be called by the LLM."""
+
     name: str
     description: str
     parameters: List[ToolParameter]
@@ -155,6 +159,7 @@ class ToolDefinition:
 @dataclass
 class ToolCall:
     """Represents a tool call made by the LLM."""
+
     id: str
     name: str
     arguments: Dict[str, Any]
@@ -163,9 +168,11 @@ class ToolCall:
 @dataclass
 class ToolResult:
     """Result of executing a tool."""
+
     tool_call_id: str
     content: str
     is_error: bool = False
+
 
 # Prometheus metrics for LLM operations
 LLM_REQUEST_COUNTER = Counter(
@@ -178,12 +185,8 @@ LLM_REQUEST_DURATION = Histogram(
     "LLM request duration",
     ["provider", "feature_domain"],
 )
-LLM_TOKEN_USAGE = Counter(
-    "qbitel_llm_tokens_total", "Total tokens used", ["provider", "type"]
-)
-LLM_ACTIVE_CONNECTIONS = Gauge(
-    "qbitel_llm_active_connections", "Active LLM connections", ["provider"]
-)
+LLM_TOKEN_USAGE = Counter("qbitel_llm_tokens_total", "Total tokens used", ["provider", "type"])
+LLM_ACTIVE_CONNECTIONS = Gauge("qbitel_llm_active_connections", "Active LLM connections", ["provider"])
 
 logger = logging.getLogger(__name__)
 
@@ -199,6 +202,7 @@ class LLMProvider(Enum):
 
 class ResponseFormat(Enum):
     """Response format options."""
+
     TEXT = "text"
     JSON = "json_object"
     JSON_SCHEMA = "json_schema"
@@ -260,14 +264,10 @@ class UnifiedLLMService:
         self.config = config
         self.logger = logging.getLogger(__name__)
 
-        self.primary_provider: LLMProvider = self._coerce_provider(
-            getattr(config, "llm_provider", None)
-        )
+        self.primary_provider: LLMProvider = self._coerce_provider(getattr(config, "llm_provider", None))
         self.fallback_providers: List[LLMProvider] = []
         timeout_value = getattr(config, "llm_request_timeout", None)
-        self.request_timeout: Optional[float] = (
-            float(timeout_value) if timeout_value else None
-        )
+        self.request_timeout: Optional[float] = float(timeout_value) if timeout_value else None
 
         # Initialize providers (optional dependencies)
         self.openai_client: Optional[Any] = None
@@ -328,24 +328,18 @@ class UnifiedLLMService:
         }
 
         # Request queue for rate limiting
-        self.request_queues = {
-            provider: asyncio.Queue(maxsize=100) for provider in LLMProvider
-        }
+        self.request_queues = {provider: asyncio.Queue(maxsize=100) for provider in LLMProvider}
 
         # Thread pool for synchronous operations
         self.executor = ThreadPoolExecutor(max_workers=4)
 
-        default_domain = self._resolve_domain_config(
-            getattr(config, "llm_feature_domain", "protocol_copilot")
-        )
+        default_domain = self._resolve_domain_config(getattr(config, "llm_feature_domain", "protocol_copilot"))
         self.fallback_providers.extend(default_domain.get("fallback", []))
 
     async def initialize(self) -> None:
         """Initialize all LLM providers."""
         if self._initialized:
-            self.logger.debug(
-                "Unified LLM Service already initialized; skipping reinitialization"
-            )
+            self.logger.debug("Unified LLM Service already initialized; skipping reinitialization")
             return
         try:
             self.logger.info("Initializing Unified LLM Service...")
@@ -356,47 +350,31 @@ class UnifiedLLMService:
             # Initialize OpenAI
             openai_key = getattr(self.config, "openai_api_key", None)
             if openai_key and openai is not None:
-                self.openai_client = openai.AsyncOpenAI(
-                    api_key=openai_key, timeout=30.0
-                )
+                self.openai_client = openai.AsyncOpenAI(api_key=openai_key, timeout=30.0)
                 await self._test_provider(LLMProvider.OPENAI_GPT4)
             else:
                 if openai_key and openai is None:
-                    self.logger.warning(
-                        "OpenAI SDK not installed; disabling GPT-4 provider"
-                    )
+                    self.logger.warning("OpenAI SDK not installed; disabling GPT-4 provider")
                 elif not openai_key:
-                    self.logger.info(
-                        "OpenAI API key not configured; GPT-4 provider disabled"
-                    )
+                    self.logger.info("OpenAI API key not configured; GPT-4 provider disabled")
                 self.provider_health[LLMProvider.OPENAI_GPT4] = False
 
             # Initialize Anthropic
             anthropic_key = getattr(self.config, "anthropic_api_key", None)
             if anthropic_key and AsyncAnthropic is not None:
-                self.anthropic_client = AsyncAnthropic(
-                    api_key=anthropic_key, timeout=30.0
-                )
+                self.anthropic_client = AsyncAnthropic(api_key=anthropic_key, timeout=30.0)
                 await self._test_provider(LLMProvider.ANTHROPIC_CLAUDE)
             else:
                 if anthropic_key and AsyncAnthropic is None:
-                    self.logger.warning(
-                        "Anthropic SDK not installed; disabling Claude provider"
-                    )
+                    self.logger.warning("Anthropic SDK not installed; disabling Claude provider")
                 elif not anthropic_key:
-                    self.logger.info(
-                        "Anthropic API key not configured; Claude provider disabled"
-                    )
+                    self.logger.info("Anthropic API key not configured; Claude provider disabled")
                 self.provider_health[LLMProvider.ANTHROPIC_CLAUDE] = False
 
             # Initialize Ollama (local)
             if ollama is not None:
                 try:
-                    self.ollama_client = ollama.AsyncClient(
-                        host=getattr(
-                            self.config, "ollama_host", "http://localhost:11434"
-                        )
-                    )
+                    self.ollama_client = ollama.AsyncClient(host=getattr(self.config, "ollama_host", "http://localhost:11434"))
                     await self._test_provider(LLMProvider.OLLAMA_LOCAL)
                 except Exception as e:
                     self.logger.warning(f"Ollama initialization failed: {e}")
@@ -410,12 +388,8 @@ class UnifiedLLMService:
             if vllm_available and VLLMProvider and vllm_enabled:
                 try:
                     vllm_config = VLLMProviderConfig(
-                        default_endpoint=getattr(
-                            self.config, "vllm_endpoint", "http://localhost:8000"
-                        ),
-                        default_model=getattr(
-                            self.config, "vllm_default_model", "llama-3.2-8b"
-                        ),
+                        default_endpoint=getattr(self.config, "vllm_endpoint", "http://localhost:8000"),
+                        default_model=getattr(self.config, "vllm_default_model", "llama-3.2-8b"),
                     )
                     self.vllm_provider = VLLMProvider(vllm_config)
                     await self.vllm_provider.initialize()
@@ -469,9 +443,7 @@ class UnifiedLLMService:
 
             try:
                 attempted_provider = True
-                response = await self._execute_request(
-                    request, provider, domain_config["system_prompt"]
-                )
+                response = await self._execute_request(request, provider, domain_config["system_prompt"])
 
                 # Update metrics
                 LLM_REQUEST_COUNTER.labels(
@@ -480,9 +452,9 @@ class UnifiedLLMService:
                     status="success",
                 ).inc()
 
-                LLM_REQUEST_DURATION.labels(
-                    provider=provider.value, feature_domain=request.feature_domain
-                ).observe(time.time() - start_time)
+                LLM_REQUEST_DURATION.labels(provider=provider.value, feature_domain=request.feature_domain).observe(
+                    time.time() - start_time
+                )
 
                 return response
 
@@ -501,14 +473,10 @@ class UnifiedLLMService:
 
         # All providers failed
         if not attempted_provider:
-            raise LLMException(
-                "No healthy LLM providers are available for this request"
-            )
+            raise LLMException("No healthy LLM providers are available for this request")
         raise LLMException(f"All LLM providers failed. Last error: {last_error}")
 
-    async def _execute_request(
-        self, request: LLMRequest, provider: LLMProvider, system_prompt: str
-    ) -> LLMResponse:
+    async def _execute_request(self, request: LLMRequest, provider: LLMProvider, system_prompt: str) -> LLMResponse:
         """Execute request on specific provider."""
         start_time = self._safe_time()
 
@@ -546,13 +514,9 @@ class UnifiedLLMService:
         }.get(provider)
 
         metrics_mocked = isinstance(LLM_TOKEN_USAGE, Mock)
-        if provider_metric and (
-            metrics_mocked or not hasattr(time.time, "side_effect")
-        ):
+        if provider_metric and (metrics_mocked or not hasattr(time.time, "side_effect")):
             try:
-                LLM_TOKEN_USAGE.labels(provider=provider_metric, type="total").inc(
-                    response.tokens_used
-                )
+                LLM_TOKEN_USAGE.labels(provider=provider_metric, type="total").inc(response.tokens_used)
             except Exception as exc:  # pragma: no cover - metrics are best effort
                 self.logger.debug(
                     "Token usage metric update failed for %s: %s",
@@ -561,9 +525,7 @@ class UnifiedLLMService:
                 )
         return response
 
-    async def _generate_openai(
-        self, request: LLMRequest, messages: List[Dict], start_time: float
-    ) -> LLMResponse:
+    async def _generate_openai(self, request: LLMRequest, messages: List[Dict], start_time: float) -> LLMResponse:
         """Execute request using OpenAI with tools and JSON mode support."""
         # Select model - use override if provided, otherwise use latest default
         model = request.model_override or ModelConfig.OPENAI_DEFAULT
@@ -578,9 +540,7 @@ class UnifiedLLMService:
 
         # Add tools if provided
         if request.tools:
-            request_params["tools"] = [
-                tool.to_openai_format() for tool in request.tools
-            ]
+            request_params["tools"] = [tool.to_openai_format() for tool in request.tools]
             if request.tool_choice:
                 if request.tool_choice in ("auto", "none", "required"):
                     request_params["tool_choice"] = request.tool_choice
@@ -644,9 +604,7 @@ class UnifiedLLMService:
                     args = json.loads(tc.function.arguments)
                 except json.JSONDecodeError:
                     args = {"raw": tc.function.arguments}
-                tool_calls.append(
-                    ToolCall(id=tc.id, name=tc.function.name, arguments=args)
-                )
+                tool_calls.append(ToolCall(id=tc.id, name=tc.function.name, arguments=args))
 
         # Parse JSON response if JSON mode was used
         parsed_response = None
@@ -675,9 +633,7 @@ class UnifiedLLMService:
             validated_model=validated_model,
         )
 
-    async def _generate_anthropic(
-        self, request: LLMRequest, messages: List[Dict], start_time: float
-    ) -> LLMResponse:
+    async def _generate_anthropic(self, request: LLMRequest, messages: List[Dict], start_time: float) -> LLMResponse:
         """Execute request using Anthropic Claude with tool use support."""
         # Select model - use override if provided, otherwise use latest default
         model = request.model_override or ModelConfig.ANTHROPIC_DEFAULT
@@ -714,9 +670,7 @@ class UnifiedLLMService:
 
         # Add tools if provided (Anthropic tool use)
         if request.tools:
-            request_params["tools"] = [
-                tool.to_anthropic_format() for tool in request.tools
-            ]
+            request_params["tools"] = [tool.to_anthropic_format() for tool in request.tools]
             if request.tool_choice:
                 if request.tool_choice == "auto":
                     request_params["tool_choice"] = {"type": "auto"}
@@ -788,9 +742,7 @@ class UnifiedLLMService:
             validated_model=validated_model,
         )
 
-    async def _generate_ollama(
-        self, request: LLMRequest, messages: List[Dict], start_time: float
-    ) -> LLMResponse:
+    async def _generate_ollama(self, request: LLMRequest, messages: List[Dict], start_time: float) -> LLMResponse:
         """Execute request using Ollama (local) with JSON mode support."""
         # Select model - use override if provided, otherwise use latest default
         model = request.model_override or ModelConfig.OLLAMA_DEFAULT
@@ -870,9 +822,7 @@ class UnifiedLLMService:
             validated_model=validated_model,
         )
 
-    async def _generate_vllm(
-        self, request: LLMRequest, messages: List[Dict], start_time: float
-    ) -> LLMResponse:
+    async def _generate_vllm(self, request: LLMRequest, messages: List[Dict], start_time: float) -> LLMResponse:
         """
         Execute request using vLLM for high-performance inference.
 
@@ -901,10 +851,7 @@ class UnifiedLLMService:
             model=model_alias,
             max_tokens=request.max_tokens,
             temperature=request.temperature,
-            messages=[
-                {"role": msg["role"], "content": msg["content"]}
-                for msg in messages
-            ],
+            messages=[{"role": msg["role"], "content": msg["content"]} for msg in messages],
             system_prompt=messages[0]["content"] if messages and messages[0]["role"] == "system" else None,
         )
 
@@ -966,9 +913,7 @@ class UnifiedLLMService:
 
         return "\n\n".join(prompt_parts) + "\n\nASSISTANT:"
 
-    def _coerce_provider(
-        self, provider_value: Union[str, LLMProvider, None]
-    ) -> LLMProvider:
+    def _coerce_provider(self, provider_value: Union[str, LLMProvider, None]) -> LLMProvider:
         """Normalize provider configuration values to LLMProvider enum."""
         if isinstance(provider_value, LLMProvider):
             return provider_value
@@ -984,9 +929,7 @@ class UnifiedLLMService:
 
     def _resolve_domain_config(self, feature_domain: str) -> Dict[str, Any]:
         """Return domain routing configuration with sensible default."""
-        return self.domain_routing.get(
-            feature_domain, self.domain_routing["protocol_copilot"]
-        )
+        return self.domain_routing.get(feature_domain, self.domain_routing["protocol_copilot"])
 
     def _resolve_system_prompt(self, request: LLMRequest) -> str:
         """Determine system prompt using request override or domain default."""
@@ -995,9 +938,7 @@ class UnifiedLLMService:
         domain_config = self._resolve_domain_config(request.feature_domain)
         return domain_config.get("system_prompt", "")
 
-    def _build_messages(
-        self, request: LLMRequest, system_prompt: str
-    ) -> List[Dict[str, str]]:
+    def _build_messages(self, request: LLMRequest, system_prompt: str) -> List[Dict[str, str]]:
         """Assemble chat messages payload for provider requests."""
         messages: List[Dict[str, str]] = []
         if system_prompt:
@@ -1040,9 +981,7 @@ class UnifiedLLMService:
             ).inc()
 
             if status == "success" and duration is not None:
-                LLM_REQUEST_DURATION.labels(
-                    provider=provider.value, feature_domain=feature_domain
-                ).observe(duration)
+                LLM_REQUEST_DURATION.labels(provider=provider.value, feature_domain=feature_domain).observe(duration)
         except Exception as exc:  # pragma: no cover - metrics best-effort
             self.logger.debug(
                 "LLM request metric emission failed for %s/%s: %s",
@@ -1051,16 +990,12 @@ class UnifiedLLMService:
                 exc,
             )
 
-    async def _run_generation(
-        self, provider: LLMProvider, request: LLMRequest, system_prompt: str
-    ) -> LLMResponse:
+    async def _run_generation(self, provider: LLMProvider, request: LLMRequest, system_prompt: str) -> LLMResponse:
         """Execute generation with metrics and timeout handling."""
         try:
             coroutine = self._execute_request(request, provider, system_prompt)
             if self.request_timeout and self.request_timeout > 0:
-                response = await asyncio.wait_for(
-                    coroutine, timeout=self.request_timeout
-                )
+                response = await asyncio.wait_for(coroutine, timeout=self.request_timeout)
             else:
                 response = await coroutine
 
@@ -1089,19 +1024,14 @@ class UnifiedLLMService:
 
     async def generate(self, request: LLMRequest) -> LLMResponse:
         """Generate text using the configured primary provider."""
-        provider = (
-            self.primary_provider
-            or self._resolve_domain_config(request.feature_domain)["primary"]
-        )
+        provider = self.primary_provider or self._resolve_domain_config(request.feature_domain)["primary"]
         system_prompt = self._resolve_system_prompt(request)
         return await self._run_generation(provider, request, system_prompt)
 
     async def generate_with_fallback(self, request: LLMRequest) -> LLMResponse:
         """Generate text using fallback providers when necessary."""
         providers = [self.primary_provider] + [
-            provider
-            for provider in self.fallback_providers
-            if provider != self.primary_provider
+            provider for provider in self.fallback_providers if provider != self.primary_provider
         ]
 
         system_prompt = self._resolve_system_prompt(request)
@@ -1118,10 +1048,7 @@ class UnifiedLLMService:
 
     async def generate_stream(self, request: LLMRequest) -> AsyncIterator[str]:
         """Stream responses from the primary provider."""
-        provider = (
-            self.primary_provider
-            or self._resolve_domain_config(request.feature_domain)["primary"]
-        )
+        provider = self.primary_provider or self._resolve_domain_config(request.feature_domain)["primary"]
 
         system_prompt = self._resolve_system_prompt(request)
         messages = self._build_messages(request, system_prompt)
@@ -1175,9 +1102,7 @@ class UnifiedLLMService:
                     yield text
 
         else:
-            raise LLMException(
-                f"Streaming is not supported for provider: {provider.value}"
-            )
+            raise LLMException(f"Streaming is not supported for provider: {provider.value}")
 
     async def _test_provider(self, provider: LLMProvider) -> bool:
         """Test provider health."""
@@ -1209,9 +1134,7 @@ class UnifiedLLMService:
                 temperature=0.0,
             )
 
-            response = await self._execute_request(
-                test_request, provider, "You are a helpful assistant."
-            )
+            response = await self._execute_request(test_request, provider, "You are a helpful assistant.")
 
             self.provider_health[provider] = True
             self.logger.info(f"Provider {provider.value} is healthy")
@@ -1256,26 +1179,14 @@ class UnifiedLLMService:
                 }
                 for provider in LLMProvider
             },
-            "total_requests": sum(
-                [
-                    counter._value._value
-                    for counter in LLM_REQUEST_COUNTER._metrics.values()
-                ]
-            ),
-            "active_connections": sum(
-                [
-                    gauge._value._value
-                    for gauge in LLM_ACTIVE_CONNECTIONS._metrics.values()
-                ]
-            ),
+            "total_requests": sum([counter._value._value for counter in LLM_REQUEST_COUNTER._metrics.values()]),
+            "active_connections": sum([gauge._value._value for gauge in LLM_ACTIVE_CONNECTIONS._metrics.values()]),
         }
 
     async def shutdown(self) -> None:
         """Shutdown LLM service."""
         if not self._initialized:
-            self.logger.debug(
-                "Unified LLM Service shutdown requested but service is not initialized"
-            )
+            self.logger.debug("Unified LLM Service shutdown requested but service is not initialized")
             return
         self.logger.info("Shutting down Unified LLM Service...")
 
@@ -1285,9 +1196,7 @@ class UnifiedLLMService:
             try:
                 await asyncio.wait_for(self._health_monitor_task, timeout=5.0)
             except asyncio.TimeoutError:
-                self.logger.warning(
-                    "Health monitor task did not stop gracefully, cancelling..."
-                )
+                self.logger.warning("Health monitor task did not stop gracefully, cancelling...")
                 self._health_monitor_task.cancel()
                 try:
                     await self._health_monitor_task
@@ -1398,10 +1307,7 @@ class UnifiedLLMService:
             # This varies by provider - for now, include in context
             tool_context = {
                 "previous_response": response.content,
-                "tool_results": [
-                    {"id": tr.tool_call_id, "result": tr.content, "error": tr.is_error}
-                    for tr in tool_results
-                ],
+                "tool_results": [{"id": tr.tool_call_id, "result": tr.content, "error": tr.is_error} for tr in tool_results],
             }
 
             current_request = LLMRequest(

@@ -25,6 +25,7 @@ __all__: List[str] = []
 # Import feature flags
 try:
     from ..core.feature_flags import feature_flags
+
     _feature_flags_available = True
 except ImportError:
     _feature_flags_available = False
@@ -39,6 +40,7 @@ def _load_domain_modules():
     if not _feature_flags_available or feature_flags.is_enabled("healthcare_domain"):
         try:
             from . import healthcare
+
             __all__.append("healthcare")
             logger.info("Healthcare domain module loaded")
         except ImportError as e:
@@ -48,6 +50,7 @@ def _load_domain_modules():
     if not _feature_flags_available or feature_flags.is_enabled("automotive_domain"):
         try:
             from . import automotive
+
             __all__.append("automotive")
             logger.info("Automotive domain module loaded")
         except ImportError as e:
@@ -57,6 +60,7 @@ def _load_domain_modules():
     if not _feature_flags_available or feature_flags.is_enabled("aviation_domain"):
         try:
             from . import aviation
+
             __all__.append("aviation")
             logger.info("Aviation domain module loaded")
         except ImportError as e:
@@ -66,6 +70,7 @@ def _load_domain_modules():
     if not _feature_flags_available or feature_flags.is_enabled("industrial_domain"):
         try:
             from . import industrial
+
             __all__.append("industrial")
             logger.info("Industrial domain module loaded")
         except ImportError as e:

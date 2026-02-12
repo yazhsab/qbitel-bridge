@@ -201,9 +201,7 @@ class FixValidator(BaseValidator):
                 field="OrigSendingTime",
             )
 
-    def _validate_required_fields(
-        self, msg: FixMessage, result: ValidationResult
-    ) -> None:
+    def _validate_required_fields(self, msg: FixMessage, result: ValidationResult) -> None:
         """Validate required fields for message type."""
         msg_type = msg.header.msg_type
         required = REQUIRED_TAGS.get(msg_type, [])
@@ -220,9 +218,7 @@ class FixValidator(BaseValidator):
                     field=get_tag_name(tag),
                 )
 
-    def _validate_field_formats(
-        self, msg: FixMessage, result: ValidationResult
-    ) -> None:
+    def _validate_field_formats(self, msg: FixMessage, result: ValidationResult) -> None:
         """Validate field formats."""
         for field in msg.body:
             self._validate_field(field, result)
@@ -329,9 +325,7 @@ class FixValidator(BaseValidator):
                     field="Currency",
                 )
 
-    def _validate_new_order_single(
-        self, msg: FixMessage, result: ValidationResult
-    ) -> None:
+    def _validate_new_order_single(self, msg: FixMessage, result: ValidationResult) -> None:
         """Validate New Order Single (MsgType=D)."""
         order_type = msg.get_value(40)
 
@@ -362,9 +356,7 @@ class FixValidator(BaseValidator):
                 field="OrderQty",
             )
 
-    def _validate_execution_report(
-        self, msg: FixMessage, result: ValidationResult
-    ) -> None:
+    def _validate_execution_report(self, msg: FixMessage, result: ValidationResult) -> None:
         """Validate Execution Report (MsgType=8)."""
         exec_type = msg.get_value(150)
         ord_status = msg.get_value(39)
@@ -400,9 +392,7 @@ class FixValidator(BaseValidator):
         # Validate exec type and ord status consistency
         self._validate_exec_ord_status_consistency(exec_type, ord_status, result)
 
-    def _validate_exec_ord_status_consistency(
-        self, exec_type: str, ord_status: str, result: ValidationResult
-    ) -> None:
+    def _validate_exec_ord_status_consistency(self, exec_type: str, ord_status: str, result: ValidationResult) -> None:
         """Validate ExecType and OrdStatus are consistent."""
         valid_combinations = {
             "0": ["0", "A"],  # New -> New, Pending New
@@ -421,9 +411,7 @@ class FixValidator(BaseValidator):
                     field="ExecType/OrdStatus",
                 )
 
-    def _validate_order_cancel_request(
-        self, msg: FixMessage, result: ValidationResult
-    ) -> None:
+    def _validate_order_cancel_request(self, msg: FixMessage, result: ValidationResult) -> None:
         """Validate Order Cancel Request (MsgType=F)."""
         # OrigClOrdID is required
         if not msg.get_field(41):
@@ -433,9 +421,7 @@ class FixValidator(BaseValidator):
                 field="OrigClOrdID",
             )
 
-    def _validate_order_cancel_replace(
-        self, msg: FixMessage, result: ValidationResult
-    ) -> None:
+    def _validate_order_cancel_replace(self, msg: FixMessage, result: ValidationResult) -> None:
         """Validate Order Cancel/Replace Request (MsgType=G)."""
         # OrigClOrdID is required
         if not msg.get_field(41):
@@ -474,9 +460,7 @@ class FixValidator(BaseValidator):
                 field="EncryptMethod",
             )
 
-    def _validate_market_data_request(
-        self, msg: FixMessage, result: ValidationResult
-    ) -> None:
+    def _validate_market_data_request(self, msg: FixMessage, result: ValidationResult) -> None:
         """Validate Market Data Request (MsgType=V)."""
         # MDReqID is required
         if not msg.get_field(262):
@@ -527,8 +511,7 @@ class FixValidator(BaseValidator):
             if group.count != len(group.entries):
                 result.add_warning(
                     "FIX_GROUP_COUNT_MISMATCH",
-                    f"Group {get_tag_name(count_tag)}: count {group.count} "
-                    f"doesn't match entries {len(group.entries)}",
+                    f"Group {get_tag_name(count_tag)}: count {group.count} " f"doesn't match entries {len(group.entries)}",
                     field=get_tag_name(count_tag),
                 )
 

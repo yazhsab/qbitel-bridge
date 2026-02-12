@@ -252,9 +252,7 @@ class TestContextUpdate:
         manager.active_sessions["sess_123"] = session
 
         with patch.object(manager, "_save_session_to_redis", new_callable=AsyncMock):
-            with patch.object(
-                manager, "_update_persistent_context", new_callable=AsyncMock
-            ):
+            with patch.object(manager, "_update_persistent_context", new_callable=AsyncMock):
                 await manager.update_context(
                     user_id="user_456",
                     session_id="sess_123",
@@ -297,9 +295,7 @@ class TestContextUpdate:
         manager.active_sessions["sess_123"] = session
 
         with patch.object(manager, "_save_session_to_redis", new_callable=AsyncMock):
-            with patch.object(
-                manager, "_update_persistent_context", new_callable=AsyncMock
-            ):
+            with patch.object(manager, "_update_persistent_context", new_callable=AsyncMock):
                 await manager.update_context(
                     user_id="user_456",
                     session_id="sess_123",
@@ -331,9 +327,7 @@ class TestContextUpdate:
         additional = {"protocol": "HTTP", "version": "1.1"}
 
         with patch.object(manager, "_save_session_to_redis", new_callable=AsyncMock):
-            with patch.object(
-                manager, "_update_persistent_context", new_callable=AsyncMock
-            ):
+            with patch.object(manager, "_update_persistent_context", new_callable=AsyncMock):
                 await manager.update_context(
                     user_id="user_456",
                     session_id="sess_123",
@@ -495,9 +489,7 @@ class TestConcurrency:
         manager.active_sessions["sess_123"] = session
 
         with patch.object(manager, "_save_session_to_redis", new_callable=AsyncMock):
-            with patch.object(
-                manager, "_update_persistent_context", new_callable=AsyncMock
-            ):
+            with patch.object(manager, "_update_persistent_context", new_callable=AsyncMock):
                 # Run multiple updates concurrently
                 tasks = [
                     manager.update_context(

@@ -28,13 +28,7 @@ class AzureSentinelIntegration:
         self.subscription_id = subscription_id
         logger.info(f"Initialized Azure Sentinel integration")
 
-    def send_security_event(
-        self,
-        event_type: str,
-        severity: str,
-        description: str,
-        resource_id: str
-    ) -> Dict[str, Any]:
+    def send_security_event(self, event_type: str, severity: str, description: str, resource_id: str) -> Dict[str, Any]:
         """Send security event to Sentinel"""
         event = {
             "TimeGenerated": None,
@@ -43,7 +37,7 @@ class AzureSentinelIntegration:
             "Description": description,
             "ResourceId": resource_id,
             "Provider": "QBITEL",
-            "Category": "Quantum Security"
+            "Category": "Quantum Security",
         }
 
         logger.info(f"Sent event to Azure Sentinel: {event_type}")
@@ -54,16 +48,18 @@ class AzureSentinelIntegration:
         return {
             "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
             "contentVersion": "1.0.0.0",
-            "resources": [{
-                "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
-                "apiVersion": "2021-03-01-preview",
-                "name": "qbitel-connector",
-                "properties": {
-                    "connectorUiConfig": {
-                        "title": "QBITEL Quantum Security",
-                        "publisher": "QBITEL",
-                        "descriptionMarkdown": "Quantum-safe security monitoring"
-                    }
+            "resources": [
+                {
+                    "type": "Microsoft.OperationalInsights/workspaces/providers/dataConnectors",
+                    "apiVersion": "2021-03-01-preview",
+                    "name": "qbitel-connector",
+                    "properties": {
+                        "connectorUiConfig": {
+                            "title": "QBITEL Quantum Security",
+                            "publisher": "QBITEL",
+                            "descriptionMarkdown": "Quantum-safe security monitoring",
+                        }
+                    },
                 }
-            }]
+            ],
         }

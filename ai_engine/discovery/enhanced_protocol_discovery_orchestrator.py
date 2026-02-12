@@ -36,9 +36,7 @@ LLM_ANALYSIS_COUNTER = Counter(
     ["protocol_type", "analysis_type", "status"],
 )
 
-LLM_ANALYSIS_DURATION = Histogram(
-    "qbitel_llm_analysis_duration_seconds", "LLM analysis duration", ["analysis_type"]
-)
+LLM_ANALYSIS_DURATION = Histogram("qbitel_llm_analysis_duration_seconds", "LLM analysis duration", ["analysis_type"])
 
 
 class LLMAnalysisType(Enum):
@@ -123,13 +121,9 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
         self.llm_timeout = 30.0
 
         # LLM analysis cache
-        self.llm_analysis_cache: Dict[str, Dict[LLMAnalysisType, LLMAnalysisResult]] = (
-            {}
-        )
+        self.llm_analysis_cache: Dict[str, Dict[LLMAnalysisType, LLMAnalysisResult]] = {}
 
-        self.logger.info(
-            "Enhanced Protocol Discovery Orchestrator initialized with LLM capabilities"
-        )
+        self.logger.info("Enhanced Protocol Discovery Orchestrator initialized with LLM capabilities")
 
     async def initialize(self) -> None:
         """Initialize enhanced orchestrator with LLM services."""
@@ -144,21 +138,15 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
 
             if self.protocol_copilot:
                 self.llm_service = self.protocol_copilot.llm_service
-                self.logger.info(
-                    "LLM services initialized for enhanced protocol discovery"
-                )
+                self.logger.info("LLM services initialized for enhanced protocol discovery")
             else:
-                self.logger.warning(
-                    "LLM services not available - falling back to traditional discovery"
-                )
+                self.logger.warning("LLM services not available - falling back to traditional discovery")
 
         except Exception as e:
             self.logger.error(f"Failed to initialize LLM services: {e}")
             # Continue without LLM capabilities
 
-    async def discover_protocol_enhanced(
-        self, request: EnhancedDiscoveryRequest
-    ) -> EnhancedDiscoveryResult:
+    async def discover_protocol_enhanced(self, request: EnhancedDiscoveryRequest) -> EnhancedDiscoveryResult:
         """
         Enhanced protocol discovery with LLM analysis.
 
@@ -231,9 +219,7 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
                 metadata={"error": str(e)},
             )
 
-    async def _perform_llm_analysis(
-        self, request: EnhancedDiscoveryRequest, result: EnhancedDiscoveryResult
-    ) -> None:
+    async def _perform_llm_analysis(self, request: EnhancedDiscoveryRequest, result: EnhancedDiscoveryResult) -> None:
         """Perform comprehensive LLM analysis on discovery results."""
 
         for analysis_type in request.llm_analysis_types:
@@ -241,21 +227,15 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
 
             try:
                 # Check cache first
-                cache_key = self._generate_llm_cache_key(
-                    request.messages, analysis_type
-                )
+                cache_key = self._generate_llm_cache_key(request.messages, analysis_type)
                 if cache_key in self.llm_analysis_cache:
                     cached_analyses = self.llm_analysis_cache[cache_key]
                     if analysis_type in cached_analyses:
-                        result.llm_analyses[analysis_type] = cached_analyses[
-                            analysis_type
-                        ]
+                        result.llm_analyses[analysis_type] = cached_analyses[analysis_type]
                         continue
 
                 # Perform LLM analysis
-                llm_result = await self._execute_llm_analysis(
-                    analysis_type, request, result
-                )
+                llm_result = await self._execute_llm_analysis(analysis_type, request, result)
 
                 if llm_result:
                     llm_result.processing_time = time.time() - analysis_start
@@ -273,9 +253,7 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
                         status="success",
                     ).inc()
 
-                    LLM_ANALYSIS_DURATION.labels(
-                        analysis_type=analysis_type.value
-                    ).observe(llm_result.processing_time)
+                    LLM_ANALYSIS_DURATION.labels(analysis_type=analysis_type.value).observe(llm_result.processing_time)
 
             except Exception as e:
                 self.logger.error(f"LLM analysis {analysis_type.value} failed: {e}")
@@ -299,16 +277,8 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
                 "protocol_type": result.protocol_type,
                 "confidence": result.confidence,
                 "statistical_analysis": result.statistical_analysis,
-                "classification_details": (
-                    result.classification_details.__dict__
-                    if result.classification_details
-                    else None
-                ),
-                "validation_result": (
-                    result.validation_result.__dict__
-                    if result.validation_result
-                    else None
-                ),
+                "classification_details": (result.classification_details.__dict__ if result.classification_details else None),
+                "validation_result": (result.validation_result.__dict__ if result.validation_result else None),
                 "message_count": len(request.messages),
                 "user_context": request.user_context or {},
             }
@@ -320,13 +290,8 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
             copilot_query = CopilotQuery(
                 query=query_text,
                 query_type=self._map_analysis_to_copilot_type(analysis_type),
-                user_id=(
-                    request.user_context.get("user_id", "system")
-                    if request.user_context
-                    else "system"
-                ),
-                session_id=request.conversation_session_id
-                or f"discovery_{int(time.time())}",
+                user_id=(request.user_context.get("user_id", "system") if request.user_context else "system"),
+                session_id=request.conversation_session_id or f"discovery_{int(time.time())}",
                 context=context,
                 packet_data=request.messages[0] if request.messages else None,
                 enable_learning=True,
@@ -342,17 +307,11 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
                 confidence=copilot_response.confidence,
                 recommendations=copilot_response.suggestions,
                 sources=copilot_response.sources,
-                llm_provider=(
-                    copilot_response.metadata.get("llm_provider")
-                    if copilot_response.metadata
-                    else None
-                ),
+                llm_provider=(copilot_response.metadata.get("llm_provider") if copilot_response.metadata else None),
             )
 
             # Extract specific insights based on analysis type
-            await self._extract_analysis_insights(
-                analysis_type, copilot_response, llm_result
-            )
+            await self._extract_analysis_insights(analysis_type, copilot_response, llm_result)
 
             return llm_result
 
@@ -416,33 +375,19 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
 
         if analysis_type == LLMAnalysisType.SECURITY_ASSESSMENT:
             # Extract security-specific insights
-            if any(
-                term in response_text
-                for term in ["vulnerable", "exploit", "attack", "risk"]
-            ):
-                llm_result.security_implications = (
-                    "Security concerns identified - review recommendations"
-                )
+            if any(term in response_text for term in ["vulnerable", "exploit", "attack", "risk"]):
+                llm_result.security_implications = "Security concerns identified - review recommendations"
             else:
-                llm_result.security_implications = (
-                    "No immediate security concerns detected"
-                )
+                llm_result.security_implications = "No immediate security concerns detected"
 
         elif analysis_type == LLMAnalysisType.COMPLIANCE_CHECK:
             # Extract compliance-specific insights
-            if any(
-                term in response_text
-                for term in ["compliant", "compliance", "regulatory"]
-            ):
-                llm_result.compliance_notes = (
-                    "Compliance considerations identified - review analysis"
-                )
+            if any(term in response_text for term in ["compliant", "compliance", "regulatory"]):
+                llm_result.compliance_notes = "Compliance considerations identified - review analysis"
             else:
                 llm_result.compliance_notes = "Standard compliance considerations apply"
 
-    async def _generate_natural_language_summary(
-        self, result: EnhancedDiscoveryResult
-    ) -> None:
+    async def _generate_natural_language_summary(self, result: EnhancedDiscoveryResult) -> None:
         """Generate comprehensive natural language summary of discovery results."""
 
         if not self.protocol_copilot:
@@ -495,22 +440,18 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
                 ]
                 for analysis_type in result.llm_analyses
             ):
-                result.security_assessment = self._extract_security_summary(
-                    result.llm_analyses
-                )
+                result.security_assessment = self._extract_security_summary(result.llm_analyses)
 
             if LLMAnalysisType.COMPLIANCE_CHECK in result.llm_analyses:
-                result.compliance_status = self._extract_compliance_summary(
-                    result.llm_analyses
-                )
+                result.compliance_status = self._extract_compliance_summary(result.llm_analyses)
 
         except Exception as e:
             self.logger.error(f"Failed to generate natural language summary: {e}")
-            result.natural_language_summary = f"Protocol {result.protocol_type} discovered with {result.confidence:.2f} confidence"
+            result.natural_language_summary = (
+                f"Protocol {result.protocol_type} discovered with {result.confidence:.2f} confidence"
+            )
 
-    def _extract_security_summary(
-        self, analyses: Dict[LLMAnalysisType, LLMAnalysisResult]
-    ) -> str:
+    def _extract_security_summary(self, analyses: Dict[LLMAnalysisType, LLMAnalysisResult]) -> str:
         """Extract security summary from LLM analyses."""
         security_analyses = [
             analysis
@@ -526,20 +467,14 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
             return "No security analysis performed"
 
         # Combine security insights
-        high_confidence_findings = [
-            analysis.response
-            for analysis in security_analyses
-            if analysis.confidence > 0.8
-        ]
+        high_confidence_findings = [analysis.response for analysis in security_analyses if analysis.confidence > 0.8]
 
         if high_confidence_findings:
             return f"Security analysis completed with {len(high_confidence_findings)} high-confidence findings"
         else:
             return "Security analysis completed - review detailed findings"
 
-    def _extract_compliance_summary(
-        self, analyses: Dict[LLMAnalysisType, LLMAnalysisResult]
-    ) -> str:
+    def _extract_compliance_summary(self, analyses: Dict[LLMAnalysisType, LLMAnalysisResult]) -> str:
         """Extract compliance summary from LLM analyses."""
         compliance_analysis = analyses.get(LLMAnalysisType.COMPLIANCE_CHECK)
 
@@ -551,9 +486,7 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
         else:
             return "Compliance analysis completed - review findings"
 
-    def _generate_llm_cache_key(
-        self, messages: List[bytes], analysis_type: LLMAnalysisType
-    ) -> str:
+    def _generate_llm_cache_key(self, messages: List[bytes], analysis_type: LLMAnalysisType) -> str:
         """Generate cache key for LLM analysis results."""
         import hashlib
 
@@ -572,9 +505,7 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
 
                 # Add LLM enhancement indicators
                 profile["llm_enhanced"] = True
-                profile["analysis_capabilities"] = [
-                    analysis_type.value for analysis_type in LLMAnalysisType
-                ]
+                profile["analysis_capabilities"] = [analysis_type.value for analysis_type in LLMAnalysisType]
 
                 # Add recent analysis counts if cache exists
                 recent_analyses = sum(
@@ -597,9 +528,7 @@ class EnhancedProtocolDiscoveryOrchestrator(ProtocolDiscoveryOrchestrator):
         """Get LLM analysis statistics."""
         stats = {
             "total_cached_analyses": len(self.llm_analysis_cache),
-            "analysis_types_available": [
-                analysis_type.value for analysis_type in LLMAnalysisType
-            ],
+            "analysis_types_available": [analysis_type.value for analysis_type in LLMAnalysisType],
             "copilot_available": self.protocol_copilot is not None,
             "llm_service_available": self.llm_service is not None,
         }

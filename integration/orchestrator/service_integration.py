@@ -88,9 +88,7 @@ class ServiceIntegrationOrchestrator:
 
         # Thread pools for different types of work
         self.io_executor = ThreadPoolExecutor(max_workers=20, thread_name_prefix="io_")
-        self.cpu_executor = ThreadPoolExecutor(
-            max_workers=10, thread_name_prefix="cpu_"
-        )
+        self.cpu_executor = ThreadPoolExecutor(max_workers=10, thread_name_prefix="cpu_")
 
         # Message queues for internal routing
         self.message_queue = asyncio.Queue(maxsize=10000)
@@ -135,11 +133,7 @@ class ServiceIntegrationOrchestrator:
                     "host": self.config.redis.host,
                     "port": self.config.redis.port,
                     "db": self.config.redis.database,
-                    "password": (
-                        self.config.redis.password
-                        if self.config.redis.password
-                        else None
-                    ),
+                    "password": (self.config.redis.password if self.config.redis.password else None),
                     "ssl": self.config.redis.ssl,
                     "retry_on_timeout": True,
                     "socket_connect_timeout": self.config.redis.connection_timeout,
@@ -248,21 +242,11 @@ class ServiceIntegrationOrchestrator:
     async def _init_health_monitoring(self):
         """Initialize component health monitoring"""
         self.components = {
-            "ai_engine": ComponentHealth(
-                "ai_engine", ComponentStatus.STARTING, time.time()
-            ),
-            "protocol_processor": ComponentHealth(
-                "protocol_processor", ComponentStatus.STARTING, time.time()
-            ),
-            "security_analyzer": ComponentHealth(
-                "security_analyzer", ComponentStatus.STARTING, time.time()
-            ),
-            "dpi_engine": ComponentHealth(
-                "dpi_engine", ComponentStatus.STARTING, time.time()
-            ),
-            "quantum_crypto": ComponentHealth(
-                "quantum_crypto", ComponentStatus.STARTING, time.time()
-            ),
+            "ai_engine": ComponentHealth("ai_engine", ComponentStatus.STARTING, time.time()),
+            "protocol_processor": ComponentHealth("protocol_processor", ComponentStatus.STARTING, time.time()),
+            "security_analyzer": ComponentHealth("security_analyzer", ComponentStatus.STARTING, time.time()),
+            "dpi_engine": ComponentHealth("dpi_engine", ComponentStatus.STARTING, time.time()),
+            "quantum_crypto": ComponentHealth("quantum_crypto", ComponentStatus.STARTING, time.time()),
         }
 
     async def start(self):
@@ -320,9 +304,7 @@ class ServiceIntegrationOrchestrator:
                 if handler:
                     await handler(message)
                 else:
-                    logger.warning(
-                        f"No handler for message type: {message.message_type}"
-                    )
+                    logger.warning(f"No handler for message type: {message.message_type}")
 
                 self.message_count += 1
 
@@ -399,8 +381,7 @@ class ServiceIntegrationOrchestrator:
                         [
                             c
                             for c in self.components.values()
-                            if c.status
-                            in [ComponentStatus.HEALTHY, ComponentStatus.DEGRADED]
+                            if c.status in [ComponentStatus.HEALTHY, ComponentStatus.DEGRADED]
                         ]
                     ),
                     "memory_usage": self._get_memory_usage(),
@@ -577,9 +558,7 @@ class ServiceIntegrationOrchestrator:
         config_key = message.payload.get("config_key")
         config_value = message.payload.get("config_value")
 
-        logger.info(
-            f"Configuration update for {component}: {config_key} = {config_value}"
-        )
+        logger.info(f"Configuration update for {component}: {config_key} = {config_value}")
 
         # Broadcast to relevant components
         if component == "all":
@@ -612,9 +591,7 @@ class ServiceIntegrationOrchestrator:
                     "source": message.source,
                     "destination": message.destination,
                 }
-                await self.kafka_producer.send(
-                    f"qbitel-{message.destination}", kafka_message
-                )
+                await self.kafka_producer.send(f"qbitel-{message.destination}", kafka_message)
 
     async def _run_protocol_classification(self, input_data):
         """Run protocol classification via AI engine"""
@@ -671,9 +648,7 @@ class ServiceIntegrationOrchestrator:
         """Publish health metrics to monitoring system"""
         health_summary = {
             "timestamp": time.time(),
-            "components": {
-                name: asdict(health) for name, health in self.components.items()
-            },
+            "components": {name: asdict(health) for name, health in self.components.items()},
             "overall_status": self._calculate_overall_health(),
         }
 
@@ -686,9 +661,7 @@ class ServiceIntegrationOrchestrator:
 
     def _calculate_overall_health(self) -> str:
         """Calculate overall system health"""
-        healthy_count = len(
-            [c for c in self.components.values() if c.status == ComponentStatus.HEALTHY]
-        )
+        healthy_count = len([c for c in self.components.values() if c.status == ComponentStatus.HEALTHY])
         total_count = len(self.components)
 
         if healthy_count == total_count:
@@ -724,9 +697,7 @@ class ServiceIntegrationOrchestrator:
         """Get overall system health"""
         return {
             "overall_status": self._calculate_overall_health(),
-            "components": {
-                name: asdict(health) for name, health in self.components.items()
-            },
+            "components": {name: asdict(health) for name, health in self.components.items()},
             "uptime": time.time() - self.start_time,
             "message_count": self.message_count,
             "error_count": self.error_count,

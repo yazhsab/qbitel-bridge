@@ -85,9 +85,7 @@ class TestDataRetentionManagerLifecycle:
     @pytest.mark.asyncio
     async def test_initialize(self, retention_manager):
         """Test manager initialization."""
-        with patch.object(
-            retention_manager, "_load_lifecycle_records", new_callable=AsyncMock
-        ):
+        with patch.object(retention_manager, "_load_lifecycle_records", new_callable=AsyncMock):
             await retention_manager.initialize()
 
             assert retention_manager._running is True
@@ -96,9 +94,7 @@ class TestDataRetentionManagerLifecycle:
     @pytest.mark.asyncio
     async def test_shutdown(self, retention_manager):
         """Test manager shutdown."""
-        with patch.object(
-            retention_manager, "_load_lifecycle_records", new_callable=AsyncMock
-        ):
+        with patch.object(retention_manager, "_load_lifecycle_records", new_callable=AsyncMock):
             await retention_manager.initialize()
             await retention_manager.shutdown()
 
@@ -111,9 +107,7 @@ class TestRegisterData:
     @pytest.mark.asyncio
     async def test_register_data_success(self, retention_manager, mock_audit_manager):
         """Test successful data registration."""
-        record_id = await retention_manager.register_data(
-            DataCategory.USER_DATA, "user_123", {"email": "test@example.com"}
-        )
+        record_id = await retention_manager.register_data(DataCategory.USER_DATA, "user_123", {"email": "test@example.com"})
 
         assert record_id is not None
         assert record_id in retention_manager.lifecycle_records
@@ -128,24 +122,18 @@ class TestRegisterData:
     @pytest.mark.asyncio
     async def test_register_data_calculates_retention(self, retention_manager):
         """Test retention period calculation."""
-        record_id = await retention_manager.register_data(
-            DataCategory.SYSTEM_LOGS, "log_456"
-        )
+        record_id = await retention_manager.register_data(DataCategory.SYSTEM_LOGS, "log_456")
 
         record = retention_manager.lifecycle_records[record_id]
         policy = retention_manager.policies["system_logs"]
 
-        expected_retention = record.created_at + timedelta(
-            days=policy.retention_period_days
-        )
+        expected_retention = record.created_at + timedelta(days=policy.retention_period_days)
         assert abs((record.retention_until - expected_retention).total_seconds()) < 1
 
     @pytest.mark.asyncio
     async def test_register_data_with_archive_period(self, retention_manager):
         """Test registration with archive period."""
-        record_id = await retention_manager.register_data(
-            DataCategory.PROTOCOL_ANALYSIS, "analysis_789"
-        )
+        record_id = await retention_manager.register_data(DataCategory.PROTOCOL_ANALYSIS, "analysis_789")
 
         record = retention_manager.lifecycle_records[record_id]
         assert record.archive_at is not None
@@ -175,13 +163,9 @@ class TestLegalHold:
     @pytest.mark.asyncio
     async def test_apply_legal_hold(self, retention_manager, mock_audit_manager):
         """Test applying legal hold."""
-        record_id = await retention_manager.register_data(
-            DataCategory.USER_DATA, "user_123"
-        )
+        record_id = await retention_manager.register_data(DataCategory.USER_DATA, "user_123")
 
-        result = await retention_manager.apply_legal_hold(
-            record_id, "Pending litigation"
-        )
+        result = await retention_manager.apply_legal_hold(record_id, "Pending litigation")
 
         assert result is True
         record = retention_manager.lifecycle_records[record_id]
@@ -198,9 +182,7 @@ class TestLegalHold:
     @pytest.mark.asyncio
     async def test_release_legal_hold(self, retention_manager, mock_audit_manager):
         """Test releasing legal hold."""
-        record_id = await retention_manager.register_data(
-            DataCategory.USER_DATA, "user_123"
-        )
+        record_id = await retention_manager.register_data(DataCategory.USER_DATA, "user_123")
         await retention_manager.apply_legal_hold(record_id, "Test reason")
 
         result = await retention_manager.release_legal_hold(record_id)
@@ -242,9 +224,7 @@ class TestEnforceRetentionPolicies:
     @pytest.mark.asyncio
     async def test_enforce_policies_expired_archive(self, retention_manager):
         """Test enforcement archives expired data."""
-        record_id = await retention_manager.register_data(
-            DataCategory.AUDIT_LOGS, "audit_001"
-        )
+        record_id = await retention_manager.register_data(DataCategory.AUDIT_LOGS, "audit_001")
 
         # Set retention to past
         record = retention_manager.lifecycle_records[record_id]
@@ -258,9 +238,7 @@ class TestEnforceRetentionPolicies:
     @pytest.mark.asyncio
     async def test_enforce_policies_expired_delete(self, retention_manager):
         """Test enforcement deletes expired data."""
-        record_id = await retention_manager.register_data(
-            DataCategory.METRICS, "metric_001"
-        )
+        record_id = await retention_manager.register_data(DataCategory.METRICS, "metric_001")
 
         # Set retention to past
         record = retention_manager.lifecycle_records[record_id]
@@ -274,9 +252,7 @@ class TestEnforceRetentionPolicies:
     @pytest.mark.asyncio
     async def test_enforce_policies_expired_anonymize(self, retention_manager):
         """Test enforcement anonymizes expired data."""
-        record_id = await retention_manager.register_data(
-            DataCategory.USER_DATA, "user_123"
-        )
+        record_id = await retention_manager.register_data(DataCategory.USER_DATA, "user_123")
 
         # Set retention to past
         record = retention_manager.lifecycle_records[record_id]
@@ -290,9 +266,7 @@ class TestEnforceRetentionPolicies:
     @pytest.mark.asyncio
     async def test_enforce_policies_legal_hold_skipped(self, retention_manager):
         """Test enforcement skips records with legal hold."""
-        record_id = await retention_manager.register_data(
-            DataCategory.USER_DATA, "user_123"
-        )
+        record_id = await retention_manager.register_data(DataCategory.USER_DATA, "user_123")
 
         # Apply legal hold and set retention to past
         await retention_manager.apply_legal_hold(record_id, "Test")
@@ -307,18 +281,14 @@ class TestEnforceRetentionPolicies:
     @pytest.mark.asyncio
     async def test_enforce_policies_handles_errors(self, retention_manager):
         """Test enforcement handles errors gracefully."""
-        record_id = await retention_manager.register_data(
-            DataCategory.USER_DATA, "user_123"
-        )
+        record_id = await retention_manager.register_data(DataCategory.USER_DATA, "user_123")
 
         # Set retention to past
         record = retention_manager.lifecycle_records[record_id]
         record.retention_until = datetime.utcnow() - timedelta(days=1)
 
         # Mock _anonymize_data to raise exception
-        with patch.object(
-            retention_manager, "_anonymize_data", side_effect=Exception("Test error")
-        ):
+        with patch.object(retention_manager, "_anonymize_data", side_effect=Exception("Test error")):
             results = await retention_manager.enforce_retention_policies()
 
             assert len(results["errors"]) == 1
@@ -331,9 +301,7 @@ class TestDataActions:
     @pytest.mark.asyncio
     async def test_archive_data(self, retention_manager, mock_audit_manager):
         """Test archiving data."""
-        record_id = await retention_manager.register_data(
-            DataCategory.AUDIT_LOGS, "audit_001"
-        )
+        record_id = await retention_manager.register_data(DataCategory.AUDIT_LOGS, "audit_001")
         record = retention_manager.lifecycle_records[record_id]
 
         await retention_manager._archive_data(record)
@@ -345,9 +313,7 @@ class TestDataActions:
     @pytest.mark.asyncio
     async def test_delete_data(self, retention_manager, mock_audit_manager):
         """Test deleting data."""
-        record_id = await retention_manager.register_data(
-            DataCategory.METRICS, "metric_001"
-        )
+        record_id = await retention_manager.register_data(DataCategory.METRICS, "metric_001")
         record = retention_manager.lifecycle_records[record_id]
 
         await retention_manager._delete_data(record)
@@ -359,9 +325,7 @@ class TestDataActions:
     @pytest.mark.asyncio
     async def test_anonymize_data(self, retention_manager, mock_audit_manager):
         """Test anonymizing data."""
-        record_id = await retention_manager.register_data(
-            DataCategory.USER_DATA, "user_123"
-        )
+        record_id = await retention_manager.register_data(DataCategory.USER_DATA, "user_123")
         record = retention_manager.lifecycle_records[record_id]
 
         await retention_manager._anonymize_data(record)
@@ -413,9 +377,7 @@ class TestReporting:
     @pytest.mark.asyncio
     async def test_report_upcoming_actions(self, retention_manager):
         """Test report shows upcoming actions."""
-        record_id = await retention_manager.register_data(
-            DataCategory.METRICS, "metric_1"
-        )
+        record_id = await retention_manager.register_data(DataCategory.METRICS, "metric_1")
 
         # Set retention to near future
         record = retention_manager.lifecycle_records[record_id]
@@ -445,12 +407,8 @@ class TestEnforcementLoop:
     async def test_enforcement_loop_runs(self, retention_manager):
         """Test enforcement loop executes."""
         with (
-            patch.object(
-                retention_manager, "_load_lifecycle_records", new_callable=AsyncMock
-            ),
-            patch.object(
-                retention_manager, "enforce_retention_policies", new_callable=AsyncMock
-            ) as mock_enforce,
+            patch.object(retention_manager, "_load_lifecycle_records", new_callable=AsyncMock),
+            patch.object(retention_manager, "enforce_retention_policies", new_callable=AsyncMock) as mock_enforce,
         ):
 
             await retention_manager.initialize()
@@ -467,9 +425,7 @@ class TestEnforcementLoop:
     async def test_enforcement_loop_handles_errors(self, retention_manager):
         """Test enforcement loop handles errors."""
         with (
-            patch.object(
-                retention_manager, "_load_lifecycle_records", new_callable=AsyncMock
-            ),
+            patch.object(retention_manager, "_load_lifecycle_records", new_callable=AsyncMock),
             patch.object(
                 retention_manager,
                 "enforce_retention_policies",
@@ -540,12 +496,8 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_multiple_registrations_same_identifier(self, retention_manager):
         """Test registering multiple records with same identifier."""
-        record_id1 = await retention_manager.register_data(
-            DataCategory.USER_DATA, "user_123"
-        )
-        record_id2 = await retention_manager.register_data(
-            DataCategory.USER_DATA, "user_123"
-        )
+        record_id1 = await retention_manager.register_data(DataCategory.USER_DATA, "user_123")
+        record_id2 = await retention_manager.register_data(DataCategory.USER_DATA, "user_123")
 
         assert record_id1 != record_id2
         assert len(retention_manager.lifecycle_records) == 2
@@ -553,9 +505,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_enforce_with_no_policy(self, retention_manager):
         """Test enforcement when policy is missing."""
-        record_id = await retention_manager.register_data(
-            DataCategory.METRICS, "metric_001"
-        )
+        record_id = await retention_manager.register_data(DataCategory.METRICS, "metric_001")
 
         # Remove policy
         del retention_manager.policies["metrics"]
@@ -571,9 +521,7 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_empty_metadata(self, retention_manager):
         """Test registration with empty metadata."""
-        record_id = await retention_manager.register_data(
-            DataCategory.METRICS, "metric_001", {}
-        )
+        record_id = await retention_manager.register_data(DataCategory.METRICS, "metric_001", {})
 
         record = retention_manager.lifecycle_records[record_id]
         assert record.metadata == {}

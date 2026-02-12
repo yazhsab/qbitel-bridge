@@ -94,9 +94,7 @@ class LogEvent:
         """Convert to dictionary for JSON serialization."""
         result = {
             "timestamp": self.timestamp,
-            "iso_timestamp": datetime.fromtimestamp(
-                self.timestamp, timezone.utc
-            ).isoformat(),
+            "iso_timestamp": datetime.fromtimestamp(self.timestamp, timezone.utc).isoformat(),
             "level": self.level.value,
             "category": self.category.value,
             "message": self.message,
@@ -112,9 +110,7 @@ class LogEvent:
             result["exception"] = {
                 "type": type(self.exception).__name__,
                 "message": str(self.exception),
-                "traceback": traceback.format_exception(
-                    type(self.exception), self.exception, self.exception.__traceback__
-                ),
+                "traceback": traceback.format_exception(type(self.exception), self.exception, self.exception.__traceback__),
             }
 
         if self.performance_metrics:
@@ -185,9 +181,7 @@ class PerformanceLogger:
 
                 # Keep only last 1000 measurements
                 if len(self.operation_times[operation_name]) > 1000:
-                    self.operation_times[operation_name] = self.operation_times[
-                        operation_name
-                    ][-1000:]
+                    self.operation_times[operation_name] = self.operation_times[operation_name][-1000:]
 
             # Log performance metric
             self.logger.info(
@@ -221,10 +215,7 @@ class PerformanceLogger:
     def get_all_stats(self) -> Dict[str, Dict[str, float]]:
         """Get statistics for all operations."""
         with self.lock:
-            return {
-                operation: self.get_operation_stats(operation)
-                for operation in self.operation_times.keys()
-            }
+            return {operation: self.get_operation_stats(operation) for operation in self.operation_times.keys()}
 
 
 class SecurityLogger:
@@ -551,9 +542,7 @@ class LoggerFactory:
     _default_config: Dict[str, Any] = {"log_level": "INFO", "log_file": None}
 
     @classmethod
-    def get_logger(
-        cls, name: str, config: Optional[Dict[str, Any]] = None
-    ) -> StructuredLogger:
+    def get_logger(cls, name: str, config: Optional[Dict[str, Any]] = None) -> StructuredLogger:
         """Get or create a structured logger."""
         if name not in cls._loggers:
             logger_config = {**cls._default_config}

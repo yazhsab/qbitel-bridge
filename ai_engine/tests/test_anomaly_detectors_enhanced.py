@@ -147,9 +147,7 @@ class TestEnsembleAnomalyDetector:
         detector = EnsembleAnomalyDetector()
 
         mock_detector = Mock()
-        mock_detector.detect = Mock(
-            return_value=(np.array([True, False]), np.array([0.8, 0.3]))
-        )
+        mock_detector.detect = Mock(return_value=(np.array([True, False]), np.array([0.8, 0.3])))
 
         detector.add_detector(mock_detector)
 
@@ -208,9 +206,7 @@ class TestEnsembleAnomalyDetector:
                 detector.save("ensemble_model")
 
         with patch("builtins.open", create=True):
-            with patch(
-                "json.load", return_value={"voting_method": "average", "weights": [1.0]}
-            ):
+            with patch("json.load", return_value={"voting_method": "average", "weights": [1.0]}):
                 detector.load("ensemble_model")
 
 
@@ -461,9 +457,7 @@ class TestLSTMAnomalyDetector:
         detector.is_trained = True
         detector.threshold = 1.0
 
-        with patch.object(
-            detector, "_compute_reconstruction_error", return_value=np.array([0.5] * 10)
-        ):
+        with patch.object(detector, "_compute_reconstruction_error", return_value=np.array([0.5] * 10)):
             is_anomaly, scores = detector.detect(sample_sequences[:10])
 
             assert len(is_anomaly) == 10
@@ -493,9 +487,7 @@ class TestLSTMAnomalyDetector:
         detector = LSTMAnomalyDetector(input_dim=10, sequence_length=20)
         detector.is_trained = True
 
-        with patch.object(
-            detector, "_compute_reconstruction_error", return_value=np.random.randn(50)
-        ):
+        with patch.object(detector, "_compute_reconstruction_error", return_value=np.random.randn(50)):
             detector.set_threshold(sample_sequences, percentile=95)
 
             assert detector.threshold is not None
@@ -562,9 +554,7 @@ class TestLSTMAnomalyDetector:
         val_losses = [0.5, 0.6, 0.7, 0.8]
         with patch.object(detector, "_train_epoch", return_value=0.5):
             with patch.object(detector, "_validate_epoch", side_effect=val_losses):
-                detector.train(
-                    train_data, val_data=val_data, epochs=10, early_stopping_patience=2
-                )
+                detector.train(train_data, val_data=val_data, epochs=10, early_stopping_patience=2)
 
                 assert detector.is_trained
 

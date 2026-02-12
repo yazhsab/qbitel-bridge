@@ -133,9 +133,7 @@ class ConfigValidator:
         self.validators: Dict[str, Callable] = {}
         self.schemas: Dict[str, Dict[str, Any]] = {}
 
-    def register_validator(
-        self, key_pattern: str, validator_func: Callable[[Any], bool]
-    ):
+    def register_validator(self, key_pattern: str, validator_func: Callable[[Any], bool]):
         """Register a validator function for a key pattern."""
         self.validators[key_pattern] = validator_func
 
@@ -271,15 +269,11 @@ class ConfigurationStore:
         """Delete configuration key."""
         raise NotImplementedError
 
-    async def list_keys(
-        self, prefix: str = "", environment: Optional[ConfigEnvironment] = None
-    ) -> List[str]:
+    async def list_keys(self, prefix: str = "", environment: Optional[ConfigEnvironment] = None) -> List[str]:
         """List configuration keys."""
         raise NotImplementedError
 
-    async def get_metadata(
-        self, key: str, environment: ConfigEnvironment
-    ) -> Optional[ConfigMetadata]:
+    async def get_metadata(self, key: str, environment: ConfigEnvironment) -> Optional[ConfigMetadata]:
         """Get configuration metadata."""
         raise NotImplementedError
 
@@ -458,9 +452,7 @@ class FileConfigurationStore(ConfigurationStore):
             self.logger.error(f"Failed to delete config {key}: {e}")
             return False
 
-    async def list_keys(
-        self, prefix: str = "", environment: Optional[ConfigEnvironment] = None
-    ) -> List[str]:
+    async def list_keys(self, prefix: str = "", environment: Optional[ConfigEnvironment] = None) -> List[str]:
         """List configuration keys."""
         keys = []
 
@@ -494,9 +486,7 @@ class FileConfigurationStore(ConfigurationStore):
 
         return keys
 
-    async def get_metadata(
-        self, key: str, environment: ConfigEnvironment
-    ) -> Optional[ConfigMetadata]:
+    async def get_metadata(self, key: str, environment: ConfigEnvironment) -> Optional[ConfigMetadata]:
         """Get configuration metadata."""
         env_key = f"{environment.value}:{key}"
 
@@ -554,9 +544,7 @@ class EtcdConfigurationStore(ConfigurationStore):
         """Get configuration value from etcd."""
         try:
             etcd_key = self._get_key(key, environment)
-            value, metadata = await asyncio.get_event_loop().run_in_executor(
-                None, self.etcd_client.get, etcd_key
-            )
+            value, metadata = await asyncio.get_event_loop().run_in_executor(None, self.etcd_client.get, etcd_key)
 
             if value is None:
                 return None
@@ -589,9 +577,7 @@ class EtcdConfigurationStore(ConfigurationStore):
                 serialized_value = str(value)
 
             # Set in etcd
-            success = await asyncio.get_event_loop().run_in_executor(
-                None, self.etcd_client.put, etcd_key, serialized_value
-            )
+            success = await asyncio.get_event_loop().run_in_executor(None, self.etcd_client.put, etcd_key, serialized_value)
 
             return success
 
@@ -603,18 +589,14 @@ class EtcdConfigurationStore(ConfigurationStore):
         """Delete configuration key from etcd."""
         try:
             etcd_key = self._get_key(key, environment)
-            deleted = await asyncio.get_event_loop().run_in_executor(
-                None, self.etcd_client.delete, etcd_key
-            )
+            deleted = await asyncio.get_event_loop().run_in_executor(None, self.etcd_client.delete, etcd_key)
             return deleted
 
         except Exception as e:
             self.logger.error(f"Failed to delete config from etcd {key}: {e}")
             return False
 
-    async def list_keys(
-        self, prefix: str = "", environment: Optional[ConfigEnvironment] = None
-    ) -> List[str]:
+    async def list_keys(self, prefix: str = "", environment: Optional[ConfigEnvironment] = None) -> List[str]:
         """List configuration keys from etcd."""
         try:
             if environment:
@@ -624,10 +606,7 @@ class EtcdConfigurationStore(ConfigurationStore):
 
             keys = await asyncio.get_event_loop().run_in_executor(
                 None,
-                lambda: [
-                    key.decode("utf-8")
-                    for key, _ in self.etcd_client.get_prefix(search_prefix)
-                ],
+                lambda: [key.decode("utf-8") for key, _ in self.etcd_client.get_prefix(search_prefix)],
             )
 
             # Remove prefix from keys
@@ -652,9 +631,7 @@ class ConfigurationService:
         self.logger = get_logger(__name__)
 
         # Environment and defaults
-        self.current_environment = ConfigEnvironment(
-            config.get("environment", "development")
-        )
+        self.current_environment = ConfigEnvironment(config.get("environment", "development"))
         self.default_values: Dict[str, Any] = config.get("defaults", {})
 
         # Storage backend
@@ -681,9 +658,7 @@ class ConfigurationService:
         self.cache_ttl = timedelta(seconds=config.get("cache_ttl_seconds", 300))
         self.cache_lock = threading.RLock()
 
-        self.logger.info(
-            f"ConfigurationService initialized for {self.current_environment.value} environment"
-        )
+        self.logger.info(f"ConfigurationService initialized for {self.current_environment.value} environment")
 
     def _create_store(self, storage_config: Dict[str, Any]) -> ConfigurationStore:
         """Create configuration store based on config."""
@@ -721,9 +696,7 @@ class ConfigurationService:
         def validate_email(value):
             import re
 
-            email_pattern = re.compile(
-                r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-            )
+            email_pattern = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
             return bool(email_pattern.match(str(value)))
 
         self.validator.register_validator("*_email", validate_email)
@@ -869,9 +842,7 @@ class ConfigurationService:
 
             if success:
                 # Record change
-                await self._record_change(
-                    key, old_value, None, changed_by, reason, "delete"
-                )
+                await self._record_change(key, old_value, None, changed_by, reason, "delete")
 
                 # Invalidate cache
                 cache_key = f"{env.value}:{key}"
@@ -890,9 +861,7 @@ class ConfigurationService:
             self.logger.error(f"Failed to delete config {key}: {e}")
             return False
 
-    async def list_keys(
-        self, prefix: str = "", environment: Optional[ConfigEnvironment] = None
-    ) -> List[str]:
+    async def list_keys(self, prefix: str = "", environment: Optional[ConfigEnvironment] = None) -> List[str]:
         """List configuration keys."""
         try:
             return await self.store.list_keys(prefix, environment)
@@ -900,9 +869,7 @@ class ConfigurationService:
             self.logger.error(f"Failed to list keys: {e}")
             return []
 
-    async def get_all(
-        self, environment: Optional[ConfigEnvironment] = None
-    ) -> Dict[str, Any]:
+    async def get_all(self, environment: Optional[ConfigEnvironment] = None) -> Dict[str, Any]:
         """Get all configuration values."""
         env = environment or self.current_environment
         result = {}
@@ -949,11 +916,7 @@ class ConfigurationService:
         with self.watcher_lock:
             for pattern, callbacks in self.watchers.items():
                 if fnmatch.fnmatch(key, pattern):
-                    for (
-                        callback
-                    ) in (
-                        callbacks.copy()
-                    ):  # Copy to avoid modification during iteration
+                    for callback in callbacks.copy():  # Copy to avoid modification during iteration
                         try:
                             if asyncio.iscoroutinefunction(callback):
                                 await callback(key, new_value, old_value)
@@ -990,9 +953,7 @@ class ConfigurationService:
             if len(self.change_history) > 1000:
                 self.change_history = self.change_history[-1000:]
 
-    def get_change_history(
-        self, key: Optional[str] = None, limit: int = 100
-    ) -> List[ConfigChange]:
+    def get_change_history(self, key: Optional[str] = None, limit: int = 100) -> List[ConfigChange]:
         """Get configuration change history."""
         with self.change_lock:
             changes = self.change_history.copy()
@@ -1015,18 +976,14 @@ class ConfigurationService:
 
                 with self.cache_lock:
                     # Remove all cached entries for this environment
-                    keys_to_remove = [
-                        k for k in self.cache.keys() if k.startswith(f"{env_str}:")
-                    ]
+                    keys_to_remove = [k for k in self.cache.keys() if k.startswith(f"{env_str}:")]
                     for key in keys_to_remove:
                         del self.cache[key]
 
                 self.logger.info(f"Reloaded configuration from {file_path}")
 
             except ValueError:
-                self.logger.warning(
-                    f"Cannot determine environment from file: {file_path}"
-                )
+                self.logger.warning(f"Cannot determine environment from file: {file_path}")
 
     async def load_file(self, file_path: Path):
         """Load configuration from a new file."""
@@ -1058,9 +1015,7 @@ class ConfigurationService:
 
         return errors
 
-    async def get_metadata(
-        self, key: str, environment: Optional[ConfigEnvironment] = None
-    ) -> Optional[ConfigMetadata]:
+    async def get_metadata(self, key: str, environment: Optional[ConfigEnvironment] = None) -> Optional[ConfigMetadata]:
         """Get configuration metadata."""
         env = environment or self.current_environment
         return await self.store.get_metadata(key, env)

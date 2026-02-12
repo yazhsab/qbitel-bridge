@@ -41,6 +41,7 @@ try:
     from cryptography.hazmat.primitives import hashes, serialization
     from cryptography.hazmat.primitives.kdf.hkdf import HKDF
     from cryptography.hazmat.backends import default_backend
+
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False
@@ -84,8 +85,8 @@ class HybridPublicKey:
     def from_bytes(cls, data: bytes, mode: HybridMode) -> "HybridPublicKey":
         """Deserialize hybrid public key."""
         classical_len = int.from_bytes(data[:4], "big")
-        classical_key = data[4:4 + classical_len]
-        pqc_key = data[4 + classical_len:]
+        classical_key = data[4 : 4 + classical_len]
+        pqc_key = data[4 + classical_len :]
         return cls(classical_key=classical_key, pqc_key=pqc_key, mode=mode)
 
 
@@ -106,8 +107,8 @@ class HybridPrivateKey:
     def from_bytes(cls, data: bytes, mode: HybridMode) -> "HybridPrivateKey":
         """Deserialize hybrid private key."""
         classical_len = int.from_bytes(data[:4], "big")
-        classical_key = data[4:4 + classical_len]
-        pqc_key = data[4 + classical_len:]
+        classical_key = data[4 : 4 + classical_len]
+        pqc_key = data[4 + classical_len :]
         return cls(classical_key=classical_key, pqc_key=pqc_key, mode=mode)
 
 
@@ -157,8 +158,8 @@ class HybridSignature:
     def from_bytes(cls, data: bytes, mode: HybridMode) -> "HybridSignature":
         """Deserialize hybrid signature."""
         sig1_len = int.from_bytes(data[:4], "big")
-        classical_sig = data[4:4 + sig1_len]
-        pqc_sig = data[4 + sig1_len:]
+        classical_sig = data[4 : 4 + sig1_len]
+        pqc_sig = data[4 + sig1_len :]
         return cls(classical_signature=classical_sig, pqc_signature=pqc_sig, mode=mode)
 
 
@@ -199,31 +200,21 @@ class HybridKEM:
             classical_public = classical_private.public_key()
 
             classical_pub_bytes = classical_public.public_bytes(
-                serialization.Encoding.X962,
-                serialization.PublicFormat.UncompressedPoint
+                serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint
             )
             classical_priv_bytes = classical_private.private_bytes(
-                serialization.Encoding.DER,
-                serialization.PrivateFormat.PKCS8,
-                serialization.NoEncryption()
+                serialization.Encoding.DER, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()
             )
         else:
             # RSA
-            classical_private = rsa.generate_private_key(
-                public_exponent=65537,
-                key_size=3072,
-                backend=default_backend()
-            )
+            classical_private = rsa.generate_private_key(public_exponent=65537, key_size=3072, backend=default_backend())
             classical_public = classical_private.public_key()
 
             classical_pub_bytes = classical_public.public_bytes(
-                serialization.Encoding.DER,
-                serialization.PublicFormat.SubjectPublicKeyInfo
+                serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo
             )
             classical_priv_bytes = classical_private.private_bytes(
-                serialization.Encoding.DER,
-                serialization.PrivateFormat.PKCS8,
-                serialization.NoEncryption()
+                serialization.Encoding.DER, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()
             )
 
         # Generate PQC key
@@ -231,14 +222,10 @@ class HybridKEM:
 
         return HybridKeyPair(
             public_key=HybridPublicKey(
-                classical_key=classical_pub_bytes,
-                pqc_key=pqc_keypair.public_key.to_bytes(),
-                mode=self.mode
+                classical_key=classical_pub_bytes, pqc_key=pqc_keypair.public_key.to_bytes(), mode=self.mode
             ),
             private_key=HybridPrivateKey(
-                classical_key=classical_priv_bytes,
-                pqc_key=pqc_keypair.private_key.to_bytes(),
-                mode=self.mode
+                classical_key=classical_priv_bytes, pqc_key=pqc_keypair.private_key.to_bytes(), mode=self.mode
             ),
             mode=self.mode,
             _classical_public=classical_public,
@@ -263,39 +250,28 @@ class HybridKEM:
             ephemeral_public = ephemeral_private.public_key()
 
             # Load peer's public key
-            peer_public = ec.EllipticCurvePublicKey.from_encoded_point(
-                curve, public_key.classical_key
-            )
+            peer_public = ec.EllipticCurvePublicKey.from_encoded_point(curve, public_key.classical_key)
 
             # Derive shared secret
             classical_shared = ephemeral_private.exchange(ec.ECDH(), peer_public)
 
             # Ciphertext is ephemeral public key
             classical_ciphertext = ephemeral_public.public_bytes(
-                serialization.Encoding.X962,
-                serialization.PublicFormat.UncompressedPoint
+                serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint
             )
         else:
             # RSA-KEM: encrypt random value
-            peer_public = serialization.load_der_public_key(
-                public_key.classical_key, default_backend()
-            )
+            peer_public = serialization.load_der_public_key(public_key.classical_key, default_backend())
             classical_shared = secrets.token_bytes(32)
             classical_ciphertext = peer_public.encrypt(
                 classical_shared,
-                padding.OAEP(
-                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                    algorithm=hashes.SHA256(),
-                    label=None
-                )
+                padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None),
             )
 
         # PQC encapsulation
         from ai_engine.domains.banking.security.pqc.ml_kem import MLKEMPublicKey
-        pqc_public = MLKEMPublicKey.from_bytes(
-            public_key.pqc_key,
-            self._pqc_kem.level
-        )
+
+        pqc_public = MLKEMPublicKey.from_bytes(public_key.pqc_key, self._pqc_kem.level)
         pqc_encap = self._pqc_kem.encapsulate(pqc_public)
 
         # Combine shared secrets using HKDF
@@ -305,7 +281,7 @@ class HybridKEM:
             length=32,
             salt=b"hybrid-kem-v1",
             info=self.mode.algorithm_name.encode(),
-            backend=default_backend()
+            backend=default_backend(),
         )
         combined_shared = hkdf.derive(combined_ikm)
 
@@ -327,38 +303,25 @@ class HybridKEM:
             raise RuntimeError("cryptography library required for hybrid KEM")
 
         # Classical decapsulation
-        classical_private = serialization.load_der_private_key(
-            private_key.classical_key, None, default_backend()
-        )
+        classical_private = serialization.load_der_private_key(private_key.classical_key, None, default_backend())
 
         if self.mode.classical_algorithm.startswith("P-"):
             # ECDH
             curve = self._curve_map[self.mode.classical_algorithm]
-            ephemeral_public = ec.EllipticCurvePublicKey.from_encoded_point(
-                curve, encapsulation.classical_ciphertext
-            )
+            ephemeral_public = ec.EllipticCurvePublicKey.from_encoded_point(curve, encapsulation.classical_ciphertext)
             classical_shared = classical_private.exchange(ec.ECDH(), ephemeral_public)
         else:
             # RSA
             classical_shared = classical_private.decrypt(
                 encapsulation.classical_ciphertext,
-                padding.OAEP(
-                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                    algorithm=hashes.SHA256(),
-                    label=None
-                )
+                padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None),
             )
 
         # PQC decapsulation
         from ai_engine.domains.banking.security.pqc.ml_kem import MLKEMPrivateKey
-        pqc_private = MLKEMPrivateKey.from_bytes(
-            private_key.pqc_key,
-            self._pqc_kem.level
-        )
-        pqc_shared = self._pqc_kem.decapsulate(
-            encapsulation.pqc_ciphertext,
-            pqc_private
-        )
+
+        pqc_private = MLKEMPrivateKey.from_bytes(private_key.pqc_key, self._pqc_kem.level)
+        pqc_shared = self._pqc_kem.decapsulate(encapsulation.pqc_ciphertext, pqc_private)
 
         # Combine shared secrets
         combined_ikm = classical_shared + pqc_shared
@@ -367,7 +330,7 @@ class HybridKEM:
             length=32,
             salt=b"hybrid-kem-v1",
             info=self.mode.algorithm_name.encode(),
-            backend=default_backend()
+            backend=default_backend(),
         )
 
         return hkdf.derive(combined_ikm)
@@ -410,31 +373,21 @@ class HybridSigner:
             classical_public = classical_private.public_key()
 
             classical_pub_bytes = classical_public.public_bytes(
-                serialization.Encoding.X962,
-                serialization.PublicFormat.UncompressedPoint
+                serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint
             )
             classical_priv_bytes = classical_private.private_bytes(
-                serialization.Encoding.DER,
-                serialization.PrivateFormat.PKCS8,
-                serialization.NoEncryption()
+                serialization.Encoding.DER, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()
             )
         else:
             # RSA
-            classical_private = rsa.generate_private_key(
-                public_exponent=65537,
-                key_size=3072,
-                backend=default_backend()
-            )
+            classical_private = rsa.generate_private_key(public_exponent=65537, key_size=3072, backend=default_backend())
             classical_public = classical_private.public_key()
 
             classical_pub_bytes = classical_public.public_bytes(
-                serialization.Encoding.DER,
-                serialization.PublicFormat.SubjectPublicKeyInfo
+                serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo
             )
             classical_priv_bytes = classical_private.private_bytes(
-                serialization.Encoding.DER,
-                serialization.PrivateFormat.PKCS8,
-                serialization.NoEncryption()
+                serialization.Encoding.DER, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()
             )
 
         # Generate PQC key
@@ -442,14 +395,10 @@ class HybridSigner:
 
         return HybridKeyPair(
             public_key=HybridPublicKey(
-                classical_key=classical_pub_bytes,
-                pqc_key=pqc_keypair.public_key.to_bytes(),
-                mode=self.mode
+                classical_key=classical_pub_bytes, pqc_key=pqc_keypair.public_key.to_bytes(), mode=self.mode
             ),
             private_key=HybridPrivateKey(
-                classical_key=classical_priv_bytes,
-                pqc_key=pqc_keypair.private_key.to_bytes(),
-                mode=self.mode
+                classical_key=classical_priv_bytes, pqc_key=pqc_keypair.private_key.to_bytes(), mode=self.mode
             ),
             mode=self.mode,
         )
@@ -469,32 +418,20 @@ class HybridSigner:
             raise RuntimeError("cryptography library required for hybrid signatures")
 
         # Load classical private key
-        classical_private = serialization.load_der_private_key(
-            private_key.classical_key, None, default_backend()
-        )
+        classical_private = serialization.load_der_private_key(private_key.classical_key, None, default_backend())
 
         # Classical signature
         if self.mode.classical_algorithm.startswith("P-"):
-            classical_sig = classical_private.sign(
-                message,
-                ec.ECDSA(hashes.SHA384())
-            )
+            classical_sig = classical_private.sign(message, ec.ECDSA(hashes.SHA384()))
         else:
             classical_sig = classical_private.sign(
-                message,
-                padding.PSS(
-                    mgf=padding.MGF1(hashes.SHA256()),
-                    salt_length=padding.PSS.AUTO
-                ),
-                hashes.SHA256()
+                message, padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.AUTO), hashes.SHA256()
             )
 
         # PQC signature
         from ai_engine.domains.banking.security.pqc.ml_dsa import MLDSAPrivateKey
-        pqc_private = MLDSAPrivateKey.from_bytes(
-            private_key.pqc_key,
-            self._pqc_dsa.level
-        )
+
+        pqc_private = MLDSAPrivateKey.from_bytes(private_key.pqc_key, self._pqc_dsa.level)
         pqc_sig = self._pqc_dsa.sign(message, pqc_private, context)
 
         return HybridSignature(
@@ -522,26 +459,15 @@ class HybridSigner:
         try:
             if self.mode.classical_algorithm.startswith("P-"):
                 curve = self._curve_map[self.mode.classical_algorithm]
-                classical_public = ec.EllipticCurvePublicKey.from_encoded_point(
-                    curve, public_key.classical_key
-                )
-                classical_public.verify(
-                    signature.classical_signature,
-                    message,
-                    ec.ECDSA(hashes.SHA384())
-                )
+                classical_public = ec.EllipticCurvePublicKey.from_encoded_point(curve, public_key.classical_key)
+                classical_public.verify(signature.classical_signature, message, ec.ECDSA(hashes.SHA384()))
             else:
-                classical_public = serialization.load_der_public_key(
-                    public_key.classical_key, default_backend()
-                )
+                classical_public = serialization.load_der_public_key(public_key.classical_key, default_backend())
                 classical_public.verify(
                     signature.classical_signature,
                     message,
-                    padding.PSS(
-                        mgf=padding.MGF1(hashes.SHA256()),
-                        salt_length=padding.PSS.AUTO
-                    ),
-                    hashes.SHA256()
+                    padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.AUTO),
+                    hashes.SHA256(),
                 )
             classical_valid = True
         except Exception:
@@ -552,14 +478,9 @@ class HybridSigner:
             MLDSAPublicKey,
             MLDSASignature,
         )
-        pqc_public = MLDSAPublicKey.from_bytes(
-            public_key.pqc_key,
-            self._pqc_dsa.level
-        )
-        pqc_sig = MLDSASignature.from_bytes(
-            signature.pqc_signature,
-            self._pqc_dsa.level
-        )
+
+        pqc_public = MLDSAPublicKey.from_bytes(public_key.pqc_key, self._pqc_dsa.level)
+        pqc_sig = MLDSASignature.from_bytes(signature.pqc_signature, self._pqc_dsa.level)
         pqc_valid = self._pqc_dsa.verify(message, pqc_sig, pqc_public, context)
 
         # Both must be valid

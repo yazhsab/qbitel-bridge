@@ -69,9 +69,7 @@ class StreamingParser:
 
     parser_id: str
     grammar: Grammar
-    parse_function: Callable[
-        [bytes, StreamingParseState], Tuple[List[ParserNode], StreamingParseState]
-    ]
+    parse_function: Callable[[bytes, StreamingParseState], Tuple[List[ParserNode], StreamingParseState]]
     reset_function: Callable[[], StreamingParseState]
     metadata: Dict[str, Any]
     created_at: float = field(default_factory=time.time)
@@ -155,9 +153,7 @@ class EnhancedParserGenerator(ParserGenerator):
         # Profiling
         self._profiler: Optional[cProfile.Profile] = None
 
-        self.logger.info(
-            "Enhanced Parser Generator initialized with production features"
-        )
+        self.logger.info("Enhanced Parser Generator initialized with production features")
 
     async def generate_optimized_parser(
         self,
@@ -184,9 +180,7 @@ class EnhancedParserGenerator(ParserGenerator):
             Optimized generated parser
         """
         if not 1 <= optimization_level <= 3:
-            raise ValueError(
-                f"Invalid optimization level: {optimization_level}. Must be 1-3."
-            )
+            raise ValueError(f"Invalid optimization level: {optimization_level}. Must be 1-3.")
 
         start_time = time.time()
         opt_level = OptimizationLevel(optimization_level)
@@ -194,9 +188,7 @@ class EnhancedParserGenerator(ParserGenerator):
         if not parser_id:
             parser_id = self._generate_parser_id(grammar)
 
-        self.logger.info(
-            f"Generating optimized parser {parser_id} with {opt_level.name} optimization"
-        )
+        self.logger.info(f"Generating optimized parser {parser_id} with {opt_level.name} optimization")
 
         try:
             # Start with base parser generation
@@ -215,16 +207,12 @@ class EnhancedParserGenerator(ParserGenerator):
 
             if optimization_level >= 1:
                 # O1: Dead code elimination
-                optimized_code, dead_code_count = await self._eliminate_dead_code(
-                    optimized_code, grammar
-                )
+                optimized_code, dead_code_count = await self._eliminate_dead_code(optimized_code, grammar)
                 metrics.dead_code_eliminated = dead_code_count
 
             if optimization_level >= 2:
                 # O2: Common subexpression elimination
-                optimized_code, cse_count = await self._eliminate_common_subexpressions(
-                    optimized_code
-                )
+                optimized_code, cse_count = await self._eliminate_common_subexpressions(optimized_code)
                 metrics.common_subexpressions_eliminated = cse_count
 
             if optimization_level >= 3:
@@ -233,28 +221,18 @@ class EnhancedParserGenerator(ParserGenerator):
                 metrics.loops_unrolled = unroll_count
 
                 # O3: Inline expansion
-                optimized_code, inline_count = await self._inline_functions(
-                    optimized_code
-                )
+                optimized_code, inline_count = await self._inline_functions(optimized_code)
                 metrics.functions_inlined = inline_count
 
             # Calculate optimization metrics
-            metrics.code_size_reduction = (
-                (len(base_code) - len(optimized_code)) / len(base_code) * 100
-            )
+            metrics.code_size_reduction = (len(base_code) - len(optimized_code)) / len(base_code) * 100
 
             # Recompile optimized parser
-            compiled_parser = await self._compile_parser(
-                optimized_code, f"{parser_id}_opt"
-            )
+            compiled_parser = await self._compile_parser(optimized_code, f"{parser_id}_opt")
 
             # Create optimized parser functions
-            parse_function = self._create_parse_function(
-                compiled_parser, f"{parser_id}_opt"
-            )
-            validate_function = self._create_validate_function(
-                compiled_parser, f"{parser_id}_opt"
-            )
+            parse_function = self._create_parse_function(compiled_parser, f"{parser_id}_opt")
+            validate_function = self._create_validate_function(compiled_parser, f"{parser_id}_opt")
 
             # Create optimized parser
             optimized_parser = GeneratedParser(
@@ -292,9 +270,7 @@ class EnhancedParserGenerator(ParserGenerator):
             self.logger.error(f"Optimized parser generation failed: {e}")
             raise ModelException(f"Optimized parser generation error: {e}")
 
-    async def _eliminate_dead_code(
-        self, code: str, grammar: Grammar
-    ) -> Tuple[str, int]:
+    async def _eliminate_dead_code(self, code: str, grammar: Grammar) -> Tuple[str, int]:
         """
         Eliminate dead code (unreachable rules/methods).
 
@@ -322,9 +298,7 @@ class EnhancedParserGenerator(ParserGenerator):
             if method_name.startswith("parse_"):
                 symbol_name = method_name[6:]  # Remove 'parse_' prefix
                 # Check if this symbol is reachable
-                is_reachable = any(
-                    symbol_name in s or s in symbol_name for s in reachable_symbols
-                )
+                is_reachable = any(symbol_name in s or s in symbol_name for s in reachable_symbols)
                 if not is_reachable:
                     dead_methods.add(method_name)
 
@@ -339,10 +313,7 @@ class EnhancedParserGenerator(ParserGenerator):
 
         for line in lines:
             # Check if this is a dead method definition
-            is_dead_method = any(
-                f"async def {method}(" in line or f"def {method}(" in line
-                for method in dead_methods
-            )
+            is_dead_method = any(f"async def {method}(" in line or f"def {method}(" in line for method in dead_methods)
 
             if is_dead_method:
                 skip_until_next_def = True
@@ -494,9 +465,7 @@ class EnhancedParserGenerator(ParserGenerator):
                         method_body.append(lines[i])
                     i += 1
 
-                    if lines[i - 1].strip() and not lines[i - 1].strip().startswith(
-                        " "
-                    ):
+                    if lines[i - 1].strip() and not lines[i - 1].strip().startswith(" "):
                         break
 
                 if len(method_body) <= 3:
@@ -572,17 +541,13 @@ class EnhancedParserGenerator(ParserGenerator):
                             state.position += bytes_consumed
 
                             # Update metadata
-                            state.metadata["messages_parsed"] = (
-                                state.metadata.get("messages_parsed", 0) + 1
-                            )
+                            state.metadata["messages_parsed"] = state.metadata.get("messages_parsed", 0) + 1
                         else:
                             # Couldn't parse - need more data
                             break
 
                     except Exception as e:
-                        state.errors.append(
-                            f"Parse error at position {state.position}: {e}"
-                        )
+                        state.errors.append(f"Parse error at position {state.position}: {e}")
                         # Skip one byte and try again
                         state.position += 1
 
@@ -615,9 +580,7 @@ class EnhancedParserGenerator(ParserGenerator):
             # Cache streaming parser
             self._streaming_parsers[parser_id] = streaming_parser
 
-            self.logger.info(
-                f"Streaming parser generated in {time.time() - start_time:.2f}s"
-            )
+            self.logger.info(f"Streaming parser generated in {time.time() - start_time:.2f}s")
 
             return streaming_parser
 
@@ -637,9 +600,7 @@ class EnhancedParserGenerator(ParserGenerator):
         )
 
         if "children" in parse_tree:
-            node.children = [
-                self._dict_to_node(child) for child in parse_tree["children"]
-            ]
+            node.children = [self._dict_to_node(child) for child in parse_tree["children"]]
 
         return node
 
@@ -746,9 +707,7 @@ class EnhancedParserGenerator(ParserGenerator):
                             # Parse failed - try recovery
                             errors.append(f"Parse error at position {position}")
 
-                            recovered_node, new_position = await recover_from_error(
-                                data, position, "parse_failure"
-                            )
+                            recovered_node, new_position = await recover_from_error(data, position, "parse_failure")
 
                             if recovered_node:
                                 errors.append(f"Recovered at position {new_position}")
@@ -761,9 +720,7 @@ class EnhancedParserGenerator(ParserGenerator):
                         errors.append(f"Exception at position {position}: {e}")
 
                         # Try recovery
-                        recovered_node, new_position = await recover_from_error(
-                            data, position, "exception"
-                        )
+                        recovered_node, new_position = await recover_from_error(data, position, "exception")
 
                         if recovered_node:
                             position = new_position
@@ -784,9 +741,7 @@ class EnhancedParserGenerator(ParserGenerator):
                     metadata={
                         "total_nodes": len(parsed_nodes),
                         "total_errors": len(errors),
-                        "recovery_attempts": len(
-                            [e for e in errors if "Recovered" in e]
-                        ),
+                        "recovery_attempts": len([e for e in errors if "Recovered" in e]),
                     },
                 )
 
@@ -808,9 +763,7 @@ class EnhancedParserGenerator(ParserGenerator):
             # Cache robust parser
             self._robust_parsers[parser_id] = robust_parser
 
-            self.logger.info(
-                f"Error-recovering parser generated in {time.time() - start_time:.2f}s"
-            )
+            self.logger.info(f"Error-recovering parser generated in {time.time() - start_time:.2f}s")
 
             return robust_parser
 
@@ -893,12 +846,8 @@ class EnhancedParserGenerator(ParserGenerator):
         avg_time = sum(parse_times) / len(parse_times) if parse_times else 0.0
         min_time = min(parse_times) if parse_times else 0.0
         max_time = max(parse_times) if parse_times else 0.0
-        success_rate = (
-            successful_parses / total_operations if total_operations > 0 else 0.0
-        )
-        error_recovery_rate = (
-            error_recoveries / total_operations if total_operations > 0 else 0.0
-        )
+        success_rate = successful_parses / total_operations if total_operations > 0 else 0.0
+        error_recovery_rate = error_recoveries / total_operations if total_operations > 0 else 0.0
         throughput = total_operations / total_time if total_time > 0 else 0.0
 
         profile = ParserProfile(
@@ -973,9 +922,7 @@ class EnhancedParserGenerator(ParserGenerator):
                 }
             except Exception as e:
                 self.logger.error(f"Benchmark failed for {parser.parser_id}: {e}")
-                benchmark_results["parser_results"][parser.parser_id] = {
-                    "error": str(e)
-                }
+                benchmark_results["parser_results"][parser.parser_id] = {"error": str(e)}
 
         if not profiles:
             return benchmark_results
@@ -987,50 +934,28 @@ class EnhancedParserGenerator(ParserGenerator):
 
         for profile in profiles:
             benchmark_results["comparisons"][profile.parser_id] = {
-                "throughput_vs_best": (
-                    (profile.throughput / best_throughput * 100)
-                    if best_throughput > 0
-                    else 0
-                ),
-                "success_rate_vs_best": (
-                    (profile.success_rate / best_success_rate * 100)
-                    if best_success_rate > 0
-                    else 0
-                ),
-                "memory_vs_best": (
-                    (profile.memory_usage / lowest_memory * 100)
-                    if lowest_memory > 0
-                    else 0
-                ),
+                "throughput_vs_best": ((profile.throughput / best_throughput * 100) if best_throughput > 0 else 0),
+                "success_rate_vs_best": ((profile.success_rate / best_success_rate * 100) if best_success_rate > 0 else 0),
+                "memory_vs_best": ((profile.memory_usage / lowest_memory * 100) if lowest_memory > 0 else 0),
             }
 
         # Generate summary
         benchmark_results["summary"] = {
-            "best_throughput_parser": max(
-                profiles, key=lambda p: p.throughput
-            ).parser_id,
-            "best_success_rate_parser": max(
-                profiles, key=lambda p: p.success_rate
-            ).parser_id,
-            "lowest_memory_parser": min(
-                profiles, key=lambda p: p.memory_usage
-            ).parser_id,
+            "best_throughput_parser": max(profiles, key=lambda p: p.throughput).parser_id,
+            "best_success_rate_parser": max(profiles, key=lambda p: p.success_rate).parser_id,
+            "lowest_memory_parser": min(profiles, key=lambda p: p.memory_usage).parser_id,
             "average_throughput": sum(p.throughput for p in profiles) / len(profiles),
-            "average_success_rate": sum(p.success_rate for p in profiles)
-            / len(profiles),
+            "average_success_rate": sum(p.success_rate for p in profiles) / len(profiles),
             "average_memory": sum(p.memory_usage for p in profiles) / len(profiles),
         }
 
         self.logger.info(
-            f"Benchmark suite completed. Best throughput: "
-            f"{benchmark_results['summary']['best_throughput_parser']}"
+            f"Benchmark suite completed. Best throughput: " f"{benchmark_results['summary']['best_throughput_parser']}"
         )
 
         return benchmark_results
 
-    async def get_optimization_metrics(
-        self, parser_id: str
-    ) -> Optional[OptimizationMetrics]:
+    async def get_optimization_metrics(self, parser_id: str) -> Optional[OptimizationMetrics]:
         """Get optimization metrics for a parser."""
         return self._optimization_metrics.get(parser_id)
 
@@ -1060,9 +985,7 @@ class EnhancedParserGenerator(ParserGenerator):
             for parser in self._robust_parsers.values()
         ]
 
-    async def export_benchmark_report(
-        self, benchmark_results: Dict[str, Any], filepath: str, format: str = "json"
-    ) -> None:
+    async def export_benchmark_report(self, benchmark_results: Dict[str, Any], filepath: str, format: str = "json") -> None:
         """
         Export benchmark results to file.
 
@@ -1093,9 +1016,7 @@ class EnhancedParserGenerator(ParserGenerator):
                         ]
                     )
 
-                    for parser_id, results in benchmark_results.get(
-                        "parser_results", {}
-                    ).items():
+                    for parser_id, results in benchmark_results.get("parser_results", {}).items():
                         if "error" not in results:
                             writer.writerow(
                                 [

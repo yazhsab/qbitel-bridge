@@ -14,12 +14,7 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 
-from ai_engine.cloud_native.service_mesh.envoy.xds_server import (
-    EnvoyXDSServer,
-    XDSResourceType,
-    EnvoyNode,
-    XDSResource
-)
+from ai_engine.cloud_native.service_mesh.envoy.xds_server import EnvoyXDSServer, XDSResourceType, EnvoyNode, XDSResource
 
 
 class TestEnvoyXDSServer:
@@ -47,10 +42,7 @@ class TestEnvoyXDSServer:
     async def test_create_listener(self, xds_server):
         """Test creating a listener resource"""
         listener = await xds_server.create_listener(
-            name="test_listener",
-            address="0.0.0.0",
-            port=8080,
-            enable_quantum_filter=True
+            name="test_listener", address="0.0.0.0", port=8080, enable_quantum_filter=True
         )
 
         assert listener.name == "test_listener"
@@ -61,16 +53,10 @@ class TestEnvoyXDSServer:
     @pytest.mark.asyncio
     async def test_create_cluster(self, xds_server):
         """Test creating a cluster resource"""
-        endpoints = [
-            {"address": "192.168.1.1", "port_value": 8080},
-            {"address": "192.168.1.2", "port_value": 8080}
-        ]
+        endpoints = [{"address": "192.168.1.1", "port_value": 8080}, {"address": "192.168.1.2", "port_value": 8080}]
 
         cluster = await xds_server.create_cluster(
-            name="test_cluster",
-            endpoints=endpoints,
-            lb_policy="ROUND_ROBIN",
-            enable_quantum_tls=True
+            name="test_cluster", endpoints=endpoints, lb_policy="ROUND_ROBIN", enable_quantum_tls=True
         )
 
         assert cluster.name == "test_cluster"
@@ -81,11 +67,7 @@ class TestEnvoyXDSServer:
     @pytest.mark.asyncio
     async def test_register_node(self, xds_server):
         """Test registering an Envoy node"""
-        node = EnvoyNode(
-            id="test-node-1",
-            cluster="test-cluster",
-            metadata={"region": "us-west-1"}
-        )
+        node = EnvoyNode(id="test-node-1", cluster="test-cluster", metadata={"region": "us-west-1"})
 
         xds_server.register_node(node)
 
@@ -108,21 +90,14 @@ class TestEnvoyXDSServer:
     async def test_get_resources_for_node(self, xds_server):
         """Test retrieving resources for a node"""
         # Create test resources
-        await xds_server.create_listener(
-            name="test_listener",
-            address="0.0.0.0",
-            port=8080
-        )
+        await xds_server.create_listener(name="test_listener", address="0.0.0.0", port=8080)
 
         # Subscribe node to resources
         node_id = "test-node-1"
         xds_server.subscribe(node_id, ["test_listener"])
 
         # Get resources
-        resources = xds_server.get_resources_for_node(
-            node_id,
-            XDSResourceType.LISTENER
-        )
+        resources = xds_server.get_resources_for_node(node_id, XDSResourceType.LISTENER)
 
         assert len(resources) == 1
         assert resources[0].name == "test_listener"
@@ -131,19 +106,12 @@ class TestEnvoyXDSServer:
     async def test_update_listener(self, xds_server):
         """Test updating listener configuration"""
         # Create initial listener
-        await xds_server.create_listener(
-            name="test_listener",
-            address="0.0.0.0",
-            port=8080
-        )
+        await xds_server.create_listener(name="test_listener", address="0.0.0.0", port=8080)
 
         initial_version = xds_server._listeners["test_listener"].version
 
         # Update listener
-        updated = await xds_server.update_listener(
-            "test_listener",
-            {"updated": True}
-        )
+        updated = await xds_server.update_listener("test_listener", {"updated": True})
 
         assert updated is not None
         assert updated.version != initial_version
@@ -153,19 +121,12 @@ class TestEnvoyXDSServer:
     async def test_delete_resource(self, xds_server):
         """Test deleting a resource"""
         # Create listener
-        await xds_server.create_listener(
-            name="test_listener",
-            address="0.0.0.0",
-            port=8080
-        )
+        await xds_server.create_listener(name="test_listener", address="0.0.0.0", port=8080)
 
         assert "test_listener" in xds_server._listeners
 
         # Delete listener
-        deleted = await xds_server.delete_resource(
-            XDSResourceType.LISTENER,
-            "test_listener"
-        )
+        deleted = await xds_server.delete_resource(XDSResourceType.LISTENER, "test_listener")
 
         assert deleted is True
         assert "test_listener" not in xds_server._listeners
@@ -174,16 +135,9 @@ class TestEnvoyXDSServer:
     async def test_get_snapshot(self, xds_server):
         """Test getting server snapshot"""
         # Create some resources
-        await xds_server.create_listener(
-            name="listener1",
-            address="0.0.0.0",
-            port=8080
-        )
+        await xds_server.create_listener(name="listener1", address="0.0.0.0", port=8080)
 
-        await xds_server.create_cluster(
-            name="cluster1",
-            endpoints=[{"address": "192.168.1.1", "port_value": 8080}]
-        )
+        await xds_server.create_cluster(name="cluster1", endpoints=[{"address": "192.168.1.1", "port_value": 8080}])
 
         snapshot = xds_server.get_snapshot()
 
@@ -197,11 +151,7 @@ class TestEnvoyXDSServer:
     async def test_get_statistics(self, xds_server):
         """Test getting server statistics"""
         # Create resources
-        await xds_server.create_listener(
-            name="listener1",
-            address="0.0.0.0",
-            port=8080
-        )
+        await xds_server.create_listener(name="listener1", address="0.0.0.0", port=8080)
 
         # Register node
         node = EnvoyNode(id="node1", cluster="cluster1", metadata={})
@@ -223,10 +173,7 @@ class TestEnvoyXDSServer:
 
         # Check for quantum encryption filter
         http_filters = filter_chain[0]["filters"][0]["typed_config"]["http_filters"]
-        quantum_filter = next(
-            (f for f in http_filters if "quantum_encryption" in f["name"]),
-            None
-        )
+        quantum_filter = next((f for f in http_filters if "quantum_encryption" in f["name"]), None)
 
         assert quantum_filter is not None
         assert "kyber-1024" in quantum_filter["typed_config"]["key_algorithm"]
@@ -243,10 +190,7 @@ class TestEnvoyXDSServer:
         assert tls_context["tls_params"]["tls_minimum_protocol_version"] == "TLSv1_3"
 
     @pytest.mark.asyncio
-    @pytest.mark.skipif(
-        not hasattr(EnvoyXDSServer, '_server'),
-        reason="gRPC server not available"
-    )
+    @pytest.mark.skipif(not hasattr(EnvoyXDSServer, "_server"), reason="gRPC server not available")
     async def test_grpc_server_start_stop(self):
         """Test gRPC server lifecycle"""
         server = EnvoyXDSServer(port=18002)
@@ -288,7 +232,7 @@ class TestEnvoyXDSServer:
         secret = await xds_server.create_secret(
             name="test_cert",
             certificate="-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----",
-            private_key="-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----"
+            private_key="-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----",
         )
 
         assert secret.name == "test_cert"

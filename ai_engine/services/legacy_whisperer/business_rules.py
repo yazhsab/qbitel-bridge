@@ -140,9 +140,7 @@ class BusinessRulesExtractor:
                 "security_concerns": [],
             }
 
-    async def analyze_behavior_with_llm(
-        self, behavior: str, context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def analyze_behavior_with_llm(self, behavior: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Analyze legacy behavior using LLM.
 
@@ -194,9 +192,7 @@ class BusinessRulesExtractor:
                 "confidence": 0.7,
             }
 
-    async def gather_historical_context(
-        self, behavior: str, context: Dict[str, Any]
-    ) -> str:
+    async def gather_historical_context(self, behavior: str, context: Dict[str, Any]) -> str:
         """
         Gather historical context using RAG.
 
@@ -209,9 +205,7 @@ class BusinessRulesExtractor:
         """
         # Search knowledge base for similar behaviors
         query = f"legacy system behavior: {behavior}"
-        results = await self.rag_engine.query_similar(
-            query, collection_name="protocol_knowledge", n_results=3
-        )
+        results = await self.rag_engine.query_similar(query, collection_name="protocol_knowledge", n_results=3)
 
         if results.documents:
             historical_context = "Historical Context:\n\n"

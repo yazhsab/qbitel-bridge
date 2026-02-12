@@ -16,7 +16,6 @@ from .base import (
 )
 from .tools import RiskCalculatorTool
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -147,10 +146,7 @@ Go/No-Go Recommendation: [Proceed/Proceed with caution/Delay/Do not proceed]
         return base_prompt + risk_prompt
 
     async def assess_modernization_risk(
-        self,
-        protocol_spec: Dict[str, Any],
-        target_protocol: str,
-        context: Dict[str, Any]
+        self, protocol_spec: Dict[str, Any], target_protocol: str, context: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Assess risks for modernizing a protocol.
@@ -187,11 +183,7 @@ Your task:
 
 Be thorough but practical. Focus on actionable insights.
 """,
-            data={
-                "protocol_spec": protocol_spec,
-                "target_protocol": target_protocol,
-                "context": context
-            }
+            data={"protocol_spec": protocol_spec, "target_protocol": target_protocol, "context": context},
         )
 
         response = await self.process_message(message)
@@ -201,15 +193,13 @@ Be thorough but practical. Focus on actionable insights.
         self.assessments[assessment_id] = {
             "protocol": protocol_spec.get("protocol_name", "unknown"),
             "target": target_protocol,
-            "result": response.data
+            "result": response.data,
         }
 
         return response.data
 
     async def evaluate_approach_risks(
-        self,
-        approaches: List[Dict[str, Any]],
-        context: Dict[str, Any]
+        self, approaches: List[Dict[str, Any]], context: Dict[str, Any]
     ) -> Dict[str, Dict[str, Any]]:
         """
         Evaluate risks for different modernization approaches.
@@ -242,20 +232,13 @@ For each approach:
 
 Provide a recommendation on which approach to pursue.
 """,
-            data={
-                "approaches": approaches,
-                "context": context
-            }
+            data={"approaches": approaches, "context": context},
         )
 
         response = await self.process_message(message)
         return response.data.get("evaluations", {})
 
-    async def identify_dependencies(
-        self,
-        protocol_spec: Dict[str, Any],
-        system_info: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    async def identify_dependencies(self, protocol_spec: Dict[str, Any], system_info: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
         Identify system dependencies that may impact modernization.
 
@@ -289,10 +272,7 @@ For each dependency, provide:
 - Impact if disrupted
 - Coordination needed
 """,
-            data={
-                "protocol_spec": protocol_spec,
-                "system_info": system_info
-            }
+            data={"protocol_spec": protocol_spec, "system_info": system_info},
         )
 
         response = await self.process_message(message)
@@ -313,7 +293,7 @@ For each dependency, provide:
         for i, approach in enumerate(approaches, 1):
             lines.append(f"\n{i}. {approach.get('name', f'Approach {i}')}")
             for k, v in approach.items():
-                if k != 'name':
+                if k != "name":
                     lines.append(f"   - {k}: {v}")
         return "\n".join(lines)
 

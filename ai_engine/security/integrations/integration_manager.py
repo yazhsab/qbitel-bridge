@@ -243,9 +243,7 @@ class IntegrationManager:
             timeout_seconds=config_data.get("timeout_seconds", 30),
             retry_attempts=config_data.get("retry_attempts", 3),
             retry_delay_seconds=config_data.get("retry_delay_seconds", 5),
-            rate_limit_requests_per_minute=config_data.get(
-                "rate_limit_requests_per_minute"
-            ),
+            rate_limit_requests_per_minute=config_data.get("rate_limit_requests_per_minute"),
             custom_config=config_data.get("custom_config", {}),
         )
 
@@ -259,9 +257,7 @@ class IntegrationManager:
             priority=priority,
             enabled=integration_config.enabled,
             auto_retry=config_data.get("auto_retry", True),
-            max_failures_before_disable=config_data.get(
-                "max_failures_before_disable", 5
-            ),
+            max_failures_before_disable=config_data.get("max_failures_before_disable", 5),
         )
 
         self.logger.log_security_event(
@@ -338,9 +334,7 @@ class IntegrationManager:
 
         # Determine target integrations
         if target_integrations:
-            targets = [
-                name for name in target_integrations if name in self.integrations
-            ]
+            targets = [name for name in target_integrations if name in self.integrations]
         else:
             targets = self._determine_event_targets(security_event, "security_events")
 
@@ -408,9 +402,7 @@ class IntegrationManager:
 
         # Determine target integrations
         if target_integrations:
-            targets = [
-                name for name in target_integrations if name in self.integrations
-            ]
+            targets = [name for name in target_integrations if name in self.integrations]
         else:
             targets = self._determine_threat_targets(threat_analysis)
 
@@ -464,9 +456,7 @@ class IntegrationManager:
 
         # Determine target integrations
         if target_integrations:
-            targets = [
-                name for name in target_integrations if name in self.integrations
-            ]
+            targets = [name for name in target_integrations if name in self.integrations]
         else:
             targets = self._determine_response_targets(automated_response)
 
@@ -497,9 +487,7 @@ class IntegrationManager:
 
         return results
 
-    async def _send_to_integration(
-        self, integration_name: str, send_method, data
-    ) -> IntegrationResult:
+    async def _send_to_integration(self, integration_name: str, send_method, data) -> IntegrationResult:
         """Send data to a specific integration with error handling."""
 
         registration = self.integrations[integration_name]
@@ -526,9 +514,7 @@ class IntegrationManager:
                 error_code="INTEGRATION_ERROR",
             )
 
-    async def _handle_integration_failure(
-        self, integration_name: str, error_message: str
-    ):
+    async def _handle_integration_failure(self, integration_name: str, error_message: str):
         """Handle integration failure and disable if necessary."""
 
         registration = self.integrations[integration_name]
@@ -553,9 +539,7 @@ class IntegrationManager:
                 error_code="INTEGRATION_DISABLED",
             )
 
-    def _determine_event_targets(
-        self, security_event: SecurityEvent, event_type: str
-    ) -> List[str]:
+    def _determine_event_targets(self, security_event: SecurityEvent, event_type: str) -> List[str]:
         """Determine which integrations should receive this event."""
 
         targets = []
@@ -599,9 +583,7 @@ class IntegrationManager:
 
         return targets
 
-    def _determine_response_targets(
-        self, automated_response: AutomatedResponse
-    ) -> List[str]:
+    def _determine_response_targets(self, automated_response: AutomatedResponse) -> List[str]:
         """Determine which integrations should receive response execution details."""
 
         targets = []
@@ -624,9 +606,7 @@ class IntegrationManager:
                     "isolate_system",
                     "network_segmentation",
                 }
-                action_types = {
-                    action.action_type.value for action in automated_response.actions
-                }
+                action_types = {action.action_type.value for action in automated_response.actions}
 
                 if any(action in network_actions for action in action_types):
                     targets.append(name)
@@ -670,11 +650,7 @@ class IntegrationManager:
         while self._running:
             try:
                 for name, registration in self.integrations.items():
-                    if (
-                        not registration.enabled
-                        and registration.auto_retry
-                        and registration.current_failures > 0
-                    ):
+                    if not registration.enabled and registration.auto_retry and registration.current_failures > 0:
 
                         # Try to re-enable the integration
                         try:
@@ -715,9 +691,7 @@ class IntegrationManager:
 
         status = {
             "total_integrations": len(self.integrations),
-            "enabled_integrations": sum(
-                1 for reg in self.integrations.values() if reg.enabled
-            ),
+            "enabled_integrations": sum(1 for reg in self.integrations.values() if reg.enabled),
             "integrations": {},
         }
 

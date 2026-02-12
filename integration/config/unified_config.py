@@ -181,16 +181,10 @@ class ConfigurationManager:
         """Initialize configuration backend"""
         try:
             if self.backend == ConfigBackend.CONSUL:
-                self._consul_client = consul.Consul(
-                    host=self.consul_host, port=self.consul_port
-                )
-                logger.info(
-                    f"Connected to Consul at {self.consul_host}:{self.consul_port}"
-                )
+                self._consul_client = consul.Consul(host=self.consul_host, port=self.consul_port)
+                logger.info(f"Connected to Consul at {self.consul_host}:{self.consul_port}")
             elif self.backend == ConfigBackend.ETCD:
-                self._etcd_client = etcd3.client(
-                    host=self.etcd_host, port=self.etcd_port
-                )
+                self._etcd_client = etcd3.client(host=self.etcd_host, port=self.etcd_port)
                 logger.info(f"Connected to etcd at {self.etcd_host}:{self.etcd_port}")
         except Exception as e:
             logger.warning(f"Failed to connect to {self.backend.value}: {e}")
@@ -234,9 +228,7 @@ class ConfigurationManager:
         """Load configuration from local file"""
         try:
             with open(self.config_path, "r") as f:
-                if self.config_path.endswith(".yaml") or self.config_path.endswith(
-                    ".yml"
-                ):
+                if self.config_path.endswith(".yaml") or self.config_path.endswith(".yml"):
                     return yaml.safe_load(f)
                 else:
                     return json.load(f)
@@ -396,11 +388,7 @@ class ConfigurationManager:
             logger.warning("Configuration updates not supported for local file backend")
             return
 
-        config_key = (
-            f"qbitel/config/{service}/{key}"
-            if service
-            else f"qbitel/config/{key}"
-        )
+        config_key = f"qbitel/config/{service}/{key}" if service else f"qbitel/config/{key}"
 
         try:
             if self.backend == ConfigBackend.CONSUL:
@@ -434,9 +422,7 @@ class ConfigurationManager:
             index = None
             while True:
                 try:
-                    index, data = self._consul_client.kv.get(
-                        "qbitel/config", recurse=True, index=index, wait="10s"
-                    )
+                    index, data = self._consul_client.kv.get("qbitel/config", recurse=True, index=index, wait="10s")
                     if data:
                         # Clear cache and notify callback
                         with self._lock:
@@ -454,9 +440,7 @@ class ConfigurationManager:
 
         def watch_loop():
             try:
-                events_iterator, cancel = self._etcd_client.watch_prefix(
-                    "/qbitel/config/"
-                )
+                events_iterator, cancel = self._etcd_client.watch_prefix("/qbitel/config/")
                 for event in events_iterator:
                     # Clear cache and notify callback
                     with self._lock:

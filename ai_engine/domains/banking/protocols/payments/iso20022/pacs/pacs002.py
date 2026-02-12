@@ -312,8 +312,7 @@ class Pacs002Message:
     def all_accepted(self) -> bool:
         """Check if all transactions were accepted."""
         if not self.transaction_info_and_status:
-            return self.original_group_info.group_status and \
-                   self.original_group_info.group_status.is_positive
+            return self.original_group_info.group_status and self.original_group_info.group_status.is_positive
 
         return all(tx.is_accepted() for tx in self.transaction_info_and_status)
 
@@ -401,7 +400,7 @@ class Pacs002Parser:
     def _extract_namespace(self, root: ET.Element) -> str:
         """Extract namespace from root element."""
         if root.tag.startswith("{"):
-            return root.tag[1:root.tag.index("}")]
+            return root.tag[1 : root.tag.index("}")]
         return ""
 
     def _parse_group_header(self, grp_hdr: ET.Element, ns: str, message: Pacs002Message) -> None:
@@ -413,9 +412,7 @@ class Pacs002Parser:
         cre_dt_tm = grp_hdr.find(f"{ns}CreDtTm")
         if cre_dt_tm is not None and cre_dt_tm.text:
             try:
-                message.creation_datetime = datetime.fromisoformat(
-                    cre_dt_tm.text.replace("Z", "+00:00")
-                )
+                message.creation_datetime = datetime.fromisoformat(cre_dt_tm.text.replace("Z", "+00:00"))
             except ValueError:
                 pass
 
@@ -429,8 +426,7 @@ class Pacs002Parser:
         if instd_agt is not None and instd_agt.text:
             message.instructed_agent_bic = instd_agt.text
 
-    def _parse_original_group_info(self, orgnl_grp: ET.Element, ns: str,
-                                    message: Pacs002Message) -> None:
+    def _parse_original_group_info(self, orgnl_grp: ET.Element, ns: str, message: Pacs002Message) -> None:
         """Parse original group information."""
         og = message.original_group_info
 
@@ -496,9 +492,7 @@ class Pacs002Parser:
         acpt_dt_tm = tx_inf.find(f"{ns}AccptncDtTm")
         if acpt_dt_tm is not None and acpt_dt_tm.text:
             try:
-                tx.acceptance_datetime = datetime.fromisoformat(
-                    acpt_dt_tm.text.replace("Z", "+00:00")
-                )
+                tx.acceptance_datetime = datetime.fromisoformat(acpt_dt_tm.text.replace("Z", "+00:00"))
             except ValueError:
                 pass
 
@@ -648,9 +642,7 @@ class Pacs002Builder:
         )
 
         if self._group_reason:
-            message.original_group_info.status_reason_info.append(
-                StatusReasonInfo(reason_code=self._group_reason)
-            )
+            message.original_group_info.status_reason_info.append(StatusReasonInfo(reason_code=self._group_reason))
 
         self._reset()
         return message

@@ -14,7 +14,6 @@ import uuid
 import json
 import os
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -74,15 +73,15 @@ class SecurityConfiguration:
 
     # TLS
     min_tls_version: str = "1.3"
-    cipher_suites: List[str] = field(default_factory=lambda: [
-        "TLS_AES_256_GCM_SHA384",
-        "TLS_CHACHA20_POLY1305_SHA256",
-    ])
+    cipher_suites: List[str] = field(
+        default_factory=lambda: [
+            "TLS_AES_256_GCM_SHA384",
+            "TLS_CHACHA20_POLY1305_SHA256",
+        ]
+    )
 
     # Compliance
-    compliance_frameworks: List[str] = field(default_factory=lambda: [
-        "PCI-DSS", "SWIFT-CSP"
-    ])
+    compliance_frameworks: List[str] = field(default_factory=lambda: ["PCI-DSS", "SWIFT-CSP"])
     audit_logging: bool = True
 
     # Monitoring
@@ -239,8 +238,7 @@ class ConfigurationManager:
 
         # Validate PQC settings
         if self._current_config.pqc_enabled:
-            valid_algos = ["ML-KEM-512", "ML-KEM-768", "ML-KEM-1024",
-                          "ML-DSA-44", "ML-DSA-65", "ML-DSA-87"]
+            valid_algos = ["ML-KEM-512", "ML-KEM-768", "ML-KEM-1024", "ML-DSA-44", "ML-DSA-65", "ML-DSA-87"]
             for algo in self._current_config.pqc_algorithms:
                 if algo not in valid_algos:
                     issues.append(f"Invalid PQC algorithm: {algo}")
@@ -363,7 +361,7 @@ class ConfigurationManager:
     def _load_from_file(self) -> None:
         """Load configuration from file."""
         try:
-            with open(self._config_path, 'r') as f:
+            with open(self._config_path, "r") as f:
                 data = json.load(f)
 
             for key, value in data.items():
@@ -382,7 +380,7 @@ class ConfigurationManager:
         try:
             config_data = json.loads(self.export_config())
 
-            with open(self._config_path, 'w') as f:
+            with open(self._config_path, "w") as f:
                 json.dump(config_data, f, indent=2)
 
         except Exception as e:

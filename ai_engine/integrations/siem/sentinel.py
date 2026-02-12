@@ -64,9 +64,7 @@ class SentinelConfig(SIEMConfig):
 
     def __post_init__(self):
         if self.workspace_id:
-            self.log_analytics_endpoint = self.log_analytics_endpoint.format(
-                workspace_id=self.workspace_id
-            )
+            self.log_analytics_endpoint = self.log_analytics_endpoint.format(workspace_id=self.workspace_id)
 
 
 class SentinelConnector(BaseSIEMConnector):
@@ -235,19 +233,14 @@ class SentinelConnector(BaseSIEMConnector):
             kql = self._build_kql_query(query)
 
             # Execute query
-            url = (
-                f"https://api.loganalytics.io/v1/workspaces/{self.config.workspace_id}/query"
-            )
+            url = f"https://api.loganalytics.io/v1/workspaces/{self.config.workspace_id}/query"
 
             payload = {
                 "query": kql,
             }
 
             if query.start_time and query.end_time:
-                payload["timespan"] = (
-                    f"{query.start_time.isoformat()}/"
-                    f"{query.end_time.isoformat()}"
-                )
+                payload["timespan"] = f"{query.start_time.isoformat()}/" f"{query.end_time.isoformat()}"
 
             response = await self._make_request("POST", url, json=payload)
 
@@ -480,9 +473,7 @@ class SentinelConnector(BaseSIEMConnector):
 
         result = response.json()
         self._access_token = result["access_token"]
-        self._token_expiry = datetime.utcnow() + timedelta(
-            seconds=result.get("expires_in", 3600)
-        )
+        self._token_expiry = datetime.utcnow() + timedelta(seconds=result.get("expires_in", 3600))
 
     async def _make_request(
         self,
@@ -526,10 +517,7 @@ class SentinelConnector(BaseSIEMConnector):
         content_type = "application/json"
         resource = "/api/logs"
 
-        string_to_sign = (
-            f"{method}\n{content_length}\n{content_type}\n"
-            f"x-ms-date:{date}\n{resource}"
-        )
+        string_to_sign = f"{method}\n{content_length}\n{content_type}\n" f"x-ms-date:{date}\n{resource}"
 
         decoded_key = base64.b64decode(shared_key)
         encoded_hash = base64.b64encode(
@@ -609,11 +597,7 @@ class SentinelConnector(BaseSIEMConnector):
         """Parse Log Analytics row into SIEMEvent."""
         try:
             timestamp_str = row.get("TimeGenerated", "")
-            timestamp = (
-                datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
-                if timestamp_str
-                else datetime.utcnow()
-            )
+            timestamp = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00")) if timestamp_str else datetime.utcnow()
 
             return SIEMEvent(
                 event_type=row.get("EventType", "unknown"),
@@ -637,9 +621,7 @@ class SentinelConnector(BaseSIEMConnector):
                 description=alert_data.get("description", ""),
                 severity=self._graph_to_severity(alert_data.get("severity", "medium")),
                 status=alert_data.get("status", "new"),
-                created_at=datetime.fromisoformat(
-                    alert_data.get("createdDateTime", "").replace("Z", "+00:00")
-                ),
+                created_at=datetime.fromisoformat(alert_data.get("createdDateTime", "").replace("Z", "+00:00")),
                 rule_name=alert_data.get("detectionSource", ""),
                 raw=alert_data,
             )

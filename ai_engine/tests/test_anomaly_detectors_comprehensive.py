@@ -30,7 +30,6 @@ from ai_engine.anomaly.lstm_detector import (
 from ai_engine.core.config import Config
 from ai_engine.core.exceptions import AnomalyDetectionException
 
-
 # ===== ENSEMBLE DETECTOR TESTS =====
 
 
@@ -423,9 +422,7 @@ async def test_isolation_forest_update_baseline_empty(isolation_forest):
 
 def test_isolation_forest_settings():
     """Test isolation forest settings."""
-    settings = IsolationForestSettings(
-        contamination=0.1, window_size=256, version="2.0.0"
-    )
+    settings = IsolationForestSettings(contamination=0.1, window_size=256, version="2.0.0")
 
     assert settings.contamination == 0.1
     assert settings.window_size == 256
@@ -434,9 +431,7 @@ def test_isolation_forest_settings():
 
 def test_isolation_forest_result():
     """Test isolation forest result."""
-    result = IsolationForestResult(
-        score=0.8, threshold=0.5, is_anomalous=True, metadata={"test": "value"}
-    )
+    result = IsolationForestResult(score=0.8, threshold=0.5, is_anomalous=True, metadata={"test": "value"})
 
     assert result.score == 0.8
     assert result.is_anomalous is True
@@ -564,9 +559,7 @@ async def test_lstm_update_threshold_bounds(lstm_detector):
 
 def test_lstm_model_metadata():
     """Test LSTM model metadata."""
-    model = LSTMModel(
-        input_size=512, hidden_size=128, num_layers=3, dropout=0.2, version="2.0.0"
-    )
+    model = LSTMModel(input_size=512, hidden_size=128, num_layers=3, dropout=0.2, version="2.0.0")
 
     metadata = model.metadata()
 
@@ -579,9 +572,7 @@ def test_lstm_model_metadata():
 
 def test_lstm_detection_result():
     """Test LSTM detection result."""
-    result = LSTMDetectionResult(
-        score=0.7, confidence=0.85, is_anomalous=True, metadata={"key": "value"}
-    )
+    result = LSTMDetectionResult(score=0.7, confidence=0.85, is_anomalous=True, metadata={"key": "value"})
 
     assert result.score == 0.7
     assert result.confidence == 0.85
@@ -651,9 +642,7 @@ async def test_concurrent_detections():
     feature_sets = [np.random.rand(50) for _ in range(10)]
 
     # Run detections concurrently
-    results = await asyncio.gather(
-        *[detector.detect(features) for features in feature_sets]
-    )
+    results = await asyncio.gather(*[detector.detect(features) for features in feature_sets])
 
     assert len(results) == 10
     assert all("score" in r for r in results)

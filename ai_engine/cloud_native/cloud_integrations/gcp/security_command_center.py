@@ -27,13 +27,7 @@ class GCPSecurityCommandCenterIntegration:
         self.organization_id = organization_id
         logger.info(f"Initialized GCP SCC integration for project {project_id}")
 
-    def create_finding(
-        self,
-        finding_id: str,
-        category: str,
-        severity: str,
-        resource_name: str
-    ) -> Dict[str, Any]:
+    def create_finding(self, finding_id: str, category: str, severity: str, resource_name: str) -> Dict[str, Any]:
         """Create a security finding"""
         finding = {
             "name": f"organizations/{self.organization_id}/sources/qbitel/findings/{finding_id}",
@@ -42,10 +36,7 @@ class GCPSecurityCommandCenterIntegration:
             "category": category,
             "severity": severity,
             "findingClass": "THREAT",
-            "sourceProperties": {
-                "provider": "QBITEL",
-                "quantum_safe": True
-            }
+            "sourceProperties": {"provider": "QBITEL", "quantum_safe": True},
         }
 
         logger.info(f"Created GCP SCC finding: {category}")
@@ -54,15 +45,14 @@ class GCPSecurityCommandCenterIntegration:
     def create_deployment_manager_template(self) -> Dict[str, Any]:
         """Create Deployment Manager template"""
         return {
-            "resources": [{
-                "name": "qbitel-scc-source",
-                "type": "gcp-types/securitycenter-v1:organizations.sources",
-                "properties": {
-                    "parent": f"organizations/{self.organization_id}",
-                    "source": {
-                        "displayName": "QBITEL Quantum Security",
-                        "description": "Quantum-safe security findings"
-                    }
+            "resources": [
+                {
+                    "name": "qbitel-scc-source",
+                    "type": "gcp-types/securitycenter-v1:organizations.sources",
+                    "properties": {
+                        "parent": f"organizations/{self.organization_id}",
+                        "source": {"displayName": "QBITEL Quantum Security", "description": "Quantum-safe security findings"},
+                    },
                 }
-            }]
+            ]
         }

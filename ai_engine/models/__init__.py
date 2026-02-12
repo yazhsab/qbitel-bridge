@@ -49,6 +49,7 @@ try:
         MarketplaceValidation,
     )
     from .database import Base
+
     _marketplace_models_available = True
 except Exception:  # pragma: no cover - optional dependency
     MarketplaceProtocol = MarketplaceUser = MarketplaceInstallation = None
@@ -79,12 +80,14 @@ __all__ = [
 
 # Add marketplace model exports if available
 if _marketplace_models_available:
-    __all__.extend([
-        "MarketplaceProtocol",
-        "MarketplaceUser",
-        "MarketplaceInstallation",
-        "MarketplaceReview",
-        "MarketplaceTransaction",
-        "MarketplaceValidation",
-        "Base",
-    ])
+    __all__.extend(
+        [
+            "MarketplaceProtocol",
+            "MarketplaceUser",
+            "MarketplaceInstallation",
+            "MarketplaceReview",
+            "MarketplaceTransaction",
+            "MarketplaceValidation",
+            "Base",
+        ]
+    )

@@ -50,9 +50,7 @@ class AIEngineServer:
         self.rest_server_task: Optional[asyncio.Task] = None
         self.grpc_server_task: Optional[asyncio.Task] = None
 
-        self.logger.info(
-            f"AIEngineServer initialized - REST: {self.enable_rest}, gRPC: {self.enable_grpc}"
-        )
+        self.logger.info(f"AIEngineServer initialized - REST: {self.enable_rest}, gRPC: {self.enable_grpc}")
 
     async def initialize(self) -> None:
         """Initialize server components."""
@@ -93,15 +91,11 @@ class AIEngineServer:
             if self.enable_rest and self.rest_app:
                 self.rest_server_task = asyncio.create_task(self._run_rest_server())
                 tasks.append(self.rest_server_task)
-                self.logger.info(
-                    f"REST API server starting on {self.rest_host}:{self.rest_port}"
-                )
+                self.logger.info(f"REST API server starting on {self.rest_host}:{self.rest_port}")
 
             if self.enable_grpc and self.grpc_server:
                 await self.grpc_server.start()
-                self.grpc_server_task = asyncio.create_task(
-                    self.grpc_server.wait_for_termination()
-                )
+                self.grpc_server_task = asyncio.create_task(self.grpc_server.wait_for_termination())
                 tasks.append(self.grpc_server_task)
                 self.logger.info(f"gRPC server starting on port {self.grpc_port}")
 
@@ -168,14 +162,12 @@ class AIEngineServer:
                 "enabled": self.enable_rest,
                 "host": self.rest_host,
                 "port": self.rest_port,
-                "running": self.rest_server_task is not None
-                and not self.rest_server_task.done(),
+                "running": self.rest_server_task is not None and not self.rest_server_task.done(),
             },
             "grpc_api": {
                 "enabled": self.enable_grpc,
                 "port": self.grpc_port,
-                "running": self.grpc_server_task is not None
-                and not self.grpc_server_task.done(),
+                "running": self.grpc_server_task is not None and not self.grpc_server_task.done(),
             },
         }
 
@@ -362,12 +354,8 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
     parser.add_argument("--grpc-port", type=int, default=50051, help="gRPC port")
     parser.add_argument("--enable-grpc", action="store_true", help="Enable gRPC server")
-    parser.add_argument(
-        "--development", action="store_true", help="Run in development mode"
-    )
-    parser.add_argument(
-        "--reload", action="store_true", help="Enable hot reloading (dev only)"
-    )
+    parser.add_argument("--development", action="store_true", help="Run in development mode")
+    parser.add_argument("--reload", action="store_true", help="Enable hot reloading (dev only)")
     parser.add_argument("--log-level", type=str, default="INFO", help="Log level")
 
     args = parser.parse_args()

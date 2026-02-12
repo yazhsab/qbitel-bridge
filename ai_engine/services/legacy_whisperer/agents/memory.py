@@ -21,13 +21,13 @@ import numpy as np
 
 from .base import AgentRole, AgentMessage
 
-
 logger = logging.getLogger(__name__)
 
 
 # =============================================================================
 # Memory Types
 # =============================================================================
+
 
 class MemoryType(str, Enum):
     """Types of memory entries."""
@@ -90,6 +90,7 @@ class Episode:
 # Shared Memory
 # =============================================================================
 
+
 class SharedMemory:
     """
     Shared memory space accessible by all agents.
@@ -119,7 +120,7 @@ class SharedMemory:
         importance: float = 0.5,
         tags: Optional[Set[str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        embedding: Optional[List[float]] = None
+        embedding: Optional[List[float]] = None,
     ) -> str:
         """
         Store an entry in shared memory.
@@ -129,9 +130,7 @@ class SharedMemory:
         """
         async with self._lock:
             # Generate ID
-            entry_id = hashlib.sha256(
-                f"{content}{created_by.value}{time.time()}".encode()
-            ).hexdigest()[:16]
+            entry_id = hashlib.sha256(f"{content}{created_by.value}{time.time()}".encode()).hexdigest()[:16]
 
             entry = SharedMemoryEntry(
                 id=entry_id,
@@ -141,7 +140,7 @@ class SharedMemory:
                 importance=importance,
                 tags=tags or set(),
                 metadata=metadata or {},
-                embedding=embedding
+                embedding=embedding,
             )
 
             # Store entry
@@ -165,11 +164,7 @@ class SharedMemory:
 
             return entry_id
 
-    async def retrieve(
-        self,
-        entry_id: str,
-        accessor: Optional[AgentRole] = None
-    ) -> Optional[SharedMemoryEntry]:
+    async def retrieve(self, entry_id: str, accessor: Optional[AgentRole] = None) -> Optional[SharedMemoryEntry]:
         """Retrieve a specific entry by ID."""
         async with self._lock:
             entry = self._entries.get(entry_id)
@@ -184,7 +179,7 @@ class SharedMemory:
         memory_types: Optional[List[MemoryType]] = None,
         tags: Optional[Set[str]] = None,
         created_by: Optional[AgentRole] = None,
-        limit: int = 10
+        limit: int = 10,
     ) -> List[SharedMemoryEntry]:
         """
         Search memory entries.
@@ -197,21 +192,15 @@ class SharedMemory:
 
             # Filter by type
             if memory_types:
-                candidates = [
-                    e for e in candidates if e.memory_type in memory_types
-                ]
+                candidates = [e for e in candidates if e.memory_type in memory_types]
 
             # Filter by tags
             if tags:
-                candidates = [
-                    e for e in candidates if e.tags & tags
-                ]
+                candidates = [e for e in candidates if e.tags & tags]
 
             # Filter by creator
             if created_by:
-                candidates = [
-                    e for e in candidates if e.created_by == created_by
-                ]
+                candidates = [e for e in candidates if e.created_by == created_by]
 
             # Score by relevance (simple keyword matching)
             query_words = set(query.lower().split())
@@ -230,37 +219,19 @@ class SharedMemory:
             scored.sort(key=lambda x: x[0], reverse=True)
             return [entry for _, entry in scored[:limit]]
 
-    async def get_by_type(
-        self,
-        memory_type: MemoryType,
-        limit: int = 50
-    ) -> List[SharedMemoryEntry]:
+    async def get_by_type(self, memory_type: MemoryType, limit: int = 50) -> List[SharedMemoryEntry]:
         """Get entries by memory type."""
         async with self._lock:
             entry_ids = self._by_type.get(memory_type, [])[-limit:]
-            return [
-                self._entries[eid] for eid in entry_ids
-                if eid in self._entries
-            ]
+            return [self._entries[eid] for eid in entry_ids if eid in self._entries]
 
-    async def get_by_agent(
-        self,
-        agent: AgentRole,
-        limit: int = 50
-    ) -> List[SharedMemoryEntry]:
+    async def get_by_agent(self, agent: AgentRole, limit: int = 50) -> List[SharedMemoryEntry]:
         """Get entries created by a specific agent."""
         async with self._lock:
             entry_ids = self._by_agent.get(agent, [])[-limit:]
-            return [
-                self._entries[eid] for eid in entry_ids
-                if eid in self._entries
-            ]
+            return [self._entries[eid] for eid in entry_ids if eid in self._entries]
 
-    async def update_importance(
-        self,
-        entry_id: str,
-        new_importance: float
-    ) -> None:
+    async def update_importance(self, entry_id: str, new_importance: float) -> None:
         """Update the importance of an entry."""
         async with self._lock:
             if entry_id in self._entries:
@@ -308,6 +279,7 @@ class SharedMemory:
 # Conversation Memory
 # =============================================================================
 
+
 class ConversationMemory:
     """
     Manages conversation threads between agents.
@@ -325,22 +297,12 @@ class ConversationMemory:
         self._by_participant: Dict[AgentRole, Set[str]] = defaultdict(set)
         self._lock = asyncio.Lock()
 
-    async def create_thread(
-        self,
-        participants: Set[AgentRole],
-        topic: str = ""
-    ) -> str:
+    async def create_thread(self, participants: Set[AgentRole], topic: str = "") -> str:
         """Create a new conversation thread."""
         async with self._lock:
-            thread_id = hashlib.sha256(
-                f"{participants}{topic}{time.time()}".encode()
-            ).hexdigest()[:12]
+            thread_id = hashlib.sha256(f"{participants}{topic}{time.time()}".encode()).hexdigest()[:12]
 
-            thread = ConversationThread(
-                thread_id=thread_id,
-                participants=participants,
-                topic=topic
-            )
+            thread = ConversationThread(thread_id=thread_id, participants=participants, topic=topic)
 
             self._threads[thread_id] = thread
 
@@ -353,11 +315,7 @@ class ConversationMemory:
 
             return thread_id
 
-    async def add_message(
-        self,
-        thread_id: str,
-        message: AgentMessage
-    ) -> None:
+    async def add_message(self, thread_id: str, message: AgentMessage) -> None:
         """Add a message to a thread."""
         async with self._lock:
             if thread_id not in self._threads:
@@ -369,17 +327,13 @@ class ConversationMemory:
 
             # Trim if too many messages
             if len(thread.messages) > self.max_messages_per_thread:
-                thread.messages = thread.messages[-self.max_messages_per_thread:]
+                thread.messages = thread.messages[-self.max_messages_per_thread :]
 
     async def get_thread(self, thread_id: str) -> Optional[ConversationThread]:
         """Get a conversation thread."""
         return self._threads.get(thread_id)
 
-    async def get_thread_messages(
-        self,
-        thread_id: str,
-        limit: int = 50
-    ) -> List[AgentMessage]:
+    async def get_thread_messages(self, thread_id: str, limit: int = 50) -> List[AgentMessage]:
         """Get recent messages from a thread."""
         async with self._lock:
             thread = self._threads.get(thread_id)
@@ -387,18 +341,11 @@ class ConversationMemory:
                 return thread.messages[-limit:]
             return []
 
-    async def get_participant_threads(
-        self,
-        participant: AgentRole,
-        active_only: bool = True
-    ) -> List[ConversationThread]:
+    async def get_participant_threads(self, participant: AgentRole, active_only: bool = True) -> List[ConversationThread]:
         """Get threads for a participant."""
         async with self._lock:
             thread_ids = self._by_participant.get(participant, set())
-            threads = [
-                self._threads[tid] for tid in thread_ids
-                if tid in self._threads
-            ]
+            threads = [self._threads[tid] for tid in thread_ids if tid in self._threads]
             if active_only:
                 threads = [t for t in threads if t.status == "active"]
             return threads
@@ -411,10 +358,7 @@ class ConversationMemory:
 
     async def _close_oldest_threads(self) -> None:
         """Close oldest inactive threads."""
-        threads = sorted(
-            self._threads.values(),
-            key=lambda t: t.updated_at
-        )
+        threads = sorted(self._threads.values(), key=lambda t: t.updated_at)
 
         to_close = len(self._threads) - self.max_threads + 10
         for thread in threads[:to_close]:
@@ -424,6 +368,7 @@ class ConversationMemory:
 # =============================================================================
 # Episodic Memory
 # =============================================================================
+
 
 class EpisodicMemory:
     """
@@ -443,22 +388,16 @@ class EpisodicMemory:
         self._failed: List[str] = []
         self._lock = asyncio.Lock()
 
-    async def start_episode(
-        self,
-        task_description: str,
-        agents_involved: Set[AgentRole]
-    ) -> str:
+    async def start_episode(self, task_description: str, agents_involved: Set[AgentRole]) -> str:
         """Start a new episode."""
         async with self._lock:
-            episode_id = hashlib.sha256(
-                f"{task_description}{time.time()}".encode()
-            ).hexdigest()[:12]
+            episode_id = hashlib.sha256(f"{task_description}{time.time()}".encode()).hexdigest()[:12]
 
             episode = Episode(
                 episode_id=episode_id,
                 task_description=task_description,
                 agents_involved=agents_involved,
-                start_time=datetime.now(timezone.utc)
+                start_time=datetime.now(timezone.utc),
             )
 
             self._episodes[episode_id] = episode
@@ -468,22 +407,14 @@ class EpisodicMemory:
 
             return episode_id
 
-    async def add_observation(
-        self,
-        episode_id: str,
-        observation: str
-    ) -> None:
+    async def add_observation(self, episode_id: str, observation: str) -> None:
         """Add an observation to an episode."""
         async with self._lock:
             if episode_id in self._episodes:
                 self._episodes[episode_id].observations.append(observation)
 
     async def end_episode(
-        self,
-        episode_id: str,
-        outcome: str,
-        success: bool,
-        lessons_learned: Optional[List[str]] = None
+        self, episode_id: str, outcome: str, success: bool, lessons_learned: Optional[List[str]] = None
     ) -> None:
         """End an episode and record outcome."""
         async with self._lock:
@@ -500,10 +431,7 @@ class EpisodicMemory:
                     self._failed.append(episode_id)
 
     async def get_similar_episodes(
-        self,
-        task_description: str,
-        limit: int = 5,
-        successful_only: bool = False
+        self, task_description: str, limit: int = 5, successful_only: bool = False
     ) -> List[Episode]:
         """
         Find similar past episodes.
@@ -527,11 +455,7 @@ class EpisodicMemory:
             scored.sort(key=lambda x: x[0], reverse=True)
             return [ep for _, ep in scored[:limit]]
 
-    async def get_lessons_learned(
-        self,
-        agent: Optional[AgentRole] = None,
-        successful_only: bool = True
-    ) -> List[str]:
+    async def get_lessons_learned(self, agent: Optional[AgentRole] = None, successful_only: bool = True) -> List[str]:
         """Get lessons learned from past episodes."""
         async with self._lock:
             lessons = []
@@ -552,6 +476,7 @@ class EpisodicMemory:
 # =============================================================================
 # Semantic Memory
 # =============================================================================
+
 
 class SemanticMemory:
     """
@@ -579,49 +504,27 @@ class SemanticMemory:
         return self._facts.get(key)
 
     async def add_concept(
-        self,
-        name: str,
-        definition: str,
-        properties: Optional[Dict[str, Any]] = None,
-        examples: Optional[List[str]] = None
+        self, name: str, definition: str, properties: Optional[Dict[str, Any]] = None, examples: Optional[List[str]] = None
     ) -> None:
         """Add a concept to semantic memory."""
         async with self._lock:
-            self._concepts[name] = {
-                "definition": definition,
-                "properties": properties or {},
-                "examples": examples or []
-            }
+            self._concepts[name] = {"definition": definition, "properties": properties or {}, "examples": examples or []}
 
     async def get_concept(self, name: str) -> Optional[Dict[str, Any]]:
         """Get a concept by name."""
         return self._concepts.get(name)
 
-    async def add_relationship(
-        self,
-        subject: str,
-        relation: str,
-        obj: str
-    ) -> None:
+    async def add_relationship(self, subject: str, relation: str, obj: str) -> None:
         """Add a relationship between concepts."""
         async with self._lock:
-            self._relationships[subject].append({
-                "relation": relation,
-                "object": obj
-            })
+            self._relationships[subject].append({"relation": relation, "object": obj})
 
-    async def get_related(
-        self,
-        subject: str,
-        relation: Optional[str] = None
-    ) -> List[Dict[str, str]]:
+    async def get_related(self, subject: str, relation: Optional[str] = None) -> List[Dict[str, str]]:
         """Get related concepts."""
         async with self._lock:
             relationships = self._relationships.get(subject, [])
             if relation:
-                relationships = [
-                    r for r in relationships if r["relation"] == relation
-                ]
+                relationships = [r for r in relationships if r["relation"] == relation]
             return relationships
 
     async def search_facts(self, query: str, limit: int = 10) -> List[str]:
@@ -648,8 +551,7 @@ class SemanticMemory:
                 "User Header, Text Block, and Trailer."
             ),
             "iso8583": (
-                "ISO 8583 is a financial transaction message standard. "
-                "Uses a bitmap to indicate present data elements."
+                "ISO 8583 is a financial transaction message standard. " "Uses a bitmap to indicate present data elements."
             ),
             "ebcdic_encoding": (
                 "EBCDIC (Extended Binary Coded Decimal Interchange Code) is "

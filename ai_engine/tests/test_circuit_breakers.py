@@ -73,6 +73,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_successful_call(self, breaker):
         """Test successful call through circuit breaker."""
+
         async def success_func():
             return "success"
 
@@ -83,6 +84,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_failed_call(self, breaker):
         """Test failed call through circuit breaker."""
+
         async def fail_func():
             raise RuntimeError("Test error")
 
@@ -95,6 +97,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_circuit_opens_after_threshold(self, breaker):
         """Test circuit opens after failure threshold is reached."""
+
         async def fail_func():
             raise RuntimeError("Test error")
 
@@ -108,6 +111,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_open_circuit_rejects_calls(self, breaker):
         """Test open circuit rejects new calls."""
+
         async def fail_func():
             raise RuntimeError("Test error")
 
@@ -126,6 +130,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_half_open_after_recovery_timeout(self, breaker):
         """Test circuit transitions to half-open after recovery timeout."""
+
         async def fail_func():
             raise RuntimeError("Test error")
 
@@ -151,6 +156,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_half_open_closes_after_successes(self, breaker):
         """Test circuit closes after success threshold in half-open."""
+
         async def fail_func():
             raise RuntimeError("Test error")
 
@@ -174,6 +180,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_half_open_reopens_on_failure(self, breaker):
         """Test circuit reopens on failure in half-open state."""
+
         async def fail_func():
             raise RuntimeError("Test error")
 
@@ -228,6 +235,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_reset(self, breaker):
         """Test manual reset of circuit breaker."""
+
         async def fail_func():
             raise RuntimeError("Test error")
 
@@ -356,6 +364,7 @@ class TestWithCircuitBreakerDecorator:
     @pytest.mark.asyncio
     async def test_decorator_success(self):
         """Test decorator with successful function."""
+
         @with_circuit_breaker("test_decorator")
         async def success_func():
             return "success"
@@ -366,6 +375,7 @@ class TestWithCircuitBreakerDecorator:
     @pytest.mark.asyncio
     async def test_decorator_failure(self):
         """Test decorator with failing function."""
+
         @with_circuit_breaker("test_decorator")
         async def fail_func():
             raise RuntimeError("Error")
@@ -398,6 +408,7 @@ class TestWithCircuitBreakerDecorator:
     @pytest.mark.asyncio
     async def test_decorator_unknown_breaker(self):
         """Test decorator with unknown circuit breaker name."""
+
         @with_circuit_breaker("nonexistent")
         async def func():
             return "success"

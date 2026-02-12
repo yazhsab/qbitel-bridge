@@ -162,7 +162,7 @@ class ProtocolSignatureDatabase:
                 description="IBM 3270 terminal emulation protocol for CICS",
                 encoding=EncodingType.EBCDIC,
                 framing=FramingType.LENGTH_PREFIXED,
-                magic_bytes=[(0, b"\xFF\xEF")],  # IAC EOR
+                magic_bytes=[(0, b"\xff\xef")],  # IAC EOR
                 typical_port=23,
                 header_size=5,
                 expected_entropy_range=(3.0, 6.0),
@@ -278,7 +278,7 @@ class ProtocolSignatureDatabase:
                 description="Power grid substation automation",
                 encoding=EncodingType.BINARY,
                 framing=FramingType.HEADER_DEFINED,
-                magic_bytes=[(12, b"\x88\xB8")],  # EtherType
+                magic_bytes=[(12, b"\x88\xb8")],  # EtherType
                 expected_entropy_range=(2.5, 5.0),
             ),
             ProtocolSignature(
@@ -585,8 +585,7 @@ class ProtocolSignatureDatabase:
             self.register_signature(signature)
 
         logger.info(
-            f"Loaded {len(self.signatures)} built-in protocol signatures "
-            f"across {len(self.category_index)} categories"
+            f"Loaded {len(self.signatures)} built-in protocol signatures " f"across {len(self.category_index)} categories"
         )
 
     def register_signature(self, signature: ProtocolSignature) -> None:
@@ -722,18 +721,13 @@ class ProtocolSignatureDatabase:
 
         # Normalize score to 0-1 range
         max_possible_score = (
-            signature.magic_bytes_weight
-            + signature.pattern_weight
-            + signature.structure_weight
-            + signature.statistics_weight
+            signature.magic_bytes_weight + signature.pattern_weight + signature.structure_weight + signature.statistics_weight
         )
         normalized_score = min(1.0, score / max_possible_score) if max_possible_score > 0 else 0.0
 
         return normalized_score, details, matched_criteria
 
-    def _check_magic_bytes(
-        self, data: bytes, signature: ProtocolSignature
-    ) -> Tuple[float, Dict[str, Any]]:
+    def _check_magic_bytes(self, data: bytes, signature: ProtocolSignature) -> Tuple[float, Dict[str, Any]]:
         """Check magic bytes match."""
         if not signature.magic_bytes:
             return 0.0, {}
@@ -743,11 +737,9 @@ class ProtocolSignatureDatabase:
 
         for offset, magic in signature.magic_bytes:
             if offset + len(magic) <= len(data):
-                if data[offset:offset + len(magic)] == magic:
+                if data[offset : offset + len(magic)] == magic:
                     matches += 1
-                    details["matched"].append(
-                        {"offset": offset, "magic": magic.hex()}
-                    )
+                    details["matched"].append({"offset": offset, "magic": magic.hex()})
 
         if matches > 0:
             score = matches / len(signature.magic_bytes)
@@ -755,9 +747,7 @@ class ProtocolSignatureDatabase:
 
         return 0.0, details
 
-    def _check_patterns(
-        self, data: bytes, signature: ProtocolSignature
-    ) -> Tuple[float, Dict[str, Any]]:
+    def _check_patterns(self, data: bytes, signature: ProtocolSignature) -> Tuple[float, Dict[str, Any]]:
         """Check regex pattern matches."""
         if not signature._compiled_patterns:
             return 0.0, {}
@@ -776,9 +766,7 @@ class ProtocolSignatureDatabase:
 
         return 0.0, details
 
-    def _check_byte_sequences(
-        self, data: bytes, signature: ProtocolSignature
-    ) -> Tuple[float, Dict[str, Any]]:
+    def _check_byte_sequences(self, data: bytes, signature: ProtocolSignature) -> Tuple[float, Dict[str, Any]]:
         """Check for presence of expected byte sequences."""
         if not signature.byte_sequences:
             return 0.0, {}
@@ -797,9 +785,7 @@ class ProtocolSignatureDatabase:
 
         return 0.0, details
 
-    def _check_structure(
-        self, data: bytes, signature: ProtocolSignature
-    ) -> Tuple[float, Dict[str, Any]]:
+    def _check_structure(self, data: bytes, signature: ProtocolSignature) -> Tuple[float, Dict[str, Any]]:
         """Check structural characteristics."""
         score = 0.0
         checks = 0
@@ -840,9 +826,7 @@ class ProtocolSignatureDatabase:
 
         return 0.0, details
 
-    def _check_statistics(
-        self, data: bytes, signature: ProtocolSignature
-    ) -> Tuple[float, Dict[str, Any]]:
+    def _check_statistics(self, data: bytes, signature: ProtocolSignature) -> Tuple[float, Dict[str, Any]]:
         """Check statistical characteristics."""
         import numpy as np
 
@@ -891,9 +875,7 @@ class ProtocolSignatureDatabase:
         """Get a specific protocol signature."""
         return self.signatures.get(protocol_id)
 
-    def get_signatures_by_category(
-        self, category: ProtocolCategory
-    ) -> List[ProtocolSignature]:
+    def get_signatures_by_category(self, category: ProtocolCategory) -> List[ProtocolSignature]:
         """Get all signatures in a category."""
         if category not in self.category_index:
             return []
@@ -905,9 +887,7 @@ class ProtocolSignatureDatabase:
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get database statistics."""
-        category_counts = {
-            cat.value: len(ids) for cat, ids in self.category_index.items()
-        }
+        category_counts = {cat.value: len(ids) for cat, ids in self.category_index.items()}
         return {
             "total_signatures": len(self.signatures),
             "categories": category_counts,

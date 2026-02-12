@@ -116,9 +116,7 @@ class SwiftValidator(BaseValidator):
 
         return result
 
-    def _validate_swift_message(
-        self, msg: SwiftMessage, result: ValidationResult
-    ) -> None:
+    def _validate_swift_message(self, msg: SwiftMessage, result: ValidationResult) -> None:
         """Validate a SwiftMessage object."""
         # Validate block 1 (Basic Header)
         if not msg.basic_header.content:
@@ -157,9 +155,7 @@ class SwiftValidator(BaseValidator):
         elif mt == "202" or mt.startswith("202"):
             self._validate_mt202_fields(msg, result)
 
-    def _validate_basic_header(
-        self, msg: SwiftMessage, result: ValidationResult
-    ) -> None:
+    def _validate_basic_header(self, msg: SwiftMessage, result: ValidationResult) -> None:
         """Validate basic header (block 1)."""
         header = msg.basic_header
 
@@ -191,9 +187,7 @@ class SwiftValidator(BaseValidator):
                         field="block1/lt_address",
                     )
 
-    def _validate_application_header(
-        self, msg: SwiftMessage, result: ValidationResult
-    ) -> None:
+    def _validate_application_header(self, msg: SwiftMessage, result: ValidationResult) -> None:
         """Validate application header (block 2)."""
         header = msg.application_header
 
@@ -231,16 +225,12 @@ class SwiftValidator(BaseValidator):
                         field="block2/destination_bic",
                     )
 
-    def _validate_text_block(
-        self, msg: SwiftMessage, result: ValidationResult
-    ) -> None:
+    def _validate_text_block(self, msg: SwiftMessage, result: ValidationResult) -> None:
         """Validate text block (block 4)."""
         for field in msg.text_block.fields:
             self._validate_field(field, msg.message_type, result)
 
-    def _validate_field(
-        self, field: SwiftField, message_type: str, result: ValidationResult
-    ) -> None:
+    def _validate_field(self, field: SwiftField, message_type: str, result: ValidationResult) -> None:
         """Validate a single field."""
         tag = field.full_tag
         value = field.value
@@ -362,9 +352,7 @@ class SwiftValidator(BaseValidator):
                     field="field_33B",
                 )
 
-    def _validate_party_field(
-        self, field: SwiftField, result: ValidationResult
-    ) -> None:
+    def _validate_party_field(self, field: SwiftField, result: ValidationResult) -> None:
         """Validate party fields (50, 59)."""
         lines = field.value.split("\n")
 
@@ -380,9 +368,7 @@ class SwiftValidator(BaseValidator):
                             field=f"field_{field.full_tag}",
                         )
 
-    def _validate_agent_field(
-        self, field: SwiftField, result: ValidationResult
-    ) -> None:
+    def _validate_agent_field(self, field: SwiftField, result: ValidationResult) -> None:
         """Validate agent fields (52-58)."""
         lines = field.value.split("\n")
 
@@ -402,9 +388,7 @@ class SwiftValidator(BaseValidator):
                             field=f"field_{field.full_tag}",
                         )
 
-    def _validate_mt103_fields(
-        self, msg: SwiftMessage, result: ValidationResult
-    ) -> None:
+    def _validate_mt103_fields(self, msg: SwiftMessage, result: ValidationResult) -> None:
         """Validate MT103-specific fields."""
         mandatory_fields = {"20", "23B", "32A", "59", "71A"}
         present_fields = {f.tag for f in msg.text_block.fields}
@@ -413,9 +397,7 @@ class SwiftValidator(BaseValidator):
         for tag in mandatory_fields:
             if tag not in present_fields:
                 # Check with qualifier (e.g., 59A, 59F)
-                has_variant = any(
-                    f.tag == tag for f in msg.text_block.fields
-                )
+                has_variant = any(f.tag == tag for f in msg.text_block.fields)
                 if not has_variant:
                     result.add_error(
                         "SWIFT_MISSING_FIELD",
@@ -460,9 +442,7 @@ class SwiftValidator(BaseValidator):
                     field="field_23E",
                 )
 
-    def _validate_mt202_fields(
-        self, msg: SwiftMessage, result: ValidationResult
-    ) -> None:
+    def _validate_mt202_fields(self, msg: SwiftMessage, result: ValidationResult) -> None:
         """Validate MT202-specific fields."""
         mandatory_fields = {"20", "21", "32A", "58"}
         present_fields = {f.tag for f in msg.text_block.fields}
@@ -483,9 +463,7 @@ class SwiftValidator(BaseValidator):
         if msg.user_header and msg.user_header.fields.get("119") == "COV":
             self._validate_mt202_cov(msg, result)
 
-    def _validate_mt202_cov(
-        self, msg: SwiftMessage, result: ValidationResult
-    ) -> None:
+    def _validate_mt202_cov(self, msg: SwiftMessage, result: ValidationResult) -> None:
         """Validate MT202 COV specific requirements."""
         # Sequence B mandatory fields for COV
         fields = msg.text_block.fields

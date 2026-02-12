@@ -27,6 +27,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 class GuardrailType(Enum):
     """Types of guardrails."""
+
     INPUT = "input"  # Check input before sending to LLM
     OUTPUT = "output"  # Check output from LLM
     BOTH = "both"  # Check both input and output
@@ -34,6 +35,7 @@ class GuardrailType(Enum):
 
 class SeverityLevel(Enum):
     """Severity levels for guardrail violations."""
+
     INFO = "info"  # Informational, no action needed
     WARNING = "warning"  # Log warning but continue
     ERROR = "error"  # Block and return error
@@ -42,6 +44,7 @@ class SeverityLevel(Enum):
 
 class ViolationType(Enum):
     """Types of guardrail violations."""
+
     UNSAFE_CONTENT = "unsafe_content"
     PII_DETECTED = "pii_detected"
     INVALID_FORMAT = "invalid_format"
@@ -56,6 +59,7 @@ class ViolationType(Enum):
 @dataclass
 class GuardrailViolation:
     """Represents a guardrail violation."""
+
     violation_type: ViolationType
     severity: SeverityLevel
     message: str
@@ -67,6 +71,7 @@ class GuardrailViolation:
 @dataclass
 class GuardrailResult:
     """Result of guardrail checks."""
+
     passed: bool
     violations: List[GuardrailViolation]
     sanitized_content: Optional[str] = None
@@ -77,6 +82,7 @@ class GuardrailResult:
 @dataclass
 class RateLimitConfig:
     """Rate limit configuration."""
+
     requests_per_minute: int = 60
     requests_per_hour: int = 1000
     tokens_per_minute: int = 100000
@@ -85,14 +91,17 @@ class RateLimitConfig:
 
 class PIIPattern:
     """Common PII patterns for detection."""
-    EMAIL = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')
-    PHONE_US = re.compile(r'\b(\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b')
-    SSN = re.compile(r'\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b')
-    CREDIT_CARD = re.compile(r'\b(?:\d{4}[-\s]?){3}\d{4}\b')
-    IP_ADDRESS = re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')
-    API_KEY = re.compile(r'\b(?:api[_-]?key|token|secret|password|credential)s?\s*[:=]\s*[\'"]?[\w\-_]{16,}[\'"]?\b', re.IGNORECASE)
-    AWS_KEY = re.compile(r'\bAKIA[0-9A-Z]{16}\b')
-    DATE_OF_BIRTH = re.compile(r'\b(?:\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{2,4}[-/]\d{1,2}[-/]\d{1,2})\b')
+
+    EMAIL = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")
+    PHONE_US = re.compile(r"\b(\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b")
+    SSN = re.compile(r"\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b")
+    CREDIT_CARD = re.compile(r"\b(?:\d{4}[-\s]?){3}\d{4}\b")
+    IP_ADDRESS = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
+    API_KEY = re.compile(
+        r'\b(?:api[_-]?key|token|secret|password|credential)s?\s*[:=]\s*[\'"]?[\w\-_]{16,}[\'"]?\b', re.IGNORECASE
+    )
+    AWS_KEY = re.compile(r"\bAKIA[0-9A-Z]{16}\b")
+    DATE_OF_BIRTH = re.compile(r"\b(?:\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{2,4}[-/]\d{1,2}[-/]\d{1,2})\b")
 
 
 class ContentFilter:
@@ -114,14 +123,14 @@ class ContentFilter:
 
         # Default blocked patterns (injection attempts, etc.)
         self.blocked_patterns = [
-            re.compile(r'ignore previous instructions', re.IGNORECASE),
-            re.compile(r'disregard all prior', re.IGNORECASE),
-            re.compile(r'system:\s*override', re.IGNORECASE),
-            re.compile(r'<\s*script\s*>', re.IGNORECASE),
-            re.compile(r'javascript:', re.IGNORECASE),
+            re.compile(r"ignore previous instructions", re.IGNORECASE),
+            re.compile(r"disregard all prior", re.IGNORECASE),
+            re.compile(r"system:\s*override", re.IGNORECASE),
+            re.compile(r"<\s*script\s*>", re.IGNORECASE),
+            re.compile(r"javascript:", re.IGNORECASE),
             re.compile(r'exec\s*\(\s*[\'"]', re.IGNORECASE),
             re.compile(r'eval\s*\(\s*[\'"]', re.IGNORECASE),
-            re.compile(r'\{\{\s*system', re.IGNORECASE),
+            re.compile(r"\{\{\s*system", re.IGNORECASE),
         ]
 
         if custom_blocked_patterns:
@@ -150,25 +159,29 @@ class ContentFilter:
         # Check for injection attempts
         for pattern in self.blocked_patterns:
             if pattern.search(content):
-                violations.append(GuardrailViolation(
-                    violation_type=ViolationType.INJECTION_ATTEMPT,
-                    severity=SeverityLevel.ERROR,
-                    message=f"Potential injection attempt detected",
-                    details={"pattern": pattern.pattern},
-                    content_excerpt=content[:100],
-                ))
+                violations.append(
+                    GuardrailViolation(
+                        violation_type=ViolationType.INJECTION_ATTEMPT,
+                        severity=SeverityLevel.ERROR,
+                        message=f"Potential injection attempt detected",
+                        details={"pattern": pattern.pattern},
+                        content_excerpt=content[:100],
+                    )
+                )
 
         # Check for sensitive topics
         content_lower = content.lower()
         for topic in self.sensitive_topics:
             if topic in content_lower:
-                violations.append(GuardrailViolation(
-                    violation_type=ViolationType.SENSITIVE_TOPIC,
-                    severity=SeverityLevel.WARNING,
-                    message=f"Sensitive topic detected: {topic}",
-                    details={"topic": topic},
-                    content_excerpt=content[:100],
-                ))
+                violations.append(
+                    GuardrailViolation(
+                        violation_type=ViolationType.SENSITIVE_TOPIC,
+                        severity=SeverityLevel.WARNING,
+                        message=f"Sensitive topic detected: {topic}",
+                        details={"topic": topic},
+                        content_excerpt=content[:100],
+                    )
+                )
 
         return violations
 
@@ -206,15 +219,17 @@ class PIIDetector:
         for pii_type, pattern in self.patterns.items():
             matches = pattern.findall(content)
             if matches:
-                violations.append(GuardrailViolation(
-                    violation_type=ViolationType.PII_DETECTED,
-                    severity=SeverityLevel.WARNING,
-                    message=f"PII detected: {pii_type} ({len(matches)} instance(s))",
-                    details={
-                        "pii_type": pii_type,
-                        "count": len(matches),
-                    },
-                ))
+                violations.append(
+                    GuardrailViolation(
+                        violation_type=ViolationType.PII_DETECTED,
+                        severity=SeverityLevel.WARNING,
+                        message=f"PII detected: {pii_type} ({len(matches)} instance(s))",
+                        details={
+                            "pii_type": pii_type,
+                            "count": len(matches),
+                        },
+                    )
+                )
 
         return violations
 
@@ -223,6 +238,7 @@ class PIIDetector:
         masked = content
 
         for pii_type, pattern in self.patterns.items():
+
             def replacer(match):
                 original = match.group(0)
                 # Keep first and last chars for context
@@ -262,24 +278,26 @@ class OutputValidator:
             # Handle markdown code blocks
             json_content = content
             if "```json" in content:
-                match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
+                match = re.search(r"```json\s*(.*?)\s*```", content, re.DOTALL)
                 if match:
                     json_content = match.group(1)
             elif "```" in content:
-                match = re.search(r'```\s*(.*?)\s*```', content, re.DOTALL)
+                match = re.search(r"```\s*(.*?)\s*```", content, re.DOTALL)
                 if match:
                     json_content = match.group(1)
 
             data = json.loads(json_content)
 
         except json.JSONDecodeError as e:
-            violations.append(GuardrailViolation(
-                violation_type=ViolationType.INVALID_FORMAT,
-                severity=SeverityLevel.ERROR,
-                message=f"Invalid JSON: {str(e)}",
-                details={"error": str(e)},
-                content_excerpt=content[:200],
-            ))
+            violations.append(
+                GuardrailViolation(
+                    violation_type=ViolationType.INVALID_FORMAT,
+                    severity=SeverityLevel.ERROR,
+                    message=f"Invalid JSON: {str(e)}",
+                    details={"error": str(e)},
+                    content_excerpt=content[:200],
+                )
+            )
             return False, None, violations
 
         # Validate against Pydantic model
@@ -288,12 +306,14 @@ class OutputValidator:
                 validated = model.model_validate(data)
                 return True, validated, violations
             except ValidationError as e:
-                violations.append(GuardrailViolation(
-                    violation_type=ViolationType.SCHEMA_VIOLATION,
-                    severity=SeverityLevel.ERROR,
-                    message=f"Schema validation failed: {str(e)}",
-                    details={"errors": e.errors()},
-                ))
+                violations.append(
+                    GuardrailViolation(
+                        violation_type=ViolationType.SCHEMA_VIOLATION,
+                        severity=SeverityLevel.ERROR,
+                        message=f"Schema validation failed: {str(e)}",
+                        details={"errors": e.errors()},
+                    )
+                )
                 return False, data, violations
 
         # Validate against JSON schema (basic validation)
@@ -301,11 +321,13 @@ class OutputValidator:
             schema_errors = self._validate_json_schema(data, schema)
             if schema_errors:
                 for error in schema_errors:
-                    violations.append(GuardrailViolation(
-                        violation_type=ViolationType.SCHEMA_VIOLATION,
-                        severity=SeverityLevel.ERROR,
-                        message=error,
-                    ))
+                    violations.append(
+                        GuardrailViolation(
+                            violation_type=ViolationType.SCHEMA_VIOLATION,
+                            severity=SeverityLevel.ERROR,
+                            message=error,
+                        )
+                    )
                 return False, data, violations
 
         return True, data, violations
@@ -336,11 +358,7 @@ class OutputValidator:
             properties = schema.get("properties", {})
             for prop, prop_schema in properties.items():
                 if prop in data:
-                    errors.extend(self._validate_json_schema(
-                        data[prop],
-                        prop_schema,
-                        f"{path}.{prop}" if path else prop
-                    ))
+                    errors.extend(self._validate_json_schema(data[prop], prop_schema, f"{path}.{prop}" if path else prop))
 
         elif schema_type == "array":
             if not isinstance(data, list):
@@ -350,11 +368,7 @@ class OutputValidator:
             items_schema = schema.get("items")
             if items_schema:
                 for i, item in enumerate(data):
-                    errors.extend(self._validate_json_schema(
-                        item,
-                        items_schema,
-                        f"{path}[{i}]"
-                    ))
+                    errors.extend(self._validate_json_schema(item, items_schema, f"{path}[{i}]"))
 
         elif schema_type == "string":
             if not isinstance(data, str):
@@ -385,26 +399,30 @@ class OutputValidator:
         elif expected_format == "markdown":
             # Basic markdown validation
             if not any(marker in content for marker in ["#", "-", "*", "```", "**"]):
-                violations.append(GuardrailViolation(
-                    violation_type=ViolationType.INVALID_FORMAT,
-                    severity=SeverityLevel.WARNING,
-                    message="Content does not appear to be markdown formatted",
-                ))
+                violations.append(
+                    GuardrailViolation(
+                        violation_type=ViolationType.INVALID_FORMAT,
+                        severity=SeverityLevel.WARNING,
+                        message="Content does not appear to be markdown formatted",
+                    )
+                )
 
         elif expected_format == "code":
             # Check for code-like patterns
             code_patterns = [
-                r'\bdef\s+\w+',  # Python
-                r'\bfunction\s+\w+',  # JavaScript
-                r'\bclass\s+\w+',  # Classes
-                r'[\{\}\(\);]',  # Brackets/semicolons
+                r"\bdef\s+\w+",  # Python
+                r"\bfunction\s+\w+",  # JavaScript
+                r"\bclass\s+\w+",  # Classes
+                r"[\{\}\(\);]",  # Brackets/semicolons
             ]
             if not any(re.search(p, content) for p in code_patterns):
-                violations.append(GuardrailViolation(
-                    violation_type=ViolationType.INVALID_FORMAT,
-                    severity=SeverityLevel.WARNING,
-                    message="Content does not appear to be code",
-                ))
+                violations.append(
+                    GuardrailViolation(
+                        violation_type=ViolationType.INVALID_FORMAT,
+                        severity=SeverityLevel.WARNING,
+                        message="Content does not appear to be code",
+                    )
+                )
 
         return violations
 
@@ -427,21 +445,21 @@ class HallucinationDetector:
 
         # Patterns that often indicate uncertainty or fabrication
         self.uncertainty_patterns = [
-            re.compile(r'\bi think\b', re.IGNORECASE),
-            re.compile(r'\bi believe\b', re.IGNORECASE),
-            re.compile(r'\bprobably\b', re.IGNORECASE),
-            re.compile(r'\bmight be\b', re.IGNORECASE),
-            re.compile(r'\bpossibly\b', re.IGNORECASE),
-            re.compile(r'\bI\'m not sure\b', re.IGNORECASE),
-            re.compile(r'\bas far as I know\b', re.IGNORECASE),
+            re.compile(r"\bi think\b", re.IGNORECASE),
+            re.compile(r"\bi believe\b", re.IGNORECASE),
+            re.compile(r"\bprobably\b", re.IGNORECASE),
+            re.compile(r"\bmight be\b", re.IGNORECASE),
+            re.compile(r"\bpossibly\b", re.IGNORECASE),
+            re.compile(r"\bI\'m not sure\b", re.IGNORECASE),
+            re.compile(r"\bas far as I know\b", re.IGNORECASE),
         ]
 
         # Patterns that often precede fabricated facts
         self.fabrication_patterns = [
-            re.compile(r'according to\s+(?!the\s+(?:documentation|spec|standard|RFC))', re.IGNORECASE),
-            re.compile(r'studies show that', re.IGNORECASE),
-            re.compile(r'research indicates', re.IGNORECASE),
-            re.compile(r'it is well known that', re.IGNORECASE),
+            re.compile(r"according to\s+(?!the\s+(?:documentation|spec|standard|RFC))", re.IGNORECASE),
+            re.compile(r"studies show that", re.IGNORECASE),
+            re.compile(r"research indicates", re.IGNORECASE),
+            re.compile(r"it is well known that", re.IGNORECASE),
         ]
 
     def detect(
@@ -454,38 +472,42 @@ class HallucinationDetector:
         context = context or {}
 
         # Check for uncertainty patterns
-        uncertainty_count = sum(
-            1 for p in self.uncertainty_patterns if p.search(content)
-        )
+        uncertainty_count = sum(1 for p in self.uncertainty_patterns if p.search(content))
 
         if uncertainty_count > 2:
-            violations.append(GuardrailViolation(
-                violation_type=ViolationType.HALLUCINATION,
-                severity=SeverityLevel.WARNING,
-                message=f"High uncertainty detected ({uncertainty_count} indicators)",
-                details={"uncertainty_count": uncertainty_count},
-            ))
+            violations.append(
+                GuardrailViolation(
+                    violation_type=ViolationType.HALLUCINATION,
+                    severity=SeverityLevel.WARNING,
+                    message=f"High uncertainty detected ({uncertainty_count} indicators)",
+                    details={"uncertainty_count": uncertainty_count},
+                )
+            )
 
         # Check for fabrication patterns
         for pattern in self.fabrication_patterns:
             if pattern.search(content):
-                violations.append(GuardrailViolation(
-                    violation_type=ViolationType.HALLUCINATION,
-                    severity=SeverityLevel.WARNING,
-                    message="Potential unverifiable claim detected",
-                    details={"pattern": pattern.pattern},
-                ))
+                violations.append(
+                    GuardrailViolation(
+                        violation_type=ViolationType.HALLUCINATION,
+                        severity=SeverityLevel.WARNING,
+                        message="Potential unverifiable claim detected",
+                        details={"pattern": pattern.pattern},
+                    )
+                )
 
         # Check for contradictions with provided context
         if "expected_facts" in context:
             for fact in context["expected_facts"]:
                 if fact.lower() not in content.lower():
-                    violations.append(GuardrailViolation(
-                        violation_type=ViolationType.HALLUCINATION,
-                        severity=SeverityLevel.WARNING,
-                        message=f"Expected fact not found: {fact[:50]}...",
-                        details={"missing_fact": fact},
-                    ))
+                    violations.append(
+                        GuardrailViolation(
+                            violation_type=ViolationType.HALLUCINATION,
+                            severity=SeverityLevel.WARNING,
+                            message=f"Expected fact not found: {fact[:50]}...",
+                            details={"missing_fact": fact},
+                        )
+                    )
 
         return violations
 
@@ -555,10 +577,7 @@ class RateLimiter:
                 )
 
             # Check token limits
-            tokens_last_minute = sum(
-                tokens for t, tokens in self._token_usage
-                if t > minute_ago
-            )
+            tokens_last_minute = sum(tokens for t, tokens in self._token_usage if t > minute_ago)
             tokens_last_hour = sum(tokens for _, tokens in self._token_usage)
 
             if tokens_last_minute + estimated_tokens > self.config.tokens_per_minute:
@@ -803,7 +822,9 @@ class GuardedLLMService:
         )
 
         if not input_result.passed and self.block_on_input_violation:
-            error_messages = [v.message for v in input_result.violations if v.severity in (SeverityLevel.ERROR, SeverityLevel.CRITICAL)]
+            error_messages = [
+                v.message for v in input_result.violations if v.severity in (SeverityLevel.ERROR, SeverityLevel.CRITICAL)
+            ]
             raise GuardrailException(
                 f"Input blocked by guardrails: {'; '.join(error_messages)}",
                 violations=input_result.violations,
@@ -826,12 +847,12 @@ class GuardedLLMService:
         )
 
         if not output_result.passed:
-            self.logger.warning(
-                f"Output guardrail violations: {[v.message for v in output_result.violations]}"
-            )
+            self.logger.warning(f"Output guardrail violations: {[v.message for v in output_result.violations]}")
 
             if self.block_on_output_violation:
-                error_messages = [v.message for v in output_result.violations if v.severity in (SeverityLevel.ERROR, SeverityLevel.CRITICAL)]
+                error_messages = [
+                    v.message for v in output_result.violations if v.severity in (SeverityLevel.ERROR, SeverityLevel.CRITICAL)
+                ]
                 raise GuardrailException(
                     f"Output blocked by guardrails: {'; '.join(error_messages)}",
                     violations=output_result.violations,

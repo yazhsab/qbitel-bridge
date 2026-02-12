@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 
 class FedWireBuildError(Exception):
     """Exception raised when FedWire message building fails."""
+
     pass
 
 
@@ -297,6 +298,7 @@ class FedWireBuilder:
     ) -> "FedWireBuilder":
         """Set charges information (tag 3700)."""
         from ai_engine.domains.banking.protocols.payments.domestic.fedwire.fedwire_message import Charges
+
         self._message.charges = Charges(
             charge_details=charge_details,
             send_amount=send_amount,
@@ -385,19 +387,14 @@ class FedWireBuilder:
         if validate:
             errors = self.validate()
             if errors:
-                raise FedWireBuildError(
-                    f"Message validation failed: {'; '.join(errors)}"
-                )
+                raise FedWireBuildError(f"Message validation failed: {'; '.join(errors)}")
 
         # Build message parts
         parts = []
 
         # Mandatory fields
         parts.append(self._build_tag("1500", self._message.sender_supplied.to_string()))
-        parts.append(self._build_tag(
-            "1510",
-            f"{self._message.type_code.code}{self._message.type_subcode.code}"
-        ))
+        parts.append(self._build_tag("1510", f"{self._message.type_code.code}{self._message.type_subcode.code}"))
         parts.append(self._build_tag("1520", self._message.imad.to_string()))
         parts.append(self._build_tag("2000", self._format_amount(self._message.amount)))
         parts.append(self._build_tag("3100", self._format_di(self._message.sender)))
@@ -416,10 +413,7 @@ class FedWireBuilder:
 
         if self._message.instructed_amount:
             amount_str = self._format_amount(self._message.instructed_amount)
-            parts.append(self._build_tag(
-                "3710",
-                f"{self._message.instructed_currency}{amount_str}"
-            ))
+            parts.append(self._build_tag("3710", f"{self._message.instructed_currency}{amount_str}"))
 
         if self._message.exchange_rate:
             parts.append(self._build_tag("3720", str(self._message.exchange_rate)))
@@ -449,10 +443,7 @@ class FedWireBuilder:
             parts.append(self._build_tag("5500", self._message.account_credited))
 
         if self._message.originator_to_beneficiary:
-            parts.append(self._build_tag(
-                "6000",
-                self._message.originator_to_beneficiary.to_tag_value()
-            ))
+            parts.append(self._build_tag("6000", self._message.originator_to_beneficiary.to_tag_value()))
 
         if self._message.fi_to_fi_info:
             parts.append(self._build_tag("6100", self._message.fi_to_fi_info.to_tag_value()))
@@ -487,9 +478,7 @@ class FedWireBuilder:
         if validate:
             errors = self.validate()
             if errors:
-                raise FedWireBuildError(
-                    f"Message validation failed: {'; '.join(errors)}"
-                )
+                raise FedWireBuildError(f"Message validation failed: {'; '.join(errors)}")
 
         # Set the raw message
         self._message.raw_message = self.build(validate=False)

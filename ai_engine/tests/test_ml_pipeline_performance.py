@@ -48,9 +48,7 @@ class TestFieldDetectorPerformance:
         return training_data
 
     @pytest.mark.asyncio
-    async def test_training_performance_baseline(
-        self, field_detector, sample_training_data
-    ):
+    async def test_training_performance_baseline(self, field_detector, sample_training_data):
         """Test training performance meets baseline requirements."""
         # Split data
         train_data = sample_training_data[:80]
@@ -70,9 +68,7 @@ class TestFieldDetectorPerformance:
         training_time = time.time() - start_time
 
         # Performance assertions
-        assert (
-            training_time < 60.0
-        ), f"Training took {training_time:.2f}s, should be < 60s"
+        assert training_time < 60.0, f"Training took {training_time:.2f}s, should be < 60s"
         assert "train_loss" in history
         assert "val_f1" in history
         assert len(history["train_loss"]) > 0
@@ -112,9 +108,7 @@ class TestFieldDetectorPerformance:
         p99_latency = np.percentile(latencies, 99)
 
         # Performance assertions
-        assert (
-            avg_latency < 10.0
-        ), f"Average latency {avg_latency:.2f}ms should be < 10ms"
+        assert avg_latency < 10.0, f"Average latency {avg_latency:.2f}ms should be < 10ms"
         assert p95_latency < 20.0, f"P95 latency {p95_latency:.2f}ms should be < 20ms"
         assert p99_latency < 50.0, f"P99 latency {p99_latency:.2f}ms should be < 50ms"
 
@@ -125,16 +119,11 @@ class TestFieldDetectorPerformance:
         print(f"  - P99: {p99_latency:.2f}ms")
 
     @pytest.mark.asyncio
-    async def test_batch_training_performance(
-        self, field_detector, sample_training_data
-    ):
+    async def test_batch_training_performance(self, field_detector, sample_training_data):
         """Test batch training performance."""
         # Split into batches
         batch_size = 20
-        batches = [
-            sample_training_data[i : i + batch_size]
-            for i in range(0, len(sample_training_data), batch_size)
-        ]
+        batches = [sample_training_data[i : i + batch_size] for i in range(0, len(sample_training_data), batch_size)]
 
         start_time = time.time()
 
@@ -148,23 +137,17 @@ class TestFieldDetectorPerformance:
         batch_training_time = time.time() - start_time
 
         # Performance assertions
-        assert (
-            batch_training_time < 120.0
-        ), f"Batch training took {batch_training_time:.2f}s, should be < 120s"
+        assert batch_training_time < 120.0, f"Batch training took {batch_training_time:.2f}s, should be < 120s"
         assert "batch_metrics" in history
         assert len(history["batch_metrics"]) == 3
 
         print(f"\n✓ Batch Training Performance:")
         print(f"  - Total time: {batch_training_time:.2f}s")
         print(f"  - Batches processed: {len(history['batch_metrics'])}")
-        print(
-            f"  - Avg time per batch: {batch_training_time / len(history['batch_metrics']):.2f}s"
-        )
+        print(f"  - Avg time per batch: {batch_training_time / len(history['batch_metrics']):.2f}s")
 
     @pytest.mark.asyncio
-    async def test_model_persistence_performance(
-        self, field_detector, sample_training_data, tmp_path
-    ):
+    async def test_model_persistence_performance(self, field_detector, sample_training_data, tmp_path):
         """Test model save/load performance."""
         # Train a small model
         train_data = sample_training_data[:20]
@@ -191,9 +174,7 @@ class TestFieldDetectorPerformance:
         print(f"  - Load time: {load_time:.2f}s")
 
     @pytest.mark.asyncio
-    async def test_validation_metrics_completeness(
-        self, field_detector, sample_training_data
-    ):
+    async def test_validation_metrics_completeness(self, field_detector, sample_training_data):
         """Test that validation metrics are comprehensive."""
         train_data = sample_training_data[:60]
         val_data = sample_training_data[60:80]
@@ -301,9 +282,7 @@ class TestTranslationStudioPerformance:
         return source_spec, target_spec
 
     @pytest.mark.asyncio
-    async def test_translation_latency_baseline(
-        self, translation_studio, sample_protocols
-    ):
+    async def test_translation_latency_baseline(self, translation_studio, sample_protocols):
         """Test translation latency meets baseline requirements."""
         source_spec, target_spec = sample_protocols
 
@@ -316,9 +295,7 @@ class TestTranslationStudioPerformance:
 
         # Warm-up
         try:
-            await translation_studio.translate_protocol(
-                "test_source", "test_target", test_message
-            )
+            await translation_studio.translate_protocol("test_source", "test_target", test_message)
         except:
             pass  # May fail due to mock, but warms up the system
 
@@ -329,9 +306,7 @@ class TestTranslationStudioPerformance:
         for _ in range(num_iterations):
             start_time = time.time()
             try:
-                await translation_studio.translate_protocol(
-                    "test_source", "test_target", test_message
-                )
+                await translation_studio.translate_protocol("test_source", "test_target", test_message)
             except:
                 pass  # Mock may cause failures
             latency_ms = (time.time() - start_time) * 1000
@@ -346,25 +321,19 @@ class TestTranslationStudioPerformance:
         print(f"  - P95: {p95_latency:.2f}ms")
 
     @pytest.mark.asyncio
-    async def test_rule_generation_performance(
-        self, translation_studio, sample_protocols
-    ):
+    async def test_rule_generation_performance(self, translation_studio, sample_protocols):
         """Test rule generation performance."""
         source_spec, target_spec = sample_protocols
 
         start_time = time.time()
 
         # Generate rules
-        rules = await translation_studio.generate_translation_rules(
-            source_spec, target_spec
-        )
+        rules = await translation_studio.generate_translation_rules(source_spec, target_spec)
 
         generation_time = time.time() - start_time
 
         # Performance assertions
-        assert (
-            generation_time < 30.0
-        ), f"Rule generation took {generation_time:.2f}s, should be < 30s"
+        assert generation_time < 30.0, f"Rule generation took {generation_time:.2f}s, should be < 30s"
         assert rules is not None
         assert len(rules.rules) >= 0
 
@@ -373,24 +342,18 @@ class TestTranslationStudioPerformance:
         print(f"  - Rules generated: {len(rules.rules)}")
 
     @pytest.mark.asyncio
-    async def test_rules_persistence_performance(
-        self, translation_studio, sample_protocols, tmp_path
-    ):
+    async def test_rules_persistence_performance(self, translation_studio, sample_protocols, tmp_path):
         """Test rules save/load performance."""
         source_spec, target_spec = sample_protocols
 
         # Generate rules
-        rules = await translation_studio.generate_translation_rules(
-            source_spec, target_spec
-        )
+        rules = await translation_studio.generate_translation_rules(source_spec, target_spec)
 
         rules_dir = str(tmp_path / "rules")
 
         # Test save performance
         start_time = time.time()
-        rules_path = await translation_studio.save_translation_rules(
-            rules, rules_dir=rules_dir
-        )
+        rules_path = await translation_studio.save_translation_rules(rules, rules_dir=rules_dir)
         save_time = time.time() - start_time
 
         # Test load performance
@@ -408,9 +371,7 @@ class TestTranslationStudioPerformance:
         print(f"  - Load time: {load_time:.2f}s")
 
     @pytest.mark.asyncio
-    async def test_batch_training_performance(
-        self, translation_studio, sample_protocols
-    ):
+    async def test_batch_training_performance(self, translation_studio, sample_protocols):
         """Test batch training performance for translation rules."""
         source_spec, target_spec = sample_protocols
 
@@ -436,18 +397,14 @@ class TestTranslationStudioPerformance:
         batch_training_time = time.time() - start_time
 
         # Performance assertions
-        assert (
-            batch_training_time < 180.0
-        ), f"Batch training took {batch_training_time:.2f}s, should be < 180s"
+        assert batch_training_time < 180.0, f"Batch training took {batch_training_time:.2f}s, should be < 180s"
         assert "batch_metrics" in history
         assert len(history["batch_metrics"]) == len(batches)
 
         print(f"\n✓ Batch Training Performance:")
         print(f"  - Total time: {batch_training_time:.2f}s")
         print(f"  - Batches processed: {len(history['batch_metrics'])}")
-        print(
-            f"  - Avg time per batch: {batch_training_time / len(history['batch_metrics']):.2f}s"
-        )
+        print(f"  - Avg time per batch: {batch_training_time / len(history['batch_metrics']):.2f}s")
 
 
 if __name__ == "__main__":

@@ -22,9 +22,7 @@ class TestThroughput:
     @pytest.fixture
     def test_messages(self):
         """Generate test messages of various sizes."""
-        return {
-            size: os.urandom(size) for size in self.MESSAGE_SIZES
-        }
+        return {size: os.urandom(size) for size in self.MESSAGE_SIZES}
 
     def measure_encryption_throughput(self, message_size: int, duration: float) -> Dict:
         """Measure encryption throughput over a time period."""
@@ -47,11 +45,11 @@ class TestThroughput:
         elapsed = time.perf_counter() - start_time
 
         return {
-            'bytes_encrypted': bytes_encrypted,
-            'operations': operations,
-            'elapsed': elapsed,
-            'throughput_mbps': (bytes_encrypted / elapsed) / (1024 * 1024),
-            'ops_per_sec': operations / elapsed
+            "bytes_encrypted": bytes_encrypted,
+            "operations": operations,
+            "elapsed": elapsed,
+            "throughput_mbps": (bytes_encrypted / elapsed) / (1024 * 1024),
+            "ops_per_sec": operations / elapsed,
         }
 
     def measure_decryption_throughput(self, message_size: int, duration: float) -> Dict:
@@ -76,11 +74,11 @@ class TestThroughput:
         elapsed = time.perf_counter() - start_time
 
         return {
-            'bytes_decrypted': bytes_decrypted,
-            'operations': operations,
-            'elapsed': elapsed,
-            'throughput_mbps': (bytes_decrypted / elapsed) / (1024 * 1024),
-            'ops_per_sec': operations / elapsed
+            "bytes_decrypted": bytes_decrypted,
+            "operations": operations,
+            "elapsed": elapsed,
+            "throughput_mbps": (bytes_decrypted / elapsed) / (1024 * 1024),
+            "ops_per_sec": operations / elapsed,
         }
 
     @pytest.mark.parametrize("message_size", MESSAGE_SIZES)
@@ -95,8 +93,9 @@ class TestThroughput:
 
         # Minimum acceptable throughput based on message size
         min_throughput = 10.0 if message_size >= 4096 else 5.0
-        assert metrics['throughput_mbps'] > min_throughput, \
-            f"Encryption throughput too low: {metrics['throughput_mbps']:.2f} MB/s"
+        assert (
+            metrics["throughput_mbps"] > min_throughput
+        ), f"Encryption throughput too low: {metrics['throughput_mbps']:.2f} MB/s"
 
     @pytest.mark.parametrize("message_size", MESSAGE_SIZES)
     def test_decryption_throughput(self, message_size: int):
@@ -109,8 +108,9 @@ class TestThroughput:
         print(f"  Total operations: {metrics['operations']}")
 
         min_throughput = 10.0 if message_size >= 4096 else 5.0
-        assert metrics['throughput_mbps'] > min_throughput, \
-            f"Decryption throughput too low: {metrics['throughput_mbps']:.2f} MB/s"
+        assert (
+            metrics["throughput_mbps"] > min_throughput
+        ), f"Decryption throughput too low: {metrics['throughput_mbps']:.2f} MB/s"
 
     def test_concurrent_encryption_throughput(self):
         """Test encryption throughput with concurrent operations."""
@@ -128,8 +128,8 @@ class TestThroughput:
             for future in as_completed(futures):
                 results.append(future.result())
 
-        total_throughput = sum(r['throughput_mbps'] for r in results)
-        total_ops = sum(r['ops_per_sec'] for r in results)
+        total_throughput = sum(r["throughput_mbps"] for r in results)
+        total_ops = sum(r["ops_per_sec"] for r in results)
 
         print(f"\nConcurrent Encryption Throughput ({num_threads} threads):")
         print(f"  Total Throughput: {total_throughput:.2f} MB/s")
@@ -138,14 +138,13 @@ class TestThroughput:
 
         # With 4 threads, should achieve at least 3x single-thread throughput
         single_thread = self.measure_encryption_throughput(message_size, 1.0)
-        assert total_throughput > single_thread['throughput_mbps'] * 3, \
-            "Concurrent throughput scaling insufficient"
+        assert total_throughput > single_thread["throughput_mbps"] * 3, "Concurrent throughput scaling insufficient"
 
     def test_quantum_signature_throughput(self):
         """Test quantum-safe signature generation throughput."""
         from oqs import Signature
 
-        algorithm = 'Dilithium3'
+        algorithm = "Dilithium3"
         message = b"Test message for throughput measurement"
         duration = 3.0
 
@@ -172,7 +171,7 @@ class TestThroughput:
         """Test quantum-safe signature verification throughput."""
         from oqs import Signature
 
-        algorithm = 'Dilithium3'
+        algorithm = "Dilithium3"
         message = b"Test message for throughput measurement"
         duration = 3.0
 
@@ -194,8 +193,7 @@ class TestThroughput:
         print(f"  Verifications/sec: {verifications_per_sec:.0f}")
         print(f"  Total verifications: {operations}")
 
-        assert verifications_per_sec > 300, \
-            f"Verification throughput too low: {verifications_per_sec:.0f} ops/sec"
+        assert verifications_per_sec > 300, f"Verification throughput too low: {verifications_per_sec:.0f} ops/sec"
 
     def test_message_queue_throughput(self):
         """Test message queue throughput."""
@@ -253,7 +251,7 @@ class TestThroughput:
         """Test throughput of parallel quantum key generation."""
         from oqs import KeyEncapsulation
 
-        algorithm = 'Kyber768'
+        algorithm = "Kyber768"
         num_workers = 4
         duration = 3.0
 
@@ -324,5 +322,4 @@ class TestThroughput:
         print(f"  Samples: {throughput_samples}")
 
         # Throughput should be stable (CV < 20%)
-        assert coefficient_of_variation < 20, \
-            f"Throughput too unstable: CV={coefficient_of_variation:.1f}%"
+        assert coefficient_of_variation < 20, f"Throughput too unstable: CV={coefficient_of_variation:.1f}%"

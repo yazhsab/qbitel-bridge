@@ -39,10 +39,7 @@ def _load_banking_submodules():
 
     for module_name, description in submodules:
         try:
-            module = __import__(
-                f"ai_engine.domains.banking.{module_name}",
-                fromlist=[module_name]
-            )
+            module = __import__(f"ai_engine.domains.banking.{module_name}", fromlist=[module_name])
             globals()[module_name] = module
             __all__.append(module_name)
             logger.debug(f"Loaded banking submodule: {module_name} - {description}")

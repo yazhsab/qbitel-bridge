@@ -30,16 +30,12 @@ class TicketingConnector(BaseIntegrationConnector, ABC):
         pass
 
     @abstractmethod
-    async def update_ticket(
-        self, ticket_id: str, update_data: Dict[str, Any]
-    ) -> IntegrationResult:
+    async def update_ticket(self, ticket_id: str, update_data: Dict[str, Any]) -> IntegrationResult:
         """Update an existing ticket in the ticketing system."""
         pass
 
     @abstractmethod
-    async def close_ticket(
-        self, ticket_id: str, resolution_notes: str
-    ) -> IntegrationResult:
+    async def close_ticket(self, ticket_id: str, resolution_notes: str) -> IntegrationResult:
         """Close a ticket in the ticketing system."""
         pass
 
@@ -118,9 +114,7 @@ class ServiceNowConnector(TicketingConnector):
     async def _test_connection(self) -> bool:
         """Test ServiceNow connection."""
 
-        test_url = (
-            f"{self.config.endpoint}/api/now/table/{self.table_name}?sysparm_limit=1"
-        )
+        test_url = f"{self.config.endpoint}/api/now/table/{self.table_name}?sysparm_limit=1"
         headers = {
             "Authorization": self.auth_header,
             "Accept": "application/json",
@@ -129,17 +123,13 @@ class ServiceNowConnector(TicketingConnector):
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    test_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)
-                ) as response:
+                async with session.get(test_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as response:
                     return response.status == 200
 
         except Exception:
             return False
 
-    async def send_security_event(
-        self, security_event: SecurityEvent
-    ) -> IntegrationResult:
+    async def send_security_event(self, security_event: SecurityEvent) -> IntegrationResult:
         """Send security event to ServiceNow as a new incident."""
 
         try:
@@ -160,9 +150,7 @@ class ServiceNowConnector(TicketingConnector):
                 error_code="SERVICENOW_SEND_ERROR",
             )
 
-    async def send_threat_analysis(
-        self, threat_analysis: ThreatAnalysis
-    ) -> IntegrationResult:
+    async def send_threat_analysis(self, threat_analysis: ThreatAnalysis) -> IntegrationResult:
         """Send threat analysis to ServiceNow."""
 
         try:
@@ -193,16 +181,12 @@ class ServiceNowConnector(TicketingConnector):
                 error_code="SERVICENOW_THREAT_SEND_ERROR",
             )
 
-    async def send_response_execution(
-        self, automated_response: AutomatedResponse
-    ) -> IntegrationResult:
+    async def send_response_execution(self, automated_response: AutomatedResponse) -> IntegrationResult:
         """Send automated response execution to ServiceNow."""
 
         try:
             # Find existing ticket for this event
-            existing_ticket = await self._find_existing_ticket(
-                automated_response.event_id
-            )
+            existing_ticket = await self._find_existing_ticket(automated_response.event_id)
 
             if existing_ticket:
                 # Update with response execution details
@@ -210,9 +194,7 @@ class ServiceNowConnector(TicketingConnector):
 
                 update_data = {
                     "work_notes": work_notes,
-                    "state": (
-                        "6" if automated_response.status.value == "completed" else "2"
-                    ),  # Resolved or In Progress
+                    "state": ("6" if automated_response.status.value == "completed" else "2"),  # Resolved or In Progress
                 }
 
                 if automated_response.status.value == "completed":
@@ -241,9 +223,7 @@ class ServiceNowConnector(TicketingConnector):
         incident_data = self._convert_to_incident(security_event)
         return await self._create_incident(incident_data)
 
-    async def _create_incident(
-        self, incident_data: Dict[str, Any]
-    ) -> IntegrationResult:
+    async def _create_incident(self, incident_data: Dict[str, Any]) -> IntegrationResult:
         """Create incident in ServiceNow."""
 
         create_url = f"{self.config.endpoint}/api/now/table/{self.table_name}"
@@ -290,14 +270,10 @@ class ServiceNowConnector(TicketingConnector):
                 error_code="SERVICENOW_CREATE_ERROR",
             )
 
-    async def update_ticket(
-        self, ticket_id: str, update_data: Dict[str, Any]
-    ) -> IntegrationResult:
+    async def update_ticket(self, ticket_id: str, update_data: Dict[str, Any]) -> IntegrationResult:
         """Update an existing incident in ServiceNow."""
 
-        update_url = (
-            f"{self.config.endpoint}/api/now/table/{self.table_name}/{ticket_id}"
-        )
+        update_url = f"{self.config.endpoint}/api/now/table/{self.table_name}/{ticket_id}"
         headers = {
             "Authorization": self.auth_header,
             "Accept": "application/json",
@@ -341,9 +317,7 @@ class ServiceNowConnector(TicketingConnector):
                 error_code="SERVICENOW_UPDATE_ERROR",
             )
 
-    async def close_ticket(
-        self, ticket_id: str, resolution_notes: str
-    ) -> IntegrationResult:
+    async def close_ticket(self, ticket_id: str, resolution_notes: str) -> IntegrationResult:
         """Close an incident in ServiceNow."""
 
         close_data = {
@@ -357,9 +331,7 @@ class ServiceNowConnector(TicketingConnector):
     async def get_ticket_status(self, ticket_id: str) -> IntegrationResult:
         """Get the status of an incident in ServiceNow."""
 
-        status_url = (
-            f"{self.config.endpoint}/api/now/table/{self.table_name}/{ticket_id}"
-        )
+        status_url = f"{self.config.endpoint}/api/now/table/{self.table_name}/{ticket_id}"
         headers = {"Authorization": self.auth_header, "Accept": "application/json"}
 
         try:
@@ -383,9 +355,7 @@ class ServiceNowConnector(TicketingConnector):
                                 "state": incident.get("state"),
                                 "state_name": incident.get("state.display_value"),
                                 "priority": incident.get("priority"),
-                                "assigned_to": incident.get(
-                                    "assigned_to.display_value"
-                                ),
+                                "assigned_to": incident.get("assigned_to.display_value"),
                                 "created_on": incident.get("opened_at"),
                                 "updated_on": incident.get("sys_updated_on"),
                             },
@@ -434,9 +404,7 @@ class ServiceNowConnector(TicketingConnector):
     def _convert_to_incident(self, security_event: SecurityEvent) -> Dict[str, Any]:
         """Convert SecurityEvent to ServiceNow incident format."""
 
-        priority, urgency = self._map_threat_level_to_priority(
-            security_event.threat_level.value
-        )
+        priority, urgency = self._map_threat_level_to_priority(security_event.threat_level.value)
 
         return {
             "short_description": f"QBITEL Security Alert: {security_event.event_type.value}",
@@ -446,9 +414,7 @@ class ServiceNowConnector(TicketingConnector):
             "category": "Security",
             "subcategory": "Security Incident",
             "caller_id": self.config.custom_config.get("default_caller", "admin"),
-            "assignment_group": self.config.custom_config.get(
-                "security_group", "Security Operations"
-            ),
+            "assignment_group": self.config.custom_config.get("security_group", "Security Operations"),
             "business_service": security_event.target_system,
             "correlation_id": security_event.event_id,
             "u_source_ip": security_event.source_ip,
@@ -461,14 +427,10 @@ class ServiceNowConnector(TicketingConnector):
             "work_notes": f"Automated incident created by QBITEL Security Orchestrator\nEvent ID: {security_event.event_id}\nTimestamp: {security_event.timestamp.isoformat()}",
         }
 
-    def _convert_threat_analysis_to_incident(
-        self, threat_analysis: ThreatAnalysis
-    ) -> Dict[str, Any]:
+    def _convert_threat_analysis_to_incident(self, threat_analysis: ThreatAnalysis) -> Dict[str, Any]:
         """Convert ThreatAnalysis to ServiceNow incident format."""
 
-        priority, urgency = self._map_threat_level_to_priority(
-            threat_analysis.threat_level.value
-        )
+        priority, urgency = self._map_threat_level_to_priority(threat_analysis.threat_level.value)
 
         iocs_text = "\n".join(
             [
@@ -503,9 +465,7 @@ Recommended Actions: {', '.join([action.value for action in threat_analysis.reco
             "category": "Security",
             "subcategory": "Threat Analysis",
             "caller_id": self.config.custom_config.get("default_caller", "admin"),
-            "assignment_group": self.config.custom_config.get(
-                "security_group", "Security Operations"
-            ),
+            "assignment_group": self.config.custom_config.get("security_group", "Security Operations"),
             "correlation_id": threat_analysis.event_id,
             "u_threat_id": threat_analysis.threat_id,
             "u_threat_level": threat_analysis.threat_level.value,
@@ -518,13 +478,9 @@ Recommended Actions: {', '.join([action.value for action in threat_analysis.reco
         actions_summary = []
         for action in automated_response.actions:
             status_emoji = (
-                "✅"
-                if action.status.value == "completed"
-                else "⏳" if action.status.value == "in_progress" else "❌"
+                "✅" if action.status.value == "completed" else "⏳" if action.status.value == "in_progress" else "❌"
             )
-            actions_summary.append(
-                f"{status_emoji} {action.action_type.value} on {action.target_system}"
-            )
+            actions_summary.append(f"{status_emoji} {action.action_type.value} on {action.target_system}")
 
         return f"""Automated Response Executed - {automated_response.status.value.title()}
 
@@ -659,17 +615,13 @@ class JiraConnector(TicketingConnector):
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    test_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)
-                ) as response:
+                async with session.get(test_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as response:
                     return response.status == 200
 
         except Exception:
             return False
 
-    async def send_security_event(
-        self, security_event: SecurityEvent
-    ) -> IntegrationResult:
+    async def send_security_event(self, security_event: SecurityEvent) -> IntegrationResult:
         """Send security event to Jira as a new issue."""
 
         try:
@@ -690,9 +642,7 @@ class JiraConnector(TicketingConnector):
                 error_code="JIRA_SEND_ERROR",
             )
 
-    async def send_threat_analysis(
-        self, threat_analysis: ThreatAnalysis
-    ) -> IntegrationResult:
+    async def send_threat_analysis(self, threat_analysis: ThreatAnalysis) -> IntegrationResult:
         """Send threat analysis to Jira."""
 
         try:
@@ -719,16 +669,12 @@ class JiraConnector(TicketingConnector):
                 error_code="JIRA_THREAT_SEND_ERROR",
             )
 
-    async def send_response_execution(
-        self, automated_response: AutomatedResponse
-    ) -> IntegrationResult:
+    async def send_response_execution(self, automated_response: AutomatedResponse) -> IntegrationResult:
         """Send automated response execution to Jira."""
 
         try:
             # Find existing issue for this event
-            existing_ticket = await self._find_existing_ticket(
-                automated_response.event_id
-            )
+            existing_ticket = await self._find_existing_ticket(automated_response.event_id)
 
             if existing_ticket:
                 # Add comment with response execution details
@@ -811,9 +757,7 @@ class JiraConnector(TicketingConnector):
                 error_code="JIRA_CREATE_ERROR",
             )
 
-    async def update_ticket(
-        self, ticket_id: str, update_data: Dict[str, Any]
-    ) -> IntegrationResult:
+    async def update_ticket(self, ticket_id: str, update_data: Dict[str, Any]) -> IntegrationResult:
         """Update an existing issue in Jira."""
 
         update_url = f"{self.config.endpoint}/rest/api/2/issue/{ticket_id}"
@@ -853,22 +797,16 @@ class JiraConnector(TicketingConnector):
                 error_code="JIRA_UPDATE_ERROR",
             )
 
-    async def close_ticket(
-        self, ticket_id: str, resolution_notes: str
-    ) -> IntegrationResult:
+    async def close_ticket(self, ticket_id: str, resolution_notes: str) -> IntegrationResult:
         """Close an issue in Jira."""
 
         return await self._transition_issue(ticket_id, "Done", resolution_notes)
 
-    async def _transition_issue(
-        self, ticket_id: str, transition_name: str, comment: str
-    ) -> IntegrationResult:
+    async def _transition_issue(self, ticket_id: str, transition_name: str, comment: str) -> IntegrationResult:
         """Transition an issue to a new status."""
 
         # First, get available transitions
-        transitions_url = (
-            f"{self.config.endpoint}/rest/api/2/issue/{ticket_id}/transitions"
-        )
+        transitions_url = f"{self.config.endpoint}/rest/api/2/issue/{ticket_id}/transitions"
         headers = {"Authorization": self.auth_header, "Accept": "application/json"}
 
         try:
@@ -910,9 +848,7 @@ class JiraConnector(TicketingConnector):
                             transitions_url,
                             json=transition_data,
                             headers=headers,
-                            timeout=aiohttp.ClientTimeout(
-                                total=self.config.timeout_seconds
-                            ),
+                            timeout=aiohttp.ClientTimeout(total=self.config.timeout_seconds),
                         ) as transition_response:
 
                             if transition_response.status == 204:
@@ -972,9 +908,7 @@ class JiraConnector(TicketingConnector):
                                 "ticket_key": response_data.get("key"),
                                 "status": fields.get("status", {}).get("name"),
                                 "priority": fields.get("priority", {}).get("name"),
-                                "assignee": fields.get("assignee", {}).get(
-                                    "displayName"
-                                ),
+                                "assignee": fields.get("assignee", {}).get("displayName"),
                                 "created": fields.get("created"),
                                 "updated": fields.get("updated"),
                                 "summary": fields.get("summary"),
@@ -995,9 +929,7 @@ class JiraConnector(TicketingConnector):
                 error_code="JIRA_STATUS_ERROR",
             )
 
-    async def _add_comment(
-        self, ticket_key: str, comment_text: str
-    ) -> IntegrationResult:
+    async def _add_comment(self, ticket_key: str, comment_text: str) -> IntegrationResult:
         """Add a comment to a Jira issue."""
 
         comment_url = f"{self.config.endpoint}/rest/api/2/issue/{ticket_key}/comment"
@@ -1076,9 +1008,7 @@ class JiraConnector(TicketingConnector):
     def _convert_to_issue(self, security_event: SecurityEvent) -> Dict[str, Any]:
         """Convert SecurityEvent to Jira issue format."""
 
-        priority = self._map_threat_level_to_jira_priority(
-            security_event.threat_level.value
-        )
+        priority = self._map_threat_level_to_jira_priority(security_event.threat_level.value)
 
         return {
             "fields": {
@@ -1093,23 +1023,15 @@ class JiraConnector(TicketingConnector):
                     f"threat-{security_event.threat_level.value}",
                     "security-incident",
                 ],
-                "components": (
-                    [{"name": "Security"}]
-                    if self.config.custom_config.get("security_component")
-                    else []
-                ),
+                "components": ([{"name": "Security"}] if self.config.custom_config.get("security_component") else []),
                 "customfield_10000": security_event.event_id,  # Custom field for event ID
             }
         }
 
-    def _convert_threat_analysis_to_issue(
-        self, threat_analysis: ThreatAnalysis
-    ) -> Dict[str, Any]:
+    def _convert_threat_analysis_to_issue(self, threat_analysis: ThreatAnalysis) -> Dict[str, Any]:
         """Convert ThreatAnalysis to Jira issue format."""
 
-        priority = self._map_threat_level_to_jira_priority(
-            threat_analysis.threat_level.value
-        )
+        priority = self._map_threat_level_to_jira_priority(threat_analysis.threat_level.value)
 
         iocs_text = "\n".join(
             [
@@ -1149,11 +1071,7 @@ h4. Indicators of Compromise
                     f"threat-{threat_analysis.threat_level.value}",
                     "threat-analysis",
                 ],
-                "components": (
-                    [{"name": "Security"}]
-                    if self.config.custom_config.get("security_component")
-                    else []
-                ),
+                "components": ([{"name": "Security"}] if self.config.custom_config.get("security_component") else []),
                 "customfield_10000": threat_analysis.event_id,  # Custom field for event ID
                 "customfield_10001": threat_analysis.threat_id,  # Custom field for threat ID
             }
@@ -1165,13 +1083,9 @@ h4. Indicators of Compromise
         actions_summary = []
         for action in automated_response.actions:
             status_icon = (
-                "(/) "
-                if action.status.value == "completed"
-                else "(i) " if action.status.value == "in_progress" else "(x) "
+                "(/) " if action.status.value == "completed" else "(i) " if action.status.value == "in_progress" else "(x) "
             )
-            actions_summary.append(
-                f"{status_icon}{action.action_type.value} on {action.target_system}"
-            )
+            actions_summary.append(f"{status_icon}{action.action_type.value} on {action.target_system}")
 
         return f"""h4. Automated Response Executed - {automated_response.status.value.title()}
 

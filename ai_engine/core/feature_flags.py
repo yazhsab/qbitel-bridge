@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 class FeatureCategory(str, Enum):
     """Categories of features for grouping and reporting."""
+
     DOMAIN = "domain"
     SECURITY = "security"
     INTEGRATION = "integration"
@@ -42,6 +43,7 @@ class FeatureCategory(str, Enum):
 @dataclass
 class FeatureDefinition:
     """Definition of a feature flag."""
+
     name: str
     description: str
     category: FeatureCategory
@@ -81,7 +83,6 @@ FEATURE_DEFINITIONS: Dict[str, FeatureDefinition] = {
         default_enabled=False,
         env_var="QBITEL_FEATURE_INDUSTRIAL_DOMAIN",
     ),
-
     # Core features
     "protocol_discovery": FeatureDefinition(
         name="protocol_discovery",
@@ -104,7 +105,6 @@ FEATURE_DEFINITIONS: Dict[str, FeatureDefinition] = {
         default_enabled=True,
         env_var="QBITEL_FEATURE_LEGACY_WHISPERER",
     ),
-
     # Security features
     "agentic_security": FeatureDefinition(
         name="agentic_security",
@@ -127,7 +127,6 @@ FEATURE_DEFINITIONS: Dict[str, FeatureDefinition] = {
         default_enabled=True,
         env_var="QBITEL_FEATURE_THREAT_INTELLIGENCE",
     ),
-
     # Integration features
     "marketplace": FeatureDefinition(
         name="marketplace",
@@ -150,7 +149,6 @@ FEATURE_DEFINITIONS: Dict[str, FeatureDefinition] = {
         default_enabled=True,
         env_var="QBITEL_FEATURE_COMPLIANCE_AUTOMATION",
     ),
-
     # Experimental features
     "llm_copilot": FeatureDefinition(
         name="llm_copilot",
@@ -224,9 +222,7 @@ class FeatureFlags:
         # Check dependencies
         for dependency in feature.requires:
             if not self.is_enabled(dependency):
-                logger.debug(
-                    f"Feature {feature_name} disabled: missing dependency {dependency}"
-                )
+                logger.debug(f"Feature {feature_name} disabled: missing dependency {dependency}")
                 self._cache[feature_name] = False
                 return False
 
@@ -282,10 +278,7 @@ class FeatureFlags:
         Returns:
             Dictionary of feature name to enabled status
         """
-        return {
-            name: self.is_enabled(name)
-            for name in FEATURE_DEFINITIONS.keys()
-        }
+        return {name: self.is_enabled(name) for name in FEATURE_DEFINITIONS.keys()}
 
     def get_enabled_features(self) -> Set[str]:
         """
@@ -294,10 +287,7 @@ class FeatureFlags:
         Returns:
             Set of enabled feature names
         """
-        return {
-            name for name in FEATURE_DEFINITIONS.keys()
-            if self.is_enabled(name)
-        }
+        return {name for name in FEATURE_DEFINITIONS.keys() if self.is_enabled(name)}
 
     def get_disabled_features(self) -> Set[str]:
         """
@@ -306,10 +296,7 @@ class FeatureFlags:
         Returns:
             Set of disabled feature names
         """
-        return {
-            name for name in FEATURE_DEFINITIONS.keys()
-            if not self.is_enabled(name)
-        }
+        return {name for name in FEATURE_DEFINITIONS.keys() if not self.is_enabled(name)}
 
     def get_features_by_category(self, category: FeatureCategory) -> Dict[str, bool]:
         """
@@ -322,9 +309,7 @@ class FeatureFlags:
             Dictionary of feature name to enabled status
         """
         return {
-            name: self.is_enabled(name)
-            for name, definition in FEATURE_DEFINITIONS.items()
-            if definition.category == category
+            name: self.is_enabled(name) for name, definition in FEATURE_DEFINITIONS.items() if definition.category == category
         }
 
     def get_feature_info(self, feature_name: str) -> Optional[Dict[str, Any]]:
@@ -367,10 +352,7 @@ class FeatureFlags:
             "disabled_count": len(disabled),
             "enabled_features": sorted(enabled),
             "disabled_features": sorted(disabled),
-            "by_category": {
-                category.value: self.get_features_by_category(category)
-                for category in FeatureCategory
-            },
+            "by_category": {category.value: self.get_features_by_category(category) for category in FeatureCategory},
             "overrides_active": len(self._overrides),
         }
 
@@ -397,8 +379,7 @@ def require_feature(feature_name: str) -> None:
     """
     if not feature_flags.is_enabled(feature_name):
         raise RuntimeError(
-            f"Feature '{feature_name}' is not enabled. "
-            f"Set {FEATURE_DEFINITIONS[feature_name].env_var}=true to enable it."
+            f"Feature '{feature_name}' is not enabled. " f"Set {FEATURE_DEFINITIONS[feature_name].env_var}=true to enable it."
         )
 
 
@@ -414,17 +395,17 @@ def feature_guard(feature_name: str):
         def create_listing():
             ...
     """
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             if not feature_flags.is_enabled(feature_name):
-                raise RuntimeError(
-                    f"Feature '{feature_name}' is disabled. "
-                    f"Cannot call {func.__name__}."
-                )
+                raise RuntimeError(f"Feature '{feature_name}' is disabled. " f"Cannot call {func.__name__}.")
             return func(*args, **kwargs)
+
         wrapper.__name__ = func.__name__
         wrapper.__doc__ = func.__doc__
         return wrapper
+
     return decorator
 
 

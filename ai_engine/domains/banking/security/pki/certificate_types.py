@@ -202,10 +202,7 @@ class CertificateInfo:
     @property
     def is_self_signed(self) -> bool:
         """Check if certificate is self-signed."""
-        return (
-            self.subject.common_name == self.issuer.common_name and
-            self.subject.organization == self.issuer.organization
-        )
+        return self.subject.common_name == self.issuer.common_name and self.subject.organization == self.issuer.organization
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""

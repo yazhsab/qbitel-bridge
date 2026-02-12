@@ -105,8 +105,7 @@ class BusinessFunctionCode(Enum):
     CUSTOMER_TRANSFER = ("CTR", "Customer Transfer", "Transfer on behalf of customer")
 
     # Customer Transfer Plus (CTP) - Customer transfer with additional info
-    CUSTOMER_TRANSFER_PLUS = ("CTP", "Customer Transfer Plus",
-                              "Customer transfer with originator/beneficiary info")
+    CUSTOMER_TRANSFER_PLUS = ("CTP", "Customer Transfer Plus", "Customer transfer with originator/beneficiary info")
 
     # Drawdown Request (DRW) - Request to draw funds
     DRAWDOWN_REQUEST = ("DRW", "Drawdown Request", "Request for drawdown of funds")
@@ -127,8 +126,7 @@ class BusinessFunctionCode(Enum):
     SERVICE_MESSAGE = ("SVC", "Service Message", "Service or administrative message")
 
     # Check Same Day Settlement (CKS) - Check clearing settlement
-    CHECK_SAME_DAY = ("CKS", "Check Same Day Settlement",
-                      "Check clearing same-day settlement")
+    CHECK_SAME_DAY = ("CKS", "Check Same Day Settlement", "Check clearing same-day settlement")
 
     # Deposit to Sender's Account (DEP) - Deposit
     DEPOSIT = ("DEP", "Deposit to Sender's Account", "Deposit to sender's account")
@@ -203,8 +201,7 @@ class FedWireTag(Enum):
     BENEFICIARY_INTERMEDIARY_FI = ("4000", "Beneficiary Intermediary FI", False, 9, 43)
 
     # Drawdown Tags
-    DRAWDOWN_DEBIT_ACCOUNT_ADVICE = ("6200", "Drawdown Debit Account Advice Info",
-                                     False, 1, 200)
+    DRAWDOWN_DEBIT_ACCOUNT_ADVICE = ("6200", "Drawdown Debit Account Advice Info", False, 1, 200)
 
     # Remittance Data
     RELATED_REMITTANCE_INFO = ("8200", "Related Remittance Information", False, 1, 3000)
@@ -229,8 +226,7 @@ class FedWireTag(Enum):
     # Unstructured Addenda
     UNSTRUCTURED_ADDENDA = ("7500", "Unstructured Addenda", False, 1, 9000)
 
-    def __init__(self, tag: str, description: str, mandatory: bool,
-                 min_length: int, max_length: int):
+    def __init__(self, tag: str, description: str, mandatory: bool, min_length: int, max_length: int):
         self.tag = tag
         self.description = description
         self.mandatory = mandatory

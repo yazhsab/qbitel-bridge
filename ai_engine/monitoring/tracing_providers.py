@@ -58,9 +58,7 @@ class JaegerTracingProvider(TracingProvider):
         self.jaeger_config = JaegerConfig(
             agent_host=getattr(config.monitoring, "jaeger_agent_host", "localhost"),
             agent_port=getattr(config.monitoring, "jaeger_agent_port", 6831),
-            collector_endpoint=getattr(
-                config.monitoring, "jaeger_collector_endpoint", None
-            ),
+            collector_endpoint=getattr(config.monitoring, "jaeger_collector_endpoint", None),
             service_name=getattr(config.monitoring, "service_name", "qbitel"),
             sampling_rate=getattr(config, "tracing_sampling_rate", 1.0),
         )
@@ -152,9 +150,7 @@ class JaegerTracingProvider(TracingProvider):
             batch = self._batch_queue.copy()
             self._batch_queue.clear()
 
-            jaeger_batch = {
-                "spans": [self._convert_to_jaeger_format(span) for span in batch]
-            }
+            jaeger_batch = {"spans": [self._convert_to_jaeger_format(span) for span in batch]}
 
             endpoint = urljoin(self.jaeger_config.collector_endpoint, "/api/traces")
 
@@ -164,9 +160,7 @@ class JaegerTracingProvider(TracingProvider):
                 headers={"Content-Type": "application/json"},
             ) as response:
                 if response.status != 200:
-                    self.logger.error(
-                        f"Jaeger collector returned status {response.status}"
-                    )
+                    self.logger.error(f"Jaeger collector returned status {response.status}")
                 else:
                     self.logger.debug(f"Flushed {len(batch)} spans to Jaeger")
 
@@ -182,16 +176,11 @@ class JaegerTracingProvider(TracingProvider):
             "operationName": span.operation_name,
             "startTime": int(span.start_time * 1000000),  # microseconds
             "duration": int(span.duration_ms * 1000) if span.duration_ms else 0,
-            "tags": [
-                {"key": k, "value": str(v)[: self.jaeger_config.max_tag_value_length]}
-                for k, v in span.tags.items()
-            ],
+            "tags": [{"key": k, "value": str(v)[: self.jaeger_config.max_tag_value_length]} for k, v in span.tags.items()],
             "logs": [
                 {
                     "timestamp": int(log.timestamp * 1000000),
-                    "fields": [
-                        {"key": k, "value": str(v)} for k, v in log.attributes.items()
-                    ],
+                    "fields": [{"key": k, "value": str(v)} for k, v in log.attributes.items()],
                 }
                 for log in span.logs
             ],
@@ -220,9 +209,7 @@ class ZipkinTracingProvider(TracingProvider):
 
         # Load Zipkin configuration
         self.zipkin_config = ZipkinConfig(
-            endpoint=getattr(
-                config.monitoring, "zipkin_endpoint", "http://localhost:9411"
-            ),
+            endpoint=getattr(config.monitoring, "zipkin_endpoint", "http://localhost:9411"),
             service_name=getattr(config.monitoring, "service_name", "qbitel"),
             sampling_rate=getattr(config, "tracing_sampling_rate", 1.0),
         )
@@ -333,14 +320,8 @@ class ZipkinTracingProvider(TracingProvider):
             "duration": int(span.duration_ms * 1000) if span.duration_ms else 0,
             "kind": self._map_span_kind(span.kind),
             "localEndpoint": {"serviceName": self.zipkin_config.service_name},
-            "tags": {
-                k: str(v)[: self.zipkin_config.max_tag_value_length]
-                for k, v in span.tags.items()
-            },
-            "annotations": [
-                {"timestamp": int(log.timestamp * 1000000), "value": log.name}
-                for log in span.logs
-            ],
+            "tags": {k: str(v)[: self.zipkin_config.max_tag_value_length] for k, v in span.tags.items()},
+            "annotations": [{"timestamp": int(log.timestamp * 1000000), "value": log.name} for log in span.logs],
         }
 
         if span.parent_span_id:
@@ -360,9 +341,7 @@ class ZipkinTracingProvider(TracingProvider):
         return kind_mapping.get(kind.value, "CLIENT")
 
 
-def create_tracing_provider(
-    config: Config, provider_type: str = "jaeger"
-) -> TracingProvider:
+def create_tracing_provider(config: Config, provider_type: str = "jaeger") -> TracingProvider:
     """
     Factory function to create tracing provider.
 

@@ -676,10 +676,7 @@ Include all required disclosures and attestations.
         )
 
         # Update Jinja2 loader with templates
-        template_dict = {
-            template_id: template.template
-            for template_id, template in self.templates.items()
-        }
+        template_dict = {template_id: template.template for template_id, template in self.templates.items()}
         self.jinja_env.loader = jinja2.DictLoader(template_dict)
 
     def get_template(self, template_id: str) -> Optional[PromptTemplate]:
@@ -696,9 +693,7 @@ Include all required disclosures and attestations.
         templates = list(self.templates.values())
 
         if framework:
-            templates = [
-                t for t in templates if t.framework is None or t.framework == framework
-            ]
+            templates = [t for t in templates if t.framework is None or t.framework == framework]
 
         if prompt_type:
             templates = [t for t in templates if t.type == prompt_type]
@@ -727,9 +722,7 @@ Include all required disclosures and attestations.
             # Validate required variables
             missing_vars = set(template.variables) - set(variables.keys())
             if missing_vars:
-                self.logger.warning(
-                    f"Missing variables for template {template_id}: {missing_vars}"
-                )
+                self.logger.warning(f"Missing variables for template {template_id}: {missing_vars}")
 
             # Render template
             jinja_template = self.jinja_env.get_template(template_id)
@@ -767,9 +760,7 @@ Include all required disclosures and attestations.
                 "system_evidence": system_evidence,
             }
 
-            return self.render_prompt(
-                "gap_analysis_comprehensive", variables, framework
-            )
+            return self.render_prompt("gap_analysis_comprehensive", variables, framework)
 
         except Exception as e:
             self.logger.error(f"Failed to create gap analysis prompt: {e}")
@@ -789,9 +780,7 @@ Include all required disclosures and attestations.
                 "evidence_items": evidence_items,
             }
 
-            return self.render_prompt(
-                "requirement_assessment_detailed", variables, framework
-            )
+            return self.render_prompt("requirement_assessment_detailed", variables, framework)
 
         except Exception as e:
             self.logger.error(f"Failed to create requirement assessment prompt: {e}")
@@ -805,9 +794,7 @@ Include all required disclosures and attestations.
     ) -> str:
         """Create executive summary prompt."""
         try:
-            critical_gaps = [
-                g for g in assessment.gaps if g.severity == RequirementSeverity.CRITICAL
-            ]
+            critical_gaps = [g for g in assessment.gaps if g.severity == RequirementSeverity.CRITICAL]
 
             variables = {
                 "framework": framework,
@@ -817,9 +804,7 @@ Include all required disclosures and attestations.
                 "business_impact": business_impact,
             }
 
-            return self.render_prompt(
-                "executive_summary_strategic", variables, framework
-            )
+            return self.render_prompt("executive_summary_strategic", variables, framework)
 
         except Exception as e:
             self.logger.error(f"Failed to create executive summary prompt: {e}")
@@ -842,9 +827,7 @@ Include all required disclosures and attestations.
             )
 
             # Organize gaps by technical complexity
-            technical_gaps = [
-                g for g in assessment.gaps if g.remediation_effort in ["medium", "high"]
-            ]
+            technical_gaps = [g for g in assessment.gaps if g.remediation_effort in ["medium", "high"]]
 
             variables = {
                 "framework": framework,
@@ -857,9 +840,7 @@ Include all required disclosures and attestations.
                 "technical_gaps": technical_gaps,
             }
 
-            return self.render_prompt(
-                "technical_report_comprehensive", variables, framework
-            )
+            return self.render_prompt("technical_report_comprehensive", variables, framework)
 
         except Exception as e:
             self.logger.error(f"Failed to create technical report prompt: {e}")
@@ -874,12 +855,8 @@ Include all required disclosures and attestations.
     ) -> str:
         """Create risk evaluation prompt."""
         try:
-            critical_gaps = [
-                g for g in assessment.gaps if g.severity == RequirementSeverity.CRITICAL
-            ]
-            high_priority_gaps = [
-                g for g in assessment.gaps if g.severity == RequirementSeverity.HIGH
-            ]
+            critical_gaps = [g for g in assessment.gaps if g.severity == RequirementSeverity.CRITICAL]
+            high_priority_gaps = [g for g in assessment.gaps if g.severity == RequirementSeverity.HIGH]
 
             variables = {
                 "framework": framework,
@@ -892,9 +869,7 @@ Include all required disclosures and attestations.
                 "business_criticality": "High",
             }
 
-            return self.render_prompt(
-                "risk_evaluation_quantitative", variables, framework
-            )
+            return self.render_prompt("risk_evaluation_quantitative", variables, framework)
 
         except Exception as e:
             self.logger.error(f"Failed to create risk evaluation prompt: {e}")
@@ -914,9 +889,7 @@ Include all required disclosures and attestations.
             prioritized_gaps = sorted(
                 assessment.gaps,
                 key=lambda g: (
-                    {"critical": 0, "high": 1, "medium": 2, "low": 3}.get(
-                        g.severity.value, 4
-                    ),
+                    {"critical": 0, "high": 1, "medium": 2, "low": 3}.get(g.severity.value, 4),
                     {"high": 0, "medium": 1, "low": 2}.get(g.remediation_effort, 3),
                 ),
             )
@@ -934,9 +907,7 @@ Include all required disclosures and attestations.
                 "regulatory_deadline": f"{target_timeline} months",
             }
 
-            return self.render_prompt(
-                "remediation_plan_actionable", variables, framework
-            )
+            return self.render_prompt("remediation_plan_actionable", variables, framework)
 
         except Exception as e:
             self.logger.error(f"Failed to create remediation plan prompt: {e}")
@@ -1002,10 +973,7 @@ Include all required disclosures and attestations.
             self.templates[template.id] = template
 
             # Update Jinja2 loader
-            template_dict = {
-                template_id: tmpl.template
-                for template_id, tmpl in self.templates.items()
-            }
+            template_dict = {template_id: tmpl.template for template_id, tmpl in self.templates.items()}
             self.jinja_env.loader = jinja2.DictLoader(template_dict)
 
             self.logger.info(f"Custom template added: {template.id}")
@@ -1014,9 +982,7 @@ Include all required disclosures and attestations.
             self.logger.error(f"Failed to add custom template: {e}")
             raise PromptException(f"Custom template addition failed: {e}")
 
-    def validate_prompt_variables(
-        self, template_id: str, variables: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def validate_prompt_variables(self, template_id: str, variables: Dict[str, Any]) -> Dict[str, Any]:
         """Validate prompt variables against template requirements."""
         template = self.get_template(template_id)
         if not template:

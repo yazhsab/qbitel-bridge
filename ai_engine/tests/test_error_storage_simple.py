@@ -23,9 +23,7 @@ class TestPersistentErrorStorage:
         storage = PersistentErrorStorage()
 
         assert storage.redis_url == "redis://localhost:6379/0"
-        assert (
-            storage.postgres_url == "postgresql+asyncpg://user:pass@localhost/qbitel"
-        )
+        assert storage.postgres_url == "postgresql+asyncpg://user:pass@localhost/qbitel"
         assert storage.redis_ttl == 86400
         assert storage.postgres_retention_days == 90
         assert storage.redis_client is None
@@ -92,9 +90,7 @@ class TestPersistentErrorStorage:
             exception_type="TestException",
             exception_message="Test error message",
             stack_trace="Test stack trace",
-            context=ErrorContext(
-                component="test_component", operation="test_operation"
-            ),
+            context=ErrorContext(component="test_component", operation="test_operation"),
             recovery_attempted=False,
             recovery_successful=False,
             recovery_strategy=None,

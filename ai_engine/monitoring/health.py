@@ -163,9 +163,7 @@ class HealthChecker:
         # Wait for all checks to complete
         for name, task in tasks.items():
             try:
-                component_health[name] = await asyncio.wait_for(
-                    task, timeout=self.timeout
-                )
+                component_health[name] = await asyncio.wait_for(task, timeout=self.timeout)
             except asyncio.TimeoutError:
                 component_health[name] = ComponentHealth(
                     name=name,
@@ -205,9 +203,7 @@ class HealthChecker:
                 self.health_history = self.health_history[-self.max_history_size :]
 
         check_duration = (time.time() - start_time) * 1000
-        self.logger.info(
-            f"Health check completed in {check_duration:.2f}ms - Status: {system_health.overall_status}"
-        )
+        self.logger.info(f"Health check completed in {check_duration:.2f}ms - Status: {system_health.overall_status}")
 
         return system_health
 
@@ -279,9 +275,7 @@ class HealthChecker:
             for comp_name in trends["component_availability"]:
                 comp_stats = trends["component_availability"][comp_name]
                 for status in comp_stats:
-                    comp_stats[f"{status}_percentage"] = (
-                        comp_stats[status] / total_checks
-                    ) * 100
+                    comp_stats[f"{status}_percentage"] = (comp_stats[status] / total_checks) * 100
 
             return trends
 
@@ -452,8 +446,7 @@ class HealthChecker:
                             "memory_allocated_mb": memory_allocated / (1024**2),
                             "memory_reserved_mb": memory_reserved / (1024**2),
                             "memory_total_mb": total_memory / (1024**2),
-                            "memory_utilization": (memory_reserved / total_memory)
-                            * 100,
+                            "memory_utilization": (memory_reserved / total_memory) * 100,
                         }
 
                         details["devices"].append(device_info)
@@ -462,9 +455,7 @@ class HealthChecker:
                         memory_util = (memory_reserved / total_memory) * 100
                         if memory_util > 90:
                             status = HealthStatus.DEGRADED
-                            messages.append(
-                                f"GPU {i} high memory usage: {memory_util:.1f}%"
-                            )
+                            messages.append(f"GPU {i} high memory usage: {memory_util:.1f}%")
 
                     except Exception as e:
                         self.logger.warning(f"Error checking GPU {i}: {e}")
@@ -472,15 +463,9 @@ class HealthChecker:
                         if status == HealthStatus.HEALTHY:
                             status = HealthStatus.DEGRADED
 
-                message = (
-                    "; ".join(messages)
-                    if messages
-                    else f"{device_count} GPU(s) available"
-                )
+                message = "; ".join(messages) if messages else f"{device_count} GPU(s) available"
 
-                return ComponentHealth(
-                    name="gpu", status=status, message=message, details=details
-                )
+                return ComponentHealth(name="gpu", status=status, message=message, details=details)
 
             except Exception as e:
                 self.logger.error(f"Failed to check GPU: {e}")
@@ -495,6 +480,7 @@ class HealthChecker:
             try:
                 from ..core.engine import QbitelAIEngine
                 from ..api.rest import _ai_engine
+
                 if _ai_engine is None:
                     return ComponentHealth(
                         name="ai_engine",
@@ -502,7 +488,7 @@ class HealthChecker:
                         message="AI Engine not yet initialized",
                         details={"initialized": False},
                     )
-                status_info = await _ai_engine.get_model_info() if hasattr(_ai_engine, 'get_model_info') else {}
+                status_info = await _ai_engine.get_model_info() if hasattr(_ai_engine, "get_model_info") else {}
                 return ComponentHealth(
                     name="ai_engine",
                     status=HealthStatus.HEALTHY,
@@ -532,6 +518,7 @@ class HealthChecker:
             """Check model registry health."""
             try:
                 from ..models.model_manager import get_model_manager
+
                 manager = get_model_manager()
                 if manager is None:
                     return ComponentHealth(
@@ -540,7 +527,7 @@ class HealthChecker:
                         message="Model manager not initialized",
                         details={"models_loaded": False},
                     )
-                is_ready = hasattr(manager, 'is_ready') and manager.is_ready()
+                is_ready = hasattr(manager, "is_ready") and manager.is_ready()
                 return ComponentHealth(
                     name="model_registry",
                     status=HealthStatus.HEALTHY if is_ready else HealthStatus.DEGRADED,
@@ -567,6 +554,7 @@ class HealthChecker:
             """Check external service dependencies."""
             try:
                 import os
+
                 issues = []
                 details = {}
 
@@ -612,9 +600,7 @@ class HealthChecker:
         self.register_health_checker("gpu", check_gpu_availability)
         self.register_health_checker("ai_engine", check_ai_engine)
         self.register_health_checker("model_registry", check_model_registry)
-        self.register_health_checker(
-            "external_dependencies", check_external_dependencies
-        )
+        self.register_health_checker("external_dependencies", check_external_dependencies)
 
     async def _collect_system_metrics(self) -> Dict[str, float]:
         """Collect system-level metrics."""
@@ -671,11 +657,7 @@ class HealthChecker:
 
                     metrics["gpu_total_memory_gb"] = total_memory / (1024**3)
                     metrics["gpu_allocated_memory_gb"] = total_allocated / (1024**3)
-                    metrics["gpu_memory_utilization"] = (
-                        (total_allocated / total_memory) * 100
-                        if total_memory > 0
-                        else 0
-                    )
+                    metrics["gpu_memory_utilization"] = (total_allocated / total_memory) * 100 if total_memory > 0 else 0
             except Exception:
                 pass
 

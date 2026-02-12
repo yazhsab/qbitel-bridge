@@ -78,10 +78,10 @@ from ai_engine.agents.multi_agent_orchestrator import (
     OrchestratorMode,
 )
 
-
 # ============================================================================
 # Test Fixtures
 # ============================================================================
+
 
 class TestAgent(BaseAgent):
     """A simple test agent implementation."""
@@ -161,6 +161,7 @@ async def collaboration(communication):
 # Base Agent Tests
 # ============================================================================
 
+
 class TestBaseAgent:
     """Tests for BaseAgent functionality."""
 
@@ -237,6 +238,7 @@ class TestBaseAgent:
 # ============================================================================
 # Agent Communication Protocol Tests
 # ============================================================================
+
 
 class TestAgentCommunication:
     """Tests for Agent Communication Protocol."""
@@ -347,6 +349,7 @@ class TestAgentCommunication:
 # Agent Pool Manager Tests
 # ============================================================================
 
+
 class TestAgentPoolManager:
     """Tests for Agent Pool Manager."""
 
@@ -393,10 +396,7 @@ class TestAgentPoolManager:
         )
 
         # Submit task
-        result = await asyncio.wait_for(
-            pool.submit_task(task),
-            timeout=5.0
-        )
+        result = await asyncio.wait_for(pool.submit_task(task), timeout=5.0)
 
         assert result is not None
 
@@ -427,6 +427,7 @@ class TestAgentPoolManager:
 # ============================================================================
 # Agent Memory Tests
 # ============================================================================
+
 
 class TestAgentMemory:
     """Tests for Agent Memory Manager."""
@@ -533,6 +534,7 @@ class TestAgentMemory:
 # Collaboration Framework Tests
 # ============================================================================
 
+
 class TestCollaborationFramework:
     """Tests for Collaboration Framework."""
 
@@ -627,6 +629,7 @@ class TestCollaborationFramework:
 # Planning Agent Tests
 # ============================================================================
 
+
 class TestPlanningAgent:
     """Tests for Planning Agent."""
 
@@ -703,6 +706,7 @@ class TestPlanningAgent:
 # ============================================================================
 # Multi-Agent Orchestrator Integration Tests
 # ============================================================================
+
 
 class TestMultiAgentOrchestrator:
     """Integration tests for Multi-Agent Orchestrator."""
@@ -800,6 +804,7 @@ class TestMultiAgentOrchestrator:
 # ============================================================================
 # Performance Tests
 # ============================================================================
+
 
 class TestPerformance:
     """Performance tests for the multi-agent system."""

@@ -95,9 +95,7 @@ class AnomalyDetectionConfig:
             errors.append("Anomaly threshold must be between 0.5 and 1.0")
 
         if self.critical_anomaly_threshold <= self.anomaly_threshold:
-            errors.append(
-                "Critical anomaly threshold must be higher than anomaly threshold"
-            )
+            errors.append("Critical anomaly threshold must be higher than anomaly threshold")
 
         if self.vae_latent_dim <= 0:
             errors.append("VAE latent dimension must be positive")
@@ -106,9 +104,7 @@ class AnomalyDetectionConfig:
             errors.append("Sequence length must be positive")
 
         if errors:
-            raise ConfigurationException(
-                f"Anomaly detection config validation failed: {'; '.join(errors)}"
-            )
+            raise ConfigurationException(f"Anomaly detection config validation failed: {'; '.join(errors)}")
 
 
 @dataclass
@@ -135,12 +131,8 @@ class PredictiveAnalyticsConfig:
 
     # Maintenance scheduling
     maintenance_optimization_enabled: bool = True
-    maintenance_window_hours: List[int] = field(
-        default_factory=lambda: [2, 3, 4]
-    )  # 2-4 AM
-    maintenance_blackout_days: List[str] = field(
-        default_factory=lambda: ["friday", "saturday"]
-    )
+    maintenance_window_hours: List[int] = field(default_factory=lambda: [2, 3, 4])  # 2-4 AM
+    maintenance_blackout_days: List[str] = field(default_factory=lambda: ["friday", "saturday"])
     resource_utilization_target: float = 0.8  # 80% resource utilization
 
     # Time series analysis
@@ -169,14 +161,10 @@ class PredictiveAnalyticsConfig:
             errors.append("Resource utilization target must be between 0.0 and 1.0")
 
         if self.time_series_lookback_days < self.min_historical_data_days:
-            errors.append(
-                "Time series lookback must be at least minimum historical data period"
-            )
+            errors.append("Time series lookback must be at least minimum historical data period")
 
         if errors:
-            raise ConfigurationException(
-                f"Predictive analytics config validation failed: {'; '.join(errors)}"
-            )
+            raise ConfigurationException(f"Predictive analytics config validation failed: {'; '.join(errors)}")
 
 
 @dataclass
@@ -240,9 +228,7 @@ class KnowledgeCaptureConfig:
             errors.append("Knowledge retention period must be positive")
 
         if errors:
-            raise ConfigurationException(
-                f"Knowledge capture config validation failed: {'; '.join(errors)}"
-            )
+            raise ConfigurationException(f"Knowledge capture config validation failed: {'; '.join(errors)}")
 
 
 @dataclass
@@ -306,9 +292,7 @@ class DecisionSupportConfig:
             errors.append("Decision cache TTL must be positive")
 
         if errors:
-            raise ConfigurationException(
-                f"Decision support config validation failed: {'; '.join(errors)}"
-            )
+            raise ConfigurationException(f"Decision support config validation failed: {'; '.join(errors)}")
 
 
 @dataclass
@@ -317,9 +301,7 @@ class LLMIntegrationConfig:
 
     # Primary LLM provider
     primary_provider: str = "openai"  # openai, anthropic, ollama
-    fallback_providers: List[str] = field(
-        default_factory=lambda: ["anthropic", "ollama"]
-    )
+    fallback_providers: List[str] = field(default_factory=lambda: ["anthropic", "ollama"])
 
     # Request settings
     max_tokens: int = 4000
@@ -366,9 +348,7 @@ class LLMIntegrationConfig:
             errors.append("Requests per minute must be positive")
 
         if errors:
-            raise ConfigurationException(
-                f"LLM integration config validation failed: {'; '.join(errors)}"
-            )
+            raise ConfigurationException(f"LLM integration config validation failed: {'; '.join(errors)}")
 
 
 @dataclass
@@ -432,9 +412,7 @@ class MonitoringObservabilityConfig:
             errors.append("Tracing sample rate must be between 0.0 and 1.0")
 
         if errors:
-            raise ConfigurationException(
-                f"Monitoring config validation failed: {'; '.join(errors)}"
-            )
+            raise ConfigurationException(f"Monitoring config validation failed: {'; '.join(errors)}")
 
 
 @dataclass
@@ -478,9 +456,7 @@ class SecurityConfig:
             errors.append("Session timeout must be positive")
 
         if errors:
-            raise ConfigurationException(
-                f"Security config validation failed: {'; '.join(errors)}"
-            )
+            raise ConfigurationException(f"Security config validation failed: {'; '.join(errors)}")
 
 
 @dataclass
@@ -503,22 +479,12 @@ class LegacySystemWhispererConfig:
     )
 
     # Component configurations
-    anomaly_detection: AnomalyDetectionConfig = field(
-        default_factory=AnomalyDetectionConfig
-    )
-    predictive_analytics: PredictiveAnalyticsConfig = field(
-        default_factory=PredictiveAnalyticsConfig
-    )
-    knowledge_capture: KnowledgeCaptureConfig = field(
-        default_factory=KnowledgeCaptureConfig
-    )
-    decision_support: DecisionSupportConfig = field(
-        default_factory=DecisionSupportConfig
-    )
+    anomaly_detection: AnomalyDetectionConfig = field(default_factory=AnomalyDetectionConfig)
+    predictive_analytics: PredictiveAnalyticsConfig = field(default_factory=PredictiveAnalyticsConfig)
+    knowledge_capture: KnowledgeCaptureConfig = field(default_factory=KnowledgeCaptureConfig)
+    decision_support: DecisionSupportConfig = field(default_factory=DecisionSupportConfig)
     llm_integration: LLMIntegrationConfig = field(default_factory=LLMIntegrationConfig)
-    monitoring: MonitoringObservabilityConfig = field(
-        default_factory=MonitoringObservabilityConfig
-    )
+    monitoring: MonitoringObservabilityConfig = field(default_factory=MonitoringObservabilityConfig)
     security: SecurityConfig = field(default_factory=SecurityConfig)
 
     # System limits
@@ -589,9 +555,7 @@ class LegacySystemWhispererConfig:
             errors.append(f"Security: {e}")
 
         if errors:
-            raise ConfigurationException(
-                f"Legacy System Whisperer config validation failed: {'; '.join(errors)}"
-            )
+            raise ConfigurationException(f"Legacy System Whisperer config validation failed: {'; '.join(errors)}")
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "LegacySystemWhispererConfig":
@@ -606,17 +570,11 @@ class LegacySystemWhispererConfig:
 
         # Update component configurations
         if "anomaly_detection" in data:
-            config.anomaly_detection = AnomalyDetectionConfig(
-                **data["anomaly_detection"]
-            )
+            config.anomaly_detection = AnomalyDetectionConfig(**data["anomaly_detection"])
         if "predictive_analytics" in data:
-            config.predictive_analytics = PredictiveAnalyticsConfig(
-                **data["predictive_analytics"]
-            )
+            config.predictive_analytics = PredictiveAnalyticsConfig(**data["predictive_analytics"])
         if "knowledge_capture" in data:
-            config.knowledge_capture = KnowledgeCaptureConfig(
-                **data["knowledge_capture"]
-            )
+            config.knowledge_capture = KnowledgeCaptureConfig(**data["knowledge_capture"])
         if "decision_support" in data:
             config.decision_support = DecisionSupportConfig(**data["decision_support"])
         if "llm_integration" in data:
@@ -643,9 +601,7 @@ class LegacySystemWhispererConfig:
             "enabled": self.enabled,
             "service_name": self.service_name,
             "version": self.version,
-            "supported_system_types": [
-                stype.value for stype in self.supported_system_types
-            ],
+            "supported_system_types": [stype.value for stype in self.supported_system_types],
             "max_registered_systems": self.max_registered_systems,
             "max_concurrent_analyses": self.max_concurrent_analyses,
             "memory_limit_mb": self.memory_limit_mb,
@@ -656,15 +612,11 @@ class LegacySystemWhispererConfig:
             },
             "predictive_analytics": {
                 "failure_prediction_enabled": self.predictive_analytics.failure_prediction_enabled,
-                "prediction_horizons": [
-                    h.value for h in self.predictive_analytics.prediction_horizons
-                ],
+                "prediction_horizons": [h.value for h in self.predictive_analytics.prediction_horizons],
                 "min_historical_data_days": self.predictive_analytics.min_historical_data_days,
             },
             "knowledge_capture": {
-                "enabled_sources": [
-                    src.value for src in self.knowledge_capture.enabled_sources
-                ],
+                "enabled_sources": [src.value for src in self.knowledge_capture.enabled_sources],
                 "llm_processing_enabled": self.knowledge_capture.llm_processing_enabled,
                 "knowledge_retention_days": self.knowledge_capture.knowledge_retention_days,
             },
@@ -708,9 +660,7 @@ def load_legacy_config_from_file(
     config_path = Path(config_path)
 
     if not config_path.exists():
-        raise ConfigurationException(
-            f"Legacy configuration file not found: {config_path}"
-        )
+        raise ConfigurationException(f"Legacy configuration file not found: {config_path}")
 
     try:
         with open(config_path, "r") as f:
@@ -734,17 +684,13 @@ def load_legacy_config_from_env(
     config = LegacySystemWhispererConfig()
 
     # Load basic settings
-    config.enabled = (
-        os.getenv(f"{prefix}ENABLED", str(config.enabled)).lower() == "true"
-    )
+    config.enabled = os.getenv(f"{prefix}ENABLED", str(config.enabled)).lower() == "true"
     config.service_name = os.getenv(f"{prefix}SERVICE_NAME", config.service_name)
 
     # Load anomaly detection settings
     if os.getenv(f"{prefix}ANOMALY_THRESHOLD"):
         config.anomaly_detection.anomaly_threshold = float(
-            os.getenv(
-                f"{prefix}ANOMALY_THRESHOLD", config.anomaly_detection.anomaly_threshold
-            )
+            os.getenv(f"{prefix}ANOMALY_THRESHOLD", config.anomaly_detection.anomaly_threshold)
         )
 
     # Load predictive analytics settings
@@ -759,25 +705,17 @@ def load_legacy_config_from_env(
 
     # Load LLM integration settings
     if os.getenv(f"{prefix}LLM_PROVIDER"):
-        config.llm_integration.primary_provider = os.getenv(
-            f"{prefix}LLM_PROVIDER", config.llm_integration.primary_provider
-        )
+        config.llm_integration.primary_provider = os.getenv(f"{prefix}LLM_PROVIDER", config.llm_integration.primary_provider)
 
     if os.getenv(f"{prefix}LLM_MAX_TOKENS"):
-        config.llm_integration.max_tokens = int(
-            os.getenv(f"{prefix}LLM_MAX_TOKENS", str(config.llm_integration.max_tokens))
-        )
+        config.llm_integration.max_tokens = int(os.getenv(f"{prefix}LLM_MAX_TOKENS", str(config.llm_integration.max_tokens)))
 
     # Load system limits
     if os.getenv(f"{prefix}MAX_SYSTEMS"):
-        config.max_registered_systems = int(
-            os.getenv(f"{prefix}MAX_SYSTEMS", str(config.max_registered_systems))
-        )
+        config.max_registered_systems = int(os.getenv(f"{prefix}MAX_SYSTEMS", str(config.max_registered_systems)))
 
     if os.getenv(f"{prefix}MEMORY_LIMIT_MB"):
-        config.memory_limit_mb = int(
-            os.getenv(f"{prefix}MEMORY_LIMIT_MB", str(config.memory_limit_mb))
-        )
+        config.memory_limit_mb = int(os.getenv(f"{prefix}MEMORY_LIMIT_MB", str(config.memory_limit_mb)))
 
     return config
 
@@ -802,17 +740,13 @@ def create_production_legacy_config() -> LegacySystemWhispererConfig:
     config.anomaly_detection.enable_real_time_alerts = True
     config.anomaly_detection.cache_ttl_seconds = 7200  # 2 hours
 
-    config.predictive_analytics.min_historical_data_days = (
-        90  # More data for production
-    )
+    config.predictive_analytics.min_historical_data_days = 90  # More data for production
     config.predictive_analytics.prediction_confidence_threshold = 0.85
 
     config.knowledge_capture.peer_review_required = True
     config.knowledge_capture.audit_trail_enabled = True
 
-    config.decision_support.multi_llm_consensus = (
-        True  # Use multiple LLMs for critical decisions
-    )
+    config.decision_support.multi_llm_consensus = True  # Use multiple LLMs for critical decisions
     config.decision_support.detailed_timelines = True
 
     config.llm_integration.temperature = 0.05  # Very low temperature for consistency
@@ -841,9 +775,7 @@ def create_development_legacy_config() -> LegacySystemWhispererConfig:
     config.anomaly_detection.anomaly_threshold = 0.85
     config.anomaly_detection.cache_ttl_seconds = 300  # 5 minutes
 
-    config.predictive_analytics.min_historical_data_days = (
-        7  # Less data needed for testing
-    )
+    config.predictive_analytics.min_historical_data_days = 7  # Less data needed for testing
 
     config.knowledge_capture.peer_review_required = False
     config.knowledge_capture.session_timeout_minutes = 30  # Shorter sessions

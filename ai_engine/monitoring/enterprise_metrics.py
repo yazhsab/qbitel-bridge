@@ -25,9 +25,7 @@ except ModuleNotFoundError:  # pragma: no cover - fallback stub
 
     class _AiohttpMissing:
         def __getattr__(self, item):
-            raise ModuleNotFoundError(
-                "aiohttp is required for the metrics web server functionality"
-            )
+            raise ModuleNotFoundError("aiohttp is required for the metrics web server functionality")
 
     web = _AiohttpMissing()  # type: ignore
 
@@ -126,21 +124,15 @@ class MetricsCollector:
         """Register a custom metric collector function."""
         self._custom_metrics[name] = collector_func
 
-    def increment_counter(
-        self, name: str, value: float = 1.0, labels: Optional[Dict[str, str]] = None
-    ):
+    def increment_counter(self, name: str, value: float = 1.0, labels: Optional[Dict[str, str]] = None):
         """Increment a counter metric."""
         self._add_metric(name, value, MetricType.COUNTER, labels)
 
-    def set_gauge(
-        self, name: str, value: float, labels: Optional[Dict[str, str]] = None
-    ):
+    def set_gauge(self, name: str, value: float, labels: Optional[Dict[str, str]] = None):
         """Set a gauge metric."""
         self._add_metric(name, value, MetricType.GAUGE, labels)
 
-    def record_histogram(
-        self, name: str, value: float, labels: Optional[Dict[str, str]] = None
-    ):
+    def record_histogram(self, name: str, value: float, labels: Optional[Dict[str, str]] = None):
         """Record a histogram metric."""
         self._add_metric(name, value, MetricType.HISTOGRAM, labels)
 
@@ -183,25 +175,15 @@ class MetricsCollector:
             # Disk metrics
             disk_usage = psutil.disk_usage("/")
             self.set_gauge("system_disk_usage_bytes", disk_usage.used)
-            self.set_gauge(
-                "system_disk_usage_percent", (disk_usage.used / disk_usage.total) * 100
-            )
+            self.set_gauge("system_disk_usage_percent", (disk_usage.used / disk_usage.total) * 100)
 
             # Network metrics
             network_io = psutil.net_io_counters()
             if network_io:
-                self.increment_counter(
-                    "system_network_bytes_sent", network_io.bytes_sent
-                )
-                self.increment_counter(
-                    "system_network_bytes_recv", network_io.bytes_recv
-                )
-                self.increment_counter(
-                    "system_network_packets_sent", network_io.packets_sent
-                )
-                self.increment_counter(
-                    "system_network_packets_recv", network_io.packets_recv
-                )
+                self.increment_counter("system_network_bytes_sent", network_io.bytes_sent)
+                self.increment_counter("system_network_bytes_recv", network_io.bytes_recv)
+                self.increment_counter("system_network_packets_sent", network_io.packets_sent)
+                self.increment_counter("system_network_packets_recv", network_io.packets_recv)
 
             # Process metrics
             process = psutil.Process()
@@ -290,25 +272,18 @@ class PrometheusExporter:
             latest_points = {}
             for point in points:
                 labels_key = json.dumps(point.labels, sort_keys=True)
-                if (
-                    labels_key not in latest_points
-                    or point.timestamp > latest_points[labels_key].timestamp
-                ):
+                if labels_key not in latest_points or point.timestamp > latest_points[labels_key].timestamp:
                     latest_points[labels_key] = point
 
             # Format each unique metric
             for point in latest_points.values():
                 labels_str = ""
                 if point.labels:
-                    labels_pairs = [
-                        f'{key}="{value}"' for key, value in point.labels.items()
-                    ]
+                    labels_pairs = [f'{key}="{value}"' for key, value in point.labels.items()]
                     labels_str = "{" + ",".join(labels_pairs) + "}"
 
                 # Add metric type comment
-                if metric_name not in [
-                    line.split()[2] for line in lines if line.startswith("# TYPE")
-                ]:
+                if metric_name not in [line.split()[2] for line in lines if line.startswith("# TYPE")]:
                     prometheus_type = self._get_prometheus_type(point.metric_type)
                     lines.append(f"# TYPE {metric_name} {prometheus_type}")
 
@@ -508,9 +483,7 @@ class HealthChecker:
         else:
             status = "unhealthy"
 
-        self._health_status = HealthStatus(
-            status=status, timestamp=time.time(), components=components
-        )
+        self._health_status = HealthStatus(status=status, timestamp=time.time(), components=components)
 
     def get_health_status(self) -> HealthStatus:
         """Get current health status."""
@@ -537,9 +510,7 @@ class EnterpriseMetrics:
 
         self.alert_manager = AlertManager(max_alerts=config.get("max_alerts", 1000))
 
-        self.health_checker = HealthChecker(
-            check_interval=config.get("health_check_interval", 60.0)
-        )
+        self.health_checker = HealthChecker(check_interval=config.get("health_check_interval", 60.0))
 
         self._running = False
         self._monitor_task = None
@@ -676,9 +647,7 @@ class EnterpriseMetrics:
             except Exception as e:
                 logger.error(f"Error in monitoring loop: {e}")
 
-    def record_protocol_discovery_metric(
-        self, metric_name: str, value: float, labels: Optional[Dict[str, str]] = None
-    ):
+    def record_protocol_discovery_metric(self, metric_name: str, value: float, labels: Optional[Dict[str, str]] = None):
         """Record protocol discovery specific metrics."""
         full_name = f"protocol_discovery_{metric_name}"
         self.metrics_collector.set_gauge(full_name, value, labels)
@@ -717,12 +686,8 @@ class EnterpriseMetrics:
             },
             "alerts": {
                 "active_count": len(active_alerts),
-                "critical_count": len(
-                    [a for a in active_alerts if a.severity == AlertSeverity.CRITICAL]
-                ),
-                "warning_count": len(
-                    [a for a in active_alerts if a.severity == AlertSeverity.WARNING]
-                ),
+                "critical_count": len([a for a in active_alerts if a.severity == AlertSeverity.CRITICAL]),
+                "warning_count": len([a for a in active_alerts if a.severity == AlertSeverity.WARNING]),
             },
         }
 
@@ -756,9 +721,7 @@ def record_metric(name: str, value: float, labels: Optional[Dict[str, str]] = No
     metrics.record_protocol_discovery_metric(name, value, labels)
 
 
-def increment_counter(
-    name: str, value: float = 1.0, labels: Optional[Dict[str, str]] = None
-):
+def increment_counter(name: str, value: float = 1.0, labels: Optional[Dict[str, str]] = None):
     """Increment a protocol discovery counter."""
     metrics = get_enterprise_metrics()
     metrics.increment_protocol_discovery_counter(name, value, labels)

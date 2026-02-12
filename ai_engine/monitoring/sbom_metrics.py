@@ -205,14 +205,10 @@ class SBOMMetricsCollector:
             success: Whether generation succeeded
             error_type: Type of error if failed
         """
-        SBOM_GENERATION_TIME.labels(
-            component_name=component_name, format=format
-        ).observe(duration)
+        SBOM_GENERATION_TIME.labels(component_name=component_name, format=format).observe(duration)
 
         if success:
-            SBOM_GENERATION_SUCCESS.labels(
-                component_name=component_name, format=format
-            ).inc()
+            SBOM_GENERATION_SUCCESS.labels(component_name=component_name, format=format).inc()
         else:
             SBOM_GENERATION_ERRORS.labels(
                 component_name=component_name,
@@ -220,9 +216,7 @@ class SBOMMetricsCollector:
                 error_type=error_type or "unknown",
             ).inc()
 
-    def update_vulnerability_metrics(
-        self, version: str, component_name: str, vulnerabilities: Dict[str, int]
-    ):
+    def update_vulnerability_metrics(self, version: str, component_name: str, vulnerabilities: Dict[str, int]):
         """
         Update vulnerability metrics from scan results.
 
@@ -232,26 +226,20 @@ class SBOMMetricsCollector:
             vulnerabilities: Dict with severity counts
         """
         for severity, count in vulnerabilities.items():
-            SBOM_VULNERABILITIES.labels(
-                version=version, component_name=component_name, severity=severity
-            ).set(count)
+            SBOM_VULNERABILITIES.labels(version=version, component_name=component_name, severity=severity).set(count)
 
         # Update specific severity gauges
-        SBOM_CRITICAL_VULNERABILITIES.labels(
-            version=version, component_name=component_name
-        ).set(vulnerabilities.get("critical", 0))
+        SBOM_CRITICAL_VULNERABILITIES.labels(version=version, component_name=component_name).set(
+            vulnerabilities.get("critical", 0)
+        )
 
-        SBOM_HIGH_VULNERABILITIES.labels(
-            version=version, component_name=component_name
-        ).set(vulnerabilities.get("high", 0))
+        SBOM_HIGH_VULNERABILITIES.labels(version=version, component_name=component_name).set(vulnerabilities.get("high", 0))
 
-        SBOM_MEDIUM_VULNERABILITIES.labels(
-            version=version, component_name=component_name
-        ).set(vulnerabilities.get("medium", 0))
+        SBOM_MEDIUM_VULNERABILITIES.labels(version=version, component_name=component_name).set(
+            vulnerabilities.get("medium", 0)
+        )
 
-        SBOM_LOW_VULNERABILITIES.labels(
-            version=version, component_name=component_name
-        ).set(vulnerabilities.get("low", 0))
+        SBOM_LOW_VULNERABILITIES.labels(version=version, component_name=component_name).set(vulnerabilities.get("low", 0))
 
     def record_sbom_download(self, version: str, component_name: str, format: str):
         """
@@ -262,13 +250,9 @@ class SBOMMetricsCollector:
             component_name: Name of the component
             format: SBOM format
         """
-        SBOM_DOWNLOADS.labels(
-            version=version, component_name=component_name, format=format
-        ).inc()
+        SBOM_DOWNLOADS.labels(version=version, component_name=component_name, format=format).inc()
 
-    def record_api_request(
-        self, endpoint: str, method: str, status_code: int, duration: float
-    ):
+    def record_api_request(self, endpoint: str, method: str, status_code: int, duration: float):
         """
         Record SBOM API request metrics.
 
@@ -278,13 +262,9 @@ class SBOMMetricsCollector:
             status_code: Response status code
             duration: Request duration in seconds
         """
-        SBOM_API_REQUESTS.labels(
-            endpoint=endpoint, method=method, status_code=str(status_code)
-        ).inc()
+        SBOM_API_REQUESTS.labels(endpoint=endpoint, method=method, status_code=str(status_code)).inc()
 
-        SBOM_API_REQUEST_DURATION.labels(endpoint=endpoint, method=method).observe(
-            duration
-        )
+        SBOM_API_REQUEST_DURATION.labels(endpoint=endpoint, method=method).observe(duration)
 
 
 # Global instance

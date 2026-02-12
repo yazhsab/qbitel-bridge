@@ -30,37 +30,24 @@ logger = logging.getLogger(__name__)
 
 
 # Prometheus metrics
-V2X_BATCH_VERIFICATIONS = Counter(
-    'v2x_batch_verifications_total',
-    'Total batch verifications',
-    ['result']
-)
+V2X_BATCH_VERIFICATIONS = Counter("v2x_batch_verifications_total", "Total batch verifications", ["result"])
 
 V2X_BATCH_LATENCY = Histogram(
-    'v2x_batch_latency_seconds',
-    'Batch verification latency',
-    buckets=[0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1]
+    "v2x_batch_latency_seconds", "Batch verification latency", buckets=[0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1]
 )
 
-V2X_MESSAGES_PER_SECOND = Gauge(
-    'v2x_messages_per_second',
-    'Current message verification rate'
-)
+V2X_MESSAGES_PER_SECOND = Gauge("v2x_messages_per_second", "Current message verification rate")
 
-V2X_BATCH_SIZE = Histogram(
-    'v2x_batch_size',
-    'Batch sizes processed',
-    buckets=[1, 5, 10, 25, 50, 100, 250, 500, 1000]
-)
+V2X_BATCH_SIZE = Histogram("v2x_batch_size", "Batch sizes processed", buckets=[1, 5, 10, 25, 50, 100, 250, 500, 1000])
 
 
 class VerificationPriority(Enum):
     """Message verification priority levels."""
 
-    CRITICAL = auto()    # Collision warnings, emergency braking
-    HIGH = auto()        # Traffic signals, intersection alerts
-    NORMAL = auto()      # Regular BSM messages
-    LOW = auto()         # Non-safety messages
+    CRITICAL = auto()  # Collision warnings, emergency braking
+    HIGH = auto()  # Traffic signals, intersection alerts
+    NORMAL = auto()  # Regular BSM messages
+    LOW = auto()  # Non-safety messages
 
 
 @dataclass
@@ -141,9 +128,7 @@ class V2XBatchVerifier:
         self.signature_algorithm = signature_algorithm
 
         # Task queue organized by priority
-        self._queues: Dict[VerificationPriority, List[VerificationTask]] = {
-            priority: [] for priority in VerificationPriority
-        }
+        self._queues: Dict[VerificationPriority, List[VerificationTask]] = {priority: [] for priority in VerificationPriority}
 
         # Thread pool for parallel verification
         self._executor = ThreadPoolExecutor(max_workers=max_workers)
@@ -165,15 +150,12 @@ class V2XBatchVerifier:
         from ai_engine.crypto.falcon import FalconEngine, FalconSecurityLevel
 
         if "falcon" in self.signature_algorithm.lower():
-            level = (
-                FalconSecurityLevel.FALCON_512
-                if "512" in self.signature_algorithm
-                else FalconSecurityLevel.FALCON_1024
-            )
+            level = FalconSecurityLevel.FALCON_512 if "512" in self.signature_algorithm else FalconSecurityLevel.FALCON_1024
             self._engine = FalconEngine(level)
         else:
             # Fall back to Dilithium
             from ai_engine.crypto.dilithium import DilithiumEngine
+
             self._engine = DilithiumEngine()
 
     def add_task(self, task: VerificationTask) -> None:
@@ -270,9 +252,8 @@ class V2XBatchVerifier:
         self._metrics.total_expired += expired_count
         self._metrics.batch_count += 1
         self._metrics.avg_latency_ms = (
-            (self._metrics.avg_latency_ms * (self._metrics.batch_count - 1) + elapsed_ms)
-            / self._metrics.batch_count
-        )
+            self._metrics.avg_latency_ms * (self._metrics.batch_count - 1) + elapsed_ms
+        ) / self._metrics.batch_count
         self._metrics.max_latency_ms = max(self._metrics.max_latency_ms, elapsed_ms)
         self._metrics.throughput_per_second = throughput
 
@@ -369,8 +350,8 @@ class V2XBatchVerifier:
         if not queue:
             return
 
-        tasks = queue[:self.batch_size]
-        self._queues[priority] = queue[self.batch_size:]
+        tasks = queue[: self.batch_size]
+        self._queues[priority] = queue[self.batch_size :]
 
         await self._verify_batch_parallel(tasks)
 
@@ -380,10 +361,7 @@ class V2XBatchVerifier:
 
     def get_queue_lengths(self) -> Dict[str, int]:
         """Get current queue lengths by priority."""
-        return {
-            priority.name: len(queue)
-            for priority, queue in self._queues.items()
-        }
+        return {priority.name: len(queue) for priority, queue in self._queues.items()}
 
     async def start_continuous_processing(self) -> None:
         """Start continuous batch processing loop."""

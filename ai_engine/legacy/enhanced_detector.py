@@ -143,29 +143,19 @@ class LegacySystemLLMAnalyzer:
 
         try:
             # Prepare context information
-            system_type = (
-                system_context.system_type.value if system_context else "unknown"
-            )
+            system_type = system_context.system_type.value if system_context else "unknown"
             system_name = system_context.system_name if system_context else "unknown"
-            business_function = (
-                system_context.business_function if system_context else "unknown"
-            )
-            criticality = (
-                system_context.criticality.value if system_context else "medium"
-            )
+            business_function = system_context.business_function if system_context else "unknown"
+            criticality = system_context.criticality.value if system_context else "medium"
 
             # Format current metrics
             current_metrics = self._format_metrics_for_llm(current_data)
 
             # Format historical patterns
-            historical_patterns_text = self._format_patterns_for_llm(
-                historical_patterns
-            )
+            historical_patterns_text = self._format_patterns_for_llm(historical_patterns)
 
             # Format expert knowledge
-            expert_knowledge_text = self._format_expert_knowledge_for_llm(
-                expert_knowledge
-            )
+            expert_knowledge_text = self._format_expert_knowledge_for_llm(expert_knowledge)
 
             # Create LLM request
             prompt = self.analysis_prompts["pattern_analysis"].format(
@@ -242,9 +232,7 @@ class LegacySystemLLMAnalyzer:
             response = await self.llm_service.process_request(llm_request)
 
             # Parse failure prediction response
-            prediction_result = self._parse_failure_prediction_response(
-                response.content
-            )
+            prediction_result = self._parse_failure_prediction_response(response.content)
 
             return {
                 "failure_prediction": prediction_result,
@@ -273,16 +261,14 @@ class LegacySystemLLMAnalyzer:
 
         formatted = []
         for pattern in patterns[:5]:  # Limit to top 5 patterns
-            formatted.append(
-                f"""
+            formatted.append(f"""
 Pattern: {pattern.description}
 Type: {pattern.pattern_type}
 Frequency: {pattern.frequency}
 Confidence: {pattern.confidence_score:.2f}
 Last Seen: {pattern.last_seen}
 Expert Notes: {pattern.expert_notes or 'None'}
-"""
-            )
+""")
         return "\n".join(formatted)
 
     def _format_expert_knowledge_for_llm(self, knowledge: Dict[str, Any]) -> str:
@@ -324,14 +310,12 @@ Operating System: {context.operating_system or 'Unknown'}
 
         formatted = []
         for precedent in precedents[:3]:  # Limit to top 3 precedents
-            formatted.append(
-                f"""
+            formatted.append(f"""
 Case: {precedent.get('description', 'Unknown case')}
 Outcome: {precedent.get('outcome', 'Unknown')}
 Resolution: {precedent.get('resolution', 'Unknown')}
 Lessons Learned: {precedent.get('lessons_learned', 'None')}
-"""
-            )
+""")
         return "\n".join(formatted)
 
     def _parse_pattern_analysis_response(self, content: str) -> Dict[str, Any]:
@@ -339,14 +323,10 @@ Lessons Learned: {precedent.get('lessons_learned', 'None')}
         # This is a simplified parser - in production, you'd want more sophisticated parsing
         return {
             "raw_analysis": content,
-            "pattern_deviations": self._extract_list_from_response(
-                content, "pattern deviations"
-            ),
+            "pattern_deviations": self._extract_list_from_response(content, "pattern deviations"),
             "failure_modes": self._extract_list_from_response(content, "failure modes"),
             "risk_assessment": self._extract_risk_level(content),
-            "recommended_actions": self._extract_list_from_response(
-                content, "recommended actions"
-            ),
+            "recommended_actions": self._extract_list_from_response(content, "recommended actions"),
             "confidence_level": self._extract_confidence_level(content),
         }
 
@@ -357,16 +337,10 @@ Lessons Learned: {precedent.get('lessons_learned', 'None')}
             "failure_type": self._extract_failure_type(content),
             "probability": self._extract_probability(content),
             "time_to_failure": self._extract_time_to_failure(content),
-            "contributing_factors": self._extract_list_from_response(
-                content, "contributing factors"
-            ),
+            "contributing_factors": self._extract_list_from_response(content, "contributing factors"),
             "business_impact": self._extract_business_impact(content),
-            "preventive_actions": self._extract_list_from_response(
-                content, "preventive actions"
-            ),
-            "monitoring_parameters": self._extract_list_from_response(
-                content, "monitoring parameters"
-            ),
+            "preventive_actions": self._extract_list_from_response(content, "preventive actions"),
+            "monitoring_parameters": self._extract_list_from_response(content, "monitoring parameters"),
         }
 
     def _extract_list_from_response(self, content: str, section_name: str) -> List[str]:
@@ -377,15 +351,11 @@ Lessons Learned: {precedent.get('lessons_learned', 'None')}
         in_section = False
 
         for line in lines:
-            if section_name.lower() in line and any(
-                char in line for char in [":", "-", "1.", "•"]
-            ):
+            if section_name.lower() in line and any(char in line for char in [":", "-", "1.", "•"]):
                 in_section = True
                 continue
             elif in_section and line.strip():
-                if line.strip().startswith(("-", "•", "*")) or any(
-                    line.strip().startswith(f"{i}.") for i in range(1, 10)
-                ):
+                if line.strip().startswith(("-", "•", "*")) or any(line.strip().startswith(f"{i}.") for i in range(1, 10)):
                     items.append(line.strip().lstrip("-•*0123456789. "))
                 elif not line.strip().startswith((" ", "\t")):
                     break
@@ -483,9 +453,7 @@ Lessons Learned: {precedent.get('lessons_learned', 'None')}
     def _extract_business_impact(self, content: str) -> str:
         """Extract business impact from response."""
         content_lower = content.lower()
-        if any(
-            word in content_lower for word in ["critical", "severe", "catastrophic"]
-        ):
+        if any(word in content_lower for word in ["critical", "severe", "catastrophic"]):
             return "critical"
         elif any(word in content_lower for word in ["high", "significant", "major"]):
             return "high"
@@ -514,12 +482,8 @@ class EnhancedLegacySystemDetector(VAEAnomalyDetector):
         self.expert_knowledge_base: Dict[str, Any] = {}
 
         # Enhanced thresholds for legacy systems
-        self.legacy_anomaly_threshold = getattr(
-            config, "legacy_anomaly_threshold", 0.85
-        )
-        self.pattern_deviation_threshold = getattr(
-            config, "pattern_deviation_threshold", 0.7
-        )
+        self.legacy_anomaly_threshold = getattr(config, "legacy_anomaly_threshold", 0.85)
+        self.pattern_deviation_threshold = getattr(config, "pattern_deviation_threshold", 0.7)
 
         # Metrics tracking
         self.metrics: Optional[AIEngineMetrics] = None
@@ -533,9 +497,7 @@ class EnhancedLegacySystemDetector(VAEAnomalyDetector):
 
         self.logger.info("EnhancedLegacySystemDetector initialized")
 
-    async def initialize_enhanced(
-        self, llm_service: UnifiedLLMService, metrics: Optional[AIEngineMetrics] = None
-    ) -> None:
+    async def initialize_enhanced(self, llm_service: UnifiedLLMService, metrics: Optional[AIEngineMetrics] = None) -> None:
         """Initialize enhanced components."""
         self.llm_analyzer = LegacySystemLLMAnalyzer(llm_service)
         self.metrics = metrics
@@ -579,9 +541,7 @@ class EnhancedLegacySystemDetector(VAEAnomalyDetector):
             # Get historical patterns for this system
             historical_patterns = []
             if system_context:
-                historical_patterns = self.historical_patterns.get_patterns(
-                    system_context.system_id
-                )
+                historical_patterns = self.historical_patterns.get_patterns(system_context.system_id)
 
             # LLM-enhanced analysis
             llm_analysis = {}
@@ -594,31 +554,25 @@ class EnhancedLegacySystemDetector(VAEAnomalyDetector):
                 )
 
             # Pattern deviation analysis
-            pattern_deviations = self._analyze_pattern_deviations(
-                system_data, historical_patterns
-            )
+            pattern_deviations = self._analyze_pattern_deviations(system_data, historical_patterns)
 
             # Get historical precedents
-            historical_precedents = self._get_historical_precedents(
-                anomaly_result, pattern_deviations, system_context
-            )
+            historical_precedents = self._get_historical_precedents(anomaly_result, pattern_deviations, system_context)
 
             # LLM failure prediction
             failure_prediction = {}
             if self.llm_analyzer:
-                failure_prediction = (
-                    await self.llm_analyzer.predict_failure_with_context(
-                        anomaly_score=anomaly_result.anomaly_score,
-                        reconstruction_error=anomaly_result.reconstruction_error,
-                        pattern_deviations=pattern_deviations,
-                        system_context=system_context
-                        or LegacySystemContext(
-                            system_id="unknown",
-                            system_name="Unknown System",
-                            system_type="unknown",
-                        ),
-                        historical_precedents=historical_precedents,
-                    )
+                failure_prediction = await self.llm_analyzer.predict_failure_with_context(
+                    anomaly_score=anomaly_result.anomaly_score,
+                    reconstruction_error=anomaly_result.reconstruction_error,
+                    pattern_deviations=pattern_deviations,
+                    system_context=system_context
+                    or LegacySystemContext(
+                        system_id="unknown",
+                        system_name="Unknown System",
+                        system_type="unknown",
+                    ),
+                    historical_precedents=historical_precedents,
                 )
 
             # Synthesize final prediction
@@ -645,9 +599,7 @@ class EnhancedLegacySystemDetector(VAEAnomalyDetector):
             self.logger.error(f"Enhanced failure prediction failed: {e}")
             raise AnomalyDetectionException(f"Enhanced prediction error: {e}")
 
-    def _extract_features_from_system_data(
-        self, system_data: Dict[str, Any]
-    ) -> np.ndarray:
+    def _extract_features_from_system_data(self, system_data: Dict[str, Any]) -> np.ndarray:
         """Extract features from system data for VAE analysis."""
         # Extract numeric features from system data
         features = []
@@ -680,21 +632,14 @@ class EnhancedLegacySystemDetector(VAEAnomalyDetector):
         for pattern in historical_patterns:
             if pattern.pattern_type == "normal":
                 # Check for deviations from normal patterns
-                deviation_score = self._calculate_pattern_deviation_score(
-                    current_data, pattern
-                )
+                deviation_score = self._calculate_pattern_deviation_score(current_data, pattern)
 
                 if deviation_score > self.pattern_deviation_threshold:
-                    deviations.append(
-                        f"Deviation from {pattern.description} "
-                        f"(score: {deviation_score:.2f})"
-                    )
+                    deviations.append(f"Deviation from {pattern.description} " f"(score: {deviation_score:.2f})")
 
         return deviations
 
-    def _calculate_pattern_deviation_score(
-        self, current_data: Dict[str, Any], pattern: SystemBehaviorPattern
-    ) -> float:
+    def _calculate_pattern_deviation_score(self, current_data: Dict[str, Any], pattern: SystemBehaviorPattern) -> float:
         """Calculate deviation score from a specific pattern."""
         # Simplified calculation - in production, use more sophisticated methods
         score = 0.0
@@ -764,29 +709,18 @@ class EnhancedLegacySystemDetector(VAEAnomalyDetector):
         failure_insights = failure_prediction.get("failure_prediction", {})
 
         # Determine failure type
-        failure_type_str = failure_insights.get(
-            "failure_type", "performance_degradation"
-        )
+        failure_type_str = failure_insights.get("failure_type", "performance_degradation")
         try:
             failure_type = FailureType(failure_type_str)
         except ValueError:
             failure_type = FailureType.PERFORMANCE_DEGRADATION
 
         # Determine severity based on anomaly score and LLM analysis
-        if (
-            anomaly_result.anomaly_score > 0.9
-            or llm_insights.get("risk_assessment") == "critical"
-        ):
+        if anomaly_result.anomaly_score > 0.9 or llm_insights.get("risk_assessment") == "critical":
             severity = SeverityLevel.CRITICAL
-        elif (
-            anomaly_result.anomaly_score > 0.8
-            or llm_insights.get("risk_assessment") == "high"
-        ):
+        elif anomaly_result.anomaly_score > 0.8 or llm_insights.get("risk_assessment") == "high":
             severity = SeverityLevel.HIGH
-        elif (
-            anomaly_result.anomaly_score > 0.6
-            or llm_insights.get("risk_assessment") == "medium"
-        ):
+        elif anomaly_result.anomaly_score > 0.6 or llm_insights.get("risk_assessment") == "medium":
             severity = SeverityLevel.MEDIUM
         else:
             severity = SeverityLevel.LOW
@@ -831,13 +765,9 @@ class EnhancedLegacySystemDetector(VAEAnomalyDetector):
             pattern_deviations=pattern_deviations,
             expert_analysis=llm_insights.get("raw_analysis", ""),
             immediate_actions=llm_insights.get("recommended_actions", []),
-            monitoring_recommendations=failure_insights.get(
-                "monitoring_parameters", []
-            ),
+            monitoring_recommendations=failure_insights.get("monitoring_parameters", []),
             preventive_measures=failure_insights.get("preventive_actions", []),
-            business_impact_score=self._calculate_business_impact_score(
-                severity, system_context
-            ),
+            business_impact_score=self._calculate_business_impact_score(severity, system_context),
             metadata={
                 "processing_time_seconds": processing_time,
                 "ml_confidence": anomaly_result.confidence,
@@ -883,15 +813,11 @@ class EnhancedLegacySystemDetector(VAEAnomalyDetector):
 
         return min(base_score, 10.0)  # Cap at 10.0
 
-    def _get_cached_prediction(
-        self, cache_key: str
-    ) -> Optional[SystemFailurePrediction]:
+    def _get_cached_prediction(self, cache_key: str) -> Optional[SystemFailurePrediction]:
         """Get cached prediction if still valid."""
         if cache_key in self.prediction_cache:
             prediction = self.prediction_cache[cache_key]
-            age_hours = (
-                datetime.now() - prediction.prediction_timestamp
-            ).total_seconds() / 3600
+            age_hours = (datetime.now() - prediction.prediction_timestamp).total_seconds() / 3600
 
             if age_hours < self.cache_ttl_hours:
                 return prediction
@@ -900,9 +826,7 @@ class EnhancedLegacySystemDetector(VAEAnomalyDetector):
 
         return None
 
-    def _cache_prediction(
-        self, cache_key: str, prediction: SystemFailurePrediction
-    ) -> None:
+    def _cache_prediction(self, cache_key: str, prediction: SystemFailurePrediction) -> None:
         """Cache prediction result."""
         self.prediction_cache[cache_key] = prediction
 
@@ -911,9 +835,7 @@ class EnhancedLegacySystemDetector(VAEAnomalyDetector):
         keys_to_remove = []
 
         for key, cached_prediction in self.prediction_cache.items():
-            age_hours = (
-                current_time - cached_prediction.prediction_timestamp
-            ).total_seconds() / 3600
+            age_hours = (current_time - cached_prediction.prediction_timestamp).total_seconds() / 3600
             if age_hours > self.cache_ttl_hours:
                 keys_to_remove.append(key)
 
@@ -972,8 +894,7 @@ class EnhancedLegacySystemDetector(VAEAnomalyDetector):
             pred
             for pred in self.prediction_cache.values()
             if pred.system_id == system_id
-            and (datetime.now() - pred.prediction_timestamp).total_seconds()
-            < 3600 * 24  # Last 24 hours
+            and (datetime.now() - pred.prediction_timestamp).total_seconds() < 3600 * 24  # Last 24 hours
         ]
 
         return {
@@ -981,14 +902,8 @@ class EnhancedLegacySystemDetector(VAEAnomalyDetector):
             "context": context,
             "pattern_count": len(patterns),
             "recent_predictions": len(recent_predictions),
-            "highest_risk_prediction": (
-                max(recent_predictions, key=lambda p: p.probability)
-                if recent_predictions
-                else None
-            ),
-            "health_score": self._calculate_health_score(
-                context, patterns, recent_predictions
-            ),
+            "highest_risk_prediction": (max(recent_predictions, key=lambda p: p.probability) if recent_predictions else None),
+            "health_score": self._calculate_health_score(context, patterns, recent_predictions),
         }
 
     def _calculate_health_score(

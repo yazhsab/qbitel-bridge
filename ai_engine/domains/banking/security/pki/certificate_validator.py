@@ -47,31 +47,37 @@ class ValidationResult:
 
     def add_error(self, code: str, message: str, field: Optional[str] = None) -> None:
         """Add an error."""
-        self.issues.append(ValidationIssue(
-            code=code,
-            message=message,
-            severity=ValidationSeverity.ERROR,
-            field=field,
-        ))
+        self.issues.append(
+            ValidationIssue(
+                code=code,
+                message=message,
+                severity=ValidationSeverity.ERROR,
+                field=field,
+            )
+        )
         self.is_valid = False
 
     def add_warning(self, code: str, message: str, field: Optional[str] = None) -> None:
         """Add a warning."""
-        self.issues.append(ValidationIssue(
-            code=code,
-            message=message,
-            severity=ValidationSeverity.WARNING,
-            field=field,
-        ))
+        self.issues.append(
+            ValidationIssue(
+                code=code,
+                message=message,
+                severity=ValidationSeverity.WARNING,
+                field=field,
+            )
+        )
 
     def add_info(self, code: str, message: str, field: Optional[str] = None) -> None:
         """Add an info message."""
-        self.issues.append(ValidationIssue(
-            code=code,
-            message=message,
-            severity=ValidationSeverity.INFO,
-            field=field,
-        ))
+        self.issues.append(
+            ValidationIssue(
+                code=code,
+                message=message,
+                severity=ValidationSeverity.INFO,
+                field=field,
+            )
+        )
 
     @property
     def errors(self) -> List[ValidationIssue]:
@@ -89,14 +95,8 @@ class ValidationResult:
             "is_valid": self.is_valid,
             "checked_at": self.checked_at.isoformat(),
             "certificate_id": self.certificate_id,
-            "errors": [
-                {"code": i.code, "message": i.message, "field": i.field}
-                for i in self.errors
-            ],
-            "warnings": [
-                {"code": i.code, "message": i.message, "field": i.field}
-                for i in self.warnings
-            ],
+            "errors": [{"code": i.code, "message": i.message, "field": i.field} for i in self.errors],
+            "warnings": [{"code": i.code, "message": i.message, "field": i.field} for i in self.warnings],
         }
 
 

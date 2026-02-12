@@ -293,10 +293,7 @@ class BaseAgent(ABC):
 
                 # Get task with timeout
                 try:
-                    task = await asyncio.wait_for(
-                        self.task_queue.get(),
-                        timeout=1.0
-                    )
+                    task = await asyncio.wait_for(self.task_queue.get(), timeout=1.0)
                 except asyncio.TimeoutError:
                     continue
 
@@ -325,10 +322,7 @@ class BaseAgent(ABC):
 
             # Execute with timeout
             timeout = task.timeout or self.config.task_timeout_seconds
-            result = await asyncio.wait_for(
-                self.execute(task),
-                timeout=timeout
-            )
+            result = await asyncio.wait_for(self.execute(task), timeout=timeout)
 
             execution_time = time.time() - start_time
 
@@ -337,27 +331,18 @@ class BaseAgent(ABC):
                 success=True,
                 result=result,
                 execution_time=execution_time,
-                metadata={"correlation_id": task.correlation_id}
+                metadata={"correlation_id": task.correlation_id},
             )
 
             # Update statistics
             self.stats["tasks_completed"] += 1
             self.stats["total_processing_time"] += execution_time
-            self.stats["average_processing_time"] = (
-                self.stats["total_processing_time"] / self.stats["tasks_completed"]
-            )
+            self.stats["average_processing_time"] = self.stats["total_processing_time"] / self.stats["tasks_completed"]
             self.stats["last_activity"] = datetime.utcnow().isoformat()
 
             # Update metrics
-            AGENT_TASKS_COUNTER.labels(
-                agent_type=self.agent_type,
-                agent_id=self.agent_id[:8],
-                status="success"
-            ).inc()
-            AGENT_TASK_DURATION.labels(
-                agent_type=self.agent_type,
-                task_type=task.task_type
-            ).observe(execution_time)
+            AGENT_TASKS_COUNTER.labels(agent_type=self.agent_type, agent_id=self.agent_id[:8], status="success").inc()
+            AGENT_TASK_DURATION.labels(agent_type=self.agent_type, task_type=task.task_type).observe(execution_time)
 
             self.logger.debug(f"Task completed: {task.task_id} in {execution_time:.2f}s")
 
@@ -381,32 +366,20 @@ class BaseAgent(ABC):
                 success=False,
                 result=None,
                 error=f"Task timeout after {execution_time:.2f}s",
-                execution_time=execution_time
+                execution_time=execution_time,
             )
             self.stats["tasks_failed"] += 1
-            AGENT_TASKS_COUNTER.labels(
-                agent_type=self.agent_type,
-                agent_id=self.agent_id[:8],
-                status="timeout"
-            ).inc()
+            AGENT_TASKS_COUNTER.labels(agent_type=self.agent_type, agent_id=self.agent_id[:8], status="timeout").inc()
             self.logger.warning(f"Task timeout: {task.task_id}")
             return task_result
 
         except Exception as e:
             execution_time = time.time() - start_time
             task_result = TaskResult(
-                task_id=task.task_id,
-                success=False,
-                result=None,
-                error=str(e),
-                execution_time=execution_time
+                task_id=task.task_id, success=False, result=None, error=str(e), execution_time=execution_time
             )
             self.stats["tasks_failed"] += 1
-            AGENT_TASKS_COUNTER.labels(
-                agent_type=self.agent_type,
-                agent_id=self.agent_id[:8],
-                status="error"
-            ).inc()
+            AGENT_TASKS_COUNTER.labels(agent_type=self.agent_type, agent_id=self.agent_id[:8], status="error").inc()
             self.logger.error(f"Task failed: {task.task_id} - {e}")
             return task_result
 
@@ -455,11 +428,7 @@ class BaseAgent(ABC):
             "timestamp": datetime.utcnow().isoformat(),
         }
 
-        await self.memory.store_episodic(
-            agent_id=self.agent_id,
-            event_type="task_execution",
-            content=memory_entry
-        )
+        await self.memory.store_episodic(agent_id=self.agent_id, event_type="task_execution", content=memory_entry)
 
     def _summarize_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Create a summary of task payload for memory storage."""

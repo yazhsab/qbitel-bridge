@@ -14,18 +14,13 @@ class TestDilithiumPerformance:
     """Performance benchmarks for Dilithium post-quantum signatures."""
 
     ITERATIONS = 100
-    DILITHIUM_VARIANTS = ['Dilithium2', 'Dilithium3', 'Dilithium5']
+    DILITHIUM_VARIANTS = ["Dilithium2", "Dilithium3", "Dilithium5"]
     TEST_MESSAGE = b"Performance test message for Dilithium signature scheme"
 
     @pytest.fixture
     def performance_metrics(self):
         """Initialize metrics collection."""
-        return {
-            'key_generation': [],
-            'signing': [],
-            'verification': [],
-            'total_time': []
-        }
+        return {"key_generation": [], "signing": [], "verification": [], "total_time": []}
 
     def measure_key_generation(self, algorithm: str, iterations: int) -> List[float]:
         """Measure key generation performance."""
@@ -48,8 +43,9 @@ class TestDilithiumPerformance:
             timings.append((end - start) * 1000)
         return timings
 
-    def measure_verification(self, sig: Signature, message: bytes, signature: bytes,
-                           public_key: bytes, iterations: int) -> List[float]:
+    def measure_verification(
+        self, sig: Signature, message: bytes, signature: bytes, public_key: bytes, iterations: int
+    ) -> List[float]:
         """Measure verification performance."""
         timings = []
         for _ in range(iterations):
@@ -79,7 +75,7 @@ class TestDilithiumPerformance:
         print(f"  Max: {max_time:.3f} ms")
 
         # Performance assertions (adjust thresholds based on security level)
-        max_acceptable = 10.0 if algorithm == 'Dilithium5' else 7.0
+        max_acceptable = 10.0 if algorithm == "Dilithium5" else 7.0
         assert avg_time < max_acceptable, f"{algorithm} key generation too slow: {avg_time:.3f} ms"
         assert std_dev < 3.0, f"{algorithm} key generation inconsistent: {std_dev:.3f} ms"
 
@@ -101,7 +97,7 @@ class TestDilithiumPerformance:
         print(f"  Std Dev: {std_dev:.3f} ms")
 
         # Signing should be fast
-        max_acceptable = 5.0 if algorithm == 'Dilithium5' else 3.0
+        max_acceptable = 5.0 if algorithm == "Dilithium5" else 3.0
         assert avg_time < max_acceptable, f"{algorithm} signing too slow: {avg_time:.3f} ms"
         assert std_dev < 2.0, f"{algorithm} signing inconsistent: {std_dev:.3f} ms"
 
@@ -112,8 +108,7 @@ class TestDilithiumPerformance:
         public_key = sig.generate_keypair()
         signature = sig.sign(self.TEST_MESSAGE)
 
-        timings = self.measure_verification(sig, self.TEST_MESSAGE, signature,
-                                           public_key, self.ITERATIONS)
+        timings = self.measure_verification(sig, self.TEST_MESSAGE, signature, public_key, self.ITERATIONS)
 
         avg_time = statistics.mean(timings)
         median_time = statistics.median(timings)
@@ -125,7 +120,7 @@ class TestDilithiumPerformance:
         print(f"  Std Dev: {std_dev:.3f} ms")
 
         # Verification should be very fast
-        max_acceptable = 3.0 if algorithm == 'Dilithium5' else 2.0
+        max_acceptable = 3.0 if algorithm == "Dilithium5" else 2.0
         assert avg_time < max_acceptable, f"{algorithm} verification too slow: {avg_time:.3f} ms"
         assert std_dev < 1.5, f"{algorithm} verification inconsistent: {std_dev:.3f} ms"
 
@@ -161,12 +156,12 @@ class TestDilithiumPerformance:
         print(f"  95th Percentile: {percentile_95:.3f} ms")
 
         # Performance assertions for complete cycle
-        max_acceptable = 15.0 if algorithm == 'Dilithium5' else 12.0
+        max_acceptable = 15.0 if algorithm == "Dilithium5" else 12.0
         assert avg_time < max_acceptable, f"{algorithm} full cycle too slow: {avg_time:.3f} ms"
 
     def test_dilithium_signing_throughput(self):
         """Test Dilithium signing throughput."""
-        algorithm = 'Dilithium3'  # Standard recommended variant
+        algorithm = "Dilithium3"  # Standard recommended variant
         sig = Signature(algorithm)
         public_key = sig.generate_keypair()
 
@@ -185,7 +180,7 @@ class TestDilithiumPerformance:
 
     def test_dilithium_verification_throughput(self):
         """Test Dilithium verification throughput."""
-        algorithm = 'Dilithium3'
+        algorithm = "Dilithium3"
         sig = Signature(algorithm)
         public_key = sig.generate_keypair()
         signature = sig.sign(self.TEST_MESSAGE)
@@ -206,7 +201,7 @@ class TestDilithiumPerformance:
     @pytest.mark.parametrize("message_size", [100, 1024, 10240, 102400])
     def test_dilithium_variable_message_size_performance(self, message_size: int):
         """Test Dilithium performance with different message sizes."""
-        algorithm = 'Dilithium3'
+        algorithm = "Dilithium3"
         sig = Signature(algorithm)
         public_key = sig.generate_keypair()
 
@@ -246,7 +241,7 @@ class TestDilithiumPerformance:
         """Test memory usage during Dilithium operations."""
         import tracemalloc
 
-        algorithm = 'Dilithium3'
+        algorithm = "Dilithium3"
         tracemalloc.start()
 
         # Perform operations

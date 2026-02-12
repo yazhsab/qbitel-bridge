@@ -12,7 +12,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 import uuid
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -210,9 +209,7 @@ class MigrationPlanner:
         plan.data_migration = self._create_data_migration_spec(source_analysis, target_requirements)
 
         # Create security migration spec
-        plan.security_migration = self._create_security_migration_spec(
-            source_analysis, target_requirements
-        )
+        plan.security_migration = self._create_security_migration_spec(source_analysis, target_requirements)
 
         # Assess risks
         plan.risks = self._assess_risks(source_analysis, strategy)
@@ -398,190 +395,202 @@ class MigrationPlanner:
         phases = []
 
         # Assessment phase (always first)
-        phases.append(MigrationPhase(
-            phase_id=str(uuid.uuid4()),
-            name="Assessment & Discovery",
-            phase_type=MigrationPhaseType.ASSESSMENT,
-            description="Complete analysis of source system and requirements",
-            order=1,
-            entry_criteria=["Project kickoff complete", "Stakeholders identified"],
-            exit_criteria=["Source system fully documented", "Requirements validated"],
-            tasks=[
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Protocol Analysis",
-                    description="Analyze all protocols and data formats",
-                    phase=MigrationPhaseType.ASSESSMENT,
-                    automated=True,
-                    automation_tool="Qbitel AI Protocol Analyzer",
-                    deliverables=["Protocol inventory", "Data dictionary"],
-                ),
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Legacy Fingerprinting",
-                    description="Fingerprint legacy system components",
-                    phase=MigrationPhaseType.ASSESSMENT,
-                    automated=True,
-                    automation_tool="Qbitel AI Fingerprinter",
-                ),
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Security Assessment",
-                    description="Assess current security posture",
-                    phase=MigrationPhaseType.ASSESSMENT,
-                    automated=True,
-                    automation_tool="Qbitel AI Security Assessor",
-                ),
-            ],
-        ))
+        phases.append(
+            MigrationPhase(
+                phase_id=str(uuid.uuid4()),
+                name="Assessment & Discovery",
+                phase_type=MigrationPhaseType.ASSESSMENT,
+                description="Complete analysis of source system and requirements",
+                order=1,
+                entry_criteria=["Project kickoff complete", "Stakeholders identified"],
+                exit_criteria=["Source system fully documented", "Requirements validated"],
+                tasks=[
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Protocol Analysis",
+                        description="Analyze all protocols and data formats",
+                        phase=MigrationPhaseType.ASSESSMENT,
+                        automated=True,
+                        automation_tool="Qbitel AI Protocol Analyzer",
+                        deliverables=["Protocol inventory", "Data dictionary"],
+                    ),
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Legacy Fingerprinting",
+                        description="Fingerprint legacy system components",
+                        phase=MigrationPhaseType.ASSESSMENT,
+                        automated=True,
+                        automation_tool="Qbitel AI Fingerprinter",
+                    ),
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Security Assessment",
+                        description="Assess current security posture",
+                        phase=MigrationPhaseType.ASSESSMENT,
+                        automated=True,
+                        automation_tool="Qbitel AI Security Assessor",
+                    ),
+                ],
+            )
+        )
 
         # Design phase
-        phases.append(MigrationPhase(
-            phase_id=str(uuid.uuid4()),
-            name="Architecture Design",
-            phase_type=MigrationPhaseType.DESIGN,
-            description="Design target architecture and migration approach",
-            order=2,
-            entry_criteria=["Assessment complete"],
-            exit_criteria=["Architecture approved", "Migration approach defined"],
-            tasks=[
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Target Architecture",
-                    description="Design target state architecture",
-                    phase=MigrationPhaseType.DESIGN,
-                    skills_required=["Enterprise Architecture", "Cloud"],
-                ),
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Data Mapping",
-                    description="Create field-level data mappings",
-                    phase=MigrationPhaseType.DESIGN,
-                    automated=True,
-                    automation_tool="Qbitel AI Protocol Mapper",
-                ),
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Security Architecture",
-                    description="Design PQC-ready security architecture",
-                    phase=MigrationPhaseType.DESIGN,
-                    skills_required=["Security Architecture", "PQC"],
-                ),
-            ],
-        ))
+        phases.append(
+            MigrationPhase(
+                phase_id=str(uuid.uuid4()),
+                name="Architecture Design",
+                phase_type=MigrationPhaseType.DESIGN,
+                description="Design target architecture and migration approach",
+                order=2,
+                entry_criteria=["Assessment complete"],
+                exit_criteria=["Architecture approved", "Migration approach defined"],
+                tasks=[
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Target Architecture",
+                        description="Design target state architecture",
+                        phase=MigrationPhaseType.DESIGN,
+                        skills_required=["Enterprise Architecture", "Cloud"],
+                    ),
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Data Mapping",
+                        description="Create field-level data mappings",
+                        phase=MigrationPhaseType.DESIGN,
+                        automated=True,
+                        automation_tool="Qbitel AI Protocol Mapper",
+                    ),
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Security Architecture",
+                        description="Design PQC-ready security architecture",
+                        phase=MigrationPhaseType.DESIGN,
+                        skills_required=["Security Architecture", "PQC"],
+                    ),
+                ],
+            )
+        )
 
         # Build phase
-        phases.append(MigrationPhase(
-            phase_id=str(uuid.uuid4()),
-            name="Build & Configure",
-            phase_type=MigrationPhaseType.BUILD,
-            description="Build target components and configure integration",
-            order=3,
-            tasks=[
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Protocol Adapters",
-                    description="Build protocol adapters and transformers",
-                    phase=MigrationPhaseType.BUILD,
-                    automated=True,
-                    automation_tool="Qbitel AI Zero-Touch Builder",
-                ),
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Security Implementation",
-                    description="Implement PQC and HSM integration",
-                    phase=MigrationPhaseType.BUILD,
-                    skills_required=["Cryptography", "HSM"],
-                ),
-            ],
-        ))
+        phases.append(
+            MigrationPhase(
+                phase_id=str(uuid.uuid4()),
+                name="Build & Configure",
+                phase_type=MigrationPhaseType.BUILD,
+                description="Build target components and configure integration",
+                order=3,
+                tasks=[
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Protocol Adapters",
+                        description="Build protocol adapters and transformers",
+                        phase=MigrationPhaseType.BUILD,
+                        automated=True,
+                        automation_tool="Qbitel AI Zero-Touch Builder",
+                    ),
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Security Implementation",
+                        description="Implement PQC and HSM integration",
+                        phase=MigrationPhaseType.BUILD,
+                        skills_required=["Cryptography", "HSM"],
+                    ),
+                ],
+            )
+        )
 
         # Test phase
-        phases.append(MigrationPhase(
-            phase_id=str(uuid.uuid4()),
-            name="Testing & Validation",
-            phase_type=MigrationPhaseType.TEST,
-            description="Comprehensive testing of migrated components",
-            order=4,
-            tasks=[
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Protocol Validation",
-                    description="Validate protocol transformations",
-                    phase=MigrationPhaseType.TEST,
-                    automated=True,
-                    automation_tool="Qbitel AI Validator",
-                ),
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Security Testing",
-                    description="Penetration testing and security validation",
-                    phase=MigrationPhaseType.TEST,
-                ),
-            ],
-        ))
+        phases.append(
+            MigrationPhase(
+                phase_id=str(uuid.uuid4()),
+                name="Testing & Validation",
+                phase_type=MigrationPhaseType.TEST,
+                description="Comprehensive testing of migrated components",
+                order=4,
+                tasks=[
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Protocol Validation",
+                        description="Validate protocol transformations",
+                        phase=MigrationPhaseType.TEST,
+                        automated=True,
+                        automation_tool="Qbitel AI Validator",
+                    ),
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Security Testing",
+                        description="Penetration testing and security validation",
+                        phase=MigrationPhaseType.TEST,
+                    ),
+                ],
+            )
+        )
 
         # Migration phase
-        phases.append(MigrationPhase(
-            phase_id=str(uuid.uuid4()),
-            name="Data Migration",
-            phase_type=MigrationPhaseType.MIGRATE,
-            description="Execute data and workload migration",
-            order=5,
-            risks=[
-                {"name": "Data loss", "level": "high"},
-                {"name": "Downtime", "level": "medium"},
-            ],
-            tasks=[
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Data Extraction",
-                    description="Extract data from source system",
-                    phase=MigrationPhaseType.MIGRATE,
-                    risk_level=MigrationRisk.HIGH,
-                ),
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Data Transformation",
-                    description="Transform data to target format",
-                    phase=MigrationPhaseType.MIGRATE,
-                    automated=True,
-                ),
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Data Load",
-                    description="Load data into target system",
-                    phase=MigrationPhaseType.MIGRATE,
-                ),
-            ],
-        ))
+        phases.append(
+            MigrationPhase(
+                phase_id=str(uuid.uuid4()),
+                name="Data Migration",
+                phase_type=MigrationPhaseType.MIGRATE,
+                description="Execute data and workload migration",
+                order=5,
+                risks=[
+                    {"name": "Data loss", "level": "high"},
+                    {"name": "Downtime", "level": "medium"},
+                ],
+                tasks=[
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Data Extraction",
+                        description="Extract data from source system",
+                        phase=MigrationPhaseType.MIGRATE,
+                        risk_level=MigrationRisk.HIGH,
+                    ),
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Data Transformation",
+                        description="Transform data to target format",
+                        phase=MigrationPhaseType.MIGRATE,
+                        automated=True,
+                    ),
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Data Load",
+                        description="Load data into target system",
+                        phase=MigrationPhaseType.MIGRATE,
+                    ),
+                ],
+            )
+        )
 
         # Cutover phase
-        phases.append(MigrationPhase(
-            phase_id=str(uuid.uuid4()),
-            name="Cutover",
-            phase_type=MigrationPhaseType.CUTOVER,
-            description="Production cutover to new system",
-            order=6,
-            risks=[
-                {"name": "Business disruption", "level": "critical"},
-            ],
-            tasks=[
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Traffic Routing",
-                    description="Route traffic to new system",
-                    phase=MigrationPhaseType.CUTOVER,
-                    risk_level=MigrationRisk.CRITICAL,
-                ),
-                MigrationTask(
-                    task_id=str(uuid.uuid4()),
-                    name="Monitoring Setup",
-                    description="Configure production monitoring",
-                    phase=MigrationPhaseType.CUTOVER,
-                ),
-            ],
-        ))
+        phases.append(
+            MigrationPhase(
+                phase_id=str(uuid.uuid4()),
+                name="Cutover",
+                phase_type=MigrationPhaseType.CUTOVER,
+                description="Production cutover to new system",
+                order=6,
+                risks=[
+                    {"name": "Business disruption", "level": "critical"},
+                ],
+                tasks=[
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Traffic Routing",
+                        description="Route traffic to new system",
+                        phase=MigrationPhaseType.CUTOVER,
+                        risk_level=MigrationRisk.CRITICAL,
+                    ),
+                    MigrationTask(
+                        task_id=str(uuid.uuid4()),
+                        name="Monitoring Setup",
+                        description="Configure production monitoring",
+                        phase=MigrationPhaseType.CUTOVER,
+                    ),
+                ],
+            )
+        )
 
         return phases
 
@@ -645,46 +654,54 @@ class MigrationPlanner:
 
         # Encoding risk
         if source.get("encoding") == "EBCDIC":
-            risks.append({
-                "id": str(uuid.uuid4()),
-                "name": "Character Encoding",
-                "level": MigrationRisk.MEDIUM.value,
-                "description": "EBCDIC to UTF-8 conversion may cause data corruption",
-                "probability": "medium",
-                "impact": "high",
-            })
+            risks.append(
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Character Encoding",
+                    "level": MigrationRisk.MEDIUM.value,
+                    "description": "EBCDIC to UTF-8 conversion may cause data corruption",
+                    "probability": "medium",
+                    "impact": "high",
+                }
+            )
 
         # Complexity risk
         if source.get("modernization_complexity") in ("high", "very_high"):
-            risks.append({
-                "id": str(uuid.uuid4()),
-                "name": "System Complexity",
-                "level": MigrationRisk.HIGH.value,
-                "description": "High system complexity increases migration risk",
-                "probability": "high",
-                "impact": "high",
-            })
+            risks.append(
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "System Complexity",
+                    "level": MigrationRisk.HIGH.value,
+                    "description": "High system complexity increases migration risk",
+                    "probability": "high",
+                    "impact": "high",
+                }
+            )
 
         # Strategy-specific risks
         if strategy == MigrationStrategy.REARCHITECT:
-            risks.append({
-                "id": str(uuid.uuid4()),
-                "name": "Scope Creep",
-                "level": MigrationRisk.HIGH.value,
-                "description": "Re-architecture may lead to scope expansion",
-                "probability": "high",
-                "impact": "medium",
-            })
+            risks.append(
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Scope Creep",
+                    "level": MigrationRisk.HIGH.value,
+                    "description": "Re-architecture may lead to scope expansion",
+                    "probability": "high",
+                    "impact": "medium",
+                }
+            )
 
         # Security risks
-        risks.append({
-            "id": str(uuid.uuid4()),
-            "name": "Key Material Exposure",
-            "level": MigrationRisk.CRITICAL.value,
-            "description": "Cryptographic keys exposed during migration",
-            "probability": "low",
-            "impact": "critical",
-        })
+        risks.append(
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Key Material Exposure",
+                "level": MigrationRisk.CRITICAL.value,
+                "description": "Cryptographic keys exposed during migration",
+                "probability": "low",
+                "impact": "critical",
+            }
+        )
 
         return risks
 
@@ -703,25 +720,31 @@ class MigrationPlanner:
             }
 
             if "encoding" in risk["name"].lower():
-                mitigation["mitigations"].extend([
-                    "Use validated encoding conversion libraries",
-                    "Implement comprehensive character set testing",
-                    "Maintain rollback capability",
-                ])
+                mitigation["mitigations"].extend(
+                    [
+                        "Use validated encoding conversion libraries",
+                        "Implement comprehensive character set testing",
+                        "Maintain rollback capability",
+                    ]
+                )
 
             if "complexity" in risk["name"].lower():
-                mitigation["mitigations"].extend([
-                    "Break migration into smaller increments",
-                    "Use Qbitel AI for automated analysis",
-                    "Implement continuous validation",
-                ])
+                mitigation["mitigations"].extend(
+                    [
+                        "Break migration into smaller increments",
+                        "Use Qbitel AI for automated analysis",
+                        "Implement continuous validation",
+                    ]
+                )
 
             if "key" in risk["name"].lower():
-                mitigation["mitigations"].extend([
-                    "Use HSM-to-HSM secure key transfer",
-                    "Implement PQC hybrid key wrapping",
-                    "Maintain audit trail of all key operations",
-                ])
+                mitigation["mitigations"].extend(
+                    [
+                        "Use HSM-to-HSM secure key transfer",
+                        "Implement PQC hybrid key wrapping",
+                        "Maintain audit trail of all key operations",
+                    ]
+                )
 
             mitigations.append(mitigation)
 
@@ -758,10 +781,7 @@ class MigrationPlanner:
         pqc_algos = ["ML-KEM", "ML-DSA", "Kyber", "Dilithium"]
         target_crypto = plan.security_migration.target_crypto
 
-        return any(
-            any(pqc in crypto for pqc in pqc_algos)
-            for crypto in target_crypto
-        )
+        return any(any(pqc in crypto for pqc in pqc_algos) for crypto in target_crypto)
 
     def _build_strategy_templates(self) -> Dict[MigrationStrategy, Dict[str, Any]]:
         """Build templates for each migration strategy."""

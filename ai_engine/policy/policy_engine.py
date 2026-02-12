@@ -32,9 +32,7 @@ except ModuleNotFoundError:  # pragma: no cover - fallback stub
     jsonpath_ng = types.ModuleType("jsonpath_ng")
 
     def _missing_jsonpath(*_args, **_kwargs):
-        raise ModuleNotFoundError(
-            "jsonpath_ng is required for JSONPath-based policy rules"
-        )
+        raise ModuleNotFoundError("jsonpath_ng is required for JSONPath-based policy rules")
 
     jsonpath_ng.parse = _missing_jsonpath  # type: ignore[attr-defined]
     sys.modules.setdefault("jsonpath_ng", jsonpath_ng)
@@ -588,9 +586,7 @@ class PolicyRegistry:
         self.logger = get_logger(__name__)
 
         # Storage configuration
-        self.registry_path = Path(
-            getattr(config, "policy_registry_path", "./policy_registry")
-        )
+        self.registry_path = Path(getattr(config, "policy_registry_path", "./policy_registry"))
 
         # In-memory policy cache
         self.policies: Dict[str, Policy] = {}
@@ -623,9 +619,7 @@ class PolicyRegistry:
                     self.policies[policy.policy_id] = policy
 
                 except Exception as e:
-                    self.logger.warning(
-                        f"Failed to load policy from {policy_file}: {e}"
-                    )
+                    self.logger.warning(f"Failed to load policy from {policy_file}: {e}")
 
             self.logger.info(f"Loaded {len(self.policies)} policies from storage")
 
@@ -713,9 +707,7 @@ class PolicyRegistry:
         with self.policy_lock:
             return self.policies.get(policy_id)
 
-    async def list_policies(
-        self, policy_type: Optional[PolicyType] = None, enabled_only: bool = True
-    ) -> List[Policy]:
+    async def list_policies(self, policy_type: Optional[PolicyType] = None, enabled_only: bool = True) -> List[Policy]:
         """List policies with optional filtering."""
         with self.policy_lock:
             policies = list(self.policies.values())
@@ -789,9 +781,7 @@ class PolicyRegistry:
         with open(archive_file, "w") as f:
             json.dump(policy.to_dict(), f, indent=2)
 
-    async def _is_policy_applicable(
-        self, policy: Policy, context: EvaluationContext
-    ) -> bool:
+    async def _is_policy_applicable(self, policy: Policy, context: EvaluationContext) -> bool:
         """Check if policy applies to the given context."""
         # Check exclusions
         if context.resource and context.resource in policy.exclusions:
@@ -857,9 +847,7 @@ class PolicyEngine:
 
         # Performance optimization
         self.evaluation_cache: Dict[str, Tuple[bool, datetime]] = {}
-        self.cache_ttl = timedelta(
-            minutes=getattr(config, "policy_cache_ttl_minutes", 5)
-        )
+        self.cache_ttl = timedelta(minutes=getattr(config, "policy_cache_ttl_minutes", 5))
 
         # Statistics
         self.evaluation_stats = {
@@ -871,9 +859,7 @@ class PolicyEngine:
 
         self.logger.info("PolicyEngine initialized")
 
-    async def evaluate_request(
-        self, context: EvaluationContext, fail_fast: bool = False
-    ) -> Dict[str, Any]:
+    async def evaluate_request(self, context: EvaluationContext, fail_fast: bool = False) -> Dict[str, Any]:
         """
         Evaluate policies against a request context.
 
@@ -920,8 +906,7 @@ class PolicyEngine:
 
             # Determine final decision
             allowed = len(violations) == 0 or all(
-                v.severity in [PolicySeverity.LOW, PolicySeverity.MEDIUM]
-                for v in violations
+                v.severity in [PolicySeverity.LOW, PolicySeverity.MEDIUM] for v in violations
             )
 
             # Update statistics
@@ -965,9 +950,7 @@ class PolicyEngine:
                 "error": str(e),
             }
 
-    async def _evaluate_policy(
-        self, policy: Policy, context: EvaluationContext
-    ) -> Dict[str, Any]:
+    async def _evaluate_policy(self, policy: Policy, context: EvaluationContext) -> Dict[str, Any]:
         """Evaluate a single policy against context."""
         violations = []
         actions = []
@@ -1092,11 +1075,7 @@ class PolicyEngine:
     def _cleanup_cache(self) -> None:
         """Clean up expired cache entries."""
         now = datetime.utcnow()
-        expired_keys = [
-            key
-            for key, (_, timestamp) in self.evaluation_cache.items()
-            if now - timestamp >= self.cache_ttl
-        ]
+        expired_keys = [key for key, (_, timestamp) in self.evaluation_cache.items() if now - timestamp >= self.cache_ttl]
 
         for key in expired_keys:
             del self.evaluation_cache[key]
@@ -1181,9 +1160,7 @@ class PolicyEngine:
         violations.sort(key=lambda v: v.timestamp, reverse=True)
         return violations[:limit]
 
-    async def resolve_violation(
-        self, violation_id: str, resolved_by: str, resolution_notes: str = ""
-    ) -> bool:
+    async def resolve_violation(self, violation_id: str, resolved_by: str, resolution_notes: str = "") -> bool:
         """Mark a violation as resolved."""
         try:
             with self.violation_lock:
@@ -1227,9 +1204,7 @@ class PolicyEngine:
 _policy_engine: Optional[PolicyEngine] = None
 
 
-async def initialize_policy_engine(
-    config: Config, metrics: AIEngineMetrics
-) -> PolicyEngine:
+async def initialize_policy_engine(config: Config, metrics: AIEngineMetrics) -> PolicyEngine:
     """Initialize global policy engine."""
     global _policy_engine
 

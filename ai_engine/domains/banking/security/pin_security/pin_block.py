@@ -121,7 +121,7 @@ class PINBlock:
 
         # Use remaining random for padding
         if len(block) < 16:
-            block += random_hex[:(16 - len(block))]
+            block += random_hex[: (16 - len(block))]
 
         return cls(
             format=PINBlockFormat.ISO_1,
@@ -280,15 +280,15 @@ class PINBlock:
 
             # Extract PIN
             pin_len = int(clear_hex[1], 16)
-            return clear_hex[2:2 + pin_len]
+            return clear_hex[2 : 2 + pin_len]
 
         elif self.format == PINBlockFormat.ISO_1:
             pin_len = int(block_hex[1], 16)
-            return block_hex[2:2 + pin_len]
+            return block_hex[2 : 2 + pin_len]
 
         elif self.format == PINBlockFormat.ISO_2:
             pin_len = int(block_hex[1], 16)
-            return block_hex[2:2 + pin_len]
+            return block_hex[2 : 2 + pin_len]
 
         elif self.format == PINBlockFormat.ISO_3:
             if not pan and not self.pan:
@@ -305,7 +305,7 @@ class PINBlock:
             clear_hex = f"{clear_int:016X}"
 
             pin_len = int(clear_hex[1], 16)
-            return clear_hex[2:2 + pin_len]
+            return clear_hex[2 : 2 + pin_len]
 
         elif self.format == PINBlockFormat.ISO_4:
             if not pan and not self.pan:
@@ -323,7 +323,7 @@ class PINBlock:
             clear_hex = f"{clear_int:032X}"
 
             pin_len = int(clear_hex[1], 16)
-            return clear_hex[2:2 + pin_len]
+            return clear_hex[2 : 2 + pin_len]
 
         else:
             raise ValueError(f"Extraction not implemented for format: {self.format}")

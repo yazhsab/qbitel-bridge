@@ -43,9 +43,7 @@ class TestErrorStorage:
     @pytest.mark.asyncio
     async def test_error_record_serialization(self):
         """Test error record serialization."""
-        context = ErrorContext(
-            component="test", operation="test_op", request_id="req-123"
-        )
+        context = ErrorContext(component="test", operation="test_op", request_id="req-123")
 
         error_record = ErrorRecord(
             error_id="err-123",
@@ -75,9 +73,7 @@ class TestSentryIntegration:
         """Test Sentry tracker initialization."""
         from ai_engine.core.sentry_integration import SentryErrorTracker
 
-        tracker = SentryErrorTracker(
-            dsn="https://test@sentry.io/123", environment="test", traces_sample_rate=0.1
-        )
+        tracker = SentryErrorTracker(dsn="https://test@sentry.io/123", environment="test", traces_sample_rate=0.1)
 
         assert tracker.dsn == "https://test@sentry.io/123"
         assert tracker.environment == "test"
@@ -114,9 +110,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_circuit_breaker_opens_on_failures(self):
         """Test circuit breaker opens after threshold failures."""
-        config = CircuitBreakerConfig(
-            failure_threshold=3, expected_exception_types={ConnectionError}
-        )
+        config = CircuitBreakerConfig(failure_threshold=3, expected_exception_types={ConnectionError})
         cb = CircuitBreaker(config)
 
         async def failing_func():
@@ -191,9 +185,7 @@ class TestConfigValidator:
         validator._validate_database(config)
 
         # Should have error about SSL
-        ssl_errors = [
-            issue for issue in validator.issues if "ssl" in issue.message.lower()
-        ]
+        ssl_errors = [issue for issue in validator.issues if "ssl" in issue.message.lower()]
         assert len(ssl_errors) > 0
 
     def test_security_validation(self):
@@ -216,10 +208,7 @@ class TestConfigValidator:
 
         # Check for TLS error
         tls_errors = [
-            issue
-            for issue in validator.issues
-            if issue.severity == ValidationSeverity.ERROR
-            and "tls" in issue.field.lower()
+            issue for issue in validator.issues if issue.severity == ValidationSeverity.ERROR and "tls" in issue.field.lower()
         ]
         assert len(tls_errors) > 0
 
@@ -235,9 +224,7 @@ class TestConfigValidator:
         validator._check_hardcoded_secrets(config)
 
         # Should detect hardcoded secrets
-        secret_errors = [
-            issue for issue in validator.issues if "hardcoded" in issue.message.lower()
-        ]
+        secret_errors = [issue for issue in validator.issues if "hardcoded" in issue.message.lower()]
         assert len(secret_errors) >= 2
 
 
@@ -321,9 +308,7 @@ class TestErrorHandler:
             handler.error_records.append(error)
 
         # Get aggregated errors
-        errors = await handler.get_aggregated_errors(
-            component="test", time_window_hours=1
-        )
+        errors = await handler.get_aggregated_errors(component="test", time_window_hours=1)
 
         assert len(errors) == 5
 

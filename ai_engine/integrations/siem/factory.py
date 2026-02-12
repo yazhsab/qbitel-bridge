@@ -81,10 +81,7 @@ class SIEMConnectorFactory:
             try:
                 siem_type = SIEMType(siem_type.lower())
             except ValueError:
-                raise ValueError(
-                    f"Unknown SIEM type: {siem_type}. "
-                    f"Supported: {[t.value for t in SIEMType]}"
-                )
+                raise ValueError(f"Unknown SIEM type: {siem_type}. " f"Supported: {[t.value for t in SIEMType]}")
 
         # Get connector class
         connector_class = _CONNECTOR_REGISTRY.get(siem_type)
@@ -157,9 +154,7 @@ class SIEMConnectorFactory:
 
         elif siem_type == SIEMType.SENTINEL:
             config_dict["workspace_id"] = os.getenv(f"{prefix}_WORKSPACE_ID", "")
-            config_dict["log_analytics_key"] = os.getenv(
-                f"{prefix}_LOG_ANALYTICS_KEY", ""
-            )
+            config_dict["log_analytics_key"] = os.getenv(f"{prefix}_LOG_ANALYTICS_KEY", "")
             config_dict["tenant_id"] = os.getenv(f"{prefix}_TENANT_ID", "")
             config_dict["client_id"] = os.getenv(f"{prefix}_CLIENT_ID", "")
             config_dict["client_secret"] = os.getenv(f"{prefix}_CLIENT_SECRET", "")
@@ -171,9 +166,7 @@ class SIEMConnectorFactory:
             config_dict["project_id"] = os.getenv(f"{prefix}_PROJECT_ID", "")
             config_dict["instance_id"] = os.getenv(f"{prefix}_INSTANCE_ID", "")
             config_dict["region"] = os.getenv(f"{prefix}_REGION", "us")
-            config_dict["service_account_file"] = os.getenv(
-                f"{prefix}_SERVICE_ACCOUNT_FILE"
-            )
+            config_dict["service_account_file"] = os.getenv(f"{prefix}_SERVICE_ACCOUNT_FILE")
 
         # Filter out None values
         config_dict = {k: v for k, v in config_dict.items() if v is not None}

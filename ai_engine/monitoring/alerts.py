@@ -150,9 +150,7 @@ class AlertRule:
                 return False
         return True
 
-    def _evaluate_condition(
-        self, condition: AlertCondition, metrics_data: Dict[str, Any]
-    ) -> bool:
+    def _evaluate_condition(self, condition: AlertCondition, metrics_data: Dict[str, Any]) -> bool:
         """Evaluate a single condition."""
         metric_value = metrics_data.get(condition.metric_name)
         if metric_value is None:
@@ -412,9 +410,7 @@ class SlackNotificationProvider(NotificationProvider):
                 self.logger.info(f"Slack alert sent for: {alert.alert_id}")
                 return True
             else:
-                self.logger.error(
-                    f"Slack notification failed: {response.status_code} - {response.text}"
-                )
+                self.logger.error(f"Slack notification failed: {response.status_code} - {response.text}")
                 return False
 
         except Exception as e:
@@ -469,9 +465,7 @@ class WebhookNotificationProvider(NotificationProvider):
                 self.logger.info(f"Webhook alert sent for: {alert.alert_id}")
                 return True
             else:
-                self.logger.error(
-                    f"Webhook notification failed: {response.status_code} - {response.text}"
-                )
+                self.logger.error(f"Webhook notification failed: {response.status_code} - {response.text}")
                 return False
 
         except Exception as e:
@@ -555,9 +549,7 @@ class AlertManager:
 
         # Evaluation state
         self.last_evaluation = 0
-        self.evaluation_interval = getattr(
-            config, "alert_evaluation_interval", 60
-        )  # seconds
+        self.evaluation_interval = getattr(config, "alert_evaluation_interval", 60)  # seconds
 
         # Background tasks
         self._evaluation_task: Optional[asyncio.Task] = None
@@ -658,9 +650,7 @@ class AlertManager:
 
             return False
 
-    def get_active_alerts(
-        self, severity: Optional[AlertSeverity] = None
-    ) -> List[Alert]:
+    def get_active_alerts(self, severity: Optional[AlertSeverity] = None) -> List[Alert]:
         """Get active alerts, optionally filtered by severity."""
         with self._alerts_lock:
             alerts = list(self.active_alerts.values())
@@ -713,9 +703,7 @@ class AlertManager:
             try:
                 result = await channel.provider.test_connection()
                 results[name] = result
-                self.logger.info(
-                    f"Channel {name} test: {'PASSED' if result else 'FAILED'}"
-                )
+                self.logger.info(f"Channel {name} test: {'PASSED' if result else 'FAILED'}")
             except Exception as e:
                 results[name] = False
                 self.logger.error(f"Channel {name} test failed: {e}")
@@ -802,9 +790,7 @@ class AlertManager:
     def _should_create_alert(self, rule: AlertRule, current_time: float) -> bool:
         """Check if we should create a new alert for this rule."""
         # Check if there are already too many active alerts for this rule
-        rule_alerts = [
-            a for a in self.active_alerts.values() if a.rule_name == rule.name
-        ]
+        rule_alerts = [a for a in self.active_alerts.values() if a.rule_name == rule.name]
         if len(rule_alerts) >= rule.max_alerts:
             return False
 
@@ -815,9 +801,7 @@ class AlertManager:
 
         return True
 
-    def _create_alert(
-        self, rule: AlertRule, metrics_data: Dict[str, Any], current_time: float
-    ) -> Alert:
+    def _create_alert(self, rule: AlertRule, metrics_data: Dict[str, Any], current_time: float) -> Alert:
         """Create a new alert from rule and metrics."""
         alert_id = f"{rule.name}_{int(current_time * 1000000)}"
 
@@ -861,20 +845,14 @@ class AlertManager:
                     success = await channel.provider.send_notification(alert)
                     if success:
                         self.stats["notifications_sent"] += 1
-                        self.logger.info(
-                            f"Notification sent to {channel_name} for alert {alert.alert_id}"
-                        )
+                        self.logger.info(f"Notification sent to {channel_name} for alert {alert.alert_id}")
                     else:
                         self.stats["notifications_failed"] += 1
-                        self.logger.error(
-                            f"Failed to send notification to {channel_name} for alert {alert.alert_id}"
-                        )
+                        self.logger.error(f"Failed to send notification to {channel_name} for alert {alert.alert_id}")
 
                 except Exception as e:
                     self.stats["notifications_failed"] += 1
-                    self.logger.error(
-                        f"Error sending notification to {channel_name}: {e}"
-                    )
+                    self.logger.error(f"Error sending notification to {channel_name}: {e}")
 
     async def _evaluation_loop(self) -> None:
         """Background alert evaluation loop."""
@@ -931,9 +909,7 @@ async def shutdown_alert_manager():
 
 
 # Notification provider factory
-def create_notification_provider(
-    provider_type: str, name: str, config: Dict[str, Any]
-) -> NotificationProvider:
+def create_notification_provider(provider_type: str, name: str, config: Dict[str, Any]) -> NotificationProvider:
     """Create notification provider by type."""
     providers = {
         "email": EmailNotificationProvider,

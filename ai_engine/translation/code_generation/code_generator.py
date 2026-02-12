@@ -52,9 +52,7 @@ SDK_GENERATION_COUNTER = Counter(
     ["language", "status"],
 )
 
-GENERATED_FILES_GAUGE = Gauge(
-    "qbitel_generated_files_total", "Total generated files count"
-)
+GENERATED_FILES_GAUGE = Gauge("qbitel_generated_files_total", "Total generated files count")
 
 logger = logging.getLogger(__name__)
 
@@ -310,13 +308,9 @@ class {class_name}:
             documentation=f"Main client class for {context.api_specification.title} SDK",
         )
 
-    async def _generate_endpoint_method(
-        self, endpoint: APIEndpoint, context: GenerationContext
-    ) -> str:
+    async def _generate_endpoint_method(self, endpoint: APIEndpoint, context: GenerationContext) -> str:
         """Generate Python method for an API endpoint."""
-        method_name = self._to_snake_case(
-            endpoint.operation_id or f"{endpoint.method}_{endpoint.path.split('/')[-1]}"
-        )
+        method_name = self._to_snake_case(endpoint.operation_id or f"{endpoint.method}_{endpoint.path.split('/')[-1]}")
 
         # Extract path parameters
         path_params = re.findall(r"\{([^}]+)\}", endpoint.path)
@@ -342,9 +336,7 @@ class {class_name}:
                 else:
                     params.append(f"{param_name}: {param_type}")
 
-        method_signature = (
-            f"async def {method_name}({', '.join(params)}) -> Dict[str, Any]:"
-        )
+        method_signature = f"async def {method_name}({', '.join(params)}) -> Dict[str, Any]:"
 
         # Generate method body
         docstring = f'        """{endpoint.summary}\n        \n        {endpoint.description or ""}\n        """'
@@ -390,9 +382,7 @@ class {class_name}:
             params=params
         )"""
 
-        return (
-            "    " + method_signature + method_body.replace("\n        ", "\n        ")
-        )
+        return "    " + method_signature + method_body.replace("\n        ", "\n        ")
 
     async def generate_models(self, context: GenerationContext) -> List[GeneratedCode]:
         """Generate Python data models."""
@@ -431,9 +421,7 @@ class NotFoundException({title}Exception):
     """Resource not found exception."""
     pass
 
-'''.format(
-            title=self._to_class_name(context.api_specification.title)
-        )
+'''.format(title=self._to_class_name(context.api_specification.title))
 
         # Generate models from schemas
         for schema_name, schema_def in context.api_specification.schemas.items():
@@ -768,13 +756,9 @@ export class {class_name} {{
             documentation=f"Main client class for {context.api_specification.title} SDK",
         )
 
-    async def _generate_ts_endpoint_method(
-        self, endpoint: APIEndpoint, context: GenerationContext
-    ) -> str:
+    async def _generate_ts_endpoint_method(self, endpoint: APIEndpoint, context: GenerationContext) -> str:
         """Generate TypeScript method for an API endpoint."""
-        method_name = self._to_camel_case(
-            endpoint.operation_id or f"{endpoint.method}_{endpoint.path.split('/')[-1]}"
-        )
+        method_name = self._to_camel_case(endpoint.operation_id or f"{endpoint.method}_{endpoint.path.split('/')[-1]}")
 
         # Extract path parameters
         path_params = re.findall(r"\{([^}]+)\}", endpoint.path)
@@ -792,11 +776,7 @@ export class {class_name} {{
         # Add query parameters
         query_params = [p for p in endpoint.parameters if p.get("in") == "query"]
         if query_params:
-            params.append(
-                "options?: { "
-                + ", ".join(f"{p['name']}?: any" for p in query_params)
-                + " }"
-            )
+            params.append("options?: { " + ", ".join(f"{p['name']}?: any" for p in query_params) + " }")
 
         method_signature = f"async {method_name}({', '.join(params)}): Promise<any>"
 
@@ -1055,15 +1035,11 @@ class MultiLanguageCodeGenerator:
         start_time = time.time()
 
         try:
-            self.logger.info(
-                f"Generating {target_language.value} SDK for {api_specification.title}"
-            )
+            self.logger.info(f"Generating {target_language.value} SDK for {api_specification.title}")
 
             # Validate inputs
             if target_language not in self.generators:
-                raise CodeGenerationException(
-                    f"Unsupported language: {target_language.value}"
-                )
+                raise CodeGenerationException(f"Unsupported language: {target_language.value}")
 
             generator = self.generators[target_language]
 
@@ -1126,19 +1102,12 @@ class MultiLanguageCodeGenerator:
             generation_time = time.time() - start_time
             self._update_generation_metrics(True, generation_time)
 
-            SDK_GENERATION_COUNTER.labels(
-                language=target_language.value, status="success"
-            ).inc()
+            SDK_GENERATION_COUNTER.labels(language=target_language.value, status="success").inc()
 
-            CODE_GENERATION_DURATION.labels(
-                language=target_language.value, type="sdk"
-            ).observe(generation_time)
+            CODE_GENERATION_DURATION.labels(language=target_language.value, type="sdk").observe(generation_time)
 
             GENERATED_FILES_GAUGE.set(
-                len(sdk.source_files)
-                + len(sdk.test_files)
-                + len(sdk.config_files)
-                + len(sdk.documentation_files)
+                len(sdk.source_files) + len(sdk.test_files) + len(sdk.config_files) + len(sdk.documentation_files)
             )
 
             self.logger.info(
@@ -1153,9 +1122,7 @@ class MultiLanguageCodeGenerator:
 
             # Update error metrics
             self._update_generation_metrics(False, time.time() - start_time)
-            SDK_GENERATION_COUNTER.labels(
-                language=target_language.value, status="error"
-            ).inc()
+            SDK_GENERATION_COUNTER.labels(language=target_language.value, status="error").inc()
 
             raise CodeGenerationException(f"SDK generation failed: {e}")
 
@@ -1182,11 +1149,7 @@ class MultiLanguageCodeGenerator:
                 return language, sdk
 
         # Generate SDKs concurrently
-        tasks = [
-            generate_single_sdk(lang)
-            for lang in target_languages
-            if lang in self.generators
-        ]
+        tasks = [generate_single_sdk(lang) for lang in target_languages if lang in self.generators]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         # Process results
@@ -1201,9 +1164,7 @@ class MultiLanguageCodeGenerator:
 
         return sdks
 
-    async def _generate_config_files(
-        self, context: GenerationContext, generator: BaseCodeGenerator
-    ) -> List[GeneratedCode]:
+    async def _generate_config_files(self, context: GenerationContext, generator: BaseCodeGenerator) -> List[GeneratedCode]:
         """Generate configuration files for the SDK."""
         config_files = []
 
@@ -1258,8 +1219,7 @@ setup(
             package_json = {
                 "name": context.package_name,
                 "version": context.version,
-                "description": context.description
-                or f"{context.api_specification.title} TypeScript SDK",
+                "description": context.description or f"{context.api_specification.title} TypeScript SDK",
                 "main": "dist/client.js",
                 "types": "dist/client.d.ts",
                 "scripts": {
@@ -1328,9 +1288,7 @@ setup(
 
         return config_files
 
-    async def _generate_documentation(
-        self, context: GenerationContext, sdk: GeneratedSDK
-    ) -> List[GeneratedCode]:
+    async def _generate_documentation(self, context: GenerationContext, sdk: GeneratedSDK) -> List[GeneratedCode]:
         """Generate comprehensive documentation for the SDK."""
         doc_files = []
 
@@ -1445,9 +1403,7 @@ Generated by QBITEL Translation Studio. For issues with this SDK, please contact
 
         return doc_files
 
-    async def _generate_examples(
-        self, context: GenerationContext, generator: BaseCodeGenerator
-    ) -> List[GeneratedCode]:
+    async def _generate_examples(self, context: GenerationContext, generator: BaseCodeGenerator) -> List[GeneratedCode]:
         """Generate usage examples for the SDK."""
         examples = []
 
@@ -1492,9 +1448,7 @@ if __name__ == "__main__":
 
         return examples
 
-    async def _enhance_sdk_with_llm(
-        self, sdk: GeneratedSDK, context: GenerationContext
-    ) -> None:
+    async def _enhance_sdk_with_llm(self, sdk: GeneratedSDK, context: GenerationContext) -> None:
         """Enhance generated SDK with LLM improvements."""
         if not self.llm_service:
             return
@@ -1503,18 +1457,14 @@ if __name__ == "__main__":
             # Enhance documentation
             for doc_file in sdk.documentation_files:
                 if doc_file.filename == "README.md":
-                    enhanced_readme = await self._enhance_readme_with_llm(
-                        doc_file.code, context
-                    )
+                    enhanced_readme = await self._enhance_readme_with_llm(doc_file.code, context)
                     if enhanced_readme:
                         doc_file.code = enhanced_readme
 
         except Exception as e:
             self.logger.warning(f"LLM enhancement failed: {e}")
 
-    async def _enhance_readme_with_llm(
-        self, readme_content: str, context: GenerationContext
-    ) -> Optional[str]:
+    async def _enhance_readme_with_llm(self, readme_content: str, context: GenerationContext) -> Optional[str]:
         """Enhance README with LLM-generated improvements."""
         try:
             prompt = f"""
@@ -1558,9 +1508,7 @@ if __name__ == "__main__":
                 try:
                     compile(code_file.code, code_file.filename, "exec")
                 except SyntaxError as e:
-                    validation_errors.append(
-                        f"Syntax error in {code_file.filename}: {e}"
-                    )
+                    validation_errors.append(f"Syntax error in {code_file.filename}: {e}")
 
             # Check for common issues
             if len(code_file.code.strip()) == 0:
@@ -1592,13 +1540,9 @@ if __name__ == "__main__":
         """Convert to class name (PascalCase)."""
         return "".join(word.capitalize() for word in re.split(r"[_\-\s]+", name))
 
-    def _method_name_for_docs(
-        self, endpoint: APIEndpoint, language: CodeLanguage
-    ) -> str:
+    def _method_name_for_docs(self, endpoint: APIEndpoint, language: CodeLanguage) -> str:
         """Generate method name for documentation."""
-        base_name = (
-            endpoint.operation_id or f"{endpoint.method}_{endpoint.path.split('/')[-1]}"
-        )
+        base_name = endpoint.operation_id or f"{endpoint.method}_{endpoint.path.split('/')[-1]}"
 
         if language == CodeLanguage.PYTHON:
             return re.sub(r"[_\-\s]+", "_", base_name).lower()
@@ -1621,9 +1565,7 @@ if __name__ == "__main__":
             "code_validation_enabled": self.enable_code_validation,
         }
 
-    async def export_sdk(
-        self, sdk: GeneratedSDK, output_directory: Path, create_package: bool = True
-    ) -> Dict[str, Path]:
+    async def export_sdk(self, sdk: GeneratedSDK, output_directory: Path, create_package: bool = True) -> Dict[str, Path]:
         """
         Export generated SDK to filesystem.
 
@@ -1639,9 +1581,7 @@ if __name__ == "__main__":
             # Create SDK package structure
             file_paths = sdk.generate_package_structure(output_directory)
 
-            self.logger.info(
-                f"SDK exported to {output_directory}: {len(file_paths)} files"
-            )
+            self.logger.info(f"SDK exported to {output_directory}: {len(file_paths)} files")
 
             return file_paths
 

@@ -129,9 +129,7 @@ class DecisionAuditLogger:
                 # Explainability data
                 explanation_method=explanation.explanation_method.value,
                 explanation_id=explanation.explanation_id,
-                feature_importance=[
-                    fi.__dict__ for fi in explanation.feature_importances
-                ],
+                feature_importance=[fi.__dict__ for fi in explanation.feature_importances],
                 top_features=[fi.__dict__ for fi in explanation.top_features],
                 decision_rationale=explanation.explanation_summary,
                 regulatory_justification=explanation.regulatory_justification,
@@ -163,10 +161,7 @@ class DecisionAuditLogger:
                 success=True,
             )
 
-            logger.info(
-                f"Logged decision {explanation.decision_id} to audit trail "
-                f"(record_id={record_id})"
-            )
+            logger.info(f"Logged decision {explanation.decision_id} to audit trail " f"(record_id={record_id})")
 
             return str(record_id)
 
@@ -228,11 +223,7 @@ class DecisionAuditLogger:
             AIDecisionAudit record or None if not found
         """
         async with self.async_session() as session:
-            result = await session.execute(
-                select(AIDecisionAudit).where(
-                    AIDecisionAudit.decision_id == decision_id
-                )
-            )
+            result = await session.execute(select(AIDecisionAudit).where(AIDecisionAudit.decision_id == decision_id))
             return result.scalar_one_or_none()
 
     async def query_decisions(
@@ -276,9 +267,7 @@ class DecisionAuditLogger:
             if end_date:
                 filters.append(AIDecisionAudit.timestamp <= end_date)
             if compliance_framework:
-                filters.append(
-                    AIDecisionAudit.compliance_framework == compliance_framework
-                )
+                filters.append(AIDecisionAudit.compliance_framework == compliance_framework)
             if min_confidence is not None:
                 filters.append(AIDecisionAudit.confidence_score >= min_confidence)
             if max_confidence is not None:
@@ -315,11 +304,7 @@ class DecisionAuditLogger:
             override_reason: Reason for override (if applicable)
         """
         async with self.async_session() as session:
-            result = await session.execute(
-                select(AIDecisionAudit).where(
-                    AIDecisionAudit.decision_id == decision_id
-                )
-            )
+            result = await session.execute(select(AIDecisionAudit).where(AIDecisionAudit.decision_id == decision_id))
             record = result.scalar_one_or_none()
 
             if not record:
@@ -333,10 +318,7 @@ class DecisionAuditLogger:
 
             await session.commit()
 
-            logger.info(
-                f"Marked decision {decision_id} as human-reviewed "
-                f"(override={override}, reviewer={reviewer_id})"
-            )
+            logger.info(f"Marked decision {decision_id} as human-reviewed " f"(override={override}, reviewer={reviewer_id})")
 
     async def get_compliance_report(
         self,
@@ -366,11 +348,7 @@ class DecisionAuditLogger:
         total_decisions = len(decisions)
         human_reviewed_count = sum(1 for d in decisions if d.human_reviewed)
         human_override_count = sum(1 for d in decisions if d.human_override)
-        avg_confidence = (
-            sum(d.confidence_score for d in decisions) / total_decisions
-            if total_decisions > 0
-            else 0
-        )
+        avg_confidence = sum(d.confidence_score for d in decisions) / total_decisions if total_decisions > 0 else 0
 
         # Confidence distribution
         confidence_buckets = {
@@ -397,17 +375,9 @@ class DecisionAuditLogger:
             },
             "total_decisions": total_decisions,
             "human_reviewed_count": human_reviewed_count,
-            "human_reviewed_percentage": (
-                (human_reviewed_count / total_decisions * 100)
-                if total_decisions > 0
-                else 0
-            ),
+            "human_reviewed_percentage": ((human_reviewed_count / total_decisions * 100) if total_decisions > 0 else 0),
             "human_override_count": human_override_count,
-            "human_override_percentage": (
-                (human_override_count / total_decisions * 100)
-                if total_decisions > 0
-                else 0
-            ),
+            "human_override_percentage": ((human_override_count / total_decisions * 100) if total_decisions > 0 else 0),
             "average_confidence": avg_confidence,
             "confidence_distribution": confidence_buckets,
             "models_used": list(set(d.model_name for d in decisions)),
@@ -439,16 +409,12 @@ class DecisionAuditLogger:
 
         except Exception as e:
             if retry_count < self.max_retries:
-                logger.warning(
-                    f"Audit write failed (attempt {retry_count + 1}/{self.max_retries}): {e}"
-                )
+                logger.warning(f"Audit write failed (attempt {retry_count + 1}/{self.max_retries}): {e}")
                 # Exponential backoff
                 await asyncio.sleep(2**retry_count)
                 return await self._write_with_retry(record, retry_count + 1)
             else:
-                raise AuditLoggerException(
-                    f"Failed to write audit record after {self.max_retries} retries"
-                ) from e
+                raise AuditLoggerException(f"Failed to write audit record after {self.max_retries} retries") from e
 
     async def close(self):
         """Close database connections."""

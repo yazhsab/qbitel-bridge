@@ -302,11 +302,7 @@ class TestSecretRotation:
 
             # Verify metadata was updated
             call_args = mock_set.call_args
-            metadata = (
-                call_args[0][2]
-                if len(call_args[0]) > 2
-                else call_args[1].get("metadata")
-            )
+            metadata = call_args[0][2] if len(call_args[0]) > 2 else call_args[1].get("metadata")
 
             if metadata:
                 assert metadata.last_rotated is not None
@@ -334,9 +330,7 @@ class TestSecretValidation:
 
         # JWT secret should be empty or from environment
         if config.jwt_secret:
-            assert os.getenv("QBITEL_AI_JWT_SECRET") or os.getenv(
-                "JWT_SECRET"
-            ), "SecurityConfig has hardcoded JWT secret"
+            assert os.getenv("QBITEL_AI_JWT_SECRET") or os.getenv("JWT_SECRET"), "SecurityConfig has hardcoded JWT secret"
 
         # Encryption key should be empty or from environment
         if config.encryption_key:
@@ -370,15 +364,11 @@ class TestProductionSafety:
 
             # Check database password is empty
             if "database" in prod_config:
-                assert (
-                    prod_config["database"].get("password", "") == ""
-                ), "Production config has hardcoded database password"
+                assert prod_config["database"].get("password", "") == "", "Production config has hardcoded database password"
 
             # Check security secrets are empty
             if "security" in prod_config:
-                assert (
-                    prod_config["security"].get("jwt_secret", "") == ""
-                ), "Production config has hardcoded JWT secret"
+                assert prod_config["security"].get("jwt_secret", "") == "", "Production config has hardcoded JWT secret"
                 assert (
                     prod_config["security"].get("encryption_key", "") == ""
                 ), "Production config has hardcoded encryption key"

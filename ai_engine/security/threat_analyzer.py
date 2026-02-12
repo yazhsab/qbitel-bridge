@@ -39,12 +39,8 @@ THREAT_ANALYSIS_COUNTER = Counter(
     "Threat analysis requests",
     ["event_type", "threat_level"],
 )
-THREAT_ANALYSIS_DURATION = Histogram(
-    "qbitel_threat_analysis_duration_seconds", "Threat analysis duration"
-)
-THREAT_CONFIDENCE_GAUGE = Gauge(
-    "qbitel_threat_confidence_latest", "Latest threat confidence score"
-)
+THREAT_ANALYSIS_DURATION = Histogram("qbitel_threat_analysis_duration_seconds", "Threat analysis duration")
+THREAT_CONFIDENCE_GAUGE = Gauge("qbitel_threat_confidence_latest", "Latest threat confidence score")
 ML_MODEL_PREDICTIONS = Counter(
     "qbitel_threat_ml_predictions_total",
     "ML model predictions",
@@ -252,9 +248,7 @@ class FeatureExtractor:
 
         # Time since detection
         if event.detection_timestamp:
-            time_diff = (
-                event.detection_timestamp - event.event_timestamp
-            ).total_seconds()
+            time_diff = (event.detection_timestamp - event.event_timestamp).total_seconds()
             features.append(min(time_diff / 3600.0, 24.0))  # Cap at 24 hours
         else:
             features.append(0.0)
@@ -376,10 +370,7 @@ class ThreatAnalyzer:
 
             # Initialize LLM service
             self.llm_service = get_llm_service()
-            if (
-                not hasattr(self.llm_service, "_initialized")
-                or not self.llm_service._initialized
-            ):
+            if not hasattr(self.llm_service, "_initialized") or not self.llm_service._initialized:
                 await self.llm_service.initialize()
 
             # Initialize ML models
@@ -425,38 +416,26 @@ class ThreatAnalyzer:
             cache_key = self._create_cache_key(security_event)
             if cache_key in self.analysis_cache:
                 cached_analysis = self.analysis_cache[cache_key]
-                self.logger.info(
-                    f"Using cached analysis for event {security_event.event_id}"
-                )
+                self.logger.info(f"Using cached analysis for event {security_event.event_id}")
                 return cached_analysis
 
             # Step 1: Extract features for ML analysis
             features = self.feature_extractor.extract_event_features(security_event)
 
             # Step 2: ML-based classification
-            ml_classification = await self._perform_ml_classification(
-                features, security_event
-            )
+            ml_classification = await self._perform_ml_classification(features, security_event)
 
             # Step 3: Severity assessment
-            severity_assessment = await self._assess_threat_severity(
-                security_event, ml_classification, security_context
-            )
+            severity_assessment = await self._assess_threat_severity(security_event, ml_classification, security_context)
 
             # Step 4: Context analysis with legacy systems
-            context_analysis = await self._analyze_context(
-                security_event, security_context, legacy_systems
-            )
+            context_analysis = await self._analyze_context(security_event, security_context, legacy_systems)
 
             # Step 5: Threat intelligence correlation
-            intelligence_correlation = await self._correlate_threat_intelligence(
-                security_event
-            )
+            intelligence_correlation = await self._correlate_threat_intelligence(security_event)
 
             # Step 6: Business impact assessment
-            business_impact = await self._assess_business_impact(
-                security_event, severity_assessment, legacy_systems
-            )
+            business_impact = await self._assess_business_impact(security_event, severity_assessment, legacy_systems)
 
             # Step 7: Create comprehensive analysis
             threat_analysis = self._create_threat_analysis(
@@ -490,14 +469,10 @@ class ThreatAnalyzer:
             return threat_analysis
 
         except Exception as e:
-            self.logger.error(
-                f"Threat analysis failed for event {security_event.event_id}: {e}"
-            )
+            self.logger.error(f"Threat analysis failed for event {security_event.event_id}: {e}")
             raise ThreatAnalysisException(f"Threat analysis failed: {e}")
 
-    async def _perform_ml_classification(
-        self, features: np.ndarray, security_event: SecurityEvent
-    ) -> Dict[str, Any]:
+    async def _perform_ml_classification(self, features: np.ndarray, security_event: SecurityEvent) -> Dict[str, Any]:
         """Perform ML-based threat classification."""
 
         try:
@@ -506,9 +481,7 @@ class ThreatAnalyzer:
                 model_output = self.classification_model.predict(model_input)
 
                 predicted_class_idx = model_output.metadata.get("predicted_class", 0)
-                class_probabilities = model_output.metadata.get(
-                    "class_probabilities", []
-                )
+                class_probabilities = model_output.metadata.get("class_probabilities", [])
 
                 # Map prediction to threat type
                 event_types = list(SecurityEventType)
@@ -518,16 +491,12 @@ class ThreatAnalyzer:
                     else SecurityEventType.ANOMALOUS_BEHAVIOR
                 )
 
-                ML_MODEL_PREDICTIONS.labels(
-                    model_type="classification", prediction=predicted_type.value
-                ).inc()
+                ML_MODEL_PREDICTIONS.labels(model_type="classification", prediction=predicted_type.value).inc()
 
                 return {
                     "predicted_type": predicted_type,
                     "confidence": (
-                        float(model_output.confidence.max().item())
-                        if hasattr(model_output.confidence, "max")
-                        else 0.5
+                        float(model_output.confidence.max().item()) if hasattr(model_output.confidence, "max") else 0.5
                     ),
                     "class_probabilities": class_probabilities,
                     "ml_confidence": 0.8,  # Base ML confidence
@@ -540,9 +509,7 @@ class ThreatAnalyzer:
             self.logger.warning(f"ML classification failed: {e}")
             return self._rule_based_classification(security_event)
 
-    def _rule_based_classification(
-        self, security_event: SecurityEvent
-    ) -> Dict[str, Any]:
+    def _rule_based_classification(self, security_event: SecurityEvent) -> Dict[str, Any]:
         """Fallback rule-based classification."""
 
         # Simple rule-based logic
@@ -584,9 +551,7 @@ class ThreatAnalyzer:
 
         # Adjust based on context
         if security_context:
-            context_multiplier = self._calculate_context_severity_multiplier(
-                security_context
-            )
+            context_multiplier = self._calculate_context_severity_multiplier(security_context)
             severity_score *= context_multiplier
 
         # Adjust based on indicators
@@ -682,9 +647,7 @@ Provide concise, actionable insights."""
                 "llm_analysis": response.content,
                 "context_score": self._calculate_context_risk_score(context_data),
                 "key_factors": self._extract_key_context_factors(response.content),
-                "business_impact_indicators": self._extract_business_impact_indicators(
-                    context_data
-                ),
+                "business_impact_indicators": self._extract_business_impact_indicators(context_data),
             }
 
         except Exception as e:
@@ -696,9 +659,7 @@ Provide concise, actionable insights."""
                 "business_impact_indicators": [],
             }
 
-    async def _correlate_threat_intelligence(
-        self, security_event: SecurityEvent
-    ) -> Dict[str, Any]:
+    async def _correlate_threat_intelligence(self, security_event: SecurityEvent) -> Dict[str, Any]:
         """Correlate event with threat intelligence data."""
 
         correlations = []
@@ -722,9 +683,7 @@ Provide concise, actionable insights."""
 
         # Check event type patterns
         event_type_matches = [
-            intel
-            for intel in self.threat_intelligence.values()
-            if intel.threat_type == security_event.event_type
+            intel for intel in self.threat_intelligence.values() if intel.threat_type == security_event.event_type
         ]
 
         return {
@@ -732,19 +691,9 @@ Provide concise, actionable insights."""
             "relevance_score": relevance_score,
             "matched_intelligence_count": len(correlations),
             "event_type_matches": len(event_type_matches),
-            "threat_actors": list(
-                set(
-                    actor
-                    for correlation in correlations
-                    for actor in correlation["threat_actor"]
-                )
-            ),
+            "threat_actors": list(set(actor for correlation in correlations for actor in correlation["threat_actor"])),
             "associated_campaigns": list(
-                set(
-                    campaign
-                    for correlation in correlations
-                    for campaign in correlation["campaigns"]
-                )
+                set(campaign for correlation in correlations for campaign in correlation["campaigns"])
             ),
         }
 
@@ -770,22 +719,16 @@ Provide concise, actionable insights."""
                     # Criticality impact
                     if system.criticality.value == "mission_critical":
                         impact_score += 0.3
-                        impact_factors.append(
-                            f"Mission-critical system {system.system_name}"
-                        )
+                        impact_factors.append(f"Mission-critical system {system.system_name}")
                     elif system.criticality.value == "business_critical":
                         impact_score += 0.2
-                        impact_factors.append(
-                            f"Business-critical system {system.system_name}"
-                        )
+                        impact_factors.append(f"Business-critical system {system.system_name}")
 
                     # Dependency impact
                     if system.dependent_systems:
                         dependency_impact = len(system.dependent_systems) * 0.05
                         impact_score += min(dependency_impact, 0.2)
-                        impact_factors.append(
-                            f"{len(system.dependent_systems)} dependent systems"
-                        )
+                        impact_factors.append(f"{len(system.dependent_systems)} dependent systems")
 
         # Event type impact
         high_impact_events = {
@@ -796,9 +739,7 @@ Provide concise, actionable insights."""
 
         if security_event.event_type in high_impact_events:
             impact_score += 0.2
-            impact_factors.append(
-                f"High-impact event type: {security_event.event_type.value}"
-            )
+            impact_factors.append(f"High-impact event type: {security_event.event_type.value}")
 
         # Cap the impact score
         impact_score = min(impact_score, 1.0)
@@ -807,9 +748,7 @@ Provide concise, actionable insights."""
             "business_impact_score": impact_score,
             "impact_factors": impact_factors,
             "estimated_financial_impact": self._estimate_financial_impact(impact_score),
-            "operational_impact_level": self._get_operational_impact_level(
-                impact_score
-            ),
+            "operational_impact_level": self._get_operational_impact_level(impact_score),
             "recovery_time_estimate": self._estimate_recovery_time(impact_score),
         }
 
@@ -838,19 +777,13 @@ Provide concise, actionable insights."""
 
         return ThreatAnalysis(
             event_id=security_event.event_id,
-            threat_classification=ml_classification.get(
-                "predicted_type", security_event.event_type
-            ),
-            threat_level=severity_assessment.get(
-                "threat_level", security_event.threat_level
-            ),
+            threat_classification=ml_classification.get("predicted_type", security_event.event_type),
+            threat_level=severity_assessment.get("threat_level", security_event.threat_level),
             confidence=confidence_level,
             confidence_score=overall_confidence,
             # Threat intelligence
             threat_actor=intelligence_correlation.get("threat_actors", [None])[0],
-            ttps=self._extract_ttps_from_analysis(
-                security_event, intelligence_correlation
-            ),
+            ttps=self._extract_ttps_from_analysis(security_event, intelligence_correlation),
             mitre_attack_techniques=self._map_to_mitre_techniques(security_event),
             # Impact assessment
             potential_damage=business_impact,
@@ -865,14 +798,11 @@ Provide concise, actionable insights."""
             prevalence_score=self._calculate_prevalence_score(intelligence_correlation),
             detectability_score=overall_confidence,
             # Recommendations
-            immediate_actions=self._generate_immediate_actions(
-                security_event, severity_assessment
-            ),
+            immediate_actions=self._generate_immediate_actions(security_event, severity_assessment),
             short_term_actions=self._generate_short_term_actions(context_analysis),
             long_term_actions=self._generate_long_term_actions(business_impact),
             # Metadata
-            processing_time_ms=(time.time() - time.time())
-            * 1000,  # Will be updated by caller
+            processing_time_ms=(time.time() - time.time()) * 1000,  # Will be updated by caller
             data_sources=["ml_models", "threat_intelligence", "llm_analysis"],
         )
 
@@ -954,9 +884,7 @@ Provide concise, actionable insights."""
         # Legacy systems factors
         legacy_systems = context_data.get("legacy_systems", [])
         critical_systems = sum(
-            1
-            for sys in legacy_systems
-            if sys.get("criticality") in ["mission_critical", "business_critical"]
+            1 for sys in legacy_systems if sys.get("criticality") in ["mission_critical", "business_critical"]
         )
         score += min(critical_systems * 0.1, 0.3)
 
@@ -970,18 +898,13 @@ Provide concise, actionable insights."""
 
         for line in lines:
             line = line.strip()
-            if any(
-                keyword in line.lower()
-                for keyword in ["factor", "risk", "impact", "concern"]
-            ):
+            if any(keyword in line.lower() for keyword in ["factor", "risk", "impact", "concern"]):
                 if len(line) > 20 and len(line) < 200:
                     factors.append(line)
 
         return factors[:5]  # Top 5 factors
 
-    def _extract_business_impact_indicators(
-        self, context_data: Dict[str, Any]
-    ) -> List[str]:
+    def _extract_business_impact_indicators(self, context_data: Dict[str, Any]) -> List[str]:
         """Extract business impact indicators from context."""
         indicators = []
 
@@ -994,9 +917,7 @@ Provide concise, actionable insights."""
         # Security context indicators
         security_ctx = context_data.get("security_context", {})
         if security_ctx.get("active_incidents", 0) > 0:
-            indicators.append(
-                f"Multiple active incidents: {security_ctx['active_incidents']}"
-            )
+            indicators.append(f"Multiple active incidents: {security_ctx['active_incidents']}")
 
         return indicators
 
@@ -1028,9 +949,7 @@ Provide concise, actionable insights."""
         base_time = 4  # 4 hours base
         return int(base_time * (1 + impact_score * 5))
 
-    def _extract_ttps_from_analysis(
-        self, event: SecurityEvent, intelligence: Dict[str, Any]
-    ) -> List[str]:
+    def _extract_ttps_from_analysis(self, event: SecurityEvent, intelligence: Dict[str, Any]) -> List[str]:
         """Extract TTPs from analysis."""
         ttps = []
 
@@ -1165,9 +1084,7 @@ Provide concise, actionable insights."""
 
         return min(score, 1.0)
 
-    def _generate_immediate_actions(
-        self, event: SecurityEvent, severity: Dict[str, Any]
-    ) -> List[str]:
+    def _generate_immediate_actions(self, event: SecurityEvent, severity: Dict[str, Any]) -> List[str]:
         """Generate immediate action recommendations."""
         actions = ["Alert security team"]
 
@@ -1241,13 +1158,9 @@ Provide concise, actionable insights."""
             confidence=0.85,
         )
 
-        self.threat_intelligence[sample_intelligence.intelligence_id] = (
-            sample_intelligence
-        )
+        self.threat_intelligence[sample_intelligence.intelligence_id] = sample_intelligence
 
-        self.logger.info(
-            f"Loaded {len(self.threat_intelligence)} threat intelligence entries"
-        )
+        self.logger.info(f"Loaded {len(self.threat_intelligence)} threat intelligence entries")
 
     async def update_threat_intelligence(self, intelligence: ThreatIntelligence):
         """Update threat intelligence database."""

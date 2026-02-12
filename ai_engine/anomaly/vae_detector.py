@@ -150,9 +150,7 @@ class VAEModel(nn.Module):
         """Decode latent representation to reconstruction."""
         return self.decoder(z)
 
-    def forward(
-        self, x: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass through VAE."""
         mu, logvar = self.encode(x)
         z = self.reparameterize(mu, logvar)
@@ -195,9 +193,7 @@ class VAEModel(nn.Module):
             "kl_loss": kl_loss,
         }
 
-    def anomaly_score(
-        self, x: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def anomaly_score(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Calculate anomaly scores for input data.
 
@@ -301,9 +297,7 @@ class VAEDetector:
             self.logger.error(f"Failed to initialize VAE model: {e}")
             raise ModelException(f"VAE initialization failed: {e}")
 
-    async def detect(
-        self, features: np.ndarray, context: Optional[Dict[str, Any]] = None
-    ) -> AnomalyResult:
+    async def detect(self, features: np.ndarray, context: Optional[Dict[str, Any]] = None) -> AnomalyResult:
         """
         Detect anomalies in the provided features.
 
@@ -338,9 +332,7 @@ class VAEDetector:
             confidence = self._calculate_confidence(total_score, recon_error, kl_div)
 
             # Generate explanation
-            explanation = self._generate_explanation(
-                is_anomaly, total_score, recon_error, kl_div, context
-            )
+            explanation = self._generate_explanation(is_anomaly, total_score, recon_error, kl_div, context)
 
             processing_time = time.time() - start_time
 
@@ -447,10 +439,7 @@ class VAEDetector:
                     self.logger.info("Early stopping triggered")
                     break
             else:
-                self.logger.info(
-                    f"Epoch {epoch+1}/{num_epochs}: "
-                    f"train_loss={train_metrics['total_loss']:.4f}"
-                )
+                self.logger.info(f"Epoch {epoch+1}/{num_epochs}: " f"train_loss={train_metrics['total_loss']:.4f}")
 
         # Calculate anomaly thresholds from training data
         await self._calculate_thresholds(training_data)
@@ -518,26 +507,18 @@ class VAEDetector:
         if len(features.shape) == 1:
             features = features.reshape(1, -1)
 
-        features_tensor = torch.tensor(
-            features, dtype=torch.float32, device=self.device
-        )
+        features_tensor = torch.tensor(features, dtype=torch.float32, device=self.device)
 
         # Normalize if statistics available
         if self.feature_mean is not None and self.feature_std is not None:
-            features_tensor = (features_tensor - self.feature_mean) / (
-                self.feature_std + 1e-8
-            )
+            features_tensor = (features_tensor - self.feature_mean) / (self.feature_std + 1e-8)
 
         return features_tensor
 
     def _calculate_normalization_stats(self, training_data: np.ndarray) -> None:
         """Calculate feature normalization statistics."""
-        self.feature_mean = torch.tensor(
-            np.mean(training_data, axis=0), dtype=torch.float32, device=self.device
-        )
-        self.feature_std = torch.tensor(
-            np.std(training_data, axis=0), dtype=torch.float32, device=self.device
-        )
+        self.feature_mean = torch.tensor(np.mean(training_data, axis=0), dtype=torch.float32, device=self.device)
+        self.feature_std = torch.tensor(np.std(training_data, axis=0), dtype=torch.float32, device=self.device)
 
         self.logger.info("Calculated normalization statistics")
 
@@ -547,9 +528,7 @@ class VAEDetector:
 
         # Normalize data
         if self.feature_mean is not None and self.feature_std is not None:
-            normalized_data = (data - self.feature_mean.cpu().numpy()) / (
-                self.feature_std.cpu().numpy() + 1e-8
-            )
+            normalized_data = (data - self.feature_mean.cpu().numpy()) / (self.feature_std.cpu().numpy() + 1e-8)
         else:
             normalized_data = data
 
@@ -581,9 +560,7 @@ class VAEDetector:
             if self.scaler:
                 with torch.cuda.amp.autocast():
                     reconstruction, mu, logvar = self.model(batch_data)
-                    losses = self.model.loss_function(
-                        batch_data, reconstruction, mu, logvar, self.beta
-                    )
+                    losses = self.model.loss_function(batch_data, reconstruction, mu, logvar, self.beta)
 
                 # Backward pass with scaling
                 self.scaler.scale(losses["total_loss"]).backward()
@@ -591,9 +568,7 @@ class VAEDetector:
                 self.scaler.update()
             else:
                 reconstruction, mu, logvar = self.model(batch_data)
-                losses = self.model.loss_function(
-                    batch_data, reconstruction, mu, logvar, self.beta
-                )
+                losses = self.model.loss_function(batch_data, reconstruction, mu, logvar, self.beta)
 
                 losses["total_loss"].backward()
                 self.optimizer.step()
@@ -624,9 +599,7 @@ class VAEDetector:
                 batch_data = batch_data.to(self.device)
 
                 reconstruction, mu, logvar = self.model(batch_data)
-                losses = self.model.loss_function(
-                    batch_data, reconstruction, mu, logvar, self.beta
-                )
+                losses = self.model.loss_function(batch_data, reconstruction, mu, logvar, self.beta)
 
                 total_loss += losses["total_loss"].item()
                 total_recon_loss += losses["reconstruction_loss"].item()
@@ -654,9 +627,7 @@ class VAEDetector:
                 batch = training_data[i : i + self.batch_size]
                 features_tensor = self._preprocess_features(batch)
 
-                total_score, recon_error, kl_div = self.model.anomaly_score(
-                    features_tensor
-                )
+                total_score, recon_error, kl_div = self.model.anomaly_score(features_tensor)
 
                 scores.extend(total_score.cpu().numpy().tolist())
                 recon_errors.extend(recon_error.cpu().numpy().tolist())
@@ -664,9 +635,7 @@ class VAEDetector:
 
         # Set thresholds at specified percentile
         self.anomaly_threshold = np.percentile(scores, self.percentile_threshold)
-        self.reconstruction_threshold = np.percentile(
-            recon_errors, self.percentile_threshold
-        )
+        self.reconstruction_threshold = np.percentile(recon_errors, self.percentile_threshold)
         self.kl_threshold = np.percentile(kl_divs, self.percentile_threshold)
 
         self.logger.info(
@@ -675,23 +644,17 @@ class VAEDetector:
             f"kl={self.kl_threshold:.4f}"
         )
 
-    def _is_anomalous(
-        self, total_score: float, recon_error: float, kl_div: float
-    ) -> bool:
+    def _is_anomalous(self, total_score: float, recon_error: float, kl_div: float) -> bool:
         """Determine if the scores indicate an anomaly."""
         if self.anomaly_threshold is None:
             # Fallback to simple heuristic
             return total_score > 10.0
 
         return (
-            total_score > self.anomaly_threshold
-            or recon_error > self.reconstruction_threshold
-            or kl_div > self.kl_threshold
+            total_score > self.anomaly_threshold or recon_error > self.reconstruction_threshold or kl_div > self.kl_threshold
         )
 
-    def _calculate_confidence(
-        self, total_score: float, recon_error: float, kl_div: float
-    ) -> float:
+    def _calculate_confidence(self, total_score: float, recon_error: float, kl_div: float) -> float:
         """Calculate confidence score for the anomaly detection."""
         if self.anomaly_threshold is None:
             return 0.5  # Low confidence without thresholds
@@ -723,18 +686,13 @@ class VAEDetector:
 
         explanations = []
 
-        if (
-            self.reconstruction_threshold
-            and recon_error > self.reconstruction_threshold
-        ):
+        if self.reconstruction_threshold and recon_error > self.reconstruction_threshold:
             ratio = recon_error / self.reconstruction_threshold
             explanations.append(f"High reconstruction error ({ratio:.2f}x threshold)")
 
         if self.kl_threshold and kl_div > self.kl_threshold:
             ratio = kl_div / self.kl_threshold
-            explanations.append(
-                f"Unusual latent space distribution ({ratio:.2f}x threshold)"
-            )
+            explanations.append(f"Unusual latent space distribution ({ratio:.2f}x threshold)")
 
         if not explanations:
             explanations.append("Combined anomaly score exceeds threshold")
@@ -763,9 +721,7 @@ class VAEAnomalyDetector(VAEDetector):
 class VAEEncoder(nn.Module):
     """Standalone VAE encoder for backward compatibility."""
 
-    def __init__(
-        self, input_dim: int, latent_dim: int = 32, hidden_dims: List[int] = None
-    ):
+    def __init__(self, input_dim: int, latent_dim: int = 32, hidden_dims: List[int] = None):
         super(VAEEncoder, self).__init__()
 
         if hidden_dims is None:
@@ -796,9 +752,7 @@ class VAEEncoder(nn.Module):
 class VAEDecoder(nn.Module):
     """Standalone VAE decoder for backward compatibility."""
 
-    def __init__(
-        self, latent_dim: int = 32, output_dim: int = 100, hidden_dims: List[int] = None
-    ):
+    def __init__(self, latent_dim: int = 32, output_dim: int = 100, hidden_dims: List[int] = None):
         super(VAEDecoder, self).__init__()
 
         if hidden_dims is None:
@@ -825,19 +779,13 @@ class VAEDecoder(nn.Module):
 class VAE(nn.Module):
     """Complete VAE model for backward compatibility."""
 
-    def __init__(
-        self, input_dim: int, latent_dim: int = 32, hidden_dims: List[int] = None
-    ):
+    def __init__(self, input_dim: int, latent_dim: int = 32, hidden_dims: List[int] = None):
         super(VAE, self).__init__()
 
         self.encoder = VAEEncoder(input_dim, latent_dim, hidden_dims)
-        self.decoder = VAEDecoder(
-            latent_dim, input_dim, hidden_dims[::-1] if hidden_dims else None
-        )
+        self.decoder = VAEDecoder(latent_dim, input_dim, hidden_dims[::-1] if hidden_dims else None)
 
-    def forward(
-        self, x: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass through VAE."""
         mu, logvar = self.encoder(x)
 

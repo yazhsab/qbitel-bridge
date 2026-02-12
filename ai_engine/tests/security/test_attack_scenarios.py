@@ -27,10 +27,10 @@ class TestAttackScenarios:
     def message_samples(self):
         """Generate sample messages for testing."""
         return {
-            'small': b"Small message",
-            'medium': b"Medium message " * 100,
-            'large': b"Large message " * 1000,
-            'binary': os.urandom(1024)
+            "small": b"Small message",
+            "medium": b"Medium message " * 100,
+            "large": b"Large message " * 1000,
+            "binary": os.urandom(1024),
         }
 
     def test_replay_attack_prevention(self, encryption_key):
@@ -62,10 +62,10 @@ class TestAttackScenarios:
     def test_man_in_the_middle_attack_detection(self):
         """Test detection of MITM attacks using digital signatures."""
         # Alice and Bob establish keys
-        alice_sig = Signature('Dilithium3')
+        alice_sig = Signature("Dilithium3")
         alice_public = alice_sig.generate_keypair()
 
-        bob_sig = Signature('Dilithium3')
+        bob_sig = Signature("Dilithium3")
         bob_public = bob_sig.generate_keypair()
 
         # Alice sends a message with signature
@@ -84,7 +84,7 @@ class TestAttackScenarios:
         assert not is_valid_tampered, "Tampered message should not verify"
 
         # Attacker tries to replace signature
-        eve_sig = Signature('Dilithium3')
+        eve_sig = Signature("Dilithium3")
         eve_public = eve_sig.generate_keypair()
         eve_signature = eve_sig.sign(tampered_message)
 
@@ -101,7 +101,7 @@ class TestAttackScenarios:
             b"\x00" * 16,  # All zeros
             b"\xff" * 16,  # All ones
             b"\xaa" * 16,  # Alternating pattern
-            b"AAAA" * 4,   # Repetitive
+            b"AAAA" * 4,  # Repetitive
         ]
 
         ciphertexts = []
@@ -114,8 +114,7 @@ class TestAttackScenarios:
             nonces.append(nonce)
 
         # Verify all ciphertexts are different
-        assert len(set(ciphertexts)) == len(ciphertexts), \
-            "Ciphertexts should be unique even for chosen plaintexts"
+        assert len(set(ciphertexts)) == len(ciphertexts), "Ciphertexts should be unique even for chosen plaintexts"
 
         # Verify ciphertexts don't reveal patterns
         for i, ct in enumerate(ciphertexts):
@@ -137,9 +136,9 @@ class TestAttackScenarios:
 
         # Attacker modifies ciphertext
         tampered_ciphertexts = [
-            ciphertext[:-1] + b'\x00',  # Modify last byte
-            ciphertext[:5] + b'\xff' + ciphertext[6:],  # Modify middle
-            ciphertext + b'\x00',  # Append byte
+            ciphertext[:-1] + b"\x00",  # Modify last byte
+            ciphertext[:5] + b"\xff" + ciphertext[6:],  # Modify middle
+            ciphertext + b"\x00",  # Append byte
             ciphertext[1:],  # Remove first byte
         ]
 
@@ -150,7 +149,7 @@ class TestAttackScenarios:
 
     def test_timing_attack_resistance(self):
         """Test resistance to timing attacks in cryptographic operations."""
-        kem = KeyEncapsulation('Kyber768')
+        kem = KeyEncapsulation("Kyber768")
         public_key = kem.generate_keypair()
 
         # Measure decapsulation time for multiple valid ciphertexts
@@ -176,14 +175,14 @@ class TestAttackScenarios:
 
         # Calculate average times
         import statistics
+
         avg_valid = statistics.mean(valid_timings)
         avg_invalid = statistics.mean(invalid_timings)
 
         # Timing difference should be minimal (constant-time operation)
         # Allow up to 50% difference due to system noise
         timing_ratio = max(avg_valid, avg_invalid) / min(avg_valid, avg_invalid)
-        assert timing_ratio < 1.5, \
-            f"Potential timing attack vulnerability: {timing_ratio:.2f}x difference"
+        assert timing_ratio < 1.5, f"Potential timing attack vulnerability: {timing_ratio:.2f}x difference"
 
     def test_padding_oracle_attack_prevention(self):
         """Test that padding oracle attacks are prevented."""
@@ -209,8 +208,7 @@ class TestAttackScenarios:
 
             # Exception should not reveal information about padding
             error_msg = str(exc_info.value).lower()
-            assert 'padding' not in error_msg, \
-                "Error message should not reveal padding information"
+            assert "padding" not in error_msg, "Error message should not reveal padding information"
 
     def test_length_extension_attack_prevention(self):
         """Test prevention of length extension attacks."""
@@ -250,8 +248,7 @@ class TestAttackScenarios:
             hashes_seen.add(hash_digest)
 
         # All hashes should be unique (no collisions)
-        assert len(hashes_seen) == num_messages, \
-            f"Hash collision detected: {num_messages - len(hashes_seen)} collisions"
+        assert len(hashes_seen) == num_messages, f"Hash collision detected: {num_messages - len(hashes_seen)} collisions"
 
     def test_denial_of_service_resistance(self):
         """Test resistance to DoS attacks through resource exhaustion."""
@@ -272,8 +269,7 @@ class TestAttackScenarios:
         time_per_op = elapsed / iterations
 
         # Operations should complete in reasonable time (< 100ms per 1MB)
-        assert time_per_op < 0.1, \
-            f"Operation too slow, vulnerable to DoS: {time_per_op:.3f}s per 1MB"
+        assert time_per_op < 0.1, f"Operation too slow, vulnerable to DoS: {time_per_op:.3f}s per 1MB"
 
     def test_key_exhaustion_attack_resistance(self):
         """Test that key space is large enough to resist exhaustion."""
@@ -284,11 +280,10 @@ class TestAttackScenarios:
         # Key space should be at least 2^256
         min_key_space_bits = 256
 
-        assert kyber_key_size * 8 >= min_key_space_bits, \
-            "Kyber key space too small"
+        assert kyber_key_size * 8 >= min_key_space_bits, "Kyber key space too small"
 
         # Test that generated keys have good distribution
-        kem = KeyEncapsulation('Kyber768')
+        kem = KeyEncapsulation("Kyber768")
         shared_secrets = []
 
         for _ in range(100):
@@ -304,8 +299,8 @@ class TestAttackScenarios:
         # System should enforce use of strong algorithms
 
         # Acceptable algorithms (post-quantum)
-        acceptable_kems = ['Kyber512', 'Kyber768', 'Kyber1024']
-        acceptable_sigs = ['Dilithium2', 'Dilithium3', 'Dilithium5']
+        acceptable_kems = ["Kyber512", "Kyber768", "Kyber1024"]
+        acceptable_sigs = ["Dilithium2", "Dilithium3", "Dilithium5"]
 
         # Verify we can use strong algorithms
         for algorithm in acceptable_kems:
@@ -323,7 +318,7 @@ class TestAttackScenarios:
 
     def test_side_channel_cache_timing_resistance(self):
         """Test resistance to cache timing side-channel attacks."""
-        kem = KeyEncapsulation('Kyber768')
+        kem = KeyEncapsulation("Kyber768")
         public_key = kem.generate_keypair()
 
         # Perform many operations and measure timing variance
@@ -339,6 +334,7 @@ class TestAttackScenarios:
 
         # Calculate coefficient of variation
         import statistics
+
         mean_time = statistics.mean(timings)
         std_dev = statistics.stdev(timings)
         cv = (std_dev / mean_time) * 100
@@ -348,7 +344,7 @@ class TestAttackScenarios:
 
     def test_fault_injection_attack_resistance(self):
         """Test resistance to fault injection attacks."""
-        sig = Signature('Dilithium3')
+        sig = Signature("Dilithium3")
         public_key = sig.generate_keypair()
         message = b"Test message"
 
@@ -362,13 +358,12 @@ class TestAttackScenarios:
                 bit_pos = bit_position % 8
 
                 faulty_signature = bytearray(signature)
-                faulty_signature[byte_pos] ^= (1 << bit_pos)
+                faulty_signature[byte_pos] ^= 1 << bit_pos
                 faulty_signature = bytes(faulty_signature)
 
                 # Verification should fail for faulty signature
                 is_valid = sig.verify(message, faulty_signature, public_key)
-                assert not is_valid, \
-                    f"Fault injection at bit {bit_position} not detected"
+                assert not is_valid, f"Fault injection at bit {bit_position} not detected"
 
     def test_nonce_reuse_detection(self):
         """Test that nonce reuse is catastrophic and detectable."""
@@ -387,23 +382,18 @@ class TestAttackScenarios:
         # In production, nonce reuse MUST be prevented
 
         # Verify that same nonce produces different ciphertexts for different messages
-        assert ciphertext1 != ciphertext2, \
-            "Different messages should produce different ciphertexts"
+        assert ciphertext1 != ciphertext2, "Different messages should produce different ciphertexts"
 
     def test_session_hijacking_prevention(self):
         """Test prevention of session hijacking through authenticated encryption."""
         # Simulate session establishment
-        kem = KeyEncapsulation('Kyber768')
+        kem = KeyEncapsulation("Kyber768")
         public_key = kem.generate_keypair()
         ciphertext, session_key = kem.encap_secret(public_key)
 
         # Derive encryption key from session key
         kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
-            length=32,
-            salt=b'session_salt',
-            iterations=100000,
-            backend=default_backend()
+            algorithm=hashes.SHA256(), length=32, salt=b"session_salt", iterations=100000, backend=default_backend()
         )
         encryption_key = kdf.derive(session_key)
 
@@ -427,8 +417,8 @@ class TestAttackScenarios:
     def test_quantum_attack_resistance(self):
         """Test that post-quantum algorithms are used for quantum resistance."""
         # Verify we're using post-quantum algorithms
-        kem_algorithms = ['Kyber512', 'Kyber768', 'Kyber1024']
-        sig_algorithms = ['Dilithium2', 'Dilithium3', 'Dilithium5']
+        kem_algorithms = ["Kyber512", "Kyber768", "Kyber1024"]
+        sig_algorithms = ["Dilithium2", "Dilithium3", "Dilithium5"]
 
         # These are NIST post-quantum finalists/winners
         for alg in kem_algorithms:
@@ -460,7 +450,7 @@ class TestAttackScenarios:
             length=32,
             salt=salt,
             iterations=100000,  # High iteration count slows brute force
-            backend=default_backend()
+            backend=default_backend(),
         )
 
         # Measure time to derive key
@@ -469,26 +459,14 @@ class TestAttackScenarios:
         elapsed = time.perf_counter() - start
 
         # Should take noticeable time (> 10ms) to slow brute force
-        assert elapsed > 0.01, \
-            f"KDF too fast, vulnerable to brute force: {elapsed*1000:.1f}ms"
+        assert elapsed > 0.01, f"KDF too fast, vulnerable to brute force: {elapsed*1000:.1f}ms"
 
         # Verify key is deterministic
-        kdf2 = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
-            length=32,
-            salt=salt,
-            iterations=100000,
-            backend=default_backend()
-        )
+        kdf2 = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=100000, backend=default_backend())
         key2 = kdf2.derive(password)
         assert key == key2, "KDF should be deterministic"
 
-    @pytest.mark.parametrize("attack_type", [
-        "bit_flip",
-        "byte_modification",
-        "truncation",
-        "extension"
-    ])
+    @pytest.mark.parametrize("attack_type", ["bit_flip", "byte_modification", "truncation", "extension"])
     def test_integrity_attack_detection(self, attack_type, encryption_key):
         """Test detection of various integrity attacks."""
         cipher = ChaCha20Poly1305(encryption_key)

@@ -99,6 +99,7 @@ try:
         RelevanceDecayConfig,
         CompressionConfig,
     )
+
     _PERSISTENT_MEMORY_AVAILABLE = True
 except ImportError:
     _PERSISTENT_MEMORY_AVAILABLE = False

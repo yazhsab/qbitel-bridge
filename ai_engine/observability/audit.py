@@ -584,10 +584,7 @@ class AuditLogger:
         Returns:
             Compliance report
         """
-        events = [
-            e for e in self._events
-            if start_date <= e.timestamp <= end_date
-        ]
+        events = [e for e in self._events if start_date <= e.timestamp <= end_date]
 
         # Category breakdown
         by_category = {}
@@ -644,6 +641,7 @@ def create_siem_exporter(
     api_key: Optional[str] = None,
 ) -> Callable[[AuditEvent], None]:
     """Create a SIEM exporter function."""
+
     def exporter(event: AuditEvent) -> None:
         try:
             import urllib.request

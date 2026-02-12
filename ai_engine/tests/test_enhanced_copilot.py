@@ -37,7 +37,6 @@ from ai_engine.copilot.protocol_handler_generator import (
 from ai_engine.security.models import SecurityEvent, SecurityEventType, ThreatLevel
 from ai_engine.core.config import Config
 
-
 # Fixtures
 
 
@@ -117,9 +116,7 @@ class TestPredictiveThreatModeler:
             scenario_id="test_scenario_2",
             scenario_type=ScenarioType.ENCRYPTION_CHANGE,
             description="Downgrade encryption to TLS 1.0",
-            proposed_change={
-                "encryption": {"algorithm": "TLS 1.0", "strength": "weaken"}
-            },
+            proposed_change={"encryption": {"algorithm": "TLS 1.0", "strength": "weaken"}},
         )
 
         mock_llm_service.query.return_value.content = """
@@ -170,9 +167,7 @@ class TestPlaybookGenerator:
     """Test suite for PlaybookGenerator."""
 
     @pytest.mark.asyncio
-    async def test_generate_playbook_for_unauthorized_access(
-        self, config, mock_llm_service
-    ):
+    async def test_generate_playbook_for_unauthorized_access(self, config, mock_llm_service):
         """Test playbook generation for unauthorized access incident."""
         generator = PlaybookGenerator(config, llm_service=mock_llm_service)
 
@@ -440,19 +435,13 @@ class TestProtocolHandlerGenerator:
         generator = ProtocolHandlerGenerator(config, llm_service=mock_llm_service)
 
         # Test different languages
-        py_file = generator._determine_file_name(
-            "MyProtocol", ComponentType.PARSER, ProgrammingLanguage.PYTHON
-        )
+        py_file = generator._determine_file_name("MyProtocol", ComponentType.PARSER, ProgrammingLanguage.PYTHON)
         assert py_file == "myprotocol_parser.py"
 
-        rs_file = generator._determine_file_name(
-            "MyProtocol", ComponentType.HANDLER, ProgrammingLanguage.RUST
-        )
+        rs_file = generator._determine_file_name("MyProtocol", ComponentType.HANDLER, ProgrammingLanguage.RUST)
         assert rs_file == "myprotocol_handler.rs"
 
-        go_file = generator._determine_file_name(
-            "MyProtocol", ComponentType.VALIDATOR, ProgrammingLanguage.GO
-        )
+        go_file = generator._determine_file_name("MyProtocol", ComponentType.VALIDATOR, ProgrammingLanguage.GO)
         assert go_file == "myprotocol_validator.go"
 
 
@@ -533,10 +522,7 @@ class TestEnhancedCopilotIntegration:
             playbook = await generator.generate_playbook(incident)
 
             assert len(playbook.actions) > 0
-            assert any(
-                action.priority == ActionPriority.CRITICAL
-                for action in playbook.actions
-            )
+            assert any(action.priority == ActionPriority.CRITICAL for action in playbook.actions)
 
 
 # Performance Tests

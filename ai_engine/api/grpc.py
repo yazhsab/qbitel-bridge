@@ -125,9 +125,7 @@ class AIEngineGRPCService:
             # Remove nulls to avoid clutter
             metadata = {k: v for k, v in metadata.items() if v is not None}
 
-            result = await self.ai_engine.discover_protocol(
-                data_bytes, metadata=metadata if metadata else None
-            )
+            result = await self.ai_engine.discover_protocol(data_bytes, metadata=metadata if metadata else None)
 
             # Update statistics
             processing_time = (time.time() - start_time) * 1000
@@ -294,10 +292,7 @@ class AIEngineGRPCService:
             baseline_bytes = None
             baseline_attr = getattr(request, "baseline_data", None)
             if isinstance(baseline_attr, (list, tuple)) and baseline_attr:
-                baseline_bytes = [
-                    self._decode_data(baseline, request.data_format)
-                    for baseline in baseline_attr
-                ]
+                baseline_bytes = [self._decode_data(baseline, request.data_format) for baseline in baseline_attr]
             elif isinstance(baseline_attr, (str, bytes)) and baseline_attr:
                 baseline_bytes = [self._decode_data(baseline_attr, request.data_format)]
 
@@ -310,9 +305,7 @@ class AIEngineGRPCService:
             }
             context = {k: v for k, v in context.items() if v is not None}
 
-            result = await self.ai_engine.detect_anomaly(
-                data_bytes, context=context if context else None
-            )
+            result = await self.ai_engine.detect_anomaly(data_bytes, context=context if context else None)
 
             # Update statistics
             processing_time = (time.time() - start_time) * 1000
@@ -397,10 +390,7 @@ class AIEngineGRPCService:
             # Calculate average processing time
             avg_processing_time = 0.0
             if self.stats["successful_requests"] > 0:
-                avg_processing_time = (
-                    self.stats["total_processing_time_ms"]
-                    / self.stats["successful_requests"]
-                )
+                avg_processing_time = self.stats["total_processing_time_ms"] / self.stats["successful_requests"]
 
             # Get AI Engine status
             engine_status = {}
@@ -415,10 +405,7 @@ class AIEngineGRPCService:
                     "total_requests": self.stats["total_requests"],
                     "successful_requests": self.stats["successful_requests"],
                     "failed_requests": self.stats["failed_requests"],
-                    "success_rate": (
-                        self.stats["successful_requests"]
-                        / max(1, self.stats["total_requests"])
-                    ),
+                    "success_rate": (self.stats["successful_requests"] / max(1, self.stats["total_requests"])),
                     "average_processing_time_ms": avg_processing_time,
                 },
                 "engine_status": engine_status,
@@ -596,9 +583,7 @@ class GRPCServer:
 
         self.port = getattr(config, "grpc_port", 50051)
         self.max_workers = getattr(config, "grpc_max_workers", 10)
-        self.max_message_length = getattr(
-            config, "grpc_max_message_length", 10 * 1024 * 1024
-        )  # 10MB
+        self.max_message_length = getattr(config, "grpc_max_message_length", 10 * 1024 * 1024)  # 10MB
 
     async def start(self) -> None:
         """Start the gRPC server."""

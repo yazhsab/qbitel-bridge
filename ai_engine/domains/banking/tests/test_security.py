@@ -411,8 +411,7 @@ class TestCSRBuilder:
         builder = CSRBuilder()
 
         csr = (
-            builder
-            .set_subject(
+            builder.set_subject(
                 common_name="server.example.com",
                 organization="Example Corp",
                 country="US",
@@ -439,8 +438,7 @@ class TestCSRBuilder:
 
         builder = CSRBuilder()
         csr = (
-            builder
-            .set_subject_info(subject)
+            builder.set_subject_info(subject)
             .for_psd2_qwac()
             .set_psd2_roles(
                 payment_initiation=True,
@@ -596,8 +594,7 @@ class TestPINValidator:
         result = validator.validate("1234")
 
         assert not result.is_valid
-        assert any("ascend" in e.message.lower() or "blacklist" in e.message.lower()
-                   for e in result.errors)
+        assert any("ascend" in e.message.lower() or "blacklist" in e.message.lower() for e in result.errors)
 
     def test_validate_pan_match(self):
         """Test validation catches PIN matching PAN digits."""

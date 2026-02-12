@@ -27,6 +27,7 @@ from pydantic import BaseModel, Field
 
 class TemplateStatus(Enum):
     """Status of a prompt template."""
+
     DRAFT = "draft"
     ACTIVE = "active"
     DEPRECATED = "deprecated"
@@ -35,6 +36,7 @@ class TemplateStatus(Enum):
 
 class VariableType(Enum):
     """Types of template variables."""
+
     STRING = "string"
     NUMBER = "number"
     BOOLEAN = "boolean"
@@ -46,6 +48,7 @@ class VariableType(Enum):
 @dataclass
 class TemplateVariable:
     """Definition of a template variable."""
+
     name: str
     var_type: VariableType
     description: str
@@ -58,6 +61,7 @@ class TemplateVariable:
 @dataclass
 class TemplateVersion:
     """A specific version of a template."""
+
     version: str  # Semantic versioning (e.g., "1.0.0")
     content: str
     system_prompt: Optional[str]
@@ -72,6 +76,7 @@ class TemplateVersion:
 @dataclass
 class PromptTemplate:
     """A prompt template with version history."""
+
     template_id: str
     name: str
     description: str
@@ -95,6 +100,7 @@ class PromptTemplate:
 @dataclass
 class RenderedPrompt:
     """A rendered prompt ready for LLM consumption."""
+
     prompt: str
     system_prompt: Optional[str]
     template_id: str
@@ -108,6 +114,7 @@ class RenderedPrompt:
 @dataclass
 class ABTestConfig:
     """Configuration for A/B testing templates."""
+
     test_id: str
     template_id: str
     version_a: str
@@ -122,6 +129,7 @@ class ABTestConfig:
 @dataclass
 class ABTestResult:
     """Results from an A/B test."""
+
     test_id: str
     version_a_samples: int
     version_b_samples: int
@@ -288,7 +296,9 @@ Provide:
                         variables=[
                             TemplateVariable("framework", VariableType.STRING, "Compliance framework", default="PCI-DSS"),
                             TemplateVariable("configuration", VariableType.STRING, "Configuration to check", required=True),
-                            TemplateVariable("controls", VariableType.LIST, "Specific controls to check", required=False, default=[]),
+                            TemplateVariable(
+                                "controls", VariableType.LIST, "Specific controls to check", required=False, default=[]
+                            ),
                         ],
                         created_at=datetime.now(),
                         created_by="system",
@@ -555,7 +565,7 @@ Generate production-ready code with:
         seen = set()
 
         # Match {{variable}} and {{variable|default}}
-        pattern = r'\{\{(\w+)(?:\|([^}]+))?\}\}'
+        pattern = r"\{\{(\w+)(?:\|([^}]+))?\}\}"
         for match in re.finditer(pattern, content):
             name = match.group(1)
             default = match.group(2)
@@ -564,27 +574,31 @@ Generate production-ready code with:
                 continue
             seen.add(name)
 
-            variables.append(TemplateVariable(
-                name=name,
-                var_type=VariableType.STRING,
-                description=f"Variable: {name}",
-                default=default,
-                required=default is None,
-            ))
+            variables.append(
+                TemplateVariable(
+                    name=name,
+                    var_type=VariableType.STRING,
+                    description=f"Variable: {name}",
+                    default=default,
+                    required=default is None,
+                )
+            )
 
         # Match {% for item in list %}
-        list_pattern = r'\{% for \w+ in (\w+) %\}'
+        list_pattern = r"\{% for \w+ in (\w+) %\}"
         for match in re.finditer(list_pattern, content):
             name = match.group(1)
             if name not in seen:
                 seen.add(name)
-                variables.append(TemplateVariable(
-                    name=name,
-                    var_type=VariableType.LIST,
-                    description=f"List variable: {name}",
-                    default=[],
-                    required=False,
-                ))
+                variables.append(
+                    TemplateVariable(
+                        name=name,
+                        var_type=VariableType.LIST,
+                        description=f"List variable: {name}",
+                        default=[],
+                        required=False,
+                    )
+                )
 
         return variables
 
@@ -631,7 +645,7 @@ Generate production-ready code with:
         result = template
 
         # Handle conditionals {% if var %}...{% endif %}
-        if_pattern = r'\{% if (\w+) %\}(.*?)\{% endif %\}'
+        if_pattern = r"\{% if (\w+) %\}(.*?)\{% endif %\}"
         for match in re.finditer(if_pattern, result, re.DOTALL):
             var_name = match.group(1)
             content = match.group(2)
@@ -643,7 +657,7 @@ Generate production-ready code with:
                 result = result.replace(match.group(0), "")
 
         # Handle for loops {% for item in list %}...{% endfor %}
-        for_pattern = r'\{% for (\w+) in (\w+) %\}(.*?)\{% endfor %\}'
+        for_pattern = r"\{% for (\w+) in (\w+) %\}(.*?)\{% endfor %\}"
         for match in re.finditer(for_pattern, result, re.DOTALL):
             item_name = match.group(1)
             list_name = match.group(2)
@@ -658,7 +672,7 @@ Generate production-ready code with:
             result = result.replace(match.group(0), "\n".join(rendered_items))
 
         # Handle simple variables {{var}} and {{var|default}}
-        var_pattern = r'\{\{(\w+)(?:\|([^}]+))?\}\}'
+        var_pattern = r"\{\{(\w+)(?:\|([^}]+))?\}\}"
         for match in re.finditer(var_pattern, result):
             var_name = match.group(1)
             default = match.group(2)
@@ -681,6 +695,7 @@ Generate production-ready code with:
             if test.template_id == template_id and test.is_active:
                 # Simple random assignment based on hash
                 import random
+
                 if random.random() < test.traffic_split:
                     return test.version_b
                 else:
@@ -764,10 +779,7 @@ Generate production-ready code with:
 
         # Simple statistical significance check
         n_a, n_b = len(a_scores), len(b_scores)
-        is_significant = (
-            n_a >= config.min_samples and
-            n_b >= config.min_samples
-        )
+        is_significant = n_a >= config.min_samples and n_b >= config.min_samples
 
         winner = None
         if is_significant:
@@ -781,7 +793,7 @@ Generate production-ready code with:
         if is_significant:
             pooled_std = ((std(a_scores) ** 2 + std(b_scores) ** 2) / 2) ** 0.5
             if pooled_std > 0:
-                z = abs(a_mean - b_mean) / (pooled_std * (1/n_a + 1/n_b) ** 0.5)
+                z = abs(a_mean - b_mean) / (pooled_std * (1 / n_a + 1 / n_b) ** 0.5)
                 # Approximate p-value from z-score
                 confidence = min(0.99, z / 3)
 
@@ -847,7 +859,7 @@ Generate production-ready code with:
 
         # Update current markers
         for v in template.versions:
-            v.is_current = (v.version == version)
+            v.is_current = v.version == version
 
         template.current_version = version
         template.updated_at = datetime.now()

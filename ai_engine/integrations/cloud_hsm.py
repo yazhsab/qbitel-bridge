@@ -28,24 +28,16 @@ from prometheus_client import Counter, Histogram, Gauge
 logger = logging.getLogger(__name__)
 
 # Metrics
-HSM_OPERATIONS = Counter(
-    'cloud_hsm_operations_total',
-    'Total Cloud HSM operations',
-    ['provider', 'operation', 'status']
-)
+HSM_OPERATIONS = Counter("cloud_hsm_operations_total", "Total Cloud HSM operations", ["provider", "operation", "status"])
 
 HSM_LATENCY = Histogram(
-    'cloud_hsm_operation_latency_seconds',
-    'Cloud HSM operation latency',
-    ['provider', 'operation'],
-    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0]
+    "cloud_hsm_operation_latency_seconds",
+    "Cloud HSM operation latency",
+    ["provider", "operation"],
+    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0],
 )
 
-HSM_ACTIVE_SESSIONS = Gauge(
-    'cloud_hsm_active_sessions',
-    'Number of active HSM sessions',
-    ['provider']
-)
+HSM_ACTIVE_SESSIONS = Gauge("cloud_hsm_active_sessions", "Number of active HSM sessions", ["provider"])
 
 
 class CloudHSMProvider(Enum):
@@ -401,9 +393,7 @@ class AWSCloudHSMAdapter(CloudHSMAdapter):
         session.touch()
 
         # Simulate public key export
-        public_key = hashlib.sha256(
-            b"PUBLIC_KEY" + key_handle.key_id.encode()
-        ).digest()
+        public_key = hashlib.sha256(b"PUBLIC_KEY" + key_handle.key_id.encode()).digest()
 
         HSM_OPERATIONS.labels(provider="aws", operation="export_public_key", status="success").inc()
         return public_key

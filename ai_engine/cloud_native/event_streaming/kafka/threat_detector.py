@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class KafkaAnomaly:
     """Detected anomaly in Kafka stream"""
+
     topic: str
     partition: int
     offset: int
@@ -38,13 +39,7 @@ class KafkaThreatDetector:
         self._baseline_stats = {}
         logger.info("Initialized KafkaThreatDetector")
 
-    def analyze_stream(
-        self,
-        topic: str,
-        message_rate: float,
-        error_rate: float,
-        consumer_lag: int
-    ) -> List[KafkaAnomaly]:
+    def analyze_stream(self, topic: str, message_rate: float, error_rate: float, consumer_lag: int) -> List[KafkaAnomaly]:
         """
         Analyze Kafka stream for anomalies.
 
@@ -68,7 +63,7 @@ class KafkaThreatDetector:
                 anomaly_type="high_message_rate",
                 severity="MEDIUM",
                 description=f"Unusually high message rate: {message_rate} msg/s",
-                confidence=0.85
+                confidence=0.85,
             )
             anomalies.append(anomaly)
 
@@ -81,7 +76,7 @@ class KafkaThreatDetector:
                 anomaly_type="high_error_rate",
                 severity="HIGH",
                 description=f"High error rate: {error_rate*100:.1f}%",
-                confidence=0.9
+                confidence=0.9,
             )
             anomalies.append(anomaly)
 
@@ -94,7 +89,7 @@ class KafkaThreatDetector:
                 anomaly_type="consumer_lag",
                 severity="MEDIUM",
                 description=f"High consumer lag: {consumer_lag} messages",
-                confidence=0.8
+                confidence=0.8,
             )
             anomalies.append(anomaly)
 
@@ -109,6 +104,6 @@ class KafkaThreatDetector:
                 "critical": sum(1 for a in self._anomalies if a.severity == "CRITICAL"),
                 "high": sum(1 for a in self._anomalies if a.severity == "HIGH"),
                 "medium": sum(1 for a in self._anomalies if a.severity == "MEDIUM"),
-                "low": sum(1 for a in self._anomalies if a.severity == "LOW")
-            }
+                "low": sum(1 for a in self._anomalies if a.severity == "LOW"),
+            },
         }

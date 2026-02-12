@@ -113,9 +113,7 @@ class TestModelTrainer:
     async def test_initialize_trainer(self, trainer):
         """Test trainer initialization."""
         with patch.object(trainer, "_initialize_mlflow", new_callable=AsyncMock):
-            with patch.object(
-                trainer, "_initialize_distributed", new_callable=AsyncMock
-            ):
+            with patch.object(trainer, "_initialize_distributed", new_callable=AsyncMock):
                 with patch("ai_engine.training.trainer.ModelRegistry") as mock_registry:
                     mock_registry_instance = AsyncMock()
                     mock_registry.return_value = mock_registry_instance
@@ -139,19 +137,13 @@ class TestModelTrainer:
             with patch("mlflow.log_params"):
                 with patch("mlflow.log_metrics"):
                     with patch("mlflow.pytorch.log_model"):
-                        with patch.object(
-                            trainer, "_prepare_model_for_training", return_value=model
-                        ):
-                            with patch.object(
-                                trainer, "_training_loop", new_callable=AsyncMock
-                            ) as mock_loop:
+                        with patch.object(trainer, "_prepare_model_for_training", return_value=model):
+                            with patch.object(trainer, "_training_loop", new_callable=AsyncMock) as mock_loop:
                                 mock_loop.return_value = {
                                     "train_loss": [0.5, 0.4, 0.3],
                                     "best_val_loss": 0.3,
                                 }
-                                with patch.object(
-                                    trainer, "_save_best_model", new_callable=AsyncMock
-                                ) as mock_save:
+                                with patch.object(trainer, "_save_best_model", new_callable=AsyncMock) as mock_save:
                                     mock_save.return_value = "/tmp/model.pt"
 
                                     job = await trainer.train_model(
@@ -184,20 +176,14 @@ class TestModelTrainer:
             with patch("mlflow.log_params"):
                 with patch("mlflow.log_metrics"):
                     with patch("mlflow.pytorch.log_model"):
-                        with patch.object(
-                            trainer, "_prepare_model_for_training", return_value=model
-                        ):
-                            with patch.object(
-                                trainer, "_training_loop", new_callable=AsyncMock
-                            ) as mock_loop:
+                        with patch.object(trainer, "_prepare_model_for_training", return_value=model):
+                            with patch.object(trainer, "_training_loop", new_callable=AsyncMock) as mock_loop:
                                 mock_loop.return_value = {
                                     "train_loss": [0.5, 0.4],
                                     "val_loss": [0.6, 0.5],
                                     "best_val_loss": 0.5,
                                 }
-                                with patch.object(
-                                    trainer, "_save_best_model", new_callable=AsyncMock
-                                ) as mock_save:
+                                with patch.object(trainer, "_save_best_model", new_callable=AsyncMock) as mock_save:
                                     mock_save.return_value = "/tmp/model.pt"
 
                                     job = await trainer.train_model(
@@ -236,9 +222,7 @@ class TestModelTrainer:
     def test_create_optimizer_adamw(self, trainer):
         """Test creating AdamW optimizer."""
         model = SimpleTestModel()
-        config = TrainingConfig(
-            learning_rate=0.001, optimizer="adamw", weight_decay=0.01
-        )
+        config = TrainingConfig(learning_rate=0.001, optimizer="adamw", weight_decay=0.01)
 
         optimizer = trainer._create_optimizer(model, config)
 

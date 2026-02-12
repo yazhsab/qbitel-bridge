@@ -76,9 +76,7 @@ class ThalesHSM(HSMProvider):
     def connect(self) -> None:
         """Connect to Thales Luna HSM."""
         if not self._config.library_path:
-            raise HSMConnectionError(
-                "library_path required for Thales HSM (cryptoki library)"
-            )
+            raise HSMConnectionError("library_path required for Thales HSM (cryptoki library)")
 
         # In production, this would:
         # 1. Load the PKCS#11 library
@@ -107,6 +105,7 @@ class ThalesHSM(HSMProvider):
 
         # Stub: In production, call C_OpenSession
         import uuid
+
         session_id = str(uuid.uuid4())
         self._session_handles[session_id] = {
             "read_write": read_write,
@@ -138,6 +137,7 @@ class ThalesHSM(HSMProvider):
 
         # Stub implementation
         import uuid
+
         key_id = str(uuid.uuid4())
 
         return HSMKeyHandle(
@@ -166,6 +166,7 @@ class ThalesHSM(HSMProvider):
 
         # In production, call C_GenerateKeyPair with appropriate mechanism
         import uuid
+
         pub_key_id = str(uuid.uuid4())
         priv_key_id = str(uuid.uuid4())
 
@@ -207,6 +208,7 @@ class ThalesHSM(HSMProvider):
 
         # In production, call C_CreateObject with key data
         import uuid
+
         key_id = str(uuid.uuid4())
 
         return HSMKeyHandle(
@@ -455,6 +457,7 @@ class ThalesHSM(HSMProvider):
 
         # In production, call C_GenerateRandom
         import secrets
+
         return secrets.token_bytes(length)
 
     def _check_connected(self) -> None:

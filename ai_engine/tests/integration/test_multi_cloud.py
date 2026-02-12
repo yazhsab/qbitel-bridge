@@ -1,6 +1,7 @@
 """
 Integration tests for Multi-Cloud Deployments.
 """
+
 import pytest
 from unittest.mock import patch, MagicMock
 import sys
@@ -16,7 +17,7 @@ from cloud_native.cloud_integrations.gcp.security_command_center import GCPSecur
 class TestMultiCloud:
     """Test multi-cloud deployment scenarios"""
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_hybrid_cloud_security(self, mock_boto):
         """Test security across multiple cloud providers"""
         mock_client = MagicMock()
@@ -44,7 +45,7 @@ class TestMultiCloud:
         finding_data = {
             "title": "Cross-Cloud Security Issue",
             "description": "Quantum vulnerability detected",
-            "severity": "HIGH"
+            "severity": "HIGH",
         }
 
         aws.publish_finding(
@@ -52,21 +53,18 @@ class TestMultiCloud:
             description=finding_data["description"],
             severity=80,
             resource_id="arn:aws:test",
-            finding_type="Vulnerability"
+            finding_type="Vulnerability",
         )
 
         azure.send_security_event(
             event_type="SecurityAlert",
             severity=finding_data["severity"],
             description=finding_data["description"],
-            resource_id="/subscriptions/test"
+            resource_id="/subscriptions/test",
         )
 
         gcp.create_finding(
-            finding_id="cross-cloud-001",
-            category="VULNERABILITY",
-            severity=finding_data["severity"],
-            resource_name="//test"
+            finding_id="cross-cloud-001", category="VULNERABILITY", severity=finding_data["severity"], resource_name="//test"
         )
 
         assert True  # All operations completed

@@ -133,12 +133,8 @@ class LSTMProtocolClassifier(nn.Module):
         self.embedding = nn.Embedding(256, embedding_dim)
 
         # Bidirectional LSTM layers
-        self.lstm1 = nn.LSTM(
-            embedding_dim, hidden_dim, batch_first=True, bidirectional=True
-        )
-        self.lstm2 = nn.LSTM(
-            hidden_dim * 2, hidden_dim, batch_first=True, bidirectional=True
-        )
+        self.lstm1 = nn.LSTM(embedding_dim, hidden_dim, batch_first=True, bidirectional=True)
+        self.lstm2 = nn.LSTM(hidden_dim * 2, hidden_dim, batch_first=True, bidirectional=True)
 
         # Attention mechanism
         self.attention = nn.MultiheadAttention(hidden_dim * 2, 8, batch_first=True)
@@ -215,9 +211,7 @@ class ProtocolClassifier:
 
         # Performance optimization
         self.use_parallel_processing = True
-        self.max_workers = (
-            config.inference.num_workers if hasattr(config, "inference") else 4
-        )
+        self.max_workers = config.inference.num_workers if hasattr(config, "inference") else 4
         self.executor = ThreadPoolExecutor(max_workers=self.max_workers)
 
         # Caching
@@ -247,9 +241,7 @@ class ProtocolClassifier:
             raise ProtocolException("No training samples provided")
 
         start_time = time.time()
-        self.logger.info(
-            f"Training protocol classifier with {len(training_samples)} samples"
-        )
+        self.logger.info(f"Training protocol classifier with {len(training_samples)} samples")
 
         try:
             # Validate training samples
@@ -280,28 +272,16 @@ class ProtocolClassifier:
             training_tasks = []
 
             # Train CNN model
-            training_tasks.append(
-                self._train_cnn_model(
-                    training_samples, X_train, y_train, X_val, y_val, epochs
-                )
-            )
+            training_tasks.append(self._train_cnn_model(training_samples, X_train, y_train, X_val, y_val, epochs))
 
             # Train LSTM model
-            training_tasks.append(
-                self._train_lstm_model(
-                    training_samples, X_train, y_train, X_val, y_val, epochs
-                )
-            )
+            training_tasks.append(self._train_lstm_model(training_samples, X_train, y_train, X_val, y_val, epochs))
 
             # Train Random Forest
-            training_tasks.append(
-                self._train_random_forest(X_train_scaled, y_train, X_val_scaled, y_val)
-            )
+            training_tasks.append(self._train_random_forest(X_train_scaled, y_train, X_val_scaled, y_val))
 
             # Execute training tasks
-            training_results = await asyncio.gather(
-                *training_tasks, return_exceptions=True
-            )
+            training_results = await asyncio.gather(*training_tasks, return_exceptions=True)
 
             # Process results
             cnn_results, lstm_results, rf_results = training_results
@@ -319,21 +299,9 @@ class ProtocolClassifier:
                 "num_samples": len(training_samples),
                 "num_protocols": len(self.known_protocols),
                 "protocols": list(self.known_protocols),
-                "cnn_results": (
-                    cnn_results
-                    if not isinstance(cnn_results, Exception)
-                    else str(cnn_results)
-                ),
-                "lstm_results": (
-                    lstm_results
-                    if not isinstance(lstm_results, Exception)
-                    else str(lstm_results)
-                ),
-                "rf_results": (
-                    rf_results
-                    if not isinstance(rf_results, Exception)
-                    else str(rf_results)
-                ),
+                "cnn_results": (cnn_results if not isinstance(cnn_results, Exception) else str(cnn_results)),
+                "lstm_results": (lstm_results if not isinstance(lstm_results, Exception) else str(lstm_results)),
+                "rf_results": (rf_results if not isinstance(rf_results, Exception) else str(rf_results)),
                 "ensemble_results": validation_results,
                 "device_used": str(self.device),
             }
@@ -402,9 +370,7 @@ class ProtocolClassifier:
                 probabilities["rf"] = rf_probs
 
             # Ensemble prediction
-            final_prediction, final_confidence, final_probabilities = (
-                await self._ensemble_predict(predictions, probabilities)
-            )
+            final_prediction, final_confidence, final_probabilities = await self._ensemble_predict(predictions, probabilities)
 
             # Create result
             result = ClassificationResult(
@@ -438,9 +404,7 @@ class ProtocolClassifier:
     async def _validate_training_data(self, samples: List[ProtocolSample]) -> None:
         """Validate training data quality."""
         if len(samples) < 10:
-            raise ProtocolException(
-                "Insufficient training samples (minimum 10 required)"
-            )
+            raise ProtocolException("Insufficient training samples (minimum 10 required)")
 
         # Check label distribution
         label_counts = Counter([sample.label for sample in samples])
@@ -456,13 +420,9 @@ class ProtocolClassifier:
         if empty_samples > 0:
             self.logger.warning(f"Found {empty_samples} empty samples")
 
-        self.logger.info(
-            f"Training data validation passed: {len(label_counts)} protocols"
-        )
+        self.logger.info(f"Training data validation passed: {len(label_counts)} protocols")
 
-    async def _prepare_training_data(
-        self, samples: List[ProtocolSample]
-    ) -> Tuple[np.ndarray, List[str]]:
+    async def _prepare_training_data(self, samples: List[ProtocolSample]) -> Tuple[np.ndarray, List[str]]:
         """Prepare training data by extracting features."""
         features_list = []
         labels = []
@@ -473,9 +433,7 @@ class ProtocolClassifier:
             batch = samples[i : i + batch_size]
 
             # Extract features for batch
-            batch_features = await asyncio.gather(
-                *[self._extract_features(sample.data) for sample in batch]
-            )
+            batch_features = await asyncio.gather(*[self._extract_features(sample.data) for sample in batch])
 
             features_list.extend(batch_features)
             labels.extend([sample.label for sample in batch])
@@ -496,9 +454,7 @@ class ProtocolClassifier:
             features.extend([len(data), np.log(len(data) + 1)])  # Log length
 
             # Byte distribution features
-            byte_counts = np.bincount(
-                np.frombuffer(data, dtype=np.uint8), minlength=256
-            )
+            byte_counts = np.bincount(np.frombuffer(data, dtype=np.uint8), minlength=256)
             byte_probs = byte_counts / len(data)
 
             # Entropy
@@ -580,31 +536,23 @@ class ProtocolClassifier:
         try:
             # Prepare sequence data
             train_sequences = await self._prepare_sequences(
-                [
-                    s.data
-                    for s in samples
-                    if s.label in self.label_encoder.transform([s.label])
-                ]
+                [s.data for s in samples if s.label in self.label_encoder.transform([s.label])]
             )
             train_labels = y_train[: len(train_sequences)]
 
             # Create model
             num_classes = len(self.known_protocols)
-            self.cnn_model = CNNProtocolClassifier(
-                input_size=self.max_sequence_length, num_classes=num_classes
-            ).to(self.device)
+            self.cnn_model = CNNProtocolClassifier(input_size=self.max_sequence_length, num_classes=num_classes).to(
+                self.device
+            )
 
             # Training setup
             criterion = nn.NLLLoss()
             optimizer = torch.optim.Adam(self.cnn_model.parameters(), lr=0.001)
-            scheduler = torch.optim.lr_scheduler.StepLR(
-                optimizer, step_size=20, gamma=0.5
-            )
+            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
 
             # Create data loaders
-            train_dataset = TensorDataset(
-                torch.LongTensor(train_sequences), torch.LongTensor(train_labels)
-            )
+            train_dataset = TensorDataset(torch.LongTensor(train_sequences), torch.LongTensor(train_labels))
             train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
             # Training loop
@@ -641,9 +589,7 @@ class ProtocolClassifier:
                 train_accuracies.append(epoch_accuracy)
 
                 if epoch % 10 == 0:
-                    self.logger.debug(
-                        f"CNN Epoch {epoch}: Loss={epoch_loss:.4f}, Accuracy={epoch_accuracy:.2f}%"
-                    )
+                    self.logger.debug(f"CNN Epoch {epoch}: Loss={epoch_loss:.4f}, Accuracy={epoch_accuracy:.2f}%")
 
             return {
                 "model_type": "CNN",
@@ -672,34 +618,24 @@ class ProtocolClassifier:
         try:
             # Prepare sequence data
             train_sequences = await self._prepare_sequences(
-                [
-                    s.data
-                    for s in samples
-                    if s.label in self.label_encoder.transform([s.label])
-                ]
+                [s.data for s in samples if s.label in self.label_encoder.transform([s.label])]
             )
             train_labels = y_train[: len(train_sequences)]
 
             # Create model
             num_classes = len(self.known_protocols)
-            self.lstm_model = LSTMProtocolClassifier(
-                input_size=self.max_sequence_length, num_classes=num_classes
-            ).to(self.device)
+            self.lstm_model = LSTMProtocolClassifier(input_size=self.max_sequence_length, num_classes=num_classes).to(
+                self.device
+            )
 
             # Training setup
             criterion = nn.NLLLoss()
             optimizer = torch.optim.Adam(self.lstm_model.parameters(), lr=0.001)
-            scheduler = torch.optim.lr_scheduler.StepLR(
-                optimizer, step_size=20, gamma=0.5
-            )
+            scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
 
             # Create data loaders
-            train_dataset = TensorDataset(
-                torch.LongTensor(train_sequences), torch.LongTensor(train_labels)
-            )
-            train_loader = DataLoader(
-                train_dataset, batch_size=16, shuffle=True
-            )  # Smaller batch for LSTM
+            train_dataset = TensorDataset(torch.LongTensor(train_sequences), torch.LongTensor(train_labels))
+            train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)  # Smaller batch for LSTM
 
             # Training loop
             train_losses = []
@@ -735,9 +671,7 @@ class ProtocolClassifier:
                 train_accuracies.append(epoch_accuracy)
 
                 if epoch % 10 == 0:
-                    self.logger.debug(
-                        f"LSTM Epoch {epoch}: Loss={epoch_loss:.4f}, Accuracy={epoch_accuracy:.2f}%"
-                    )
+                    self.logger.debug(f"LSTM Epoch {epoch}: Loss={epoch_loss:.4f}, Accuracy={epoch_accuracy:.2f}%")
 
             return {
                 "model_type": "LSTM",
@@ -762,9 +696,7 @@ class ProtocolClassifier:
         self.logger.info("Training Random Forest model")
 
         try:
-            self.rf_model = RandomForestClassifier(
-                n_estimators=100, max_depth=20, random_state=42, n_jobs=-1
-            )
+            self.rf_model = RandomForestClassifier(n_estimators=100, max_depth=20, random_state=42, n_jobs=-1)
 
             # Train model
             self.rf_model.fit(X_train, y_train)
@@ -800,9 +732,7 @@ class ProtocolClassifier:
                 if len(byte_sequence) > self.max_sequence_length:
                     sequence = byte_sequence[: self.max_sequence_length]
                 else:
-                    sequence = byte_sequence + [0] * (
-                        self.max_sequence_length - len(byte_sequence)
-                    )
+                    sequence = byte_sequence + [0] * (self.max_sequence_length - len(byte_sequence))
 
             sequences.append(sequence)
 
@@ -816,9 +746,7 @@ class ProtocolClassifier:
         # In a full implementation, you might create a meta-learner
         pass
 
-    async def _validate_ensemble(
-        self, X_val: np.ndarray, y_val: np.ndarray
-    ) -> Dict[str, Any]:
+    async def _validate_ensemble(self, X_val: np.ndarray, y_val: np.ndarray) -> Dict[str, Any]:
         """Validate ensemble model performance."""
         # For now, return basic validation metrics
         return {
@@ -848,10 +776,7 @@ class ProtocolClassifier:
             predicted_label = self.label_encoder.classes_[predicted_class]
 
             # Create probability distribution
-            prob_dict = {
-                self.label_encoder.classes_[i]: float(probabilities[i])
-                for i in range(len(probabilities))
-            }
+            prob_dict = {self.label_encoder.classes_[i]: float(probabilities[i]) for i in range(len(probabilities))}
 
             return predicted_label, prob_dict
 
@@ -880,10 +805,7 @@ class ProtocolClassifier:
             predicted_label = self.label_encoder.classes_[predicted_class]
 
             # Create probability distribution
-            prob_dict = {
-                self.label_encoder.classes_[i]: float(probabilities[i])
-                for i in range(len(probabilities))
-            }
+            prob_dict = {self.label_encoder.classes_[i]: float(probabilities[i]) for i in range(len(probabilities))}
 
             return predicted_label, prob_dict
 
@@ -891,9 +813,7 @@ class ProtocolClassifier:
             self.logger.error(f"LSTM prediction failed: {e}")
             return "unknown", {}
 
-    async def _predict_random_forest(
-        self, features: np.ndarray
-    ) -> Tuple[str, Dict[str, float]]:
+    async def _predict_random_forest(self, features: np.ndarray) -> Tuple[str, Dict[str, float]]:
         """Get Random Forest prediction."""
         if not self.rf_model:
             return "unknown", {}
@@ -909,10 +829,7 @@ class ProtocolClassifier:
             predicted_label = self.label_encoder.classes_[predicted_class]
 
             # Create probability distribution
-            prob_dict = {
-                self.label_encoder.classes_[i]: float(probabilities[i])
-                for i in range(len(probabilities))
-            }
+            prob_dict = {self.label_encoder.classes_[i]: float(probabilities[i]) for i in range(len(probabilities))}
 
             return predicted_label, prob_dict
 
@@ -942,10 +859,7 @@ class ProtocolClassifier:
 
             averaged_probs = {}
             for class_name in all_classes:
-                class_probs = [
-                    prob_dict.get(class_name, 0.0)
-                    for prob_dict in probabilities.values()
-                ]
+                class_probs = [prob_dict.get(class_name, 0.0) for prob_dict in probabilities.values()]
                 averaged_probs[class_name] = np.mean(class_probs)
 
             final_prediction = max(averaged_probs, key=averaged_probs.get)
@@ -1012,23 +926,19 @@ class ProtocolClassifier:
             num_classes = len(self.known_protocols)
 
             try:
-                self.cnn_model = CNNProtocolClassifier(
-                    input_size=self.max_sequence_length, num_classes=num_classes
-                ).to(self.device)
-                self.cnn_model.load_state_dict(
-                    torch.load(f"{filepath}_cnn.pt", map_location=self.device)
+                self.cnn_model = CNNProtocolClassifier(input_size=self.max_sequence_length, num_classes=num_classes).to(
+                    self.device
                 )
+                self.cnn_model.load_state_dict(torch.load(f"{filepath}_cnn.pt", map_location=self.device))
                 self.cnn_model.eval()
             except FileNotFoundError:
                 self.logger.warning("CNN model file not found")
 
             try:
-                self.lstm_model = LSTMProtocolClassifier(
-                    input_size=self.max_sequence_length, num_classes=num_classes
-                ).to(self.device)
-                self.lstm_model.load_state_dict(
-                    torch.load(f"{filepath}_lstm.pt", map_location=self.device)
+                self.lstm_model = LSTMProtocolClassifier(input_size=self.max_sequence_length, num_classes=num_classes).to(
+                    self.device
                 )
+                self.lstm_model.load_state_dict(torch.load(f"{filepath}_lstm.pt", map_location=self.device))
                 self.lstm_model.eval()
             except FileNotFoundError:
                 self.logger.warning("LSTM model file not found")

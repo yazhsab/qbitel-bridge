@@ -496,10 +496,8 @@ FIX_TAG_NAMES: Dict[int, str] = {
     43: "PossDupFlag",
     97: "PossResend",
     122: "OrigSendingTime",
-
     # Standard Trailer
     10: "CheckSum",
-
     # Order fields
     11: "ClOrdID",
     14: "CumQty",
@@ -531,14 +529,12 @@ FIX_TAG_NAMES: Dict[int, str] = {
     65: "SymbolSfx",
     75: "TradeDate",
     76: "ExecBroker",
-
     # Execution fields
     6: "AvgPx",
     99: "StopPx",
     103: "OrdRejReason",
     150: "ExecType",
     151: "LeavesQty",
-
     # Party fields
     109: "ClientID",
     115: "OnBehalfOfCompID",
@@ -549,7 +545,6 @@ FIX_TAG_NAMES: Dict[int, str] = {
     143: "TargetLocationID",
     144: "OnBehalfOfLocationID",
     145: "DeliverToLocationID",
-
     # Security fields
     106: "Issuer",
     107: "SecurityDesc",
@@ -568,21 +563,17 @@ FIX_TAG_NAMES: Dict[int, str] = {
     231: "ContractMultiplier",
     255: "CreditRating",
     541: "MaturityDate",
-
     # Quantity fields
     53: "Quantity",
     110: "MinQty",
     111: "MaxFloor",
     152: "CashOrderQty",
-
     # Price fields
     140: "PrevClosePx",
     423: "PriceType",
-
     # Commission
     12: "Commission",
     13: "CommType",
-
     # Allocation
     70: "AllocID",
     71: "AllocTransType",
@@ -593,7 +584,6 @@ FIX_TAG_NAMES: Dict[int, str] = {
     80: "AllocQty",
     81: "ProcessCode",
     366: "AllocPrice",
-
     # Trade Capture
     568: "TradeRequestID",
     569: "TradeRequestType",
@@ -610,7 +600,6 @@ FIX_TAG_NAMES: Dict[int, str] = {
     580: "NoDates",
     581: "AccountType",
     635: "ClearingFeeIndicator",
-
     # Parties
     448: "PartyID",
     447: "PartyIDSource",
@@ -619,14 +608,12 @@ FIX_TAG_NAMES: Dict[int, str] = {
     802: "NoPartySubIDs",
     523: "PartySubID",
     803: "PartySubIDType",
-
     # Position
     702: "NoPositions",
     703: "PosType",
     704: "LongQty",
     705: "ShortQty",
     706: "PosQtyStatus",
-
     # Market Data
     262: "MDReqID",
     263: "SubscriptionRequestType",

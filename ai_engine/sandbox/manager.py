@@ -313,9 +313,7 @@ class SandboxPool:
                 if sandbox.sandbox_id in self._busy_sandboxes:
                     continue
                 await self._destroy_sandbox(sandbox)
-                self._free_sandboxes = deque(
-                    s for s in self._free_sandboxes if s.sandbox_id != sandbox.sandbox_id
-                )
+                self._free_sandboxes = deque(s for s in self._free_sandboxes if s.sandbox_id != sandbox.sandbox_id)
 
             self._update_metrics()
 
@@ -498,13 +496,15 @@ class SandboxManager:
         """
         exec_id = str(uuid.uuid4())
 
-        await self._queue.put({
-            "id": exec_id,
-            "code": code,
-            "language": language,
-            "callback": callback,
-            **kwargs,
-        })
+        await self._queue.put(
+            {
+                "id": exec_id,
+                "code": code,
+                "language": language,
+                "callback": callback,
+                **kwargs,
+            }
+        )
 
         return exec_id
 
@@ -534,10 +534,7 @@ class SandboxManager:
     def get_metrics(self) -> Dict[str, Any]:
         """Get manager metrics."""
         return {
-            "pools": {
-                name: pool.get_metrics()
-                for name, pool in self._pools.items()
-            },
+            "pools": {name: pool.get_metrics() for name, pool in self._pools.items()},
             "queue_size": self._queue.qsize(),
             "worker_count": len(self._workers),
         }

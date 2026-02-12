@@ -88,9 +88,7 @@ class DataRetentionManager:
     - Compliance reporting
     """
 
-    def __init__(
-        self, config: Config, audit_manager: Optional[AuditTrailManager] = None
-    ):
+    def __init__(self, config: Config, audit_manager: Optional[AuditTrailManager] = None):
         """Initialize data retention manager."""
         self.config = config
         self.logger = logging.getLogger(__name__)
@@ -227,9 +225,7 @@ class DataRetentionManager:
             # Get policy for category
             policy = self.policies.get(data_category.value)
             if not policy:
-                raise DataRetentionException(
-                    f"No policy found for category {data_category.value}"
-                )
+                raise DataRetentionException(f"No policy found for category {data_category.value}")
 
             # Create lifecycle record
             record_id = str(uuid.uuid4())
@@ -241,11 +237,7 @@ class DataRetentionManager:
                 data_identifier=data_identifier,
                 created_at=now,
                 retention_until=now + timedelta(days=policy.retention_period_days),
-                archive_at=(
-                    now + timedelta(days=policy.archive_period_days)
-                    if policy.archive_period_days
-                    else None
-                ),
+                archive_at=(now + timedelta(days=policy.archive_period_days) if policy.archive_period_days else None),
                 metadata=metadata or {},
             )
 
@@ -380,12 +372,8 @@ class DataRetentionManager:
                     record.action_taken_at = now
 
             except Exception as e:
-                self.logger.error(
-                    f"Error enforcing policy for record {record.record_id}: {e}"
-                )
-                enforcement_results["errors"].append(
-                    {"record_id": record.record_id, "error": str(e)}
-                )
+                self.logger.error(f"Error enforcing policy for record {record.record_id}: {e}")
+                enforcement_results["errors"].append({"record_id": record.record_id, "error": str(e)})
 
         return enforcement_results
 
@@ -483,39 +471,19 @@ class DataRetentionManager:
         # Lifecycle summary
         now = datetime.utcnow()
         for category in DataCategory:
-            category_records = [
-                r
-                for r in self.lifecycle_records.values()
-                if r.data_category == category
-            ]
+            category_records = [r for r in self.lifecycle_records.values() if r.data_category == category]
 
             report["lifecycle_summary"][category.value] = {
                 "total_records": len(category_records),
                 "active": len([r for r in category_records if not r.action_taken]),
-                "archived": len(
-                    [
-                        r
-                        for r in category_records
-                        if r.action_taken == RetentionAction.ARCHIVE
-                    ]
-                ),
-                "deleted": len(
-                    [
-                        r
-                        for r in category_records
-                        if r.action_taken == RetentionAction.DELETE
-                    ]
-                ),
+                "archived": len([r for r in category_records if r.action_taken == RetentionAction.ARCHIVE]),
+                "deleted": len([r for r in category_records if r.action_taken == RetentionAction.DELETE]),
                 "legal_hold": len([r for r in category_records if r.legal_hold]),
             }
 
         # Upcoming actions (next 30 days)
         upcoming_cutoff = now + timedelta(days=30)
-        upcoming = [
-            r
-            for r in self.lifecycle_records.values()
-            if not r.action_taken and r.retention_until <= upcoming_cutoff
-        ]
+        upcoming = [r for r in self.lifecycle_records.values() if not r.action_taken and r.retention_until <= upcoming_cutoff]
 
         for record in upcoming:
             report["upcoming_actions"].append(
@@ -536,25 +504,17 @@ class DataRetentionManager:
             "total_records": len(self.lifecycle_records),
             "by_category": {},
             "by_action": {},
-            "legal_holds": len(
-                [r for r in self.lifecycle_records.values() if r.legal_hold]
-            ),
+            "legal_holds": len([r for r in self.lifecycle_records.values() if r.legal_hold]),
         }
 
         # By category
         for category in DataCategory:
             stats["by_category"][category.value] = len(
-                [
-                    r
-                    for r in self.lifecycle_records.values()
-                    if r.data_category == category
-                ]
+                [r for r in self.lifecycle_records.values() if r.data_category == category]
             )
 
         # By action
         for action in RetentionAction:
-            stats["by_action"][action.value] = len(
-                [r for r in self.lifecycle_records.values() if r.action_taken == action]
-            )
+            stats["by_action"][action.value] = len([r for r in self.lifecycle_records.values() if r.action_taken == action])
 
         return stats

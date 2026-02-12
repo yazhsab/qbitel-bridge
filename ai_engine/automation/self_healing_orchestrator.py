@@ -354,10 +354,7 @@ class SelfHealingOrchestrator:
                 self._circuit_breakers.pop(component_id, None)
 
                 # Remove associated health checks
-                to_remove = [
-                    k for k, v in self._health_checks.items()
-                    if k.startswith(component_id)
-                ]
+                to_remove = [k for k, v in self._health_checks.items() if k.startswith(component_id)]
                 for k in to_remove:
                     del self._health_checks[k]
 
@@ -418,11 +415,7 @@ class SelfHealingOrchestrator:
                 )
 
             # Find health check
-            check = next(
-                (c for c in self._health_checks.values()
-                 if c.check_id.startswith(component_id)),
-                None
-            )
+            check = next((c for c in self._health_checks.values() if c.check_id.startswith(component_id)), None)
 
             if not check or not check.enabled:
                 return HealthResult(

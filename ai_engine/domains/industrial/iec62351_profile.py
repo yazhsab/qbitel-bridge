@@ -31,44 +31,40 @@ logger = logging.getLogger(__name__)
 
 # Metrics
 IEC62351_AUTH_OPS = Counter(
-    'iec62351_authentication_operations_total',
-    'Total IEC 62351 authentication operations',
-    ['protocol', 'operation']
+    "iec62351_authentication_operations_total", "Total IEC 62351 authentication operations", ["protocol", "operation"]
 )
 
 IEC62351_LATENCY = Histogram(
-    'iec62351_operation_latency_ms',
-    'IEC 62351 operation latency',
-    buckets=[0.1, 0.5, 1, 2, 5, 10, 20]
+    "iec62351_operation_latency_ms", "IEC 62351 operation latency", buckets=[0.1, 0.5, 1, 2, 5, 10, 20]
 )
 
 
 class SecurityObjective(Enum):
     """IEC 62351 security objectives."""
 
-    AUTHENTICATION = auto()      # Entity authentication
-    AUTHORIZATION = auto()       # Access control
-    INTEGRITY = auto()          # Message integrity
-    CONFIDENTIALITY = auto()    # Data encryption
-    ACCOUNTABILITY = auto()      # Audit logging
-    AVAILABILITY = auto()        # DoS protection
+    AUTHENTICATION = auto()  # Entity authentication
+    AUTHORIZATION = auto()  # Access control
+    INTEGRITY = auto()  # Message integrity
+    CONFIDENTIALITY = auto()  # Data encryption
+    ACCOUNTABILITY = auto()  # Audit logging
+    AVAILABILITY = auto()  # DoS protection
 
 
 class ProtectionLevel(Enum):
     """Message protection levels."""
 
-    NONE = 0                # No protection
-    AUTHENTICATION = 1      # MAC only
-    AUTH_ENCRYPTION = 2     # MAC + encryption
+    NONE = 0  # No protection
+    AUTHENTICATION = 1  # MAC only
+    AUTH_ENCRYPTION = 2  # MAC + encryption
 
 
 class IEC61850Protocol(Enum):
     """IEC 61850 protocols."""
 
-    GOOSE = auto()      # Generic Object Oriented Substation Event
-    SV = auto()         # Sampled Values
-    MMS = auto()        # Manufacturing Message Specification
-    RSTP = auto()       # Rapid Spanning Tree Protocol
+    GOOSE = auto()  # Generic Object Oriented Substation Event
+    SV = auto()  # Sampled Values
+    MMS = auto()  # Manufacturing Message Specification
+    RSTP = auto()  # Rapid Spanning Tree Protocol
 
 
 @dataclass
@@ -211,9 +207,7 @@ class IEC62351MessageProtection:
         self.policy = policy
         self._sequence = 0
 
-        logger.info(
-            f"Message protection initialized: level={policy.protection_level.name}"
-        )
+        logger.info(f"Message protection initialized: level={policy.protection_level.name}")
 
     async def protect_message(
         self,
@@ -248,25 +242,18 @@ class IEC62351MessageProtection:
 
         # Compute MAC
         mac_input = (
-            protocol.value.to_bytes(2, 'big') +
-            key_set.key_id +
-            self._sequence.to_bytes(8, 'big') +
-            timestamp.to_bytes(8, 'big') +
-            protected_payload
+            protocol.value.to_bytes(2, "big")
+            + key_set.key_id
+            + self._sequence.to_bytes(8, "big")
+            + timestamp.to_bytes(8, "big")
+            + protected_payload
         )
 
-        mac = hmac.new(
-            key_set.authentication_key,
-            mac_input,
-            hashlib.sha256
-        ).digest()[:16]  # 128-bit MAC
+        mac = hmac.new(key_set.authentication_key, mac_input, hashlib.sha256).digest()[:16]  # 128-bit MAC
 
         elapsed_ms = (time.time() - start) * 1000
         IEC62351_LATENCY.observe(elapsed_ms)
-        IEC62351_AUTH_OPS.labels(
-            protocol=protocol.name,
-            operation="protect"
-        ).inc()
+        IEC62351_AUTH_OPS.labels(protocol=protocol.name, operation="protect").inc()
 
         return ProtectedMessage(
             protocol=protocol,
@@ -305,18 +292,14 @@ class IEC62351MessageProtection:
 
         # Verify MAC
         mac_input = (
-            message.protocol.value.to_bytes(2, 'big') +
-            message.key_id +
-            message.sequence.to_bytes(8, 'big') +
-            message.timestamp.to_bytes(8, 'big') +
-            message.payload
+            message.protocol.value.to_bytes(2, "big")
+            + message.key_id
+            + message.sequence.to_bytes(8, "big")
+            + message.timestamp.to_bytes(8, "big")
+            + message.payload
         )
 
-        expected_mac = hmac.new(
-            key_set.authentication_key,
-            mac_input,
-            hashlib.sha256
-        ).digest()[:16]
+        expected_mac = hmac.new(key_set.authentication_key, mac_input, hashlib.sha256).digest()[:16]
 
         if not secrets.compare_digest(message.mac, expected_mac):
             logger.warning("MAC verification failed")
@@ -329,10 +312,7 @@ class IEC62351MessageProtection:
 
         elapsed_ms = (time.time() - start) * 1000
         IEC62351_LATENCY.observe(elapsed_ms)
-        IEC62351_AUTH_OPS.labels(
-            protocol=message.protocol.name,
-            operation="verify"
-        ).inc()
+        IEC62351_AUTH_OPS.labels(protocol=message.protocol.name, operation="verify").inc()
 
         return payload
 
@@ -426,11 +406,11 @@ class GooseSecurityProfile:
         """Serialize protected GOOSE for transmission."""
         # Format: key_id(8) | seq(8) | timestamp(8) | mac(16) | payload
         return (
-            message.key_id +
-            message.sequence.to_bytes(8, 'big') +
-            message.timestamp.to_bytes(8, 'big') +
-            message.mac +
-            message.payload
+            message.key_id
+            + message.sequence.to_bytes(8, "big")
+            + message.timestamp.to_bytes(8, "big")
+            + message.mac
+            + message.payload
         )
 
     def _deserialize_protected_goose(self, data: bytes) -> ProtectedMessage:
@@ -438,8 +418,8 @@ class GooseSecurityProfile:
         return ProtectedMessage(
             protocol=IEC61850Protocol.GOOSE,
             key_id=data[:8],
-            sequence=int.from_bytes(data[8:16], 'big'),
-            timestamp=int.from_bytes(data[16:24], 'big'),
+            sequence=int.from_bytes(data[8:16], "big"),
+            timestamp=int.from_bytes(data[16:24], "big"),
             mac=data[24:40],
             payload=data[40:],
         )
@@ -508,7 +488,7 @@ class SvSecurityProfile:
     ) -> bytes:
         """Compute lightweight MAC for SV sample."""
         # Use truncated MAC for efficiency
-        mac_input = timestamp.to_bytes(8, 'big') + sample
+        mac_input = timestamp.to_bytes(8, "big") + sample
         return hmac.new(key, mac_input, hashlib.sha256).digest()[:8]
 
 

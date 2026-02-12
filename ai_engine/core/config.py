@@ -73,11 +73,7 @@ class DatabaseConfig:
         """Load password from environment with comprehensive validation."""
         if not self.password:
             # Try environment variables in priority order
-            self.password = (
-                os.getenv("QBITEL_AI_DB_PASSWORD")
-                or os.getenv("DATABASE_PASSWORD")
-                or ""
-            )
+            self.password = os.getenv("QBITEL_AI_DB_PASSWORD") or os.getenv("DATABASE_PASSWORD") or ""
 
             if not self.password:
                 error_msg = (
@@ -105,9 +101,7 @@ class DatabaseConfig:
 
     def _is_production_mode(self) -> bool:
         """Check if running in production mode."""
-        env = os.getenv(
-            "QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
-        ).lower()
+        env = os.getenv("QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")).lower()
         return env in ("production", "prod")
 
     def _validate_password(self) -> None:
@@ -116,24 +110,17 @@ class DatabaseConfig:
 
         # Check minimum length
         if len(self.password) < self.MIN_PASSWORD_LENGTH:
-            errors.append(
-                f"Password too short: {len(self.password)} characters "
-                f"(minimum: {self.MIN_PASSWORD_LENGTH})"
-            )
+            errors.append(f"Password too short: {len(self.password)} characters " f"(minimum: {self.MIN_PASSWORD_LENGTH})")
 
         # Check for weak patterns
         password_lower = self.password.lower()
         found_patterns = [p for p in self.WEAK_PATTERNS if p in password_lower]
         if found_patterns:
-            errors.append(
-                f"Password contains weak patterns: {', '.join(found_patterns)}"
-            )
+            errors.append(f"Password contains weak patterns: {', '.join(found_patterns)}")
 
         # Check for sequential characters
         if self._has_sequential_chars(self.password):
-            errors.append(
-                "Password contains sequential characters (e.g., '123', 'abc')"
-            )
+            errors.append("Password contains sequential characters (e.g., '123', 'abc')")
 
         # Check for repeated characters
         if self._has_repeated_chars(self.password):
@@ -141,9 +128,7 @@ class DatabaseConfig:
 
         if errors:
             error_msg = (
-                "Database password validation failed:\n"
-                + "\n".join(f"  - {error}" for error in errors)
-                + "\n\nRemediation:\n"
+                "Database password validation failed:\n" + "\n".join(f"  - {error}" for error in errors) + "\n\nRemediation:\n"
                 "  1. Generate a strong password:\n"
                 '     python -c "import secrets; print(secrets.token_urlsafe(32))"\n'
                 "  2. Set the environment variable:\n"
@@ -183,9 +168,7 @@ class DatabaseConfig:
     def url(self) -> str:
         """Get database URL."""
         if not self.password:
-            raise ConfigurationException(
-                "Database password not configured. Set QBITEL_AI_DB_PASSWORD environment variable."
-            )
+            raise ConfigurationException("Database password not configured. Set QBITEL_AI_DB_PASSWORD environment variable.")
         return f"postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
 
 
@@ -222,9 +205,7 @@ class RedisConfig:
         """Load password from environment with comprehensive validation."""
         if not self.password:
             # Try environment variables in priority order
-            self.password = os.getenv("QBITEL_AI_REDIS_PASSWORD") or os.getenv(
-                "REDIS_PASSWORD"
-            )
+            self.password = os.getenv("QBITEL_AI_REDIS_PASSWORD") or os.getenv("REDIS_PASSWORD")
 
             # In production, Redis MUST have authentication
             if not self.password and self._is_production_mode():
@@ -254,9 +235,7 @@ class RedisConfig:
 
     def _is_production_mode(self) -> bool:
         """Check if running in production mode."""
-        env = os.getenv(
-            "QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
-        ).lower()
+        env = os.getenv("QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")).lower()
         return env in ("production", "prod")
 
     def _validate_password(self) -> None:
@@ -265,24 +244,17 @@ class RedisConfig:
 
         # Check minimum length
         if len(self.password) < self.MIN_PASSWORD_LENGTH:
-            errors.append(
-                f"Password too short: {len(self.password)} characters "
-                f"(minimum: {self.MIN_PASSWORD_LENGTH})"
-            )
+            errors.append(f"Password too short: {len(self.password)} characters " f"(minimum: {self.MIN_PASSWORD_LENGTH})")
 
         # Check for weak patterns
         password_lower = self.password.lower()
         found_patterns = [p for p in self.WEAK_PATTERNS if p in password_lower]
         if found_patterns:
-            errors.append(
-                f"Password contains weak patterns: {', '.join(found_patterns)}"
-            )
+            errors.append(f"Password contains weak patterns: {', '.join(found_patterns)}")
 
         if errors:
             error_msg = (
-                "Redis password validation failed:\n"
-                + "\n".join(f"  - {error}" for error in errors)
-                + "\n\nRemediation:\n"
+                "Redis password validation failed:\n" + "\n".join(f"  - {error}" for error in errors) + "\n\nRemediation:\n"
                 "  1. Generate a strong password:\n"
                 '     python -c "import secrets; print(secrets.token_urlsafe(32))"\n'
                 "  2. Set the environment variable:\n"
@@ -518,9 +490,7 @@ class SecurityConfig:
 
         # Load JWT secret
         if not self.jwt_secret:
-            self.jwt_secret = os.getenv("QBITEL_AI_JWT_SECRET") or os.getenv(
-                "JWT_SECRET"
-            )
+            self.jwt_secret = os.getenv("QBITEL_AI_JWT_SECRET") or os.getenv("JWT_SECRET")
 
             if not self.jwt_secret:
                 error_msg = (
@@ -544,9 +514,7 @@ class SecurityConfig:
 
         # Load encryption key
         if not self.encryption_key:
-            self.encryption_key = os.getenv("QBITEL_AI_ENCRYPTION_KEY") or os.getenv(
-                "ENCRYPTION_KEY"
-            )
+            self.encryption_key = os.getenv("QBITEL_AI_ENCRYPTION_KEY") or os.getenv("ENCRYPTION_KEY")
 
             if not self.encryption_key and self.enable_encryption:
                 error_msg = (
@@ -635,9 +603,7 @@ class SecurityConfig:
 
     def _is_production_mode(self) -> bool:
         """Check if running in production mode."""
-        env = os.getenv(
-            "QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")
-        ).lower()
+        env = os.getenv("QBITEL_AI_ENVIRONMENT", os.getenv("ENVIRONMENT", "development")).lower()
         return env in ("production", "prod")
 
     def _validate_secret(self, secret_name: str, secret_value: str) -> None:
@@ -646,24 +612,17 @@ class SecurityConfig:
 
         # Check minimum length
         if len(secret_value) < self.MIN_SECRET_LENGTH:
-            errors.append(
-                f"{secret_name} too short: {len(secret_value)} characters "
-                f"(minimum: {self.MIN_SECRET_LENGTH})"
-            )
+            errors.append(f"{secret_name} too short: {len(secret_value)} characters " f"(minimum: {self.MIN_SECRET_LENGTH})")
 
         # Check for weak patterns
         secret_lower = secret_value.lower()
         found_patterns = [p for p in self.WEAK_PATTERNS if p in secret_lower]
         if found_patterns:
-            errors.append(
-                f"{secret_name} contains weak patterns: {', '.join(found_patterns)}"
-            )
+            errors.append(f"{secret_name} contains weak patterns: {', '.join(found_patterns)}")
 
         # Check entropy (basic check)
         if len(set(secret_value)) < len(secret_value) * 0.5:
-            errors.append(
-                f"{secret_name} has low entropy (too many repeated characters)"
-            )
+            errors.append(f"{secret_name} has low entropy (too many repeated characters)")
 
         # Check for sequential characters
         if self._has_sequential_chars(secret_value):
@@ -671,9 +630,7 @@ class SecurityConfig:
 
         if errors:
             error_msg = (
-                f"{secret_name} validation failed:\n"
-                + "\n".join(f"  - {error}" for error in errors)
-                + "\n\nRemediation:\n"
+                f"{secret_name} validation failed:\n" + "\n".join(f"  - {error}" for error in errors) + "\n\nRemediation:\n"
                 "  1. Generate a cryptographically secure secret:\n"
                 '     python -c "import secrets; print(secrets.token_urlsafe(48))"\n'
                 "  2. Set the appropriate environment variable:\n"
@@ -693,10 +650,7 @@ class SecurityConfig:
 
         # Check minimum length
         if len(self.api_key) < self.MIN_API_KEY_LENGTH:
-            errors.append(
-                f"API key too short: {len(self.api_key)} characters "
-                f"(minimum: {self.MIN_API_KEY_LENGTH})"
-            )
+            errors.append(f"API key too short: {len(self.api_key)} characters " f"(minimum: {self.MIN_API_KEY_LENGTH})")
 
         # Check format (should be alphanumeric with special chars)
         if not any(c.isdigit() for c in self.api_key):
@@ -708,15 +662,11 @@ class SecurityConfig:
         api_key_lower = self.api_key.lower()
         found_patterns = [p for p in self.WEAK_PATTERNS if p in api_key_lower]
         if found_patterns:
-            errors.append(
-                f"API key contains weak patterns: {', '.join(found_patterns)}"
-            )
+            errors.append(f"API key contains weak patterns: {', '.join(found_patterns)}")
 
         if errors:
             error_msg = (
-                "API key validation failed:\n"
-                + "\n".join(f"  - {error}" for error in errors)
-                + "\n\nRemediation:\n"
+                "API key validation failed:\n" + "\n".join(f"  - {error}" for error in errors) + "\n\nRemediation:\n"
                 "  1. Generate a secure API key:\n"
                 "     python -c \"import secrets; print('qbitel_' + secrets.token_urlsafe(32))\"\n"
                 "  2. Set the environment variable:\n"
@@ -752,40 +702,30 @@ class SecurityConfig:
 
         # Validate JWT secret strength
         if self.jwt_secret and len(self.jwt_secret) < self.MIN_SECRET_LENGTH:
-            errors.append(
-                f"JWT secret must be at least {self.MIN_SECRET_LENGTH} characters long"
-            )
+            errors.append(f"JWT secret must be at least {self.MIN_SECRET_LENGTH} characters long")
 
         # Validate encryption key
         if self.encryption_key and len(self.encryption_key) < self.MIN_SECRET_LENGTH:
-            errors.append(
-                f"Encryption key must be at least {self.MIN_SECRET_LENGTH} characters long"
-            )
+            errors.append(f"Encryption key must be at least {self.MIN_SECRET_LENGTH} characters long")
 
         # Validate API key
         if self.api_key and len(self.api_key) < self.MIN_API_KEY_LENGTH:
-            errors.append(
-                f"API key must be at least {self.MIN_API_KEY_LENGTH} characters long"
-            )
+            errors.append(f"API key must be at least {self.MIN_API_KEY_LENGTH} characters long")
 
         # Production-specific validations
         if self._is_production_mode():
             if not self.jwt_secret:
                 errors.append("JWT secret is REQUIRED in production mode")
             if self.enable_encryption and not self.encryption_key:
-                errors.append(
-                    "Encryption key is REQUIRED when encryption is enabled in production"
-                )
+                errors.append("Encryption key is REQUIRED when encryption is enabled in production")
             if "*" in self.cors_origins:
                 errors.append(
-                    "CORS wildcard (*) is FORBIDDEN in production mode. "
-                    "Specify explicit allowed origins for security."
+                    "CORS wildcard (*) is FORBIDDEN in production mode. " "Specify explicit allowed origins for security."
                 )
 
         if errors:
             raise ConfigurationException(
-                f"Security configuration validation failed:\n"
-                + "\n".join(f"  - {error}" for error in errors)
+                f"Security configuration validation failed:\n" + "\n".join(f"  - {error}" for error in errors)
             )
 
 
@@ -890,48 +830,28 @@ class Config:
         config = cls()
 
         # Load basic settings
-        config.environment = Environment(
-            os.getenv(f"{prefix}ENVIRONMENT", config.environment.value)
-        )
+        config.environment = Environment(os.getenv(f"{prefix}ENVIRONMENT", config.environment.value))
         config.debug = os.getenv(f"{prefix}DEBUG", str(config.debug)).lower() == "true"
-        config.log_level = LogLevel(
-            os.getenv(f"{prefix}LOG_LEVEL", config.log_level.value)
-        )
+        config.log_level = LogLevel(os.getenv(f"{prefix}LOG_LEVEL", config.log_level.value))
 
         # Load database configuration
         if os.getenv(f"{prefix}DB_HOST"):
             config.database.host = os.getenv(f"{prefix}DB_HOST", config.database.host)
-            config.database.port = int(
-                os.getenv(f"{prefix}DB_PORT", str(config.database.port))
-            )
-            config.database.database = os.getenv(
-                f"{prefix}DB_NAME", config.database.database
-            )
-            config.database.username = os.getenv(
-                f"{prefix}DB_USER", config.database.username
-            )
-            config.database.password = os.getenv(
-                f"{prefix}DB_PASSWORD", config.database.password
-            )
+            config.database.port = int(os.getenv(f"{prefix}DB_PORT", str(config.database.port)))
+            config.database.database = os.getenv(f"{prefix}DB_NAME", config.database.database)
+            config.database.username = os.getenv(f"{prefix}DB_USER", config.database.username)
+            config.database.password = os.getenv(f"{prefix}DB_PASSWORD", config.database.password)
 
         # Load Redis configuration
         if os.getenv(f"{prefix}REDIS_HOST"):
             config.redis.host = os.getenv(f"{prefix}REDIS_HOST", config.redis.host)
-            config.redis.port = int(
-                os.getenv(f"{prefix}REDIS_PORT", str(config.redis.port))
-            )
-            config.redis.password = os.getenv(
-                f"{prefix}REDIS_PASSWORD", config.redis.password
-            )
+            config.redis.port = int(os.getenv(f"{prefix}REDIS_PORT", str(config.redis.port)))
+            config.redis.password = os.getenv(f"{prefix}REDIS_PASSWORD", config.redis.password)
 
         # Load MLflow configuration
         if os.getenv(f"{prefix}MLFLOW_TRACKING_URI"):
-            config.mlflow.tracking_uri = os.getenv(
-                f"{prefix}MLFLOW_TRACKING_URI", config.mlflow.tracking_uri
-            )
-            config.mlflow.experiment_name = os.getenv(
-                f"{prefix}MLFLOW_EXPERIMENT", config.mlflow.experiment_name
-            )
+            config.mlflow.tracking_uri = os.getenv(f"{prefix}MLFLOW_TRACKING_URI", config.mlflow.tracking_uri)
+            config.mlflow.experiment_name = os.getenv(f"{prefix}MLFLOW_EXPERIMENT", config.mlflow.experiment_name)
 
         return config
 
@@ -939,9 +859,7 @@ class Config:
         """Validate and normalize device selection."""
         normalized = device.lower()
         if normalized not in self._ALLOWED_DEVICES:
-            raise ValueError(
-                f"Unsupported device '{device}'. Allowed values: {sorted(self._ALLOWED_DEVICES)}"
-            )
+            raise ValueError(f"Unsupported device '{device}'. Allowed values: {sorted(self._ALLOWED_DEVICES)}")
         return normalized
 
     @classmethod
@@ -973,10 +891,7 @@ class Config:
 
         # Update model configurations
         if "models" in data:
-            config.models = {
-                name: ModelConfig(name=name, **model_data)
-                for name, model_data in data["models"].items()
-            }
+            config.models = {name: ModelConfig(name=name, **model_data) for name, model_data in data["models"].items()}
         if "training" in data:
             config.training = TrainingConfig(**data["training"])
         if "inference" in data:
@@ -1053,14 +968,10 @@ class Config:
         if not 0 <= self.anomaly_threshold <= 1:
             errors.append("Anomaly threshold must be between 0 and 1")
         if not 0 <= self.field_detection_confidence_threshold <= 1:
-            errors.append(
-                "Field detection confidence threshold must be between 0 and 1"
-            )
+            errors.append("Field detection confidence threshold must be between 0 and 1")
 
         if errors:
-            raise ConfigurationException(
-                f"Configuration validation failed: {'; '.join(errors)}"
-            )
+            raise ConfigurationException(f"Configuration validation failed: {'; '.join(errors)}")
 
 
 # Global configuration instance

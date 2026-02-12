@@ -100,9 +100,7 @@ class EmvValidator(BaseValidator):
 
         return result
 
-    def _validate_transaction(
-        self, txn: EmvTransaction, result: ValidationResult
-    ) -> None:
+    def _validate_transaction(self, txn: EmvTransaction, result: ValidationResult) -> None:
         """Validate complete EMV transaction."""
         # Validate card
         self._validate_card(txn.card, result)
@@ -209,9 +207,7 @@ class EmvValidator(BaseValidator):
                 field="aip",
             )
 
-    def _validate_terminal(
-        self, terminal: EmvTerminal, result: ValidationResult
-    ) -> None:
+    def _validate_terminal(self, terminal: EmvTerminal, result: ValidationResult) -> None:
         """Validate terminal data."""
         # Terminal ID
         if not terminal.terminal_id:
@@ -267,9 +263,7 @@ class EmvValidator(BaseValidator):
                 field="cvm_results",
             )
 
-    def _validate_cryptogram(
-        self, cryptogram: EmvCryptogram, result: ValidationResult
-    ) -> None:
+    def _validate_cryptogram(self, cryptogram: EmvCryptogram, result: ValidationResult) -> None:
         """Validate cryptogram data."""
         # Application cryptogram
         if not cryptogram.application_cryptogram:
@@ -329,9 +323,7 @@ class EmvValidator(BaseValidator):
                 field="unpredictable_number",
             )
 
-    def _validate_transaction_data(
-        self, txn: EmvTransaction, result: ValidationResult
-    ) -> None:
+    def _validate_transaction_data(self, txn: EmvTransaction, result: ValidationResult) -> None:
         """Validate transaction-level data."""
         # Transaction type
         if not txn.transaction_type:
@@ -417,9 +409,7 @@ class EmvValidator(BaseValidator):
                     bit=bit_num,
                 )
 
-    def _validate_cross_fields(
-        self, txn: EmvTransaction, result: ValidationResult
-    ) -> None:
+    def _validate_cross_fields(self, txn: EmvTransaction, result: ValidationResult) -> None:
         """Validate cross-field dependencies."""
         # If cryptogram is ARQC, transaction should be online
         if txn.cryptogram.cryptogram_type == EmvCryptogramType.ARQC:

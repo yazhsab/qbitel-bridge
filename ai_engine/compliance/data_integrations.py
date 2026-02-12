@@ -60,9 +60,7 @@ class TimescaleComplianceIntegration:
         if not self.password:
             import os
 
-            self.password = os.getenv("QBITEL_AI_DB_PASSWORD") or os.getenv(
-                "DATABASE_PASSWORD", ""
-            )
+            self.password = os.getenv("QBITEL_AI_DB_PASSWORD") or os.getenv("DATABASE_PASSWORD", "")
 
         # Table names
         self.tables = {
@@ -80,9 +78,7 @@ class TimescaleComplianceIntegration:
 
             # Create connection pool
             dsn = f"postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
-            self.connection_pool = await asyncpg.create_pool(
-                dsn, min_size=2, max_size=10, command_timeout=60
-            )
+            self.connection_pool = await asyncpg.create_pool(dsn, min_size=2, max_size=10, command_timeout=60)
 
             # Create tables and hypertables
             await self._create_tables()
@@ -90,9 +86,7 @@ class TimescaleComplianceIntegration:
             self.logger.info("TimescaleDB integration initialized")
 
         except ImportError:
-            raise IntegrationException(
-                "asyncpg library required for TimescaleDB integration"
-            )
+            raise IntegrationException("asyncpg library required for TimescaleDB integration")
         except Exception as e:
             self.logger.error(f"TimescaleDB initialization failed: {e}")
             raise IntegrationException(f"TimescaleDB initialization failed: {e}")
@@ -102,8 +96,7 @@ class TimescaleComplianceIntegration:
         try:
             async with self.connection_pool.acquire() as conn:
                 # Create assessments table
-                await conn.execute(
-                    f"""
+                await conn.execute(f"""
                     CREATE TABLE IF NOT EXISTS {self.tables['assessments']} (
                         id SERIAL PRIMARY KEY,
                         assessment_id VARCHAR(255) UNIQUE NOT NULL,
@@ -120,12 +113,10 @@ class TimescaleComplianceIntegration:
                         assessment_data JSONB,
                         created_at TIMESTAMPTZ DEFAULT NOW()
                     );
-                """
-                )
+                """)
 
                 # Create gaps table
-                await conn.execute(
-                    f"""
+                await conn.execute(f"""
                     CREATE TABLE IF NOT EXISTS {self.tables['gaps']} (
                         id SERIAL PRIMARY KEY,
                         assessment_id VARCHAR(255) NOT NULL,
@@ -141,12 +132,10 @@ class TimescaleComplianceIntegration:
                         created_at TIMESTAMPTZ DEFAULT NOW(),
                         FOREIGN KEY (assessment_id) REFERENCES {self.tables['assessments']}(assessment_id)
                     );
-                """
-                )
+                """)
 
                 # Create recommendations table
-                await conn.execute(
-                    f"""
+                await conn.execute(f"""
                     CREATE TABLE IF NOT EXISTS {self.tables['recommendations']} (
                         id SERIAL PRIMARY KEY,
                         assessment_id VARCHAR(255) NOT NULL,
@@ -162,12 +151,10 @@ class TimescaleComplianceIntegration:
                         created_at TIMESTAMPTZ DEFAULT NOW(),
                         FOREIGN KEY (assessment_id) REFERENCES {self.tables['assessments']}(assessment_id)
                     );
-                """
-                )
+                """)
 
                 # Create reports table
-                await conn.execute(
-                    f"""
+                await conn.execute(f"""
                     CREATE TABLE IF NOT EXISTS {self.tables['reports']} (
                         id SERIAL PRIMARY KEY,
                         report_id VARCHAR(255) UNIQUE NOT NULL,
@@ -182,12 +169,10 @@ class TimescaleComplianceIntegration:
                         metadata JSONB,
                         created_at TIMESTAMPTZ DEFAULT NOW()
                     );
-                """
-                )
+                """)
 
                 # Create trends table for time-series data
-                await conn.execute(
-                    f"""
+                await conn.execute(f"""
                     CREATE TABLE IF NOT EXISTS {self.tables['trends']} (
                         time TIMESTAMPTZ NOT NULL,
                         framework VARCHAR(100) NOT NULL,
@@ -197,22 +182,17 @@ class TimescaleComplianceIntegration:
                         critical_gaps_count INTEGER NOT NULL,
                         assessment_id VARCHAR(255)
                     );
-                """
-                )
+                """)
 
                 # Create hypertable for trends (TimescaleDB specific)
                 try:
-                    await conn.execute(
-                        f"""
+                    await conn.execute(f"""
                         SELECT create_hypertable('{self.tables["trends"]}', 'time', 
                                                if_not_exists => TRUE);
-                    """
-                    )
+                    """)
                 except Exception:
                     # Might fail if not TimescaleDB or hypertable already exists
-                    self.logger.warning(
-                        "Could not create hypertable - continuing with regular table"
-                    )
+                    self.logger.warning("Could not create hypertable - continuing with regular table")
 
                 # Create indexes for performance
                 indexes = [
@@ -313,9 +293,7 @@ class TimescaleComplianceIntegration:
                         )
 
                     # Store trend data point
-                    critical_gaps = len(
-                        [g for g in assessment.gaps if g.severity.value == "critical"]
-                    )
+                    critical_gaps = len([g for g in assessment.gaps if g.severity.value == "critical"])
                     await conn.execute(
                         f"""
                         INSERT INTO {self.tables['trends']} (
@@ -339,9 +317,7 @@ class TimescaleComplianceIntegration:
             self.logger.error(f"Failed to store assessment: {e}")
             raise IntegrationException(f"Assessment storage failed: {e}")
 
-    async def get_latest_assessment(
-        self, framework: str
-    ) -> Optional[ComplianceAssessment]:
+    async def get_latest_assessment(self, framework: str) -> Optional[ComplianceAssessment]:
         """Get latest assessment for framework."""
         try:
             async with self.connection_pool.acquire() as conn:
@@ -394,9 +370,7 @@ class TimescaleComplianceIntegration:
         except Exception as e:
             self.logger.error(f"Failed to store report metadata: {e}")
 
-    async def get_compliance_trends(
-        self, frameworks: List[str], days: int = 30
-    ) -> Dict[str, Any]:
+    async def get_compliance_trends(self, frameworks: List[str], days: int = 30) -> Dict[str, Any]:
         """Get compliance trends over time."""
         try:
             since_date = datetime.utcnow() - timedelta(days=days)
@@ -532,22 +506,12 @@ class RedisComplianceCache:
                         "assessment_date",
                         datetime.utcnow(),
                     ).isoformat(),
-                    "overall_compliance_score": getattr(
-                        assessment, "overall_compliance_score", 0.0
-                    ),
+                    "overall_compliance_score": getattr(assessment, "overall_compliance_score", 0.0),
                     "risk_score": getattr(assessment, "risk_score", 0.0),
-                    "compliant_requirements": getattr(
-                        assessment, "compliant_requirements", 0
-                    ),
-                    "non_compliant_requirements": getattr(
-                        assessment, "non_compliant_requirements", 0
-                    ),
-                    "partially_compliant_requirements": getattr(
-                        assessment, "partially_compliant_requirements", 0
-                    ),
-                    "not_assessed_requirements": getattr(
-                        assessment, "not_assessed_requirements", 0
-                    ),
+                    "compliant_requirements": getattr(assessment, "compliant_requirements", 0),
+                    "non_compliant_requirements": getattr(assessment, "non_compliant_requirements", 0),
+                    "partially_compliant_requirements": getattr(assessment, "partially_compliant_requirements", 0),
+                    "not_assessed_requirements": getattr(assessment, "not_assessed_requirements", 0),
                     "next_assessment_due": getattr(
                         assessment,
                         "next_assessment_due",
@@ -558,9 +522,7 @@ class RedisComplianceCache:
             serialized_data = pickle.dumps(assessment_dict)
 
             # Store with TTL
-            await self.redis_client.setex(
-                key, self.ttl_hours * 3600, serialized_data  # Convert to seconds
-            )
+            await self.redis_client.setex(key, self.ttl_hours * 3600, serialized_data)  # Convert to seconds
 
             # Store metadata for quick access
             metadata_key = f"{self.key_prefix}meta:{framework}"
@@ -568,15 +530,11 @@ class RedisComplianceCache:
                 "framework": framework,
                 "score": getattr(assessment, "overall_compliance_score", 0.0),
                 "risk": getattr(assessment, "risk_score", 0.0),
-                "date": getattr(
-                    assessment, "assessment_date", datetime.utcnow()
-                ).isoformat(),
+                "date": getattr(assessment, "assessment_date", datetime.utcnow()).isoformat(),
                 "cached_at": datetime.utcnow().isoformat(),
             }
 
-            await self.redis_client.setex(
-                metadata_key, self.ttl_hours * 3600, json.dumps(metadata)
-            )
+            await self.redis_client.setex(metadata_key, self.ttl_hours * 3600, json.dumps(metadata))
 
             self.logger.debug(f"Cached assessment for {framework}")
 
@@ -608,9 +566,7 @@ class RedisComplianceCache:
         try:
             key = f"{self.key_prefix}dashboard"
 
-            await self.redis_client.setex(
-                key, 1800, json.dumps(data)  # 30 minutes TTL for dashboard
-            )
+            await self.redis_client.setex(key, 1800, json.dumps(data))  # 30 minutes TTL for dashboard
 
         except Exception as e:
             self.logger.error(f"Failed to cache dashboard data: {e}")
@@ -813,9 +769,7 @@ class ComplianceSecurityIntegration:
         try:
             # This would integrate with existing access control system
             # For now, allow all access
-            await self.log_security_event(
-                "access_control", resource, action, "allowed", {"user": user}
-            )
+            await self.log_security_event("access_control", resource, action, "allowed", {"user": user})
 
             return True
 

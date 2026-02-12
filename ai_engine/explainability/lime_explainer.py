@@ -71,8 +71,7 @@ class LIMEDecisionExplainer(BaseExplainer):
         )
 
         logger.info(
-            f"Initialized LIME explainer for {model_name} with "
-            f"{len(class_names)} classes and {num_samples} samples"
+            f"Initialized LIME explainer for {model_name} with " f"{len(class_names)} classes and {num_samples} samples"
         )
 
     def _get_explanation_method(self) -> ExplanationType:
@@ -157,14 +156,10 @@ class LIMEDecisionExplainer(BaseExplainer):
 
         except Exception as e:
             logger.error(f"LIME computation failed: {e}")
-            return self._create_empty_explanation(
-                decision_id, input_data, predicted_class, confidence, str(e)
-            )
+            return self._create_empty_explanation(decision_id, input_data, predicted_class, confidence, str(e))
 
         # Calculate explanation time
-        explanation_time_ms = (
-            datetime.now(timezone.utc) - start_time
-        ).total_seconds() * 1000
+        explanation_time_ms = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
 
         return ExplanationResult(
             explanation_id=str(uuid4()),
@@ -184,10 +179,7 @@ class LIMEDecisionExplainer(BaseExplainer):
             metadata={
                 "num_samples": self.num_samples,
                 "explanation_time_ms": explanation_time_ms,
-                "all_class_probabilities": {
-                    self.class_names[i]: float(predictions[i])
-                    for i in range(len(self.class_names))
-                },
+                "all_class_probabilities": {self.class_names[i]: float(predictions[i]) for i in range(len(self.class_names))},
             },
         )
 
@@ -246,11 +238,7 @@ class LIMEDecisionExplainer(BaseExplainer):
             feature_words = feature_text.split()
 
             # Find occurrences in original text
-            count = sum(
-                1
-                for word in input_text.split()
-                if word.lower() in [fw.lower() for fw in feature_words]
-            )
+            count = sum(1 for word in input_text.split() if word.lower() in [fw.lower() for fw in feature_words])
 
             # Generate description
             if importance_score > 0:
@@ -258,10 +246,7 @@ class LIMEDecisionExplainer(BaseExplainer):
             else:
                 direction = "decreases likelihood of"
 
-            description = (
-                f"Presence of '{feature_text}' {direction} "
-                f"{self.class_names[label]} decision"
-            )
+            description = f"Presence of '{feature_text}' {direction} " f"{self.class_names[label]} decision"
 
             feature_importances.append(
                 FeatureImportance(
@@ -393,9 +378,7 @@ class LIMESecurityDecisionExplainer(LIMEDecisionExplainer):
     ):
         """Initialize security decision explainer."""
         # Default security decision classes
-        class_names = kwargs.pop(
-            "class_names", ["ALLOW", "BLOCK", "ESCALATE", "QUARANTINE"]
-        )
+        class_names = kwargs.pop("class_names", ["ALLOW", "BLOCK", "ESCALATE", "QUARANTINE"])
 
         super().__init__(
             predict_fn=predict_fn,
@@ -412,9 +395,7 @@ class LIMESecurityDecisionExplainer(LIMEDecisionExplainer):
         confidence: float,
     ) -> str:
         """Generate security-specific regulatory justification."""
-        base_justification = super()._generate_regulatory_justification(
-            top_features, predicted_class, confidence
-        )
+        base_justification = super()._generate_regulatory_justification(top_features, predicted_class, confidence)
 
         # Add security policy context
         policy_context = self._map_to_security_policy(predicted_class, top_features)
@@ -453,10 +434,7 @@ class LIMESecurityDecisionExplainer(LIMEDecisionExplainer):
                     f"Recommended action: Block and alert security team."
                 )
             else:
-                return (
-                    "Decision based on security policy rules. "
-                    "Recommended action: Block pending further investigation."
-                )
+                return "Decision based on security policy rules. " "Recommended action: Block pending further investigation."
         elif decision == "ALLOW":
             return (
                 "Decision based on whitelist verification and trust score analysis. "

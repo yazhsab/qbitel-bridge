@@ -111,10 +111,7 @@ class Counter:
     def collect(self) -> List[MetricValue]:
         """Collect all metric values."""
         with self._lock:
-            return [
-                MetricValue(value=v, labels=l)
-                for l, v in self._values.items()
-            ]
+            return [MetricValue(value=v, labels=l) for l, v in self._values.items()]
 
 
 class CounterChild:
@@ -192,10 +189,7 @@ class Gauge:
     def collect(self) -> List[MetricValue]:
         """Collect all metric values."""
         with self._lock:
-            return [
-                MetricValue(value=v, labels=l)
-                for l, v in self._values.items()
-            ]
+            return [MetricValue(value=v, labels=l) for l, v in self._values.items()]
 
 
 class GaugeChild:
@@ -226,8 +220,21 @@ class Histogram:
     """
 
     DEFAULT_BUCKETS = (
-        0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5,
-        0.75, 1.0, 2.5, 5.0, 7.5, 10.0, float("inf"),
+        0.005,
+        0.01,
+        0.025,
+        0.05,
+        0.075,
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        1.0,
+        2.5,
+        5.0,
+        7.5,
+        10.0,
+        float("inf"),
     )
 
     def __init__(
@@ -241,9 +248,7 @@ class Histogram:
         self.description = description
         self.label_names = label_names or []
         self.buckets = buckets or self.DEFAULT_BUCKETS
-        self._buckets: Dict[MetricLabels, Dict[float, int]] = defaultdict(
-            lambda: {b: 0 for b in self.buckets}
-        )
+        self._buckets: Dict[MetricLabels, Dict[float, int]] = defaultdict(lambda: {b: 0 for b in self.buckets})
         self._sums: Dict[MetricLabels, float] = defaultdict(float)
         self._counts: Dict[MetricLabels, int] = defaultdict(int)
         self._lock = threading.Lock()
@@ -273,10 +278,12 @@ class Histogram:
             for label_obj in set(self._buckets.keys()) | set(self._sums.keys()):
                 # Add bucket values
                 for bucket, count in self._buckets[label_obj].items():
-                    bucket_labels = MetricLabels({
-                        **label_obj.labels,
-                        "le": str(bucket) if bucket != float("inf") else "+Inf",
-                    })
+                    bucket_labels = MetricLabels(
+                        {
+                            **label_obj.labels,
+                            "le": str(bucket) if bucket != float("inf") else "+Inf",
+                        }
+                    )
                     values.append(MetricValue(value=count, labels=bucket_labels))
 
                 # Add sum
@@ -364,10 +371,7 @@ class Summary:
             self._counts[label_obj] += 1
 
             # Clean old observations
-            self._observations[label_obj] = [
-                (t, v) for t, v in self._observations[label_obj]
-                if t > cutoff
-            ]
+            self._observations[label_obj] = [(t, v) for t, v in self._observations[label_obj] if t > cutoff]
 
     def labels(self, **kwargs: str) -> "SummaryChild":
         """Return a child summary with labels."""
@@ -388,14 +392,18 @@ class Summary:
                 for quantile in self.quantiles:
                     idx = int(len(sorted_values) * quantile)
                     idx = min(idx, len(sorted_values) - 1)
-                    quantile_labels = MetricLabels({
-                        **label_obj.labels,
-                        "quantile": str(quantile),
-                    })
-                    values.append(MetricValue(
-                        value=sorted_values[idx],
-                        labels=quantile_labels,
-                    ))
+                    quantile_labels = MetricLabels(
+                        {
+                            **label_obj.labels,
+                            "quantile": str(quantile),
+                        }
+                    )
+                    values.append(
+                        MetricValue(
+                            value=sorted_values[idx],
+                            labels=quantile_labels,
+                        )
+                    )
 
                 # Add sum and count
                 sum_labels = MetricLabels({**label_obj.labels, "aggregate": "sum"})
@@ -479,9 +487,7 @@ class MetricsCollector:
         full_name = f"{self.namespace}_{name}"
         with self._lock:
             if full_name not in self._metrics:
-                self._metrics[full_name] = Histogram(
-                    full_name, description, label_names, buckets
-                )
+                self._metrics[full_name] = Histogram(full_name, description, label_names, buckets)
             return self._metrics[full_name]  # type: ignore
 
     def summary(
@@ -495,9 +501,7 @@ class MetricsCollector:
         full_name = f"{self.namespace}_{name}"
         with self._lock:
             if full_name not in self._metrics:
-                self._metrics[full_name] = Summary(
-                    full_name, description, label_names, quantiles
-                )
+                self._metrics[full_name] = Summary(full_name, description, label_names, quantiles)
             return self._metrics[full_name]  # type: ignore
 
     def collect_all(self) -> Dict[str, List[MetricValue]]:
@@ -557,10 +561,13 @@ class MetricsCollector:
             "Python version info",
             ["version", "implementation"],
         )
-        info_gauge.set(1.0, {
-            "version": sys.version.split()[0],
-            "implementation": sys.implementation.name,
-        })
+        info_gauge.set(
+            1.0,
+            {
+                "version": sys.version.split()[0],
+                "implementation": sys.implementation.name,
+            },
+        )
 
 
 # Global metrics collector instance
@@ -598,7 +605,6 @@ def create_banking_metrics(collector: Optional[MetricsCollector] = None) -> Dict
             ["protocol"],
             buckets=(0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5),
         ),
-
         # Cryptographic operations
         "crypto_operations_total": mc.counter(
             "crypto_operations_total",
@@ -610,7 +616,6 @@ def create_banking_metrics(collector: Optional[MetricsCollector] = None) -> Dict
             "Cryptographic operation duration",
             ["operation", "algorithm"],
         ),
-
         # Key management
         "keys_total": mc.gauge(
             "keys_total",
@@ -622,7 +627,6 @@ def create_banking_metrics(collector: Optional[MetricsCollector] = None) -> Dict
             "Total key rotations performed",
             ["type", "reason"],
         ),
-
         # Certificate management
         "certificates_total": mc.gauge(
             "certificates_total",
@@ -634,7 +638,6 @@ def create_banking_metrics(collector: Optional[MetricsCollector] = None) -> Dict
             "Days until certificate expiry",
             ["common_name"],
         ),
-
         # HSM metrics
         "hsm_operations_total": mc.counter(
             "hsm_operations_total",
@@ -651,14 +654,12 @@ def create_banking_metrics(collector: Optional[MetricsCollector] = None) -> Dict
             "HSM connection pool size",
             ["provider"],
         ),
-
         # Verification metrics
         "verifications_total": mc.counter(
             "verifications_total",
             "Total verification operations",
             ["type", "result"],
         ),
-
         # Health metrics
         "component_health": mc.gauge(
             "component_health",

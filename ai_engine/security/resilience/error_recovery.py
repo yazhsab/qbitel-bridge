@@ -113,9 +113,7 @@ class RecoveryHandler(ABC):
     """Abstract base class for recovery handlers."""
 
     @abstractmethod
-    async def handle_recovery(
-        self, error_context: ErrorContext, recovery_action: RecoveryAction
-    ) -> RecoveryExecutionResult:
+    async def handle_recovery(self, error_context: ErrorContext, recovery_action: RecoveryAction) -> RecoveryExecutionResult:
         """Handle recovery for an error."""
         pass
 
@@ -123,9 +121,7 @@ class RecoveryHandler(ABC):
 class RetryRecoveryHandler(RecoveryHandler):
     """Handles retry-based recovery."""
 
-    async def handle_recovery(
-        self, error_context: ErrorContext, recovery_action: RecoveryAction
-    ) -> RecoveryExecutionResult:
+    async def handle_recovery(self, error_context: ErrorContext, recovery_action: RecoveryAction) -> RecoveryExecutionResult:
         """Execute retry recovery."""
 
         if error_context.retry_count >= error_context.max_retries:
@@ -169,9 +165,7 @@ class RetryRecoveryHandler(RecoveryHandler):
 class FallbackRecoveryHandler(RecoveryHandler):
     """Handles fallback-based recovery."""
 
-    async def handle_recovery(
-        self, error_context: ErrorContext, recovery_action: RecoveryAction
-    ) -> RecoveryExecutionResult:
+    async def handle_recovery(self, error_context: ErrorContext, recovery_action: RecoveryAction) -> RecoveryExecutionResult:
         """Execute fallback recovery."""
 
         if not recovery_action.fallback_operation:
@@ -210,9 +204,7 @@ class FallbackRecoveryHandler(RecoveryHandler):
 class CompensatingRecoveryHandler(RecoveryHandler):
     """Handles compensating action recovery."""
 
-    async def handle_recovery(
-        self, error_context: ErrorContext, recovery_action: RecoveryAction
-    ) -> RecoveryExecutionResult:
+    async def handle_recovery(self, error_context: ErrorContext, recovery_action: RecoveryAction) -> RecoveryExecutionResult:
         """Execute compensating action recovery."""
 
         if not recovery_action.compensating_action:
@@ -251,9 +243,7 @@ class CompensatingRecoveryHandler(RecoveryHandler):
 class DegradedModeHandler(RecoveryHandler):
     """Handles degraded mode recovery."""
 
-    async def handle_recovery(
-        self, error_context: ErrorContext, recovery_action: RecoveryAction
-    ) -> RecoveryExecutionResult:
+    async def handle_recovery(self, error_context: ErrorContext, recovery_action: RecoveryAction) -> RecoveryExecutionResult:
         """Execute degraded mode recovery."""
 
         # Degraded mode typically means reduced functionality
@@ -384,9 +374,7 @@ class ErrorRecoveryManager:
             level=LogLevel.INFO,
         )
 
-    def register_recovery_handler(
-        self, strategy: RecoveryStrategy, handler: RecoveryHandler
-    ):
+    def register_recovery_handler(self, strategy: RecoveryStrategy, handler: RecoveryHandler):
         """Register a custom recovery handler."""
 
         self.recovery_handlers[strategy] = handler
@@ -397,9 +385,7 @@ class ErrorRecoveryManager:
             level=LogLevel.INFO,
         )
 
-    def _identify_recovery_plan(
-        self, error_context: ErrorContext
-    ) -> Optional[RecoveryPlan]:
+    def _identify_recovery_plan(self, error_context: ErrorContext) -> Optional[RecoveryPlan]:
         """Identify the appropriate recovery plan for an error."""
 
         error_type = type(error_context.error).__name__
@@ -500,9 +486,7 @@ class ErrorRecoveryManager:
                         timeout=recovery_plan.recovery_timeout,
                     )
 
-                    recovery_result.execution_time = (
-                        asyncio.get_event_loop().time() - start_time
-                    )
+                    recovery_result.execution_time = asyncio.get_event_loop().time() - start_time
 
                     if recovery_result.success:
                         self._successful_recoveries += 1
@@ -573,9 +557,7 @@ class ErrorRecoveryManager:
         self._record_recovery_result(error_context, result)
         return result
 
-    def _record_recovery_result(
-        self, error_context: ErrorContext, recovery_result: RecoveryExecutionResult
-    ):
+    def _record_recovery_result(self, error_context: ErrorContext, recovery_result: RecoveryExecutionResult):
         """Record recovery result for metrics and analysis."""
 
         record = {
@@ -585,11 +567,7 @@ class ErrorRecoveryManager:
                 "success": recovery_result.success,
                 "result": recovery_result.result.value,
                 "message": recovery_result.message,
-                "strategy_used": (
-                    recovery_result.strategy_used.value
-                    if recovery_result.strategy_used
-                    else None
-                ),
+                "strategy_used": (recovery_result.strategy_used.value if recovery_result.strategy_used else None),
                 "execution_time": recovery_result.execution_time,
             },
         }
@@ -603,11 +581,7 @@ class ErrorRecoveryManager:
     def get_recovery_metrics(self) -> Dict[str, Any]:
         """Get recovery metrics and statistics."""
 
-        success_rate = (
-            self._successful_recoveries / self._total_recovery_attempts
-            if self._total_recovery_attempts > 0
-            else 0
-        )
+        success_rate = self._successful_recoveries / self._total_recovery_attempts if self._total_recovery_attempts > 0 else 0
 
         # Analyze recovery patterns
         strategy_usage = {}

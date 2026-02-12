@@ -120,9 +120,7 @@ class SystemStateAnalyzer:
         """Capture complete system state snapshot."""
         try:
             start_time = time.time()
-            snapshot_id = hashlib.md5(
-                f"{datetime.utcnow().isoformat()}".encode()
-            ).hexdigest()[:16]
+            snapshot_id = hashlib.md5(f"{datetime.utcnow().isoformat()}".encode()).hexdigest()[:16]
 
             self.logger.info(f"Capturing system state snapshot: {snapshot_id}")
 
@@ -142,10 +140,7 @@ class SystemStateAnalyzer:
             }
 
             with ThreadPoolExecutor(max_workers=8) as executor:
-                futures = {
-                    executor.submit(collector): name
-                    for name, collector in collectors.items()
-                }
+                futures = {executor.submit(collector): name for name, collector in collectors.items()}
 
                 collected_data = {}
                 for future in as_completed(futures):
@@ -153,9 +148,7 @@ class SystemStateAnalyzer:
                     try:
                         data = future.result(timeout=30)
                         collected_data[collector_name] = data
-                        self.logger.debug(
-                            f"Collected {collector_name} data: {len(str(data))} bytes"
-                        )
+                        self.logger.debug(f"Collected {collector_name} data: {len(str(data))} bytes")
                     except Exception as e:
                         self.logger.error(f"Failed to collect {collector_name}: {e}")
                         collected_data[collector_name] = {}
@@ -248,11 +241,7 @@ class SystemStateAnalyzer:
                     "packets_recv": net_io.packets_recv,
                 },
                 "connections": len(psutil.net_connections()),
-                "listening_ports": [
-                    conn.laddr.port
-                    for conn in psutil.net_connections("inet")
-                    if conn.status == "LISTEN"
-                ],
+                "listening_ports": [conn.laddr.port for conn in psutil.net_connections("inet") if conn.status == "LISTEN"],
             }
         except Exception as e:
             self.logger.error(f"Failed to collect network config: {e}")
@@ -272,35 +261,23 @@ class SystemStateAnalyzer:
                 }
 
                 security_config["encryption"] = {
-                    "enabled": getattr(
-                        self.config.security, "enable_encryption", False
-                    ),
-                    "algorithm": getattr(
-                        self.config.security, "encryption_algorithm", ""
-                    ),
+                    "enabled": getattr(self.config.security, "enable_encryption", False),
+                    "algorithm": getattr(self.config.security, "encryption_algorithm", ""),
                 }
 
                 security_config["authentication"] = {
-                    "jwt_enabled": bool(
-                        getattr(self.config.security, "jwt_secret", "")
-                    ),
+                    "jwt_enabled": bool(getattr(self.config.security, "jwt_secret", "")),
                     "jwt_algorithm": getattr(self.config.security, "jwt_algorithm", ""),
-                    "jwt_expiry_hours": getattr(
-                        self.config.security, "jwt_expiration_hours", 0
-                    ),
+                    "jwt_expiry_hours": getattr(self.config.security, "jwt_expiration_hours", 0),
                 }
 
             # Rate limiting
             security_config["rate_limiting"] = {
                 "enabled": (
-                    getattr(self.config.security, "enable_rate_limiting", False)
-                    if hasattr(self.config, "security")
-                    else False
+                    getattr(self.config.security, "enable_rate_limiting", False) if hasattr(self.config, "security") else False
                 ),
                 "rate_limit": (
-                    getattr(self.config.security, "rate_limit_per_minute", 0)
-                    if hasattr(self.config, "security")
-                    else 0
+                    getattr(self.config.security, "rate_limit_per_minute", 0) if hasattr(self.config, "security") else 0
                 ),
             }
 
@@ -339,10 +316,7 @@ class SystemStateAnalyzer:
             if hasattr(self.config, "database"):
                 db_config = {
                     "encryption_at_rest": True,  # Assume encrypted
-                    "encryption_in_transit": getattr(
-                        self.config.database, "ssl_mode", ""
-                    )
-                    == "require",
+                    "encryption_in_transit": getattr(self.config.database, "ssl_mode", "") == "require",
                     "backup_retention_days": 30,
                     "access_logging": True,
                     "connection_pooling": True,
@@ -383,18 +357,10 @@ class SystemStateAnalyzer:
 
             if hasattr(self.config, "monitoring"):
                 monitoring_config = {
-                    "metrics_enabled": getattr(
-                        self.config.monitoring, "enable_metrics", False
-                    ),
-                    "prometheus_enabled": getattr(
-                        self.config.monitoring, "prometheus_enabled", False
-                    ),
-                    "health_checks": getattr(
-                        self.config.monitoring, "enable_health_checks", False
-                    ),
-                    "alerting": getattr(
-                        self.config.monitoring, "alerting_enabled", False
-                    ),
+                    "metrics_enabled": getattr(self.config.monitoring, "enable_metrics", False),
+                    "prometheus_enabled": getattr(self.config.monitoring, "prometheus_enabled", False),
+                    "health_checks": getattr(self.config.monitoring, "enable_health_checks", False),
+                    "alerting": getattr(self.config.monitoring, "alerting_enabled", False),
                     "tracing": getattr(self.config.monitoring, "enable_tracing", False),
                 }
 
@@ -590,16 +556,10 @@ class ComplianceAssessmentEngine:
 
             requirements_to_assess = framework_instance.get_all_requirements()
             if target_requirements:
-                requirements_to_assess = [
-                    req
-                    for req in requirements_to_assess
-                    if req.id in target_requirements
-                ]
+                requirements_to_assess = [req for req in requirements_to_assess if req.id in target_requirements]
 
             # Assess individual requirements
-            requirement_assessments = await self._assess_requirements(
-                requirements_to_assess, system_snapshot, framework
-            )
+            requirement_assessments = await self._assess_requirements(requirements_to_assess, system_snapshot, framework)
 
             # Generate overall assessment
             overall_assessment = await self._generate_overall_assessment(
@@ -647,10 +607,7 @@ class ComplianceAssessmentEngine:
         batch_size = 10
         for i in range(0, len(requirements), batch_size):
             batch = requirements[i : i + batch_size]
-            batch_tasks = [
-                self._assess_single_requirement(req, system_snapshot, framework)
-                for req in batch
-            ]
+            batch_tasks = [self._assess_single_requirement(req, system_snapshot, framework) for req in batch]
 
             batch_results = await asyncio.gather(*batch_tasks, return_exceptions=True)
 
@@ -671,22 +628,16 @@ class ComplianceAssessmentEngine:
         """Assess a single compliance requirement using LLM analysis."""
         try:
             # Extract relevant evidence from system snapshot
-            evidence = self._extract_evidence_for_requirement(
-                requirement, system_snapshot
-            )
+            evidence = self._extract_evidence_for_requirement(requirement, system_snapshot)
 
             # Use LLM for intelligent assessment
-            assessment_result = await self._llm_assess_requirement(
-                requirement, evidence, framework
-            )
+            assessment_result = await self._llm_assess_requirement(requirement, evidence, framework)
 
             # Create requirement assessment
             requirement_assessment = RequirementAssessment(
                 requirement_id=requirement.id,
                 requirement_title=requirement.title,
-                status=ComplianceStatus(
-                    assessment_result.get("status", "not_assessed")
-                ),
+                status=ComplianceStatus(assessment_result.get("status", "not_assessed")),
                 compliance_score=assessment_result.get("compliance_score", 0.0),
                 evidence=evidence,
                 findings=assessment_result.get("findings", []),
@@ -726,9 +677,7 @@ class ComplianceAssessmentEngine:
 
         # Determine relevant evidence sources based on requirement
         relevant_sources = []
-        requirement_lower = (
-            requirement.title.lower() + " " + requirement.description.lower()
-        )
+        requirement_lower = requirement.title.lower() + " " + requirement.description.lower()
 
         for category, sources in evidence_mapping.items():
             if category in requirement_lower:
@@ -788,9 +737,7 @@ class ComplianceAssessmentEngine:
         """Use LLM to assess compliance requirement."""
         try:
             # Create assessment prompt
-            prompt = self._create_requirement_assessment_prompt(
-                requirement, evidence, framework
-            )
+            prompt = self._create_requirement_assessment_prompt(requirement, evidence, framework)
 
             # Request LLM assessment
             llm_request = LLMRequest(
@@ -926,9 +873,7 @@ Focus on objective assessment based on available evidence.
                 elif "recommend" in line.lower() or "suggest" in line.lower():
                     assessment["recommendations"].append(line.strip()[2:])
 
-        assessment["findings"].append(
-            f"Text analysis of response: {response_text[:200]}..."
-        )
+        assessment["findings"].append(f"Text analysis of response: {response_text[:200]}...")
 
         return assessment
 
@@ -945,30 +890,14 @@ Focus on objective assessment based on available evidence.
 
         # Calculate compliance metrics
         total_requirements = len(requirement_assessments)
-        compliant_count = sum(
-            1 for r in requirement_assessments if r.status == ComplianceStatus.COMPLIANT
-        )
-        partially_compliant_count = sum(
-            1
-            for r in requirement_assessments
-            if r.status == ComplianceStatus.PARTIALLY_COMPLIANT
-        )
-        non_compliant_count = sum(
-            1
-            for r in requirement_assessments
-            if r.status == ComplianceStatus.NON_COMPLIANT
-        )
-        not_assessed_count = sum(
-            1
-            for r in requirement_assessments
-            if r.status == ComplianceStatus.NOT_ASSESSED
-        )
+        compliant_count = sum(1 for r in requirement_assessments if r.status == ComplianceStatus.COMPLIANT)
+        partially_compliant_count = sum(1 for r in requirement_assessments if r.status == ComplianceStatus.PARTIALLY_COMPLIANT)
+        non_compliant_count = sum(1 for r in requirement_assessments if r.status == ComplianceStatus.NON_COMPLIANT)
+        not_assessed_count = sum(1 for r in requirement_assessments if r.status == ComplianceStatus.NOT_ASSESSED)
 
         # Calculate overall compliance score
         total_score = sum(r.compliance_score for r in requirement_assessments)
-        overall_compliance_score = (
-            total_score / total_requirements if total_requirements > 0 else 0.0
-        )
+        overall_compliance_score = total_score / total_requirements if total_requirements > 0 else 0.0
 
         # Calculate risk score (inverse of compliance)
         risk_score = 100.0 - overall_compliance_score
@@ -984,17 +913,11 @@ Focus on objective assessment based on available evidence.
                     requirement_id=req_assessment.requirement_id,
                     requirement_title=req_assessment.requirement_title,
                     severity=self._risk_to_severity(req_assessment.risk_level),
-                    current_state=(
-                        "; ".join(req_assessment.findings)
-                        if req_assessment.findings
-                        else "Non-compliant state"
-                    ),
+                    current_state=("; ".join(req_assessment.findings) if req_assessment.findings else "Non-compliant state"),
                     required_state="Full compliance required",
                     gap_description=f"Requirement {req_assessment.requirement_id} is {req_assessment.status.value}",
                     impact_assessment=f"Risk level: {req_assessment.risk_level.value}",
-                    remediation_effort=self._estimate_remediation_effort(
-                        req_assessment.risk_level
-                    ),
+                    remediation_effort=self._estimate_remediation_effort(req_assessment.risk_level),
                 )
                 gaps.append(gap)
 
@@ -1009,9 +932,7 @@ Focus on objective assessment based on available evidence.
                     description=rec_text,
                     priority=self._risk_to_severity(req_assessment.risk_level),
                     implementation_steps=[rec_text],
-                    estimated_effort_days=self._estimate_effort_days(
-                        req_assessment.risk_level
-                    ),
+                    estimated_effort_days=self._estimate_effort_days(req_assessment.risk_level),
                     business_impact=f"Improves compliance for {req_assessment.requirement_id}",
                 )
                 recommendations.append(recommendation)
@@ -1081,9 +1002,7 @@ Focus on objective assessment based on available evidence.
 
         return assessment
 
-    def _cache_assessment(
-        self, cache_key: str, assessment: ComplianceAssessment
-    ) -> None:
+    def _cache_assessment(self, cache_key: str, assessment: ComplianceAssessment) -> None:
         """Cache assessment result."""
         self.assessment_cache[cache_key] = assessment
 
@@ -1097,9 +1016,7 @@ Focus on objective assessment based on available evidence.
             for key in oldest_keys:
                 del self.assessment_cache[key]
 
-    async def get_requirement_assessment(
-        self, framework: str, requirement_id: str
-    ) -> Optional[RequirementAssessment]:
+    async def get_requirement_assessment(self, framework: str, requirement_id: str) -> Optional[RequirementAssessment]:
         """Get assessment for specific requirement."""
         try:
             # Capture current system state
@@ -1115,9 +1032,7 @@ Focus on objective assessment based on available evidence.
                 raise AssessmentException(f"Unknown requirement: {requirement_id}")
 
             # Assess the single requirement
-            assessment = await self._assess_single_requirement(
-                requirement, system_snapshot, framework
-            )
+            assessment = await self._assess_single_requirement(requirement, system_snapshot, framework)
 
             return assessment
 
@@ -1145,19 +1060,12 @@ Focus on objective assessment based on available evidence.
                 "non_compliant": assessment.non_compliant_requirements,
                 "partially_compliant": assessment.partially_compliant_requirements,
                 "not_assessed": assessment.not_assessed_requirements,
-                "critical_gaps": len(
-                    [
-                        g
-                        for g in assessment.gaps
-                        if g.severity == RequirementSeverity.CRITICAL
-                    ]
-                ),
+                "critical_gaps": len([g for g in assessment.gaps if g.severity == RequirementSeverity.CRITICAL]),
                 "high_priority_recommendations": len(
                     [
                         r
                         for r in assessment.recommendations
-                        if r.priority
-                        in [RequirementSeverity.CRITICAL, RequirementSeverity.HIGH]
+                        if r.priority in [RequirementSeverity.CRITICAL, RequirementSeverity.HIGH]
                     ]
                 ),
                 "next_assessment_due": assessment.next_assessment_due.isoformat(),
@@ -1180,9 +1088,7 @@ class ComplianceDataCollector:
         self.logger = logging.getLogger(__name__)
         self.system_analyzer = SystemStateAnalyzer(config)
 
-    async def collect_compliance_data(
-        self, requirements: List[ComplianceRequirement]
-    ) -> Dict[str, Any]:
+    async def collect_compliance_data(self, requirements: List[ComplianceRequirement]) -> Dict[str, Any]:
         """Collect comprehensive compliance data for given requirements."""
         try:
             # Capture system state
@@ -1206,23 +1112,15 @@ class ComplianceDataCollector:
                     "policies": system_snapshot.policies,
                     "training": system_snapshot.training_records,
                     "incident_management": {
-                        "recent_incidents": system_snapshot.incident_logs[
-                            -10:
-                        ],  # Last 10 incidents
-                        "response_procedures": system_snapshot.policies.get(
-                            "incident_response_policy", {}
-                        ),
+                        "recent_incidents": system_snapshot.incident_logs[-10:],  # Last 10 incidents
+                        "response_procedures": system_snapshot.policies.get("incident_response_policy", {}),
                     },
                 },
                 "operational_controls": {
                     "data_handling": system_snapshot.data_handling,
                     "audit_logging": {
-                        "recent_events": system_snapshot.audit_logs[
-                            -20:
-                        ],  # Last 20 audit events
-                        "retention_policy": system_snapshot.data_handling.get(
-                            "retention_policies", {}
-                        ),
+                        "recent_events": system_snapshot.audit_logs[-20:],  # Last 20 audit events
+                        "retention_policy": system_snapshot.data_handling.get("retention_policies", {}),
                     },
                     "system_maintenance": system_snapshot.system_info,
                 },
@@ -1235,9 +1133,7 @@ class ComplianceDataCollector:
             self.logger.error(f"Failed to collect compliance data: {e}")
             return {}
 
-    def _map_requirements_to_controls(
-        self, requirements: List[ComplianceRequirement]
-    ) -> Dict[str, List[str]]:
+    def _map_requirements_to_controls(self, requirements: List[ComplianceRequirement]) -> Dict[str, List[str]]:
         """Map requirements to applicable control categories."""
         mapping = {}
 
@@ -1250,25 +1146,13 @@ class ComplianceDataCollector:
             if isinstance(control_type_value, str):
                 control_type_value = control_type_value.lower()
 
-            if (
-                control_type_value == ControlType.TECHNICAL
-                or control_type_value == ControlType.TECHNICAL.value
-            ):
+            if control_type_value == ControlType.TECHNICAL or control_type_value == ControlType.TECHNICAL.value:
                 control_categories.append("technical_controls")
-            elif (
-                control_type_value == ControlType.ADMINISTRATIVE
-                or control_type_value == ControlType.ADMINISTRATIVE.value
-            ):
+            elif control_type_value == ControlType.ADMINISTRATIVE or control_type_value == ControlType.ADMINISTRATIVE.value:
                 control_categories.append("administrative_controls")
-            elif (
-                control_type_value == ControlType.OPERATIONAL
-                or control_type_value == ControlType.OPERATIONAL.value
-            ):
+            elif control_type_value == ControlType.OPERATIONAL or control_type_value == ControlType.OPERATIONAL.value:
                 control_categories.append("operational_controls")
-            elif (
-                control_type_value == ControlType.PHYSICAL
-                or control_type_value == ControlType.PHYSICAL.value
-            ):
+            elif control_type_value == ControlType.PHYSICAL or control_type_value == ControlType.PHYSICAL.value:
                 control_categories.append("physical_controls")
 
             # Additional categorization based on requirement content
@@ -1276,14 +1160,9 @@ class ComplianceDataCollector:
             description = getattr(req, "description", "") or ""
             req_content = (str(title) + " " + str(description)).lower()
 
-            if any(
-                term in req_content for term in ["network", "firewall", "encryption"]
-            ):
+            if any(term in req_content for term in ["network", "firewall", "encryption"]):
                 control_categories.append("network_security")
-            if any(
-                term in req_content
-                for term in ["access", "authentication", "authorization"]
-            ):
+            if any(term in req_content for term in ["access", "authentication", "authorization"]):
                 control_categories.append("access_controls")
             if any(term in req_content for term in ["data", "storage", "protection"]):
                 control_categories.append("data_protection")

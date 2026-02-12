@@ -17,12 +17,12 @@ logger = logging.getLogger(__name__)
 class MessageType(Enum):
     """V2X message types per SAE J2735."""
 
-    BSM = 0x14              # Basic Safety Message
-    EVA = 0x16              # Emergency Vehicle Alert
-    TIM = 0x1F              # Traveler Information Message
-    SPAT = 0x13             # Signal Phase and Timing
-    MAP = 0x12              # Map Data
-    RSA = 0x1B              # Road Side Alert
+    BSM = 0x14  # Basic Safety Message
+    EVA = 0x16  # Emergency Vehicle Alert
+    TIM = 0x1F  # Traveler Information Message
+    SPAT = 0x13  # Signal Phase and Timing
+    MAP = 0x12  # Map Data
+    RSA = 0x1B  # Road Side Alert
 
 
 @dataclass
@@ -30,13 +30,13 @@ class BasicSafetyMessage:
     """SAE J2735 Basic Safety Message (BSM)."""
 
     msg_count: int
-    temp_id: bytes          # 4 bytes
-    latitude: float         # Degrees
-    longitude: float        # Degrees
-    elevation: float        # Meters
-    speed: float            # m/s
-    heading: float          # Degrees
-    acceleration: float     # m/s^2
+    temp_id: bytes  # 4 bytes
+    latitude: float  # Degrees
+    longitude: float  # Degrees
+    elevation: float  # Meters
+    speed: float  # m/s
+    heading: float  # Degrees
+    acceleration: float  # m/s^2
     brake_status: int
     vehicle_size_width: float
     vehicle_size_length: float
@@ -92,7 +92,7 @@ class V2XCertificate:
     signature_algorithm: str
     signature: bytes
     pqc_public_key: Optional[bytes] = None  # PQC extension
-    pqc_signature: Optional[bytes] = None   # PQC extension
+    pqc_signature: Optional[bytes] = None  # PQC extension
     is_hybrid: bool = False
 
     @property

@@ -281,22 +281,16 @@ class AutomatedReportGenerator:
         """
         try:
             start_time = datetime.utcnow()
-            self.logger.info(
-                f"Generating {report_type.value} report in {format.value} format"
-            )
+            self.logger.info(f"Generating {report_type.value} report in {format.value} format")
 
             # Select appropriate template
             template = self._select_template(template_name, report_type, format)
 
             # Generate LLM-powered content
-            report_content = await self._generate_report_content(
-                assessment, template, custom_sections
-            )
+            report_content = await self._generate_report_content(assessment, template, custom_sections)
 
             # Format report using appropriate formatter
-            formatted_report = await self._format_report(
-                report_content, format, template
-            )
+            formatted_report = await self._format_report(report_content, format, template)
 
             # Create report metadata
             report_id = self._generate_report_id(assessment.framework, report_type)
@@ -383,9 +377,7 @@ class AutomatedReportGenerator:
         template_key = (report_type, format)
         template_name = template_mapping.get(template_key)
 
-        return (
-            self.template_manager.get_template(template_name) if template_name else None
-        )
+        return self.template_manager.get_template(template_name) if template_name else None
 
     async def _generate_report_content(
         self,
@@ -421,14 +413,9 @@ class AutomatedReportGenerator:
             }
 
             # Generate sections concurrently for performance
-            section_tasks = [
-                self._generate_section_content(section, assessment)
-                for section in sections
-            ]
+            section_tasks = [self._generate_section_content(section, assessment) for section in sections]
 
-            section_results = await asyncio.gather(
-                *section_tasks, return_exceptions=True
-            )
+            section_results = await asyncio.gather(*section_tasks, return_exceptions=True)
 
             # Collect successful results
             for section, result in zip(sections, section_results):
@@ -447,9 +434,7 @@ class AutomatedReportGenerator:
             self.logger.error(f"Failed to generate report content: {e}")
             raise ReportException(f"Content generation failed: {e}")
 
-    async def _generate_section_content(
-        self, section_name: str, assessment: ComplianceAssessment
-    ) -> Dict[str, Any]:
+    async def _generate_section_content(self, section_name: str, assessment: ComplianceAssessment) -> Dict[str, Any]:
         """Generate content for a specific report section using LLM."""
         try:
             # Create section-specific prompt
@@ -471,9 +456,7 @@ class AutomatedReportGenerator:
             response = await self.llm_service.process_request(llm_request)
 
             # Parse response and structure content
-            section_content = self._parse_section_response(
-                section_name, response.content
-            )
+            section_content = self._parse_section_response(section_name, response.content)
 
             return section_content
 
@@ -485,9 +468,7 @@ class AutomatedReportGenerator:
                 "error": True,
             }
 
-    def _create_section_prompt(
-        self, section_name: str, assessment: ComplianceAssessment
-    ) -> str:
+    def _create_section_prompt(self, section_name: str, assessment: ComplianceAssessment) -> str:
         """Create LLM prompt for specific report section."""
         base_context = f"""
 Framework: {assessment.framework}
@@ -593,9 +574,7 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
 """,
         )
 
-    def _parse_section_response(
-        self, section_name: str, content: str
-    ) -> Dict[str, Any]:
+    def _parse_section_response(self, section_name: str, content: str) -> Dict[str, Any]:
         """Parse LLM response into structured section content."""
         return {
             "title": section_name.replace("_", " ").title(),
@@ -651,9 +630,7 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
 
         return await formatter(content, template)
 
-    async def _generate_pdf_report(
-        self, content: Dict[str, Any], template: Optional[ReportTemplate]
-    ) -> bytes:
+    async def _generate_pdf_report(self, content: Dict[str, Any], template: Optional[ReportTemplate]) -> bytes:
         """Generate PDF report using HTML template and WeasyPrint."""
         try:
             # Generate HTML first
@@ -673,9 +650,7 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
         except Exception as e:
             raise ReportException(f"PDF generation failed: {e}")
 
-    async def _generate_html_report(
-        self, content: Dict[str, Any], template: Optional[ReportTemplate]
-    ) -> bytes:
+    async def _generate_html_report(self, content: Dict[str, Any], template: Optional[ReportTemplate]) -> bytes:
         """Generate HTML report."""
         try:
             html_content = await self._generate_html_content(content, template)
@@ -683,21 +658,15 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
         except Exception as e:
             raise ReportException(f"HTML generation failed: {e}")
 
-    async def _generate_html_content(
-        self, content: Dict[str, Any], template: Optional[ReportTemplate]
-    ) -> str:
+    async def _generate_html_content(self, content: Dict[str, Any], template: Optional[ReportTemplate]) -> str:
         """Generate HTML content from report data."""
         if template and template.template_path:
             # Use custom template
             try:
-                jinja_template = self.template_manager.jinja_env.get_template(
-                    template.template_path
-                )
+                jinja_template = self.template_manager.jinja_env.get_template(template.template_path)
                 return jinja_template.render(content=content)
             except jinja2.TemplateNotFound:
-                self.logger.warning(
-                    f"Template not found: {template.template_path}, using default"
-                )
+                self.logger.warning(f"Template not found: {template.template_path}, using default")
 
         # Use default HTML template
         html_template = """
@@ -768,9 +737,7 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
         jinja_template = jinja2.Template(html_template)
         return jinja_template.render(content=content)
 
-    async def _generate_excel_report(
-        self, content: Dict[str, Any], template: Optional[ReportTemplate]
-    ) -> bytes:
+    async def _generate_excel_report(self, content: Dict[str, Any], template: Optional[ReportTemplate]) -> bytes:
         """Generate Excel report."""
         try:
             import openpyxl
@@ -788,9 +755,7 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
 
             # Create detailed sheets for each section
             for section_name, section_data in content["sections"].items():
-                ws = wb.create_sheet(
-                    section_name.replace("_", " ").title()[:31]
-                )  # Excel sheet name limit
+                ws = wb.create_sheet(section_name.replace("_", " ").title()[:31])  # Excel sheet name limit
                 self._populate_excel_section(ws, section_data)
 
             # Save to bytes
@@ -830,9 +795,7 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
         for i, line in enumerate(lines):
             worksheet[f"A{i+3}"] = line
 
-    async def _generate_json_report(
-        self, content: Dict[str, Any], template: Optional[ReportTemplate]
-    ) -> bytes:
+    async def _generate_json_report(self, content: Dict[str, Any], template: Optional[ReportTemplate]) -> bytes:
         """Generate JSON report."""
         try:
             json_content = json.dumps(content, indent=2, default=str)
@@ -840,9 +803,7 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
         except Exception as e:
             raise ReportException(f"JSON generation failed: {e}")
 
-    async def _generate_word_report(
-        self, content: Dict[str, Any], template: Optional[ReportTemplate]
-    ) -> bytes:
+    async def _generate_word_report(self, content: Dict[str, Any], template: Optional[ReportTemplate]) -> bytes:
         """Generate Word document report."""
         try:
             import docx
@@ -852,9 +813,7 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
             doc = docx.Document()
 
             # Add title
-            title = doc.add_heading(
-                f"{content['metadata']['framework']} Compliance Report", 0
-            )
+            title = doc.add_heading(f"{content['metadata']['framework']} Compliance Report", 0)
 
             # Add metadata
             metadata_para = doc.add_paragraph()
@@ -884,9 +843,7 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
         except Exception as e:
             raise ReportException(f"Word generation failed: {e}")
 
-    async def _generate_csv_report(
-        self, content: Dict[str, Any], template: Optional[ReportTemplate]
-    ) -> bytes:
+    async def _generate_csv_report(self, content: Dict[str, Any], template: Optional[ReportTemplate]) -> bytes:
         """Generate CSV report."""
         try:
             import io
@@ -923,9 +880,7 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
         return f"{framework}_{report_type.value}_{timestamp}"
 
-    def _generate_report_title(
-        self, assessment: ComplianceAssessment, report_type: ReportType
-    ) -> str:
+    def _generate_report_title(self, assessment: ComplianceAssessment, report_type: ReportType) -> str:
         """Generate report title."""
         type_titles = {
             ReportType.EXECUTIVE_SUMMARY: "Executive Summary",
@@ -948,10 +903,7 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
         """Generate reports in multiple formats simultaneously."""
         try:
             # Generate reports for all formats concurrently
-            report_tasks = [
-                self.generate_compliance_report(assessment, report_type, format)
-                for format in formats
-            ]
+            report_tasks = [self.generate_compliance_report(assessment, report_type, format) for format in formats]
 
             reports = await asyncio.gather(*report_tasks, return_exceptions=True)
 
@@ -959,9 +911,7 @@ Provide comprehensive, accurate, and actionable content appropriate for enterpri
             successful_reports = []
             for report in reports:
                 if isinstance(report, Exception):
-                    self.logger.error(
-                        f"Multi-format report generation failed: {report}"
-                    )
+                    self.logger.error(f"Multi-format report generation failed: {report}")
                 else:
                     successful_reports.append(report)
 

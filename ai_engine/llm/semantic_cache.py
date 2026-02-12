@@ -30,6 +30,7 @@ except ImportError:
 
 class CacheHitType(Enum):
     """Type of cache hit."""
+
     EXACT = "exact"  # Exact query match
     SEMANTIC = "semantic"  # Semantically similar query
     MISS = "miss"  # No cache hit
@@ -38,6 +39,7 @@ class CacheHitType(Enum):
 @dataclass
 class CacheEntry:
     """Single cache entry with metadata."""
+
     query: str
     query_embedding: List[float]
     response: str
@@ -54,6 +56,7 @@ class CacheEntry:
 @dataclass
 class CacheHitResult:
     """Result of a cache lookup."""
+
     hit_type: CacheHitType
     entry: Optional[CacheEntry]
     similarity_score: float = 0.0
@@ -63,6 +66,7 @@ class CacheHitResult:
 @dataclass
 class CacheStats:
     """Cache statistics."""
+
     total_queries: int = 0
     exact_hits: int = 0
     semantic_hits: int = 0
@@ -91,7 +95,7 @@ class _FallbackEmbedder:
         digest = hashlib.sha256(text.lower().encode()).digest()
         floats = [byte / 255.0 for byte in digest]
         repeats = (self.dimension + len(floats) - 1) // len(floats)
-        return (floats * repeats)[:self.dimension]
+        return (floats * repeats)[: self.dimension]
 
 
 class SemanticCache:
@@ -186,10 +190,7 @@ class SemanticCache:
                     self._stats.exact_hits += 1
 
                     return CacheHitResult(
-                        hit_type=CacheHitType.EXACT,
-                        entry=entry,
-                        similarity_score=1.0,
-                        lookup_time=time.time() - start_time
+                        hit_type=CacheHitType.EXACT, entry=entry, similarity_score=1.0, lookup_time=time.time() - start_time
                     )
                 else:
                     # Expired, remove from cache
@@ -210,10 +211,7 @@ class SemanticCache:
                     if feature_domain and entry.feature_domain != feature_domain:
                         continue
 
-                    score = self._cosine_similarity(
-                        query_embedding,
-                        np.array(entry.query_embedding)
-                    )
+                    score = self._cosine_similarity(query_embedding, np.array(entry.query_embedding))
 
                     if score > best_score and score >= threshold:
                         best_score = score
@@ -229,16 +227,13 @@ class SemanticCache:
                         hit_type=CacheHitType.SEMANTIC,
                         entry=best_match,
                         similarity_score=best_score,
-                        lookup_time=time.time() - start_time
+                        lookup_time=time.time() - start_time,
                     )
 
             # No cache hit
             self._stats.misses += 1
             return CacheHitResult(
-                hit_type=CacheHitType.MISS,
-                entry=None,
-                similarity_score=0.0,
-                lookup_time=time.time() - start_time
+                hit_type=CacheHitType.MISS, entry=None, similarity_score=0.0, lookup_time=time.time() - start_time
             )
 
     async def put(
@@ -335,41 +330,30 @@ class SemanticCache:
 
                 # Remove from semantic cache
                 self._semantic_cache = [
-                    e for e in self._semantic_cache
+                    e
+                    for e in self._semantic_cache
                     if e.query != query or (feature_domain and e.feature_domain != feature_domain)
                 ]
 
             elif feature_domain is not None:
                 # Invalidate all entries for domain
                 before_count = len(self._semantic_cache)
-                self._semantic_cache = [
-                    e for e in self._semantic_cache
-                    if e.feature_domain != feature_domain
-                ]
+                self._semantic_cache = [e for e in self._semantic_cache if e.feature_domain != feature_domain]
                 count = before_count - len(self._semantic_cache)
 
                 # Clean exact cache
-                hashes_to_remove = [
-                    h for h, e in self._exact_cache.items()
-                    if e.feature_domain == feature_domain
-                ]
+                hashes_to_remove = [h for h, e in self._exact_cache.items() if e.feature_domain == feature_domain]
                 for h in hashes_to_remove:
                     del self._exact_cache[h]
 
             elif older_than is not None:
                 # Invalidate old entries
                 before_count = len(self._semantic_cache)
-                self._semantic_cache = [
-                    e for e in self._semantic_cache
-                    if e.created_at >= older_than
-                ]
+                self._semantic_cache = [e for e in self._semantic_cache if e.created_at >= older_than]
                 count = before_count - len(self._semantic_cache)
 
                 # Clean exact cache
-                hashes_to_remove = [
-                    h for h, e in self._exact_cache.items()
-                    if e.created_at < older_than
-                ]
+                hashes_to_remove = [h for h, e in self._exact_cache.items() if e.created_at < older_than]
                 for h in hashes_to_remove:
                     del self._exact_cache[h]
 
@@ -390,17 +374,11 @@ class SemanticCache:
 
             # Clean semantic cache
             before_count = len(self._semantic_cache)
-            self._semantic_cache = [
-                e for e in self._semantic_cache
-                if e.expires_at > now
-            ]
+            self._semantic_cache = [e for e in self._semantic_cache if e.expires_at > now]
             removed = before_count - len(self._semantic_cache)
 
             # Clean exact cache
-            expired_hashes = [
-                h for h, e in self._exact_cache.items()
-                if e.expires_at <= now
-            ]
+            expired_hashes = [h for h, e in self._exact_cache.items() if e.expires_at <= now]
             for h in expired_hashes:
                 del self._exact_cache[h]
 
@@ -429,10 +407,7 @@ class SemanticCache:
 
         # Clean exact cache
         evicted_queries = {(e.query, e.feature_domain) for e in evicted}
-        self._exact_cache = {
-            h: e for h, e in self._exact_cache.items()
-            if (e.query, e.feature_domain) not in evicted_queries
-        }
+        self._exact_cache = {h: e for h, e in self._exact_cache.items() if (e.query, e.feature_domain) not in evicted_queries}
 
     def get_stats(self) -> CacheStats:
         """Get cache statistics."""
@@ -520,10 +495,7 @@ class CachedLLMService:
         cache_result = await self.cache.get(query, feature_domain=domain)
 
         if cache_result.hit_type != CacheHitType.MISS:
-            self.logger.debug(
-                f"Cache {cache_result.hit_type.value} hit "
-                f"(similarity: {cache_result.similarity_score:.3f})"
-            )
+            self.logger.debug(f"Cache {cache_result.hit_type.value} hit " f"(similarity: {cache_result.similarity_score:.3f})")
 
             # Reconstruct response from cache
             entry = cache_result.entry
@@ -556,6 +528,7 @@ class CachedLLMService:
         # Import here to avoid circular imports
         try:
             from .unified_llm_service import LLMResponse
+
             return LLMResponse(
                 content=entry.response,
                 provider=entry.response_metadata.get("provider", "cache"),
@@ -566,7 +539,7 @@ class CachedLLMService:
                     "cached": True,
                     "cache_hit_type": "semantic",
                     "original_created_at": entry.created_at.isoformat(),
-                }
+                },
             )
         except ImportError:
             # Return as dictionary if LLMResponse not available

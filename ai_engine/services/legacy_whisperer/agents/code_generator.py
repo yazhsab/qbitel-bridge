@@ -16,7 +16,6 @@ from .base import (
 )
 from .tools import CodeGenerationTool, TestGenerationTool
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -165,10 +164,7 @@ When generating code, structure output as:
         return base_prompt + code_prompt
 
     async def generate_adapter(
-        self,
-        protocol_spec: Dict[str, Any],
-        target_protocol: str,
-        language: str = "python"
+        self, protocol_spec: Dict[str, Any], target_protocol: str, language: str = "python"
     ) -> Dict[str, str]:
         """
         Generate a protocol adapter.
@@ -206,11 +202,7 @@ Generate:
 - Comprehensive tests
 - Configuration template
 """,
-            data={
-                "protocol_spec": protocol_spec,
-                "target_protocol": target_protocol,
-                "language": language
-            }
+            data={"protocol_spec": protocol_spec, "target_protocol": target_protocol, "language": language},
         )
 
         response = await self.process_message(message)
@@ -222,10 +214,7 @@ Generate:
         return response.data
 
     async def generate_tests(
-        self,
-        code: Dict[str, str],
-        protocol_spec: Dict[str, Any],
-        language: str = "python"
+        self, code: Dict[str, str], protocol_spec: Dict[str, Any], language: str = "python"
     ) -> Dict[str, str]:
         """
         Generate tests for adapter code.
@@ -265,21 +254,14 @@ Tests should cover:
 - Edge cases (empty, malformed, oversized)
 - Performance under load
 """,
-            data={
-                "code": code,
-                "protocol_spec": protocol_spec,
-                "language": language
-            }
+            data={"code": code, "protocol_spec": protocol_spec, "language": language},
         )
 
         response = await self.process_message(message)
         return response.data.get("tests", {})
 
     async def generate_integration_guide(
-        self,
-        adapter_code: Dict[str, str],
-        protocol_spec: Dict[str, Any],
-        target_protocol: str
+        self, adapter_code: Dict[str, str], protocol_spec: Dict[str, Any], target_protocol: str
     ) -> str:
         """
         Generate integration guide for the adapter.
@@ -314,21 +296,14 @@ Create a guide covering:
 7. Performance tuning
 8. Monitoring and observability
 """,
-            data={
-                "adapter_code": adapter_code,
-                "protocol_spec": protocol_spec,
-                "target_protocol": target_protocol
-            }
+            data={"adapter_code": adapter_code, "protocol_spec": protocol_spec, "target_protocol": target_protocol},
         )
 
         response = await self.process_message(message)
         return response.content
 
     async def generate_deployment_config(
-        self,
-        adapter_code: Dict[str, str],
-        language: str,
-        platform: str = "kubernetes"
+        self, adapter_code: Dict[str, str], language: str, platform: str = "kubernetes"
     ) -> Dict[str, str]:
         """
         Generate deployment configurations.
@@ -361,11 +336,7 @@ Generate:
 - Health check configurations
 - Resource limits recommendations
 """,
-            data={
-                "adapter_code": adapter_code,
-                "language": language,
-                "platform": platform
-            }
+            data={"adapter_code": adapter_code, "language": language, "platform": platform},
         )
 
         response = await self.process_message(message)

@@ -217,8 +217,7 @@ class APISpecification:
                 "version": self.version,
                 "description": self.description or f"Generated API for {self.title}",
             },
-            "servers": self.servers
-            or [{"url": self.base_url or "http://localhost:8000"}],
+            "servers": self.servers or [{"url": self.base_url or "http://localhost:8000"}],
             "paths": {},
             "components": {
                 "schemas": self.schemas,
@@ -247,14 +246,10 @@ class APISpecification:
             }
 
             if endpoint.request_body:
-                openapi_spec["paths"][endpoint.path][endpoint.method.lower()][
-                    "requestBody"
-                ] = endpoint.request_body
+                openapi_spec["paths"][endpoint.path][endpoint.method.lower()]["requestBody"] = endpoint.request_body
 
             if endpoint.security:
-                openapi_spec["paths"][endpoint.path][endpoint.method.lower()][
-                    "security"
-                ] = endpoint.security
+                openapi_spec["paths"][endpoint.path][endpoint.method.lower()]["security"] = endpoint.security
 
         if self.extensions:
             openapi_spec.setdefault("x-qbitel-extensions", self.extensions)
@@ -414,9 +409,7 @@ class TranslationRequest:
     translation_mode: TranslationMode = TranslationMode.HYBRID
     quality_level: QualityLevel = QualityLevel.BALANCED
     target_api_style: APIStyle = APIStyle.REST
-    target_languages: List[CodeLanguage] = field(
-        default_factory=lambda: [CodeLanguage.PYTHON]
-    )
+    target_languages: List[CodeLanguage] = field(default_factory=lambda: [CodeLanguage.PYTHON])
     generate_documentation: bool = True
     generate_tests: bool = True
     generate_examples: bool = True
@@ -473,9 +466,7 @@ class TranslationRequest:
 
     def to_dict(self) -> Dict[str, Any]:
         """Create JSON-safe representation of the request."""
-        encoded_data = (
-            base64.b64encode(self.data).decode("ascii") if self.data else None
-        )
+        encoded_data = base64.b64encode(self.data).decode("ascii") if self.data else None
         return {
             "request_id": self.request_id,
             "source_protocol": self.source_protocol,
@@ -582,11 +573,7 @@ class TranslationResult:
 
     def to_dict(self) -> Dict[str, Any]:
         """Create JSON-safe representation of the translation result."""
-        encoded_data = (
-            base64.b64encode(self.translated_data).decode("ascii")
-            if self.translated_data
-            else None
-        )
+        encoded_data = base64.b64encode(self.translated_data).decode("ascii") if self.translated_data else None
         return {
             "translation_id": self.translation_id,
             "source_protocol": self.source_protocol,
@@ -648,16 +635,13 @@ class TranslationStudioMetrics:
 
             # Update averages
             self.average_confidence = (
-                self.average_confidence * (self.successful_generations - 1)
-                + result.confidence_score
+                self.average_confidence * (self.successful_generations - 1) + result.confidence_score
             ) / self.successful_generations
             self.average_completeness = (
-                self.average_completeness * (self.successful_generations - 1)
-                + result.completeness_score
+                self.average_completeness * (self.successful_generations - 1) + result.completeness_score
             ) / self.successful_generations
             self.average_security_score = (
-                self.average_security_score * (self.successful_generations - 1)
-                + result.security_score
+                self.average_security_score * (self.successful_generations - 1) + result.security_score
             ) / self.successful_generations
 
         elif result.status == GenerationStatus.FAILED:
@@ -672,8 +656,7 @@ class TranslationStudioMetrics:
         if result.processing_time > 0:
             total_completed = self.successful_generations + self.failed_generations
             self.average_processing_time = (
-                self.average_processing_time * (total_completed - 1)
-                + result.processing_time
+                self.average_processing_time * (total_completed - 1) + result.processing_time
             ) / total_completed
 
         self.last_updated = datetime.now(timezone.utc)
@@ -682,9 +665,7 @@ class TranslationStudioMetrics:
 # Factory functions for creating common configurations
 
 
-def create_rest_api_spec(
-    title: str, version: str = "1.0.0", description: Optional[str] = None
-) -> APISpecification:
+def create_rest_api_spec(title: str, version: str = "1.0.0", description: Optional[str] = None) -> APISpecification:
     """Create a basic REST API specification."""
     return APISpecification(
         title=title,
@@ -729,8 +710,7 @@ def create_translation_request(
         request_id=str(uuid.uuid4()),
         protocol_data=protocol_data,
         target_api_style=api_style,
-        target_languages=target_languages
-        or [CodeLanguage.PYTHON, CodeLanguage.TYPESCRIPT],
+        target_languages=target_languages or [CodeLanguage.PYTHON, CodeLanguage.TYPESCRIPT],
         generate_documentation=True,
         generate_tests=True,
         generate_examples=True,
@@ -769,13 +749,9 @@ def validate_api_specification(spec: APISpecification) -> List[str]:
     # Validate endpoint responses
     for endpoint in spec.endpoints:
         if not endpoint.responses:
-            issues.append(
-                f"Endpoint {endpoint.method} {endpoint.path} must have response definitions"
-            )
+            issues.append(f"Endpoint {endpoint.method} {endpoint.path} must have response definitions")
         elif "200" not in endpoint.responses and "201" not in endpoint.responses:
-            issues.append(
-                f"Endpoint {endpoint.method} {endpoint.path} should have a success response (200/201)"
-            )
+            issues.append(f"Endpoint {endpoint.method} {endpoint.path} should have a success response (200/201)")
 
     return issues
 
@@ -942,14 +918,10 @@ def calculate_schema_complexity(schema: ProtocolSchema) -> float:
         return 0.0
 
     total_fields = len(schema.fields)
-    variable_fields = sum(
-        1 for field in schema.fields if field.length == 0 or field.optional
-    )
+    variable_fields = sum(1 for field in schema.fields if field.length == 0 or field.optional)
     unique_types = len({field.field_type for field in schema.fields})
 
     complexity = (
-        0.4 * (variable_fields / total_fields)
-        + 0.4 * (unique_types / len(FieldType))
-        + 0.2 * min(1.0, total_fields / 10)
+        0.4 * (variable_fields / total_fields) + 0.4 * (unique_types / len(FieldType)) + 0.2 * min(1.0, total_fields / 10)
     )
     return round(min(1.0, complexity), 3)

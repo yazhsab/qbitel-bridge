@@ -241,9 +241,7 @@ class TestErrorHandlingIntegration:
         try:
             raise ValueError("Test error")
         except Exception as e:
-            error_id = await error_handler.capture_exception(
-                e, context={"test": "data"}, severity="error"
-            )
+            error_id = await error_handler.capture_exception(e, context={"test": "data"}, severity="error")
 
             assert error_id is not None
             assert error_id.startswith("ERR_")
@@ -255,9 +253,7 @@ class TestErrorHandlingIntegration:
             try:
                 raise RuntimeError("Critical error")
             except Exception as e:
-                await error_handler.capture_exception(
-                    e, severity="critical", notify=True
-                )
+                await error_handler.capture_exception(e, severity="critical", notify=True)
 
             # Verify notification was attempted
             # Implementation specific

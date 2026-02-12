@@ -223,10 +223,7 @@ class CertificateAutomation:
 
             # Validate against policy
             if policy.allowed_domains:
-                if not any(
-                    common_name.endswith(d) or common_name == d
-                    for d in policy.allowed_domains
-                ):
+                if not any(common_name.endswith(d) or common_name == d for d in policy.allowed_domains):
                     raise ValueError(f"Domain {common_name} not allowed by policy")
 
             request = CertificateRequest(
@@ -311,9 +308,7 @@ class CertificateAutomation:
                     logger.warning(f"Key generation via KMS failed: {e}")
 
             # Generate certificate (simulated - in production use CA provider)
-            cert_pem = self._generate_certificate_pem(
-                request, serial_number, not_before, not_after, policy
-            )
+            cert_pem = self._generate_certificate_pem(request, serial_number, not_before, not_after, policy)
 
             # Calculate fingerprint
             fingerprint = self._calculate_fingerprint(cert_pem)
@@ -346,9 +341,7 @@ class CertificateAutomation:
             # Clean up request
             del self._requests[request_id]
 
-            logger.info(
-                f"Issued certificate {certificate.cert_id} for {request.common_name}"
-            )
+            logger.info(f"Issued certificate {certificate.cert_id} for {request.common_name}")
 
             return certificate
 
@@ -459,9 +452,7 @@ class CertificateAutomation:
                 except Exception as e:
                     logger.error(f"Key destruction failed: {e}")
 
-            logger.warning(
-                f"Revoked certificate {cert_id}: {reason.name} by {revoked_by}"
-            )
+            logger.warning(f"Revoked certificate {cert_id}: {reason.name} by {revoked_by}")
 
             return True
 
@@ -471,10 +462,7 @@ class CertificateAutomation:
 
     def find_certificate_by_cn(self, common_name: str) -> List[Certificate]:
         """Find certificates by common name."""
-        return [
-            c for c in self._certificates.values()
-            if c.common_name == common_name and c.state == CertificateState.ACTIVE
-        ]
+        return [c for c in self._certificates.values() if c.common_name == common_name and c.state == CertificateState.ACTIVE]
 
     def list_certificates(
         self,
@@ -497,10 +485,7 @@ class CertificateAutomation:
         days: int = 30,
     ) -> List[Certificate]:
         """Get certificates expiring within specified days."""
-        return [
-            c for c in self._certificates.values()
-            if c.state == CertificateState.ACTIVE and c.is_expiring_soon(days)
-        ]
+        return [c for c in self._certificates.values() if c.state == CertificateState.ACTIVE and c.is_expiring_soon(days)]
 
     def start_renewal_scheduler(
         self,
@@ -611,9 +596,7 @@ class CertificateAutomation:
 
     def _generate_serial_number(self) -> str:
         """Generate unique serial number."""
-        return hashlib.sha256(
-            f"{uuid.uuid4()}{datetime.utcnow().isoformat()}".encode()
-        ).hexdigest()[:40]
+        return hashlib.sha256(f"{uuid.uuid4()}{datetime.utcnow().isoformat()}".encode()).hexdigest()[:40]
 
     def _generate_certificate_pem(
         self,
@@ -643,6 +626,7 @@ class CertificateAutomation:
 
         # Encode as base64 (simulated PEM)
         import json
+
         encoded = base64.b64encode(json.dumps(cert_data).encode()).decode()
 
         return f"""-----BEGIN CERTIFICATE-----
@@ -679,10 +663,7 @@ class CertificateAutomation:
         events = self._renewal_events
 
         if cert_id:
-            events = [
-                e for e in events
-                if e.old_cert_id == cert_id or e.new_cert_id == cert_id
-            ]
+            events = [e for e in events if e.old_cert_id == cert_id or e.new_cert_id == cert_id]
 
         return events[-limit:]
 

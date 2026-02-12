@@ -173,9 +173,7 @@ class TestSBOMVersionEndpoints:
         assert metadata.commit == "abc123def456"
         assert "qbitel-platform" in metadata.components
 
-    def test_get_version_metadata_not_found(
-        self, sbom_api, sbom_test_data, monkeypatch
-    ):
+    def test_get_version_metadata_not_found(self, sbom_api, sbom_test_data, monkeypatch):
         """Test getting metadata for non-existent version."""
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
@@ -196,16 +194,10 @@ class TestSBOMDownloadEndpoint:
 
         import asyncio
 
-        response = asyncio.run(
-            sbom_api.download_sbom(
-                version="v1.0.0", component="qbitel-platform", format="spdx"
-            )
-        )
+        response = asyncio.run(sbom_api.download_sbom(version="v1.0.0", component="qbitel-platform", format="spdx"))
 
         assert response is not None
-        assert "qbitel-platform-spdx.json" in response.headers.get(
-            "Content-Disposition", ""
-        )
+        assert "qbitel-platform-spdx.json" in response.headers.get("Content-Disposition", "")
 
     def test_download_sbom_cyclonedx(self, sbom_api, sbom_test_data, monkeypatch):
         """Test downloading CycloneDX format SBOM."""
@@ -213,11 +205,7 @@ class TestSBOMDownloadEndpoint:
 
         import asyncio
 
-        response = asyncio.run(
-            sbom_api.download_sbom(
-                version="v1.0.0", component="qbitel-platform", format="cyclonedx"
-            )
-        )
+        response = asyncio.run(sbom_api.download_sbom(version="v1.0.0", component="qbitel-platform", format="cyclonedx"))
 
         assert response is not None
 
@@ -228,11 +216,7 @@ class TestSBOMDownloadEndpoint:
         import asyncio
 
         with pytest.raises(HTTPException) as exc:
-            asyncio.run(
-                sbom_api.download_sbom(
-                    version="v1.0.0", component="non-existent-component", format="spdx"
-                )
-            )
+            asyncio.run(sbom_api.download_sbom(version="v1.0.0", component="non-existent-component", format="spdx"))
 
         assert exc.value.status_code == 404
 
@@ -246,9 +230,7 @@ class TestSBOMMetadataEndpoint:
 
         import asyncio
 
-        metadata = asyncio.run(
-            sbom_api.get_sbom_metadata(version="v1.0.0", component="qbitel-platform")
-        )
+        metadata = asyncio.run(sbom_api.get_sbom_metadata(version="v1.0.0", component="qbitel-platform"))
 
         assert metadata.component == "qbitel-platform"
         assert metadata.version == "v1.0.0"
@@ -268,11 +250,7 @@ class TestSBOMVulnerabilitiesEndpoint:
 
         import asyncio
 
-        result = asyncio.run(
-            sbom_api.get_sbom_vulnerabilities(
-                version="v1.0.0", component="qbitel-platform", severity=None
-            )
-        )
+        result = asyncio.run(sbom_api.get_sbom_vulnerabilities(version="v1.0.0", component="qbitel-platform", severity=None))
 
         assert result["component"] == "qbitel-platform"
         assert result["summary"]["total"] == 2
@@ -280,36 +258,26 @@ class TestSBOMVulnerabilitiesEndpoint:
         assert result["summary"]["high"] == 1
         assert len(result["vulnerabilities"]) == 2
 
-    def test_get_sbom_vulnerabilities_filtered(
-        self, sbom_api, sbom_test_data, monkeypatch
-    ):
+    def test_get_sbom_vulnerabilities_filtered(self, sbom_api, sbom_test_data, monkeypatch):
         """Test getting filtered vulnerability report."""
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
         import asyncio
 
         result = asyncio.run(
-            sbom_api.get_sbom_vulnerabilities(
-                version="v1.0.0", component="qbitel-platform", severity="Critical"
-            )
+            sbom_api.get_sbom_vulnerabilities(version="v1.0.0", component="qbitel-platform", severity="Critical")
         )
 
         assert len(result["vulnerabilities"]) == 1
         assert result["vulnerabilities"][0]["severity"] == "Critical"
 
-    def test_get_sbom_vulnerabilities_no_data(
-        self, sbom_api, sbom_test_data, monkeypatch
-    ):
+    def test_get_sbom_vulnerabilities_no_data(self, sbom_api, sbom_test_data, monkeypatch):
         """Test getting vulnerabilities when no scan data exists."""
         monkeypatch.setattr(sbom_api, "SBOM_FALLBACK_DIR", sbom_test_data)
 
         import asyncio
 
-        result = asyncio.run(
-            sbom_api.get_sbom_vulnerabilities(
-                version="v1.0.0", component="non-existent"
-            )
-        )
+        result = asyncio.run(sbom_api.get_sbom_vulnerabilities(version="v1.0.0", component="non-existent"))
 
         assert result["summary"]["total"] == 0
         assert len(result["vulnerabilities"]) == 0
@@ -355,9 +323,7 @@ class TestSBOMMetricsCollector:
         from ai_engine.monitoring.sbom_metrics import SBOMMetricsCollector
 
         collector = SBOMMetricsCollector()
-        collector.record_sbom_generation(
-            component_name="test-component", format="spdx", duration=1.5, success=True
-        )
+        collector.record_sbom_generation(component_name="test-component", format="spdx", duration=1.5, success=True)
 
         # Metrics should be recorded without errors
         assert True
@@ -397,9 +363,7 @@ class TestSBOMMetricsCollector:
         from ai_engine.monitoring.sbom_metrics import SBOMMetricsCollector
 
         collector = SBOMMetricsCollector()
-        collector.record_sbom_download(
-            version="v1.0.0", component_name="test-component", format="spdx"
-        )
+        collector.record_sbom_download(version="v1.0.0", component_name="test-component", format="spdx")
 
         # Metrics should be recorded without errors
         assert True

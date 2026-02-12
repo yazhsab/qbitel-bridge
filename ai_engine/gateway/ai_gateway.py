@@ -77,8 +77,10 @@ GATEWAY_PROVIDER_USAGE = Counter(
 # Data Classes
 # =============================================================================
 
+
 class RequestPriority(str, Enum):
     """Request priority levels."""
+
     LOW = "low"
     NORMAL = "normal"
     HIGH = "high"
@@ -219,6 +221,7 @@ class GatewayResponse:
 # AI Gateway
 # =============================================================================
 
+
 class AIGateway:
     """
     Centralized AI Gateway for QBITEL.
@@ -269,9 +272,7 @@ class AIGateway:
 
         # Initialize semantic cache
         if self.config.cache_enabled:
-            cache_config = self.config.cache_config or CacheConfig(
-                redis_url=self.config.redis_url
-            )
+            cache_config = self.config.cache_config or CacheConfig(redis_url=self.config.redis_url)
             self._cache = SemanticCache(cache_config)
             await self._cache.initialize()
             self.logger.info("Semantic cache initialized")
@@ -288,9 +289,7 @@ class AIGateway:
 
         # Initialize rate limiter
         if self.config.rate_limiting_enabled:
-            rate_config = self.config.rate_limit_config or RateLimitConfig(
-                redis_url=self.config.redis_url
-            )
+            rate_config = self.config.rate_limit_config or RateLimitConfig(redis_url=self.config.redis_url)
             self._rate_limiter = RateLimiter(rate_config)
             await self._rate_limiter.initialize()
             self.logger.info("Rate limiter initialized")
@@ -349,8 +348,7 @@ class AIGateway:
             # Log request
             if self.config.log_requests:
                 self.logger.info(
-                    f"Gateway request: id={request.request_id}, "
-                    f"domain={request.domain}, priority={request.priority.value}"
+                    f"Gateway request: id={request.request_id}, " f"domain={request.domain}, priority={request.priority.value}"
                 )
 
             # Rate limiting
@@ -618,15 +616,11 @@ class AIGateway:
 
             except asyncio.TimeoutError:
                 last_error = Exception(f"Request timeout after {self.config.default_timeout}s")
-                self.logger.warning(
-                    f"LLM request timeout (attempt {attempt + 1}/{self.config.max_retries})"
-                )
+                self.logger.warning(f"LLM request timeout (attempt {attempt + 1}/{self.config.max_retries})")
 
             except Exception as e:
                 last_error = e
-                self.logger.warning(
-                    f"LLM request failed (attempt {attempt + 1}/{self.config.max_retries}): {e}"
-                )
+                self.logger.warning(f"LLM request failed (attempt {attempt + 1}/{self.config.max_retries}): {e}")
 
             # Wait before retry
             if attempt < self.config.max_retries - 1:
@@ -668,8 +662,7 @@ class AIGateway:
             prompt_version=prompt_version,
             parsed_response=llm_response.parsed_response,
             validated_model=llm_response.validated_model,
-            tool_calls=[asdict(tc) for tc in llm_response.tool_calls]
-            if llm_response.tool_calls else None,
+            tool_calls=[asdict(tc) for tc in llm_response.tool_calls] if llm_response.tool_calls else None,
             metadata=llm_response.metadata or {},
         )
 

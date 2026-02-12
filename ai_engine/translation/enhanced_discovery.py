@@ -67,9 +67,7 @@ API_GENERATION_DURATION = Histogram(
     ["protocol_type", "api_style"],
 )
 
-SCHEMA_EXTRACTION_DURATION = Histogram(
-    "qbitel_schema_extraction_duration_seconds", "Protocol schema extraction duration"
-)
+SCHEMA_EXTRACTION_DURATION = Histogram("qbitel_schema_extraction_duration_seconds", "Protocol schema extraction duration")
 
 SEMANTIC_ANALYSIS_COUNTER = Counter(
     "qbitel_semantic_analysis_total",
@@ -133,9 +131,7 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
         self.api_generation_cache: Dict[str, APISpecification] = {}
         self.schema_cache: Dict[str, ProtocolSchema] = {}
 
-        self.logger.info(
-            "Enhanced Protocol Discovery Orchestrator with API Generation initialized"
-        )
+        self.logger.info("Enhanced Protocol Discovery Orchestrator with API Generation initialized")
 
     async def initialize(self) -> None:
         """Initialize enhanced orchestrator with field detection capabilities."""
@@ -157,9 +153,7 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
             # Continue with basic discovery capabilities
             self.enable_api_generation = False
 
-    async def discover_and_generate_api(
-        self, request: APIGenerationRequest
-    ) -> APIGenerationDiscoveryResult:
+    async def discover_and_generate_api(self, request: APIGenerationRequest) -> APIGenerationDiscoveryResult:
         """
         Main entry point for protocol discovery with automatic API generation.
 
@@ -175,9 +169,7 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
         start_time = time.time()
 
         try:
-            self.logger.info(
-                f"Starting discovery and API generation for {len(request.messages)} messages"
-            )
+            self.logger.info(f"Starting discovery and API generation for {len(request.messages)} messages")
 
             # Phase 1: Enhanced Protocol Discovery
             discovery_result = await self.discover_protocol_enhanced(request)
@@ -264,9 +256,7 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
                 metadata={"error": str(e), "phase": "api_generation"},
             )
 
-    async def _extract_protocol_schema(
-        self, request: APIGenerationRequest, result: APIGenerationDiscoveryResult
-    ) -> None:
+    async def _extract_protocol_schema(self, request: APIGenerationRequest, result: APIGenerationDiscoveryResult) -> None:
         """Extract detailed protocol schema from discovery results."""
         schema_start = time.time()
 
@@ -285,31 +275,24 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
                 name=result.protocol_type,
                 version="1.0.0",
                 description=f"Auto-generated schema for {result.protocol_type} protocol",
-                format=self._infer_protocol_format(
-                    request.messages[0] if request.messages else b""
-                ),
+                format=self._infer_protocol_format(request.messages[0] if request.messages else b""),
             )
 
             # Extract fields using field detector
             if self.field_detector and request.messages:
-                detected_fields = await self._detect_protocol_fields(
-                    request.messages[0]
-                )
+                detected_fields = await self._detect_protocol_fields(request.messages[0])
 
                 for field_boundary in detected_fields:
                     protocol_field = ProtocolField(
-                        name=field_boundary.field_name
-                        or f"field_{field_boundary.start_pos}",
+                        name=field_boundary.field_name or f"field_{field_boundary.start_pos}",
                         field_type=field_boundary.field_type.value,
                         offset=field_boundary.start_pos,
                         length=field_boundary.end_pos - field_boundary.start_pos,
                         description=f"Auto-detected {field_boundary.field_type.value} field",
                         optional=False,
                         constraints={
-                            "min_length": field_boundary.end_pos
-                            - field_boundary.start_pos,
-                            "max_length": field_boundary.end_pos
-                            - field_boundary.start_pos,
+                            "min_length": field_boundary.end_pos - field_boundary.start_pos,
+                            "max_length": field_boundary.end_pos - field_boundary.start_pos,
                             "confidence": field_boundary.confidence,
                         },
                     )
@@ -320,22 +303,15 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
                     protocol_schema.add_field(protocol_field)
 
             # Enhance schema with LLM analysis if available
-            if (
-                result.llm_analyses
-                and LLMAnalysisType.FIELD_SEMANTICS in result.llm_analyses
-            ):
+            if result.llm_analyses and LLMAnalysisType.FIELD_SEMANTICS in result.llm_analyses:
                 semantic_analysis = result.llm_analyses[LLMAnalysisType.FIELD_SEMANTICS]
-                await self._enhance_schema_with_semantics(
-                    protocol_schema, semantic_analysis
-                )
+                await self._enhance_schema_with_semantics(protocol_schema, semantic_analysis)
 
             # Add metadata from discovery
             protocol_schema.metadata.update(
                 {
                     "discovery_confidence": result.confidence,
-                    "grammar_rules_count": (
-                        len(result.grammar.rules) if result.grammar else 0
-                    ),
+                    "grammar_rules_count": (len(result.grammar.rules) if result.grammar else 0),
                     "statistical_features": result.statistical_analysis or {},
                     "extraction_method": "automated_discovery",
                 }
@@ -376,9 +352,7 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
             field_boundaries = await self.field_detector.detect_boundaries(message_data)
 
             # Infer field types
-            enhanced_boundaries = await self.field_detector.infer_field_types(
-                field_boundaries
-            )
+            enhanced_boundaries = await self.field_detector.infer_field_types(field_boundaries)
 
             return enhanced_boundaries
 
@@ -386,9 +360,7 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
             self.logger.error(f"Field detection failed: {e}")
             return []
 
-    async def _generate_api_specification(
-        self, request: APIGenerationRequest, result: APIGenerationDiscoveryResult
-    ) -> None:
+    async def _generate_api_specification(self, request: APIGenerationRequest, result: APIGenerationDiscoveryResult) -> None:
         """Generate comprehensive API specification from protocol schema."""
         try:
             self.logger.debug("Starting API specification generation")
@@ -409,17 +381,11 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
 
             # Generate endpoints based on protocol schema and style
             if request.target_api_style == APIStyle.REST:
-                await self._generate_rest_endpoints(
-                    api_spec, result.protocol_schema, request
-                )
+                await self._generate_rest_endpoints(api_spec, result.protocol_schema, request)
             elif request.target_api_style == APIStyle.GRAPHQL:
-                await self._generate_graphql_schema(
-                    api_spec, result.protocol_schema, request
-                )
+                await self._generate_graphql_schema(api_spec, result.protocol_schema, request)
             elif request.target_api_style == APIStyle.GRPC:
-                await self._generate_grpc_service(
-                    api_spec, result.protocol_schema, request
-                )
+                await self._generate_grpc_service(api_spec, result.protocol_schema, request)
 
             # Add security schemes based on security level
             self._add_security_schemes(api_spec, request.security_level)
@@ -429,24 +395,18 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
 
             # Generate examples if requested
             if request.include_examples:
-                await self._add_api_examples(
-                    api_spec, result.protocol_schema, request.messages
-                )
+                await self._add_api_examples(api_spec, result.protocol_schema, request.messages)
 
             # Validate generated API specification
             validation_issues = validate_api_specification(api_spec)
             if validation_issues:
-                self.logger.warning(
-                    f"API specification validation issues: {validation_issues}"
-                )
+                self.logger.warning(f"API specification validation issues: {validation_issues}")
                 result.metadata.setdefault("warnings", []).extend(validation_issues)
 
             # Calculate API confidence based on completeness
             endpoint_count = len(api_spec.endpoints)
             schema_count = len(api_spec.schemas)
-            result.api_confidence = min(
-                0.95, 0.6 + (endpoint_count * 0.05) + (schema_count * 0.02)
-            )
+            result.api_confidence = min(0.95, 0.6 + (endpoint_count * 0.05) + (schema_count * 0.02))
 
             result.api_specification = api_spec
 
@@ -521,9 +481,7 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "parsed_data": {
-                                        "$ref": f"#/components/schemas/{protocol_schema.name}ParsedData"
-                                    },
+                                    "parsed_data": {"$ref": f"#/components/schemas/{protocol_schema.name}ParsedData"},
                                     "metadata": {"type": "object"},
                                     "validation_status": {"type": "string"},
                                 },
@@ -558,9 +516,7 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
                         "schema": {
                             "type": "object",
                             "properties": {
-                                "data": {
-                                    "$ref": f"#/components/schemas/{protocol_schema.name}Data"
-                                },
+                                "data": {"$ref": f"#/components/schemas/{protocol_schema.name}Data"},
                                 "options": {"type": "object"},
                             },
                             "required": ["data"],
@@ -661,9 +617,7 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "schema": {
-                                        "$ref": f"#/components/schemas/{protocol_schema.name}Schema"
-                                    },
+                                    "schema": {"$ref": f"#/components/schemas/{protocol_schema.name}Schema"},
                                     "version": {"type": "string"},
                                     "metadata": {"type": "object"},
                                 },
@@ -767,9 +721,7 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
         }
         api_spec.extensions.setdefault("grpc", grpc_assets)
 
-    def _add_security_schemes(
-        self, api_spec: APISpecification, security_level: SecurityLevel
-    ) -> None:
+    def _add_security_schemes(self, api_spec: APISpecification, security_level: SecurityLevel) -> None:
         """Add appropriate security schemes based on security level."""
         if security_level == SecurityLevel.PUBLIC:
             # No authentication required
@@ -815,9 +767,7 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
                 }
             )
 
-    def _add_protocol_schemas(
-        self, api_spec: APISpecification, protocol_schema: ProtocolSchema
-    ) -> None:
+    def _add_protocol_schemas(self, api_spec: APISpecification, protocol_schema: ProtocolSchema) -> None:
         """Add protocol-specific schemas to OpenAPI components."""
         schema_name = protocol_schema.name
 
@@ -952,9 +902,7 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
             return
 
         try:
-            SEMANTIC_ANALYSIS_COUNTER.labels(
-                analysis_type="field_semantics", status="started"
-            ).inc()
+            SEMANTIC_ANALYSIS_COUNTER.labels(analysis_type="field_semantics", status="started").inc()
 
             # Prepare context for LLM analysis
             fields_info = []
@@ -1013,14 +961,10 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
             # Parse recommendations from LLM response
             response_text = llm_response.content.lower()
             if "security" in response_text:
-                semantic_result.security_considerations = [
-                    "Review field-level security based on LLM analysis"
-                ]
+                semantic_result.security_considerations = ["Review field-level security based on LLM analysis"]
 
             if "recommend" in response_text:
-                semantic_result.api_recommendations = [
-                    "Apply LLM-suggested field naming and endpoint design improvements"
-                ]
+                semantic_result.api_recommendations = ["Apply LLM-suggested field naming and endpoint design improvements"]
 
             # Store in result
             result.llm_analyses[LLMAnalysisType.FIELD_SEMANTICS] = semantic_result
@@ -1028,19 +972,13 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
             # Extract field mappings for better naming
             await self._extract_field_mappings(result, semantic_result)
 
-            SEMANTIC_ANALYSIS_COUNTER.labels(
-                analysis_type="field_semantics", status="success"
-            ).inc()
+            SEMANTIC_ANALYSIS_COUNTER.labels(analysis_type="field_semantics", status="success").inc()
 
         except Exception as e:
             self.logger.error(f"Semantic field analysis failed: {e}")
-            SEMANTIC_ANALYSIS_COUNTER.labels(
-                analysis_type="field_semantics", status="error"
-            ).inc()
+            SEMANTIC_ANALYSIS_COUNTER.labels(analysis_type="field_semantics", status="error").inc()
 
-    async def _extract_field_mappings(
-        self, result: APIGenerationDiscoveryResult, semantic_result: LLMAnalysisResult
-    ) -> None:
+    async def _extract_field_mappings(self, result: APIGenerationDiscoveryResult, semantic_result: LLMAnalysisResult) -> None:
         """Extract improved field mappings from semantic analysis."""
         # Simple extraction from LLM response
         # In production, this would be more sophisticated
@@ -1051,9 +989,7 @@ class EnhancedProtocolDiscoveryOrchestrator(EnhancedProtocolDiscoveryOrchestrato
                 # Use existing name as default
                 result.field_mappings[field.name] = field.name
 
-    async def _enhance_schema_with_semantics(
-        self, schema: ProtocolSchema, semantic_analysis: LLMAnalysisResult
-    ) -> None:
+    async def _enhance_schema_with_semantics(self, schema: ProtocolSchema, semantic_analysis: LLMAnalysisResult) -> None:
         """Enhance protocol schema with semantic analysis results."""
         # Add semantic insights to schema metadata
         schema.metadata.update(

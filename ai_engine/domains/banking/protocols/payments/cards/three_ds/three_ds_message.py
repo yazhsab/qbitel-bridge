@@ -257,7 +257,7 @@ class ThreeDSAuthRequest:
     def amount_decimal(self) -> Decimal:
         """Get amount as decimal."""
         exp = int(self.purchase_exponent)
-        return Decimal(self.purchase_amount) / (10 ** exp)
+        return Decimal(self.purchase_amount) / (10**exp)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API request."""
@@ -637,9 +637,7 @@ class ThreeDSResult:
         }
 
     @classmethod
-    def from_auth_response(
-        cls, auth_response: ThreeDSAuthResponse
-    ) -> "ThreeDSResult":
+    def from_auth_response(cls, auth_response: ThreeDSAuthResponse) -> "ThreeDSResult":
         """Create from authentication response (frictionless flow)."""
         return cls(
             version=auth_response.message_version,
@@ -673,8 +671,4 @@ class ThreeDSResult:
         )
 
     def __str__(self) -> str:
-        return (
-            f"ThreeDSResult(status={self.trans_status}, "
-            f"eci={self.eci}, "
-            f"auth={bool(self.authentication_value)})"
-        )
+        return f"ThreeDSResult(status={self.trans_status}, " f"eci={self.eci}, " f"auth={bool(self.authentication_value)})"

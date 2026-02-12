@@ -65,9 +65,7 @@ def mock_policy_engine():
 
 
 @pytest_asyncio.fixture
-async def security_orchestrator(
-    mock_config, mock_llm_service, mock_alert_manager, mock_policy_engine
-):
+async def security_orchestrator(mock_config, mock_llm_service, mock_alert_manager, mock_policy_engine):
     """Create security orchestrator instance."""
     orchestrator = ZeroTouchSecurityOrchestrator(
         config=mock_config,
@@ -136,9 +134,7 @@ class TestSecurityOrchestrator:
         assert security_orchestrator.stats["total_events"] == 0
 
     @pytest.mark.asyncio
-    async def test_detect_and_respond_success(
-        self, security_orchestrator, sample_security_event
-    ):
+    async def test_detect_and_respond_success(self, security_orchestrator, sample_security_event):
         """Test successful threat detection and response."""
         response = await security_orchestrator.detect_and_respond(sample_security_event)
 
@@ -169,36 +165,24 @@ class TestSecurityOrchestrator:
 
         assert response.success is True
         # Critical threats should trigger multiple actions
-        assert ResponseAction.BLOCK in response.actions_taken or "block" in [
-            a.value for a in response.actions_taken
-        ]
-        assert ResponseAction.ALERT in response.actions_taken or "alert" in [
-            a.value for a in response.actions_taken
-        ]
+        assert ResponseAction.BLOCK in response.actions_taken or "block" in [a.value for a in response.actions_taken]
+        assert ResponseAction.ALERT in response.actions_taken or "alert" in [a.value for a in response.actions_taken]
 
     @pytest.mark.asyncio
-    async def test_threat_analysis_caching(
-        self, security_orchestrator, sample_security_event
-    ):
+    async def test_threat_analysis_caching(self, security_orchestrator, sample_security_event):
         """Test threat analysis caching mechanism."""
         # First analysis
-        response1 = await security_orchestrator.detect_and_respond(
-            sample_security_event
-        )
+        response1 = await security_orchestrator.detect_and_respond(sample_security_event)
 
         # Second analysis with same event (should use cache)
-        response2 = await security_orchestrator.detect_and_respond(
-            sample_security_event
-        )
+        response2 = await security_orchestrator.detect_and_respond(sample_security_event)
 
         assert response1.event_id == response2.event_id
         # Cache should have entry
         assert len(security_orchestrator.threat_intelligence_cache) > 0
 
     @pytest.mark.asyncio
-    async def test_generate_security_policies(
-        self, security_orchestrator, sample_security_requirements, mock_llm_service
-    ):
+    async def test_generate_security_policies(self, security_orchestrator, sample_security_requirements, mock_llm_service):
         """Test security policy generation."""
         # Mock LLM response for policy generation
         mock_llm_service.process_request.return_value = LLMResponse(
@@ -209,9 +193,7 @@ class TestSecurityOrchestrator:
             confidence=0.9,
         )
 
-        policies = await security_orchestrator.generate_security_policies(
-            sample_security_requirements
-        )
+        policies = await security_orchestrator.generate_security_policies(sample_security_requirements)
 
         assert len(policies) > 0
         assert policies[0].name is not None
@@ -223,9 +205,7 @@ class TestSecurityOrchestrator:
         assert security_orchestrator.stats["policies_generated"] > 0
 
     @pytest.mark.asyncio
-    async def test_threat_intelligence_analysis(
-        self, security_orchestrator, sample_threat_data, mock_llm_service
-    ):
+    async def test_threat_intelligence_analysis(self, security_orchestrator, sample_threat_data, mock_llm_service):
         """Test threat intelligence analysis."""
         # Mock LLM response for threat analysis
         mock_llm_service.process_request.return_value = LLMResponse(
@@ -236,9 +216,7 @@ class TestSecurityOrchestrator:
             confidence=0.95,
         )
 
-        analysis = await security_orchestrator.threat_intelligence_analysis(
-            sample_threat_data
-        )
+        analysis = await security_orchestrator.threat_intelligence_analysis(sample_threat_data)
 
         assert analysis is not None
         assert analysis.threat_id is not None
@@ -250,9 +228,7 @@ class TestSecurityOrchestrator:
         assert len(analysis.mitigation_strategies) > 0
 
     @pytest.mark.asyncio
-    async def test_assess_security_posture(
-        self, security_orchestrator, sample_security_event
-    ):
+    async def test_assess_security_posture(self, security_orchestrator, sample_security_event):
         """Test security posture assessment."""
         # Create some incidents first
         await security_orchestrator.detect_and_respond(sample_security_event)
@@ -274,9 +250,7 @@ class TestSecurityOrchestrator:
         assert "detection_accuracy" in stats
 
     @pytest.mark.asyncio
-    async def test_incident_management(
-        self, security_orchestrator, sample_security_event
-    ):
+    async def test_incident_management(self, security_orchestrator, sample_security_event):
         """Test incident creation and management."""
         response = await security_orchestrator.detect_and_respond(sample_security_event)
 
@@ -312,9 +286,7 @@ class TestSecurityOrchestrator:
             assert all(isinstance(action, ResponseAction) for action in actions)
 
     @pytest.mark.asyncio
-    async def test_alert_generation(
-        self, security_orchestrator, sample_security_event, mock_alert_manager
-    ):
+    async def test_alert_generation(self, security_orchestrator, sample_security_event, mock_alert_manager):
         """Test security alert generation."""
         # Set event to high severity to trigger alert
         sample_security_event.severity = ThreatSeverity.HIGH
@@ -322,15 +294,10 @@ class TestSecurityOrchestrator:
         response = await security_orchestrator.detect_and_respond(sample_security_event)
 
         # Verify alert was generated for high severity
-        assert (
-            len(response.alerts_generated) > 0
-            or len(mock_alert_manager.active_alerts) > 0
-        )
+        assert len(response.alerts_generated) > 0 or len(mock_alert_manager.active_alerts) > 0
 
     @pytest.mark.asyncio
-    async def test_statistics_tracking(
-        self, security_orchestrator, sample_security_event
-    ):
+    async def test_statistics_tracking(self, security_orchestrator, sample_security_event):
         """Test statistics tracking."""
         initial_stats = security_orchestrator.get_statistics()
 
@@ -341,9 +308,7 @@ class TestSecurityOrchestrator:
 
         assert updated_stats["total_events"] > initial_stats["total_events"]
         assert updated_stats["threats_detected"] > initial_stats["threats_detected"]
-        assert (
-            updated_stats["automated_responses"] > initial_stats["automated_responses"]
-        )
+        assert updated_stats["automated_responses"] > initial_stats["automated_responses"]
 
     @pytest.mark.asyncio
     async def test_error_handling(self, security_orchestrator, mock_llm_service):
@@ -366,9 +331,7 @@ class TestSecurityOrchestrator:
         assert "error" in response.metadata or "failed" in response.details.lower()
 
     @pytest.mark.asyncio
-    async def test_policy_validation(
-        self, security_orchestrator, sample_security_requirements
-    ):
+    async def test_policy_validation(self, security_orchestrator, sample_security_requirements):
         """Test policy validation."""
         from ai_engine.llm.security_orchestrator import SecurityPolicy
 
@@ -394,9 +357,7 @@ class TestSecurityOrchestrator:
             ),
         ]
 
-        validated = await security_orchestrator._validate_policies(
-            policies, sample_security_requirements
-        )
+        validated = await security_orchestrator._validate_policies(policies, sample_security_requirements)
 
         # Only valid policy should pass
         assert len(validated) == 1
@@ -417,9 +378,7 @@ class TestSecurityOrchestrator:
         ]
 
         # Process events concurrently
-        responses = await asyncio.gather(
-            *[security_orchestrator.detect_and_respond(event) for event in events]
-        )
+        responses = await asyncio.gather(*[security_orchestrator.detect_and_respond(event) for event in events])
 
         assert len(responses) == 5
         assert all(r.success for r in responses)
@@ -480,9 +439,7 @@ class TestSecurityOrchestratorIntegration:
     """Integration tests for security orchestrator."""
 
     @pytest.mark.asyncio
-    async def test_end_to_end_threat_response(
-        self, security_orchestrator, sample_security_event
-    ):
+    async def test_end_to_end_threat_response(self, security_orchestrator, sample_security_event):
         """Test complete end-to-end threat response workflow."""
         # 1. Detect and respond
         response = await security_orchestrator.detect_and_respond(sample_security_event)

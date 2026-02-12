@@ -142,9 +142,7 @@ class TestRegulatoryKnowledgeBase:
         assert "full_name" in metadata
         assert "applicable_to" in metadata
         assert "last_updated" in metadata
-        assert (
-            metadata["full_name"] == "Payment Card Industry Data Security Standard v4.0"
-        )
+        assert metadata["full_name"] == "Payment Card Industry Data Security Standard v4.0"
 
     @pytest.mark.asyncio
     async def test_compliance_assessment(self, regulatory_kb, mock_llm_service):
@@ -211,15 +209,9 @@ class TestAssessmentEngine:
         analyzer = SystemStateAnalyzer(mock_config)
 
         with (
-            patch.object(
-                analyzer, "_collect_system_info", return_value={"hostname": "test"}
-            ),
-            patch.object(
-                analyzer, "_collect_network_config", return_value={"interfaces": {}}
-            ),
-            patch.object(
-                analyzer, "_collect_security_config", return_value={"tls": True}
-            ),
+            patch.object(analyzer, "_collect_system_info", return_value={"hostname": "test"}),
+            patch.object(analyzer, "_collect_network_config", return_value={"interfaces": {}}),
+            patch.object(analyzer, "_collect_security_config", return_value={"tls": True}),
         ):
 
             snapshot = await analyzer.capture_system_state()
@@ -231,15 +223,11 @@ class TestAssessmentEngine:
     @pytest.mark.asyncio
     async def test_compliance_assessment(self, assessment_engine, mock_regulatory_kb):
         """Test full compliance assessment."""
-        mock_regulatory_kb.get_framework.return_value.get_all_requirements.return_value = (
-            []
-        )
+        mock_regulatory_kb.get_framework.return_value.get_all_requirements.return_value = []
 
         with (
             patch.object(assessment_engine, "_assess_requirements", return_value=[]),
-            patch.object(
-                assessment_engine, "_generate_overall_assessment"
-            ) as mock_generate,
+            patch.object(assessment_engine, "_generate_overall_assessment") as mock_generate,
         ):
 
             mock_assessment = Mock(spec=ComplianceAssessment)
@@ -312,9 +300,7 @@ class TestReportGenerator:
         with patch.object(report_generator, "_generate_report_content") as mock_content:
             mock_content.return_value = {
                 "metadata": {"framework": "PCI_DSS_4_0", "compliance_score": 80.0},
-                "sections": {
-                    "summary": {"title": "Summary", "content": "Test summary"}
-                },
+                "sections": {"summary": {"title": "Summary", "content": "Test summary"}},
             }
 
             report = await report_generator.generate_compliance_report(
@@ -363,18 +349,14 @@ class TestReportGenerator:
         """Test generating reports in multiple formats."""
         formats = [ReportFormat.HTML, ReportFormat.JSON]
 
-        with patch.object(
-            report_generator, "generate_compliance_report"
-        ) as mock_generate:
+        with patch.object(report_generator, "generate_compliance_report") as mock_generate:
             mock_reports = [
                 Mock(format=ReportFormat.HTML),
                 Mock(format=ReportFormat.JSON),
             ]
             mock_generate.side_effect = mock_reports
 
-            reports = await report_generator.generate_multiple_formats(
-                sample_assessment, formats
-            )
+            reports = await report_generator.generate_multiple_formats(sample_assessment, formats)
 
             assert len(reports) == 2
             assert mock_generate.call_count == 2
@@ -517,15 +499,11 @@ class TestPromptTemplates:
     def test_template_filtering(self, prompt_manager):
         """Test template filtering."""
         # Filter by type
-        gap_templates = prompt_manager.list_templates(
-            prompt_type=PromptType.GAP_ANALYSIS
-        )
+        gap_templates = prompt_manager.list_templates(prompt_type=PromptType.GAP_ANALYSIS)
         assert all(t.type == PromptType.GAP_ANALYSIS for t in gap_templates)
 
         # Filter by category
-        analysis_templates = prompt_manager.list_templates(
-            category=PromptCategory.ANALYSIS
-        )
+        analysis_templates = prompt_manager.list_templates(category=PromptCategory.ANALYSIS)
         assert all(t.category == PromptCategory.ANALYSIS for t in analysis_templates)
 
     def test_prompt_rendering(self, prompt_manager):
@@ -538,9 +516,7 @@ class TestPromptTemplates:
             "system_evidence": "Test evidence",
         }
 
-        rendered = prompt_manager.render_prompt(
-            "gap_analysis_comprehensive", variables, "PCI_DSS_4_0"
-        )
+        rendered = prompt_manager.render_prompt("gap_analysis_comprehensive", variables, "PCI_DSS_4_0")
 
         assert "PCI_DSS_4_0" in rendered
         assert "75.0" in rendered
@@ -612,9 +588,7 @@ class TestComplianceService:
         await compliance_service.start()
 
         try:
-            with patch.object(
-                compliance_service.assessment_engine, "assess_compliance"
-            ) as mock_assess:
+            with patch.object(compliance_service.assessment_engine, "assess_compliance") as mock_assess:
                 mock_assessment = Mock(spec=ComplianceAssessment)
                 mock_assessment.framework = "TEST_FRAMEWORK"
                 mock_assessment.overall_compliance_score = 85.0
@@ -637,9 +611,7 @@ class TestComplianceService:
         try:
             with (
                 patch.object(compliance_service, "assess_compliance") as mock_assess,
-                patch.object(
-                    compliance_service.report_generator, "generate_compliance_report"
-                ) as mock_report,
+                patch.object(compliance_service.report_generator, "generate_compliance_report") as mock_report,
             ):
 
                 mock_assessment = Mock(spec=ComplianceAssessment)
@@ -734,9 +706,7 @@ class TestPerformanceAndSecurity:
 
             try:
                 # Mock assessment engine
-                with patch.object(
-                    service.assessment_engine, "assess_compliance"
-                ) as mock_assess:
+                with patch.object(service.assessment_engine, "assess_compliance") as mock_assess:
                     # Simulate slow assessment
                     async def slow_assessment(*args, **kwargs):
                         await asyncio.sleep(0.1)
@@ -747,9 +717,7 @@ class TestPerformanceAndSecurity:
                     # Start multiple assessments
                     tasks = []
                     for i in range(3):  # More than max_concurrent
-                        task = asyncio.create_task(
-                            service.assess_compliance(f"FRAMEWORK_{i}")
-                        )
+                        task = asyncio.create_task(service.assess_compliance(f"FRAMEWORK_{i}"))
                         tasks.append(task)
 
                     # Third assessment should fail due to limit
@@ -843,9 +811,7 @@ pytestmark = pytest.mark.asyncio
 
 def pytest_configure(config):
     """Configure pytest markers."""
-    config.addinivalue_line(
-        "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"
-    )
+    config.addinivalue_line("markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')")
     config.addinivalue_line("markers", "integration: marks tests as integration tests")
     config.addinivalue_line("markers", "performance: marks tests as performance tests")
 

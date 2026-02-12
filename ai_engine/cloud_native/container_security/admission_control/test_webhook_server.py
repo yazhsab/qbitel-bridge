@@ -19,7 +19,7 @@ from ai_engine.cloud_native.container_security.admission_control.webhook_server 
     AdmissionWebhookServer,
     SecurityPolicy,
     AdmissionRequest,
-    AdmissionAction
+    AdmissionAction,
 )
 
 
@@ -55,15 +55,12 @@ class TestAdmissionWebhookServer:
                     {
                         "name": "app",
                         "image": "gcr.io/distroless/base@sha256:abc123",
-                        "securityContext": {
-                            "privileged": False,
-                            "readOnlyRootFilesystem": False
-                        }
+                        "securityContext": {"privileged": False, "readOnlyRootFilesystem": False},
                     }
                 ],
                 "hostNetwork": False,
-                "hostPID": False
-            }
+                "hostPID": False,
+            },
         }
 
         result = webhook_server.validate_pod(pod)
@@ -77,15 +74,9 @@ class TestAdmissionWebhookServer:
             "metadata": {"name": "test-pod"},
             "spec": {
                 "containers": [
-                    {
-                        "name": "app",
-                        "image": "nginx:latest",
-                        "securityContext": {
-                            "privileged": True  # Privileged container
-                        }
-                    }
+                    {"name": "app", "image": "nginx:latest", "securityContext": {"privileged": True}}  # Privileged container
                 ]
-            }
+            },
         }
 
         result = webhook_server.validate_pod(pod)
@@ -100,14 +91,9 @@ class TestAdmissionWebhookServer:
         pod = {
             "metadata": {"name": "test-pod"},
             "spec": {
-                "containers": [
-                    {
-                        "name": "app",
-                        "image": "gcr.io/app:v1@sha256:abc123"
-                    }
-                ],
-                "hostNetwork": True  # Host network enabled
-            }
+                "containers": [{"name": "app", "image": "gcr.io/app:v1@sha256:abc123"}],
+                "hostNetwork": True,  # Host network enabled
+            },
         }
 
         result = webhook_server.validate_pod(pod)
@@ -119,14 +105,7 @@ class TestAdmissionWebhookServer:
         """Test pod validation for unsigned images"""
         pod = {
             "metadata": {"name": "test-pod"},
-            "spec": {
-                "containers": [
-                    {
-                        "name": "app",
-                        "image": "unknown-registry.io/app:latest"  # No digest, untrusted
-                    }
-                ]
-            }
+            "spec": {"containers": [{"name": "app", "image": "unknown-registry.io/app:latest"}]},  # No digest, untrusted
         }
 
         result = webhook_server.validate_pod(pod)
@@ -136,17 +115,7 @@ class TestAdmissionWebhookServer:
 
     def test_validate_pod_blocked_registry(self, webhook_server):
         """Test pod validation blocks disallowed registries"""
-        pod = {
-            "metadata": {"name": "test-pod"},
-            "spec": {
-                "containers": [
-                    {
-                        "name": "app",
-                        "image": "untrusted.io/app:latest"
-                    }
-                ]
-            }
-        }
+        pod = {"metadata": {"name": "test-pod"}, "spec": {"containers": [{"name": "app", "image": "untrusted.io/app:latest"}]}}
 
         result = webhook_server.validate_pod(pod)
 
@@ -157,21 +126,13 @@ class TestAdmissionWebhookServer:
         """Test pod validation detects quantum-vulnerable libraries"""
         pod = {
             "metadata": {"name": "test-pod"},
-            "spec": {
-                "containers": [
-                    {
-                        "name": "app",
-                        "image": "ubuntu:14.04"  # Outdated base with vulnerable libs
-                    }
-                ]
-            }
+            "spec": {"containers": [{"name": "app", "image": "ubuntu:14.04"}]},  # Outdated base with vulnerable libs
         }
 
         result = webhook_server.validate_pod(pod)
 
         assert result["allowed"] is False
-        assert any("quantum-vulnerable" in v.lower() or "outdated" in v.lower()
-                  for v in result["violations"])
+        assert any("quantum-vulnerable" in v.lower() or "outdated" in v.lower() for v in result["violations"])
 
     def test_validate_image_registry_allowed(self, webhook_server):
         """Test image registry validation for allowed registries"""
@@ -191,23 +152,17 @@ class TestAdmissionWebhookServer:
     def test_verify_image_signature_with_digest(self, webhook_server):
         """Test image signature verification for images with digest"""
         # Images with digest are considered signed
-        assert webhook_server._verify_image_signature(
-            "gcr.io/myapp@sha256:abc123"
-        ) is True
+        assert webhook_server._verify_image_signature("gcr.io/myapp@sha256:abc123") is True
 
     def test_verify_image_signature_without_digest(self, webhook_server):
         """Test image signature verification for images without digest"""
         # Unknown images without digest should fail verification
-        assert webhook_server._verify_image_signature(
-            "unknown.io/app:latest"
-        ) is False
+        assert webhook_server._verify_image_signature("unknown.io/app:latest") is False
 
     def test_verify_image_signature_trusted_registry(self, webhook_server):
         """Test image signature verification for trusted registries"""
         # Trusted registry images pass even without explicit digest
-        assert webhook_server._verify_image_signature(
-            "gcr.io/distroless/base:latest"
-        ) is True
+        assert webhook_server._verify_image_signature("gcr.io/distroless/base:latest") is True
 
     def test_check_quantum_vulnerable_libs(self, webhook_server):
         """Test checking for quantum-vulnerable libraries"""
@@ -227,7 +182,7 @@ class TestAdmissionWebhookServer:
             max_critical_vulnerabilities=0,
             max_high_vulnerabilities=0,
             disallow_privileged=True,
-            require_read_only_root=True
+            require_read_only_root=True,
         )
 
         webhook_server.add_policy(custom_policy)
@@ -288,16 +243,9 @@ class TestAdmissionWebhookServer:
                 "namespace": "default",
                 "object": {
                     "metadata": {"name": "test-pod"},
-                    "spec": {
-                        "containers": [
-                            {
-                                "name": "app",
-                                "image": "gcr.io/distroless/base@sha256:abc123"
-                            }
-                        ]
-                    }
-                }
-            }
+                    "spec": {"containers": [{"name": "app", "image": "gcr.io/distroless/base@sha256:abc123"}]},
+                },
+            },
         }
 
         # Create mock request
@@ -327,40 +275,24 @@ class TestAdmissionWebhookServer:
         pod = {
             "metadata": {"name": "test-pod"},
             "spec": {
-                "initContainers": [
-                    {
-                        "name": "init",
-                        "image": "untrusted.io/init:latest"  # Blocked registry
-                    }
-                ],
-                "containers": [
-                    {
-                        "name": "app",
-                        "image": "gcr.io/app@sha256:abc123"
-                    }
-                ]
-            }
+                "initContainers": [{"name": "init", "image": "untrusted.io/init:latest"}],  # Blocked registry
+                "containers": [{"name": "app", "image": "gcr.io/app@sha256:abc123"}],
+            },
         }
 
         result = webhook_server.validate_pod(pod)
 
         assert result["allowed"] is False
-        assert any("init" in v and "disallowed registry" in v.lower()
-                  for v in result["violations"])
+        assert any("init" in v and "disallowed registry" in v.lower() for v in result["violations"])
 
     def test_validate_pod_host_pid(self, webhook_server):
         """Test pod validation denies host PID namespace"""
         pod = {
             "metadata": {"name": "test-pod"},
             "spec": {
-                "containers": [
-                    {
-                        "name": "app",
-                        "image": "gcr.io/app@sha256:abc123"
-                    }
-                ],
-                "hostPID": True  # Host PID namespace
-            }
+                "containers": [{"name": "app", "image": "gcr.io/app@sha256:abc123"}],
+                "hostPID": True,  # Host PID namespace
+            },
         }
 
         result = webhook_server.validate_pod(pod)
@@ -374,11 +306,7 @@ class TestSecurityPolicy:
 
     def test_security_policy_creation(self):
         """Test creating a SecurityPolicy"""
-        policy = SecurityPolicy(
-            name="test-policy",
-            require_image_signature=True,
-            max_critical_vulnerabilities=0
-        )
+        policy = SecurityPolicy(name="test-policy", require_image_signature=True, max_critical_vulnerabilities=0)
 
         assert policy.name == "test-policy"
         assert policy.require_image_signature is True
@@ -388,9 +316,7 @@ class TestSecurityPolicy:
     def test_security_policy_with_registries(self):
         """Test SecurityPolicy with registry lists"""
         policy = SecurityPolicy(
-            name="registry-policy",
-            allowed_registries=["gcr.io", "docker.io"],
-            blocked_registries=["untrusted.io"]
+            name="registry-policy", allowed_registries=["gcr.io", "docker.io"], blocked_registries=["untrusted.io"]
         )
 
         assert "gcr.io" in policy.allowed_registries

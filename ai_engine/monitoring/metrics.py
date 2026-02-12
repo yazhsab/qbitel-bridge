@@ -84,9 +84,7 @@ class MetricsCollector:
 
         # Collection state
         self.collection_enabled = True
-        self.collection_interval = getattr(
-            config, "metrics_collection_interval", 15
-        )  # seconds
+        self.collection_interval = getattr(config, "metrics_collection_interval", 15)  # seconds
 
         # Background collection task
         self._collection_task: Optional[asyncio.Task] = None
@@ -98,9 +96,7 @@ class MetricsCollector:
         """Maintain compatibility with call sites expecting initialize."""
         await self.start()
 
-    def register_metric(
-        self, metric_config: MetricConfig, metric_type: MetricType
-    ) -> Any:
+    def register_metric(self, metric_config: MetricConfig, metric_type: MetricType) -> Any:
         """Register a new metric."""
         with self.lock:
             if metric_config.name in self.metrics:
@@ -149,15 +145,11 @@ class MetricsCollector:
                     raise MonitoringException(f"Unsupported metric type: {metric_type}")
 
                 self.metrics[metric_config.name] = metric
-                self.logger.info(
-                    f"Registered metric: {metric_config.name} ({metric_type})"
-                )
+                self.logger.info(f"Registered metric: {metric_config.name} ({metric_type})")
                 return metric
 
             except Exception as e:
-                self.logger.error(
-                    f"Failed to register metric {metric_config.name}: {e}"
-                )
+                self.logger.error(f"Failed to register metric {metric_config.name}: {e}")
                 raise MonitoringException(f"Metric registration failed: {e}")
 
     def get_metric(self, name: str) -> Optional[Any]:
@@ -165,9 +157,7 @@ class MetricsCollector:
         with self.lock:
             return self.metrics.get(name)
 
-    def increment_counter(
-        self, name: str, labels: Optional[Dict[str, str]] = None, value: float = 1.0
-    ) -> None:
+    def increment_counter(self, name: str, labels: Optional[Dict[str, str]] = None, value: float = 1.0) -> None:
         """Increment a counter metric."""
         metric = self.get_metric(name)
         if metric and hasattr(metric, "inc"):
@@ -176,9 +166,7 @@ class MetricsCollector:
             else:
                 metric.inc(value)
 
-    def set_gauge(
-        self, name: str, value: float, labels: Optional[Dict[str, str]] = None
-    ) -> None:
+    def set_gauge(self, name: str, value: float, labels: Optional[Dict[str, str]] = None) -> None:
         """Set a gauge metric value."""
         metric = self.get_metric(name)
         if metric and hasattr(metric, "set"):
@@ -187,9 +175,7 @@ class MetricsCollector:
             else:
                 metric.set(value)
 
-    def observe_histogram(
-        self, name: str, value: float, labels: Optional[Dict[str, str]] = None
-    ) -> None:
+    def observe_histogram(self, name: str, value: float, labels: Optional[Dict[str, str]] = None) -> None:
         """Observe a value in a histogram metric."""
         metric = self.get_metric(name)
         if metric and hasattr(metric, "observe"):
@@ -198,9 +184,7 @@ class MetricsCollector:
             else:
                 metric.observe(value)
 
-    def observe_summary(
-        self, name: str, value: float, labels: Optional[Dict[str, str]] = None
-    ) -> None:
+    def observe_summary(self, name: str, value: float, labels: Optional[Dict[str, str]] = None) -> None:
         """Observe a value in a summary metric."""
         metric = self.get_metric(name)
         if metric and hasattr(metric, "observe"):
@@ -248,9 +232,7 @@ class MetricsCollector:
         try:
             await asyncio.wait_for(self._collection_task, timeout=5.0)
         except asyncio.TimeoutError:
-            self.logger.warning(
-                "Metrics collection task did not stop gracefully, cancelling..."
-            )
+            self.logger.warning("Metrics collection task did not stop gracefully, cancelling...")
             self._collection_task.cancel()
             try:
                 await self._collection_task
@@ -277,9 +259,7 @@ class MetricsCollector:
         """Collect system-level metrics."""
         try:
             if psutil is None:
-                self.logger.debug(
-                    "psutil not available; skipping system metrics collection"
-                )
+                self.logger.debug("psutil not available; skipping system metrics collection")
                 return
 
             # CPU metrics
@@ -307,9 +287,7 @@ class MetricsCollector:
         """Collect GPU metrics if available."""
         try:
             if torch is None:
-                self.logger.debug(
-                    "PyTorch not available; skipping GPU metrics collection"
-                )
+                self.logger.debug("PyTorch not available; skipping GPU metrics collection")
                 return
 
             if torch.cuda.is_available():
@@ -323,9 +301,7 @@ class MetricsCollector:
                     max_memory = torch.cuda.max_memory_allocated(i)
 
                     labels = {"device": str(i)}
-                    self.set_gauge(
-                        "gpu_memory_allocated_bytes", memory_allocated, labels
-                    )
+                    self.set_gauge("gpu_memory_allocated_bytes", memory_allocated, labels)
                     self.set_gauge("gpu_memory_reserved_bytes", memory_reserved, labels)
                     self.set_gauge("gpu_max_memory_allocated_bytes", max_memory, labels)
 
@@ -475,9 +451,7 @@ class PrometheusMetrics(MetricsCollector):
         )
 
         self.register_metric(
-            MetricConfig(
-                name="system_memory_percent", help="System memory usage percentage"
-            ),
+            MetricConfig(name="system_memory_percent", help="System memory usage percentage"),
             MetricType.GAUGE,
         )
 
@@ -490,16 +464,12 @@ class PrometheusMetrics(MetricsCollector):
         )
 
         self.register_metric(
-            MetricConfig(
-                name="system_memory_used_bytes", help="Used system memory in bytes"
-            ),
+            MetricConfig(name="system_memory_used_bytes", help="Used system memory in bytes"),
             MetricType.GAUGE,
         )
 
         self.register_metric(
-            MetricConfig(
-                name="gpu_device_count", help="Number of available GPU devices"
-            ),
+            MetricConfig(name="gpu_device_count", help="Number of available GPU devices"),
             MetricType.GAUGE,
         )
 
@@ -518,9 +488,7 @@ class PrometheusMetrics(MetricsCollector):
             from prometheus_client import start_http_server
 
             start_http_server(self.metrics_port, registry=self.registry)
-            self.logger.info(
-                f"Prometheus metrics server started on port {self.metrics_port}"
-            )
+            self.logger.info(f"Prometheus metrics server started on port {self.metrics_port}")
         except Exception as e:
             self.logger.error(f"Failed to start metrics server: {e}")
             raise MonitoringException(f"Metrics server startup failed: {e}")
@@ -650,14 +618,10 @@ class AIEngineMetrics:
                 "protocol_type": discovered_protocol,
                 "success": str(success).lower(),
             }
-            self.prometheus.increment_counter(
-                "protocol_discovery_requests_total", labels
-            )
+            self.prometheus.increment_counter("protocol_discovery_requests_total", labels)
 
             duration_labels = {"protocol_type": discovered_protocol}
-            self.prometheus.observe_histogram(
-                "protocol_discovery_duration_seconds", duration, duration_labels
-            )
+            self.prometheus.observe_histogram("protocol_discovery_duration_seconds", duration, duration_labels)
 
             # Custom metrics
             self.custom.increment_custom_counter("protocol_discovery_total")
@@ -666,9 +630,7 @@ class AIEngineMetrics:
             else:
                 self.custom.increment_custom_counter("protocol_discovery_failures")
 
-            self.custom.add_histogram_observation(
-                "protocol_discovery_latency", duration
-            )
+            self.custom.add_histogram_observation("protocol_discovery_latency", duration)
 
             # Cleanup
             self.operation_start_times.pop(operation_id, None)
@@ -698,9 +660,7 @@ class AIEngineMetrics:
             self.prometheus.increment_counter("field_detection_requests_total", labels)
 
             duration_labels = {"protocol_type": protocol}
-            self.prometheus.observe_histogram(
-                "field_detection_duration_seconds", duration, duration_labels
-            )
+            self.prometheus.observe_histogram("field_detection_duration_seconds", duration, duration_labels)
 
             # Custom metrics
             self.custom.increment_custom_counter("field_detection_total")
@@ -739,13 +699,9 @@ class AIEngineMetrics:
                 "anomaly_detected": str(anomaly_detected).lower(),
                 "success": str(success).lower(),
             }
-            self.prometheus.increment_counter(
-                "anomaly_detection_requests_total", labels
-            )
+            self.prometheus.increment_counter("anomaly_detection_requests_total", labels)
 
-            self.prometheus.observe_histogram(
-                "anomaly_detection_duration_seconds", duration
-            )
+            self.prometheus.observe_histogram("anomaly_detection_duration_seconds", duration)
 
             # Custom metrics
             self.custom.increment_custom_counter("anomaly_detection_total")
@@ -774,9 +730,7 @@ class AIEngineMetrics:
             yield
             success = True
         except Exception as e:
-            self.logger.error(
-                f"Model inference failed for {model_name}:{model_version}: {e}"
-            )
+            self.logger.error(f"Model inference failed for {model_name}:{model_version}: {e}")
             success = False
             raise
         finally:
@@ -791,46 +745,30 @@ class AIEngineMetrics:
             self.prometheus.increment_counter("model_inference_requests_total", labels)
 
             duration_labels = {"model_name": model_name, "model_version": model_version}
-            self.prometheus.observe_histogram(
-                "model_inference_duration_seconds", duration, duration_labels
-            )
+            self.prometheus.observe_histogram("model_inference_duration_seconds", duration, duration_labels)
 
             # Custom metrics
             model_key = f"{model_name}:{model_version}"
             self.custom.increment_custom_counter(f"model_inference_total_{model_key}")
             if success:
-                self.custom.increment_custom_counter(
-                    f"model_inference_success_{model_key}"
-                )
+                self.custom.increment_custom_counter(f"model_inference_success_{model_key}")
             else:
-                self.custom.increment_custom_counter(
-                    f"model_inference_failures_{model_key}"
-                )
+                self.custom.increment_custom_counter(f"model_inference_failures_{model_key}")
 
-            self.custom.add_histogram_observation(
-                f"model_inference_latency_{model_key}", duration
-            )
+            self.custom.add_histogram_observation(f"model_inference_latency_{model_key}", duration)
 
             # Cleanup
             self.operation_start_times.pop(operation_id, None)
 
-    def record_data_processing_metrics(
-        self, data_size: int, processing_time: float
-    ) -> None:
+    def record_data_processing_metrics(self, data_size: int, processing_time: float) -> None:
         """Record data processing metrics."""
-        self.custom.add_histogram_observation(
-            "data_processing_size_bytes", float(data_size)
-        )
-        self.custom.add_histogram_observation(
-            "data_processing_time_seconds", processing_time
-        )
+        self.custom.add_histogram_observation("data_processing_size_bytes", float(data_size))
+        self.custom.add_histogram_observation("data_processing_time_seconds", processing_time)
 
         # Calculate throughput
         if processing_time > 0:
             throughput = data_size / processing_time  # bytes per second
-            self.custom.add_histogram_observation(
-                "data_processing_throughput_bps", throughput
-            )
+            self.custom.add_histogram_observation("data_processing_throughput_bps", throughput)
 
     def record_model_accuracy(self, model_name: str, accuracy: float) -> None:
         """Record model accuracy metrics."""

@@ -16,7 +16,6 @@ from ...core.config import Config, get_config
 from ..logging import get_legacy_logger
 from ..models import LegacySystemContext
 
-
 # Initialize security and logging
 security = HTTPBearer(auto_error=False)
 logger = get_legacy_logger(__name__)
@@ -278,9 +277,7 @@ class LegacySystemAuth:
             # Check expiration
             exp_timestamp = payload.get("exp")
             if exp_timestamp and datetime.fromtimestamp(exp_timestamp) < datetime.now():
-                raise HTTPException(
-                    status_code=HTTP_401_UNAUTHORIZED, detail="Token expired"
-                )
+                raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Token expired")
 
             # Reconstruct user from payload
             user = User(
@@ -296,19 +293,13 @@ class LegacySystemAuth:
 
         except ExpiredSignatureError:
             logger.warning("Token expired")
-            raise HTTPException(
-                status_code=HTTP_401_UNAUTHORIZED, detail="Token expired"
-            )
+            raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Token expired")
         except jwt.InvalidTokenError as e:
             logger.warning(f"Invalid token: {e}")
-            raise HTTPException(
-                status_code=HTTP_401_UNAUTHORIZED, detail="Invalid token"
-            )
+            raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Invalid token")
         except Exception as e:
             logger.error(f"Token verification error: {e}")
-            raise HTTPException(
-                status_code=HTTP_401_UNAUTHORIZED, detail="Token verification failed"
-            )
+            raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Token verification failed")
 
     def authenticate_user(self, username: str, password: str) -> Optional[User]:
         """Authenticate user with username/password (mock implementation)."""
@@ -326,9 +317,7 @@ class LegacySystemAuth:
         has_permission = user.has_permission(required_permission)
 
         if not has_permission:
-            logger.warning(
-                f"Authorization failed: user {user.username} lacks permission {required_permission}"
-            )
+            logger.warning(f"Authorization failed: user {user.username} lacks permission {required_permission}")
 
         return has_permission
 
@@ -337,9 +326,7 @@ class LegacySystemAuth:
         can_access = user.can_access_system(system_id)
 
         if not can_access:
-            logger.warning(
-                f"System access denied: user {user.username} cannot access system {system_id}"
-            )
+            logger.warning(f"System access denied: user {user.username} cannot access system {system_id}")
 
         return can_access
 
@@ -425,9 +412,7 @@ def require_role(role: str):
 
     def role_dependency(user: User = Depends(get_current_user)) -> User:
         if not user.has_role(role):
-            raise HTTPException(
-                status_code=HTTP_403_FORBIDDEN, detail=f"Role required: {role}"
-            )
+            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail=f"Role required: {role}")
 
         return user
 
@@ -527,9 +512,7 @@ async def authenticate_user_endpoint(username: str, password: str) -> Dict[str, 
     user = auth.authenticate_user(username, password)
 
     if not user:
-        raise HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
-        )
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     access_token = auth.create_access_token(user)
 
@@ -555,9 +538,7 @@ def get_user_systems(user: User) -> List[str]:
 def check_system_permission(user: User, system_id: str, permission: str) -> bool:
     """Check if user has permission for specific system."""
     auth = get_auth()
-    return auth.authorize_permission(user, permission) and auth.authorize_system_access(
-        user, system_id
-    )
+    return auth.authorize_permission(user, permission) and auth.authorize_system_access(user, system_id)
 
 
 def is_system_admin(user: User) -> bool:
@@ -627,9 +608,7 @@ def check_rate_limit(user_id: str, limit: int, window_seconds: int) -> bool:
         _rate_limit_cache[user_id] = []
 
     # Clean old entries
-    _rate_limit_cache[user_id] = [
-        timestamp for timestamp in _rate_limit_cache[user_id] if timestamp > cutoff
-    ]
+    _rate_limit_cache[user_id] = [timestamp for timestamp in _rate_limit_cache[user_id] if timestamp > cutoff]
 
     # Check limit
     if len(_rate_limit_cache[user_id]) >= limit:

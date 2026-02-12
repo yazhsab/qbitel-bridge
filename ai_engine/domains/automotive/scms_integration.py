@@ -111,10 +111,7 @@ class SCMSClient:
         now = time.time()
 
         # Remove expired certificates
-        self._pseudonym_pool = [
-            c for c in self._pseudonym_pool
-            if c.validity_end > now
-        ]
+        self._pseudonym_pool = [c for c in self._pseudonym_pool if c.validity_end > now]
 
         if self._pseudonym_pool:
             return self._pseudonym_pool[0]

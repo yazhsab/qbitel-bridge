@@ -131,16 +131,12 @@ class TestAIEngineGRPCService:
         """Test service initialization failure."""
         service = AIEngineGRPCService(mock_config)
 
-        with patch(
-            "ai_engine.api.grpc.QbitelAIEngine", side_effect=Exception("Init failed")
-        ):
+        with patch("ai_engine.api.grpc.QbitelAIEngine", side_effect=Exception("Init failed")):
             with pytest.raises(Exception, match="Init failed"):
                 await service.initialize()
 
     @pytest.mark.asyncio
-    async def test_discover_protocol_success(
-        self, mock_config, mock_ai_engine, mock_grpc_context, mock_request
-    ):
+    async def test_discover_protocol_success(self, mock_config, mock_ai_engine, mock_grpc_context, mock_request):
         """Test successful protocol discovery."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -153,9 +149,7 @@ class TestAIEngineGRPCService:
         assert service.stats["total_requests"] == 1
 
     @pytest.mark.asyncio
-    async def test_discover_protocol_no_engine(
-        self, mock_config, mock_grpc_context, mock_request
-    ):
+    async def test_discover_protocol_no_engine(self, mock_config, mock_grpc_context, mock_request):
         """Test protocol discovery without initialized engine."""
         service = AIEngineGRPCService(mock_config)
 
@@ -166,9 +160,7 @@ class TestAIEngineGRPCService:
         mock_grpc_context.set_details.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_discover_protocol_with_metadata(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_discover_protocol_with_metadata(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test protocol discovery with metadata."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -187,9 +179,7 @@ class TestAIEngineGRPCService:
         mock_ai_engine.discover_protocol.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_discover_protocol_failure(
-        self, mock_config, mock_ai_engine, mock_grpc_context, mock_request
-    ):
+    async def test_discover_protocol_failure(self, mock_config, mock_ai_engine, mock_grpc_context, mock_request):
         """Test protocol discovery failure."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -202,9 +192,7 @@ class TestAIEngineGRPCService:
         mock_grpc_context.set_code.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_detect_fields_success(
-        self, mock_config, mock_ai_engine, mock_grpc_context, mock_request
-    ):
+    async def test_detect_fields_success(self, mock_config, mock_ai_engine, mock_grpc_context, mock_request):
         """Test successful field detection."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -217,9 +205,7 @@ class TestAIEngineGRPCService:
         assert service.stats["successful_requests"] == 1
 
     @pytest.mark.asyncio
-    async def test_detect_fields_no_engine(
-        self, mock_config, mock_grpc_context, mock_request
-    ):
+    async def test_detect_fields_no_engine(self, mock_config, mock_grpc_context, mock_request):
         """Test field detection without initialized engine."""
         service = AIEngineGRPCService(mock_config)
 
@@ -229,9 +215,7 @@ class TestAIEngineGRPCService:
         mock_grpc_context.set_code.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_detect_fields_with_protocol_hint(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_detect_fields_with_protocol_hint(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test field detection with protocol hint."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -247,9 +231,7 @@ class TestAIEngineGRPCService:
         mock_ai_engine.detect_fields.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_detect_anomalies_success(
-        self, mock_config, mock_ai_engine, mock_grpc_context, mock_request
-    ):
+    async def test_detect_anomalies_success(self, mock_config, mock_ai_engine, mock_grpc_context, mock_request):
         """Test successful anomaly detection."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -261,9 +243,7 @@ class TestAIEngineGRPCService:
         assert service.stats["successful_requests"] == 1
 
     @pytest.mark.asyncio
-    async def test_detect_anomalies_with_baseline(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_detect_anomalies_with_baseline(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test anomaly detection with baseline data."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -283,9 +263,7 @@ class TestAIEngineGRPCService:
         mock_ai_engine.detect_anomaly.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_get_service_status(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_get_service_status(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test service status retrieval."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -303,9 +281,7 @@ class TestAIEngineGRPCService:
         assert response["statistics"]["successful_requests"] == 10
 
     @pytest.mark.asyncio
-    async def test_health_check_healthy(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_health_check_healthy(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test health check when service is healthy."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -339,9 +315,7 @@ class TestAIEngineGRPCService:
         assert response["status"] == "degraded"
 
     @pytest.mark.asyncio
-    async def test_batch_process_discovery(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_batch_process_discovery(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test batch processing for discovery operation."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -361,9 +335,7 @@ class TestAIEngineGRPCService:
         assert len(response["results"]) == 2
 
     @pytest.mark.asyncio
-    async def test_batch_process_detection(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_batch_process_detection(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test batch processing for detection operation."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -378,9 +350,7 @@ class TestAIEngineGRPCService:
         assert response["successful_items"] == 1
 
     @pytest.mark.asyncio
-    async def test_batch_process_anomaly(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_batch_process_anomaly(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test batch processing for anomaly operation."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -395,9 +365,7 @@ class TestAIEngineGRPCService:
         assert response["successful_items"] == 1
 
     @pytest.mark.asyncio
-    async def test_batch_process_unknown_operation(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_batch_process_unknown_operation(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test batch processing with unknown operation."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -642,9 +610,7 @@ class TestAIEngineGRPCServiceStreaming:
     """Tests for streaming endpoints."""
 
     @pytest.mark.asyncio
-    async def test_discover_protocol_stream(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_discover_protocol_stream(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test streaming protocol discovery."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -657,18 +623,14 @@ class TestAIEngineGRPCServiceStreaming:
                 yield request
 
         responses = []
-        async for response in service.DiscoverProtocolStream(
-            request_generator(), mock_grpc_context
-        ):
+        async for response in service.DiscoverProtocolStream(request_generator(), mock_grpc_context):
             responses.append(response)
 
         assert len(responses) == 3
         assert all(r["discovered_protocol"] == "http" for r in responses)
 
     @pytest.mark.asyncio
-    async def test_detect_fields_stream(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_detect_fields_stream(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test streaming field detection."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -681,17 +643,13 @@ class TestAIEngineGRPCServiceStreaming:
                 yield request
 
         responses = []
-        async for response in service.DetectFieldsStream(
-            request_generator(), mock_grpc_context
-        ):
+        async for response in service.DetectFieldsStream(request_generator(), mock_grpc_context):
             responses.append(response)
 
         assert len(responses) == 2
 
     @pytest.mark.asyncio
-    async def test_detect_anomalies_stream(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_detect_anomalies_stream(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test streaming anomaly detection."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -704,9 +662,7 @@ class TestAIEngineGRPCServiceStreaming:
                 yield request
 
         responses = []
-        async for response in service.DetectAnomaliesStream(
-            request_generator(), mock_grpc_context
-        ):
+        async for response in service.DetectAnomaliesStream(request_generator(), mock_grpc_context):
             responses.append(response)
 
         assert len(responses) == 2
@@ -760,9 +716,7 @@ class TestServiceStatusEdgeCases:
     """Test edge cases for service status."""
 
     @pytest.mark.asyncio
-    async def test_get_service_status_no_requests(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_get_service_status_no_requests(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test service status with no requests."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -815,9 +769,7 @@ class TestBatchProcessingEdgeCases:
         assert response == {}
 
     @pytest.mark.asyncio
-    async def test_batch_process_empty_items(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_batch_process_empty_items(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test batch processing with empty items."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -832,9 +784,7 @@ class TestBatchProcessingEdgeCases:
         assert response["successful_items"] == 0
 
     @pytest.mark.asyncio
-    async def test_batch_process_partial_failure(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_batch_process_partial_failure(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test batch processing with partial failures."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -923,9 +873,7 @@ class TestAnomalyDetectionWithBaseline:
     """Test anomaly detection with various baseline configurations."""
 
     @pytest.mark.asyncio
-    async def test_detect_anomalies_with_string_baseline(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_detect_anomalies_with_string_baseline(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test anomaly detection with string baseline."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine
@@ -940,9 +888,7 @@ class TestAnomalyDetectionWithBaseline:
         assert "is_anomalous" in response
 
     @pytest.mark.asyncio
-    async def test_detect_anomalies_with_empty_baseline(
-        self, mock_config, mock_ai_engine, mock_grpc_context
-    ):
+    async def test_detect_anomalies_with_empty_baseline(self, mock_config, mock_ai_engine, mock_grpc_context):
         """Test anomaly detection with empty baseline."""
         service = AIEngineGRPCService(mock_config)
         service.ai_engine = mock_ai_engine

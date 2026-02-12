@@ -1,6 +1,7 @@
 """
 Unit tests for Istio Mesh Policy management.
 """
+
 import pytest
 import sys
 from pathlib import Path
@@ -9,11 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 try:
-    from cloud_native.service_mesh.istio.mesh_policy import (
-        MeshPolicyManager,
-        PolicyType,
-        TrafficPolicy
-    )
+    from cloud_native.service_mesh.istio.mesh_policy import MeshPolicyManager, PolicyType, TrafficPolicy
 except ImportError:
     pytest.skip("mesh_policy module not found", allow_module_level=True)
 
@@ -34,11 +31,7 @@ class TestTrafficPolicy:
 
     def test_policy_creation(self):
         """Test creating traffic policy"""
-        policy = TrafficPolicy(
-            name="test-policy",
-            policy_type=PolicyType.RATE_LIMIT,
-            config={"requests_per_second": 100}
-        )
+        policy = TrafficPolicy(name="test-policy", policy_type=PolicyType.RATE_LIMIT, config={"requests_per_second": 100})
 
         assert policy.name == "test-policy"
         assert policy.policy_type == PolicyType.RATE_LIMIT
@@ -61,10 +54,7 @@ class TestMeshPolicyManager:
     def test_create_rate_limit_policy(self, policy_manager):
         """Test rate limit policy creation"""
         policy = policy_manager.create_rate_limit_policy(
-            name="api-rate-limit",
-            service="api-service",
-            requests_per_second=100,
-            burst=50
+            name="api-rate-limit", service="api-service", requests_per_second=100, burst=50
         )
 
         assert policy["kind"] == "EnvoyFilter"
@@ -78,7 +68,7 @@ class TestMeshPolicyManager:
             max_connections=100,
             max_pending_requests=50,
             max_requests=200,
-            consecutive_errors=5
+            consecutive_errors=5,
         )
 
         assert policy["kind"] == "DestinationRule"
@@ -96,7 +86,7 @@ class TestMeshPolicyManager:
             service="flaky-service",
             num_retries=3,
             retry_on="5xx,reset,connect-failure",
-            per_try_timeout="2s"
+            per_try_timeout="2s",
         )
 
         assert policy["kind"] == "VirtualService"
@@ -110,10 +100,7 @@ class TestMeshPolicyManager:
     def test_create_timeout_policy(self, policy_manager):
         """Test timeout policy creation"""
         policy = policy_manager.create_timeout_policy(
-            name="service-timeout",
-            service="slow-service",
-            request_timeout="10s",
-            idle_timeout="300s"
+            name="service-timeout", service="slow-service", request_timeout="10s", idle_timeout="300s"
         )
 
         assert policy["kind"] == "VirtualService"
@@ -122,11 +109,7 @@ class TestMeshPolicyManager:
 
     def test_add_policy(self, policy_manager):
         """Test adding policy to manager"""
-        policy = TrafficPolicy(
-            name="test-policy",
-            policy_type=PolicyType.RATE_LIMIT,
-            config={"requests_per_second": 100}
-        )
+        policy = TrafficPolicy(name="test-policy", policy_type=PolicyType.RATE_LIMIT, config={"requests_per_second": 100})
 
         policy_manager.add_policy(policy)
         retrieved = policy_manager.get_policy("test-policy")
@@ -135,11 +118,7 @@ class TestMeshPolicyManager:
 
     def test_remove_policy(self, policy_manager):
         """Test removing policy"""
-        policy = TrafficPolicy(
-            name="temp-policy",
-            policy_type=PolicyType.TIMEOUT,
-            config={"timeout": "5s"}
-        )
+        policy = TrafficPolicy(name="temp-policy", policy_type=PolicyType.TIMEOUT, config={"timeout": "5s"})
 
         policy_manager.add_policy(policy)
         assert policy_manager.get_policy("temp-policy") is not None
@@ -152,7 +131,7 @@ class TestMeshPolicyManager:
         policies = [
             TrafficPolicy("policy1", PolicyType.RATE_LIMIT, {}),
             TrafficPolicy("policy2", PolicyType.RETRY, {}),
-            TrafficPolicy("policy3", PolicyType.CIRCUIT_BREAKER, {})
+            TrafficPolicy("policy3", PolicyType.CIRCUIT_BREAKER, {}),
         ]
 
         for policy in policies:
@@ -164,12 +143,7 @@ class TestMeshPolicyManager:
     def test_fault_injection_policy(self, policy_manager):
         """Test fault injection policy"""
         policy = policy_manager.create_fault_injection_policy(
-            name="chaos-test",
-            service="test-service",
-            delay_percent=10,
-            delay_duration="5s",
-            abort_percent=5,
-            abort_status=503
+            name="chaos-test", service="test-service", delay_percent=10, delay_duration="5s", abort_percent=5, abort_status=503
         )
 
         assert policy["kind"] == "VirtualService"
@@ -184,10 +158,7 @@ class TestMeshPolicyManager:
     def test_traffic_mirroring_policy(self, policy_manager):
         """Test traffic mirroring policy"""
         policy = policy_manager.create_traffic_mirror_policy(
-            name="mirror-test",
-            service="production-service",
-            mirror_service="test-service",
-            mirror_percentage=10
+            name="mirror-test", service="production-service", mirror_service="test-service", mirror_percentage=10
         )
 
         assert policy["kind"] == "VirtualService"
@@ -200,11 +171,7 @@ class TestMeshPolicyManager:
     def test_canary_deployment_policy(self, policy_manager):
         """Test canary deployment policy"""
         policy = policy_manager.create_canary_policy(
-            name="canary-deploy",
-            service="my-service",
-            stable_version="v1",
-            canary_version="v2",
-            canary_weight=20
+            name="canary-deploy", service="my-service", stable_version="v1", canary_version="v2", canary_weight=20
         )
 
         assert policy["kind"] == "VirtualService"
@@ -221,11 +188,7 @@ class TestMeshPolicyManager:
     def test_header_based_routing(self, policy_manager):
         """Test header-based routing policy"""
         policy = policy_manager.create_header_routing_policy(
-            name="header-route",
-            service="api-service",
-            header_name="x-api-version",
-            header_value="v2",
-            target_version="v2"
+            name="header-route", service="api-service", header_name="x-api-version", header_value="v2", target_version="v2"
         )
 
         assert policy["kind"] == "VirtualService"

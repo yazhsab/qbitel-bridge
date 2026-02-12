@@ -107,8 +107,12 @@ class EmvCard:
         card.effective_date = tag_map.get("5F25")
         card.service_code = tag_map.get("5F30", "")
         card.aid = tag_map.get("9F06", "") or tag_map.get("84", "")
-        card.application_label = bytes.fromhex(tag_map.get("50", "")).decode("ascii", errors="ignore") if tag_map.get("50") else ""
-        card.application_preferred_name = bytes.fromhex(tag_map.get("9F12", "")).decode("ascii", errors="ignore") if tag_map.get("9F12") else ""
+        card.application_label = (
+            bytes.fromhex(tag_map.get("50", "")).decode("ascii", errors="ignore") if tag_map.get("50") else ""
+        )
+        card.application_preferred_name = (
+            bytes.fromhex(tag_map.get("9F12", "")).decode("ascii", errors="ignore") if tag_map.get("9F12") else ""
+        )
         card.application_version = tag_map.get("9F08", "")
         card.track2_equivalent = tag_map.get("57", "")
         card.aip = tag_map.get("82", "")
@@ -116,7 +120,9 @@ class EmvCard:
         card.cvm_list = tag_map.get("8E", "")
         card.atc = tag_map.get("9F36", "")
         card.issuer_application_data = tag_map.get("9F10", "")
-        card.cardholder_name = bytes.fromhex(tag_map.get("5F20", "")).decode("ascii", errors="ignore") if tag_map.get("5F20") else ""
+        card.cardholder_name = (
+            bytes.fromhex(tag_map.get("5F20", "")).decode("ascii", errors="ignore") if tag_map.get("5F20") else ""
+        )
 
         return card
 
@@ -434,7 +440,9 @@ class EmvTransaction:
         """Convert to dictionary."""
         return {
             "transaction_id": self.transaction_id,
-            "transaction_type": self.transaction_type_enum.description if self.transaction_type_enum else self.transaction_type,
+            "transaction_type": (
+                self.transaction_type_enum.description if self.transaction_type_enum else self.transaction_type
+            ),
             "amount": str(self.amount_decimal),
             "currency_code": self.currency_code,
             "transaction_date": self.transaction_date,

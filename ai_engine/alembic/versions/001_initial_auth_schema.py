@@ -81,9 +81,7 @@ def upgrade() -> None:
     op.create_index("idx_users_email", "users", ["email"])
     op.create_index("idx_users_role", "users", ["role"])
     op.create_index("idx_users_is_active", "users", ["is_active"])
-    op.create_index(
-        "idx_users_oauth_provider_id", "users", ["oauth_provider", "oauth_id"]
-    )
+    op.create_index("idx_users_oauth_provider_id", "users", ["oauth_provider", "oauth_id"])
     op.create_index("idx_users_created_at", "users", ["created_at"])
 
     # Create api_keys table
@@ -222,9 +220,7 @@ def upgrade() -> None:
     op.create_index("idx_audit_logs_action", "audit_logs", ["action"])
     op.create_index("idx_audit_logs_user_id", "audit_logs", ["user_id"])
     op.create_index("idx_audit_logs_timestamp", "audit_logs", ["timestamp"])
-    op.create_index(
-        "idx_audit_logs_resource", "audit_logs", ["resource_type", "resource_id"]
-    )
+    op.create_index("idx_audit_logs_resource", "audit_logs", ["resource_type", "resource_id"])
     op.create_index("idx_audit_logs_success", "audit_logs", ["success"])
 
     # Create oauth_providers table
@@ -303,15 +299,9 @@ def upgrade() -> None:
     )
 
     # Create indexes for password_reset_tokens table
-    op.create_index(
-        "idx_password_reset_tokens_token_hash", "password_reset_tokens", ["token_hash"]
-    )
-    op.create_index(
-        "idx_password_reset_tokens_user_id", "password_reset_tokens", ["user_id"]
-    )
-    op.create_index(
-        "idx_password_reset_tokens_expires_at", "password_reset_tokens", ["expires_at"]
-    )
+    op.create_index("idx_password_reset_tokens_token_hash", "password_reset_tokens", ["token_hash"])
+    op.create_index("idx_password_reset_tokens_user_id", "password_reset_tokens", ["user_id"])
+    op.create_index("idx_password_reset_tokens_expires_at", "password_reset_tokens", ["expires_at"])
 
 
 def downgrade() -> None:

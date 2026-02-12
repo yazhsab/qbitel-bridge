@@ -41,9 +41,7 @@ class EncryptionKeyManager:
     def __init__(self):
         """Initialize encryption key manager."""
         if EncryptionKeyManager._instance is not None:
-            raise RuntimeError(
-                "EncryptionKeyManager is a singleton. Use get_instance() instead."
-            )
+            raise RuntimeError("EncryptionKeyManager is a singleton. Use get_instance() instead.")
 
         self._load_encryption_key()
         EncryptionKeyManager._instance = self
@@ -136,9 +134,7 @@ class EncryptionKeyManager:
             EncryptionError: If key derivation fails
         """
         if len(master_key) < 32:
-            raise EncryptionError(
-                "Master encryption key must be at least 32 characters"
-            )
+            raise EncryptionError("Master encryption key must be at least 32 characters")
 
         # Use a static salt (in production, consider using a configurable salt)
         # The salt doesn't need to be secret, but should be consistent
@@ -202,12 +198,9 @@ class EncryptionKeyManager:
         try:
             return self._fernet.decrypt(ciphertext).decode("utf-8")
         except InvalidToken as e:
-            logger.error(
-                "Decryption failed: Invalid token (wrong key or corrupted data)"
-            )
+            logger.error("Decryption failed: Invalid token (wrong key or corrupted data)")
             raise EncryptionError(
-                "Decryption failed: Invalid token. "
-                "This may indicate the encryption key has changed."
+                "Decryption failed: Invalid token. " "This may indicate the encryption key has changed."
             ) from e
         except Exception as e:
             logger.error(f"Decryption failed: {e}")

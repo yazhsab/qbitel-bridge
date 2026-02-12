@@ -99,9 +99,7 @@ class CopilotMonitoringService:
     and health checking for all copilot components.
     """
 
-    def __init__(
-        self, config: Config, copilot: Optional[ProtocolIntelligenceCopilot] = None
-    ):
+    def __init__(self, config: Config, copilot: Optional[ProtocolIntelligenceCopilot] = None):
         """Initialize monitoring service."""
         self.config = config
         self.copilot = copilot
@@ -125,9 +123,7 @@ class CopilotMonitoringService:
         self.is_initialized = False
         self.monitoring_tasks: List[asyncio.Task] = []
         self.alert_history: deque = deque(maxlen=1000)
-        self.performance_history: deque = deque(
-            maxlen=288
-        )  # 24 hours at 5-min intervals
+        self.performance_history: deque = deque(maxlen=288)  # 24 hours at 5-min intervals
         self.active_alerts: Dict[str, Alert] = {}
 
         # Performance tracking
@@ -361,12 +357,8 @@ class CopilotMonitoringService:
             if self.copilot:
                 copilot_health = self.copilot.get_health_status()
                 health_status["copilot_service"] = "healthy"
-                health_status["llm_providers"] = copilot_health.get(
-                    "llm_service", {}
-                ).get("providers", {})
-                health_status["rag_engine"] = copilot_health.get(
-                    "rag_engine", "unknown"
-                )
+                health_status["llm_providers"] = copilot_health.get("llm_service", {}).get("providers", {})
+                health_status["rag_engine"] = copilot_health.get("rag_engine", "unknown")
 
             # Check system resources
             memory_percent = psutil.virtual_memory().percent
@@ -445,9 +437,7 @@ class CopilotMonitoringService:
             # Clean up expired sessions (older than 1 hour)
             cutoff_time = datetime.now() - timedelta(hours=1)
             expired_sessions = [
-                session_id
-                for session_id, timestamp in self.session_tracker.items()
-                if timestamp < cutoff_time
+                session_id for session_id, timestamp in self.session_tracker.items() if timestamp < cutoff_time
             ]
 
             for session_id in expired_sessions:
@@ -466,18 +456,14 @@ class CopilotMonitoringService:
             current_time = datetime.now()
 
             # Query rate calculation
-            recent_queries = [
-                t
-                for t in self.query_times
-                if current_time - datetime.fromtimestamp(t) < timedelta(minutes=1)
-            ]
+            recent_queries = [t for t in self.query_times if current_time - datetime.fromtimestamp(t) < timedelta(minutes=1)]
             queries_per_second = len(recent_queries) / 60.0
 
             # Average response time
             if self.query_times:
-                avg_response_time = sum(
-                    [time.time() - t for t in list(self.query_times)[-100:]]
-                ) / min(100, len(self.query_times))
+                avg_response_time = sum([time.time() - t for t in list(self.query_times)[-100:]]) / min(
+                    100, len(self.query_times)
+                )
             else:
                 avg_response_time = 0.0
 
@@ -489,9 +475,7 @@ class CopilotMonitoringService:
             # LLM provider health
             llm_health = {}
             if self.copilot and self.copilot.llm_service:
-                llm_health = self.copilot.llm_service.get_health_status().get(
-                    "providers", {}
-                )
+                llm_health = self.copilot.llm_service.get_health_status().get("providers", {})
 
             # Create performance snapshot
             snapshot = PerformanceMetrics(
@@ -546,9 +530,7 @@ class CopilotMonitoringService:
                 {"query_rate": snapshot.copilot_queries_per_second},
             )
 
-    async def _create_alert(
-        self, level: AlertLevel, title: str, description: str, metadata: Dict[str, Any]
-    ):
+    async def _create_alert(self, level: AlertLevel, title: str, description: str, metadata: Dict[str, Any]):
         """Create and store alert."""
         alert_key = f"{title}_{level.value}"
 
@@ -556,9 +538,7 @@ class CopilotMonitoringService:
             # Check cooldown period
             if alert_key in self.active_alerts:
                 last_alert = self.active_alerts[alert_key]
-                if (
-                    datetime.now() - last_alert.timestamp
-                ).total_seconds() < self.alert_cooldown_period:
+                if (datetime.now() - last_alert.timestamp).total_seconds() < self.alert_cooldown_period:
                     return  # Skip duplicate alert within cooldown period
 
             # Create new alert
@@ -635,18 +615,12 @@ class CopilotMonitoringService:
         try:
             with self.metrics_lock:
                 # Update counters and histograms
-                self.copilot_queries_total.labels(
-                    query_type=query_type, user_id=user_id, status=status
-                ).inc()
+                self.copilot_queries_total.labels(query_type=query_type, user_id=user_id, status=status).inc()
 
                 if llm_provider:
-                    self.copilot_query_duration.labels(
-                        query_type=query_type, llm_provider=llm_provider
-                    ).observe(duration)
+                    self.copilot_query_duration.labels(query_type=query_type, llm_provider=llm_provider).observe(duration)
 
-                self.copilot_confidence_score.labels(query_type=query_type).observe(
-                    confidence
-                )
+                self.copilot_confidence_score.labels(query_type=query_type).observe(confidence)
 
                 # Track timing for performance analysis
                 self.query_times.append(time.time())
@@ -673,17 +647,11 @@ class CopilotMonitoringService:
     ):
         """Record LLM provider request metrics."""
         try:
-            self.llm_requests_total.labels(
-                provider=provider, model=model, status=status
-            ).inc()
+            self.llm_requests_total.labels(provider=provider, model=model, status=status).inc()
 
-            self.llm_request_duration.labels(provider=provider, model=model).observe(
-                duration
-            )
+            self.llm_request_duration.labels(provider=provider, model=model).observe(duration)
 
-            self.llm_tokens_used.labels(
-                provider=provider, model=model, token_type=token_type
-            ).inc(tokens_used)
+            self.llm_tokens_used.labels(provider=provider, model=model, token_type=token_type).inc(tokens_used)
 
         except Exception as e:
             self.logger.error(f"Failed to record LLM request metrics: {e}")
@@ -701,9 +669,7 @@ class CopilotMonitoringService:
     def record_cache_operation(self, operation: str, cache_type: str, status: str):
         """Record cache operation metrics."""
         try:
-            self.cache_operations_total.labels(
-                operation=operation, cache_type=cache_type, status=status
-            ).inc()
+            self.cache_operations_total.labels(operation=operation, cache_type=cache_type, status=status).inc()
 
         except Exception as e:
             self.logger.error(f"Failed to record cache operation metrics: {e}")
@@ -730,12 +696,8 @@ class CopilotMonitoringService:
             # Calculate trends
             if len(self.performance_history) > 1:
                 previous = self.performance_history[-2]
-                response_time_trend = (
-                    latest.average_response_time - previous.average_response_time
-                )
-                error_rate_trend = (
-                    latest.error_rate_percent - previous.error_rate_percent
-                )
+                response_time_trend = latest.average_response_time - previous.average_response_time
+                error_rate_trend = latest.error_rate_percent - previous.error_rate_percent
             else:
                 response_time_trend = 0.0
                 error_rate_trend = 0.0
@@ -763,20 +725,14 @@ class CopilotMonitoringService:
             return {
                 "active_alerts": len(self.active_alerts),
                 "total_alerts_24h": len(
-                    [
-                        alert
-                        for alert in self.alert_history
-                        if (datetime.now() - alert.timestamp).total_seconds() < 86400
-                    ]
+                    [alert for alert in self.alert_history if (datetime.now() - alert.timestamp).total_seconds() < 86400]
                 ),
                 "alerts_by_level": {
                     level.value: len(
                         [
                             alert
                             for alert in self.alert_history
-                            if alert.level == level
-                            and (datetime.now() - alert.timestamp).total_seconds()
-                            < 86400
+                            if alert.level == level and (datetime.now() - alert.timestamp).total_seconds() < 86400
                         ]
                     )
                     for level in AlertLevel

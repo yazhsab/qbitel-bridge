@@ -181,9 +181,7 @@ class TestRetryManager:
     @pytest.mark.asyncio
     async def test_retry_non_retryable_exception(self):
         """Test non-retryable exception fails immediately."""
-        retry_manager = RetryManager(
-            max_retries=3, retryable_exceptions=(ConnectionError,)
-        )
+        retry_manager = RetryManager(max_retries=3, retryable_exceptions=(ConnectionError,))
 
         async def raises_value_error():
             raise ValueError("Non-retryable")
@@ -194,9 +192,7 @@ class TestRetryManager:
     @pytest.mark.asyncio
     async def test_retry_exponential_backoff(self):
         """Test exponential backoff delay calculation."""
-        retry_manager = RetryManager(
-            max_retries=3, base_delay=1.0, backoff_factor=2.0, jitter=False
-        )
+        retry_manager = RetryManager(max_retries=3, base_delay=1.0, backoff_factor=2.0, jitter=False)
 
         delay1 = retry_manager._get_delay(1)
         delay2 = retry_manager._get_delay(2)
@@ -208,9 +204,7 @@ class TestRetryManager:
 
     def test_retry_should_retry_logic(self):
         """Test retry decision logic."""
-        retry_manager = RetryManager(
-            retryable_exceptions=(ConnectionError, TimeoutError)
-        )
+        retry_manager = RetryManager(retryable_exceptions=(ConnectionError, TimeoutError))
 
         assert retry_manager._should_retry(ConnectionError())
         assert retry_manager._should_retry(TimeoutError())
@@ -237,9 +231,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_circuit_breaker_opens_after_threshold(self):
         """Test circuit breaker opens after failure threshold."""
-        config = CircuitBreakerConfig(
-            failure_threshold=3, expected_exception_types={ConnectionError}
-        )
+        config = CircuitBreakerConfig(failure_threshold=3, expected_exception_types={ConnectionError})
         cb = CircuitBreaker(config)
 
         async def failing_func():
@@ -387,9 +379,7 @@ class TestErrorHandler:
 
         exception = InferenceException("Inference failed")
 
-        success, result = await handler.handle_error(
-            exception, context, recovery_func=recovery_func
-        )
+        success, result = await handler.handle_error(exception, context, recovery_func=recovery_func)
 
         assert success is True
         assert result == "recovered"

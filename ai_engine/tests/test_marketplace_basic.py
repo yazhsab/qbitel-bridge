@@ -81,7 +81,7 @@ protocol_spec:
       type: string
 """
 
-        with patch.object(validator, '_download_spec_file', return_value=valid_yaml):
+        with patch.object(validator, "_download_spec_file", return_value=valid_yaml):
             result = await validator.validate_syntax(mock_protocol)
 
         assert result.status == "passed"
@@ -105,7 +105,7 @@ invalid: yaml: content:
     indent
 """
 
-        with patch.object(validator, '_download_spec_file', return_value=invalid_yaml):
+        with patch.object(validator, "_download_spec_file", return_value=invalid_yaml):
             result = await validator.validate_syntax(mock_protocol)
 
         assert result.status == "failed"
@@ -127,7 +127,7 @@ protocol_metadata:
   # Missing version and category
 """
 
-        with patch.object(validator, '_download_spec_file', return_value=incomplete_yaml):
+        with patch.object(validator, "_download_spec_file", return_value=incomplete_yaml):
             result = await validator.validate_syntax(mock_protocol)
 
         # Should have errors for missing fields
@@ -166,7 +166,7 @@ def parse_packet(data: bytes) -> dict:
     }
 """
 
-        with patch.object(validator, '_download_parser_code', return_value=safe_code):
+        with patch.object(validator, "_download_parser_code", return_value=safe_code):
             result = await validator.security_scan(mock_protocol)
 
         assert result.validation_type == "security_scan"
@@ -192,7 +192,7 @@ def parse_packet(data: bytes) -> dict:
     return result
 """
 
-        with patch.object(validator, '_download_parser_code', return_value=dangerous_code):
+        with patch.object(validator, "_download_parser_code", return_value=dangerous_code):
             result = await validator.security_scan(mock_protocol)
 
         assert result.validation_type == "security_scan"
@@ -293,9 +293,9 @@ class TestMarketplaceSchemas:
         from ai_engine.api import marketplace_schemas
 
         assert marketplace_schemas is not None
-        assert hasattr(marketplace_schemas, 'ProtocolSearchRequest')
-        assert hasattr(marketplace_schemas, 'ProtocolSubmitRequest')
-        assert hasattr(marketplace_schemas, 'ProtocolPurchaseRequest')
+        assert hasattr(marketplace_schemas, "ProtocolSearchRequest")
+        assert hasattr(marketplace_schemas, "ProtocolSubmitRequest")
+        assert hasattr(marketplace_schemas, "ProtocolPurchaseRequest")
 
     def test_protocol_category_enum(self):
         """Test ProtocolCategory enum."""
@@ -322,8 +322,8 @@ class TestMarketplaceIntegration:
         from ai_engine.marketplace import knowledge_base_integration
 
         assert knowledge_base_integration is not None
-        assert hasattr(knowledge_base_integration, 'MarketplaceKnowledgeBaseIntegration')
-        assert hasattr(knowledge_base_integration, 'MarketplaceProtocolDeployer')
+        assert hasattr(knowledge_base_integration, "MarketplaceKnowledgeBaseIntegration")
+        assert hasattr(knowledge_base_integration, "MarketplaceProtocolDeployer")
 
     @pytest.mark.asyncio
     async def test_parse_specification_yaml(self):

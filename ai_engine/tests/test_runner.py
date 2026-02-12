@@ -55,9 +55,7 @@ class TestRunnerClass:
 
         self.logger.info("TestRunner initialized")
 
-    def run_all_tests(
-        self, verbose: bool = True, generate_report: bool = True
-    ) -> Dict[str, Any]:
+    def run_all_tests(self, verbose: bool = True, generate_report: bool = True) -> Dict[str, Any]:
         """
         Run all test categories.
 
@@ -78,9 +76,7 @@ class TestRunnerClass:
             # Run each test category
             for category, test_files in self.test_categories.items():
                 self.logger.info(f"Running {category} tests...")
-                category_results = self._run_test_category(
-                    category, test_files, verbose
-                )
+                category_results = self._run_test_category(category, test_files, verbose)
                 results[category] = category_results
 
             # Generate summary
@@ -112,15 +108,11 @@ class TestRunnerClass:
 
     def run_integration_tests(self, verbose: bool = True) -> Dict[str, Any]:
         """Run integration tests only."""
-        return self._run_test_category(
-            "integration", self.test_categories["integration"], verbose
-        )
+        return self._run_test_category("integration", self.test_categories["integration"], verbose)
 
     def run_performance_tests(self, verbose: bool = True) -> Dict[str, Any]:
         """Run performance tests only."""
-        return self._run_test_category(
-            "performance", self.test_categories["performance"], verbose
-        )
+        return self._run_test_category("performance", self.test_categories["performance"], verbose)
 
     def run_smoke_tests(self) -> Dict[str, Any]:
         """Run quick smoke tests to verify basic functionality."""
@@ -173,15 +165,11 @@ class TestRunnerClass:
         }
 
         # Overall validation status
-        validation_results["overall_status"] = all(
-            result.get("status", False) for result in validation_results.values()
-        )
+        validation_results["overall_status"] = all(result.get("status", False) for result in validation_results.values())
 
         return validation_results
 
-    def _run_test_category(
-        self, category: str, test_files: List[str], verbose: bool
-    ) -> Dict[str, Any]:
+    def _run_test_category(self, category: str, test_files: List[str], verbose: bool) -> Dict[str, Any]:
         """Run tests for a specific category."""
         results = {
             "category": category,
@@ -224,15 +212,11 @@ class TestRunnerClass:
             cmd.extend(existing_files)
 
             # Add output format
-            cmd.extend(
-                ["--tb=short", f"--junit-xml={self.reports_dir}/{category}_results.xml"]
-            )
+            cmd.extend(["--tb=short", f"--junit-xml={self.reports_dir}/{category}_results.xml"])
 
             # Run tests
             self.logger.info(f"Running command: {' '.join(cmd)}")
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, cwd=self.test_root.parent
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.test_root.parent)
 
             results["duration"] = time.time() - results["start_time"]
             results["return_code"] = result.returncode
@@ -257,9 +241,7 @@ class TestRunnerClass:
             results["duration"] = time.time() - results["start_time"]
             return results
 
-    def _run_specific_tests(
-        self, test_patterns: List[str], verbose: bool = True
-    ) -> Dict[str, Any]:
+    def _run_specific_tests(self, test_patterns: List[str], verbose: bool = True) -> Dict[str, Any]:
         """Run specific tests by pattern."""
         results = {
             "patterns": test_patterns,
@@ -276,9 +258,7 @@ class TestRunnerClass:
             cmd.extend(test_patterns)
             cmd.extend(["--tb=short"])
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, cwd=self.test_root.parent
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.test_root.parent)
 
             results["duration"] = time.time() - results["start_time"]
             results["return_code"] = result.returncode
@@ -327,12 +307,7 @@ class TestRunnerClass:
                         except ValueError:
                             pass
 
-        results["total"] = (
-            results["passed"]
-            + results["failed"]
-            + results["errors"]
-            + results["skipped"]
-        )
+        results["total"] = results["passed"] + results["failed"] + results["errors"] + results["skipped"]
 
     def _generate_summary(self, results: Dict[str, Any]) -> Dict[str, Any]:
         """Generate test results summary."""
@@ -354,15 +329,10 @@ class TestRunnerClass:
             summary["total_errors"] += category_results.get("errors", 0)
             summary["total_skipped"] += category_results.get("skipped", 0)
             summary["total_duration"] += category_results.get("duration", 0.0)
-            summary["category_status"][category] = category_results.get(
-                "status", "unknown"
-            )
+            summary["category_status"][category] = category_results.get("status", "unknown")
 
         summary["total_tests"] = (
-            summary["total_passed"]
-            + summary["total_failed"]
-            + summary["total_errors"]
-            + summary["total_skipped"]
+            summary["total_passed"] + summary["total_failed"] + summary["total_errors"] + summary["total_skipped"]
         )
 
         if summary["total_tests"] > 0:
@@ -370,9 +340,7 @@ class TestRunnerClass:
 
         return summary
 
-    def _generate_html_report(
-        self, results: Dict[str, Any], summary: Dict[str, Any]
-    ) -> str:
+    def _generate_html_report(self, results: Dict[str, Any], summary: Dict[str, Any]) -> str:
         """Generate HTML test report."""
         report_path = self.reports_dir / "test_report.html"
 
@@ -579,11 +547,7 @@ class TestRunnerClass:
                 "status": True,  # GPU is optional
                 "cuda_available": cuda_available,
                 "gpu_count": gpu_count,
-                "gpu_names": (
-                    [torch.cuda.get_device_name(i) for i in range(gpu_count)]
-                    if cuda_available
-                    else []
-                ),
+                "gpu_names": ([torch.cuda.get_device_name(i) for i in range(gpu_count)] if cuda_available else []),
             }
         except ImportError:
             return {"status": False, "error": "PyTorch not available"}
@@ -638,14 +602,10 @@ def main():
         help="Test category to run",
     )
     parser.add_argument("--smoke", action="store_true", help="Run smoke tests only")
-    parser.add_argument(
-        "--benchmark", action="store_true", help="Run performance benchmarks"
-    )
+    parser.add_argument("--benchmark", action="store_true", help="Run performance benchmarks")
     parser.add_argument("--validate", action="store_true", help="Validate installation")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
-    parser.add_argument(
-        "--no-report", action="store_true", help="Skip HTML report generation"
-    )
+    parser.add_argument("--no-report", action="store_true", help="Skip HTML report generation")
 
     args = parser.parse_args()
 
@@ -677,9 +637,7 @@ def main():
             # Run specified test category
             if args.category == "all":
                 print("Running all tests...")
-                results = runner.run_all_tests(
-                    verbose=args.verbose, generate_report=not args.no_report
-                )
+                results = runner.run_all_tests(verbose=args.verbose, generate_report=not args.no_report)
             elif args.category == "unit":
                 results = runner.run_unit_tests(verbose=args.verbose)
             elif args.category == "api":

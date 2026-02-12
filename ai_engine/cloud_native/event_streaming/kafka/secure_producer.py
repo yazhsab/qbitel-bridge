@@ -31,7 +31,7 @@ class SecureKafkaProducer:
         topic: str,
         enable_quantum_encryption: bool = True,
         kafka_config: Optional[Dict[str, Any]] = None,
-        max_retries: int = 3
+        max_retries: int = 3,
     ):
         """
         Initialize secure Kafka producer.
@@ -70,15 +70,15 @@ class SecureKafkaProducer:
         try:
             # Base configuration
             config = {
-                'bootstrap_servers': self.bootstrap_servers.split(','),
-                'value_serializer': lambda v: v if isinstance(v, bytes) else v.encode('utf-8'),
-                'key_serializer': lambda k: k if k is None or isinstance(k, bytes) else k.encode('utf-8'),
-                'acks': 'all',  # Wait for all replicas to acknowledge
-                'retries': self.max_retries,
-                'max_in_flight_requests_per_connection': 5,
-                'compression_type': 'snappy',  # Compress messages
-                'linger_ms': 10,  # Batch messages for efficiency
-                'batch_size': 16384,
+                "bootstrap_servers": self.bootstrap_servers.split(","),
+                "value_serializer": lambda v: v if isinstance(v, bytes) else v.encode("utf-8"),
+                "key_serializer": lambda k: k if k is None or isinstance(k, bytes) else k.encode("utf-8"),
+                "acks": "all",  # Wait for all replicas to acknowledge
+                "retries": self.max_retries,
+                "max_in_flight_requests_per_connection": 5,
+                "compression_type": "snappy",  # Compress messages
+                "linger_ms": 10,  # Batch messages for efficiency
+                "batch_size": 16384,
             }
 
             # Merge with user-provided config
@@ -97,7 +97,7 @@ class SecureKafkaProducer:
         key: Optional[bytes] = None,
         headers: Optional[Dict[str, str]] = None,
         partition: Optional[int] = None,
-        timeout: int = 10
+        timeout: int = 10,
     ) -> Dict[str, Any]:
         """
         Send encrypted message to Kafka.
@@ -129,12 +129,14 @@ class SecureKafkaProducer:
             if headers is None:
                 headers = {}
 
-            headers.update({
-                "x-qbitel-encrypted": "true",
-                "x-qbitel-algorithm": "aes-256-gcm",
-                "x-qbitel-nonce": base64.b64encode(nonce).decode(),
-                "x-qbitel-tag": base64.b64encode(tag).decode()
-            })
+            headers.update(
+                {
+                    "x-qbitel-encrypted": "true",
+                    "x-qbitel-algorithm": "aes-256-gcm",
+                    "x-qbitel-nonce": base64.b64encode(nonce).decode(),
+                    "x-qbitel-tag": base64.b64encode(tag).decode(),
+                }
+            )
 
             value = encrypted_value
         else:
@@ -150,11 +152,7 @@ class SecureKafkaProducer:
             try:
                 # Send message asynchronously
                 future = self._producer.send(
-                    topic=self.topic,
-                    value=value,
-                    key=key,
-                    headers=kafka_headers,
-                    partition=partition
+                    topic=self.topic, value=value, key=key, headers=kafka_headers, partition=partition
                 )
 
                 # Wait for send to complete
@@ -174,10 +172,12 @@ class SecureKafkaProducer:
                     "original_size_bytes": original_size,
                     "sent_size_bytes": len(value),
                     "serialized_key_size": record_metadata.serialized_key_size,
-                    "serialized_value_size": record_metadata.serialized_value_size
+                    "serialized_value_size": record_metadata.serialized_value_size,
                 }
 
-                logger.debug(f"Successfully sent message to {self.topic} partition {record_metadata.partition} offset {record_metadata.offset}")
+                logger.debug(
+                    f"Successfully sent message to {self.topic} partition {record_metadata.partition} offset {record_metadata.offset}"
+                )
                 return result
 
             except KafkaTimeoutError as e:
@@ -185,7 +185,7 @@ class SecureKafkaProducer:
                 logger.warning(f"Kafka timeout on attempt {attempt + 1}/{self.max_retries}: {e}")
 
                 if attempt < self.max_retries - 1:
-                    wait_time = 2 ** attempt
+                    wait_time = 2**attempt
                     logger.info(f"Retrying in {wait_time} seconds...")
                     time.sleep(wait_time)
                 else:
@@ -197,7 +197,7 @@ class SecureKafkaProducer:
                 logger.error(f"Kafka error on attempt {attempt + 1}/{self.max_retries}: {e}")
 
                 if attempt < self.max_retries - 1:
-                    wait_time = 2 ** attempt
+                    wait_time = 2**attempt
                     time.sleep(wait_time)
                 else:
                     logger.error(f"Failed to send message after {self.max_retries} attempts")
@@ -254,7 +254,7 @@ class SecureKafkaProducer:
             while len(key_stream) < len(plaintext):
                 key_stream += hashlib.sha3_256(key_stream).digest()
 
-            ciphertext = bytes(p ^ k for p, k in zip(plaintext, key_stream[:len(plaintext)]))
+            ciphertext = bytes(p ^ k for p, k in zip(plaintext, key_stream[: len(plaintext)]))
 
             # Generate authentication tag
             tag = hashlib.sha3_256(ciphertext + nonce + self._encryption_key).digest()[:16]
@@ -296,7 +296,11 @@ class SecureKafkaProducer:
             "messages_sent": self._messages_sent,
             "bytes_sent": self._bytes_sent,
             "errors": self._errors,
-            "success_rate": (self._messages_sent / (self._messages_sent + self._errors)) if (self._messages_sent + self._errors) > 0 else 0.0
+            "success_rate": (
+                (self._messages_sent / (self._messages_sent + self._errors))
+                if (self._messages_sent + self._errors) > 0
+                else 0.0
+            ),
         }
 
     def create_connector_config(self) -> Dict[str, Any]:
@@ -314,6 +318,6 @@ class SecureKafkaProducer:
                 "transforms.qbitel_encryption.algorithm": "kyber-1024",
                 "security.protocol": "SSL",
                 "ssl.truststore.location": "/etc/qbitel/kafka/truststore.jks",
-                "ssl.keystore.location": "/etc/qbitel/kafka/keystore.jks"
-            }
+                "ssl.keystore.location": "/etc/qbitel/kafka/keystore.jks",
+            },
         }

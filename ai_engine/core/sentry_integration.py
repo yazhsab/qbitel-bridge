@@ -77,12 +77,8 @@ class SentryErrorTracker:
                 dsn=self.dsn,
                 environment=self.environment,
                 release=self.release,
-                traces_sample_rate=(
-                    self.traces_sample_rate if self.enable_tracing else 0.0
-                ),
-                profiles_sample_rate=(
-                    self.profiles_sample_rate if self.enable_tracing else 0.0
-                ),
+                traces_sample_rate=(self.traces_sample_rate if self.enable_tracing else 0.0),
+                profiles_sample_rate=(self.profiles_sample_rate if self.enable_tracing else 0.0),
                 integrations=[
                     FastApiIntegration(transaction_style="endpoint"),
                     AsyncioIntegration(),
@@ -111,9 +107,7 @@ class SentryErrorTracker:
             self.logger.error(f"Failed to initialize Sentry: {e}")
             return False
 
-    def _before_send(
-        self, event: Dict[str, Any], hint: Dict[str, Any]
-    ) -> Optional[Dict[str, Any]]:
+    def _before_send(self, event: Dict[str, Any], hint: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         Filter and modify events before sending to Sentry.
 
@@ -138,9 +132,7 @@ class SentryErrorTracker:
 
         return event
 
-    def _before_breadcrumb(
-        self, crumb: Dict[str, Any], hint: Dict[str, Any]
-    ) -> Optional[Dict[str, Any]]:
+    def _before_breadcrumb(self, crumb: Dict[str, Any], hint: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         Filter and modify breadcrumbs before adding to event.
 
@@ -152,9 +144,7 @@ class SentryErrorTracker:
             Modified breadcrumb or None to drop it
         """
         # Filter out noisy breadcrumbs
-        if crumb.get("category") == "query" and crumb.get("message", "").startswith(
-            "SELECT 1"
-        ):
+        if crumb.get("category") == "query" and crumb.get("message", "").startswith("SELECT 1"):
             return None
 
         return crumb
@@ -191,9 +181,7 @@ class SentryErrorTracker:
                         "recovery_attempted": error_record.recovery_attempted,
                         "recovery_successful": error_record.recovery_successful,
                         "recovery_strategy": (
-                            error_record.recovery_strategy.value
-                            if error_record.recovery_strategy
-                            else None
+                            error_record.recovery_strategy.value if error_record.recovery_strategy else None
                         ),
                         "retry_count": error_record.retry_count,
                     },
@@ -293,9 +281,7 @@ class SentryErrorTracker:
             return
 
         try:
-            sentry_sdk.add_breadcrumb(
-                message=message, category=category, level=level, data=data or {}
-            )
+            sentry_sdk.add_breadcrumb(message=message, category=category, level=level, data=data or {})
         except Exception as e:
             self.logger.error(f"Failed to add breadcrumb: {e}")
 

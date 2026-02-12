@@ -53,17 +53,17 @@ class FileHeader:
 
     record_type: str = "1"
     priority_code: str = "01"
-    immediate_destination: str = ""     # 10 chars, space + 9-digit routing
-    immediate_origin: str = ""          # 10 chars, space + 9-digit ID
+    immediate_destination: str = ""  # 10 chars, space + 9-digit routing
+    immediate_origin: str = ""  # 10 chars, space + 9-digit ID
     file_creation_date: Optional[date] = None
-    file_creation_time: str = ""        # HHMM
-    file_id_modifier: str = "A"         # A-Z, 0-9
+    file_creation_time: str = ""  # HHMM
+    file_id_modifier: str = "A"  # A-Z, 0-9
     record_size: str = "094"
     blocking_factor: str = "10"
     format_code: str = "1"
     immediate_destination_name: str = ""  # 23 chars
-    immediate_origin_name: str = ""       # 23 chars
-    reference_code: str = ""              # 8 chars
+    immediate_origin_name: str = ""  # 23 chars
+    reference_code: str = ""  # 8 chars
 
     def validate(self) -> List[str]:
         """Validate file header."""
@@ -107,16 +107,16 @@ class BatchHeader:
 
     record_type: str = "5"
     service_class_code: ServiceClassCode = ServiceClassCode.MIXED
-    company_name: str = ""              # 16 chars
+    company_name: str = ""  # 16 chars
     company_discretionary_data: str = ""  # 20 chars
-    company_identification: str = ""    # 10 chars (1+9 digit tax ID)
+    company_identification: str = ""  # 10 chars (1+9 digit tax ID)
     standard_entry_class: SECCode = SECCode.PPD
     company_entry_description: str = ""  # 10 chars
-    company_descriptive_date: str = ""   # 6 chars
+    company_descriptive_date: str = ""  # 6 chars
     effective_entry_date: Optional[date] = None
-    settlement_date: str = ""            # 3 chars julian date (set by ACH operator)
-    originator_status_code: str = "1"    # 1 = ACH operator
-    originating_dfi: str = ""            # 8 chars (first 8 of routing)
+    settlement_date: str = ""  # 3 chars julian date (set by ACH operator)
+    originator_status_code: str = "1"  # 1 = ACH operator
+    originating_dfi: str = ""  # 8 chars (first 8 of routing)
     batch_number: int = 1
 
     def validate(self) -> List[str]:
@@ -161,15 +161,15 @@ class EntryDetail:
 
     record_type: str = "6"
     transaction_code: TransactionCode = TransactionCode.CHECKING_CREDIT
-    receiving_dfi: str = ""              # 8 chars routing number
-    check_digit: str = ""                # 1 char
-    dfi_account_number: str = ""         # 17 chars
-    amount: Decimal = Decimal("0")       # 10 chars, right justified, no decimal
+    receiving_dfi: str = ""  # 8 chars routing number
+    check_digit: str = ""  # 1 char
+    dfi_account_number: str = ""  # 17 chars
+    amount: Decimal = Decimal("0")  # 10 chars, right justified, no decimal
     individual_identification: str = ""  # 15 chars
-    individual_name: str = ""            # 22 chars
-    discretionary_data: str = ""         # 2 chars
+    individual_name: str = ""  # 22 chars
+    discretionary_data: str = ""  # 2 chars
     addenda_record_indicator: str = "0"  # 0 or 1
-    trace_number: str = ""               # 15 chars
+    trace_number: str = ""  # 15 chars
 
     # Addenda records associated with this entry
     addenda: List["Addenda"] = field(default_factory=list)
@@ -246,8 +246,8 @@ class Addenda:
 
     record_type: str = "7"
     addenda_type_code: AddendaTypeCode = AddendaTypeCode.STANDARD
-    payment_related_info: str = ""       # 80 chars
-    addenda_sequence_number: int = 1     # 4 chars
+    payment_related_info: str = ""  # 80 chars
+    addenda_sequence_number: int = 1  # 4 chars
     entry_detail_sequence_number: str = ""  # 7 chars
 
     # For return addenda (type 99)
@@ -277,15 +277,15 @@ class BatchControl:
 
     record_type: str = "8"
     service_class_code: ServiceClassCode = ServiceClassCode.MIXED
-    entry_addenda_count: int = 0         # 6 chars
-    entry_hash: str = ""                 # 10 chars
-    total_debit_amount: Decimal = Decimal("0")    # 12 chars
-    total_credit_amount: Decimal = Decimal("0")   # 12 chars
-    company_identification: str = ""     # 10 chars
+    entry_addenda_count: int = 0  # 6 chars
+    entry_hash: str = ""  # 10 chars
+    total_debit_amount: Decimal = Decimal("0")  # 12 chars
+    total_credit_amount: Decimal = Decimal("0")  # 12 chars
+    company_identification: str = ""  # 10 chars
     message_authentication_code: str = ""  # 19 chars (optional)
-    reserved: str = ""                   # 6 chars
-    originating_dfi: str = ""            # 8 chars
-    batch_number: int = 1                # 7 chars
+    reserved: str = ""  # 6 chars
+    originating_dfi: str = ""  # 8 chars
+    batch_number: int = 1  # 7 chars
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -310,13 +310,13 @@ class FileControl:
     """
 
     record_type: str = "9"
-    batch_count: int = 0                 # 6 chars
-    block_count: int = 0                 # 6 chars
-    entry_addenda_count: int = 0         # 8 chars
-    entry_hash: str = ""                 # 10 chars
-    total_debit_amount: Decimal = Decimal("0")    # 12 chars
-    total_credit_amount: Decimal = Decimal("0")   # 12 chars
-    reserved: str = ""                   # 39 chars
+    batch_count: int = 0  # 6 chars
+    block_count: int = 0  # 6 chars
+    entry_addenda_count: int = 0  # 8 chars
+    entry_hash: str = ""  # 10 chars
+    total_debit_amount: Decimal = Decimal("0")  # 12 chars
+    total_credit_amount: Decimal = Decimal("0")  # 12 chars
+    reserved: str = ""  # 39 chars
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -418,10 +418,7 @@ class NACHAFile:
         # Cross-validate totals
         if self.file_control:
             if self.file_control.batch_count != self.batch_count:
-                errors.append(
-                    f"Batch count mismatch: control={self.file_control.batch_count}, "
-                    f"actual={self.batch_count}"
-                )
+                errors.append(f"Batch count mismatch: control={self.file_control.batch_count}, " f"actual={self.batch_count}")
 
             actual_entry_count = sum(b.total_entries_and_addenda for b in self.batches)
             if self.file_control.entry_addenda_count != actual_entry_count:
@@ -557,7 +554,7 @@ class NACHAParser:
 
         records = []
         for i in range(0, len(content), RECORD_LENGTH):
-            record = content[i:i + RECORD_LENGTH]
+            record = content[i : i + RECORD_LENGTH]
             if record.strip():  # Skip empty records
                 records.append(record)
 

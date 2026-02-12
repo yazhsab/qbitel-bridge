@@ -104,18 +104,12 @@ class TestProductionModeConfig:
     def test_validation(self):
         """Test ProductionModeConfig validation."""
         # Valid config
-        config = ProductionModeConfig(
-            environment=EnvironmentType.PRODUCTION, debug=False, log_level="INFO"
-        )
+        config = ProductionModeConfig(environment=EnvironmentType.PRODUCTION, debug=False, log_level="INFO")
         assert config.validate() is True
 
         # Invalid config - debug enabled in production
-        config = ProductionModeConfig(
-            environment=EnvironmentType.PRODUCTION, debug=True
-        )
-        with pytest.raises(
-            ProductionModeError, match="Debug mode cannot be enabled in production"
-        ):
+        config = ProductionModeConfig(environment=EnvironmentType.PRODUCTION, debug=True)
+        with pytest.raises(ProductionModeError, match="Debug mode cannot be enabled in production"):
             config.validate()
 
     def test_to_dict(self):
@@ -152,9 +146,7 @@ class TestProductionModeConfig:
 
     def test_merge(self):
         """Test merging ProductionModeConfig with another config."""
-        config1 = ProductionModeConfig(
-            environment=EnvironmentType.PRODUCTION, debug=False, log_level="INFO"
-        )
+        config1 = ProductionModeConfig(environment=EnvironmentType.PRODUCTION, debug=False, log_level="INFO")
 
         config2 = ProductionModeConfig(enable_metrics=True, enable_tracing=True)
 
@@ -282,13 +274,9 @@ class TestProductionModeDetector:
     def test_detect_from_heuristics(self, detector):
         """Test detecting production mode from heuristics."""
         # Mock system properties to indicate production
-        with patch(
-            "ai_engine.core.production_mode.platform.system", return_value="Linux"
-        ):
+        with patch("ai_engine.core.production_mode.platform.system", return_value="Linux"):
             with patch("ai_engine.core.production_mode.os.getenv", return_value=None):
-                with patch(
-                    "ai_engine.core.production_mode.sys.argv", ["/usr/bin/qbitel"]
-                ):
+                with patch("ai_engine.core.production_mode.sys.argv", ["/usr/bin/qbitel"]):
                     result = detector.detect_from_heuristics()
 
                     # Should detect as production based on heuristics
@@ -297,13 +285,9 @@ class TestProductionModeDetector:
     def test_detect_from_heuristics_development(self, detector):
         """Test detecting development mode from heuristics."""
         # Mock system properties to indicate development
-        with patch(
-            "ai_engine.core.production_mode.platform.system", return_value="Darwin"
-        ):
+        with patch("ai_engine.core.production_mode.platform.system", return_value="Darwin"):
             with patch("ai_engine.core.production_mode.os.getenv", return_value=None):
-                with patch(
-                    "ai_engine.core.production_mode.sys.argv", ["python", "main.py"]
-                ):
+                with patch("ai_engine.core.production_mode.sys.argv", ["python", "main.py"]):
                     result = detector.detect_from_heuristics()
 
                     # Should detect as development based on heuristics
@@ -320,9 +304,7 @@ class TestProductionModeDetector:
         """Test automatic detection with fallback."""
         with patch.dict(os.environ, {}, clear=True):
             with patch.object(detector, "detect_from_heuristics") as mock_heuristics:
-                mock_heuristics.return_value = ProductionModeConfig(
-                    environment=EnvironmentType.DEVELOPMENT
-                )
+                mock_heuristics.return_value = ProductionModeConfig(environment=EnvironmentType.DEVELOPMENT)
 
                 result = detector.detect_auto()
 
@@ -386,9 +368,7 @@ class TestProductionModeManager:
 
     def test_get_config_not_initialized(self, manager):
         """Test getting config when not initialized."""
-        with pytest.raises(
-            ProductionModeError, match="Production mode manager not initialized"
-        ):
+        with pytest.raises(ProductionModeError, match="Production mode manager not initialized"):
             manager.get_config()
 
     def test_is_production(self, manager):
@@ -450,16 +430,12 @@ class TestProductionModeManager:
 
     def test_get_environment_not_initialized(self, manager):
         """Test getting environment when not initialized."""
-        with pytest.raises(
-            ProductionModeError, match="Production mode manager not initialized"
-        ):
+        with pytest.raises(ProductionModeError, match="Production mode manager not initialized"):
             manager.get_environment()
 
     def test_validate_config(self, manager):
         """Test validating production mode config."""
-        config = ProductionModeConfig(
-            environment=EnvironmentType.PRODUCTION, debug=False
-        )
+        config = ProductionModeConfig(environment=EnvironmentType.PRODUCTION, debug=False)
         manager.initialize(config)
 
         # Should not raise exception
@@ -467,14 +443,10 @@ class TestProductionModeManager:
 
     def test_validate_config_invalid(self, manager):
         """Test validating invalid production mode config."""
-        config = ProductionModeConfig(
-            environment=EnvironmentType.PRODUCTION, debug=True
-        )
+        config = ProductionModeConfig(environment=EnvironmentType.PRODUCTION, debug=True)
         manager.initialize(config)
 
-        with pytest.raises(
-            ProductionModeError, match="Invalid production mode configuration"
-        ):
+        with pytest.raises(ProductionModeError, match="Invalid production mode configuration"):
             manager.validate_config()
 
     def test_get_health_status(self, manager):
@@ -536,35 +508,23 @@ class TestProductionModeValidator:
 
     def test_validate_config_debug_in_production(self, validator):
         """Test validating config with debug enabled in production."""
-        config = ProductionModeConfig(
-            environment=EnvironmentType.PRODUCTION, debug=True
-        )
+        config = ProductionModeConfig(environment=EnvironmentType.PRODUCTION, debug=True)
 
-        with pytest.raises(
-            ProductionModeError, match="Debug mode cannot be enabled in production"
-        ):
+        with pytest.raises(ProductionModeError, match="Debug mode cannot be enabled in production"):
             validator.validate_config(config)
 
     def test_validate_config_debug_log_level_in_production(self, validator):
         """Test validating config with debug log level in production."""
-        config = ProductionModeConfig(
-            environment=EnvironmentType.PRODUCTION, debug=False, log_level="DEBUG"
-        )
+        config = ProductionModeConfig(environment=EnvironmentType.PRODUCTION, debug=False, log_level="DEBUG")
 
-        with pytest.raises(
-            ProductionModeError, match="Debug log level cannot be used in production"
-        ):
+        with pytest.raises(ProductionModeError, match="Debug log level cannot be used in production"):
             validator.validate_config(config)
 
     def test_validate_config_metrics_disabled_in_production(self, validator):
         """Test validating config with metrics disabled in production."""
-        config = ProductionModeConfig(
-            environment=EnvironmentType.PRODUCTION, debug=False, enable_metrics=False
-        )
+        config = ProductionModeConfig(environment=EnvironmentType.PRODUCTION, debug=False, enable_metrics=False)
 
-        with pytest.raises(
-            ProductionModeError, match="Metrics must be enabled in production"
-        ):
+        with pytest.raises(ProductionModeError, match="Metrics must be enabled in production"):
             validator.validate_config(config)
 
     def test_validate_config_tracing_disabled_in_production(self, validator):
@@ -576,9 +536,7 @@ class TestProductionModeValidator:
             enable_tracing=False,
         )
 
-        with pytest.raises(
-            ProductionModeError, match="Tracing must be enabled in production"
-        ):
+        with pytest.raises(ProductionModeError, match="Tracing must be enabled in production"):
             validator.validate_config(config)
 
     def test_validate_config_low_security_in_production(self, validator):
@@ -591,9 +549,7 @@ class TestProductionModeValidator:
             security_level="low",
         )
 
-        with pytest.raises(
-            ProductionModeError, match="Security level must be high in production"
-        ):
+        with pytest.raises(ProductionModeError, match="Security level must be high in production"):
             validator.validate_config(config)
 
     def test_validate_config_development_mode_in_production(self, validator):
@@ -848,9 +804,7 @@ class TestProductionModeHealthCheck:
 
         result = health_check.get_overall_health()
 
-        assert (
-            result["status"] == "unhealthy"
-        )  # Any unhealthy check makes overall unhealthy
+        assert result["status"] == "unhealthy"  # Any unhealthy check makes overall unhealthy
         assert result["total_checks"] == 2
         assert result["healthy_checks"] == 1
         assert result["unhealthy_checks"] == 1
@@ -1094,9 +1048,7 @@ class TestProductionModeSecurity:
         """Test validating security configuration with low level."""
         security.set_security_level("low")
 
-        with pytest.raises(
-            ProductionModeError, match="Security level too low for production"
-        ):
+        with pytest.raises(ProductionModeError, match="Security level too low for production"):
             security.validate_security_config()
 
     def test_get_security_status(self, security):
@@ -1217,18 +1169,14 @@ class TestProductionModeCompliance:
 
     def test_add_requirement(self, compliance):
         """Test adding compliance requirement."""
-        compliance.add_requirement(
-            "SOC2", "encryption", "Data must be encrypted at rest"
-        )
+        compliance.add_requirement("SOC2", "encryption", "Data must be encrypted at rest")
 
         assert "SOC2" in compliance._requirements
         assert "encryption" in compliance._requirements["SOC2"]
 
     def test_remove_requirement(self, compliance):
         """Test removing compliance requirement."""
-        compliance.add_requirement(
-            "SOC2", "encryption", "Data must be encrypted at rest"
-        )
+        compliance.add_requirement("SOC2", "encryption", "Data must be encrypted at rest")
         compliance.remove_requirement("SOC2", "encryption")
 
         assert "encryption" not in compliance._requirements["SOC2"]
@@ -1236,9 +1184,7 @@ class TestProductionModeCompliance:
     def test_validate_compliance(self, compliance):
         """Test validating compliance."""
         compliance.add_standard("SOC2")
-        compliance.add_requirement(
-            "SOC2", "encryption", "Data must be encrypted at rest"
-        )
+        compliance.add_requirement("SOC2", "encryption", "Data must be encrypted at rest")
 
         # Should not raise exception
         compliance.validate_compliance("SOC2")
@@ -1251,16 +1197,12 @@ class TestProductionModeCompliance:
     def test_get_compliance_status(self, compliance):
         """Test getting compliance status."""
         compliance.add_standard("SOC2")
-        compliance.add_requirement(
-            "SOC2", "encryption", "Data must be encrypted at rest"
-        )
+        compliance.add_requirement("SOC2", "encryption", "Data must be encrypted at rest")
 
         status = compliance.get_compliance_status("SOC2")
 
         assert status["standard"] == "SOC2"
-        assert status["requirements"] == {
-            "encryption": "Data must be encrypted at rest"
-        }
+        assert status["requirements"] == {"encryption": "Data must be encrypted at rest"}
         assert status["compliant"] is True
 
     def test_get_all_standards(self, compliance):
@@ -1353,9 +1295,7 @@ class TestProductionModeIntegration:
         manager.initialize(config)
 
         # Should raise validation error
-        with pytest.raises(
-            ProductionModeError, match="Invalid production mode configuration"
-        ):
+        with pytest.raises(ProductionModeError, match="Invalid production mode configuration"):
             manager.validate_config()
 
     @pytest.mark.asyncio
@@ -1402,9 +1342,7 @@ class TestProductionModeIntegration:
         def config_validation_check():
             return {"status": "healthy", "message": "Configuration is valid"}
 
-        manager.health_check.register_check(
-            "config_validation", config_validation_check
-        )
+        manager.health_check.register_check("config_validation", config_validation_check)
 
         # Check health
         health = manager.health_check.check_health("config_validation")

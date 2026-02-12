@@ -29,9 +29,7 @@ class SIEMConnector(BaseIntegrationConnector, ABC):
         pass
 
     @abstractmethod
-    async def update_case(
-        self, case_id: str, update_data: Dict[str, Any]
-    ) -> IntegrationResult:
+    async def update_case(self, case_id: str, update_data: Dict[str, Any]) -> IntegrationResult:
         """Update an existing case in the SIEM system."""
         pass
 
@@ -130,9 +128,7 @@ class SplunkConnector(SIEMConnector):
             )
             return False
 
-    async def send_security_event(
-        self, security_event: SecurityEvent
-    ) -> IntegrationResult:
+    async def send_security_event(self, security_event: SecurityEvent) -> IntegrationResult:
         """Send security event to Splunk."""
 
         try:
@@ -156,9 +152,7 @@ class SplunkConnector(SIEMConnector):
                 error_code="SPLUNK_SEND_ERROR",
             )
 
-    async def send_threat_analysis(
-        self, threat_analysis: ThreatAnalysis
-    ) -> IntegrationResult:
+    async def send_threat_analysis(self, threat_analysis: ThreatAnalysis) -> IntegrationResult:
         """Send threat analysis to Splunk."""
 
         try:
@@ -177,9 +171,7 @@ class SplunkConnector(SIEMConnector):
                 error_code="SPLUNK_THREAT_SEND_ERROR",
             )
 
-    async def send_response_execution(
-        self, automated_response: AutomatedResponse
-    ) -> IntegrationResult:
+    async def send_response_execution(self, automated_response: AutomatedResponse) -> IntegrationResult:
         """Send automated response execution to Splunk."""
 
         try:
@@ -264,9 +256,7 @@ class SplunkConnector(SIEMConnector):
             },
         }
 
-    def _convert_threat_analysis_to_splunk(
-        self, threat_analysis: ThreatAnalysis
-    ) -> Dict[str, Any]:
+    def _convert_threat_analysis_to_splunk(self, threat_analysis: ThreatAnalysis) -> Dict[str, Any]:
         """Convert ThreatAnalysis to Splunk event format."""
 
         return {
@@ -299,25 +289,18 @@ class SplunkConnector(SIEMConnector):
                     }
                     for pred in threat_analysis.ml_predictions
                 ],
-                "recommended_actions": [
-                    action.value for action in threat_analysis.recommended_actions
-                ],
+                "recommended_actions": [action.value for action in threat_analysis.recommended_actions],
                 "business_impact": {
                     "criticality": threat_analysis.business_impact.criticality.value,
                     "affected_services": threat_analysis.business_impact.affected_services,
                     "estimated_cost": threat_analysis.business_impact.estimated_cost,
-                    "compliance_impact": [
-                        ci.value
-                        for ci in threat_analysis.business_impact.compliance_impact
-                    ],
+                    "compliance_impact": [ci.value for ci in threat_analysis.business_impact.compliance_impact],
                 },
                 "context": threat_analysis.context,
             },
         }
 
-    def _convert_response_to_splunk(
-        self, automated_response: AutomatedResponse
-    ) -> Dict[str, Any]:
+    def _convert_response_to_splunk(self, automated_response: AutomatedResponse) -> Dict[str, Any]:
         """Convert AutomatedResponse to Splunk event format."""
 
         return {
@@ -338,16 +321,8 @@ class SplunkConnector(SIEMConnector):
                         "target_system": action.target_system,
                         "parameters": action.parameters,
                         "status": action.status.value,
-                        "executed_at": (
-                            action.executed_at.isoformat()
-                            if action.executed_at
-                            else None
-                        ),
-                        "completed_at": (
-                            action.completed_at.isoformat()
-                            if action.completed_at
-                            else None
-                        ),
+                        "executed_at": (action.executed_at.isoformat() if action.executed_at else None),
+                        "completed_at": (action.completed_at.isoformat() if action.completed_at else None),
                         "result": action.result,
                     }
                     for action in automated_response.actions
@@ -379,9 +354,7 @@ class SplunkConnector(SIEMConnector):
         alert_data = {
             "title": f"QBITEL Security Alert: {security_event.event_type.value}",
             "description": security_event.description,
-            "severity": self._map_threat_level_to_splunk_severity(
-                security_event.threat_level.value
-            ),
+            "severity": self._map_threat_level_to_splunk_severity(security_event.threat_level.value),
             "source_ip": security_event.source_ip,
             "dest_ip": security_event.destination_ip,
             "event_id": security_event.event_id,
@@ -401,9 +374,7 @@ class SplunkConnector(SIEMConnector):
                 error_code="SPLUNK_ALERT_ERROR",
             )
 
-    async def update_case(
-        self, case_id: str, update_data: Dict[str, Any]
-    ) -> IntegrationResult:
+    async def update_case(self, case_id: str, update_data: Dict[str, Any]) -> IntegrationResult:
         """Update an existing case in Splunk."""
 
         try:
@@ -490,16 +461,9 @@ class SplunkConnector(SIEMConnector):
                     if response.status == 200:
                         status_data = await response.json()
 
-                        if (
-                            status_data.get("entry", [{}])[0]
-                            .get("content", {})
-                            .get("dispatchState")
-                            == "DONE"
-                        ):
+                        if status_data.get("entry", [{}])[0].get("content", {}).get("dispatchState") == "DONE":
                             # Get results
-                            async with session.get(
-                                f"{results_url}?output_mode=json", headers=headers
-                            ) as results_response:
+                            async with session.get(f"{results_url}?output_mode=json", headers=headers) as results_response:
                                 if results_response.status == 200:
                                     return await results_response.json()
                                 else:
@@ -531,9 +495,7 @@ class SplunkConnector(SIEMConnector):
             headers = {"Authorization": f"Splunk {self.session_key}"}
 
             async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    info_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)
-                ) as response:
+                async with session.get(info_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as response:
 
                     if response.status == 200:
                         self.connection_status = "healthy"
@@ -607,9 +569,7 @@ class QRadarConnector(SIEMConnector):
             )
             return False
 
-    async def send_security_event(
-        self, security_event: SecurityEvent
-    ) -> IntegrationResult:
+    async def send_security_event(self, security_event: SecurityEvent) -> IntegrationResult:
         """Send security event to QRadar."""
 
         try:
@@ -628,9 +588,7 @@ class QRadarConnector(SIEMConnector):
                 error_code="QRADAR_SEND_ERROR",
             )
 
-    async def send_threat_analysis(
-        self, threat_analysis: ThreatAnalysis
-    ) -> IntegrationResult:
+    async def send_threat_analysis(self, threat_analysis: ThreatAnalysis) -> IntegrationResult:
         """Send threat analysis to QRadar."""
 
         try:
@@ -649,9 +607,7 @@ class QRadarConnector(SIEMConnector):
                 error_code="QRADAR_THREAT_SEND_ERROR",
             )
 
-    async def send_response_execution(
-        self, automated_response: AutomatedResponse
-    ) -> IntegrationResult:
+    async def send_response_execution(self, automated_response: AutomatedResponse) -> IntegrationResult:
         """Send automated response execution to QRadar."""
 
         try:
@@ -718,9 +674,7 @@ class QRadarConnector(SIEMConnector):
             "logsourceid": self.config.custom_config.get("log_source_id", 1),
             "starttime": int(security_event.timestamp.timestamp() * 1000),
             "eventcount": 1,
-            "magnitude": self._map_threat_level_to_magnitude(
-                security_event.threat_level.value
-            ),
+            "magnitude": self._map_threat_level_to_magnitude(security_event.threat_level.value),
             "sourceip": security_event.source_ip,
             "destinationip": security_event.destination_ip,
             "sourceport": security_event.port,
@@ -731,23 +685,13 @@ class QRadarConnector(SIEMConnector):
                 "event_id": security_event.event_id,
                 "source_system": security_event.source_system,
                 "target_system": security_event.target_system,
-                "raw_data": (
-                    json.dumps(security_event.raw_data)
-                    if security_event.raw_data
-                    else None
-                ),
-                "context": (
-                    json.dumps(security_event.context)
-                    if security_event.context
-                    else None
-                ),
+                "raw_data": (json.dumps(security_event.raw_data) if security_event.raw_data else None),
+                "context": (json.dumps(security_event.context) if security_event.context else None),
                 "tags": ",".join(security_event.tags) if security_event.tags else None,
             },
         }
 
-    def _convert_threat_analysis_to_qradar(
-        self, threat_analysis: ThreatAnalysis
-    ) -> Dict[str, Any]:
+    def _convert_threat_analysis_to_qradar(self, threat_analysis: ThreatAnalysis) -> Dict[str, Any]:
         """Convert ThreatAnalysis to QRadar event format."""
 
         return {
@@ -755,30 +699,22 @@ class QRadarConnector(SIEMConnector):
             "logsourceid": self.config.custom_config.get("log_source_id", 1),
             "starttime": int(threat_analysis.analysis_timestamp.timestamp() * 1000),
             "eventcount": 1,
-            "magnitude": self._map_threat_level_to_magnitude(
-                threat_analysis.threat_level.value
-            ),
+            "magnitude": self._map_threat_level_to_magnitude(threat_analysis.threat_level.value),
             "payload": f"Threat Analysis - {threat_analysis.threat_category.value}",
             "custom_properties": {
                 "threat_id": threat_analysis.threat_id,
                 "event_id": threat_analysis.event_id,
                 "confidence_score": threat_analysis.confidence_score,
                 "threat_category": threat_analysis.threat_category.value,
-                "attack_vectors": ",".join(
-                    [av.value for av in threat_analysis.attack_vectors]
-                ),
+                "attack_vectors": ",".join([av.value for av in threat_analysis.attack_vectors]),
                 "affected_systems": ",".join(threat_analysis.affected_systems),
-                "recommended_actions": ",".join(
-                    [action.value for action in threat_analysis.recommended_actions]
-                ),
+                "recommended_actions": ",".join([action.value for action in threat_analysis.recommended_actions]),
                 "business_impact_criticality": threat_analysis.business_impact.criticality.value,
                 "estimated_cost": threat_analysis.business_impact.estimated_cost,
             },
         }
 
-    def _convert_response_to_qradar(
-        self, automated_response: AutomatedResponse
-    ) -> Dict[str, Any]:
+    def _convert_response_to_qradar(self, automated_response: AutomatedResponse) -> Dict[str, Any]:
         """Convert AutomatedResponse to QRadar event format."""
 
         return {
@@ -795,14 +731,7 @@ class QRadarConnector(SIEMConnector):
                 "status": automated_response.status.value,
                 "confidence_score": automated_response.confidence_score,
                 "actions_count": len(automated_response.actions),
-                "action_types": ",".join(
-                    set(
-                        [
-                            action.action_type.value
-                            for action in automated_response.actions
-                        ]
-                    )
-                ),
+                "action_types": ",".join(set([action.action_type.value for action in automated_response.actions])),
             },
         }
 
@@ -860,9 +789,7 @@ class QRadarConnector(SIEMConnector):
                 error_code="QRADAR_OFFENSE_ERROR",
             )
 
-    async def update_case(
-        self, case_id: str, update_data: Dict[str, Any]
-    ) -> IntegrationResult:
+    async def update_case(self, case_id: str, update_data: Dict[str, Any]) -> IntegrationResult:
         """Update an existing offense in QRadar."""
 
         try:
@@ -974,9 +901,7 @@ class QRadarConnector(SIEMConnector):
                         if search_info.get("status") == "COMPLETED":
                             # Get results
                             results_url = f"{self.config.endpoint}/api/ariel/searches/{search_id}/results"
-                            async with session.get(
-                                results_url, headers=headers
-                            ) as results_response:
+                            async with session.get(results_url, headers=headers) as results_response:
                                 if results_response.status == 200:
                                     return await results_response.json()
                                 else:
@@ -999,9 +924,7 @@ class QRadarConnector(SIEMConnector):
             }
 
             async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    system_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)
-                ) as response:
+                async with session.get(system_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as response:
 
                     if response.status == 200:
                         self.connection_status = "healthy"

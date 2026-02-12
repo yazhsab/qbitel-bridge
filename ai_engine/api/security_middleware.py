@@ -39,17 +39,19 @@ class SecurityConfig:
 
     # Content Security Policy
     csp_enabled: bool = True
-    csp_directives: Dict[str, str] = field(default_factory=lambda: {
-        "default-src": "'self'",
-        "script-src": "'self' 'unsafe-inline'",
-        "style-src": "'self' 'unsafe-inline'",
-        "img-src": "'self' data: https:",
-        "font-src": "'self'",
-        "connect-src": "'self'",
-        "frame-ancestors": "'none'",
-        "base-uri": "'self'",
-        "form-action": "'self'",
-    })
+    csp_directives: Dict[str, str] = field(
+        default_factory=lambda: {
+            "default-src": "'self'",
+            "script-src": "'self' 'unsafe-inline'",
+            "style-src": "'self' 'unsafe-inline'",
+            "img-src": "'self' data: https:",
+            "font-src": "'self'",
+            "connect-src": "'self'",
+            "frame-ancestors": "'none'",
+            "base-uri": "'self'",
+            "form-action": "'self'",
+        }
+    )
 
     # Frame options
     frame_options: str = "DENY"  # DENY, SAMEORIGIN
@@ -64,32 +66,38 @@ class SecurityConfig:
     referrer_policy: str = "strict-origin-when-cross-origin"
 
     # Permissions policy
-    permissions_policy: Dict[str, str] = field(default_factory=lambda: {
-        "geolocation": "()",
-        "microphone": "()",
-        "camera": "()",
-        "payment": "()",
-        "usb": "()",
-    })
+    permissions_policy: Dict[str, str] = field(
+        default_factory=lambda: {
+            "geolocation": "()",
+            "microphone": "()",
+            "camera": "()",
+            "payment": "()",
+            "usb": "()",
+        }
+    )
 
     # CORS
     cors_enabled: bool = True
-    cors_origins: List[str] = field(default_factory=lambda: os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000").split(","))
+    cors_origins: List[str] = field(
+        default_factory=lambda: os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000").split(",")
+    )
     cors_allow_credentials: bool = True
     cors_allow_methods: List[str] = field(default_factory=lambda: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
     cors_allow_headers: List[str] = field(default_factory=lambda: ["*"])
-    cors_expose_headers: List[str] = field(default_factory=lambda: [
-        "X-Request-ID", "X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"
-    ])
+    cors_expose_headers: List[str] = field(
+        default_factory=lambda: ["X-Request-ID", "X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"]
+    )
     cors_max_age: int = 600
 
     # Request validation
     max_content_length: int = 10 * 1024 * 1024  # 10MB
-    allowed_content_types: Set[str] = field(default_factory=lambda: {
-        "application/json",
-        "application/x-www-form-urlencoded",
-        "multipart/form-data",
-    })
+    allowed_content_types: Set[str] = field(
+        default_factory=lambda: {
+            "application/json",
+            "application/x-www-form-urlencoded",
+            "multipart/form-data",
+        }
+    )
 
     # Rate limiting headers
     rate_limit_headers: bool = True
@@ -100,11 +108,13 @@ class SecurityConfig:
 
     # Audit logging
     audit_logging: bool = True
-    audit_sensitive_paths: Set[str] = field(default_factory=lambda: {
-        "/api/v1/auth",
-        "/api/v1/admin",
-        "/api/v1/security",
-    })
+    audit_sensitive_paths: Set[str] = field(
+        default_factory=lambda: {
+            "/api/v1/auth",
+            "/api/v1/admin",
+            "/api/v1/security",
+        }
+    )
 
     # Trusted proxies
     trusted_proxies: List[str] = field(default_factory=lambda: ["127.0.0.1", "10.0.0.0/8"])
@@ -174,10 +184,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
         # CSP
         if self.config.csp_enabled:
-            csp_value = "; ".join(
-                f"{directive} {value}"
-                for directive, value in self.config.csp_directives.items()
-            )
+            csp_value = "; ".join(f"{directive} {value}" for directive, value in self.config.csp_directives.items())
             response.headers["Content-Security-Policy"] = csp_value
 
         # X-Frame-Options
@@ -195,10 +202,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
         # Permissions-Policy
         if self.config.permissions_policy:
-            policy_value = ", ".join(
-                f"{feature}={value}"
-                for feature, value in self.config.permissions_policy.items()
-            )
+            policy_value = ", ".join(f"{feature}={value}" for feature, value in self.config.permissions_policy.items())
             response.headers["Permissions-Policy"] = policy_value
 
         # Cache control for sensitive responses
@@ -389,6 +393,7 @@ def require_secure_context(
         require_auth: Require authentication
         allowed_ips: IP whitelist
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def wrapper(request: Request, *args, **kwargs):
@@ -403,9 +408,9 @@ def require_secure_context(
 
             # Check IP whitelist
             if allowed_ips:
-                client_ip = request.headers.get(
-                    "X-Forwarded-For", request.client.host if request.client else ""
-                ).split(",")[0].strip()
+                client_ip = (
+                    request.headers.get("X-Forwarded-For", request.client.host if request.client else "").split(",")[0].strip()
+                )
 
                 if client_ip not in allowed_ips:
                     return JSONResponse(
@@ -416,6 +421,7 @@ def require_secure_context(
             return await func(request, *args, **kwargs)
 
         return wrapper
+
     return decorator
 
 

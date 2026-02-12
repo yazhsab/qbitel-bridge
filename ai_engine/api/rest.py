@@ -206,14 +206,10 @@ All endpoints (except `/health` and `/docs`) require authentication via:
     logger.info("✅ Graceful shutdown manager initialized")
 
     # Add input validation middleware
-    max_payload_size = int(
-        os.getenv("MAX_PAYLOAD_SIZE", str(10 * 1024 * 1024))
-    )  # 10MB default
+    max_payload_size = int(os.getenv("MAX_PAYLOAD_SIZE", str(10 * 1024 * 1024)))  # 10MB default
     app.add_middleware(PayloadSizeLimitMiddleware, max_size=max_payload_size)
     app.add_middleware(ContentTypeValidationMiddleware)
-    logger.info(
-        f"✅ Input validation middleware initialized (max payload: {max_payload_size} bytes)"
-    )
+    logger.info(f"✅ Input validation middleware initialized (max payload: {max_payload_size} bytes)")
 
     # Register exception handlers for standardized error responses
     register_exception_handlers(app)
@@ -315,12 +311,8 @@ All endpoints (except `/health` and `/docs`) require authentication via:
             if _protocol_copilot:
                 copilot_health = _protocol_copilot.get_health_status()
                 health_data["services"]["protocol_copilot"] = "healthy"
-                health_data["services"]["llm_service"] = copilot_health.get(
-                    "llm_service", {}
-                ).get("providers", {})
-                health_data["services"]["rag_engine"] = copilot_health.get(
-                    "rag_engine", "unknown"
-                )
+                health_data["services"]["llm_service"] = copilot_health.get("llm_service", {}).get("providers", {})
+                health_data["services"]["rag_engine"] = copilot_health.get("rag_engine", "unknown")
             else:
                 health_data["services"]["protocol_copilot"] = "not_initialized"
                 health_data["checks"].append(
@@ -352,10 +344,7 @@ All endpoints (except `/health` and `/docs`) require authentication via:
             health_data["status"] = "degraded"
             health_data["error"] = str(e)
 
-        if any(
-            check["status"] in {"unhealthy", "degraded"}
-            for check in health_data["checks"]
-        ):
+        if any(check["status"] in {"unhealthy", "degraded"} for check in health_data["checks"]):
             health_data["status"] = "degraded"
 
         return health_data
@@ -374,15 +363,11 @@ All endpoints (except `/health` and `/docs`) require authentication via:
             packet_data = request.packet_data
             try:
                 if isinstance(packet_data, str):
-                    packet_data = base64.b64decode(
-                        packet_data.encode("utf-8"), validate=True
-                    )
+                    packet_data = base64.b64decode(packet_data.encode("utf-8"), validate=True)
                 else:
                     packet_data = base64.b64decode(packet_data, validate=True)
             except (ValueError, binascii.Error):
-                raise HTTPException(
-                    status_code=422, detail="Invalid base64 packet data"
-                )
+                raise HTTPException(status_code=422, detail="Invalid base64 packet data")
 
             if not _ai_engine:
                 raise HTTPException(status_code=503, detail="AI Engine not initialized")
@@ -433,9 +418,7 @@ All endpoints (except `/health` and `/docs`) require authentication via:
             }
 
             # Background task for learning
-            background_tasks.add_task(
-                update_knowledge_base, result, request.packet_data
-            )
+            background_tasks.add_task(update_knowledge_base, result, request.packet_data)
 
             return enhanced_result
 
@@ -462,9 +445,7 @@ All endpoints (except `/health` and `/docs`) require authentication via:
 
         try:
             start_time = time.time()
-            fields = await _ai_engine.detect_fields(
-                request.message_data, request.protocol_type
-            )
+            fields = await _ai_engine.detect_fields(request.message_data, request.protocol_type)
 
             processing_time = time.time() - start_time
 
@@ -559,9 +540,7 @@ All endpoints (except `/health` and `/docs`) require authentication via:
             # Initialize Security Orchestrator
             alert_manager = await initialize_alert_manager(config)
             policy_engine = get_policy_engine()
-            await initialize_security_orchestrator(
-                config, llm_service, alert_manager, policy_engine
-            )
+            await initialize_security_orchestrator(config, llm_service, alert_manager, policy_engine)
 
             # Initialize Zero-Touch Decision Engine
             await initialize_decision_engine(config)
@@ -569,6 +548,7 @@ All endpoints (except `/health` and `/docs`) require authentication via:
 
             # Initialize Observability Stack
             from ai_engine.observability import initialize_observability
+
             await initialize_observability(
                 service_name="qbitel",
                 environment=environment,
@@ -595,9 +575,7 @@ All endpoints (except `/health` and `/docs`) require authentication via:
                 await shutdown_mgr.initiate_shutdown()
                 logger.info("✅ Graceful shutdown complete (all requests completed)")
             except RuntimeError:
-                logger.warning(
-                    "Shutdown manager not initialized, skipping request tracking"
-                )
+                logger.warning("Shutdown manager not initialized, skipping request tracking")
             except Exception as e:
                 logger.error(f"Error during graceful shutdown: {e}")
 
@@ -605,6 +583,7 @@ All endpoints (except `/health` and `/docs`) require authentication via:
             # Shutdown Observability Stack
             try:
                 from ai_engine.observability import shutdown_observability
+
                 await shutdown_observability()
                 logger.info("✅ Observability stack shutdown complete")
             except Exception as e:
@@ -650,9 +629,7 @@ All endpoints (except `/health` and `/docs`) require authentication via:
                 await db_manager.dispose()
                 logger.info("✅ Database shutdown complete")
             except RuntimeError:
-                logger.warning(
-                    "Database manager not initialized, skipping database shutdown"
-                )
+                logger.warning("Database manager not initialized, skipping database shutdown")
             except Exception as e:
                 logger.error(f"Error during database shutdown: {e}")
 
@@ -701,9 +678,7 @@ async def update_knowledge_base(result: Dict[str, Any], packet_data: bytes):
                 created_at=datetime.utcnow(),
             )
 
-            await _protocol_copilot.rag_engine.add_documents(
-                "protocol_knowledge", [discovery_doc]
-            )
+            await _protocol_copilot.rag_engine.add_documents("protocol_knowledge", [discovery_doc])
 
     except Exception as e:
         logger.error(f"Failed to update knowledge base: {e}")

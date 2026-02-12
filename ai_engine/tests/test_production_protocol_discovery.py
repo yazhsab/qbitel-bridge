@@ -261,9 +261,7 @@ class TestConcurrency:
         num_requests = 50
 
         async def make_request(i):
-            request = DiscoveryRequest(
-                request_id=f"concurrent_{i}", packet_data=sample_packet_data
-            )
+            request = DiscoveryRequest(request_id=f"concurrent_{i}", packet_data=sample_packet_data)
             return await discovery_system.discover_with_sla(request, sla_ms=5000)
 
         # Execute requests concurrently
@@ -283,9 +281,7 @@ class TestConcurrency:
         for batch in range(num_batches):
             tasks = []
             for i in range(batch_size):
-                request = DiscoveryRequest(
-                    request_id=f"load_test_{batch}_{i}", packet_data=sample_packet_data
-                )
+                request = DiscoveryRequest(request_id=f"load_test_{batch}_{i}", packet_data=sample_packet_data)
                 tasks.append(discovery_system.discover_with_sla(request, sla_ms=2000))
 
             results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -301,9 +297,7 @@ class TestCaching:
     @pytest.mark.asyncio
     async def test_cache_hit(self, discovery_system, sample_packet_data):
         """Test cache hit scenario."""
-        request1 = DiscoveryRequest(
-            request_id="cache_test_1", packet_data=sample_packet_data
-        )
+        request1 = DiscoveryRequest(request_id="cache_test_1", packet_data=sample_packet_data)
 
         # First request - cache miss
         result1 = await discovery_system.discover_with_sla(request1, sla_ms=5000)
@@ -319,9 +313,7 @@ class TestCaching:
         original_ttl = discovery_system.cache_ttl
         discovery_system.cache_ttl = 1  # 1 second
 
-        request = DiscoveryRequest(
-            request_id="cache_expire_test", packet_data=sample_packet_data
-        )
+        request = DiscoveryRequest(request_id="cache_expire_test", packet_data=sample_packet_data)
 
         # Make request
         await discovery_system.discover_with_sla(request, sla_ms=5000)
@@ -345,9 +337,7 @@ class TestMetrics:
         """Test metrics are recorded."""
         initial_count = discovery_system.request_count
 
-        request = DiscoveryRequest(
-            request_id="metrics_test", packet_data=sample_packet_data
-        )
+        request = DiscoveryRequest(request_id="metrics_test", packet_data=sample_packet_data)
 
         await discovery_system.discover_with_sla(request, sla_ms=5000)
 
@@ -379,9 +369,7 @@ class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_invalid_packet_data(self, discovery_system):
         """Test handling of invalid packet data."""
-        request = DiscoveryRequest(
-            request_id="invalid_data_test", packet_data=b""  # Empty data
-        )
+        request = DiscoveryRequest(request_id="invalid_data_test", packet_data=b"")  # Empty data
 
         # Should handle gracefully
         result = await discovery_system.discover_with_sla(request, sla_ms=5000)

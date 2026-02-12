@@ -62,9 +62,7 @@ class TestAIEngine:
         """Test successful engine initialization."""
         engine = AIEngine(config)
 
-        with patch.object(
-            engine, "_initialize_components", new_callable=AsyncMock
-        ) as mock_init:
+        with patch.object(engine, "_initialize_components", new_callable=AsyncMock) as mock_init:
             mock_init.return_value = None
 
             await engine.initialize()
@@ -77,14 +75,10 @@ class TestAIEngine:
         """Test engine initialization failure handling."""
         engine = AIEngine(config)
 
-        with patch.object(
-            engine, "_initialize_components", new_callable=AsyncMock
-        ) as mock_init:
+        with patch.object(engine, "_initialize_components", new_callable=AsyncMock) as mock_init:
             mock_init.side_effect = Exception("Initialization failed")
 
-            with pytest.raises(
-                AIEngineException, match="Failed to initialize AI Engine"
-            ):
+            with pytest.raises(AIEngineException, match="Failed to initialize AI Engine"):
                 await engine.initialize()
 
             assert engine.state == "failed"
@@ -294,9 +288,7 @@ class TestModelOutput:
         confidence = torch.tensor([0.9, 0.1])
         metadata = {"model": "test_model"}
 
-        output = ModelOutput(
-            predictions=predictions, confidence=confidence, metadata=metadata
-        )
+        output = ModelOutput(predictions=predictions, confidence=confidence, metadata=metadata)
 
         assert torch.equal(output.predictions, predictions)
         assert torch.equal(output.confidence, confidence)

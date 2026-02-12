@@ -111,9 +111,7 @@ class TestJaegerTracingProvider:
         """Test JaegerTracingProvider initialization."""
         assert jaeger_provider.jaeger_config.agent_host == "localhost"
         assert jaeger_provider.jaeger_config.agent_port == 6831
-        assert (
-            jaeger_provider.jaeger_config.collector_endpoint == "http://localhost:14268"
-        )
+        assert jaeger_provider.jaeger_config.collector_endpoint == "http://localhost:14268"
         assert jaeger_provider.jaeger_config.service_name == "test-service"
         assert jaeger_provider.jaeger_config.sampling_rate == 1.0
         assert jaeger_provider._batch_size == 100
@@ -252,9 +250,7 @@ class TestJaegerTracingProvider:
         trace = Mock()
         trace.spans = [span]
 
-        with patch.object(
-            jaeger_provider, "export_span", side_effect=Exception("Export error")
-        ):
+        with patch.object(jaeger_provider, "export_span", side_effect=Exception("Export error")):
             with pytest.raises(ObservabilityException):
                 await jaeger_provider.export_trace(trace)
 
@@ -319,9 +315,7 @@ class TestJaegerTracingProvider:
         # Mock successful response
         mock_response = AsyncMock()
         mock_response.status = 200
-        jaeger_provider._session.post.return_value.__aenter__.return_value = (
-            mock_response
-        )
+        jaeger_provider._session.post.return_value.__aenter__.return_value = mock_response
 
         with patch.object(jaeger_provider, "_convert_to_jaeger_format") as mock_convert:
             mock_convert.return_value = {"span": "data"}
@@ -343,9 +337,7 @@ class TestJaegerTracingProvider:
         # Mock failed response
         mock_response = AsyncMock()
         mock_response.status = 500
-        jaeger_provider._session.post.return_value.__aenter__.return_value = (
-            mock_response
-        )
+        jaeger_provider._session.post.return_value.__aenter__.return_value = mock_response
 
         with patch.object(jaeger_provider, "_convert_to_jaeger_format") as mock_convert:
             mock_convert.return_value = {"span": "data"}
@@ -448,9 +440,7 @@ class TestJaegerTracingProvider:
         assert jaeger_span["references"][0]["traceId"] == "linked_trace"
         assert jaeger_span["references"][0]["spanId"] == "linked_span"
 
-    def test_jaeger_provider_convert_to_jaeger_format_tag_truncation(
-        self, jaeger_provider
-    ):
+    def test_jaeger_provider_convert_to_jaeger_format_tag_truncation(self, jaeger_provider):
         """Test tag value truncation in Jaeger format."""
         # Mock span with long tag value
         long_value = "x" * 2000  # Longer than max_tag_value_length
@@ -560,9 +550,7 @@ class TestZipkinTracingProvider:
         span = Mock()
         span.span_id = "span_error"
 
-        with patch.object(
-            zipkin_provider, "_flush_batch", side_effect=Exception("Flush error")
-        ):
+        with patch.object(zipkin_provider, "_flush_batch", side_effect=Exception("Flush error")):
             with pytest.raises(ObservabilityException):
                 await zipkin_provider.export_span(span)
 
@@ -594,9 +582,7 @@ class TestZipkinTracingProvider:
         trace = Mock()
         trace.spans = [span]
 
-        with patch.object(
-            zipkin_provider, "export_span", side_effect=Exception("Export error")
-        ):
+        with patch.object(zipkin_provider, "export_span", side_effect=Exception("Export error")):
             with pytest.raises(ObservabilityException):
                 await zipkin_provider.export_trace(trace)
 
@@ -625,9 +611,7 @@ class TestZipkinTracingProvider:
         # Mock successful response
         mock_response = AsyncMock()
         mock_response.status = 200
-        zipkin_provider._session.post.return_value.__aenter__.return_value = (
-            mock_response
-        )
+        zipkin_provider._session.post.return_value.__aenter__.return_value = mock_response
 
         with patch.object(zipkin_provider, "_convert_to_zipkin_format") as mock_convert:
             mock_convert.return_value = {"span": "data"}
@@ -649,9 +633,7 @@ class TestZipkinTracingProvider:
         # Mock failed response
         mock_response = AsyncMock()
         mock_response.status = 500
-        zipkin_provider._session.post.return_value.__aenter__.return_value = (
-            mock_response
-        )
+        zipkin_provider._session.post.return_value.__aenter__.return_value = mock_response
 
         with patch.object(zipkin_provider, "_convert_to_zipkin_format") as mock_convert:
             mock_convert.return_value = {"span": "data"}
@@ -781,9 +763,7 @@ class TestZipkinTracingProvider:
             zipkin_span = zipkin_provider._convert_to_zipkin_format(span)
             assert zipkin_span["kind"] == zipkin_kind
 
-    def test_zipkin_provider_convert_to_zipkin_format_tag_truncation(
-        self, zipkin_provider
-    ):
+    def test_zipkin_provider_convert_to_zipkin_format_tag_truncation(self, zipkin_provider):
         """Test tag value truncation in Zipkin format."""
         # Mock span with long tag value
         long_value = "x" * 2000  # Longer than max_tag_value_length
@@ -836,9 +816,7 @@ class TestTracingProviderFactory:
 
     def test_create_tracing_provider_inmemory(self, mock_config):
         """Test creating in-memory tracing provider."""
-        with patch(
-            "ai_engine.monitoring.tracing_providers.InMemoryTracingProvider"
-        ) as mock_inmemory:
+        with patch("ai_engine.monitoring.tracing_providers.InMemoryTracingProvider") as mock_inmemory:
             provider = create_tracing_provider(mock_config, "inmemory")
 
             mock_inmemory.assert_called_once_with(mock_config)

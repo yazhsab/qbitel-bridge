@@ -218,9 +218,7 @@ class RequestBatcher(Generic[T, R]):
         self.process_fn = process_fn
         self.config = config or BatchConfig()
 
-        self._queues: Dict[int, List[BatchRequest[T]]] = {
-            i: [] for i in range(self.config.priority_levels)
-        }
+        self._queues: Dict[int, List[BatchRequest[T]]] = {i: [] for i in range(self.config.priority_levels)}
         self._lock = asyncio.Lock()
         self._batch_task: Optional[asyncio.Task] = None
         self._running = False
@@ -303,10 +301,7 @@ class RequestBatcher(Generic[T, R]):
             # Check all priority queues
             async with self._lock:
                 for priority in range(self.config.priority_levels):
-                    while (
-                        self._queues[priority]
-                        and len(batch) < self.config.max_batch_size
-                    ):
+                    while self._queues[priority] and len(batch) < self.config.max_batch_size:
                         batch.append(self._queues[priority].pop(0))
 
             # Check if we have minimum batch or deadline passed
@@ -324,9 +319,7 @@ class RequestBatcher(Generic[T, R]):
         # Pad batch size if configured
         if self.config.pad_to_multiple > 1 and batch:
             target_size = (
-                (len(batch) + self.config.pad_to_multiple - 1)
-                // self.config.pad_to_multiple
-                * self.config.pad_to_multiple
+                (len(batch) + self.config.pad_to_multiple - 1) // self.config.pad_to_multiple * self.config.pad_to_multiple
             )
             # Note: actual padding would duplicate last request or add no-ops
 
@@ -338,15 +331,12 @@ class RequestBatcher(Generic[T, R]):
 
         # Update metrics
         self._metrics.total_batches += 1
-        self._metrics.max_batch_size_seen = max(
-            self._metrics.max_batch_size_seen, len(batch)
-        )
+        self._metrics.max_batch_size_seen = max(self._metrics.max_batch_size_seen, len(batch))
 
         # Calculate average batch size
         self._metrics.avg_batch_size = (
-            (self._metrics.avg_batch_size * (self._metrics.total_batches - 1)
-             + len(batch)) / self._metrics.total_batches
-        )
+            self._metrics.avg_batch_size * (self._metrics.total_batches - 1) + len(batch)
+        ) / self._metrics.total_batches
 
         try:
             # Extract data for processing
@@ -366,9 +356,8 @@ class RequestBatcher(Generic[T, R]):
             # Update latency metrics
             elapsed_ms = (time.time() - start_time) * 1000
             self._metrics.avg_latency_ms = (
-                (self._metrics.avg_latency_ms * (self._metrics.total_batches - 1)
-                 + elapsed_ms) / self._metrics.total_batches
-            )
+                self._metrics.avg_latency_ms * (self._metrics.total_batches - 1) + elapsed_ms
+            ) / self._metrics.total_batches
 
         except Exception as e:
             # Set exception on all futures
@@ -513,10 +502,7 @@ class InferenceOptimizer:
         Returns:
             List of inference results
         """
-        tasks = [
-            self.infer(request_id, input_data, use_cache)
-            for request_id, input_data in requests
-        ]
+        tasks = [self.infer(request_id, input_data, use_cache) for request_id, input_data in requests]
         return await asyncio.gather(*tasks)
 
     async def warm_cache(
@@ -580,9 +566,7 @@ class InferenceOptimizer:
         # Calculate throughput
         elapsed = time.time() - self._start_time
         if elapsed > 0:
-            self._metrics.requests_per_second = (
-                self._metrics.total_requests / elapsed
-            )
+            self._metrics.requests_per_second = self._metrics.total_requests / elapsed
 
         return self._metrics
 

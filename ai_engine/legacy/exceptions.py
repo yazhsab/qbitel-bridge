@@ -501,9 +501,7 @@ class ErrorHandler:
             "by_component": {},
         }
 
-    def handle_exception(
-        self, exception: Exception, context: Optional[Dict[str, Any]] = None
-    ) -> ErrorContext:
+    def handle_exception(self, exception: Exception, context: Optional[Dict[str, Any]] = None) -> ErrorContext:
         """
         Handle exception with proper logging and statistics tracking.
 
@@ -546,9 +544,7 @@ class ErrorHandler:
 
         return error_context
 
-    def _handle_generic_exception(
-        self, exception: Exception, context: Optional[Dict[str, Any]] = None
-    ) -> ErrorContext:
+    def _handle_generic_exception(self, exception: Exception, context: Optional[Dict[str, Any]] = None) -> ErrorContext:
         """Handle generic exceptions."""
 
         import uuid
@@ -584,9 +580,7 @@ class ErrorHandler:
 
         return error_context
 
-    def _update_error_statistics(
-        self, exception: LegacySystemWhispererException
-    ) -> None:
+    def _update_error_statistics(self, exception: LegacySystemWhispererException) -> None:
         """Update error statistics."""
 
         self.error_statistics["total_errors"] += 1
@@ -631,9 +625,7 @@ def create_error_handler(logger) -> ErrorHandler:
     return ErrorHandler(logger)
 
 
-def handle_with_recovery(
-    operation_func, recovery_func=None, max_retries: int = 3, logger=None
-):
+def handle_with_recovery(operation_func, recovery_func=None, max_retries: int = 3, logger=None):
     """
     Decorator for handling operations with recovery mechanisms.
 

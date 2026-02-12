@@ -27,61 +27,48 @@ from prometheus_client import Counter, Gauge, Histogram
 logger = logging.getLogger(__name__)
 
 # Metrics
-ADSB_VERIFIED = Counter(
-    'adsb_messages_verified_total',
-    'Total ADS-B messages verified',
-    ['status', 'message_type']
-)
+ADSB_VERIFIED = Counter("adsb_messages_verified_total", "Total ADS-B messages verified", ["status", "message_type"])
 
-ADSB_SPOOFING_DETECTED = Counter(
-    'adsb_spoofing_attempts_detected_total',
-    'Detected ADS-B spoofing attempts',
-    ['attack_type']
-)
+ADSB_SPOOFING_DETECTED = Counter("adsb_spoofing_attempts_detected_total", "Detected ADS-B spoofing attempts", ["attack_type"])
 
 ADSB_AUTH_LATENCY = Histogram(
-    'adsb_authentication_latency_seconds',
-    'ADS-B authentication latency',
-    buckets=[0.0001, 0.0005, 0.001, 0.002, 0.005, 0.01]
+    "adsb_authentication_latency_seconds", "ADS-B authentication latency", buckets=[0.0001, 0.0005, 0.001, 0.002, 0.005, 0.01]
 )
 
-TRACKED_AIRCRAFT = Gauge(
-    'adsb_tracked_aircraft',
-    'Number of aircraft being tracked'
-)
+TRACKED_AIRCRAFT = Gauge("adsb_tracked_aircraft", "Number of aircraft being tracked")
 
 
 class AdsbMessageType(Enum):
     """ADS-B message types (Downlink Format)."""
 
-    SHORT_SQUITTER = 11        # DF11: All-call reply
-    EXTENDED_SQUITTER = 17     # DF17: Extended squitter
+    SHORT_SQUITTER = 11  # DF11: All-call reply
+    EXTENDED_SQUITTER = 17  # DF17: Extended squitter
     EXTENDED_SQUITTER_NT = 18  # DF18: Extended squitter (non-transponder)
-    MILITARY = 19              # DF19: Military extended squitter
+    MILITARY = 19  # DF19: Military extended squitter
 
 
 class AdsbAuthenticationMode(Enum):
     """Authentication modes for ADS-B."""
 
-    NONE = auto()              # No authentication (legacy)
-    OUT_OF_BAND = auto()       # Authentication via separate channel
-    EXTENDED_FIELD = auto()    # Extended ADS-B with auth field
-    MULTILATERATION = auto()   # Position verification via MLAT
+    NONE = auto()  # No authentication (legacy)
+    OUT_OF_BAND = auto()  # Authentication via separate channel
+    EXTENDED_FIELD = auto()  # Extended ADS-B with auth field
+    MULTILATERATION = auto()  # Position verification via MLAT
 
 
 @dataclass
 class AdsbPosition:
     """ADS-B position report."""
 
-    icao_address: str   # 24-bit ICAO aircraft address
+    icao_address: str  # 24-bit ICAO aircraft address
     latitude: float
     longitude: float
-    altitude: int       # feet
-    velocity: float     # knots
-    heading: float      # degrees
+    altitude: int  # feet
+    velocity: float  # knots
+    heading: float  # degrees
     timestamp: float
 
-    def distance_from(self, other: 'AdsbPosition') -> float:
+    def distance_from(self, other: "AdsbPosition") -> float:
         """Calculate distance in nautical miles."""
         from math import radians, sin, cos, sqrt, atan2
 
@@ -93,8 +80,8 @@ class AdsbPosition:
         dlat = lat2 - lat1
         dlon = lon2 - lon1
 
-        a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-        c = 2 * atan2(sqrt(a), sqrt(1-a))
+        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
         return R * c
 
@@ -104,9 +91,9 @@ class AdsbAuthToken:
     """Out-of-band authentication token for ADS-B."""
 
     icao_address: str
-    public_key_hash: bytes    # Hash of aircraft's PQC public key
-    signature: bytes          # PQC signature
-    validity_window: int      # Seconds this token is valid
+    public_key_hash: bytes  # Hash of aircraft's PQC public key
+    signature: bytes  # PQC signature
+    validity_window: int  # Seconds this token is valid
     created_at: float = field(default_factory=time.time)
 
     @property
@@ -148,7 +135,7 @@ class AircraftTrackingState:
         total_checks = 0
 
         for i in range(2, len(self.positions)):
-            prev = self.positions[i-1]
+            prev = self.positions[i - 1]
             curr = self.positions[i]
 
             # Time between positions
@@ -204,10 +191,7 @@ class AdsbAuthenticator:
         # Blacklist for detected spoofers
         self._blacklist: Set[str] = set()
 
-        logger.info(
-            f"ADS-B authenticator initialized: mode={auth_mode.name}, "
-            f"threshold={anomaly_threshold}"
-        )
+        logger.info(f"ADS-B authenticator initialized: mode={auth_mode.name}, " f"threshold={anomaly_threshold}")
 
     async def process_adsb_message(
         self,
@@ -236,9 +220,7 @@ class AdsbAuthenticator:
 
         # Get or create tracking state
         if position.icao_address not in self._aircraft:
-            self._aircraft[position.icao_address] = AircraftTrackingState(
-                icao_address=position.icao_address
-            )
+            self._aircraft[position.icao_address] = AircraftTrackingState(icao_address=position.icao_address)
             TRACKED_AIRCRAFT.set(len(self._aircraft))
 
         state = self._aircraft[position.icao_address]
@@ -249,10 +231,7 @@ class AdsbAuthenticator:
         state.anomaly_score = anomaly_score
 
         if anomaly_score > self.anomaly_threshold:
-            logger.warning(
-                f"ADS-B anomaly detected: {position.icao_address}, "
-                f"score={anomaly_score:.2f}"
-            )
+            logger.warning(f"ADS-B anomaly detected: {position.icao_address}, " f"score={anomaly_score:.2f}")
             ADSB_SPOOFING_DETECTED.labels(attack_type="trajectory_anomaly").inc()
 
             # Don't blacklist immediately - could be legitimate
@@ -265,10 +244,7 @@ class AdsbAuthenticator:
 
         elapsed = time.time() - start
         ADSB_AUTH_LATENCY.observe(elapsed)
-        ADSB_VERIFIED.labels(
-            status="verified" if is_authenticated else "unverified",
-            message_type="position"
-        ).inc()
+        ADSB_VERIFIED.labels(status="verified" if is_authenticated else "unverified", message_type="position").inc()
 
         return position, is_authenticated
 
@@ -425,12 +401,12 @@ class AdsbAuthenticator:
     def _decode_cpr_lat(self, data: bytes) -> float:
         """Decode CPR latitude (simplified)."""
         # Real implementation would use proper CPR decoding
-        raw = int.from_bytes(data[:3], 'big') & 0x1FFFF
+        raw = int.from_bytes(data[:3], "big") & 0x1FFFF
         return (raw / 131072.0) * 360.0 - 180.0
 
     def _decode_cpr_lon(self, data: bytes) -> float:
         """Decode CPR longitude (simplified)."""
-        raw = int.from_bytes(data[1:4], 'big') & 0x1FFFF
+        raw = int.from_bytes(data[1:4], "big") & 0x1FFFF
         return (raw / 131072.0) * 360.0 - 180.0
 
     def _decode_velocity(self, data: bytes) -> Tuple[float, float]:
@@ -445,6 +421,7 @@ class AdsbAuthenticator:
         ns = ns_vel if not ns_sign else -ns_vel
 
         from math import sqrt, atan2, degrees
+
         velocity = sqrt(ew**2 + ns**2)
         heading = (degrees(atan2(ew, ns)) + 360) % 360
 
@@ -466,17 +443,12 @@ class AdsbAuthenticator:
             "positions": len(state.positions),
             "first_seen": state.first_seen,
             "last_seen": state.last_seen,
-            "has_valid_token": bool(
-                [t for t in state.auth_tokens if t.is_valid]
-            ),
+            "has_valid_token": bool([t for t in state.auth_tokens if t.is_valid]),
         }
 
     def get_all_aircraft(self) -> List[Dict]:
         """Get status of all tracked aircraft."""
-        return [
-            self.get_aircraft_status(icao)
-            for icao in self._aircraft
-        ]
+        return [self.get_aircraft_status(icao) for icao in self._aircraft]
 
     def blacklist_aircraft(self, icao_address: str, reason: str) -> None:
         """Add aircraft to blacklist."""
@@ -490,10 +462,7 @@ class AdsbAuthenticator:
     async def cleanup_stale_tracks(self, max_age: float = 300.0) -> int:
         """Remove stale aircraft tracks."""
         now = time.time()
-        stale = [
-            icao for icao, state in self._aircraft.items()
-            if now - state.last_seen > max_age
-        ]
+        stale = [icao for icao, state in self._aircraft.items() if now - state.last_seen > max_age]
 
         for icao in stale:
             del self._aircraft[icao]
@@ -543,11 +512,7 @@ class AdsbAuthTokenGenerator:
         public_key_hash = hashlib.sha256(public_key).digest()[:16]
 
         # Create message to sign
-        message = (
-            icao_address.encode() +
-            self.validity_window.to_bytes(4, 'big') +
-            int(created_at).to_bytes(8, 'big')
-        )
+        message = icao_address.encode() + self.validity_window.to_bytes(4, "big") + int(created_at).to_bytes(8, "big")
 
         # Sign with Falcon
         engine = FalconEngine(FalconSecurityLevel.FALCON_512)

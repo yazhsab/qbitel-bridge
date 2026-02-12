@@ -22,7 +22,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 import hashlib
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -327,24 +326,21 @@ class LegacyFingerprinter:
             Compatibility report
         """
         # Encoding compatibility
-        encoding_compatible = (
-            fp1.encoding_profile.primary_encoding ==
-            fp2.encoding_profile.primary_encoding
-        )
+        encoding_compatible = fp1.encoding_profile.primary_encoding == fp2.encoding_profile.primary_encoding
 
         # Layout compatibility
-        layout_compatible = (
-            fp1.data_layout.record_type == fp2.data_layout.record_type
-        )
+        layout_compatible = fp1.data_layout.record_type == fp2.data_layout.record_type
 
         # Same platform
         same_platform = fp1.likely_platform == fp2.likely_platform
 
-        compatibility_score = sum([
-            0.4 if encoding_compatible else 0,
-            0.3 if layout_compatible else 0,
-            0.3 if same_platform else 0,
-        ])
+        compatibility_score = sum(
+            [
+                0.4 if encoding_compatible else 0,
+                0.3 if layout_compatible else 0,
+                0.3 if same_platform else 0,
+            ]
+        )
 
         return {
             "compatibility_score": compatibility_score,
@@ -352,9 +348,7 @@ class LegacyFingerprinter:
             "layout_compatible": layout_compatible,
             "same_platform": same_platform,
             "transformation_required": not encoding_compatible,
-            "recommendations": self._generate_compatibility_recommendations(
-                fp1, fp2, encoding_compatible, layout_compatible
-            ),
+            "recommendations": self._generate_compatibility_recommendations(fp1, fp2, encoding_compatible, layout_compatible),
         }
 
     # =========================================================================
@@ -371,13 +365,15 @@ class LegacyFingerprinter:
 
         if ebcdic_score > ascii_score:
             profile.primary_encoding = "EBCDIC"
-            fingerprint.characteristics.append(SystemCharacteristic(
-                name="encoding",
-                value="EBCDIC",
-                confidence=ebcdic_score,
-                category="encoding",
-                evidence=["Character frequency analysis indicates EBCDIC"],
-            ))
+            fingerprint.characteristics.append(
+                SystemCharacteristic(
+                    name="encoding",
+                    value="EBCDIC",
+                    confidence=ebcdic_score,
+                    category="encoding",
+                    evidence=["Character frequency analysis indicates EBCDIC"],
+                )
+            )
         else:
             profile.primary_encoding = "ASCII"
 
@@ -385,12 +381,14 @@ class LegacyFingerprinter:
         if self._detect_packed_decimal(data):
             profile.packed_decimal = True
             profile.comp3_detected = True
-            fingerprint.characteristics.append(SystemCharacteristic(
-                name="packed_decimal",
-                value="COMP-3 detected",
-                confidence=0.8,
-                category="encoding",
-            ))
+            fingerprint.characteristics.append(
+                SystemCharacteristic(
+                    name="packed_decimal",
+                    value="COMP-3 detected",
+                    confidence=0.8,
+                    category="encoding",
+                )
+            )
 
         # Check for binary integers
         if self._detect_binary_integers(data):
@@ -452,7 +450,7 @@ class LegacyFingerprinter:
         # Check for common binary patterns
         for i in range(0, len(data) - 3, 4):
             # Big-endian integer check
-            val = int.from_bytes(data[i:i+4], 'big')
+            val = int.from_bytes(data[i : i + 4], "big")
             if 0 < val < 1000000000:  # Reasonable integer value
                 return True
 
@@ -467,7 +465,7 @@ class LegacyFingerprinter:
         layout = DataLayoutProfile()
 
         # Check for fixed-length records
-        lines = data.split(b'\n') if b'\n' in data else [data]
+        lines = data.split(b"\n") if b"\n" in data else [data]
 
         if len(lines) > 1:
             lengths = [len(line) for line in lines if line]
@@ -482,7 +480,7 @@ class LegacyFingerprinter:
                     layout.max_record_length = max(lengths)
 
                 # Estimate field count based on common patterns
-                layout.field_count = self._estimate_field_count(lines[0] if lines else b'')
+                layout.field_count = self._estimate_field_count(lines[0] if lines else b"")
         else:
             # Single record or no newlines
             layout.record_type = "fixed"
@@ -490,15 +488,17 @@ class LegacyFingerprinter:
 
         # Check for RDW (Record Descriptor Word)
         if len(data) >= 4:
-            potential_rdw = int.from_bytes(data[0:2], 'big')
+            potential_rdw = int.from_bytes(data[0:2], "big")
             if 4 <= potential_rdw <= len(data):
                 layout.record_type = "variable"
-                fingerprint.characteristics.append(SystemCharacteristic(
-                    name="rdw_detected",
-                    value="Variable length records with RDW",
-                    confidence=0.7,
-                    category="format",
-                ))
+                fingerprint.characteristics.append(
+                    SystemCharacteristic(
+                        name="rdw_detected",
+                        value="Variable length records with RDW",
+                        confidence=0.7,
+                        category="format",
+                    )
+                )
 
         fingerprint.data_layout = layout
 
@@ -568,13 +568,15 @@ class LegacyFingerprinter:
             if score > 0:
                 scores[system_type] = min(score, 1.0)
                 if score > 0.3:
-                    fingerprint.characteristics.append(SystemCharacteristic(
-                        name=f"{system_type.value}_detection",
-                        value="Detected",
-                        confidence=score,
-                        evidence=evidence,
-                        category="system",
-                    ))
+                    fingerprint.characteristics.append(
+                        SystemCharacteristic(
+                            name=f"{system_type.value}_detection",
+                            value="Detected",
+                            confidence=score,
+                            evidence=evidence,
+                            category="system",
+                        )
+                    )
 
         # Encoding-based inference
         if fingerprint.encoding_profile.primary_encoding == "EBCDIC":
@@ -715,10 +717,7 @@ class LegacyFingerprinter:
             LegacySystemType.BASE24: "1980s-1990s",
         }
 
-        fingerprint.estimated_era = era_map.get(
-            fingerprint.system_type,
-            "Unknown"
-        )
+        fingerprint.estimated_era = era_map.get(fingerprint.system_type, "Unknown")
 
     # =========================================================================
     # Modernization Assessment
@@ -765,10 +764,7 @@ class LegacyFingerprinter:
             LegacySystemType.IBM_MQ: "Cloud messaging (AWS SQS, Azure Service Bus)",
         }
 
-        fingerprint.recommended_target = target_map.get(
-            fingerprint.system_type,
-            "Cloud-native architecture"
-        )
+        fingerprint.recommended_target = target_map.get(fingerprint.system_type, "Cloud-native architecture")
 
         # Opportunities
         fingerprint.migration_opportunities = [
@@ -785,57 +781,63 @@ class LegacyFingerprinter:
     def _parse_copybook(self, text: str, fingerprint: SystemFingerprint) -> None:
         """Parse COBOL copybook for detailed analysis."""
         # Count PIC clauses
-        pic_count = len(re.findall(r'PIC\s+', text, re.IGNORECASE))
+        pic_count = len(re.findall(r"PIC\s+", text, re.IGNORECASE))
 
         fingerprint.data_layout.field_count = pic_count
 
         # Detect COMP-3
-        if re.search(r'COMP-3', text, re.IGNORECASE):
+        if re.search(r"COMP-3", text, re.IGNORECASE):
             fingerprint.encoding_profile.comp3_detected = True
 
         # Detect COMP (binary)
-        if re.search(r'COMP\b', text, re.IGNORECASE):
+        if re.search(r"COMP\b", text, re.IGNORECASE):
             fingerprint.encoding_profile.binary_integers = True
 
         # Calculate record length from OCCURS and PIC
-        fingerprint.characteristics.append(SystemCharacteristic(
-            name="copybook_fields",
-            value=str(pic_count),
-            confidence=0.95,
-            category="format",
-        ))
+        fingerprint.characteristics.append(
+            SystemCharacteristic(
+                name="copybook_fields",
+                value=str(pic_count),
+                confidence=0.95,
+                category="format",
+            )
+        )
 
     def _detect_platform_from_copybook(self, text: str, fingerprint: SystemFingerprint) -> None:
         """Detect platform specifics from copybook."""
         # IBM specific
-        if re.search(r'SYNC|SYNCHRONIZED', text, re.IGNORECASE):
+        if re.search(r"SYNC|SYNCHRONIZED", text, re.IGNORECASE):
             fingerprint.likely_platform = "IBM Mainframe"
 
         # CICS specific
-        if re.search(r'DFHCOMMAREA|DFHEIBLK', text, re.IGNORECASE):
+        if re.search(r"DFHCOMMAREA|DFHEIBLK", text, re.IGNORECASE):
             fingerprint.system_type = LegacySystemType.IBM_CICS
 
     def _parse_jcl(self, text: str, fingerprint: SystemFingerprint) -> None:
         """Parse JCL for system information."""
         # Extract DD statements
-        dd_count = len(re.findall(r'//\w+\s+DD\s+', text))
+        dd_count = len(re.findall(r"//\w+\s+DD\s+", text))
 
-        fingerprint.characteristics.append(SystemCharacteristic(
-            name="jcl_datasets",
-            value=str(dd_count),
-            confidence=0.9,
-            category="system",
-        ))
+        fingerprint.characteristics.append(
+            SystemCharacteristic(
+                name="jcl_datasets",
+                value=str(dd_count),
+                confidence=0.9,
+                category="system",
+            )
+        )
 
         # Detect program names
-        pgm_match = re.findall(r'PGM=(\w+)', text)
+        pgm_match = re.findall(r"PGM=(\w+)", text)
         if pgm_match:
-            fingerprint.characteristics.append(SystemCharacteristic(
-                name="programs",
-                value=",".join(set(pgm_match)),
-                confidence=0.95,
-                category="system",
-            ))
+            fingerprint.characteristics.append(
+                SystemCharacteristic(
+                    name="programs",
+                    value=",".join(set(pgm_match)),
+                    confidence=0.95,
+                    category="system",
+                )
+            )
 
         # Detect CICS or IMS
         if any(p.startswith("DFH") for p in pgm_match):
@@ -891,8 +893,7 @@ class LegacyFingerprinter:
 
         if not layout_compatible:
             recommendations.append(
-                f"Transform record format from {fp1.data_layout.record_type} "
-                f"to {fp2.data_layout.record_type}"
+                f"Transform record format from {fp1.data_layout.record_type} " f"to {fp2.data_layout.record_type}"
             )
 
         if fp1.encoding_profile.comp3_detected and not fp2.encoding_profile.comp3_detected:

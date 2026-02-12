@@ -170,9 +170,7 @@ class TestDataRetentionManager:
         )
 
         # Apply legal hold
-        result = await retention_manager.apply_legal_hold(
-            record_id, reason="Litigation"
-        )
+        result = await retention_manager.apply_legal_hold(record_id, reason="Litigation")
 
         assert result is True
         record = retention_manager.lifecycle_records[record_id]
@@ -216,13 +214,9 @@ class TestDataRetentionManager:
     @pytest.mark.asyncio
     async def test_archive_data(self, retention_manager):
         """Test data archival."""
-        record_id = await retention_manager.register_data(
-            data_category=DataCategory.BACKUPS, data_identifier="backup_001"
-        )
+        record_id = await retention_manager.register_data(data_category=DataCategory.BACKUPS, data_identifier="backup_001")
 
-        with patch.object(
-            retention_manager, "_archive_data_impl", new_callable=AsyncMock
-        ) as mock_archive:
+        with patch.object(retention_manager, "_archive_data_impl", new_callable=AsyncMock) as mock_archive:
             mock_archive.return_value = True
 
             result = await retention_manager.archive_data(record_id)
@@ -233,13 +227,9 @@ class TestDataRetentionManager:
     @pytest.mark.asyncio
     async def test_delete_data(self, retention_manager):
         """Test data deletion."""
-        record_id = await retention_manager.register_data(
-            data_category=DataCategory.SYSTEM_LOGS, data_identifier="log_001"
-        )
+        record_id = await retention_manager.register_data(data_category=DataCategory.SYSTEM_LOGS, data_identifier="log_001")
 
-        with patch.object(
-            retention_manager, "_delete_data_impl", new_callable=AsyncMock
-        ) as mock_delete:
+        with patch.object(retention_manager, "_delete_data_impl", new_callable=AsyncMock) as mock_delete:
             mock_delete.return_value = True
 
             result = await retention_manager.delete_data(record_id)
@@ -250,13 +240,9 @@ class TestDataRetentionManager:
     @pytest.mark.asyncio
     async def test_anonymize_data(self, retention_manager):
         """Test data anonymization."""
-        record_id = await retention_manager.register_data(
-            data_category=DataCategory.USER_DATA, data_identifier="user_001"
-        )
+        record_id = await retention_manager.register_data(data_category=DataCategory.USER_DATA, data_identifier="user_001")
 
-        with patch.object(
-            retention_manager, "_anonymize_data_impl", new_callable=AsyncMock
-        ) as mock_anon:
+        with patch.object(retention_manager, "_anonymize_data_impl", new_callable=AsyncMock) as mock_anon:
             mock_anon.return_value = True
 
             result = await retention_manager.anonymize_data(record_id)
@@ -283,9 +269,7 @@ class TestDataRetentionManager:
 
         # Register some data
         for i in range(5):
-            await retention_manager.register_data(
-                data_category=DataCategory.AUDIT_LOGS, data_identifier=f"audit_{i}"
-            )
+            await retention_manager.register_data(data_category=DataCategory.AUDIT_LOGS, data_identifier=f"audit_{i}")
 
         stats = await retention_manager.get_statistics()
 

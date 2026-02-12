@@ -154,10 +154,7 @@ class APIKeyManager:
         )
         active_keys = result.scalars().all()
         if len(active_keys) >= self.max_keys_per_user:
-            raise ValueError(
-                f"Maximum {self.max_keys_per_user} active API keys per user. "
-                f"Revoke an existing key first."
-            )
+            raise ValueError(f"Maximum {self.max_keys_per_user} active API keys per user. " f"Revoke an existing key first.")
 
         # Generate API key
         api_key_plain = self.generate_api_key()
@@ -181,10 +178,7 @@ class APIKeyManager:
         db.add(api_key_obj)
         await db.flush()
 
-        logger.info(
-            f"✅ Created API key '{name}' for user {user_id} "
-            f"(expires: {expires_at.date()})"
-        )
+        logger.info(f"✅ Created API key '{name}' for user {user_id} " f"(expires: {expires_at.date()})")
 
         # Return key info (plaintext key shown only once!)
         return {
@@ -193,10 +187,7 @@ class APIKeyManager:
             "name": name,
             "scopes": scopes or [],
             "expires_at": expires_at.isoformat(),
-            "warning": (
-                "⚠️  This is the only time the API key will be shown. "
-                "Store it securely."
-            ),
+            "warning": ("⚠️  This is the only time the API key will be shown. " "Store it securely."),
         }
 
     @transactional()
@@ -228,18 +219,12 @@ class APIKeyManager:
 
         # Check if revoked
         if key_obj.revoked_at:
-            logger.warning(
-                f"API key verification failed: key revoked "
-                f"(key_id={key_obj.id}, revoked={key_obj.revoked_at})"
-            )
+            logger.warning(f"API key verification failed: key revoked " f"(key_id={key_obj.id}, revoked={key_obj.revoked_at})")
             return None
 
         # Check if expired
         if key_obj.expires_at and key_obj.expires_at < datetime.utcnow():
-            logger.warning(
-                f"API key verification failed: key expired "
-                f"(key_id={key_obj.id}, expired={key_obj.expires_at})"
-            )
+            logger.warning(f"API key verification failed: key expired " f"(key_id={key_obj.id}, expired={key_obj.expires_at})")
             return None
 
         # Update last used timestamp
@@ -252,26 +237,20 @@ class APIKeyManager:
             days_until_expiration = (key_obj.expires_at - datetime.utcnow()).days
             if days_until_expiration <= self.warning_days_before_expiration:
                 logger.warning(
-                    f"⚠️  API key expiring soon: {days_until_expiration} days "
-                    f"(key_id={key_obj.id}, name='{key_obj.name}')"
+                    f"⚠️  API key expiring soon: {days_until_expiration} days " f"(key_id={key_obj.id}, name='{key_obj.name}')"
                 )
 
-        logger.debug(
-            f"✅ API key verified (key_id={key_obj.id}, user_id={key_obj.user_id})"
-        )
+        logger.debug(f"✅ API key verified (key_id={key_obj.id}, user_id={key_obj.user_id})")
 
         return {
             "key_id": key_obj.id,
             "user_id": key_obj.user_id,
             "name": key_obj.name,
             "scopes": key_obj.scopes,
-            "expires_at": (
-                key_obj.expires_at.isoformat() if key_obj.expires_at else None
-            ),
+            "expires_at": (key_obj.expires_at.isoformat() if key_obj.expires_at else None),
             "days_until_expiration": days_until_expiration,
             "expiring_soon": (
-                days_until_expiration is not None
-                and days_until_expiration <= self.warning_days_before_expiration
+                days_until_expiration is not None and days_until_expiration <= self.warning_days_before_expiration
             ),
         }
 
@@ -362,10 +341,7 @@ class APIKeyManager:
         old_key.expires_at = datetime.utcnow() + timedelta(days=grace_period_days)
         await db.flush()
 
-        logger.info(
-            f"✅ Rotated API key {key_id} → {new_key_info['key_id']} "
-            f"(grace period: {grace_period_days} days)"
-        )
+        logger.info(f"✅ Rotated API key {key_id} → {new_key_info['key_id']} " f"(grace period: {grace_period_days} days)")
 
         return {
             **new_key_info,
@@ -373,8 +349,7 @@ class APIKeyManager:
             "old_key_expires_at": old_key.expires_at.isoformat(),
             "grace_period_days": grace_period_days,
             "migration_warning": (
-                f"⚠️  Update your application to use the new API key. "
-                f"Old key will expire on {old_key.expires_at.date()}"
+                f"⚠️  Update your application to use the new API key. " f"Old key will expire on {old_key.expires_at.date()}"
             ),
         }
 
@@ -416,9 +391,7 @@ class APIKeyManager:
                 "key_prefix": key.key_prefix,
                 "expires_at": key.expires_at.isoformat(),
                 "days_until_expiration": (key.expires_at - datetime.utcnow()).days,
-                "last_used_at": (
-                    key.last_used_at.isoformat() if key.last_used_at else None
-                ),
+                "last_used_at": (key.last_used_at.isoformat() if key.last_used_at else None),
             }
             for key in expiring_keys
         ]
@@ -456,18 +429,12 @@ class APIKeyManager:
                 "scopes": key.scopes,
                 "created_at": key.created_at.isoformat(),
                 "expires_at": key.expires_at.isoformat() if key.expires_at else None,
-                "last_used_at": (
-                    key.last_used_at.isoformat() if key.last_used_at else None
-                ),
+                "last_used_at": (key.last_used_at.isoformat() if key.last_used_at else None),
                 "revoked_at": key.revoked_at.isoformat() if key.revoked_at else None,
-                "is_active": (
-                    key.revoked_at is None
-                    and (key.expires_at is None or key.expires_at > datetime.utcnow())
-                ),
+                "is_active": (key.revoked_at is None and (key.expires_at is None or key.expires_at > datetime.utcnow())),
                 "is_expiring_soon": (
                     key.expires_at is not None
-                    and (key.expires_at - datetime.utcnow()).days
-                    <= self.warning_days_before_expiration
+                    and (key.expires_at - datetime.utcnow()).days <= self.warning_days_before_expiration
                     and key.expires_at > datetime.utcnow()
                 ),
             }

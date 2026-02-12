@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 class SettlementMethod(str):
     """Settlement method codes."""
+
     INDA = "INDA"  # Instructed Agent
     INGA = "INGA"  # Instructing Agent
     COVE = "COVE"  # Cover Payment
@@ -41,6 +42,7 @@ class SettlementMethod(str):
 
 class ClearingSystem(str):
     """Clearing system codes."""
+
     FEDWIRE = "FEDWIR"
     CHIPS = "CHIPS"
     TARGET2 = "TGT"
@@ -88,8 +90,8 @@ class FIToFICreditTransfer:
     # Transaction identification
     instruction_id: str = ""
     end_to_end_id: str = ""
-    transaction_id: str = ""           # UETR for SWIFT gpi
-    uetr: Optional[str] = None         # Unique End-to-end Transaction Reference
+    transaction_id: str = ""  # UETR for SWIFT gpi
+    uetr: Optional[str] = None  # Unique End-to-end Transaction Reference
 
     # Status
     status: Optional[TransactionStatus] = None
@@ -137,7 +139,9 @@ class FIToFICreditTransfer:
                 "value": str(self.interbank_settlement_amount.value) if self.interbank_settlement_amount else None,
                 "currency": self.interbank_settlement_amount.currency if self.interbank_settlement_amount else None,
             },
-            "interbank_settlement_date": self.interbank_settlement_date.isoformat() if self.interbank_settlement_date else None,
+            "interbank_settlement_date": (
+                self.interbank_settlement_date.isoformat() if self.interbank_settlement_date else None
+            ),
             "charge_bearer": self.charge_bearer,
             "debtor_name": self.debtor.name if self.debtor else None,
             "creditor_name": self.creditor.name if self.creditor else None,
@@ -214,8 +218,7 @@ class Pacs008Message(ISO20022Message):
         if self.total_interbank_settlement_amount:
             if self.total_interbank_settlement_amount.value != total_amount:
                 errors.append(
-                    f"Total amount mismatch: header={self.total_interbank_settlement_amount.value}, "
-                    f"actual={total_amount}"
+                    f"Total amount mismatch: header={self.total_interbank_settlement_amount.value}, " f"actual={total_amount}"
                 )
 
         return errors
@@ -227,16 +230,24 @@ class Pacs008Message(ISO20022Message):
 
     def to_dict(self) -> Dict[str, Any]:
         base = super().to_dict()
-        base.update({
-            "number_of_transactions": self.number_of_transactions,
-            "total_interbank_settlement_amount": {
-                "value": str(self.total_interbank_settlement_amount.value) if self.total_interbank_settlement_amount else None,
-                "currency": self.total_interbank_settlement_amount.currency if self.total_interbank_settlement_amount else None,
-            },
-            "interbank_settlement_date": self.interbank_settlement_date.isoformat() if self.interbank_settlement_date else None,
-            "settlement_information": self.settlement_information.to_dict() if self.settlement_information else None,
-            "credit_transfers": [ct.to_dict() for ct in self.credit_transfers],
-        })
+        base.update(
+            {
+                "number_of_transactions": self.number_of_transactions,
+                "total_interbank_settlement_amount": {
+                    "value": (
+                        str(self.total_interbank_settlement_amount.value) if self.total_interbank_settlement_amount else None
+                    ),
+                    "currency": (
+                        self.total_interbank_settlement_amount.currency if self.total_interbank_settlement_amount else None
+                    ),
+                },
+                "interbank_settlement_date": (
+                    self.interbank_settlement_date.isoformat() if self.interbank_settlement_date else None
+                ),
+                "settlement_information": self.settlement_information.to_dict() if self.settlement_information else None,
+                "credit_transfers": [ct.to_dict() for ct in self.credit_transfers],
+            }
+        )
         return base
 
 
@@ -278,7 +289,7 @@ class Pacs008Parser(ISO20022Parser):
         ns = {}
         tag = root.tag
         if "{" in tag:
-            namespace = tag[1:tag.index("}")]
+            namespace = tag[1 : tag.index("}")]
             ns["ns"] = namespace
         return ns
 
@@ -554,10 +565,7 @@ class Pacs008Builder(ISO20022Builder):
         self._add_element(grp_hdr, "NbOfTxs", str(message.number_of_transactions))
 
         if message.total_interbank_settlement_amount:
-            ttl_amt = self._add_element(
-                grp_hdr, "TtlIntrBkSttlmAmt",
-                message.total_interbank_settlement_amount.to_xml_value()
-            )
+            ttl_amt = self._add_element(grp_hdr, "TtlIntrBkSttlmAmt", message.total_interbank_settlement_amount.to_xml_value())
             ttl_amt.set("Ccy", message.total_interbank_settlement_amount.currency)
 
         if message.interbank_settlement_date:
@@ -607,10 +615,7 @@ class Pacs008Builder(ISO20022Builder):
             self._add_element(pmt_id, "UETR", txn["uetr"])
 
         # Interbank Settlement Amount
-        amt = self._add_element(
-            parent, "IntrBkSttlmAmt",
-            f"{Decimal(str(txn.get('amount', 0))):.2f}"
-        )
+        amt = self._add_element(parent, "IntrBkSttlmAmt", f"{Decimal(str(txn.get('amount', 0))):.2f}")
         amt.set("Ccy", txn.get("currency", "USD"))
 
         # Charge Bearer
@@ -669,10 +674,7 @@ class Pacs008Builder(ISO20022Builder):
 
         # Interbank Settlement Amount
         if txn.interbank_settlement_amount:
-            amt = self._add_element(
-                parent, "IntrBkSttlmAmt",
-                txn.interbank_settlement_amount.to_xml_value()
-            )
+            amt = self._add_element(parent, "IntrBkSttlmAmt", txn.interbank_settlement_amount.to_xml_value())
             amt.set("Ccy", txn.interbank_settlement_amount.currency)
 
         # Settlement Date

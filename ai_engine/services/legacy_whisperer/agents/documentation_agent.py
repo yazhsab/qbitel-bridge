@@ -16,7 +16,6 @@ from .base import (
 )
 from .tools import DocumentationSearchTool
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -31,12 +30,7 @@ class DocumentationAgent(BaseAgent):
     - Explain legacy behavior
     """
 
-    def __init__(
-        self,
-        llm_service: Any,
-        rag_engine: Any = None,
-        config: Optional[AgentConfig] = None
-    ):
+    def __init__(self, llm_service: Any, rag_engine: Any = None, config: Optional[AgentConfig] = None):
         config = config or AgentConfig(
             role=AgentRole.DOCUMENTATION,
             name="Documentation Specialist",
@@ -157,10 +151,7 @@ Related documentation and standards.
         return base_prompt + doc_prompt
 
     async def generate_documentation(
-        self,
-        analysis_results: Dict[str, Any],
-        protocol_name: str = "Unknown Protocol",
-        context: str = ""
+        self, analysis_results: Dict[str, Any], protocol_name: str = "Unknown Protocol", context: str = ""
     ) -> str:
         """
         Generate comprehensive protocol documentation.
@@ -196,10 +187,7 @@ The documentation should be:
 - Suitable for both developers and architects
 - Include code examples in Python and Java
 """,
-            data={
-                "analysis": analysis_results,
-                "protocol_name": protocol_name
-            }
+            data={"analysis": analysis_results, "protocol_name": protocol_name},
         )
 
         response = await self.process_message(message)
@@ -212,11 +200,7 @@ The documentation should be:
 
         return documentation
 
-    async def explain_behavior(
-        self,
-        behavior: str,
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def explain_behavior(self, behavior: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Explain legacy system behavior.
 
@@ -250,24 +234,14 @@ Provide:
 - Impact on modernization
 - Recommended approach for handling
 """,
-            data={
-                "behavior": behavior,
-                "context": context
-            }
+            data={"behavior": behavior, "context": context},
         )
 
         response = await self.process_message(message)
 
-        return {
-            "explanation": response.content,
-            "data": response.data
-        }
+        return {"explanation": response.content, "data": response.data}
 
-    async def create_usage_examples(
-        self,
-        protocol_spec: Dict[str, Any],
-        languages: List[str] = None
-    ) -> Dict[str, str]:
+    async def create_usage_examples(self, protocol_spec: Dict[str, Any], languages: List[str] = None) -> Dict[str, str]:
         """
         Create code examples for using the protocol.
 
@@ -302,10 +276,7 @@ Examples should be:
 - Well-commented
 - Following language best practices
 """,
-            data={
-                "spec": protocol_spec,
-                "languages": languages
-            }
+            data={"spec": protocol_spec, "languages": languages},
         )
 
         response = await self.process_message(message)
@@ -338,10 +309,7 @@ Examples should be:
 
 
 # Factory function
-def create_documentation_agent(
-    llm_service: Any,
-    rag_engine: Any = None
-) -> DocumentationAgent:
+def create_documentation_agent(llm_service: Any, rag_engine: Any = None) -> DocumentationAgent:
     """Create a Documentation agent."""
     return DocumentationAgent(llm_service, rag_engine)
 

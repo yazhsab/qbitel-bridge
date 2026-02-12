@@ -21,7 +21,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set
 import uuid
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -159,9 +158,7 @@ class ComplianceMapper:
         reports = []
 
         for framework in frameworks:
-            report = self._assess_framework(
-                framework, protocol_analysis, system_context
-            )
+            report = self._assess_framework(framework, protocol_analysis, system_context)
             reports.append(report)
 
         return reports
@@ -296,19 +293,21 @@ class ComplianceMapper:
             else:
                 req3.status = ControlStatus.NON_COMPLIANT
                 req3.gaps.append("PCI data fields not encrypted")
-                gaps.append(ComplianceGap(
-                    gap_id=str(uuid.uuid4()),
-                    framework=ComplianceFramework.PCI_DSS,
-                    control_id="PCI-3",
-                    title="Unencrypted Cardholder Data",
-                    description="Cardholder data stored/transmitted without encryption",
-                    severity="critical",
-                    remediation_steps=[
-                        "Implement AES-256 encryption for stored data",
-                        "Enable TLS 1.3 for transmission",
-                        "Deploy PQC-ready encryption (ML-KEM)",
-                    ],
-                ))
+                gaps.append(
+                    ComplianceGap(
+                        gap_id=str(uuid.uuid4()),
+                        framework=ComplianceFramework.PCI_DSS,
+                        control_id="PCI-3",
+                        title="Unencrypted Cardholder Data",
+                        description="Cardholder data stored/transmitted without encryption",
+                        severity="critical",
+                        remediation_steps=[
+                            "Implement AES-256 encryption for stored data",
+                            "Enable TLS 1.3 for transmission",
+                            "Deploy PQC-ready encryption (ML-KEM)",
+                        ],
+                    )
+                )
         else:
             req3.status = ControlStatus.NOT_APPLICABLE
 
@@ -330,19 +329,21 @@ class ComplianceMapper:
         else:
             req4.status = ControlStatus.NON_COMPLIANT
             req4.gaps.append("Transmission encryption not detected")
-            gaps.append(ComplianceGap(
-                gap_id=str(uuid.uuid4()),
-                framework=ComplianceFramework.PCI_DSS,
-                control_id="PCI-4",
-                title="Unencrypted Transmission",
-                description="Cardholder data transmitted without encryption",
-                severity="critical",
-                remediation_steps=[
-                    "Implement TLS 1.3",
-                    "Configure strong cipher suites",
-                    "Disable legacy protocols (TLS 1.0, 1.1)",
-                ],
-            ))
+            gaps.append(
+                ComplianceGap(
+                    gap_id=str(uuid.uuid4()),
+                    framework=ComplianceFramework.PCI_DSS,
+                    control_id="PCI-4",
+                    title="Unencrypted Transmission",
+                    description="Cardholder data transmitted without encryption",
+                    severity="critical",
+                    remediation_steps=[
+                        "Implement TLS 1.3",
+                        "Configure strong cipher suites",
+                        "Disable legacy protocols (TLS 1.0, 1.1)",
+                    ],
+                )
+            )
 
         controls.append(req4)
 
@@ -381,19 +382,21 @@ class ComplianceMapper:
         else:
             req12_pqc.status = ControlStatus.PARTIALLY_COMPLIANT
             req12_pqc.gaps.append("PQC migration not started")
-            gaps.append(ComplianceGap(
-                gap_id=str(uuid.uuid4()),
-                framework=ComplianceFramework.PCI_DSS,
-                control_id="PCI-12-PQC",
-                title="PQC Migration Required",
-                description="System not prepared for post-quantum cryptography",
-                severity="medium",
-                remediation_steps=[
-                    "Assess current cryptographic inventory",
-                    "Plan hybrid classical+PQC implementation",
-                    "Deploy ML-KEM-768 and ML-DSA-65",
-                ],
-            ))
+            gaps.append(
+                ComplianceGap(
+                    gap_id=str(uuid.uuid4()),
+                    framework=ComplianceFramework.PCI_DSS,
+                    control_id="PCI-12-PQC",
+                    title="PQC Migration Required",
+                    description="System not prepared for post-quantum cryptography",
+                    severity="medium",
+                    remediation_steps=[
+                        "Assess current cryptographic inventory",
+                        "Plan hybrid classical+PQC implementation",
+                        "Deploy ML-KEM-768 and ML-DSA-65",
+                    ],
+                )
+            )
 
         controls.append(req12_pqc)
 
@@ -408,9 +411,7 @@ class ComplianceMapper:
 
         applicable = report.controls_total - report.controls_na
         if applicable > 0:
-            report.compliance_score = (
-                (report.controls_compliant + 0.5 * report.controls_partial) / applicable
-            ) * 100
+            report.compliance_score = ((report.controls_compliant + 0.5 * report.controls_partial) / applicable) * 100
 
         # Priority actions
         if gaps:
@@ -460,7 +461,9 @@ class ComplianceMapper:
             title="Password Policy",
             description="Implement strong password management",
             category="Prevent Credential Compromise",
-            status=ControlStatus.COMPLIANT if protocol_analysis.get("signature_detected") else ControlStatus.PARTIALLY_COMPLIANT,
+            status=(
+                ControlStatus.COMPLIANT if protocol_analysis.get("signature_detected") else ControlStatus.PARTIALLY_COMPLIANT
+            ),
         )
         controls.append(ctrl_4_1)
 

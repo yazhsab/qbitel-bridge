@@ -242,9 +242,7 @@ class TestMetricsCollector:
 
     def test_metrics_collector_record_histogram(self, metrics_collector):
         """Test recording histogram metric."""
-        metrics_collector.record_histogram(
-            "test_histogram", 150.0, {"operation": "test"}
-        )
+        metrics_collector.record_histogram("test_histogram", 150.0, {"operation": "test"})
 
         assert "test_histogram" in metrics_collector._metrics
         assert len(metrics_collector._metrics["test_histogram"]) == 1
@@ -303,20 +301,12 @@ class TestMetricsCollector:
 
             # Mock system metrics
             mock_cpu.return_value = 25.5
-            mock_memory.return_value = Mock(
-                percent=60.0, used=1024 * 1024 * 1024, available=1024 * 1024 * 1024
-            )
-            mock_disk.return_value = Mock(
-                used=1024 * 1024 * 1024, total=1024 * 1024 * 1024 * 10
-            )
-            mock_net.return_value = Mock(
-                bytes_sent=1000, bytes_recv=2000, packets_sent=10, packets_recv=20
-            )
+            mock_memory.return_value = Mock(percent=60.0, used=1024 * 1024 * 1024, available=1024 * 1024 * 1024)
+            mock_disk.return_value = Mock(used=1024 * 1024 * 1024, total=1024 * 1024 * 1024 * 10)
+            mock_net.return_value = Mock(bytes_sent=1000, bytes_recv=2000, packets_sent=10, packets_recv=20)
             mock_process.return_value = Mock(
                 cpu_percent=Mock(return_value=15.0),
-                memory_info=Mock(
-                    return_value=Mock(rss=512 * 1024 * 1024, vms=1024 * 1024 * 1024)
-                ),
+                memory_info=Mock(return_value=Mock(rss=512 * 1024 * 1024, vms=1024 * 1024 * 1024)),
                 num_threads=Mock(return_value=8),
                 num_fds=Mock(return_value=50),
             )
@@ -351,9 +341,7 @@ class TestMetricsCollector:
         assert latest["custom_custom2"] == 84.0
 
     @pytest.mark.asyncio
-    async def test_metrics_collector_collect_custom_metrics_error(
-        self, metrics_collector
-    ):
+    async def test_metrics_collector_collect_custom_metrics_error(self, metrics_collector):
         """Test custom metrics collection with error."""
 
         def error_metric():
@@ -441,17 +429,13 @@ class TestPrometheusExporter:
         assert prometheus_exporter._server is None
         assert prometheus_exporter._app is None
 
-    def test_prometheus_exporter_set_metrics_collector(
-        self, prometheus_exporter, mock_metrics_collector
-    ):
+    def test_prometheus_exporter_set_metrics_collector(self, prometheus_exporter, mock_metrics_collector):
         """Test setting metrics collector."""
         prometheus_exporter.set_metrics_collector(mock_metrics_collector)
 
         assert prometheus_exporter.metrics_collector == mock_metrics_collector
 
-    def test_prometheus_exporter_format_prometheus_metrics(
-        self, prometheus_exporter, mock_metrics_collector
-    ):
+    def test_prometheus_exporter_format_prometheus_metrics(self, prometheus_exporter, mock_metrics_collector):
         """Test formatting Prometheus metrics."""
         prometheus_exporter.set_metrics_collector(mock_metrics_collector)
 
@@ -462,9 +446,7 @@ class TestPrometheusExporter:
         assert 'test_gauge{service="test"} 100.0' in metrics_text
         assert 'test_counter{operation="test"} 5.0' in metrics_text
 
-    def test_prometheus_exporter_format_prometheus_metrics_no_collector(
-        self, prometheus_exporter
-    ):
+    def test_prometheus_exporter_format_prometheus_metrics_no_collector(self, prometheus_exporter):
         """Test formatting metrics without collector."""
         metrics_text = prometheus_exporter._format_prometheus_metrics()
 
@@ -474,16 +456,11 @@ class TestPrometheusExporter:
         """Test getting Prometheus type."""
         assert prometheus_exporter._get_prometheus_type(MetricType.COUNTER) == "counter"
         assert prometheus_exporter._get_prometheus_type(MetricType.GAUGE) == "gauge"
-        assert (
-            prometheus_exporter._get_prometheus_type(MetricType.HISTOGRAM)
-            == "histogram"
-        )
+        assert prometheus_exporter._get_prometheus_type(MetricType.HISTOGRAM) == "histogram"
         assert prometheus_exporter._get_prometheus_type(MetricType.SUMMARY) == "summary"
 
     @pytest.mark.asyncio
-    async def test_prometheus_exporter_metrics_handler(
-        self, prometheus_exporter, mock_metrics_collector
-    ):
+    async def test_prometheus_exporter_metrics_handler(self, prometheus_exporter, mock_metrics_collector):
         """Test metrics HTTP handler."""
         prometheus_exporter.set_metrics_collector(mock_metrics_collector)
 
@@ -508,9 +485,7 @@ class TestPrometheusExporter:
             response = await prometheus_exporter.metrics_handler(mock_request)
 
             assert response == "error_response"
-            mock_web.Response.assert_called_once_with(
-                status=500, text="Internal server error"
-            )
+            mock_web.Response.assert_called_once_with(status=500, text="Internal server error")
 
     @pytest.mark.asyncio
     async def test_prometheus_exporter_start(self, prometheus_exporter):
@@ -530,9 +505,7 @@ class TestPrometheusExporter:
             await prometheus_exporter.start()
 
             mock_web.Application.assert_called_once()
-            mock_app.router.add_get.assert_called_once_with(
-                "/metrics", prometheus_exporter.metrics_handler
-            )
+            mock_app.router.add_get.assert_called_once_with("/metrics", prometheus_exporter.metrics_handler)
             mock_runner.setup.assert_called_once()
             mock_site.start.assert_called_once()
 
@@ -579,9 +552,7 @@ class TestAlertManager:
         def condition(metrics):
             return metrics.get("cpu_usage", 0) > 90
 
-        alert_manager.register_alert_rule(
-            "high_cpu", condition, AlertSeverity.WARNING, "CPU usage is high"
-        )
+        alert_manager.register_alert_rule("high_cpu", condition, AlertSeverity.WARNING, "CPU usage is high")
 
         assert "high_cpu" in alert_manager._alert_rules
         rule = alert_manager._alert_rules["high_cpu"]
@@ -779,9 +750,7 @@ class TestHealthChecker:
             assert health_checker._running is False
 
     @pytest.mark.asyncio
-    async def test_health_checker_perform_health_checks_all_healthy(
-        self, health_checker
-    ):
+    async def test_health_checker_perform_health_checks_all_healthy(self, health_checker):
         """Test performing health checks - all healthy."""
 
         def cpu_check():
@@ -911,10 +880,7 @@ class TestEnterpriseMetrics:
         assert "high_memory_usage" in enterprise_metrics.alert_manager._alert_rules
         assert "high_disk_usage" in enterprise_metrics.alert_manager._alert_rules
         assert "process_errors" in enterprise_metrics.alert_manager._alert_rules
-        assert (
-            "compliance_assessment_failures"
-            in enterprise_metrics.alert_manager._alert_rules
-        )
+        assert "compliance_assessment_failures" in enterprise_metrics.alert_manager._alert_rules
 
     def test_enterprise_metrics_setup_default_health_checks(self, enterprise_metrics):
         """Test setup of default health checks."""
@@ -928,12 +894,8 @@ class TestEnterpriseMetrics:
         """Test starting and stopping enterprise metrics."""
         with (
             patch.object(enterprise_metrics.metrics_collector, "start") as mock_start,
-            patch.object(
-                enterprise_metrics.prometheus_exporter, "start"
-            ) as mock_prom_start,
-            patch.object(
-                enterprise_metrics.health_checker, "start"
-            ) as mock_health_start,
+            patch.object(enterprise_metrics.prometheus_exporter, "start") as mock_prom_start,
+            patch.object(enterprise_metrics.health_checker, "start") as mock_health_start,
             patch("asyncio.create_task") as mock_create_task,
         ):
 
@@ -948,12 +910,8 @@ class TestEnterpriseMetrics:
             # Test stop
             with (
                 patch.object(enterprise_metrics.metrics_collector, "stop") as mock_stop,
-                patch.object(
-                    enterprise_metrics.prometheus_exporter, "stop"
-                ) as mock_prom_stop,
-                patch.object(
-                    enterprise_metrics.health_checker, "stop"
-                ) as mock_health_stop,
+                patch.object(enterprise_metrics.prometheus_exporter, "stop") as mock_prom_stop,
+                patch.object(enterprise_metrics.health_checker, "stop") as mock_health_stop,
             ):
 
                 await enterprise_metrics.stop()
@@ -963,24 +921,16 @@ class TestEnterpriseMetrics:
                 mock_prom_stop.assert_called_once()
                 mock_health_stop.assert_called_once()
 
-    def test_enterprise_metrics_record_protocol_discovery_metric(
-        self, enterprise_metrics
-    ):
+    def test_enterprise_metrics_record_protocol_discovery_metric(self, enterprise_metrics):
         """Test recording protocol discovery metric."""
-        enterprise_metrics.record_protocol_discovery_metric(
-            "test_metric", 123.45, {"service": "test"}
-        )
+        enterprise_metrics.record_protocol_discovery_metric("test_metric", 123.45, {"service": "test"})
 
         latest = enterprise_metrics.metrics_collector.get_latest_values()
         assert latest["protocol_discovery_test_metric"] == 123.45
 
-    def test_enterprise_metrics_increment_protocol_discovery_counter(
-        self, enterprise_metrics
-    ):
+    def test_enterprise_metrics_increment_protocol_discovery_counter(self, enterprise_metrics):
         """Test incrementing protocol discovery counter."""
-        enterprise_metrics.increment_protocol_discovery_counter(
-            "test_counter", 5.0, {"operation": "test"}
-        )
+        enterprise_metrics.increment_protocol_discovery_counter("test_counter", 5.0, {"operation": "test"})
 
         latest = enterprise_metrics.metrics_collector.get_latest_values()
         assert latest["protocol_discovery_test_counter"] == 5.0
@@ -989,15 +939,9 @@ class TestEnterpriseMetrics:
         """Test getting dashboard metrics."""
         # Set some test metrics
         enterprise_metrics.metrics_collector.set_gauge("system_cpu_usage_percent", 25.5)
-        enterprise_metrics.metrics_collector.set_gauge(
-            "system_memory_usage_percent", 60.0
-        )
-        enterprise_metrics.metrics_collector.set_gauge(
-            "system_disk_usage_percent", 45.0
-        )
-        enterprise_metrics.metrics_collector.set_gauge(
-            "protocol_discovery_operations_total", 100
-        )
+        enterprise_metrics.metrics_collector.set_gauge("system_memory_usage_percent", 60.0)
+        enterprise_metrics.metrics_collector.set_gauge("system_disk_usage_percent", 45.0)
+        enterprise_metrics.metrics_collector.set_gauge("protocol_discovery_operations_total", 100)
 
         dashboard_metrics = enterprise_metrics.get_dashboard_metrics()
 
@@ -1018,12 +962,8 @@ class TestEnterpriseMetrics:
         enterprise_metrics._running = True
 
         with (
-            patch.object(
-                enterprise_metrics.metrics_collector, "get_latest_values"
-            ) as mock_get_values,
-            patch.object(
-                enterprise_metrics.alert_manager, "check_alert_conditions"
-            ) as mock_check_alerts,
+            patch.object(enterprise_metrics.metrics_collector, "get_latest_values") as mock_get_values,
+            patch.object(enterprise_metrics.alert_manager, "check_alert_conditions") as mock_check_alerts,
         ):
 
             mock_get_values.return_value = {"cpu_usage": 95.0}
@@ -1074,9 +1014,7 @@ class TestEnterpriseMetricsIntegration:
 
         finally:
             # Restore original instance
-            ai_engine.monitoring.enterprise_metrics._enterprise_metrics = (
-                original_metrics
-            )
+            ai_engine.monitoring.enterprise_metrics._enterprise_metrics = original_metrics
 
     @pytest.mark.asyncio
     async def test_shutdown_enterprise_metrics(self):
@@ -1094,23 +1032,17 @@ class TestEnterpriseMetricsIntegration:
 
     def test_record_metric_convenience_function(self):
         """Test record_metric convenience function."""
-        with patch(
-            "ai_engine.monitoring.enterprise_metrics.get_enterprise_metrics"
-        ) as mock_get_metrics:
+        with patch("ai_engine.monitoring.enterprise_metrics.get_enterprise_metrics") as mock_get_metrics:
             mock_metrics = Mock()
             mock_get_metrics.return_value = mock_metrics
 
             record_metric("test_metric", 123.45, {"service": "test"})
 
-            mock_metrics.record_protocol_discovery_metric.assert_called_once_with(
-                "test_metric", 123.45, {"service": "test"}
-            )
+            mock_metrics.record_protocol_discovery_metric.assert_called_once_with("test_metric", 123.45, {"service": "test"})
 
     def test_increment_counter_convenience_function(self):
         """Test increment_counter convenience function."""
-        with patch(
-            "ai_engine.monitoring.enterprise_metrics.get_enterprise_metrics"
-        ) as mock_get_metrics:
+        with patch("ai_engine.monitoring.enterprise_metrics.get_enterprise_metrics") as mock_get_metrics:
             mock_metrics = Mock()
             mock_get_metrics.return_value = mock_metrics
 
@@ -1123,9 +1055,7 @@ class TestEnterpriseMetricsIntegration:
     @pytest.mark.asyncio
     async def test_metrics_context_success(self):
         """Test metrics_context with successful operation."""
-        with patch(
-            "ai_engine.monitoring.enterprise_metrics.get_enterprise_metrics"
-        ) as mock_get_metrics:
+        with patch("ai_engine.monitoring.enterprise_metrics.get_enterprise_metrics") as mock_get_metrics:
             mock_metrics = Mock()
             mock_get_metrics.return_value = mock_metrics
 
@@ -1150,9 +1080,7 @@ class TestEnterpriseMetricsIntegration:
     @pytest.mark.asyncio
     async def test_metrics_context_error(self):
         """Test metrics_context with error."""
-        with patch(
-            "ai_engine.monitoring.enterprise_metrics.get_enterprise_metrics"
-        ) as mock_get_metrics:
+        with patch("ai_engine.monitoring.enterprise_metrics.get_enterprise_metrics") as mock_get_metrics:
             mock_metrics = Mock()
             mock_get_metrics.return_value = mock_metrics
 

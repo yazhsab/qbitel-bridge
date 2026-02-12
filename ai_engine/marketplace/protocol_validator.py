@@ -79,9 +79,7 @@ class ProtocolValidator:
         # Get protocol from database
         session = self.db_manager.get_session()
         try:
-            protocol = session.query(MarketplaceProtocol).filter(
-                MarketplaceProtocol.protocol_id == protocol_id
-            ).first()
+            protocol = session.query(MarketplaceProtocol).filter(MarketplaceProtocol.protocol_id == protocol_id).first()
 
             if not protocol:
                 raise ValueError(f"Protocol {protocol_id} not found")
@@ -100,9 +98,7 @@ class ProtocolValidator:
             else:
                 logger.warning("Skipping parser testing due to syntax errors")
                 results["parser_testing"] = ValidationResult(
-                    validation_type="parser_testing",
-                    status="skipped",
-                    errors=["Skipped due to syntax validation failures"]
+                    validation_type="parser_testing", status="skipped", errors=["Skipped due to syntax validation failures"]
                 )
 
             # Step 3: Security scan
@@ -118,7 +114,7 @@ class ProtocolValidator:
                 results["performance_benchmark"] = ValidationResult(
                     validation_type="performance_benchmark",
                     status="skipped",
-                    errors=["Skipped due to parser testing failures"]
+                    errors=["Skipped due to parser testing failures"],
                 )
 
             # Save results to database
@@ -478,12 +474,7 @@ class ProtocolValidator:
                 errors=[f"Benchmark error: {str(e)}"],
             )
 
-    def _save_validation_result(
-        self,
-        session,
-        protocol_id: str,
-        result: ValidationResult
-    ):
+    def _save_validation_result(self, session, protocol_id: str, result: ValidationResult):
         """Save validation result to database."""
         try:
             validation = MarketplaceValidation(
@@ -519,10 +510,7 @@ class ProtocolValidator:
             return "failed"
 
         # Check all passed
-        all_passed = all(
-            r.status == "passed" or r.status == "skipped"
-            for r in results.values()
-        )
+        all_passed = all(r.status == "passed" or r.status == "skipped" for r in results.values())
 
         if all_passed:
             return "passed"

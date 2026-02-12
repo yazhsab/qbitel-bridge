@@ -226,11 +226,13 @@ class HSMError(Exception):
 
 class HSMConnectionError(HSMError):
     """Exception for HSM connection failures."""
+
     pass
 
 
 class HSMAuthenticationError(HSMError):
     """Exception for HSM authentication failures."""
+
     pass
 
 

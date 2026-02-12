@@ -121,9 +121,7 @@ class ErrorRecord:
             },
             "recovery_attempted": self.recovery_attempted,
             "recovery_successful": self.recovery_successful,
-            "recovery_strategy": (
-                self.recovery_strategy.value if self.recovery_strategy else None
-            ),
+            "recovery_strategy": (self.recovery_strategy.value if self.recovery_strategy else None),
             "retry_count": self.retry_count,
             "metadata": self.metadata,
         }
@@ -151,9 +149,7 @@ class CircuitBreakerConfig:
     failure_threshold: int = 5
     recovery_timeout: float = 60.0
     half_open_max_calls: int = 3
-    expected_exception_types: Set[Type[Exception]] = field(
-        default_factory=lambda: {ConnectionError, TimeoutError}
-    )
+    expected_exception_types: Set[Type[Exception]] = field(default_factory=lambda: {ConnectionError, TimeoutError})
 
 
 class CircuitBreakerState(Enum):
@@ -269,9 +265,7 @@ class CircuitBreaker:
             if self.state == CircuitBreakerState.HALF_OPEN:
                 self.state = CircuitBreakerState.CLOSED
                 self.failure_count = 0
-                self.logger.info(
-                    "Circuit breaker transitioned to CLOSED after recovery"
-                )
+                self.logger.info("Circuit breaker transitioned to CLOSED after recovery")
 
             return result
 
@@ -285,9 +279,7 @@ class CircuitBreaker:
                     self.logger.warning("Circuit breaker transitioned back to OPEN")
                 elif self.failure_count >= self.config.failure_threshold:
                     self.state = CircuitBreakerState.OPEN
-                    self.logger.warning(
-                        f"Circuit breaker OPENED after {self.failure_count} failures"
-                    )
+                    self.logger.warning(f"Circuit breaker OPENED after {self.failure_count} failures")
 
             raise
 
@@ -341,9 +333,7 @@ class ErrorHandler:
         self.config = config
 
         # Error tracking
-        self.error_records: deque = deque(
-            maxlen=config.max_error_records
-        )  # Keep last N errors
+        self.error_records: deque = deque(maxlen=config.max_error_records)  # Keep last N errors
         self.error_stats = defaultdict(int)
         self.component_errors = defaultdict(lambda: defaultdict(int))
 
@@ -418,9 +408,7 @@ class ErrorHandler:
             ),
         }
 
-    def classify_error(
-        self, exception: Exception
-    ) -> Tuple[ErrorSeverity, ErrorCategory, RecoveryStrategy]:
+    def classify_error(self, exception: Exception) -> Tuple[ErrorSeverity, ErrorCategory, RecoveryStrategy]:
         """Classify an error and determine handling strategy."""
         exc_type = type(exception)
 
@@ -546,9 +534,7 @@ class ErrorHandler:
             try:
                 await self.persistent_storage.store_error(error_record)
             except Exception as storage_error:
-                self.logger.error(
-                    f"Failed to store error in persistent storage: {storage_error}"
-                )
+                self.logger.error(f"Failed to store error in persistent storage: {storage_error}")
 
         # Send to Sentry
         if self.enable_sentry and self.sentry_tracker:
@@ -559,9 +545,7 @@ class ErrorHandler:
 
         return recovery_successful, result
 
-    async def _retry_with_backoff(
-        self, func: Callable, context: ErrorContext, max_attempts: int = 3
-    ) -> Any:
+    async def _retry_with_backoff(self, func: Callable, context: ErrorContext, max_attempts: int = 3) -> Any:
         """Retry function with exponential backoff."""
         config = self.retry_configs.get(context.component, RetryConfig())
 
@@ -615,8 +599,7 @@ class ErrorHandler:
     ) -> Any:
         """Execute fallback function."""
         self.logger.info(
-            f"Executing fallback for {context.component}.{context.operation} "
-            f"due to {type(original_exception).__name__}"
+            f"Executing fallback for {context.component}.{context.operation} " f"due to {type(original_exception).__name__}"
         )
 
         try:
@@ -631,13 +614,10 @@ class ErrorHandler:
             )
             raise
 
-    async def _degrade_gracefully(
-        self, context: ErrorContext, exception: Exception
-    ) -> Any:
+    async def _degrade_gracefully(self, context: ErrorContext, exception: Exception) -> Any:
         """Provide degraded functionality."""
         self.logger.warning(
-            f"Degrading functionality for {context.component}.{context.operation} "
-            f"due to {type(exception).__name__}"
+            f"Degrading functionality for {context.component}.{context.operation} " f"due to {type(exception).__name__}"
         )
 
         # Return appropriate degraded result based on component
@@ -660,9 +640,7 @@ class ErrorHandler:
         }
         return level_map[severity]
 
-    def get_circuit_breaker(
-        self, component: str, config: Optional[CircuitBreakerConfig] = None
-    ) -> CircuitBreaker:
+    def get_circuit_breaker(self, component: str, config: Optional[CircuitBreakerConfig] = None) -> CircuitBreaker:
         """Get or create circuit breaker for component."""
         if component not in self.circuit_breakers:
             cb_config = config or CircuitBreakerConfig()
@@ -679,15 +657,9 @@ class ErrorHandler:
         return {
             "total_errors": len(self.error_records),
             "error_by_severity": dict(self.error_stats),
-            "error_by_component": {
-                comp: dict(errors) for comp, errors in self.component_errors.items()
-            },
-            "circuit_breaker_states": {
-                comp: cb.state.value for comp, cb in self.circuit_breakers.items()
-            },
-            "recent_errors": [
-                record.to_dict() for record in list(self.error_records)[-10:]
-            ],
+            "error_by_component": {comp: dict(errors) for comp, errors in self.component_errors.items()},
+            "circuit_breaker_states": {comp: cb.state.value for comp, cb in self.circuit_breakers.items()},
+            "recent_errors": [record.to_dict() for record in list(self.error_records)[-10:]],
         }
 
     def get_component_health(self, component: str) -> Dict[str, Any]:
@@ -695,8 +667,7 @@ class ErrorHandler:
         recent_errors = [
             record
             for record in self.error_records
-            if record.component == component
-            and time.time() - record.timestamp < 3600  # Last hour
+            if record.component == component and time.time() - record.timestamp < 3600  # Last hour
         ]
 
         error_rate = len(recent_errors) / 60.0  # Errors per minute
@@ -715,15 +686,10 @@ class ErrorHandler:
             "error_rate_per_minute": error_rate,
             "recent_error_count": len(recent_errors),
             "circuit_breaker_state": (
-                self.circuit_breakers[component].state.value
-                if component in self.circuit_breakers
-                else "not_configured"
+                self.circuit_breakers[component].state.value if component in self.circuit_breakers else "not_configured"
             ),
             "dominant_error_types": [
-                error_type
-                for error_type, count in Counter(
-                    [r.exception_type for r in recent_errors]
-                ).most_common(5)
+                error_type for error_type, count in Counter([r.exception_type for r in recent_errors]).most_common(5)
             ],
         }
 
@@ -740,9 +706,7 @@ class ErrorHandler:
             if self.enable_persistent_storage:
                 from .error_storage import get_error_storage
 
-                self.persistent_storage = await get_error_storage(
-                    redis_url, postgres_url
-                )
+                self.persistent_storage = await get_error_storage(redis_url, postgres_url)
                 self.logger.info("Persistent error storage initialized")
 
             # Initialize Sentry
@@ -775,11 +739,7 @@ class ErrorHandler:
         if not self.persistent_storage:
             # Fall back to in-memory records
             cutoff_time = time.time() - (time_window_hours * 3600)
-            errors = [
-                record.to_dict()
-                for record in self.error_records
-                if record.timestamp >= cutoff_time
-            ]
+            errors = [record.to_dict() for record in self.error_records if record.timestamp >= cutoff_time]
             if component:
                 errors = [e for e in errors if e["component"] == component]
             return errors[:limit]
@@ -787,14 +747,10 @@ class ErrorHandler:
         try:
             if component:
                 since = time.time() - (time_window_hours * 3600)
-                return await self.persistent_storage.get_errors_by_component(
-                    component, limit, since
-                )
+                return await self.persistent_storage.get_errors_by_component(component, limit, since)
             else:
                 # Get statistics and recent errors
-                stats = await self.persistent_storage.get_error_statistics(
-                    time_window_hours
-                )
+                stats = await self.persistent_storage.get_error_statistics(time_window_hours)
                 return stats
         except Exception as e:
             self.logger.error(f"Failed to get aggregated errors: {e}")
@@ -855,9 +811,7 @@ def handle_errors(
                     return await func(*args, **kwargs)
 
             except Exception as e:
-                recovery_successful, result = await error_handler.handle_error(
-                    e, context, recovery_func
-                )
+                recovery_successful, result = await error_handler.handle_error(e, context, recovery_func)
 
                 if recovery_successful:
                     return result
@@ -923,9 +877,7 @@ async def error_context(component: str, operation: str, **context_data):
 
         # Log successful completion
         duration = time.time() - start_time
-        logging.getLogger(component).debug(
-            f"Operation {operation} completed successfully in {duration:.3f}s"
-        )
+        logging.getLogger(component).debug(f"Operation {operation} completed successfully in {duration:.3f}s")
 
     except Exception as e:
         duration = time.time() - start_time
@@ -933,9 +885,7 @@ async def error_context(component: str, operation: str, **context_data):
         # Handle error
         await error_handler.handle_error(e, context)
 
-        logging.getLogger(component).error(
-            f"Operation {operation} failed after {duration:.3f}s: {e}"
-        )
+        logging.getLogger(component).error(f"Operation {operation} failed after {duration:.3f}s: {e}")
 
         raise
 
@@ -949,9 +899,7 @@ class HealthMonitor:
         self.component_health: Dict[str, Dict[str, Any]] = {}
         self.health_checks: Dict[str, Callable] = {}
 
-    def register_health_check(
-        self, component: str, health_check_func: Callable
-    ) -> None:
+    def register_health_check(self, component: str, health_check_func: Callable) -> None:
         """Register a health check function for a component."""
         self.health_checks[component] = health_check_func
         self.logger.info(f"Registered health check for component: {component}")
@@ -989,16 +937,12 @@ class HealthMonitor:
 
         # Determine overall health
         unhealthy_components = [
-            comp
-            for comp, health in component_healths.items()
-            if health["health_status"] in ["unhealthy", "degraded"]
+            comp for comp, health in component_healths.items() if health["health_status"] in ["unhealthy", "degraded"]
         ]
 
         if not unhealthy_components:
             overall_status = "healthy"
-        elif (
-            len(unhealthy_components) <= len(component_healths) * 0.3
-        ):  # Less than 30% unhealthy
+        elif len(unhealthy_components) <= len(component_healths) * 0.3:  # Less than 30% unhealthy
             overall_status = "degraded"
         else:
             overall_status = "unhealthy"

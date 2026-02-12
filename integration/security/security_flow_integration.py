@@ -129,12 +129,8 @@ class SecurityFlowIntegrator:
         self.reputation_cache: Dict[str, float] = {}
 
         # Thread pools
-        self.security_executor = ThreadPoolExecutor(
-            max_workers=10, thread_name_prefix="security_"
-        )
-        self.crypto_executor = ThreadPoolExecutor(
-            max_workers=5, thread_name_prefix="crypto_"
-        )
+        self.security_executor = ThreadPoolExecutor(max_workers=10, thread_name_prefix="security_")
+        self.crypto_executor = ThreadPoolExecutor(max_workers=5, thread_name_prefix="crypto_")
 
         # Processing queues
         self.security_queue = asyncio.Queue(maxsize=5000)
@@ -291,10 +287,7 @@ class SecurityFlowIntegrator:
             cache_key = self._generate_security_cache_key(context, data[:64])
             if cache_key in self.decision_cache:
                 cached_decision = self.decision_cache[cache_key]
-                if (
-                    cached_decision.expiry_time is None
-                    or time.time() < cached_decision.expiry_time
-                ):
+                if cached_decision.expiry_time is None or time.time() < cached_decision.expiry_time:
                     return await self._apply_security_decision(data, cached_decision)
 
             # Parallel security analyses
@@ -309,21 +302,11 @@ class SecurityFlowIntegrator:
             results = await asyncio.gather(*security_tasks, return_exceptions=True)
 
             # Process results
-            threat_analysis = (
-                results[0] if not isinstance(results[0], Exception) else None
-            )
-            access_granted = (
-                results[1] if not isinstance(results[1], Exception) else False
-            )
-            encryption_valid = (
-                results[2] if not isinstance(results[2], Exception) else False
-            )
-            rate_limit_ok = (
-                results[3] if not isinstance(results[3], Exception) else False
-            )
-            reputation_score = (
-                results[4] if not isinstance(results[4], Exception) else 0.5
-            )
+            threat_analysis = results[0] if not isinstance(results[0], Exception) else None
+            access_granted = results[1] if not isinstance(results[1], Exception) else False
+            encryption_valid = results[2] if not isinstance(results[2], Exception) else False
+            rate_limit_ok = results[3] if not isinstance(results[3], Exception) else False
+            reputation_score = results[4] if not isinstance(results[4], Exception) else 0.5
 
             # Make security decision
             decision = await self._make_security_decision(
@@ -467,9 +450,7 @@ class SecurityFlowIntegrator:
 
             # Check user permissions if available
             if context.user_id:
-                return await self.access_controller.check_user_access(
-                    context.user_id, context.protocol, context.dest_port
-                )
+                return await self.access_controller.check_user_access(context.user_id, context.protocol, context.dest_port)
 
             # Check device trust level
             if context.device_id and context.trust_level < 0.3:
@@ -490,9 +471,7 @@ class SecurityFlowIntegrator:
             logger.error(f"Error checking access control: {e}")
             return False
 
-    async def _validate_encryption_requirements(
-        self, data: bytes, context: SecurityContext
-    ) -> bool:
+    async def _validate_encryption_requirements(self, data: bytes, context: SecurityContext) -> bool:
         """Validate encryption requirements"""
         try:
             if not self.security_policies.get("encryption_required", True):
@@ -524,23 +503,17 @@ class SecurityFlowIntegrator:
 
             # Check per-IP rate limit
             if "per_ip" in rate_limits:
-                if await self._check_rate_limit(
-                    f"ip:{context.source_ip}", rate_limits["per_ip"]
-                ):
+                if await self._check_rate_limit(f"ip:{context.source_ip}", rate_limits["per_ip"]):
                     return False
 
             # Check per-user rate limit
             if context.user_id and "per_user" in rate_limits:
-                if await self._check_rate_limit(
-                    f"user:{context.user_id}", rate_limits["per_user"]
-                ):
+                if await self._check_rate_limit(f"user:{context.user_id}", rate_limits["per_user"]):
                     return False
 
             # Check per-session rate limit
             if "per_session" in rate_limits:
-                if await self._check_rate_limit(
-                    f"session:{context.session_id}", rate_limits["per_session"]
-                ):
+                if await self._check_rate_limit(f"session:{context.session_id}", rate_limits["per_session"]):
                     return False
 
             return True
@@ -602,21 +575,15 @@ class SecurityFlowIntegrator:
             if threat_analysis:
                 if threat_analysis.threat_level == ThreatLevel.CRITICAL:
                     action = SecurityAction.BLOCK
-                    reasons.append(
-                        f"Critical threat detected: {threat_analysis.threat_type}"
-                    )
+                    reasons.append(f"Critical threat detected: {threat_analysis.threat_type}")
                     confidence = threat_analysis.confidence
                 elif threat_analysis.threat_level == ThreatLevel.HIGH:
                     action = SecurityAction.QUARANTINE
-                    reasons.append(
-                        f"High threat detected: {threat_analysis.threat_type}"
-                    )
+                    reasons.append(f"High threat detected: {threat_analysis.threat_type}")
                     confidence = threat_analysis.confidence
                 elif threat_analysis.threat_level == ThreatLevel.MEDIUM:
                     action = SecurityAction.MONITOR
-                    reasons.append(
-                        f"Medium threat detected: {threat_analysis.threat_type}"
-                    )
+                    reasons.append(f"Medium threat detected: {threat_analysis.threat_type}")
 
             # Check access control
             if not access_granted:
@@ -651,14 +618,10 @@ class SecurityFlowIntegrator:
             decision = SecurityDecision(
                 decision_id=decision_id,
                 action=action,
-                reason=(
-                    "; ".join(reasons) if reasons else "No security concerns detected"
-                ),
+                reason=("; ".join(reasons) if reasons else "No security concerns detected"),
                 confidence=confidence,
                 metadata={
-                    "threat_analysis": (
-                        asdict(threat_analysis) if threat_analysis else None
-                    ),
+                    "threat_analysis": (asdict(threat_analysis) if threat_analysis else None),
                     "access_granted": access_granted,
                     "encryption_valid": encryption_valid,
                     "rate_limit_ok": rate_limit_ok,
@@ -677,9 +640,7 @@ class SecurityFlowIntegrator:
                 confidence=1.0,
             )
 
-    async def _apply_security_decision(
-        self, data: bytes, decision: SecurityDecision
-    ) -> bytes:
+    async def _apply_security_decision(self, data: bytes, decision: SecurityDecision) -> bytes:
         """Apply security decision to data"""
         try:
             if decision.action == SecurityAction.BLOCK:
@@ -725,9 +686,7 @@ class SecurityFlowIntegrator:
             logger.error(f"Error checking IOCs: {e}")
             return False
 
-    async def _check_suspicious_patterns(
-        self, data: bytes, context: SecurityContext
-    ) -> List[Dict[str, Any]]:
+    async def _check_suspicious_patterns(self, data: bytes, context: SecurityContext) -> List[Dict[str, Any]]:
         """Check for suspicious patterns in data"""
         patterns = []
 
@@ -804,10 +763,7 @@ class SecurityFlowIntegrator:
         """Check if rate limit is exceeded"""
         try:
             # Use Redis for distributed rate limiting if available
-            if (
-                hasattr(self.orchestrator, "redis_client")
-                and self.orchestrator.redis_client
-            ):
+            if hasattr(self.orchestrator, "redis_client") and self.orchestrator.redis_client:
                 current = await self.orchestrator.redis_client.incr(f"rate_limit:{key}")
                 if current == 1:
                     await self.orchestrator.redis_client.expire(f"rate_limit:{key}", 60)
@@ -862,9 +818,7 @@ class SecurityFlowIntegrator:
 
         return mitigations.get(threat_level, ["Monitor traffic"])
 
-    def _generate_security_cache_key(
-        self, context: SecurityContext, data_sample: bytes
-    ) -> str:
+    def _generate_security_cache_key(self, context: SecurityContext, data_sample: bytes) -> str:
         """Generate cache key for security decisions"""
         try:
             key_data = f"{context.source_ip}:{context.dest_port}:{context.protocol}:{data_sample}"
@@ -952,8 +906,7 @@ class SecurityFlowIntegrator:
                     "false_positives": self.false_positives,
                     "blocked_ips_count": len(self.blocked_ips),
                     "active_threats_count": len(self.active_threats),
-                    "cache_hit_rate": len(self.decision_cache)
-                    / max(self.security_checks_count, 1),
+                    "cache_hit_rate": len(self.decision_cache) / max(self.security_checks_count, 1),
                 }
 
                 # Send metrics to orchestrator
@@ -981,8 +934,7 @@ class SecurityFlowIntegrator:
         return {
             "security_checks_count": self.security_checks_count,
             "threats_detected": self.threats_detected,
-            "detection_rate": self.threats_detected
-            / max(self.security_checks_count, 1),
+            "detection_rate": self.threats_detected / max(self.security_checks_count, 1),
             "blocked_ips_count": len(self.blocked_ips),
             "active_threats": len(self.active_threats),
         }

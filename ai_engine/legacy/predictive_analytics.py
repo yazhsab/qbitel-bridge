@@ -61,9 +61,7 @@ class TimeSeriesData:
 
     def to_dataframe(self) -> pd.DataFrame:
         """Convert to pandas DataFrame."""
-        return pd.DataFrame(
-            {"timestamp": self.timestamps, "value": self.values}
-        ).set_index("timestamp")
+        return pd.DataFrame({"timestamp": self.timestamps, "value": self.values}).set_index("timestamp")
 
     def get_latest_window(self, hours: int = 24) -> "TimeSeriesData":
         """Get data from the latest N hours."""
@@ -120,12 +118,8 @@ class FailurePredictor:
         self.logger = logging.getLogger(__name__)
 
         # Time series models
-        self.isolation_forest = IsolationForest(
-            contamination=0.1, random_state=42, n_estimators=100
-        )
-        self.regression_model = RandomForestRegressor(
-            n_estimators=100, random_state=42, max_depth=10
-        )
+        self.isolation_forest = IsolationForest(contamination=0.1, random_state=42, n_estimators=100)
+        self.regression_model = RandomForestRegressor(n_estimators=100, random_state=42, max_depth=10)
         self.scaler = StandardScaler()
 
         # Model state
@@ -175,9 +169,7 @@ class FailurePredictor:
             combined_features = self._prepare_features(time_series_data)
 
             # Perform statistical analysis
-            statistical_analysis = self._perform_statistical_analysis(
-                time_series_data, prediction_horizon
-            )
+            statistical_analysis = self._perform_statistical_analysis(time_series_data, prediction_horizon)
 
             # Anomaly detection
             anomaly_analysis = self._detect_anomalies(combined_features)
@@ -224,9 +216,7 @@ class FailurePredictor:
 
         for ts_data in time_series_data:
             if len(ts_data.values) < self.min_data_points:
-                self.logger.warning(
-                    f"Insufficient data points for {ts_data.metric_name}"
-                )
+                self.logger.warning(f"Insufficient data points for {ts_data.metric_name}")
                 continue
 
             # Basic statistical features
@@ -257,11 +247,7 @@ class FailurePredictor:
             else:
                 features.extend([0.0, 0.0])
 
-        return (
-            np.array(features).reshape(1, -1)
-            if features
-            else np.array([]).reshape(1, -1)
-        )
+        return np.array(features).reshape(1, -1) if features else np.array([]).reshape(1, -1)
 
     def _perform_statistical_analysis(
         self,
@@ -305,11 +291,7 @@ class FailurePredictor:
 
             analysis["trend_indicators"][ts_data.metric_name] = {
                 "slope": float(trend_slope),
-                "direction": (
-                    "increasing"
-                    if trend_slope > 0.01
-                    else "decreasing" if trend_slope < -0.01 else "stable"
-                ),
+                "direction": ("increasing" if trend_slope > 0.01 else "decreasing" if trend_slope < -0.01 else "stable"),
                 "volatility": float(np.std(np.diff(values))),
                 "mean": float(np.mean(values)),
                 "std": float(np.std(values)),
@@ -322,9 +304,7 @@ class FailurePredictor:
                     if len(values) >= 48:  # 2 days of hourly data
                         first_half = values[: len(values) // 2]
                         second_half = values[len(values) // 2 :]
-                        correlation = np.corrcoef(
-                            first_half[: len(second_half)], second_half
-                        )[0, 1]
+                        correlation = np.corrcoef(first_half[: len(second_half)], second_half)[0, 1]
                         if not np.isnan(correlation) and correlation > 0.5:
                             analysis["seasonality_detected"] = True
                 except Exception:
@@ -349,9 +329,7 @@ class FailurePredictor:
             values = np.array(ts_data.values)
             q1, q3 = np.percentile(values, [25, 75])
             iqr = q3 - q1
-            outliers = sum(
-                1 for v in values if v < q1 - 1.5 * iqr or v > q3 + 1.5 * iqr
-            )
+            outliers = sum(1 for v in values if v < q1 - 1.5 * iqr or v > q3 + 1.5 * iqr)
             outlier_ratio = outliers / len(values)
             quality_factors.append(1.0 - min(outlier_ratio, 0.3) / 0.3 * 0.3)
 
@@ -373,9 +351,7 @@ class FailurePredictor:
 
             return {
                 "anomaly_detected": anomaly_score == -1,
-                "anomaly_score": float(
-                    -anomaly_probability
-                ),  # Convert to positive score
+                "anomaly_score": float(-anomaly_probability),  # Convert to positive score
                 "isolation_score": float(anomaly_score),
                 "confidence": 0.7 if anomaly_score == -1 else 0.3,
             }
@@ -435,9 +411,7 @@ class FailurePredictor:
             "trend_confidence": min(trend_strength * 1.5, 1.0),
         }
 
-    def _analyze_patterns(
-        self, time_series_data: List[TimeSeriesData]
-    ) -> Dict[str, Any]:
+    def _analyze_patterns(self, time_series_data: List[TimeSeriesData]) -> Dict[str, Any]:
         """Analyze patterns in time series data."""
 
         patterns = {
@@ -456,9 +430,7 @@ class FailurePredictor:
             # Detect spikes (values > 2 standard deviations)
             mean_val = np.mean(values)
             std_val = np.std(values)
-            spikes = [
-                i for i, v in enumerate(values) if abs(v - mean_val) > 2 * std_val
-            ]
+            spikes = [i for i, v in enumerate(values) if abs(v - mean_val) > 2 * std_val]
 
             if spikes:
                 patterns["spike_patterns"].append(
@@ -466,9 +438,7 @@ class FailurePredictor:
                         "metric": ts_data.metric_name,
                         "spike_count": len(spikes),
                         "spike_ratio": len(spikes) / len(values),
-                        "max_spike_magnitude": float(
-                            max(abs(values[i] - mean_val) for i in spikes)
-                        ),
+                        "max_spike_magnitude": float(max(abs(values[i] - mean_val) for i in spikes)),
                     }
                 )
 
@@ -485,9 +455,7 @@ class FailurePredictor:
                         {
                             "metric": ts_data.metric_name,
                             "drift_magnitude": float(mean_diff),
-                            "drift_direction": (
-                                "upward" if mean_diff > 0 else "downward"
-                            ),
+                            "drift_direction": ("upward" if mean_diff > 0 else "downward"),
                             "drift_significance": float(abs(mean_diff) / std_diff),
                         }
                     )
@@ -500,15 +468,9 @@ class FailurePredictor:
                         try:
                             correlation = np.corrcoef(ts1.values, ts2.values)[0, 1]
                             if not np.isnan(correlation) and abs(correlation) > 0.5:
-                                patterns["correlation_patterns"][
-                                    f"{ts1.metric_name}_vs_{ts2.metric_name}"
-                                ] = {
+                                patterns["correlation_patterns"][f"{ts1.metric_name}_vs_{ts2.metric_name}"] = {
                                     "correlation": float(correlation),
-                                    "strength": (
-                                        "strong"
-                                        if abs(correlation) > 0.8
-                                        else "moderate"
-                                    ),
+                                    "strength": ("strong" if abs(correlation) > 0.8 else "moderate"),
                                 }
                         except Exception:
                             pass
@@ -694,9 +656,7 @@ Consider the system's age, criticality, and business impact in your assessment.
 
         # Adjust based on data quality
         data_quality = statistical_analysis.get("data_quality_score", 1.0)
-        base_probability *= (
-            data_quality  # Lower quality data = less confident prediction
-        )
+        base_probability *= data_quality  # Lower quality data = less confident prediction
 
         # Incorporate LLM insights
         llm_probability = llm_insights.get("failure_probability", 0)
@@ -742,9 +702,7 @@ Consider the system's age, criticality, and business impact in your assessment.
             "processing_time_seconds": processing_time,
             "prediction_timestamp": datetime.now().isoformat(),
             "recommended_actions": llm_insights.get("recommended_actions", []),
-            "monitoring_recommendations": llm_insights.get(
-                "monitoring_recommendations", []
-            ),
+            "monitoring_recommendations": llm_insights.get("monitoring_recommendations", []),
             "key_indicators": llm_insights.get("warning_signs", []),
         }
 
@@ -757,9 +715,7 @@ class PerformanceMonitor:
     and anomaly detection specifically tuned for legacy system characteristics.
     """
 
-    def __init__(
-        self, config: Config, metrics_collector: Optional[AIEngineMetrics] = None
-    ):
+    def __init__(self, config: Config, metrics_collector: Optional[AIEngineMetrics] = None):
         """Initialize performance monitor."""
         self.config = config
         self.metrics = metrics_collector
@@ -815,35 +771,25 @@ class PerformanceMonitor:
             # Limit history size
             max_history = 1000
             if len(self.performance_history[system_id]) > max_history:
-                self.performance_history[system_id] = self.performance_history[
-                    system_id
-                ][-max_history:]
+                self.performance_history[system_id] = self.performance_history[system_id][-max_history:]
 
             # Get historical data for comparison
-            historical_metrics = self._get_historical_metrics(
-                system_id, historical_window_hours
-            )
+            historical_metrics = self._get_historical_metrics(system_id, historical_window_hours)
 
             # Calculate performance indicators
-            performance_indicators = self._calculate_performance_indicators(
-                current_metrics, historical_metrics
-            )
+            performance_indicators = self._calculate_performance_indicators(current_metrics, historical_metrics)
 
             # Threshold analysis
             threshold_analysis = self._analyze_thresholds(current_metrics)
 
             # Anomaly detection
-            anomaly_analysis = await self._detect_performance_anomalies(
-                system_id, current_metrics, historical_metrics
-            )
+            anomaly_analysis = await self._detect_performance_anomalies(system_id, current_metrics, historical_metrics)
 
             # Trend analysis
             trend_analysis = self._analyze_performance_trends(historical_metrics)
 
             # Calculate overall performance score
-            performance_score = self._calculate_performance_score(
-                performance_indicators, threshold_analysis, anomaly_analysis
-            )
+            performance_score = self._calculate_performance_score(performance_indicators, threshold_analysis, anomaly_analysis)
 
             analysis_result = {
                 "system_id": system_id,
@@ -856,9 +802,7 @@ class PerformanceMonitor:
                 "recommendations": self._generate_performance_recommendations(
                     performance_indicators, threshold_analysis, anomaly_analysis
                 ),
-                "alert_level": self._determine_alert_level(
-                    threshold_analysis, anomaly_analysis
-                ),
+                "alert_level": self._determine_alert_level(threshold_analysis, anomaly_analysis),
             }
 
             # Record metrics
@@ -868,14 +812,10 @@ class PerformanceMonitor:
             return analysis_result
 
         except Exception as e:
-            self.logger.error(
-                f"Performance analysis failed for system {system_id}: {e}"
-            )
+            self.logger.error(f"Performance analysis failed for system {system_id}: {e}")
             raise QbitelAIException(f"Performance analysis error: {e}")
 
-    def _get_historical_metrics(
-        self, system_id: str, window_hours: int
-    ) -> List[SystemMetrics]:
+    def _get_historical_metrics(self, system_id: str, window_hours: int) -> List[SystemMetrics]:
         """Get historical metrics within the specified time window."""
 
         if system_id not in self.performance_history:
@@ -883,11 +823,7 @@ class PerformanceMonitor:
 
         cutoff_time = datetime.now() - timedelta(hours=window_hours)
 
-        return [
-            metric
-            for metric in self.performance_history[system_id]
-            if metric.timestamp >= cutoff_time
-        ]
+        return [metric for metric in self.performance_history[system_id] if metric.timestamp >= cutoff_time]
 
     def _calculate_performance_indicators(
         self, current_metrics: SystemMetrics, historical_metrics: List[SystemMetrics]
@@ -933,41 +869,27 @@ class PerformanceMonitor:
                 current_value = indicators[metric_name]["current"]
 
                 indicators[metric_name]["baseline"] = baseline
-                indicators[metric_name]["deviation"] = (
-                    (current_value - baseline) / std_dev if std_dev > 0 else 0.0
-                )
+                indicators[metric_name]["deviation"] = (current_value - baseline) / std_dev if std_dev > 0 else 0.0
 
                 # Calculate percentile rank
                 if current_value is not None:
-                    percentile_rank = sum(
-                        1 for v in values if v <= current_value
-                    ) / len(values)
+                    percentile_rank = sum(1 for v in values if v <= current_value) / len(values)
                     indicators[metric_name]["percentile_rank"] = percentile_rank
 
         # Add response time and error rate if available
         if current_metrics.response_time_ms is not None:
-            response_times = [
-                m.response_time_ms
-                for m in historical_metrics
-                if m.response_time_ms is not None
-            ]
+            response_times = [m.response_time_ms for m in historical_metrics if m.response_time_ms is not None]
             if response_times:
                 indicators["response_time"] = {
                     "current": current_metrics.response_time_ms,
                     "baseline": np.mean(response_times),
                     "deviation": (
-                        (current_metrics.response_time_ms - np.mean(response_times))
-                        / np.std(response_times)
+                        (current_metrics.response_time_ms - np.mean(response_times)) / np.std(response_times)
                         if np.std(response_times) > 0
                         else 0.0
                     ),
                     "percentile_rank": (
-                        sum(
-                            1
-                            for t in response_times
-                            if t <= current_metrics.response_time_ms
-                        )
-                        / len(response_times)
+                        sum(1 for t in response_times if t <= current_metrics.response_time_ms) / len(response_times)
                     ),
                 }
 
@@ -1057,9 +979,7 @@ class PerformanceMonitor:
 
             # Train or use existing anomaly detector
             if system_id not in self.anomaly_detectors:
-                self.anomaly_detectors[system_id] = IsolationForest(
-                    contamination=0.1, random_state=42
-                )
+                self.anomaly_detectors[system_id] = IsolationForest(contamination=0.1, random_state=42)
                 self.anomaly_detectors[system_id].fit(features)
 
             # Test current metrics
@@ -1081,9 +1001,7 @@ class PerformanceMonitor:
             anomaly_score = detector.score_samples(current_features)[0]
 
             anomaly_analysis["anomaly_detected"] = anomaly_prediction == -1
-            anomaly_analysis["anomaly_score"] = float(
-                -anomaly_score
-            )  # Convert to positive
+            anomaly_analysis["anomaly_score"] = float(-anomaly_score)  # Convert to positive
             anomaly_analysis["confidence"] = 0.8 if anomaly_prediction == -1 else 0.3
 
             # Identify which specific metrics are anomalous
@@ -1097,9 +1015,7 @@ class PerformanceMonitor:
                     "transaction_rate",
                 ]
 
-                for i, (metric_name, current_value) in enumerate(
-                    zip(metric_names, current_features[0])
-                ):
+                for i, (metric_name, current_value) in enumerate(zip(metric_names, current_features[0])):
                     historical_values = features[:, i]
                     if len(historical_values) > 0:
                         mean_val = np.mean(historical_values)
@@ -1114,9 +1030,7 @@ class PerformanceMonitor:
                                         float(mean_val - 2 * std_val),
                                         float(mean_val + 2 * std_val),
                                     ],
-                                    "deviation_magnitude": float(
-                                        abs(current_value - mean_val) / std_val
-                                    ),
+                                    "deviation_magnitude": float(abs(current_value - mean_val) / std_val),
                                 }
                             )
 
@@ -1126,9 +1040,7 @@ class PerformanceMonitor:
 
         return anomaly_analysis
 
-    def _analyze_performance_trends(
-        self, historical_metrics: List[SystemMetrics]
-    ) -> Dict[str, Any]:
+    def _analyze_performance_trends(self, historical_metrics: List[SystemMetrics]) -> Dict[str, Any]:
         """Analyze performance trends over time."""
 
         if len(historical_metrics) < 5:
@@ -1220,8 +1132,7 @@ class PerformanceMonitor:
             metric = violation["metric"]
             if metric == "cpu_utilization":
                 recommendations.append(
-                    "CPU utilization is critically high. Consider scaling resources or "
-                    "optimizing CPU-intensive processes."
+                    "CPU utilization is critically high. Consider scaling resources or " "optimizing CPU-intensive processes."
                 )
             elif metric == "memory_utilization":
                 recommendations.append(
@@ -1235,8 +1146,7 @@ class PerformanceMonitor:
                 )
             elif metric == "response_time_ms":
                 recommendations.append(
-                    "Response times are critically high. Investigate performance bottlenecks "
-                    "and optimize slow operations."
+                    "Response times are critically high. Investigate performance bottlenecks " "and optimize slow operations."
                 )
 
         # Anomaly-based recommendations
@@ -1245,8 +1155,7 @@ class PerformanceMonitor:
             if anomalous_metrics:
                 metrics_list = ", ".join([m["metric"] for m in anomalous_metrics])
                 recommendations.append(
-                    f"Anomalous behavior detected in: {metrics_list}. "
-                    "Review recent changes and investigate root causes."
+                    f"Anomalous behavior detected in: {metrics_list}. " "Review recent changes and investigate root causes."
                 )
 
         # Performance deviation recommendations
@@ -1264,9 +1173,7 @@ class PerformanceMonitor:
 
         return recommendations
 
-    def _determine_alert_level(
-        self, threshold_analysis: Dict[str, Any], anomaly_analysis: Dict[str, Any]
-    ) -> str:
+    def _determine_alert_level(self, threshold_analysis: Dict[str, Any], anomaly_analysis: Dict[str, Any]) -> str:
         """Determine overall alert level."""
 
         if threshold_analysis.get("violations"):
@@ -1285,9 +1192,7 @@ class PerformanceMonitor:
 
         return "normal"
 
-    def _record_performance_metrics(
-        self, system_id: str, analysis_result: Dict[str, Any]
-    ) -> None:
+    def _record_performance_metrics(self, system_id: str, analysis_result: Dict[str, Any]) -> None:
         """Record performance metrics for monitoring."""
 
         if not self.metrics:
@@ -1295,29 +1200,21 @@ class PerformanceMonitor:
 
         try:
             # Record performance score
-            self.metrics.custom.set_custom_gauge(
-                f"performance_score_{system_id}", analysis_result["performance_score"]
-            )
+            self.metrics.custom.set_custom_gauge(f"performance_score_{system_id}", analysis_result["performance_score"])
 
             # Record alert level as numeric value
             alert_levels = {"normal": 0, "info": 1, "warning": 2, "critical": 3}
             alert_numeric = alert_levels.get(analysis_result["alert_level"], 0)
-            self.metrics.custom.set_custom_gauge(
-                f"alert_level_{system_id}", alert_numeric
-            )
+            self.metrics.custom.set_custom_gauge(f"alert_level_{system_id}", alert_numeric)
 
             # Record anomaly detection
             if analysis_result["anomaly_analysis"].get("anomaly_detected"):
-                self.metrics.custom.increment_custom_counter(
-                    f"anomalies_detected_{system_id}"
-                )
+                self.metrics.custom.increment_custom_counter(f"anomalies_detected_{system_id}")
 
         except Exception as e:
             self.logger.error(f"Failed to record performance metrics: {e}")
 
-    def update_performance_thresholds(
-        self, metric_name: str, warning: float, critical: float
-    ) -> None:
+    def update_performance_thresholds(self, metric_name: str, warning: float, critical: float) -> None:
         """Update performance thresholds for a metric."""
 
         if metric_name not in self.performance_thresholds:
@@ -1326,9 +1223,7 @@ class PerformanceMonitor:
         self.performance_thresholds[metric_name]["warning"] = warning
         self.performance_thresholds[metric_name]["critical"] = critical
 
-        self.logger.info(
-            f"Updated thresholds for {metric_name}: warning={warning}, critical={critical}"
-        )
+        self.logger.info(f"Updated thresholds for {metric_name}: warning={warning}, critical={critical}")
 
     def get_system_performance_summary(self, system_id: str) -> Dict[str, Any]:
         """Get performance summary for a system."""
@@ -1336,9 +1231,7 @@ class PerformanceMonitor:
         if system_id not in self.performance_history:
             return {"system_id": system_id, "status": "no_data"}
 
-        recent_metrics = self.performance_history[system_id][
-            -10:
-        ]  # Last 10 measurements
+        recent_metrics = self.performance_history[system_id][-10:]  # Last 10 measurements
 
         if not recent_metrics:
             return {"system_id": system_id, "status": "no_recent_data"}
@@ -1368,8 +1261,7 @@ class PerformanceMonitor:
             },
             "data_points": len(self.performance_history[system_id]),
             "monitoring_duration_hours": (
-                latest_metric.timestamp
-                - self.performance_history[system_id][0].timestamp
+                latest_metric.timestamp - self.performance_history[system_id][0].timestamp
             ).total_seconds()
             / 3600,
         }
@@ -1432,9 +1324,7 @@ class MaintenanceScheduler:
 
         try:
             # Filter and prioritize requests
-            prioritized_requests = self._prioritize_maintenance_requests(
-                maintenance_requests
-            )
+            prioritized_requests = self._prioritize_maintenance_requests(maintenance_requests)
 
             # Check scheduling constraints
             scheduling_analysis = self._analyze_scheduling_constraints(
@@ -1442,14 +1332,10 @@ class MaintenanceScheduler:
             )
 
             # Generate optimal schedule
-            optimized_schedule = await self._generate_optimal_schedule(
-                prioritized_requests, scheduling_analysis
-            )
+            optimized_schedule = await self._generate_optimal_schedule(prioritized_requests, scheduling_analysis)
 
             # Calculate resource utilization
-            resource_utilization = self._calculate_resource_utilization(
-                optimized_schedule
-            )
+            resource_utilization = self._calculate_resource_utilization(optimized_schedule)
 
             # Get LLM recommendations for schedule optimization
             llm_recommendations = {}
@@ -1466,17 +1352,10 @@ class MaintenanceScheduler:
                 "optimization_metrics": {
                     "total_requests": len(maintenance_requests),
                     "scheduled_requests": len(optimized_schedule),
-                    "deferred_requests": len(maintenance_requests)
-                    - len(optimized_schedule),
-                    "average_lead_time_hours": self._calculate_average_lead_time(
-                        optimized_schedule
-                    ),
-                    "estimated_total_cost": sum(
-                        r.estimated_cost or 0 for r in optimized_schedule
-                    ),
-                    "schedule_efficiency_score": self._calculate_schedule_efficiency(
-                        optimized_schedule, resource_utilization
-                    ),
+                    "deferred_requests": len(maintenance_requests) - len(optimized_schedule),
+                    "average_lead_time_hours": self._calculate_average_lead_time(optimized_schedule),
+                    "estimated_total_cost": sum(r.estimated_cost or 0 for r in optimized_schedule),
+                    "schedule_efficiency_score": self._calculate_schedule_efficiency(optimized_schedule, resource_utilization),
                 },
             }
 
@@ -1484,9 +1363,7 @@ class MaintenanceScheduler:
             self.logger.error(f"Maintenance schedule optimization failed: {e}")
             raise QbitelAIException(f"Schedule optimization error: {e}")
 
-    def _prioritize_maintenance_requests(
-        self, requests: List[MaintenanceRecommendation]
-    ) -> List[MaintenanceRecommendation]:
+    def _prioritize_maintenance_requests(self, requests: List[MaintenanceRecommendation]) -> List[MaintenanceRecommendation]:
         """Prioritize maintenance requests based on multiple factors."""
 
         def calculate_priority_score(request: MaintenanceRecommendation) -> float:
@@ -1524,9 +1401,7 @@ class MaintenanceScheduler:
 
             # Urgency based on recommended start time
             if request.recommended_start_time:
-                time_to_start = (
-                    request.recommended_start_time - datetime.now()
-                ).total_seconds() / 3600
+                time_to_start = (request.recommended_start_time - datetime.now()).total_seconds() / 3600
                 if time_to_start < 24:  # Less than 24 hours
                     score += 40
                 elif time_to_start < 72:  # Less than 72 hours
@@ -1535,9 +1410,7 @@ class MaintenanceScheduler:
                     score += 10
 
             # Business impact consideration
-            if hasattr(request, "business_impact_score") and request.metadata.get(
-                "business_impact_score"
-            ):
+            if hasattr(request, "business_impact_score") and request.metadata.get("business_impact_score"):
                 score += min(request.metadata["business_impact_score"] * 5, 25)
 
             return score
@@ -1570,9 +1443,7 @@ class MaintenanceScheduler:
         # Analyze time windows
         available_windows = []
         start_date = datetime.now()
-        end_date = start_date + timedelta(
-            days=constraints.get("max_schedule_horizon_days", 90)
-        )
+        end_date = start_date + timedelta(days=constraints.get("max_schedule_horizon_days", 90))
 
         current_date = start_date
         while current_date < end_date:
@@ -1603,38 +1474,20 @@ class MaintenanceScheduler:
 
         # Analyze resource constraints
         resource_analysis = {
-            "available_technicians": (
-                resource_constraints.get("technicians", 5)
-                if resource_constraints
-                else 5
-            ),
-            "available_tools": (
-                resource_constraints.get("tools", []) if resource_constraints else []
-            ),
-            "budget_limit": (
-                resource_constraints.get("budget", 100000)
-                if resource_constraints
-                else 100000
-            ),
+            "available_technicians": (resource_constraints.get("technicians", 5) if resource_constraints else 5),
+            "available_tools": (resource_constraints.get("tools", []) if resource_constraints else []),
+            "budget_limit": (resource_constraints.get("budget", 100000) if resource_constraints else 100000),
             "concurrent_capacity": constraints.get("max_concurrent_maintenance", 3),
         }
 
         # Analyze request requirements
         request_analysis = {
             "total_requests": len(requests),
-            "emergency_requests": sum(
-                1 for r in requests if r.maintenance_type == MaintenanceType.EMERGENCY
-            ),
-            "critical_requests": sum(
-                1 for r in requests if r.priority == SeverityLevel.CRITICAL
-            ),
-            "total_estimated_duration": sum(
-                r.expected_duration_hours for r in requests
-            ),
+            "emergency_requests": sum(1 for r in requests if r.maintenance_type == MaintenanceType.EMERGENCY),
+            "critical_requests": sum(1 for r in requests if r.priority == SeverityLevel.CRITICAL),
+            "total_estimated_duration": sum(r.expected_duration_hours for r in requests),
             "total_estimated_cost": sum(r.estimated_cost or 0 for r in requests),
-            "required_expertise": list(
-                set(expertise for r in requests for expertise in r.required_expertise)
-            ),
+            "required_expertise": list(set(expertise for r in requests for expertise in r.required_expertise)),
         }
 
         return {
@@ -1642,9 +1495,7 @@ class MaintenanceScheduler:
             "available_windows": available_windows,
             "resource_analysis": resource_analysis,
             "request_analysis": request_analysis,
-            "scheduling_feasibility": self._assess_scheduling_feasibility(
-                requests, available_windows, resource_analysis
-            ),
+            "scheduling_feasibility": self._assess_scheduling_feasibility(requests, available_windows, resource_analysis),
         }
 
     def _assess_scheduling_feasibility(
@@ -1655,22 +1506,14 @@ class MaintenanceScheduler:
     ) -> Dict[str, Any]:
         """Assess the feasibility of scheduling all requests."""
 
-        total_available_hours = sum(
-            window["available_hours"] for window in available_windows
-        )
-        total_required_hours = sum(
-            request.expected_duration_hours for request in requests
-        )
+        total_available_hours = sum(window["available_hours"] for window in available_windows)
+        total_required_hours = sum(request.expected_duration_hours for request in requests)
 
         # Account for concurrent capacity
         concurrent_capacity = resource_analysis.get("concurrent_capacity", 1)
         effective_available_hours = total_available_hours * concurrent_capacity
 
-        utilization_ratio = (
-            total_required_hours / effective_available_hours
-            if effective_available_hours > 0
-            else float("inf")
-        )
+        utilization_ratio = total_required_hours / effective_available_hours if effective_available_hours > 0 else float("inf")
 
         return {
             "total_available_hours": total_available_hours,
@@ -1678,12 +1521,8 @@ class MaintenanceScheduler:
             "total_required_hours": total_required_hours,
             "utilization_ratio": utilization_ratio,
             "feasible": utilization_ratio <= 0.9,  # 90% utilization threshold
-            "over_capacity_hours": max(
-                0, total_required_hours - effective_available_hours
-            ),
-            "capacity_recommendations": self._generate_capacity_recommendations(
-                utilization_ratio
-            ),
+            "over_capacity_hours": max(0, total_required_hours - effective_available_hours),
+            "capacity_recommendations": self._generate_capacity_recommendations(utilization_ratio),
         }
 
     def _generate_capacity_recommendations(self, utilization_ratio: float) -> List[str]:
@@ -1708,9 +1547,7 @@ class MaintenanceScheduler:
                 "maintenance or optimizing resource allocation."
             )
         else:
-            recommendations.append(
-                "Schedule utilization is within optimal range (50-90%)."
-            )
+            recommendations.append("Schedule utilization is within optimal range (50-90%).")
 
         return recommendations
 
@@ -1730,9 +1567,7 @@ class MaintenanceScheduler:
 
         for request in prioritized_requests:
             # Find best time slot for this request
-            best_slot = self._find_best_time_slot(
-                request, available_windows, resource_usage, resource_analysis
-            )
+            best_slot = self._find_best_time_slot(request, available_windows, resource_usage, resource_analysis)
 
             if best_slot:
                 # Schedule the request
@@ -1745,9 +1580,7 @@ class MaintenanceScheduler:
                 # Could not schedule - add to deferred list
                 request.status = "deferred"
                 request.metadata = request.metadata or {}
-                request.metadata["deferral_reason"] = (
-                    "No available time slots or resources"
-                )
+                request.metadata["deferral_reason"] = "No available time slots or resources"
 
         # Sort schedule by start time
         optimized_schedule.sort(key=lambda r: r.recommended_start_time or datetime.max)
@@ -1763,9 +1596,7 @@ class MaintenanceScheduler:
     ) -> Optional[Dict[str, Any]]:
         """Find the best time slot for a maintenance request."""
 
-        min_start_time = datetime.now() + timedelta(
-            hours=self.scheduling_constraints.get("min_lead_time_hours", 24)
-        )
+        min_start_time = datetime.now() + timedelta(hours=self.scheduling_constraints.get("min_lead_time_hours", 24))
 
         # Consider preferred start time if specified
         preferred_start = request.recommended_start_time or min_start_time
@@ -1789,15 +1620,11 @@ class MaintenanceScheduler:
                     continue
 
                 # Check resource availability
-                if not self._check_resource_availability(
-                    slot_start, slot_end, resource_usage, resource_analysis, request
-                ):
+                if not self._check_resource_availability(slot_start, slot_end, resource_usage, resource_analysis, request):
                     continue
 
                 # Calculate slot score
-                slot_score = self._calculate_slot_score(
-                    slot_start, preferred_start, request, resource_usage
-                )
+                slot_score = self._calculate_slot_score(slot_start, preferred_start, request, resource_usage)
 
                 if slot_score > best_score:
                     best_score = slot_score
@@ -1887,9 +1714,7 @@ class MaintenanceScheduler:
 
         return max(score, 0)
 
-    def _schedule_request(
-        self, request: MaintenanceRecommendation, time_slot: Dict[str, Any]
-    ) -> MaintenanceRecommendation:
+    def _schedule_request(self, request: MaintenanceRecommendation, time_slot: Dict[str, Any]) -> MaintenanceRecommendation:
         """Schedule a maintenance request in the specified time slot."""
 
         scheduled_request = request
@@ -1932,16 +1757,10 @@ class MaintenanceScheduler:
             }
 
         resource_usage[date_key]["concurrent_tasks"] += 1
-        resource_usage[date_key][
-            "allocated_hours"
-        ] += scheduled_request.expected_duration_hours
-        resource_usage[date_key]["scheduled_requests"].append(
-            scheduled_request.recommendation_id
-        )
+        resource_usage[date_key]["allocated_hours"] += scheduled_request.expected_duration_hours
+        resource_usage[date_key]["scheduled_requests"].append(scheduled_request.recommendation_id)
 
-    def _calculate_resource_utilization(
-        self, scheduled_requests: List[MaintenanceRecommendation]
-    ) -> Dict[str, Any]:
+    def _calculate_resource_utilization(self, scheduled_requests: List[MaintenanceRecommendation]) -> Dict[str, Any]:
         """Calculate resource utilization metrics."""
 
         if not scheduled_requests:
@@ -1961,22 +1780,12 @@ class MaintenanceScheduler:
                 total_hours += request.expected_duration_hours
 
         # Calculate metrics
-        avg_daily_utilization = (
-            np.mean(list(daily_utilization.values())) if daily_utilization else 0.0
-        )
-        max_daily_utilization = (
-            max(daily_utilization.values()) if daily_utilization else 0.0
-        )
+        avg_daily_utilization = np.mean(list(daily_utilization.values())) if daily_utilization else 0.0
+        max_daily_utilization = max(daily_utilization.values()) if daily_utilization else 0.0
 
         # Efficiency based on even distribution
-        utilization_variance = (
-            np.var(list(daily_utilization.values()))
-            if len(daily_utilization) > 1
-            else 0.0
-        )
-        efficiency = max(
-            0, 100 - utilization_variance
-        )  # Lower variance = higher efficiency
+        utilization_variance = np.var(list(daily_utilization.values())) if len(daily_utilization) > 1 else 0.0
+        efficiency = max(0, 100 - utilization_variance)  # Lower variance = higher efficiency
 
         return {
             "total_scheduled_hours": total_hours,
@@ -1985,14 +1794,10 @@ class MaintenanceScheduler:
             "peak_daily_hours": max_daily_utilization,
             "efficiency_score": efficiency,
             "schedule_span_days": len(daily_utilization),
-            "utilization_distribution": self._calculate_utilization_distribution(
-                daily_utilization
-            ),
+            "utilization_distribution": self._calculate_utilization_distribution(daily_utilization),
         }
 
-    def _calculate_utilization_distribution(
-        self, daily_utilization: Dict[str, float]
-    ) -> Dict[str, int]:
+    def _calculate_utilization_distribution(self, daily_utilization: Dict[str, float]) -> Dict[str, int]:
         """Calculate distribution of daily utilization levels."""
 
         if not daily_utilization:
@@ -2042,9 +1847,7 @@ class MaintenanceScheduler:
                 type_distribution[mtype] = type_distribution.get(mtype, 0) + 1
 
                 priority = request.priority.value
-                priority_distribution[priority] = (
-                    priority_distribution.get(priority, 0) + 1
-                )
+                priority_distribution[priority] = priority_distribution.get(priority, 0) + 1
 
             prompt = f"""
 You are optimizing a maintenance schedule for legacy systems.
@@ -2142,9 +1945,7 @@ Focus on practical, actionable recommendations for legacy system maintenance.
                 current_section = "operational_improvements"
             elif "cost optimization" in line.lower():
                 current_section = "cost_optimization"
-            elif current_section and (
-                line.startswith("-") or line.startswith("•") or line.startswith("*")
-            ):
+            elif current_section and (line.startswith("-") or line.startswith("•") or line.startswith("*")):
                 # Extract recommendation item
                 item = line.lstrip("-•* ").strip()
                 if item and current_section in recommendations:
@@ -2157,9 +1958,7 @@ Focus on practical, actionable recommendations for legacy system maintenance.
 
         return recommendations
 
-    def _calculate_average_lead_time(
-        self, scheduled_requests: List[MaintenanceRecommendation]
-    ) -> float:
+    def _calculate_average_lead_time(self, scheduled_requests: List[MaintenanceRecommendation]) -> float:
         """Calculate average lead time for scheduled requests."""
 
         if not scheduled_requests:
@@ -2170,9 +1969,7 @@ Focus on practical, actionable recommendations for legacy system maintenance.
 
         for request in scheduled_requests:
             if request.recommended_start_time:
-                lead_time_hours = (
-                    request.recommended_start_time - now
-                ).total_seconds() / 3600
+                lead_time_hours = (request.recommended_start_time - now).total_seconds() / 3600
                 lead_times.append(max(0, lead_time_hours))
 
         return np.mean(lead_times) if lead_times else 0.0
@@ -2238,9 +2035,7 @@ Focus on practical, actionable recommendations for legacy system maintenance.
 
         # Calculate estimated cost if not provided
         if estimated_cost is None:
-            cost_model = self.cost_models.get(
-                maintenance_type, {"base_cost": 1000, "urgency_multiplier": 1.0}
-            )
+            cost_model = self.cost_models.get(maintenance_type, {"base_cost": 1000, "urgency_multiplier": 1.0})
             base_cost = cost_model["base_cost"]
             urgency_multiplier = cost_model["urgency_multiplier"]
 
@@ -2256,12 +2051,7 @@ Focus on practical, actionable recommendations for legacy system maintenance.
                 SeverityLevel.INFO: 0.6,
             }.get(priority, 1.0)
 
-            estimated_cost = (
-                base_cost
-                * urgency_multiplier
-                * duration_multiplier
-                * priority_multiplier
-            )
+            estimated_cost = base_cost * urgency_multiplier * duration_multiplier * priority_multiplier
 
         recommendation = MaintenanceRecommendation(
             recommendation_id=str(uuid.uuid4()),
@@ -2278,15 +2068,11 @@ Focus on practical, actionable recommendations for legacy system maintenance.
             status="pending",
         )
 
-        self.logger.info(
-            f"Created maintenance recommendation {recommendation.recommendation_id} for system {system_id}"
-        )
+        self.logger.info(f"Created maintenance recommendation {recommendation.recommendation_id} for system {system_id}")
 
         return recommendation
 
-    def get_maintenance_calendar(
-        self, start_date: Optional[datetime] = None, days: int = 30
-    ) -> Dict[str, Any]:
+    def get_maintenance_calendar(self, start_date: Optional[datetime] = None, days: int = 30) -> Dict[str, Any]:
         """Get maintenance calendar view."""
 
         if start_date is None:
@@ -2298,8 +2084,7 @@ Focus on practical, actionable recommendations for legacy system maintenance.
         scheduled_maintenance = [
             maintenance
             for maintenance in self.scheduled_maintenance.values()
-            if maintenance.recommended_start_time
-            and start_date <= maintenance.recommended_start_time <= end_date
+            if maintenance.recommended_start_time and start_date <= maintenance.recommended_start_time <= end_date
         ]
 
         # Group by date
@@ -2332,9 +2117,7 @@ Focus on practical, actionable recommendations for legacy system maintenance.
                             "system_id": maintenance.system_id,
                         }
                     )
-                    calendar_view[date_key][
-                        "total_hours"
-                    ] += maintenance.expected_duration_hours
+                    calendar_view[date_key]["total_hours"] += maintenance.expected_duration_hours
 
                     # Update risk level based on maintenance priority
                     if maintenance.priority in [
@@ -2342,10 +2125,7 @@ Focus on practical, actionable recommendations for legacy system maintenance.
                         SeverityLevel.HIGH,
                     ]:
                         calendar_view[date_key]["risk_level"] = "high"
-                    elif (
-                        maintenance.priority == SeverityLevel.MEDIUM
-                        and calendar_view[date_key]["risk_level"] == "low"
-                    ):
+                    elif maintenance.priority == SeverityLevel.MEDIUM and calendar_view[date_key]["risk_level"] == "low":
                         calendar_view[date_key]["risk_level"] = "medium"
 
         return {
@@ -2355,17 +2135,9 @@ Focus on practical, actionable recommendations for legacy system maintenance.
             "calendar": calendar_view,
             "summary": {
                 "total_maintenance_items": len(scheduled_maintenance),
-                "high_risk_days": sum(
-                    1 for day in calendar_view.values() if day["risk_level"] == "high"
-                ),
-                "busiest_day": (
-                    max(calendar_view.values(), key=lambda d: d["total_hours"])
-                    if calendar_view
-                    else None
-                ),
-                "total_scheduled_hours": sum(
-                    m.expected_duration_hours for m in scheduled_maintenance
-                ),
+                "high_risk_days": sum(1 for day in calendar_view.values() if day["risk_level"] == "high"),
+                "busiest_day": (max(calendar_view.values(), key=lambda d: d["total_hours"]) if calendar_view else None),
+                "total_scheduled_hours": sum(m.expected_duration_hours for m in scheduled_maintenance),
             },
         }
 
@@ -2373,9 +2145,7 @@ Focus on practical, actionable recommendations for legacy system maintenance.
         """Add a maintenance item to the schedule."""
         maintenance.status = "scheduled"
         self.scheduled_maintenance[maintenance.recommendation_id] = maintenance
-        self.logger.info(
-            f"Added maintenance {maintenance.recommendation_id} to schedule"
-        )
+        self.logger.info(f"Added maintenance {maintenance.recommendation_id} to schedule")
 
     def remove_scheduled_maintenance(self, recommendation_id: str) -> bool:
         """Remove a maintenance item from the schedule."""
@@ -2465,9 +2235,7 @@ Focus on practical, actionable recommendations for legacy system maintenance.
                 "required_expertise": list(required_expertise),
                 "total_estimated_cost": total_cost,
                 "total_estimated_hours": total_hours,
-                "average_duration_hours": (
-                    total_hours / len(active_maintenance) if active_maintenance else 0
-                ),
+                "average_duration_hours": (total_hours / len(active_maintenance) if active_maintenance else 0),
             },
             "history": {
                 "completed_maintenance": len(self.maintenance_history),
@@ -2481,14 +2249,6 @@ Focus on practical, actionable recommendations for legacy system maintenance.
         if not self.maintenance_history:
             return 1.0
 
-        successful = sum(
-            1
-            for m in self.maintenance_history
-            if m.success_score and m.success_score > 0.7
-        )
+        successful = sum(1 for m in self.maintenance_history if m.success_score and m.success_score > 0.7)
 
-        return (
-            successful / len(self.maintenance_history)
-            if self.maintenance_history
-            else 1.0
-        )
+        return successful / len(self.maintenance_history) if self.maintenance_history else 1.0

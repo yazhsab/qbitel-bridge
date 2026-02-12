@@ -96,37 +96,23 @@ class TestProtocolCopilotCore:
     @pytest_asyncio.fixture
     async def protocol_copilot(self, mock_config, mock_llm_service, mock_rag_engine):
         """Create Protocol Intelligence Copilot instance."""
-        with patch(
-            "ai_engine.copilot.protocol_copilot.UnifiedLLMService"
-        ) as mock_llm_class:
+        with patch("ai_engine.copilot.protocol_copilot.UnifiedLLMService") as mock_llm_class:
             mock_llm_class.return_value = mock_llm_service
-            with patch(
-                "ai_engine.copilot.protocol_copilot.RAGEngine"
-            ) as mock_rag_class:
+            with patch("ai_engine.copilot.protocol_copilot.RAGEngine") as mock_rag_class:
                 mock_rag_class.return_value = mock_rag_engine
-                copilot = ProtocolIntelligenceCopilot(
-                    llm_service=mock_llm_service, rag_engine=mock_rag_engine
-                )
+                copilot = ProtocolIntelligenceCopilot(llm_service=mock_llm_service, rag_engine=mock_rag_engine)
                 await copilot.initialize()
                 return copilot
 
     @pytest.mark.asyncio
-    async def test_copilot_initialization(
-        self, mock_config, mock_llm_service, mock_rag_engine
-    ):
+    async def test_copilot_initialization(self, mock_config, mock_llm_service, mock_rag_engine):
         """Test Protocol Intelligence Copilot initialization."""
-        with patch(
-            "ai_engine.copilot.protocol_copilot.UnifiedLLMService"
-        ) as mock_llm_class:
+        with patch("ai_engine.copilot.protocol_copilot.UnifiedLLMService") as mock_llm_class:
             mock_llm_class.return_value = mock_llm_service
-            with patch(
-                "ai_engine.copilot.protocol_copilot.RAGEngine"
-            ) as mock_rag_class:
+            with patch("ai_engine.copilot.protocol_copilot.RAGEngine") as mock_rag_class:
                 mock_rag_class.return_value = mock_rag_engine
 
-                copilot = ProtocolIntelligenceCopilot(
-                    llm_service=mock_llm_service, rag_engine=mock_rag_engine
-                )
+                copilot = ProtocolIntelligenceCopilot(llm_service=mock_llm_service, rag_engine=mock_rag_engine)
 
                 assert copilot.llm_service == mock_llm_service
                 assert copilot.rag_engine == mock_rag_engine
@@ -221,26 +207,14 @@ class TestEnhancedProtocolDiscovery:
         """Create Enhanced Protocol Discovery Orchestrator."""
         # Mock all the required components
         with (
-            patch(
-                "ai_engine.discovery.enhanced_protocol_discovery_orchestrator.StatisticalAnalyzer"
-            ),
-            patch(
-                "ai_engine.discovery.enhanced_protocol_discovery_orchestrator.GrammarLearner"
-            ),
-            patch(
-                "ai_engine.discovery.enhanced_protocol_discovery_orchestrator.ParserGenerator"
-            ),
-            patch(
-                "ai_engine.discovery.enhanced_protocol_discovery_orchestrator.ProtocolClassifier"
-            ),
-            patch(
-                "ai_engine.discovery.enhanced_protocol_discovery_orchestrator.MessageValidator"
-            ),
+            patch("ai_engine.discovery.enhanced_protocol_discovery_orchestrator.StatisticalAnalyzer"),
+            patch("ai_engine.discovery.enhanced_protocol_discovery_orchestrator.GrammarLearner"),
+            patch("ai_engine.discovery.enhanced_protocol_discovery_orchestrator.ParserGenerator"),
+            patch("ai_engine.discovery.enhanced_protocol_discovery_orchestrator.ProtocolClassifier"),
+            patch("ai_engine.discovery.enhanced_protocol_discovery_orchestrator.MessageValidator"),
         ):
 
-            orchestrator = EnhancedProtocolDiscoveryOrchestrator(
-                mock_config, mock_copilot
-            )
+            orchestrator = EnhancedProtocolDiscoveryOrchestrator(mock_config, mock_copilot)
 
             # Mock the traditional discovery method
             orchestrator._execute_discovery = AsyncMock(
@@ -255,9 +229,7 @@ class TestEnhancedProtocolDiscovery:
             return orchestrator
 
     @pytest.mark.asyncio
-    async def test_enhanced_discovery_with_llm_analysis(
-        self, enhanced_orchestrator, mock_copilot
-    ):
+    async def test_enhanced_discovery_with_llm_analysis(self, enhanced_orchestrator, mock_copilot):
         """Test enhanced protocol discovery with LLM analysis."""
         request = EnhancedDiscoveryRequest(
             messages=[b"GET /test HTTP/1.1\r\nHost: example.com\r\n\r\n"],
@@ -366,9 +338,7 @@ class TestLLMServiceIntegration:
             assert response.tokens_used == 100
 
     @pytest.mark.asyncio
-    async def test_llm_service_fallback(
-        self, mock_openai_client, mock_anthropic_client
-    ):
+    async def test_llm_service_fallback(self, mock_openai_client, mock_anthropic_client):
         """Test LLM service provider fallback."""
         config = {
             "providers": {
@@ -379,9 +349,7 @@ class TestLLMServiceIntegration:
         }
 
         # Make OpenAI fail
-        mock_openai_client.chat.completions.create.side_effect = Exception(
-            "OpenAI error"
-        )
+        mock_openai_client.chat.completions.create.side_effect = Exception("OpenAI error")
 
         with (
             patch("openai.AsyncOpenAI", return_value=mock_openai_client),
@@ -391,9 +359,7 @@ class TestLLMServiceIntegration:
             service = UnifiedLLMService(config)
             await service.initialize()
 
-            request = LLMRequest(
-                prompt="Test prompt", feature_domain="protocol_copilot"
-            )
+            request = LLMRequest(prompt="Test prompt", feature_domain="protocol_copilot")
 
             response = await service.process_request(request)
 
@@ -410,9 +376,7 @@ class TestRAGEngine:
         """Test RAG engine initialization."""
         with patch("chromadb.Client") as mock_chroma:
             mock_collection = Mock()
-            mock_chroma.return_value.get_or_create_collection.return_value = (
-                mock_collection
-            )
+            mock_chroma.return_value.get_or_create_collection.return_value = mock_collection
 
             engine = RAGEngine()
             await engine.initialize()
@@ -430,9 +394,7 @@ class TestRAGEngine:
                 "distances": [[0.1]],
                 "metadatas": [[{"source": "test"}]],
             }
-            mock_chroma.return_value.get_or_create_collection.return_value = (
-                mock_collection
-            )
+            mock_chroma.return_value.get_or_create_collection.return_value = mock_collection
 
             engine = RAGEngine()
             await engine.initialize()
@@ -449,14 +411,10 @@ class TestRAGEngine:
             assert result is True
 
             # Test search
-            search_results = await engine.search(
-                "test_collection", "test query", limit=5
-            )
+            search_results = await engine.search("test_collection", "test query", limit=5)
             assert len(search_results) > 0
             assert search_results[0]["content"] == "Test document content"
-            assert (
-                search_results[0]["similarity"] > 0.8
-            )  # High similarity for low distance
+            assert search_results[0]["similarity"] > 0.8  # High similarity for low distance
 
 
 class TestAPIIntegration:
@@ -489,9 +447,7 @@ class TestAPIIntegration:
             session_id="api_test_session",
         )
 
-        with patch(
-            "ai_engine.api.copilot_endpoints._get_copilot", return_value=mock_copilot
-        ):
+        with patch("ai_engine.api.copilot_endpoints._get_copilot", return_value=mock_copilot):
             response = await process_copilot_query(query, {"user_id": "test_user"})
 
             assert response.response == "API test response"
@@ -530,12 +486,8 @@ class TestWebSocketIntegration:
             "user_id": "test_user",
         }
 
-        with patch(
-            "ai_engine.api.copilot_endpoints._get_copilot", return_value=mock_copilot
-        ):
-            await handle_websocket_message(
-                mock_websocket, message_data, {"user_id": "test_user"}
-            )
+        with patch("ai_engine.api.copilot_endpoints._get_copilot", return_value=mock_copilot):
+            await handle_websocket_message(mock_websocket, message_data, {"user_id": "test_user"})
 
             # Verify WebSocket response was sent
             mock_websocket.send_text.assert_called_once()
@@ -615,9 +567,7 @@ class TestPerformanceAndResilience:
 
         # Execute concurrently
         start_time = time.time()
-        responses = await asyncio.gather(
-            *[mock_copilot.process_query(query) for query in queries]
-        )
+        responses = await asyncio.gather(*[mock_copilot.process_query(query) for query in queries])
         end_time = time.time()
 
         # Verify all queries completed
@@ -731,9 +681,7 @@ class TestPerformanceBenchmarks:
 
         async def mock_discovery():
             await asyncio.sleep(0.01)  # Simulate processing time
-            return EnhancedDiscoveryResult(
-                protocol_type="HTTP", confidence=0.9, processing_time=0.01
-            )
+            return EnhancedDiscoveryResult(protocol_type="HTTP", confidence=0.9, processing_time=0.01)
 
         result = await benchmark(mock_discovery)
         assert isinstance(result, EnhancedDiscoveryResult)
@@ -746,8 +694,6 @@ pytest_plugins = ["pytest_asyncio", "pytest_benchmark"]
 # Custom test markers
 def pytest_configure(config):
     """Configure custom test markers."""
-    config.addinivalue_line(
-        "markers", "benchmark: mark test as a performance benchmark"
-    )
+    config.addinivalue_line("markers", "benchmark: mark test as a performance benchmark")
     config.addinivalue_line("markers", "integration: mark test as an integration test")
     config.addinivalue_line("markers", "slow: mark test as slow running")

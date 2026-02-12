@@ -35,9 +35,7 @@ from ai_engine.domains.banking.security.hsm.cloud.hsm_pool import (
 )
 
 
-def create_hsm_provider(
-    config: Union[HSMConfig, AWSCloudHSMConfig, AzureHSMConfig, GCPHSMConfig]
-) -> HSMProvider:
+def create_hsm_provider(config: Union[HSMConfig, AWSCloudHSMConfig, AzureHSMConfig, GCPHSMConfig]) -> HSMProvider:
     """
     Create an HSM provider based on configuration.
 

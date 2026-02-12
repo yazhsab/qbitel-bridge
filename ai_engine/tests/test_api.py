@@ -135,9 +135,7 @@ class TestRESTAPI:
         )
 
         with patch("ai_engine.api.rest._ai_engine", mock_engine):
-            response = client.post(
-                "/api/v1/discover", json=payload, headers=auth_headers
-            )
+            response = client.post("/api/v1/discover", json=payload, headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -154,9 +152,7 @@ class TestRESTAPI:
     def test_field_detection_success(self, client, auth_headers, sample_data):
         """Test successful field detection."""
         payload = {
-            "message_data": base64.b64encode(
-                b"GET / HTTP/1.1\r\nHost: example.com\r\n\r\n"
-            ).decode(),
+            "message_data": base64.b64encode(b"GET / HTTP/1.1\r\nHost: example.com\r\n\r\n").decode(),
             "protocol_type": "http",
             "enable_llm_analysis": False,
         }
@@ -185,9 +181,7 @@ class TestRESTAPI:
         )
 
         with patch("ai_engine.api.rest._ai_engine", mock_engine):
-            response = client.post(
-                "/api/v1/detect-fields", json=payload, headers=auth_headers
-            )
+            response = client.post("/api/v1/detect-fields", json=payload, headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -196,25 +190,13 @@ class TestRESTAPI:
 
     def test_app_startup_initializes_services(self, config):
         with ExitStack() as stack:
-            mock_engine_cls = stack.enter_context(
-                patch("ai_engine.api.rest.QbitelAIEngine")
-            )
-            mock_init_llm = stack.enter_context(
-                patch(
-                    "ai_engine.api.rest.initialize_llm_service", new_callable=AsyncMock
-                )
-            )
-            mock_shutdown_llm = stack.enter_context(
-                patch("ai_engine.api.rest.shutdown_llm_service", new_callable=AsyncMock)
-            )
+            mock_engine_cls = stack.enter_context(patch("ai_engine.api.rest.QbitelAIEngine"))
+            mock_init_llm = stack.enter_context(patch("ai_engine.api.rest.initialize_llm_service", new_callable=AsyncMock))
+            mock_shutdown_llm = stack.enter_context(patch("ai_engine.api.rest.shutdown_llm_service", new_callable=AsyncMock))
             mock_create_copilot = stack.enter_context(
-                patch(
-                    "ai_engine.api.rest.create_protocol_copilot", new_callable=AsyncMock
-                )
+                patch("ai_engine.api.rest.create_protocol_copilot", new_callable=AsyncMock)
             )
-            mock_metrics_cls = stack.enter_context(
-                patch("ai_engine.api.rest.MetricsCollector")
-            )
+            mock_metrics_cls = stack.enter_context(patch("ai_engine.api.rest.MetricsCollector"))
             mock_init_translation = stack.enter_context(
                 patch(
                     "ai_engine.api.rest.initialize_translation_studio",
@@ -234,13 +216,9 @@ class TestRESTAPI:
                 )
             )
             mock_shutdown_alert = stack.enter_context(
-                patch(
-                    "ai_engine.api.rest.shutdown_alert_manager", new_callable=AsyncMock
-                )
+                patch("ai_engine.api.rest.shutdown_alert_manager", new_callable=AsyncMock)
             )
-            mock_get_policy = stack.enter_context(
-                patch("ai_engine.api.rest.get_policy_engine")
-            )
+            mock_get_policy = stack.enter_context(patch("ai_engine.api.rest.get_policy_engine"))
             mock_init_security = stack.enter_context(
                 patch(
                     "ai_engine.api.rest.initialize_security_orchestrator",
@@ -484,9 +462,7 @@ class TestGRPCAPI:
 
         # Mock AI Engine status
         mock_engine_status = {"status": "ready", "components": {}}
-        engine = SimpleNamespace(
-            _initialized=True, get_model_info=lambda: mock_engine_status
-        )
+        engine = SimpleNamespace(_initialized=True, get_model_info=lambda: mock_engine_status)
         grpc_service.ai_engine = engine
 
         # Test status
@@ -562,10 +538,7 @@ class TestAPIAuthentication:
         api_key = get_api_key()
 
         assert api_key is not None
-        assert (
-            api_key.startswith("qbitel_")
-            or api_key == "qbitel_mock_key_for_testing"
-        )
+        assert api_key.startswith("qbitel_") or api_key == "qbitel_mock_key_for_testing"
 
     def test_invalid_api_key(self, client, sample_data):
         """Invalid bearer token should be rejected."""

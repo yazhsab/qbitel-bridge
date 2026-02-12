@@ -79,11 +79,7 @@ async def list_sbom_versions():
     """
     try:
         sbom_dir = get_sbom_directory()
-        versions = [
-            d.name
-            for d in sbom_dir.iterdir()
-            if d.is_dir() and not d.name.startswith(".")
-        ]
+        versions = [d.name for d in sbom_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
         return sorted(versions, reverse=True)
     except Exception as e:
         logger.error(f"Failed to list SBOM versions: {e}")
@@ -109,9 +105,7 @@ async def get_version_metadata(version: str):
         version_dir = sbom_dir / version
 
         if not version_dir.exists():
-            raise HTTPException(
-                status_code=404, detail=f"SBOM version {version} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"SBOM version {version} not found")
 
         # Read summary file if available
         summary_file = version_dir / "sbom-summary.json"
@@ -174,11 +168,7 @@ async def download_sbom(
             sbom_file = sbom_dir / version / f"qbitel-{component}-{format}.json"
 
         if not sbom_file.exists():
-            available = (
-                list((sbom_dir / version).glob(f"*-{format}.json"))
-                if (sbom_dir / version).exists()
-                else []
-            )
+            available = list((sbom_dir / version).glob(f"*-{format}.json")) if (sbom_dir / version).exists() else []
             available_names = [f.stem.replace(f"-{format}", "") for f in available]
 
             raise HTTPException(
@@ -263,26 +253,10 @@ async def get_sbom_metadata(
 
                 vuln_summary = SBOMVulnerabilitySummary(
                     total=len(matches),
-                    critical=sum(
-                        1
-                        for m in matches
-                        if m.get("vulnerability", {}).get("severity") == "Critical"
-                    ),
-                    high=sum(
-                        1
-                        for m in matches
-                        if m.get("vulnerability", {}).get("severity") == "High"
-                    ),
-                    medium=sum(
-                        1
-                        for m in matches
-                        if m.get("vulnerability", {}).get("severity") == "Medium"
-                    ),
-                    low=sum(
-                        1
-                        for m in matches
-                        if m.get("vulnerability", {}).get("severity") == "Low"
-                    ),
+                    critical=sum(1 for m in matches if m.get("vulnerability", {}).get("severity") == "Critical"),
+                    high=sum(1 for m in matches if m.get("vulnerability", {}).get("severity") == "High"),
+                    medium=sum(1 for m in matches if m.get("vulnerability", {}).get("severity") == "Medium"),
+                    low=sum(1 for m in matches if m.get("vulnerability", {}).get("severity") == "Low"),
                 )
 
         return SBOMMetadata(
@@ -306,9 +280,7 @@ async def get_sbom_metadata(
 async def get_sbom_vulnerabilities(
     version: str = Query(..., description="QBITEL version"),
     component: str = Query("qbitel-platform", description="Component name"),
-    severity: Optional[str] = Query(
-        None, description="Filter by severity (Critical, High, Medium, Low)"
-    ),
+    severity: Optional[str] = Query(None, description="Filter by severity (Critical, High, Medium, Low)"),
 ):
     """
     Get known vulnerabilities for a specific version and component.
@@ -351,36 +323,15 @@ async def get_sbom_vulnerabilities(
 
         # Filter by severity if requested
         if severity:
-            matches = [
-                m
-                for m in matches
-                if m.get("vulnerability", {}).get("severity", "").lower()
-                == severity.lower()
-            ]
+            matches = [m for m in matches if m.get("vulnerability", {}).get("severity", "").lower() == severity.lower()]
 
         # Build summary
         summary = {
             "total": len(matches),
-            "critical": sum(
-                1
-                for m in matches
-                if m.get("vulnerability", {}).get("severity") == "Critical"
-            ),
-            "high": sum(
-                1
-                for m in matches
-                if m.get("vulnerability", {}).get("severity") == "High"
-            ),
-            "medium": sum(
-                1
-                for m in matches
-                if m.get("vulnerability", {}).get("severity") == "Medium"
-            ),
-            "low": sum(
-                1
-                for m in matches
-                if m.get("vulnerability", {}).get("severity") == "Low"
-            ),
+            "critical": sum(1 for m in matches if m.get("vulnerability", {}).get("severity") == "Critical"),
+            "high": sum(1 for m in matches if m.get("vulnerability", {}).get("severity") == "High"),
+            "medium": sum(1 for m in matches if m.get("vulnerability", {}).get("severity") == "Medium"),
+            "low": sum(1 for m in matches if m.get("vulnerability", {}).get("severity") == "Low"),
         }
 
         # Format vulnerabilities
@@ -396,13 +347,9 @@ async def get_sbom_vulnerabilities(
                     "description": vuln.get("description", "")[:200],
                     "package": artifact.get("name", "Unknown"),
                     "version": artifact.get("version", "Unknown"),
-                    "fixed_in": match.get("vulnerability", {})
-                    .get("fix", {})
-                    .get("versions", []),
+                    "fixed_in": match.get("vulnerability", {}).get("fix", {}).get("versions", []),
                     "cvss_score": (
-                        vuln.get("cvss", [{}])[0].get("metrics", {}).get("baseScore")
-                        if vuln.get("cvss")
-                        else None
+                        vuln.get("cvss", [{}])[0].get("metrics", {}).get("baseScore") if vuln.get("cvss") else None
                     ),
                     "urls": vuln.get("urls", []),
                 }
@@ -436,11 +383,7 @@ async def sbom_health_check():
     """
     try:
         sbom_dir = get_sbom_directory()
-        versions = [
-            d.name
-            for d in sbom_dir.iterdir()
-            if d.is_dir() and not d.name.startswith(".")
-        ]
+        versions = [d.name for d in sbom_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
 
         return {
             "status": "healthy",

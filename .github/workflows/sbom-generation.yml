@@ -36,7 +36,7 @@ jobs:
         run: |
           # Install Syft (Primary SBOM generator)
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | \
-            sh -s -- -b /usr/local/bin v0.100.0
+            sh -s -- -b /usr/local/bin v1.18.1
 
           # Install Cosign (for SBOM signing)
           curl -sSfL https://github.com/sigstore/cosign/releases/download/v2.2.2/cosign-linux-amd64 \
@@ -159,11 +159,47 @@ jobs:
           done
 
       - name: Upload vulnerability reports to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
         if: always()
+        run: |
+          for sarif in ${{ env.SBOM_OUTPUT_DIR }}/*-vulnerabilities.sarif; do
+            component=$(basename "$sarif" | sed 's/-vulnerabilities.sarif//')
+            echo "Uploading SARIF for $component"
+          done
+
+      - name: Upload engine vulnerability SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('./sbom-artifacts/qbitel-engine-vulnerabilities.sarif') != ''
         with:
-          sarif_file: ${{ env.SBOM_OUTPUT_DIR }}
-          category: sbom-vulnerabilities
+          sarif_file: ${{ env.SBOM_OUTPUT_DIR }}/qbitel-engine-vulnerabilities.sarif
+          category: sbom-vuln-engine
+
+      - name: Upload dataplane vulnerability SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('./sbom-artifacts/qbitel-dataplane-vulnerabilities.sarif') != ''
+        with:
+          sarif_file: ${{ env.SBOM_OUTPUT_DIR }}/qbitel-dataplane-vulnerabilities.sarif
+          category: sbom-vuln-dataplane
+
+      - name: Upload controlplane vulnerability SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('./sbom-artifacts/qbitel-controlplane-vulnerabilities.sarif') != ''
+        with:
+          sarif_file: ${{ env.SBOM_OUTPUT_DIR }}/qbitel-controlplane-vulnerabilities.sarif
+          category: sbom-vuln-controlplane
+
+      - name: Upload console vulnerability SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('./sbom-artifacts/qbitel-console-vulnerabilities.sarif') != ''
+        with:
+          sarif_file: ${{ env.SBOM_OUTPUT_DIR }}/qbitel-console-vulnerabilities.sarif
+          category: sbom-vuln-console
+
+      - name: Upload platform vulnerability SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('./sbom-artifacts/qbitel-platform-vulnerabilities.sarif') != ''
+        with:
+          sarif_file: ${{ env.SBOM_OUTPUT_DIR }}/qbitel-platform-vulnerabilities.sarif
+          category: sbom-vuln-platform
 
       # ============================================
       # Sign SBOMs with Cosign (SLSA Level 3)

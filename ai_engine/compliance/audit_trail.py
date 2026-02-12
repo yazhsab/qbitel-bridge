@@ -186,9 +186,7 @@ class CryptographicManager:
             key_path = getattr(self.config, "audit_private_key_path", None)
             if key_path and Path(key_path).exists():
                 with open(key_path, "rb") as f:
-                    private_key = serialization.load_pem_private_key(
-                        f.read(), password=None
-                    )
+                    private_key = serialization.load_pem_private_key(f.read(), password=None)
                 return private_key
         except Exception as e:
             self.logger.warning(f"Could not load existing key: {e}")
@@ -203,9 +201,7 @@ class CryptographicManager:
         """Derive encryption key from configuration."""
         # In production, this would use proper key derivation
         master_key = getattr(self.config, "audit_master_key", "qbitel_audit_2024")
-        return hashlib.pbkdf2_hmac(
-            "sha256", master_key.encode(), b"qbitel_salt", 100000, 32
-        )
+        return hashlib.pbkdf2_hmac("sha256", master_key.encode(), b"qbitel_salt", 100000, 32)
 
     def sign_block(self, block: AuditBlock) -> str:
         """Digitally sign audit block."""
@@ -443,9 +439,7 @@ class BlockchainAuditTrail:
                 {"block_number": str(new_block.block_number)},
             )
 
-            self.logger.info(
-                f"Block {new_block.block_number} created with {len(new_block.events)} events"
-            )
+            self.logger.info(f"Block {new_block.block_number} created with {len(new_block.events)} events")
 
         except Exception as e:
             self.logger.error(f"Failed to create audit block: {e}")
@@ -564,9 +558,7 @@ class BlockchainAuditTrail:
             },
             "event_type_distribution": dict(event_types),
             "blockchain_size_mb": self._calculate_blockchain_size() / (1024 * 1024),
-            "genesis_timestamp": (
-                self.blocks[0].timestamp.isoformat() if self.blocks else None
-            ),
+            "genesis_timestamp": (self.blocks[0].timestamp.isoformat() if self.blocks else None),
         }
 
     def _calculate_blockchain_size(self) -> int:
@@ -741,9 +733,7 @@ class AuditTrailManager:
         random_part = secrets.token_hex(4)
         return f"EVT_{timestamp}_{random_part}"
 
-    async def create_compliance_trail(
-        self, framework: str, assessment_id: str, events: List[Dict[str, Any]]
-    ) -> str:
+    async def create_compliance_trail(self, framework: str, assessment_id: str, events: List[Dict[str, Any]]) -> str:
         """Create comprehensive compliance audit trail."""
         try:
             trail_id = f"TRAIL_{framework}_{assessment_id}_{int(time.time())}"
@@ -900,16 +890,10 @@ class AuditTrailManager:
 
         # Generate recommendations
         if analysis["summary"]["severity_distribution"]["critical"] > 0:
-            analysis["recommendations"].append(
-                "Critical events detected - immediate investigation required"
-            )
+            analysis["recommendations"].append("Critical events detected - immediate investigation required")
 
-        if analysis["summary"]["outcomes"]["failure"] > analysis["summary"][
-            "outcomes"
-        ].get("success", 0):
-            analysis["recommendations"].append(
-                "High failure rate detected - review system processes"
-            )
+        if analysis["summary"]["outcomes"]["failure"] > analysis["summary"]["outcomes"].get("success", 0):
+            analysis["recommendations"].append("High failure rate detected - review system processes")
 
         return analysis
 
@@ -920,9 +904,7 @@ class AuditTrailManager:
         return {
             "blockchain": blockchain_summary,
             "active_sessions": len(self.session_events),
-            "session_events": {
-                session: len(events) for session, events in self.session_events.items()
-            },
+            "session_events": {session: len(events) for session, events in self.session_events.items()},
             "integrity_status": self.blockchain.verify_blockchain_integrity()["valid"],
             "uptime": "active",  # Would track actual uptime in production
         }

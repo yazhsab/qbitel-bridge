@@ -191,9 +191,7 @@ class MultiAgentOrchestrator:
         self._running = False
         self._background_tasks: List[asyncio.Task] = []
 
-        self.logger = logging.getLogger(
-            f"{__name__}.Orchestrator.{self.orchestrator_id[:8]}"
-        )
+        self.logger = logging.getLogger(f"{__name__}.Orchestrator.{self.orchestrator_id[:8]}")
 
     async def start(self) -> None:
         """Start the orchestrator and all components."""
@@ -204,9 +202,7 @@ class MultiAgentOrchestrator:
         self.logger.info(f"Starting Multi-Agent Orchestrator: {self.config.name}")
 
         # Initialize communication protocol
-        self.communication = AgentCommunicationProtocol(
-            max_queue_size=self.config.max_message_queue_size
-        )
+        self.communication = AgentCommunicationProtocol(max_queue_size=self.config.max_message_queue_size)
         await self.communication.start()
 
         # Initialize memory manager
@@ -224,9 +220,7 @@ class MultiAgentOrchestrator:
 
         # Initialize collaboration framework
         if self.config.enable_collaboration:
-            self.collaboration = CollaborationFramework(
-                communication=self.communication
-            )
+            self.collaboration = CollaborationFramework(communication=self.communication)
             await self.collaboration.start()
 
         # Initialize planning agent
@@ -250,12 +244,8 @@ class MultiAgentOrchestrator:
             await self.planning_agent.start()
 
         # Start background tasks
-        self._background_tasks.append(
-            asyncio.create_task(self._health_monitor())
-        )
-        self._background_tasks.append(
-            asyncio.create_task(self._metrics_collector())
-        )
+        self._background_tasks.append(asyncio.create_task(self._health_monitor()))
+        self._background_tasks.append(asyncio.create_task(self._metrics_collector()))
 
         self._running = True
         self.logger.info("Multi-Agent Orchestrator started")
@@ -386,26 +376,18 @@ class MultiAgentOrchestrator:
                 )
 
             self.stats["tasks_completed"] += 1
-            ORCHESTRATOR_TASKS.labels(
-                task_type=task_type,
-                status="success"
-            ).inc()
+            ORCHESTRATOR_TASKS.labels(task_type=task_type, status="success").inc()
 
             execution_time = time.time() - start_time
             ORCHESTRATOR_LATENCY.labels(task_type=task_type).observe(execution_time)
 
-            self.logger.info(
-                f"Task completed: {task_id[:8]} in {execution_time:.2f}s"
-            )
+            self.logger.info(f"Task completed: {task_id[:8]} in {execution_time:.2f}s")
 
             return result
 
         except Exception as e:
             self.stats["tasks_failed"] += 1
-            ORCHESTRATOR_TASKS.labels(
-                task_type=task_type,
-                status="failed"
-            ).inc()
+            ORCHESTRATOR_TASKS.labels(task_type=task_type, status="failed").inc()
             self.logger.error(f"Task failed: {task_id[:8]} - {e}")
             raise
 
@@ -421,12 +403,9 @@ class MultiAgentOrchestrator:
 
         # Add planning metadata
         task.payload["execution_strategy"] = (
-            execution_strategy.value if execution_strategy
-            else self.config.default_execution_strategy.value
+            execution_strategy.value if execution_strategy else self.config.default_execution_strategy.value
         )
-        task.payload["required_capabilities"] = (
-            [c.value for c in required_capabilities] if required_capabilities else []
-        )
+        task.payload["required_capabilities"] = [c.value for c in required_capabilities] if required_capabilities else []
 
         # Submit to planning agent
         planning_task = AgentTask(
@@ -458,11 +437,7 @@ class MultiAgentOrchestrator:
             required_capabilities=required_capabilities,
         )
 
-    async def _wait_for_task(
-        self,
-        task_id: str,
-        timeout: Optional[float] = None
-    ) -> Any:
+    async def _wait_for_task(self, task_id: str, timeout: Optional[float] = None) -> Any:
         """Wait for a task to complete."""
         timeout = timeout or self.config.task_timeout_seconds
         start_time = time.time()
@@ -567,10 +542,7 @@ class MultiAgentOrchestrator:
 
     # Query Methods
 
-    async def get_agents_with_capability(
-        self,
-        capability: AgentCapability
-    ) -> List[Dict[str, Any]]:
+    async def get_agents_with_capability(self, capability: AgentCapability) -> List[Dict[str, Any]]:
         """Get all agents with a specific capability."""
         if not self.pool_manager:
             return []
@@ -659,17 +631,13 @@ class MultiAgentOrchestrator:
                 if self.communication:
                     agents = self.communication.get_agents()
                     for agent_info in agents:
-                        ORCHESTRATOR_AGENTS.labels(
-                            agent_type=agent_info["agent_type"]
-                        ).set(1)
+                        ORCHESTRATOR_AGENTS.labels(agent_type=agent_info["agent_type"]).set(1)
 
                 # Check pools
                 if self.pool_manager:
                     status = await self.pool_manager.get_status()
                     for agent_type, pool_stat in status.get("pools", {}).items():
-                        ORCHESTRATOR_AGENTS.labels(
-                            agent_type=agent_type
-                        ).set(pool_stat["total_agents"])
+                        ORCHESTRATOR_AGENTS.labels(agent_type=agent_type).set(pool_stat["total_agents"])
 
                 await asyncio.sleep(self.config.health_check_interval)
 
@@ -698,10 +666,7 @@ class MultiAgentOrchestrator:
 
 
 # Convenience function to create a fully configured orchestrator
-async def create_orchestrator(
-    llm_service: Optional["UnifiedLLMService"] = None,
-    **config_kwargs
-) -> MultiAgentOrchestrator:
+async def create_orchestrator(llm_service: Optional["UnifiedLLMService"] = None, **config_kwargs) -> MultiAgentOrchestrator:
     """
     Create and start a fully configured Multi-Agent Orchestrator.
 

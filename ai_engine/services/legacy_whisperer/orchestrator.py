@@ -46,9 +46,7 @@ LEGACY_ANALYSIS_DURATION = Histogram(
     "Legacy protocol analysis duration",
     ["analysis_type"],
 )
-LEGACY_CONFIDENCE_SCORE = Histogram(
-    "qbitel_legacy_confidence_score", "Legacy protocol analysis confidence scores"
-)
+LEGACY_CONFIDENCE_SCORE = Histogram("qbitel_legacy_confidence_score", "Legacy protocol analysis confidence scores")
 LEGACY_ADAPTER_GENERATION = Counter(
     "qbitel_legacy_adapter_generation_total",
     "Total adapter code generations",
@@ -127,9 +125,7 @@ class LegacySystemWhisperer:
             self.logger.error(f"Failed to initialize Legacy System Whisperer: {e}")
             raise LegacyWhispererException(f"Initialization failed: {e}")
 
-    async def reverse_engineer_protocol(
-        self, traffic_samples: List[bytes], system_context: str = ""
-    ) -> ProtocolSpecification:
+    async def reverse_engineer_protocol(self, traffic_samples: List[bytes], system_context: str = "") -> ProtocolSpecification:
         """
         Reverse engineer legacy protocol from traffic samples.
 
@@ -143,15 +139,12 @@ class LegacySystemWhisperer:
         start_time = time.time()
 
         try:
-            LEGACY_ANALYSIS_COUNTER.labels(
-                analysis_type="reverse_engineering", status="started"
-            ).inc()
+            LEGACY_ANALYSIS_COUNTER.labels(analysis_type="reverse_engineering", status="started").inc()
 
             # Validate input
             if len(traffic_samples) < self.min_samples_for_analysis:
                 raise LegacyWhispererException(
-                    f"Insufficient samples: {len(traffic_samples)} "
-                    f"(minimum: {self.min_samples_for_analysis})"
+                    f"Insufficient samples: {len(traffic_samples)} " f"(minimum: {self.min_samples_for_analysis})"
                 )
 
             # Check cache
@@ -191,9 +184,7 @@ class LegacySystemWhisperer:
             complexity = self.cobol_parser.assess_complexity(fields, patterns, message_types)
 
             # Step 7: Calculate confidence score (COBOL Parser)
-            confidence = self.cobol_parser.calculate_confidence(
-                len(traffic_samples), patterns, fields, message_types
-            )
+            confidence = self.cobol_parser.calculate_confidence(len(traffic_samples), patterns, fields, message_types)
 
             # Create specification
             spec = ProtocolSpecification(
@@ -223,13 +214,9 @@ class LegacySystemWhisperer:
             self._cache_specification(cache_key, spec)
 
             # Update metrics
-            LEGACY_ANALYSIS_DURATION.labels(
-                analysis_type="reverse_engineering"
-            ).observe(time.time() - start_time)
+            LEGACY_ANALYSIS_DURATION.labels(analysis_type="reverse_engineering").observe(time.time() - start_time)
             LEGACY_CONFIDENCE_SCORE.observe(confidence)
-            LEGACY_ANALYSIS_COUNTER.labels(
-                analysis_type="reverse_engineering", status="success"
-            ).inc()
+            LEGACY_ANALYSIS_COUNTER.labels(analysis_type="reverse_engineering", status="success").inc()
 
             self.logger.info(
                 f"Protocol reverse engineering completed in {time.time() - start_time:.2f}s "
@@ -240,9 +227,7 @@ class LegacySystemWhisperer:
 
         except Exception as e:
             self.logger.error(f"Protocol reverse engineering failed: {e}")
-            LEGACY_ANALYSIS_COUNTER.labels(
-                analysis_type="reverse_engineering", status="error"
-            ).inc()
+            LEGACY_ANALYSIS_COUNTER.labels(analysis_type="reverse_engineering", status="error").inc()
             raise LegacyWhispererException(f"Reverse engineering failed: {e}")
 
     async def generate_adapter_code(
@@ -279,9 +264,7 @@ class LegacySystemWhisperer:
 
             # Step 1: Analyze protocol differences (Data Flow)
             self.logger.info("Analyzing protocol differences...")
-            differences = await self.data_flow.analyze_protocol_differences(
-                legacy_protocol, target_protocol
-            )
+            differences = await self.data_flow.analyze_protocol_differences(legacy_protocol, target_protocol)
 
             # Step 2: Generate transformation logic (Modernization)
             self.logger.info(f"Generating {language.value} adapter code...")
@@ -291,9 +274,7 @@ class LegacySystemWhisperer:
 
             # Step 3: Generate test cases (Modernization)
             self.logger.info("Generating test cases...")
-            test_code = await self.modernization.generate_test_cases(
-                legacy_protocol, target_protocol, language, adapter_code
-            )
+            test_code = await self.modernization.generate_test_cases(legacy_protocol, target_protocol, language, adapter_code)
 
             # Step 4: Generate documentation (Modernization)
             self.logger.info("Generating integration documentation...")
@@ -303,9 +284,7 @@ class LegacySystemWhisperer:
 
             # Step 5: Extract dependencies and configuration (Modernization)
             dependencies = self.modernization.extract_dependencies(adapter_code, language)
-            config_template = self.modernization.generate_config_template(
-                legacy_protocol, target_protocol, language
-            )
+            config_template = self.modernization.generate_config_template(legacy_protocol, target_protocol, language)
 
             # Step 6: Generate deployment guide (Modernization)
             deployment_guide = await self.modernization.generate_deployment_guide(
@@ -361,9 +340,7 @@ class LegacySystemWhisperer:
             ).inc()
             raise LegacyWhispererException(f"Adapter generation failed: {e}")
 
-    async def explain_legacy_behavior(
-        self, behavior: str, context: Dict[str, Any]
-    ) -> Explanation:
+    async def explain_legacy_behavior(self, behavior: str, context: Dict[str, Any]) -> Explanation:
         """
         Explain legacy system behavior with modernization guidance.
 
@@ -377,9 +354,7 @@ class LegacySystemWhisperer:
         start_time = time.time()
 
         try:
-            LEGACY_ANALYSIS_COUNTER.labels(
-                analysis_type="behavior_explanation", status="started"
-            ).inc()
+            LEGACY_ANALYSIS_COUNTER.labels(analysis_type="behavior_explanation", status="started").inc()
 
             # Step 1: Analyze behavior patterns (Business Rules)
             self.logger.info("Analyzing legacy behavior...")
@@ -387,27 +362,19 @@ class LegacySystemWhisperer:
 
             # Step 2: Provide historical context (Business Rules)
             self.logger.info("Gathering historical context...")
-            historical_context = await self.business_rules.gather_historical_context(
-                behavior, context
-            )
+            historical_context = await self.business_rules.gather_historical_context(behavior, context)
 
             # Step 3: Suggest modernization approaches (Business Rules)
             self.logger.info("Generating modernization approaches...")
-            approaches = await self.business_rules.suggest_modernization_approaches(
-                behavior, context, analysis
-            )
+            approaches = await self.business_rules.suggest_modernization_approaches(behavior, context, analysis)
 
             # Step 4: Assess modernization risks (Data Flow)
             self.logger.info("Assessing modernization risks...")
-            risks = await self.data_flow.assess_modernization_risks(
-                behavior, context, approaches
-            )
+            risks = await self.data_flow.assess_modernization_risks(behavior, context, approaches)
 
             # Step 5: Generate implementation guidance (Modernization)
             self.logger.info("Generating implementation guidance...")
-            implementation = await self.modernization.generate_implementation_guidance(
-                behavior, approaches, risks
-            )
+            implementation = await self.modernization.generate_implementation_guidance(behavior, approaches, risks)
 
             # Create explanation
             explanation = Explanation(
@@ -428,24 +395,16 @@ class LegacySystemWhisperer:
             )
 
             # Update metrics
-            LEGACY_ANALYSIS_DURATION.labels(
-                analysis_type="behavior_explanation"
-            ).observe(time.time() - start_time)
-            LEGACY_ANALYSIS_COUNTER.labels(
-                analysis_type="behavior_explanation", status="success"
-            ).inc()
+            LEGACY_ANALYSIS_DURATION.labels(analysis_type="behavior_explanation").observe(time.time() - start_time)
+            LEGACY_ANALYSIS_COUNTER.labels(analysis_type="behavior_explanation", status="success").inc()
 
-            self.logger.info(
-                f"Behavior explanation completed in {time.time() - start_time:.2f}s"
-            )
+            self.logger.info(f"Behavior explanation completed in {time.time() - start_time:.2f}s")
 
             return explanation
 
         except Exception as e:
             self.logger.error(f"Behavior explanation failed: {e}")
-            LEGACY_ANALYSIS_COUNTER.labels(
-                analysis_type="behavior_explanation", status="error"
-            ).inc()
+            LEGACY_ANALYSIS_COUNTER.labels(analysis_type="behavior_explanation", status="error").inc()
             raise LegacyWhispererException(f"Behavior explanation failed: {e}")
 
     def _generate_cache_key(self, samples: List[bytes], context: str) -> str:

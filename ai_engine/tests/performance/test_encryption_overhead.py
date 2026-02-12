@@ -21,9 +21,7 @@ class TestEncryptionOverhead:
     @pytest.fixture
     def test_data(self):
         """Generate test data of various sizes."""
-        return {
-            size: os.urandom(size) for size in self.MESSAGE_SIZES
-        }
+        return {size: os.urandom(size) for size in self.MESSAGE_SIZES}
 
     def measure_aes_gcm_encryption(self, data: bytes, iterations: int) -> Tuple[List[float], List[float]]:
         """Measure AES-GCM encryption and decryption performance."""
@@ -34,11 +32,7 @@ class TestEncryptionOverhead:
         for _ in range(iterations):
             # Encryption
             nonce = os.urandom(12)
-            cipher = Cipher(
-                algorithms.AES(key),
-                modes.GCM(nonce),
-                backend=default_backend()
-            )
+            cipher = Cipher(algorithms.AES(key), modes.GCM(nonce), backend=default_backend())
 
             start = time.perf_counter()
             encryptor = cipher.encryptor()
@@ -48,11 +42,7 @@ class TestEncryptionOverhead:
             encryption_timings.append((end - start) * 1000)
 
             # Decryption
-            cipher = Cipher(
-                algorithms.AES(key),
-                modes.GCM(nonce, tag),
-                backend=default_backend()
-            )
+            cipher = Cipher(algorithms.AES(key), modes.GCM(nonce, tag), backend=default_backend())
 
             start = time.perf_counter()
             decryptor = cipher.decryptor()
@@ -139,14 +129,8 @@ class TestEncryptionOverhead:
             chacha_enc, chacha_dec = self.measure_chacha20_poly1305_encryption(data, 50)
 
             results[size] = {
-                'aes_gcm': {
-                    'encryption': statistics.mean(aes_enc),
-                    'decryption': statistics.mean(aes_dec)
-                },
-                'chacha20': {
-                    'encryption': statistics.mean(chacha_enc),
-                    'decryption': statistics.mean(chacha_dec)
-                }
+                "aes_gcm": {"encryption": statistics.mean(aes_enc), "decryption": statistics.mean(aes_dec)},
+                "chacha20": {"encryption": statistics.mean(chacha_enc), "decryption": statistics.mean(chacha_dec)},
             }
 
         # Print comparison table
@@ -161,8 +145,8 @@ class TestEncryptionOverhead:
 
         # Verify overhead is acceptable
         for size, metrics in results.items():
-            aes_enc = metrics['aes_gcm']['encryption']
-            chacha_enc = metrics['chacha20']['encryption']
+            aes_enc = metrics["aes_gcm"]["encryption"]
+            chacha_enc = metrics["chacha20"]["encryption"]
 
             # Overhead should not exceed 50% difference
             overhead_ratio = max(aes_enc, chacha_enc) / min(aes_enc, chacha_enc)
@@ -191,7 +175,7 @@ class TestEncryptionOverhead:
             shared_key2 = private_key2.exchange(ec.ECDH(), private_key1.public_key())
 
             # Derive key
-            kdf = HKDF(algorithm=hashes.SHA256(), length=32, salt=None, info=b'', backend=default_backend())
+            kdf = HKDF(algorithm=hashes.SHA256(), length=32, salt=None, info=b"", backend=default_backend())
             key = kdf.derive(shared_key1)
 
             end = time.perf_counter()
@@ -202,7 +186,7 @@ class TestEncryptionOverhead:
         for _ in range(iterations):
             start = time.perf_counter()
 
-            kem = KeyEncapsulation('Kyber768')
+            kem = KeyEncapsulation("Kyber768")
             public_key = kem.generate_keypair()
             ciphertext, shared_secret1 = kem.encap_secret(public_key)
             shared_secret2 = kem.decap_secret(ciphertext)
@@ -254,7 +238,7 @@ class TestEncryptionOverhead:
         dilithium_verify_timings = []
 
         for _ in range(iterations):
-            sig = Signature('Dilithium3')
+            sig = Signature("Dilithium3")
             public_key = sig.generate_keypair()
 
             start = time.perf_counter()

@@ -40,7 +40,6 @@ from .production_enhancements import (
     ProductionConfig,
 )
 
-
 # ============================================================================
 # DATA STRUCTURES
 # ============================================================================
@@ -153,12 +152,7 @@ class Grammar:
             prob_entropy = 0.0
 
         # Combined complexity score
-        complexity = (
-            rule_complexity * 0.3
-            + symbol_complexity * 0.2
-            + length_complexity * 0.2
-            + prob_entropy * 0.3
-        )
+        complexity = rule_complexity * 0.3 + symbol_complexity * 0.2 + length_complexity * 0.2 + prob_entropy * 0.3
 
         return complexity
 
@@ -239,11 +233,7 @@ class Grammar:
         for token in tokens:
             token_str = f"0x{token}"
             # Find rules that produce this token
-            matching_rules = [
-                rule
-                for rule in self.rules
-                if token_str in rule.right_hand_side and rule.probability > 0
-            ]
+            matching_rules = [rule for rule in self.rules if token_str in rule.right_hand_side and rule.probability > 0]
             if matching_rules:
                 max_prob = max(rule.probability for rule in matching_rules)
                 log_prob += np.log(max_prob + 1e-10)
@@ -347,9 +337,7 @@ class BayesianOptimizer:
         Returns:
             Optimized hyperparameter configuration
         """
-        self.logger.info(
-            "Starting Bayesian hyperparameter optimization", n_iterations=n_iterations
-        )
+        self.logger.info("Starting Bayesian hyperparameter optimization", n_iterations=n_iterations)
 
         start_time = time.time()
 
@@ -425,9 +413,7 @@ class BayesianOptimizer:
 
         return best_config
 
-    def _sample_random_config(
-        self, param_space: Dict[str, Tuple[float, float]]
-    ) -> HyperparameterConfig:
+    def _sample_random_config(self, param_space: Dict[str, Tuple[float, float]]) -> HyperparameterConfig:
         """Sample random configuration from parameter space."""
         config_dict = {}
         for param, (low, high) in param_space.items():
@@ -438,9 +424,7 @@ class BayesianOptimizer:
 
         return HyperparameterConfig(**config_dict)
 
-    async def _sample_next_config(
-        self, param_space: Dict[str, Tuple[float, float]]
-    ) -> HyperparameterConfig:
+    async def _sample_next_config(self, param_space: Dict[str, Tuple[float, float]]) -> HyperparameterConfig:
         """Sample next configuration using Expected Improvement acquisition."""
         # Simplified: use random sampling with bias towards good regions
         # In production, would use Gaussian Process + EI
@@ -449,9 +433,7 @@ class BayesianOptimizer:
             return self._sample_random_config(param_space)
 
         # Get top 3 configurations
-        sorted_history = sorted(
-            self.optimization_history, key=lambda x: x["score"], reverse=True
-        )[:3]
+        sorted_history = sorted(self.optimization_history, key=lambda x: x["score"], reverse=True)[:3]
 
         # Sample around best configurations
         best_configs = [HyperparameterConfig(**h["config"]) for h in sorted_history]
@@ -464,21 +446,15 @@ class BayesianOptimizer:
             noise_scale = (high - low) * 0.1
 
             if param in ["min_pattern_frequency", "max_rule_length", "max_iterations"]:
-                new_value = int(
-                    np.clip(current_value + np.random.normal(0, noise_scale), low, high)
-                )
+                new_value = int(np.clip(current_value + np.random.normal(0, noise_scale), low, high))
             else:
-                new_value = np.clip(
-                    current_value + np.random.normal(0, noise_scale), low, high
-                )
+                new_value = np.clip(current_value + np.random.normal(0, noise_scale), low, high)
 
             config_dict[param] = new_value
 
         return HyperparameterConfig(**config_dict)
 
-    async def _evaluate_config(
-        self, config: HyperparameterConfig, messages: List[bytes]
-    ) -> float:
+    async def _evaluate_config(self, config: HyperparameterConfig, messages: List[bytes]) -> float:
         """Evaluate hyperparameter configuration."""
         try:
             # Split into train/validation
@@ -565,13 +541,9 @@ class EnhancedPCFGInference:
             self.cache = None
 
         # Parallel processing
-        self.enable_parallel = (
-            enable_parallel and self.production_config.worker_threads > 1
-        )
+        self.enable_parallel = enable_parallel and self.production_config.worker_threads > 1
         if self.enable_parallel:
-            self.executor = ProcessPoolExecutor(
-                max_workers=self.production_config.worker_threads
-            )
+            self.executor = ProcessPoolExecutor(max_workers=self.production_config.worker_threads)
         else:
             self.executor = None
 
@@ -614,22 +586,16 @@ class EnhancedPCFGInference:
             cached_grammar = await self.cache.get(cache_key)
             if cached_grammar:
                 self.logger.info("Returning cached grammar")
-                self.metrics.discovery_requests_total.labels(
-                    protocol_type="unknown", status="success", cache_hit="true"
-                ).inc()
+                self.metrics.discovery_requests_total.labels(protocol_type="unknown", status="success", cache_hit="true").inc()
                 return cached_grammar
 
         try:
-            with self.metrics.discovery_duration_seconds.labels(
-                protocol_type="unknown", phase="total"
-            ).time():
+            with self.metrics.discovery_duration_seconds.labels(protocol_type="unknown", phase="total").time():
                 # Store samples
                 self._message_samples = message_samples
 
                 # Step 1: Tokenize messages
-                with self.metrics.discovery_duration_seconds.labels(
-                    protocol_type="unknown", phase="tokenization"
-                ).time():
+                with self.metrics.discovery_duration_seconds.labels(protocol_type="unknown", phase="tokenization").time():
                     tokens = await self._tokenize_messages(message_samples)
 
                 # Step 2: Extract patterns
@@ -645,20 +611,12 @@ class EnhancedPCFGInference:
                     terminals, non_terminals = self._identify_symbols(patterns)
 
                 # Step 4: Generate initial rules
-                with self.metrics.discovery_duration_seconds.labels(
-                    protocol_type="unknown", phase="rule_generation"
-                ).time():
-                    initial_rules = self._generate_initial_rules(
-                        patterns, terminals, non_terminals
-                    )
+                with self.metrics.discovery_duration_seconds.labels(protocol_type="unknown", phase="rule_generation").time():
+                    initial_rules = self._generate_initial_rules(patterns, terminals, non_terminals)
 
                 # Step 5: Refine with EM + Bayesian
-                with self.metrics.discovery_duration_seconds.labels(
-                    protocol_type="unknown", phase="refinement"
-                ).time():
-                    refined_rules = await self._refine_grammar_bayesian(
-                        initial_rules, tokens
-                    )
+                with self.metrics.discovery_duration_seconds.labels(protocol_type="unknown", phase="refinement").time():
+                    refined_rules = await self._refine_grammar_bayesian(initial_rules, tokens)
 
                 # Step 6: Build grammar
                 grammar = Grammar(
@@ -685,9 +643,7 @@ class EnhancedPCFGInference:
                     protocol_type="unknown", status="success", cache_hit="false"
                 ).inc()
 
-                self.metrics.discovery_confidence_score.labels(
-                    protocol_type="unknown"
-                ).observe(grammar.f1_score)
+                self.metrics.discovery_confidence_score.labels(protocol_type="unknown").observe(grammar.f1_score)
 
                 self.logger.info(
                     "PCFG inference completed",
@@ -703,14 +659,10 @@ class EnhancedPCFGInference:
 
         except Exception as e:
             self.logger.error(f"PCFG inference failed: {e}", exc_info=True)
-            self.metrics.discovery_errors_total.labels(
-                error_type=type(e).__name__, component="pcfg_inference"
-            ).inc()
+            self.metrics.discovery_errors_total.labels(error_type=type(e).__name__, component="pcfg_inference").inc()
             raise ModelException(f"PCFG inference error: {e}")
 
-    async def infer_with_bayesian_optimization(
-        self, messages: List[bytes], n_optimization_iterations: int = 20
-    ) -> Grammar:
+    async def infer_with_bayesian_optimization(self, messages: List[bytes], n_optimization_iterations: int = 20) -> Grammar:
         """
         Infer grammar with Bayesian hyperparameter optimization.
 
@@ -725,9 +677,7 @@ class EnhancedPCFGInference:
 
         # Optimize hyperparameters
         optimizer = BayesianOptimizer(self.config, self.metrics)
-        optimal_hyperparams = await optimizer.optimize_hyperparameters(
-            messages, n_iterations=n_optimization_iterations
-        )
+        optimal_hyperparams = await optimizer.optimize_hyperparameters(messages, n_iterations=n_optimization_iterations)
 
         # Update hyperparameters
         self.hyperparams = optimal_hyperparams
@@ -737,9 +687,7 @@ class EnhancedPCFGInference:
 
         return grammar
 
-    async def parallel_grammar_inference(
-        self, message_batches: List[List[bytes]]
-    ) -> List[Grammar]:
+    async def parallel_grammar_inference(self, message_batches: List[List[bytes]]) -> List[Grammar]:
         """
         Parallel inference across message batches.
 
@@ -758,9 +706,7 @@ class EnhancedPCFGInference:
                 grammars.append(grammar)
             return grammars
 
-        self.logger.info(
-            f"Starting parallel inference on {len(message_batches)} batches"
-        )
+        self.logger.info(f"Starting parallel inference on {len(message_batches)} batches")
         start_time = time.time()
 
         # Submit tasks
@@ -777,9 +723,7 @@ class EnhancedPCFGInference:
                 grammars.append(grammar)
             except Exception as e:
                 self.logger.error(f"Batch inference failed: {e}")
-                self.metrics.discovery_errors_total.labels(
-                    error_type=type(e).__name__, component="parallel_inference"
-                ).inc()
+                self.metrics.discovery_errors_total.labels(error_type=type(e).__name__, component="parallel_inference").inc()
 
         duration = time.time() - start_time
         self.logger.info(
@@ -805,9 +749,7 @@ class EnhancedPCFGInference:
         finally:
             loop.close()
 
-    async def incremental_grammar_update(
-        self, existing_grammar: Grammar, new_messages: List[bytes]
-    ) -> Grammar:
+    async def incremental_grammar_update(self, existing_grammar: Grammar, new_messages: List[bytes]) -> Grammar:
         """
         Incremental learning without full retraining.
 
@@ -818,9 +760,7 @@ class EnhancedPCFGInference:
         Returns:
             Updated grammar
         """
-        self.logger.info(
-            f"Starting incremental update with {len(new_messages)} new messages"
-        )
+        self.logger.info(f"Starting incremental update with {len(new_messages)} new messages")
         start_time = time.time()
 
         try:
@@ -911,9 +851,7 @@ class EnhancedPCFGInference:
             self.logger.error(f"Incremental update failed: {e}", exc_info=True)
             raise ModelException(f"Incremental learning error: {e}")
 
-    def _count_rule_occurrences(
-        self, rule: ProductionRule, tokenized_messages: List[List[str]]
-    ) -> int:
+    def _count_rule_occurrences(self, rule: ProductionRule, tokenized_messages: List[List[str]]) -> int:
         """Count occurrences of a rule in tokenized messages."""
         count = 0
         rhs = rule.right_hand_side
@@ -929,9 +867,7 @@ class EnhancedPCFGInference:
 
         return count
 
-    def _normalize_rule_probabilities(
-        self, rules: List[ProductionRule]
-    ) -> List[ProductionRule]:
+    def _normalize_rule_probabilities(self, rules: List[ProductionRule]) -> List[ProductionRule]:
         """Normalize rule probabilities by left-hand side."""
         # Group by LHS
         rules_by_lhs = defaultdict(list)
@@ -1020,14 +956,10 @@ class EnhancedPCFGInference:
 
         return tokenized_messages
 
-    async def _tokenize_messages_parallel(
-        self, messages: List[bytes]
-    ) -> List[List[str]]:
+    async def _tokenize_messages_parallel(self, messages: List[bytes]) -> List[List[str]]:
         """Parallel tokenization for large datasets."""
         batch_size = max(1, len(messages) // self.production_config.worker_threads)
-        batches = [
-            messages[i : i + batch_size] for i in range(0, len(messages), batch_size)
-        ]
+        batches = [messages[i : i + batch_size] for i in range(0, len(messages), batch_size)]
 
         futures = []
         for batch in batches:
@@ -1063,9 +995,7 @@ class EnhancedPCFGInference:
         pattern_tokens = self._identify_repeating_patterns(byte_tokens)
 
         # Select best tokenization
-        best_tokens = self._select_best_tokenization(
-            [byte_tokens, delimiter_tokens, pattern_tokens]
-        )
+        best_tokens = self._select_best_tokenization([byte_tokens, delimiter_tokens, pattern_tokens])
 
         # Convert to standard format
         return [f"0x{token}" if len(token) == 2 else token for token in best_tokens]
@@ -1162,9 +1092,7 @@ class EnhancedPCFGInference:
     # PATTERN EXTRACTION
     # ========================================================================
 
-    async def _extract_frequent_patterns(
-        self, tokenized_messages: List[List[str]]
-    ) -> Dict[str, Any]:
+    async def _extract_frequent_patterns(self, tokenized_messages: List[List[str]]) -> Dict[str, Any]:
         """Extract frequent patterns from tokenized messages."""
         self.logger.debug("Extracting frequent patterns")
 
@@ -1190,43 +1118,31 @@ class EnhancedPCFGInference:
                 patterns["trigrams"][trigram] += 1
 
         # Extract common subsequences
-        patterns["common_subsequences"] = self._find_common_subsequences(
-            tokenized_messages
-        )
+        patterns["common_subsequences"] = self._find_common_subsequences(tokenized_messages)
 
         # Extract structural patterns
-        patterns["structural_patterns"] = self._extract_structural_patterns(
-            tokenized_messages
-        )
+        patterns["structural_patterns"] = self._extract_structural_patterns(tokenized_messages)
 
         return patterns
 
-    def _find_common_subsequences(
-        self, tokenized_messages: List[List[str]]
-    ) -> Dict[Tuple[str, ...], int]:
+    def _find_common_subsequences(self, tokenized_messages: List[List[str]]) -> Dict[Tuple[str, ...], int]:
         """Find common subsequences across messages."""
         subsequence_counts = Counter()
 
         for tokens in tokenized_messages:
-            for length in range(
-                2, min(self.hyperparams.max_rule_length, len(tokens) + 1)
-            ):
+            for length in range(2, min(self.hyperparams.max_rule_length, len(tokens) + 1)):
                 for i in range(len(tokens) - length + 1):
                     subseq = tuple(tokens[i : i + length])
                     subsequence_counts[subseq] += 1
 
         # Filter by minimum frequency
         common_subsequences = {
-            subseq: count
-            for subseq, count in subsequence_counts.items()
-            if count >= self.hyperparams.min_pattern_frequency
+            subseq: count for subseq, count in subsequence_counts.items() if count >= self.hyperparams.min_pattern_frequency
         }
 
         return common_subsequences
 
-    def _extract_structural_patterns(
-        self, tokenized_messages: List[List[str]]
-    ) -> List[Dict[str, Any]]:
+    def _extract_structural_patterns(self, tokenized_messages: List[List[str]]) -> List[Dict[str, Any]]:
         """Extract structural patterns like headers, bodies, footers."""
         structural_patterns = []
 
@@ -1252,9 +1168,7 @@ class EnhancedPCFGInference:
         if len(tokenized_messages) > 1:
             prefix_len = 0
             for i in range(min(len(msg) for msg in tokenized_messages)):
-                if all(
-                    msg[i] == tokenized_messages[0][i] for msg in tokenized_messages[1:]
-                ):
+                if all(msg[i] == tokenized_messages[0][i] for msg in tokenized_messages[1:]):
                     prefix_len += 1
                 else:
                     break
@@ -1273,10 +1187,7 @@ class EnhancedPCFGInference:
             suffix_len = 0
             min_len = min(len(msg) for msg in tokenized_messages)
             for i in range(1, min_len + 1):
-                if all(
-                    msg[-i] == tokenized_messages[0][-i]
-                    for msg in tokenized_messages[1:]
-                ):
+                if all(msg[-i] == tokenized_messages[0][-i] for msg in tokenized_messages[1:]):
                     suffix_len += 1
                 else:
                     break
@@ -1332,9 +1243,7 @@ class EnhancedPCFGInference:
         # Ensure standard non-terminals
         non_terminals.update(["<START>", "<MESSAGE>", "<BODY>"])
 
-        self.logger.debug(
-            f"Identified {len(terminals)} terminals and {len(non_terminals)} non-terminals"
-        )
+        self.logger.debug(f"Identified {len(terminals)} terminals and {len(non_terminals)} non-terminals")
 
         return terminals, non_terminals
 
@@ -1361,12 +1270,8 @@ class EnhancedPCFGInference:
         )
 
         # Structural rules
-        has_header = any(
-            p["type"] == "common_prefix" for p in patterns["structural_patterns"]
-        )
-        has_footer = any(
-            p["type"] == "common_suffix" for p in patterns["structural_patterns"]
-        )
+        has_header = any(p["type"] == "common_prefix" for p in patterns["structural_patterns"])
+        has_footer = any(p["type"] == "common_suffix" for p in patterns["structural_patterns"])
 
         if has_header and has_footer:
             rules.append(
@@ -1461,30 +1366,20 @@ class EnhancedPCFGInference:
         convergence_scores = []
 
         for iteration in range(self.hyperparams.max_iterations):
-            self.logger.debug(
-                f"Bayesian EM iteration {iteration + 1}/{self.hyperparams.max_iterations}"
-            )
+            self.logger.debug(f"Bayesian EM iteration {iteration + 1}/{self.hyperparams.max_iterations}")
 
             # E-step: Calculate expected counts
-            expected_counts = self._calculate_expected_counts(
-                current_rules, tokenized_messages
-            )
+            expected_counts = self._calculate_expected_counts(current_rules, tokenized_messages)
 
             # M-step: Update with Bayesian statistics
-            new_rules = self._update_rules_bayesian(
-                current_rules, expected_counts, len(tokenized_messages)
-            )
+            new_rules = self._update_rules_bayesian(current_rules, expected_counts, len(tokenized_messages))
 
             # Check convergence
-            convergence_score = self._calculate_convergence_score(
-                current_rules, new_rules
-            )
+            convergence_score = self._calculate_convergence_score(current_rules, new_rules)
             convergence_scores.append(convergence_score)
 
             if self._has_converged_advanced(convergence_scores):
-                self.logger.debug(
-                    f"Bayesian EM converged after {iteration + 1} iterations"
-                )
+                self.logger.debug(f"Bayesian EM converged after {iteration + 1} iterations")
                 break
 
             current_rules = new_rules
@@ -1496,9 +1391,7 @@ class EnhancedPCFGInference:
 
         return filtered_rules
 
-    def _calculate_expected_counts(
-        self, rules: List[ProductionRule], tokenized_messages: List[List[str]]
-    ) -> Dict[str, float]:
+    def _calculate_expected_counts(self, rules: List[ProductionRule], tokenized_messages: List[List[str]]) -> Dict[str, float]:
         """Calculate expected counts for each rule (E-step)."""
         expected_counts = defaultdict(float)
 
@@ -1515,9 +1408,7 @@ class EnhancedPCFGInference:
 
         return dict(expected_counts)
 
-    def _count_subsequence_occurrences(
-        self, tokens: List[str], pattern: List[str]
-    ) -> int:
+    def _count_subsequence_occurrences(self, tokens: List[str], pattern: List[str]) -> int:
         """Count occurrences of a pattern in a token sequence."""
         count = 0
         for i in range(len(tokens) - len(pattern) + 1):
@@ -1559,9 +1450,7 @@ class EnhancedPCFGInference:
 
         return updated_rules
 
-    def _calculate_convergence_score(
-        self, old_rules: List[ProductionRule], new_rules: List[ProductionRule]
-    ) -> float:
+    def _calculate_convergence_score(self, old_rules: List[ProductionRule], new_rules: List[ProductionRule]) -> float:
         """Calculate convergence score between rule sets."""
         if len(old_rules) != len(new_rules):
             return 1.0  # Not converged
@@ -1594,17 +1483,12 @@ class EnhancedPCFGInference:
 
         # Criterion 3: Monotonic decrease stopped
         if len(convergence_scores) >= 3:
-            if all(
-                convergence_scores[i] <= convergence_scores[i - 1] * 1.01
-                for i in range(-2, 0)
-            ):
+            if all(convergence_scores[i] <= convergence_scores[i - 1] * 1.01 for i in range(-2, 0)):
                 return True
 
         return False
 
-    def _filter_rules_by_quality(
-        self, rules: List[ProductionRule]
-    ) -> List[ProductionRule]:
+    def _filter_rules_by_quality(self, rules: List[ProductionRule]) -> List[ProductionRule]:
         """Filter rules based on quality metrics."""
         filtered_rules = []
 
@@ -1616,9 +1500,7 @@ class EnhancedPCFGInference:
 
             # Keep rule if it meets any strong criterion or multiple weak criteria
             strong_criterion = has_min_frequency and has_min_confidence
-            weak_criteria_count = sum(
-                [has_min_probability, has_min_frequency, has_min_confidence]
-            )
+            weak_criteria_count = sum([has_min_probability, has_min_frequency, has_min_confidence])
 
             if strong_criterion or weak_criteria_count >= 2:
                 filtered_rules.append(rule)

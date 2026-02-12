@@ -67,16 +67,16 @@ class MarketplaceKnowledgeBaseIntegration:
             # Get protocol and installation from database
             session = self.db_manager.get_session()
             try:
-                protocol = session.query(MarketplaceProtocol).filter(
-                    MarketplaceProtocol.protocol_id == protocol_id
-                ).first()
+                protocol = session.query(MarketplaceProtocol).filter(MarketplaceProtocol.protocol_id == protocol_id).first()
 
                 if not protocol:
                     raise ValueError(f"Protocol {protocol_id} not found")
 
-                installation = session.query(MarketplaceInstallation).filter(
-                    MarketplaceInstallation.installation_id == installation_id
-                ).first()
+                installation = (
+                    session.query(MarketplaceInstallation)
+                    .filter(MarketplaceInstallation.installation_id == installation_id)
+                    .first()
+                )
 
                 if not installation:
                     raise ValueError(f"Installation {installation_id} not found")
@@ -111,13 +111,10 @@ class MarketplaceKnowledgeBaseIntegration:
                         "license_type": protocol.license_type.value,
                         "author": protocol.author.username,
                         "is_official": protocol.is_official,
-                    }
+                    },
                 )
 
-                self.logger.info(
-                    f"Successfully imported protocol {protocol.protocol_name} "
-                    f"from marketplace"
-                )
+                self.logger.info(f"Successfully imported protocol {protocol.protocol_name} " f"from marketplace")
 
                 return protocol_knowledge
 
@@ -125,10 +122,7 @@ class MarketplaceKnowledgeBaseIntegration:
                 session.close()
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to import marketplace protocol {protocol_id}: {e}",
-                exc_info=True
-            )
+            self.logger.error(f"Failed to import marketplace protocol {protocol_id}: {e}", exc_info=True)
             raise RuntimeError(f"Protocol import failed: {str(e)}")
 
     async def _download_protocol_spec(self, spec_url: str) -> str:
@@ -237,28 +231,34 @@ def parse_packet(data: bytes) -> dict:
         field_definitions = []
         if "protocol_spec" in spec_data and "fields" in spec_data["protocol_spec"]:
             for field in spec_data["protocol_spec"]["fields"]:
-                field_definitions.append({
-                    "id": field.get("id"),
-                    "name": field.get("name"),
-                    "type": field.get("type"),
-                    "length": field.get("length"),
-                    "description": field.get("description", ""),
-                })
+                field_definitions.append(
+                    {
+                        "id": field.get("id"),
+                        "name": field.get("name"),
+                        "type": field.get("type"),
+                        "length": field.get("length"),
+                        "description": field.get("description", ""),
+                    }
+                )
 
         # Extract security implications from protocol metadata
         security_implications = []
         if protocol.category.value == "finance":
-            security_implications.extend([
-                "Financial data requires encryption in transit and at rest",
-                "PCI DSS compliance may be required",
-                "Monitor for transaction anomalies",
-            ])
+            security_implications.extend(
+                [
+                    "Financial data requires encryption in transit and at rest",
+                    "PCI DSS compliance may be required",
+                    "Monitor for transaction anomalies",
+                ]
+            )
         elif protocol.category.value == "healthcare":
-            security_implications.extend([
-                "HIPAA compliance required for PHI data",
-                "Audit logging mandatory for all access",
-                "End-to-end encryption required",
-            ])
+            security_implications.extend(
+                [
+                    "HIPAA compliance required for PHI data",
+                    "Audit logging mandatory for all access",
+                    "End-to-end encryption required",
+                ]
+            )
 
         # Extract compliance requirements
         compliance_requirements = []
@@ -345,7 +345,7 @@ def parse_packet(data: bytes) -> dict:
                 content=documentation,
                 metadata={
                     "protocol_name": protocol_knowledge.protocol_name,
-                    "category": protocol_knowledge.technical_details.get('category'),
+                    "category": protocol_knowledge.technical_details.get("category"),
                     "source": "marketplace",
                     **metadata,
                 },
@@ -354,16 +354,10 @@ def parse_packet(data: bytes) -> dict:
             # Add to knowledge base
             await self.knowledge_base.rag_engine.add_documents([rag_doc])
 
-            self.logger.info(
-                f"Registered protocol {protocol_knowledge.protocol_name} "
-                f"with knowledge base"
-            )
+            self.logger.info(f"Registered protocol {protocol_knowledge.protocol_name} " f"with knowledge base")
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to register protocol with knowledge base: {e}",
-                exc_info=True
-            )
+            self.logger.error(f"Failed to register protocol with knowledge base: {e}", exc_info=True)
             raise
 
     async def remove_protocol(self, protocol_name: str):
@@ -414,17 +408,16 @@ class MarketplaceProtocolDeployer:
             ValueError: If installation not found or inactive
             RuntimeError: If deployment fails
         """
-        self.logger.info(
-            f"Deploying marketplace protocol installation {installation_id} "
-            f"to {target_environment}"
-        )
+        self.logger.info(f"Deploying marketplace protocol installation {installation_id} " f"to {target_environment}")
 
         try:
             session = self.db_manager.get_session()
             try:
-                installation = session.query(MarketplaceInstallation).filter(
-                    MarketplaceInstallation.installation_id == installation_id
-                ).first()
+                installation = (
+                    session.query(MarketplaceInstallation)
+                    .filter(MarketplaceInstallation.installation_id == installation_id)
+                    .first()
+                )
 
                 if not installation:
                     raise ValueError(f"Installation {installation_id} not found")
@@ -438,18 +431,13 @@ class MarketplaceProtocolDeployer:
                 api_spec = await self._generate_api_spec(protocol)
 
                 # Deploy to translation bridge (mock implementation)
-                self.logger.info(
-                    f"Deployed protocol {protocol.protocol_name} to {target_environment}"
-                )
+                self.logger.info(f"Deployed protocol {protocol.protocol_name} to {target_environment}")
 
             finally:
                 session.close()
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to deploy protocol installation {installation_id}: {e}",
-                exc_info=True
-            )
+            self.logger.error(f"Failed to deploy protocol installation {installation_id}: {e}", exc_info=True)
             raise RuntimeError(f"Protocol deployment failed: {str(e)}")
 
     async def _generate_api_spec(self, protocol: MarketplaceProtocol) -> Dict[str, Any]:
@@ -473,19 +461,9 @@ class MarketplaceProtocolDeployer:
                 f"/api/{protocol.protocol_name}/translate": {
                     "post": {
                         "summary": f"Translate {protocol.display_name} protocol",
-                        "requestBody": {
-                            "content": {
-                                "application/json": {
-                                    "schema": {"type": "object"}
-                                }
-                            }
-                        },
-                        "responses": {
-                            "200": {
-                                "description": "Translation successful"
-                            }
-                        }
+                        "requestBody": {"content": {"application/json": {"schema": {"type": "object"}}}},
+                        "responses": {"200": {"description": "Translation successful"}},
                     }
                 }
-            }
+            },
         }

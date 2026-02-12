@@ -118,9 +118,7 @@ class TestKubernetesHealthProbes:
         assert "system_health" in result.checks
 
     @pytest.mark.asyncio
-    async def test_check_readiness_low_health_ratio(
-        self, health_probes, mock_health_checker
-    ):
+    async def test_check_readiness_low_health_ratio(self, health_probes, mock_health_checker):
         """Test readiness check with low health ratio."""
         from ai_engine.api.k8s_health import ProbeStatus
         from ai_engine.monitoring.health import SystemHealth, HealthStatus
@@ -136,9 +134,7 @@ class TestKubernetesHealthProbes:
             "c3": Mock(),
             "c4": Mock(),
         }
-        system_health.get_healthy_components.return_value = [
-            "c1"
-        ]  # Only 1 of 4 healthy
+        system_health.get_healthy_components.return_value = ["c1"]  # Only 1 of 4 healthy
 
         mock_health_checker.check_all_components = AsyncMock(return_value=system_health)
 

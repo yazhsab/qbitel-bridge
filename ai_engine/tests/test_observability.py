@@ -242,6 +242,7 @@ class TestTracingProvider:
 
     def test_trace_method_decorator(self):
         """Test trace_method decorator."""
+
         @trace_method(name="decorated_function")
         def my_function():
             return "result"

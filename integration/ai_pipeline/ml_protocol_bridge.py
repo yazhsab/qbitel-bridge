@@ -93,9 +93,7 @@ class MLProtocolBridge:
 
         # Thread pools for different AI tasks
         self.ml_executor = ThreadPoolExecutor(max_workers=8, thread_name_prefix="ml_")
-        self.feature_executor = ThreadPoolExecutor(
-            max_workers=4, thread_name_prefix="feature_"
-        )
+        self.feature_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="feature_")
 
         # Cache for frequent protocols
         self.protocol_cache = {}
@@ -136,11 +134,7 @@ class MLProtocolBridge:
         """Initialize core AI components"""
         try:
             # Initialize field detector
-            device = torch.device(
-                "cuda"
-                if torch.cuda.is_available() and self.config.get("use_gpu")
-                else "cpu"
-            )
+            device = torch.device("cuda" if torch.cuda.is_available() and self.config.get("use_gpu") else "cpu")
 
             self.field_detector = FieldDetector(
                 vocab_size=256,  # Byte vocabulary
@@ -166,10 +160,7 @@ class MLProtocolBridge:
         """Load pre-trained models"""
         try:
             # Load field detection model
-            field_model_path = (
-                Path(self.config.get("model_cache_dir", "/tmp/models"))
-                / "field_detector.pt"
-            )
+            field_model_path = Path(self.config.get("model_cache_dir", "/tmp/models")) / "field_detector.pt"
             if field_model_path.exists():
                 self.field_detector.load_model(str(field_model_path))
                 logger.info("Field detection model loaded")
@@ -194,9 +185,7 @@ class MLProtocolBridge:
     async def _init_feature_extractors(self):
         """Initialize feature extraction components"""
         try:
-            self.statistical_extractor = StatisticalFeatureExtractor(
-                window_size=self.config.get("entropy_window_size", 1000)
-            )
+            self.statistical_extractor = StatisticalFeatureExtractor(window_size=self.config.get("entropy_window_size", 1000))
 
             self.structural_extractor = StructuralFeatureExtractor(
                 max_pattern_length=self.config.get("max_sequence_length", 512)
@@ -253,21 +242,13 @@ class MLProtocolBridge:
             results = await asyncio.gather(*tasks, return_exceptions=True)
 
             # Combine results
-            protocol_classification = (
-                results[0] if not isinstance(results[0], Exception) else {}
-            )
-            field_boundaries = (
-                results[1] if not isinstance(results[1], Exception) else []
-            )
+            protocol_classification = results[0] if not isinstance(results[0], Exception) else {}
+            field_boundaries = results[1] if not isinstance(results[1], Exception) else []
             anomaly_score = results[2] if not isinstance(results[2], Exception) else 0.0
-            threat_level = (
-                results[3] if not isinstance(results[3], Exception) else "low"
-            )
+            threat_level = results[3] if not isinstance(results[3], Exception) else "low"
 
             # Calculate overall confidence
-            confidence = self._calculate_confidence(
-                protocol_classification, field_boundaries, anomaly_score
-            )
+            confidence = self._calculate_confidence(protocol_classification, field_boundaries, anomaly_score)
 
             # Create result
             result = AIAnalysisResult(
@@ -386,9 +367,7 @@ class MLProtocolBridge:
 
             # Run field detection
             loop = asyncio.get_event_loop()
-            field_boundaries = await loop.run_in_executor(
-                self.ml_executor, self.field_detector.detect_fields, data_sequence
-            )
+            field_boundaries = await loop.run_in_executor(self.ml_executor, self.field_detector.detect_fields, data_sequence)
 
             return field_boundaries
 
@@ -420,9 +399,7 @@ class MLProtocolBridge:
             logger.error(f"Error in anomaly detection: {e}")
             return 0.5  # Neutral score on error
 
-    async def _assess_threat_level(
-        self, features: Dict[str, Any], protocol_data: ProtocolData
-    ) -> str:
+    async def _assess_threat_level(self, features: Dict[str, Any], protocol_data: ProtocolData) -> str:
         """Assess threat level based on analysis results"""
         try:
             # Simple rule-based threat assessment
@@ -430,10 +407,7 @@ class MLProtocolBridge:
 
             # Check for suspicious ports
             suspicious_ports = [1337, 4444, 5555, 6666, 31337]
-            if (
-                protocol_data.dest_port in suspicious_ports
-                or protocol_data.source_port in suspicious_ports
-            ):
+            if protocol_data.dest_port in suspicious_ports or protocol_data.source_port in suspicious_ports:
                 threat_score += 0.3
 
             # Check packet size anomalies
@@ -485,11 +459,7 @@ class MLProtocolBridge:
             anomaly_confidence = 1.0 - min(anomaly_score, 1.0)
 
             # Weighted average
-            overall_confidence = (
-                protocol_confidence * 0.5
-                + field_confidence * 0.3
-                + anomaly_confidence * 0.2
-            )
+            overall_confidence = protocol_confidence * 0.5 + field_confidence * 0.3 + anomaly_confidence * 0.2
 
             return min(max(overall_confidence, 0.0), 1.0)
 
@@ -580,9 +550,7 @@ class MLProtocolBridge:
         try:
             # Use hash of first 64 bytes + ports for caching
             data_sample = protocol_data.raw_data[:64]
-            key_data = (
-                f"{data_sample}_{protocol_data.source_port}_{protocol_data.dest_port}"
-            )
+            key_data = f"{data_sample}_{protocol_data.source_port}_{protocol_data.dest_port}"
             return str(hash(key_data))
         except Exception as e:
             logger.error(f"Error generating cache key: {e}")
@@ -593,9 +561,7 @@ class MLProtocolBridge:
         while True:
             try:
                 # Get inference request from queue
-                request = await asyncio.wait_for(
-                    self.inference_queue.get(), timeout=1.0
-                )
+                request = await asyncio.wait_for(self.inference_queue.get(), timeout=1.0)
 
                 # Process request
                 result = await self.analyze_protocol(request["protocol_data"])
@@ -656,9 +622,7 @@ class MLProtocolBridge:
                     "error_count": self.error_count,
                     "error_rate": self.error_count / processed,
                     "average_processing_time_ms": total_time / processed,
-                    "cache_hit_rate": (
-                        self.cache_hit_count / processed if processed > 0 else 0
-                    ),
+                    "cache_hit_rate": (self.cache_hit_count / processed if processed > 0 else 0),
                     "cache_size": len(self.protocol_cache),
                     "queue_sizes": {
                         "inference_queue": self.inference_queue.qsize(),
@@ -687,9 +651,7 @@ class MLProtocolBridge:
                 await asyncio.sleep(30)
 
     # Public API
-    async def queue_analysis(
-        self, protocol_data: ProtocolData, correlation_id: Optional[str] = None
-    ):
+    async def queue_analysis(self, protocol_data: ProtocolData, correlation_id: Optional[str] = None):
         """Queue protocol data for analysis"""
         request = {
             "protocol_data": protocol_data,
@@ -704,12 +666,9 @@ class MLProtocolBridge:
         return {
             "processed_count": self.processed_count,
             "error_count": self.error_count,
-            "average_processing_time_ms": self.total_processing_time
-            / max(self.processed_count, 1),
+            "average_processing_time_ms": self.total_processing_time / max(self.processed_count, 1),
             "cache_hit_rate": self.cache_hit_count / max(self.processed_count, 1),
-            "model_status": (
-                self.model_manager.get_model_status() if self.model_manager else {}
-            ),
+            "model_status": (self.model_manager.get_model_status() if self.model_manager else {}),
         }
 
     async def update_models(self, model_updates: Dict[str, str]):

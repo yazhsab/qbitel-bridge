@@ -89,12 +89,8 @@ class ElasticsearchLogAggregator:
         self.logger = logging.getLogger(__name__)
 
         # Elasticsearch configuration
-        self.es_hosts = getattr(
-            config, "elasticsearch_hosts", ["http://localhost:9200"]
-        )
-        self.es_index_prefix = getattr(
-            config, "elasticsearch_index_prefix", "qbitel-logs"
-        )
+        self.es_hosts = getattr(config, "elasticsearch_hosts", ["http://localhost:9200"])
+        self.es_index_prefix = getattr(config, "elasticsearch_index_prefix", "qbitel-logs")
         self.es_username = getattr(config, "elasticsearch_username", None)
         self.es_password = getattr(config, "elasticsearch_password", None)
 
@@ -109,9 +105,7 @@ class ElasticsearchLogAggregator:
         self.logs_sent = 0
         self.logs_failed = 0
 
-        self.logger.info(
-            f"ElasticsearchLogAggregator initialized (hosts: {self.es_hosts})"
-        )
+        self.logger.info(f"ElasticsearchLogAggregator initialized (hosts: {self.es_hosts})")
 
     async def initialize(self):
         """Initialize HTTP session and background tasks."""
@@ -182,15 +176,11 @@ class ElasticsearchLogAggregator:
 
             # Build bulk request
             bulk_data = []
-            index_name = (
-                f"{self.es_index_prefix}-{datetime.utcnow().strftime('%Y.%m.%d')}"
-            )
+            index_name = f"{self.es_index_prefix}-{datetime.utcnow().strftime('%Y.%m.%d')}"
 
             for log in batch:
                 # Index action
-                bulk_data.append(
-                    json.dumps({"index": {"_index": index_name, "_type": "_doc"}})
-                )
+                bulk_data.append(json.dumps({"index": {"_index": index_name, "_type": "_doc"}}))
                 # Document
                 bulk_data.append(json.dumps(log.to_dict()))
 
@@ -210,18 +200,12 @@ class ElasticsearchLogAggregator:
                             result = await response.json()
                             if not result.get("errors", False):
                                 self.logs_sent += len(batch)
-                                self.logger.debug(
-                                    f"Flushed {len(batch)} logs to Elasticsearch"
-                                )
+                                self.logger.debug(f"Flushed {len(batch)} logs to Elasticsearch")
                                 return
                             else:
-                                self.logger.error(
-                                    f"Elasticsearch bulk errors: {result}"
-                                )
+                                self.logger.error(f"Elasticsearch bulk errors: {result}")
                         else:
-                            self.logger.error(
-                                f"Elasticsearch returned status {response.status}"
-                            )
+                            self.logger.error(f"Elasticsearch returned status {response.status}")
 
                 except Exception as e:
                     self.logger.error(f"Failed to send to {host}: {e}")
@@ -264,9 +248,7 @@ class ElasticsearchLogAggregator:
 
         try:
             for host in self.es_hosts:
-                endpoint = urljoin(
-                    host, f"/_index_template/{self.es_index_prefix}-template"
-                )
+                endpoint = urljoin(host, f"/_index_template/{self.es_index_prefix}-template")
 
                 async with self._session.put(endpoint, json=template) as response:
                     if response.status in (200, 201):
@@ -392,9 +374,7 @@ class LokiLogAggregator:
             # Send to Loki
             endpoint = urljoin(self.loki_url, "/loki/api/v1/push")
 
-            async with self._session.post(
-                endpoint, json=loki_data, headers={"Content-Type": "application/json"}
-            ) as response:
+            async with self._session.post(endpoint, json=loki_data, headers={"Content-Type": "application/json"}) as response:
                 if response.status == 204:
                     self.logs_sent += len(batch)
                     self.logger.debug(f"Flushed {len(batch)} logs to Loki")
@@ -444,9 +424,7 @@ class LogAggregationManager:
         self.environment = getattr(config.environment, "value", "development")
 
         # Aggregators
-        self.aggregators: List[Union[ElasticsearchLogAggregator, LokiLogAggregator]] = (
-            []
-        )
+        self.aggregators: List[Union[ElasticsearchLogAggregator, LokiLogAggregator]] = []
 
         # Initialize aggregators based on configuration
         if getattr(config, "enable_elasticsearch_logging", False):
@@ -455,9 +433,7 @@ class LogAggregationManager:
         if getattr(config, "enable_loki_logging", False):
             self.aggregators.append(LokiLogAggregator(config))
 
-        self.logger.info(
-            f"LogAggregationManager initialized with {len(self.aggregators)} aggregators"
-        )
+        self.logger.info(f"LogAggregationManager initialized with {len(self.aggregators)} aggregators")
 
     async def initialize(self):
         """Initialize all aggregators."""

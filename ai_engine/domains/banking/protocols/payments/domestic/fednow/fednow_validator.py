@@ -125,9 +125,7 @@ class FedNowValidator(BaseValidator):
 
         # Instructing Agent
         if msg.instructing_agent:
-            self._validate_participant(
-                msg.instructing_agent, "instructing_agent", result
-            )
+            self._validate_participant(msg.instructing_agent, "instructing_agent", result)
         else:
             result.add_error(
                 "FEDNOW_MISSING_INSTG_AGT",
@@ -137,9 +135,7 @@ class FedNowValidator(BaseValidator):
 
         # Instructed Agent
         if msg.instructed_agent:
-            self._validate_participant(
-                msg.instructed_agent, "instructed_agent", result
-            )
+            self._validate_participant(msg.instructed_agent, "instructed_agent", result)
         else:
             result.add_error(
                 "FEDNOW_MISSING_INSTD_AGT",
@@ -147,9 +143,7 @@ class FedNowValidator(BaseValidator):
                 field="instructed_agent",
             )
 
-    def _validate_participant(
-        self, participant, field_prefix: str, result: ValidationResult
-    ) -> None:
+    def _validate_participant(self, participant, field_prefix: str, result: ValidationResult) -> None:
         """Validate participant (financial institution) information."""
         if not participant.routing_number:
             result.add_error(
@@ -166,9 +160,7 @@ class FedNowValidator(BaseValidator):
                     field=f"{field_prefix}/routing_number",
                 )
 
-    def _validate_credit_transfer(
-        self, msg: FedNowCreditTransfer, result: ValidationResult
-    ) -> None:
+    def _validate_credit_transfer(self, msg: FedNowCreditTransfer, result: ValidationResult) -> None:
         """Validate FedNow Credit Transfer (pacs.008)."""
         # Base validation
         self._validate_base_message(msg, result)
@@ -228,17 +220,17 @@ class FedNowValidator(BaseValidator):
 
         # Check debtor and creditor are different
         if msg.debtor and msg.creditor:
-            if (msg.debtor.account.account_number == msg.creditor.account.account_number and
-                    msg.debtor.account.routing_number == msg.creditor.account.routing_number):
+            if (
+                msg.debtor.account.account_number == msg.creditor.account.account_number
+                and msg.debtor.account.routing_number == msg.creditor.account.routing_number
+            ):
                 result.add_error(
                     "FEDNOW_SAME_ACCOUNT",
                     "Debtor and creditor accounts must be different",
                     field="debtor/creditor",
                 )
 
-    def _validate_payment_status(
-        self, msg: FedNowPaymentStatus, result: ValidationResult
-    ) -> None:
+    def _validate_payment_status(self, msg: FedNowPaymentStatus, result: ValidationResult) -> None:
         """Validate FedNow Payment Status (pacs.002)."""
         # Base validation
         self._validate_base_message(msg, result)
@@ -275,9 +267,7 @@ class FedNowValidator(BaseValidator):
                     field="reject_code",
                 )
 
-    def _validate_payment_return(
-        self, msg: FedNowPaymentReturn, result: ValidationResult
-    ) -> None:
+    def _validate_payment_return(self, msg: FedNowPaymentReturn, result: ValidationResult) -> None:
         """Validate FedNow Payment Return (pacs.004)."""
         # Base validation
         self._validate_base_message(msg, result)
@@ -320,9 +310,7 @@ class FedNowValidator(BaseValidator):
                 field="returned_amount",
             )
 
-    def _validate_request_for_payment(
-        self, msg: FedNowRequestForPayment, result: ValidationResult
-    ) -> None:
+    def _validate_request_for_payment(self, msg: FedNowRequestForPayment, result: ValidationResult) -> None:
         """Validate FedNow Request for Payment (pain.013)."""
         # Base validation
         self._validate_base_message(msg, result)
@@ -373,9 +361,7 @@ class FedNowValidator(BaseValidator):
                     field="expiry_datetime",
                 )
 
-    def _validate_party(
-        self, party, field_prefix: str, result: ValidationResult
-    ) -> None:
+    def _validate_party(self, party, field_prefix: str, result: ValidationResult) -> None:
         """Validate party (debtor/creditor) information."""
         if not party.name:
             result.add_error(
@@ -450,8 +436,7 @@ class FedNowValidator(BaseValidator):
                 )
 
         # Routing numbers
-        for field in ["debtor_routing", "creditor_routing",
-                      "instructing_agent_routing", "instructed_agent_routing"]:
+        for field in ["debtor_routing", "creditor_routing", "instructing_agent_routing", "instructed_agent_routing"]:
             if field in data and self.check_routing_numbers:
                 error = validate_routing_number(data[field])
                 if error:

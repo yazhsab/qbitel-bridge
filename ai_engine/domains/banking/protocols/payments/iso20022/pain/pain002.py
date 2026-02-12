@@ -223,34 +223,40 @@ class Pain002Message:
 
         # Group level reasons
         for reason in self.group_status_reason:
-            reasons.append({
-                "level": "group",
-                "code": reason.reason_code.code if reason.reason_code else reason.proprietary_code,
-                "description": reason.reason_code.description if reason.reason_code else "",
-                "additional_info": reason.additional_info,
-            })
+            reasons.append(
+                {
+                    "level": "group",
+                    "code": reason.reason_code.code if reason.reason_code else reason.proprietary_code,
+                    "description": reason.reason_code.description if reason.reason_code else "",
+                    "additional_info": reason.additional_info,
+                }
+            )
 
         # Payment info level reasons
         for pmt_info in self.original_payment_info_and_status:
             for reason in pmt_info.status_reason_info:
-                reasons.append({
-                    "level": "payment_info",
-                    "payment_info_id": pmt_info.original_payment_info_id,
-                    "code": reason.reason_code.code if reason.reason_code else reason.proprietary_code,
-                    "description": reason.reason_code.description if reason.reason_code else "",
-                    "additional_info": reason.additional_info,
-                })
+                reasons.append(
+                    {
+                        "level": "payment_info",
+                        "payment_info_id": pmt_info.original_payment_info_id,
+                        "code": reason.reason_code.code if reason.reason_code else reason.proprietary_code,
+                        "description": reason.reason_code.description if reason.reason_code else "",
+                        "additional_info": reason.additional_info,
+                    }
+                )
 
             # Transaction level reasons
             for tx in pmt_info.transaction_statuses:
                 for reason in tx.status_reason_info:
-                    reasons.append({
-                        "level": "transaction",
-                        "end_to_end_id": tx.original_end_to_end_id,
-                        "code": reason.reason_code.code if reason.reason_code else reason.proprietary_code,
-                        "description": reason.reason_code.description if reason.reason_code else "",
-                        "additional_info": reason.additional_info,
-                    })
+                    reasons.append(
+                        {
+                            "level": "transaction",
+                            "end_to_end_id": tx.original_end_to_end_id,
+                            "code": reason.reason_code.code if reason.reason_code else reason.proprietary_code,
+                            "description": reason.reason_code.description if reason.reason_code else "",
+                            "additional_info": reason.additional_info,
+                        }
+                    )
 
         return reasons
 
@@ -334,7 +340,7 @@ class Pain002Parser:
     def _extract_namespace(self, root: ET.Element) -> str:
         """Extract namespace from root element."""
         if root.tag.startswith("{"):
-            return root.tag[1:root.tag.index("}")]
+            return root.tag[1 : root.tag.index("}")]
         return ""
 
     def _parse_group_header(self, grp_hdr: ET.Element, ns: str, message: Pain002Message) -> None:
@@ -346,9 +352,7 @@ class Pain002Parser:
         cre_dt_tm = grp_hdr.find(f"{ns}CreDtTm")
         if cre_dt_tm is not None and cre_dt_tm.text:
             try:
-                message.creation_datetime = datetime.fromisoformat(
-                    cre_dt_tm.text.replace("Z", "+00:00")
-                )
+                message.creation_datetime = datetime.fromisoformat(cre_dt_tm.text.replace("Z", "+00:00"))
             except ValueError:
                 pass
 
@@ -364,8 +368,7 @@ class Pain002Parser:
         if dbtr_agt is not None and dbtr_agt.text:
             message.debtor_agent_bic = dbtr_agt.text
 
-    def _parse_original_group_info(self, orgnl_grp: ET.Element, ns: str,
-                                    message: Pain002Message) -> None:
+    def _parse_original_group_info(self, orgnl_grp: ET.Element, ns: str, message: Pain002Message) -> None:
         """Parse original group information."""
         # Original Message ID
         orgnl_msg_id = orgnl_grp.find(f"{ns}OrgnlMsgId")
@@ -381,9 +384,7 @@ class Pain002Parser:
         orgnl_cre_dt_tm = orgnl_grp.find(f"{ns}OrgnlCreDtTm")
         if orgnl_cre_dt_tm is not None and orgnl_cre_dt_tm.text:
             try:
-                message.original_creation_datetime = datetime.fromisoformat(
-                    orgnl_cre_dt_tm.text.replace("Z", "+00:00")
-                )
+                message.original_creation_datetime = datetime.fromisoformat(orgnl_cre_dt_tm.text.replace("Z", "+00:00"))
             except ValueError:
                 pass
 
@@ -398,8 +399,7 @@ class Pain002Parser:
             if reason:
                 message.group_status_reason.append(reason)
 
-    def _parse_original_payment_info(self, orgnl_pmt: ET.Element,
-                                      ns: str) -> Optional[OriginalPaymentInfo]:
+    def _parse_original_payment_info(self, orgnl_pmt: ET.Element, ns: str) -> Optional[OriginalPaymentInfo]:
         """Parse original payment information."""
         pmt_info = OriginalPaymentInfo()
 
@@ -458,9 +458,7 @@ class Pain002Parser:
         acpt_dt_tm = tx_inf.find(f"{ns}AccptncDtTm")
         if acpt_dt_tm is not None and acpt_dt_tm.text:
             try:
-                tx.acceptance_datetime = datetime.fromisoformat(
-                    acpt_dt_tm.text.replace("Z", "+00:00")
-                )
+                tx.acceptance_datetime = datetime.fromisoformat(acpt_dt_tm.text.replace("Z", "+00:00"))
             except ValueError:
                 pass
 
@@ -591,10 +589,12 @@ class Pain002Builder:
         pmt_info = OriginalPaymentInfo(
             original_payment_info_id=original_payment_info_id,
             payment_info_status=TransactionStatus.RJCT,
-            status_reason_info=[StatusReasonInfo(
-                reason_code=reason_code,
-                additional_info=[additional_info] if additional_info else [],
-            )],
+            status_reason_info=[
+                StatusReasonInfo(
+                    reason_code=reason_code,
+                    additional_info=[additional_info] if additional_info else [],
+                )
+            ],
         )
 
         if transactions:
@@ -604,10 +604,12 @@ class Pain002Builder:
                     original_end_to_end_id=tx.get("end_to_end_id", ""),
                     original_instruction_id=tx.get("instruction_id", ""),
                     transaction_status=TransactionStatus.RJCT,
-                    status_reason_info=[StatusReasonInfo(
-                        reason_code=tx_reason,
-                        additional_info=[tx.get("additional_info", "")] if tx.get("additional_info") else [],
-                    )],
+                    status_reason_info=[
+                        StatusReasonInfo(
+                            reason_code=tx_reason,
+                            additional_info=[tx.get("additional_info", "")] if tx.get("additional_info") else [],
+                        )
+                    ],
                 )
                 pmt_info.transaction_statuses.append(tx_info)
 
@@ -627,9 +629,7 @@ class Pain002Builder:
         )
 
         if self._group_reason:
-            message.group_status_reason.append(
-                StatusReasonInfo(reason_code=self._group_reason)
-            )
+            message.group_status_reason.append(StatusReasonInfo(reason_code=self._group_reason))
 
         self._reset()
         return message

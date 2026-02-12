@@ -103,9 +103,7 @@ class GDPRComplianceManager:
     - Data protection impact assessments (Article 35)
     """
 
-    def __init__(
-        self, config: Config, audit_manager: Optional[AuditTrailManager] = None
-    ):
+    def __init__(self, config: Config, audit_manager: Optional[AuditTrailManager] = None):
         """Initialize GDPR compliance manager."""
         self.config = config
         self.logger = logging.getLogger(__name__)
@@ -362,9 +360,7 @@ class GDPRComplianceManager:
             if c.expires_at and c.expires_at < datetime.utcnow() and not c.withdrawn_at
         ]
         if expired_consents:
-            compliance_status["issues"].append(
-                f"{len(expired_consents)} expired consents need renewal"
-            )
+            compliance_status["issues"].append(f"{len(expired_consents)} expired consents need renewal")
 
         # Check pending subject requests
         pending_requests = [
@@ -374,15 +370,11 @@ class GDPRComplianceManager:
         ]
         if pending_requests:
             compliance_status["compliant"] = False
-            compliance_status["issues"].append(
-                f"{len(pending_requests)} subject requests exceed 30-day response time"
-            )
+            compliance_status["issues"].append(f"{len(pending_requests)} subject requests exceed 30-day response time")
 
         # Check processing records
         if not self.processing_records:
-            compliance_status["recommendations"].append(
-                "No processing activities recorded (Article 30 requirement)"
-            )
+            compliance_status["recommendations"].append("No processing activities recorded (Article 30 requirement)")
 
         return compliance_status
 
@@ -399,25 +391,14 @@ class GDPRComplianceManager:
                 [
                     c
                     for c in self.consent_records.values()
-                    if not c.withdrawn_at
-                    and (not c.expires_at or c.expires_at > datetime.utcnow())
+                    if not c.withdrawn_at and (not c.expires_at or c.expires_at > datetime.utcnow())
                 ]
             ),
-            "withdrawn_consents": len(
-                [c for c in self.consent_records.values() if c.withdrawn_at]
-            ),
+            "withdrawn_consents": len([c for c in self.consent_records.values() if c.withdrawn_at]),
             "subject_requests": {
                 "total": len(self.subject_requests),
-                "pending": len(
-                    [r for r in self.subject_requests.values() if r.status == "pending"]
-                ),
-                "completed": len(
-                    [
-                        r
-                        for r in self.subject_requests.values()
-                        if r.status == "completed"
-                    ]
-                ),
+                "pending": len([r for r in self.subject_requests.values() if r.status == "pending"]),
+                "completed": len([r for r in self.subject_requests.values() if r.status == "completed"]),
             },
             "processing_records": len(self.processing_records),
         }

@@ -45,7 +45,7 @@ class IstioSidecarInjector:
         self,
         namespace: str = "qbitel-system",
         config: Optional[SidecarConfig] = None,
-        webhook_name: str = "qbitel-sidecar-injector"
+        webhook_name: str = "qbitel-sidecar-injector",
     ):
         """
         Initialize the Istio sidecar injector.
@@ -70,42 +70,21 @@ class IstioSidecarInjector:
         webhook_config = {
             "apiVersion": "admissionregistration.k8s.io/v1",
             "kind": "MutatingWebhookConfiguration",
-            "metadata": {
-                "name": self.webhook_name,
-                "labels": {
-                    "app": "qbitel",
-                    "component": "sidecar-injector"
-                }
-            },
+            "metadata": {"name": self.webhook_name, "labels": {"app": "qbitel", "component": "sidecar-injector"}},
             "webhooks": [
                 {
                     "name": f"{self.webhook_name}.qbitel.io",
                     "clientConfig": {
-                        "service": {
-                            "name": "qbitel-sidecar-injector",
-                            "namespace": self.namespace,
-                            "path": "/inject"
-                        },
-                        "caBundle": ""  # Will be populated with actual CA certificate
+                        "service": {"name": "qbitel-sidecar-injector", "namespace": self.namespace, "path": "/inject"},
+                        "caBundle": "",  # Will be populated with actual CA certificate
                     },
-                    "rules": [
-                        {
-                            "operations": ["CREATE"],
-                            "apiGroups": [""],
-                            "apiVersions": ["v1"],
-                            "resources": ["pods"]
-                        }
-                    ],
+                    "rules": [{"operations": ["CREATE"], "apiGroups": [""], "apiVersions": ["v1"], "resources": ["pods"]}],
                     "failurePolicy": "Fail",
                     "admissionReviewVersions": ["v1", "v1beta1"],
                     "sideEffects": "None",
-                    "namespaceSelector": {
-                        "matchLabels": {
-                            "qbitel-injection": "enabled"
-                        }
-                    }
+                    "namespaceSelector": {"matchLabels": {"qbitel-injection": "enabled"}},
                 }
-            ]
+            ],
         }
 
         logger.info(f"Created webhook configuration: {self.webhook_name}")
@@ -147,12 +126,14 @@ class IstioSidecarInjector:
         if "annotations" not in pod_spec["metadata"]:
             pod_spec["metadata"]["annotations"] = {}
 
-        pod_spec["metadata"]["annotations"].update({
-            "qbitel.ai/sidecar-injected": "true",
-            "qbitel.ai/quantum-algorithm": self.config.quantum_algorithm,
-            "qbitel.ai/signature-algorithm": self.config.signature_algorithm,
-            "qbitel.ai/version": "1.0.0"
-        })
+        pod_spec["metadata"]["annotations"].update(
+            {
+                "qbitel.ai/sidecar-injected": "true",
+                "qbitel.ai/quantum-algorithm": self.config.quantum_algorithm,
+                "qbitel.ai/signature-algorithm": self.config.signature_algorithm,
+                "qbitel.ai/version": "1.0.0",
+            }
+        )
 
         logger.info("Successfully injected QBITEL sidecar into pod")
         return pod_spec
@@ -165,98 +146,52 @@ class IstioSidecarInjector:
             "imagePullPolicy": "IfNotPresent",
             "args": [
                 "proxy",
-                "--quantum-algo", self.config.quantum_algorithm,
-                "--signature-algo", self.config.signature_algorithm,
-                "--proxy-port", str(self.config.proxy_port),
-                "--admin-port", str(self.config.admin_port),
-                "--metrics-port", str(self.config.metrics_port),
-                "--log-level", "info"
+                "--quantum-algo",
+                self.config.quantum_algorithm,
+                "--signature-algo",
+                self.config.signature_algorithm,
+                "--proxy-port",
+                str(self.config.proxy_port),
+                "--admin-port",
+                str(self.config.admin_port),
+                "--metrics-port",
+                str(self.config.metrics_port),
+                "--log-level",
+                "info",
             ],
             "ports": [
-                {
-                    "name": "proxy",
-                    "containerPort": self.config.proxy_port,
-                    "protocol": "TCP"
-                },
-                {
-                    "name": "admin",
-                    "containerPort": self.config.admin_port,
-                    "protocol": "TCP"
-                },
-                {
-                    "name": "metrics",
-                    "containerPort": self.config.metrics_port,
-                    "protocol": "TCP"
-                }
+                {"name": "proxy", "containerPort": self.config.proxy_port, "protocol": "TCP"},
+                {"name": "admin", "containerPort": self.config.admin_port, "protocol": "TCP"},
+                {"name": "metrics", "containerPort": self.config.metrics_port, "protocol": "TCP"},
             ],
             "env": [
-                {
-                    "name": "POD_NAME",
-                    "valueFrom": {
-                        "fieldRef": {
-                            "fieldPath": "metadata.name"
-                        }
-                    }
-                },
-                {
-                    "name": "POD_NAMESPACE",
-                    "valueFrom": {
-                        "fieldRef": {
-                            "fieldPath": "metadata.namespace"
-                        }
-                    }
-                },
-                {
-                    "name": "QBITEL_QUANTUM_ENABLED",
-                    "value": "true"
-                }
+                {"name": "POD_NAME", "valueFrom": {"fieldRef": {"fieldPath": "metadata.name"}}},
+                {"name": "POD_NAMESPACE", "valueFrom": {"fieldRef": {"fieldPath": "metadata.namespace"}}},
+                {"name": "QBITEL_QUANTUM_ENABLED", "value": "true"},
             ],
             "resources": {
-                "requests": {
-                    "cpu": self.config.cpu_request,
-                    "memory": self.config.memory_request
-                },
-                "limits": {
-                    "cpu": self.config.cpu_limit,
-                    "memory": self.config.memory_limit
-                }
+                "requests": {"cpu": self.config.cpu_request, "memory": self.config.memory_request},
+                "limits": {"cpu": self.config.cpu_limit, "memory": self.config.memory_limit},
             },
             "volumeMounts": [
-                {
-                    "name": "qbitel-certs",
-                    "mountPath": "/etc/qbitel/certs",
-                    "readOnly": True
-                },
-                {
-                    "name": "qbitel-config",
-                    "mountPath": "/etc/qbitel/config",
-                    "readOnly": True
-                }
+                {"name": "qbitel-certs", "mountPath": "/etc/qbitel/certs", "readOnly": True},
+                {"name": "qbitel-config", "mountPath": "/etc/qbitel/config", "readOnly": True},
             ],
             "securityContext": {
                 "runAsNonRoot": True,
                 "runAsUser": 1337,
-                "capabilities": {
-                    "add": ["NET_ADMIN", "NET_RAW"],
-                    "drop": ["ALL"]
-                }
+                "capabilities": {"add": ["NET_ADMIN", "NET_RAW"], "drop": ["ALL"]},
             },
             "livenessProbe": {
-                "httpGet": {
-                    "path": "/healthz",
-                    "port": self.config.admin_port
-                },
+                "httpGet": {"path": "/healthz", "port": self.config.admin_port},
                 "initialDelaySeconds": 10,
-                "periodSeconds": 10
+                "periodSeconds": 10,
             },
             "readinessProbe": {
-                "httpGet": {
-                    "path": "/ready",
-                    "port": self.config.admin_port
-                },
+                "httpGet": {"path": "/ready", "port": self.config.admin_port},
                 "initialDelaySeconds": 5,
-                "periodSeconds": 5
-            }
+                "periodSeconds": 5,
+            },
         }
 
     def _create_init_container(self) -> Dict[str, Any]:
@@ -266,51 +201,21 @@ class IstioSidecarInjector:
             "image": self.config.image,
             "imagePullPolicy": "IfNotPresent",
             "command": ["qbitel-iptables"],
-            "args": [
-                "-p", str(self.config.proxy_port),
-                "-u", "1337",
-                "-m", "REDIRECT",
-                "-i", "*",
-                "-b", "*"
-            ],
+            "args": ["-p", str(self.config.proxy_port), "-u", "1337", "-m", "REDIRECT", "-i", "*", "-b", "*"],
             "securityContext": {
-                "capabilities": {
-                    "add": ["NET_ADMIN", "NET_RAW"],
-                    "drop": ["ALL"]
-                },
+                "capabilities": {"add": ["NET_ADMIN", "NET_RAW"], "drop": ["ALL"]},
                 "privileged": False,
                 "runAsNonRoot": False,
-                "runAsUser": 0
+                "runAsUser": 0,
             },
-            "resources": {
-                "requests": {
-                    "cpu": "10m",
-                    "memory": "10Mi"
-                },
-                "limits": {
-                    "cpu": "50m",
-                    "memory": "50Mi"
-                }
-            }
+            "resources": {"requests": {"cpu": "10m", "memory": "10Mi"}, "limits": {"cpu": "50m", "memory": "50Mi"}},
         }
 
     def _create_volumes(self) -> List[Dict[str, Any]]:
         """Create volume specifications for certificates and config"""
         return [
-            {
-                "name": "qbitel-certs",
-                "secret": {
-                    "secretName": "qbitel-quantum-certs",
-                    "optional": False
-                }
-            },
-            {
-                "name": "qbitel-config",
-                "configMap": {
-                    "name": "qbitel-mesh-config",
-                    "optional": False
-                }
-            }
+            {"name": "qbitel-certs", "secret": {"secretName": "qbitel-quantum-certs", "optional": False}},
+            {"name": "qbitel-config", "configMap": {"name": "qbitel-mesh-config", "optional": False}},
         ]
 
     def should_inject(self, pod: Dict[str, Any]) -> bool:
@@ -358,21 +263,13 @@ class IstioSidecarInjector:
             "neverInjectSelector": [],
             "injectedAnnotations": {},
             "template": {
-                "metadata": {
-                    "annotations": {
-                        "qbitel.ai/sidecar-injected": "true"
-                    }
-                },
+                "metadata": {"annotations": {"qbitel.ai/sidecar-injected": "true"}},
                 "spec": {
-                    "containers": [
-                        self._create_sidecar_container()
-                    ],
-                    "initContainers": [
-                        self._create_init_container()
-                    ],
-                    "volumes": self._create_volumes()
-                }
-            }
+                    "containers": [self._create_sidecar_container()],
+                    "initContainers": [self._create_init_container()],
+                    "volumes": self._create_volumes(),
+                },
+            },
         }
 
         return template
@@ -391,24 +288,11 @@ def create_injection_webhook_service() -> Dict[str, Any]:
         "metadata": {
             "name": "qbitel-sidecar-injector",
             "namespace": "qbitel-system",
-            "labels": {
-                "app": "qbitel",
-                "component": "sidecar-injector"
-            }
+            "labels": {"app": "qbitel", "component": "sidecar-injector"},
         },
         "spec": {
-            "ports": [
-                {
-                    "name": "https-webhook",
-                    "port": 443,
-                    "targetPort": 9443,
-                    "protocol": "TCP"
-                }
-            ],
-            "selector": {
-                "app": "qbitel",
-                "component": "sidecar-injector"
-            },
-            "type": "ClusterIP"
-        }
+            "ports": [{"name": "https-webhook", "port": 443, "targetPort": 9443, "protocol": "TCP"}],
+            "selector": {"app": "qbitel", "component": "sidecar-injector"},
+            "type": "ClusterIP",
+        },
     }

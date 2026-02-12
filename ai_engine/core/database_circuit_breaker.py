@@ -57,9 +57,7 @@ class DatabaseCircuitBreakerManager:
             slow_call_rate_threshold=0.3,  # 30% slow calls
         )
 
-    def get_circuit_breaker(
-        self, name: str, config: Optional[CircuitBreakerConfig] = None
-    ) -> CircuitBreaker:
+    def get_circuit_breaker(self, name: str, config: Optional[CircuitBreakerConfig] = None) -> CircuitBreaker:
         """
         Get or create a circuit breaker for a specific database operation.
 
@@ -72,9 +70,7 @@ class DatabaseCircuitBreakerManager:
         """
         if name not in self._circuit_breakers:
             breaker_config = config or self._default_config
-            self._circuit_breakers[name] = CircuitBreaker(
-                name=f"db_{name}", config=breaker_config
-            )
+            self._circuit_breakers[name] = CircuitBreaker(name=f"db_{name}", config=breaker_config)
             logger.info(f"Created circuit breaker for database operation: {name}")
 
         return self._circuit_breakers[name]
@@ -176,22 +172,17 @@ def with_database_circuit_breaker(
                     try:
                         return await fallback(*args, **kwargs)
                     except Exception as fb_error:
-                        logger.error(
-                            f"Fallback also failed for {func.__name__}: {fb_error}"
-                        )
+                        logger.error(f"Fallback also failed for {func.__name__}: {fb_error}")
                         raise
 
                 # No fallback available
                 raise RuntimeError(
-                    f"Database operation '{func.__name__}' unavailable due to circuit breaker. "
-                    f"State: {e.state.value}"
+                    f"Database operation '{func.__name__}' unavailable due to circuit breaker. " f"State: {e.state.value}"
                 ) from e
 
             except (OperationalError, DBAPIError, DatabaseError, SQLTimeoutError) as e:
                 # Database-specific errors
-                logger.error(
-                    f"Database error in {func.__name__} (circuit: {name}): {e}"
-                )
+                logger.error(f"Database error in {func.__name__} (circuit: {name}): {e}")
                 raise
 
         return wrapper
@@ -247,13 +238,9 @@ def get_database_health_status() -> dict[str, Any]:
     states = manager.get_all_states()
 
     # Determine overall health
-    all_closed = all(
-        state["state"] == CircuitBreakerState.CLOSED.value for state in states.values()
-    )
+    all_closed = all(state["state"] == CircuitBreakerState.CLOSED.value for state in states.values())
 
-    any_open = any(
-        state["state"] == CircuitBreakerState.OPEN.value for state in states.values()
-    )
+    any_open = any(state["state"] == CircuitBreakerState.OPEN.value for state in states.values())
 
     if all_closed:
         overall_status = "healthy"
@@ -288,9 +275,7 @@ if __name__ == "__main__":
         """Fallback to cache when database is down."""
         return [{"id": 1, "name": "cached_user"}]
 
-    @with_database_circuit_breaker(
-        name="read_users_with_fallback", fallback=get_cached_users
-    )
+    @with_database_circuit_breaker(name="read_users_with_fallback", fallback=get_cached_users)
     async def get_users_with_fallback(db: AsyncSession):
         """Example with fallback to cache."""
         from sqlalchemy import select

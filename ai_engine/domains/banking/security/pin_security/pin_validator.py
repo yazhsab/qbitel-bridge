@@ -36,20 +36,24 @@ class PINValidationResult:
 
     def add_error(self, code: str, message: str) -> None:
         """Add an error."""
-        self.issues.append(PINValidationIssue(
-            code=code,
-            message=message,
-            severity=PINValidationSeverity.ERROR,
-        ))
+        self.issues.append(
+            PINValidationIssue(
+                code=code,
+                message=message,
+                severity=PINValidationSeverity.ERROR,
+            )
+        )
         self.is_valid = False
 
     def add_warning(self, code: str, message: str) -> None:
         """Add a warning."""
-        self.issues.append(PINValidationIssue(
-            code=code,
-            message=message,
-            severity=PINValidationSeverity.WARNING,
-        ))
+        self.issues.append(
+            PINValidationIssue(
+                code=code,
+                message=message,
+                severity=PINValidationSeverity.WARNING,
+            )
+        )
 
     @property
     def errors(self) -> List[PINValidationIssue]:
@@ -72,16 +76,50 @@ class PINValidator:
 
     # Common weak PINs to reject
     DEFAULT_BLACKLIST: Set[str] = {
-        "0000", "1111", "2222", "3333", "4444",
-        "5555", "6666", "7777", "8888", "9999",
-        "1234", "2345", "3456", "4567", "5678",
-        "6789", "0123", "9876", "8765", "7654",
-        "6543", "5432", "4321", "3210",
-        "1212", "2121", "1010", "2020",
-        "0852", "2580", "1470", "0741",  # Keypad patterns
-        "1379", "9731", "7913", "3197",  # More keypad patterns
-        "1478", "8741", "2569", "9652",
-        "1357", "7531", "2468", "8642",
+        "0000",
+        "1111",
+        "2222",
+        "3333",
+        "4444",
+        "5555",
+        "6666",
+        "7777",
+        "8888",
+        "9999",
+        "1234",
+        "2345",
+        "3456",
+        "4567",
+        "5678",
+        "6789",
+        "0123",
+        "9876",
+        "8765",
+        "7654",
+        "6543",
+        "5432",
+        "4321",
+        "3210",
+        "1212",
+        "2121",
+        "1010",
+        "2020",
+        "0852",
+        "2580",
+        "1470",
+        "0741",  # Keypad patterns
+        "1379",
+        "9731",
+        "7913",
+        "3197",  # More keypad patterns
+        "1478",
+        "8741",
+        "2569",
+        "9652",
+        "1357",
+        "7531",
+        "2468",
+        "8642",
     }
 
     def __init__(
@@ -189,7 +227,7 @@ class PINValidator:
 
         # Ascending sequence
         digits = [int(d) for d in pin]
-        if all(digits[i] == digits[i-1] + 1 for i in range(1, len(digits))):
+        if all(digits[i] == digits[i - 1] + 1 for i in range(1, len(digits))):
             result.add_error(
                 "PIN_ASCENDING",
                 "PIN cannot be ascending sequence",
@@ -197,7 +235,7 @@ class PINValidator:
             return
 
         # Descending sequence
-        if all(digits[i] == digits[i-1] - 1 for i in range(1, len(digits))):
+        if all(digits[i] == digits[i - 1] - 1 for i in range(1, len(digits))):
             result.add_error(
                 "PIN_DESCENDING",
                 "PIN cannot be descending sequence",
@@ -236,7 +274,7 @@ class PINValidator:
 
         # PIN matches any 4 consecutive digits in PAN
         for i in range(len(clean_pan) - len(pin) + 1):
-            if clean_pan[i:i + len(pin)] == pin:
+            if clean_pan[i : i + len(pin)] == pin:
                 result.add_error(
                     "PIN_MATCHES_PAN",
                     "PIN cannot match digits from card number",
@@ -246,7 +284,7 @@ class PINValidator:
         # PIN is reverse of any 4 consecutive digits in PAN
         reversed_pin = pin[::-1]
         for i in range(len(clean_pan) - len(pin) + 1):
-            if clean_pan[i:i + len(pin)] == reversed_pin:
+            if clean_pan[i : i + len(pin)] == reversed_pin:
                 result.add_error(
                     "PIN_MATCHES_PAN_REVERSE",
                     "PIN cannot be reverse of card number digits",

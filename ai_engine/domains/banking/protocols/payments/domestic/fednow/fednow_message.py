@@ -288,24 +288,26 @@ class FedNowCreditTransfer(FedNowMessage):
     def to_dict(self) -> Dict:
         """Convert to dictionary."""
         base = super().to_dict()
-        base.update({
-            "end_to_end_id": self.end_to_end_id,
-            "transaction_id": self.transaction_id,
-            "uetr": self.uetr,
-            "amount": str(self.amount),
-            "currency": self.currency,
-            "debtor": {
-                "name": self.debtor.name,
-                "account": self.debtor.account.account_number,
-                "routing": self.debtor.account.routing_number,
-            },
-            "creditor": {
-                "name": self.creditor.name,
-                "account": self.creditor.account.account_number,
-                "routing": self.creditor.account.routing_number,
-            },
-            "settlement_date": self.settlement_date.isoformat() if self.settlement_date else None,
-        })
+        base.update(
+            {
+                "end_to_end_id": self.end_to_end_id,
+                "transaction_id": self.transaction_id,
+                "uetr": self.uetr,
+                "amount": str(self.amount),
+                "currency": self.currency,
+                "debtor": {
+                    "name": self.debtor.name,
+                    "account": self.debtor.account.account_number,
+                    "routing": self.debtor.account.routing_number,
+                },
+                "creditor": {
+                    "name": self.creditor.name,
+                    "account": self.creditor.account.account_number,
+                    "routing": self.creditor.account.routing_number,
+                },
+                "settlement_date": self.settlement_date.isoformat() if self.settlement_date else None,
+            }
+        )
         return base
 
 
@@ -377,15 +379,17 @@ class FedNowPaymentStatus(FedNowMessage):
     def to_dict(self) -> Dict:
         """Convert to dictionary."""
         base = super().to_dict()
-        base.update({
-            "original_message_id": self.original_message_id,
-            "original_end_to_end_id": self.original_end_to_end_id,
-            "transaction_status": self.transaction_status.code,
-            "is_accepted": self.is_accepted,
-            "is_rejected": self.is_rejected,
-            "reject_code": self.reject_code.code if self.reject_code else None,
-            "reject_reason": self.reject_reason,
-        })
+        base.update(
+            {
+                "original_message_id": self.original_message_id,
+                "original_end_to_end_id": self.original_end_to_end_id,
+                "transaction_status": self.transaction_status.code,
+                "is_accepted": self.is_accepted,
+                "is_rejected": self.is_rejected,
+                "reject_code": self.reject_code.code if self.reject_code else None,
+                "reject_reason": self.reject_reason,
+            }
+        )
         return base
 
 
@@ -453,15 +457,17 @@ class FedNowPaymentReturn(FedNowMessage):
     def to_dict(self) -> Dict:
         """Convert to dictionary."""
         base = super().to_dict()
-        base.update({
-            "original_message_id": self.original_message_id,
-            "original_end_to_end_id": self.original_end_to_end_id,
-            "return_id": self.return_id,
-            "return_code": self.return_code.code if self.return_code else None,
-            "return_reason": self.return_reason,
-            "returned_amount": str(self.returned_amount),
-            "original_amount": str(self.original_amount),
-        })
+        base.update(
+            {
+                "original_message_id": self.original_message_id,
+                "original_end_to_end_id": self.original_end_to_end_id,
+                "return_id": self.return_id,
+                "return_code": self.return_code.code if self.return_code else None,
+                "return_reason": self.return_reason,
+                "returned_amount": str(self.returned_amount),
+                "original_amount": str(self.original_amount),
+            }
+        )
         return base
 
 
@@ -528,19 +534,21 @@ class FedNowRequestForPayment(FedNowMessage):
     def to_dict(self) -> Dict:
         """Convert to dictionary."""
         base = super().to_dict()
-        base.update({
-            "request_id": self.request_id,
-            "end_to_end_id": self.end_to_end_id,
-            "requested_amount": str(self.requested_amount),
-            "currency": self.currency,
-            "creditor": {
-                "name": self.creditor.name,
-                "account": self.creditor.account.account_number,
-            },
-            "debtor": {
-                "name": self.debtor.name,
-                "account": self.debtor.account.account_number,
-            },
-            "expiry_datetime": self.expiry_datetime.isoformat() if self.expiry_datetime else None,
-        })
+        base.update(
+            {
+                "request_id": self.request_id,
+                "end_to_end_id": self.end_to_end_id,
+                "requested_amount": str(self.requested_amount),
+                "currency": self.currency,
+                "creditor": {
+                    "name": self.creditor.name,
+                    "account": self.creditor.account.account_number,
+                },
+                "debtor": {
+                    "name": self.debtor.name,
+                    "account": self.debtor.account.account_number,
+                },
+                "expiry_datetime": self.expiry_datetime.isoformat() if self.expiry_datetime else None,
+            }
+        )
         return base

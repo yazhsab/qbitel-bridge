@@ -194,14 +194,10 @@ class ComplianceService:
             self.regulatory_kb = RegulatoryKnowledgeBase(self.config, self.llm_service)
 
             # Initialize assessment engine
-            self.assessment_engine = ComplianceAssessmentEngine(
-                self.config, self.regulatory_kb, self.llm_service
-            )
+            self.assessment_engine = ComplianceAssessmentEngine(self.config, self.regulatory_kb, self.llm_service)
 
             # Initialize report generator
-            self.report_generator = AutomatedReportGenerator(
-                self.config, self.llm_service
-            )
+            self.report_generator = AutomatedReportGenerator(self.config, self.llm_service)
 
             # Initialize audit trail
             if self.service_config.enable_audit_trail:
@@ -253,9 +249,7 @@ class ComplianceService:
         """Start background maintenance tasks."""
         # Periodic assessment task
         if self.service_config.assessment_interval_hours > 0:
-            self._assessment_task = asyncio.create_task(
-                self._periodic_assessment_loop()
-            )
+            self._assessment_task = asyncio.create_task(self._periodic_assessment_loop())
 
         # Cleanup task
         self._cleanup_task = asyncio.create_task(self._cleanup_loop())
@@ -304,16 +298,11 @@ class ComplianceService:
                     return cached_result
 
             # Check concurrent assessment limit
-            if (
-                len(self.active_assessments)
-                >= self.service_config.max_concurrent_assessments
-            ):
+            if len(self.active_assessments) >= self.service_config.max_concurrent_assessments:
                 raise ComplianceException("Maximum concurrent assessments reached")
 
             # Start assessment
-            assessment_task = asyncio.create_task(
-                self._perform_assessment(framework, target_requirements, assessment_id)
-            )
+            assessment_task = asyncio.create_task(self._perform_assessment(framework, target_requirements, assessment_id))
             self.active_assessments[assessment_id] = assessment_task
 
             try:
@@ -340,9 +329,7 @@ class ComplianceService:
                             "framework": framework,
                             "assessment_id": assessment_id,
                             "compliance_score": score,
-                            "duration_seconds": (
-                                datetime.utcnow() - assessment_start
-                            ).total_seconds(),
+                            "duration_seconds": (datetime.utcnow() - assessment_start).total_seconds(),
                         },
                         compliance_framework=framework,
                     )
@@ -354,9 +341,7 @@ class ComplianceService:
                     {"framework": framework},
                 )
 
-                self.logger.info(
-                    f"Assessment completed: {assessment_id} - {score:.1f}%"
-                )
+                self.logger.info(f"Assessment completed: {assessment_id} - {score:.1f}%")
                 return assessment
 
             finally:
@@ -399,9 +384,7 @@ class ComplianceService:
                 {
                     "framework": framework,
                     "assessment_id": assessment_id,
-                    "target_requirements": (
-                        len(target_requirements) if target_requirements else "all"
-                    ),
+                    "target_requirements": (len(target_requirements) if target_requirements else "all"),
                 },
                 compliance_framework=framework,
             )
@@ -438,9 +421,7 @@ class ComplianceService:
             self.logger.info(f"Generating {report_type.value} report for {framework}")
 
             # Get or perform assessment
-            assessment = await self.assess_compliance(
-                framework, force_refresh=force_refresh
-            )
+            assessment = await self.assess_compliance(framework, force_refresh=force_refresh)
 
             # Generate report
             report = await self.report_generator.generate_compliance_report(
@@ -449,12 +430,8 @@ class ComplianceService:
 
             # Record audit event
             if self.audit_trail:
-                report_id = getattr(
-                    report, "report_id", f"report_{uuid.uuid4().hex[:8]}"
-                )
-                file_size = getattr(
-                    report, "file_size", len(getattr(report, "content", b""))
-                )
+                report_id = getattr(report, "report_id", f"report_{uuid.uuid4().hex[:8]}")
+                file_size = getattr(report, "file_size", len(getattr(report, "content", b"")))
                 await self.audit_trail.record_compliance_event(
                     EventType.REPORT_GENERATED,
                     "system",
@@ -481,9 +458,7 @@ class ComplianceService:
             self.logger.error(f"Report generation failed: {e}")
             raise ComplianceException(f"Report generation failed: {e}")
 
-    async def get_compliance_dashboard(
-        self, frameworks: List[str] = None
-    ) -> Dict[str, Any]:
+    async def get_compliance_dashboard(self, frameworks: List[str] = None) -> Dict[str, Any]:
         """
         Get comprehensive compliance dashboard data.
 
@@ -522,9 +497,7 @@ class ComplianceService:
                         assessment = await self.redis_client.get_assessment(framework)
 
                     if not assessment and self.timescale_client:
-                        assessment = await self.timescale_client.get_latest_assessment(
-                            framework
-                        )
+                        assessment = await self.timescale_client.get_latest_assessment(framework)
 
                     if assessment:
                         framework_data = {
@@ -538,18 +511,8 @@ class ComplianceService:
                             ),
                             "compliant": assessment.compliant_requirements,
                             "non_compliant": assessment.non_compliant_requirements,
-                            "critical_gaps": len(
-                                [
-                                    g
-                                    for g in assessment.gaps
-                                    if g.severity.value == "critical"
-                                ]
-                            ),
-                            "status": (
-                                "compliant"
-                                if assessment.overall_compliance_score >= 80
-                                else "non_compliant"
-                            ),
+                            "critical_gaps": len([g for g in assessment.gaps if g.severity.value == "critical"]),
+                            "status": ("compliant" if assessment.overall_compliance_score >= 80 else "non_compliant"),
                         }
 
                         total_compliance += assessment.overall_compliance_score
@@ -567,9 +530,7 @@ class ComplianceService:
                     dashboard_data["frameworks"][framework] = framework_data
 
                 except Exception as e:
-                    self.logger.error(
-                        f"Error getting dashboard data for {framework}: {e}"
-                    )
+                    self.logger.error(f"Error getting dashboard data for {framework}: {e}")
                     dashboard_data["frameworks"][framework] = {
                         "status": "error",
                         "error": str(e),
@@ -577,24 +538,16 @@ class ComplianceService:
 
             # Calculate summary
             valid_frameworks = [
-                f
-                for f in dashboard_data["frameworks"].values()
-                if f.get("status") not in ["error", "not_assessed"]
+                f for f in dashboard_data["frameworks"].values() if f.get("status") not in ["error", "not_assessed"]
             ]
 
             if valid_frameworks:
-                dashboard_data["summary"]["average_compliance"] = (
-                    total_compliance / len(valid_frameworks)
-                )
+                dashboard_data["summary"]["average_compliance"] = total_compliance / len(valid_frameworks)
                 dashboard_data["summary"]["critical_gaps"] = critical_gaps
 
             # Get trends from TimescaleDB if available
             if self.timescale_client:
-                dashboard_data["trends"] = (
-                    await self.timescale_client.get_compliance_trends(
-                        frameworks, days=30
-                    )
-                )
+                dashboard_data["trends"] = await self.timescale_client.get_compliance_trends(frameworks, days=30)
 
             # Get top recommendations
             all_recommendations = []
@@ -628,9 +581,7 @@ class ComplianceService:
             if not end_date:
                 end_date = datetime.utcnow()
 
-            report = await self.audit_trail.generate_compliance_audit_report(
-                framework or "all", start_date, end_date
-            )
+            report = await self.audit_trail.generate_compliance_audit_report(framework or "all", start_date, end_date)
 
             return report
 
@@ -642,9 +593,7 @@ class ComplianceService:
         """Background task for periodic assessments."""
         while self._running:
             try:
-                await asyncio.sleep(
-                    self.service_config.assessment_interval_hours * 3600
-                )
+                await asyncio.sleep(self.service_config.assessment_interval_hours * 3600)
 
                 if not self._running:
                     break
@@ -657,19 +606,12 @@ class ComplianceService:
                 # Assess each framework
                 for framework in frameworks:
                     try:
-                        if (
-                            len(self.active_assessments)
-                            < self.service_config.max_concurrent_assessments
-                        ):
+                        if len(self.active_assessments) < self.service_config.max_concurrent_assessments:
                             await self.assess_compliance(framework)
                         else:
-                            self.logger.warning(
-                                f"Skipping {framework} assessment - too many active assessments"
-                            )
+                            self.logger.warning(f"Skipping {framework} assessment - too many active assessments")
                     except Exception as e:
-                        self.logger.error(
-                            f"Periodic assessment failed for {framework}: {e}"
-                        )
+                        self.logger.error(f"Periodic assessment failed for {framework}: {e}")
 
             except asyncio.CancelledError:
                 break

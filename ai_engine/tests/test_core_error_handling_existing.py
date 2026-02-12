@@ -168,9 +168,7 @@ class TestErrorRecord:
             category=ErrorCategory.DATA_VALIDATION,
         )
 
-        record = ErrorRecord(
-            error=error, context=context, handled=True, recovered=False
-        )
+        record = ErrorRecord(error=error, context=context, handled=True, recovered=False)
 
         assert record.error == error
         assert record.context == context
@@ -190,9 +188,7 @@ class TestErrorRecord:
         )
 
         custom_id = "custom_error_id"
-        record = ErrorRecord(
-            error=error, context=context, handled=True, recovered=False, id=custom_id
-        )
+        record = ErrorRecord(error=error, context=context, handled=True, recovered=False, id=custom_id)
 
         assert record.id == custom_id
 
@@ -206,9 +202,7 @@ class TestErrorRecord:
             category=ErrorCategory.DATA_VALIDATION,
         )
 
-        record = ErrorRecord(
-            error=error, context=context, handled=True, recovered=False
-        )
+        record = ErrorRecord(error=error, context=context, handled=True, recovered=False)
 
         record_dict = record.to_dict()
 
@@ -332,9 +326,7 @@ class TestCircuitBreakerConfig:
 
     def test_initialization(self):
         """Test CircuitBreakerConfig initialization."""
-        config = CircuitBreakerConfig(
-            failure_threshold=5, timeout=60.0, expected_exception=ConnectionError
-        )
+        config = CircuitBreakerConfig(failure_threshold=5, timeout=60.0, expected_exception=ConnectionError)
 
         assert config.failure_threshold == 5
         assert config.timeout == 60.0
@@ -932,15 +924,9 @@ class TestHealthMonitor:
     def test_get_error_statistics(self, health_monitor):
         """Test getting error statistics."""
         # Record some errors
-        health_monitor.record_error(
-            "ValueError", "component1", "medium", "data_validation"
-        )
-        health_monitor.record_error(
-            "ValueError", "component1", "medium", "data_validation"
-        )
-        health_monitor.record_error(
-            "TypeError", "component2", "high", "model_inference"
-        )
+        health_monitor.record_error("ValueError", "component1", "medium", "data_validation")
+        health_monitor.record_error("ValueError", "component1", "medium", "data_validation")
+        health_monitor.record_error("TypeError", "component2", "high", "model_inference")
 
         stats = health_monitor.get_error_statistics()
 
@@ -952,9 +938,7 @@ class TestHealthMonitor:
 
     def test_reset_metrics(self, health_monitor):
         """Test resetting metrics."""
-        health_monitor.record_error(
-            "ValueError", "test_component", "medium", "data_validation"
-        )
+        health_monitor.record_error("ValueError", "test_component", "medium", "data_validation")
 
         assert len(health_monitor._error_counts) > 0
 
@@ -967,9 +951,7 @@ class TestHealthMonitor:
         """Test calculating error rate."""
         # Record errors over time
         for _ in range(10):
-            health_monitor.record_error(
-                "ValueError", "test_component", "medium", "data_validation"
-            )
+            health_monitor.record_error("ValueError", "test_component", "medium", "data_validation")
 
         rate = health_monitor.calculate_error_rate("ValueError", "test_component")
 
@@ -979,9 +961,7 @@ class TestHealthMonitor:
     def test_get_health_status(self, health_monitor):
         """Test getting health status."""
         # Record some errors
-        health_monitor.record_error(
-            "ValueError", "test_component", "medium", "data_validation"
-        )
+        health_monitor.record_error("ValueError", "test_component", "medium", "data_validation")
 
         status = health_monitor.get_health_status()
 
@@ -993,9 +973,7 @@ class TestHealthMonitor:
         """Test getting health status when unhealthy."""
         # Record many errors to make it unhealthy
         for _ in range(100):
-            health_monitor.record_error(
-                "ValueError", "test_component", "medium", "data_validation"
-            )
+            health_monitor.record_error("ValueError", "test_component", "medium", "data_validation")
 
         status = health_monitor.get_health_status()
 

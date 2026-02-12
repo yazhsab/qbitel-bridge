@@ -59,9 +59,7 @@ class PVV:
         """
         if not self._hsm:
             # Software implementation for development
-            return self._generate_ibm_3624_software(
-                pin, pan, decimalization_table
-            )
+            return self._generate_ibm_3624_software(pin, pan, decimalization_table)
 
         # HSM implementation
         return self._hsm.generate_pin_offset(
@@ -89,6 +87,7 @@ class PVV:
         # Calculate natural PIN (first 4 digits of encrypted validation data)
         # For demo, just use a simple derivation
         import hashlib
+
         hash_input = f"{validation_data}:{pin}"
         hash_result = hashlib.sha256(hash_input.encode()).hexdigest()
 
@@ -201,6 +200,7 @@ class PVV:
 
         # For development, use simplified derivation
         import hashlib
+
         hash_result = hashlib.sha256(transform.encode()).hexdigest()
 
         # Decimalize: scan for decimal digits
@@ -325,6 +325,7 @@ class CVV:
 
         # Simplified derivation for development
         import hashlib
+
         hash_input = cvv_data
         hash_result = hashlib.sha256(hash_input.encode()).hexdigest()
 
@@ -448,6 +449,7 @@ class CVV:
         )
         # Use constant-time comparison for security
         import secrets
+
         return secrets.compare_digest(expected, cvv)
 
     def verify_cvv2(

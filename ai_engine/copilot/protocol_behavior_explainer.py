@@ -94,9 +94,7 @@ class ProtocolBehaviorExplainer:
             },
         }
 
-    async def explain_protocol_behavior(
-        self, query: ProtocolBehaviorQuery
-    ) -> BehaviorExplanation:
+    async def explain_protocol_behavior(self, query: ProtocolBehaviorQuery) -> BehaviorExplanation:
         """
         Explain protocol behavior based on message analysis.
 
@@ -110,34 +108,22 @@ class ProtocolBehaviorExplainer:
             self.logger.info(f"Explaining behavior for {query.protocol_type} protocol")
 
             # Analyze message patterns
-            patterns = await self._analyze_message_patterns(
-                query.messages, query.protocol_type
-            )
+            patterns = await self._analyze_message_patterns(query.messages, query.protocol_type)
 
             # Analyze message sequence
-            sequence_analysis = await self._analyze_message_sequence(
-                query.messages, query.protocol_type
-            )
+            sequence_analysis = await self._analyze_message_sequence(query.messages, query.protocol_type)
 
             # Get relevant protocol knowledge
-            protocol_knowledge = await self._get_protocol_knowledge(
-                query.protocol_type, query.question
-            )
+            protocol_knowledge = await self._get_protocol_knowledge(query.protocol_type, query.question)
 
             # Generate explanation using LLM
-            explanation = await self._generate_explanation(
-                query, patterns, sequence_analysis, protocol_knowledge
-            )
+            explanation = await self._generate_explanation(query, patterns, sequence_analysis, protocol_knowledge)
 
             # Extract key observations
-            key_observations = self._extract_key_observations(
-                patterns, sequence_analysis
-            )
+            key_observations = self._extract_key_observations(patterns, sequence_analysis)
 
             # Identify security implications
-            security_implications = await self._identify_security_implications(
-                query.protocol_type, patterns, query.messages
-            )
+            security_implications = await self._identify_security_implications(query.protocol_type, patterns, query.messages)
 
             # Generate examples if requested
             examples = []
@@ -167,9 +153,7 @@ class ProtocolBehaviorExplainer:
             self.logger.error(f"Failed to explain protocol behavior: {e}")
             raise QbitelAIException(f"Behavior explanation failed: {e}")
 
-    async def _analyze_message_patterns(
-        self, messages: List[bytes], protocol_type: str
-    ) -> List[MessagePattern]:
+    async def _analyze_message_patterns(self, messages: List[bytes], protocol_type: str) -> List[MessagePattern]:
         """Analyze and identify message patterns."""
         patterns = []
 
@@ -186,9 +170,7 @@ class ProtocolBehaviorExplainer:
                 characteristics = self._analyze_message_characteristics(group_messages)
 
                 # Determine pattern type
-                pattern_type = self._classify_pattern_type(
-                    group_type, characteristics, protocol_type
-                )
+                pattern_type = self._classify_pattern_type(group_type, characteristics, protocol_type)
 
                 # Create pattern
                 pattern = MessagePattern(
@@ -197,9 +179,7 @@ class ProtocolBehaviorExplainer:
                     frequency=len(group_messages),
                     example_messages=group_messages[:3],  # First 3 examples
                     characteristics=characteristics,
-                    significance=self._assess_pattern_significance(
-                        pattern_type, len(group_messages), len(messages)
-                    ),
+                    significance=self._assess_pattern_significance(pattern_type, len(group_messages), len(messages)),
                 )
 
                 patterns.append(pattern)
@@ -285,15 +265,11 @@ class ProtocolBehaviorExplainer:
         variance = sum((x - mean) ** 2 for x in values) / len(values)
         return variance
 
-    def _classify_pattern_type(
-        self, group_type: str, characteristics: Dict[str, Any], protocol_type: str
-    ) -> str:
+    def _classify_pattern_type(self, group_type: str, characteristics: Dict[str, Any], protocol_type: str) -> str:
         """Classify the type of pattern."""
         # Check against known patterns
         for pattern_name, template in self.pattern_templates.items():
-            if any(
-                indicator in group_type.lower() for indicator in template["indicators"]
-            ):
+            if any(indicator in group_type.lower() for indicator in template["indicators"]):
                 return pattern_name
 
         # Classify based on characteristics
@@ -317,9 +293,7 @@ class ProtocolBehaviorExplainer:
 
         return descriptions.get(pattern_type, "Unclassified message pattern")
 
-    def _assess_pattern_significance(
-        self, pattern_type: str, frequency: int, total_messages: int
-    ) -> str:
+    def _assess_pattern_significance(self, pattern_type: str, frequency: int, total_messages: int) -> str:
         """Assess significance of pattern."""
         ratio = frequency / max(total_messages, 1)
 
@@ -335,9 +309,7 @@ class ProtocolBehaviorExplainer:
         else:
             return "low"
 
-    async def _analyze_message_sequence(
-        self, messages: List[bytes], protocol_type: str
-    ) -> str:
+    async def _analyze_message_sequence(self, messages: List[bytes], protocol_type: str) -> str:
         """Analyze the sequence of messages."""
         if len(messages) < 2:
             return "Insufficient messages for sequence analysis."
@@ -350,33 +322,21 @@ class ProtocolBehaviorExplainer:
         # Check for alternating patterns
         sizes = [len(m) for m in messages]
         if self._is_alternating(sizes):
-            analysis_parts.append(
-                "- Alternating message sizes detected (likely request-response pattern)"
-            )
+            analysis_parts.append("- Alternating message sizes detected (likely request-response pattern)")
 
         # Check for increasing/decreasing trends
         if self._is_increasing(sizes):
-            analysis_parts.append(
-                "- Message sizes increasing (possible data transfer or streaming)"
-            )
+            analysis_parts.append("- Message sizes increasing (possible data transfer or streaming)")
         elif self._is_decreasing(sizes):
-            analysis_parts.append(
-                "- Message sizes decreasing (possible connection teardown)"
-            )
+            analysis_parts.append("- Message sizes decreasing (possible connection teardown)")
 
         # Check for periodic patterns
         if self._has_periodic_pattern(sizes):
-            analysis_parts.append(
-                "- Periodic pattern detected (possible heartbeat or polling)"
-            )
+            analysis_parts.append("- Periodic pattern detected (possible heartbeat or polling)")
 
         # Analyze timing if available
-        analysis_parts.append(
-            f"- Message size range: {min(sizes)} to {max(sizes)} bytes"
-        )
-        analysis_parts.append(
-            f"- Average message size: {sum(sizes) / len(sizes):.1f} bytes"
-        )
+        analysis_parts.append(f"- Message size range: {min(sizes)} to {max(sizes)} bytes")
+        analysis_parts.append(f"- Average message size: {sum(sizes) / len(sizes):.1f} bytes")
 
         return "\n".join(analysis_parts)
 
@@ -389,11 +349,7 @@ class ProtocolBehaviorExplainer:
         above_median = [v > median for v in values]
 
         # Check for alternating pattern
-        alternations = sum(
-            1
-            for i in range(len(above_median) - 1)
-            if above_median[i] != above_median[i + 1]
-        )
+        alternations = sum(1 for i in range(len(above_median) - 1) if above_median[i] != above_median[i + 1])
 
         return alternations > len(values) * 0.6
 
@@ -430,9 +386,7 @@ class ProtocolBehaviorExplainer:
 
         return False
 
-    async def _get_protocol_knowledge(
-        self, protocol_type: str, question: str
-    ) -> List[Dict[str, Any]]:
+    async def _get_protocol_knowledge(self, protocol_type: str, question: str) -> List[Dict[str, Any]]:
         """Get relevant protocol knowledge from RAG."""
         try:
             query = f"{protocol_type} protocol behavior {question}"
@@ -519,18 +473,14 @@ class ProtocolBehaviorExplainer:
             self.logger.error(f"Failed to generate explanation: {e}")
             return f"Unable to generate detailed explanation. Observed {len(patterns)} message patterns in {len(query.messages)} messages."
 
-    def _extract_key_observations(
-        self, patterns: List[MessagePattern], sequence_analysis: str
-    ) -> List[str]:
+    def _extract_key_observations(self, patterns: List[MessagePattern], sequence_analysis: str) -> List[str]:
         """Extract key observations from analysis."""
         observations = []
 
         # Pattern-based observations
         for pattern in patterns:
             if pattern.significance == "high":
-                observations.append(
-                    f"{pattern.description} appears {pattern.frequency} times"
-                )
+                observations.append(f"{pattern.description} appears {pattern.frequency} times")
 
         # Sequence-based observations
         if "alternating" in sequence_analysis.lower():
@@ -558,53 +508,37 @@ class ProtocolBehaviorExplainer:
         # Check for large messages (potential DoS)
         large_messages = sum(1 for m in messages if len(m) > 10000)
         if large_messages > 0:
-            implications.append(
-                f"{large_messages} large messages detected (potential DoS risk)"
-            )
+            implications.append(f"{large_messages} large messages detected (potential DoS risk)")
 
         # Check for error patterns
         error_patterns = [p for p in patterns if "error" in p.pattern_type.lower()]
         if error_patterns:
-            implications.append(
-                "Error handling patterns observed (review error information disclosure)"
-            )
+            implications.append("Error handling patterns observed (review error information disclosure)")
 
         return implications
 
-    def _analyze_performance_characteristics(
-        self, patterns: List[MessagePattern]
-    ) -> List[str]:
+    def _analyze_performance_characteristics(self, patterns: List[MessagePattern]) -> List[str]:
         """Analyze performance characteristics."""
         notes = []
 
         # Check message frequency
         total_messages = sum(p.frequency for p in patterns)
         if total_messages > 100:
-            notes.append(
-                f"High message volume ({total_messages} messages) - consider batching"
-            )
+            notes.append(f"High message volume ({total_messages} messages) - consider batching")
 
         # Check for small messages
-        small_message_patterns = [
-            p for p in patterns if p.characteristics.get("avg_size", 0) < 100
-        ]
+        small_message_patterns = [p for p in patterns if p.characteristics.get("avg_size", 0) < 100]
         if small_message_patterns:
-            notes.append(
-                "Multiple small messages detected - potential for optimization"
-            )
+            notes.append("Multiple small messages detected - potential for optimization")
 
         # Check for large messages
-        large_message_patterns = [
-            p for p in patterns if p.characteristics.get("avg_size", 0) > 10000
-        ]
+        large_message_patterns = [p for p in patterns if p.characteristics.get("avg_size", 0) > 10000]
         if large_message_patterns:
             notes.append("Large messages present - consider streaming or chunking")
 
         return notes
 
-    def _generate_examples(
-        self, patterns: List[MessagePattern], messages: List[bytes]
-    ) -> List[Dict[str, Any]]:
+    def _generate_examples(self, patterns: List[MessagePattern], messages: List[bytes]) -> List[Dict[str, Any]]:
         """Generate example explanations."""
         examples = []
 

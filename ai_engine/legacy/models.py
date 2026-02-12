@@ -113,9 +113,7 @@ class SystemBehaviorPattern:
     description: str
     frequency: str  # "hourly", "daily", "weekly", "monthly", "irregular"
     duration_minutes: Optional[float] = None
-    time_of_occurrence: Optional[str] = (
-        None  # "morning", "evening", "night", "business_hours"
-    )
+    time_of_occurrence: Optional[str] = None  # "morning", "evening", "night", "business_hours"
 
     # Pattern metrics
     cpu_utilization_pattern: Optional[List[float]] = field(default_factory=list)
@@ -234,9 +232,7 @@ class MaintenanceRecommendation:
     safety_precautions: List[str] = field(default_factory=list)
 
     # Tracking
-    status: str = (
-        "pending"  # pending, approved, scheduled, in_progress, completed, cancelled
-    )
+    status: str = "pending"  # pending, approved, scheduled, in_progress, completed, cancelled
     approved_by: Optional[str] = None
     scheduled_by: Optional[str] = None
     executed_by: Optional[str] = None
@@ -260,9 +256,7 @@ class FormalizedKnowledge:
 
     knowledge_id: str
     system_id: Optional[str] = None  # Can be system-specific or general
-    knowledge_type: str = (
-        "general"  # "behavior", "troubleshooting", "maintenance", "configuration"
-    )
+    knowledge_type: str = "general"  # "behavior", "troubleshooting", "maintenance", "configuration"
 
     # Knowledge content
     title: str = ""
@@ -359,13 +353,9 @@ class HistoricalPatternDatabase:
 
     patterns: Dict[str, SystemBehaviorPattern] = field(default_factory=dict)
     pattern_relationships: Dict[str, List[str]] = field(default_factory=dict)
-    system_patterns: Dict[str, List[str]] = field(
-        default_factory=dict
-    )  # system_id -> pattern_ids
+    system_patterns: Dict[str, List[str]] = field(default_factory=dict)  # system_id -> pattern_ids
 
-    def get_patterns(
-        self, system_id: Optional[str] = None
-    ) -> List[SystemBehaviorPattern]:
+    def get_patterns(self, system_id: Optional[str] = None) -> List[SystemBehaviorPattern]:
         """Get patterns for a specific system or all patterns."""
         if system_id:
             pattern_ids = self.system_patterns.get(system_id, [])

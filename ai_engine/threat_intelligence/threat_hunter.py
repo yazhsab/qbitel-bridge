@@ -21,7 +21,6 @@ from ..security.models import SecurityEvent, ThreatLevel
 from .stix_taxii_client import STIXIndicator, STIXTAXIIClient
 from .mitre_attack_mapper import MITREATTACKMapper, ATTACKTechnique
 
-
 # Prometheus metrics
 HUNT_CAMPAIGNS_EXECUTED = Counter(
     "qbitel_threat_hunt_campaigns_total",
@@ -186,9 +185,7 @@ class ThreatHunter:
         # Load pre-defined hunt hypotheses
         self._load_default_hypotheses()
 
-        self.logger.info(
-            f"Threat hunter initialized: {len(self.hypotheses)} hypotheses loaded"
-        )
+        self.logger.info(f"Threat hunter initialized: {len(self.hypotheses)} hypotheses loaded")
 
     def _load_default_hypotheses(self):
         """Load default hunting hypotheses."""
@@ -284,9 +281,7 @@ class ThreatHunter:
         if hypotheses is None:
             hunt_hypotheses = list(self.hypotheses.values())
         else:
-            hunt_hypotheses = [
-                self.hypotheses[h_id] for h_id in hypotheses if h_id in self.hypotheses
-            ]
+            hunt_hypotheses = [self.hypotheses[h_id] for h_id in hypotheses if h_id in self.hypotheses]
 
         # Sort by priority
         hunt_hypotheses.sort(key=lambda h: h.priority, reverse=True)
@@ -304,9 +299,7 @@ class ThreatHunter:
 
         self.active_campaigns[campaign_id] = campaign
 
-        self.logger.info(
-            f"Starting hunt campaign {campaign_id} with {len(hunt_hypotheses)} hypotheses"
-        )
+        self.logger.info(f"Starting hunt campaign {campaign_id} with {len(hunt_hypotheses)} hypotheses")
 
         try:
             # Execute each hypothesis
@@ -332,10 +325,7 @@ class ThreatHunter:
             HUNT_CAMPAIGNS_EXECUTED.labels(hunt_type="automated").inc()
             HUNT_CAMPAIGN_DURATION.observe(time.time() - start_time)
 
-            self.logger.info(
-                f"Hunt campaign {campaign_id} completed: "
-                f"{len(campaign.findings)} findings discovered"
-            )
+            self.logger.info(f"Hunt campaign {campaign_id} completed: " f"{len(campaign.findings)} findings discovered")
 
             return campaign
 
@@ -345,9 +335,7 @@ class ThreatHunter:
             self.logger.error(f"Hunt campaign {campaign_id} failed: {e}")
             raise QbitelAIException(f"Hunt campaign failed: {e}")
 
-    async def _hunt_hypothesis(
-        self, hypothesis: HuntHypothesis, time_range_hours: int
-    ) -> List[HuntFinding]:
+    async def _hunt_hypothesis(self, hypothesis: HuntHypothesis, time_range_hours: int) -> List[HuntFinding]:
         """Hunt a specific hypothesis."""
         findings = []
 
@@ -360,9 +348,7 @@ class ThreatHunter:
 
         return findings
 
-    async def _hunt_ioc_based(
-        self, hypothesis: HuntHypothesis, time_range_hours: int
-    ) -> List[HuntFinding]:
+    async def _hunt_ioc_based(self, hypothesis: HuntHypothesis, time_range_hours: int) -> List[HuntFinding]:
         """Hunt using known IOCs."""
         findings = []
 
@@ -394,9 +380,7 @@ class ThreatHunter:
 
         return findings
 
-    async def _hunt_ttp_based(
-        self, hypothesis: HuntHypothesis, time_range_hours: int
-    ) -> List[HuntFinding]:
+    async def _hunt_ttp_based(self, hypothesis: HuntHypothesis, time_range_hours: int) -> List[HuntFinding]:
         """Hunt using MITRE ATT&CK TTPs."""
         findings = []
 
@@ -412,23 +396,15 @@ class ThreatHunter:
             ttp_mapping = await self.attack_mapper.map_event_to_techniques(event)
 
             # Check if any matched techniques are in hypothesis TTPs
-            matched_ttps = [
-                t.technique_id
-                for t in ttp_mapping.matched_techniques
-                if t.technique_id in hypothesis.ttps
-            ]
+            matched_ttps = [t.technique_id for t in ttp_mapping.matched_techniques if t.technique_id in hypothesis.ttps]
 
             if matched_ttps:
-                finding = self._create_ttp_finding(
-                    hypothesis, event, matched_ttps, ttp_mapping
-                )
+                finding = self._create_ttp_finding(hypothesis, event, matched_ttps, ttp_mapping)
                 findings.append(finding)
 
         return findings
 
-    async def _hunt_behavior_based(
-        self, hypothesis: HuntHypothesis, time_range_hours: int
-    ) -> List[HuntFinding]:
+    async def _hunt_behavior_based(self, hypothesis: HuntHypothesis, time_range_hours: int) -> List[HuntFinding]:
         """Hunt using behavioral patterns."""
         findings = []
 
@@ -448,12 +424,7 @@ class ThreatHunter:
         for source, events in events_by_source.items():
             # Check for multiple failed logins
             if "multiple_failed_logins" in hypothesis.behavioral_patterns:
-                failed_logins = [
-                    e
-                    for e in events
-                    if "failed" in e.description.lower()
-                    and "login" in e.description.lower()
-                ]
+                failed_logins = [e for e in events if "failed" in e.description.lower() and "login" in e.description.lower()]
 
                 if len(failed_logins) >= 5:  # Threshold
                     finding = self._create_behavior_finding(
@@ -465,9 +436,7 @@ class ThreatHunter:
 
         return findings
 
-    async def _event_matches_ioc(
-        self, event: SecurityEvent, indicator: STIXIndicator
-    ) -> bool:
+    async def _event_matches_ioc(self, event: SecurityEvent, indicator: STIXIndicator) -> bool:
         """Check if event matches an IOC."""
         # Simple pattern matching (can be enhanced)
         event_text = f"{event.description} {event.source_ip} {event.destination_ip}"
@@ -606,13 +575,8 @@ class ThreatHunter:
             ],
             iocs_matched=[],
             ttps_matched=[],
-            affected_assets=list(
-                set([getattr(e, "source_ip", "unknown") for e in events])
-            ),
-            timeline=[
-                {"timestamp": e.timestamp.isoformat(), "event": e.description}
-                for e in events[:5]
-            ],
+            affected_assets=list(set([getattr(e, "source_ip", "unknown") for e in events])),
+            timeline=[{"timestamp": e.timestamp.isoformat(), "event": e.description} for e in events[:5]],
             recommendations=[
                 "Investigate source for compromise",
                 "Review authentication policies",
@@ -626,40 +590,18 @@ class ThreatHunter:
     def _calculate_coverage_metrics(self, campaign: HuntCampaign) -> Dict[str, Any]:
         """Calculate hunt campaign coverage metrics."""
         total_hypotheses = len(campaign.hypotheses)
-        hypotheses_with_findings = len(
-            set([f.hypothesis_id for f in campaign.findings])
-        )
+        hypotheses_with_findings = len(set([f.hypothesis_id for f in campaign.findings]))
 
         return {
             "total_hypotheses": total_hypotheses,
             "hypotheses_with_findings": hypotheses_with_findings,
-            "coverage_percentage": (
-                hypotheses_with_findings / total_hypotheses * 100
-                if total_hypotheses > 0
-                else 0
-            ),
+            "coverage_percentage": (hypotheses_with_findings / total_hypotheses * 100 if total_hypotheses > 0 else 0),
             "total_findings": len(campaign.findings),
             "findings_by_severity": {
-                "critical": len(
-                    [
-                        f
-                        for f in campaign.findings
-                        if f.severity == FindingSeverity.CRITICAL
-                    ]
-                ),
-                "high": len(
-                    [f for f in campaign.findings if f.severity == FindingSeverity.HIGH]
-                ),
-                "medium": len(
-                    [
-                        f
-                        for f in campaign.findings
-                        if f.severity == FindingSeverity.MEDIUM
-                    ]
-                ),
-                "low": len(
-                    [f for f in campaign.findings if f.severity == FindingSeverity.LOW]
-                ),
+                "critical": len([f for f in campaign.findings if f.severity == FindingSeverity.CRITICAL]),
+                "high": len([f for f in campaign.findings if f.severity == FindingSeverity.HIGH]),
+                "medium": len([f for f in campaign.findings if f.severity == FindingSeverity.MEDIUM]),
+                "low": len([f for f in campaign.findings if f.severity == FindingSeverity.LOW]),
             },
         }
 

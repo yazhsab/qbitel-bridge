@@ -180,14 +180,10 @@ class TestSOC2ControlsManager:
         await soc2_manager.register_control(security_control)
         await soc2_manager.register_control(availability_control)
 
-        security_controls = await soc2_manager.get_controls_by_criteria(
-            TrustServiceCriteria.SECURITY
-        )
+        security_controls = await soc2_manager.get_controls_by_criteria(TrustServiceCriteria.SECURITY)
 
         assert len(security_controls) >= 1
-        assert all(
-            c.criteria == TrustServiceCriteria.SECURITY for c in security_controls
-        )
+        assert all(c.criteria == TrustServiceCriteria.SECURITY for c in security_controls)
 
     @pytest.mark.asyncio
     async def test_list_controls_by_status(self, soc2_manager):
@@ -210,9 +206,7 @@ class TestSOC2ControlsManager:
         await soc2_manager.register_control(implemented_control)
         await soc2_manager.register_control(pending_control)
 
-        implemented = await soc2_manager.get_controls_by_status(
-            ControlStatus.IMPLEMENTED
-        )
+        implemented = await soc2_manager.get_controls_by_status(ControlStatus.IMPLEMENTED)
 
         assert len(implemented) >= 1
         assert all(c.status == ControlStatus.IMPLEMENTED for c in implemented)
@@ -232,9 +226,7 @@ class TestSOC2ControlsManager:
 
         await soc2_manager.register_control(old_control)
 
-        controls_to_test = await soc2_manager.get_controls_needing_testing(
-            days_threshold=90
-        )
+        controls_to_test = await soc2_manager.get_controls_needing_testing(days_threshold=90)
 
         assert len(controls_to_test) >= 1
         assert any(c.control_id == "CC6.4" for c in controls_to_test)
@@ -333,9 +325,7 @@ class TestSOC2ControlsManager:
         await soc2_manager.register_control(sample_control)
 
         # Update control
-        await soc2_manager.update_control_status(
-            "CC6.1", ControlStatus.IMPLEMENTED, notes="Updated"
-        )
+        await soc2_manager.update_control_status("CC6.1", ControlStatus.IMPLEMENTED, notes="Updated")
 
         # Verify timestamp tracking
         control = soc2_manager.get_control("CC6.1")

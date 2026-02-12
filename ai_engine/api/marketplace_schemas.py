@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field, validator, EmailStr, HttpUrl
 # Enumerations
 class ProtocolCategoryEnum(str, Enum):
     """Protocol category enumeration."""
+
     FINANCE = "finance"
     HEALTHCARE = "healthcare"
     IOT = "iot"
@@ -28,6 +29,7 @@ class ProtocolCategoryEnum(str, Enum):
 
 class ProtocolTypeEnum(str, Enum):
     """Protocol type enumeration."""
+
     BINARY = "binary"
     TEXT = "text"
     XML = "xml"
@@ -38,6 +40,7 @@ class ProtocolTypeEnum(str, Enum):
 
 class LicenseTypeEnum(str, Enum):
     """License type enumeration."""
+
     FREE = "free"
     PAID = "paid"
     ENTERPRISE = "enterprise"
@@ -46,6 +49,7 @@ class LicenseTypeEnum(str, Enum):
 
 class PriceModelEnum(str, Enum):
     """Price model enumeration."""
+
     ONE_TIME = "one_time"
     SUBSCRIPTION = "subscription"
     USAGE_BASED = "usage_based"
@@ -54,6 +58,7 @@ class PriceModelEnum(str, Enum):
 
 class CertificationStatusEnum(str, Enum):
     """Certification status enumeration."""
+
     PENDING = "pending"
     IN_REVIEW = "in_review"
     CERTIFIED = "certified"
@@ -62,6 +67,7 @@ class CertificationStatusEnum(str, Enum):
 
 class ProtocolStatusEnum(str, Enum):
     """Protocol status enumeration."""
+
     DRAFT = "draft"
     PENDING_VALIDATION = "pending_validation"
     PUBLISHED = "published"
@@ -70,6 +76,7 @@ class ProtocolStatusEnum(str, Enum):
 
 class SortOrderEnum(str, Enum):
     """Sort order enumeration."""
+
     RATING = "rating"
     DOWNLOADS = "downloads"
     RECENT = "recent"
@@ -81,6 +88,7 @@ class SortOrderEnum(str, Enum):
 # Request Schemas
 class ProtocolSearchRequest(BaseModel):
     """Protocol search request parameters."""
+
     q: Optional[str] = Field(None, description="Search query for protocol name, description, or tags")
     category: Optional[ProtocolCategoryEnum] = Field(None, description="Filter by category")
     license_type: Optional[LicenseTypeEnum] = Field(None, description="Filter by license type")
@@ -95,6 +103,7 @@ class ProtocolSearchRequest(BaseModel):
 
 class ProtocolSubmitRequest(BaseModel):
     """Protocol submission request."""
+
     protocol_name: str = Field(..., min_length=3, max_length=255, description="Unique protocol identifier")
     display_name: str = Field(..., min_length=3, max_length=255, description="Human-readable protocol name")
     short_description: str = Field(..., min_length=10, max_length=500, description="Brief protocol description")
@@ -118,7 +127,9 @@ class ProtocolSubmitRequest(BaseModel):
     base_price: Optional[Decimal] = Field(None, ge=0, description="Base price (required if not free)")
 
     min_qbitel_version: str = Field(..., description="Minimum compatible QBITEL version")
-    dependencies: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Dependencies on other protocols or libraries")
+    dependencies: Optional[Dict[str, Any]] = Field(
+        default_factory=dict, description="Dependencies on other protocols or libraries"
+    )
 
     @validator("base_price")
     def validate_price(cls, v, values):
@@ -133,13 +144,15 @@ class ProtocolSubmitRequest(BaseModel):
     def validate_protocol_name(cls, v):
         """Validate protocol name format."""
         import re
-        if not re.match(r'^[a-z0-9][a-z0-9-]*[a-z0-9]$', v):
+
+        if not re.match(r"^[a-z0-9][a-z0-9-]*[a-z0-9]$", v):
             raise ValueError("protocol_name must be lowercase alphanumeric with hyphens (kebab-case)")
         return v
 
 
 class ProtocolPurchaseRequest(BaseModel):
     """Protocol purchase request."""
+
     license_type: LicenseTypeEnum = Field(..., description="License type to purchase")
     payment_method_id: str = Field(..., description="Stripe payment method ID")
     billing_email: EmailStr = Field(..., description="Billing email address")
@@ -148,6 +161,7 @@ class ProtocolPurchaseRequest(BaseModel):
 
 class ReviewSubmitRequest(BaseModel):
     """Review submission request."""
+
     rating: int = Field(..., ge=1, le=5, description="Rating (1-5 stars)")
     title: Optional[str] = Field(None, max_length=255, description="Review title")
     review_text: Optional[str] = Field(None, description="Review text")
@@ -156,6 +170,7 @@ class ReviewSubmitRequest(BaseModel):
 # Response Schemas
 class AuthorInfo(BaseModel):
     """Author/creator information."""
+
     user_id: UUID
     username: str
     full_name: Optional[str]
@@ -171,6 +186,7 @@ class AuthorInfo(BaseModel):
 
 class LicensingInfo(BaseModel):
     """Licensing information."""
+
     license_type: LicenseTypeEnum
     price_model: Optional[PriceModelEnum]
     base_price: Optional[Decimal]
@@ -183,6 +199,7 @@ class LicensingInfo(BaseModel):
 
 class QualityMetrics(BaseModel):
     """Protocol quality metrics."""
+
     certification_status: CertificationStatusEnum
     certification_date: Optional[datetime]
     average_rating: Decimal
@@ -196,6 +213,7 @@ class QualityMetrics(BaseModel):
 
 class CompatibilityInfo(BaseModel):
     """Compatibility information."""
+
     min_qbitel_version: str
     supported_qbitel_versions: List[str]
     dependencies: Dict[str, Any]
@@ -206,6 +224,7 @@ class CompatibilityInfo(BaseModel):
 
 class TechnicalSpecs(BaseModel):
     """Technical specifications."""
+
     spec_format: str
     spec_file_url: str
     parser_code_url: Optional[str]
@@ -218,6 +237,7 @@ class TechnicalSpecs(BaseModel):
 
 class ProtocolSummary(BaseModel):
     """Protocol summary for list views."""
+
     protocol_id: UUID
     protocol_name: str
     display_name: str
@@ -247,6 +267,7 @@ class ProtocolSummary(BaseModel):
 
 class ReviewSummary(BaseModel):
     """Review summary statistics."""
+
     five_star: int = Field(alias="5_star")
     four_star: int = Field(alias="4_star")
     three_star: int = Field(alias="3_star")
@@ -260,6 +281,7 @@ class ReviewSummary(BaseModel):
 
 class ProtocolDetail(BaseModel):
     """Detailed protocol information."""
+
     protocol_id: UUID
     protocol_name: str
     display_name: str
@@ -292,6 +314,7 @@ class ProtocolDetail(BaseModel):
 
 class PaginationInfo(BaseModel):
     """Pagination information."""
+
     total: int
     page: int
     limit: int
@@ -300,12 +323,14 @@ class PaginationInfo(BaseModel):
 
 class SearchFacets(BaseModel):
     """Search result facets."""
+
     categories: Dict[str, int]
     license_types: Dict[str, int]
 
 
 class ProtocolSearchResponse(BaseModel):
     """Protocol search response."""
+
     protocols: List[ProtocolSummary]
     pagination: PaginationInfo
     facets: SearchFacets
@@ -313,6 +338,7 @@ class ProtocolSearchResponse(BaseModel):
 
 class ValidationStep(BaseModel):
     """Validation step status."""
+
     step: str
     status: str
     message: str
@@ -320,6 +346,7 @@ class ValidationStep(BaseModel):
 
 class ValidationStatusResponse(BaseModel):
     """Protocol validation status response."""
+
     protocol_id: UUID
     validation_status: str
     steps: List[ValidationStep]
@@ -328,6 +355,7 @@ class ValidationStatusResponse(BaseModel):
 
 class ProtocolSubmitResponse(BaseModel):
     """Protocol submission response."""
+
     protocol_id: UUID
     status: ProtocolStatusEnum
     message: str
@@ -337,6 +365,7 @@ class ProtocolSubmitResponse(BaseModel):
 
 class InstallationInfo(BaseModel):
     """Installation information."""
+
     installation_id: UUID
     license_key: str
     license_type: LicenseTypeEnum
@@ -348,12 +377,14 @@ class InstallationInfo(BaseModel):
 
 class ProtocolPurchaseResponse(BaseModel):
     """Protocol purchase response."""
+
     transaction_id: UUID
     installation: InstallationInfo
 
 
 class ReviewResponse(BaseModel):
     """Review response."""
+
     review_id: UUID
     protocol_id: UUID
     customer_id: UUID
@@ -371,6 +402,7 @@ class ReviewResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     """Error response."""
+
     error: str
     detail: Optional[str]
     error_code: Optional[str]

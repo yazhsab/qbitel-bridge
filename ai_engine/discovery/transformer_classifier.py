@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 # Configuration
 # =============================================================================
 
+
 @dataclass
 class TransformerConfig:
     """Configuration for Protocol Transformer model."""
@@ -103,6 +104,7 @@ class ProtocolSample:
 # Positional Encoding
 # =============================================================================
 
+
 class PositionalEncoding(nn.Module):
     """Sinusoidal positional encoding for Transformer."""
 
@@ -113,25 +115,24 @@ class PositionalEncoding(nn.Module):
         # Create positional encoding matrix
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-        div_term = torch.exp(
-            torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)
-        )
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
 
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
         pe = pe.unsqueeze(0)  # (1, max_len, d_model)
 
-        self.register_buffer('pe', pe)
+        self.register_buffer("pe", pe)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Add positional encoding to input tensor."""
-        x = x + self.pe[:, :x.size(1), :]
+        x = x + self.pe[:, : x.size(1), :]
         return self.dropout(x)
 
 
 # =============================================================================
 # Byte-Level Embedding
 # =============================================================================
+
 
 class ByteEmbedding(nn.Module):
     """
@@ -149,7 +150,7 @@ class ByteEmbedding(nn.Module):
         vocab_size: int = 259,  # 256 bytes + 3 special tokens
         embedding_dim: int = 256,
         max_len: int = 1024,
-        dropout: float = 0.1
+        dropout: float = 0.1,
     ):
         super().__init__()
 
@@ -164,12 +165,8 @@ class ByteEmbedding(nn.Module):
         self.mask_id = 258
 
         # Embeddings
-        self.token_embedding = nn.Embedding(
-            vocab_size, embedding_dim, padding_idx=self.pad_id
-        )
-        self.position_encoding = PositionalEncoding(
-            embedding_dim, max_len, dropout
-        )
+        self.token_embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=self.pad_id)
+        self.position_encoding = PositionalEncoding(embedding_dim, max_len, dropout)
 
         # Layer normalization
         self.layer_norm = nn.LayerNorm(embedding_dim)
@@ -202,28 +199,22 @@ class ByteEmbedding(nn.Module):
 # Multi-Head Attention with Visualization
 # =============================================================================
 
+
 class MultiHeadAttentionWithVisualization(nn.Module):
     """
     Multi-head attention that returns attention weights for visualization.
     """
 
-    def __init__(
-        self,
-        embed_dim: int,
-        num_heads: int,
-        dropout: float = 0.1,
-        bias: bool = True
-    ):
+    def __init__(self, embed_dim: int, num_heads: int, dropout: float = 0.1, bias: bool = True):
         super().__init__()
 
         self.embed_dim = embed_dim
         self.num_heads = num_heads
         self.head_dim = embed_dim // num_heads
 
-        assert self.head_dim * num_heads == embed_dim, \
-            "embed_dim must be divisible by num_heads"
+        assert self.head_dim * num_heads == embed_dim, "embed_dim must be divisible by num_heads"
 
-        self.scaling = self.head_dim ** -0.5
+        self.scaling = self.head_dim**-0.5
 
         # Linear projections
         self.q_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
@@ -243,7 +234,7 @@ class MultiHeadAttentionWithVisualization(nn.Module):
         value: torch.Tensor,
         key_padding_mask: Optional[torch.Tensor] = None,
         need_weights: bool = False,
-        attn_mask: Optional[torch.Tensor] = None
+        attn_mask: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
         """
         Forward pass with optional attention weight return.
@@ -269,10 +260,7 @@ class MultiHeadAttentionWithVisualization(nn.Module):
 
         # Apply key padding mask
         if key_padding_mask is not None:
-            attn_scores = attn_scores.masked_fill(
-                key_padding_mask.unsqueeze(1).unsqueeze(2),
-                float('-inf')
-            )
+            attn_scores = attn_scores.masked_fill(key_padding_mask.unsqueeze(1).unsqueeze(2), float("-inf"))
 
         # Softmax and dropout
         attn_weights = F.softmax(attn_scores, dim=-1)
@@ -286,9 +274,7 @@ class MultiHeadAttentionWithVisualization(nn.Module):
         attn_output = torch.matmul(attn_weights, v)
 
         # Reshape back
-        attn_output = attn_output.transpose(1, 2).contiguous().view(
-            batch_size, seq_len, self.embed_dim
-        )
+        attn_output = attn_output.transpose(1, 2).contiguous().view(batch_size, seq_len, self.embed_dim)
 
         # Output projection
         output = self.out_proj(attn_output)
@@ -302,24 +288,16 @@ class MultiHeadAttentionWithVisualization(nn.Module):
 # Transformer Encoder Layer
 # =============================================================================
 
+
 class ProtocolTransformerEncoderLayer(nn.Module):
     """
     Transformer encoder layer optimized for protocol classification.
     """
 
-    def __init__(
-        self,
-        d_model: int,
-        nhead: int,
-        dim_feedforward: int = 2048,
-        dropout: float = 0.1,
-        activation: str = "gelu"
-    ):
+    def __init__(self, d_model: int, nhead: int, dim_feedforward: int = 2048, dropout: float = 0.1, activation: str = "gelu"):
         super().__init__()
 
-        self.self_attn = MultiHeadAttentionWithVisualization(
-            d_model, nhead, dropout=dropout
-        )
+        self.self_attn = MultiHeadAttentionWithVisualization(d_model, nhead, dropout=dropout)
 
         # Feedforward network
         self.linear1 = nn.Linear(d_model, dim_feedforward)
@@ -342,17 +320,14 @@ class ProtocolTransformerEncoderLayer(nn.Module):
         src: torch.Tensor,
         src_mask: Optional[torch.Tensor] = None,
         src_key_padding_mask: Optional[torch.Tensor] = None,
-        need_weights: bool = False
+        need_weights: bool = False,
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
         """Forward pass with Pre-LN variant."""
 
         # Self-attention block (Pre-LN)
         src_norm = self.norm1(src)
         attn_output, attn_weights = self.self_attn(
-            src_norm, src_norm, src_norm,
-            key_padding_mask=src_key_padding_mask,
-            need_weights=need_weights,
-            attn_mask=src_mask
+            src_norm, src_norm, src_norm, key_padding_mask=src_key_padding_mask, need_weights=need_weights, attn_mask=src_mask
         )
         src = src + self.dropout1(attn_output)
 
@@ -367,6 +342,7 @@ class ProtocolTransformerEncoderLayer(nn.Module):
 # =============================================================================
 # Protocol Transformer Model
 # =============================================================================
+
 
 class ProtocolTransformer(nn.Module):
     """
@@ -387,22 +363,21 @@ class ProtocolTransformer(nn.Module):
 
         # Byte embedding (256 bytes + 3 special tokens)
         self.embedding = ByteEmbedding(
-            vocab_size=259,
-            embedding_dim=config.embedding_dim,
-            max_len=config.max_sequence_length,
-            dropout=config.dropout
+            vocab_size=259, embedding_dim=config.embedding_dim, max_len=config.max_sequence_length, dropout=config.dropout
         )
 
         # Transformer encoder layers
-        self.encoder_layers = nn.ModuleList([
-            ProtocolTransformerEncoderLayer(
-                d_model=config.embedding_dim,
-                nhead=config.num_attention_heads,
-                dim_feedforward=config.feedforward_dim,
-                dropout=config.dropout
-            )
-            for _ in range(config.num_encoder_layers)
-        ])
+        self.encoder_layers = nn.ModuleList(
+            [
+                ProtocolTransformerEncoderLayer(
+                    d_model=config.embedding_dim,
+                    nhead=config.num_attention_heads,
+                    dim_feedforward=config.feedforward_dim,
+                    dropout=config.dropout,
+                )
+                for _ in range(config.num_encoder_layers)
+            ]
+        )
 
         # Final layer norm
         self.final_norm = nn.LayerNorm(config.embedding_dim)
@@ -412,7 +387,7 @@ class ProtocolTransformer(nn.Module):
             nn.Linear(config.embedding_dim, config.embedding_dim),
             nn.GELU(),
             nn.Dropout(config.dropout),
-            nn.Linear(config.embedding_dim, num_classes)
+            nn.Linear(config.embedding_dim, num_classes),
         )
 
         # Projection head for contrastive learning
@@ -420,21 +395,19 @@ class ProtocolTransformer(nn.Module):
             self.projection_head = nn.Sequential(
                 nn.Linear(config.embedding_dim, config.embedding_dim),
                 nn.GELU(),
-                nn.Linear(config.embedding_dim, config.prototype_dim)
+                nn.Linear(config.embedding_dim, config.prototype_dim),
             )
 
         # Prototypical network head for few-shot
         if config.enable_few_shot:
-            self.prototype_head = nn.Linear(
-                config.embedding_dim, config.prototype_dim
-            )
+            self.prototype_head = nn.Linear(config.embedding_dim, config.prototype_dim)
 
         # MLM head for pre-training
         self.mlm_head = nn.Sequential(
             nn.Linear(config.embedding_dim, config.embedding_dim),
             nn.GELU(),
             nn.LayerNorm(config.embedding_dim),
-            nn.Linear(config.embedding_dim, 259)  # vocab size
+            nn.Linear(config.embedding_dim, 259),  # vocab size
         )
 
         # Initialize weights
@@ -457,7 +430,7 @@ class ProtocolTransformer(nn.Module):
         input_ids: torch.Tensor,
         attention_mask: Optional[torch.Tensor] = None,
         return_all_layers: bool = False,
-        need_attention_weights: bool = False
+        need_attention_weights: bool = False,
     ) -> Tuple[torch.Tensor, Optional[List[torch.Tensor]], Optional[List[torch.Tensor]]]:
         """
         Encode input sequences.
@@ -482,9 +455,7 @@ class ProtocolTransformer(nn.Module):
         # Pass through encoder layers
         for layer in self.encoder_layers:
             hidden_states, attn_weights = layer(
-                hidden_states,
-                src_key_padding_mask=key_padding_mask,
-                need_weights=need_attention_weights
+                hidden_states, src_key_padding_mask=key_padding_mask, need_weights=need_attention_weights
             )
 
             if return_all_layers:
@@ -501,7 +472,7 @@ class ProtocolTransformer(nn.Module):
         return (
             cls_output,
             all_hidden_states if return_all_layers else None,
-            all_attention_weights if need_attention_weights else None
+            all_attention_weights if need_attention_weights else None,
         )
 
     def forward(
@@ -509,7 +480,7 @@ class ProtocolTransformer(nn.Module):
         input_ids: torch.Tensor,
         attention_mask: Optional[torch.Tensor] = None,
         labels: Optional[torch.Tensor] = None,
-        return_dict: bool = True
+        return_dict: bool = True,
     ) -> Dict[str, torch.Tensor]:
         """
         Forward pass for classification.
@@ -524,18 +495,13 @@ class ProtocolTransformer(nn.Module):
 
         # Compute loss if labels provided
         if labels is not None:
-            loss_fn = nn.CrossEntropyLoss(
-                label_smoothing=self.config.label_smoothing
-            )
+            loss_fn = nn.CrossEntropyLoss(label_smoothing=self.config.label_smoothing)
             output["loss"] = loss_fn(logits, labels)
 
         return output
 
     def forward_mlm(
-        self,
-        input_ids: torch.Tensor,
-        attention_mask: Optional[torch.Tensor] = None,
-        mlm_labels: Optional[torch.Tensor] = None
+        self, input_ids: torch.Tensor, attention_mask: Optional[torch.Tensor] = None, mlm_labels: Optional[torch.Tensor] = None
     ) -> Dict[str, torch.Tensor]:
         """
         Forward pass for Masked Language Modeling (pre-training).
@@ -551,9 +517,7 @@ class ProtocolTransformer(nn.Module):
 
         # Pass through encoder
         for layer in self.encoder_layers:
-            hidden_states, _ = layer(
-                hidden_states, src_key_padding_mask=key_padding_mask
-            )
+            hidden_states, _ = layer(hidden_states, src_key_padding_mask=key_padding_mask)
 
         hidden_states = self.final_norm(hidden_states)
 
@@ -565,18 +529,11 @@ class ProtocolTransformer(nn.Module):
         # Compute MLM loss
         if mlm_labels is not None:
             loss_fn = nn.CrossEntropyLoss(ignore_index=-100)
-            output["loss"] = loss_fn(
-                prediction_scores.view(-1, 259),
-                mlm_labels.view(-1)
-            )
+            output["loss"] = loss_fn(prediction_scores.view(-1, 259), mlm_labels.view(-1))
 
         return output
 
-    def forward_contrastive(
-        self,
-        input_ids: torch.Tensor,
-        attention_mask: Optional[torch.Tensor] = None
-    ) -> torch.Tensor:
+    def forward_contrastive(self, input_ids: torch.Tensor, attention_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Forward pass for contrastive learning.
         """
@@ -592,10 +549,7 @@ class ProtocolTransformer(nn.Module):
         return projections
 
     def get_prototypes(
-        self,
-        support_input_ids: torch.Tensor,
-        support_attention_mask: torch.Tensor,
-        support_labels: torch.Tensor
+        self, support_input_ids: torch.Tensor, support_attention_mask: torch.Tensor, support_labels: torch.Tensor
     ) -> Dict[int, torch.Tensor]:
         """
         Compute class prototypes from support set (few-shot).
@@ -619,6 +573,7 @@ class ProtocolTransformer(nn.Module):
 # Protocol Transformer Classifier
 # =============================================================================
 
+
 class ProtocolTransformerClassifier:
     """
     High-level classifier using Protocol Transformer.
@@ -637,9 +592,7 @@ class ProtocolTransformerClassifier:
 
         # Set device
         if self.config.device == "auto":
-            self.device = torch.device(
-                "cuda" if torch.cuda.is_available() else "cpu"
-            )
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         else:
             self.device = torch.device(self.config.device)
 
@@ -665,10 +618,7 @@ class ProtocolTransformerClassifier:
         self.logger.info("Protocol Transformer Classifier initialized")
 
     async def pretrain(
-        self,
-        corpus_samples: List[bytes],
-        epochs: Optional[int] = None,
-        batch_size: Optional[int] = None
+        self, corpus_samples: List[bytes], epochs: Optional[int] = None, batch_size: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         Pre-train the Transformer using Masked Language Modeling.
@@ -684,29 +634,20 @@ class ProtocolTransformerClassifier:
 
         # Initialize model for pre-training
         if self.model is None:
-            self.model = ProtocolTransformer(
-                self.config, num_classes=2  # Dummy, will be reset during fine-tuning
-            ).to(self.device)
+            self.model = ProtocolTransformer(self.config, num_classes=2).to(  # Dummy, will be reset during fine-tuning
+                self.device
+            )
 
         # Prepare data
         sequences = self._prepare_sequences(corpus_samples)
-        dataset = TensorDataset(
-            torch.LongTensor(sequences),
-            torch.ones(len(sequences), dtype=torch.long)  # Attention mask
-        )
+        dataset = TensorDataset(torch.LongTensor(sequences), torch.ones(len(sequences), dtype=torch.long))  # Attention mask
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
         # Optimizer with warmup
-        optimizer = torch.optim.AdamW(
-            self.model.parameters(),
-            lr=self.config.learning_rate,
-            weight_decay=0.01
-        )
+        optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.config.learning_rate, weight_decay=0.01)
 
         total_steps = len(dataloader) * epochs
-        scheduler = self._get_linear_scheduler(
-            optimizer, self.config.warmup_steps, total_steps
-        )
+        scheduler = self._get_linear_scheduler(optimizer, self.config.warmup_steps, total_steps)
 
         # Training loop
         self.model.train()
@@ -724,9 +665,7 @@ class ProtocolTransformerClassifier:
 
                 # Forward pass
                 optimizer.zero_grad()
-                outputs = self.model.forward_mlm(
-                    masked_input_ids, attention_mask, mlm_labels
-                )
+                outputs = self.model.forward_mlm(masked_input_ids, attention_mask, mlm_labels)
 
                 loss = outputs["loss"]
                 loss.backward()
@@ -752,17 +691,14 @@ class ProtocolTransformerClassifier:
             "epochs": epochs,
             "num_samples": len(corpus_samples),
             "final_loss": losses[-1] if losses else 0.0,
-            "loss_history": losses
+            "loss_history": losses,
         }
 
         self.logger.info(f"Pre-training completed in {results['pretrain_time']:.2f}s")
         return results
 
     async def train(
-        self,
-        training_samples: List[ProtocolSample],
-        validation_split: float = 0.2,
-        epochs: Optional[int] = None
+        self, training_samples: List[ProtocolSample], validation_split: float = 0.2, epochs: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         Train the classifier on labeled protocol samples.
@@ -785,40 +721,23 @@ class ProtocolTransformerClassifier:
         self.logger.info(f"Found {num_classes} protocol classes")
 
         # Prepare sequences
-        sequences = self._prepare_sequences(
-            [sample.data for sample in training_samples]
-        )
+        sequences = self._prepare_sequences([sample.data for sample in training_samples])
 
         # Split data
         X_train, X_val, y_train, y_val = train_test_split(
-            sequences, encoded_labels,
-            test_size=validation_split,
-            stratify=encoded_labels,
-            random_state=42
+            sequences, encoded_labels, test_size=validation_split, stratify=encoded_labels, random_state=42
         )
 
         # Create datasets
-        train_dataset = TensorDataset(
-            torch.LongTensor(X_train),
-            torch.LongTensor(y_train)
-        )
-        val_dataset = TensorDataset(
-            torch.LongTensor(X_val),
-            torch.LongTensor(y_val)
-        )
+        train_dataset = TensorDataset(torch.LongTensor(X_train), torch.LongTensor(y_train))
+        val_dataset = TensorDataset(torch.LongTensor(X_val), torch.LongTensor(y_val))
 
-        train_loader = DataLoader(
-            train_dataset, batch_size=self.config.batch_size, shuffle=True
-        )
-        val_loader = DataLoader(
-            val_dataset, batch_size=self.config.batch_size
-        )
+        train_loader = DataLoader(train_dataset, batch_size=self.config.batch_size, shuffle=True)
+        val_loader = DataLoader(val_dataset, batch_size=self.config.batch_size)
 
         # Initialize or reset model
         if self.model is None or not self.is_pretrained:
-            self.model = ProtocolTransformer(
-                self.config, num_classes=num_classes
-            ).to(self.device)
+            self.model = ProtocolTransformer(self.config, num_classes=num_classes).to(self.device)
         else:
             # Reset classifier head for new number of classes
             self.model.num_classes = num_classes
@@ -826,20 +745,14 @@ class ProtocolTransformerClassifier:
                 nn.Linear(self.config.embedding_dim, self.config.embedding_dim),
                 nn.GELU(),
                 nn.Dropout(self.config.dropout),
-                nn.Linear(self.config.embedding_dim, num_classes)
+                nn.Linear(self.config.embedding_dim, num_classes),
             ).to(self.device)
 
         # Optimizer and scheduler
-        optimizer = torch.optim.AdamW(
-            self.model.parameters(),
-            lr=self.config.learning_rate,
-            weight_decay=0.01
-        )
+        optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.config.learning_rate, weight_decay=0.01)
 
         total_steps = len(train_loader) * epochs
-        scheduler = self._get_linear_scheduler(
-            optimizer, self.config.warmup_steps, total_steps
-        )
+        scheduler = self._get_linear_scheduler(optimizer, self.config.warmup_steps, total_steps)
 
         # Training loop with early stopping
         best_val_acc = 0.0
@@ -877,18 +790,14 @@ class ProtocolTransformerClassifier:
             val_accuracies.append(val_acc)
 
             if epoch % 5 == 0:
-                self.logger.info(
-                    f"Epoch {epoch}: Loss={avg_train_loss:.4f}, Val Acc={val_acc:.2%}"
-                )
+                self.logger.info(f"Epoch {epoch}: Loss={avg_train_loss:.4f}, Val Acc={val_acc:.2%}")
 
             # Early stopping check
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
                 patience_counter = 0
                 # Save best model state
-                best_model_state = {
-                    k: v.cpu().clone() for k, v in self.model.state_dict().items()
-                }
+                best_model_state = {k: v.cpu().clone() for k, v in self.model.state_dict().items()}
             else:
                 patience_counter += 1
                 if patience_counter >= self.config.early_stopping_patience:
@@ -897,9 +806,7 @@ class ProtocolTransformerClassifier:
 
         # Restore best model
         if best_model_state:
-            self.model.load_state_dict(
-                {k: v.to(self.device) for k, v in best_model_state.items()}
-            )
+            self.model.load_state_dict({k: v.to(self.device) for k, v in best_model_state.items()})
 
         self.is_trained = True
 
@@ -915,9 +822,7 @@ class ProtocolTransformerClassifier:
             "protocols": list(self.known_protocols),
             "best_val_accuracy": best_val_acc,
             "final_train_loss": train_losses[-1] if train_losses else 0.0,
-            "model_parameters": sum(
-                p.numel() for p in self.model.parameters()
-            )
+            "model_parameters": sum(p.numel() for p in self.model.parameters()),
         }
 
         self.training_history.append(results)
@@ -926,10 +831,7 @@ class ProtocolTransformerClassifier:
         return results
 
     async def classify(
-        self,
-        data: bytes,
-        return_attention: bool = False,
-        return_explanation: bool = False
+        self, data: bytes, return_attention: bool = False, return_explanation: bool = False
     ) -> ClassificationResult:
         """
         Classify protocol type from message data.
@@ -939,10 +841,7 @@ class ProtocolTransformerClassifier:
 
         if not data:
             return ClassificationResult(
-                protocol_type="unknown",
-                confidence=0.0,
-                probabilities={},
-                metadata={"error": "Empty data"}
+                protocol_type="unknown", confidence=0.0, probabilities={}, metadata={"error": "Empty data"}
             )
 
         # Check cache
@@ -961,10 +860,7 @@ class ProtocolTransformerClassifier:
 
             with torch.no_grad():
                 # Get predictions and optionally attention
-                cls_output, _, attention_weights = self.model.encode(
-                    input_ids,
-                    need_attention_weights=return_attention
-                )
+                cls_output, _, attention_weights = self.model.encode(input_ids, need_attention_weights=return_attention)
 
                 logits = self.model.classifier(cls_output)
                 probabilities = F.softmax(logits, dim=-1).cpu().numpy()[0]
@@ -975,10 +871,7 @@ class ProtocolTransformerClassifier:
             confidence = float(probabilities[predicted_class])
 
             # Create probability dict
-            prob_dict = {
-                self.label_encoder.classes_[i]: float(probabilities[i])
-                for i in range(len(probabilities))
-            }
+            prob_dict = {self.label_encoder.classes_[i]: float(probabilities[i]) for i in range(len(probabilities))}
 
             # Process attention weights
             attn_weights_np = None
@@ -989,9 +882,7 @@ class ProtocolTransformerClassifier:
             # Generate explanation
             explanation = None
             if return_explanation:
-                explanation = await self._generate_explanation(
-                    data, predicted_label, attention_weights
-                )
+                explanation = await self._generate_explanation(data, predicted_label, attention_weights)
 
             result = ClassificationResult(
                 protocol_type=predicted_label,
@@ -1003,8 +894,8 @@ class ProtocolTransformerClassifier:
                 metadata={
                     "prediction_time": time.time() - start_time,
                     "data_length": len(data),
-                    "model": "ProtocolTransformer"
-                }
+                    "model": "ProtocolTransformer",
+                },
             )
 
             # Cache result
@@ -1014,18 +905,9 @@ class ProtocolTransformerClassifier:
 
         except Exception as e:
             self.logger.error(f"Classification failed: {e}")
-            return ClassificationResult(
-                protocol_type="unknown",
-                confidence=0.0,
-                probabilities={},
-                metadata={"error": str(e)}
-            )
+            return ClassificationResult(protocol_type="unknown", confidence=0.0, probabilities={}, metadata={"error": str(e)})
 
-    async def classify_few_shot(
-        self,
-        data: bytes,
-        support_set: List[ProtocolSample]
-    ) -> ClassificationResult:
+    async def classify_few_shot(self, data: bytes, support_set: List[ProtocolSample]) -> ClassificationResult:
         """
         Classify using few-shot learning with support set.
 
@@ -1037,26 +919,20 @@ class ProtocolTransformerClassifier:
         self.model.eval()
 
         # Prepare support set
-        support_sequences = self._prepare_sequences(
-            [sample.data for sample in support_set]
-        )
+        support_sequences = self._prepare_sequences([sample.data for sample in support_set])
         support_labels = [sample.label for sample in support_set]
 
         # Encode labels (may include new protocols)
         unique_labels = list(set(support_labels))
         label_to_idx = {label: idx for idx, label in enumerate(unique_labels)}
-        support_label_indices = torch.LongTensor(
-            [label_to_idx[label] for label in support_labels]
-        ).to(self.device)
+        support_label_indices = torch.LongTensor([label_to_idx[label] for label in support_labels]).to(self.device)
 
         support_input_ids = torch.LongTensor(support_sequences).to(self.device)
         support_mask = torch.ones_like(support_input_ids)
 
         with torch.no_grad():
             # Get prototypes
-            prototypes = self.model.get_prototypes(
-                support_input_ids, support_mask, support_label_indices
-            )
+            prototypes = self.model.get_prototypes(support_input_ids, support_mask, support_label_indices)
 
             # Encode query
             query_sequence = self._prepare_sequences([data])
@@ -1068,17 +944,12 @@ class ProtocolTransformerClassifier:
             # Compute distances to prototypes
             distances = {}
             for label_idx, prototype in prototypes.items():
-                dist = F.pairwise_distance(
-                    query_embedding, prototype.unsqueeze(0)
-                ).item()
+                dist = F.pairwise_distance(query_embedding, prototype.unsqueeze(0)).item()
                 distances[unique_labels[label_idx]] = dist
 
         # Convert distances to probabilities (using negative distance as logit)
         max_dist = max(distances.values())
-        probs = {
-            label: np.exp(-(dist / max_dist))
-            for label, dist in distances.items()
-        }
+        probs = {label: np.exp(-(dist / max_dist)) for label, dist in distances.items()}
         prob_sum = sum(probs.values())
         probs = {label: p / prob_sum for label, p in probs.items()}
 
@@ -1089,13 +960,10 @@ class ProtocolTransformerClassifier:
             protocol_type=predicted_label,
             confidence=confidence,
             probabilities=probs,
-            metadata={"method": "few_shot", "support_set_size": len(support_set)}
+            metadata={"method": "few_shot", "support_set_size": len(support_set)},
         )
 
-    async def get_embeddings(
-        self,
-        data: bytes
-    ) -> np.ndarray:
+    async def get_embeddings(self, data: bytes) -> np.ndarray:
         """
         Get embedding representation of protocol data.
 
@@ -1123,11 +991,7 @@ class ProtocolTransformerClassifier:
 
         return embedding
 
-    def _prepare_sequences(
-        self,
-        data_samples: List[bytes],
-        add_cls: bool = True
-    ) -> np.ndarray:
+    def _prepare_sequences(self, data_samples: List[bytes], add_cls: bool = True) -> np.ndarray:
         """
         Prepare byte sequences for the Transformer.
 
@@ -1150,7 +1014,7 @@ class ProtocolTransformerClassifier:
                 if add_cls:
                     # [CLS] + data + padding
                     if len(byte_list) >= max_len - 1:
-                        sequence = [256] + byte_list[:max_len - 1]
+                        sequence = [256] + byte_list[: max_len - 1]
                     else:
                         sequence = [256] + byte_list + [0] * (max_len - 1 - len(byte_list))
                 else:
@@ -1163,10 +1027,7 @@ class ProtocolTransformerClassifier:
 
         return np.array(sequences, dtype=np.int64)
 
-    def _create_mlm_masks(
-        self,
-        input_ids: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def _create_mlm_masks(self, input_ids: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Create masked input and labels for MLM pre-training.
         """
@@ -1186,15 +1047,11 @@ class ProtocolTransformerClassifier:
         labels[masked_indices] = input_ids[masked_indices]
 
         # 80% replace with [MASK]
-        indices_replaced = torch.bernoulli(
-            torch.full(input_ids.shape, 0.8)
-        ).bool() & masked_indices
+        indices_replaced = torch.bernoulli(torch.full(input_ids.shape, 0.8)).bool() & masked_indices
         masked_input[indices_replaced] = 258  # [MASK] token
 
         # 10% replace with random byte
-        indices_random = torch.bernoulli(
-            torch.full(input_ids.shape, 0.5)
-        ).bool() & masked_indices & ~indices_replaced
+        indices_random = torch.bernoulli(torch.full(input_ids.shape, 0.5)).bool() & masked_indices & ~indices_replaced
         random_bytes = torch.randint(256, input_ids.shape, dtype=torch.long)
         masked_input[indices_random] = random_bytes[indices_random]
 
@@ -1202,20 +1059,13 @@ class ProtocolTransformerClassifier:
 
         return masked_input.to(self.device), labels.to(self.device)
 
-    def _get_linear_scheduler(
-        self,
-        optimizer: torch.optim.Optimizer,
-        warmup_steps: int,
-        total_steps: int
-    ):
+    def _get_linear_scheduler(self, optimizer: torch.optim.Optimizer, warmup_steps: int, total_steps: int):
         """Create learning rate scheduler with warmup."""
+
         def lr_lambda(step):
             if step < warmup_steps:
                 return float(step) / float(max(1, warmup_steps))
-            return max(
-                0.0,
-                float(total_steps - step) / float(max(1, total_steps - warmup_steps))
-            )
+            return max(0.0, float(total_steps - step) / float(max(1, total_steps - warmup_steps)))
 
         return torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 
@@ -1238,11 +1088,7 @@ class ProtocolTransformerClassifier:
 
         return correct / total if total > 0 else 0.0
 
-    async def _train_contrastive(
-        self,
-        dataloader: DataLoader,
-        epochs: int = 10
-    ) -> None:
+    async def _train_contrastive(self, dataloader: DataLoader, epochs: int = 10) -> None:
         """
         Train using supervised contrastive learning.
 
@@ -1250,10 +1096,7 @@ class ProtocolTransformerClassifier:
         """
         self.logger.info("Training with contrastive learning")
 
-        optimizer = torch.optim.AdamW(
-            self.model.projection_head.parameters(),
-            lr=self.config.learning_rate * 0.1
-        )
+        optimizer = torch.optim.AdamW(self.model.projection_head.parameters(), lr=self.config.learning_rate * 0.1)
 
         for epoch in range(epochs):
             self.model.train()
@@ -1268,20 +1111,14 @@ class ProtocolTransformerClassifier:
                 projections = self.model.forward_contrastive(input_ids)
 
                 # Supervised contrastive loss
-                loss = self._supervised_contrastive_loss(
-                    projections, labels
-                )
+                loss = self._supervised_contrastive_loss(projections, labels)
 
                 loss.backward()
                 optimizer.step()
 
         self.logger.info("Contrastive training completed")
 
-    def _supervised_contrastive_loss(
-        self,
-        features: torch.Tensor,
-        labels: torch.Tensor
-    ) -> torch.Tensor:
+    def _supervised_contrastive_loss(self, features: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
         """
         Compute supervised contrastive loss.
 
@@ -1306,12 +1143,7 @@ class ProtocolTransformerClassifier:
         logits = similarity - logits_max.detach()
 
         # Exclude self-comparisons
-        logits_mask = torch.scatter(
-            torch.ones_like(mask),
-            1,
-            torch.arange(mask.size(0)).view(-1, 1).to(device),
-            0
-        )
+        logits_mask = torch.scatter(torch.ones_like(mask), 1, torch.arange(mask.size(0)).view(-1, 1).to(device), 0)
         mask = mask * logits_mask
 
         # Compute log-softmax
@@ -1326,20 +1158,12 @@ class ProtocolTransformerClassifier:
         return loss
 
     async def _generate_explanation(
-        self,
-        data: bytes,
-        prediction: str,
-        attention_weights: Optional[List[torch.Tensor]]
+        self, data: bytes, prediction: str, attention_weights: Optional[List[torch.Tensor]]
     ) -> Dict[str, Any]:
         """
         Generate explanation for the classification decision.
         """
-        explanation = {
-            "prediction": prediction,
-            "key_bytes": [],
-            "attention_summary": None,
-            "confidence_factors": []
-        }
+        explanation = {"prediction": prediction, "key_bytes": [], "attention_summary": None, "confidence_factors": []}
 
         if attention_weights:
             # Average attention from last layer
@@ -1355,15 +1179,16 @@ class ProtocolTransformerClassifier:
                 {
                     "position": int(pos),
                     "byte_value": int(data[pos - 1]) if 0 < pos <= len(data) else 0,
-                    "attention_weight": float(cls_attention[pos])
+                    "attention_weight": float(cls_attention[pos]),
                 }
-                for pos in top_positions if pos > 0  # Skip CLS position
+                for pos in top_positions
+                if pos > 0  # Skip CLS position
             ]
 
             explanation["attention_summary"] = {
                 "mean": float(cls_attention.mean()),
                 "max": float(cls_attention.max()),
-                "entropy": float(-np.sum(cls_attention * np.log(cls_attention + 1e-10)))
+                "entropy": float(-np.sum(cls_attention * np.log(cls_attention + 1e-10))),
             }
 
         return explanation
@@ -1379,7 +1204,7 @@ class ProtocolTransformerClassifier:
             "label_encoder_classes": list(self.label_encoder.classes_),
             "known_protocols": list(self.known_protocols),
             "is_pretrained": self.is_pretrained,
-            "training_history": self.training_history
+            "training_history": self.training_history,
         }
 
         torch.save(checkpoint, f"{filepath}_transformer.pt")
@@ -1387,10 +1212,7 @@ class ProtocolTransformerClassifier:
 
     async def load_model(self, filepath: str) -> None:
         """Load trained model from file."""
-        checkpoint = torch.load(
-            f"{filepath}_transformer.pt",
-            map_location=self.device
-        )
+        checkpoint = torch.load(f"{filepath}_transformer.pt", map_location=self.device)
 
         self.config = checkpoint["config"]
         self.label_encoder.classes_ = np.array(checkpoint["label_encoder_classes"])
@@ -1399,10 +1221,7 @@ class ProtocolTransformerClassifier:
         self.training_history = checkpoint.get("training_history", [])
 
         # Initialize model
-        self.model = ProtocolTransformer(
-            self.config,
-            num_classes=len(self.known_protocols)
-        ).to(self.device)
+        self.model = ProtocolTransformer(self.config, num_classes=len(self.known_protocols)).to(self.device)
 
         self.model.load_state_dict(checkpoint["model_state_dict"])
         self.model.eval()
@@ -1425,16 +1244,14 @@ class ProtocolTransformerClassifier:
                 "num_encoder_layers": self.config.num_encoder_layers,
                 "max_sequence_length": self.config.max_sequence_length,
                 "enable_few_shot": self.config.enable_few_shot,
-                "enable_contrastive": self.config.enable_contrastive
+                "enable_contrastive": self.config.enable_contrastive,
             },
-            "training_history": self.training_history
+            "training_history": self.training_history,
         }
 
         if self.model:
             info["parameters"] = sum(p.numel() for p in self.model.parameters())
-            info["trainable_parameters"] = sum(
-                p.numel() for p in self.model.parameters() if p.requires_grad
-            )
+            info["trainable_parameters"] = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
 
         return info
 
@@ -1462,9 +1279,9 @@ class ProtocolTransformerClassifier:
 # Factory Function
 # =============================================================================
 
+
 def create_transformer_classifier(
-    config: Optional[TransformerConfig] = None,
-    pretrained_path: Optional[str] = None
+    config: Optional[TransformerConfig] = None, pretrained_path: Optional[str] = None
 ) -> ProtocolTransformerClassifier:
     """
     Factory function to create a Protocol Transformer classifier.
@@ -1480,9 +1297,8 @@ def create_transformer_classifier(
 
     if pretrained_path:
         import asyncio
-        asyncio.get_event_loop().run_until_complete(
-            classifier.load_model(pretrained_path)
-        )
+
+        asyncio.get_event_loop().run_until_complete(classifier.load_model(pretrained_path))
 
     return classifier
 
@@ -1493,5 +1309,5 @@ __all__ = [
     "ProtocolSample",
     "ProtocolTransformer",
     "ProtocolTransformerClassifier",
-    "create_transformer_classifier"
+    "create_transformer_classifier",
 ]

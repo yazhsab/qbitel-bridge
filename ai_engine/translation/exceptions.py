@@ -152,9 +152,7 @@ class ProtocolDiscoveryException(TranslationStudioException):
 class ProtocolNotSupportedException(ProtocolDiscoveryException):
     """Exception raised when a protocol is not supported."""
 
-    def __init__(
-        self, protocol_name: str, supported_protocols: List[str] = None, **kwargs
-    ):
+    def __init__(self, protocol_name: str, supported_protocols: List[str] = None, **kwargs):
         self.protocol_name = protocol_name
         self.supported_protocols = supported_protocols or []
 
@@ -329,9 +327,7 @@ class ProtocolTranslationException(TranslationStudioException):
 class TranslationMappingException(ProtocolTranslationException):
     """Exception raised when protocol mapping fails."""
 
-    def __init__(
-        self, source_protocol: str, target_protocol: str, mapping_error: str, **kwargs
-    ):
+    def __init__(self, source_protocol: str, target_protocol: str, mapping_error: str, **kwargs):
         self.source_protocol = source_protocol
         self.target_protocol = target_protocol
         self.mapping_error = mapping_error
@@ -436,9 +432,7 @@ class ResourceLimitException(TranslationStudioException):
 class RateLimitException(TranslationStudioException):
     """Exception raised when rate limits are exceeded."""
 
-    def __init__(
-        self, operation: str, limit: int, window: int, retry_after: int = 60, **kwargs
-    ):
+    def __init__(self, operation: str, limit: int, window: int, retry_after: int = 60, **kwargs):
         self.operation = operation
         self.limit = limit
         self.window = window
@@ -474,9 +468,7 @@ class LLMServiceException(ExternalServiceException):
     """Exception raised for LLM service errors."""
 
     def __init__(self, llm_provider: str, llm_error: str, **kwargs):
-        super().__init__(
-            service_name=f"LLM_{llm_provider}", service_error=llm_error, **kwargs
-        )
+        super().__init__(service_name=f"LLM_{llm_provider}", service_error=llm_error, **kwargs)
 
 
 class RAGEngineException(ExternalServiceException):
@@ -576,9 +568,7 @@ def handle_external_exception(
 
     category = exception_mapping.get(type(exception), default_category)
 
-    return TranslationStudioException(
-        message=str(exception), category=category, context=context, cause=exception
-    )
+    return TranslationStudioException(message=str(exception), category=category, context=context, cause=exception)
 
 
 def raise_for_validation_errors(errors: List[str], context: ErrorContext = None):
