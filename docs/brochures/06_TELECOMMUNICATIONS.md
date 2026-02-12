@@ -44,7 +44,7 @@ Quantum-safe encryption that meets telecom performance requirements:
 |---|---|---|
 | Throughput | 100,000+ ops/sec | 150,000 ops/sec |
 | Latency | <5ms per operation | <2ms |
-| Availability | 99.999% | 99.9999% |
+| Availability | 99.999% | 99.999% |
 | Scalability | Billions of sessions | Horizontal scaling |
 | Standards | 3GPP, GSMA | Compliant + PQC extension |
 

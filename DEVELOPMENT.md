@@ -19,7 +19,7 @@ This guide provides information for developers who want to contribute to QBITEL 
 
 | Component | Requirement | Purpose |
 |-----------|------------|---------|
-| Python | 3.9+ | AI Engine, compliance, security |
+| Python | 3.10+ | AI Engine, compliance, security |
 | Rust | 1.70+ (with cargo) | Data plane, PQC-TLS |
 | Go | 1.21+ | Control plane, mgmt API |
 | Node.js | 18+ (with npm) | UI console |
@@ -44,7 +44,7 @@ make test
 
 ```bash
 # Create and activate virtual environment
-python3.9 -m venv venv
+python3.10 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
@@ -622,7 +622,7 @@ Reviewers will check:
 - **Documentation**: Check existing docs
 - **Issues**: Search GitHub issues
 - **Discussions**: Use GitHub Discussions
-- **Chat**: Join our developer Slack (link in README)
+- **Email**: developers@qbitel.com
 
 ## Debugging
 
@@ -760,7 +760,6 @@ By contributing, you agree that your contributions will be licensed under the Ap
 
 For questions or support, reach out via:
 - GitHub Issues: https://github.com/yazhsab/qbitel-bridge/issues
-- Developer Chat: [Link to Slack/Discord]
 - Email: developers@qbitel.com
 
 **Last Updated**: 2025-02-08

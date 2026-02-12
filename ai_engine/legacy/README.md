@@ -100,7 +100,7 @@ graph TB
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.10+
 - Docker and Docker Compose
 - Kubernetes cluster (for production)
 - PostgreSQL/TimescaleDB

@@ -12,16 +12,17 @@ interface Props {
 const { title, description, icon, href, badge } = Astro.props;
 ---
 
-<a href={url(href)} class="card p-6 group block">
+<a href={url(href)} class="card p-6 group block relative overflow-hidden">
+  <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neon-cyan/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
   <div class="flex items-start gap-4">
-    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-quantum-500/10 border border-quantum-500/20 flex items-center justify-center group-hover:bg-quantum-500/20 transition-colors">
-      <svg class="w-5 h-5 text-quantum-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-neon-cyan/10 border border-neon-cyan/30 flex items-center justify-center group-hover:bg-neon-cyan/20 transition-colors">
+      <svg class="w-5 h-5 text-neon-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
         <path stroke-linecap="round" stroke-linejoin="round" d={icon} />
       </svg>
     </div>
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2 mb-1">
-        <h3 class="text-base font-semibold text-white group-hover:text-quantum-400 transition-colors">{title}</h3>
+        <h3 class="text-base font-semibold text-white group-hover:text-neon-cyan transition-colors">{title}</h3>
         {badge && (
           <span class="badge text-[10px]">{badge}</span>
         )}

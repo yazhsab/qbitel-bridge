@@ -280,11 +280,10 @@ kubectl delete namespace qbitel-service-mesh
 
 ## Next Steps
 
-1. **Read Architecture**: [ARCHITECTURE.md](ARCHITECTURE.md)
+1. **Read Architecture**: [architecture.md](architecture.md)
 2. **Production Deployment**: [DEPLOYMENT.md](DEPLOYMENT.md)
 3. **Developer Guide**: [DEVELOPMENT.md](DEVELOPMENT.md)
 4. **API Documentation**: http://localhost:8000/docs (after port-forward)
-5. **Phase 1 Report**: [PHASE1_COMPLETION_REPORT.md](PHASE1_COMPLETION_REPORT.md)
 
 ## Support
 

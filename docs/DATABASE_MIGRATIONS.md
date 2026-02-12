@@ -7,7 +7,7 @@ QBITEL Engine uses Alembic for database schema migrations, providing a robust an
 ## Prerequisites
 
 - PostgreSQL 12+ installed and running
-- Python 3.9+ with required dependencies
+- Python 3.10+ with required dependencies
 - Database credentials configured via environment variables
 
 ## Environment Variables
@@ -419,7 +419,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: '3.10'
       
       - name: Install dependencies
         run: |

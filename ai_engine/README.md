@@ -51,7 +51,7 @@ The QBITEL Bridge AI Engine is a production-ready, enterprise-grade artificial i
 
 ### Prerequisites
 
-- Python 3.9 or higher
+- Python 3.10+
 - Docker (for containerized deployment)
 - Kubernetes cluster (for production deployment)
 - CUDA-compatible GPU (optional, for accelerated training)

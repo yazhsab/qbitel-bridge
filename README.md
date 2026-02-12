@@ -142,7 +142,7 @@ LLM-powered autonomous response with confidence-driven execution. Auto-executes 
 ### Legacy System Whisperer
 Deep analysis for undocumented legacy systems: COBOL copybook parsing, JCL analysis, mainframe dataset discovery, business rule extraction, and predictive failure analysis.
 
-[Learn more](docs/products/04_AGENTIC_AI_SECURITY.md)
+[Learn more](docs/LEGACY_SYSTEM_WHISPERER.md)
 
 </td>
 </tr>
@@ -406,7 +406,7 @@ qbitel-bridge/
 ├── ops/                      # Grafana dashboards, Prometheus rules, runbooks
 ├── diagrams/                 # SVG architecture diagrams
 ├── samples/cobol/            # 500+ COBOL sample programs
-├── docs/                     # 65+ documentation files
+├── docs/                     # 73+ documentation files
 │   ├── products/             #   10 product guides
 │   └── brochures/            #   9 industry brochures
 └── tests/                    # Integration, load, chaos, smoke tests
@@ -525,7 +525,7 @@ See [LICENSE](LICENSE) for full license details.
   <a href="https://bridge.qbitel.com">Website</a> &nbsp;&bull;&nbsp;
   <a href="docs/">Documentation</a> &nbsp;&bull;&nbsp;
   <a href="https://github.com/yazhsab/qbitel-bridge">GitHub</a> &nbsp;&bull;&nbsp;
-  <a href="mailto:hello@qbitel.com">Enterprise Support</a>
+  <a href="mailto:enterprise@qbitel.com">Enterprise Support</a>
 </p>
 
 <p align="center">

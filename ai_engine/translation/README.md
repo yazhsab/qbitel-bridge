@@ -61,7 +61,7 @@ ai_engine/translation/
 ## 🛠 Installation
 
 ### Prerequisites
-- Python 3.8+
+- Python 3.10+
 - QBITEL platform
 - ChromaDB (for RAG functionality)
 - Redis (for caching)
@@ -686,5 +686,5 @@ This project is licensed under the MIT License - see the [LICENSE](../../../LICE
 ---
 
 **Version**: 1.0.0  
-**Last Updated**: 2024-01-20  
+**Last Updated**: 2025-11-22  
 **Maintainers**: QBITEL Team

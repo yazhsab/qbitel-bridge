@@ -668,10 +668,10 @@ async def batch_discovery_example():
 For API-related questions and issues:
 
 - **Documentation**: [docs/README.md](README.md)
-- **Issues**: [GitHub Issues](https://github.com/yazhsab/protocol-discovery/issues)
+- **Issues**: [GitHub Issues](https://github.com/yazhsab/qbitel-bridge/issues)
 - **API Support**: api-support@qbitel.com
 
 ---
 
-**API Version**: v1.0.0  
-**Last Updated**: 2024-01-15
+**API Version**: v2.1.0
+**Last Updated**: 2025-11-22

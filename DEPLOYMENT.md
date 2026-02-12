@@ -35,7 +35,7 @@ This guide provides comprehensive instructions for deploying QBITEL Bridge in de
 
 ```bash
 # Required
-- Python 3.9+
+- Python 3.10+
 - Rust 1.70+ (with cargo)
 - Go 1.21+
 - Node.js 18+ (with npm)
@@ -90,7 +90,7 @@ make test
 
 ```bash
 # Create Python virtual environment
-python3.9 -m venv venv
+python3.10 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies

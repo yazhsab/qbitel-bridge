@@ -2,128 +2,79 @@
 import { url } from '@/utils/url';
 ---
 
-<section class="relative overflow-hidden min-h-[90vh] flex items-center">
-  <!-- Background effects -->
-  <div class="absolute inset-0 bg-surface-900" />
-  <div class="absolute inset-0 bg-grid-pattern bg-grid opacity-30" />
-  <div class="absolute inset-0 bg-gradient-radial from-quantum-500/5 via-transparent to-transparent" />
-
-  <!-- Animated gradient orbs -->
-  <div class="absolute top-1/4 -left-32 w-96 h-96 bg-quantum-500/10 rounded-full blur-[128px] animate-pulse-slow" />
-  <div class="absolute bottom-1/4 -right-32 w-96 h-96 bg-neon-cyan/5 rounded-full blur-[128px] animate-pulse-slow" style="animation-delay: 2s;" />
+<section class="relative overflow-hidden min-h-[92vh] flex items-center border-b border-surface-600/50">
+  <div class="absolute inset-0 bg-grid-pattern bg-grid opacity-20" />
+  <div class="absolute inset-0 bg-gradient-radial from-quantum-500/10 via-transparent to-transparent" />
 
   <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
     <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-      <!-- Left column: Text content -->
       <div>
-        <!-- Badge -->
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-quantum-500/10 border border-quantum-500/20 mb-6 animate-fade-in">
-          <span class="flex h-2 w-2 rounded-full bg-neon-green animate-pulse" />
-          <span class="text-sm text-quantum-400 font-medium">Enterprise Open Source &middot; Apache 2.0 &middot; Production-Ready</span>
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-800/70 border border-surface-600/60 mb-6 animate-fade-in">
+          <span class="flex h-2 w-2 rounded-full bg-neon-copper animate-pulse" />
+          <span class="text-sm text-slate-200 font-medium">AI Discovery. PQC Defense. Autonomous Operation.</span>
         </div>
 
-        <!-- Headline -->
-        <h1 class="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-extrabold leading-tight tracking-tight mb-6 animate-slide-up">
-          <span class="text-white">AI-Powered</span>
+        <h1 class="text-4xl sm:text-5xl xl:text-6xl font-bold leading-tight tracking-tight mb-6 animate-slide-up">
+          <span class="text-white">Blueprint the Unknown.</span>
           <br />
-          <span class="gradient-text">Quantum-Safe</span>
-          <br />
-          <span class="text-white">Legacy Modernization</span>
+          <span class="gradient-text">Modernize at Quantum Scale.</span>
         </h1>
 
-        <!-- Subheadline -->
-        <p class="text-lg sm:text-xl text-gray-400 max-w-xl mb-4 animate-slide-up" style="animation-delay: 0.1s;">
-          The only open-source platform that discovers unknown protocols with AI, protects them with post-quantum cryptography, and operates them autonomously &mdash; without replacing a single legacy system.
+        <p class="text-lg sm:text-xl text-slate-300 max-w-xl mb-8 animate-slide-up" style="animation-delay: 0.1s;">
+          QBITEL Bridge converts undocumented legacy protocols into secure, observable, and future-ready systems using AI protocol discovery and NIST Level 5 cryptography.
         </p>
 
-        <!-- Enterprise Trust Line -->
-        <p class="text-sm text-gray-500 max-w-xl mb-8 animate-slide-up" style="animation-delay: 0.15s;">
-          No open-core. No feature gating. No bait-and-switch. Enterprise-grade security, fully transparent.
-        </p>
-
-        <!-- CTAs -->
         <div class="flex flex-wrap items-center gap-4 mb-10 animate-slide-up" style="animation-delay: 0.2s;">
           <a href={url('/docs/getting-started/quickstart')} class="btn-primary text-base">
-            Get Started Free
-            <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
+            Launch Quickstart
           </a>
-          <a href="https://github.com/yazhsab/qbitel-bridge" target="_blank" rel="noopener noreferrer" class="btn-secondary text-base">
-            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-            </svg>
-            Star on GitHub
-          </a>
-          <a href={url('/enterprise')} class="text-sm text-quantum-400 hover:text-quantum-300 transition-colors font-medium">
-            Enterprise Support &rarr;
+          <a href={url('/docs/architecture/overview')} class="btn-secondary text-base">
+            View Architecture
           </a>
         </div>
 
-        <!-- Language badges -->
         <div class="flex flex-wrap items-center gap-3 animate-slide-up" style="animation-delay: 0.3s;">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-surface-800 border border-surface-600 text-xs text-gray-300">
-            <span class="w-2 h-2 rounded-full bg-[#3572A5]"></span> Python
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-surface-800/80 border border-surface-600/60 text-xs text-slate-200">
+            <span class="w-2 h-2 rounded-full bg-neon-copper"></span> Legacy Signals
           </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-surface-800 border border-surface-600 text-xs text-gray-300">
-            <span class="w-2 h-2 rounded-full bg-[#dea584]"></span> Rust
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-surface-800/80 border border-surface-600/60 text-xs text-slate-200">
+            <span class="w-2 h-2 rounded-full bg-neon-cyan"></span> AI Graph Inference
           </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-surface-800 border border-surface-600 text-xs text-gray-300">
-            <span class="w-2 h-2 rounded-full bg-[#00ADD8]"></span> Go
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-surface-800 border border-surface-600 text-xs text-gray-300">
-            <span class="w-2 h-2 rounded-full bg-[#3178c6]"></span> TypeScript
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-surface-800 border border-surface-600 text-xs text-gray-300">
-            <span class="w-2 h-2 rounded-full bg-[#326CE5]"></span> Kubernetes
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-surface-800/80 border border-surface-600/60 text-xs text-slate-200">
+            <span class="w-2 h-2 rounded-full bg-neon-green"></span> PQC Protected
           </span>
         </div>
       </div>
 
-      <!-- Right column: Terminal preview -->
-      <div class="hidden lg:block animate-slide-up" style="animation-delay: 0.4s;">
-        <div class="card p-0 overflow-hidden shadow-2xl shadow-quantum-500/10">
-          <!-- Terminal header -->
-          <div class="flex items-center gap-2 px-4 py-3 bg-surface-800 border-b border-surface-600">
-            <div class="flex gap-1.5">
-              <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
-              <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-              <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
-            </div>
-            <span class="text-xs text-gray-500 font-mono ml-2">qbitel-bridge &mdash; enterprise</span>
-          </div>
-          <!-- Terminal content -->
-          <div class="p-4 bg-surface-900 font-mono text-sm leading-relaxed">
-            <div class="text-gray-500">$ qbitel discover --input traffic.pcap --pqc auto</div>
-            <div class="mt-3 text-neon-green">Phase 1: Statistical Analysis... done (8.2s)</div>
-            <div class="text-neon-green">Phase 2: ML Classification... done (15.1s)</div>
-            <div class="text-quantum-400 pl-4">Protocol: ISO 8583 (confidence: 94.2%)</div>
-            <div class="text-neon-green">Phase 3: Grammar Learning... done (62.4s)</div>
-            <div class="text-neon-green">Phase 4: Parser Generation... done (31.0s)</div>
-            <div class="text-neon-green">Phase 5: Adaptive Learning... active</div>
-            <div class="mt-3 text-gray-500">---</div>
-            <div class="mt-1 text-white">Discovery complete: <span class="text-neon-cyan">47 message types</span></div>
-            <div class="text-white">Parser throughput: <span class="text-neon-cyan">52,340 msg/sec</span></div>
-            <div class="text-white">PQC protection: <span class="text-neon-green">ML-KEM + ML-DSA (Level 5)</span></div>
-            <div class="text-white">Compliance: <span class="text-neon-green">SOC2, PCI-DSS &check;</span></div>
-            <div class="mt-3 text-gray-500">$ <span class="animate-pulse text-quantum-400">|</span></div>
-          </div>
-        </div>
+      <div class="hidden lg:block relative animate-slide-up" style="animation-delay: 0.4s;">
+        <div class="relative h-[430px] rounded-3xl border border-surface-600/60 bg-surface-900/70 overflow-hidden shadow-2xl shadow-black/40">
+          <div class="absolute inset-0 bg-grid-pattern bg-grid opacity-30" />
 
-        <!-- Trust indicators below terminal -->
-        <div class="mt-4 flex items-center justify-center gap-6 text-xs text-gray-500">
-          <span class="flex items-center gap-1">
-            <svg class="w-3.5 h-3.5 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
-            NIST Level 5
-          </span>
-          <span class="flex items-center gap-1">
-            <svg class="w-3.5 h-3.5 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-            SOC 2 Ready
-          </span>
-          <span class="flex items-center gap-1">
-            <svg class="w-3.5 h-3.5 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-            Air-Gap Ready
-          </span>
+          <div class="absolute left-[-8%] top-[35%] text-[11px] font-mono text-neon-copper/80 leading-4 tracking-[0.2em] rotate-[-10deg]">
+            0110110101100110011010010110111001100101<br />
+            0011010001100010011001010111001001100100<br />
+            1100100011000010111001101101000010101110
+          </div>
+
+          <div class="absolute left-[31%] top-[20%] w-28 h-48 border border-neon-cyan/70 rotate-[18deg] bg-gradient-to-b from-neon-cyan/10 to-transparent shadow-[0_0_28px_rgba(79,216,255,0.25)]" />
+
+          <div class="absolute left-[42%] top-[47%] h-px w-[26%] bg-gradient-to-r from-neon-copper/80 to-neon-cyan/80" />
+          <div class="absolute left-[42%] top-[42%] h-px w-[26%] bg-gradient-to-r from-neon-copper/50 to-neon-cyan/70" />
+          <div class="absolute left-[42%] top-[52%] h-px w-[26%] bg-gradient-to-r from-neon-copper/50 to-neon-cyan/70" />
+
+          <div class="absolute right-[8%] top-[14%] w-56 h-56 rounded-full border border-neon-cyan/60">
+            <div class="absolute inset-3 rounded-full border border-neon-cyan/40" />
+            <div class="absolute inset-0 rounded-full" style="background-image: linear-gradient(to right, rgba(79,216,255,.4) 1px, transparent 1px), linear-gradient(to bottom, rgba(79,216,255,.4) 1px, transparent 1px); background-size: 32px 32px; mask-image: radial-gradient(circle at center, black 68%, transparent 100%);" />
+            <div class="absolute inset-0 rounded-full border-t border-l border-neon-cyan/60 rotate-12" />
+            <div class="absolute inset-0 rounded-full border-b border-r border-neon-cyan/60 -rotate-12" />
+          </div>
+
+          <div class="absolute bottom-5 left-5 right-5 rounded-xl border border-surface-600/60 bg-surface-800/80 p-3 font-mono text-xs text-slate-300">
+            <div class="text-neon-green">session: legacy-modernization</div>
+            <div class="mt-1">protocols.discovered = 47</div>
+            <div>pqc.profile = ML-KEM-1024 + ML-DSA-87</div>
+            <div>response.mode = autonomous</div>
+          </div>
         </div>
       </div>
     </div>

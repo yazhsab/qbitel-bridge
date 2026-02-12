@@ -79,7 +79,7 @@ The Protocol Translation Studio is an LLM-powered protocol translation system th
 ### Prerequisites
 
 ```bash
-# Python 3.9+
+# Python 3.10+
 python --version
 
 # Required packages

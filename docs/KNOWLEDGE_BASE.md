@@ -62,7 +62,7 @@ QBITEL is an **enterprise-grade, quantum-safe security platform** that provides:
 
 | Layer | Technologies |
 |-------|--------------|
-| **Backend** | Python 3.9+, FastAPI 0.104.1, gRPC |
+| **Backend** | Python 3.10+, FastAPI 0.104.1, gRPC |
 | **AI/ML** | PyTorch 2.2.2, Scikit-learn, SHAP, LIME |
 | **LLM** | Ollama (primary), Claude, GPT-4 |
 | **Database** | PostgreSQL 15, Redis 7, TimescaleDB, ChromaDB |

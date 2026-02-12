@@ -105,8 +105,8 @@ graph TB
 
 ```bash
 # Clone repository
-git clone https://github.com/yazhsab/protocol-discovery.git
-cd protocol-discovery
+git clone https://github.com/yazhsab/qbitel-bridge.git
+cd qbitel-bridge
 
 # Install Python dependencies
 pip install -r ai_engine/requirements.txt
@@ -344,7 +344,7 @@ Grafana dashboard configuration available at [`ops/grafana-dashboards/`](../ops/
 ### **Docker Deployment**
 
 ```dockerfile
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -393,7 +393,7 @@ spec:
     spec:
       containers:
       - name: qbitel
-        image: qbitel/protocol-discovery:v1.0.0
+        image: qbitel/qbitel-bridge:v2.1.0
         ports:
         - containerPort: 8080
         - containerPort: 8000
@@ -547,7 +547,7 @@ This project is licensed under the MIT License - see the [LICENSE](../LICENSE) f
 ## 📞 **Support**
 
 - **Documentation**: [docs/](.)
-- **Issues**: [GitHub Issues](https://github.com/yazhsab/protocol-discovery/issues)
+- **Issues**: [GitHub Issues](https://github.com/yazhsab/qbitel-bridge/issues)
 - **Security**: security@qbitel.com
 - **General**: support@qbitel.com
 

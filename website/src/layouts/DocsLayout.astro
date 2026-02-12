@@ -18,7 +18,7 @@ const { title, description } = Astro.props;
     <div class="mx-auto max-w-[90rem]">
       <div class="flex">
         <!-- Sidebar -->
-        <aside class="hidden lg:block w-64 shrink-0 border-r border-surface-600/50">
+        <aside class="hidden lg:block w-64 shrink-0 border-r border-surface-600/40 bg-surface-900/30">
           <div class="sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto py-8 px-4">
             <DocsSidebar />
           </div>
@@ -51,7 +51,7 @@ const { title, description } = Astro.props;
   const tocContainer = document.getElementById('toc-container');
   if (tocContainer && headings.length > 0) {
     const title = document.createElement('h4');
-    title.className = 'text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3';
+    title.className = 'text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3';
     title.textContent = 'On this page';
     tocContainer.appendChild(title);
 
@@ -61,8 +61,8 @@ const { title, description } = Astro.props;
       const link = document.createElement('a');
       link.href = `#${h.id}`;
       link.textContent = h.textContent || '';
-      link.className = `block text-sm transition-colors hover:text-quantum-400 ${
-        h.tagName === 'H3' ? 'pl-3 text-gray-500' : 'text-gray-400'
+      link.className = `block text-sm transition-colors hover:text-neon-cyan ${
+        h.tagName === 'H3' ? 'pl-3 text-slate-500' : 'text-slate-300'
       }`;
       nav.appendChild(link);
     });

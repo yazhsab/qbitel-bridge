@@ -45,7 +45,7 @@ A Tier 1 global bank needs to connect their 1985 mainframe (processing $50B dail
 
 | Regulation | Deadline | Requirement |
 |------------|----------|-------------|
-| PCI-DSS 4.0 | March 2025 | Quantum-safe encryption evaluation |
+| PCI-DSS 4.0 | March 2025 (enforced) | Quantum-safe encryption evaluation |
 | Fed Reserve Guidance | 2026 | Quantum risk assessment mandatory |
 | NIST PQC Standards | 2027 | All federal systems quantum-safe |
 | EU DORA | 2025 | Digital operational resilience |

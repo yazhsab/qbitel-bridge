@@ -45,7 +45,7 @@ security/validation/
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.10+
 - Root/sudo access for system-level checks
 - Kubernetes cluster access (if validating K8s deployments)
 - Required system tools: `openssl`, `iptables`, `systemctl`, `kubectl`

@@ -30,7 +30,7 @@ This guide covers complete production deployment of the QBITEL Bridge System wit
 
 ### **Software Dependencies**
 
-- **Python**: 3.9+
+- **Python**: 3.10+
 - **Rust**: 1.70+
 - **Docker**: 20.10+
 - **Kubernetes**: 1.25+ (if using K8s)
@@ -87,17 +87,17 @@ graph TB
 
 ```bash
 # Clone repository
-git clone https://github.com/yazhsab/protocol-discovery.git
-cd protocol-discovery
+git clone https://github.com/yazhsab/qbitel-bridge.git
+cd qbitel-bridge
 
 # Build production image
-docker build -f ops/deploy/docker/dockerfiles/production.Dockerfile -t qbitel/protocol-discovery:v1.0.0 .
+docker build -f ops/deploy/docker/dockerfiles/production.Dockerfile -t qbitel/qbitel-bridge:v2.1.0 .
 
 # Tag for registry
-docker tag qbitel/protocol-discovery:v1.0.0 your-registry.com/qbitel/protocol-discovery:v1.0.0
+docker tag qbitel/qbitel-bridge:v2.1.0 your-registry.com/qbitel/qbitel-bridge:v2.1.0
 
 # Push to registry
-docker push your-registry.com/qbitel/protocol-discovery:v1.0.0
+docker push your-registry.com/qbitel/qbitel-bridge:v2.1.0
 ```
 
 ### **2. Docker Compose Setup**
@@ -110,7 +110,7 @@ version: '3.8'
 services:
   # Protocol Discovery API
   qbitel-api:
-    image: your-registry.com/qbitel/protocol-discovery:v1.0.0
+    image: your-registry.com/qbitel/qbitel-bridge:v2.1.0
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -498,7 +498,7 @@ spec:
     spec:
       containers:
       - name: qbitel-api
-        image: your-registry.com/qbitel/protocol-discovery:v1.0.0
+        image: your-registry.com/qbitel/qbitel-bridge:v2.1.0
         ports:
         - containerPort: 8080
         - containerPort: 8000
@@ -1370,6 +1370,6 @@ echo "Health check completed"
 
 ---
 
-**Deployment Guide Version**: v1.0.0  
-**Last Updated**: 2024-01-15  
+**Deployment Guide Version**: v2.1.0
+**Last Updated**: 2025-11-22  
 **Support**: deployment-support@qbitel.com

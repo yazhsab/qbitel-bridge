@@ -1341,7 +1341,7 @@ Protocol Marketplace
 
 ### Programming Languages
 
-- **Python 3.9+**: AI Engine, cloud-native components, compliance
+- **Python 3.10+**: AI Engine, cloud-native components, compliance
 - **Rust**: High-performance data plane, PQC-TLS implementation
 - **Go**: Control plane, management API, device agents
 - **TypeScript/React**: Admin console UI

@@ -1,7 +1,7 @@
 # QBITEL - Local Development & Testing Guide
 
 **Version**: 2.1.0
-**Last Updated**: 2024-11-22
+**Last Updated**: 2025-11-22
 **Purpose**: Complete guide for running QBITEL locally for development and testing
 
 ---
@@ -28,7 +28,7 @@
 
 | Software | Version | Installation |
 |----------|---------|--------------|
-| Python | 3.9+ | `brew install python@3.11` (macOS) |
+| Python | 3.10+ | `brew install python@3.11` (macOS) |
 | PostgreSQL | 15+ | `brew install postgresql@15` |
 | Redis | 7+ | `brew install redis` |
 | Docker | 24+ | [Docker Desktop](https://www.docker.com/products/docker-desktop/) |
@@ -123,7 +123,7 @@ source venv/bin/activate
 venv\Scripts\activate
 
 # Verify Python version
-python --version  # Should be 3.9+
+python --version  # Should be 3.10+
 ```
 
 ### 3.3 Install Dependencies

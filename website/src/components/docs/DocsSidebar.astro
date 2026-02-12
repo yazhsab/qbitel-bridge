@@ -8,7 +8,7 @@ const currentPath = Astro.url.pathname;
   <div class="space-y-6">
     {docsSidebar.map((section) => (
       <div>
-        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{section.title}</h3>
+        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">{section.title}</h3>
         <ul class="space-y-0.5">
           {section.items.map((item) => (
             <li>
@@ -16,8 +16,8 @@ const currentPath = Astro.url.pathname;
                 href={item.href}
                 class={`block px-3 py-1.5 rounded-md text-sm transition-colors ${
                   currentPath === item.href
-                    ? 'text-quantum-400 bg-quantum-500/10 font-medium'
-                    : 'text-gray-400 hover:text-white hover:bg-surface-700/50'
+                    ? 'text-neon-cyan bg-neon-cyan/10 font-medium'
+                    : 'text-slate-300 hover:text-white hover:bg-surface-700/50'
                 }`}
               >
                 {item.label}

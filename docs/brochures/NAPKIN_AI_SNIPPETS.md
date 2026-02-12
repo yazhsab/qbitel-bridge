@@ -11,7 +11,7 @@
 ### Platform Visuals
 - [Snippet 1: Market Opportunity — TAM/SAM/SOM](#snippet-1-market-opportunity)
 - [Snippet 2: Revenue Projections](#snippet-2-revenue-projections)
-- [Snippet 3: The Quantum Timeline Threat](#snippet-3-quantum-timeline)
+- [Snippet 3: Quantum Timeline](#snippet-3-quantum-timeline)
 - [Snippet 4: Funding Allocation](#snippet-4-funding-allocation)
 - [Snippet 5: Product Roadmap Milestones](#snippet-5-product-roadmap)
 
@@ -1090,7 +1090,7 @@ Scale challenge:
 QBITEL carrier-grade performance:
 - Throughput: 150,000 crypto operations per second
 - Latency: Less than 2ms per operation
-- Availability: 99.9999% (six nines)
+- Availability: 99.999% (five nines)
 - Scalability: Horizontal, handles billions of sessions
 
 Protocols protected:
