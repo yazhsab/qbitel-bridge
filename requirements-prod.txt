@@ -39,7 +39,7 @@ certifi==2023.11.17
 # Production Performance
 # ============================================================================
 # Caching (aiohttp moved to base requirements.txt)
-aiocache==0.12.2
+aiocache==0.12.3
 
 # ============================================================================
 # Production Database
