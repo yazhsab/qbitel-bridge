@@ -29,7 +29,7 @@ flake8==6.1.0
 isort==5.13.2
 mypy==1.7.1
 pylint==3.0.3
-autopep8==2.0.4
+autopep8==2.3.2
 
 # Type stubs
 types-PyYAML==6.0.12.12
