@@ -38,7 +38,7 @@
     "simple-statistics": "^7.8.3",
     "fuse.js": "^7.0.0",
     "react-markdown": "^9.0.1",
-    "react-syntax-highlighter": "^15.5.0",
+    "react-syntax-highlighter": "^16.1.0",
     "react-json-view": "^1.21.3",
     "react-hotkeys-hook": "^4.4.1",
     "react-use": "^17.4.2",
