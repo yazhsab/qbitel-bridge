@@ -139,7 +139,7 @@ gunicorn==23.0.0
 # AI Explainability
 # ============================================================================
 # SHAP for deep learning model explanations
-shap==0.44.0
+shap==0.49.1
 
 # LIME for model-agnostic explanations
 lime==0.2.0.1
