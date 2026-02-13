@@ -69,7 +69,7 @@ opentelemetry-instrumentation-redis==0.42b0
 opentelemetry-instrumentation-requests==0.42b0
 opentelemetry-instrumentation-logging==0.42b0
 opentelemetry-exporter-jaeger-thrift==1.21.0
-opentelemetry-exporter-otlp-proto-grpc==1.21.0
+opentelemetry-exporter-otlp-proto-grpc==1.39.1
 opentelemetry-propagator-b3==1.21.0
 opentelemetry-exporter-prometheus==1.12.0rc1
 
