@@ -2,7 +2,7 @@
 # Multi-stage build for optimal image size and security
 
 # Build stage
-FROM python:3.11-slim as builder
+FROM python:3.14-slim as builder
 
 # Set build arguments
 ARG BUILD_VERSION=1.0.0
@@ -45,7 +45,7 @@ COPY --chown=builder:builder . ./app/
 RUN cd app && pip install -e .
 
 # Production stage
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 # Set metadata labels
 LABEL maintainer="QBITEL Team <enterprise@qbitel.com>"
