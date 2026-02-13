@@ -68,7 +68,7 @@ dependencies = [
     # Network & Communication
     "httpx>=0.25.0,<1.0",
     "aiohttp>=3.9.0,<4.0",
-    "websockets>=12.0,<14.0",
+    "websockets>=12.0,<17.0",
     "python-socketio>=5.10.0,<6.0",
     "grpcio>=1.60.0,<2.0",
     "grpcio-tools>=1.60.0,<2.0",
