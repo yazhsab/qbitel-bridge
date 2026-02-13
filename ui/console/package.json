@@ -17,7 +17,7 @@
     "react-router-dom": "^6.20.1",
     "oidc-client-ts": "^2.4.0",
     "recharts": "^2.8.0",
-    "date-fns": "^2.30.0",
+    "date-fns": "^4.1.0",
     "lodash": "^4.17.21",
     "axios": "^1.6.2",
     "socket.io-client": "^4.7.4",
