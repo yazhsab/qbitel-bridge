@@ -120,7 +120,7 @@ xds-protos==0.0.11  # Official xDS protocol buffer definitions
 # ============================================================================
 pandas==2.1.4
 pyyaml==6.0.1
-python-dotenv==1.0.0
+python-dotenv==1.2.1
 aiofiles==23.2.1
 defusedxml==0.7.1
 
