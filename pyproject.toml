@@ -93,7 +93,7 @@ dependencies = [
     "click>=8.1.0,<9.0",
     "rich>=13.7.0,<14.0",
     "tenacity>=8.2.0,<9.0",
-    "circuitbreaker>=1.4.0,<2.0",
+    "circuitbreaker>=1.4.0,<3.0",
 ]
 
 [project.optional-dependencies]

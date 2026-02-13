@@ -190,4 +190,4 @@ langfuse==2.57.4
 click==8.1.7
 rich==13.7.0
 tenacity==8.2.3
-circuitbreaker==1.4.0
+circuitbreaker==2.1.3
