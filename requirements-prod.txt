@@ -58,7 +58,7 @@ timescaledb==0.0.2; python_version < '3.11'
 aiokafka==0.10.0
 
 # RabbitMQ support
-aio-pika==9.3.1
+aio-pika==9.5.8
 
 # ============================================================================
 # Production Metrics Export
