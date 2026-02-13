@@ -33,7 +33,7 @@ langgraph==0.2.60  # For agent workflows
 # ============================================================================
 # PyTorch (CPU version for broad compatibility, GPU version in requirements-gpu.txt)
 torch==2.2.2+cpu; sys_platform != "darwin"
-torch==2.2.2; sys_platform == "darwin"
+torch==2.10.0; sys_platform == "darwin"
 
 # TorchCRF for sequence labeling (field detection)
 torchcrf==1.1.0
