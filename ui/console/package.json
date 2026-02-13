@@ -11,7 +11,7 @@
     "@mui/x-data-grid": "^6.18.2",
     "@mui/x-date-pickers": "^6.18.2",
     "@mui/x-charts": "^6.18.2",
-    "@mui/lab": "^5.0.0-alpha.153",
+    "@mui/lab": "^6.0.0-dev.240424162023-9968b4889d",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
