@@ -83,7 +83,7 @@ jobs:
 
     - name: Upload Test Results
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: quantum-crypto-test-results
         path: |
@@ -197,7 +197,7 @@ jobs:
         cat compliance-report.md
 
     - name: Upload Compliance Report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: nist-compliance-report
         path: compliance-report.md

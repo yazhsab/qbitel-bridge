@@ -388,7 +388,7 @@ jobs:
           k6 run --out json=stress-results.json stress-test.js
       
       - name: Upload performance results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: performance-results
           path: tests/performance/*-results.json

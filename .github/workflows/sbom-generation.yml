@@ -303,7 +303,7 @@ jobs:
       # Upload as workflow artifacts (always available)
       # ============================================
       - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: qbitel-sbom-${{ github.sha }}
           path: ${{ env.SBOM_OUTPUT_DIR }}
