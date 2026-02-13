@@ -25,7 +25,7 @@ ollama==0.4.4
 
 # LangChain for advanced LLM patterns (optional but recommended)
 langchain==0.3.13
-langchain-community==0.3.13
+langchain-community==0.4.1
 langgraph==0.2.60  # For agent workflows
 
 # ============================================================================
