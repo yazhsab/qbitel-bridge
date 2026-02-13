@@ -15,7 +15,7 @@ ddtrace==2.3.0
 newrelic==9.4.0
 
 # Sentry error tracking
-sentry-sdk[fastapi]==1.40.0
+sentry-sdk[fastapi]==2.52.0
 
 # ============================================================================
 # Production Logging
