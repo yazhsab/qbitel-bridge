@@ -193,7 +193,7 @@ jobs:
           version: ${{ env.HELM_VERSION }}
 
       - name: Install kubectl
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@v4
         with:
           version: ${{ env.KUBECTL_VERSION }}
 
@@ -240,7 +240,7 @@ jobs:
           version: ${{ env.HELM_VERSION }}
 
       - name: Install kubectl
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@v4
         with:
           version: ${{ env.KUBECTL_VERSION }}
 
@@ -328,7 +328,7 @@ jobs:
           version: ${{ env.HELM_VERSION }}
 
       - name: Install kubectl
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@v4
         with:
           version: ${{ env.KUBECTL_VERSION }}
 
