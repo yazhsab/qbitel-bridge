@@ -65,7 +65,7 @@ python-jose[cryptography]>=3.3.0
 
 # Post-Quantum Cryptography (PQC) - NIST-approved algorithms
 kyber-py==1.0.1       # Kyber KEM for quantum-safe key exchange
-dilithium-py==1.3.0   # Dilithium signatures for quantum-safe authentication
+dilithium-py==1.4.0   # Dilithium signatures for quantum-safe authentication
 pycryptodomex>=3.23.0 # Extended cryptography support
 
 # Additional PQC Libraries for Production
