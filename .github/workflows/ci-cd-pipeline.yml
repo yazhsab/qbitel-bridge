@@ -166,7 +166,7 @@ jobs:
             type=sha
 
       - name: Build Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         continue-on-error: true
         with:
           context: .
@@ -206,7 +206,7 @@ jobs:
 
       - name: Push Docker image
         if: github.event_name != 'pull_request'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./ops/deploy/docker/dockerfiles/controlplane.Dockerfile
