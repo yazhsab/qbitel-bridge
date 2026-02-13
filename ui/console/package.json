@@ -14,7 +14,7 @@
     "@mui/lab": "^5.0.0-alpha.153",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.20.1",
+    "react-router-dom": "^7.13.0",
     "oidc-client-ts": "^2.4.0",
     "recharts": "^2.8.0",
     "date-fns": "^2.30.0",
