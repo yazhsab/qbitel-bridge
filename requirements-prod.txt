@@ -9,7 +9,7 @@
 # Production Monitoring & APM
 # ============================================================================
 # Datadog APM
-ddtrace==2.3.0
+ddtrace==4.4.0
 
 # New Relic APM
 newrelic==9.4.0
