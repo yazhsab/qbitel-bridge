@@ -89,7 +89,7 @@ etcd3==0.12.0
 # Security & Authentication
 # ============================================================================
 cryptography==44.0.0
-pyjwt==2.8.0
+pyjwt==2.11.0
 passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.3.0
 python-multipart==0.0.6
