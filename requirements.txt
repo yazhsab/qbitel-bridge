@@ -79,7 +79,7 @@ opentelemetry-exporter-prometheus==1.12.0rc1
 sqlalchemy==2.0.23
 alembic==1.13.0
 asyncpg==0.29.0
-redis==5.0.1
+redis==7.1.1
 # aioredis is deprecated and merged into redis>=4.2.0 (use redis.asyncio instead)
 # WARNING: etcd3 is unmaintained (last release 2019). Consider replacing with
 # direct gRPC calls to etcd or removing if unused. Pinned for compatibility.
