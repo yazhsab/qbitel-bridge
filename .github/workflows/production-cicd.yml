@@ -200,7 +200,7 @@ jobs:
         continue-on-error: true
       
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: ./ai_engine/coverage.xml,./integration/coverage.xml,./go/coverage.out
           flags: unittests
