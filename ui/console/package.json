@@ -29,7 +29,7 @@
     "react-grid-layout": "^1.4.4",
     "react-resizable": "^3.0.5",
     "react-virtualized": "^9.22.5",
-    "framer-motion": "^10.16.16",
+    "framer-motion": "^12.34.0",
     "react-spring": "^9.7.3",
     "react-use-websocket": "^4.5.0",
     "moment": "^2.29.4",
