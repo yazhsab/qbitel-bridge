@@ -2,6 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PageHero from '@/components/hero/PageHero.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
+import { url } from '@/utils/url';
 ---
 
 <PageLayout
@@ -234,6 +235,35 @@ import CTABanner from '@/components/cta/CTABanner.astro';
         <div class="card p-5 text-center">
           <span class="text-2xl font-bold text-amber-400">TSA SD</span>
           <p class="text-xs text-gray-400 mt-2">TSA Security Directives for pipeline and transportation systems</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Resources -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Infrastructure <span class="gradient-text">Resources</span>
+        </h2>
+      </div>
+      <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <a href={url('/resources/infographics/qbitel-bridge-critical-infrastructure-infographics.png')} target="_blank" class="group block bg-surface-800/50 rounded-xl border border-surface-600/50 overflow-hidden hover:border-primary-500/50 transition-all duration-300">
+          <div class="aspect-video overflow-hidden">
+            <img src={url('/resources/infographics/qbitel-bridge-critical-infrastructure-infographics.png')} alt="Critical Infrastructure & Industrial OT Infographic" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          </div>
+          <div class="p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">Infographic: Critical Infrastructure & OT</h3>
+            <p class="text-gray-400 text-sm">SCADA/ICS quantum-safe overlays, IEC 62508 safety integrity, and Purdue Model alignment.</p>
+          </div>
+        </a>
+        <div class="bg-surface-800/50 rounded-xl border border-surface-600/50 p-6 hover:border-primary-500/50 transition-all duration-300 flex flex-col justify-center">
+          <h3 class="text-lg font-semibold text-white mb-4">Audio: Aging Infrastructure</h3>
+          <p class="text-gray-400 text-sm mb-4">Quantum-proofing aging infrastructure with QBITEL overlays.</p>
+          <audio controls class="w-full" preload="none">
+            <source src={url('/resources/audio/quantum-proofing_aging_infrastructure_with_qbitel.m4a')} type="audio/mp4" />
+          </audio>
         </div>
       </div>
     </div>

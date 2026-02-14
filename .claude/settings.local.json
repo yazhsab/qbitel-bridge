@@ -45,7 +45,16 @@
       "Bash(gh run view:*)",
       "Bash(pip install:*)",
       "Bash(pip3 install:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git remote add:*)",
+      "Bash(while read branch)",
+      "Bash(gh run cancel:*)",
+      "Bash(do gh run cancel $id --repo yazhsab/qbitel-bridge done echo \"=== Remaining queued ===\" gh run list --repo yazhsab/qbitel-bridge --status queued --json databaseId --jq 'length' 2)",
+      "Bash(1 echo \"=== Remaining in_progress ===\" gh run list --repo yazhsab/qbitel-bridge --status in_progress --json databaseId --jq 'length')",
+      "Bash(brew install:*)",
+      "Bash(pdftoppm:*)",
+      "Bash(pdfinfo:*)",
+      "Bash(pdftotext:*)"
     ]
   }
 }

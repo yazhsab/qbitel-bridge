@@ -49,6 +49,7 @@ export const mainNavigation: NavItem[] = [
     ],
   },
   { label: 'Tutorials', href: '/tutorials' },
+  { label: 'Resources', href: '/resources' },
   { label: 'Community', href: '/community' },
   { label: 'Blog', href: '/blog' },
 ];
@@ -71,6 +72,7 @@ export const footerNavigation = {
     { label: 'API Reference', href: '/docs/api/rest-api' },
     { label: 'Blog', href: '/blog' },
     { label: 'Roadmap', href: '/roadmap' },
+    { label: 'Infographics & Media', href: '/resources' },
   ],
   community: [
     { label: 'GitHub', href: 'https://github.com/yazhsab/qbitel-bridge' },

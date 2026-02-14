@@ -1,0 +1,290 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+import { url } from '@/utils/url';
+---
+
+<PageLayout
+  title="Resources | QBITEL Bridge"
+  description="Explore QBITEL Bridge infographics, audio walkthroughs, and whitepapers covering quantum-safe legacy modernization across industries."
+>
+  <PageHero
+    title="Resources"
+    description="Infographics, audio walkthroughs, and whitepapers to help you understand how QBITEL Bridge secures legacy infrastructure with quantum-safe cryptography."
+    badge="Downloads"
+  />
+
+  <!-- Infographics Section -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Industry <span class="gradient-text">Infographics</span>
+        </h2>
+        <p class="text-gray-400 max-w-3xl mx-auto">
+          Visual overviews of how QBITEL Bridge applies quantum-safe protection to specific industries and use cases.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Overview Infographic -->
+        <a href={url('/resources/infographics/qbitel-bridge-infographic.png')} target="_blank" class="group block bg-surface-800/50 rounded-xl border border-surface-600/50 overflow-hidden hover:border-primary-500/50 transition-all duration-300">
+          <div class="aspect-video overflow-hidden">
+            <img src={url('/resources/infographics/qbitel-bridge-infographic.png')} alt="QBITEL Bridge Overview Infographic" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          </div>
+          <div class="p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">QBITEL Bridge Overview</h3>
+            <p class="text-gray-400 text-sm">The 5-stage journey from legacy crisis to autonomous quantum-safe defense. Covers discovery, protection, translation, compliance, and operations.</p>
+          </div>
+        </a>
+
+        <!-- 4 Industries Infographic -->
+        <a href={url('/resources/infographics/4-industries-infographics.png')} target="_blank" class="group block bg-surface-800/50 rounded-xl border border-surface-600/50 overflow-hidden hover:border-primary-500/50 transition-all duration-300">
+          <div class="aspect-video overflow-hidden">
+            <img src={url('/resources/infographics/4-industries-infographics.png')} alt="4 Industries Quantum-Safe Shield" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          </div>
+          <div class="p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">Quantum-Safe Shield: 4 Industries</h3>
+            <p class="text-gray-400 text-sm">Protecting legacy critical infrastructure across healthcare, aviation, SCADA/ICS, and telecommunications with quantum-safe overlays.</p>
+          </div>
+        </a>
+
+        <!-- BFSI Infographic -->
+        <a href={url('/resources/infographics/qbitel-bridge-bfsi-infographics.png')} target="_blank" class="group block bg-surface-800/50 rounded-xl border border-surface-600/50 overflow-hidden hover:border-primary-500/50 transition-all duration-300">
+          <div class="aspect-video overflow-hidden">
+            <img src={url('/resources/infographics/qbitel-bridge-bfsi-infographics.png')} alt="Banking & Financial Services Infographic" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          </div>
+          <div class="p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">Banking & Financial Services</h3>
+            <p class="text-gray-400 text-sm">Breaking the COBOL mainframe modernization deadlock with quantum-safe banking. High-frequency HSM integration and automated OpenAPI generation.</p>
+          </div>
+        </a>
+
+        <!-- Insurance Infographic -->
+        <a href={url('/resources/infographics/qbitel-bridge-insurance-infographics.png')} target="_blank" class="group block bg-surface-800/50 rounded-xl border border-surface-600/50 overflow-hidden hover:border-primary-500/50 transition-all duration-300">
+          <div class="aspect-video overflow-hidden">
+            <img src={url('/resources/infographics/qbitel-bridge-insurance-infographics.png')} alt="Insurance Industry Infographic" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          </div>
+          <div class="p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">Insurance</h3>
+            <p class="text-gray-400 text-sm">Modernizing the insurance fortress. 2,000x faster legacy-to-cloud connectivity with HIPAA/PCI compliance automation.</p>
+          </div>
+        </a>
+
+        <!-- BPO Infographic -->
+        <a href={url('/resources/infographics/qbitel-bridge-BPO-infographics.png')} target="_blank" class="group block bg-surface-800/50 rounded-xl border border-surface-600/50 overflow-hidden hover:border-primary-500/50 transition-all duration-300">
+          <div class="aspect-video overflow-hidden">
+            <img src={url('/resources/infographics/qbitel-bridge-BPO-infographics.png')} alt="BPO & Call Centers Infographic" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          </div>
+          <div class="p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">BPOs & Call Centers</h3>
+            <p class="text-gray-400 text-sm">Quantum-safe protection for the human API. Secure voice, VPN-less remote security, and mainframe terminal protection for call centers.</p>
+          </div>
+        </a>
+
+        <!-- Defense Infographic -->
+        <a href={url('/resources/infographics/qbitel-bridge-defense-infographics.png')} target="_blank" class="group block bg-surface-800/50 rounded-xl border border-surface-600/50 overflow-hidden hover:border-primary-500/50 transition-all duration-300">
+          <div class="aspect-video overflow-hidden">
+            <img src={url('/resources/infographics/qbitel-bridge-defense-infographics.png')} alt="Sovereign Defense Infographic" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          </div>
+          <div class="p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">Sovereign Defense</h3>
+            <p class="text-gray-400 text-sm">Achieving quantum-safe security for air-gapped networks. On-premise sovereign AI, military-grade cryptography, and 100% open-source transparency.</p>
+          </div>
+        </a>
+
+        <!-- Telecom Infographic -->
+        <a href={url('/resources/infographics/qbitel-bridge-telecom-infographics.png')} target="_blank" class="group block bg-surface-800/50 rounded-xl border border-surface-600/50 overflow-hidden hover:border-primary-500/50 transition-all duration-300">
+          <div class="aspect-video overflow-hidden">
+            <img src={url('/resources/infographics/qbitel-bridge-telecom-infographics.png')} alt="Telecommunications Infographic" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          </div>
+          <div class="p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">Telecommunications</h3>
+            <p class="text-gray-400 text-sm">Securing the global backbone with quantum-safe multi-generational telecom defense. SS7 surveillance defense, 5G core migration, and IoT virtual shield.</p>
+          </div>
+        </a>
+
+        <!-- Critical Infrastructure Infographic -->
+        <a href={url('/resources/infographics/qbitel-bridge-critical-infrastructure-infographics.png')} target="_blank" class="group block bg-surface-800/50 rounded-xl border border-surface-600/50 overflow-hidden hover:border-primary-500/50 transition-all duration-300">
+          <div class="aspect-video overflow-hidden">
+            <img src={url('/resources/infographics/qbitel-bridge-critical-infrastructure-infographics.png')} alt="Critical Infrastructure & Industrial OT Infographic" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          </div>
+          <div class="p-6">
+            <h3 class="text-lg font-semibold text-white mb-2">Critical Infrastructure & Industrial OT</h3>
+            <p class="text-gray-400 text-sm">Quantum-safe security for SCADA/ICS and telecommunications networks. IEC 62508 safety integrity, Purdue Model alignment, and 5G slice-specific security.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Audio Walkthroughs Section -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Audio <span class="gradient-text">Walkthroughs</span>
+        </h2>
+        <p class="text-gray-400 max-w-3xl mx-auto">
+          Listen to deep dives on how QBITEL Bridge applies quantum-safe protection to specific industries and use cases.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-surface-800/50 rounded-xl border border-surface-600/50 p-6 hover:border-primary-500/50 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-primary-400" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
+            </div>
+            <h3 class="text-white font-semibold text-sm">QBITEL Bridge Overview</h3>
+          </div>
+          <p class="text-gray-400 text-xs mb-4">Quantum-proofing legacy infrastructure with QBITEL Bridge.</p>
+          <audio controls class="w-full" preload="none">
+            <source src={url('/resources/audio/qbitel_bridge_quantum-proofs_legacy_infrastructure.m4a')} type="audio/mp4" />
+          </audio>
+        </div>
+
+        <div class="bg-surface-800/50 rounded-xl border border-surface-600/50 p-6 hover:border-primary-500/50 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-primary-400" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
+            </div>
+            <h3 class="text-white font-semibold text-sm">COBOL Mainframes</h3>
+          </div>
+          <p class="text-gray-400 text-xs mb-4">Quantum-proofing COBOL mainframes without rewriting code.</p>
+          <audio controls class="w-full" preload="none">
+            <source src={url('/resources/audio/quantum-proofing_cobol_mainframes_without_rewriting_code.m4a')} type="audio/mp4" />
+          </audio>
+        </div>
+
+        <div class="bg-surface-800/50 rounded-xl border border-surface-600/50 p-6 hover:border-primary-500/50 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-primary-400" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
+            </div>
+            <h3 class="text-white font-semibold text-sm">Insurance Mainframes</h3>
+          </div>
+          <p class="text-gray-400 text-xs mb-4">Quantum-proofing ancient insurance mainframes.</p>
+          <audio controls class="w-full" preload="none">
+            <source src={url('/resources/audio/quantum-proofing_ancient_insurance_mainframes.m4a')} type="audio/mp4" />
+          </audio>
+        </div>
+
+        <div class="bg-surface-800/50 rounded-xl border border-surface-600/50 p-6 hover:border-primary-500/50 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-primary-400" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
+            </div>
+            <h3 class="text-white font-semibold text-sm">Legacy Call Centers</h3>
+          </div>
+          <p class="text-gray-400 text-xs mb-4">Quantum-safe security for legacy call centers and BPOs.</p>
+          <audio controls class="w-full" preload="none">
+            <source src={url('/resources/audio/quantum-safe_security_for_legacy_call_centers.m4a')} type="audio/mp4" />
+          </audio>
+        </div>
+
+        <div class="bg-surface-800/50 rounded-xl border border-surface-600/50 p-6 hover:border-primary-500/50 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-primary-400" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
+            </div>
+            <h3 class="text-white font-semibold text-sm">5G Networks</h3>
+          </div>
+          <p class="text-gray-400 text-xs mb-4">Quantum-proofing 5G with network overlays.</p>
+          <audio controls class="w-full" preload="none">
+            <source src={url('/resources/audio/quantum-proofing_5g_with_network_overlays.m4a')} type="audio/mp4" />
+          </audio>
+        </div>
+
+        <div class="bg-surface-800/50 rounded-xl border border-surface-600/50 p-6 hover:border-primary-500/50 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-primary-400" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
+            </div>
+            <h3 class="text-white font-semibold text-sm">Air-Gapped Networks</h3>
+          </div>
+          <p class="text-gray-400 text-xs mb-4">Quantum-proofing air-gapped defense networks with overlays.</p>
+          <audio controls class="w-full" preload="none">
+            <source src={url('/resources/audio/quantum-proofing_air-gapped_networks_with_overlays.m4a')} type="audio/mp4" />
+          </audio>
+        </div>
+
+        <div class="bg-surface-800/50 rounded-xl border border-surface-600/50 p-6 hover:border-primary-500/50 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-primary-400" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
+            </div>
+            <h3 class="text-white font-semibold text-sm">Unpatchable Legacy Tech</h3>
+          </div>
+          <p class="text-gray-400 text-xs mb-4">Non-invasive quantum shields for unpatchable legacy technology.</p>
+          <audio controls class="w-full" preload="none">
+            <source src={url('/resources/audio/non-invasive_quantum_shields_for_unpatchable_legacy_tech.m4a')} type="audio/mp4" />
+          </audio>
+        </div>
+
+        <div class="bg-surface-800/50 rounded-xl border border-surface-600/50 p-6 hover:border-primary-500/50 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-primary-400" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
+            </div>
+            <h3 class="text-white font-semibold text-sm">Aging Infrastructure</h3>
+          </div>
+          <p class="text-gray-400 text-xs mb-4">Quantum-proofing aging infrastructure with QBITEL overlays.</p>
+          <audio controls class="w-full" preload="none">
+            <source src={url('/resources/audio/quantum-proofing_aging_infrastructure_with_qbitel.m4a')} type="audio/mp4" />
+          </audio>
+        </div>
+
+        <div class="bg-surface-800/50 rounded-xl border border-surface-600/50 p-6 hover:border-primary-500/50 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-primary-500/20 flex items-center justify-center">
+              <svg class="w-5 h-5 text-primary-400" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
+            </div>
+            <h3 class="text-white font-semibold text-sm">Legacy Infrastructure</h3>
+          </div>
+          <p class="text-gray-400 text-xs mb-4">Securing legacy infrastructure with quantum overlays.</p>
+          <audio controls class="w-full" preload="none">
+            <source src={url('/resources/audio/securing_legacy_infrastructure_with_quantum_overlays.m4a')} type="audio/mp4" />
+          </audio>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Whitepapers Section -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          <span class="gradient-text">Whitepapers</span>
+        </h2>
+        <p class="text-gray-400 max-w-3xl mx-auto">
+          In-depth technical documents on quantum-safe legacy modernization strategy and autonomous defense.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <a href={url('/resources/whitepapers/legacy_systems_quantum_safe.pdf')} target="_blank" class="group bg-surface-800/50 rounded-xl border border-surface-600/50 p-8 hover:border-primary-500/50 transition-all duration-300">
+          <div class="w-14 h-14 rounded-xl bg-red-500/20 flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>
+          </div>
+          <h3 class="text-xl font-semibold text-white mb-3">Legacy Systems Quantum Safe</h3>
+          <p class="text-gray-400 text-sm mb-4">Comprehensive guide to making legacy systems quantum-safe without replacement. Covers protocol discovery, PQC wrapping, and compliance automation.</p>
+          <span class="text-primary-400 text-sm font-medium group-hover:underline">Download PDF &rarr;</span>
+        </a>
+
+        <a href={url('/resources/whitepapers/qbitel_bridge_autonomous_quantum_safety.pdf')} target="_blank" class="group bg-surface-800/50 rounded-xl border border-surface-600/50 p-8 hover:border-primary-500/50 transition-all duration-300">
+          <div class="w-14 h-14 rounded-xl bg-red-500/20 flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>
+          </div>
+          <h3 class="text-xl font-semibold text-white mb-3">Autonomous Quantum Safety</h3>
+          <p class="text-gray-400 text-sm mb-4">How QBITEL Bridge delivers autonomous quantum safety through AI-driven protocol discovery, zero-touch security, and multi-agent orchestration.</p>
+          <span class="text-primary-400 text-sm font-medium group-hover:underline">Download PDF &rarr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <CTABanner />
+</PageLayout>

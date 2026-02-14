@@ -29,6 +29,7 @@
   <a href="docs/">Documentation</a> &nbsp;&bull;&nbsp;
   <a href="QUICKSTART.md">Quick Start</a> &nbsp;&bull;&nbsp;
   <a href="docs/API.md">API Reference</a> &nbsp;&bull;&nbsp;
+  <a href="https://bridge.qbitel.com/resources">Resources</a> &nbsp;&bull;&nbsp;
   <a href="mailto:enterprise@qbitel.com">Enterprise Support</a>
 </p>
 
@@ -271,7 +272,7 @@ No other platform combines these capabilities:
 | **Aviation** | ADS-B, ACARS, ARINC 429 | Air traffic and avionics data security | 600bps bandwidth-optimized PQC |
 | **Telecommunications** | SS7, Diameter, SIP | 5G core and IoT infrastructure protection | Billion-device scale |
 
-[Industry brochures](docs/brochures/)
+[Industry brochures](docs/brochures/) &bull; [Industry infographics](infographics/) &bull; [Audio walkthroughs](audio-walkthrough/)
 
 ---
 
@@ -405,6 +406,9 @@ qbitel-bridge/
 ├── helm/qbitel-bridge/       # Production Helm chart
 ├── ops/                      # Grafana dashboards, Prometheus rules, runbooks
 ├── diagrams/                 # SVG architecture diagrams
+├── infographics/             # Industry infographics (8 visual overviews)
+├── audio-walkthrough/        # Audio deep dives (9 walkthroughs)
+├── pdf-documents/            # Whitepapers and technical PDFs
 ├── samples/cobol/            # 500+ COBOL sample programs
 ├── docs/                     # 73+ documentation files
 │   ├── products/             #   10 product guides
@@ -445,6 +449,44 @@ qbitel-bridge/
 ### Industry Brochures
 
 [Banking](docs/brochures/01_BANKING_FINANCIAL_SERVICES.md) &bull; [Healthcare](docs/brochures/02_HEALTHCARE.md) &bull; [Critical Infrastructure](docs/brochures/03_CRITICAL_INFRASTRUCTURE_SCADA.md) &bull; [Automotive](docs/brochures/04_AUTOMOTIVE.md) &bull; [Aviation](docs/brochures/05_AVIATION.md) &bull; [Telecommunications](docs/brochures/06_TELECOMMUNICATIONS.md) &bull; [Executive Overview](docs/brochures/08_EXECUTIVE_OVERVIEW.md)
+
+### Resources
+
+#### Infographics
+
+| Infographic | Description |
+|-------------|-------------|
+| [QBITEL Bridge Overview](infographics/qbitel-bridge-infographic.png) | The 5-stage journey from legacy crisis to autonomous quantum-safe defense |
+| [4 Industries Shield](infographics/4-industries-infographics.png) | Protecting healthcare, aviation, SCADA/ICS, and telecom infrastructure |
+| [Banking & Financial Services](infographics/qbitel-bridge-bfsi-infographics.png) | Quantum-safe banking: COBOL mainframe modernization and HSM integration |
+| [Insurance](infographics/qbitel-bridge-insurance-infographics.png) | Modernizing the insurance fortress with 2,000x faster connectivity |
+| [BPOs & Call Centers](infographics/qbitel-bridge-BPO-infographics.png) | Quantum-safe protection for voice, terminal, and remote security |
+| [Sovereign Defense](infographics/qbitel-bridge-defense-infographics.png) | Air-gapped networks, sovereign AI, and military-grade cryptography |
+| [Telecommunications](infographics/qbitel-bridge-telecom-infographics.png) | SS7 defense, 5G core migration, and massive IoT virtual shield |
+| [Critical Infrastructure & OT](infographics/qbitel-bridge-critical-infrastructure-infographics.png) | SCADA/ICS and telecom quantum-safe overlays |
+
+#### Audio Walkthroughs
+
+| Topic | Audio |
+|-------|-------|
+| QBITEL Bridge Overview | [Listen](audio-walkthrough/qbitel_bridge_quantum-proofs_legacy_infrastructure.m4a) |
+| COBOL Mainframes | [Listen](audio-walkthrough/quantum-proofing_cobol_mainframes_without_rewriting_code.m4a) |
+| Insurance Mainframes | [Listen](audio-walkthrough/quantum-proofing_ancient_insurance_mainframes.m4a) |
+| Legacy Call Centers | [Listen](audio-walkthrough/quantum-safe_security_for_legacy_call_centers.m4a) |
+| 5G Networks | [Listen](audio-walkthrough/quantum-proofing_5g_with_network_overlays.m4a) |
+| Air-Gapped Networks | [Listen](audio-walkthrough/quantum-proofing_air-gapped_networks_with_overlays.m4a) |
+| Unpatchable Legacy Tech | [Listen](audio-walkthrough/non-invasive_quantum_shields_for_unpatchable_legacy_tech.m4a) |
+| Aging Infrastructure | [Listen](audio-walkthrough/quantum-proofing_aging_infrastructure_with_qbitel.m4a) |
+| Legacy Infrastructure | [Listen](audio-walkthrough/securing_legacy_infrastructure_with_quantum_overlays.m4a) |
+
+#### Whitepapers (PDF)
+
+| Document | Pages | Description |
+|----------|-------|-------------|
+| [Legacy Systems Quantum Safe](pdf-documents/legacy_systems_quantum_safe.pdf) | 15 | Comprehensive guide to making legacy systems quantum-safe without replacement |
+| [Autonomous Quantum Safety](pdf-documents/qbitel_bridge_autonomous_quantum_safety.pdf) | 13 | AI-driven protocol discovery, zero-touch security, and multi-agent orchestration |
+
+Browse all resources on the [website](https://bridge.qbitel.com/resources).
 
 ---
 
