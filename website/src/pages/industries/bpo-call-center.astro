@@ -1,0 +1,62 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+
+const outcomes = [
+  'SIP, RTP, WebRTC, IVR, recording, and CRM flow inventory',
+  'Toll fraud, call abuse, payment leakage, and voice phishing risk scoring',
+  'PCI/HIPAA-ready evidence for client audits and security questionnaires',
+  'Gateway-first protection that avoids disruption to live contact-center operations',
+];
+
+const protocols = ['SIP', 'RTP/SRTP', 'WebRTC', 'IVR logs', 'PCI voice capture', 'Call recordings', 'CRM APIs', 'WFM/WFO feeds'];
+---
+
+<PageLayout
+  title="BPO & Call Centers | QBITEL Bridge"
+  description="Voice-channel intelligence and protection for BPOs and call centers handling high-volume SIP/RTP, IVR, payment, and customer data workflows."
+>
+  <PageHero
+    title="BPO & Call Centers"
+    description="QBITEL Voice Shield discovers call-flow behavior, detects fraud exposure, protects sensitive voice and payment paths, and generates evidence for client assurance."
+    badge="QBITEL Voice Shield"
+    gradient="from-teal-500 to-cyan-500"
+  />
+
+  <section class="border-b border-surface-600/50 py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+        <div>
+          <h2 class="section-heading">The fastest revenue wedge</h2>
+          <p class="text-lg leading-8 text-slate-300">
+            BPO and call-center buyers feel immediate pain: toll fraud, payment-card exposure,
+            agent misuse, client audit pressure, and fragmented voice infrastructure. QBITEL can
+            land with a paid discovery assessment and expand into protection and evidence.
+          </p>
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          {outcomes.map((item) => (
+            <div class="card p-5 text-sm leading-6 text-slate-200">{item}</div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <h2 class="section-heading text-center">Protocols and systems in scope</h2>
+      <div class="mt-8 flex flex-wrap justify-center gap-2">
+        {protocols.map((protocol) => (
+          <span class="rounded-full border border-neon-cyan/20 bg-neon-cyan/10 px-3 py-1 text-xs text-neon-cyan">{protocol}</span>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CTABanner
+    title="Use voice-channel discovery as the land motion"
+    description="Start with fraud and PCI exposure, then expand into governed protection, client evidence packs, and multi-site platform contracts."
+  />
+</PageLayout>

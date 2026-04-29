@@ -1,0 +1,51 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+
+const requirements = [
+  'Air-gapped and offline deployment modes',
+  'CNSA 2.0-aligned PQC migration planning',
+  'Mission protocol discovery and assurance',
+  'Signed evidence packages for ATO and security reviews',
+  'Human approval gates for every critical action',
+  'Fail-closed cryptography and strict audit trails',
+];
+---
+
+<PageLayout
+  title="Defense & Mission Systems | QBITEL Bridge"
+  description="Air-gapped critical system intelligence, protocol assurance, CNSA 2.0 readiness, and signed evidence for defense environments."
+>
+  <PageHero
+    title="Defense & Mission Systems"
+    description="QBITEL Mission Bridge discovers and protects long-lived mission systems under strict control: offline operation, governed PQC migration, explicit approval gates, and signed evidence."
+    badge="QBITEL Mission Bridge"
+    gradient="from-slate-500 to-zinc-400"
+  />
+
+  <section class="border-b border-surface-600/50 py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+        <div>
+          <h2 class="section-heading">Premium track for high-trust environments</h2>
+          <p class="text-lg leading-8 text-slate-300">
+            Defense is a slower sales motion, but it creates premium positioning. The product
+            story should emphasize institutional control: offline deployment, no silent fallbacks,
+            cryptographic proof, mission protocol assurance, and explicit human approval.
+          </p>
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          {requirements.map((item) => (
+            <div class="card p-5 text-sm leading-6 text-slate-200">{item}</div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTABanner
+    title="Position defense as the elite trust tier"
+    description="Use the same core platform, but package it with offline operation, CNSA 2.0 readiness, signed evidence, and strict approval controls."
+  />
+</PageLayout>

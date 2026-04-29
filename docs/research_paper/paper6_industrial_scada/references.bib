@@ -1,0 +1,292 @@
+% ─────────────────────────────────────────────────────────────
+% References for Paper 6: PQ Broadcast Auth & VDFs for IEC 61850
+% ─────────────────────────────────────────────────────────────
+
+% ── TESLA and Broadcast Authentication ──────────────────────
+
+@inproceedings{perrig2000tesla,
+  author    = {Perrig, Adrian and Canetti, Ran and Tygar, J. D. and Song, Dawn},
+  title     = {Efficient Authentication and Signing of Multicast Streams over Lossy Channels},
+  booktitle = {Proc.\ IEEE Symp.\ Security and Privacy (S\&P)},
+  year      = {2000},
+  pages     = {56--73},
+  publisher = {IEEE}
+}
+
+@article{perrig2002tesla,
+  author  = {Perrig, Adrian and Canetti, Ran and Tygar, J. D. and Song, Dawn},
+  title   = {The {TESLA} Broadcast Authentication Protocol},
+  journal = {RSA CryptoBytes},
+  volume  = {5},
+  number  = {2},
+  pages   = {2--13},
+  year    = {2002}
+}
+
+@inproceedings{perrig2001spins,
+  author    = {Perrig, Adrian and Szewczyk, Robert and Tygar, J. D. and Wen, Victor and Culler, David E.},
+  title     = {{SPINS}: Security Protocols for Sensor Networks},
+  booktitle = {Proc.\ ACM MobiCom},
+  year      = {2001},
+  pages     = {189--199}
+}
+
+@article{liu2004multilevel,
+  author  = {Liu, Donggang and Ning, Peng},
+  title   = {Multi-level {$\mu$TESLA}: Broadcast Authentication for Distributed Sensor Networks},
+  journal = {ACM Trans.\ Embedded Computing Systems},
+  volume  = {3},
+  number  = {4},
+  pages   = {800--836},
+  year    = {2004}
+}
+
+% ── Post-Quantum Cryptography ──────────────────────────────
+
+@techreport{nistfips204,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {{FIPS 204}: Module-Lattice-Based Digital Signature Standard ({ML-DSA})},
+  institution = {NIST},
+  year        = {2024},
+  type        = {Federal Information Processing Standard}
+}
+
+@techreport{nistsp800185,
+  author      = {Kelsey, John and Chang, Shu-jen and Perlner, Ray},
+  title       = {{SHA-3} Derived Functions: {cSHAKE}, {KMAC}, {TupleHash} and {ParallelHash}},
+  number      = {SP 800-185},
+  institution = {NIST},
+  year        = {2016}
+}
+
+@techreport{nistfips202,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {{SHA-3} Standard: Permutation-Based Hash and Extendable-Output Functions},
+  number      = {FIPS 202},
+  institution = {NIST},
+  year        = {2015}
+}
+
+@inproceedings{bernstein2017pqcrypto,
+  author    = {Bernstein, Daniel J. and Lange, Tanja},
+  title     = {Post-Quantum Cryptography},
+  booktitle = {Nature},
+  volume    = {549},
+  pages     = {188--194},
+  year      = {2017}
+}
+
+@article{mosca2018quantum,
+  author  = {Mosca, Michele},
+  title   = {Cybersecurity in an Era with Quantum Computers: Will We Be Ready?},
+  journal = {IEEE Security \& Privacy},
+  volume  = {16},
+  number  = {5},
+  pages   = {38--41},
+  year    = {2018}
+}
+
+% ── Verifiable Delay Functions ─────────────────────────────
+
+@inproceedings{boneh2018vdf,
+  author    = {Boneh, Dan and Bonneau, Joseph and B{\"u}nz, Benedikt and Fisch, Ben},
+  title     = {Verifiable Delay Functions},
+  booktitle = {Proc.\ CRYPTO},
+  year      = {2018},
+  pages     = {757--788},
+  publisher = {Springer}
+}
+
+@inproceedings{wesolowski2019vdf,
+  author    = {Wesolowski, Benjamin},
+  title     = {Efficient Verifiable Delay Functions},
+  booktitle = {Proc.\ EUROCRYPT},
+  year      = {2019},
+  pages     = {379--407},
+  publisher = {Springer}
+}
+
+@inproceedings{pietrzak2019simple,
+  author    = {Pietrzak, Krzysztof},
+  title     = {Simple Verifiable Delay Functions},
+  booktitle = {Proc.\ ITCS},
+  year      = {2019},
+  pages     = {60:1--60:15}
+}
+
+@article{ephraim2020continuous,
+  author  = {Ephraim, Naomi and Freitag, Cody and Komargodski, Ilan and Pass, Rafael},
+  title   = {Continuous Verifiable Delay Functions},
+  journal = {J.\ Cryptology},
+  volume  = {36},
+  number  = {1},
+  pages   = {1--38},
+  year    = {2023}
+}
+
+% ── IEC 61850 and Substation Automation ────────────────────
+
+@standard{iec61850-1,
+  author = {{IEC}},
+  title  = {{IEC 61850-1}: Communication Networks and Systems for Power Utility Automation -- {Part 1}: Introduction and Overview},
+  year   = {2013},
+  organization = {International Electrotechnical Commission}
+}
+
+@standard{iec61850-7-2,
+  author = {{IEC}},
+  title  = {{IEC 61850-7-2}: Communication Networks and Systems for Power Utility Automation -- {Part 7-2}: Basic Information and Communication Structure -- Abstract Communication Service Interface ({ACSI})},
+  year   = {2010},
+  organization = {International Electrotechnical Commission}
+}
+
+@standard{iec61850-8-1,
+  author = {{IEC}},
+  title  = {{IEC 61850-8-1}: Communication Networks and Systems for Power Utility Automation -- {Part 8-1}: Specific Communication Service Mapping ({SCSM}) -- Mappings to {MMS}},
+  year   = {2011},
+  organization = {International Electrotechnical Commission}
+}
+
+@standard{iec61850-9-2,
+  author = {{IEC}},
+  title  = {{IEC 61850-9-2}: Communication Networks and Systems for Power Utility Automation -- {Part 9-2}: Specific Communication Service Mapping ({SCSM}) -- Sampled Values over {ISO/IEC 8802-3}},
+  year   = {2011},
+  organization = {International Electrotechnical Commission}
+}
+
+% ── IEC 62351 Security ─────────────────────────────────────
+
+@standard{iec62351-6,
+  author = {{IEC}},
+  title  = {{IEC 62351-6}: Power Systems Management and Associated Information Exchange -- Data and Communications Security -- {Part 6}: Security for {IEC 61850}},
+  year   = {2020},
+  organization = {International Electrotechnical Commission}
+}
+
+@standard{iec62351-3,
+  author = {{IEC}},
+  title  = {{IEC 62351-3}: Power Systems Management and Associated Information Exchange -- Data and Communications Security -- {Part 3}: Communication Network and System Security -- Profiles Including {TCP/IP}},
+  year   = {2014},
+  organization = {International Electrotechnical Commission}
+}
+
+% ── Functional Safety Standards ────────────────────────────
+
+@standard{iec61508,
+  author = {{IEC}},
+  title  = {{IEC 61508}: Functional Safety of Electrical/Electronic/Programmable Electronic Safety-related Systems},
+  year   = {2010},
+  organization = {International Electrotechnical Commission}
+}
+
+@standard{iec61511,
+  author = {{IEC}},
+  title  = {{IEC 61511}: Functional Safety -- Safety Instrumented Systems for the Process Industry Sector},
+  year   = {2016},
+  organization = {International Electrotechnical Commission}
+}
+
+@standard{iec62443,
+  author = {{IEC}},
+  title  = {{IEC 62443}: Industrial Communication Networks -- Network and System Security},
+  year   = {2018},
+  organization = {International Electrotechnical Commission}
+}
+
+% ── ICS/SCADA Security ─────────────────────────────────────
+
+@article{knapp2024industrial,
+  author  = {Knapp, Eric D. and Langill, Joel Thomas},
+  title   = {Industrial Network Security: Securing Critical Infrastructure Networks for Smart Grid, {SCADA}, and Other Industrial Control Systems},
+  journal = {Syngress},
+  year    = {2024},
+  edition = {3rd}
+}
+
+@inproceedings{zhu2011scada,
+  author    = {Zhu, Bonnie and Joseph, Anthony and Sastry, Shankar},
+  title     = {A Taxonomy of Cyber Attacks on {SCADA} Systems},
+  booktitle = {Proc.\ Int.\ Conf.\ Internet of Things and Cyber, Physical and Social Computing},
+  year      = {2011},
+  pages     = {380--388}
+}
+
+@article{stouffer2015guide,
+  author  = {Stouffer, Keith and Pillitteri, Victoria and Lightman, Suzanne and Abrams, Marshall and Hahn, Adam},
+  title   = {Guide to Industrial Control Systems ({ICS}) Security},
+  journal = {NIST SP 800-82 Rev.~2},
+  year    = {2015}
+}
+
+@article{case2016ukraine,
+  author  = {Case, David U.},
+  title   = {Analysis of the Cyber Attack on the {Ukrainian} Power Grid},
+  journal = {SANS ICS},
+  year    = {2016}
+}
+
+@inproceedings{hong2014goose,
+  author    = {Hong, Jin and Liu, Chen-Ching and Govindarasu, Manimaran},
+  title     = {Integrated Anomaly Detection for Cyber Security of the Substations},
+  booktitle = {IEEE Trans.\ Smart Grid},
+  volume    = {5},
+  number    = {4},
+  pages     = {1643--1653},
+  year      = {2014}
+}
+
+@inproceedings{hoyos2012goose,
+  author    = {Hoyos, Javier and Dehus, Mark and Brown, Timothy X.},
+  title     = {Exploiting the {GOOSE} Protocol: A Practical Attack on Cyber-Infrastructure},
+  booktitle = {Proc.\ IEEE Globecom Workshops},
+  year      = {2012},
+  pages     = {1508--1513}
+}
+
+% ── Hash Chain Applications ────────────────────────────────
+
+@article{lamport1981password,
+  author  = {Lamport, Leslie},
+  title   = {Password Authentication with Insecure Communication},
+  journal = {Communications of the ACM},
+  volume  = {24},
+  number  = {11},
+  pages   = {770--772},
+  year    = {1981}
+}
+
+@article{hu2005efficient,
+  author  = {Hu, Yih-Chun and Perrig, Adrian and Johnson, David B.},
+  title   = {Efficient Security Mechanisms for Routing Protocols},
+  journal = {IEEE Trans.\ Mobile Computing},
+  volume  = {4},
+  number  = {4},
+  year    = {2005}
+}
+
+% ── Timing and Real-Time Security ──────────────────────────
+
+@inproceedings{anderson2019timing,
+  author    = {Anderson, Ross and Barton, Ryan and B{\"o}lte, Ralph and others},
+  title     = {Measuring and Mitigating {AS}-level Adversaries Against Tor},
+  booktitle = {Proc.\ NDSS},
+  year      = {2019}
+}
+
+@article{lee2017real,
+  author  = {Lee, Edward A.},
+  title   = {Fundamental Limits of Cyber-Physical Systems Modeling},
+  journal = {ACM Trans.\ Cyber-Physical Systems},
+  volume  = {1},
+  number  = {1},
+  pages   = {3:1--3:26},
+  year    = {2016}
+}
+
+@inproceedings{lisova2018safety,
+  author    = {Lisova, Elena and Vyatkin, Valeriy and Bj{\"o}rkman, Mats},
+  title     = {Safety and Security Co-analysis of Communication in Industrial Automation},
+  booktitle = {Proc.\ IEEE Int.\ Conf.\ Industrial Informatics (INDIN)},
+  year      = {2018},
+  pages     = {1--6}
+}

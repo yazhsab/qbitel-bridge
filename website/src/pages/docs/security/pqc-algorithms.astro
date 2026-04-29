@@ -7,6 +7,13 @@ import { url } from '@/utils/url';
   <h1 class="text-3xl font-bold text-white mb-2">Post-Quantum Cryptography Algorithms</h1>
   <p class="text-gray-400 mb-8">QBITEL Bridge implements NIST-standardized post-quantum cryptographic algorithms to protect data against both classical and quantum computing threats.</p>
 
+  <div class="bg-surface-800 rounded-lg p-5 border border-neon-cyan/20 mb-8">
+    <p class="text-sm text-gray-300">
+      Implementation note: algorithm families and target deployment profiles are broader than the current production maturity of every domain-specific module. For the code-level review of what is strong today and what still needs hardening, see
+      <a href={url('/pqc-audit')} class="text-quantum-400 hover:underline">the PQC implementation audit</a>.
+    </p>
+  </div>
+
   <h2 id="why-pqc" class="text-2xl font-bold text-white mt-12 mb-4">Why Post-Quantum Cryptography?</h2>
   <p class="text-gray-300 mb-4">Current public-key cryptography (RSA, ECC) will be broken by sufficiently powerful quantum computers running Shor's algorithm. QBITEL Bridge uses NIST-standardized PQC algorithms to provide quantum-safe security today, protecting against "harvest now, decrypt later" attacks.</p>
 

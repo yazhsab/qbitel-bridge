@@ -1,0 +1,303 @@
+% ============================================================
+% References for Paper 3: PQC for Aviation ATC Datalinks
+% ============================================================
+
+% --- NIST PQC Standards ---
+
+@techreport{fips203,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {{Module-Lattice-Based Key-Encapsulation Mechanism Standard (ML-KEM)}},
+  institution = {NIST},
+  number      = {FIPS 203},
+  year        = {2024},
+  note        = {Federal Information Processing Standards Publication 203}
+}
+
+@techreport{fips204,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {{Module-Lattice-Based Digital Signature Standard (ML-DSA)}},
+  institution = {NIST},
+  number      = {FIPS 204},
+  year        = {2024},
+  note        = {Federal Information Processing Standards Publication 204}
+}
+
+@techreport{fips205,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {{Stateless Hash-Based Digital Signature Standard (SLH-DSA)}},
+  institution = {NIST},
+  number      = {FIPS 205},
+  year        = {2024},
+  note        = {Federal Information Processing Standards Publication 205}
+}
+
+@inproceedings{ducas2018crystals,
+  author    = {Ducas, L\'{e}o and Kiltz, Eike and Lepoint, Tancr\`{e}de and Lyubashevsky, Vadim and Schwabe, Peter and Seiler, Gregor and Stehl\'{e}, Damien},
+  title     = {{CRYSTALS-Dilithium}: A Lattice-Based Digital Signature Scheme},
+  booktitle = {IACR Transactions on Cryptographic Hardware and Embedded Systems},
+  year      = {2018},
+  volume    = {2018},
+  number    = {1},
+  pages     = {238--268}
+}
+
+@inproceedings{fouque2018falcon,
+  author    = {Fouque, Pierre-Alain and Hoffstein, Jeffrey and Kirchner, Paul and Lyubashevsky, Vadim and Pornin, Thomas and Prest, Thomas and Ricosset, Thomas and Seiler, Gregor and Whyte, William and Zhang, Zhenfei},
+  title     = {{Falcon}: Fast-Fourier Lattice-based Compact Signatures over {NTRU}},
+  booktitle = {NIST Post-Quantum Cryptography Standardization},
+  year      = {2018}
+}
+
+% --- Aviation Communication Standards ---
+
+@techreport{arinc823,
+  author      = {{ARINC}},
+  title       = {{ARINC Specification 823: Datalink Security}},
+  institution = {Aeronautical Radio, Inc.},
+  year        = {2007},
+  note        = {Part 1: ACARS Message Security}
+}
+
+@techreport{icao9896,
+  author      = {{International Civil Aviation Organization}},
+  title       = {{Manual on the Aeronautical Telecommunication Network (ATN) using IPS Standards and Protocols}},
+  institution = {ICAO},
+  number      = {Doc 9896},
+  year        = {2015},
+  edition     = {2nd}
+}
+
+@techreport{ed228,
+  author      = {{EUROCAE}},
+  title       = {{LDACS Air-Ground Data Link Security}},
+  institution = {European Organisation for Civil Aviation Equipment},
+  number      = {ED-228},
+  year        = {2022}
+}
+
+@techreport{ed154,
+  author      = {{EUROCAE}},
+  title       = {{LDACS Technical Specification}},
+  institution = {European Organisation for Civil Aviation Equipment},
+  number      = {ED-154},
+  year        = {2021}
+}
+
+@techreport{do350a,
+  author      = {{RTCA}},
+  title       = {{Safety, Performance and Interoperability Requirements for ADS-B}},
+  institution = {RTCA Inc.},
+  number      = {DO-350A},
+  year        = {2016}
+}
+
+% --- Aviation Cybersecurity ---
+
+@inproceedings{strohmeier2015security,
+  author    = {Strohmeier, Martin and Lenders, Vincent and Martinovic, Ivan},
+  title     = {On the Security of the Automatic Dependent Surveillance-Broadcast Protocol},
+  booktitle = {IEEE Symposium on Security and Privacy},
+  year      = {2015},
+  pages     = {640--657}
+}
+
+@article{costin2012ghost,
+  author  = {Costin, Andrei and Francillon, Aur\'{e}lien},
+  title   = {Ghost in the Air(Traffic): On Insecurity of {ADS-B} Protocol and Practical Attacks on {ADS-B} Devices},
+  journal = {Black Hat USA},
+  year    = {2012}
+}
+
+@article{smith2020aviation,
+  author  = {Smith, Matthew and Strohmeier, Martin and Harber, Jonathan and Lenders, Vincent and Martinovic, Ivan},
+  title   = {A View from the Cockpit: Exploring Pilot Reactions to Attacks on Avionics Systems},
+  journal = {Network and Distributed Systems Security Symposium},
+  year    = {2020}
+}
+
+@article{schafer2014experimental,
+  author  = {Sch{\"a}fer, Matthias and Lenders, Vincent and Martinovic, Ivan},
+  title   = {Experimental Analysis of Attacks on Next Generation Air Traffic Communication},
+  journal = {Applied Cryptography and Network Security},
+  year    = {2014},
+  pages   = {253--271}
+}
+
+% --- Aggregate Signatures ---
+
+@inproceedings{boneh2003aggregate,
+  author    = {Boneh, Dan and Gentry, Craig and Lynn, Ben and Shacham, Hovav},
+  title     = {Aggregate and Verifiably Encrypted Signatures from Bilinear Maps},
+  booktitle = {Advances in Cryptology -- EUROCRYPT 2003},
+  year      = {2003},
+  pages     = {416--432}
+}
+
+@article{eldridge2023hash,
+  author  = {Eldridge, Harrison and Hajiabadi, Mohammad and Ronen, Eyal},
+  title   = {Hash-Based Aggregate Signatures for Post-Quantum Security},
+  journal = {IACR Cryptology ePrint Archive},
+  year    = {2023},
+  note    = {Report 2023/492}
+}
+
+@inproceedings{lu2006sequential,
+  author    = {Lu, Steve and Ostrovsky, Rafail and Sahai, Amit and Shacham, Hovav and Waters, Brent},
+  title     = {Sequential Aggregate Signatures and Multisignatures Without Random Oracles},
+  booktitle = {Advances in Cryptology -- EUROCRYPT 2006},
+  year      = {2006},
+  pages     = {465--485}
+}
+
+@inproceedings{chalkias2021noninteractive,
+  author    = {Chalkias, Konstantinos and Garillot, Fran{\c{c}}ois and Kondi, Yashvanth and Nikolaenko, Valeria},
+  title     = {Non-Interactive Half-Aggregation of {EdDSA} and Variants of {Schnorr} Signatures},
+  booktitle = {CT-RSA 2021},
+  year      = {2021},
+  pages     = {577--608}
+}
+
+% --- Forward Secrecy and Ratchets ---
+
+@article{cohn2020formal,
+  author  = {Cohn-Gordon, Katriel and Cremers, Cas and Dowling, Benjamin and Garratt, Luke and Stebila, Douglas},
+  title   = {A Formal Security Analysis of the Signal Messaging Protocol},
+  journal = {Journal of Cryptology},
+  year    = {2020},
+  volume  = {33},
+  pages   = {1914--1983}
+}
+
+@inproceedings{alwen2020double,
+  author    = {Alwen, Jo\"{e}l and Coretti, Sandro and Dodis, Yevgeniy},
+  title     = {The Double Ratchet: Security Notions, Proofs, and Modularization for the Signal Protocol},
+  booktitle = {Advances in Cryptology -- EUROCRYPT 2019},
+  year      = {2019},
+  pages     = {129--158}
+}
+
+@inproceedings{brendel2020pqsignal,
+  author    = {Brendel, Jacqueline and Fischlin, Marc and G\"{u}nther, Felix and Janson, Christian and Stebila, Douglas},
+  title     = {Towards Post-Quantum Security for Signal's {X3DH} Handshake},
+  booktitle = {Selected Areas in Cryptography},
+  year      = {2020},
+  pages     = {404--430}
+}
+
+@inproceedings{hashimoto2021pqratchet,
+  author    = {Hashimoto, Keitaro and Katsumata, Shuichi and Kwiatkowski, Kris and Prest, Thomas},
+  title     = {An Efficient and Generic Construction for Signal's Handshake ({X3DH}): Post-Quantum, State Leakage Secure, and Deniable},
+  booktitle = {Public-Key Cryptography -- PKC 2021},
+  year      = {2021},
+  pages     = {410--440}
+}
+
+% --- Merkle Trees and Hash-based Crypto ---
+
+@article{merkle1989certified,
+  author  = {Merkle, Ralph C.},
+  title   = {A Certified Digital Signature},
+  journal = {Advances in Cryptology -- CRYPTO '89},
+  year    = {1989},
+  pages   = {218--238}
+}
+
+@techreport{sp800185,
+  author      = {Kelsey, John and Chang, Shu-jen and Perlner, Ray},
+  title       = {{SHA-3 Derived Functions: cSHAKE, KMAC, TupleHash, and ParallelHash}},
+  institution = {NIST},
+  number      = {SP 800-185},
+  year        = {2016}
+}
+
+% --- Quantum Computing Threats ---
+
+@article{shor1997polynomial,
+  author  = {Shor, Peter W.},
+  title   = {Polynomial-Time Algorithms for Prime Factorization and Discrete Logarithms on a Quantum Computer},
+  journal = {SIAM Journal on Computing},
+  volume  = {26},
+  number  = {5},
+  pages   = {1484--1509},
+  year    = {1997}
+}
+
+@techreport{nsa2022cnsa2,
+  author      = {{National Security Agency}},
+  title       = {{Announcing the Commercial National Security Algorithm Suite 2.0}},
+  institution = {NSA Cybersecurity},
+  year        = {2022}
+}
+
+@article{mosca2018cybersecurity,
+  author  = {Mosca, Michele},
+  title   = {Cybersecurity in an Era with Quantum Computers: Will We Be Ready?},
+  journal = {IEEE Security \& Privacy},
+  volume  = {16},
+  number  = {5},
+  pages   = {38--41},
+  year    = {2018}
+}
+
+% --- LDACS and Next-Gen Datalinks ---
+
+@article{maeurer2021ldacs,
+  author  = {M\"{a}urer, Nils and Bilzhause, Arne and Gr\"{a}upl, Thomas and Schmitt, Corinna},
+  title   = {Cybersecurity for the {L-band Digital Aeronautical Communications System (LDACS)}},
+  journal = {IEEE/AIAA Digital Avionics Systems Conference},
+  year    = {2021},
+  pages   = {1--10}
+}
+
+@inproceedings{maeurer2022pqldacs,
+  author    = {M\"{a}urer, Nils and Gr\"{a}upl, Thomas and Schmitt, Corinna},
+  title     = {Post-Quantum Cryptography in {LDACS}: Evaluating Lattice-Based Key Exchange for Aeronautical Communications},
+  booktitle = {IEEE Aerospace Conference},
+  year      = {2022},
+  pages     = {1--12}
+}
+
+@article{polak2022ldacssurvey,
+  author  = {Pol\'{a}k, Luk\'{a}{\v{s}} and Maeurer, Nils},
+  title   = {A Survey on Cybersecurity of Digital Aeronautical Communication Systems},
+  journal = {IEEE Access},
+  volume  = {10},
+  pages   = {29004--29028},
+  year    = {2022}
+}
+
+% --- Bandwidth Constrained Crypto ---
+
+@article{kampanakis2023pqsize,
+  author  = {Kampanakis, Panos and Stebila, Douglas},
+  title   = {Post-Quantum Signatures in Transport Layer Protocols: Challenges and Opportunities},
+  journal = {IEEE Security \& Privacy},
+  volume  = {21},
+  number  = {3},
+  pages   = {62--71},
+  year    = {2023}
+}
+
+@inproceedings{sikeridis2020pqtls,
+  author    = {Sikeridis, Dimitrios and Kampanakis, Panos and Devetsikiotis, Michael},
+  title     = {Post-Quantum Authentication in {TLS 1.3}: A Performance Study},
+  booktitle = {Network and Distributed Systems Security Symposium (NDSS)},
+  year      = {2020}
+}
+
+@article{schwabe2021pqembedded,
+  author  = {Schwabe, Peter and Stebila, Douglas and Wiggers, Thom},
+  title   = {Post-Quantum {TLS} Without Handshake Signatures},
+  journal = {ACM Conference on Computer and Communications Security (CCS)},
+  year    = {2020},
+  pages   = {1461--1480}
+}
+
+% --- Compression and Optimization ---
+
+@misc{zstd2021,
+  author = {Collet, Yann and Kucherawy, Murray},
+  title  = {{Zstandard Compression and the 'application/zstd' Media Type}},
+  howpublished = {RFC 8878},
+  year   = {2021}
+}

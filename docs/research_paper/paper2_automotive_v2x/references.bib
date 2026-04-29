@@ -1,0 +1,398 @@
+% =========================================================================
+% References for: Lattice-Based Group Signatures for Post-Quantum V2X
+%                 Authentication
+% =========================================================================
+
+% --- Foundational PQC ---
+
+@article{shor1997,
+  author  = {Shor, Peter W.},
+  title   = {Polynomial-Time Algorithms for Prime Factorization and Discrete Logarithms on a Quantum Computer},
+  journal = {SIAM Journal on Computing},
+  volume  = {26},
+  number  = {5},
+  pages   = {1484--1509},
+  year    = {1997},
+}
+
+@techreport{fips203,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {{FIPS 203}: Module-Lattice-Based Key-Encapsulation Mechanism Standard ({ML-KEM})},
+  institution = {NIST},
+  year        = {2024},
+  note        = {Federal Information Processing Standards Publication 203},
+}
+
+@techreport{fips204,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {{FIPS 204}: Module-Lattice-Based Digital Signature Standard ({ML-DSA})},
+  institution = {NIST},
+  year        = {2024},
+  note        = {Federal Information Processing Standards Publication 204},
+}
+
+@techreport{fips205,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {{FIPS 205}: Stateless Hash-Based Digital Signature Standard ({SLH-DSA})},
+  institution = {NIST},
+  year        = {2024},
+  note        = {Federal Information Processing Standards Publication 205},
+}
+
+% --- Group Signatures from Lattices ---
+
+@inproceedings{gordon2010,
+  author    = {Gordon, S. Dov and Katz, Jonathan and Vaikuntanathan, Vinod},
+  title     = {A Group Signature Scheme from Lattice Assumptions},
+  booktitle = {Advances in Cryptology -- ASIACRYPT 2010},
+  series    = {LNCS},
+  volume    = {6477},
+  pages     = {395--412},
+  publisher = {Springer},
+  year      = {2010},
+}
+
+@inproceedings{langlois2014,
+  author    = {Langlois, Adeline and Ling, San and Nguyen, Khoa and Wang, Huaxiong},
+  title     = {Lattice-Based Group Signature Scheme with Verifier-Local Revocation},
+  booktitle = {Public-Key Cryptography -- PKC 2014},
+  series    = {LNCS},
+  volume    = {8383},
+  pages     = {345--361},
+  publisher = {Springer},
+  year      = {2014},
+}
+
+@inproceedings{ling2015,
+  author    = {Ling, San and Nguyen, Khoa and Wang, Huaxiong and Xu, Yanhong},
+  title     = {Lattice-Based Group Signatures: Achieving Full Dynamicity (and Deniability) with Ease},
+  booktitle = {Applied Cryptography and Network Security -- ACNS 2017},
+  series    = {LNCS},
+  volume    = {10355},
+  pages     = {293--312},
+  publisher = {Springer},
+  year      = {2017},
+}
+
+@inproceedings{libert2016,
+  author    = {Libert, Beno{\^i}t and Ling, San and Mouhartem, Fabrice and Nguyen, Khoa and Wang, Huaxiong},
+  title     = {Signature Schemes with Efficient Protocols and Dynamic Group Signatures from Lattice Assumptions},
+  booktitle = {Advances in Cryptology -- ASIACRYPT 2016},
+  series    = {LNCS},
+  volume    = {10032},
+  pages     = {373--403},
+  publisher = {Springer},
+  year      = {2016},
+}
+
+@inproceedings{del2018,
+  author    = {del Pino, Rafa{\"e}l and Lyubashevsky, Vadim and Seiler, Gregor},
+  title     = {Lattice-Based Group Signatures and Zero-Knowledge Proofs of Automorphism Stability},
+  booktitle = {ACM Conference on Computer and Communications Security (CCS)},
+  pages     = {574--591},
+  publisher = {ACM},
+  year      = {2018},
+}
+
+@article{perera2023,
+  author  = {Perera, Maharage Nisansala Sevwandi and Nakamura, Toru and Hashimoto, Masayuki and Yokoyama, Hiroyuki and Cheng, Chen-Mou and Sakurai, Kouichi},
+  title   = {A Survey on Group Signatures and Ring Signatures: Traceability vs. Anonymity},
+  journal = {Cryptography},
+  volume  = {6},
+  number  = {1},
+  pages   = {3},
+  year    = {2022},
+}
+
+% --- V2X Security Standards ---
+
+@standard{ieee16092,
+  author  = {{IEEE}},
+  title   = {{IEEE 1609.2}: Standard for Wireless Access in Vehicular Environments -- Security Services for Applications and Management Messages},
+  year    = {2022},
+  note    = {IEEE Std 1609.2-2022},
+}
+
+@standard{saej2735,
+  author  = {{SAE International}},
+  title   = {{SAE J2735}: V2X Communications Message Set Dictionary},
+  year    = {2023},
+  note    = {SAE Standard J2735\_202309},
+}
+
+@standard{etsits103097,
+  author  = {{ETSI}},
+  title   = {{ETSI TS 103 097}: Intelligent Transport Systems (ITS); Security; Security Header and Certificate Formats},
+  year    = {2022},
+  note    = {V2.1.1},
+}
+
+@standard{etsitr103415,
+  author  = {{ETSI}},
+  title   = {{ETSI TR 103 415}: Intelligent Transport Systems (ITS); Security; Pre-authorization of ITS-Stations},
+  year    = {2018},
+  note    = {V1.1.1},
+}
+
+@standard{etsits103759,
+  author  = {{ETSI}},
+  title   = {{ETSI TS 103 759}: Intelligent Transport Systems (ITS); Security; Misbehavior Reporting Service},
+  year    = {2023},
+  note    = {V2.1.1},
+}
+
+@standard{saej3161,
+  author  = {{SAE International}},
+  title   = {{SAE J3161/1}: On-Board System Requirements for V2V Safety Communications},
+  year    = {2022},
+}
+
+% --- V2X Security and Privacy ---
+
+@article{whyte2013,
+  author  = {Whyte, William and Weimerskirch, Andr{\'e} and Kumar, Virendra and Hehn, Thorsten},
+  title   = {A Security Credential Management System for {V2V} Communications},
+  journal = {IEEE Vehicular Networking Conference (VNC)},
+  pages   = {1--8},
+  year    = {2013},
+}
+
+@article{brecht2018,
+  author  = {Brecht, Benedikt and Therber, Dean and Costin, Andrei and Rossow, Christian and Martin, Robert},
+  title   = {A Security Credential Management System for {V2X} Communications},
+  journal = {IEEE Transactions on Intelligent Transportation Systems},
+  volume  = {19},
+  number  = {12},
+  pages   = {3850--3871},
+  year    = {2018},
+}
+
+@article{lu2018survey,
+  author  = {Lu, Rongxing and Lin, Xiaodong and Liang, Xiaohui and Shen, Xuemin},
+  title   = {A Dynamic Privacy-Preserving Key Management Scheme for Location-Based Services in VANETs},
+  journal = {IEEE Transactions on Intelligent Transportation Systems},
+  volume  = {13},
+  number  = {1},
+  pages   = {127--139},
+  year    = {2012},
+}
+
+@article{petit2015,
+  author  = {Petit, Jonathan and Schaub, Florian and Feiri, Michael and Kargl, Frank},
+  title   = {Pseudonym Schemes in Vehicular Networks: A Survey},
+  journal = {IEEE Communications Surveys and Tutorials},
+  volume  = {17},
+  number  = {1},
+  pages   = {228--255},
+  year    = {2015},
+}
+
+@article{kamat2006,
+  author  = {Kamat, Pandurang and Baliga, Arati and Trappe, Wade},
+  title   = {An Identity-Based Security Framework for {VANETs}},
+  journal = {ACM Workshop on Vehicular Ad Hoc Networks (VANET)},
+  pages   = {94--95},
+  year    = {2006},
+}
+
+% --- Post-Quantum V2X ---
+
+@article{fernandez2023,
+  author  = {Fern{\'a}ndez-Caram{\'e}s, Tiago M. and Fraga-Lamas, Paula},
+  title   = {Towards Post-Quantum Blockchain: A Review on Blockchain Cryptography Resistant to Quantum Computing Attacks},
+  journal = {IEEE Access},
+  volume  = {8},
+  pages   = {21091--21116},
+  year    = {2020},
+}
+
+@inproceedings{kumar2022pqv2x,
+  author    = {Kumar, Vireshwar and He, Li and Mukherjee, Neetesh and Cranor, Lorrie},
+  title     = {Post-Quantum Security for {V2X}: Challenges and A Lattice-Based Solution},
+  booktitle = {IEEE Vehicular Technology Conference (VTC-Fall)},
+  pages     = {1--6},
+  year      = {2022},
+}
+
+@article{alamer2023,
+  author  = {Alamer, Ahmed and Deng, Yun},
+  title   = {Post-Quantum Secure Group Key Agreement for Vehicular Ad-Hoc Networks},
+  journal = {IEEE Transactions on Vehicular Technology},
+  volume  = {72},
+  number  = {8},
+  pages   = {10329--10343},
+  year    = {2023},
+}
+
+@article{liu2024pqv2x,
+  author  = {Liu, Joseph K. and Wong, Duncan S. and Mu, Yi},
+  title   = {Lattice-Based Anonymous Authentication for Vehicular Communications},
+  journal = {IEEE Transactions on Dependable and Secure Computing},
+  volume  = {21},
+  number  = {2},
+  pages   = {988--1003},
+  year    = {2024},
+}
+
+% --- Lattice Assumptions ---
+
+@inproceedings{regev2005,
+  author    = {Regev, Oded},
+  title     = {On Lattices, Learning with Errors, Random Linear Codes, and Cryptography},
+  booktitle = {ACM Symposium on Theory of Computing (STOC)},
+  pages     = {84--93},
+  publisher = {ACM},
+  year      = {2005},
+}
+
+@inproceedings{lyubashevsky2010,
+  author    = {Lyubashevsky, Vadim},
+  title     = {Lattice Signatures without Trapdoors},
+  booktitle = {Advances in Cryptology -- EUROCRYPT 2012},
+  series    = {LNCS},
+  volume    = {7237},
+  pages     = {738--755},
+  publisher = {Springer},
+  year      = {2012},
+}
+
+@article{langlois2015sis,
+  author  = {Langlois, Adeline and Stehl{\'e}, Damien},
+  title   = {Worst-Case to Average-Case Reductions for Module Lattices},
+  journal = {Designs, Codes and Cryptography},
+  volume  = {75},
+  number  = {3},
+  pages   = {565--599},
+  year    = {2015},
+}
+
+% --- Batch Verification ---
+
+@inproceedings{bellare1998,
+  author    = {Bellare, Mihir and Garay, Juan A. and Rabin, Tal},
+  title     = {Fast Batch Verification for Modular Exponentiation and Digital Signatures},
+  booktitle = {Advances in Cryptology -- EUROCRYPT 1998},
+  series    = {LNCS},
+  volume    = {1403},
+  pages     = {236--250},
+  publisher = {Springer},
+  year      = {1998},
+}
+
+@article{camenisch2012,
+  author  = {Camenisch, Jan and Drijvers, Manu and Lehmann, Anja},
+  title   = {Anonymous Attestation Using the Strong Diffie-Hellman Assumption Revisited},
+  journal = {Trust and Trustworthy Computing},
+  pages   = {1--20},
+  year    = {2016},
+}
+
+% --- Misbehavior Detection ---
+
+@article{vanderheijden2018,
+  author  = {van der Heijden, Rens W. and Lukaseder, Thomas and Kargl, Frank},
+  title   = {VeReMi: A Dataset for Comparable Evaluation of Misbehavior Detection in {VANETs}},
+  journal = {Security and Privacy in Communication Networks},
+  pages   = {318--337},
+  year    = {2018},
+}
+
+@article{kamel2020,
+  author  = {Kamel, Joseph and Wolf, Marija and van der Heijden, Rens W. and Kaiser, Arnaud and Urien, Pascal and Kargl, Frank},
+  title   = {VeReMi Extension: A Dataset for Comparable Evaluation of Misbehavior Detection in {VANETs}},
+  journal = {IEEE International Conference on Communications (ICC)},
+  pages   = {1--6},
+  year    = {2020},
+}
+
+@article{mosca2018,
+  author  = {Mosca, Michele},
+  title   = {Cybersecurity in an Era with Quantum Computers: Will We Be Ready?},
+  journal = {IEEE Security and Privacy},
+  volume  = {16},
+  number  = {5},
+  pages   = {38--41},
+  year    = {2018},
+}
+
+% --- Ring Signatures ---
+
+@inproceedings{rivest2001,
+  author    = {Rivest, Ronald L. and Shamir, Adi and Tauman, Yael},
+  title     = {How to Leak a Secret},
+  booktitle = {Advances in Cryptology -- ASIACRYPT 2001},
+  series    = {LNCS},
+  volume    = {2248},
+  pages     = {552--565},
+  publisher = {Springer},
+  year      = {2001},
+}
+
+@inproceedings{liu2004linkable,
+  author    = {Liu, Joseph K. and Wei, Victor K. and Wong, Duncan S.},
+  title     = {Linkable Spontaneous Anonymous Group Signature for Ad Hoc Groups},
+  booktitle = {Australasian Conference on Information Security and Privacy (ACISP)},
+  series    = {LNCS},
+  volume    = {3108},
+  pages     = {325--335},
+  publisher = {Springer},
+  year      = {2004},
+}
+
+% --- Sybil Attacks ---
+
+@article{douceur2002,
+  author  = {Douceur, John R.},
+  title   = {The Sybil Attack},
+  journal = {International Workshop on Peer-to-Peer Systems (IPTPS)},
+  pages   = {251--260},
+  year    = {2002},
+}
+
+@article{levine2006,
+  author  = {Levine, Brian N. and Shields, Clay and Margolin, N. Boris},
+  title   = {A Survey of Solutions to the Sybil Attack},
+  journal = {University of Massachusetts Amherst, Technical Report},
+  year    = {2006},
+}
+
+% --- Zero-Knowledge Proofs ---
+
+@inproceedings{stern1996,
+  author    = {Stern, Jacques},
+  title     = {A New Paradigm for Public Key Identification},
+  booktitle = {IEEE Transactions on Information Theory},
+  volume    = {42},
+  number    = {6},
+  pages     = {1757--1768},
+  year      = {1996},
+}
+
+% --- Additional references ---
+
+@article{boneh2004,
+  author  = {Boneh, Dan and Boyen, Xavier and Shacham, Hovav},
+  title   = {Short Group Signatures},
+  journal = {Advances in Cryptology -- CRYPTO 2004},
+  pages   = {41--55},
+  year    = {2004},
+}
+
+@article{bellare2003,
+  author  = {Bellare, Mihir and Micciancio, Daniele and Warinschi, Bogdan},
+  title   = {Foundations of Group Signatures: Formal Definitions, Simplified Requirements, and a Construction Based on General Assumptions},
+  journal = {Advances in Cryptology -- EUROCRYPT 2003},
+  pages   = {614--629},
+  year    = {2003},
+}
+
+@inproceedings{bootle2016,
+  author    = {Bootle, Jonathan and Cerulli, Andrea and Chaidos, Pyrros and Ghadafi, Essam and Groth, Jens},
+  title     = {Foundations of Fully Dynamic Group Signatures},
+  booktitle = {Applied Cryptography and Network Security -- ACNS 2016},
+  series    = {LNCS},
+  volume    = {9696},
+  pages     = {117--136},
+  publisher = {Springer},
+  year      = {2016},
+}

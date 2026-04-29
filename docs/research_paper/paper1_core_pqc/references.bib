@@ -1,0 +1,300 @@
+% ── NIST Standards and Reports ──────────────────────────────────
+
+@techreport{nist-sp800-227,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {Recommendations for the Transition to Post-Quantum Cryptography},
+  institution = {NIST},
+  number      = {SP 800-227},
+  year        = {2025},
+  note        = {\url{https://csrc.nist.gov/publications/detail/sp/800-227/final}}
+}
+
+@techreport{nist-fips203,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {Module-Lattice-Based Key-Encapsulation Mechanism Standard ({ML-KEM})},
+  institution = {NIST},
+  number      = {FIPS 203},
+  year        = {2024},
+  note        = {\url{https://csrc.nist.gov/pubs/fips/203/final}}
+}
+
+@techreport{nist-fips204,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {Module-Lattice-Based Digital Signature Standard ({ML-DSA})},
+  institution = {NIST},
+  number      = {FIPS 204},
+  year        = {2024},
+  note        = {\url{https://csrc.nist.gov/pubs/fips/204/final}}
+}
+
+@techreport{nist-fips205,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {Stateless Hash-Based Digital Signature Standard ({SLH-DSA})},
+  institution = {NIST},
+  number      = {FIPS 205},
+  year        = {2024},
+  note        = {\url{https://csrc.nist.gov/pubs/fips/205/final}}
+}
+
+@techreport{nist-sp800-208,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {Recommendation for Stateful Hash-Based Signature Schemes},
+  institution = {NIST},
+  number      = {SP 800-208},
+  year        = {2020},
+  note        = {\url{https://csrc.nist.gov/publications/detail/sp/800-208/final}}
+}
+
+% ── NSA / CNSA ─────────────────────────────────────────────────
+
+@techreport{cnsa2,
+  author      = {{National Security Agency}},
+  title       = {Commercial {National Security Algorithm Suite} 2.0},
+  institution = {NSA},
+  year        = {2022},
+  note        = {\url{https://media.defense.gov/2022/Sep/07/2003071834/-1/-1/0/CSA_CNSA_2.0_ALGORITHMS_.PDF}}
+}
+
+% ── ETSI ───────────────────────────────────────────────────────
+
+@techreport{etsi-ts103744,
+  author      = {{European Telecommunications Standards Institute}},
+  title       = {Quantum-Safe Cryptography; Migration Strategies for Hybrid Approaches},
+  institution = {ETSI},
+  number      = {TS 103 744},
+  year        = {2023}
+}
+
+% ── IETF RFCs and Drafts ──────────────────────────────────────
+
+@misc{rfc8446,
+  author    = {E. Rescorla},
+  title     = {The {Transport Layer Security} ({TLS}) Protocol Version 1.3},
+  series    = {RFC},
+  number    = {8446},
+  year      = {2018},
+  publisher = {IETF}
+}
+
+@misc{rfc5869,
+  author    = {H. Krawczyk and P. Eronen},
+  title     = {{HMAC}-based Extract-and-Expand Key Derivation Function ({HKDF})},
+  series    = {RFC},
+  number    = {5869},
+  year      = {2010},
+  publisher = {IETF}
+}
+
+@misc{draft-hybrid-design,
+  author    = {D. Stebila and S. Fluhrer and S. Gueron},
+  title     = {Hybrid Key Exchange in {TLS} 1.3},
+  howpublished = {Internet-Draft, draft-ietf-tls-hybrid-design},
+  year      = {2024},
+  publisher = {IETF}
+}
+
+@misc{rfc9180,
+  author    = {R. Barnes and K. Bhargavan and B. Lipp and C. Wood},
+  title     = {Hybrid Public Key Encryption},
+  series    = {RFC},
+  number    = {9180},
+  year      = {2022},
+  publisher = {IETF}
+}
+
+@misc{rfc7748,
+  author    = {A. Langley and M. Hamburg and S. Turner},
+  title     = {Elliptic Curves for Security},
+  series    = {RFC},
+  number    = {7748},
+  year      = {2016},
+  publisher = {IETF}
+}
+
+% ── Lattice Cryptography ──────────────────────────────────────
+
+@inproceedings{regev2005,
+  author    = {O. Regev},
+  title     = {On Lattices, Learning with Errors, Random Linear Codes, and Cryptography},
+  booktitle = {Proceedings of the 37th Annual ACM Symposium on Theory of Computing (STOC)},
+  year      = {2005},
+  pages     = {84--93}
+}
+
+@inproceedings{lyubashevsky2010,
+  author    = {V. Lyubashevsky and C. Peikert and O. Regev},
+  title     = {On Ideal Lattices and Learning with Errors over Rings},
+  booktitle = {Advances in Cryptology -- EUROCRYPT 2010},
+  year      = {2010},
+  pages     = {1--23},
+  publisher = {Springer}
+}
+
+@inproceedings{langlois2015,
+  author    = {A. Langlois and D. Stehl{\'e}},
+  title     = {Worst-case to average-case reductions for module lattices},
+  booktitle = {Designs, Codes and Cryptography},
+  year      = {2015},
+  volume    = {75},
+  number    = {3},
+  pages     = {565--599}
+}
+
+% ── Quantum Computing Threat ──────────────────────────────────
+
+@article{shor1997,
+  author  = {P. W. Shor},
+  title   = {Polynomial-Time Algorithms for Prime Factorization and Discrete Logarithms on a Quantum Computer},
+  journal = {SIAM Journal on Computing},
+  volume  = {26},
+  number  = {5},
+  pages   = {1484--1509},
+  year    = {1997}
+}
+
+@article{grover1996,
+  author  = {L. K. Grover},
+  title   = {A Fast Quantum Mechanical Algorithm for Database Search},
+  booktitle = {Proceedings of the 28th Annual ACM Symposium on Theory of Computing},
+  year    = {1996},
+  pages   = {212--219}
+}
+
+@inproceedings{mosca2018,
+  author    = {M. Mosca},
+  title     = {Cybersecurity in an Era with Quantum Computers: Will We Be Ready?},
+  journal   = {IEEE Security \& Privacy},
+  volume    = {16},
+  number    = {5},
+  pages     = {38--41},
+  year      = {2018}
+}
+
+% ── Hybrid Key Exchange ───────────────────────────────────────
+
+@inproceedings{bindel2019,
+  author    = {N. Bindel and U. Herath and M. McKague and D. Stebila},
+  title     = {Transitioning to a Quantum-Resistant Public Key Infrastructure},
+  booktitle = {Post-Quantum Cryptography (PQCrypto 2017)},
+  year      = {2017},
+  pages     = {384--405},
+  publisher = {Springer}
+}
+
+@inproceedings{giacon2018,
+  author    = {F. Giacon and F. Heuer and B. Poettering},
+  title     = {{KEM} Combiners},
+  booktitle = {Public-Key Cryptography -- PKC 2018},
+  year      = {2018},
+  pages     = {190--218},
+  publisher = {Springer}
+}
+
+@article{dowling2020,
+  author  = {B. Dowling and T. G{\"u}nther and A. Poirrier},
+  title   = {Hybrid Key Encapsulation Mechanisms and Authenticated Key Exchange},
+  journal = {Journal of Cryptology},
+  year    = {2024},
+  volume  = {37},
+  pages   = {1--45}
+}
+
+@inproceedings{brendel2022,
+  author    = {J. Brendel and M. Fischlin and F. G{\"u}nther and C. Janson},
+  title     = {{PRF}-{ODH}: Relations, Instantiations, and Impossibility Results},
+  booktitle = {Advances in Cryptology -- CRYPTO 2017},
+  year      = {2017},
+  pages     = {651--681},
+  publisher = {Springer}
+}
+
+% ── Crypto Agility ────────────────────────────────────────────
+
+@inproceedings{ott2019,
+  author    = {D. Ott and C. Peikert},
+  title     = {Identifying Research Challenges in Post Quantum Cryptography Migration and Cryptographic Agility},
+  booktitle = {NIST PQC Conference},
+  year      = {2019}
+}
+
+@article{housley2024,
+  author  = {R. Housley},
+  title   = {Cryptographic Algorithm Agility for Digital Certificates},
+  journal = {Computer Security Resource Center, NIST},
+  year    = {2024}
+}
+
+@techreport{dhs-pqc-roadmap,
+  author      = {{Department of Homeland Security}},
+  title       = {Post-Quantum Cryptography: Roadmap for Migration},
+  institution = {DHS CISA},
+  year        = {2023}
+}
+
+% ── Quantum Risk Assessment ───────────────────────────────────
+
+@inproceedings{joseph2022,
+  author    = {D. Joseph and R. Misoczki and M. Manzano and J. Tricot and F. D. Pinuaga and O. Lacombe and S. Leichenauer and J. Hidary and P. Venables and R. Royal},
+  title     = {Transitioning Organizations to Post-Quantum Cryptography},
+  journal   = {Nature},
+  volume    = {605},
+  pages     = {237--243},
+  year      = {2022}
+}
+
+@article{mavroeidis2018,
+  author  = {V. Mavroeidis and K. Vishi and M. D. Zych and A. J{\o}sang},
+  title   = {The Impact of Quantum Computing on Present Cryptography},
+  journal = {International Journal of Advanced Computer Science and Applications},
+  volume  = {9},
+  number  = {3},
+  year    = {2018}
+}
+
+% ── Implementation and Performance ────────────────────────────
+
+@inproceedings{bos2018,
+  author    = {J. W. Bos and J. Renes and D. Stebila},
+  title     = {Post-quantum Key Exchange for the {TLS} Protocol from the Ring Learning with Errors Problem},
+  booktitle = {IEEE Symposium on Security and Privacy},
+  year      = {2018},
+  pages     = {553--570}
+}
+
+@article{paquin2020,
+  author  = {C. Paquin and D. Stebila and G. Tamvada},
+  title   = {Benchmarking Post-Quantum Cryptography in {TLS}},
+  booktitle = {Post-Quantum Cryptography (PQCrypto 2020)},
+  year    = {2020},
+  pages   = {72--91},
+  publisher = {Springer}
+}
+
+@inproceedings{schwabe2024,
+  author    = {P. Schwabe and D. Stebila and T. Wiggers},
+  title     = {More Efficient Post-Quantum {KEMTLS} with Pre-distributed Public Keys},
+  booktitle = {European Symposium on Research in Computer Security (ESORICS)},
+  year      = {2024},
+  publisher = {Springer}
+}
+
+@inproceedings{kwiatkowski2019,
+  author    = {K. Kwiatkowski and N. Sullivan and A. Langley and D. Levin and A. Mislove},
+  title     = {Measuring {TLS} Key Exchange with Post-Quantum {KEM}},
+  booktitle = {Workshop on Measurements, Attacks, and Defenses for the Web (MADWeb)},
+  year      = {2019}
+}
+
+@misc{cloudflare-pq,
+  author  = {{Cloudflare Research}},
+  title   = {Post-Quantum {TLS} in Cloudflare},
+  year    = {2024},
+  howpublished = {\url{https://blog.cloudflare.com/post-quantum-for-all}}
+}
+
+@misc{chrome-pq,
+  author  = {{Google Chrome Team}},
+  title   = {Post-Quantum Cryptography in {Chrome}},
+  year    = {2024},
+  howpublished = {\url{https://blog.chromium.org/2024/09/a-new-satisfsatisfying-satisfyingly.html}}
+}

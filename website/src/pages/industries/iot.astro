@@ -1,0 +1,60 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+
+const outcomes = [
+  'Device inventory across unmanaged and partially managed fleets',
+  'Protocol fingerprinting for MQTT, CoAP, BLE, Zigbee, LoRaWAN, and proprietary traffic',
+  'Crypto posture scoring for weak keys, stale firmware, and unsafe trust paths',
+  'Gateway-first protection plans for devices that cannot be upgraded quickly',
+];
+
+const buyerPains = ['Unknown devices', 'Weak firmware', 'Proprietary protocols', 'No crypto inventory', 'Fragmented ownership', 'Unsafe update paths'];
+---
+
+<PageLayout
+  title="IoT & Connected Devices | QBITEL Bridge"
+  description="Device trust, protocol intelligence, crypto posture, and gateway-first protection for fragmented IoT estates."
+>
+  <PageHero
+    title="IoT & Connected Devices"
+    description="QBITEL Device Trust discovers unmanaged devices, maps protocol behavior, scores crypto posture, and protects constrained fleets without waiting for every endpoint to be replaced."
+    badge="QBITEL Device Trust"
+    gradient="from-lime-500 to-emerald-500"
+  />
+
+  <section class="border-b border-surface-600/50 py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h2 class="section-heading">IoT needs trust before automation</h2>
+        <p class="section-subheading mx-auto">
+          Large device estates usually lack reliable inventory, ownership, protocol maps, and
+          cryptographic posture. QBITEL turns network behavior into a device trust graph and a
+          practical containment or upgrade plan.
+        </p>
+      </div>
+      <div class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {outcomes.map((item) => (
+          <div class="card p-5 text-sm leading-6 text-slate-200">{item}</div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <h2 class="section-heading text-center">Problems the pack targets</h2>
+      <div class="mt-8 flex flex-wrap justify-center gap-2">
+        {buyerPains.map((pain) => (
+          <span class="rounded-full border border-surface-500/70 bg-surface-800/90 px-3 py-1 text-sm text-slate-200">{pain}</span>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CTABanner
+    title="Turn fragmented devices into governed assets"
+    description="Start with device and protocol discovery, then attach crypto posture, anomaly detection, gateway protection, and compliance evidence."
+  />
+</PageLayout>
