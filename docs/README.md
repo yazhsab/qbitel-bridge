@@ -1,8 +1,20 @@
-# QBITEL Bridge System
+# QBITEL Bridge Documentation
 
-## 🚀 **Complete Enterprise-Grade Implementation**
+## Product Direction
 
-The QBITEL Bridge System is a state-of-the-art, AI-powered solution for automatically learning, classifying, and parsing unknown network protocols in real-time. This system provides 100% production-ready functionality with enterprise-grade reliability, performance, and monitoring.
+QBITEL Bridge is positioned as a **Critical Systems Intelligence and Protection Platform**.
+
+It helps enterprises discover, understand, modernize, protect, and prove control over critical systems they cannot easily replace: BPO/call centers, IoT fleets, defense networks, banking mainframes, telecom cores, healthcare devices, and industrial infrastructure.
+
+Start here for current positioning and product strategy:
+
+- [Final Product Positioning](QBITEL_FINAL_PRODUCT_POSITIONING.md)
+- [Product Strategy 2026](QBITEL_PRODUCT_STRATEGY_2026.md)
+- [PQC Implementation Evaluation 2026](PQC_IMPLEMENTATION_EVALUATION_2026.md)
+
+## 🚀 **Technical Implementation**
+
+The QBITEL Bridge System includes AI-powered protocol discovery, system behavior intelligence, modernization asset generation, governed protection controls, and evidence packaging for critical environments.
 
 ## 📋 **Table of Contents**
 

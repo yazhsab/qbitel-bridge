@@ -22,11 +22,11 @@ export const coreFeatures: Feature[] = [
     badge: 'NIST Level 5',
   },
   {
-    title: 'Zero-Touch Security',
-    description: 'LLM-powered autonomous SOC with 78% auto-execution rate and sub-second response times. On-premise Ollama support for air-gapped deployments. Complete MITRE ATT&CK mapping.',
+    title: 'Governed Protection',
+    description: 'Policy-led fraud, threat, and PQC controls with approval gates, rollback paths, simulation, and audit evidence for critical systems.',
     icon: 'M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z',
     href: '/products/zero-touch-security',
-    badge: '78% Autonomous',
+    badge: 'Controlled',
   },
   {
     title: 'Translation Studio',
@@ -36,11 +36,11 @@ export const coreFeatures: Feature[] = [
     badge: '6 Languages',
   },
   {
-    title: 'Protocol Marketplace',
-    description: 'Community-driven marketplace with 1,000+ pre-built protocol definitions. Discover, share, and monetize parsers across banking, healthcare, industrial, telecom, and IoT verticals.',
+    title: 'Vertical Solution Packs',
+    description: 'Packaged protocols, risk models, deployment templates, and evidence mappings for BPO/call centers, IoT, defense, banking, OT, healthcare, telecom, and mobility.',
     icon: 'M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016A3.001 3.001 0 0021 9.349m-18 0a2.999 2.999 0 002.25-1.033 2.999 2.999 0 002.25 1.033 2.999 2.999 0 002.25-1.033A2.999 2.999 0 0012 9.35',
-    href: '/products/protocol-marketplace',
-    badge: '1000+ Protocols',
+    href: '/industries',
+    badge: '8 Verticals',
   },
   {
     title: 'Enterprise Compliance',
@@ -65,9 +65,9 @@ export const coreFeatures: Feature[] = [
 ];
 
 export const howItWorks = [
-  { step: '01', title: 'Discover', description: 'AI analyzes network traffic using PCFG inference, CNN + BiLSTM classifiers, and transformer models to extract protocol grammar automatically.' },
-  { step: '02', title: 'Protect', description: 'Apply NIST FIPS 203/204 post-quantum encryption with industry-specific profiles optimized for your latency and compliance requirements.' },
-  { step: '03', title: 'Translate', description: 'Auto-generate REST APIs, gRPC services, and production SDKs in 6 languages. Bridge legacy to modern without rewriting a single line.' },
-  { step: '04', title: 'Comply', description: 'Continuous monitoring across 9 regulatory frameworks with automated evidence collection and audit-ready reports in under 10 minutes.' },
-  { step: '05', title: 'Operate', description: 'Zero-touch autonomous security with LLM-powered decisions, on-premise inference, and complete cryptographic audit trails.' },
+  { step: '01', title: 'Discover', description: 'Build the critical asset, protocol, dependency, and crypto inventory from traffic, logs, captures, and samples.' },
+  { step: '02', title: 'Understand', description: 'Explain behavior, business meaning, risk, fraud, failure patterns, and modernization readiness.' },
+  { step: '03', title: 'Modernize', description: 'Generate specs, adapters, REST APIs, gRPC services, SDKs, replay harnesses, and migration plans.' },
+  { step: '04', title: 'Protect', description: 'Apply policy controls, fraud/threat defenses, secure gateways, and governed PQC overlays.' },
+  { step: '05', title: 'Prove', description: 'Produce audit, board, client-assurance, and change-control evidence in the same workflow.' },
 ];

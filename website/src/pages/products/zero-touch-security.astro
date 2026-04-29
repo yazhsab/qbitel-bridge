@@ -5,13 +5,13 @@ import CTABanner from '@/components/cta/CTABanner.astro';
 ---
 
 <PageLayout
-  title="Zero-Touch Security Engine | QBITEL Bridge"
-  description="LLM-powered autonomous security operations with 78% auto-execute rate, sub-second decision time, and full MITRE ATT&CK coverage."
+  title="Governed Protection Engine | QBITEL Bridge"
+  description="Policy-led fraud, threat, and PQC protection with confidence scoring, approval gates, rollback paths, and full audit evidence."
 >
   <PageHero
-    title="Zero-Touch Security Engine"
-    description="Reduce SOC response time from 65 minutes to under 1 second with an AI-driven decision engine. On-premise Ollama support ensures data never leaves your network."
-    badge="Autonomous Security"
+    title="Governed Protection Engine"
+    description="Use AI-assisted decisions for fraud, threat, and runtime protection while keeping production-critical actions under approval, simulation, rollback, and evidence controls."
+    badge="Controlled Security Automation"
     gradient="from-red-500 to-orange-500"
   />
 
@@ -20,20 +20,20 @@ import CTABanner from '@/components/cta/CTABanner.astro';
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="card p-6 text-center">
-          <div class="text-3xl font-bold gradient-text mb-1">78%</div>
-          <div class="text-sm text-gray-400">Auto-Execute Rate</div>
+          <div class="text-3xl font-bold gradient-text mb-1">Gated</div>
+          <div class="text-sm text-gray-400">Critical Actions</div>
         </div>
         <div class="card p-6 text-center">
-          <div class="text-3xl font-bold gradient-text mb-1">&lt;1s</div>
-          <div class="text-sm text-gray-400">Decision Time</div>
+          <div class="text-3xl font-bold gradient-text mb-1">Sim</div>
+          <div class="text-sm text-gray-400">Before Execution</div>
         </div>
         <div class="card p-6 text-center">
-          <div class="text-3xl font-bold gradient-text mb-1">94%</div>
-          <div class="text-sm text-gray-400">Decision Accuracy</div>
+          <div class="text-3xl font-bold gradient-text mb-1">Full</div>
+          <div class="text-sm text-gray-400">Audit Evidence</div>
         </div>
         <div class="card p-6 text-center">
-          <div class="text-3xl font-bold gradient-text mb-1">65x</div>
-          <div class="text-sm text-gray-400">Faster Than Manual</div>
+          <div class="text-3xl font-bold gradient-text mb-1">Fail</div>
+          <div class="text-sm text-gray-400">Closed by Default</div>
         </div>
       </div>
     </div>
@@ -45,35 +45,35 @@ import CTABanner from '@/components/cta/CTABanner.astro';
       <div class="grid lg:grid-cols-2 gap-12 items-center">
         <div>
           <h2 class="section-heading">
-            The <span class="gradient-text">SOC Challenge</span>
+            The <span class="gradient-text">Control Challenge</span>
           </h2>
           <p class="text-gray-400 mb-6 leading-relaxed">
-            Security Operations Centers are overwhelmed. Analysts face thousands of alerts daily, with an average response time of 65 minutes per incident. Alert fatigue leads to missed threats, while staffing shortages mean most SOCs operate understaffed.
+            Critical systems need faster decisions, but uncontrolled autonomy is hard to sell into banks, BPOs, defense networks, hospitals, telecom cores, and OT environments.
           </p>
           <p class="text-gray-400 leading-relaxed">
-            The Zero-Touch Security Engine uses LLM-powered decision making to autonomously triage, investigate, and respond to security incidents. For 78% of incidents, the system acts without human intervention, reducing response time from over an hour to under a second.
+            The Governed Protection Engine uses AI-assisted reasoning to triage fraud, threat, and runtime events while enforcing approval gates, blast-radius limits, rollback paths, and evidence collection.
           </p>
         </div>
         <div class="space-y-4">
           <div class="card p-5">
-            <div class="text-white font-semibold mb-2">Before Zero-Touch</div>
+            <div class="text-white font-semibold mb-2">Ungoverned Automation</div>
             <div class="flex items-center gap-3 mb-2">
               <div class="flex-1 h-2 rounded-full bg-surface-700 overflow-hidden">
                 <div class="h-full bg-red-500 rounded-full" style="width: 100%"></div>
               </div>
               <span class="text-sm text-red-400 font-mono">65 min</span>
             </div>
-            <div class="text-xs text-gray-500">Average SOC response time</div>
+            <div class="text-xs text-gray-500">Fast action without proof creates adoption risk</div>
           </div>
           <div class="card p-5">
-            <div class="text-white font-semibold mb-2">After Zero-Touch</div>
+            <div class="text-white font-semibold mb-2">Governed Protection</div>
             <div class="flex items-center gap-3 mb-2">
               <div class="flex-1 h-2 rounded-full bg-surface-700 overflow-hidden">
                 <div class="h-full bg-neon-green rounded-full" style="width: 2%"></div>
               </div>
-              <span class="text-sm text-neon-green font-mono">&lt;1 sec</span>
+              <span class="text-sm text-neon-green font-mono">Approved</span>
             </div>
-            <div class="text-xs text-gray-500">Automated decision time</div>
+            <div class="text-xs text-gray-500">Controlled action with evidence</div>
           </div>
         </div>
       </div>
@@ -231,8 +231,8 @@ import CTABanner from '@/components/cta/CTABanner.astro';
         <div class="flex items-start gap-4">
           <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-orange-500 text-white font-bold text-sm flex-shrink-0 mt-1">4</div>
           <div class="card p-4 flex-1">
-            <h3 class="text-white font-semibold mb-1">Autonomous Response</h3>
-            <p class="text-sm text-gray-400">High-confidence decisions are executed automatically. Lower-confidence decisions are escalated to analysts with full context and recommendations.</p>
+            <h3 class="text-white font-semibold mb-1">Governed Response</h3>
+            <p class="text-sm text-gray-400">Low-risk decisions can be automated by policy. Critical production actions require approval gates, rollback context, and full evidence.</p>
           </div>
         </div>
       </div>
@@ -240,7 +240,7 @@ import CTABanner from '@/components/cta/CTABanner.astro';
   </section>
 
   <CTABanner
-    title="Ready for Autonomous Security?"
-    description="Deploy the Zero-Touch Security Engine and reduce your SOC response time from minutes to milliseconds."
+    title="Ready for governed protection?"
+    description="Deploy AI-assisted protection with approval gates, rollback paths, and evidence that critical-system buyers can trust."
   />
 </PageLayout>

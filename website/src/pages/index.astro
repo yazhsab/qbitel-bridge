@@ -1,351 +1,306 @@
 ---
 import LandingLayout from '@/layouts/LandingLayout.astro';
-import HomeHero from '@/components/hero/HomeHero.astro';
-import StatsBar from '@/components/content/StatsBar.astro';
-import FeatureGrid from '@/components/content/FeatureGrid.astro';
-import IndustryCard from '@/components/content/IndustryCard.astro';
-import TechStackBadge from '@/components/content/TechStackBadge.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
-import { howItWorks } from '@/data/features';
-import { industries } from '@/data/industries';
-import { performanceStats } from '@/data/stats';
+import DomainDemoLab from '@/components/interactive/DomainDemoLab';
+import OutcomeCalculator from '@/components/interactive/OutcomeCalculator';
+import PlatformExplorer from '@/components/interactive/PlatformExplorer';
+import { maturitySummary } from '@/data/pqcAudit';
+import { productModules, proofArtifacts, signalMetrics } from '@/data/strategy';
 import { url } from '@/utils/url';
+
+const challengeCards = [
+  {
+    title: 'Unknown critical systems',
+    description:
+      'BPO voice platforms, IoT fleets, mainframes, defense networks, OT systems, and telecom cores still depend on protocols and workflows few teams fully understand.',
+    signal: 'Build the asset, protocol, dependency, and ownership graph from traffic, logs, captures, and samples.',
+  },
+  {
+    title: 'Modernization without replacement',
+    description:
+      'Teams need reviewed specs, adapters, APIs, and replay harnesses before they can move anything safely into a modern architecture.',
+    signal: 'Generate integration assets and governed rollout plans instead of one-off migration projects.',
+  },
+  {
+    title: 'Future risk with real constraints',
+    description:
+      'Organizations need fraud reduction, cyber resilience, PQC migration, and regulatory proof that fit latency, certification, uptime, and air-gap boundaries.',
+    signal: 'Apply controlled overlays and prove changes with evidence packs, approvals, and rollback paths.',
+  },
+];
+
+const deliveryStack = [
+  {
+    label: 'Rust dataplane',
+    detail: 'Performance-sensitive cryptography, transport, and enforcement surfaces.',
+  },
+  {
+    label: 'Python AI engine',
+    detail: 'Protocol discovery, asset inference, modernization workflows, and evidence generation.',
+  },
+  {
+    label: 'Go control plane',
+    detail: 'Policy distribution, deployment orchestration, and approval-led rollout controls.',
+  },
+  {
+    label: 'Astro + React website',
+    detail: 'Interactive product narrative, roadmap, and implementation review surfaces.',
+  },
+];
 ---
 
 <LandingLayout
-  title="QBITEL Bridge — Enterprise-Grade Open-Source Quantum-Safe Legacy Modernization"
-  description="The only open-source platform that discovers unknown protocols with AI, protects them with NIST Level 5 post-quantum cryptography, and operates them autonomously. Enterprise-grade. Apache 2.0. Production-ready."
+  title="QBITEL | Critical Systems Intelligence and Protection"
+  description="QBITEL discovers, understands, modernizes, protects, and proves control over critical legacy, voice, IoT, defense, industrial, healthcare, banking, and telecom systems."
 >
-  <!-- Hero -->
-  <HomeHero />
+  <section class="relative overflow-hidden border-b border-surface-600/50">
+    <div class="absolute inset-0 bg-grid-pattern bg-grid opacity-15" />
+    <div class="absolute -left-24 top-24 h-80 w-80 rounded-full bg-neon-copper/15 blur-3xl" />
+    <div class="absolute right-0 top-0 h-96 w-96 rounded-full bg-neon-cyan/10 blur-3xl" />
 
-  <!-- Stats -->
-  <StatsBar />
-
-  <!-- The Problem — Why QBitel Exists -->
-  <section class="py-16 lg:py-24 border-b border-surface-600/50">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="section-heading">
-          Three Problems. <span class="gradient-text">One Platform.</span>
-        </h2>
-        <p class="section-subheading mx-auto">
-          Legacy systems, quantum threats, and security bottlenecks cost enterprises billions annually. QBITEL Bridge solves all three.
-        </p>
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-6">
-        <!-- Problem 1: Legacy Crisis -->
-        <div class="card p-6">
-          <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-            </svg>
+    <div class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+      <div class="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 rounded-full border border-surface-600/60 bg-surface-800/70 px-4 py-1.5 text-sm text-slate-200">
+            <span class="h-2 w-2 rounded-full bg-neon-green" />
+            Critical systems intelligence with governed protection
           </div>
-          <h3 class="text-lg font-bold text-white mb-2">The Legacy Crisis</h3>
-          <p class="text-sm text-gray-400 mb-3">75% of enterprise systems run on undocumented proprietary protocols. Manual reverse engineering costs $2-10M per protocol and takes 6-12 months.</p>
-          <div class="text-sm text-quantum-400 font-medium">QBitel: 2-4 hours, $200K &rarr; 95% savings</div>
+
+          <h1 class="mt-6 max-w-4xl text-4xl font-bold leading-tight text-white sm:text-5xl xl:text-6xl">
+            Turn unknown critical systems
+            <span class="gradient-text"> into governed, modern, quantum-safe infrastructure.</span>
+          </h1>
+
+          <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+            QBITEL helps enterprises discover, understand, modernize, protect, and prove control
+            over systems they cannot easily replace: BPO call centers, IoT fleets, defense
+            networks, banking mainframes, telecom cores, healthcare devices, and industrial
+            infrastructure.
+          </p>
+
+          <div class="mt-8 flex flex-wrap gap-4">
+            <a href={url('/products')} class="btn-primary text-base">
+              Explore the platform
+            </a>
+            <a href={url('/pqc-audit')} class="btn-secondary text-base">
+              Review PQC implementation
+            </a>
+            <a href={url('/roadmap')} class="btn-ghost text-base">
+              View roadmap
+            </a>
+          </div>
+
+          <div class="mt-8 flex flex-wrap gap-3">
+            <span class="badge">Discover</span>
+            <span class="badge">Understand</span>
+            <span class="badge">Modernize</span>
+            <span class="badge">Protect</span>
+            <span class="badge">Prove</span>
+          </div>
         </div>
 
-        <!-- Problem 2: Quantum Threat -->
-        <div class="card p-6">
-          <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-            </svg>
+        <div class="card overflow-hidden">
+          <div class="border-b border-surface-600/60 p-6">
+            <p class="text-xs font-semibold uppercase tracking-[0.32em] text-neon-cyan/80">
+              What the workflow produces
+            </p>
+            <h2 class="mt-3 text-2xl font-bold text-white">
+              One operating sequence instead of disconnected feature claims.
+            </h2>
           </div>
-          <h3 class="text-lg font-bold text-white mb-2">The Quantum Threat</h3>
-          <p class="text-sm text-gray-400 mb-3">Nation-states are harvesting encrypted data today to decrypt with quantum computers tomorrow. Classical cryptography has an expiration date.</p>
-          <div class="text-sm text-quantum-400 font-medium">QBitel: NIST Level 5 PQC at &lt;1ms overhead</div>
-        </div>
 
-        <!-- Problem 3: Speed Gap -->
-        <div class="card p-6">
-          <div class="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 class="text-lg font-bold text-white mb-2">The Speed Gap</h3>
-          <p class="text-sm text-gray-400 mb-3">Manual SOC response averages 65 minutes. Attackers compromise systems in seconds. Human-speed security can't defend against machine-speed threats.</p>
-          <div class="text-sm text-quantum-400 font-medium">QBitel: &lt;1s response, 78% autonomous</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- How It Works -->
-  <section class="py-16 lg:py-24 border-b border-surface-600/50">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="section-heading">
-          How <span class="gradient-text">QBITEL Bridge</span> Works
-        </h2>
-        <p class="section-subheading mx-auto">
-          Five automated phases take you from undocumented legacy protocols to quantum-safe, compliant, autonomously-operated systems.
-        </p>
-      </div>
-
-      <div class="grid md:grid-cols-5 gap-4">
-        {howItWorks.map((item, i) => (
-          <div class="relative group">
-            <div class="card p-5 h-full text-center">
-              <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-quantum-500 to-neon-cyan text-white font-bold text-sm mb-3">
-                {item.step}
+          <div class="grid gap-4 p-6">
+            {productModules.map((module, index) => (
+              <div class="rounded-3xl border border-surface-600/70 bg-surface-900/70 p-5">
+                <div class="flex items-center justify-between">
+                  <div class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                    0{index + 1} · {module.eyebrow}
+                  </div>
+                  <span class={`inline-flex rounded-full bg-gradient-to-r px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white ${module.color}`}>
+                    {module.label}
+                  </span>
+                </div>
+                <h3 class="mt-3 text-lg font-semibold text-white">{module.headline}</h3>
+                <p class="mt-2 text-sm leading-6 text-slate-300">{module.summary}</p>
               </div>
-              <h3 class="text-lg font-bold text-white mb-2">{item.title}</h3>
-              <p class="text-sm text-gray-400">{item.description}</p>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-12 grid gap-4 md:grid-cols-4">
+        {signalMetrics.map((metric) => (
+          <div class="card p-5">
+            <div class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+              {metric.label}
             </div>
-            {i < howItWorks.length - 1 && (
-              <div class="hidden md:block absolute top-1/2 -right-2 w-4 text-surface-600 z-10">
-                <svg viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" fill="none" />
-                </svg>
+            <div class="mt-3 text-2xl font-bold text-white">{metric.value}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="border-b border-surface-600/50 py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h2 class="section-heading">
+          One platform. <span class="gradient-text">Vertical solution packs.</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          QBITEL stays unified at the platform layer while each industry gets protocols,
+          datasets, compliance mappings, risk models, and deployment playbooks tailored to its
+          operational reality.
+        </p>
+      </div>
+
+      <div class="mt-12 grid gap-6 md:grid-cols-3">
+        {challengeCards.map((card) => (
+          <div class="card p-6">
+            <h3 class="text-xl font-semibold text-white">{card.title}</h3>
+            <p class="mt-4 text-sm leading-7 text-slate-300">{card.description}</p>
+            <div class="mt-5 rounded-2xl border border-neon-cyan/20 bg-neon-cyan/10 p-4 text-sm leading-6 text-neon-cyan">
+              {card.signal}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="border-b border-surface-600/50 py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-10 text-center">
+        <h2 class="section-heading">
+          Interactive <span class="gradient-text">Platform Explorer</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Explore the five-module workflow and switch between vertical messages without leaving
+          the page.
+        </p>
+      </div>
+
+      <PlatformExplorer client:load />
+    </div>
+  </section>
+
+  <section class="border-b border-surface-600/50 py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-10 text-center">
+        <h2 class="section-heading">
+          Bring Your Own <span class="gradient-text">Domain Data</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Visitors should not have to imagine the product. They can paste BPO, IoT, defense,
+          banking, OT, healthcare, telecom, or mobility samples and see an explainable QBITEL
+          workflow in the browser.
+        </p>
+      </div>
+
+      <DomainDemoLab client:load />
+    </div>
+  </section>
+
+  <section class="border-b border-surface-600/50 py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-10 text-center">
+        <h2 class="section-heading">
+          Interactive <span class="gradient-text">Program Outcome Model</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Compare a manual modernization effort against a QBITEL-style delivery motion using your
+          own ranges.
+        </p>
+      </div>
+
+      <OutcomeCalculator client:load />
+    </div>
+  </section>
+
+  <section class="border-b border-surface-600/50 py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+        <div>
+          <h2 class="section-heading">
+            Every delivery ends with an <span class="gradient-text">evidence pack</span>
+          </h2>
+          <p class="text-lg leading-8 text-slate-300">
+            QBITEL should not stop at discovery or code generation. The differentiator is the full
+            record of what changed, why it changed, how it was validated, and which controls govern
+            it in production.
+          </p>
+
+          <div class="mt-8 grid gap-3">
+            {proofArtifacts.map((artifact) => (
+              <div class="rounded-2xl border border-surface-600/70 bg-surface-800/80 p-4 text-sm text-slate-200">
+                {artifact}
               </div>
-            )}
+            ))}
           </div>
-        ))}
+        </div>
+
+        <div class="card p-6">
+          <div class="text-xs font-semibold uppercase tracking-[0.32em] text-neon-copper/80">
+            Delivery stack
+          </div>
+          <div class="mt-5 grid gap-4">
+            {deliveryStack.map((item) => (
+              <div class="rounded-3xl border border-surface-600/70 bg-surface-900/70 p-5">
+                <h3 class="text-lg font-semibold text-white">{item.label}</h3>
+                <p class="mt-2 text-sm leading-6 text-slate-300">{item.detail}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Features Grid -->
-  <FeatureGrid />
-
-  <!-- Performance Benchmarks -->
-  <section class="py-16 lg:py-24 border-t border-surface-600/50">
+  <section class="border-b border-surface-600/50 py-16 lg:py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="section-heading">
-          <span class="gradient-text">Performance</span> at Enterprise Scale
-        </h2>
-        <p class="section-subheading mx-auto">
-          Built for production workloads with quantified benchmarks across every layer.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-        {performanceStats.map((stat) => (
-          <div class="card p-5 text-center">
-            <div class="text-2xl md:text-3xl font-bold gradient-text mb-1">{stat.value}</div>
-            <div class="text-sm font-medium text-white">{stat.label}</div>
-            {stat.description && (
-              <div class="text-xs text-gray-500 mt-1">{stat.description}</div>
-            )}
+      <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+        <div>
+          <div class="inline-flex items-center gap-2 rounded-full border border-surface-600/60 bg-surface-800/70 px-4 py-1.5 text-sm text-slate-200">
+            <span class="h-2 w-2 rounded-full bg-neon-copper" />
+            Code-level implementation signal
           </div>
-        ))}
-      </div>
-    </div>
-  </section>
+          <h2 class="mt-6 section-heading">
+            Strong foundations exist.
+            <span class="gradient-text"> Several domain-specific PQC modules still need hardening.</span>
+          </h2>
+          <p class="text-lg leading-8 text-slate-300">
+            The repo already contains credible building blocks, especially in the Rust Falcon
+            engine and the LMS/XMSS stateful signature implementation. But multiple domain modules
+            are still prototype-grade and should not be marketed as production cryptography yet.
+          </p>
 
-  <!-- Architecture Preview -->
-  <section class="py-16 lg:py-24 border-t border-surface-600/50">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="section-heading">
-          <span class="gradient-text">Four-Layer</span> Architecture
-        </h2>
-        <p class="section-subheading mx-auto">
-          Purpose-built with the right language for each layer: Rust for speed, Python for intelligence, Go for orchestration, React for experience.
-        </p>
-      </div>
-
-      <div class="max-w-4xl mx-auto space-y-3">
-        <!-- UI Layer -->
-        <div class="card p-4 flex items-center gap-4 group">
-          <div class="w-12 h-12 rounded-lg bg-[#3178c6]/10 border border-[#3178c6]/30 flex items-center justify-center flex-shrink-0">
-            <span class="text-[#3178c6] font-bold text-sm">TS</span>
+          <div class="mt-8 flex flex-wrap gap-4">
+            <a href={url('/pqc-audit')} class="btn-primary">
+              Open interactive PQC audit
+            </a>
+            <a href={url('/products/post-quantum-crypto')} class="btn-secondary">
+              See PQC product page
+            </a>
           </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <h3 class="text-white font-semibold">UI Console</h3>
-              <span class="text-xs text-gray-500">React + TypeScript + Material UI</span>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-3">
+          {maturitySummary.map((item) => (
+            <div class="card p-6">
+              <div class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                {item.label}
+              </div>
+              <div class="mt-3 text-3xl font-bold text-white">{item.value}</div>
+              <p class="mt-3 text-sm leading-6 text-slate-300">{item.detail}</p>
             </div>
-            <p class="text-sm text-gray-400">Admin dashboard, protocol copilot, marketplace, security operations center</p>
-          </div>
-        </div>
-
-        <!-- Go Layer -->
-        <div class="card p-4 flex items-center gap-4 group">
-          <div class="w-12 h-12 rounded-lg bg-[#00ADD8]/10 border border-[#00ADD8]/30 flex items-center justify-center flex-shrink-0">
-            <span class="text-[#00ADD8] font-bold text-sm">Go</span>
-          </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <h3 class="text-white font-semibold">Control Plane</h3>
-              <span class="text-xs text-gray-500">Gin + OPA + gRPC</span>
-            </div>
-            <p class="text-sm text-gray-400">Policy orchestration, management API, device agents, edge coordination</p>
-          </div>
-        </div>
-
-        <!-- Python Layer -->
-        <div class="card p-4 flex items-center gap-4 group">
-          <div class="w-12 h-12 rounded-lg bg-[#3572A5]/10 border border-[#3572A5]/30 flex items-center justify-center flex-shrink-0">
-            <span class="text-[#3572A5] font-bold text-sm">Py</span>
-          </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <h3 class="text-white font-semibold">AI Engine</h3>
-              <span class="text-xs text-gray-500">PyTorch + FastAPI + Transformers</span>
-            </div>
-            <p class="text-sm text-gray-400">Protocol discovery, LLM/RAG, multi-agent orchestration, compliance automation</p>
-          </div>
-        </div>
-
-        <!-- Rust Layer -->
-        <div class="card p-4 flex items-center gap-4 group">
-          <div class="w-12 h-12 rounded-lg bg-[#dea584]/10 border border-[#dea584]/30 flex items-center justify-center flex-shrink-0">
-            <span class="text-[#dea584] font-bold text-sm">Rs</span>
-          </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <h3 class="text-white font-semibold">Data Plane</h3>
-              <span class="text-xs text-gray-500">Tokio + liboqs + oqs-rs</span>
-            </div>
-            <p class="text-sm text-gray-400">PQC-TLS termination, wire-speed encryption, high-performance protocol parsing</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="text-center mt-8">
-        <a href={url('/docs/architecture/overview')} class="btn-secondary">
-          Explore Architecture
-          <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Industries -->
-  <section class="py-16 lg:py-24 border-t border-surface-600/50">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="section-heading">
-          Built For <span class="gradient-text">Critical Industries</span>
-        </h2>
-        <p class="section-subheading mx-auto">
-          Domain-specific PQC profiles, protocol libraries, and compliance frameworks tailored to your industry's requirements and constraints.
-        </p>
-      </div>
-
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {industries.map((industry) => (
-          <IndustryCard
-            title={industry.title}
-            description={industry.description}
-            protocols={industry.protocols}
-            href={industry.href}
-            icon={industry.icon}
-            color={industry.color}
-          />
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- Tech Stack -->
-  <TechStackBadge />
-
-  <!-- Resources Highlight -->
-  <section class="py-16 lg:py-20 border-t border-surface-600/50">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-10">
-        <h2 class="section-heading">
-          Explore <span class="gradient-text">Resources</span>
-        </h2>
-        <p class="text-gray-400 max-w-2xl mx-auto">
-          Infographics, audio walkthroughs, and whitepapers on quantum-safe legacy modernization.
-        </p>
-      </div>
-      <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-        <a href={url('/resources')} class="card p-6 text-center hover:border-primary-500/50 transition-all duration-300">
-          <p class="text-3xl font-bold text-primary-400 mb-1">8</p>
-          <p class="text-white font-medium text-sm mb-1">Industry Infographics</p>
-          <p class="text-gray-500 text-xs">Banking, defense, telecom, insurance & more</p>
-        </a>
-        <a href={url('/resources')} class="card p-6 text-center hover:border-primary-500/50 transition-all duration-300">
-          <p class="text-3xl font-bold text-primary-400 mb-1">9</p>
-          <p class="text-white font-medium text-sm mb-1">Audio Walkthroughs</p>
-          <p class="text-gray-500 text-xs">Deep dives on quantum-proofing legacy systems</p>
-        </a>
-        <a href={url('/resources')} class="card p-6 text-center hover:border-primary-500/50 transition-all duration-300">
-          <p class="text-3xl font-bold text-primary-400 mb-1">2</p>
-          <p class="text-white font-medium text-sm mb-1">Whitepapers</p>
-          <p class="text-gray-500 text-xs">Technical strategy documents (PDF)</p>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Enterprise Open Source Banner -->
-  <section class="py-16 lg:py-20 border-t border-surface-600/50">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="card p-8 lg:p-12 text-center bg-gradient-to-b from-surface-800 to-surface-900">
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neon-green/10 border border-neon-green/20 mb-6">
-          <span class="flex h-2 w-2 rounded-full bg-neon-green" />
-          <span class="text-sm text-neon-green font-medium">Enterprise-Grade Open Source</span>
-        </div>
-        <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">
-          Enterprise Security, Fully Transparent
-        </h2>
-        <p class="text-gray-400 max-w-2xl mx-auto mb-3">
-          Every line of cryptographic code is open for audit. No black boxes. No vendor lock-in.
-          No open-core. No feature gating. No bait-and-switch.
-        </p>
-        <p class="text-sm text-gray-500 max-w-xl mx-auto mb-6">
-          100% open source under Apache 2.0. Community-driven development. Enterprise support available for production deployments.
-        </p>
-        <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-400 mb-8">
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            Apache 2.0 License
-          </div>
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            Full Source Available
-          </div>
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            No Vendor Lock-in
-          </div>
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            Production-Ready
-          </div>
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            Air-Gap Deployable
-          </div>
-        </div>
-
-        <div class="flex flex-wrap justify-center gap-4">
-          <a href="https://github.com/yazhsab/qbitel-bridge" target="_blank" rel="noopener noreferrer" class="btn-primary text-sm">
-            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-            </svg>
-            View on GitHub
-          </a>
-          <a href={url('/enterprise')} class="btn-secondary text-sm">
-            Enterprise Support
-          </a>
+          ))}
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Final CTA -->
-  <CTABanner />
+  <CTABanner
+    title="Start with protocol inventory, then expand into modernization and PQC rollout"
+    description="QBITEL is strongest when it lands as a concrete legacy modernization program with governed protection and evidence, not as a generic bundle of AI security claims."
+  />
 </LandingLayout>

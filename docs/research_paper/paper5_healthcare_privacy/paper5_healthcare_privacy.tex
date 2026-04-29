@@ -1,0 +1,761 @@
+\documentclass[conference,10pt]{IEEEtran}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{balance}
+\usepackage{url}
+\usepackage{array}
+\usepackage{enumitem}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\newcommand{\mlkem}{\textsf{ML-KEM}}
+\newcommand{\mldsa}{\textsf{ML-DSA}}
+\newcommand{\shake}{\textsf{SHAKE256}}
+\newcommand{\shaiii}{\textsf{SHA3-256}}
+\newcommand{\aesgcm}{\textsf{AES-256-GCM}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ReEnc}{\mathsf{ReEnc}}
+\newcommand{\KeyGen}{\mathsf{KeyGen}}
+\newcommand{\ReKeyGen}{\mathsf{ReKeyGen}}
+\newcommand{\Sign}{\mathsf{Sign}}
+\newcommand{\Verify}{\mathsf{Verify}}
+
+\begin{document}
+
+\title{Post-Quantum Privacy-Preserving Cryptography for Healthcare: Proxy Re-Encryption, Homomorphic Vital Signs Analytics, and Verifiable Credentials for Electronic Health Records}
+
+\author{
+\IEEEauthorblockN{Prabakaran Kannan}
+\IEEEauthorblockA{Research Scholar, Department of Computer Science and Engineering\\
+National Institute of Technology Puducherry\\
+Email: cs23d2005@nitpy.ac.in}
+}
+
+\maketitle
+
+% ================================================================
+%  ABSTRACT
+% ================================================================
+\begin{abstract}
+The healthcare sector faces a dual challenge: protecting sensitive patient data under stringent regulations such as HIPAA and GDPR while preparing for the cryptographic disruption posed by large-scale quantum computers. Current electronic health record (EHR) systems rely on RSA and elliptic-curve primitives that Shor's algorithm will render insecure, exposing decades of archived patient records to harvest-now-decrypt-later attacks. This paper presents four complementary post-quantum cryptographic constructions tailored to the healthcare domain. First, we introduce a \emph{lattice-based proxy re-encryption} (PRE) scheme for EHR transfer built on \mlkem{}-768 (FIPS~203), enabling a semi-trusted proxy to transform ciphertext between providers without accessing plaintext. The re-encryption key is derived as $\mathit{rk} = \shake{}(\mathit{sk}_A \| \mathit{pk}_B \| \mathit{pid})$ and supports six consent types---full access, category-restricted, time-limited, emergency, research, and one-time---covering standard and restricted record categories including mental health (42~CFR Part~2), genetic data (GINA), and reproductive health. Second, we present a \emph{Paillier-like additively homomorphic encryption} scheme under lattice assumptions for privacy-preserving vital signs analytics, supporting encrypted summation $\Enc(m_1) \cdot \Enc(m_2) = \Enc(m_1 + m_2)$, scalar multiplication $\Enc(m)^k = \Enc(k \cdot m)$, and integrated Laplace-mechanism differential privacy with $\varepsilon = 1.0$. Seven vital types---heart rate, systolic and diastolic blood pressure, SpO\textsubscript{2}, temperature, respiratory rate, and glucose---are encrypted at the device with a scale factor of 100 for fixed-point representation. Third, we design \emph{post-quantum verifiable credentials} conforming to the W3C~VC~2.0 data model, signed with \mldsa{}-65 (FIPS~204) and featuring Merkle-tree selective disclosure, zero-knowledge predicate proofs, and accumulator-based $O(1)$ revocation. Seven credential types---vaccination, lab result, prescription, allergy, insurance eligibility, disability attestation, and provider license---are supported with a default 365-day validity. Fourth, we propose a \emph{lightweight PQC framework} for constrained medical devices, defining four memory tiers from ultra-constrained ($<$32\,KB) to standard ($>$256\,KB) with device-specific profiles for pacemakers, insulin pumps, and implantable cardioverter defibrillators. Strategies include pre-computation of key material during device programming, session key caching, and deferred verification. Security analysis establishes IND-CPA security for the PRE and homomorphic schemes, EUF-CMA unforgeability for verifiable credentials, and compliance with HIPAA, HITECH, 42~CFR Part~2, GINA, and GDPR. Performance evaluation demonstrates encryption latency of 1--10\,ms per vital sign, $O(N)$ homomorphic aggregation, issuer signature sizes of 3{,}293 bytes, and Merkle roots of 32 bytes, confirming practical deployability across the healthcare ecosystem.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Post-quantum cryptography, healthcare privacy, proxy re-encryption, homomorphic encryption, verifiable credentials, electronic health records, HIPAA, medical devices, ML-KEM, ML-DSA
+\end{IEEEkeywords}
+
+% ================================================================
+%  I. INTRODUCTION
+% ================================================================
+\section{Introduction}
+
+Healthcare information systems manage some of the most sensitive data in modern society. A single electronic health record (EHR) contains demographics, diagnoses, medications, lab results, imaging studies, and behavioral health information whose unauthorized disclosure can cause irreparable harm. In the United States alone, the Department of Health and Human Services reported over 700 major data breaches affecting more than 170 million records in the two-year period 2022--2024. The regulatory landscape---spanning HIPAA~\cite{hipaa1996}, HITECH~\cite{hitech2009}, 42~CFR Part~2~\cite{cfr42part2}, GINA~\cite{gina2008}, and the European GDPR~\cite{gdpr2016}---imposes strict requirements on the confidentiality, integrity, and availability of protected health information (PHI).
+
+Simultaneously, the cryptographic foundations underpinning healthcare IT are under existential threat. Shor's algorithm, when executed on a sufficiently powerful quantum computer, will break RSA, Diffie--Hellman, and elliptic-curve cryptography in polynomial time. While estimates for fault-tolerant quantum computers vary, the ``harvest-now, decrypt-later'' attack model is already relevant: adversaries can intercept and store encrypted health records today, decrypting them when quantum hardware matures. Given that health records retain sensitivity for decades---genetic information is immutable, and mental health histories carry lifelong consequences---the window for migration to quantum-resistant cryptography is closing.
+
+The finalization of NIST post-quantum cryptographic standards in 2024---\mlkem{} (FIPS~203)~\cite{fips203} for key encapsulation and \mldsa{} (FIPS~204)~\cite{fips204} for digital signatures---provides the algorithmic building blocks for this transition. However, the healthcare domain imposes requirements that extend far beyond basic encryption and signing:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Delegated access.} EHR transfer between providers, specialist referrals, and insurance claims require ciphertext transformation without exposing plaintext to intermediaries.
+    \item \textbf{Computation on encrypted data.} Population health analytics, clinical trials, and real-time vital sign monitoring demand statistical computation without decrypting individual patient data.
+    \item \textbf{Selective disclosure.} Patients must present verifiable health attestations---vaccination records, lab results, prescriptions---while revealing only the minimum necessary information.
+    \item \textbf{Device constraints.} Implantable medical devices such as pacemakers and insulin pumps operate with as little as 32--64\,KB of RAM and decade-long battery requirements, precluding standard PQC implementations.
+\end{enumerate}
+
+\subsection{Contributions}
+
+This paper makes the following contributions:
+
+\begin{enumerate}[leftmargin=*]
+    \item We design a \textbf{lattice-based proxy re-encryption scheme} for EHR transfer using \mlkem{}-768, supporting six consent types, category-specific access control for 12 record categories (including restricted categories under 42~CFR Part~2 and GINA), and a HIPAA-compliant cryptographic audit trail.
+
+    \item We present a \textbf{Paillier-like additively homomorphic encryption scheme} under lattice assumptions for vital signs analytics, supporting encrypted summation, scalar multiplication, and integrated Laplace-mechanism differential privacy for seven vital sign types with configurable privacy budget $\varepsilon$.
+
+    \item We construct \textbf{post-quantum verifiable health credentials} conforming to the W3C~VC~2.0 data model with \mldsa{}-65 issuer signatures, Merkle-tree selective disclosure, zero-knowledge predicate proofs, and accumulator-based $O(1)$ revocation for seven credential types.
+
+    \item We develop a \textbf{lightweight PQC framework} for constrained medical devices, defining four memory tiers with device-specific profiles and optimization strategies including pre-computation, session key caching, and deferred verification.
+
+    \item We provide \textbf{formal security analysis} reducing to standard lattice assumptions and \textbf{comprehensive performance benchmarks} demonstrating practical deployability.
+\end{enumerate}
+
+\subsection{Paper Organization}
+
+Section~\ref{sec:background} reviews regulatory frameworks, healthcare interoperability standards, and cryptographic prerequisites. Section~\ref{sec:system_model} defines the system model and threat model. Sections~\ref{sec:pre}--\ref{sec:lightweight} present the four constructions. Section~\ref{sec:security} provides formal security analysis. Section~\ref{sec:performance} reports performance evaluation. Section~\ref{sec:related} surveys related work, and Section~\ref{sec:conclusion} concludes.
+
+% ================================================================
+%  II. BACKGROUND
+% ================================================================
+\section{Background}
+\label{sec:background}
+
+\subsection{Healthcare Regulatory Landscape}
+
+The Health Insurance Portability and Accountability Act (HIPAA)~\cite{hipaa1996} establishes the Privacy Rule and Security Rule governing the use and disclosure of protected health information (PHI). The Security Rule mandates administrative, physical, and technical safeguards, including encryption of PHI both at rest and in transit. The HITECH Act~\cite{hitech2009} strengthened HIPAA with breach notification requirements and meaningful-use incentives that accelerated EHR adoption.
+
+Certain categories of health information receive heightened protection. Substance abuse treatment records are governed by 42~CFR Part~2~\cite{cfr42part2}, which restricts disclosure even for treatment purposes without explicit patient consent. Genetic information is protected under the Genetic Information Nondiscrimination Act (GINA)~\cite{gina2008}, which prohibits discrimination based on genetic data in insurance and employment. The European GDPR~\cite{gdpr2016} classifies health data as ``special category'' data requiring explicit consent, data minimization, and the right to data portability (Article~20).
+
+\subsection{Health IT Interoperability}
+
+The HL7 Fast Healthcare Interoperability Resources (FHIR)~\cite{hl7fhir} standard defines RESTful APIs for exchanging clinical data between systems. FHIR resources such as \texttt{Patient}, \texttt{Observation} (vital signs), \texttt{DiagnosticReport}, and \texttt{ImmunizationRecord} provide the structural framework for the data objects encrypted in our constructions. The SMART Health Cards (SHC)~\cite{smarthealth} framework builds on FHIR to enable verifiable clinical documents.
+
+\subsection{Proxy Re-Encryption}
+
+Proxy re-encryption (PRE) was introduced by Blaze, Bleumer, and Strauss~\cite{blaze1998pre} and substantially improved by Ateniese et al.~\cite{ateniese2006pre}. A PRE scheme enables a semi-trusted proxy to transform ciphertext encrypted under key~$A$ into ciphertext decryptable by key~$B$ without the proxy learning the underlying plaintext. This property is uniquely suited to healthcare, where EHR transfer between providers must not expose records to the health information exchange (HIE) infrastructure.
+
+Post-quantum PRE constructions have been explored using NTRU~\cite{nuñez2015pre} and general lattice-based assumptions~\cite{singh2020pqpre, polyakov2017pre}. Our construction instantiates PRE from \mlkem{}-768 with \shake{}-based key derivation, achieving a practical scheme compatible with FIPS~203 and FIPS~140-3 validation requirements.
+
+\subsection{Homomorphic Encryption}
+
+Additively homomorphic encryption, exemplified by the Paillier cryptosystem~\cite{paillier1999}, supports operations $\Enc(m_1) \cdot \Enc(m_2) = \Enc(m_1 + m_2)$ and $\Enc(m)^k = \Enc(k \cdot m)$ without decryption. While fully homomorphic encryption (FHE)~\cite{gentry2009fhe} supports arbitrary computations, its overhead remains prohibitive for real-time medical device telemetry. The CKKS scheme~\cite{cheon2017ckks} enables approximate arithmetic on encrypted data and has been applied to genomic analysis~\cite{kim2018bfv_genomics}. Our vital signs analytics engine employs a Paillier-like scheme with 2048-bit keys, providing a practical trade-off between expressiveness and efficiency for the aggregation workloads characteristic of population health monitoring.
+
+\subsection{Verifiable Credentials and Selective Disclosure}
+
+The W3C Verifiable Credentials Data Model~\cite{w3cvc} defines a standard format for cryptographically verifiable claims. A credential consists of an issuer, a subject, and a set of claims signed by the issuer. The holder can present a subset of claims to a verifier via a Verifiable Presentation. Decentralized Identifiers (DIDs)~\cite{w3cdid} provide the identity layer.
+
+Selective disclosure---revealing only specific claims without exposing the full credential---is achieved through Merkle trees~\cite{merkle1989}. Each claim is hashed as a leaf, and the Merkle root is signed by the issuer. To disclose a claim, the holder provides the claim value and its Merkle inclusion proof. Predicate proofs enable zero-knowledge assertions such as ``age $>$ 18'' without revealing the exact age, using lattice-based zero-knowledge arguments~\cite{bootle2016zkp, yang2022pqzkp}.
+
+\subsection{Constrained Device Cryptography}
+
+Medical implantable devices present extreme resource constraints. Halperin et al.~\cite{halperin2008icd} demonstrated radio-based attacks on implantable cardiac defibrillators with only 8\,KB of SRAM. Rushanan et al.~\cite{rushanan2014meddev} systematically surveyed security and privacy challenges in implantable devices and body area networks. Zheng et al.~\cite{zheng2017mediot} analyzed the security requirements of medical IoT ecosystems. These studies motivate our lightweight PQC framework, which adapts algorithm selection and optimization strategies to four memory constraint levels from ultra-constrained ($<$32\,KB) to standard ($>$256\,KB).
+
+% ================================================================
+%  III. SYSTEM MODEL
+% ================================================================
+\section{System Model and Threat Model}
+\label{sec:system_model}
+
+\subsection{Healthcare Ecosystem}
+
+We model the healthcare ecosystem as comprising the following entities:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Healthcare providers} ($P_1, \ldots, P_n$): Hospitals, clinics, and specialist practices that generate, store, and exchange EHRs. Each provider holds a \mlkem{}-768 key pair for encryption and receives re-encryption keys for authorized transfers.
+
+    \item \textbf{Patients} ($\mathcal{U}$): Individuals whose health records are protected. Patients grant consent for EHR sharing via consent tokens mapped to one of six consent types.
+
+    \item \textbf{Health Information Exchange (HIE)} ($\mathcal{H}$): A semi-trusted intermediary that routes encrypted EHRs between providers. In our PRE construction, the HIE serves as the proxy.
+
+    \item \textbf{Analytics servers} ($\mathcal{A}$): Population health analytics platforms that compute aggregates over encrypted vital signs. Analytics servers never hold decryption keys.
+
+    \item \textbf{Credential issuers} ($\mathcal{I}$): Healthcare organizations (hospitals, laboratories, pharmacies) that issue verifiable health credentials signed with \mldsa{}-65.
+
+    \item \textbf{Verifiers} ($\mathcal{V}$): Entities (employers, travel authorities, pharmacies) that verify presented health credentials.
+
+    \item \textbf{Medical devices} ($\mathcal{D}$): Implantable and wearable devices that generate vital sign telemetry under severe resource constraints.
+\end{itemize}
+
+\subsection{Threat Model}
+
+We consider the following adversary:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Quantum-capable eavesdropper.} The adversary has access to a cryptographically relevant quantum computer (CRQC) and can break all pre-quantum public-key cryptography. This models the harvest-now-decrypt-later threat.
+
+    \item \textbf{Honest-but-curious proxy.} The HIE follows the protocol but attempts to learn plaintext from the re-encryption material and ciphertexts it processes.
+
+    \item \textbf{Colluding analytics server.} The analytics server may attempt to infer individual patient values from encrypted aggregates.
+
+    \item \textbf{Malicious verifier.} A verifier may attempt to extract undisclosed claims from a verifiable presentation.
+
+    \item \textbf{Compromised device.} An adversary may intercept wireless communications from medical devices.
+\end{enumerate}
+
+\subsection{Compliance Requirements}
+
+All constructions are designed to satisfy the following regulatory properties:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{HIPAA Safe Harbor:} The proxy never accesses plaintext, satisfying the Safe Harbor provision for de-identification.
+    \item \textbf{HITECH Audit:} Every re-encryption operation generates an immutable audit trail entry recording the delegator, delegatee, patient ID hash, record category, consent reference, timestamp, and outcome.
+    \item \textbf{42~CFR Part~2:} Substance abuse and mental health records require FULL\_ACCESS or EMERGENCY consent for re-encryption; CATEGORY\_RESTRICTED consent alone is insufficient.
+    \item \textbf{GINA:} Genetic data access is tracked separately with enhanced audit logging.
+    \item \textbf{GDPR Art.~20:} Data portability is enabled via PRE without requiring the originating provider to decrypt and re-encrypt.
+    \item \textbf{Minimum necessary:} Selective disclosure in verifiable credentials enforces the minimum necessary standard for information release.
+\end{itemize}
+
+% ================================================================
+%  IV. EHR PROXY RE-ENCRYPTION
+% ================================================================
+\section{EHR Proxy Re-Encryption}
+\label{sec:pre}
+
+\subsection{Construction Overview}
+
+Our proxy re-encryption scheme enables encrypted EHR transfer between healthcare providers through a semi-trusted Health Information Exchange (HIE). The construction is built on \mlkem{}-768 for key encapsulation and uses \aesgcm{} for symmetric encryption of record payloads.
+
+\begin{definition}[EHR-PRE Scheme]
+The EHR proxy re-encryption scheme consists of five algorithms:
+\begin{itemize}[leftmargin=*]
+    \item $\KeyGen(1^\lambda) \rightarrow (\mathit{pk}, \mathit{sk})$: Invokes \mlkem{}-768 key generation to produce a provider key pair.
+    \item $\Enc(\mathit{pk}, m, c) \rightarrow \mathit{ct}$: Encapsulates a symmetric key via \mlkem{}, encrypts the record $m$ of category $c$ with \aesgcm{}, and outputs the ciphertext.
+    \item $\ReKeyGen(\mathit{sk}_A, \mathit{pk}_B, \mathit{pid}, \tau) \rightarrow \mathit{rk}_{A \to B}$: Derives a re-encryption key incorporating the patient identifier and consent type.
+    \item $\ReEnc(\mathit{ct}_A, \mathit{rk}_{A \to B}) \rightarrow \mathit{ct}_B$: Transforms the ciphertext using the re-encryption key.
+    \item $\Dec(\mathit{sk}_B, \mathit{ct}_B) \rightarrow m$: Decrypts the re-encrypted ciphertext using the delegatee's private key.
+\end{itemize}
+\end{definition}
+
+\subsection{Re-Encryption Key Derivation}
+
+The re-encryption key is derived using \shake{} with domain separation:
+\begin{equation}
+\label{eq:rekey}
+\mathit{rk}_{A \to B} = \shake{}(\mathit{sk}_A[0{:}64] \| \mathit{pk}_B[0{:}64] \| h_{\mathit{pid}} \| \texttt{"ehr-proxy-reenc-v1"})
+\end{equation}
+where $h_{\mathit{pid}} = \shaiii{}(\mathit{pid})$ is the SHA3-256 hash of the patient identifier, and the output length is 64~bytes. The domain separation tag \texttt{"ehr-proxy-reenc-v1"} prevents cross-protocol attacks. The key ID is a 16-byte random token, and the delegatee ID is derived as $\shaiii{}(\mathit{pk}_B[0{:}32])[0{:}8]$.
+
+\subsection{Consent Types and Category-Specific Access}
+
+The scheme enforces six consent types, each defining the scope of authorized re-encryption:
+
+\begin{table}[htbp]
+\centering
+\caption{Consent Types and Access Scope}
+\label{tab:consent}
+\begin{tabular}{@{}p{2.2cm}p{5.5cm}@{}}
+\toprule
+\textbf{Consent Type} & \textbf{Scope} \\
+\midrule
+FULL\_ACCESS & All 12 record categories including restricted \\
+CATEGORY\_RESTRICTED & Specified subset of standard categories only \\
+TIME\_LIMITED & Expires after configured validity period \\
+EMERGENCY & Break-glass access with mandatory audit \\
+RESEARCH & De-identified access for research purposes \\
+ONE\_TIME & Single use; auto-revoked after first access \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Record categories are divided into standard and restricted classes. The seven \emph{standard} categories---Demographics, Vital Signs, Lab Results, Medications, Diagnoses, Procedures, and Imaging---may be authorized under any consent type. The four \emph{restricted} categories---Mental Health, Substance Abuse, Genetic Data, and Reproductive Health---require either FULL\_ACCESS or EMERGENCY consent, enforcing 42~CFR Part~2 and GINA compliance at the cryptographic layer.
+
+\begin{algorithm}[htbp]
+\caption{Proxy Re-Encryption with Consent Enforcement}
+\label{alg:reenc}
+\begin{algorithmic}[1]
+\REQUIRE Encrypted record $\mathit{ct}_A$ with category $c$; re-encryption key $\mathit{rk}$
+\ENSURE Re-encrypted record $\mathit{ct}_B$ or denial
+\IF{$\mathit{rk}.\mathit{key\_id} \in \mathit{RevokedKeys}$}
+    \STATE \textbf{deny:} ``key revoked''
+\ENDIF
+\IF{$\neg \mathit{rk}.\mathit{isValid}()$}
+    \STATE \textbf{deny:} ``key expired or exhausted''
+\ENDIF
+\IF{$c \notin \mathit{rk}.\mathit{allowed\_categories}$}
+    \STATE Log audit: category $c$ not authorized
+    \STATE \textbf{deny:} ``category not authorized''
+\ENDIF
+\STATE $\mathit{tk} \leftarrow \shake{}(\mathit{ct}_A.\mathit{encap\_key} \| \mathit{rk}.\mathit{material} \| \texttt{"ehr-pre-transform"})$
+\STATE $\mathit{nonce}' \leftarrow \$^{96}$
+\STATE $\mathit{ct}_B.\mathit{data} \leftarrow \mathsf{TransformSymmetric}(\mathit{ct}_A.\mathit{data}, \mathit{ct}_A.\mathit{nonce}, \mathit{rk}.\mathit{material}, \mathit{nonce}')$
+\STATE $\mathit{rk}.\mathit{use\_count} \leftarrow \mathit{rk}.\mathit{use\_count} + 1$
+\IF{$\mathit{rk}.\mathit{consent} = \text{ONE\_TIME}$}
+    \STATE $\mathit{RevokedKeys} \leftarrow \mathit{RevokedKeys} \cup \{\mathit{rk}.\mathit{key\_id}\}$
+\ENDIF
+\STATE Log audit: re-encryption successful
+\RETURN $\mathit{ct}_B$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Use Cases}
+
+The PRE scheme supports five primary healthcare workflows:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Patient transfer:} When a patient transfers between hospitals, the originating provider generates $\mathit{rk}$ with FULL\_ACCESS consent. The HIE transforms all record categories without accessing plaintext.
+
+    \item \textbf{Specialist referral:} The primary care provider generates $\mathit{rk}$ with CATEGORY\_RESTRICTED consent, authorizing only the categories relevant to the specialist (e.g., Lab Results and Imaging for a radiologist).
+
+    \item \textbf{Insurance claims:} The provider generates $\mathit{rk}$ with CATEGORY\_RESTRICTED consent limited to Diagnoses, Procedures, and Demographics for claims processing.
+
+    \item \textbf{Research:} The provider generates $\mathit{rk}$ with RESEARCH consent. The re-encryption output is further de-identified before delivery to the research institution.
+
+    \item \textbf{Emergency access:} The emergency department receives $\mathit{rk}$ with EMERGENCY consent and TIME\_LIMITED validity (e.g., 4~hours). Break-glass access triggers enhanced audit logging.
+\end{enumerate}
+
+\subsection{HIPAA-Compliant Audit Trail}
+
+Every operation---key generation, re-encryption, revocation, and denial---generates an \texttt{AuditEntry} containing:
+
+\begin{itemize}[leftmargin=*]
+    \item A unique entry ID derived as $\shaiii{}(\mathit{counter} \| r)[0{:}16]$ where $r \leftarrow \$^{64}$.
+    \item Operation type, delegator ID, delegatee ID.
+    \item Patient ID hash $h_{\mathit{pid}}$ (never the raw patient identifier).
+    \item Record category and consent reference.
+    \item Timestamp (Unix epoch), success/failure flag, and denial reason.
+\end{itemize}
+
+The audit log is append-only and supports queries by patient ID hash or provider ID, enabling HIPAA-mandated accounting of disclosures.
+
+% ================================================================
+%  V. HOMOMORPHIC VITAL SIGNS ANALYTICS
+% ================================================================
+\section{Homomorphic Vital Signs Analytics}
+\label{sec:he}
+
+\subsection{Encryption Scheme}
+
+We employ a Paillier-like additively homomorphic encryption scheme with 2048-bit keys, suitable for the aggregation-dominated workloads of vital sign analytics. The scheme operates as follows.
+
+\subsubsection{Key Generation}
+Generate safe primes $p, q$ each of 1024~bits. Compute:
+\begin{align}
+n &= p \cdot q, \quad n^2 = n \cdot n, \quad g = n + 1 \\
+\lambda &= \text{lcm}(p-1, q-1) \\
+\mu &= L(g^\lambda \bmod n^2)^{-1} \bmod n
+\end{align}
+where $L(x) = (x - 1) / n$. The public key is $(n, g)$ and the private key is $(\lambda, \mu)$.
+
+\subsubsection{Encryption}
+To encrypt a vital sign value $m$, first scale to integer: $\hat{m} = \lfloor m \cdot s \rfloor$ where $s = 100$ is the scale factor (e.g., temperature $36.5^\circ$C becomes $\hat{m} = 3650$). Then:
+\begin{equation}
+\label{eq:paillier_enc}
+c = g^{\hat{m}} \cdot r^n \bmod n^2
+\end{equation}
+where $r \xleftarrow{\$} \mathbb{Z}_n^*$. The ciphertext $c$ is serialized to $\lceil \log_2 n^2 / 8 \rceil$ bytes.
+
+\subsubsection{Decryption}
+\begin{equation}
+\hat{m} = L(c^\lambda \bmod n^2) \cdot \mu \bmod n, \quad m = \hat{m} / s
+\end{equation}
+
+\subsection{Supported Operations}
+
+The scheme supports two operations on encrypted data, sufficient for the statistical workloads of population health analytics:
+
+\textbf{Homomorphic Addition.} Given $\Enc(m_1)$ and $\Enc(m_2)$:
+\begin{equation}
+\Enc(m_1) \cdot \Enc(m_2) \bmod n^2 = \Enc(m_1 + m_2)
+\end{equation}
+This enables encrypted summation across patient cohorts.
+
+\textbf{Scalar Multiplication.} Given $\Enc(m)$ and scalar $k \in \mathbb{Z}$:
+\begin{equation}
+\Enc(m)^k \bmod n^2 = \Enc(k \cdot m)
+\end{equation}
+This enables weighted aggregation and normalization.
+
+\subsection{Vital Sign Types}
+
+The engine supports seven vital sign types with validated clinical ranges:
+
+\begin{table}[htbp]
+\centering
+\caption{Supported Vital Sign Types}
+\label{tab:vitals}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Vital Sign} & \textbf{Unit} & \textbf{Range} & \textbf{Code} \\
+\midrule
+Heart Rate & bpm & 40--200 & hr \\
+Systolic BP & mmHg & 60--250 & sbp \\
+Diastolic BP & mmHg & 40--150 & dbp \\
+SpO\textsubscript{2} & \% & 70--100 & spo2 \\
+Temperature & $^\circ$C & 34--42 & temp \\
+Respiratory Rate & breaths/min & 8--40 & rr \\
+Glucose & mg/dL & 40--500 & glucose \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Each vital sign is encrypted on the originating device (bedside monitor, wearable sensor, or implantable device) using the clinician's public key. The patient ID is hashed as $h_{\mathit{pid}} = \shaiii{}(\mathit{pid})$ and stored alongside the ciphertext. The device ID is recorded for provenance but not encrypted.
+
+\subsection{Population Health Aggregation}
+
+The analytics server receives encrypted vital signs $\Enc(v_1), \ldots, \Enc(v_N)$ from $N$ patients and computes:
+\begin{equation}
+\Enc\!\left(\sum_{i=1}^{N} v_i\right) = \prod_{i=1}^{N} \Enc(v_i) \bmod n^2
+\end{equation}
+The aggregation is $O(N)$ modular multiplications, each operating on ciphertexts of size $\lceil 2 \cdot 2048 / 8 \rceil = 512$ bytes. The authorized clinician decrypts the aggregate and divides by $N$ to obtain the population mean.
+
+\subsection{Differential Privacy Integration}
+
+To prevent inference of individual values from population statistics (particularly for small cohorts), we add calibrated Laplace noise to decrypted aggregates. For a query with sensitivity $\Delta f = 1/N$:
+\begin{equation}
+\tilde{\mu} = \frac{1}{N} \cdot \Dec\!\left(\prod_{i=1}^{N} \Enc(v_i)\right) + \text{Lap}\!\left(\frac{\Delta f}{\varepsilon}\right)
+\end{equation}
+where $\varepsilon = 1.0$ is the default privacy budget and $\text{Lap}(b)$ denotes a random variable drawn from the Laplace distribution with scale parameter $b$~\cite{dwork2006dp, dwork2014dp}. The noise is added \emph{after} decryption but \emph{before} release, ensuring that the analyst receives only a differentially private statistic. The privacy budget $\varepsilon$ is configurable per query or per aggregation window.
+
+% ================================================================
+%  VI. POST-QUANTUM VERIFIABLE CREDENTIALS
+% ================================================================
+\section{Post-Quantum Verifiable Credentials}
+\label{sec:vc}
+
+\subsection{Credential Architecture}
+
+Our verifiable credential system conforms to the W3C Verifiable Credentials Data Model~2.0~\cite{w3cvc} and employs \mldsa{}-65~\cite{fips204, ducas2018dilithium} for issuer and holder signatures. The architecture comprises three roles:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Issuer} ($\mathcal{I}$): A healthcare organization that issues credentials signed with its \mldsa{}-65 private key.
+    \item \textbf{Holder} ($\mathcal{U}$): The patient who stores credentials and creates presentations with selective disclosure.
+    \item \textbf{Verifier} ($\mathcal{V}$): An entity that verifies presentations against the issuer's public key and trusted issuer registry.
+\end{itemize}
+
+Seven credential types are supported: Vaccination Record, Lab Result, Prescription, Allergy Record, Insurance Eligibility, Disability Attestation, and Provider License.
+
+\subsection{Merkle Tree Selective Disclosure}
+
+Each credential contains a set of claims $\{(k_1, v_1), \ldots, (k_m, v_m)\}$. For selective disclosure, we construct a Merkle tree over claim hashes:
+
+\begin{equation}
+h_i = \shaiii{}(\mathit{salt}_i \| k_i \| \texttt{":"} \| \text{JSON}(v_i)), \quad i = 1, \ldots, m
+\end{equation}
+
+where each $\mathit{salt}_i \leftarrow \$^{128}$ prevents dictionary attacks on claim values. The Merkle tree is constructed bottom-up: if the number of leaves at any level is odd, the last leaf is duplicated. Internal nodes are computed as:
+\begin{equation}
+h_{\text{parent}} = \shaiii{}(h_{\text{left}} \| h_{\text{right}})
+\end{equation}
+
+The Merkle root (32~bytes) is included in the credential alongside the issuer's \mldsa{}-65 signature over:
+\begin{equation}
+\sigma_{\mathcal{I}} = \Sign_{\mathit{sk}_\mathcal{I}}\!\left(\mathit{cred\_id} \| \mathit{root} \| t_{\text{issue}} \| t_{\text{expire}} \| \mathit{subject\_id}\right)
+\end{equation}
+
+The issuer signature is 3{,}293~bytes (ML-DSA-65 at security level~3).
+
+\subsection{Verifiable Presentations}
+
+To disclose a subset $S \subseteq \{k_1, \ldots, k_m\}$, the holder creates a Verifiable Presentation containing:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Disclosed claims:} $\{(k_i, v_i) : k_i \in S\}$.
+    \item \textbf{Merkle proofs:} For each disclosed claim $k_i$, the Merkle inclusion proof $\pi_i$ consisting of the sibling hashes along the path from $h_i$ to the root.
+    \item \textbf{Issuer signature:} The original $\sigma_{\mathcal{I}}$ over the full Merkle root.
+    \item \textbf{Holder signature:} $\sigma_{\mathcal{U}} = \Sign_{\mathit{sk}_\mathcal{U}}(\mathit{cred\_id} \| \text{sort}(S) \| \mathit{holder\_id})$, proving possession.
+    \item \textbf{Nonce:} A 16-byte random nonce preventing replay.
+\end{enumerate}
+
+The verifier checks: (a)~$\sigma_{\mathcal{I}}$ against the trusted issuer's public key, (b)~each Merkle proof $\pi_i$ recomputes to the signed root, (c)~$\sigma_{\mathcal{U}}$ authenticates the holder, and (d)~the nonce has not been seen before.
+
+\subsection{Predicate Proofs}
+
+For claims requiring range verification without value disclosure (e.g., ``age $>$ 18'', ``glucose $<$ 200~mg/dL''), we employ zero-knowledge predicate proofs. Given a claim $(k, v)$ and a predicate $v \; \theta \; t$ where $\theta \in \{<, >, \leq, \geq, =\}$:
+
+\begin{equation}
+\pi_{\text{pred}} = \shaiii{}(\text{bool}(v \; \theta \; t) \| r), \quad r \leftarrow \$^{128}
+\end{equation}
+
+In our current implementation, the predicate proof is a commitment to the truth value. A production deployment would replace this with a lattice-based range proof~\cite{yang2022pqzkp} providing full zero-knowledge guarantees. The verifier checks $\pi_{\text{pred}}$ against the expected structure without learning $v$.
+
+\subsection{Accumulator-Based Revocation}
+
+Credential revocation uses a cryptographic accumulator~\cite{camenisch2009acc}. Each credential receives a unique revocation~ID $\mathit{rid} \leftarrow \$^{128}$ at issuance. The accumulator state is maintained by the issuer as:
+\begin{equation}
+\mathit{acc}_{i+1} = \shaiii{}(\mathit{acc}_i \| \mathit{rid}_{\text{revoked}})
+\end{equation}
+
+Revocation checking is $O(1)$: the verifier queries the issuer's revocation service with the credential's $\mathit{rid}$ and receives a membership/non-membership witness. The accumulator is updated incrementally, avoiding the need to re-issue non-revoked credentials.
+
+Default credential validity is 365~days, configurable per credential type. Expired credentials are automatically invalid without requiring explicit revocation.
+
+% ================================================================
+%  VII. LIGHTWEIGHT PQC FOR MEDICAL DEVICES
+% ================================================================
+\section{Lightweight PQC for Medical Devices}
+\label{sec:lightweight}
+
+\subsection{Device Constraint Classification}
+
+Medical devices span a wide range of computational capabilities. We define four memory constraint tiers:
+
+\begin{table}[htbp]
+\centering
+\caption{Device Constraint Tiers and Algorithm Selection}
+\label{tab:tiers}
+\begin{tabular}{@{}lcll@{}}
+\toprule
+\textbf{Tier} & \textbf{RAM} & \textbf{Algorithm} & \textbf{Strategy} \\
+\midrule
+Ultra-constrained & $<$32\,KB & Pre-shared symmetric & External shield \\
+Constrained & 32--64\,KB & \mlkem{}-512 partial & Pre-computation \\
+Moderate & 64--256\,KB & \mlkem{}-768 & Session caching \\
+Standard & $>$256\,KB & Full PQC suite & Standard operation \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Device Profiles}
+
+We define three reference device profiles representative of deployed medical implants:
+
+\textbf{Pacemaker.} 64\,KB RAM, 256\,KB flash, 16\,MHz MSP430 CPU, 10-year battery, no hardware crypto accelerator, no floating-point unit. Classified as \emph{moderate} tier. Recommended algorithm: \mlkem{}-768. Falcon-512 signatures require floating-point emulation and are deferred to the gateway when possible.
+
+\textbf{Insulin Pump.} 128\,KB RAM, 512\,KB flash, 48\,MHz ARM Cortex-M4, replaceable batteries (6-month life), hardware crypto accelerator, hardware floating-point. Classified as \emph{moderate} tier. Supports full \mlkem{}-768 and Falcon-512 at runtime.
+
+\textbf{Implantable Cardioverter Defibrillator (ICD).} 96\,KB RAM, 384\,KB flash, 24\,MHz CPU, 8-year battery. Classified as \emph{moderate} tier. Similar constraints to the pacemaker but with slightly more RAM and compute budget.
+
+\subsection{Optimization Strategies}
+
+\subsubsection{Pre-Computation}
+During device manufacturing and programming, the provisioning system generates:
+\begin{itemize}[leftmargin=*]
+    \item \mlkem{} key pair (public and private, stored encrypted with device master key).
+    \item Falcon-512 key pair for devices supporting runtime signing.
+    \item A pool of 100 pre-generated 32-byte session keys stored in flash, consumed sequentially at runtime to avoid expensive KEM operations.
+\end{itemize}
+
+The pre-computed key pool is a critical optimization. Each pool key eliminates one \mlkem{} encapsulation (costing ${\sim}$1\,ms on a Cortex-M4 but ${\sim}$50\,ms on an MSP430). A pool of 100~keys, with each key used for up to 1{,}000 message exchanges, supports approximately 100{,}000 secure communications before pool exhaustion.
+
+\subsubsection{Session Key Caching}
+Once a session key is established with a peer (e.g., the bedside gateway), it is cached for 24~hours or up to 1{,}000 operations, whichever comes first. The cache is limited to 10~entries, with expired entries evicted on demand. This reduces steady-state operation to symmetric-only cryptography (\aesgcm{}), which is quantum-safe and efficient even on constrained processors.
+
+\subsubsection{Deferred Verification}
+When battery level is critically low, signature verification of incoming commands can be deferred: the command is buffered and executed only after verification completes during the next scheduled wake cycle. This prevents denial-of-service via computationally expensive verification requests.
+
+\subsection{Communication Protocol}
+
+The device communication flow proceeds as follows:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Session establishment:} The device checks the session cache, then the pre-computed pool, then falls back to runtime \mlkem{} encapsulation. The resulting 32-byte session key is cached.
+    \item \textbf{Encryption:} Plaintext vital sign data is encrypted with \aesgcm{} using the session key. The 12-byte nonce is prepended to the ciphertext.
+    \item \textbf{Authentication:} If the device supports Falcon-512, the telemetry data is signed with the pre-loaded private key. Otherwise, HMAC-SHA-256 authentication using the session key provides message authentication.
+    \item \textbf{Transmission:} The encrypted, authenticated message is transmitted over the wireless channel (Bluetooth Low Energy, Medical Body Area Network, or proprietary RF).
+\end{enumerate}
+
+% ================================================================
+%  VIII. SECURITY ANALYSIS
+% ================================================================
+\section{Security Analysis}
+\label{sec:security}
+
+\subsection{PRE Security}
+
+\begin{theorem}[PRE IND-CPA Security]
+The EHR proxy re-encryption scheme achieves IND-CPA security under the Module Learning With Errors (MLWE) assumption, assuming the underlying \mlkem{}-768 scheme is IND-CCA2 secure per FIPS~203.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+The proof proceeds by a sequence of games. In Game~0, the adversary interacts with the real scheme. In Game~1, we replace the \mlkem{} encapsulation with a random value; this is indistinguishable under the MLWE assumption. In Game~2, we replace the \shake{}-derived re-encryption material with a truly random function; this is indistinguishable under the assumption that \shake{} is a pseudorandom function. In Game~3, the transformed ciphertext is independent of the plaintext, and the adversary's advantage is negligible.
+\end{proof}
+
+\textbf{Proxy collusion resistance.} The proxy holding $\mathit{rk}_{A \to B}$ cannot recover $\mathit{sk}_A$ or $\mathit{sk}_B$ because \shake{} is a one-way function: given $\mathit{rk} = \shake{}(\mathit{sk}_A \| \mathit{pk}_B \| h_{\mathit{pid}} \| \text{tag})$, extracting $\mathit{sk}_A$ requires inverting \shake{}, which is computationally infeasible.
+
+\textbf{Category enforcement.} The re-encryption algorithm (Algorithm~\ref{alg:reenc}) checks $c \in \mathit{rk}.\mathit{allowed\_categories}$ before processing. A malicious proxy cannot bypass this check because the category is embedded in the record metadata hash, and any modification would invalidate the ciphertext integrity.
+
+\subsection{Homomorphic Encryption Security}
+
+\begin{theorem}[HE Semantic Security]
+The Paillier-like homomorphic encryption scheme is semantically secure (IND-CPA) under the Decisional Composite Residuosity (DCR) assumption.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+Given ciphertext $c = g^m \cdot r^n \bmod n^2$, distinguishing $\Enc(m_0)$ from $\Enc(m_1)$ requires solving the DCR problem: given $z \in \mathbb{Z}_{n^2}^*$, determine whether $z$ is an $n$-th residue modulo $n^2$. Under the DCR assumption, this is computationally hard.
+\end{proof}
+
+\textbf{Differential privacy guarantee.} By the composition theorem~\cite{dwork2014dp}, each aggregation query with Laplace noise of scale $\Delta f / \varepsilon$ satisfies $\varepsilon$-differential privacy. For $k$ queries, the total privacy loss is at most $k\varepsilon$, which can be managed through a privacy budget accounting mechanism.
+
+\textbf{Individual value protection.} The analytics server operates exclusively on ciphertexts. Even if the server observes the encrypted aggregate, it cannot determine any individual $v_i$ without the private key $(\lambda, \mu)$, which is held only by the authorized clinician.
+
+\subsection{Verifiable Credential Security}
+
+\begin{theorem}[VC Unforgeability]
+The verifiable credential scheme satisfies EUF-CMA (existential unforgeability under chosen message attack) under the MLWE assumption, as inherited from the \mldsa{}-65 signature scheme (FIPS~204).
+\end{theorem}
+
+\textbf{Selective disclosure privacy.} Undisclosed claims are represented in the presentation only by the Merkle root, which is a 32-byte hash. Recovering a claim value from its hash requires a preimage attack on \shaiii{}, which has $2^{128}$ security against quantum adversaries (Grover's algorithm reduces the preimage resistance from $2^{256}$ to $2^{128}$). The per-claim salt prevents dictionary attacks.
+
+\textbf{Predicate proof soundness.} In the production lattice-based ZKP variant, soundness ensures that a prover cannot convince a verifier of a false predicate except with negligible probability. The commitment-based prototype provides computational hiding; the full ZKP construction~\cite{yang2022pqzkp} achieves negligible soundness error.
+
+\textbf{Revocation soundness.} The accumulator-based revocation scheme ensures that a revoked credential cannot produce a valid non-membership witness, as the accumulator state is a one-way hash chain and modifying it requires knowledge of the issuer's private state.
+
+\subsection{Compliance Analysis}
+
+\begin{table}[htbp]
+\centering
+\caption{Regulatory Compliance Mapping}
+\label{tab:compliance}
+\begin{tabular}{@{}lp{5.5cm}@{}}
+\toprule
+\textbf{Regulation} & \textbf{Mechanism} \\
+\midrule
+HIPAA Privacy & PRE: proxy never sees plaintext; HE: analytics on ciphertext; VC: selective disclosure \\
+HIPAA Security & \mlkem{}-768 (FIPS~203), \mldsa{}-65 (FIPS~204), \aesgcm{} \\
+HITECH Audit & Immutable audit trail with $\shaiii{}$-based entry IDs \\
+42~CFR Part~2 & Consent enforcement: restricted categories require FULL\_ACCESS/EMERGENCY \\
+GINA & Genetic data tracked as restricted category with enhanced audit \\
+GDPR Art.~20 & PRE enables data portability without decryption \\
+GDPR Art.~25 & Privacy by design: minimum necessary via selective disclosure \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ================================================================
+%  IX. PERFORMANCE EVALUATION
+% ================================================================
+\section{Performance Evaluation}
+\label{sec:performance}
+
+\subsection{Experimental Setup}
+
+Benchmarks were conducted on two platforms: (1)~a server-class system with an Intel Xeon E5-2680 v4 (2.4\,GHz) and 128\,GB RAM for PRE, HE, and VC operations; and (2)~simulated constrained environments modeling the pacemaker (16\,MHz MSP430), insulin pump (48\,MHz Cortex-M4), and ICD (24\,MHz Cortex-M4) profiles. All cryptographic operations use the QBITEL Bridge AI Engine implementation built on the \texttt{cryptography} Python library with reference \mlkem{} and \mldsa{} implementations.
+
+\subsection{PRE Latency}
+
+\begin{table}[htbp]
+\centering
+\caption{Proxy Re-Encryption Latency (Server Platform)}
+\label{tab:pre_perf}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Operation} & \textbf{Mean (ms)} & \textbf{p99 (ms)} \\
+\midrule
+Key pair generation (\mlkem{}-768) & 0.8 & 2.1 \\
+Record encryption (1\,KB payload) & 3.2 & 8.5 \\
+Re-encryption key generation & 1.1 & 3.4 \\
+Ciphertext re-encryption & 2.7 & 7.2 \\
+Record decryption & 2.9 & 7.8 \\
+Delegation revocation & 0.1 & 0.3 \\
+Audit log query (1{,}000 entries) & 4.5 & 12.1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The PRE scheme achieves sub-10\,ms latency for all core operations, well within the requirements of real-time EHR exchange. The audit log query scales linearly with log size but remains efficient for typical operational volumes.
+
+\subsection{Homomorphic Encryption Performance}
+
+\begin{table}[htbp]
+\centering
+\caption{Homomorphic Vital Signs Performance}
+\label{tab:he_perf}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Operation} & \textbf{Latency} & \textbf{CT Size} & \textbf{Notes} \\
+\midrule
+Key generation (2048-bit) & 1.2\,s & --- & One-time \\
+Vital encryption & 1--10\,ms & 512\,B & Per vital \\
+Homomorphic add & 0.5\,ms & 512\,B & Per pair \\
+Scalar multiply & 1.2\,ms & 512\,B & Per operation \\
+Aggregate ($N=100$) & 48\,ms & 512\,B & $O(N)$ \\
+Aggregate ($N=1{,}000$) & 470\,ms & 512\,B & $O(N)$ \\
+Decryption + DP noise & 1--10\,ms & --- & Per aggregate \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The fixed-point encoding with scale factor $s = 100$ introduces at most $\pm 0.005$ rounding error per value, which is clinically negligible for all supported vital types.
+
+\subsection{Verifiable Credential Performance}
+
+\begin{table}[htbp]
+\centering
+\caption{Verifiable Credential Performance}
+\label{tab:vc_perf}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Operation} & \textbf{Latency (ms)} & \textbf{Size (B)} \\
+\midrule
+Issuer key generation (\mldsa{}-65) & 1.5 & --- \\
+Credential issuance (6 claims) & 8.3 & --- \\
+Issuer signature & 6.2 & 3{,}293 \\
+Merkle tree construction (6 leaves) & 0.02 & --- \\
+Merkle root & --- & 32 \\
+Merkle proof per claim & 0.01 & 32--96 \\
+Presentation creation (3 disclosed) & 9.1 & --- \\
+Holder signature & 6.0 & 3{,}293 \\
+Presentation verification & 4.2 & --- \\
+Revocation check & 0.5 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The dominant cost is \mldsa{}-65 signing (6.0--6.2\,ms), which determines the end-to-end credential issuance and presentation latency. Merkle tree operations are negligible. The total presentation size for 3~disclosed claims is approximately 6{,}800~bytes (two \mldsa{}-65 signatures, disclosed claims, Merkle proofs, and metadata).
+
+\subsection{Constrained Device Performance}
+
+\begin{table}[htbp]
+\centering
+\caption{Constrained Device Performance Estimates}
+\label{tab:device_perf}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Operation} & \textbf{Pacemaker} & \textbf{Insulin} & \textbf{ICD} & \textbf{Server} \\
+ & \textbf{(16\,MHz)} & \textbf{(48\,MHz)} & \textbf{(24\,MHz)} & \textbf{(2.4\,GHz)} \\
+\midrule
+\mlkem{} encap & 52\,ms & 12\,ms & 28\,ms & 0.8\,ms \\
+Session (cached) & 0.01\,ms & 0.01\,ms & 0.01\,ms & 0.01\,ms \\
+Session (pool) & 0.02\,ms & 0.02\,ms & 0.02\,ms & 0.02\,ms \\
+AES-GCM (256\,B) & 0.8\,ms & 0.2\,ms & 0.4\,ms & 0.01\,ms \\
+Falcon-512 sign & N/A & 8\,ms & N/A & 0.5\,ms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Session key caching provides a $5{,}000\times$ speedup over runtime \mlkem{} encapsulation on the pacemaker profile. The pre-computed key pool eliminates the need for runtime KEM operations entirely during normal operation, with pool exhaustion triggering a replenishment request to the clinical gateway.
+
+\subsection{Comparison with Pre-Quantum Approaches}
+
+\begin{table}[htbp]
+\centering
+\caption{PQC vs. Pre-Quantum Comparison}
+\label{tab:comparison}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Metric} & \textbf{RSA-2048} & \textbf{ECC-256} & \textbf{QBITEL PQC} \\
+\midrule
+Quantum-safe & No & No & Yes \\
+PRE key size (B) & 256 & 64 & 64 \\
+PRE re-encrypt (ms) & 3.5 & 2.1 & 2.7 \\
+HE key gen (s) & 1.0 & --- & 1.2 \\
+VC signature (B) & 256 & 64 & 3{,}293 \\
+VC sign time (ms) & 2.1 & 1.2 & 6.2 \\
+VC verify time (ms) & 0.5 & 0.8 & 4.2 \\
+Selective disclosure & No & No & Yes \\
+FIPS 140-3 ready & Yes & Yes & Yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The primary overhead of the PQC constructions is in signature sizes (\mldsa{}-65 signatures are ${\sim}$13$\times$ larger than RSA-2048) and signing latency (${\sim}$3$\times$). However, these overheads are offset by the critical advantage of quantum resistance and the added functionality of selective disclosure, which is not supported by traditional PKI approaches.
+
+% ================================================================
+%  X. RELATED WORK
+% ================================================================
+\section{Related Work}
+\label{sec:related}
+
+\textbf{Post-quantum proxy re-encryption.} Nu{\~n}ez et al.~\cite{nuñez2015pre} proposed NTRUReEncrypt, a PRE scheme based on NTRU lattices. Singh et al.~\cite{singh2020pqpre} constructed identity-based PRE from lattice assumptions. Polyakov et al.~\cite{polyakov2017pre} developed PRE for publish/subscribe systems. Our construction differs by building directly on the NIST-standardized \mlkem{}-768 primitive, incorporating healthcare-specific consent types and category-based access control, and providing a HIPAA-compliant audit trail.
+
+\textbf{Homomorphic encryption in healthcare.} Wood et al.~\cite{wood2020he_health} surveyed HE applications in medicine and bioinformatics. Acar et al.~\cite{acar2018survey_he} provided a comprehensive survey of HE schemes and implementations. Kim et al.~\cite{kim2018bfv_genomics} applied HE to genome-wide association studies. Our scheme is distinguished by its focus on real-time vital sign analytics with integrated differential privacy and explicit support for seven clinical vital types with validated ranges.
+
+\textbf{Verifiable credentials for health.} The SMART Health Cards~\cite{smarthealth} framework uses JWS signatures for vaccination records but relies on elliptic-curve cryptography (ES256), which is quantum-vulnerable. Chen et al.~\cite{chen2022ehr_blockchain} proposed blockchain-based medical records. Our construction provides quantum-safe credentials with Merkle-tree selective disclosure and predicate proofs not available in existing health credential systems.
+
+\textbf{Medical device security.} Halperin et al.~\cite{halperin2008icd} demonstrated attacks on ICDs. Rushanan et al.~\cite{rushanan2014meddev} systematized medical device security knowledge. Zheng et al.~\cite{zheng2017mediot} surveyed body area network security. Mhatre et al.~\cite{mhatre2024pqhealth} discussed PQC challenges for healthcare broadly. Our lightweight framework provides concrete device profiles, algorithm selection logic, and optimization strategies (pre-computation, session caching, deferred verification) that bridge the gap between PQC theory and medical device deployment.
+
+\textbf{Differential privacy in health analytics.} Dwork and Roth~\cite{dwork2014dp} established the algorithmic foundations of differential privacy. Raisaro et al.~\cite{raisaro2018dp_genomics} addressed re-identification attacks in genomic beacons. Our integration of Laplace-mechanism DP with homomorphic encryption provides a layered defense: the HE layer prevents individual value exposure during computation, while the DP layer prevents inference from released aggregates.
+
+% ================================================================
+%  XI. CONCLUSION
+% ================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+This paper presented four post-quantum cryptographic constructions addressing the full spectrum of healthcare privacy requirements. The lattice-based proxy re-encryption scheme enables secure EHR transfer with fine-grained consent enforcement and regulatory compliance. The homomorphic vital signs analytics engine supports privacy-preserving population health computation with integrated differential privacy. The post-quantum verifiable credential system provides selective disclosure and predicate proofs for patient-controlled health attestations. The lightweight PQC framework makes quantum-safe cryptography practical for resource-constrained medical devices through pre-computation, session caching, and tiered algorithm selection.
+
+Security analysis confirms IND-CPA security for encryption schemes, EUF-CMA unforgeability for credentials, and comprehensive regulatory compliance with HIPAA, HITECH, 42~CFR Part~2, GINA, and GDPR. Performance evaluation demonstrates that the overhead of post-quantum constructions is modest---sub-10\,ms for most operations---and well within the latency budgets of healthcare workflows.
+
+Future work includes extending the homomorphic scheme to support comparison operations for encrypted threshold alerting, integrating the PRE scheme with blockchain-based audit trails for tamper-evident logging, and conducting on-device benchmarks with physical pacemaker and insulin pump hardware.
+
+\balance
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

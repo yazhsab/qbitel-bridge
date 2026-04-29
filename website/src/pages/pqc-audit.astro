@@ -1,0 +1,57 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import CTABanner from '@/components/cta/CTABanner.astro';
+import PqcAuditExplorer from '@/components/interactive/PqcAuditExplorer';
+import { maturitySummary } from '@/data/pqcAudit';
+---
+
+<PageLayout
+  title="PQC Implementation Audit | QBITEL"
+  description="Interactive code-level review of QBITEL's custom and domain-specific post-quantum cryptography implementations."
+>
+  <PageHero
+    title="PQC Implementation Audit"
+    description="A code-level review of QBITEL's current custom and domain-specific PQC implementations, separating strong foundations from guarded wrappers and prototype domain modules."
+    badge="Repository Review"
+    gradient="from-neon-copper to-neon-cyan"
+  />
+
+  <section class="border-b border-surface-600/50 py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid gap-6 md:grid-cols-3">
+        {maturitySummary.map((item) => (
+          <div class="card p-6">
+            <div class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+              {item.label}
+            </div>
+            <div class="mt-3 text-3xl font-bold text-white">{item.value}</div>
+            <p class="mt-3 text-sm leading-6 text-slate-300">{item.detail}</p>
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-10 rounded-3xl border border-surface-600/70 bg-surface-800/80 p-6">
+        <div class="text-xs font-semibold uppercase tracking-[0.24em] text-neon-cyan/80">
+          Review frame
+        </div>
+        <p class="mt-3 text-sm leading-7 text-slate-300">
+          This assessment focuses on what the code currently enforces: key generation, signing,
+          verification, state handling, trust anchors, and whether the advertised security
+          property is actually delivered by the implementation.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <PqcAuditExplorer client:load />
+    </div>
+  </section>
+
+  <CTABanner
+    title="Use the audit to guide positioning and hardening work"
+    description="The core message should emphasize governed PQC migration and strong foundational primitives, while the prototype domain modules are hardened or re-scoped."
+  />
+</PageLayout>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: white; font-family: 'Segoe UI', Arial, sans-serif; padding: 30px 20px; width: 1200px; }
+
+.title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1B3A5C;
+  margin-bottom: 24px;
+}
+
+.arch {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.layer {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.layer-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  background: #1B3A5C;
+  color: white;
+  padding: 8px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 6px 0 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  letter-spacing: 1px;
+}
+
+.layer-content {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+}
+
+.component {
+  flex: 1;
+  border: 2px solid;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.comp-header {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.comp-body {
+  padding: 10px 12px;
+  font-size: 10px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.comp-body .tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 600;
+  margin: 2px 2px;
+}
+
+/* Color schemes */
+.python { border-color: #3776AB; }
+.python .comp-header { background: linear-gradient(135deg, #3776AB, #4B8BBE); }
+.python .tag { background: #e3f2fd; color: #1565c0; }
+
+.rust { border-color: #CE422B; }
+.rust .comp-header { background: linear-gradient(135deg, #CE422B, #E6593D); }
+.rust .tag { background: #fbe9e7; color: #bf360c; }
+
+.go { border-color: #00ADD8; }
+.go .comp-header { background: linear-gradient(135deg, #00ADD8, #29B6F6); }
+.go .tag { background: #e0f7fa; color: #00838f; }
+
+.ts { border-color: #3178C6; }
+.ts .comp-header { background: linear-gradient(135deg, #3178C6, #5C9CE6); }
+.ts .tag { background: #e8eaf6; color: #283593; }
+
+.infra { border-color: #7B1FA2; }
+.infra .comp-header { background: linear-gradient(135deg, #7B1FA2, #AB47BC); }
+.infra .tag { background: #f3e5f5; color: #6a1b9a; }
+
+.obs { border-color: #E65100; }
+.obs .comp-header { background: linear-gradient(135deg, #E65100, #FF6D00); }
+.obs .tag { background: #fff3e0; color: #e65100; }
+
+.arrow-row {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin: 4px 0;
+  padding-left: 28px;
+}
+
+.arrow-down {
+  text-align: center;
+  color: #2E75B6;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.arrow-label {
+  font-size: 9px;
+  color: #888;
+  font-weight: 600;
+}
+
+.perf-strip {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.perf-item {
+  background: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  border-radius: 16px;
+  padding: 5px 14px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #2e7d32;
+}
+</style>
+</head>
+<body>
+
+<div class="title">Figure 3: QBITEL Bridge — Four-Layer System Architecture</div>
+
+<div class="arch">
+
+  <!-- Layer 1: Presentation -->
+  <div class="layer">
+    <div class="layer-label">UI</div>
+    <div class="layer-content">
+      <div class="component ts" style="flex: 1;">
+        <div class="comp-header">🖥️ Web Console — TypeScript 5.x / React</div>
+        <div class="comp-body">
+          <span class="tag">Dashboard</span>
+          <span class="tag">Protocol Explorer</span>
+          <span class="tag">Compliance Reports</span>
+          <span class="tag">Agent Monitor</span>
+          <span class="tag">Translation Studio UI</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row">
+    <div><div class="arrow-down">↕</div><div class="arrow-label">REST API</div></div>
+  </div>
+
+  <!-- Layer 2: Intelligence -->
+  <div class="layer">
+    <div class="layer-label">AI ENGINE</div>
+    <div class="layer-content">
+      <div class="component python">
+        <div class="comp-header">🧠 AI Engine — Python 3.11+</div>
+        <div class="comp-body">
+          <span class="tag">Protocol Discovery</span>
+          <span class="tag">Transformer Classifier</span>
+          <span class="tag">BiLSTM-CRF</span>
+          <span class="tag">PCFG Inference</span>
+          <span class="tag">Translation Studio</span>
+          <span class="tag">16+ Agents</span>
+          <span class="tag">PQC Engine</span>
+          <span class="tag">Compliance</span>
+          <br>
+          <span class="tag">FastAPI</span>
+          <span class="tag">PyTorch 2.x</span>
+          <span class="tag">LangGraph</span>
+          <span class="tag">Ollama</span>
+          <span class="tag">ChromaDB</span>
+          <span class="tag">Redis</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row">
+    <div><div class="arrow-down">↕</div><div class="arrow-label">gRPC</div></div>
+    <div><div class="arrow-down">↕</div><div class="arrow-label">gRPC</div></div>
+  </div>
+
+  <!-- Layer 3: Data & Control Plane -->
+  <div class="layer">
+    <div class="layer-label">PLANES</div>
+    <div class="layer-content">
+      <div class="component rust">
+        <div class="comp-header">⚡ Rust Dataplane — Rust 1.75+</div>
+        <div class="comp-body">
+          <span class="tag">Packet Processing</span>
+          <span class="tag">PQC-TLS Termination</span>
+          <span class="tag">Protocol Proxying</span>
+          <span class="tag">eBPF Monitor</span>
+          <span class="tag">DPDK Engine</span>
+          <br>
+          <span class="tag">ISO-8583</span>
+          <span class="tag">TN3270e</span>
+          <span class="tag">HL7 MLLP</span>
+          <span class="tag">Modbus</span>
+          <br>
+          <span class="tag">Tokio</span>
+          <span class="tag">liboqs / oqs-rs</span>
+        </div>
+      </div>
+      <div class="component go">
+        <div class="comp-header">🔧 Go Controlplane — Go 1.22+</div>
+        <div class="comp-body">
+          <span class="tag">Management API</span>
+          <span class="tag">K8s Operator</span>
+          <span class="tag">xDS Server</span>
+          <span class="tag">Admission Webhooks</span>
+          <span class="tag">Device Agent</span>
+          <br>
+          <span class="tag">Istio Integration</span>
+          <span class="tag">Envoy xDS</span>
+          <span class="tag">Helm Charts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row">
+    <div><div class="arrow-down">↕</div><div class="arrow-label">Events</div></div>
+    <div><div class="arrow-down">↕</div><div class="arrow-label">Metrics</div></div>
+    <div><div class="arrow-down">↕</div><div class="arrow-label">Traces</div></div>
+  </div>
+
+  <!-- Layer 4: Infrastructure -->
+  <div class="layer">
+    <div class="layer-label">INFRA</div>
+    <div class="layer-content">
+      <div class="component infra">
+        <div class="comp-header">☁️ Cloud-Native Infrastructure</div>
+        <div class="comp-body">
+          <span class="tag">Kubernetes</span>
+          <span class="tag">Apache Kafka</span>
+          <span class="tag">Istio Service Mesh</span>
+          <span class="tag">Envoy Proxy</span>
+          <span class="tag">Redis</span>
+          <span class="tag">Docker</span>
+        </div>
+      </div>
+      <div class="component obs">
+        <div class="comp-header">📊 Observability Stack</div>
+        <div class="comp-body">
+          <span class="tag">Prometheus</span>
+          <span class="tag">Grafana</span>
+          <span class="tag">OpenTelemetry</span>
+          <span class="tag">Jaeger</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="perf-strip">
+  <span class="perf-item">89%+ Discovery Accuracy</span>
+  <span class="perf-item">2–4 Hours Discovery</span>
+  <span class="perf-item">100K+ msg/sec Kafka</span>
+  <span class="perf-item">&lt;1ms PQC Overhead</span>
+  <span class="perf-item">&lt;1s Threat Response</span>
+  <span class="perf-item">78% Autonomous</span>
+  <span class="perf-item">9 Compliance Frameworks</span>
+</div>
+
+</body>
+</html>

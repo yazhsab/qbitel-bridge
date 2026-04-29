@@ -3,18 +3,19 @@ import PageLayout from '@/layouts/PageLayout.astro';
 import PageHero from '@/components/hero/PageHero.astro';
 import IndustryCard from '@/components/content/IndustryCard.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
+import DomainDemoLab from '@/components/interactive/DomainDemoLab';
 import { industries } from '@/data/industries';
 import { url } from '@/utils/url';
 ---
 
 <PageLayout
   title="Industries | QBITEL Bridge"
-  description="Domain-specific quantum-safe security for banking, healthcare, critical infrastructure, automotive, aviation, and telecommunications."
+  description="Vertical solution packs for BPO, IoT, defense, banking, healthcare, critical infrastructure, automotive, aviation, and telecommunications."
 >
   <PageHero
-    title="Industries We Protect"
-    description="Domain-specific PQC profiles, protocol support, and compliance frameworks tailored to the world's most critical industries."
-    badge="Industry Solutions"
+    title="Vertical Solution Packs"
+    description="One critical systems platform, tailored by industry with protocols, risk models, compliance mappings, and deployment playbooks for the environments that cannot be replaced."
+    badge="BPO · IoT · Defense · Banking · OT · Healthcare · Telecom"
   />
 
   <!-- Industry Overview -->
@@ -22,10 +23,10 @@ import { url } from '@/utils/url';
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
         <h2 class="section-heading">
-          Quantum-Safe Security for <span class="gradient-text">Critical Industries</span>
+          Critical Systems Intelligence for <span class="gradient-text">Every Vertical</span>
         </h2>
         <p class="section-subheading mx-auto">
-          Every industry has unique protocols, compliance demands, and operational constraints. QBITEL Bridge delivers purpose-built security that fits your environment without disrupting it.
+          Every vertical has unique protocols, compliance demands, fraud patterns, and operational constraints. QBITEL keeps the platform unified while delivering industry-specific solution packs that fit each environment.
         </p>
       </div>
 
@@ -49,10 +50,10 @@ import { url } from '@/utils/url';
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
         <h2 class="section-heading">
-          Why <span class="gradient-text">Industry-Specific</span> Matters
+          Why <span class="gradient-text">Solution Packs</span> Matter
         </h2>
         <p class="section-subheading mx-auto">
-          Generic security tools break in specialized environments. QBITEL Bridge is purpose-built for the protocols, constraints, and regulations of each industry.
+          Generic tools break in specialized environments. QBITEL solution packs package the protocol knowledge, rollout controls, evidence templates, and risk models each industry needs.
         </p>
       </div>
 
@@ -63,9 +64,9 @@ import { url } from '@/utils/url';
               <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-white mb-2">Domain-Optimized PQC</h3>
+          <h3 class="text-lg font-semibold text-white mb-2">Domain-Optimized Protection</h3>
           <p class="text-sm text-gray-400 leading-relaxed">
-            Cryptographic profiles tuned for each industry's latency, power, and lifecycle requirements. Sub-millisecond for payments, battery-optimized for medical devices, 50-year agility for aviation.
+            Fraud, cyber, and PQC controls tuned for each industry's latency, power, lifecycle, and certification boundaries.
           </p>
         </div>
 
@@ -75,9 +76,9 @@ import { url } from '@/utils/url';
               <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" />
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-white mb-2">Native Protocol Support</h3>
+          <h3 class="text-lg font-semibold text-white mb-2">Native Protocol Intelligence</h3>
           <p class="text-sm text-gray-400 leading-relaxed">
-            Pre-built parsers for 30+ industry-specific protocols. AI discovery for undocumented and proprietary formats. No protocol reverse engineering required.
+            Pre-built knowledge for common industry protocols plus AI discovery for undocumented and proprietary formats.
           </p>
         </div>
 
@@ -87,12 +88,30 @@ import { url } from '@/utils/url';
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-white mb-2">Compliance Automation</h3>
+          <h3 class="text-lg font-semibold text-white mb-2">Evidence Automation</h3>
           <p class="text-sm text-gray-400 leading-relaxed">
-            Pre-mapped regulatory frameworks for each industry. PCI-DSS, HIPAA, NERC CIP, ISO/SAE 21434, EUROCAE ED-153 and more. Continuous audit evidence generation.
+            Pre-mapped evidence packs for PCI-DSS, HIPAA, NERC CIP, CNSA 2.0, ISO 27001, DORA, and customer assurance reviews.
           </p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Interactive Demo Lab -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Test Each <span class="gradient-text">Solution Pack</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Load a sample or paste your own domain data. The demo explains what QBITEL would
+          discover, which risks matter, how modernization starts, what protection applies, and
+          which evidence artifacts are produced.
+        </p>
+      </div>
+
+      <DomainDemoLab client:load />
     </div>
   </section>
 
@@ -135,7 +154,7 @@ import { url } from '@/utils/url';
 
   <!-- CTA -->
   <CTABanner
-    title="Find Your Industry Solution"
-    description="Talk to our team about quantum-safe security tailored to your industry's protocols, compliance, and operational requirements."
+    title="Start with the vertical where ROI is clearest"
+    description="Use BPO/call center, banking, IoT/OT, or defense solution packs to land quickly, then expand into the platform across more critical systems."
   />
 </PageLayout>

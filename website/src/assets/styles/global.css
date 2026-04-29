@@ -159,10 +159,38 @@
   .signal-copper {
     color: var(--color-copper);
   }
+
+  .demo-scan-line {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, transparent, rgba(79, 216, 255, 0.16), transparent),
+      linear-gradient(180deg, transparent, rgba(40, 240, 164, 0.1), transparent);
+    transform: translateX(-100%);
+    animation: demo-scan 7s ease-in-out infinite;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  @keyframes demo-scan {
+    0% {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    12% {
+      opacity: 1;
+    }
+    55% {
+      transform: translateX(100%);
+      opacity: 0.9;
+    }
+    100% {
+      transform: translateX(100%);
+      opacity: 0;
+    }
   }
 }

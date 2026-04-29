@@ -12,6 +12,17 @@ export interface Industry {
 
 export const industries: Industry[] = [
   {
+    id: 'bpo-call-center',
+    title: 'BPO & Call Centers',
+    tagline: 'Voice-channel fraud and compliance protection',
+    description: 'Protect high-volume SIP/RTP, IVR, CRM, and recording workflows from toll fraud, payment leakage, voice phishing, and agent misuse while producing PCI/HIPAA-ready evidence for client audits.',
+    protocols: ['SIP', 'RTP/SRTP', 'WebRTC', 'IVR logs', 'PCI voice capture', 'CRM APIs'],
+    href: '/industries/bpo-call-center',
+    color: 'from-teal-500 to-cyan-500',
+    icon: 'M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106a1.125 1.125 0 00-1.173.417l-.97 1.293a1.125 1.125 0 01-1.21.38 12.035 12.035 0 01-7.143-7.143 1.125 1.125 0 01.38-1.21l1.293-.97c.36-.27.526-.733.417-1.173L6.963 3.102A1.125 1.125 0 005.872 2.25H4.5A2.25 2.25 0 002.25 4.5v2.25z',
+    impact: 'Fraud reduction and client audit evidence',
+  },
+  {
     id: 'banking',
     title: 'Banking & Financial Services',
     tagline: 'Quantum-safe financial infrastructure',
@@ -21,6 +32,28 @@ export const industries: Industry[] = [
     color: 'from-blue-500 to-indigo-500',
     icon: 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z',
     impact: 'Protocol discovery: $2-10M to $200K',
+  },
+  {
+    id: 'iot',
+    title: 'IoT & Connected Devices',
+    tagline: 'Device trust for unmanaged fleets',
+    description: 'Discover unmanaged devices, proprietary protocols, weak crypto, and firmware risk across fragmented IoT estates. Build device trust graphs and protect constrained devices through gateway-first controls.',
+    protocols: ['MQTT', 'CoAP', 'BLE', 'Zigbee', 'LoRaWAN', 'Proprietary binary'],
+    href: '/industries/iot',
+    color: 'from-lime-500 to-emerald-500',
+    icon: 'M8.25 3v1.5M4.5 8.25H3m1.5 7.5H3m5.25 4.5V21m7.5-18v1.5m3.75 3.75H21m-1.5 7.5H21m-5.25 4.5V21M7.5 7.5h9v9h-9v-9z',
+    impact: 'Device inventory and crypto posture',
+  },
+  {
+    id: 'defense',
+    title: 'Defense & Mission Systems',
+    tagline: 'Air-gapped modernization and CNSA 2.0 readiness',
+    description: 'Run offline discovery and modernization for mission networks, tactical links, classified environments, and long-lived defense systems with strict approval gates and signed evidence packages.',
+    protocols: ['Tactical data links', 'Serial links', 'Legacy IP', 'MIL-STD messages', 'Custom mission protocols'],
+    href: '/industries/defense',
+    color: 'from-slate-500 to-zinc-400',
+    icon: 'M12 2.25c2.25 2.25 5.25 3 8.25 3v6.75c0 5.25-3.75 8.25-8.25 9.75-4.5-1.5-8.25-4.5-8.25-9.75V5.25c3 0 6-.75 8.25-3z',
+    impact: 'CNSA 2.0 and ATO evidence',
   },
   {
     id: 'healthcare',

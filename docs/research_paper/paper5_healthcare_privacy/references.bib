@@ -1,0 +1,329 @@
+% ────────────────────────────────────────────────────────────────
+%  References for Paper 5 – Healthcare Privacy-Preserving PQC
+% ────────────────────────────────────────────────────────────────
+
+% ── NIST PQC Standards ────────────────────────────────────────
+@techreport{fips203,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {{Module-Lattice-Based Key-Encapsulation Mechanism Standard (FIPS 203)}},
+  institution = {NIST},
+  year        = {2024},
+  type        = {Federal Information Processing Standard}
+}
+
+@techreport{fips204,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {{Module-Lattice-Based Digital Signature Standard (FIPS 204)}},
+  institution = {NIST},
+  year        = {2024},
+  type        = {Federal Information Processing Standard}
+}
+
+@techreport{fips205,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {{Stateless Hash-Based Digital Signature Standard (FIPS 205)}},
+  institution = {NIST},
+  year        = {2024},
+  type        = {Federal Information Processing Standard}
+}
+
+% ── Healthcare Regulation ─────────────────────────────────────
+@misc{hipaa1996,
+  author = {{U.S. Congress}},
+  title  = {{Health Insurance Portability and Accountability Act (HIPAA)}},
+  year   = {1996},
+  note   = {Public Law 104-191}
+}
+
+@misc{hitech2009,
+  author = {{U.S. Department of Health and Human Services}},
+  title  = {{Health Information Technology for Economic and Clinical Health (HITECH) Act}},
+  year   = {2009},
+  note   = {Title XIII of the American Recovery and Reinvestment Act}
+}
+
+@misc{cfr42part2,
+  author = {{Substance Abuse and Mental Health Services Administration}},
+  title  = {{42 CFR Part 2 -- Confidentiality of Substance Use Disorder Patient Records}},
+  year   = {2020},
+  note   = {Final Rule}
+}
+
+@misc{gina2008,
+  author = {{U.S. Congress}},
+  title  = {{Genetic Information Nondiscrimination Act (GINA)}},
+  year   = {2008},
+  note   = {Public Law 110-233}
+}
+
+@misc{gdpr2016,
+  author = {{European Parliament}},
+  title  = {{General Data Protection Regulation (GDPR)}},
+  year   = {2016},
+  note   = {Regulation (EU) 2016/679}
+}
+
+% ── HL7 FHIR and Health IT Standards ─────────────────────────
+@misc{hl7fhir,
+  author = {{HL7 International}},
+  title  = {{HL7 FHIR (Fast Healthcare Interoperability Resources) R4}},
+  year   = {2019},
+  howpublished = {\url{https://hl7.org/fhir/}}
+}
+
+@misc{smarthealth,
+  author = {{VCI Consortium}},
+  title  = {{SMART Health Cards: Vaccination and Testing}},
+  year   = {2021},
+  howpublished = {\url{https://smarthealth.cards/}}
+}
+
+% ── W3C Verifiable Credentials ────────────────────────────────
+@misc{w3cvc,
+  author = {{W3C}},
+  title  = {{Verifiable Credentials Data Model 2.0}},
+  year   = {2024},
+  howpublished = {\url{https://www.w3.org/TR/vc-data-model-2.0/}}
+}
+
+@misc{w3cdid,
+  author = {{W3C}},
+  title  = {{Decentralized Identifiers (DIDs) v1.0}},
+  year   = {2022},
+  howpublished = {\url{https://www.w3.org/TR/did-core/}}
+}
+
+% ── Proxy Re-Encryption ──────────────────────────────────────
+@inproceedings{blaze1998pre,
+  author    = {Blaze, Matt and Bleumer, Gerrit and Strauss, Martin},
+  title     = {Divertible Protocols and Atomic Proxy Cryptography},
+  booktitle = {Advances in Cryptology -- EUROCRYPT '98},
+  year      = {1998},
+  pages     = {127--144},
+  publisher = {Springer}
+}
+
+@article{ateniese2006pre,
+  author  = {Ateniese, Giuseppe and Fu, Kevin and Green, Matthew and Hohenberger, Susan},
+  title   = {Improved Proxy Re-Encryption Schemes with Applications to Secure Distributed Storage},
+  journal = {ACM Transactions on Information and System Security},
+  volume  = {9},
+  number  = {1},
+  pages   = {1--30},
+  year    = {2006}
+}
+
+@inproceedings{nuñez2015pre,
+  author    = {Nu{\~n}ez, David and Agudo, Isaac and Lopez, Javier},
+  title     = {NTRUReEncrypt: An Efficient Proxy Re-Encryption Scheme Based on NTRU},
+  booktitle = {ACM ASIA Conference on Computer and Communications Security},
+  year      = {2015},
+  pages     = {179--189}
+}
+
+@inproceedings{polyakov2017pre,
+  author    = {Polyakov, Yuriy and Rohloff, Kurt and Sahu, Gyana and Vaikuntanathan, Vinod},
+  title     = {Fast Proxy Re-Encryption for Publish/Subscribe Systems},
+  booktitle = {ACM Transactions on Privacy and Security},
+  volume    = {20},
+  number    = {4},
+  pages     = {1--31},
+  year      = {2017}
+}
+
+@inproceedings{singh2020pqpre,
+  author    = {Singh, Kunwar and Rangan, C. Pandu and Banerjee, Avik},
+  title     = {Lattice-Based Identity-Based Proxy Re-Encryption},
+  booktitle = {International Conference on Cryptology in India},
+  year      = {2020},
+  pages     = {321--341},
+  publisher = {Springer}
+}
+
+% ── Homomorphic Encryption ────────────────────────────────────
+@inproceedings{paillier1999,
+  author    = {Paillier, Pascal},
+  title     = {Public-Key Cryptosystems Based on Composite Degree Residuosity Classes},
+  booktitle = {Advances in Cryptology -- EUROCRYPT '99},
+  year      = {1999},
+  pages     = {223--238},
+  publisher = {Springer}
+}
+
+@article{gentry2009fhe,
+  author  = {Gentry, Craig},
+  title   = {Fully Homomorphic Encryption Using Ideal Lattices},
+  journal = {Proceedings of the 41st ACM Symposium on Theory of Computing},
+  pages   = {169--178},
+  year    = {2009}
+}
+
+@inproceedings{cheon2017ckks,
+  author    = {Cheon, Jung Hee and Kim, Andrey and Kim, Miran and Song, Yongsoo},
+  title     = {Homomorphic Encryption for Arithmetic of Approximate Numbers},
+  booktitle = {Advances in Cryptology -- ASIACRYPT 2017},
+  year      = {2017},
+  pages     = {409--437},
+  publisher = {Springer}
+}
+
+@article{wood2020he_health,
+  author  = {Wood, Alexander and Najarian, Kayvan and Kahrobaei, Delaram},
+  title   = {Homomorphic Encryption for Machine Learning in Medicine and Bioinformatics},
+  journal = {ACM Computing Surveys},
+  volume  = {53},
+  number  = {4},
+  pages   = {1--35},
+  year    = {2020}
+}
+
+% ── Differential Privacy ──────────────────────────────────────
+@article{dwork2006dp,
+  author  = {Dwork, Cynthia},
+  title   = {Differential Privacy},
+  journal = {Automata, Languages and Programming},
+  pages   = {1--12},
+  year    = {2006},
+  publisher = {Springer}
+}
+
+@article{dwork2014dp,
+  author  = {Dwork, Cynthia and Roth, Aaron},
+  title   = {The Algorithmic Foundations of Differential Privacy},
+  journal = {Foundations and Trends in Theoretical Computer Science},
+  volume  = {9},
+  number  = {3--4},
+  pages   = {211--407},
+  year    = {2014}
+}
+
+% ── Medical Device Security ───────────────────────────────────
+@article{rushanan2014meddev,
+  author  = {Rushanan, Michael and Rubin, Aviel D. and Kune, Denis Foo and Swanson, Colleen},
+  title   = {SoK: Security and Privacy in Implantable Medical Devices and Body Area Networks},
+  booktitle = {IEEE Symposium on Security and Privacy},
+  pages   = {524--539},
+  year    = {2014}
+}
+
+@article{zheng2017mediot,
+  author  = {Zheng, Guang and Shankaran, Rajan and Yang, Wei and Valli, Craig and Qiao, Liangxiu and Orgun, Mehmet A. and Mukhopadhyay, Subhas C.},
+  title   = {A Survey on the Security of Body Area Networks},
+  journal = {IEEE Communications Surveys and Tutorials},
+  volume  = {19},
+  number  = {3},
+  pages   = {1403--1440},
+  year    = {2017}
+}
+
+@inproceedings{halperin2008icd,
+  author    = {Halperin, Daniel and Heydt-Benjamin, Thomas S. and Ransford, Benjamin and Clark, Shane S. and Defend, Benessa and Morgan, Will and Fu, Kevin and Kohno, Tadayoshi and Maisel, William H.},
+  title     = {Pacemakers and Implantable Cardiac Defibrillators: Software Radio Attacks and Zero-Power Defenses},
+  booktitle = {IEEE Symposium on Security and Privacy},
+  year      = {2008},
+  pages     = {129--142}
+}
+
+% ── Merkle Trees and Accumulators ─────────────────────────────
+@article{merkle1989,
+  author  = {Merkle, Ralph C.},
+  title   = {A Certified Digital Signature},
+  journal = {Advances in Cryptology -- CRYPTO '89},
+  pages   = {218--238},
+  year    = {1989},
+  publisher = {Springer}
+}
+
+@inproceedings{camenisch2009acc,
+  author    = {Camenisch, Jan and Kohlweiss, Markus and Soriente, Claudio},
+  title     = {An Accumulator Based on Bilinear Maps and Efficient Revocation for Anonymous Credentials},
+  booktitle = {International Conference on Practice and Theory in Public Key Cryptography},
+  year      = {2009},
+  pages     = {481--500},
+  publisher = {Springer}
+}
+
+% ── Post-Quantum Signatures ──────────────────────────────────
+@inproceedings{ducas2018dilithium,
+  author    = {Ducas, L{\'e}o and Kiltz, Eike and Lepoint, Tancr{\`e}de and Lyubashevsky, Vadim and Schwabe, Peter and Seiler, Gregor and Stehl{\'e}, Damien},
+  title     = {{CRYSTALS-Dilithium}: A Lattice-Based Digital Signature Scheme},
+  booktitle = {IACR Transactions on Cryptographic Hardware and Embedded Systems},
+  volume    = {2018},
+  number    = {1},
+  pages     = {238--268},
+  year      = {2018}
+}
+
+@article{avanzi2022mlkem,
+  author  = {Avanzi, Roberto and Bos, Joppe and Ducas, L{\'e}o and Kiltz, Eike and Lepoint, Tancr{\`e}de and Lyubashevsky, Vadim and Schanck, John M. and Schwabe, Peter and Seiler, Gregor and Stehl{\'e}, Damien},
+  title   = {{CRYSTALS-Kyber}: Algorithm Specifications and Supporting Documentation},
+  journal = {NIST Post-Quantum Cryptography Standardization Round 3 Submission},
+  year    = {2022}
+}
+
+% ── Zero-Knowledge Proofs ─────────────────────────────────────
+@inproceedings{bootle2016zkp,
+  author    = {Bootle, Jonathan and Cerulli, Andrea and Chaidos, Pyrros and Groth, Jens and Petit, Christophe},
+  title     = {Efficient Zero-Knowledge Arguments for Arithmetic Circuits in the Discrete Log Setting},
+  booktitle = {Advances in Cryptology -- EUROCRYPT 2016},
+  year      = {2016},
+  pages     = {327--357},
+  publisher = {Springer}
+}
+
+@article{yang2022pqzkp,
+  author  = {Yang, Rupeng and Au, Man Ho and Zhang, Zhenfei and Xu, Qiuliang and Yu, Zuoxia and Whyte, William},
+  title   = {Efficient Lattice-Based Zero-Knowledge Arguments with Standard Soundness: Construction and Applications},
+  journal = {Annual International Cryptology Conference},
+  year    = {2022},
+  pages   = {468--498}
+}
+
+% ── Healthcare Cryptography ───────────────────────────────────
+@article{acar2018survey_he,
+  author  = {Acar, Abbas and Aksu, Hidayet and Uluagac, A. Selcuk and Conti, Mauro},
+  title   = {A Survey on Homomorphic Encryption Schemes: Theory and Implementation},
+  journal = {ACM Computing Surveys},
+  volume  = {51},
+  number  = {4},
+  pages   = {1--35},
+  year    = {2018}
+}
+
+@article{mhatre2024pqhealth,
+  author  = {Mhatre, Sagar and Shende, Pranav and Bhatia, Saurabh},
+  title   = {Post-Quantum Cryptography for Healthcare: Challenges and Opportunities},
+  journal = {IEEE Access},
+  volume  = {12},
+  pages   = {41257--41279},
+  year    = {2024}
+}
+
+@inproceedings{kim2018bfv_genomics,
+  author    = {Kim, Miran and Song, Yongsoo and Li, Baiyu and Micciancio, Daniele},
+  title     = {Semi-Parallel Logistic Regression for {GWAS} on Encrypted Data},
+  booktitle = {BMC Medical Genomics},
+  volume    = {13},
+  pages     = {1--13},
+  year      = {2020}
+}
+
+@article{raisaro2018dp_genomics,
+  author  = {Raisaro, Jean Louis and Tramèr, Florian and Ji, Zhanglong and Bu, Diyue and Zhao, Yongan and Carey, Knox and Lloyd, David and Sofia, Heidi and Baker, Dixie and Flaherty, Paul and others},
+  title   = {Addressing Beacon Re-Identification Attacks: Quantification and Mitigation of Privacy Risks},
+  journal = {Journal of the American Medical Informatics Association},
+  volume  = {24},
+  number  = {4},
+  pages   = {799--805},
+  year    = {2017}
+}
+
+@article{chen2022ehr_blockchain,
+  author  = {Chen, Yuxiang and Ding, Shuai and Xu, Zhi and Zheng, Huiling and Yang, Shanlin},
+  title   = {Blockchain-Based Medical Records Secure Storage and Medical Service Framework},
+  journal = {Journal of Medical Internet Research},
+  volume  = {24},
+  number  = {1},
+  pages   = {e29438},
+  year    = {2022}
+}

@@ -1,0 +1,23 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import PageHero from '@/components/hero/PageHero.astro';
+import DomainDemoLab from '@/components/interactive/DomainDemoLab';
+---
+
+<PageLayout
+  title="Interactive Demo Lab | QBITEL Bridge"
+  description="Test QBITEL's vertical solution-pack story with your own BPO, IoT, defense, banking, OT, healthcare, telecom, and mobility sample data."
+>
+  <PageHero
+    title="Interactive Demo Lab"
+    description="Paste domain-specific traffic, logs, protocol messages, or telemetry and see an explainable QBITEL-style output: discovery, risk, modernization, protection, and evidence."
+    badge="Bring your own sample data"
+    gradient="from-neon-cyan to-neon-green"
+  />
+
+  <section class="border-b border-surface-600/50 py-10 lg:py-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <DomainDemoLab client:load />
+    </div>
+  </section>
+</PageLayout>

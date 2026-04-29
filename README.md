@@ -4,10 +4,10 @@
 
 <h1 align="center">QBITEL Bridge</h1>
 
-<h3 align="center">Enterprise-Grade Open-Source Platform for AI-Powered Quantum-Safe Legacy Modernization</h3>
+<h3 align="center">Critical Systems Intelligence and Protection Platform</h3>
 
 <p align="center">
-  <em>The only open-source platform that discovers unknown protocols with AI, encrypts them with post-quantum cryptography, and defends them autonomously — without replacing your legacy systems.</em>
+  <em>Discover, understand, modernize, protect, and prove control over the critical systems enterprises cannot easily replace.</em>
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@
 <td align="center"><h3>89%+</h3><sub>Discovery Accuracy</sub></td>
 <td align="center"><h3>NIST Level 5</h3><sub>Quantum Security</sub></td>
 <td align="center"><h3>&lt;1ms</h3><sub>Encryption Overhead</sub></td>
-<td align="center"><h3>78%</h3><sub>Autonomous Response</sub></td>
+<td align="center"><h3>5</h3><sub>Linked Product Modules</sub></td>
 <td align="center"><h3>9</h3><sub>Compliance Frameworks</sub></td>
 <td align="center"><h3>100K+</h3><sub>msg/sec Throughput</sub></td>
 </tr>
@@ -54,32 +54,32 @@
 
 ## The Problem
 
-Sixty percent of Fortune 500 companies run critical operations on systems built 20-40 years ago. These systems process trillions of dollars daily, keep power grids running, and manage patient records. They share three fatal weaknesses:
+Enterprises run critical operations on systems that were never designed for today's threat, fraud, compliance, and quantum-risk environment. These systems process payments, route calls, run devices, operate factories, support defense missions, move telecom traffic, and manage patient records. They share three structural weaknesses:
 
 <table>
 <tr>
 <td width="33%">
 
-### The Legacy Crisis
-Undocumented protocols with **no source code**, no documentation, and no original developers. Manual reverse engineering costs **$2M-10M** and takes **6-12 months** per system.
+### Unknown Systems
+Undocumented protocols, unmanaged devices, call-flow dependencies, mission links, mainframe interfaces, and operational workflows with no reliable system of record.
 
 </td>
 <td width="33%">
 
-### The Quantum Threat
-Quantum computers will break RSA/ECC within 5-10 years. Adversaries are **harvesting encrypted data today** to decrypt later. Every unprotected wire transfer, patient record, and grid command is a future breach.
+### Unexplained Behavior
+Teams can see traffic moving, but cannot reliably explain business meaning, fraud patterns, failure indicators, ownership, or blast radius.
 
 </td>
 <td width="33%">
 
-### The Speed Gap
-Average SOC response time: **65 minutes**. In that window, an attacker can exfiltrate 100GB, encrypt an entire network, or manipulate industrial controls. **Human speed cannot match machine-speed attacks.**
+### Future Exposure
+Weak crypto, fragile integrations, fraud pressure, AI-accelerated attacks, and harvest-now-decrypt-later risk are converging faster than replacement programs can move.
 
 </td>
 </tr>
 </table>
 
-**QBITEL Bridge solves all three.** No rip-and-replace. No downtime. No cloud dependency.
+**QBITEL Bridge provides the intelligence and protection layer for systems that cannot be ripped out.** No forced replacement. No blind automation. Evidence for every critical change.
 
 ---
 
@@ -88,23 +88,23 @@ Average SOC response time: **65 minutes**. In that window, an attacker can exfil
 ```
   Legacy System                    QBITEL Bridge                         Modern Infrastructure
                         ┌──────────────────────────────────┐
-  COBOL Mainframes      │                                  │          Cloud APIs
-  SCADA / PLCs     ───► │  1. DISCOVER  unknown protocols  │ ───►     Microservices
-  Medical Devices       │  2. PROTECT   with quantum crypto│          Dashboards
-  Banking Terminals     │  3. TRANSLATE to modern APIs     │          Event Streams
-  Custom Protocols      │  4. COMPLY    across 9 frameworks│          Data Lakes
-                        │  5. OPERATE   with autonomous AI │
+  BPO / Voice           │                                  │          Cloud APIs
+  Mainframes       ───► │  1. DISCOVER  assets and flows   │ ───►     Microservices
+  IoT / OT / SCADA      │  2. UNDERSTAND behavior and risk │          Dashboards
+  Defense Networks      │  3. MODERNIZE adapters and APIs  │          Event Streams
+  Healthcare / Telecom  │  4. PROTECT   with policy + PQC  │          Evidence Packs
+                        │  5. PROVE     control and lineage│
                         └──────────────────────────────────┘
                                  2-4 hours to first results
 ```
 
 | Step | What Happens | Traditional Approach | With QBITEL |
 |------|-------------|---------------------|-------------|
-| **Discover** | AI learns protocol structure from raw traffic | 6-12 months, $2-10M | **2-4 hours**, automated |
-| **Protect** | Wraps communications in NIST Level 5 PQC | Not available | **ML-KEM + ML-DSA**, <1ms |
-| **Translate** | Generates REST APIs + SDKs in 6 languages | Weeks of manual coding | **Minutes**, auto-generated |
-| **Comply** | Produces audit-ready reports for 9 frameworks | $500K-1M/year manual | **<10 min**, automated |
-| **Operate** | Autonomous threat detection and response | 65 min avg SOC response | **<1 sec**, 78% autonomous |
+| **Discover** | Builds asset, protocol, dependency, and crypto inventory | 6-12 months, $2-10M | **Hours to days**, automated |
+| **Understand** | Explains behavior, risk, fraud, and failure patterns | Tribal knowledge | **Evidence-backed intelligence** |
+| **Modernize** | Generates specs, APIs, adapters, SDKs, and replay harnesses | Weeks/months of manual coding | **Repeatable delivery assets** |
+| **Protect** | Applies policy controls, fraud/threat defenses, and PQC overlays | Fragmented tools | **Governed runtime controls** |
+| **Prove** | Produces audit, board, client, and change-control evidence | Manual audit prep | **Evidence pack in the workflow** |
 
 ---
 
@@ -132,8 +132,8 @@ NIST Level 5 protection with **ML-KEM** (Kyber-1024) and **ML-DSA** (Dilithium-5
 <tr>
 <td width="50%">
 
-### Zero-Touch Security Engine
-LLM-powered autonomous response with confidence-driven execution. Auto-executes at >95% confidence, escalates at <50%. MITRE ATT&CK mapping. Full audit trail.
+### Governed Protection Engine
+Policy-led protection for fraud, threat, and quantum-risk workflows. Critical actions require approval gates, rollback paths, simulation, and audit evidence.
 
 [Learn more](docs/products/04_AGENTIC_AI_SECURITY.md) &bull; [Architecture](diagrams/04_zero_touch_decision_engine.svg)
 
@@ -158,8 +158,8 @@ Point at any protocol, get a REST API with OpenAPI 3.0 spec + SDKs in Python, Ty
 </td>
 <td width="50%">
 
-### Protocol Marketplace
-Community-driven protocol knowledge sharing with 1,000+ pre-built adapters. Publish, discover, and monetize protocol definitions. Automated validation pipeline with security scanning.
+### Vertical Solution Packs
+Industry-specific protocols, templates, risk models, and evidence packs for BPO/call centers, IoT, defense, banking, OT, healthcare, telecom, aviation, and automotive.
 
 [Learn more](docs/products/03_PROTOCOL_MARKETPLACE.md)
 
@@ -168,8 +168,8 @@ Community-driven protocol knowledge sharing with 1,000+ pre-built adapters. Publ
 <tr>
 <td width="50%">
 
-### Multi-Agent Orchestration
-16+ specialized AI agents with 5 execution strategies (parallel, sequential, pipeline, consensus, adaptive). Persistent memory, dynamic scaling, coordinated incident response.
+### Critical System Intelligence
+AI-assisted analysis of system behavior, ownership, business meaning, fraud indicators, failure signals, and modernization readiness across critical estates.
 
 [Architecture](diagrams/02_ai_agent_ecosystem.svg)
 
@@ -448,7 +448,7 @@ qbitel-bridge/
 
 ### Industry Brochures
 
-[Banking](docs/brochures/01_BANKING_FINANCIAL_SERVICES.md) &bull; [Healthcare](docs/brochures/02_HEALTHCARE.md) &bull; [Critical Infrastructure](docs/brochures/03_CRITICAL_INFRASTRUCTURE_SCADA.md) &bull; [Automotive](docs/brochures/04_AUTOMOTIVE.md) &bull; [Aviation](docs/brochures/05_AVIATION.md) &bull; [Telecommunications](docs/brochures/06_TELECOMMUNICATIONS.md) &bull; [Executive Overview](docs/brochures/08_EXECUTIVE_OVERVIEW.md)
+[Banking](docs/brochures/01_BANKING_FINANCIAL_SERVICES.md) &bull; [Healthcare](docs/brochures/02_HEALTHCARE.md) &bull; [Critical Infrastructure](docs/brochures/03_CRITICAL_INFRASTRUCTURE_SCADA.md) &bull; [Automotive](docs/brochures/04_AUTOMOTIVE.md) &bull; [Aviation](docs/brochures/05_AVIATION.md) &bull; [Telecommunications](docs/brochures/06_TELECOMMUNICATIONS.md) &bull; [BPOs & Call Centers](docs/brochures/10_BPO_CALL_CENTERS.md) &bull; [Executive Overview](docs/brochures/08_EXECUTIVE_OVERVIEW.md)
 
 ### Resources
 

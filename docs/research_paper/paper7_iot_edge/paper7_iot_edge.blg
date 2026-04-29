@@ -1,0 +1,59 @@
+This is BibTeX, Version 0.99d (TeX Live 2025)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: paper7_iot_edge.aux
+The style file: IEEEtran.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: references.bib
+-- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+Warning--missing institution in iec61508
+Warning--missing institution in en50129
+
+Done.
+You've used 22 entries,
+            4087 wiz_defined-function locations,
+            943 strings with 10711 characters,
+and the built_in function-call counts, 13015 in all, are:
+= -- 1059
+> -- 248
+< -- 88
++ -- 138
+- -- 50
+* -- 572
+:= -- 2139
+add.period$ -- 42
+call.type$ -- 22
+change.case$ -- 28
+chr.to.int$ -- 201
+cite$ -- 24
+duplicate$ -- 996
+empty$ -- 1071
+format.name$ -- 49
+if$ -- 2956
+int.to.chr$ -- 0
+int.to.str$ -- 22
+missing$ -- 202
+newline$ -- 89
+num.names$ -- 22
+pop$ -- 429
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 2
+skip$ -- 1016
+stack$ -- 0
+substring$ -- 439
+swap$ -- 757
+text.length$ -- 21
+text.prefix$ -- 0
+top$ -- 5
+type$ -- 22
+warning$ -- 2
+while$ -- 52
+width$ -- 24
+write$ -- 227
+(There were 2 warnings)
