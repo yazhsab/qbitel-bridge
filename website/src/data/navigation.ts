@@ -41,13 +41,13 @@ export const mainNavigation: NavItem[] = [
       { label: 'Quick Start', href: '/docs/getting-started/quickstart', description: 'Deploy in under 5 minutes' },
       { label: 'Architecture', href: '/docs/architecture/overview', description: '4-layer system design' },
       { label: 'PQC Algorithms', href: '/docs/security/pqc-algorithms', description: 'Algorithm families and implementation layers' },
+      { label: 'Implementation Review', href: '/pqc-audit', description: 'Transparent PQC maturity and hardening notes' },
       { label: 'API Reference', href: '/docs/api/rest-api', description: 'REST & gRPC API documentation' },
       { label: 'Deployment', href: '/docs/deployment/docker', description: 'Production deployment guides' },
       { label: 'Development', href: '/docs/development/python', description: 'Contributing and local development setup' },
     ],
   },
   { label: 'Roadmap', href: '/roadmap' },
-  { label: 'PQC Audit', href: '/pqc-audit' },
   { label: 'About', href: '/about' },
 ];
 
@@ -64,7 +64,7 @@ export const footerNavigation = {
     { label: 'Interactive Demo Lab', href: '/demo-lab' },
     { label: 'Documentation', href: '/docs' },
     { label: 'Quick Start', href: '/docs/getting-started/quickstart' },
-    { label: 'PQC Audit', href: '/pqc-audit' },
+    { label: 'Implementation Review', href: '/pqc-audit' },
     { label: 'API Reference', href: '/docs/api/rest-api' },
     { label: 'Roadmap', href: '/roadmap' },
     { label: 'Infographics & Media', href: '/resources' },

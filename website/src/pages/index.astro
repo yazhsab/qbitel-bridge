@@ -58,15 +58,15 @@ const deliveryStack = [
     <div class="absolute -left-24 top-24 h-80 w-80 rounded-full bg-neon-copper/15 blur-3xl" />
     <div class="absolute right-0 top-0 h-96 w-96 rounded-full bg-neon-cyan/10 blur-3xl" />
 
-    <div class="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-      <div class="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+    <div class="relative mx-auto max-w-7xl px-4 pb-14 pt-24 sm:px-6 lg:px-8 lg:pb-16 lg:pt-24">
+      <div class="grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
         <div>
           <div class="inline-flex items-center gap-2 rounded-full border border-surface-600/60 bg-surface-800/70 px-4 py-1.5 text-sm text-slate-200">
             <span class="h-2 w-2 rounded-full bg-neon-green" />
             Critical systems intelligence with governed protection
           </div>
 
-          <h1 class="mt-6 max-w-4xl text-4xl font-bold leading-tight text-white sm:text-5xl xl:text-6xl">
+          <h1 class="mt-5 max-w-4xl text-4xl font-bold leading-[1.05] text-white sm:text-5xl xl:text-[3.45rem]">
             Turn unknown critical systems
             <span class="gradient-text"> into governed, modern, quantum-safe infrastructure.</span>
           </h1>
@@ -79,14 +79,14 @@ const deliveryStack = [
           </p>
 
           <div class="mt-8 flex flex-wrap gap-4">
-            <a href={url('/products')} class="btn-primary text-base">
-              Explore the platform
+            <a href={url('/enterprise')} class="btn-primary text-base">
+              Request assessment
             </a>
-            <a href={url('/pqc-audit')} class="btn-secondary text-base">
-              Review PQC implementation
+            <a href={url('/demo-lab')} class="btn-secondary text-base">
+              Try Demo Lab
             </a>
-            <a href={url('/roadmap')} class="btn-ghost text-base">
-              View roadmap
+            <a href={url('/products')} class="btn-ghost text-base">
+              Explore platform
             </a>
           </div>
 
@@ -100,28 +100,28 @@ const deliveryStack = [
         </div>
 
         <div class="card overflow-hidden">
-          <div class="border-b border-surface-600/60 p-6">
+          <div class="border-b border-surface-600/60 p-5">
             <p class="text-xs font-semibold uppercase tracking-[0.32em] text-neon-cyan/80">
               What the workflow produces
             </p>
-            <h2 class="mt-3 text-2xl font-bold text-white">
+            <h2 class="mt-3 text-xl font-bold text-white">
               One operating sequence instead of disconnected feature claims.
             </h2>
           </div>
 
-          <div class="grid gap-4 p-6">
+          <div class="grid gap-3 p-5">
             {productModules.map((module, index) => (
-              <div class="rounded-3xl border border-surface-600/70 bg-surface-900/70 p-5">
-                <div class="flex items-center justify-between">
-                  <div class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                    0{index + 1} · {module.eyebrow}
+              <div class="rounded-2xl border border-surface-600/70 bg-surface-900/70 p-4">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-surface-600 bg-surface-950 text-xs font-bold text-slate-300">
+                    0{index + 1}
                   </div>
                   <span class={`inline-flex rounded-full bg-gradient-to-r px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white ${module.color}`}>
                     {module.label}
                   </span>
                 </div>
-                <h3 class="mt-3 text-lg font-semibold text-white">{module.headline}</h3>
-                <p class="mt-2 text-sm leading-6 text-slate-300">{module.summary}</p>
+                <h3 class="mt-3 text-base font-semibold text-white">{module.headline}</h3>
+                <p class="mt-1 line-clamp-2 text-sm leading-6 text-slate-300">{module.summary}</p>
               </div>
             ))}
           </div>
@@ -191,9 +191,8 @@ const deliveryStack = [
           Bring Your Own <span class="gradient-text">Domain Data</span>
         </h2>
         <p class="section-subheading mx-auto">
-          Visitors should not have to imagine the product. They can paste BPO, IoT, defense,
-          banking, OT, healthcare, telecom, or mobility samples and see an explainable QBITEL
-          workflow in the browser.
+          Paste BPO, IoT, defense, banking, OT, healthcare, telecom, or mobility samples and see
+          an explainable QBITEL workflow directly in the browser.
         </p>
       </div>
 
@@ -225,9 +224,8 @@ const deliveryStack = [
             Every delivery ends with an <span class="gradient-text">evidence pack</span>
           </h2>
           <p class="text-lg leading-8 text-slate-300">
-            QBITEL should not stop at discovery or code generation. The differentiator is the full
-            record of what changed, why it changed, how it was validated, and which controls govern
-            it in production.
+            QBITEL packages the full record of what changed, why it changed, how it was validated,
+            and which controls govern it in production.
           </p>
 
           <div class="mt-8 grid gap-3">
@@ -265,18 +263,17 @@ const deliveryStack = [
             Code-level implementation signal
           </div>
           <h2 class="mt-6 section-heading">
-            Strong foundations exist.
-            <span class="gradient-text"> Several domain-specific PQC modules still need hardening.</span>
+            Technical transparency.
+            <span class="gradient-text"> Clear maturity signals for PQC rollout.</span>
           </h2>
           <p class="text-lg leading-8 text-slate-300">
-            The repo already contains credible building blocks, especially in the Rust Falcon
-            engine and the LMS/XMSS stateful signature implementation. But multiple domain modules
-            are still prototype-grade and should not be marketed as production cryptography yet.
+            QBITEL separates production-grade primitives, guarded wrappers, and prototype domain
+            modules so enterprise teams can plan a controlled hardening and rollout path.
           </p>
 
           <div class="mt-8 flex flex-wrap gap-4">
             <a href={url('/pqc-audit')} class="btn-primary">
-              Open interactive PQC audit
+              Open implementation review
             </a>
             <a href={url('/products/post-quantum-crypto')} class="btn-secondary">
               See PQC product page
@@ -301,6 +298,6 @@ const deliveryStack = [
 
   <CTABanner
     title="Start with protocol inventory, then expand into modernization and PQC rollout"
-    description="QBITEL is strongest when it lands as a concrete legacy modernization program with governed protection and evidence, not as a generic bundle of AI security claims."
+    description="Start with a concrete assessment, produce a protocol inventory, then expand into modernization, governed protection, and evidence-backed rollout."
   />
 </LandingLayout>

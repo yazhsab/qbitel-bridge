@@ -66,6 +66,12 @@ const currentPath = Astro.url.pathname;
       <!-- Right side -->
       <div class="flex items-center gap-3">
         <a
+          href={url('/enterprise')}
+          class="hidden md:inline-flex rounded-lg bg-gradient-to-r from-neon-cyan to-quantum-500 px-3.5 py-2 text-sm font-semibold text-white shadow-lg shadow-neon-cyan/10 transition-transform hover:-translate-y-0.5"
+        >
+          Request assessment
+        </a>
+        <a
           href="https://github.com/yazhsab/qbitel-bridge"
           target="_blank"
           rel="noopener noreferrer"
@@ -123,6 +129,12 @@ const currentPath = Astro.url.pathname;
         </div>
       ))}
       <div class="pt-2 border-t border-surface-600">
+        <a
+          href={url('/enterprise')}
+          class="mb-2 flex items-center justify-center rounded-lg bg-gradient-to-r from-neon-cyan to-quantum-500 px-3 py-2 text-sm font-semibold text-white"
+        >
+          Request assessment
+        </a>
         <a
           href="https://github.com/yazhsab/qbitel-bridge"
           target="_blank"
