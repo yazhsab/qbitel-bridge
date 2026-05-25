@@ -100,19 +100,19 @@ jobs:
             --cov-report=xml \
             --cov-report=html \
             --cov-report=term \
-            --cov-fail-under=0 \
+            --cov-fail-under=70 \
             --junitxml=junit.xml \
-            -v -p no:cacheprovider || true
+            -v -p no:cacheprovider
         env:
-          COVERAGE_THRESHOLD: 80
+          COVERAGE_THRESHOLD: 70
 
-      - name: Check coverage threshold
-        continue-on-error: true
+      - name: Check overall coverage threshold
         run: |
-          coverage report --fail-under=0 || {
-            echo "::warning::Code coverage check."
-            exit 1
-          }
+          coverage report --fail-under=70
+
+      - name: Check crypto module coverage (80% minimum)
+        run: |
+          coverage report --include="ai_engine/crypto/*" --fail-under=80
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

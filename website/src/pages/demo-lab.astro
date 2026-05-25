@@ -2,6 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PageHero from '@/components/hero/PageHero.astro';
 import DomainDemoLab from '@/components/interactive/DomainDemoLab';
+import IndustryUseCaseAnimator from '@/components/interactive/IndustryUseCaseAnimator';
 ---
 
 <PageLayout
@@ -13,10 +14,34 @@ import DomainDemoLab from '@/components/interactive/DomainDemoLab';
     description="Paste domain-specific traffic, logs, protocol messages, or telemetry and see an explainable QBITEL-style output: discovery, risk, modernization, protection, and evidence."
     badge="Bring your own sample data"
     gradient="from-neon-cyan to-neon-green"
+    visual="demo"
   />
 
   <section class="border-b border-surface-600/50 py-10 lg:py-16">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-10 text-center">
+        <h2 class="section-heading">
+          Animated <span class="gradient-text">Use-Case Walkthroughs</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Start with a clear business explanation, then continue into the raw-data test lab.
+        </p>
+      </div>
+      <IndustryUseCaseAnimator client:load />
+    </div>
+  </section>
+
+  <section class="border-b border-surface-600/50 py-10 lg:py-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-10 text-center">
+        <h2 class="section-heading">
+          Bring Your Own <span class="gradient-text">Sample Data</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Paste representative traffic, logs, protocol messages, or telemetry to see a
+          QBITEL-style analysis.
+        </p>
+      </div>
       <DomainDemoLab client:load />
     </div>
   </section>

@@ -1,0 +1,127 @@
+{
+  "intersection_id": 25660,
+  "msg_count": 69,
+  "minute_of_year": 281533,
+  "location_name": "Downtown St. Louis",
+  "latitude": 38.6262501,
+  "longitude": -90.196958,
+  "num_signal_groups": 7,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 177,
+      "max_end_time_ds": 240,
+      "likely_time_ds": 187,
+      "confidence": 3
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 204,
+      "max_end_time_ds": 301,
+      "likely_time_ds": 227,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 274,
+      "max_end_time_ds": 345,
+      "likely_time_ds": 289,
+      "confidence": 0
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 131,
+      "max_end_time_ds": 188,
+      "likely_time_ds": 145,
+      "confidence": 14
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 90,
+      "max_end_time_ds": 98,
+      "likely_time_ds": 97,
+      "confidence": 14
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 287,
+      "max_end_time_ds": 356,
+      "likely_time_ds": 297,
+      "confidence": 1
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "dark",
+      "min_end_time_ds": 289,
+      "max_end_time_ds": 295,
+      "likely_time_ds": 293,
+      "confidence": 11
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "ec0a019fd60b9a1ed3817e74bd170c66dd3cb184cb9c1c0ab95e45bbcc24e8ee",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.094858",
+  "message_length": 176,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 112,
+      "length": 1
+    }
+  ],
+  "hash": "f8e870766160551fdb4ae575f659c845b94f50be532f76550d92334d0acf6b8a",
+  "sample_index": 424
+}

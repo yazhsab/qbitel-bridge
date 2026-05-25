@@ -186,8 +186,18 @@ class WorkflowManager:
     - Workflow visualization
     """
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: Dict[str, Any] = None, llm_service=None):
+        """
+        Initialize the WorkflowManager.
+
+        Args:
+            config: Optional configuration dict.
+            llm_service: An instance of ``UnifiedLLMService`` (or compatible).
+                         When provided, workflow nodes invoke the LLM for actual
+                         analysis instead of returning stub/placeholder results.
+        """
         self.config = config or {}
+        self.llm_service = llm_service
         self.logger = logging.getLogger(__name__)
 
         # Workflow registry
@@ -258,12 +268,51 @@ class WorkflowManager:
         compiled = workflow.compile(checkpointer=self.checkpointer)
         self.workflows["protocol_analysis"] = compiled
 
+    async def _llm_generate_json(self, prompt: str, feature_domain: str = "protocol_copilot") -> Dict[str, Any]:
+        """Helper: invoke the LLM service and return parsed JSON, or an empty dict on failure."""
+        if self.llm_service is None:
+            return {}
+        try:
+            # Import LLMRequest locally to avoid circular imports at module level
+            from .unified_llm_service import LLMRequest, ResponseFormat
+
+            request = LLMRequest(
+                prompt=prompt,
+                feature_domain=feature_domain,
+                response_format=ResponseFormat.JSON,
+                max_tokens=2000,
+                temperature=0.2,
+            )
+            response = await self.llm_service.process_request(request)
+            if response.parsed_response:
+                return response.parsed_response
+            return json.loads(response.content) if response.content else {}
+        except Exception as e:
+            self.logger.warning("LLM call failed in workflow node: %s", e)
+            return {}
+
     async def _classify_protocol_node(self, state: ProtocolAnalysisState) -> Dict[str, Any]:
-        """Classify the protocol type."""
+        """Classify the protocol type using the LLM service."""
         WORKFLOW_STEP_COUNTER.labels(workflow_type="protocol_analysis", step_name="classify_protocol").inc()
 
-        # Simulated classification (in production, use actual LLM service)
-        classification = {"protocol_type": "unknown", "confidence": 0.0, "possible_matches": [], "features_detected": []}
+        protocol_data = state.get("protocol_data", "")
+        hint = state.get("protocol_hint", "")
+
+        if self.llm_service:
+            prompt = (
+                "You are a protocol analysis expert. Classify the following captured "
+                "network protocol data. Return JSON with keys: protocol_type (string), "
+                "confidence (float 0-1), possible_matches (list of strings), "
+                "features_detected (list of strings).\n\n"
+                f"Protocol hint: {hint or 'none'}\n"
+                f"Data sample:\n{protocol_data[:2000]}"
+            )
+            classification = await self._llm_generate_json(prompt, "protocol_copilot")
+        else:
+            classification = {
+                "protocol_type": "unknown", "confidence": 0.0,
+                "possible_matches": [], "features_detected": [],
+            }
 
         return {
             "classification_result": classification,
@@ -272,21 +321,55 @@ class WorkflowManager:
         }
 
     async def _analyze_fields_node(self, state: ProtocolAnalysisState) -> Dict[str, Any]:
-        """Analyze protocol fields."""
+        """Analyze protocol fields using the LLM service."""
         WORKFLOW_STEP_COUNTER.labels(workflow_type="protocol_analysis", step_name="analyze_fields").inc()
 
-        field_analysis = {"fields_detected": [], "field_boundaries": [], "data_types": {}, "patterns": []}
+        protocol_data = state.get("protocol_data", "")
+        classification = state.get("classification_result", {})
+
+        if self.llm_service:
+            prompt = (
+                "Analyze the following protocol data and identify its field structure. "
+                "Return JSON with keys: fields_detected (list of field name strings), "
+                "field_boundaries (list of {start, end, name}), data_types (dict of "
+                "field_name to type), patterns (list of observed patterns).\n\n"
+                f"Protocol type: {classification.get('protocol_type', 'unknown')}\n"
+                f"Data sample:\n{protocol_data[:2000]}"
+            )
+            field_analysis = await self._llm_generate_json(prompt, "protocol_copilot")
+        else:
+            field_analysis = {
+                "fields_detected": [], "field_boundaries": [],
+                "data_types": {}, "patterns": [],
+            }
 
         return {"field_analysis": field_analysis, "current_step": "analyze_fields"}
 
     async def _assess_security_node(self, state: ProtocolAnalysisState) -> Dict[str, Any]:
-        """Assess security implications."""
+        """Assess security implications using the LLM service."""
         WORKFLOW_STEP_COUNTER.labels(workflow_type="protocol_analysis", step_name="assess_security").inc()
 
-        security_assessment = {"vulnerabilities": [], "risk_level": "low", "recommendations": [], "encryption_detected": False}
+        classification = state.get("classification_result", {})
+        field_analysis = state.get("field_analysis", {})
 
-        # Determine if human review is needed
-        requires_review = security_assessment.get("risk_level") in ["high", "critical"]
+        if self.llm_service:
+            prompt = (
+                "Assess the security implications of this protocol. Return JSON with "
+                "keys: vulnerabilities (list of {name, severity, description}), "
+                "risk_level (low/medium/high/critical), recommendations (list of "
+                "strings), encryption_detected (bool).\n\n"
+                f"Protocol: {classification.get('protocol_type', 'unknown')}\n"
+                f"Fields: {json.dumps(field_analysis.get('fields_detected', []))}\n"
+                f"Features: {json.dumps(classification.get('features_detected', []))}"
+            )
+            security_assessment = await self._llm_generate_json(prompt, "security_orchestrator")
+        else:
+            security_assessment = {
+                "vulnerabilities": [], "risk_level": "low",
+                "recommendations": [], "encryption_detected": False,
+            }
+
+        requires_review = security_assessment.get("risk_level") in ("high", "critical")
 
         return {
             "security_assessment": security_assessment,

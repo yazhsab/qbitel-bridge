@@ -36,8 +36,8 @@ export const auditStatusCopy: Record<
     description: 'Important parts of the flow are simplified or rely on placeholders rather than complete cryptographic verification.',
   },
   unsafe: {
-    label: 'Unsafe as implemented',
-    description: 'The current logic accepts invalid states or uses a construction that does not deliver the advertised security property.',
+    label: 'Needs redesign',
+    description: 'The current logic accepts invalid states or uses a construction that does not yet deliver the advertised security property.',
   },
 };
 

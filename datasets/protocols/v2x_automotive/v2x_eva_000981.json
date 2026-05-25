@@ -1,0 +1,92 @@
+{
+  "temp_id_hex": "46685439",
+  "timestamp_ms": 3071423285,
+  "latitude": 29.7650749,
+  "longitude": -95.3679064,
+  "location_name": "Downtown Houston",
+  "speed_mph": 58.4,
+  "heading_deg": 221.2649,
+  "vehicle_label": "road_maintenance",
+  "priority": 2,
+  "response_type": "stationary",
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x20",
+    "signer_type": "digest",
+    "signer_id_hex": "2fc4c34a54a49ff9",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 79
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "eva",
+  "timestamp": "2026-03-04T09:49:09.237274",
+  "message_length": 102,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 79,
+      "length": 1
+    },
+    {
+      "name": "timestamp",
+      "offset": 80,
+      "length": 4
+    },
+    {
+      "name": "temporary_id",
+      "offset": 84,
+      "length": 4
+    },
+    {
+      "name": "latitude",
+      "offset": 88,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 92,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 96,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 98,
+      "length": 2
+    },
+    {
+      "name": "priority",
+      "offset": 100,
+      "length": 1
+    },
+    {
+      "name": "response_type",
+      "offset": 101,
+      "length": 1
+    }
+  ],
+  "hash": "a8e9cd2587ec95281fa094d5b99d5505422dce8bedcbd165d8f25d17233de0ca",
+  "sample_index": 981
+}

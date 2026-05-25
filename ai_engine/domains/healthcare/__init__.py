@@ -45,6 +45,35 @@ from .fda_compliance import (
     PremarketSubmission,
 )
 
+from .ehr_proxy_reencryption import (
+    EHRProxyReEncryption,
+    ProxyReEncryptionKey,
+    EncryptedEHRRecord,
+    ReEncryptedRecord,
+    RecordCategory,
+    ConsentType,
+    ReEncryptionDeniedError,
+)
+
+from .homomorphic_vitals import (
+    HomomorphicVitalEngine,
+    EncryptedVital,
+    EncryptedAggregate,
+    DecryptedStatistic,
+    VitalType,
+    HEKeyPair,
+)
+
+from .verifiable_credentials import (
+    HealthCredentialIssuer,
+    HealthCredentialHolder,
+    HealthCredentialVerifier,
+    VerifiableCredential,
+    VerifiablePresentation,
+    CredentialType,
+    CredentialSubject,
+)
+
 __all__ = [
     # Lightweight PQC
     "LightweightPQCEngine",
@@ -66,4 +95,27 @@ __all__ = [
     "FDAComplianceValidator",
     "CybersecurityRequirement",
     "PremarketSubmission",
+    # EHR Proxy Re-Encryption
+    "EHRProxyReEncryption",
+    "ProxyReEncryptionKey",
+    "EncryptedEHRRecord",
+    "ReEncryptedRecord",
+    "RecordCategory",
+    "ConsentType",
+    "ReEncryptionDeniedError",
+    # Homomorphic Vital Sign Analytics
+    "HomomorphicVitalEngine",
+    "EncryptedVital",
+    "EncryptedAggregate",
+    "DecryptedStatistic",
+    "VitalType",
+    "HEKeyPair",
+    # Verifiable Health Credentials
+    "HealthCredentialIssuer",
+    "HealthCredentialHolder",
+    "HealthCredentialVerifier",
+    "VerifiableCredential",
+    "VerifiablePresentation",
+    "CredentialType",
+    "CredentialSubject",
 ]

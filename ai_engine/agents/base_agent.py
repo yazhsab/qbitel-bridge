@@ -20,6 +20,7 @@ from prometheus_client import Counter, Histogram, Gauge
 if TYPE_CHECKING:
     from .agent_communication import AgentCommunicationProtocol, AgentMessage
     from .agent_memory import AgentMemoryManager
+    from .agent_llm_integration import AgentLLMService, LLMTaskType, LLMResponse
 
 # Prometheus metrics
 AGENT_TASKS_COUNTER = Counter(
@@ -158,6 +159,7 @@ class BaseAgent(ABC):
         config: AgentConfig,
         communication: Optional["AgentCommunicationProtocol"] = None,
         memory: Optional["AgentMemoryManager"] = None,
+        llm_service: Optional["AgentLLMService"] = None,
     ):
         """Initialize the base agent."""
         self.agent_id = str(uuid.uuid4())
@@ -167,9 +169,10 @@ class BaseAgent(ABC):
         self.status = AgentStatus.INITIALIZING
         self.priority = config.priority
 
-        # Communication and memory
+        # Communication, memory, and LLM
         self.communication = communication
         self.memory = memory
+        self.llm_service: Optional["AgentLLMService"] = llm_service
 
         # Task management
         self.task_queue: asyncio.Queue = asyncio.Queue()
@@ -472,6 +475,64 @@ class BaseAgent(ABC):
             "started_at": self.started_at.isoformat() if self.started_at else None,
             "last_heartbeat": self.last_heartbeat.isoformat() if self.last_heartbeat else None,
         }
+
+    # ------ LLM Integration Helpers ------
+
+    async def llm_generate(
+        self,
+        prompt: str,
+        task_type: str = "general",
+        system_prompt: Optional[str] = None,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        **kwargs,
+    ) -> Optional["LLMResponse"]:
+        """
+        Generate an LLM response using the agent's LLM service.
+
+        Convenience wrapper that automatically passes agent_type for
+        metrics and selects the appropriate model based on task_type.
+
+        Returns None if no LLM service is configured.
+        """
+        if self.llm_service is None:
+            self.logger.debug("No LLM service configured; skipping generation")
+            return None
+
+        return await self.llm_service.generate(
+            agent_type=self.agent_type,
+            prompt=prompt,
+            task_type=task_type,
+            system_prompt=system_prompt,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            **kwargs,
+        )
+
+    async def llm_generate_structured(
+        self,
+        prompt: str,
+        output_schema: Optional[dict] = None,
+        task_type: str = "general",
+        system_prompt: Optional[str] = None,
+        **kwargs,
+    ) -> Optional["LLMResponse"]:
+        """
+        Generate a structured (JSON) LLM response.
+
+        Returns None if no LLM service is configured.
+        """
+        if self.llm_service is None:
+            return None
+
+        return await self.llm_service.generate_structured(
+            agent_type=self.agent_type,
+            prompt=prompt,
+            output_schema=output_schema,
+            task_type=task_type,
+            system_prompt=system_prompt,
+            **kwargs,
+        )
 
     # Abstract methods to be implemented by specialized agents
 

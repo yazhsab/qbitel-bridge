@@ -95,6 +95,9 @@ python-jose[cryptography]==3.3.0
 python-multipart==0.0.6
 
 # Post-Quantum Cryptography (PQC)
+# Production-tier (constant-time C/Rust implementations)
+liboqs-python>=0.10.0
+# Dev-tier (pure-Python, NOT constant-time — do not use in production)
 kyber-py==1.0.1
 dilithium-py==1.3.0
 pycryptodomex==3.23.0

@@ -99,3 +99,5 @@ pytestdebug.log
 # Knowledge base (local reference only)
 KNOWLEDGE_BASE.md
 
+.claude/
+.understand-anything/

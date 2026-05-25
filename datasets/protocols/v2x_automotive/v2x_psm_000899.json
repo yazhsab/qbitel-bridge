@@ -1,0 +1,86 @@
+{
+  "basic_type": "unavailable",
+  "sec_mark_ms": 34157,
+  "msg_count": 32,
+  "latitude": 40.7567993,
+  "longitude": -73.9875029,
+  "location_name": "Times Square, NYC",
+  "speed_mph": 4.3,
+  "heading_deg": 190.6426,
+  "position_accuracy": 5,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8002",
+    "signer_type": "certificate",
+    "signer_id_hex": "f2fdfffc51a9eade558998dcadd1c7200654dc583887a837dd0580454c154404",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.219233",
+  "message_length": 122,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 108,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 109,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 113,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 117,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 119,
+      "length": 2
+    }
+  ],
+  "hash": "893d57539d4ef7cf38fe2a597dc0fcee95205284468b6dffe946fbc67733f749",
+  "sample_index": 899
+}

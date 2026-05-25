@@ -818,6 +818,20 @@ Generate production-ready code with:
         """Get a template by ID."""
         return self._templates.get(template_id)
 
+    def get_template_by_domain(self, feature_domain: str) -> Optional[PromptTemplate]:
+        """Return the first ACTIVE template whose feature_domain matches.
+
+        This is used by the UnifiedLLMService to resolve versioned system
+        prompts for domain routing.  Returns ``None`` when no match is found.
+        """
+        for template in self._templates.values():
+            if (
+                template.feature_domain == feature_domain
+                and template.status == TemplateStatus.ACTIVE
+            ):
+                return template
+        return None
+
     def list_templates(
         self,
         feature_domain: Optional[str] = None,

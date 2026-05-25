@@ -1,0 +1,119 @@
+{
+  "intersection_id": 59141,
+  "msg_count": 26,
+  "minute_of_year": 175189,
+  "location_name": "Midtown Atlanta",
+  "latitude": 33.7515065,
+  "longitude": -84.3876764,
+  "num_signal_groups": 6,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 292,
+      "max_end_time_ds": 368,
+      "likely_time_ds": 330,
+      "confidence": 15
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 293,
+      "max_end_time_ds": 340,
+      "likely_time_ds": 305,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 287,
+      "max_end_time_ds": 309,
+      "likely_time_ds": 305,
+      "confidence": 2
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "dark",
+      "min_end_time_ds": 89,
+      "max_end_time_ds": 116,
+      "likely_time_ds": 99,
+      "confidence": 4
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 95,
+      "max_end_time_ds": 130,
+      "likely_time_ds": 101,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 83,
+      "max_end_time_ds": 156,
+      "likely_time_ds": 106,
+      "confidence": 5
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "ddea76d18d203314adf443b3c1598675019c7920c1a7ca14ee43bf2b7f25171e",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 136
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.114794",
+  "message_length": 199,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 136,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 137,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 138,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 140,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 144,
+      "length": 1
+    }
+  ],
+  "hash": "2d609b1da6b71583682869fdfccda27caee6117f133889bcf3d3db069374f319",
+  "sample_index": 509
+}

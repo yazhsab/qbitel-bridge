@@ -91,8 +91,8 @@ class BudgetStatus:
     alert_triggered: bool = False
 
 
-# Default model specifications (2024-2025 pricing)
-DEFAULT_MODELS = [
+# Default model specifications (hardcoded fallback — override via config file)
+_BUILTIN_MODELS = [
     ModelSpec(
         model_id="gpt-4o",
         provider="openai",
@@ -118,7 +118,7 @@ DEFAULT_MODELS = [
         latency_ms=400,
     ),
     ModelSpec(
-        model_id="claude-sonnet-4-5-20250929",
+        model_id="claude-sonnet-4-5-20250514",
         provider="anthropic",
         tier=ModelTier.PREMIUM,
         cost_per_1k_input=3.00,
@@ -130,7 +130,7 @@ DEFAULT_MODELS = [
         latency_ms=900,
     ),
     ModelSpec(
-        model_id="claude-3-5-haiku-20241022",
+        model_id="claude-haiku-4-5-20251001",
         provider="anthropic",
         tier=ModelTier.ECONOMY,
         cost_per_1k_input=0.25,
@@ -141,6 +141,119 @@ DEFAULT_MODELS = [
         quality_score=0.82,
         latency_ms=300,
     ),
+    # -------------------------------------------------------------------------
+    # Local Models (2026 MoE-first — zero cost, maximum privacy)
+    # -------------------------------------------------------------------------
+    ModelSpec(
+        model_id="qwen3-coder-next",
+        provider="vllm",
+        tier=ModelTier.LOCAL,
+        cost_per_1k_input=0.0,
+        cost_per_1k_output=0.0,
+        max_tokens=32768,
+        context_window=32768,
+        capabilities=["code", "tools", "agents"],
+        quality_score=0.91,  # 70%+ SWE-bench Verified
+        latency_ms=50,  # 3B active params = ultra-fast
+    ),
+    ModelSpec(
+        model_id="deepseek-r1-distilled-32b",
+        provider="vllm",
+        tier=ModelTier.LOCAL,
+        cost_per_1k_input=0.0,
+        cost_per_1k_output=0.0,
+        max_tokens=32768,
+        context_window=32768,
+        capabilities=["code", "tools", "reasoning", "security"],
+        quality_score=0.92,  # Strong CoT from R1 distillation
+        latency_ms=150,
+    ),
+    ModelSpec(
+        model_id="mimo-v2-flash",
+        provider="vllm",
+        tier=ModelTier.LOCAL,
+        cost_per_1k_input=0.0,
+        cost_per_1k_output=0.0,
+        max_tokens=32768,
+        context_window=256000,
+        capabilities=["code", "tools", "long_context"],
+        quality_score=0.90,  # 73.4% SWE-bench, 150 tok/s
+        latency_ms=40,  # Fastest MoE — 15B active
+    ),
+    ModelSpec(
+        model_id="deepseek-v3.2",
+        provider="vllm",
+        tier=ModelTier.LOCAL,
+        cost_per_1k_input=0.0,
+        cost_per_1k_output=0.0,
+        max_tokens=65536,
+        context_window=163840,
+        capabilities=["code", "tools", "reasoning", "long_context", "json"],
+        quality_score=0.96,  # Frontier-class, beats GPT-5
+        latency_ms=200,  # 37B active
+    ),
+    ModelSpec(
+        model_id="llama-4-scout",
+        provider="vllm",
+        tier=ModelTier.LOCAL,
+        cost_per_1k_input=0.0,
+        cost_per_1k_output=0.0,
+        max_tokens=65536,
+        context_window=10_000_000,  # 10M token context
+        capabilities=["code", "vision", "tools", "long_context"],
+        quality_score=0.89,
+        latency_ms=120,  # 17B active, 16 experts
+    ),
+    ModelSpec(
+        model_id="qwen3-235b",
+        provider="vllm",
+        tier=ModelTier.LOCAL,
+        cost_per_1k_input=0.0,
+        cost_per_1k_output=0.0,
+        max_tokens=32768,
+        context_window=131072,
+        capabilities=["code", "tools", "reasoning", "long_context", "json"],
+        quality_score=0.93,
+        latency_ms=180,  # 22B active
+    ),
+    # QBITEL fine-tuned specialist models
+    ModelSpec(
+        model_id="qbitel-protocol",
+        provider="vllm",
+        tier=ModelTier.LOCAL,
+        cost_per_1k_input=0.0,
+        cost_per_1k_output=0.0,
+        max_tokens=16384,
+        context_window=32768,
+        capabilities=["code", "tools", "protocol_analysis", "field_detection"],
+        quality_score=0.94,  # Domain-specialized
+        latency_ms=50,
+    ),
+    ModelSpec(
+        model_id="qbitel-security",
+        provider="vllm",
+        tier=ModelTier.LOCAL,
+        cost_per_1k_input=0.0,
+        cost_per_1k_output=0.0,
+        max_tokens=32768,
+        context_window=32768,
+        capabilities=["code", "tools", "reasoning", "security", "pqc", "compliance"],
+        quality_score=0.95,  # Domain-specialized
+        latency_ms=150,
+    ),
+    ModelSpec(
+        model_id="qbitel-translate",
+        provider="vllm",
+        tier=ModelTier.LOCAL,
+        cost_per_1k_input=0.0,
+        cost_per_1k_output=0.0,
+        max_tokens=32768,
+        context_window=32768,
+        capabilities=["code", "tools", "translation", "protocol_analysis"],
+        quality_score=0.93,  # Domain-specialized
+        latency_ms=80,
+    ),
+    # Legacy Ollama models (kept for backward compatibility)
     ModelSpec(
         model_id="llama3.2",
         provider="ollama",
@@ -153,19 +266,83 @@ DEFAULT_MODELS = [
         quality_score=0.75,
         latency_ms=200,
     ),
-    ModelSpec(
-        model_id="qwen2.5",
-        provider="ollama",
-        tier=ModelTier.LOCAL,
-        cost_per_1k_input=0.0,
-        cost_per_1k_output=0.0,
-        max_tokens=4096,
-        context_window=32768,
-        capabilities=["code", "long_context"],
-        quality_score=0.78,
-        latency_ms=250,
-    ),
 ]
+
+
+def load_model_specs(config_path: Optional[str] = None) -> List[ModelSpec]:
+    """
+    Load model specifications from a JSON/YAML config file.
+
+    Falls back to built-in defaults if no config is provided or loading fails.
+    The config file is a JSON array of objects matching ModelSpec fields, e.g.:
+
+        [
+          {
+            "model_id": "gpt-4o",
+            "provider": "openai",
+            "tier": "premium",
+            "cost_per_1k_input": 2.50,
+            "cost_per_1k_output": 10.00,
+            "max_tokens": 16384,
+            "context_window": 128000,
+            "capabilities": ["code", "vision", "tools", "json"],
+            "quality_score": 0.95,
+            "latency_ms": 800
+          }
+        ]
+
+    This allows operators to update pricing and add models without code changes.
+
+    Args:
+        config_path: Path to a JSON file with model specs. If None, checks the
+                     ``QBITEL_MODEL_SPECS_PATH`` environment variable.
+
+    Returns:
+        List of ModelSpec instances.
+    """
+    import json as _json
+    import os
+
+    path = config_path or os.environ.get("QBITEL_MODEL_SPECS_PATH")
+    if not path:
+        return list(_BUILTIN_MODELS)
+
+    try:
+        with open(path, "r") as f:
+            raw_specs = _json.load(f)
+
+        models = []
+        for spec in raw_specs:
+            models.append(
+                ModelSpec(
+                    model_id=spec["model_id"],
+                    provider=spec["provider"],
+                    tier=ModelTier(spec.get("tier", "standard")),
+                    cost_per_1k_input=float(spec.get("cost_per_1k_input", 0.0)),
+                    cost_per_1k_output=float(spec.get("cost_per_1k_output", 0.0)),
+                    max_tokens=int(spec.get("max_tokens", 4096)),
+                    context_window=int(spec.get("context_window", 32000)),
+                    capabilities=spec.get("capabilities", []),
+                    quality_score=float(spec.get("quality_score", 0.8)),
+                    latency_ms=float(spec.get("latency_ms", 500)),
+                    is_available=spec.get("is_available", True),
+                )
+            )
+
+        logging.getLogger(__name__).info(
+            "Loaded %d model specs from %s", len(models), path
+        )
+        return models
+
+    except Exception as e:
+        logging.getLogger(__name__).warning(
+            "Failed to load model specs from %s: %s — using built-in defaults", path, e
+        )
+        return list(_BUILTIN_MODELS)
+
+
+# Module-level default: loaded on import (can be overridden by calling load_model_specs)
+DEFAULT_MODELS = load_model_specs()
 
 
 class ComplexityAssessor:

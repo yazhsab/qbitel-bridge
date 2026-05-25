@@ -1,0 +1,111 @@
+{
+  "intersection_id": 2465,
+  "msg_count": 31,
+  "minute_of_year": 347167,
+  "location_name": "Times Square, NYC",
+  "latitude": 40.7568534,
+  "longitude": -73.989253,
+  "num_signal_groups": 5,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 259,
+      "max_end_time_ds": 358,
+      "likely_time_ds": 355,
+      "confidence": 13
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 132,
+      "max_end_time_ds": 181,
+      "likely_time_ds": 169,
+      "confidence": 2
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 291,
+      "max_end_time_ds": 342,
+      "likely_time_ds": 337,
+      "confidence": 14
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 170,
+      "max_end_time_ds": 249,
+      "likely_time_ds": 200,
+      "confidence": 8
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 202,
+      "max_end_time_ds": 253,
+      "likely_time_ds": 220,
+      "confidence": 13
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "c6522be14b357073",
+    "signature_algorithm": "ML-DSA-65",
+    "signature_size_bytes": 3293,
+    "is_pqc_signature": true,
+    "header_length": 3309
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.116147",
+  "message_length": 3363,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 3309,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 3310,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 3311,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 3313,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 3317,
+      "length": 1
+    }
+  ],
+  "hash": "23f430cff32d7032919eda5b036d093ca029181cf4b6c7f1267090ab136cb150",
+  "sample_index": 514
+}

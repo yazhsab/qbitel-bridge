@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPEDALCYCLIST",
+  "sec_mark_ms": 19033,
+  "msg_count": 103,
+  "latitude": 38.6225298,
+  "longitude": -90.1996787,
+  "location_name": "Downtown St. Louis",
+  "speed_mph": 12.6,
+  "heading_deg": 237.8123,
+  "position_accuracy": 11,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8002",
+    "signer_type": "certificate",
+    "signer_id_hex": "13512262167fa7e70aa38afc1d7fe7e548d90f55a46e08f186b75617311d466d",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 136
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.207297",
+  "message_length": 154,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 136,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 137,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 138,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 140,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 141,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 145,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 149,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 151,
+      "length": 2
+    }
+  ],
+  "hash": "529cf9114991dc10e5859680e89411b4d042f285edfb9f048844cf7e134e714b",
+  "sample_index": 842
+}

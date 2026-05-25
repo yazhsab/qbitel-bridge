@@ -1,0 +1,127 @@
+{
+  "intersection_id": 47666,
+  "msg_count": 107,
+  "minute_of_year": 466855,
+  "location_name": "Portland Pioneer Sq",
+  "latitude": 45.5236326,
+  "longitude": -122.6718731,
+  "num_signal_groups": 7,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 210,
+      "max_end_time_ds": 297,
+      "likely_time_ds": 283,
+      "confidence": 3
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 170,
+      "max_end_time_ds": 213,
+      "likely_time_ds": 170,
+      "confidence": 13
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 32,
+      "max_end_time_ds": 109,
+      "likely_time_ds": 69,
+      "confidence": 0
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 30,
+      "max_end_time_ds": 95,
+      "likely_time_ds": 71,
+      "confidence": 13
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 238,
+      "max_end_time_ds": 297,
+      "likely_time_ds": 269,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 245,
+      "max_end_time_ds": 335,
+      "likely_time_ds": 289,
+      "confidence": 13
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 127,
+      "max_end_time_ds": 192,
+      "likely_time_ds": 153,
+      "confidence": 2
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "639aee949a0c5225f0651b81b94320122d8efbe1b194d0e8dfd1408eeee7b8f6",
+    "signature_algorithm": "ML-DSA-44",
+    "signature_size_bytes": 2420,
+    "is_pqc_signature": true,
+    "header_length": 2460
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.134520",
+  "message_length": 2532,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 2460,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 2461,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 2462,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 2464,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 2468,
+      "length": 1
+    }
+  ],
+  "hash": "82190170d6f363018f0d30c40d1301a36a6149cac4af4fc1a972fee35a8f6667",
+  "sample_index": 590
+}

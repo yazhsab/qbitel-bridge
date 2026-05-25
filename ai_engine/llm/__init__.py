@@ -347,3 +347,37 @@ try:
     )
 except Exception:  # pragma: no cover - optional dependency failures
     GuardrailManager = None  # type: ignore
+
+# New: LLM & RAG Evaluation Framework
+try:
+    from .evaluation import (
+        LLMEvaluator,
+        HeuristicEvaluator,
+        LLMJudgeEvaluator,
+        ABExperimentRunner,
+        EvalResult,
+        EvalSuiteResult,
+        EvalScore,
+        EvalDatasetItem,
+        EvalMetricType,
+        ABExperiment,
+        ABResult,
+    )
+
+    __all__.extend(
+        [
+            "LLMEvaluator",
+            "HeuristicEvaluator",
+            "LLMJudgeEvaluator",
+            "ABExperimentRunner",
+            "EvalResult",
+            "EvalSuiteResult",
+            "EvalScore",
+            "EvalDatasetItem",
+            "EvalMetricType",
+            "ABExperiment",
+            "ABResult",
+        ]
+    )
+except Exception:  # pragma: no cover - optional dependency failures
+    LLMEvaluator = None  # type: ignore

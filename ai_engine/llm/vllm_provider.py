@@ -94,39 +94,127 @@ class VLLMModelConfig:
     output_cost_per_1k: float = 0.0
 
 
+# =============================================================================
 # Pre-configured models for vLLM
+#
+# Updated March 2026 — MoE-first architecture leveraging latest open-source
+# models for maximum capability-per-GPU-dollar.
+#
+# Tier layout:
+#   - Protocol/Code: Qwen3-Coder-Next (80B/3B active) — single GPU
+#   - Security/Reasoning: DeepSeek-R1-Distilled-Qwen-32B — dense, strong CoT
+#   - High-Throughput: MiMo-V2-Flash (309B/15B active) — 150 tok/s
+#   - Orchestration: DeepSeek-V3.2 (671B/37B active) — frontier reasoning
+#   - Legacy compat: Llama 4 Scout, Qwen3-235B (kept for migration)
+# =============================================================================
+
 VLLM_MODELS = {
-    "llama-3.2-70b": VLLMModelConfig(
-        model_name="meta-llama/Llama-3.2-70B-Instruct",
-        endpoint="http://vllm-llama:8000",
-        max_tokens=8192,
+    # -------------------------------------------------------------------------
+    # Tier 1: Protocol Analysis & Code Tasks (PRIMARY WORKHORSE)
+    # -------------------------------------------------------------------------
+    "qwen3-coder-next": VLLMModelConfig(
+        model_name="Qwen/Qwen3-Coder-Next",
+        endpoint="http://vllm-qwen-coder:8000",
+        max_tokens=32768,
         supports_function_calling=True,
+        # 80B total / 3B active — runs on single A6000 or RTX 4090
+        # 70%+ SWE-bench, Apache 2.0, trained on 800K GitHub PR bug-fix tasks
     ),
+
+    # -------------------------------------------------------------------------
+    # Tier 2: Security Reasoning & Compliance
+    # -------------------------------------------------------------------------
+    "deepseek-r1-distilled-32b": VLLMModelConfig(
+        model_name="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+        endpoint="http://vllm-deepseek-r1:8000",
+        max_tokens=32768,
+        supports_function_calling=True,
+        # Dense 32B — strong chain-of-thought reasoning from R1 distillation
+        # Ideal for PQC algorithm selection, threat scoring, compliance analysis
+    ),
+
+    # -------------------------------------------------------------------------
+    # Tier 3: High-Throughput Batch Processing
+    # -------------------------------------------------------------------------
+    "mimo-v2-flash": VLLMModelConfig(
+        model_name="XiaomiMiMo/MiMo-V2-Flash",
+        endpoint="http://vllm-mimo:8000",
+        max_tokens=32768,
+        supports_function_calling=True,
+        # 309B total / 15B active — 150 tok/s, MIT license
+        # 73.4% SWE-bench, hybrid SWA/GA attention, 6x KV-cache reduction
+        # Best for: bulk protocol scanning, anomaly detection, real-time analysis
+    ),
+
+    # -------------------------------------------------------------------------
+    # Tier 4: Frontier Orchestration & Complex Planning
+    # -------------------------------------------------------------------------
+    "deepseek-v3.2": VLLMModelConfig(
+        model_name="deepseek-ai/DeepSeek-V3.2",
+        endpoint="http://vllm-deepseek-v3:8000",
+        max_tokens=65536,
+        supports_function_calling=True,
+        request_timeout=300.0,  # Longer timeout for complex reasoning
+        # 671B total / 37B active, 163K context, MIT license
+        # Tool-use in thinking mode, beats GPT-5 on many benchmarks
+        # Use for: multi-agent orchestration, complex security analysis
+    ),
+
+    # -------------------------------------------------------------------------
+    # Tier 5: Multimodal & General Purpose
+    # -------------------------------------------------------------------------
+    "llama-4-scout": VLLMModelConfig(
+        model_name="meta-llama/Llama-4-Scout-17B-16E-Instruct",
+        endpoint="http://vllm-llama4:8000",
+        max_tokens=65536,
+        supports_function_calling=True,
+        # 109B total / 17B active, 16 experts, multimodal (text+image)
+        # 10M token context window, ideal for document analysis
+    ),
+    "qwen3-235b": VLLMModelConfig(
+        model_name="Qwen/Qwen3-235B-A22B",
+        endpoint="http://vllm-qwen3:8000",
+        max_tokens=32768,
+        supports_function_calling=True,
+        # 235B total / 22B active, Apache 2.0
+        # Strong reasoning + multilingual, extendable to 131K context via YaRN
+    ),
+
+    # -------------------------------------------------------------------------
+    # Fine-Tuned QBITEL Specialist Models (deployed after training)
+    # -------------------------------------------------------------------------
+    "qbitel-protocol": VLLMModelConfig(
+        model_name="qbitel/qbitel-protocol-v1",
+        endpoint="http://vllm-qbitel-protocol:8000",
+        max_tokens=16384,
+        supports_function_calling=True,
+        # Fine-tuned Qwen3-Coder-Next on protocol analysis, field detection,
+        # binary parsing, protocol translation tasks
+    ),
+    "qbitel-security": VLLMModelConfig(
+        model_name="qbitel/qbitel-security-v1",
+        endpoint="http://vllm-qbitel-security:8000",
+        max_tokens=32768,
+        supports_function_calling=True,
+        # Fine-tuned DeepSeek-R1-Distilled-32B on PQC algorithm selection,
+        # quantum threat scoring, compliance analysis
+    ),
+    "qbitel-translate": VLLMModelConfig(
+        model_name="qbitel/qbitel-translate-v1",
+        endpoint="http://vllm-qbitel-translate:8000",
+        max_tokens=32768,
+        supports_function_calling=True,
+        # Fine-tuned on legacy→modern protocol translation tasks
+        # (TN3270→REST, HL7v2→FHIR, ISO8583→ISO20022, GOOSE→OPC-UA)
+    ),
+
+    # -------------------------------------------------------------------------
+    # Legacy models (kept for backward compatibility, will be phased out)
+    # -------------------------------------------------------------------------
     "llama-3.2-8b": VLLMModelConfig(
         model_name="meta-llama/Llama-3.2-8B-Instruct",
         endpoint="http://vllm-llama-8b:8000",
         max_tokens=8192,
-    ),
-    "mistral-7b": VLLMModelConfig(
-        model_name="mistralai/Mistral-7B-Instruct-v0.3",
-        endpoint="http://vllm-mistral:8000",
-        max_tokens=32768,
-    ),
-    "codellama-34b": VLLMModelConfig(
-        model_name="codellama/CodeLlama-34b-Instruct-hf",
-        endpoint="http://vllm-codellama:8000",
-        max_tokens=16384,
-    ),
-    "qwen-72b": VLLMModelConfig(
-        model_name="Qwen/Qwen2.5-72B-Instruct",
-        endpoint="http://vllm-qwen:8000",
-        max_tokens=32768,
-        supports_function_calling=True,
-    ),
-    "deepseek-coder-33b": VLLMModelConfig(
-        model_name="deepseek-ai/deepseek-coder-33b-instruct",
-        endpoint="http://vllm-deepseek:8000",
-        max_tokens=16384,
     ),
 }
 
@@ -141,11 +229,14 @@ class VLLMProviderConfig:
     # Model configurations
     models: Dict[str, VLLMModelConfig] = field(default_factory=lambda: VLLM_MODELS.copy())
 
-    # Default model selection
-    default_model: str = "llama-3.2-8b"
-    code_model: str = "codellama-34b"
-    fast_model: str = "llama-3.2-8b"
-    powerful_model: str = "llama-3.2-70b"
+    # Default model selection (2026 MoE-first)
+    default_model: str = "qwen3-coder-next"
+    code_model: str = "qwen3-coder-next"
+    fast_model: str = "mimo-v2-flash"
+    powerful_model: str = "deepseek-v3.2"
+    security_model: str = "deepseek-r1-distilled-32b"
+    protocol_model: str = "qbitel-protocol"
+    translation_model: str = "qbitel-translate"
 
     # Connection settings
     connection_pool_size: int = 100
@@ -538,23 +629,47 @@ class VLLMProvider:
             "fast": self.config.fast_model,
             "code": self.config.code_model,
             "powerful": self.config.powerful_model,
-            "llama": "llama-3.2-8b",
-            "mistral": "mistral-7b",
-            "codellama": "codellama-34b",
-            "qwen": "qwen-72b",
-            "deepseek": "deepseek-coder-33b",
+            "security": self.config.security_model,
+            "protocol": self.config.protocol_model,
+            "translate": self.config.translation_model,
+            # Model family aliases
+            "qwen": "qwen3-coder-next",
+            "deepseek": "deepseek-v3.2",
+            "deepseek-r1": "deepseek-r1-distilled-32b",
+            "mimo": "mimo-v2-flash",
+            "llama": "llama-4-scout",
+            "llama4": "llama-4-scout",
+            # QBITEL specialist aliases
+            "qbitel-protocol": "qbitel-protocol",
+            "qbitel-security": "qbitel-security",
+            "qbitel-translate": "qbitel-translate",
+            # Legacy aliases (backward compat)
+            "codellama": "qwen3-coder-next",
+            "mistral": "mimo-v2-flash",
+            "llama-3.2-8b": "llama-3.2-8b",
         }
 
         return aliases.get(model, self.config.default_model)
 
     def _get_fallback_model(self, model_id: str) -> Optional[str]:
         """Get a fallback model when primary is unhealthy."""
-        # Define fallback chains
+        # Define fallback chains (2026 MoE-first)
         fallback_chains = {
-            "llama-3.2-70b": ["llama-3.2-8b", "mistral-7b"],
-            "llama-3.2-8b": ["mistral-7b"],
-            "codellama-34b": ["deepseek-coder-33b", "llama-3.2-8b"],
-            "qwen-72b": ["llama-3.2-70b", "llama-3.2-8b"],
+            # Code tasks: Qwen3-Coder → MiMo → Llama 4
+            "qwen3-coder-next": ["mimo-v2-flash", "llama-4-scout", "llama-3.2-8b"],
+            "qbitel-protocol": ["qwen3-coder-next", "mimo-v2-flash"],
+            "qbitel-translate": ["qwen3-coder-next", "deepseek-r1-distilled-32b"],
+            # Security/reasoning: DeepSeek-R1 → DeepSeek-V3.2 → Qwen3
+            "deepseek-r1-distilled-32b": ["deepseek-v3.2", "qwen3-235b"],
+            "qbitel-security": ["deepseek-r1-distilled-32b", "deepseek-v3.2"],
+            # High-throughput: MiMo → Qwen3-Coder → Llama 4
+            "mimo-v2-flash": ["qwen3-coder-next", "llama-4-scout"],
+            # Frontier: DeepSeek-V3.2 → Qwen3-235B → Llama 4
+            "deepseek-v3.2": ["qwen3-235b", "llama-4-scout"],
+            "qwen3-235b": ["deepseek-v3.2", "llama-4-scout"],
+            "llama-4-scout": ["qwen3-235b", "mimo-v2-flash"],
+            # Legacy
+            "llama-3.2-8b": ["mimo-v2-flash", "qwen3-coder-next"],
         }
 
         fallbacks = fallback_chains.get(model_id, [])

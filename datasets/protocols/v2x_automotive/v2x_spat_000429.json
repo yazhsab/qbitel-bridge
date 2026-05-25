@@ -1,0 +1,95 @@
+{
+  "intersection_id": 39288,
+  "msg_count": 74,
+  "minute_of_year": 400339,
+  "location_name": "Uptown Charlotte",
+  "latitude": 35.2247045,
+  "longitude": -80.8449139,
+  "num_signal_groups": 3,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 281,
+      "max_end_time_ds": 375,
+      "likely_time_ds": 326,
+      "confidence": 3
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 238,
+      "max_end_time_ds": 288,
+      "likely_time_ds": 283,
+      "confidence": 14
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 88,
+      "max_end_time_ds": 173,
+      "likely_time_ds": 112,
+      "confidence": 2
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "35d855c3e5303e96",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 80
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.095933",
+  "message_length": 116,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 80,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 81,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 82,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 84,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 88,
+      "length": 1
+    }
+  ],
+  "hash": "dbc4cec32d8ba79d3ca0fef3b5002b5864ccf8d275bacd1aec3cdcb6acd3bf9e",
+  "sample_index": 429
+}

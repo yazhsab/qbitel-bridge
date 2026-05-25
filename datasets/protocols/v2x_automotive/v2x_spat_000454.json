@@ -1,0 +1,103 @@
+{
+  "intersection_id": 22147,
+  "msg_count": 99,
+  "minute_of_year": 31419,
+  "location_name": "Downtown San Diego",
+  "latitude": 32.7183265,
+  "longitude": -117.158153,
+  "num_signal_groups": 4,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 93,
+      "max_end_time_ds": 159,
+      "likely_time_ds": 149,
+      "confidence": 1
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 266,
+      "max_end_time_ds": 318,
+      "likely_time_ds": 285,
+      "confidence": 12
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 26,
+      "max_end_time_ds": 40,
+      "likely_time_ds": 36,
+      "confidence": 13
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 30,
+      "max_end_time_ds": 81,
+      "likely_time_ds": 40,
+      "confidence": 5
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ML-DSA-44",
+    "signature_size_bytes": 2420,
+    "is_pqc_signature": true,
+    "header_length": 2428
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.102625",
+  "message_length": 2473,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 2428,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 2429,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 2430,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 2432,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 2436,
+      "length": 1
+    }
+  ],
+  "hash": "8f5e777d63ded5a757b3e6be8c877ae0293efd1ce1b94eef4f46cce7bb826aef",
+  "sample_index": 454
+}

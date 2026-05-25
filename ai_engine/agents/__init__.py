@@ -117,6 +117,44 @@ from .multi_agent_orchestrator import (
     OrchestratorConfig,
 )
 
+# New: Circuit Breaker for cascading failure protection
+from .circuit_breaker import (
+    CircuitBreaker,
+    CircuitBreakerConfig,
+    CircuitBreakerRegistry,
+    CircuitOpenError,
+    BulkheadFullError,
+    get_circuit_breaker_registry,
+)
+
+# New: Agent LLM Integration (local-first model routing)
+from .agent_llm_integration import (
+    AgentLLMService,
+    AgentLLMConfig,
+    LLMTaskType,
+    LLMResponse,
+)
+
+# New: Unified Agent Interface (bridges Core / Legacy Whisperer / BPO)
+from .unified_agent_interface import (
+    UnifiedAgentRegistry,
+    UnifiedTask,
+    UnifiedResult,
+    UnifiedCapability,
+    AgentSubsystem,
+    CoreAgentAdapter,
+    LegacyWhispererAdapter,
+    BPOAgentAdapter,
+)
+
+# New: Centralized Health Monitoring
+from .agent_health_monitor import (
+    AgentHealthMonitor,
+    HealthMonitorConfig,
+    HealthStatus,
+    AlertSeverity,
+)
+
 __all__ = [
     # Base Agent
     "BaseAgent",
@@ -155,4 +193,30 @@ __all__ = [
     # Orchestrator
     "MultiAgentOrchestrator",
     "OrchestratorConfig",
+    # Circuit Breaker
+    "CircuitBreaker",
+    "CircuitBreakerConfig",
+    "CircuitBreakerRegistry",
+    "CircuitOpenError",
+    "BulkheadFullError",
+    "get_circuit_breaker_registry",
+    # Agent LLM Integration
+    "AgentLLMService",
+    "AgentLLMConfig",
+    "LLMTaskType",
+    "LLMResponse",
+    # Unified Agent Interface
+    "UnifiedAgentRegistry",
+    "UnifiedTask",
+    "UnifiedResult",
+    "UnifiedCapability",
+    "AgentSubsystem",
+    "CoreAgentAdapter",
+    "LegacyWhispererAdapter",
+    "BPOAgentAdapter",
+    # Health Monitor
+    "AgentHealthMonitor",
+    "HealthMonitorConfig",
+    "HealthStatus",
+    "AlertSeverity",
 ]

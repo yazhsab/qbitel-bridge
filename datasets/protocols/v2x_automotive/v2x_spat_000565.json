@@ -1,0 +1,95 @@
+{
+  "intersection_id": 52937,
+  "msg_count": 82,
+  "minute_of_year": 370149,
+  "location_name": "Downtown Seattle",
+  "latitude": 47.6034509,
+  "longitude": -122.3356077,
+  "num_signal_groups": 3,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 190,
+      "max_end_time_ds": 230,
+      "likely_time_ds": 223,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 108,
+      "max_end_time_ds": 131,
+      "likely_time_ds": 109,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "dark",
+      "min_end_time_ds": 229,
+      "max_end_time_ds": 287,
+      "likely_time_ds": 231,
+      "confidence": 2
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "8eefcac33b3db7e3",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 80
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.127966",
+  "message_length": 116,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 80,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 81,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 82,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 84,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 88,
+      "length": 1
+    }
+  ],
+  "hash": "a7b72711fa21e486f007d52becedd71e1b66d5e6280073365c6ef695c9338773",
+  "sample_index": 565
+}

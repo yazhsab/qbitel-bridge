@@ -1,0 +1,127 @@
+{
+  "intersection_id": 62099,
+  "msg_count": 58,
+  "minute_of_year": 279203,
+  "location_name": "Uptown Charlotte",
+  "latitude": 35.2231903,
+  "longitude": -80.8448207,
+  "num_signal_groups": 7,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 186,
+      "max_end_time_ds": 260,
+      "likely_time_ds": 193,
+      "confidence": 14
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 272,
+      "max_end_time_ds": 336,
+      "likely_time_ds": 297,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 25,
+      "max_end_time_ds": 98,
+      "likely_time_ds": 69,
+      "confidence": 10
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 191,
+      "max_end_time_ds": 227,
+      "likely_time_ds": 223,
+      "confidence": 0
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 97,
+      "max_end_time_ds": 137,
+      "likely_time_ds": 101,
+      "confidence": 0
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 251,
+      "max_end_time_ds": 289,
+      "likely_time_ds": 268,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 298,
+      "max_end_time_ds": 349,
+      "likely_time_ds": 336,
+      "confidence": 0
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 72
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.091972",
+  "message_length": 144,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 72,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 73,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 74,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 76,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 80,
+      "length": 1
+    }
+  ],
+  "hash": "62464892b1ea06a35ab38be4c8c5cce4517ede5a5b32de948917ce21e244f05a",
+  "sample_index": 413
+}

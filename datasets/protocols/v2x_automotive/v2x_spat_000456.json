@@ -1,0 +1,127 @@
+{
+  "intersection_id": 55625,
+  "msg_count": 101,
+  "minute_of_year": 189145,
+  "location_name": "Boston Common",
+  "latitude": 42.36003,
+  "longitude": -71.0553167,
+  "num_signal_groups": 7,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "dark",
+      "min_end_time_ds": 254,
+      "max_end_time_ds": 340,
+      "likely_time_ds": 304,
+      "confidence": 3
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 188,
+      "max_end_time_ds": 257,
+      "likely_time_ds": 218,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "dark",
+      "min_end_time_ds": 269,
+      "max_end_time_ds": 281,
+      "likely_time_ds": 280,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 249,
+      "max_end_time_ds": 310,
+      "likely_time_ds": 309,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 228,
+      "max_end_time_ds": 259,
+      "likely_time_ds": 245,
+      "confidence": 3
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 14,
+      "max_end_time_ds": 42,
+      "likely_time_ds": 21,
+      "confidence": 15
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 173,
+      "max_end_time_ds": 242,
+      "likely_time_ds": 242,
+      "confidence": 13
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "f674590c54bc56f7dcf7fbe2881a75de6117ac735fd4376c4575414b0903964d",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.102992",
+  "message_length": 176,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 112,
+      "length": 1
+    }
+  ],
+  "hash": "a022d1202000afc39488f024221075cf0097b770d7ec174aeb320c30d18150b1",
+  "sample_index": 456
+}

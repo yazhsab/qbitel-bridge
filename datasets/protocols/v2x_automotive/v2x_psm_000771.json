@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPEDESTRIAN",
+  "sec_mark_ms": 43964,
+  "msg_count": 32,
+  "latitude": 45.5226138,
+  "longitude": -122.6809776,
+  "location_name": "Portland Pioneer Sq",
+  "speed_mph": 4.6,
+  "heading_deg": 348.0772,
+  "position_accuracy": 8,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8002",
+    "signer_type": "certificate",
+    "signer_id_hex": "c065835e07a40b9251c53c38a97971838926d79af785a6f64f0d286d82cc08cc",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.192475",
+  "message_length": 122,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 108,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 109,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 113,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 117,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 119,
+      "length": 2
+    }
+  ],
+  "hash": "0013015c5c0ee8517cc3d74a7b2effc3255933878f6c91d220cbd02def5cd323",
+  "sample_index": 771
+}

@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPEDALCYCLIST",
+  "sec_mark_ms": 18966,
+  "msg_count": 66,
+  "latitude": 36.1591793,
+  "longitude": -86.7817781,
+  "location_name": "Downtown Nashville",
+  "speed_mph": 5.2,
+  "heading_deg": 17.0391,
+  "position_accuracy": 5,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8002",
+    "signer_type": "certificate",
+    "signer_id_hex": "6b1bc8e26b713605783228c21c3ae69b6ec42d4ebcd87a4a58f1676a0ee7bb62",
+    "signature_algorithm": "ML-DSA-44",
+    "signature_size_bytes": 2420,
+    "is_pqc_signature": true,
+    "header_length": 2460
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.199699",
+  "message_length": 2478,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 2460,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 2461,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 2462,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 2464,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 2465,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 2469,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 2473,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 2475,
+      "length": 2
+    }
+  ],
+  "hash": "058c3d2af2a2e537c868a32f584edf61ea697673f3bdfb127df7330bfe5ef94a",
+  "sample_index": 805
+}

@@ -1,0 +1,95 @@
+{
+  "intersection_id": 35770,
+  "msg_count": 108,
+  "minute_of_year": 187394,
+  "location_name": "The Loop, Chicago",
+  "latitude": 41.8817207,
+  "longitude": -87.6304853,
+  "num_signal_groups": 3,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 290,
+      "max_end_time_ds": 366,
+      "likely_time_ds": 324,
+      "confidence": 0
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 277,
+      "max_end_time_ds": 328,
+      "likely_time_ds": 285,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 176,
+      "max_end_time_ds": 238,
+      "likely_time_ds": 190,
+      "confidence": 13
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "61da373f1ed0fdf8",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 80
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.134719",
+  "message_length": 116,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 80,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 81,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 82,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 84,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 88,
+      "length": 1
+    }
+  ],
+  "hash": "1205e42e7a73dc42122fc3bd495ba78bce3e3bfca97901e761187e34addf3add",
+  "sample_index": 591
+}

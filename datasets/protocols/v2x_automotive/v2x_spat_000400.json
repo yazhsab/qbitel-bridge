@@ -1,0 +1,103 @@
+{
+  "intersection_id": 54672,
+  "msg_count": 45,
+  "minute_of_year": 197218,
+  "location_name": "Central Phoenix",
+  "latitude": 33.4499021,
+  "longitude": -112.0696235,
+  "num_signal_groups": 4,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 114,
+      "max_end_time_ds": 200,
+      "likely_time_ds": 180,
+      "confidence": 13
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 275,
+      "max_end_time_ds": 311,
+      "likely_time_ds": 306,
+      "confidence": 3
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 67,
+      "max_end_time_ds": 125,
+      "likely_time_ds": 109,
+      "confidence": 10
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 83,
+      "max_end_time_ds": 103,
+      "likely_time_ds": 92,
+      "confidence": 9
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "c1c0d4d9b7a38e52ded787050f0f005984f89abb602efa7d5c548094de1bcc5e",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 136
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.089249",
+  "message_length": 181,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 136,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 137,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 138,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 140,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 144,
+      "length": 1
+    }
+  ],
+  "hash": "3b85bedfa6d2b13aecc3eb01873a0de884bbb5977b08d74db978502353d79e53",
+  "sample_index": 400
+}

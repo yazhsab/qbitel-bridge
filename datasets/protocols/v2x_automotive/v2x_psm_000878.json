@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPUBLICSAFETYWORKER",
+  "sec_mark_ms": 25125,
+  "msg_count": 11,
+  "latitude": 30.2720246,
+  "longitude": -97.7466299,
+  "location_name": "Austin Capitol",
+  "speed_mph": 3.6,
+  "heading_deg": 316.0843,
+  "position_accuracy": 13,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8002",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.215295",
+  "message_length": 122,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 108,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 109,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 113,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 117,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 119,
+      "length": 2
+    }
+  ],
+  "hash": "891b42efebe8766b4639ba0c7989acd81c2228096550fad3586fea2213aa280d",
+  "sample_index": 878
+}

@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPEDESTRIAN",
+  "sec_mark_ms": 36677,
+  "msg_count": 88,
+  "latitude": 32.7170714,
+  "longitude": -117.1609106,
+  "location_name": "Downtown San Diego",
+  "speed_mph": 7.9,
+  "heading_deg": 335.6469,
+  "position_accuracy": 6,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8002",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ML-DSA-65",
+    "signature_size_bytes": 3293,
+    "is_pqc_signature": true,
+    "header_length": 3301
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.204016",
+  "message_length": 3319,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 3301,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 3302,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 3303,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 3305,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 3306,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 3310,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 3314,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 3316,
+      "length": 2
+    }
+  ],
+  "hash": "4dc7148abf3d9cac7b923c7d5cbcecaa26c05e52fabafa065e13742406465b10",
+  "sample_index": 827
+}

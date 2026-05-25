@@ -1,0 +1,92 @@
+{
+  "temp_id_hex": "466853ea",
+  "timestamp_ms": 3071423267,
+  "latitude": 35.2224445,
+  "longitude": -80.8448465,
+  "location_name": "Uptown Charlotte",
+  "speed_mph": 51.2,
+  "heading_deg": 15.8905,
+  "vehicle_label": "police",
+  "priority": 6,
+  "response_type": "emergency",
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x20",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ML-DSA-65",
+    "signature_size_bytes": 3293,
+    "is_pqc_signature": true,
+    "header_length": 3300
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "eva",
+  "timestamp": "2026-03-04T09:49:09.220060",
+  "message_length": 3323,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 3300,
+      "length": 1
+    },
+    {
+      "name": "timestamp",
+      "offset": 3301,
+      "length": 4
+    },
+    {
+      "name": "temporary_id",
+      "offset": 3305,
+      "length": 4
+    },
+    {
+      "name": "latitude",
+      "offset": 3309,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 3313,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 3317,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 3319,
+      "length": 2
+    },
+    {
+      "name": "priority",
+      "offset": 3321,
+      "length": 1
+    },
+    {
+      "name": "response_type",
+      "offset": 3322,
+      "length": 1
+    }
+  ],
+  "hash": "49bca327634fa7b98a463d593fc954525321b3354d3f9791f9bb9a319b7460c9",
+  "sample_index": 902
+}

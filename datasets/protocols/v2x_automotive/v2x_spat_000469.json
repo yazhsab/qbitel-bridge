@@ -1,0 +1,135 @@
+{
+  "intersection_id": 52470,
+  "msg_count": 114,
+  "minute_of_year": 130199,
+  "location_name": "The Loop, Chicago",
+  "latitude": 41.880215,
+  "longitude": -87.6329953,
+  "num_signal_groups": 8,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 97,
+      "max_end_time_ds": 152,
+      "likely_time_ds": 137,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 155,
+      "max_end_time_ds": 164,
+      "likely_time_ds": 160,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 256,
+      "max_end_time_ds": 271,
+      "likely_time_ds": 270,
+      "confidence": 0
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 252,
+      "max_end_time_ds": 330,
+      "likely_time_ds": 327,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 116,
+      "max_end_time_ds": 168,
+      "likely_time_ds": 123,
+      "confidence": 15
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 290,
+      "max_end_time_ds": 334,
+      "likely_time_ds": 312,
+      "confidence": 2
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 214,
+      "max_end_time_ds": 256,
+      "likely_time_ds": 233,
+      "confidence": 10
+    },
+    {
+      "signal_group_id": 8,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 203,
+      "max_end_time_ds": 250,
+      "likely_time_ds": 212,
+      "confidence": 1
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "55fe30ff555df38f",
+    "signature_algorithm": "Falcon-512",
+    "signature_size_bytes": 666,
+    "is_pqc_signature": true,
+    "header_length": 682
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.105968",
+  "message_length": 763,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 682,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 683,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 684,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 686,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 690,
+      "length": 1
+    }
+  ],
+  "hash": "d7a22d9e0e269d9666dad69c1f064a3c76590729b97eebdab09b3a5cd4f9cd8e",
+  "sample_index": 469
+}

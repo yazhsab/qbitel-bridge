@@ -1,0 +1,199 @@
+{
+  "intersection_id": 34198,
+  "msg_count": 105,
+  "ref_point": {
+    "latitude": 36.1636472,
+    "longitude": -86.7766441
+  },
+  "location_name": "Downtown Nashville",
+  "num_lanes": 5,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "vehicle",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 360,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": -2317,
+          "dy_cm": 4851
+        },
+        {
+          "dx_cm": 3458,
+          "dy_cm": 3979
+        },
+        {
+          "dx_cm": -3494,
+          "dy_cm": 780
+        },
+        {
+          "dx_cm": 226,
+          "dy_cm": 1397
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "striping",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 330,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": -3768,
+          "dy_cm": -163
+        },
+        {
+          "dx_cm": 1485,
+          "dy_cm": -3246
+        },
+        {
+          "dx_cm": -849,
+          "dy_cm": -3055
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "vehicle",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 300,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": -149,
+          "dy_cm": 2740
+        },
+        {
+          "dx_cm": 4883,
+          "dy_cm": 2739
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "median",
+      "lane_direction": "egressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 330,
+      "num_nodes": 5,
+      "nodes": [
+        {
+          "dx_cm": 4187,
+          "dy_cm": -1644
+        },
+        {
+          "dx_cm": 4742,
+          "dy_cm": 4482
+        },
+        {
+          "dx_cm": 476,
+          "dy_cm": -3724
+        },
+        {
+          "dx_cm": -4867,
+          "dy_cm": -724
+        },
+        {
+          "dx_cm": -2888,
+          "dy_cm": 1526
+        }
+      ]
+    },
+    {
+      "lane_id": 5,
+      "lane_type": "trackedVehicle",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 450,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": 1253,
+          "dy_cm": -4521
+        },
+        {
+          "dx_cm": -4441,
+          "dy_cm": -3738
+        },
+        {
+          "dx_cm": 4864,
+          "dy_cm": -626
+        },
+        {
+          "dx_cm": 1786,
+          "dy_cm": 3225
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "Falcon-512",
+    "signature_size_bytes": 666,
+    "is_pqc_signature": true,
+    "header_length": 674
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.176927",
+  "message_length": 784,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 674,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 675,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 676,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 678,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 682,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 686,
+      "length": 1
+    }
+  ],
+  "hash": "f062b702a6a4581a80f2bad6cb8beb349b7cf9d4917743a34620eaffb7f4e8fc",
+  "sample_index": 716
+}

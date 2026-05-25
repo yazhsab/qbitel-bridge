@@ -1,0 +1,181 @@
+{
+  "intersection_id": 33663,
+  "msg_count": 10,
+  "ref_point": {
+    "latitude": 33.4451532,
+    "longitude": -112.0786671
+  },
+  "location_name": "Central Phoenix",
+  "num_lanes": 4,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "parking",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 360,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": 2924,
+          "dy_cm": -832
+        },
+        {
+          "dx_cm": 2686,
+          "dy_cm": -732
+        },
+        {
+          "dx_cm": -2265,
+          "dy_cm": 2010
+        },
+        {
+          "dx_cm": -2865,
+          "dy_cm": -1220
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "vehicle",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 360,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": -1002,
+          "dy_cm": -2839
+        },
+        {
+          "dx_cm": 2298,
+          "dy_cm": -1526
+        },
+        {
+          "dx_cm": -2031,
+          "dy_cm": 4589
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "trackedVehicle",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 360,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": 2548,
+          "dy_cm": -1907
+        },
+        {
+          "dx_cm": 2926,
+          "dy_cm": -2704
+        },
+        {
+          "dx_cm": 881,
+          "dy_cm": 3032
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "sidewalk",
+      "lane_direction": "egressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 450,
+      "num_nodes": 6,
+      "nodes": [
+        {
+          "dx_cm": 2999,
+          "dy_cm": 3918
+        },
+        {
+          "dx_cm": -180,
+          "dy_cm": 2160
+        },
+        {
+          "dx_cm": -4895,
+          "dy_cm": 397
+        },
+        {
+          "dx_cm": 3110,
+          "dy_cm": 2225
+        },
+        {
+          "dx_cm": -2441,
+          "dy_cm": -1957
+        },
+        {
+          "dx_cm": 823,
+          "dy_cm": -2657
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ML-DSA-65",
+    "signature_size_bytes": 3293,
+    "is_pqc_signature": true,
+    "header_length": 3301
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.188267",
+  "message_length": 3398,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 3301,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 3302,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 3303,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 3305,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 3309,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 3313,
+      "length": 1
+    }
+  ],
+  "hash": "4c7855619e0ca6517e431f7551f663d8a6b40da3f7e2a0a2ed4d5a8a8daf1147",
+  "sample_index": 749
+}

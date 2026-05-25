@@ -1,0 +1,127 @@
+{
+  "intersection_id": 362,
+  "msg_count": 98,
+  "minute_of_year": 186780,
+  "location_name": "Downtown Seattle",
+  "latitude": 47.6099426,
+  "longitude": -122.3271725,
+  "num_signal_groups": 7,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 204,
+      "max_end_time_ds": 214,
+      "likely_time_ds": 213,
+      "confidence": 14
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 142,
+      "max_end_time_ds": 202,
+      "likely_time_ds": 144,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 81,
+      "max_end_time_ds": 146,
+      "likely_time_ds": 123,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 15,
+      "max_end_time_ds": 76,
+      "likely_time_ds": 65,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 300,
+      "max_end_time_ds": 353,
+      "likely_time_ds": 352,
+      "confidence": 4
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 23,
+      "max_end_time_ds": 29,
+      "likely_time_ds": 25,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 165,
+      "max_end_time_ds": 233,
+      "likely_time_ds": 175,
+      "confidence": 14
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "fdadb979211d85cb",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 80
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.131545",
+  "message_length": 152,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 80,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 81,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 82,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 84,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 88,
+      "length": 1
+    }
+  ],
+  "hash": "d2aadd1aa5f80a24dc4c0bd5db4a2a801fb94f1dc36ce6989867364c2c9abf54",
+  "sample_index": 581
+}

@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QBITEL Bridge - Post-Quantum Banking Security Demo</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --accent-cyan: #00e5ff;
+            --accent-green: #00e676;
+            --text-primary: #e0e0e0;
+            --text-secondary: #9e9e9e;
+            --text-muted: #616161;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --gradient-accent: linear-gradient(135deg, #00e5ff, #00e676);
+            --risk-critical: #ff1744;
+            --risk-high: #ff9100;
+            --risk-moderate: #ffea00;
+            --risk-low: #00e676;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-title .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .env-badge {
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(0, 229, 255, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+        }
+
+        /* Tab Bar */
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            padding: 0 2rem;
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .tab-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-width: 800px;
+        }
+
+        /* Shared Components */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: background 0.2s;
+        }
+
+        .card:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-accent);
+            color: #0a0a0f;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Tab 1: SWIFT Chain */
+        .swift-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .bank-node {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            text-align: center;
+            min-width: 180px;
+        }
+
+        .bank-node .bic {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .bank-node .bank-name {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            margin-top: 0.35rem;
+        }
+
+        .bank-node .bank-role {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .flow-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 0.75rem;
+        }
+
+        .flow-arrow .arrow-line {
+            font-size: 1.5rem;
+            color: var(--accent-green);
+            line-height: 1;
+        }
+
+        .flow-arrow .arrow-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            margin-top: 0.2rem;
+        }
+
+        .swift-results {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-green);
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .metric-card .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .metric-card .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Tab 2: Multi-Authority Signing */
+        .authority-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .authority-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: border-color 0.3s, background 0.2s;
+        }
+
+        .authority-card.signed {
+            border-color: var(--accent-green);
+            background: rgba(0, 230, 118, 0.05);
+        }
+
+        .authority-card .authority-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .authority-card .authority-name {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .authority-card .authority-role {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+
+        .authority-card .sign-btn {
+            margin-top: 0.75rem;
+            padding: 0.45rem 1.25rem;
+            background: transparent;
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .authority-card .sign-btn:hover {
+            background: rgba(0, 229, 255, 0.1);
+        }
+
+        .authority-card .sign-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .authority-card .status-indicator {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            min-height: 1.2em;
+        }
+
+        .progress-section {
+            margin: 1.5rem 0;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--gradient-accent);
+            border-radius: 999px;
+            transition: width 0.4s ease;
+        }
+
+        .threshold-result {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-green);
+            min-height: 60px;
+            white-space: pre-wrap;
+        }
+
+        /* Tab 3: Zero-Knowledge Proofs */
+        .zkp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .zkp-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: border-color 0.3s;
+        }
+
+        .zkp-card.verified {
+            border-color: var(--accent-green);
+        }
+
+        .zkp-card .zkp-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .zkp-card .zkp-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .zkp-card .zkp-result {
+            margin-top: 1rem;
+            min-height: 2rem;
+            font-size: 0.85rem;
+        }
+
+        .zkp-card .zkp-result .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 229, 255, 0.3);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+
+        .zkp-card .zkp-result .verified-check {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Tab 4: Quantum Threat Assessment */
+        .portfolio-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .counter-card {
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .counter-card.critical {
+            background: rgba(255, 23, 68, 0.15);
+            border: 1px solid rgba(255, 23, 68, 0.3);
+        }
+
+        .counter-card.high {
+            background: rgba(255, 145, 0, 0.15);
+            border: 1px solid rgba(255, 145, 0, 0.3);
+        }
+
+        .counter-card.moderate {
+            background: rgba(255, 234, 0, 0.1);
+            border: 1px solid rgba(255, 234, 0, 0.25);
+        }
+
+        .counter-card.low {
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid rgba(0, 230, 118, 0.25);
+        }
+
+        .counter-card .counter-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .counter-card.critical .counter-value { color: var(--risk-critical); }
+        .counter-card.high .counter-value { color: var(--risk-high); }
+        .counter-card.moderate .counter-value { color: var(--risk-moderate); }
+        .counter-card.low .counter-value { color: var(--risk-low); }
+
+        .counter-card .counter-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .asset-table-wrapper {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+        }
+
+        .asset-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .asset-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+        }
+
+        .asset-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            vertical-align: middle;
+        }
+
+        .asset-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .risk-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .risk-bar-track {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+            min-width: 60px;
+        }
+
+        .risk-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.5s ease;
+        }
+
+        .risk-bar-fill.critical { background: var(--risk-critical); }
+        .risk-bar-fill.high { background: var(--risk-high); }
+        .risk-bar-fill.moderate { background: var(--risk-moderate); }
+        .risk-bar-fill.low { background: var(--risk-low); }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .risk-badge.critical { background: rgba(255, 23, 68, 0.2); color: var(--risk-critical); }
+        .risk-badge.high { background: rgba(255, 145, 0, 0.2); color: var(--risk-high); }
+        .risk-badge.moderate { background: rgba(255, 234, 0, 0.15); color: var(--risk-moderate); }
+        .risk-badge.low { background: rgba(0, 230, 118, 0.15); color: var(--risk-low); }
+
+        /* Footer */
+        .footer {
+            padding: 1.25rem 2rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem 1.25rem;
+            }
+
+            .header-title h1 {
+                font-size: 1.35rem;
+            }
+
+            .main-content {
+                padding: 1.25rem;
+            }
+
+            .tab-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.8rem;
+            }
+
+            .swift-flow {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+                padding: 0.5rem 0;
+            }
+
+            .authority-grid {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
+
+            .zkp-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-title">
+            <h1>QBITEL Bridge</h1>
+            <div class="subtitle">Post-Quantum Banking Security Demo</div>
+        </div>
+        <span class="env-badge">{{ environment }}</span>
+    </header>
+
+    <!-- Tab Bar -->
+    <nav class="tab-bar">
+        <button class="tab-btn active" data-tab="swift">SWIFT Chain</button>
+        <button class="tab-btn" data-tab="threshold">Multi-Authority Signing</button>
+        <button class="tab-btn" data-tab="zkp">Zero-Knowledge Proofs</button>
+        <button class="tab-btn" data-tab="threat">Quantum Threat Assessment</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Tab 1: SWIFT Correspondent Chain -->
+        <section id="tab-swift" class="tab-panel active">
+            <p class="tab-description">
+                Demonstrates proxy re-encryption for SWIFT correspondent banking.
+                Messages flow through intermediary banks without the intermediary ever seeing plaintext.
+            </p>
+
+            <button id="swift-run" class="btn-primary">Run SWIFT Chain Demo</button>
+
+            <!-- Flow Diagram -->
+            <div id="swift-flow" class="swift-flow">
+                <div class="bank-node">
+                    <div class="bic">DEUTDEFF</div>
+                    <div class="bank-name">Deutsche Bank</div>
+                    <div class="bank-role">Originator</div>
+                </div>
+                <div class="flow-arrow">
+                    <span class="arrow-line">&#8594;</span>
+                    <span class="arrow-label">Encrypted MT103</span>
+                </div>
+                <div class="bank-node">
+                    <div class="bic">CHASUS33</div>
+                    <div class="bank-name">JPMorgan Chase</div>
+                    <div class="bank-role">Intermediary</div>
+                </div>
+                <div class="flow-arrow">
+                    <span class="arrow-line">&#8594;</span>
+                    <span class="arrow-label">Re-encrypted MT103</span>
+                </div>
+                <div class="bank-node">
+                    <div class="bic">HSBCHKHH</div>
+                    <div class="bank-name">HSBC Hong Kong</div>
+                    <div class="bank-role">Beneficiary</div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="card">
+                <div class="section-label">Audit Trail</div>
+                <div id="swift-results" class="swift-results">Awaiting demo execution...</div>
+            </div>
+
+            <!-- Metrics -->
+            <div class="section-label">Latency Metrics</div>
+            <div id="swift-metrics" class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">--</div>
+                    <div class="metric-label">Key Generation</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">--</div>
+                    <div class="metric-label">Encryption</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">--</div>
+                    <div class="metric-label">Re-Encryption</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">--</div>
+                    <div class="metric-label">Decryption</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 2: Multi-Authority Signing -->
+        <section id="tab-threshold" class="tab-panel">
+            <p class="tab-description">
+                Simulates a $50M wire transfer requiring multi-authority approval.
+                The HIGH_VALUE tier requires 3-of-5 signatures from authorized personnel.
+            </p>
+
+            <button id="threshold-init" class="btn-primary">Initiate $50M Wire Transfer</button>
+
+            <!-- Authority Grid -->
+            <div id="authority-grid" class="authority-grid">
+                <div class="authority-card" data-authority="treasury">
+                    <div class="authority-icon">&#127975;</div>
+                    <div class="authority-name">Sarah Chen</div>
+                    <div class="authority-role">Treasury Director</div>
+                    <button class="sign-btn" data-authority-id="auth-treasury" disabled>Sign</button>
+                    <div class="status-indicator"></div>
+                </div>
+                <div class="authority-card" data-authority="compliance">
+                    <div class="authority-icon">&#128737;</div>
+                    <div class="authority-name">James Mitchell</div>
+                    <div class="authority-role">Chief Compliance Officer</div>
+                    <button class="sign-btn" data-authority-id="auth-compliance" disabled>Sign</button>
+                    <div class="status-indicator"></div>
+                </div>
+                <div class="authority-card" data-authority="legal">
+                    <div class="authority-icon">&#9878;</div>
+                    <div class="authority-name">Maria Rodriguez</div>
+                    <div class="authority-role">General Counsel</div>
+                    <button class="sign-btn" data-authority-id="auth-legal" disabled>Sign</button>
+                    <div class="status-indicator"></div>
+                </div>
+                <div class="authority-card" data-authority="risk">
+                    <div class="authority-icon">&#128200;</div>
+                    <div class="authority-name">David Park</div>
+                    <div class="authority-role">Chief Risk Officer</div>
+                    <button class="sign-btn" data-authority-id="auth-risk" disabled>Sign</button>
+                    <div class="status-indicator"></div>
+                </div>
+                <div class="authority-card" data-authority="board">
+                    <div class="authority-icon">&#128081;</div>
+                    <div class="authority-name">Elizabeth Warren</div>
+                    <div class="authority-role">Board Chair</div>
+                    <button class="sign-btn" data-authority-id="auth-board" disabled>Sign</button>
+                    <div class="status-indicator"></div>
+                </div>
+            </div>
+
+            <!-- Progress -->
+            <div class="progress-section">
+                <div class="progress-text"><span id="sig-count">0</span> of 3 signatures collected</div>
+                <div class="progress-bar-track">
+                    <div id="sig-progress" class="progress-bar-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Combined Result -->
+            <div class="card">
+                <div class="section-label">Transaction Result</div>
+                <div id="threshold-result" class="threshold-result">Awaiting transaction initiation...</div>
+            </div>
+        </section>
+
+        <!-- Tab 3: Zero-Knowledge Proofs -->
+        <section id="tab-zkp" class="tab-panel">
+            <p class="tab-description">
+                Bank proves regulatory compliance to auditors without revealing actual values.
+                The regulator learns only that requirements are met &mdash; nothing more.
+            </p>
+
+            <div class="zkp-grid">
+                <!-- Balance Range Proof -->
+                <div class="zkp-card" id="zkp-balance-card">
+                    <div class="zkp-title">Balance Range Proof</div>
+                    <div class="zkp-desc">
+                        Prove balance in [$1M, $10M] without revealing actual $3.2M.
+                    </div>
+                    <button id="zkp-balance-btn" class="btn-primary">Generate Proof</button>
+                    <div class="zkp-result" id="zkp-balance-result"></div>
+                </div>
+
+                <!-- Capital Adequacy Proof -->
+                <div class="zkp-card" id="zkp-capital-card">
+                    <div class="zkp-title">Capital Adequacy Proof</div>
+                    <div class="zkp-desc">
+                        Prove Basel III ratios meet minimums (CET1 &ge; 4.5%, Tier1 &ge; 6%, Total &ge; 8%).
+                    </div>
+                    <button id="zkp-capital-btn" class="btn-primary">Generate Proof</button>
+                    <div class="zkp-result" id="zkp-capital-result"></div>
+                </div>
+
+                <!-- AML Screening Proof -->
+                <div class="zkp-card" id="zkp-aml-card">
+                    <div class="zkp-title">AML Screening Proof</div>
+                    <div class="zkp-desc">
+                        Prove AML screening completed across 4 watchlists without revealing match details.
+                    </div>
+                    <button id="zkp-aml-btn" class="btn-primary">Generate Proof</button>
+                    <div class="zkp-result" id="zkp-aml-result"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 4: Quantum Threat Assessment -->
+        <section id="tab-threat" class="tab-panel">
+            <p class="tab-description">
+                Scans a banking crypto portfolio for quantum vulnerability. Identifies algorithms
+                at risk from Shor's and Grover's algorithms and recommends PQC migration path.
+            </p>
+
+            <button id="threat-scan" class="btn-primary">Scan Crypto Portfolio</button>
+
+            <!-- Portfolio Summary -->
+            <div id="portfolio-summary" class="portfolio-summary">
+                <div class="counter-card critical">
+                    <div class="counter-value" id="count-critical">--</div>
+                    <div class="counter-label">Critical</div>
+                </div>
+                <div class="counter-card high">
+                    <div class="counter-value" id="count-high">--</div>
+                    <div class="counter-label">High</div>
+                </div>
+                <div class="counter-card moderate">
+                    <div class="counter-value" id="count-moderate">--</div>
+                    <div class="counter-label">Moderate</div>
+                </div>
+                <div class="counter-card low">
+                    <div class="counter-value" id="count-low">--</div>
+                    <div class="counter-label">Low</div>
+                </div>
+            </div>
+
+            <!-- Asset Table -->
+            <div class="asset-table-wrapper">
+                <table id="asset-table" class="asset-table">
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Algorithm</th>
+                            <th>Key Size</th>
+                            <th>Risk Score</th>
+                            <th>Risk Level</th>
+                            <th>HNDL Risk</th>
+                            <th>Recommended Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated by dashboard.js -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        Powered by QBITEL Bridge v1.0.0 &mdash; Post-Quantum Cryptography for Enterprise
+    </footer>
+
+    <script src="/static/js/dashboard.js"></script>
+    <script>
+        /* Tab switching */
+        document.querySelectorAll('.tab-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+                document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

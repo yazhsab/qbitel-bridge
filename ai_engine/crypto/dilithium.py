@@ -5,13 +5,21 @@ Python implementation supporting all security levels:
 - ML-DSA-44 (Dilithium2): Security Level 2 (~128-bit)
 - ML-DSA-65 (Dilithium3): Security Level 3 (~192-bit) - Enterprise default
 - ML-DSA-87 (Dilithium5): Security Level 5 (~256-bit) - Maximum security
+
+Security:
+    Set strict_mode=True (default in production) to prevent fallback to
+    random-byte generation when crypto libraries are unavailable.
 """
 
 import logging
+import os
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
+
+from .mlkem import PQCProviderUnavailableError
+from .providers import ProviderRegistry, _GLOBAL_STRICT_MODE
 
 logger = logging.getLogger(__name__)
 
@@ -149,35 +157,40 @@ class DilithiumEngine:
 
     Faster signing than Falcon, larger signatures.
     Recommended for enterprise where bandwidth is not critical.
+
+    Args:
+        level: Security level
+        provider: Crypto provider ("dilithium-py", "liboqs", or None for auto)
+        strict_mode: If True (default), raises PQCProviderUnavailableError when
+            no real crypto library is available. Set to False ONLY for unit testing.
     """
 
     def __init__(
         self,
         level: DilithiumSecurityLevel = DilithiumSecurityLevel.DILITHIUM_3,
         provider: Optional[str] = None,
+        strict_mode: Optional[bool] = None,
     ):
         self.level = level
+        self.strict_mode = strict_mode if strict_mode is not None else _GLOBAL_STRICT_MODE
         self.provider = provider or self._detect_provider()
+
+        if self.provider == "fallback" and self.strict_mode:
+            raise PQCProviderUnavailableError(level.value, "initialization")
+
+        if self.provider == "fallback":
+            logger.warning(
+                f"Dilithium engine using INSECURE fallback for {level.value}. "
+                f"This MUST NOT be used in production."
+            )
+
         self._engine = self._initialize_engine()
 
         logger.info(f"Dilithium engine initialized: level={level.value}, provider={self.provider}")
 
     def _detect_provider(self) -> str:
-        try:
-            import dilithium
-
-            return "dilithium-py"
-        except ImportError:
-            pass
-
-        try:
-            import oqs
-
-            return "liboqs"
-        except ImportError:
-            pass
-
-        return "fallback"
+        """Detect available signature provider via the unified registry."""
+        return ProviderRegistry().get_sig_provider(algorithm="dilithium", strict_mode=False)
 
     def _initialize_engine(self):
         if self.provider == "dilithium-py":
@@ -229,6 +242,10 @@ class DilithiumEngine:
         else:
             import secrets
 
+            logger.critical(
+                f"Dilithium keygen using INSECURE random fallback for {self.level.value}. "
+                f"Keys have NO quantum-safe security."
+            )
             keypair = DilithiumKeyPair(
                 level=self.level,
                 public_key=DilithiumPublicKey(self.level, secrets.token_bytes(self.level.public_key_size)),
@@ -277,6 +294,10 @@ class DilithiumEngine:
         else:
             import secrets
 
+            logger.critical(
+                f"Dilithium sign using INSECURE random fallback for {self.level.value}. "
+                f"Signature provides NO authenticity guarantee."
+            )
             signature = DilithiumSignature(self.level, secrets.token_bytes(self.level.signature_size))
 
         logger.debug(f"Dilithium sign: {signature.size} bytes in {time.time() - start:.3f}s")
@@ -318,6 +339,10 @@ class DilithiumEngine:
             with oqs.Signature(sig_name) as sig:
                 valid = sig.verify(message, signature.data, public_key.data)
         else:
+            logger.critical(
+                f"Dilithium verify using INSECURE fallback for {self.level.value}. "
+                f"Verification always returns True — NO security."
+            )
             valid = True
 
         logger.debug(f"Dilithium verify: {valid} in {time.time() - start:.3f}s")

@@ -1,0 +1,207 @@
+{
+  "intersection_id": 58640,
+  "msg_count": 47,
+  "ref_point": {
+    "latitude": 39.9624571,
+    "longitude": -83.0003521
+  },
+  "location_name": "Downtown Columbus",
+  "num_lanes": 5,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "crosswalk",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 400,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": 1309,
+          "dy_cm": 3767
+        },
+        {
+          "dx_cm": -3799,
+          "dy_cm": -4834
+        },
+        {
+          "dx_cm": 1588,
+          "dy_cm": 856
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "bikeLane",
+      "lane_direction": "egressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 400,
+      "num_nodes": 6,
+      "nodes": [
+        {
+          "dx_cm": -2931,
+          "dy_cm": 2890
+        },
+        {
+          "dx_cm": 4655,
+          "dy_cm": 3886
+        },
+        {
+          "dx_cm": -16,
+          "dy_cm": -4038
+        },
+        {
+          "dx_cm": -639,
+          "dy_cm": -2187
+        },
+        {
+          "dx_cm": -498,
+          "dy_cm": 1919
+        },
+        {
+          "dx_cm": 2775,
+          "dy_cm": -3158
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "striping",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 330,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": -750,
+          "dy_cm": 2337
+        },
+        {
+          "dx_cm": 4721,
+          "dy_cm": 336
+        },
+        {
+          "dx_cm": -3088,
+          "dy_cm": 1022
+        },
+        {
+          "dx_cm": -3409,
+          "dy_cm": -2026
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "crosswalk",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 400,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": -4759,
+          "dy_cm": -1795
+        },
+        {
+          "dx_cm": 2461,
+          "dy_cm": -2461
+        },
+        {
+          "dx_cm": 1798,
+          "dy_cm": 4488
+        }
+      ]
+    },
+    {
+      "lane_id": 5,
+      "lane_type": "parking",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 330,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": -3369,
+          "dy_cm": -179
+        },
+        {
+          "dx_cm": -3061,
+          "dy_cm": 4862
+        },
+        {
+          "dx_cm": 1104,
+          "dy_cm": 1530
+        },
+        {
+          "dx_cm": 4690,
+          "dy_cm": 2271
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "7b185ea138b86804",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 112
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.158295",
+  "message_length": 230,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 112,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 113,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 114,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 116,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 120,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 124,
+      "length": 1
+    }
+  ],
+  "hash": "cb592f9b74097b9d12073e82bc3fa7717572b0c8bb8684e2f5bd86fad07469de",
+  "sample_index": 658
+}

@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPEDALCYCLIST",
+  "sec_mark_ms": 41660,
+  "msg_count": 126,
+  "latitude": 39.9613932,
+  "longitude": -82.9980351,
+  "location_name": "Downtown Columbus",
+  "speed_mph": 9.7,
+  "heading_deg": 249.1375,
+  "position_accuracy": 11,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8002",
+    "signer_type": "certificate",
+    "signer_id_hex": "38a728303ce91083bb6acb954e446a8a08efe545191d9a0e6cce6d69f509df8a",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 136
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.212517",
+  "message_length": 154,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 136,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 137,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 138,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 140,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 141,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 145,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 149,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 151,
+      "length": 2
+    }
+  ],
+  "hash": "347ba500688457272a0a511b5087d0913175b20466be6c0770605587f2bf9538",
+  "sample_index": 865
+}

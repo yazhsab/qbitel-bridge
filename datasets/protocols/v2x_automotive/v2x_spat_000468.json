@@ -1,0 +1,103 @@
+{
+  "intersection_id": 52545,
+  "msg_count": 113,
+  "minute_of_year": 169867,
+  "location_name": "Downtown LA",
+  "latitude": 34.0476817,
+  "longitude": -118.2424525,
+  "num_signal_groups": 4,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 189,
+      "max_end_time_ds": 202,
+      "likely_time_ds": 201,
+      "confidence": 15
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 225,
+      "max_end_time_ds": 289,
+      "likely_time_ds": 279,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 82,
+      "max_end_time_ds": 147,
+      "likely_time_ds": 121,
+      "confidence": 14
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 151,
+      "max_end_time_ds": 248,
+      "likely_time_ds": 179,
+      "confidence": 13
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "f80cb0a5b35b29fb",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 80
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.105727",
+  "message_length": 125,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 80,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 81,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 82,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 84,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 88,
+      "length": 1
+    }
+  ],
+  "hash": "d8e988855a39c10a0203a7d8dda5b9b8e59b38fc8eee74b39bd3920521db7c38",
+  "sample_index": 468
+}

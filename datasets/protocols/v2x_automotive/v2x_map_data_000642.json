@@ -1,0 +1,233 @@
+{
+  "intersection_id": 61488,
+  "msg_count": 31,
+  "ref_point": {
+    "latitude": 45.5187187,
+    "longitude": -122.6768385
+  },
+  "location_name": "Portland Pioneer Sq",
+  "num_lanes": 6,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "striping",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 366,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": 4132,
+          "dy_cm": -107
+        },
+        {
+          "dx_cm": 270,
+          "dy_cm": -2324
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "bikeLane",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 400,
+      "num_nodes": 5,
+      "nodes": [
+        {
+          "dx_cm": 2225,
+          "dy_cm": -1847
+        },
+        {
+          "dx_cm": -3831,
+          "dy_cm": 966
+        },
+        {
+          "dx_cm": 2861,
+          "dy_cm": 1692
+        },
+        {
+          "dx_cm": -2466,
+          "dy_cm": -1356
+        },
+        {
+          "dx_cm": 1628,
+          "dy_cm": 4528
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "parking",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 366,
+      "num_nodes": 5,
+      "nodes": [
+        {
+          "dx_cm": 519,
+          "dy_cm": -3908
+        },
+        {
+          "dx_cm": -617,
+          "dy_cm": 2829
+        },
+        {
+          "dx_cm": 4035,
+          "dy_cm": -3216
+        },
+        {
+          "dx_cm": -4137,
+          "dy_cm": -762
+        },
+        {
+          "dx_cm": 2052,
+          "dy_cm": -2483
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "striping",
+      "lane_direction": "egressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 400,
+      "num_nodes": 5,
+      "nodes": [
+        {
+          "dx_cm": -2198,
+          "dy_cm": 595
+        },
+        {
+          "dx_cm": -1984,
+          "dy_cm": 4971
+        },
+        {
+          "dx_cm": -1990,
+          "dy_cm": -1711
+        },
+        {
+          "dx_cm": -3761,
+          "dy_cm": 2312
+        },
+        {
+          "dx_cm": 168,
+          "dy_cm": -4574
+        }
+      ]
+    },
+    {
+      "lane_id": 5,
+      "lane_type": "sidewalk",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 360,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": 1645,
+          "dy_cm": -4762
+        },
+        {
+          "dx_cm": -2782,
+          "dy_cm": -2391
+        }
+      ]
+    },
+    {
+      "lane_id": 6,
+      "lane_type": "parking",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 366,
+      "num_nodes": 5,
+      "nodes": [
+        {
+          "dx_cm": 2109,
+          "dy_cm": 1076
+        },
+        {
+          "dx_cm": -3811,
+          "dy_cm": -2305
+        },
+        {
+          "dx_cm": -233,
+          "dy_cm": 967
+        },
+        {
+          "dx_cm": 3914,
+          "dy_cm": -468
+        },
+        {
+          "dx_cm": 79,
+          "dy_cm": -2507
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 72
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.152892",
+  "message_length": 211,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 72,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 73,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 74,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 76,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 80,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 84,
+      "length": 1
+    }
+  ],
+  "hash": "554211dc636b439321eec6a099e39c7f777dc6d74a60358da15cd9b091cc3269",
+  "sample_index": 642
+}

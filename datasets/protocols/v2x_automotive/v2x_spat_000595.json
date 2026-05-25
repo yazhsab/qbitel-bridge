@@ -1,0 +1,103 @@
+{
+  "intersection_id": 17788,
+  "msg_count": 112,
+  "minute_of_year": 106254,
+  "location_name": "Uptown Charlotte",
+  "latitude": 35.2255739,
+  "longitude": -80.8427589,
+  "num_signal_groups": 4,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 126,
+      "max_end_time_ds": 216,
+      "likely_time_ds": 149,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 70,
+      "max_end_time_ds": 123,
+      "likely_time_ds": 80,
+      "confidence": 13
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 256,
+      "max_end_time_ds": 350,
+      "likely_time_ds": 337,
+      "confidence": 15
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 276,
+      "max_end_time_ds": 303,
+      "likely_time_ds": 303,
+      "confidence": 12
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "a4d35e3dd211fc2582a0b5d13340e254afbc9f141f8850231a1c96ba6e4a4d41",
+    "signature_algorithm": "ML-DSA-65",
+    "signature_size_bytes": 3293,
+    "is_pqc_signature": true,
+    "header_length": 3333
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.136421",
+  "message_length": 3378,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 3333,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 3334,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 3335,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 3337,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 3341,
+      "length": 1
+    }
+  ],
+  "hash": "c350dbba77ae2887ed6ba0f5aacb5592c3678ccecd7bba2eea35a8bf4ca59d57",
+  "sample_index": 595
+}

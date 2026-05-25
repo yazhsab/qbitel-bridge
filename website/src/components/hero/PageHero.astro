@@ -4,9 +4,51 @@ interface Props {
   description: string;
   badge?: string;
   gradient?: string;
+  visual?: 'workflow' | 'industries' | 'demo' | 'audit' | 'pqc';
 }
 
-const { title, description, badge, gradient = 'from-quantum-500 to-neon-cyan' } = Astro.props;
+const {
+  title,
+  description,
+  badge,
+  gradient = 'from-quantum-500 to-neon-cyan',
+  visual = 'workflow',
+} = Astro.props;
+
+const visualMap = {
+  workflow: {
+    eyebrow: 'Operating sequence',
+    title: 'Discover / Understand / Modernize / Protect / Prove',
+    items: ['Protocol graph', 'Risk narrative', 'Adapter package', 'PQC overlay', 'Evidence pack'],
+    accent: 'from-neon-cyan to-quantum-500',
+  },
+  industries: {
+    eyebrow: 'Solution packs',
+    title: 'One platform tuned by vertical',
+    items: ['BPO Voice Shield', 'IoT Device Trust', 'Defense Mission Bridge', 'Banking Mainframe Shield', 'Industrial Shield'],
+    accent: 'from-neon-green to-neon-cyan',
+  },
+  demo: {
+    eyebrow: 'Live test surface',
+    title: 'Paste data. See explainable output.',
+    items: ['Domain sample', 'Protocol signals', 'Risk score', 'Protection path', 'Evidence preview'],
+    accent: 'from-neon-cyan to-neon-green',
+  },
+  audit: {
+    eyebrow: 'Technical transparency',
+    title: 'Implementation review with maturity filters',
+    items: ['Strong foundations', 'Guarded wrappers', 'Prototype modules', 'Code references', 'Hardening path'],
+    accent: 'from-neon-copper to-neon-cyan',
+  },
+  pqc: {
+    eyebrow: 'Governed PQC rollout',
+    title: 'Map exposure before changing crypto',
+    items: ['Crypto posture', 'Provider checks', 'Hybrid overlays', 'Rollback controls', 'Audit evidence'],
+    accent: 'from-quantum-500 to-neon-cyan',
+  },
+};
+
+const heroVisual = visualMap[visual];
 ---
 
 <section class="relative overflow-hidden border-b border-surface-600/50">
@@ -15,13 +57,59 @@ const { title, description, badge, gradient = 'from-quantum-500 to-neon-cyan' } 
   <div class="absolute top-[-14rem] right-[-8rem] w-96 h-96 rounded-full bg-neon-cyan/10 blur-3xl" />
   <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neon-cyan/70 to-transparent" />
 
-  <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-    {badge && (
-      <div class={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${gradient} bg-opacity-10 text-white mb-4 border border-surface-600/60`}>
-        {badge}
+  <div class="relative mx-auto max-w-7xl px-4 pb-14 pt-24 sm:px-6 lg:px-8 lg:pb-20 lg:pt-28">
+    <div class="grid gap-10 lg:grid-cols-[0.88fr_1.12fr] lg:items-start">
+      <div>
+        {badge && (
+          <div class={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${gradient} bg-opacity-10 text-white mb-4 border border-surface-600/60`}>
+            {badge}
+          </div>
+        )}
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4 max-w-3xl">{title}</h1>
+        <p class="text-lg leading-8 text-slate-300 max-w-2xl">{description}</p>
       </div>
-    )}
-    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4 max-w-3xl">{title}</h1>
-    <p class="text-lg text-slate-300 max-w-2xl">{description}</p>
+
+      <div class="hidden lg:block">
+        <div class="relative overflow-hidden rounded-3xl border border-surface-600/60 bg-surface-900/75 p-5 shadow-2xl shadow-black/30">
+          <div class={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${heroVisual.accent}`} />
+          <div class="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-neon-cyan/10 blur-3xl" />
+          <div class="relative">
+            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-neon-cyan/80">
+              {heroVisual.eyebrow}
+            </p>
+            <h2 class="mt-3 max-w-xl text-2xl font-bold leading-snug text-white">
+              {heroVisual.title}
+            </h2>
+
+            <div class="mt-6 grid gap-3">
+              {heroVisual.items.map((item, index) => (
+                <div class="group flex items-center gap-4 rounded-2xl border border-surface-600/70 bg-surface-950/70 p-3 transition-colors hover:border-neon-cyan/40">
+                  <div class={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r text-sm font-bold text-white ${heroVisual.accent}`}>
+                    {index + 1}
+                  </div>
+                  <div class="h-px flex-1 bg-gradient-to-r from-neon-cyan/50 to-transparent" />
+                  <div class="min-w-[12rem] text-sm font-semibold text-slate-100">{item}</div>
+                </div>
+              ))}
+            </div>
+
+            <div class="mt-5 grid grid-cols-3 gap-3 text-center">
+              <div class="rounded-2xl border border-surface-600/70 bg-surface-950/70 p-3">
+                <div class="text-lg font-bold text-white">Live</div>
+                <div class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Demo</div>
+              </div>
+              <div class="rounded-2xl border border-surface-600/70 bg-surface-950/70 p-3">
+                <div class="text-lg font-bold text-white">8+</div>
+                <div class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Verticals</div>
+              </div>
+              <div class="rounded-2xl border border-surface-600/70 bg-surface-950/70 p-3">
+                <div class="text-lg font-bold text-white">Proof</div>
+                <div class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Ready</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>

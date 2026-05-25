@@ -1,0 +1,92 @@
+{
+  "temp_id_hex": "46685445",
+  "timestamp_ms": 3071423287,
+  "latitude": 39.7410577,
+  "longitude": -104.9871161,
+  "location_name": "Downtown Denver",
+  "speed_mph": 47.4,
+  "heading_deg": 295.2288,
+  "vehicle_label": "ambulance",
+  "priority": 7,
+  "response_type": "nonEmergency",
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x20",
+    "signer_type": "digest",
+    "signer_id_hex": "d13575b314f8c05e",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 111
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "eva",
+  "timestamp": "2026-03-04T09:49:09.239477",
+  "message_length": 134,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 111,
+      "length": 1
+    },
+    {
+      "name": "timestamp",
+      "offset": 112,
+      "length": 4
+    },
+    {
+      "name": "temporary_id",
+      "offset": 116,
+      "length": 4
+    },
+    {
+      "name": "latitude",
+      "offset": 120,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 124,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 128,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 130,
+      "length": 2
+    },
+    {
+      "name": "priority",
+      "offset": 132,
+      "length": 1
+    },
+    {
+      "name": "response_type",
+      "offset": 133,
+      "length": 1
+    }
+  ],
+  "hash": "01a426994ed2c0bfad1564b768a5c0142d69565a56bd4c906e0ad80645b5474c",
+  "sample_index": 993
+}

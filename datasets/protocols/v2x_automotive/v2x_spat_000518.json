@@ -1,0 +1,127 @@
+{
+  "intersection_id": 60239,
+  "msg_count": 35,
+  "minute_of_year": 8519,
+  "location_name": "Downtown Nashville",
+  "latitude": 36.1591357,
+  "longitude": -86.782863,
+  "num_signal_groups": 7,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 178,
+      "max_end_time_ds": 219,
+      "likely_time_ds": 199,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 24,
+      "max_end_time_ds": 41,
+      "likely_time_ds": 34,
+      "confidence": 10
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "dark",
+      "min_end_time_ds": 211,
+      "max_end_time_ds": 275,
+      "likely_time_ds": 246,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 144,
+      "max_end_time_ds": 241,
+      "likely_time_ds": 229,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 247,
+      "max_end_time_ds": 284,
+      "likely_time_ds": 267,
+      "confidence": 0
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "dark",
+      "min_end_time_ds": 231,
+      "max_end_time_ds": 247,
+      "likely_time_ds": 235,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 223,
+      "max_end_time_ds": 303,
+      "likely_time_ds": 240,
+      "confidence": 13
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "4beb46f1ef56c047",
+    "signature_algorithm": "Falcon-512",
+    "signature_size_bytes": 666,
+    "is_pqc_signature": true,
+    "header_length": 682
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.116961",
+  "message_length": 754,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 682,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 683,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 684,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 686,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 690,
+      "length": 1
+    }
+  ],
+  "hash": "4059b80bd008aa5d6ca6446e02bebf758bf64601ad5e0927552f2a7d851d7cf5",
+  "sample_index": 518
+}

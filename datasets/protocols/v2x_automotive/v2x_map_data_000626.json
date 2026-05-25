@@ -1,0 +1,293 @@
+{
+  "intersection_id": 57431,
+  "msg_count": 15,
+  "ref_point": {
+    "latitude": 40.7570581,
+    "longitude": -73.9831655
+  },
+  "location_name": "Times Square, NYC",
+  "num_lanes": 10,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "bikeLane",
+      "lane_direction": "egressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 300,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": -1624,
+          "dy_cm": -4911
+        },
+        {
+          "dx_cm": -3148,
+          "dy_cm": -763
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "median",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 360,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": 3019,
+          "dy_cm": 1749
+        },
+        {
+          "dx_cm": 94,
+          "dy_cm": -2137
+        },
+        {
+          "dx_cm": 2800,
+          "dy_cm": -2635
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "crosswalk",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 300,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": 4313,
+          "dy_cm": -1778
+        },
+        {
+          "dx_cm": -1299,
+          "dy_cm": 4093
+        },
+        {
+          "dx_cm": 3368,
+          "dy_cm": 1729
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "sidewalk",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 450,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": 1040,
+          "dy_cm": -4220
+        },
+        {
+          "dx_cm": 4764,
+          "dy_cm": -350
+        },
+        {
+          "dx_cm": 3468,
+          "dy_cm": -4721
+        }
+      ]
+    },
+    {
+      "lane_id": 5,
+      "lane_type": "vehicle",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 360,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": 3447,
+          "dy_cm": 1720
+        },
+        {
+          "dx_cm": -2571,
+          "dy_cm": 4519
+        }
+      ]
+    },
+    {
+      "lane_id": 6,
+      "lane_type": "striping",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 300,
+      "num_nodes": 5,
+      "nodes": [
+        {
+          "dx_cm": 2622,
+          "dy_cm": 1037
+        },
+        {
+          "dx_cm": 3865,
+          "dy_cm": 3295
+        },
+        {
+          "dx_cm": -4351,
+          "dy_cm": 3944
+        },
+        {
+          "dx_cm": -4343,
+          "dy_cm": 4970
+        },
+        {
+          "dx_cm": 221,
+          "dy_cm": -3410
+        }
+      ]
+    },
+    {
+      "lane_id": 7,
+      "lane_type": "trackedVehicle",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 450,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": 4858,
+          "dy_cm": -92
+        },
+        {
+          "dx_cm": -3430,
+          "dy_cm": -2497
+        },
+        {
+          "dx_cm": 1047,
+          "dy_cm": -670
+        }
+      ]
+    },
+    {
+      "lane_id": 8,
+      "lane_type": "crosswalk",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 360,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": 366,
+          "dy_cm": 1693
+        },
+        {
+          "dx_cm": -4602,
+          "dy_cm": 3100
+        }
+      ]
+    },
+    {
+      "lane_id": 9,
+      "lane_type": "bikeLane",
+      "lane_direction": "egressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 450,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": -2579,
+          "dy_cm": -3038
+        },
+        {
+          "dx_cm": 776,
+          "dy_cm": 2462
+        },
+        {
+          "dx_cm": -1192,
+          "dy_cm": 3663
+        },
+        {
+          "dx_cm": 2323,
+          "dy_cm": 2328
+        }
+      ]
+    },
+    {
+      "lane_id": 10,
+      "lane_type": "sidewalk",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 450,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": 4786,
+          "dy_cm": -3011
+        },
+        {
+          "dx_cm": -2494,
+          "dy_cm": 73
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "11af8ffe946dc4fe",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 112
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.147329",
+  "message_length": 291,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 112,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 113,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 114,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 116,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 120,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 124,
+      "length": 1
+    }
+  ],
+  "hash": "774357e285d9c1a45e0acdbfa6cbeef072e3acd6d55358259d926b7492694b05",
+  "sample_index": 626
+}

@@ -111,7 +111,7 @@ class CacheConfig:
             "gpt-4o-mini": 0.00015,
             "claude-sonnet-4-5": 0.003,
             "claude-opus-4-5": 0.015,
-            "claude-3-5-haiku": 0.00025,
+            "claude-haiku-4-5": 0.00025,
             "llama3.2": 0.0,  # Local
         }
     )

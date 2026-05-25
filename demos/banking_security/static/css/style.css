@@ -1,0 +1,515 @@
+/* QBITEL Banking Security Dashboard - Dark Theme */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #0a0a0f;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ── Header ─────────────────────────────────────────── */
+
+.header {
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, #0d1117, #161b22);
+  border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header h1 {
+  font-size: 1.8rem;
+  background: linear-gradient(90deg, #00d9ff, #00ff88);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.subtitle {
+  color: #8b949e;
+  margin-left: 1rem;
+}
+
+.env-badge {
+  background: rgba(0, 217, 255, 0.15);
+  color: #00d9ff;
+  padding: 0.2rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+/* ── Tab Bar ────────────────────────────────────────── */
+
+.tab-bar {
+  display: flex;
+  gap: 0;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+}
+
+.tab {
+  padding: 0.8rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: 0.2s;
+  font-size: 0.9rem;
+}
+
+.tab:hover {
+  color: #e0e0e0;
+}
+
+.tab.active {
+  color: #00d9ff;
+  border-bottom-color: #00d9ff;
+}
+
+/* ── Main Content ───────────────────────────────────── */
+
+main {
+  padding: 1.5rem 2rem;
+  max-width: 1400px;
+  margin: auto;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.description-panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #8b949e;
+  line-height: 1.6;
+}
+
+/* ── Buttons ────────────────────────────────────────── */
+
+.btn-primary {
+  background: linear-gradient(135deg, #00d9ff, #00ff88);
+  color: #0a0a0f;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 217, 255, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-primary.loading {
+  position: relative;
+  color: transparent;
+}
+
+.btn-primary.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 2px solid #0a0a0f;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* ── SWIFT Flow Diagram ─────────────────────────────── */
+
+.flow-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.bank-node {
+  width: 160px;
+  text-align: center;
+  padding: 1.2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  transition: 0.5s;
+}
+
+.bank-node.active {
+  border-color: #00d9ff;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+}
+
+.bank-node .bic {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #00d9ff;
+}
+
+.bank-node .name {
+  font-size: 0.75rem;
+  color: #8b949e;
+  margin-top: 0.3rem;
+}
+
+.flow-arrow {
+  font-size: 1.5rem;
+  color: #30363d;
+  transition: 0.5s;
+}
+
+.flow-arrow.active {
+  color: #00ff88;
+}
+
+.flow-arrow .label {
+  font-size: 0.6rem;
+  display: block;
+  color: #8b949e;
+}
+
+/* ── Threshold / Authority Grid ─────────────────────── */
+
+.authority-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.authority-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 1.2rem;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.authority-card.signed {
+  border-color: #00ff88;
+  background: rgba(0, 255, 136, 0.05);
+}
+
+.authority-card .icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.authority-card .role {
+  font-size: 0.8rem;
+  color: #8b949e;
+  margin-bottom: 0.8rem;
+}
+
+.sign-btn {
+  background: linear-gradient(135deg, #00d9ff, #00ff88);
+  color: #0a0a0f;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 0.85rem;
+}
+
+.sign-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 217, 255, 0.3);
+}
+
+.sign-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Progress ───────────────────────────────────────── */
+
+.progress-section {
+  margin: 1.5rem 0;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #30363d;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00d9ff, #00ff88);
+  transition: width 0.5s;
+  border-radius: 4px;
+}
+
+/* ── ZKP Proof Cards ────────────────────────────────── */
+
+.proof-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.proof-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+
+.proof-card h3 {
+  color: #e0e0e0;
+  margin-bottom: 0.8rem;
+}
+
+.proof-card .proof-desc {
+  color: #8b949e;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.proof-result {
+  margin-top: 1rem;
+  min-height: 60px;
+}
+
+.proof-result .verified {
+  color: #00ff88;
+  font-weight: 600;
+}
+
+/* ── Threat Assessment ──────────────────────────────── */
+
+.portfolio-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-card {
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.summary-card .count {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.summary-card .label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.summary-card.critical {
+  background: rgba(255, 59, 48, 0.15);
+  color: #ff3b30;
+}
+
+.summary-card.high {
+  background: rgba(255, 149, 0, 0.15);
+  color: #ff9500;
+}
+
+.summary-card.moderate {
+  background: rgba(255, 204, 0, 0.15);
+  color: #ffcc00;
+}
+
+.summary-card.low {
+  background: rgba(0, 255, 136, 0.15);
+  color: #00ff88;
+}
+
+.asset-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.asset-table th {
+  text-align: left;
+  padding: 0.8rem;
+  color: #8b949e;
+  border-bottom: 1px solid #30363d;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.asset-table td {
+  padding: 0.8rem;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+}
+
+.risk-bar {
+  height: 6px;
+  background: #30363d;
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 100px;
+}
+
+.risk-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s;
+}
+
+.risk-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.risk-badge.critical {
+  background: rgba(255, 59, 48, 0.2);
+  color: #ff3b30;
+}
+
+.risk-badge.high {
+  background: rgba(255, 149, 0, 0.2);
+  color: #ff9500;
+}
+
+.risk-badge.moderate {
+  background: rgba(255, 204, 0, 0.2);
+  color: #ffcc00;
+}
+
+.risk-badge.low {
+  background: rgba(0, 255, 136, 0.2);
+  color: #00ff88;
+}
+
+/* ── Metrics & Results ──────────────────────────────── */
+
+.metrics-panel {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.metric-badge {
+  background: rgba(0, 217, 255, 0.1);
+  color: #00d9ff;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+
+.results-panel {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+  font-family: monospace;
+  font-size: 0.8rem;
+  max-height: 300px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+/* ── Spinner & Icons ────────────────────────────────── */
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #30363d;
+  border-top-color: #00d9ff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.check-icon {
+  color: #00ff88;
+  font-size: 1.5rem;
+}
+
+/* ── Footer ─────────────────────────────────────────── */
+
+footer {
+  text-align: center;
+  padding: 2rem;
+  color: #484f58;
+  font-size: 0.8rem;
+  border-top: 1px solid #30363d;
+  margin-top: 3rem;
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  main {
+    padding: 1rem;
+  }
+
+  .portfolio-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .authority-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .proof-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .flow-diagram {
+    gap: 0.8rem;
+  }
+
+  .tab {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+  }
+}

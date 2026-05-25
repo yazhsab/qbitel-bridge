@@ -1,0 +1,95 @@
+{
+  "intersection_id": 47365,
+  "msg_count": 89,
+  "minute_of_year": 217023,
+  "location_name": "Downtown San Diego",
+  "latitude": 32.7162093,
+  "longitude": -117.1568278,
+  "num_signal_groups": 3,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 172,
+      "max_end_time_ds": 224,
+      "likely_time_ds": 213,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "dark",
+      "min_end_time_ds": 142,
+      "max_end_time_ds": 170,
+      "likely_time_ds": 170,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 71,
+      "max_end_time_ds": 136,
+      "likely_time_ds": 108,
+      "confidence": 13
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "940ec100a5176f3ecf79b0b1d22e64df56e916268d83d8fac25f67e21129a09e",
+    "signature_algorithm": "ML-DSA-65",
+    "signature_size_bytes": 3293,
+    "is_pqc_signature": true,
+    "header_length": 3333
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.129944",
+  "message_length": 3369,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 3333,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 3334,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 3335,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 3337,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 3341,
+      "length": 1
+    }
+  ],
+  "hash": "7c99634cdeb130ecfb4fc3c56bda6558f74a4396c2aa0564715635f65869e18b",
+  "sample_index": 572
+}

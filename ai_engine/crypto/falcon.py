@@ -11,15 +11,25 @@ Key advantages over Dilithium:
 Trade-offs:
 - Slower signing than Dilithium
 - Requires careful floating-point handling
+
+Security:
+    Set strict_mode=True (default in production) to prevent fallback to
+    random-byte generation when crypto libraries are unavailable.
+    Falcon signing uses floating-point arithmetic — for constant-time
+    guarantees, use the liboqs provider (C reference implementation).
 """
 
 import asyncio
 import logging
+import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Optional, Tuple
+
+from .mlkem import PQCProviderUnavailableError
+from .providers import ProviderRegistry, _GLOBAL_STRICT_MODE
 
 logger = logging.getLogger(__name__)
 
@@ -140,25 +150,38 @@ class FalconEngine:
     Falcon signature engine.
 
     Optimized for bandwidth-constrained environments with batch verification support.
+
+    Args:
+        level: Security level (512 or 1024)
+        provider: Crypto provider ("liboqs" or None for auto)
+        strict_mode: If True (default), raises PQCProviderUnavailableError when
+            no real crypto library is available. Set to False ONLY for unit testing.
     """
 
     def __init__(
         self,
         level: FalconSecurityLevel = FalconSecurityLevel.FALCON_512,
         provider: Optional[str] = None,
+        strict_mode: Optional[bool] = None,
     ):
         self.level = level
+        self.strict_mode = strict_mode if strict_mode is not None else _GLOBAL_STRICT_MODE
         self.provider = provider or self._detect_provider()
+
+        if self.provider == "fallback" and self.strict_mode:
+            raise PQCProviderUnavailableError(level.value, "initialization")
+
+        if self.provider == "fallback":
+            logger.warning(
+                f"Falcon engine using INSECURE fallback for {level.value}. "
+                f"This MUST NOT be used in production."
+            )
 
         logger.info(f"Falcon engine initialized: level={level.value}, provider={self.provider}")
 
     def _detect_provider(self) -> str:
-        try:
-            import oqs
-
-            return "liboqs"
-        except ImportError:
-            return "fallback"
+        """Detect available signature provider via the unified registry."""
+        return ProviderRegistry().get_sig_provider(algorithm="falcon", strict_mode=False)
 
     async def generate_keypair(self) -> FalconKeyPair:
         """Generate a Falcon key pair."""
@@ -184,6 +207,10 @@ class FalconEngine:
         else:
             import secrets
 
+            logger.critical(
+                f"Falcon keygen using INSECURE random fallback for {self.level.value}. "
+                f"Keys have NO quantum-safe security."
+            )
             keypair = FalconKeyPair(
                 level=self.level,
                 public_key=FalconPublicKey(self.level, secrets.token_bytes(self.level.public_key_size)),
@@ -228,6 +255,10 @@ class FalconEngine:
         else:
             import secrets
 
+            logger.critical(
+                f"Falcon sign using INSECURE random fallback for {self.level.value}. "
+                f"Signature provides NO authenticity guarantee."
+            )
             signature = FalconSignature(self.level, secrets.token_bytes(self.level.signature_size_typical))
 
         elapsed = time.time() - start
@@ -268,7 +299,11 @@ class FalconEngine:
             with oqs.Signature(sig_name) as sig:
                 valid = sig.verify(message, signature.data, public_key.data)
         else:
-            valid = True  # Fallback for testing
+            logger.critical(
+                f"Falcon verify using INSECURE fallback for {self.level.value}. "
+                f"Verification always returns True — NO security."
+            )
+            valid = True
 
         logger.debug(f"Falcon verify: {valid} in {time.time() - start:.3f}s")
         return valid

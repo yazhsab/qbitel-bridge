@@ -1,0 +1,127 @@
+{
+  "intersection_id": 26023,
+  "msg_count": 27,
+  "minute_of_year": 205417,
+  "location_name": "Downtown San Diego",
+  "latitude": 32.7137915,
+  "longitude": -117.1660171,
+  "num_signal_groups": 7,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "dark",
+      "min_end_time_ds": 240,
+      "max_end_time_ds": 286,
+      "likely_time_ds": 261,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 38,
+      "max_end_time_ds": 109,
+      "likely_time_ds": 67,
+      "confidence": 4
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 248,
+      "max_end_time_ds": 347,
+      "likely_time_ds": 287,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 129,
+      "max_end_time_ds": 160,
+      "likely_time_ds": 130,
+      "confidence": 1
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 54,
+      "max_end_time_ds": 69,
+      "likely_time_ds": 61,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 105,
+      "max_end_time_ds": 163,
+      "likely_time_ds": 159,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 176,
+      "max_end_time_ds": 272,
+      "likely_time_ds": 260,
+      "confidence": 8
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "2f5723202228e1d4ae2364739178bc0185a096834b1744d66c5f9424f4a28a81",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.115013",
+  "message_length": 176,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 112,
+      "length": 1
+    }
+  ],
+  "hash": "ebee4cba76a1ccacb1e6c3875a6b1da0a929207c6ac6f8630390b30a4e2db2cc",
+  "sample_index": 510
+}

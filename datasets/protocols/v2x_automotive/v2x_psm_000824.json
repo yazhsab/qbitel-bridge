@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPUBLICSAFETYWORKER",
+  "sec_mark_ms": 47642,
+  "msg_count": 85,
+  "latitude": 33.746722,
+  "longitude": -84.3852488,
+  "location_name": "Midtown Atlanta",
+  "speed_mph": 5.9,
+  "heading_deg": 144.4035,
+  "position_accuracy": 3,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8002",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.203123",
+  "message_length": 122,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 108,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 109,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 113,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 117,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 119,
+      "length": 2
+    }
+  ],
+  "hash": "4e1c3cb5402c4271bab3cbc07b3d251a224a9f555cad7b8ae38f1649256de3e6",
+  "sample_index": 824
+}

@@ -64,6 +64,37 @@ from .safety_instrumented import (
     SISAuditLogger,
 )
 
+from .verifiable_delay import (
+    VDFComputer,
+    VDFVerifier,
+    VDFConfig,
+    VDFInput,
+    VDFOutput,
+    DelayAttestation,
+    SafetyDelayType,
+    ESD_COOLDOWN_CONFIG,
+    INTERLOCK_RELEASE_CONFIG,
+    CHEMICAL_HOLD_CONFIG,
+    PRESSURE_EQUALIZATION_CONFIG,
+    PURGE_CYCLE_CONFIG,
+)
+
+from .tesla_broadcast_auth import (
+    TeslaBroadcastProfile,
+    TeslaSender,
+    TeslaReceiver,
+    TeslaHashChain,
+    TeslaConfig,
+    TeslaProtocol,
+    TeslaAuthenticatedMessage,
+    KeyDisclosure,
+    ChainCommitment,
+    ChainExhaustedError,
+    GOOSE_TESLA_CONFIG,
+    SV_TESLA_CONFIG,
+    MMS_TESLA_CONFIG,
+)
+
 __all__ = [
     # SCADA
     "LightweightScadaPQC",
@@ -100,4 +131,31 @@ __all__ = [
     "SafetyKeyManager",
     "SISMessageAuthenticator",
     "SISAuditLogger",
+    # TESLA++ Broadcast Authentication
+    "TeslaBroadcastProfile",
+    "TeslaSender",
+    "TeslaReceiver",
+    "TeslaHashChain",
+    "TeslaConfig",
+    "TeslaProtocol",
+    "TeslaAuthenticatedMessage",
+    "KeyDisclosure",
+    "ChainCommitment",
+    "ChainExhaustedError",
+    "GOOSE_TESLA_CONFIG",
+    "SV_TESLA_CONFIG",
+    "MMS_TESLA_CONFIG",
+    # Verifiable Delay Functions
+    "VDFComputer",
+    "VDFVerifier",
+    "VDFConfig",
+    "VDFInput",
+    "VDFOutput",
+    "DelayAttestation",
+    "SafetyDelayType",
+    "ESD_COOLDOWN_CONFIG",
+    "INTERLOCK_RELEASE_CONFIG",
+    "CHEMICAL_HOLD_CONFIG",
+    "PRESSURE_EQUALIZATION_CONFIG",
+    "PURGE_CYCLE_CONFIG",
 ]

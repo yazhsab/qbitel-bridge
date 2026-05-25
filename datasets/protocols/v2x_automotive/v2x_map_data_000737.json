@@ -1,0 +1,203 @@
+{
+  "intersection_id": 57815,
+  "msg_count": 126,
+  "ref_point": {
+    "latitude": 40.7560511,
+    "longitude": -73.9831507
+  },
+  "location_name": "Times Square, NYC",
+  "num_lanes": 5,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "sidewalk",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 450,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": -1478,
+          "dy_cm": -4702
+        },
+        {
+          "dx_cm": -1399,
+          "dy_cm": 2034
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "parking",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 450,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": -1250,
+          "dy_cm": -1338
+        },
+        {
+          "dx_cm": 621,
+          "dy_cm": 1621
+        },
+        {
+          "dx_cm": -4264,
+          "dy_cm": 388
+        },
+        {
+          "dx_cm": 2786,
+          "dy_cm": 3369
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "vehicle",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 300,
+      "num_nodes": 6,
+      "nodes": [
+        {
+          "dx_cm": -1967,
+          "dy_cm": -2814
+        },
+        {
+          "dx_cm": -1353,
+          "dy_cm": -4467
+        },
+        {
+          "dx_cm": -1066,
+          "dy_cm": -2956
+        },
+        {
+          "dx_cm": -766,
+          "dy_cm": 4253
+        },
+        {
+          "dx_cm": -1972,
+          "dy_cm": 2020
+        },
+        {
+          "dx_cm": 774,
+          "dy_cm": -4927
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "bikeLane",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 366,
+      "num_nodes": 5,
+      "nodes": [
+        {
+          "dx_cm": -3422,
+          "dy_cm": -299
+        },
+        {
+          "dx_cm": 1627,
+          "dy_cm": 2805
+        },
+        {
+          "dx_cm": 4955,
+          "dy_cm": -4745
+        },
+        {
+          "dx_cm": 1107,
+          "dy_cm": 2478
+        },
+        {
+          "dx_cm": 2929,
+          "dy_cm": 83
+        }
+      ]
+    },
+    {
+      "lane_id": 5,
+      "lane_type": "crosswalk",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 330,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": -701,
+          "dy_cm": 1675
+        },
+        {
+          "dx_cm": 3666,
+          "dy_cm": -3212
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "231caeef8c77f488",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 112
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.183749",
+  "message_length": 226,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 112,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 113,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 114,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 116,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 120,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 124,
+      "length": 1
+    }
+  ],
+  "hash": "2c43c4d076311da0aef20c17a61c084ddf83a9d9957d84c12d1ecccb32c53989",
+  "sample_index": 737
+}

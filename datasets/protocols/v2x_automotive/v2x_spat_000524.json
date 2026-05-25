@@ -1,0 +1,127 @@
+{
+  "intersection_id": 15600,
+  "msg_count": 41,
+  "minute_of_year": 414847,
+  "location_name": "The Loop, Chicago",
+  "latitude": 41.8759641,
+  "longitude": -87.6299642,
+  "num_signal_groups": 7,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 170,
+      "max_end_time_ds": 188,
+      "likely_time_ds": 170,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "dark",
+      "min_end_time_ds": 48,
+      "max_end_time_ds": 99,
+      "likely_time_ds": 61,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "dark",
+      "min_end_time_ds": 11,
+      "max_end_time_ds": 109,
+      "likely_time_ds": 89,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 172,
+      "max_end_time_ds": 207,
+      "likely_time_ds": 197,
+      "confidence": 4
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 155,
+      "max_end_time_ds": 193,
+      "likely_time_ds": 163,
+      "confidence": 1
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "dark",
+      "min_end_time_ds": 247,
+      "max_end_time_ds": 292,
+      "likely_time_ds": 271,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 289,
+      "max_end_time_ds": 338,
+      "likely_time_ds": 307,
+      "confidence": 14
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.117905",
+  "message_length": 176,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 112,
+      "length": 1
+    }
+  ],
+  "hash": "f198e06d17961e6a6a6a21adb6a0bddc21d1dd0ad197ae53bb3bfaf4dbc89135",
+  "sample_index": 524
+}

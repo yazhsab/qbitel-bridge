@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPEDESTRIAN",
+  "sec_mark_ms": 4740,
+  "msg_count": 121,
+  "latitude": 44.9795814,
+  "longitude": -93.2641519,
+  "location_name": "Downtown Minneapolis",
+  "speed_mph": 5.4,
+  "heading_deg": 211.2066,
+  "position_accuracy": 5,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8002",
+    "signer_type": "digest",
+    "signer_id_hex": "03455bbdac259ffa",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 112
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.211764",
+  "message_length": 130,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 112,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 113,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 114,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 116,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 117,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 121,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 125,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 127,
+      "length": 2
+    }
+  ],
+  "hash": "cbda13934e0c91fb96b7f25b0881ff205f7a322dcf462e5c2d7c188a40ea2203",
+  "sample_index": 860
+}

@@ -36,10 +36,10 @@ const hardeningAreas = [
 ];
 
 const positioningPoints = [
-  'Lead with governed PQC migration and crypto posture mapping, not claims that every domain-specific scheme is production-ready.',
+  'Lead with governed PQC migration and crypto posture mapping rather than broad claims about every domain-specific scheme.',
   'Use hybrid and overlay language for constrained environments where system replacement is unrealistic.',
   'Keep strict provider enforcement on every production-facing ML-KEM and ML-DSA path.',
-  'Market the domain-specific modules as applied R&D until trust anchors, proofs, and verification flows are hardened.',
+  'Position domain-specific modules as applied R&D until trust anchors, proofs, and verification flows are hardened.',
 ];
 ---
 
@@ -49,9 +49,10 @@ const positioningPoints = [
 >
   <PageHero
     title="Post-Quantum Protection"
-    description="QBITEL is strongest when positioned as governed post-quantum migration: map crypto exposure, apply overlays where change is acceptable, and prove what changed with evidence and rollback controls."
+    description="QBITEL supports governed post-quantum migration: map crypto exposure, apply overlays where change is acceptable, and prove what changed with evidence and rollback controls."
     badge="Governed PQC Rollout"
     gradient="from-neon-cyan to-quantum-500"
+    visual="pqc"
   />
 
   <section class="border-b border-surface-600/50 py-12">
@@ -75,18 +76,17 @@ const positioningPoints = [
       <div class="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
         <div>
           <h2 class="section-heading">
-            What QBITEL PQC should mean <span class="gradient-text">right now</span>
+            What QBITEL PQC means <span class="gradient-text">in practice</span>
           </h2>
           <p class="text-lg leading-8 text-slate-300">
-            The right buyer story is not “every PQC algorithm is finished”. It is: discover the
-            flows that matter, plan migration by operational constraints, apply governed hybrid or
-            post-quantum controls where the boundary allows it, and keep an evidence trail for the
-            rollout.
+            The buyer story is practical migration: discover the flows that matter, plan by
+            operational constraints, apply governed hybrid or post-quantum controls where the
+            boundary allows it, and keep an evidence trail for the rollout.
           </p>
 
           <div class="mt-8 flex flex-wrap gap-4">
             <a href={url('/pqc-audit')} class="btn-primary">
-              Open code-level audit
+              Open implementation review
             </a>
             <a href={url('/docs/security/pqc-algorithms')} class="btn-secondary">
               Read algorithm docs
@@ -140,8 +140,8 @@ const positioningPoints = [
               Areas that still need hardening
             </h2>
             <p class="text-sm leading-7 text-slate-300">
-              These domain-specific modules are valuable prototypes, but they are not ready to
-              carry the full product trust story yet.
+              These domain-specific modules are valuable applied R&D areas that need additional
+              trust-anchor, verification, and proof hardening before production positioning.
             </p>
           </div>
 
@@ -160,6 +160,6 @@ const positioningPoints = [
 
   <CTABanner
     title="Treat PQC as a governed migration program"
-    description="QBITEL should lead with real crypto posture mapping, controlled rollout, and evidence generation, while the prototype domain-specific implementations are hardened behind the scenes."
+    description="QBITEL leads with crypto posture mapping, controlled rollout, and evidence generation while domain-specific implementations continue through transparent hardening."
   />
 </PageLayout>

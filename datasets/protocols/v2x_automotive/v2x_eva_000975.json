@@ -1,0 +1,92 @@
+{
+  "temp_id_hex": "46685433",
+  "timestamp_ms": 3071423283,
+  "latitude": 42.3598827,
+  "longitude": -71.0546375,
+  "location_name": "Boston Common",
+  "speed_mph": 68.4,
+  "heading_deg": 18.6898,
+  "vehicle_label": "police",
+  "priority": 6,
+  "response_type": "emergency",
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x20",
+    "signer_type": "digest",
+    "signer_id_hex": "17ec5ab25362937b",
+    "signature_algorithm": "ML-DSA-65",
+    "signature_size_bytes": 3293,
+    "is_pqc_signature": true,
+    "header_length": 3308
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "eva",
+  "timestamp": "2026-03-04T09:49:09.235826",
+  "message_length": 3331,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 3308,
+      "length": 1
+    },
+    {
+      "name": "timestamp",
+      "offset": 3309,
+      "length": 4
+    },
+    {
+      "name": "temporary_id",
+      "offset": 3313,
+      "length": 4
+    },
+    {
+      "name": "latitude",
+      "offset": 3317,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 3321,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 3325,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 3327,
+      "length": 2
+    },
+    {
+      "name": "priority",
+      "offset": 3329,
+      "length": 1
+    },
+    {
+      "name": "response_type",
+      "offset": 3330,
+      "length": 1
+    }
+  ],
+  "hash": "b29f532a7d50bbd04f00c709e710d18b62b489e81cfd57ca70066b86ce56bbc8",
+  "sample_index": 975
+}

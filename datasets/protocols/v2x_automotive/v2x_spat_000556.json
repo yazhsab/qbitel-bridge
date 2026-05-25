@@ -1,0 +1,135 @@
+{
+  "intersection_id": 18984,
+  "msg_count": 73,
+  "minute_of_year": 342514,
+  "location_name": "Downtown Denver",
+  "latitude": 39.7365879,
+  "longitude": -104.9907957,
+  "num_signal_groups": 8,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 174,
+      "max_end_time_ds": 226,
+      "likely_time_ds": 205,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 274,
+      "max_end_time_ds": 282,
+      "likely_time_ds": 277,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 77,
+      "max_end_time_ds": 122,
+      "likely_time_ds": 100,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 72,
+      "max_end_time_ds": 172,
+      "likely_time_ds": 149,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 205,
+      "max_end_time_ds": 247,
+      "likely_time_ds": 210,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 239,
+      "max_end_time_ds": 307,
+      "likely_time_ds": 289,
+      "confidence": 4
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 78,
+      "max_end_time_ds": 101,
+      "likely_time_ds": 83,
+      "confidence": 10
+    },
+    {
+      "signal_group_id": 8,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 188,
+      "max_end_time_ds": 207,
+      "likely_time_ds": 199,
+      "confidence": 7
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "Falcon-512",
+    "signature_size_bytes": 666,
+    "is_pqc_signature": true,
+    "header_length": 674
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.126011",
+  "message_length": 755,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 674,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 675,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 676,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 678,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 682,
+      "length": 1
+    }
+  ],
+  "hash": "337f2ed2cf9d5241b932902b7bd3b25bedd05aecfca8fe885cd86c4c99c43d70",
+  "sample_index": 556
+}

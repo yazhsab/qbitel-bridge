@@ -38,6 +38,8 @@ class DatasetValidator:
             "threat_intelligence": self.validate_threat_intelligence(),
             "security_events": self.validate_security_events(),
             "anomaly_detection": self.validate_anomaly_detection(),
+            "bpo_protocols": self.validate_bpo_protocols(),
+            "bpo_security_events": self.validate_bpo_security_events(),
         }
         return results
 
@@ -486,6 +488,266 @@ class DatasetValidator:
                 True,
                 f"Class balance: {normal_ratio:.1%} normal, {1-normal_ratio:.1%} anomalous"
             ))
+
+        return results
+
+    def validate_bpo_protocols(self) -> List[ValidationResult]:
+        """Validate BPO protocol sample datasets."""
+        results = []
+        protocols_dir = self.base_path / "protocols"
+
+        if not protocols_dir.exists():
+            results.append(ValidationResult(False, "Protocols directory not found"))
+            return results
+
+        bpo_protocols = ["sip", "rtp", "tn3270e", "cti", "ivr"]
+
+        for protocol in bpo_protocols:
+            protocol_dir = protocols_dir / protocol
+
+            if not protocol_dir.exists():
+                results.append(ValidationResult(
+                    False,
+                    f"BPO protocol directory missing: {protocol}"
+                ))
+                continue
+
+            # Check metadata file
+            meta_file = protocol_dir / "dataset_metadata.json"
+            if not meta_file.exists():
+                results.append(ValidationResult(
+                    False,
+                    f"{protocol}: Missing dataset_metadata.json"
+                ))
+                continue
+
+            with open(meta_file) as f:
+                metadata = json.load(f)
+
+            # Count samples
+            bin_files = list(protocol_dir.glob("*.bin"))
+            json_files = [f for f in protocol_dir.glob("*.json")
+                         if f.name != "dataset_metadata.json"]
+
+            # Validate sample count
+            expected_count = metadata.get("total_samples", 0)
+            actual_count = len(bin_files)
+
+            if actual_count == expected_count:
+                results.append(ValidationResult(
+                    True,
+                    f"{protocol}: Sample count matches ({actual_count})",
+                    {"expected": expected_count, "actual": actual_count}
+                ))
+            else:
+                results.append(ValidationResult(
+                    False,
+                    f"{protocol}: Sample count mismatch",
+                    {"expected": expected_count, "actual": actual_count}
+                ))
+
+            # Validate bin/json pairs
+            orphan_bins = []
+            for bin_file in bin_files:
+                json_file = bin_file.with_suffix(".json")
+                if not json_file.exists():
+                    orphan_bins.append(bin_file.name)
+
+            orphan_jsons = []
+            for json_file in json_files:
+                bin_file = json_file.with_suffix(".bin")
+                if not bin_file.exists():
+                    orphan_jsons.append(json_file.name)
+
+            if orphan_bins or orphan_jsons:
+                results.append(ValidationResult(
+                    False,
+                    f"{protocol}: Unpaired files found",
+                    {"orphan_bins": len(orphan_bins), "orphan_jsons": len(orphan_jsons)}
+                ))
+            else:
+                results.append(ValidationResult(
+                    True,
+                    f"{protocol}: All bin/json files properly paired"
+                ))
+
+            # Validate sample structure (check first 5)
+            valid_samples = 0
+            invalid_samples = []
+
+            for json_file in list(json_files)[:5]:
+                try:
+                    with open(json_file) as f:
+                        sample_meta = json.load(f)
+
+                    required = ["protocol", "message_type", "timestamp", "fields"]
+                    missing = [r for r in required if r not in sample_meta]
+
+                    if missing:
+                        invalid_samples.append({
+                            "file": json_file.name,
+                            "missing": missing
+                        })
+                    else:
+                        valid_samples += 1
+                except Exception as e:
+                    invalid_samples.append({
+                        "file": json_file.name,
+                        "error": str(e)
+                    })
+
+            if invalid_samples:
+                results.append(ValidationResult(
+                    False,
+                    f"{protocol}: Invalid sample structure",
+                    {"invalid_samples": invalid_samples}
+                ))
+            else:
+                results.append(ValidationResult(
+                    True,
+                    f"{protocol}: Sample structure validated ({valid_samples} checked)"
+                ))
+
+        return results
+
+    def validate_bpo_security_events(self) -> List[ValidationResult]:
+        """Validate BPO security event datasets (CDR, PCI, LLM pairs)."""
+        results = []
+        events_dir = self.base_path / "security_events"
+
+        if not events_dir.exists():
+            results.append(ValidationResult(False, "Security events directory not found"))
+            return results
+
+        # 1. Validate Toll Fraud CDRs
+        cdr_dir = events_dir / "bpo_toll_fraud"
+        cdr_file = cdr_dir / "cdrs.jsonl"
+
+        if not cdr_file.exists():
+            results.append(ValidationResult(False, "Toll fraud CDR file missing"))
+        else:
+            cdr_count = 0
+            fraud_count = 0
+            valid_count = 0
+            fraud_types = Counter()
+
+            with open(cdr_file) as f:
+                for line in f:
+                    if not line.strip():
+                        continue
+                    cdr_count += 1
+                    try:
+                        record = json.loads(line)
+                        required = ["call_id", "agent_id", "direction", "is_fraud"]
+                        if all(k in record for k in required):
+                            valid_count += 1
+                        if record.get("is_fraud"):
+                            fraud_count += 1
+                            fraud_types[record.get("fraud_type", "unknown")] += 1
+                    except json.JSONDecodeError:
+                        pass
+
+            if valid_count == cdr_count:
+                results.append(ValidationResult(
+                    True,
+                    f"Toll Fraud CDRs: {cdr_count} records validated",
+                    {"fraud_records": fraud_count, "fraud_types": dict(fraud_types)}
+                ))
+            else:
+                results.append(ValidationResult(
+                    False,
+                    f"Toll Fraud CDRs: {cdr_count - valid_count}/{cdr_count} invalid records"
+                ))
+
+            # Check fraud ratio
+            if cdr_count > 0:
+                fraud_ratio = fraud_count / cdr_count
+                results.append(ValidationResult(
+                    True,
+                    f"Toll Fraud ratio: {fraud_ratio:.1%} ({fraud_count}/{cdr_count})",
+                    {"fraud_ratio": fraud_ratio}
+                ))
+
+        # 2. Validate PCI Voice Events
+        pci_dir = events_dir / "bpo_pci_voice"
+        pci_file = pci_dir / "events.jsonl"
+
+        if not pci_file.exists():
+            results.append(ValidationResult(False, "PCI voice events file missing"))
+        else:
+            pci_count = 0
+            valid_count = 0
+            event_types = Counter()
+
+            with open(pci_file) as f:
+                for line in f:
+                    if not line.strip():
+                        continue
+                    pci_count += 1
+                    try:
+                        event = json.loads(line)
+                        if "event_id" in event and "event_type" in event:
+                            valid_count += 1
+                            event_types[event.get("event_type", "unknown")] += 1
+                    except json.JSONDecodeError:
+                        pass
+
+            if valid_count == pci_count:
+                results.append(ValidationResult(
+                    True,
+                    f"PCI Voice Events: {pci_count} events validated",
+                    {"event_types": dict(event_types)}
+                ))
+            else:
+                results.append(ValidationResult(
+                    False,
+                    f"PCI Voice Events: {pci_count - valid_count}/{pci_count} invalid events"
+                ))
+
+        # 3. Validate LLM Instruction Pairs
+        llm_dir = events_dir / "bpo_llm_pairs"
+        llm_file = llm_dir / "instruction_pairs.json"
+
+        if not llm_file.exists():
+            results.append(ValidationResult(False, "LLM instruction pairs file missing"))
+        else:
+            try:
+                with open(llm_file) as f:
+                    pairs = json.load(f)
+
+                if not isinstance(pairs, list):
+                    results.append(ValidationResult(
+                        False,
+                        "LLM pairs: Expected JSON array"
+                    ))
+                else:
+                    valid_count = 0
+                    categories = Counter()
+                    difficulties = Counter()
+
+                    for pair in pairs:
+                        required = ["pair_id", "category", "instruction", "response"]
+                        if all(k in pair for k in required):
+                            valid_count += 1
+                            categories[pair.get("category", "unknown")] += 1
+                            difficulties[pair.get("difficulty", "unknown")] += 1
+
+                    if valid_count == len(pairs):
+                        results.append(ValidationResult(
+                            True,
+                            f"LLM Instruction Pairs: {len(pairs)} pairs validated",
+                            {"categories": dict(categories), "difficulties": dict(difficulties)}
+                        ))
+                    else:
+                        results.append(ValidationResult(
+                            False,
+                            f"LLM Pairs: {len(pairs) - valid_count}/{len(pairs)} invalid pairs"
+                        ))
+            except (json.JSONDecodeError, Exception) as e:
+                results.append(ValidationResult(
+                    False,
+                    f"LLM pairs: Failed to parse - {str(e)}"
+                ))
 
         return results
 

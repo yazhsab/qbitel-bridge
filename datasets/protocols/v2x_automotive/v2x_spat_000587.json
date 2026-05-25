@@ -1,0 +1,135 @@
+{
+  "intersection_id": 53823,
+  "msg_count": 104,
+  "minute_of_year": 96180,
+  "location_name": "Downtown Columbus",
+  "latitude": 39.9564565,
+  "longitude": -83.0003056,
+  "num_signal_groups": 8,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "dark",
+      "min_end_time_ds": 102,
+      "max_end_time_ds": 110,
+      "likely_time_ds": 109,
+      "confidence": 3
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 32,
+      "max_end_time_ds": 56,
+      "likely_time_ds": 53,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 11,
+      "max_end_time_ds": 104,
+      "likely_time_ds": 12,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 210,
+      "max_end_time_ds": 257,
+      "likely_time_ds": 223,
+      "confidence": 4
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 19,
+      "max_end_time_ds": 87,
+      "likely_time_ds": 35,
+      "confidence": 13
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 21,
+      "max_end_time_ds": 73,
+      "likely_time_ds": 51,
+      "confidence": 14
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 56,
+      "max_end_time_ds": 151,
+      "likely_time_ds": 58,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 8,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 287,
+      "max_end_time_ds": 314,
+      "likely_time_ds": 296,
+      "confidence": 11
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "725e82db5c4547baf61e753f4a21983c5735bd8153087c9d05985919d4dbe4dd",
+    "signature_algorithm": "ML-DSA-44",
+    "signature_size_bytes": 2420,
+    "is_pqc_signature": true,
+    "header_length": 2460
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.133354",
+  "message_length": 2541,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 2460,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 2461,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 2462,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 2464,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 2468,
+      "length": 1
+    }
+  ],
+  "hash": "032a86a8442ad246c20ec0216e07558c273635dff940c08ce9815cfac0808037",
+  "sample_index": 587
+}

@@ -1,0 +1,111 @@
+{
+  "intersection_id": 12601,
+  "msg_count": 61,
+  "minute_of_year": 526504,
+  "location_name": "Austin Capitol",
+  "latitude": 30.2622422,
+  "longitude": -97.7431257,
+  "num_signal_groups": 5,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 39,
+      "max_end_time_ds": 58,
+      "likely_time_ds": 53,
+      "confidence": 2
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 183,
+      "max_end_time_ds": 245,
+      "likely_time_ds": 235,
+      "confidence": 14
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 139,
+      "max_end_time_ds": 159,
+      "likely_time_ds": 139,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 63,
+      "max_end_time_ds": 126,
+      "likely_time_ds": 112,
+      "confidence": 4
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 214,
+      "max_end_time_ds": 240,
+      "likely_time_ds": 214,
+      "confidence": 9
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "2b371fe077fc8dc66a107e05e04c8cfddb09120066e200a2bc79b077e5c73fa3",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.122996",
+  "message_length": 158,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 112,
+      "length": 1
+    }
+  ],
+  "hash": "9c044d7aa5355ea731c809b5b4035757de466f920d5e94f32bca70adfd961c3c",
+  "sample_index": 544
+}
