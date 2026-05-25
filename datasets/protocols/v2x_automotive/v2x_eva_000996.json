@@ -1,0 +1,92 @@
+{
+  "temp_id_hex": "46685448",
+  "timestamp_ms": 3071423287,
+  "latitude": 33.4519793,
+  "longitude": -112.0723548,
+  "location_name": "Central Phoenix",
+  "speed_mph": 42.5,
+  "heading_deg": 322.9271,
+  "vehicle_label": "road_maintenance",
+  "priority": 2,
+  "response_type": "pursuit",
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x20",
+    "signer_type": "certificate",
+    "signer_id_hex": "f22447adc81ab6560e1fae2de10b8544276db5b233c17304a3d3361f96e82ceb",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 135
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "eva",
+  "timestamp": "2026-03-04T09:49:09.239960",
+  "message_length": 158,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 135,
+      "length": 1
+    },
+    {
+      "name": "timestamp",
+      "offset": 136,
+      "length": 4
+    },
+    {
+      "name": "temporary_id",
+      "offset": 140,
+      "length": 4
+    },
+    {
+      "name": "latitude",
+      "offset": 144,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 148,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 152,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 154,
+      "length": 2
+    },
+    {
+      "name": "priority",
+      "offset": 156,
+      "length": 1
+    },
+    {
+      "name": "response_type",
+      "offset": 157,
+      "length": 1
+    }
+  ],
+  "hash": "1f284510eaa044eb1954499f41ec6d40830260305bc34dea62ba28441d70c713",
+  "sample_index": 996
+}

@@ -1,0 +1,119 @@
+{
+  "intersection_id": 4100,
+  "msg_count": 63,
+  "minute_of_year": 157520,
+  "location_name": "Downtown St. Louis",
+  "latitude": 38.6308152,
+  "longitude": -90.2025162,
+  "num_signal_groups": 6,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 206,
+      "max_end_time_ds": 305,
+      "likely_time_ds": 258,
+      "confidence": 10
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 161,
+      "max_end_time_ds": 247,
+      "likely_time_ds": 196,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 174,
+      "max_end_time_ds": 258,
+      "likely_time_ds": 229,
+      "confidence": 4
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 98,
+      "max_end_time_ds": 129,
+      "likely_time_ds": 108,
+      "confidence": 0
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 134,
+      "max_end_time_ds": 216,
+      "likely_time_ds": 138,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 285,
+      "max_end_time_ds": 301,
+      "likely_time_ds": 299,
+      "confidence": 6
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.123338",
+  "message_length": 167,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 112,
+      "length": 1
+    }
+  ],
+  "hash": "c0d191088d0af53ceb5a0d561611f5d4a603aaaec17b7ee2543edeeb304be855",
+  "sample_index": 546
+}

@@ -1,0 +1,95 @@
+{
+  "intersection_id": 54370,
+  "msg_count": 103,
+  "minute_of_year": 272570,
+  "location_name": "Downtown Minneapolis",
+  "latitude": 44.9775901,
+  "longitude": -93.2686366,
+  "num_signal_groups": 3,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 193,
+      "max_end_time_ds": 261,
+      "likely_time_ds": 224,
+      "confidence": 12
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 230,
+      "max_end_time_ds": 271,
+      "likely_time_ds": 246,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 112,
+      "max_end_time_ds": 163,
+      "likely_time_ds": 160,
+      "confidence": 5
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "aed2ecc5d3827b774527f8575213e3ac8aeaaabe36a10954d7fc73ab6638b928",
+    "signature_algorithm": "ML-DSA-65",
+    "signature_size_bytes": 3293,
+    "is_pqc_signature": true,
+    "header_length": 3333
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.132893",
+  "message_length": 3369,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 3333,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 3334,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 3335,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 3337,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 3341,
+      "length": 1
+    }
+  ],
+  "hash": "10aaca58c62f287c1ee7b72dae9898b89404c696c56f3c6f74dfabe08a5c3ec8",
+  "sample_index": 586
+}

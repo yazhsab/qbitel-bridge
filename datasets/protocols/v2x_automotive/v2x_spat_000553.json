@@ -1,0 +1,127 @@
+{
+  "intersection_id": 59361,
+  "msg_count": 70,
+  "minute_of_year": 161412,
+  "location_name": "Portland Pioneer Sq",
+  "latitude": 45.524742,
+  "longitude": -122.6753191,
+  "num_signal_groups": 7,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 22,
+      "max_end_time_ds": 28,
+      "likely_time_ds": 24,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 37,
+      "max_end_time_ds": 81,
+      "likely_time_ds": 81,
+      "confidence": 15
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 248,
+      "max_end_time_ds": 294,
+      "likely_time_ds": 256,
+      "confidence": 13
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 298,
+      "max_end_time_ds": 325,
+      "likely_time_ds": 304,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 176,
+      "max_end_time_ds": 275,
+      "likely_time_ds": 217,
+      "confidence": 15
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 104,
+      "max_end_time_ds": 127,
+      "likely_time_ds": 110,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "dark",
+      "min_end_time_ds": 43,
+      "max_end_time_ds": 136,
+      "likely_time_ds": 67,
+      "confidence": 2
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "187bdbe42819841c",
+    "signature_algorithm": "ML-DSA-65",
+    "signature_size_bytes": 3293,
+    "is_pqc_signature": true,
+    "header_length": 3309
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.125412",
+  "message_length": 3381,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 3309,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 3310,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 3311,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 3313,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 3317,
+      "length": 1
+    }
+  ],
+  "hash": "e3006e14eec4f1541867eb6e3e7cf26bf9641087cdbbea06cd747d427d1bf0f5",
+  "sample_index": 553
+}

@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  banking-demo:
+    build:
+      context: ../..
+      dockerfile: demos/banking_security/Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - QBITEL_PQC_ALLOW_FALLBACK=1
+      - QBITEL_ALLOW_EXPERIMENTAL_CRYPTO=1
+      - DEMO_ENV=production
+    volumes:
+      - ./config:/app/demo/config
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

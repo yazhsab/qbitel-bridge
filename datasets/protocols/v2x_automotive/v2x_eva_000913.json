@@ -1,0 +1,92 @@
+{
+  "temp_id_hex": "466853f5",
+  "timestamp_ms": 3071423270,
+  "latitude": 37.7754942,
+  "longitude": -122.4230406,
+  "location_name": "SF Civic Center",
+  "speed_mph": 40.8,
+  "heading_deg": 300.5929,
+  "vehicle_label": "ambulance",
+  "priority": 7,
+  "response_type": "stationary",
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x20",
+    "signer_type": "certificate",
+    "signer_id_hex": "717e8bd609ea928c20fb76f97b123203ca6a3718671be9fc26522323497eaaff",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 103
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "eva",
+  "timestamp": "2026-03-04T09:49:09.222816",
+  "message_length": 126,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 103,
+      "length": 1
+    },
+    {
+      "name": "timestamp",
+      "offset": 104,
+      "length": 4
+    },
+    {
+      "name": "temporary_id",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "latitude",
+      "offset": 112,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 116,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 120,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 122,
+      "length": 2
+    },
+    {
+      "name": "priority",
+      "offset": 124,
+      "length": 1
+    },
+    {
+      "name": "response_type",
+      "offset": 125,
+      "length": 1
+    }
+  ],
+  "hash": "02ed534103cdd92e4322fa15509e55cf3e72982fb4aa7d76756df1436c78d23b",
+  "sample_index": 913
+}

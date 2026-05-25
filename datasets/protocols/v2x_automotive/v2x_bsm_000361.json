@@ -1,0 +1,127 @@
+{
+  "msg_count": 6,
+  "temp_id_hex": "466853c1",
+  "sec_mark_ms": 48945,
+  "latitude": 33.4501311,
+  "longitude": -112.0777079,
+  "location_name": "Central Phoenix",
+  "elevation_m": 1810.7,
+  "speed_mph": 38.1,
+  "heading_deg": 312.6155,
+  "acceleration": {
+    "lateral_g": 0.38,
+    "longitudinal_g": -2.86,
+    "vertical_g": -0.14,
+    "yaw_rate_dps": 28.8
+  },
+  "brake_system_status": {
+    "wheelBrakes": "0011",
+    "traction": "off",
+    "abs": "on",
+    "scs": "off",
+    "brakeBoost": "off",
+    "auxBrakes": "on"
+  },
+  "vehicle_size": {
+    "width_m": 1.9,
+    "length_m": 14.0
+  },
+  "has_part_ii": false,
+  "vehicle_type": null,
+  "exterior_lights": null,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x20",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 103
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "bsm",
+  "timestamp": "2026-03-04T09:49:09.080025",
+  "message_length": 140,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 103,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "temporary_id",
+      "offset": 105,
+      "length": 4
+    },
+    {
+      "name": "sec_mark",
+      "offset": 109,
+      "length": 2
+    },
+    {
+      "name": "latitude",
+      "offset": 111,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 115,
+      "length": 4
+    },
+    {
+      "name": "elevation",
+      "offset": 119,
+      "length": 2
+    },
+    {
+      "name": "speed",
+      "offset": 121,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 123,
+      "length": 2
+    },
+    {
+      "name": "acceleration_set",
+      "offset": 125,
+      "length": 8
+    },
+    {
+      "name": "brake_system_status",
+      "offset": 133,
+      "length": 2
+    },
+    {
+      "name": "vehicle_size",
+      "offset": 135,
+      "length": 4
+    }
+  ],
+  "hash": "d3ee2f7c795ff30110921e1263c85201de08ee96a3a2d6e667f1e143ba465356",
+  "sample_index": 361
+}

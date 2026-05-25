@@ -1,0 +1,135 @@
+{
+  "intersection_id": 3154,
+  "msg_count": 42,
+  "minute_of_year": 313123,
+  "location_name": "Times Square, NYC",
+  "latitude": 40.7603916,
+  "longitude": -73.9820074,
+  "num_signal_groups": 8,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 106,
+      "max_end_time_ds": 181,
+      "likely_time_ds": 149,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 76,
+      "max_end_time_ds": 167,
+      "likely_time_ds": 85,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 252,
+      "max_end_time_ds": 300,
+      "likely_time_ds": 259,
+      "confidence": 14
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 92,
+      "max_end_time_ds": 140,
+      "likely_time_ds": 132,
+      "confidence": 3
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 259,
+      "max_end_time_ds": 350,
+      "likely_time_ds": 314,
+      "confidence": 1
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 271,
+      "max_end_time_ds": 276,
+      "likely_time_ds": 276,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "dark",
+      "min_end_time_ds": 62,
+      "max_end_time_ds": 152,
+      "likely_time_ds": 131,
+      "confidence": 0
+    },
+    {
+      "signal_group_id": 8,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 129,
+      "max_end_time_ds": 178,
+      "likely_time_ds": 141,
+      "confidence": 10
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "fc6f0ded957419a47671ab50d87b249ddb2dff472ced0da5457d75e9a8c7bc5e",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.118085",
+  "message_length": 185,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 112,
+      "length": 1
+    }
+  ],
+  "hash": "da65040486286a2d762be4967649c1b08abed53bfaee9efdbda74fe923ff21fe",
+  "sample_index": 525
+}

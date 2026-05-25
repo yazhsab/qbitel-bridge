@@ -5,15 +5,35 @@ Python implementation supporting all security levels:
 - ML-KEM-512: Security Level 1 (128-bit)
 - ML-KEM-768: Security Level 3 (192-bit) - Default for TLS 1.3
 - ML-KEM-1024: Security Level 5 (256-bit)
+
+Security:
+    Set strict_mode=True (default in production) to prevent fallback to
+    random-byte generation when crypto libraries are unavailable.
 """
 
 import logging
+import os
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, Tuple
 
+from .providers import ProviderRegistry, _GLOBAL_STRICT_MODE
+
 logger = logging.getLogger(__name__)
+
+
+class PQCProviderUnavailableError(Exception):
+    """Raised when no real PQC crypto provider is available and strict mode is enabled."""
+
+    def __init__(self, algorithm: str, operation: str):
+        self.algorithm = algorithm
+        self.operation = operation
+        super().__init__(
+            f"CRITICAL: No PQC crypto provider available for {algorithm} {operation}. "
+            f"Install 'kyber-py' or 'liboqs-python' for production use. "
+            f"Set QBITEL_PQC_ALLOW_FALLBACK=1 to allow insecure test fallback (NEVER in production)."
+        )
 
 
 class MlKemSecurityLevel(Enum):
@@ -150,43 +170,41 @@ class MlKemEngine:
     ML-KEM cryptographic engine.
 
     Supports all three security levels with automatic provider selection.
+
+    Args:
+        level: Security level (512, 768, or 1024)
+        provider: Crypto provider ("kyber-py", "liboqs", or None for auto)
+        strict_mode: If True (default), raises PQCProviderUnavailableError when
+            no real crypto library is available instead of silently falling back
+            to random bytes. Set to False ONLY for unit testing.
     """
 
     def __init__(
         self,
         level: MlKemSecurityLevel = MlKemSecurityLevel.MLKEM_768,
         provider: Optional[str] = None,
+        strict_mode: Optional[bool] = None,
     ):
-        """
-        Initialize ML-KEM engine.
-
-        Args:
-            level: Security level (512, 768, or 1024)
-            provider: Crypto provider ("kyber-py", "liboqs", or None for auto)
-        """
         self.level = level
+        self.strict_mode = strict_mode if strict_mode is not None else _GLOBAL_STRICT_MODE
         self.provider = provider or self._detect_provider()
+
+        if self.provider == "fallback" and self.strict_mode:
+            raise PQCProviderUnavailableError(level.value, "initialization")
+
+        if self.provider == "fallback":
+            logger.warning(
+                f"ML-KEM engine using INSECURE fallback for {level.value}. "
+                f"This MUST NOT be used in production."
+            )
+
         self._engine = self._initialize_engine()
 
         logger.info(f"ML-KEM engine initialized: level={level.value}, provider={self.provider}")
 
     def _detect_provider(self) -> str:
-        """Detect available crypto provider."""
-        try:
-            import kyber
-
-            return "kyber-py"
-        except ImportError:
-            pass
-
-        try:
-            import oqs
-
-            return "liboqs"
-        except ImportError:
-            pass
-
-        return "fallback"
+        """Detect available crypto provider via the unified registry."""
+        return ProviderRegistry().get_kem_provider(strict_mode=False)
 
     def _initialize_engine(self):
         """Initialize the underlying crypto engine."""
@@ -234,9 +252,13 @@ class MlKemEngine:
                 private_key=MlKemPrivateKey(self.level, sk),
             )
         else:
-            # Fallback for testing
+            # INSECURE fallback for testing only — strict_mode check already happened in __init__
             import secrets
 
+            logger.critical(
+                f"ML-KEM keygen using INSECURE random fallback for {self.level.value}. "
+                f"Keys have NO quantum-safe security."
+            )
             keypair = MlKemKeyPair(
                 level=self.level,
                 public_key=MlKemPublicKey(self.level, secrets.token_bytes(self.level.public_key_size)),
@@ -285,6 +307,10 @@ class MlKemEngine:
         else:
             import secrets
 
+            logger.critical(
+                f"ML-KEM encapsulate using INSECURE random fallback for {self.level.value}. "
+                f"Shared secret has NO quantum-safe security."
+            )
             ciphertext = MlKemCiphertext(self.level, secrets.token_bytes(self.level.ciphertext_size))
             shared_secret = MlKemSharedSecret(secrets.token_bytes(32))
 
@@ -330,6 +356,10 @@ class MlKemEngine:
         else:
             import secrets
 
+            logger.critical(
+                f"ML-KEM decapsulate using INSECURE random fallback for {self.level.value}. "
+                f"Shared secret has NO quantum-safe security."
+            )
             shared_secret = MlKemSharedSecret(secrets.token_bytes(32))
 
         logger.debug(f"Decapsulated in {time.time() - start:.3f}s")

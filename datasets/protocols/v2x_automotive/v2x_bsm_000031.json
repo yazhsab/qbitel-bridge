@@ -1,0 +1,127 @@
+{
+  "msg_count": 60,
+  "temp_id_hex": "46685277",
+  "sec_mark_ms": 11767,
+  "latitude": 36.1637776,
+  "longitude": -86.776834,
+  "location_name": "Downtown Nashville",
+  "elevation_m": 136.5,
+  "speed_mph": 0.0,
+  "heading_deg": 267.5397,
+  "acceleration": {
+    "lateral_g": 0.98,
+    "longitudinal_g": 3.23,
+    "vertical_g": -0.31,
+    "yaw_rate_dps": 27.18
+  },
+  "brake_system_status": {
+    "wheelBrakes": "1100",
+    "traction": "on",
+    "abs": "off",
+    "scs": "off",
+    "brakeBoost": "off",
+    "auxBrakes": "off"
+  },
+  "vehicle_size": {
+    "width_m": 2.7,
+    "length_m": 7.6
+  },
+  "has_part_ii": true,
+  "vehicle_type": "passenger",
+  "exterior_lights": "allLightsOff",
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x20",
+    "signer_type": "digest",
+    "signer_id_hex": "ab2cddaf4b4c8bee",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 79
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "bsm",
+  "timestamp": "2026-03-04T09:49:09.002128",
+  "message_length": 118,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 79,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 80,
+      "length": 1
+    },
+    {
+      "name": "temporary_id",
+      "offset": 81,
+      "length": 4
+    },
+    {
+      "name": "sec_mark",
+      "offset": 85,
+      "length": 2
+    },
+    {
+      "name": "latitude",
+      "offset": 87,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 91,
+      "length": 4
+    },
+    {
+      "name": "elevation",
+      "offset": 95,
+      "length": 2
+    },
+    {
+      "name": "speed",
+      "offset": 97,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 99,
+      "length": 2
+    },
+    {
+      "name": "acceleration_set",
+      "offset": 101,
+      "length": 8
+    },
+    {
+      "name": "brake_system_status",
+      "offset": 109,
+      "length": 2
+    },
+    {
+      "name": "vehicle_size",
+      "offset": 111,
+      "length": 4
+    }
+  ],
+  "hash": "a853c989f7bf55517d9b3189e02da6c344df45f08540e608954e15aeafc9d050",
+  "sample_index": 31
+}

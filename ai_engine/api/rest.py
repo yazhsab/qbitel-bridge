@@ -70,6 +70,7 @@ from .zero_touch_endpoints import (
     initialize_decision_engine,
     shutdown_decision_engine,
 )
+from .pqc_migration_endpoints import router as pqc_migration_router
 
 logger = logging.getLogger(__name__)
 
@@ -241,6 +242,10 @@ All endpoints (except `/health` and `/docs`) require authentication via:
     app.include_router(zero_touch_router)
     logger.info("✅ Zero-Touch Security Decision Engine API endpoints registered")
 
+    # PQC Migration Reviewer
+    app.include_router(pqc_migration_router)
+    logger.info("✅ PQC Migration Reviewer API endpoints registered")
+
     # Enhanced API endpoints
     @app.get("/")
     async def root():
@@ -258,11 +263,13 @@ All endpoints (except `/health` and `/docs`) require authentication via:
                 "Enterprise Security",
                 "Compliance Reporting",
                 "Protocol Marketplace",
+                "AI PQC Migration Reviewer",
             ],
             "endpoints": {
                 "copilot": "/api/v1/copilot",
                 "websocket": "/api/v1/copilot/ws",
                 "marketplace": "/api/v1/marketplace",
+                "pqc_migration": "/api/v1/pqc-migration",
                 "docs": "/docs",
                 "health": "/health",
             },

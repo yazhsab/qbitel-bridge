@@ -1,0 +1,185 @@
+{
+  "intersection_id": 63815,
+  "msg_count": 81,
+  "ref_point": {
+    "latitude": 30.2709217,
+    "longitude": -97.7424339
+  },
+  "location_name": "Austin Capitol",
+  "num_lanes": 4,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "median",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 360,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": 2561,
+          "dy_cm": -4149
+        },
+        {
+          "dx_cm": -3097,
+          "dy_cm": -2583
+        },
+        {
+          "dx_cm": 4134,
+          "dy_cm": 275
+        },
+        {
+          "dx_cm": 1418,
+          "dy_cm": 3918
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "trackedVehicle",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 330,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": 1274,
+          "dy_cm": -4928
+        },
+        {
+          "dx_cm": -4649,
+          "dy_cm": -2224
+        },
+        {
+          "dx_cm": -3819,
+          "dy_cm": -4010
+        },
+        {
+          "dx_cm": -3476,
+          "dy_cm": 3186
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "vehicle",
+      "lane_direction": "egressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 450,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": -519,
+          "dy_cm": 1035
+        },
+        {
+          "dx_cm": 2212,
+          "dy_cm": -2515
+        },
+        {
+          "dx_cm": -1642,
+          "dy_cm": 4031
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "striping",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 366,
+      "num_nodes": 6,
+      "nodes": [
+        {
+          "dx_cm": -1492,
+          "dy_cm": -2305
+        },
+        {
+          "dx_cm": -3614,
+          "dy_cm": 3359
+        },
+        {
+          "dx_cm": 466,
+          "dy_cm": 827
+        },
+        {
+          "dx_cm": -4194,
+          "dy_cm": 1979
+        },
+        {
+          "dx_cm": -346,
+          "dy_cm": 2647
+        },
+        {
+          "dx_cm": 4705,
+          "dy_cm": 3508
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "a97a3284984792ed",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 80
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.169408",
+  "message_length": 181,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 80,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 81,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 82,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 84,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 88,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 92,
+      "length": 1
+    }
+  ],
+  "hash": "a6fc0988d69897f055fee4515b49e133ce7a31a7ac6b74026b0cb2ddbbea27be",
+  "sample_index": 692
+}

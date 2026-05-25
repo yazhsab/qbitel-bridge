@@ -1,0 +1,86 @@
+{
+  "basic_type": "unavailable",
+  "sec_mark_ms": 35463,
+  "msg_count": 109,
+  "latitude": 41.875965,
+  "longitude": -87.6260118,
+  "location_name": "The Loop, Chicago",
+  "speed_mph": 7.3,
+  "heading_deg": 68.0949,
+  "position_accuracy": 8,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8002",
+    "signer_type": "certificate",
+    "signer_id_hex": "7e583b6efd2910347e1cf3089f4d4635e65cb7caa6715e6d79a58bf81212bd8e",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 136
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.209189",
+  "message_length": 154,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 136,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 137,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 138,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 140,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 141,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 145,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 149,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 151,
+      "length": 2
+    }
+  ],
+  "hash": "28ee671bf76d52fc88a0c2e97e64738c2a52c23df883b88752008ec49dfb0926",
+  "sample_index": 848
+}

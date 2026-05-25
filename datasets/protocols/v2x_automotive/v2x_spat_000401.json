@@ -1,0 +1,135 @@
+{
+  "intersection_id": 9785,
+  "msg_count": 46,
+  "minute_of_year": 155754,
+  "location_name": "Downtown Seattle",
+  "latitude": 47.6028285,
+  "longitude": -122.3368295,
+  "num_signal_groups": 8,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 122,
+      "max_end_time_ds": 147,
+      "likely_time_ds": 134,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 284,
+      "max_end_time_ds": 366,
+      "likely_time_ds": 313,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 63,
+      "max_end_time_ds": 138,
+      "likely_time_ds": 105,
+      "confidence": 10
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 118,
+      "max_end_time_ds": 183,
+      "likely_time_ds": 148,
+      "confidence": 2
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 40,
+      "max_end_time_ds": 107,
+      "likely_time_ds": 74,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 215,
+      "max_end_time_ds": 238,
+      "likely_time_ds": 236,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 245,
+      "max_end_time_ds": 312,
+      "likely_time_ds": 287,
+      "confidence": 2
+    },
+    {
+      "signal_group_id": 8,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 197,
+      "max_end_time_ds": 256,
+      "likely_time_ds": 248,
+      "confidence": 9
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "689ba239d936ced8a1dd3e79033f4f15dac49787c57be6097403759860f1b152",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.089434",
+  "message_length": 185,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 112,
+      "length": 1
+    }
+  ],
+  "hash": "9277dc8a92605b4e0457e4ea493deac1a89b94ab7756504b56027fe22736feb2",
+  "sample_index": 401
+}

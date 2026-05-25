@@ -309,12 +309,126 @@ class SecurityException(QbitelAIException):
         super().__init__(message, error_code="SECURITY_ERROR", context=context)
 
 
+class ExperimentalCryptoWarning(UserWarning):
+    """Warning emitted when experimental/simulated crypto primitives are used.
+
+    Experimental crypto modules use simplified algorithms that are
+    NOT suitable for production. Set QBITEL_ALLOW_EXPERIMENTAL_CRYPTO=1
+    to acknowledge and suppress the runtime gate.
+    """
+
+    pass
+
+
 class LLMException(QbitelAIException):
     """LLM-related exception shared across providers."""
 
     def __init__(self, message: str, provider: Optional[str] = None):
         context = {"provider": provider} if provider else {}
         super().__init__(message, error_code="LLM_ERROR", context=context)
+
+
+class LLMRateLimitError(LLMException):
+    """Raised when a provider returns a rate limit (429) error.
+
+    This is a transient error — the request should be retried after a delay.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        provider: Optional[str] = None,
+        retry_after_seconds: Optional[float] = None,
+    ):
+        super().__init__(message, provider=provider)
+        self.error_code = "LLM_RATE_LIMIT"
+        self.retry_after_seconds = retry_after_seconds
+        if retry_after_seconds is not None:
+            self.context["retry_after_seconds"] = retry_after_seconds
+
+
+class LLMAuthError(LLMException):
+    """Raised when provider authentication fails (invalid API key, expired token).
+
+    This is *not* retryable — the request will fail on every attempt until
+    credentials are fixed.
+    """
+
+    def __init__(self, message: str, provider: Optional[str] = None):
+        super().__init__(message, provider=provider)
+        self.error_code = "LLM_AUTH_ERROR"
+
+
+class LLMContextLengthError(LLMException):
+    """Raised when the prompt + max_tokens exceeds the model's context window.
+
+    The caller should truncate the prompt or reduce max_tokens and retry.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        provider: Optional[str] = None,
+        token_count: Optional[int] = None,
+        max_context: Optional[int] = None,
+    ):
+        super().__init__(message, provider=provider)
+        self.error_code = "LLM_CONTEXT_LENGTH"
+        self.token_count = token_count
+        self.max_context = max_context
+        if token_count is not None:
+            self.context["token_count"] = token_count
+        if max_context is not None:
+            self.context["max_context"] = max_context
+
+
+class LLMContentPolicyError(LLMException):
+    """Raised when the provider blocks a request due to content policy violation.
+
+    This is *not* retryable — the content itself must change.
+    """
+
+    def __init__(self, message: str, provider: Optional[str] = None):
+        super().__init__(message, provider=provider)
+        self.error_code = "LLM_CONTENT_POLICY"
+
+
+class LLMProviderUnavailableError(LLMException):
+    """Raised when the provider is temporarily unavailable (500/502/503).
+
+    This is a transient error — the request may succeed on retry.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        provider: Optional[str] = None,
+        status_code: Optional[int] = None,
+    ):
+        super().__init__(message, provider=provider)
+        self.error_code = "LLM_PROVIDER_UNAVAILABLE"
+        self.status_code = status_code
+        if status_code is not None:
+            self.context["status_code"] = status_code
+
+
+class LLMTimeoutError(LLMException):
+    """Raised when a provider request times out.
+
+    This is a transient error — the request may succeed on retry with
+    a higher timeout or smaller payload.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        provider: Optional[str] = None,
+        timeout_seconds: Optional[float] = None,
+    ):
+        super().__init__(message, provider=provider)
+        self.error_code = "LLM_TIMEOUT"
+        if timeout_seconds is not None:
+            self.context["timeout_seconds"] = timeout_seconds
 
 
 class TranslationException(QbitelAIException):

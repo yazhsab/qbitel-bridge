@@ -405,6 +405,8 @@ class RAGEngine:
         self.bm25_indices: Dict[str, Any] = {}
         self.bm25_corpus: Dict[str, List[List[str]]] = {}
         self.bm25_doc_ids: Dict[str, List[str]] = {}
+        # Track dirty indices to support lazy rebuild
+        self._bm25_dirty: Dict[str, bool] = {}
 
         # Default search configuration
         self.default_search_mode = SearchMode(self.config.get("search_mode", SearchMode.HYBRID.value))
@@ -426,8 +428,14 @@ class RAGEngine:
             "translation_best_practices",
         ]
 
-        # Query cache
+        # Semantic LRU Query Cache
+        self._cache_max_size: int = self.config.get("cache_max_size", 500)
+        self._cache_semantic_threshold: float = self.config.get(
+            "cache_semantic_threshold", 0.92,
+        )  # Similarity threshold for cache hits
         self.query_cache: Dict[str, Dict[str, Any]] = {}
+        self._cache_order: List[str] = []  # LRU ordering (oldest first)
+        self._cache_embeddings: Dict[str, List[float]] = {}  # Cached query embeddings
         self.cache_ttl = self.config.get("cache_ttl", 3600)  # seconds
 
     def _tokenize(self, text: str) -> List[str]:
@@ -445,7 +453,11 @@ class RAGEngine:
         self.logger.debug(f"Built BM25 index for {collection_name} with {len(documents)} documents")
 
     def _update_bm25_index(self, collection_name: str, document: str, doc_id: str) -> None:
-        """Update BM25 index with a new document."""
+        """Append a document to the BM25 corpus and mark the index as dirty.
+
+        The actual BM25 index is rebuilt lazily on the next query via
+        ``_ensure_bm25_index``, avoiding costly O(n) rebuilds on every insert.
+        """
         if collection_name not in self.bm25_corpus:
             self.bm25_corpus[collection_name] = []
             self.bm25_doc_ids[collection_name] = []
@@ -454,8 +466,39 @@ class RAGEngine:
         self.bm25_corpus[collection_name].append(tokens)
         self.bm25_doc_ids[collection_name].append(doc_id)
 
-        # Rebuild index (in production, use incremental updates)
-        self.bm25_indices[collection_name] = BM25Okapi(self.bm25_corpus[collection_name])
+        # Mark dirty — defer rebuild to query time
+        self._bm25_dirty[collection_name] = True
+
+    def _update_bm25_index_batch(
+        self, collection_name: str, documents: List[str], doc_ids: List[str]
+    ) -> None:
+        """Append a batch of documents to the BM25 corpus (lazy rebuild).
+
+        More efficient than calling ``_update_bm25_index`` in a loop because
+        the index is only marked dirty once.
+        """
+        if collection_name not in self.bm25_corpus:
+            self.bm25_corpus[collection_name] = []
+            self.bm25_doc_ids[collection_name] = []
+
+        for doc, doc_id in zip(documents, doc_ids):
+            tokens = self._tokenize(doc)
+            self.bm25_corpus[collection_name].append(tokens)
+            self.bm25_doc_ids[collection_name].append(doc_id)
+
+        self._bm25_dirty[collection_name] = True
+
+    def _ensure_bm25_index(self, collection_name: str) -> None:
+        """Rebuild the BM25 index for *collection_name* if it is dirty."""
+        if self._bm25_dirty.get(collection_name, False):
+            corpus = self.bm25_corpus.get(collection_name, [])
+            if corpus:
+                self.bm25_indices[collection_name] = BM25Okapi(corpus)
+                self.logger.debug(
+                    "Rebuilt BM25 index for %s with %d documents",
+                    collection_name, len(corpus),
+                )
+            self._bm25_dirty[collection_name] = False
 
     async def initialize(self) -> None:
         """Initialize RAG engine and create collections."""
@@ -581,9 +624,12 @@ class RAGEngine:
 
         collection.add(documents=texts, embeddings=embeddings, metadatas=metadatas, ids=ids)
 
-        # Update BM25 index for hybrid search
-        for doc, doc_id in zip(normalized_docs, ids):
-            self._update_bm25_index(collection_name, doc.content, doc_id)
+        # Update BM25 corpus for hybrid search (lazy rebuild on next query)
+        self._update_bm25_index_batch(
+            collection_name,
+            [doc.content for doc in normalized_docs],
+            ids,
+        )
 
         self.logger.info(
             "Added %s documents to collection '%s'",
@@ -625,15 +671,16 @@ class RAGEngine:
         vector_weight = vector_weight if vector_weight is not None else self.default_vector_weight
 
         try:
-            # Check cache (include search mode in cache key)
-            cache_key = f"{query}_{collection_name}_{n_results}_{similarity_threshold}_{search_mode.value}"
-            if cache_key in self.query_cache:
-                cache_entry = self.query_cache[cache_key]
-                if time.time() - cache_entry["timestamp"] < self.cache_ttl:
-                    return cache_entry["result"]
-
-            # Generate query embedding
+            # Generate query embedding (needed for both cache lookup and search)
             query_embedding = self.embedding_model.encode([query])[0].tolist()
+
+            # Semantic LRU cache lookup — find cached results for semantically
+            # similar queries, not just exact string matches
+            cache_hit = self._semantic_cache_lookup(
+                query_embedding, collection_name, n_results, similarity_threshold, search_mode
+            )
+            if cache_hit is not None:
+                return cache_hit
 
             # Search in specified collection or all collections
             collections_to_search = [collection_name] if collection_name else self.collection_names
@@ -683,6 +730,8 @@ class RAGEngine:
                 # Get BM25 results
                 bm25_results = {}
                 if search_mode in (SearchMode.BM25_ONLY, SearchMode.HYBRID, SearchMode.HYBRID_RERANK):
+                    # Ensure the BM25 index is up-to-date before querying
+                    self._ensure_bm25_index(coll_name)
                     if coll_name in self.bm25_indices:
                         query_tokens = self._tokenize(query)
                         bm25_scores = self.bm25_indices[coll_name].get_scores(query_tokens)
@@ -802,8 +851,11 @@ class RAGEngine:
                 reranking_applied=reranking_applied,
             )
 
-            # Cache result
-            self.query_cache[cache_key] = {"result": result, "timestamp": time.time()}
+            # Store in semantic LRU cache
+            self._semantic_cache_store(
+                query, query_embedding, result,
+                collection_name, n_results, similarity_threshold, search_mode,
+            )
 
             # Update metrics
             RAG_QUERY_COUNTER.labels(query_type=collection_name or "all").inc()
@@ -1157,6 +1209,117 @@ class RAGEngine:
             n_results=n_results,
             similarity_threshold=0.4,
         )
+
+    # =========================================================================
+    # Semantic LRU Cache Helpers
+    # =========================================================================
+
+    def _cache_key(
+        self,
+        collection_name: Optional[str],
+        n_results: int,
+        similarity_threshold: float,
+        search_mode: SearchMode,
+    ) -> str:
+        """Build a cache-partition key from search parameters."""
+        return f"{collection_name}_{n_results}_{similarity_threshold}_{search_mode.value}"
+
+    def _semantic_cache_lookup(
+        self,
+        query_embedding: List[float],
+        collection_name: Optional[str],
+        n_results: int,
+        similarity_threshold: float,
+        search_mode: SearchMode,
+    ) -> Optional[RAGQueryResult]:
+        """
+        Look up a semantically similar query in the cache.
+
+        Returns the cached result if a query with cosine similarity ≥
+        ``_cache_semantic_threshold`` is found and has not expired.
+        """
+        now = time.time()
+        partition = self._cache_key(collection_name, n_results, similarity_threshold, search_mode)
+        query_vec = np.array(query_embedding, dtype=float)
+
+        best_key: Optional[str] = None
+        best_sim: float = 0.0
+
+        for key, entry in list(self.query_cache.items()):
+            # Skip expired entries
+            if now - entry["timestamp"] > self.cache_ttl:
+                self._cache_evict(key)
+                continue
+
+            # Only compare within the same search-parameter partition
+            if entry.get("partition") != partition:
+                continue
+
+            cached_vec = np.array(self._cache_embeddings.get(key, []), dtype=float)
+            if cached_vec.size == 0:
+                continue
+
+            denom = np.linalg.norm(query_vec) * np.linalg.norm(cached_vec)
+            if denom == 0:
+                continue
+            sim = float(np.dot(query_vec, cached_vec) / denom)
+
+            if sim >= self._cache_semantic_threshold and sim > best_sim:
+                best_sim = sim
+                best_key = key
+
+        if best_key is not None:
+            # Move to end of LRU order (most recently used)
+            if best_key in self._cache_order:
+                self._cache_order.remove(best_key)
+            self._cache_order.append(best_key)
+            self.logger.debug(
+                "Semantic cache hit (sim=%.3f) for partition %s",
+                best_sim, partition,
+            )
+            return self.query_cache[best_key]["result"]
+
+        return None
+
+    def _semantic_cache_store(
+        self,
+        query: str,
+        query_embedding: List[float],
+        result: RAGQueryResult,
+        collection_name: Optional[str],
+        n_results: int,
+        similarity_threshold: float,
+        search_mode: SearchMode,
+    ) -> None:
+        """Store a query result in the semantic LRU cache."""
+        partition = self._cache_key(collection_name, n_results, similarity_threshold, search_mode)
+        key = f"{query}_{partition}"
+
+        # Evict oldest entries if at capacity
+        while len(self.query_cache) >= self._cache_max_size and self._cache_order:
+            self._cache_evict(self._cache_order[0])
+
+        self.query_cache[key] = {
+            "result": result,
+            "timestamp": time.time(),
+            "partition": partition,
+        }
+        self._cache_embeddings[key] = query_embedding
+        self._cache_order.append(key)
+
+    def _cache_evict(self, key: str) -> None:
+        """Remove a single entry from the cache."""
+        self.query_cache.pop(key, None)
+        self._cache_embeddings.pop(key, None)
+        if key in self._cache_order:
+            self._cache_order.remove(key)
+
+    def clear_cache(self) -> None:
+        """Clear the query cache."""
+        self.query_cache.clear()
+        self._cache_embeddings.clear()
+        self._cache_order.clear()
+        self.logger.info("RAG query cache cleared")
 
     async def _load_initial_knowledge(self) -> None:
         """Load initial knowledge base with protocol information."""
@@ -1642,7 +1805,3 @@ class RAGEngine:
             self.logger.error(f"Failed to delete document {document_id}: {e}")
             return False
 
-    def clear_cache(self) -> None:
-        """Clear the query cache."""
-        self.query_cache.clear()
-        self.logger.info("RAG query cache cleared")

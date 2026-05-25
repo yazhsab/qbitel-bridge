@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPEDALCYCLIST",
+  "sec_mark_ms": 50974,
+  "msg_count": 65,
+  "latitude": 37.7741565,
+  "longitude": -122.4222758,
+  "location_name": "SF Civic Center",
+  "speed_mph": 0.3,
+  "heading_deg": 275.7063,
+  "position_accuracy": 15,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8002",
+    "signer_type": "certificate",
+    "signer_id_hex": "fa942bd2b9e19f07cc3209c1d0c32896eae0989c42efa6fef32173a363955dbe",
+    "signature_algorithm": "ML-DSA-44",
+    "signature_size_bytes": 2420,
+    "is_pqc_signature": true,
+    "header_length": 2460
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.199272",
+  "message_length": 2478,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 2460,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 2461,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 2462,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 2464,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 2465,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 2469,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 2473,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 2475,
+      "length": 2
+    }
+  ],
+  "hash": "16bd7fa08208a4ea243d1070be7e8bb6e9141ec184f89612c41fdc5ff24cd226",
+  "sample_index": 804
+}

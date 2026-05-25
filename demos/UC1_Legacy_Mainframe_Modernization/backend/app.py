@@ -1860,6 +1860,1432 @@ async def interactive_demo():
     </html>
     """)
 
+@app.get("/presentation")
+async def presentation_mode():
+    """Full-screen presentation mode for 15-minute demo."""
+    return HTMLResponse(content="""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>QBITEL Bridge - Mainframe Modernization Demo</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #08090d; color: #e2e8f0; }
+
+            /* Slide container */
+            .slides { width: 100%; height: 100%; position: relative; }
+            .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; transition: opacity 0.6s ease; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px 80px; }
+            .slide.active { opacity: 1; pointer-events: all; }
+
+            /* Backgrounds */
+            .bg-hero { background: radial-gradient(ellipse at 20% 50%, rgba(0,217,255,0.15) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(0,255,136,0.1) 0%, transparent 50%), linear-gradient(135deg, #0a0b10 0%, #111827 50%, #0a0b10 100%); }
+            .bg-dark { background: linear-gradient(180deg, #0a0b10 0%, #111827 100%); }
+            .bg-gradient { background: radial-gradient(ellipse at 50% 0%, rgba(0,217,255,0.08) 0%, transparent 60%), linear-gradient(180deg, #0d0e14 0%, #111827 100%); }
+            .bg-demo { background: #0a0b10; }
+
+            /* Typography */
+            h1 { font-size: 4em; font-weight: 900; line-height: 1.1; letter-spacing: -0.03em; }
+            h2 { font-size: 2.8em; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 24px; }
+            h3 { font-size: 1.6em; font-weight: 700; margin-bottom: 16px; }
+            .gradient-text { background: linear-gradient(135deg, #00d9ff 0%, #00ff88 50%, #00d9ff 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 3s linear infinite; }
+            @keyframes shimmer { to { background-position: 200% center; } }
+            .subtitle { font-size: 1.5em; color: #94a3b8; font-weight: 400; max-width: 800px; line-height: 1.5; }
+            .label { font-size: 0.85em; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #00d9ff; margin-bottom: 16px; }
+
+            /* Navigation */
+            .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 56px; background: rgba(10,11,16,0.95); backdrop-filter: blur(12px); border-top: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; z-index: 100; }
+            .nav-btn { padding: 8px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: #e2e8f0; font-size: 0.9em; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+            .nav-btn:hover { background: rgba(255,255,255,0.08); border-color: #00d9ff; }
+            .nav-btn.primary { background: linear-gradient(135deg, #00d9ff, #00ff88); color: #000; border: none; font-weight: 700; }
+            .nav-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,217,255,0.3); }
+            .progress-bar { flex: 1; margin: 0 24px; height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+            .progress-fill { height: 100%; background: linear-gradient(90deg, #00d9ff, #00ff88); transition: width 0.4s ease; border-radius: 2px; }
+            .slide-counter { font-size: 0.85em; color: #64748b; font-weight: 500; min-width: 60px; text-align: right; }
+            .timer { font-size: 0.85em; color: #64748b; font-family: 'JetBrains Mono', monospace; min-width: 55px; }
+
+            /* Crisis cards */
+            .crisis-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 40px; max-width: 1100px; }
+            .crisis-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 32px; transition: all 0.3s; }
+            .crisis-card:hover { border-color: rgba(0,217,255,0.3); transform: translateY(-4px); }
+            .crisis-icon { font-size: 2.5em; margin-bottom: 16px; }
+            .crisis-card h3 { color: #f8fafc; font-size: 1.25em; }
+            .crisis-card p { color: #94a3b8; font-size: 0.95em; line-height: 1.6; }
+            .crisis-stat { font-size: 2em; font-weight: 800; color: #ff4444; margin: 8px 0; }
+
+            /* Architecture diagram */
+            .arch-container { display: flex; flex-direction: column; gap: 12px; max-width: 900px; width: 100%; margin-top: 32px; }
+            .arch-layer { display: flex; align-items: center; padding: 20px 28px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s; }
+            .arch-layer:hover { border-color: rgba(0,217,255,0.3); }
+            .arch-layer-name { font-weight: 700; font-size: 1.1em; min-width: 200px; }
+            .arch-layer-tech { color: #94a3b8; font-size: 0.9em; }
+            .arch-layer-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 16px; }
+            .badge-react { background: rgba(97,218,251,0.15); color: #61dafb; }
+            .badge-go { background: rgba(0,173,216,0.15); color: #00add8; }
+            .badge-python { background: rgba(255,212,59,0.15); color: #ffd43b; }
+            .badge-rust { background: rgba(222,165,132,0.15); color: #dea584; }
+
+            /* Journey steps */
+            .journey-grid { display: flex; gap: 16px; margin-top: 36px; max-width: 1100px; }
+            .journey-step { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 24px 20px; text-align: center; position: relative; }
+            .journey-step::after { content: ''; position: absolute; right: -12px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 8px solid #00d9ff; }
+            .journey-step:last-child::after { display: none; }
+            .journey-num { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #00d9ff, #00ff88); color: #000; font-weight: 800; font-size: 0.9em; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+            .journey-step h4 { color: #f8fafc; font-size: 1em; margin-bottom: 6px; }
+            .journey-step p { color: #94a3b8; font-size: 0.8em; line-height: 1.4; }
+
+            /* Demo panel */
+            .demo-layout { display: flex; width: 100%; height: calc(100% - 56px); }
+            .demo-sidebar { width: 260px; background: rgba(255,255,255,0.02); border-right: 1px solid rgba(255,255,255,0.06); padding: 24px 16px; overflow-y: auto; }
+            .demo-main { flex: 1; padding: 32px 40px; overflow-y: auto; }
+            .demo-step { padding: 14px 16px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+            .demo-step:hover { background: rgba(255,255,255,0.04); }
+            .demo-step.active { background: rgba(0,217,255,0.08); border-color: rgba(0,217,255,0.3); }
+            .demo-step.done { opacity: 0.6; }
+            .demo-step.done::before { content: ''; display: inline-block; width: 8px; height: 8px; background: #00ff88; border-radius: 50%; margin-right: 8px; }
+            .demo-step-num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,217,255,0.2); color: #00d9ff; font-size: 0.75em; font-weight: 700; margin-right: 10px; }
+            .demo-step h4 { font-size: 0.95em; color: #f8fafc; display: inline; }
+            .demo-step p { font-size: 0.8em; color: #64748b; margin-top: 4px; margin-left: 34px; }
+
+            /* Demo content panels */
+            .demo-panel { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 28px; margin-bottom: 20px; }
+            .demo-panel h2 { font-size: 1.5em; margin-bottom: 8px; color: #f8fafc; }
+            .demo-panel .desc { color: #94a3b8; font-size: 0.95em; margin-bottom: 20px; }
+            .demo-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; background: linear-gradient(135deg, #00d9ff, #00ff88); color: #000; border: none; border-radius: 10px; font-weight: 700; font-size: 0.95em; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+            .demo-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,217,255,0.3); }
+            .demo-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+            .demo-btn svg { width: 18px; height: 18px; }
+            .demo-output { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px; margin-top: 16px; max-height: 420px; overflow-y: auto; display: none; }
+            .demo-output.visible { display: block; animation: fadeUp 0.4s ease; }
+            @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+            /* System card */
+            .sys-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 20px; margin: 10px 0; }
+            .sys-card h4 { color: #00d9ff; margin-bottom: 10px; }
+            .sys-metrics { display: flex; flex-wrap: wrap; gap: 8px; }
+            .sys-metric { padding: 6px 14px; border-radius: 20px; background: rgba(0,217,255,0.08); font-size: 0.85em; }
+            .sys-metric .label { color: #94a3b8; font-size: 0.85em; letter-spacing: 0; text-transform: none; margin: 0; }
+            .sys-metric .value { color: #00ff88; font-weight: 600; }
+
+            /* Pattern badges */
+            .pattern { padding: 10px 14px; margin: 5px 0; border-radius: 8px; font-size: 0.9em; }
+            .pattern.critical { background: rgba(255,68,68,0.1); border-left: 3px solid #ff4444; }
+            .pattern.high { background: rgba(255,170,0,0.1); border-left: 3px solid #ffaa00; }
+            .pattern.warning { background: rgba(255,255,0,0.08); border-left: 3px solid #ffd700; }
+            .pattern.opportunity { background: rgba(0,255,136,0.08); border-left: 3px solid #00ff88; }
+
+            /* Code display */
+            .code-tabs { display: flex; gap: 4px; margin-bottom: -1px; position: relative; z-index: 1; }
+            .code-tab { padding: 10px 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-bottom: none; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 0.85em; font-weight: 600; color: #64748b; transition: all 0.2s; }
+            .code-tab.active { background: rgba(0,0,0,0.5); color: #00d9ff; border-color: rgba(0,217,255,0.2); }
+            pre.code-block { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 0 10px 10px 10px; padding: 20px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.82em; line-height: 1.6; }
+
+            /* Phase timeline */
+            .phase { padding: 16px 20px; margin: 8px 0; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; border-left: 3px solid #00d9ff; display: flex; align-items: flex-start; gap: 16px; }
+            .phase-num { min-width: 32px; height: 32px; border-radius: 50%; background: rgba(0,217,255,0.15); color: #00d9ff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85em; }
+            .phase-info h4 { color: #f8fafc; font-size: 0.95em; }
+            .phase-info p { color: #94a3b8; font-size: 0.85em; margin-top: 2px; }
+            .phase-info .duration { color: #00ff88; font-weight: 600; }
+
+            /* Impact metrics */
+            .impact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1000px; margin-top: 36px; }
+            .impact-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 28px; text-align: center; }
+            .impact-card .before { font-size: 1.1em; color: #ff4444; text-decoration: line-through; opacity: 0.7; }
+            .impact-card .after { font-size: 2.2em; font-weight: 800; background: linear-gradient(135deg, #00d9ff, #00ff88); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+            .impact-card .metric-name { color: #94a3b8; font-size: 0.9em; margin-top: 8px; }
+
+            /* CTA */
+            .cta-box { max-width: 700px; text-align: center; }
+            .cta-box h2 { font-size: 2.5em; margin-bottom: 16px; }
+            .cta-features { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin: 28px 0; }
+            .cta-feature { padding: 8px 18px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; font-size: 0.9em; color: #94a3b8; }
+            .cta-btn { display: inline-block; padding: 16px 48px; background: linear-gradient(135deg, #00d9ff, #00ff88); color: #000; border-radius: 12px; font-weight: 800; font-size: 1.2em; text-decoration: none; transition: all 0.3s; cursor: pointer; border: none; font-family: inherit; }
+            .cta-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,217,255,0.4); }
+
+            /* Loader */
+            .loader { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(0,217,255,0.3); border-top-color: #00d9ff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+            @keyframes spin { to { transform: rotate(360deg); } }
+
+            /* Keyboard hints */
+            .key-hints { position: fixed; top: 16px; right: 24px; z-index: 101; display: flex; gap: 8px; opacity: 0.4; transition: opacity 0.3s; }
+            .key-hints:hover { opacity: 1; }
+            .key-hint { padding: 4px 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; font-size: 0.75em; color: #64748b; font-family: 'JetBrains Mono', monospace; }
+        </style>
+    </head>
+    <body>
+        <div class="slides" id="slides">
+
+            <!-- SLIDE 0: Title -->
+            <div class="slide bg-hero active" data-time="0:00">
+                <div class="label">UC1 &mdash; Legacy Mainframe Modernization</div>
+                <h1><span class="gradient-text">QBITEL Bridge</span></h1>
+                <p class="subtitle" style="margin-top:20px;">AI-Powered Quantum-Safe Security for Legacy Systems</p>
+                <div style="margin-top:48px; display:flex; gap:48px; color:#64748b; font-size:0.95em;">
+                    <div><strong style="color:#00ff88; font-size:1.8em; display:block;">$3T</strong>Daily COBOL Transactions</div>
+                    <div><strong style="color:#00ff88; font-size:1.8em; display:block;">60%</strong>Fortune 500 on Legacy</div>
+                    <div><strong style="color:#00ff88; font-size:1.8em; display:block;">38yr</strong>Average System Age</div>
+                </div>
+            </div>
+
+            <!-- SLIDE 1: The Problem -->
+            <div class="slide bg-gradient" data-time="0:30">
+                <div class="label">The Problem</div>
+                <h2>Three Converging Crises</h2>
+                <div class="crisis-grid">
+                    <div class="crisis-card">
+                        <div class="crisis-icon">&#x1f4dc;</div>
+                        <h3>Legacy Crisis</h3>
+                        <div class="crisis-stat">$2-10M</div>
+                        <p>Cost to reverse-engineer ONE system. Original developers retired. No documentation. 6-12 months timeline.</p>
+                    </div>
+                    <div class="crisis-card">
+                        <div class="crisis-icon">&#x269b;&#xfe0f;</div>
+                        <h3>Quantum Threat</h3>
+                        <div class="crisis-stat">5-10 yrs</div>
+                        <p>Until RSA/ECC breaks. Nation-states harvesting encrypted data TODAY for future decryption.</p>
+                    </div>
+                    <div class="crisis-card">
+                        <div class="crisis-icon">&#x23f1;&#xfe0f;</div>
+                        <h3>Speed Gap</h3>
+                        <div class="crisis-stat">65 min</div>
+                        <p>Average SOC response time. Machine-speed attacks happen in seconds. Humans can't keep up.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 2: Solution Overview -->
+            <div class="slide bg-gradient" data-time="2:30">
+                <div class="label">The Solution</div>
+                <h2>Five-Stage <span class="gradient-text">Modernization Journey</span></h2>
+                <div class="journey-grid">
+                    <div class="journey-step">
+                        <div class="journey-num">1</div>
+                        <h4>Discover</h4>
+                        <p>AI learns unknown protocols from raw traffic in 2-4 hours</p>
+                    </div>
+                    <div class="journey-step">
+                        <div class="journey-num">2</div>
+                        <h4>Protect</h4>
+                        <p>NIST Level 5 PQC wrapping &mdash; zero code changes</p>
+                    </div>
+                    <div class="journey-step">
+                        <div class="journey-num">3</div>
+                        <h4>Translate</h4>
+                        <p>Auto-generate REST APIs + SDKs in 6 languages</p>
+                    </div>
+                    <div class="journey-step">
+                        <div class="journey-num">4</div>
+                        <h4>Comply</h4>
+                        <p>9 frameworks automated in under 10 minutes</p>
+                    </div>
+                    <div class="journey-step">
+                        <div class="journey-num">5</div>
+                        <h4>Operate</h4>
+                        <p>78% autonomous response, &lt;1s decision time</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 3: Architecture -->
+            <div class="slide bg-gradient" data-time="3:30">
+                <div class="label">Platform Architecture</div>
+                <h2>Four-Layer <span class="gradient-text">Polyglot Design</span></h2>
+                <div class="arch-container">
+                    <div class="arch-layer" style="background: rgba(97,218,251,0.04);">
+                        <span class="arch-layer-badge badge-react">React/TS</span>
+                        <span class="arch-layer-name">UI Console</span>
+                        <span class="arch-layer-tech">Admin Dashboard &bull; Protocol Copilot &bull; Marketplace</span>
+                    </div>
+                    <div class="arch-layer" style="background: rgba(0,173,216,0.04);">
+                        <span class="arch-layer-badge badge-go">Go</span>
+                        <span class="arch-layer-name">Control Plane</span>
+                        <span class="arch-layer-tech">Service Orchestration &bull; OPA Policies &bull; Vault Secrets &bull; gRPC</span>
+                    </div>
+                    <div class="arch-layer" style="background: rgba(255,212,59,0.04);">
+                        <span class="arch-layer-badge badge-python">Python</span>
+                        <span class="arch-layer-name">AI Engine</span>
+                        <span class="arch-layer-tech">Protocol Discovery &bull; Multi-Agent System &bull; LLM &bull; RAG &bull; Compliance</span>
+                    </div>
+                    <div class="arch-layer" style="background: rgba(222,165,132,0.04);">
+                        <span class="arch-layer-badge badge-rust">Rust</span>
+                        <span class="arch-layer-name">Data Plane</span>
+                        <span class="arch-layer-tech">PQC-TLS &bull; DPDK Packet Processing &bull; DPI &bull; Protocol Adapters &bull; &lt;1ms</span>
+                    </div>
+                </div>
+                <p style="margin-top:24px; color:#64748b; font-size:0.9em;">100% Open Source &bull; Apache 2.0 License &bull; Air-Gapped Capable</p>
+            </div>
+
+            <!-- SLIDE 4: Live Demo -->
+            <div class="slide bg-demo" data-time="4:30" style="padding:0; justify-content:flex-start; align-items:stretch;">
+                <div class="demo-layout">
+                    <div class="demo-sidebar">
+                        <div style="padding:4px 0 16px 0;">
+                            <div class="label" style="margin-bottom:4px;">Live Demo</div>
+                            <h3 style="font-size:1.1em; color:#f8fafc;">Mainframe Modernization</h3>
+                        </div>
+                        <div class="demo-step active" onclick="showDemoStep(1)" id="ds1">
+                            <span class="demo-step-num">1</span><h4>System Discovery</h4>
+                            <p>Discover legacy systems</p>
+                        </div>
+                        <div class="demo-step" onclick="showDemoStep(2)" id="ds2">
+                            <span class="demo-step-num">2</span><h4>COBOL Analysis</h4>
+                            <p>AI code analysis</p>
+                        </div>
+                        <div class="demo-step" onclick="showDemoStep(3)" id="ds3">
+                            <span class="demo-step-num">3</span><h4>Protocol Analysis</h4>
+                            <p>Reverse engineering</p>
+                        </div>
+                        <div class="demo-step" onclick="showDemoStep(4)" id="ds4">
+                            <span class="demo-step-num">4</span><h4>Code Generation</h4>
+                            <p>Modern code output</p>
+                        </div>
+                        <div class="demo-step" onclick="showDemoStep(5)" id="ds5">
+                            <span class="demo-step-num">5</span><h4>Modernization Plan</h4>
+                            <p>Roadmap generation</p>
+                        </div>
+                    </div>
+                    <div class="demo-main" id="demo-content">
+                        <!-- Dynamic demo content -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 5: Impact -->
+            <div class="slide bg-gradient" data-time="12:30">
+                <div class="label">Business Impact</div>
+                <h2>Measurable <span class="gradient-text">Results</span></h2>
+                <div class="impact-grid">
+                    <div class="impact-card">
+                        <div class="before">6-12 months</div>
+                        <div class="after">2-4 hours</div>
+                        <div class="metric-name">Protocol Discovery</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="before">None</div>
+                        <div class="after">NIST Level 5</div>
+                        <div class="metric-name">Quantum Readiness</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="before">65 minutes</div>
+                        <div class="after">&lt;1 second</div>
+                        <div class="metric-name">Security Response</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="before">2-4 weeks</div>
+                        <div class="after">&lt;10 minutes</div>
+                        <div class="metric-name">Compliance Reports</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="before">$5-50M / system</div>
+                        <div class="after">$200K-500K</div>
+                        <div class="metric-name">Integration Cost</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="before">$10-50 / event</div>
+                        <div class="after">&lt;$0.01</div>
+                        <div class="metric-name">Security Cost / Event</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 6: CTA -->
+            <div class="slide bg-hero" data-time="14:00">
+                <div class="cta-box">
+                    <div class="label">Next Steps</div>
+                    <h2><span class="gradient-text">Start Your PoC</span></h2>
+                    <p class="subtitle" style="font-size:1.15em; margin: 0 auto;">2-week proof of concept. Connect to your test environment. Full protocol discovery and modernization assessment.</p>
+                    <div class="cta-features">
+                        <span class="cta-feature">100% Open Source</span>
+                        <span class="cta-feature">Air-Gapped Ready</span>
+                        <span class="cta-feature">Zero Code Changes</span>
+                        <span class="cta-feature">9 Compliance Frameworks</span>
+                        <span class="cta-feature">Apache 2.0 License</span>
+                    </div>
+                    <button class="cta-btn" style="margin-top:12px;">Contact Us &rarr;</button>
+                    <p style="margin-top:20px; color:#64748b; font-size:0.9em;">enterprise@qbitel.com</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation bar -->
+        <div class="nav-bar">
+            <button class="nav-btn" onclick="prevSlide()" id="btn-prev">&larr; Back</button>
+            <span class="timer" id="timer">0:00</span>
+            <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+            <span class="slide-counter" id="counter">1 / 7</span>
+            <button class="nav-btn primary" onclick="nextSlide()" id="btn-next">Next &rarr;</button>
+        </div>
+
+        <!-- Keyboard hints -->
+        <div class="key-hints">
+            <span class="key-hint">&larr; &rarr; Navigate</span>
+            <span class="key-hint">F Full Screen</span>
+            <span class="key-hint">T Timer</span>
+        </div>
+
+        <script>
+            // ===== Slide Navigation =====
+            let currentSlide = 0;
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            let timerRunning = false;
+            let timerStart = 0;
+            let timerInterval = null;
+
+            function goToSlide(n) {
+                if (n < 0 || n >= totalSlides) return;
+                slides[currentSlide].classList.remove('active');
+                currentSlide = n;
+                slides[currentSlide].classList.add('active');
+                document.getElementById('counter').textContent = (currentSlide + 1) + ' / ' + totalSlides;
+                document.getElementById('progress').style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
+                if (currentSlide === 4) initDemoSlide();
+            }
+
+            function nextSlide() { goToSlide(currentSlide + 1); }
+            function prevSlide() { goToSlide(currentSlide - 1); }
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+                else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+                else if (e.key === 'f' || e.key === 'F') {
+                    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+                    else document.exitFullscreen();
+                }
+                else if (e.key === 't' || e.key === 'T') { toggleTimer(); }
+                else if (e.key === 'Home') { goToSlide(0); }
+                else if (e.key === 'End') { goToSlide(totalSlides - 1); }
+            });
+
+            // Timer
+            function toggleTimer() {
+                if (timerRunning) {
+                    clearInterval(timerInterval);
+                    timerRunning = false;
+                } else {
+                    if (timerStart === 0) timerStart = Date.now();
+                    timerInterval = setInterval(updateTimer, 1000);
+                    timerRunning = true;
+                }
+            }
+            function updateTimer() {
+                const elapsed = Math.floor((Date.now() - timerStart) / 1000);
+                const min = Math.floor(elapsed / 60);
+                const sec = elapsed % 60;
+                document.getElementById('timer').textContent = min + ':' + String(sec).padStart(2, '0');
+            }
+
+            // ===== Live Demo Logic =====
+            let currentDemoStep = 1;
+            let demoData = {};
+
+            function initDemoSlide() {
+                if (!demoData.initialized) {
+                    demoData.initialized = true;
+                    showDemoStep(1);
+                }
+            }
+
+            function showDemoStep(step) {
+                currentDemoStep = step;
+                for (let i = 1; i <= 5; i++) {
+                    const el = document.getElementById('ds' + i);
+                    el.classList.remove('active');
+                    if (i < step) el.classList.add('done');
+                }
+                document.getElementById('ds' + step).classList.add('active');
+                renderDemoContent(step);
+            }
+
+            function renderDemoContent(step) {
+                const c = document.getElementById('demo-content');
+                switch(step) {
+                    case 1: c.innerHTML = `
+                        <div class="demo-panel">
+                            <h2>Step 1: Legacy System Discovery</h2>
+                            <p class="desc">Our AI agents passively tap your network and discover every legacy system &mdash; in 2-4 hours versus 6-12 months of manual reverse engineering.</p>
+                            <button class="demo-btn" onclick="runDiscover()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                Discover Systems
+                            </button>
+                            <div class="demo-output" id="out1"></div>
+                        </div>`; break;
+                    case 2: c.innerHTML = `
+                        <div class="demo-panel">
+                            <h2>Step 2: AI-Powered COBOL Analysis</h2>
+                            <p class="desc">Deep analysis of COBOL source code &mdash; complexity scoring, legacy pattern detection, and modernization opportunities identified in seconds.</p>
+                            <button class="demo-btn" onclick="runCobolAnalysis()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m10 20-6-6 6-6"/><path d="m14 4 6 6-6 6"/></svg>
+                                Analyze COBOL
+                            </button>
+                            <div class="demo-output" id="out2"></div>
+                        </div>`; break;
+                    case 3: c.innerHTML = `
+                        <div class="demo-panel">
+                            <h2>Step 3: Protocol Reverse Engineering</h2>
+                            <p class="desc">Decode EBCDIC and proprietary mainframe binary formats. Detect field boundaries, data types, and encoding &mdash; fully automated.</p>
+                            <button class="demo-btn" onclick="runProtocol()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+                                Analyze Protocol Data
+                            </button>
+                            <div class="demo-output" id="out3"></div>
+                        </div>`; break;
+                    case 4: c.innerHTML = `
+                        <div class="demo-panel">
+                            <h2>Step 4: Modern Code Generation</h2>
+                            <p class="desc">Auto-generate production-ready Python, FastAPI endpoints, and SQL schemas from COBOL analysis. 100% data fidelity.</p>
+                            <button class="demo-btn" onclick="runCodeGen()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                                Generate Modern Code
+                            </button>
+                            <div id="code-area" style="display:none; margin-top:16px;">
+                                <div class="code-tabs">
+                                    <div class="code-tab active" onclick="switchTab(this,'models')">Python Models</div>
+                                    <div class="code-tab" onclick="switchTab(this,'api')">FastAPI Endpoints</div>
+                                    <div class="code-tab" onclick="switchTab(this,'sql')">SQL Schema</div>
+                                </div>
+                                <pre class="code-block"><code id="code-display"></code></pre>
+                            </div>
+                        </div>`; break;
+                    case 5: c.innerHTML = `
+                        <div class="demo-panel">
+                            <h2>Step 5: Modernization Roadmap</h2>
+                            <p class="desc">Generate a complete, auditable modernization plan with phases, risk assessment, effort estimation, and deliverables.</p>
+                            <div style="margin-bottom:16px;">
+                                <select id="approach" style="padding:10px 16px; background:#1a1b26; color:#e2e8f0; border:1px solid rgba(255,255,255,0.1); border-radius:8px; font-family:inherit; font-size:0.9em; margin-right:8px;">
+                                    <option value="refactor">Refactor (Transform Code)</option>
+                                    <option value="replatform">Replatform (Cloud Migration)</option>
+                                    <option value="rearchitect">Rearchitect (Redesign)</option>
+                                </select>
+                                <button class="demo-btn" onclick="runPlan()" style="vertical-align:middle;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                    Generate Plan
+                                </button>
+                            </div>
+                            <div class="demo-output" id="out5"></div>
+                        </div>`; break;
+                }
+            }
+
+            // ===== API Calls =====
+            async function runDiscover() {
+                const out = document.getElementById('out1');
+                out.classList.add('visible');
+                out.innerHTML = '<span class="loader"></span> Scanning network for legacy systems...';
+                try {
+                    const r = await fetch('/api/systems');
+                    const d = await r.json();
+                    let h = '<h3 style="color:#00ff88; margin-bottom:16px;">Discovered ' + d.total + ' Legacy Mainframe Systems</h3>';
+                    d.systems.forEach(s => {
+                        const statusColor = s.status === 'active' ? '#00ff88' : '#ffaa00';
+                        h += '<div class="sys-card"><h4>' + s.name + ' <span style="color:#64748b; font-weight:400;">(' + s.system_id + ')</span></h4><div class="sys-metrics">' +
+                            '<span class="sys-metric"><span class="label">Platform </span><span class="value">' + s.platform + '</span></span>' +
+                            '<span class="sys-metric"><span class="label">Language </span><span class="value">' + s.language + '</span></span>' +
+                            '<span class="sys-metric"><span class="label">LOC </span><span class="value">' + (s.lines_of_code/1e6).toFixed(1) + 'M</span></span>' +
+                            '<span class="sys-metric"><span class="label">Age </span><span class="value">' + s.age_years + ' years</span></span>' +
+                            '<span class="sys-metric"><span class="label">Status </span><span class="value" style="color:' + statusColor + '">' + s.status + '</span></span>' +
+                            '<span class="sys-metric"><span class="label">Deps </span><span class="value">' + s.dependencies.join(', ') + '</span></span>' +
+                            '</div></div>';
+                    });
+                    out.innerHTML = h;
+                } catch(e) { out.innerHTML = '<span style="color:#ff4444;">Error: ' + e.message + '</span>'; }
+            }
+
+            async function runCobolAnalysis() {
+                const out = document.getElementById('out2');
+                out.classList.add('visible');
+                out.innerHTML = '<span class="loader"></span> Analyzing COBOL source code...';
+                try {
+                    const lr = await fetch('/api/analyze/cobol/list');
+                    const files = await lr.json();
+                    if (!files.files.length) { out.innerHTML = 'No COBOL files found.'; return; }
+                    const ar = await fetch('/api/analyze/cobol/' + files.files[0].name);
+                    const a = await ar.json();
+                    let h = '<h3 style="color:#00ff88; margin-bottom:16px;">Analysis: ' + a.name + '</h3>';
+                    h += '<div class="sys-metrics" style="margin-bottom:16px;">' +
+                        '<span class="sys-metric"><span class="label">Lines </span><span class="value">' + a.lines_of_code + '</span></span>' +
+                        '<span class="sys-metric"><span class="label">Complexity </span><span class="value">' + a.complexity_score + '</span></span>' +
+                        '<span class="sys-metric"><span class="label">Data Divisions </span><span class="value">' + a.data_divisions + '</span></span>' +
+                        '<span class="sys-metric"><span class="label">Variables </span><span class="value">' + (a.analysis.working_storage?.variable_count || 0) + '</span></span>' +
+                        '</div>';
+                    h += '<h4 style="color:#94a3b8; margin:16px 0 8px;">Legacy Patterns Detected</h4>';
+                    (a.analysis.legacy_patterns || []).forEach(p => {
+                        const cls = p.severity === 'critical' ? 'critical' : p.severity === 'high' ? 'high' : 'warning';
+                        h += '<div class="pattern ' + cls + '"><strong>' + p.pattern + '</strong> <span style="opacity:0.6">(' + p.severity + ')</span><br><span style="color:#94a3b8; font-size:0.9em;">' + p.description + '</span></div>';
+                    });
+                    h += '<h4 style="color:#94a3b8; margin:16px 0 8px;">Modernization Opportunities</h4>';
+                    (a.analysis.modernization_opportunities || []).forEach(o => {
+                        h += '<div class="pattern opportunity"><strong>' + o.area + '</strong><br><span style="color:#94a3b8; font-size:0.9em;">' + o.current + ' &rarr; <span style="color:#00ff88;">' + o.modern + '</span></span></div>';
+                    });
+                    out.innerHTML = h;
+                } catch(e) { out.innerHTML = '<span style="color:#ff4444;">Error: ' + e.message + '</span>'; }
+            }
+
+            async function runProtocol() {
+                const out = document.getElementById('out3');
+                out.classList.add('visible');
+                out.innerHTML = '<span class="loader"></span> Decoding EBCDIC mainframe data...';
+                try {
+                    const r = await fetch('/api/analyze/protocol', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ protocol_data: 'd1d6c8d540e2d4c9e3c840404040404040404040f1f2f3f4f5f6f7f8f9f0c1c3c3d6e4d5e340', system_context: 'IBM z/OS Customer Master File' })
+                    });
+                    const a = await r.json();
+                    let h = '<h3 style="color:#00ff88; margin-bottom:16px;">Protocol Analysis Results</h3>';
+                    h += '<div class="sys-metrics" style="margin-bottom:16px;">' +
+                        '<span class="sys-metric"><span class="label">Encoding </span><span class="value">' + a.encoding + '</span></span>' +
+                        '<span class="sys-metric"><span class="label">Structure </span><span class="value">' + a.structure.type + '</span></span>' +
+                        '<span class="sys-metric"><span class="label">Length </span><span class="value">' + a.raw_length + ' bytes</span></span>' +
+                        '</div>';
+                    h += '<h4 style="color:#94a3b8; margin:12px 0 8px;">Detected Fields</h4>';
+                    (a.fields || []).forEach(f => {
+                        h += '<div style="padding:8px 12px; margin:4px 0; background:rgba(0,217,255,0.05); border-radius:6px; font-family: JetBrains Mono, monospace; font-size:0.85em;">' +
+                            '<span style="color:#00d9ff; font-weight:600;">' + f.name + '</span> <span style="color:#64748b;">@ offset ' + f.offset + ', ' + f.length + ' bytes (' + f.type + ')</span></div>';
+                    });
+                    h += '<h4 style="color:#94a3b8; margin:16px 0 8px;">Recommendations</h4>';
+                    (a.recommendations || []).forEach(r => {
+                        h += '<div class="pattern opportunity"><strong>' + r.issue + '</strong><br><span style="color:#00ff88; font-size:0.9em;">' + r.solution + '</span></div>';
+                    });
+                    out.innerHTML = h;
+                } catch(e) { out.innerHTML = '<span style="color:#ff4444;">Error: ' + e.message + '</span>'; }
+            }
+
+            let genCode = {};
+            async function runCodeGen() {
+                const area = document.getElementById('code-area');
+                const display = document.getElementById('code-display');
+                area.style.display = 'block';
+                display.textContent = 'Generating modern code...';
+                try {
+                    const lr = await fetch('/api/analyze/cobol/list');
+                    const files = await lr.json();
+                    if (!files.files.length) { display.textContent = 'No COBOL files found.'; return; }
+                    const r = await fetch('/api/generate', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ cobol_file: files.files[0].name })
+                    });
+                    const d = await r.json();
+                    genCode = d.generated_code || {};
+                    display.textContent = genCode.python_models || 'No models generated';
+                } catch(e) { display.textContent = 'Error: ' + e.message; }
+            }
+
+            function switchTab(el, tab) {
+                document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+                el.classList.add('active');
+                const d = document.getElementById('code-display');
+                if (tab === 'models') d.textContent = genCode.python_models || '';
+                else if (tab === 'api') d.textContent = genCode.fastapi_endpoints || '';
+                else if (tab === 'sql') d.textContent = genCode.sql_schema || '';
+            }
+
+            async function runPlan() {
+                const out = document.getElementById('out5');
+                out.classList.add('visible');
+                out.innerHTML = '<span class="loader"></span> Generating modernization plan...';
+                const approach = document.getElementById('approach').value;
+                try {
+                    const r = await fetch('/api/modernize', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ system_id: 'SYS001', approach: approach, target_language: 'python', target_framework: 'fastapi' })
+                    });
+                    const p = await r.json();
+                    let h = '<h3 style="color:#00ff88; margin-bottom:16px;">Modernization Plan Generated</h3>';
+                    h += '<div class="sys-metrics" style="margin-bottom:16px;">' +
+                        '<span class="sys-metric"><span class="label">Plan </span><span class="value">' + p.plan_id + '</span></span>' +
+                        '<span class="sys-metric"><span class="label">Approach </span><span class="value">' + p.approach.toUpperCase() + '</span></span>' +
+                        '<span class="sys-metric"><span class="label">Risk </span><span class="value" style="color:#ffaa00;">' + p.risk_level.toUpperCase() + '</span></span>' +
+                        '<span class="sys-metric"><span class="label">Effort </span><span class="value">' + p.estimated_effort_days + ' days</span></span>' +
+                        '</div>';
+                    h += '<h4 style="color:#94a3b8; margin:12px 0 8px;">Project Phases</h4>';
+                    let totalWeeks = 0;
+                    (p.phases || []).forEach(ph => {
+                        totalWeeks += ph.duration_weeks;
+                        h += '<div class="phase"><div class="phase-num">' + ph.phase + '</div><div class="phase-info"><h4>' + ph.name + ' <span class="duration">(' + ph.duration_weeks + ' weeks)</span></h4><p>' + ph.description + '</p></div></div>';
+                    });
+                    h += '<div style="margin-top:16px; padding:12px 16px; background:rgba(0,255,136,0.08); border-radius:8px; text-align:center;"><strong style="color:#00ff88;">Total Duration: ' + totalWeeks + ' weeks</strong></div>';
+                    out.innerHTML = h;
+                } catch(e) { out.innerHTML = '<span style="color:#ff4444;">Error: ' + e.message + '</span>'; }
+            }
+
+            // Initialize first slide
+            goToSlide(0);
+        </script>
+    </body>
+    </html>
+    """)
+
+# ============================================================================
+# E2E Demo Backend — Simulators
+# ============================================================================
+
+import random
+
+class NetworkTrafficSimulator:
+    """Simulates network traffic capture from mainframe environment."""
+
+    def __init__(self):
+        self._scan_targets = [
+            {"ip": "10.1.50.10", "port": 23, "protocol": "TN3270e", "system": "SYS001", "name": "Core Banking System", "latency_ms": 2.1},
+            {"ip": "10.1.50.11", "port": 1414, "protocol": "IBM MQ", "system": "SYS001", "name": "Core Banking System", "latency_ms": 0.8},
+            {"ip": "10.1.50.20", "port": 23, "protocol": "TN3270e", "system": "SYS002", "name": "Customer Master System", "latency_ms": 1.9},
+            {"ip": "10.1.50.20", "port": 446, "protocol": "DRDA/DB2", "system": "SYS002", "name": "Customer Master System", "latency_ms": 1.2},
+            {"ip": "10.1.50.30", "port": 23, "protocol": "TN3270e", "system": "SYS003", "name": "Account Processing Batch", "latency_ms": 3.4},
+            {"ip": "10.1.50.30", "port": 1414, "protocol": "IBM MQ", "system": "SYS003", "name": "Account Processing Batch", "latency_ms": 1.1},
+            {"ip": "10.1.50.10", "port": 8090, "protocol": "CICS/TS", "system": "SYS001", "name": "Core Banking System", "latency_ms": 0.6},
+        ]
+        self._ebcdic_samples = [
+            {"label": "Customer Record (EBCDIC)", "hex": "d1d6c8d540e2d4c9e3c840404040404040404040f1f2f3f4f5f6f7f8f9f0c1c3c3d6e4d5e340", "decoded": "JOHN SMITH          1234567890ACCOUNT "},
+            {"label": "SWIFT MT103 Header",      "hex": "f1f5f3c6c9d540d4e3f1f0f340e2e6c9c6e340e3d9c1d5e2c6c5d940f2f0f2f6f0f3f0f4",     "decoded": "153FIN MT103 SWIFT TRANSFER 20260304"},
+            {"label": "ISO-8583 Auth Request",    "hex": "f0f1f0f0f2f0f0f0f0f0f0f0f0f1f5f0f0f0f0f0f0f0f5f2f4f3f6f1f2f3f4f5f6f7f8",   "decoded": "0100 200000000150000000524361234567 8"},
+            {"label": "CICS Transaction (ACCT)",  "hex": "c1c3c3e3f0f0f0f1d7d9d6c3c5e2e2c9d5c740c2c1d3c1d5c3c540c9d5d8e4c9d9e8",       "decoded": "ACCT0001PROCESSING BALANCE INQUIRY"},
+            {"label": "MQ Message Header",        "hex": "d4d840404040f0f0f0f1f2f3d8e4c5e4c540d4c1d5c1c7c5d940d7e4e340d6d7c5d9",       "decoded": "MQ    000123QUEUE MANAGER PUT OPER"},
+        ]
+
+    def scan_network(self) -> dict:
+        results = []
+        for t in self._scan_targets:
+            results.append({**t, "status": "discovered", "encryption": "NONE", "risk": "CRITICAL" if t["protocol"] == "TN3270e" else "HIGH"})
+        unique_systems = {t["system"] for t in self._scan_targets}
+        unique_protos = {t["protocol"] for t in self._scan_targets}
+        return {
+            "scan_id": f"SCAN-{uuid.uuid4().hex[:8].upper()}",
+            "timestamp": datetime.now().isoformat(),
+            "network": "10.1.50.0/24",
+            "duration_seconds": round(random.uniform(1.8, 3.2), 1),
+            "targets_found": len(self._scan_targets),
+            "unique_systems": len(unique_systems),
+            "unique_protocols": len(unique_protos),
+            "unencrypted_channels": sum(1 for t in self._scan_targets if True),
+            "results": results,
+        }
+
+    def capture_traffic(self) -> dict:
+        packets = []
+        for i, sample in enumerate(self._ebcdic_samples):
+            packets.append({
+                "packet_id": i + 1,
+                "timestamp": (datetime.now() - timedelta(seconds=random.randint(0, 60))).isoformat(),
+                "src": f"10.1.50.{random.choice([10,20,30])}:{random.randint(1024,65535)}",
+                "dst": f"10.2.1.{random.randint(1,50)}:{random.choice([23,443,1414,8090])}",
+                "protocol": random.choice(["TN3270e", "CICS/TS", "IBM MQ", "DRDA/DB2"]),
+                "length": len(sample["hex"]) // 2,
+                "label": sample["label"],
+                "hex_dump": sample["hex"],
+                "decoded_ascii": sample["decoded"],
+                "encryption": "NONE",
+                "pii_detected": "SSN" in sample["decoded"].upper() or "ACCOUNT" in sample["decoded"].upper(),
+            })
+        return {
+            "capture_id": f"CAP-{uuid.uuid4().hex[:8].upper()}",
+            "timestamp": datetime.now().isoformat(),
+            "duration_ms": round(random.uniform(45, 120), 1),
+            "packets_captured": len(packets),
+            "unencrypted": len(packets),
+            "pii_exposure": sum(1 for p in packets if p["pii_detected"]),
+            "packets": packets,
+        }
+
+
+class PQCDemoSimulator:
+    """Simulates PQC crypto operations with real NIST FIPS parameter sizes."""
+
+    # Real sizes from ai_engine/crypto/mlkem.py and dilithium.py
+    MLKEM768 = {"name": "ML-KEM-768", "fips": "FIPS 203", "nist_level": 3, "public_key": 1184, "private_key": 2400, "ciphertext": 1088, "shared_secret": 32}
+    DILITHIUM3 = {"name": "ML-DSA-65 (Dilithium-3)", "fips": "FIPS 204", "nist_level": 3, "public_key": 1952, "private_key": 4000, "signature": 3293}
+
+    def generate_keypair(self) -> dict:
+        t0 = time.time()
+        pub_hex = os.urandom(self.MLKEM768["public_key"]).hex()
+        priv_hex = os.urandom(self.MLKEM768["private_key"]).hex()
+        sig_pub_hex = os.urandom(self.DILITHIUM3["public_key"]).hex()
+        latency = round((time.time() - t0) * 1000, 2)
+        return {
+            "algorithm": "ML-KEM-768 + ML-DSA-65",
+            "kem": {**self.MLKEM768, "public_key_hex": pub_hex[:64] + "...", "public_key_bytes": self.MLKEM768["public_key"]},
+            "signer": {**self.DILITHIUM3, "public_key_hex": sig_pub_hex[:64] + "...", "public_key_bytes": self.DILITHIUM3["public_key"]},
+            "total_key_material_bytes": self.MLKEM768["public_key"] + self.MLKEM768["private_key"] + self.DILITHIUM3["public_key"] + self.DILITHIUM3["private_key"],
+            "generation_latency_ms": max(latency, round(random.uniform(0.3, 0.9), 2)),
+            "nist_security_level": 3,
+            "quantum_safe": True,
+        }
+
+    def encrypt_transaction(self, plaintext: str) -> dict:
+        t0 = time.time()
+        plain_bytes = plaintext.encode("utf-8")
+        ciphertext = os.urandom(self.MLKEM768["ciphertext"] + len(plain_bytes))
+        shared_secret = os.urandom(32)
+        latency = round((time.time() - t0) * 1000, 2)
+        return {
+            "operation": "PQC-KEM Encapsulation + AES-256-GCM",
+            "algorithm": "ML-KEM-768",
+            "plaintext": plaintext,
+            "plaintext_bytes": len(plain_bytes),
+            "ciphertext_hex": ciphertext.hex()[:120] + "...",
+            "ciphertext_bytes": len(ciphertext),
+            "shared_secret_hex": shared_secret.hex(),
+            "overhead_bytes": len(ciphertext) - len(plain_bytes),
+            "overhead_percent": round((len(ciphertext) - len(plain_bytes)) / len(plain_bytes) * 100, 1),
+            "encryption_latency_ms": max(latency, round(random.uniform(0.2, 0.7), 2)),
+            "nist_level": 3,
+        }
+
+    def sign_transaction(self, message: str) -> dict:
+        t0 = time.time()
+        signature = os.urandom(self.DILITHIUM3["signature"])
+        latency = round((time.time() - t0) * 1000, 2)
+        return {
+            "operation": "ML-DSA-65 Digital Signature",
+            "algorithm": self.DILITHIUM3["name"],
+            "message_hash": hashlib.sha256(message.encode()).hexdigest(),
+            "signature_hex": signature.hex()[:120] + "...",
+            "signature_bytes": self.DILITHIUM3["signature"],
+            "signing_latency_ms": max(latency, round(random.uniform(0.4, 1.1), 2)),
+            "verification_latency_ms": round(random.uniform(0.2, 0.5), 2),
+            "nist_level": 3,
+            "verified": True,
+        }
+
+
+class SecurityMonitorSim:
+    """Simulates live security monitoring dashboard."""
+
+    def __init__(self):
+        self._base_time = datetime.now()
+        self._threat_templates = [
+            {"type": "BRUTE_FORCE", "severity": "HIGH", "source": "203.0.113.42", "target": "10.1.50.10:23", "action": "BLOCKED", "detail": "TN3270e login brute-force: 847 attempts in 30s", "response_ms": 12},
+            {"type": "ANOMALY", "severity": "MEDIUM", "source": "10.2.1.15", "target": "10.1.50.20:446", "action": "FLAGGED", "detail": "Unusual DB2 query pattern: 3x baseline read volume", "response_ms": 340},
+            {"type": "DATA_EXFIL", "severity": "CRITICAL", "source": "10.2.1.33", "target": "198.51.100.7:443", "action": "BLOCKED", "detail": "Bulk customer PII transfer detected (45K records)", "response_ms": 8},
+            {"type": "HARVEST_ATTACK", "severity": "CRITICAL", "source": "192.0.2.99", "target": "10.1.50.10:1414", "action": "MITIGATED", "detail": "Harvest-now-decrypt-later: MQ messages captured — PQC re-encryption applied", "response_ms": 3},
+            {"type": "CICS_INJECTION", "severity": "HIGH", "source": "10.2.1.22", "target": "10.1.50.10:8090", "action": "BLOCKED", "detail": "CICS transaction injection attempt via modified 3270 data stream", "response_ms": 6},
+            {"type": "COMPLIANCE_DRIFT", "severity": "LOW", "source": "INTERNAL", "target": "SYS003", "action": "ALERTED", "detail": "TLS certificate approaching expiry (14 days remaining)", "response_ms": 0},
+        ]
+
+    def get_metrics(self) -> dict:
+        uptime = (datetime.now() - self._base_time).total_seconds()
+        return {
+            "timestamp": datetime.now().isoformat(),
+            "uptime_seconds": round(uptime),
+            "transactions_today": 15_234_891 + int(uptime * 176),
+            "pqc_encryptions": 14_987_320 + int(uptime * 173),
+            "pqc_signatures": 14_987_320 + int(uptime * 173),
+            "threats_blocked_today": 1247 + random.randint(0, 3),
+            "avg_encryption_latency_ms": round(random.uniform(0.4, 0.8), 2),
+            "avg_response_time_ms": round(random.uniform(6, 18), 1),
+            "autonomous_response_rate": 0.78,
+            "systems_protected": 3,
+            "channels_encrypted": 7,
+            "kafka_throughput_msg_sec": random.randint(98000, 103000),
+        }
+
+    def get_threat_events(self) -> list:
+        events = []
+        for i, t in enumerate(self._threat_templates):
+            events.append({
+                **t,
+                "event_id": f"EVT-{uuid.uuid4().hex[:8].upper()}",
+                "timestamp": (datetime.now() - timedelta(minutes=random.randint(1, 120))).isoformat(),
+            })
+        return sorted(events, key=lambda e: e["timestamp"], reverse=True)
+
+    def get_agent_status(self) -> list:
+        agents = [
+            {"id": "AGT-001", "name": "Protocol Sentinel", "capability": "PROTOCOL_ANALYSIS", "status": "MONITORING", "tasks_completed": random.randint(12400, 12500), "uptime_hours": round(random.uniform(168, 720), 1)},
+            {"id": "AGT-002", "name": "Threat Hunter", "capability": "THREAT_ANALYSIS", "status": "PROCESSING", "tasks_completed": random.randint(8700, 8900), "uptime_hours": round(random.uniform(168, 720), 1)},
+            {"id": "AGT-003", "name": "Compliance Auditor", "capability": "COMPLIANCE_CHECK", "status": "IDLE", "tasks_completed": random.randint(3200, 3400), "uptime_hours": round(random.uniform(168, 720), 1)},
+            {"id": "AGT-004", "name": "Anomaly Detector", "capability": "ANOMALY_DETECTION", "status": "MONITORING", "tasks_completed": random.randint(45000, 46000), "uptime_hours": round(random.uniform(168, 720), 1)},
+            {"id": "AGT-005", "name": "Incident Responder", "capability": "INCIDENT_RESPONSE", "status": "STANDBY", "tasks_completed": random.randint(1200, 1300), "uptime_hours": round(random.uniform(168, 720), 1)},
+        ]
+        return agents
+
+
+class ComplianceReportGenerator:
+    """Generates compliance assessment reports."""
+
+    def generate_report(self) -> dict:
+        frameworks = [
+            {"name": "PCI-DSS 4.0", "score": 94, "status": "COMPLIANT", "controls_total": 64, "controls_passed": 60, "controls_failed": 2, "controls_na": 2,
+             "findings": ["Req 3.5.1: PQC key rotation schedule defined", "Req 4.1: TLS 1.3 with ML-KEM-768 enforced", "Req 6.2.4: COBOL input validation gap identified (remediation in progress)"]},
+            {"name": "DORA (EU)", "score": 91, "status": "COMPLIANT", "controls_total": 41, "controls_passed": 37, "controls_failed": 1, "controls_na": 3,
+             "findings": ["Art 5: ICT risk management framework active", "Art 11: Incident classification automated", "Art 15: Third-party risk register needs update"]},
+            {"name": "SOX", "score": 97, "status": "COMPLIANT", "controls_total": 38, "controls_passed": 37, "controls_failed": 0, "controls_na": 1,
+             "findings": ["Sec 302: Financial data integrity verified via ML-DSA signatures", "Sec 404: Internal controls monitored by agent AGT-003"]},
+            {"name": "NIST 800-53", "score": 89, "status": "CONDITIONAL", "controls_total": 122, "controls_passed": 108, "controls_failed": 5, "controls_na": 9,
+             "findings": ["SC-13: PQC algorithms FIPS 203/204/205 implemented", "AU-6: Audit log analysis automated", "IA-7: Cryptographic module validation pending CMVP"]},
+            {"name": "HIPAA", "score": 92, "status": "COMPLIANT", "controls_total": 54, "controls_passed": 50, "controls_failed": 1, "controls_na": 3,
+             "findings": ["164.312(a): Access controls enforced via zero-trust", "164.312(e): PHI encrypted with ML-KEM-768 in transit"]},
+        ]
+        overall = round(sum(f["score"] for f in frameworks) / len(frameworks), 1)
+        return {
+            "report_id": f"COMP-{uuid.uuid4().hex[:8].upper()}",
+            "generated_at": datetime.now().isoformat(),
+            "assessment_period": f"{(datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')} to {datetime.now().strftime('%Y-%m-%d')}",
+            "overall_score": overall,
+            "overall_status": "COMPLIANT" if overall >= 85 else "NON-COMPLIANT",
+            "frameworks": frameworks,
+            "pqc_readiness": {"algorithms": ["ML-KEM-768 (FIPS 203)", "ML-DSA-65 (FIPS 204)", "SLH-DSA (FIPS 205)"], "nist_level": 3, "quantum_safe": True, "cmvp_status": "Pending"},
+        }
+
+    def get_audit_trail(self) -> list:
+        entries = [
+            {"action": "PQC_KEY_ROTATION", "actor": "AGT-001", "target": "SYS001/TN3270e", "result": "SUCCESS", "detail": "ML-KEM-768 session keys rotated (15-min interval)"},
+            {"action": "THREAT_BLOCKED", "actor": "AGT-002", "target": "10.1.50.10:23", "result": "SUCCESS", "detail": "Brute-force attack blocked: 847 attempts from 203.0.113.42"},
+            {"action": "COMPLIANCE_SCAN", "actor": "AGT-003", "target": "ALL_SYSTEMS", "result": "SUCCESS", "detail": "Automated PCI-DSS 4.0 control assessment completed: 94/100"},
+            {"action": "DATA_ENCRYPTED", "actor": "SYSTEM", "target": "SYS001/MQ", "result": "SUCCESS", "detail": "Retroactive PQC encryption applied to 1.2M queued MQ messages"},
+            {"action": "ANOMALY_FLAGGED", "actor": "AGT-004", "target": "SYS002/DB2", "result": "REVIEW", "detail": "DB2 query volume 3x baseline — flagged for SOC review"},
+            {"action": "CERT_RENEWED", "actor": "SYSTEM", "target": "SYS003/TLS", "result": "SUCCESS", "detail": "TLS 1.3 certificate renewed with hybrid X25519-ML-KEM-768"},
+            {"action": "COBOL_SCAN", "actor": "AGT-001", "target": "CUSTMAST.cbl", "result": "SUCCESS", "detail": "Legacy pattern analysis: 3 critical findings, 4 modernization opportunities"},
+            {"action": "MODERNIZATION", "actor": "AGT-003", "target": "SYS002", "result": "SUCCESS", "detail": "Python/FastAPI code generation completed for Customer Master module"},
+        ]
+        for e in entries:
+            e["timestamp"] = (datetime.now() - timedelta(minutes=random.randint(1, 240))).isoformat()
+            e["event_id"] = f"AUD-{uuid.uuid4().hex[:8].upper()}"
+        return sorted(entries, key=lambda e: e["timestamp"], reverse=True)
+
+
+# Initialize E2E simulators
+network_sim = NetworkTrafficSimulator()
+pqc_sim = PQCDemoSimulator()
+security_mon = SecurityMonitorSim()
+compliance_gen = ComplianceReportGenerator()
+
+# ============================================================================
+# E2E Demo API Endpoints
+# ============================================================================
+
+@app.get("/api/e2e/network/scan")
+async def e2e_network_scan():
+    return network_sim.scan_network()
+
+@app.get("/api/e2e/network/capture")
+async def e2e_network_capture():
+    return network_sim.capture_traffic()
+
+@app.get("/api/e2e/pqc/keygen")
+async def e2e_pqc_keygen():
+    return pqc_sim.generate_keypair()
+
+class E2EEncryptRequest(BaseModel):
+    plaintext: str = "{1:F01BANKUS33AXXX0000000000}{2:O1030900260304BANKGB2LAXXX00000000002603040900N}{4:\n:20:TXN-2026-00847\n:23B:CRED\n:32A:260304USD1500000,00\n:50K:/US33XXX0123456789\nACME CORPORATION\n:59:/GB2LXXX9876543210\nGLOBAL TRADING LTD\n:71A:SHA\n-}"
+
+@app.post("/api/e2e/pqc/encrypt")
+async def e2e_pqc_encrypt(req: E2EEncryptRequest):
+    return pqc_sim.encrypt_transaction(req.plaintext)
+
+class E2ESignRequest(BaseModel):
+    message: str = "SWIFT MT103 Wire Transfer TXN-2026-00847 USD 1,500,000.00"
+
+@app.post("/api/e2e/pqc/sign")
+async def e2e_pqc_sign(req: E2ESignRequest):
+    return pqc_sim.sign_transaction(req.message)
+
+@app.get("/api/e2e/security/metrics")
+async def e2e_security_metrics():
+    return security_mon.get_metrics()
+
+@app.get("/api/e2e/security/threats")
+async def e2e_security_threats():
+    return security_mon.get_threat_events()
+
+@app.get("/api/e2e/security/agents")
+async def e2e_security_agents():
+    return security_mon.get_agent_status()
+
+@app.get("/api/e2e/compliance/report")
+async def e2e_compliance_report():
+    return compliance_gen.generate_report()
+
+@app.get("/api/e2e/compliance/audit")
+async def e2e_compliance_audit():
+    return compliance_gen.get_audit_trail()
+
+
+# ============================================================================
+# E2E Demo Frontend
+# ============================================================================
+
+@app.get("/e2e-demo")
+async def e2e_demo_page():
+    """Practical end-to-end product demo."""
+    return HTMLResponse(content=E2E_DEMO_HTML)
+
+
+E2E_DEMO_HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QBITEL Bridge — End-to-End Demo</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#08090d;--bg2:#0f1117;--bg3:#161922;--border:rgba(255,255,255,.07);--text:#e2e8f0;--dim:#64748b;--accent:#00d9ff;--green:#00ff88;--red:#ff4757;--orange:#ff9f43;--yellow:#ffd43b}
+html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+.app{display:flex;height:100%}
+
+/* Sidebar */
+.sidebar{width:270px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-header{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sidebar-header h1{font-size:1.15em;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar-header p{font-size:.75em;color:var(--dim);margin-top:2px}
+.steps{flex:1;overflow-y:auto;padding:12px 10px}
+.step{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:.15s;margin-bottom:4px;border:1px solid transparent}
+.step:hover{background:rgba(255,255,255,.03)}
+.step.active{background:rgba(0,217,255,.06);border-color:rgba(0,217,255,.2)}
+.step.done .step-num{background:var(--green);color:#000}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--bg3);color:var(--dim);font-size:.7em;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:.2s}
+.step.active .step-num{background:var(--accent);color:#000}
+.step-text h4{font-size:.85em;font-weight:600;color:var(--text)}
+.step-text p{font-size:.7em;color:var(--dim);margin-top:1px}
+.step.done .step-text h4{color:var(--dim)}
+.sidebar-footer{padding:12px 18px;border-top:1px solid var(--border);font-size:.72em;color:var(--dim)}
+.sidebar-footer span{color:var(--green);font-weight:600}
+
+/* Main content */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:44px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0}
+.topbar .tag{padding:3px 10px;border-radius:12px;font-size:.7em;font-weight:600;background:rgba(0,217,255,.1);color:var(--accent)}
+.topbar .timer{font-family:'JetBrains Mono',monospace;font-size:.8em;color:var(--dim);margin-left:auto}
+.content{flex:1;overflow-y:auto;padding:28px 32px}
+
+/* Panels */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px}
+.panel h2{font-size:1.3em;font-weight:700;margin-bottom:4px}
+.panel .desc{color:var(--dim);font-size:.9em;margin-bottom:18px;line-height:1.5}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border:none;border-radius:8px;font-weight:700;font-size:.88em;cursor:pointer;transition:.2s;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--green));color:#000}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,217,255,.25)}
+.btn-primary:disabled{opacity:.35;transform:none;cursor:not-allowed;box-shadow:none}
+.btn-secondary{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:rgba(255,255,255,.1)}
+
+/* Output area */
+.out{background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:8px;padding:16px;margin-top:14px;display:none;animation:fadeIn .3s}
+.out.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Terminal */
+.term{background:#000;border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:.78em;line-height:1.7;max-height:300px;overflow-y:auto;white-space:pre-wrap}
+.term .g{color:var(--green)}.term .c{color:var(--accent)}.term .r{color:var(--red)}.term .y{color:var(--yellow)}.term .d{color:var(--dim)}.term .o{color:var(--orange)}
+
+/* Metric badges */
+.metrics{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.metric{padding:6px 14px;border-radius:20px;background:rgba(0,217,255,.06);font-size:.82em}
+.metric .l{color:var(--dim)}.metric .v{color:var(--green);font-weight:600}
+
+/* Cards */
+.card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px;padding:16px;margin:8px 0}
+.card h4{color:var(--accent);font-size:.95em;margin-bottom:8px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+
+/* Severity badges */
+.sev{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.72em;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.sev-critical{background:rgba(255,71,87,.15);color:var(--red)}
+.sev-high{background:rgba(255,159,67,.15);color:var(--orange)}
+.sev-medium{background:rgba(255,212,59,.12);color:var(--yellow)}
+.sev-low{background:rgba(0,255,136,.1);color:var(--green)}
+
+/* Patterns */
+.pat{padding:10px 14px;margin:5px 0;border-radius:6px;font-size:.88em;border-left:3px solid}
+.pat.critical{background:rgba(255,71,87,.06);border-color:var(--red)}
+.pat.high{background:rgba(255,159,67,.06);border-color:var(--orange)}
+.pat.warning{background:rgba(255,212,59,.05);border-color:var(--yellow)}
+.pat.info{background:rgba(0,217,255,.05);border-color:var(--accent)}
+.pat.good{background:rgba(0,255,136,.05);border-color:var(--green)}
+
+/* Code */
+.code-tabs{display:flex;gap:2px;margin-bottom:-1px;position:relative;z-index:1}
+.ctab{padding:8px 16px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-bottom:none;border-radius:6px 6px 0 0;cursor:pointer;font-size:.8em;font-weight:600;color:var(--dim);transition:.15s}
+.ctab.active{background:#000;color:var(--accent);border-color:rgba(0,217,255,.15)}
+pre.cblock{background:#000;border:1px solid var(--border);border-radius:0 8px 8px 8px;padding:16px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.78em;line-height:1.6;max-height:350px;overflow-y:auto}
+
+/* Dashboard grid */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.dash-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center}
+.dash-card .num{font-size:2em;font-weight:800;font-family:'JetBrains Mono',monospace;background:linear-gradient(135deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.dash-card .lbl{font-size:.78em;color:var(--dim);margin-top:4px}
+
+/* Threat timeline */
+.threat{display:flex;align-items:flex-start;gap:12px;padding:12px;margin:6px 0;background:rgba(255,255,255,.015);border-radius:8px;border-left:3px solid}
+.threat.BLOCKED{border-color:var(--green)}.threat.FLAGGED{border-color:var(--orange)}.threat.MITIGATED{border-color:var(--accent)}.threat.ALERTED{border-color:var(--yellow)}
+.threat-time{font-family:'JetBrains Mono',monospace;font-size:.72em;color:var(--dim);min-width:55px}
+.threat-info{flex:1}.threat-info strong{font-size:.88em}.threat-info p{font-size:.8em;color:var(--dim);margin-top:2px}
+
+/* Agent panel */
+.agent{display:flex;align-items:center;gap:12px;padding:10px 14px;margin:4px 0;background:rgba(255,255,255,.02);border-radius:8px}
+.agent-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.agent-dot.MONITORING{background:var(--green);box-shadow:0 0 6px var(--green)}
+.agent-dot.PROCESSING{background:var(--accent);box-shadow:0 0 6px var(--accent);animation:pulse 1.5s infinite}
+.agent-dot.IDLE{background:var(--dim)}
+.agent-dot.STANDBY{background:var(--yellow);box-shadow:0 0 6px var(--yellow)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.agent-name{font-weight:600;font-size:.88em;flex:1}
+.agent-cap{font-size:.72em;color:var(--dim)}
+.agent-tasks{font-family:'JetBrains Mono',monospace;font-size:.75em;color:var(--accent)}
+
+/* Compliance bar */
+.comp-fw{margin:10px 0}
+.comp-fw-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.comp-fw-name{font-weight:600;font-size:.9em}
+.comp-fw-score{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95em}
+.comp-bar{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.comp-bar-fill{height:100%;border-radius:4px;transition:width .8s ease}
+.comp-findings{margin-top:6px;padding-left:12px}
+.comp-findings li{font-size:.8em;color:var(--dim);margin:3px 0;list-style:disc}
+
+/* Phase timeline */
+.phase{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;margin:8px 0;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px;border-left:3px solid var(--accent)}
+.phase-num{min-width:30px;height:30px;border-radius:50%;background:rgba(0,217,255,.12);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82em}
+.phase-info h4{font-size:.95em}.phase-info p{font-size:.82em;color:var(--dim);margin-top:2px}
+.phase-dur{color:var(--green);font-weight:600}
+
+/* Loader */
+.loader{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,217,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Before/After */
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0}
+.ba-col{background:#000;border-radius:8px;padding:14px}
+.ba-col h5{font-size:.8em;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.ba-col.before h5{color:var(--red)}.ba-col.after h5{color:var(--green)}
+.ba-col pre{font-family:'JetBrains Mono',monospace;font-size:.72em;line-height:1.6;white-space:pre-wrap;word-break:break-all}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h1>QBITEL Bridge</h1>
+      <p>End-to-End Mainframe Modernization</p>
+    </div>
+    <div class="steps" id="steps"></div>
+    <div class="sidebar-footer">Steps completed: <span id="done-count">0</span>/8</div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <span class="tag" id="step-tag">Step 1 of 8</span>
+      <span id="step-title" style="font-weight:600;font-size:.9em;"></span>
+      <span class="timer" id="timer">0:00</span>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<script>
+const STEPS=[
+  {n:1,title:"Network Discovery",desc:"Scan and discover legacy systems",icon:"1"},
+  {n:2,title:"Traffic Capture & Protocol Analysis",desc:"Capture and decode mainframe traffic",icon:"2"},
+  {n:3,title:"COBOL Deep Analysis",desc:"AI-powered code analysis",icon:"3"},
+  {n:4,title:"PQC Security Layer",desc:"Quantum-safe encryption",icon:"4"},
+  {n:5,title:"Code Generation",desc:"COBOL to modern Python/FastAPI",icon:"5"},
+  {n:6,title:"Security Monitoring",desc:"Live threat detection dashboard",icon:"6"},
+  {n:7,title:"Compliance Report",desc:"Automated regulatory assessment",icon:"7"},
+  {n:8,title:"Modernization Roadmap",desc:"Phased migration plan",icon:"8"}
+];
+let cur=1,done=new Set(),timerStart=Date.now(),timerInt=null,monitorInt=null;
+
+// Build sidebar
+const stepsEl=document.getElementById('steps');
+STEPS.forEach(s=>{
+  const d=document.createElement('div');
+  d.className='step'+(s.n===1?' active':'');
+  d.id='s'+s.n;
+  d.innerHTML=`<div class="step-num">${s.n}</div><div class="step-text"><h4>${s.title}</h4><p>${s.desc}</p></div>`;
+  d.onclick=()=>goStep(s.n);
+  stepsEl.appendChild(d);
+});
+
+// Timer
+timerInt=setInterval(()=>{
+  const s=Math.floor((Date.now()-timerStart)/1000);
+  document.getElementById('timer').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+},1000);
+
+function goStep(n){
+  if(monitorInt){clearInterval(monitorInt);monitorInt=null;}
+  cur=n;
+  document.querySelectorAll('.step').forEach((el,i)=>{
+    el.classList.remove('active');
+    if(i+1===n)el.classList.add('active');
+    if(done.has(i+1))el.classList.add('done');
+  });
+  document.getElementById('step-tag').textContent=`Step ${n} of 8`;
+  document.getElementById('step-title').textContent=STEPS[n-1].title;
+  render(n);
+}
+
+function markDone(n){done.add(n);document.getElementById('s'+n).classList.add('done');document.getElementById('done-count').textContent=done.size;}
+function showOut(id){document.getElementById(id).classList.add('show');}
+function h(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+async function api(path,opts){const r=await fetch(path,opts);return r.json();}
+
+// ========== STEP RENDERERS ==========
+
+function render(n){
+  const c=document.getElementById('content');
+  switch(n){
+    case 1: renderDiscovery(c);break;
+    case 2: renderCapture(c);break;
+    case 3: renderCobol(c);break;
+    case 4: renderPQC(c);break;
+    case 5: renderCodeGen(c);break;
+    case 6: renderMonitor(c);break;
+    case 7: renderCompliance(c);break;
+    case 8: renderRoadmap(c);break;
+  }
+}
+
+// --- Step 1: Network Discovery ---
+function renderDiscovery(c){
+  c.innerHTML=`<div class="panel"><h2>Network Discovery</h2><p class="desc">QBITEL passively scans the network to discover legacy mainframe systems, protocols, and unencrypted channels — in minutes, not months.</p><button class="btn btn-primary" onclick="runScan()">Scan Network</button><div class="out" id="out1"></div></div>`;
+}
+async function runScan(){
+  const o=document.getElementById('out1');showOut('out1');
+  o.innerHTML=`<div class="term" id="term1"></div>`;
+  const t=document.getElementById('term1');
+  const lines=['<span class="d">[QBITEL] Initializing passive network scan...</span>','<span class="d">[QBITEL] Target: 10.1.50.0/24</span>','<span class="c">[SCAN] Sending ARP probes...</span>',''];
+  for(let l of lines){t.innerHTML+=l+'\\n';await sleep(300);}
+  const d=await api('/api/e2e/network/scan');
+  for(let r of d.results){
+    t.innerHTML+=`<span class="g">[FOUND]</span> ${r.ip}:<span class="c">${r.port}</span> — <span class="y">${r.protocol}</span> → ${r.name} <span class="r">[${r.encryption}]</span>\\n`;
+    await sleep(250);
+  }
+  t.innerHTML+='\\n<span class="g">[COMPLETE]</span> Scan finished in <span class="c">'+d.duration_seconds+'s</span>\\n';
+  t.innerHTML+=`<span class="o">[WARNING]</span> <span class="r">${d.unencrypted_channels} unencrypted channels detected!</span>\\n`;
+  // Summary cards
+  o.innerHTML+=`<div class="dash-grid" style="margin-top:14px"><div class="dash-card"><div class="num">${d.unique_systems}</div><div class="lbl">Legacy Systems</div></div><div class="dash-card"><div class="num">${d.unique_protocols}</div><div class="lbl">Protocols</div></div><div class="dash-card"><div class="num">${d.targets_found}</div><div class="lbl">Channels Found</div></div><div class="dash-card"><div class="num" style="-webkit-text-fill-color:var(--red)">${d.unencrypted_channels}</div><div class="lbl">Unencrypted</div></div></div>`;
+  o.innerHTML+=`<div style="margin-top:12px;text-align:right"><button class="btn btn-primary" onclick="markDone(1);goStep(2)">Next: Capture Traffic &rarr;</button></div>`;
+}
+
+// --- Step 2: Traffic Capture & Protocol ---
+function renderCapture(c){
+  c.innerHTML=`<div class="panel"><h2>Traffic Capture & Protocol Analysis</h2><p class="desc">Capture live mainframe traffic and reverse-engineer binary protocols — EBCDIC encoding, field boundaries, data types — fully automated.</p><button class="btn btn-primary" onclick="runCapture()">Capture & Analyze</button><div class="out" id="out2"></div></div>`;
+}
+async function runCapture(){
+  const o=document.getElementById('out2');showOut('out2');
+  o.innerHTML='<span class="loader"></span> Capturing mainframe traffic...';
+  const d=await api('/api/e2e/network/capture');
+  let html=`<div class="term" style="margin-bottom:14px">`;
+  html+=`<span class="g">[CAPTURE]</span> ${d.packets_captured} packets captured in <span class="c">${d.duration_ms}ms</span>\\n`;
+  html+=`<span class="o">[ALERT]</span> <span class="r">${d.pii_exposure} packets contain exposed PII</span>\\n\\n`;
+  for(let p of d.packets){
+    html+=`<span class="d">--- Packet #${p.packet_id}: ${p.label} (${p.protocol}, ${p.length}B) ---</span>\\n`;
+    html+=`<span class="d">  ${p.src} → ${p.dst}</span>\\n`;
+    html+=`  <span class="y">HEX:</span>  <span class="c">${p.hex_dump}</span>\\n`;
+    html+=`  <span class="y">ASCII:</span> <span class="g">${h(p.decoded_ascii)}</span>\\n`;
+    if(p.pii_detected) html+=`  <span class="r">[PII DETECTED] Sensitive data in plaintext!</span>\\n`;
+    html+='\\n';
+  }
+  html+=`</div>`;
+  // Now run protocol analysis
+  const pa=await api('/api/analyze/protocol',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({protocol_data:d.packets[0].hex_dump,system_context:'IBM z/OS Mainframe'})});
+  html+=`<div class="card"><h4>Protocol Analysis Results</h4><div class="metrics"><span class="metric"><span class="l">Encoding </span><span class="v">${pa.encoding}</span></span><span class="metric"><span class="l">Structure </span><span class="v">${pa.structure.type}</span></span><span class="metric"><span class="l">Length </span><span class="v">${pa.raw_length}B</span></span></div>`;
+  if(pa.fields&&pa.fields.length){
+    html+=`<table style="width:100%;font-size:.82em;margin-top:8px;border-collapse:collapse"><tr style="color:var(--dim);text-align:left"><th style="padding:6px 8px">Field</th><th>Offset</th><th>Length</th><th>Type</th></tr>`;
+    pa.fields.forEach(f=>{html+=`<tr style="border-top:1px solid var(--border)"><td style="padding:6px 8px;color:var(--accent)">${f.name}</td><td>${f.offset}</td><td>${f.length}B</td><td>${f.type}</td></tr>`;});
+    html+=`</table>`;
+  }
+  if(pa.recommendations&&pa.recommendations.length){
+    html+=`<div style="margin-top:12px">`;
+    pa.recommendations.forEach(r=>{html+=`<div class="pat good"><strong>${r.issue}</strong><br><span style="color:var(--green)">${r.solution}</span></div>`;});
+    html+=`</div>`;
+  }
+  html+=`</div>`;
+  html+=`<div style="margin-top:12px;text-align:right"><button class="btn btn-primary" onclick="markDone(2);goStep(3)">Next: COBOL Analysis &rarr;</button></div>`;
+  o.innerHTML=html;
+}
+
+// --- Step 3: COBOL Deep Analysis ---
+function renderCobol(c){
+  c.innerHTML=`<div class="panel"><h2>COBOL Deep Analysis</h2><p class="desc">AI-powered analysis of legacy COBOL source code — complexity scoring, legacy pattern detection, and modernization opportunity mapping.</p><button class="btn btn-primary" onclick="runCobol()">Analyze COBOL Programs</button><div class="out" id="out3"></div></div>`;
+}
+async function runCobol(){
+  const o=document.getElementById('out3');showOut('out3');
+  o.innerHTML='<span class="loader"></span> Analyzing COBOL source files...';
+  const list=await api('/api/analyze/cobol/list');
+  let html='';
+  for(let f of list.files){
+    const a=await api('/api/analyze/cobol/'+f.name);
+    html+=`<div class="card"><h4>${a.name} <span style="color:var(--dim);font-weight:400">(${a.lines_of_code} LOC)</span></h4>`;
+    html+=`<div class="metrics"><span class="metric"><span class="l">Complexity </span><span class="v">${a.complexity_score}</span></span><span class="metric"><span class="l">Data Divisions </span><span class="v">${a.data_divisions}</span></span><span class="metric"><span class="l">Procedures </span><span class="v">${a.procedure_divisions}</span></span><span class="metric"><span class="l">Variables </span><span class="v">${a.analysis.working_storage?.variable_count||0}</span></span></div>`;
+    if(a.analysis.legacy_patterns?.length){
+      html+=`<div style="margin-top:10px"><strong style="font-size:.85em;color:var(--dim)">Legacy Patterns Detected</strong>`;
+      a.analysis.legacy_patterns.forEach(p=>{
+        const cls=p.severity==='critical'?'critical':p.severity==='high'?'high':'warning';
+        html+=`<div class="pat ${cls}"><span class="sev sev-${p.severity}">${p.severity}</span> <strong style="margin-left:6px">${p.pattern}</strong><br><span style="color:var(--dim);font-size:.85em">${p.description}</span></div>`;
+      });
+      html+=`</div>`;
+    }
+    if(a.analysis.modernization_opportunities?.length){
+      html+=`<div style="margin-top:10px"><strong style="font-size:.85em;color:var(--dim)">Modernization Opportunities</strong>`;
+      a.analysis.modernization_opportunities.forEach(op=>{
+        html+=`<div class="pat good"><strong>${op.area}</strong><br><span style="color:var(--dim);font-size:.85em">${op.current}</span> &rarr; <span style="color:var(--green);font-size:.85em">${op.modern}</span></div>`;
+      });
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  }
+  html+=`<div style="margin-top:12px;text-align:right"><button class="btn btn-primary" onclick="markDone(3);goStep(4)">Next: PQC Security &rarr;</button></div>`;
+  o.innerHTML=html;
+}
+
+// --- Step 4: PQC Security Layer ---
+function renderPQC(c){
+  c.innerHTML=`<div class="panel"><h2>Post-Quantum Cryptographic Protection</h2><p class="desc">Wrap all mainframe communications in NIST Level 3 quantum-safe encryption — zero code changes, &lt;1ms overhead. Protect against harvest-now-decrypt-later attacks.</p><button class="btn btn-primary" onclick="runPQC()">Apply PQC Protection</button><div class="out" id="out4"></div></div>`;
+}
+async function runPQC(){
+  const o=document.getElementById('out4');showOut('out4');
+  o.innerHTML='<span class="loader"></span> Generating quantum-safe keypair...';
+  // 1. Keygen
+  const kg=await api('/api/e2e/pqc/keygen');
+  let html=`<div class="card"><h4>Key Generation — ${kg.algorithm}</h4><div class="metrics"><span class="metric"><span class="l">KEM Public Key </span><span class="v">${kg.kem.public_key_bytes}B</span></span><span class="metric"><span class="l">KEM Ciphertext </span><span class="v">${kg.kem.ciphertext}B</span></span><span class="metric"><span class="l">Signer Public Key </span><span class="v">${kg.signer.public_key_bytes}B</span></span><span class="metric"><span class="l">Signature </span><span class="v">${kg.signer.signature}B</span></span><span class="metric"><span class="l">Latency </span><span class="v">${kg.generation_latency_ms}ms</span></span><span class="metric"><span class="l">NIST Level </span><span class="v">${kg.nist_security_level}</span></span></div></div>`;
+  // 2. Encrypt
+  const enc=await api('/api/e2e/pqc/encrypt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
+  html+=`<div class="card"><h4>Transaction Encryption — SWIFT MT103 Wire Transfer</h4><div class="ba"><div class="ba-col before"><h5>Before (Plaintext)</h5><pre>${h(enc.plaintext)}</pre></div><div class="ba-col after"><h5>After (PQC Encrypted)</h5><pre>${enc.ciphertext_hex}</pre></div></div><div class="metrics"><span class="metric"><span class="l">Plain </span><span class="v">${enc.plaintext_bytes}B</span></span><span class="metric"><span class="l">Cipher </span><span class="v">${enc.ciphertext_bytes}B</span></span><span class="metric"><span class="l">Overhead </span><span class="v">${enc.overhead_percent}%</span></span><span class="metric"><span class="l">Latency </span><span class="v">${enc.encryption_latency_ms}ms</span></span></div></div>`;
+  // 3. Sign
+  const sig=await api('/api/e2e/pqc/sign',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
+  html+=`<div class="card"><h4>Digital Signature — ${sig.algorithm}</h4><div class="metrics"><span class="metric"><span class="l">Message Hash </span><span class="v" style="font-family:'JetBrains Mono',monospace;font-size:.8em">${sig.message_hash.substring(0,24)}...</span></span><span class="metric"><span class="l">Signature </span><span class="v">${sig.signature_bytes}B</span></span><span class="metric"><span class="l">Sign Latency </span><span class="v">${sig.signing_latency_ms}ms</span></span><span class="metric"><span class="l">Verify Latency </span><span class="v">${sig.verification_latency_ms}ms</span></span><span class="metric"><span class="l">Verified </span><span class="v" style="color:var(--green)">TRUE</span></span></div></div>`;
+  html+=`<div style="margin-top:12px;text-align:right"><button class="btn btn-primary" onclick="markDone(4);goStep(5)">Next: Code Generation &rarr;</button></div>`;
+  o.innerHTML=html;
+}
+
+// --- Step 5: Code Generation ---
+let genCode={};
+function renderCodeGen(c){
+  c.innerHTML=`<div class="panel"><h2>Modern Code Generation</h2><p class="desc">Auto-generate production-ready Python dataclasses, FastAPI endpoints, and SQL schemas from COBOL analysis. 100% data fidelity with original structures.</p><button class="btn btn-primary" onclick="runGen()">Generate Modern Code</button><div class="out" id="out5"></div></div>`;
+}
+async function runGen(){
+  const o=document.getElementById('out5');showOut('out5');
+  o.innerHTML='<span class="loader"></span> Transforming COBOL to Python/FastAPI...';
+  const list=await api('/api/analyze/cobol/list');
+  if(!list.files.length){o.innerHTML='No COBOL files found.';return;}
+  const d=await api('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cobol_file:list.files[0].name})});
+  genCode=d.generated_code||{};
+  let html=`<div class="code-tabs"><div class="ctab active" onclick="switchGenTab(this,'models')">Python Models</div><div class="ctab" onclick="switchGenTab(this,'api')">FastAPI Endpoints</div><div class="ctab" onclick="switchGenTab(this,'sql')">SQL Schema</div></div><pre class="cblock"><code id="gen-code">${h(genCode.python_models||'')}</code></pre>`;
+  html+=`<div style="margin-top:12px;text-align:right"><button class="btn btn-primary" onclick="markDone(5);goStep(6)">Next: Security Monitor &rarr;</button></div>`;
+  o.innerHTML=html;
+}
+function switchGenTab(el,tab){
+  document.querySelectorAll('.ctab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const d=document.getElementById('gen-code');
+  if(tab==='models')d.textContent=genCode.python_models||'';
+  else if(tab==='api')d.textContent=genCode.fastapi_endpoints||'';
+  else d.textContent=genCode.sql_schema||'';
+}
+
+// --- Step 6: Security Monitoring ---
+function renderMonitor(c){
+  c.innerHTML=`<div class="panel"><h2>Live Security Monitoring</h2><p class="desc">Real-time threat detection, PQC operations monitoring, and autonomous agent orchestration — 78% autonomous response rate, &lt;1 second decision time.</p><button class="btn btn-primary" onclick="startMonitor()">Start Monitoring</button><div class="out" id="out6"></div></div>`;
+}
+async function startMonitor(){
+  const o=document.getElementById('out6');showOut('out6');
+  o.innerHTML='<span class="loader"></span> Connecting to security fabric...';
+  await renderMonitorData(o);
+  monitorInt=setInterval(()=>refreshMetrics(),3000);
+}
+async function renderMonitorData(o){
+  const[m,t,a]=await Promise.all([api('/api/e2e/security/metrics'),api('/api/e2e/security/threats'),api('/api/e2e/security/agents')]);
+  let html=`<div class="dash-grid" id="dash-metrics"><div class="dash-card"><div class="num" id="m-tx">${(m.transactions_today).toLocaleString()}</div><div class="lbl">Transactions Today</div></div><div class="dash-card"><div class="num" id="m-pqc">${(m.pqc_encryptions).toLocaleString()}</div><div class="lbl">PQC Encryptions</div></div><div class="dash-card"><div class="num" id="m-threats">${m.threats_blocked_today}</div><div class="lbl">Threats Blocked</div></div><div class="dash-card"><div class="num" id="m-lat">${m.avg_encryption_latency_ms}ms</div><div class="lbl">Avg PQC Latency</div></div><div class="dash-card"><div class="num" id="m-auto">78%</div><div class="lbl">Autonomous Response</div></div><div class="dash-card"><div class="num" id="m-kafka">${(m.kafka_throughput_msg_sec).toLocaleString()}</div><div class="lbl">Kafka msg/sec</div></div></div>`;
+  // Agents
+  html+=`<div class="card" style="margin-top:14px"><h4>Agent Orchestration (5 Active)</h4><div id="agents-panel">`;
+  a.forEach(ag=>{html+=`<div class="agent"><div class="agent-dot ${ag.status}"></div><div class="agent-name">${ag.name}</div><div class="agent-cap">${ag.capability}</div><div class="agent-tasks">${ag.tasks_completed.toLocaleString()} tasks</div></div>`;});
+  html+=`</div></div>`;
+  // Threats
+  html+=`<div class="card" style="margin-top:14px"><h4>Threat Events (Last 2 Hours)</h4><div id="threats-panel">`;
+  t.forEach(ev=>{
+    const ts=new Date(ev.timestamp);
+    const tstr=ts.getHours()+':'+String(ts.getMinutes()).padStart(2,'0');
+    html+=`<div class="threat ${ev.action}"><div class="threat-time">${tstr}</div><div class="threat-info"><strong><span class="sev sev-${ev.severity.toLowerCase()}">${ev.severity}</span> ${ev.type}</strong><p>${ev.detail}</p><p style="color:var(--accent)">Action: ${ev.action} | Response: ${ev.response_ms}ms | ${ev.source} &rarr; ${ev.target}</p></div></div>`;
+  });
+  html+=`</div></div>`;
+  html+=`<div style="margin-top:12px;text-align:right"><button class="btn btn-primary" onclick="markDone(6);goStep(7)">Next: Compliance &rarr;</button></div>`;
+  o.innerHTML=html;
+}
+async function refreshMetrics(){
+  try{
+    const m=await api('/api/e2e/security/metrics');
+    const el=id=>document.getElementById(id);
+    if(el('m-tx'))el('m-tx').textContent=m.transactions_today.toLocaleString();
+    if(el('m-pqc'))el('m-pqc').textContent=m.pqc_encryptions.toLocaleString();
+    if(el('m-threats'))el('m-threats').textContent=m.threats_blocked_today;
+    if(el('m-lat'))el('m-lat').textContent=m.avg_encryption_latency_ms+'ms';
+    if(el('m-kafka'))el('m-kafka').textContent=m.kafka_throughput_msg_sec.toLocaleString();
+  }catch(e){}
+}
+
+// --- Step 7: Compliance Report ---
+function renderCompliance(c){
+  c.innerHTML=`<div class="panel"><h2>Compliance & Audit Report</h2><p class="desc">Automated compliance assessment across 5 regulatory frameworks. Generate audit-ready evidence in under 10 minutes — versus 2-4 weeks manually.</p><button class="btn btn-primary" onclick="runCompliance()">Generate Report</button><div class="out" id="out7"></div></div>`;
+}
+async function runCompliance(){
+  const o=document.getElementById('out7');showOut('out7');
+  o.innerHTML='<span class="loader"></span> Running compliance assessment...';
+  const[rpt,aud]=await Promise.all([api('/api/e2e/compliance/report'),api('/api/e2e/compliance/audit')]);
+  let html=`<div class="dash-grid" style="margin-bottom:14px"><div class="dash-card"><div class="num">${rpt.overall_score}%</div><div class="lbl">Overall Score</div></div><div class="dash-card"><div class="num" style="-webkit-text-fill-color:var(--green)">${rpt.overall_status}</div><div class="lbl">Status</div></div><div class="dash-card"><div class="num">${rpt.frameworks.length}</div><div class="lbl">Frameworks</div></div><div class="dash-card"><div class="num">NIST ${rpt.pqc_readiness.nist_level}</div><div class="lbl">PQC Level</div></div></div>`;
+  // Frameworks
+  rpt.frameworks.forEach(fw=>{
+    const color=fw.score>=95?'var(--green)':fw.score>=90?'var(--accent)':fw.score>=80?'var(--yellow)':'var(--red)';
+    html+=`<div class="comp-fw"><div class="comp-fw-header"><span class="comp-fw-name">${fw.name} <span class="sev sev-${fw.status==='COMPLIANT'?'low':'medium'}">${fw.status}</span></span><span class="comp-fw-score" style="color:${color}">${fw.score}/100</span></div><div class="comp-bar"><div class="comp-bar-fill" style="width:${fw.score}%;background:${color}"></div></div><div style="font-size:.78em;color:var(--dim);margin-top:3px">${fw.controls_passed}/${fw.controls_total} controls passed, ${fw.controls_failed} failed, ${fw.controls_na} N/A</div><ul class="comp-findings">${fw.findings.map(f=>'<li>'+f+'</li>').join('')}</ul></div>`;
+  });
+  // Audit Trail
+  html+=`<div class="card" style="margin-top:14px"><h4>Recent Audit Trail</h4>`;
+  aud.slice(0,6).forEach(e=>{
+    const ts=new Date(e.timestamp);
+    const tstr=ts.getHours()+':'+String(ts.getMinutes()).padStart(2,'0');
+    const col=e.result==='SUCCESS'?'var(--green)':e.result==='REVIEW'?'var(--orange)':'var(--red)';
+    html+=`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:.82em"><span style="color:var(--dim);min-width:45px;font-family:'JetBrains Mono',monospace">${tstr}</span><span style="color:var(--accent);min-width:130px">${e.action}</span><span style="flex:1;color:var(--dim)">${e.detail}</span><span style="color:${col};font-weight:600">${e.result}</span></div>`;
+  });
+  html+=`</div>`;
+  html+=`<div style="margin-top:12px;text-align:right"><button class="btn btn-primary" onclick="markDone(7);goStep(8)">Next: Roadmap &rarr;</button></div>`;
+  o.innerHTML=html;
+}
+
+// --- Step 8: Modernization Roadmap ---
+function renderRoadmap(c){
+  c.innerHTML=`<div class="panel"><h2>Modernization Roadmap</h2><p class="desc">Generate a comprehensive, phased modernization plan with risk assessment, effort estimation, and deliverables — board-ready.</p><div style="margin-bottom:14px"><select id="approach" style="padding:8px 14px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:.88em;margin-right:8px"><option value="refactor">Refactor (Transform Code)</option><option value="replatform">Replatform (Cloud Migration)</option><option value="rearchitect">Rearchitect (Redesign)</option></select><button class="btn btn-primary" onclick="runRoadmap()">Generate Roadmap</button></div><div class="out" id="out8"></div></div>`;
+}
+async function runRoadmap(){
+  const o=document.getElementById('out8');showOut('out8');
+  const approach=document.getElementById('approach').value;
+  o.innerHTML='<span class="loader"></span> Generating modernization roadmap...';
+  const p=await api('/api/modernize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system_id:'SYS001',approach:approach,target_language:'python',target_framework:'fastapi'})});
+  let html=`<div class="dash-grid" style="margin-bottom:14px"><div class="dash-card"><div class="num">${p.approach.toUpperCase()}</div><div class="lbl">Approach</div></div><div class="dash-card"><div class="num" style="-webkit-text-fill-color:var(--orange)">${p.risk_level.toUpperCase()}</div><div class="lbl">Risk Level</div></div><div class="dash-card"><div class="num">${p.estimated_effort_days}</div><div class="lbl">Person-Days</div></div><div class="dash-card"><div class="num">${p.phases.length}</div><div class="lbl">Phases</div></div></div>`;
+  let totalWeeks=0;
+  p.phases.forEach(ph=>{
+    totalWeeks+=ph.duration_weeks;
+    html+=`<div class="phase"><div class="phase-num">${ph.phase}</div><div class="phase-info"><h4>${ph.name} <span class="phase-dur">(${ph.duration_weeks} weeks)</span></h4><p>${ph.description}</p></div></div>`;
+  });
+  html+=`<div style="margin-top:14px;padding:14px;background:rgba(0,255,136,.06);border-radius:8px;text-align:center;font-weight:700;color:var(--green)">Total Duration: ${totalWeeks} weeks &bull; Estimated Go-Live: ${getGoLiveDate(totalWeeks)}</div>`;
+  html+=`<div style="margin-top:14px;text-align:center"><button class="btn btn-primary" onclick="markDone(8);showSummary()" style="padding:14px 40px;font-size:1em">Complete Demo</button></div>`;
+  o.innerHTML=html;
+}
+function getGoLiveDate(weeks){const d=new Date();d.setDate(d.getDate()+weeks*7);return d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});}
+
+function showSummary(){
+  const c=document.getElementById('content');
+  c.innerHTML=`<div style="text-align:center;padding:60px 40px"><h2 style="font-size:2em;margin-bottom:12px"><span style="background:linear-gradient(135deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Demo Complete</span></h2><p style="color:var(--dim);font-size:1.05em;margin-bottom:32px;max-width:600px;margin-left:auto;margin-right:auto">You've seen the full QBITEL Bridge mainframe modernization journey — from network discovery to quantum-safe protection to automated compliance.</p><div class="dash-grid" style="max-width:800px;margin:0 auto 32px"><div class="dash-card"><div class="num">8/8</div><div class="lbl">Steps Completed</div></div><div class="dash-card"><div class="num">${document.getElementById('timer').textContent}</div><div class="lbl">Demo Duration</div></div><div class="dash-card"><div class="num">3</div><div class="lbl">Systems Protected</div></div><div class="dash-card"><div class="num">NIST 3</div><div class="lbl">PQC Security Level</div></div></div><div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:24px"><span style="padding:8px 18px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;font-size:.88em;color:var(--dim)">100% Open Source</span><span style="padding:8px 18px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;font-size:.88em;color:var(--dim)">Air-Gapped Ready</span><span style="padding:8px 18px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;font-size:.88em;color:var(--dim)">Zero Code Changes</span><span style="padding:8px 18px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;font-size:.88em;color:var(--dim)">Apache 2.0 License</span></div><p style="color:var(--dim);font-size:.95em">Contact: <strong style="color:var(--accent)">enterprise@qbitel.com</strong></p></div>`;
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// Init
+goStep(1);
+</script>
+</body>
+</html>"""
+
+
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint."""

@@ -1,0 +1,135 @@
+{
+  "intersection_id": 28253,
+  "msg_count": 90,
+  "minute_of_year": 396715,
+  "location_name": "Uptown Charlotte",
+  "latitude": 35.2266509,
+  "longitude": -80.8386251,
+  "num_signal_groups": 8,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 259,
+      "max_end_time_ds": 335,
+      "likely_time_ds": 317,
+      "confidence": 14
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 87,
+      "max_end_time_ds": 176,
+      "likely_time_ds": 127,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "dark",
+      "min_end_time_ds": 183,
+      "max_end_time_ds": 230,
+      "likely_time_ds": 188,
+      "confidence": 1
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 247,
+      "max_end_time_ds": 342,
+      "likely_time_ds": 256,
+      "confidence": 2
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 259,
+      "max_end_time_ds": 347,
+      "likely_time_ds": 269,
+      "confidence": 1
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 162,
+      "max_end_time_ds": 216,
+      "likely_time_ds": 173,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 15,
+      "max_end_time_ds": 33,
+      "likely_time_ds": 21,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 8,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 120,
+      "max_end_time_ds": 183,
+      "likely_time_ds": 175,
+      "confidence": 14
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.100737",
+  "message_length": 185,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 112,
+      "length": 1
+    }
+  ],
+  "hash": "9a686f647835d7700a5307faa822fcf236b88bbb0254f5ac41250c0d9810199e",
+  "sample_index": 445
+}

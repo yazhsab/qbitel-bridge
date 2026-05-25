@@ -1,0 +1,127 @@
+{
+  "intersection_id": 43128,
+  "msg_count": 102,
+  "minute_of_year": 56437,
+  "location_name": "Austin Capitol",
+  "latitude": 30.2672769,
+  "longitude": -97.7409016,
+  "num_signal_groups": 7,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "dark",
+      "min_end_time_ds": 266,
+      "max_end_time_ds": 306,
+      "likely_time_ds": 274,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "dark",
+      "min_end_time_ds": 181,
+      "max_end_time_ds": 232,
+      "likely_time_ds": 184,
+      "confidence": 12
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 203,
+      "max_end_time_ds": 212,
+      "likely_time_ds": 204,
+      "confidence": 10
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 178,
+      "max_end_time_ds": 261,
+      "likely_time_ds": 214,
+      "confidence": 2
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 130,
+      "max_end_time_ds": 160,
+      "likely_time_ds": 136,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 61,
+      "max_end_time_ds": 70,
+      "likely_time_ds": 65,
+      "confidence": 12
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 240,
+      "max_end_time_ds": 303,
+      "likely_time_ds": 290,
+      "confidence": 12
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "Falcon-512",
+    "signature_size_bytes": 666,
+    "is_pqc_signature": true,
+    "header_length": 674
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.132308",
+  "message_length": 746,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 674,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 675,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 676,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 678,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 682,
+      "length": 1
+    }
+  ],
+  "hash": "a7a0fd8c603ce37f5abc3857f1de084d56e83b4dd8b8057244764777b7032bfc",
+  "sample_index": 585
+}

@@ -1,0 +1,50 @@
+service:
+  name: "banking-security-demo"
+  version: "1.0.0"
+  environment: "production"
+  debug: false
+
+server:
+  host: "0.0.0.0"
+  port: 8002
+  workers: 4
+  reload: false
+
+pqc:
+  allow_fallback: true
+  allow_experimental: true
+
+banking:
+  swift:
+    originator_bic: "ORIGUS33"
+    originator_name: "GlobalBank New York"
+    intermediary_bic: "DEUTDEFF"
+    intermediary_name: "Deutsche Bank Frankfurt"
+    beneficiary_bic: "HSBCHKHH"
+    beneficiary_name: "HSBC Hong Kong"
+    default_message_type: "MT103"
+    default_amount: 1500000
+    default_currency: "USD"
+  threshold:
+    demo_amount: 50000000
+    authorities:
+      - {id: "auth-treasury", role: "TREASURY", dept: "Treasury Operations", name: "Treasury"}
+      - {id: "auth-compliance", role: "COMPLIANCE", dept: "Compliance", name: "Compliance"}
+      - {id: "auth-risk", role: "RISK_MANAGEMENT", dept: "Risk Management", name: "Risk Mgmt"}
+      - {id: "auth-legal", role: "LEGAL", dept: "Legal", name: "Legal"}
+      - {id: "auth-board", role: "BOARD_MEMBER", dept: "Board of Directors", name: "Board"}
+  zkp:
+    institution_id: "GLOBALBANK-001"
+    demo_balance: 3200000
+    balance_range_min: 1000000
+    balance_range_max: 10000000
+  threat:
+    quantum_timeline_year: 2035
+    cnsa2_deadline_year: 2035
+
+monitoring:
+  prometheus:
+    enabled: true
+  logging:
+    level: "INFO"
+    format: "json"

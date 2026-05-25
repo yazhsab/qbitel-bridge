@@ -1,0 +1,299 @@
+{
+  "intersection_id": 36801,
+  "msg_count": 26,
+  "ref_point": {
+    "latitude": 25.7610388,
+    "longitude": -80.1881155
+  },
+  "location_name": "Downtown Miami",
+  "num_lanes": 9,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "trackedVehicle",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 330,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": -4542,
+          "dy_cm": -4325
+        },
+        {
+          "dx_cm": -442,
+          "dy_cm": 3841
+        },
+        {
+          "dx_cm": 1330,
+          "dy_cm": -4497
+        },
+        {
+          "dx_cm": 2962,
+          "dy_cm": -2820
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "crosswalk",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 366,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": -1442,
+          "dy_cm": -1199
+        },
+        {
+          "dx_cm": -4695,
+          "dy_cm": 2734
+        },
+        {
+          "dx_cm": -4990,
+          "dy_cm": 1122
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "striping",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 400,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": -2148,
+          "dy_cm": -2113
+        },
+        {
+          "dx_cm": 1212,
+          "dy_cm": 546
+        },
+        {
+          "dx_cm": 876,
+          "dy_cm": -1929
+        },
+        {
+          "dx_cm": -3219,
+          "dy_cm": 1704
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "bikeLane",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 300,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": 402,
+          "dy_cm": 1018
+        },
+        {
+          "dx_cm": 2237,
+          "dy_cm": 3201
+        },
+        {
+          "dx_cm": -4642,
+          "dy_cm": 2238
+        },
+        {
+          "dx_cm": 4952,
+          "dy_cm": 2964
+        }
+      ]
+    },
+    {
+      "lane_id": 5,
+      "lane_type": "bikeLane",
+      "lane_direction": "egressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 400,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": 3154,
+          "dy_cm": 639
+        },
+        {
+          "dx_cm": 1701,
+          "dy_cm": -3750
+        },
+        {
+          "dx_cm": -2208,
+          "dy_cm": -409
+        },
+        {
+          "dx_cm": 3141,
+          "dy_cm": 558
+        }
+      ]
+    },
+    {
+      "lane_id": 6,
+      "lane_type": "sidewalk",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 330,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": 3605,
+          "dy_cm": 4876
+        },
+        {
+          "dx_cm": 3382,
+          "dy_cm": -2678
+        },
+        {
+          "dx_cm": 2749,
+          "dy_cm": 4991
+        },
+        {
+          "dx_cm": 1062,
+          "dy_cm": -3247
+        }
+      ]
+    },
+    {
+      "lane_id": 7,
+      "lane_type": "striping",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 366,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": -4970,
+          "dy_cm": -49
+        },
+        {
+          "dx_cm": 3023,
+          "dy_cm": -3096
+        },
+        {
+          "dx_cm": -3871,
+          "dy_cm": 417
+        },
+        {
+          "dx_cm": -674,
+          "dy_cm": -25
+        }
+      ]
+    },
+    {
+      "lane_id": 8,
+      "lane_type": "trackedVehicle",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 366,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": 2513,
+          "dy_cm": 1542
+        },
+        {
+          "dx_cm": 2745,
+          "dy_cm": -2406
+        },
+        {
+          "dx_cm": -1333,
+          "dy_cm": 2532
+        }
+      ]
+    },
+    {
+      "lane_id": 9,
+      "lane_type": "median",
+      "lane_direction": "egressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 300,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": 1823,
+          "dy_cm": -621
+        },
+        {
+          "dx_cm": 3978,
+          "dy_cm": -4802
+        },
+        {
+          "dx_cm": 2488,
+          "dy_cm": 3161
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.151366",
+  "message_length": 294,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 112,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 116,
+      "length": 1
+    }
+  ],
+  "hash": "4381b10cac61f775facda513bb622643e6ee9eac0710582b34b9f5b128a544ce",
+  "sample_index": 637
+}

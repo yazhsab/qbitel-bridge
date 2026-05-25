@@ -1,0 +1,195 @@
+{
+  "intersection_id": 46904,
+  "msg_count": 45,
+  "ref_point": {
+    "latitude": 45.5212711,
+    "longitude": -122.675536
+  },
+  "location_name": "Portland Pioneer Sq",
+  "num_lanes": 5,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "median",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 330,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": -1901,
+          "dy_cm": -1798
+        },
+        {
+          "dx_cm": 2250,
+          "dy_cm": -3506
+        },
+        {
+          "dx_cm": -2832,
+          "dy_cm": 1131
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "median",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 300,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": -386,
+          "dy_cm": -2540
+        },
+        {
+          "dx_cm": 4729,
+          "dy_cm": -1649
+        },
+        {
+          "dx_cm": -3735,
+          "dy_cm": 4731
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "trackedVehicle",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 400,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": 588,
+          "dy_cm": -2075
+        },
+        {
+          "dx_cm": 962,
+          "dy_cm": 4241
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "sidewalk",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 360,
+      "num_nodes": 5,
+      "nodes": [
+        {
+          "dx_cm": 3745,
+          "dy_cm": -4950
+        },
+        {
+          "dx_cm": -1580,
+          "dy_cm": -4710
+        },
+        {
+          "dx_cm": -3941,
+          "dy_cm": -3162
+        },
+        {
+          "dx_cm": -179,
+          "dy_cm": 3315
+        },
+        {
+          "dx_cm": 4380,
+          "dy_cm": -956
+        }
+      ]
+    },
+    {
+      "lane_id": 5,
+      "lane_type": "median",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 366,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": -500,
+          "dy_cm": -889
+        },
+        {
+          "dx_cm": -3310,
+          "dy_cm": 1405
+        },
+        {
+          "dx_cm": 1625,
+          "dy_cm": 1824
+        },
+        {
+          "dx_cm": -3300,
+          "dy_cm": 949
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "78b21bdec4b7f69b8772f36ebae7c354ca0f2d5185e89d36ee48fc679e5deb0a",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.157576",
+  "message_length": 210,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 112,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 116,
+      "length": 1
+    }
+  ],
+  "hash": "d225057641de8584e776f2b204958686f51c9eed05be2091218a7e4d8b4eeaf6",
+  "sample_index": 656
+}

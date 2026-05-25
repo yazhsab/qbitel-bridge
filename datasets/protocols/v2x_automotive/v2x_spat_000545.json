@@ -1,0 +1,95 @@
+{
+  "intersection_id": 31901,
+  "msg_count": 62,
+  "minute_of_year": 257527,
+  "location_name": "Downtown Miami",
+  "latitude": 25.7611364,
+  "longitude": -80.1915673,
+  "num_signal_groups": 3,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 284,
+      "max_end_time_ds": 289,
+      "likely_time_ds": 286,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 14,
+      "max_end_time_ds": 43,
+      "likely_time_ds": 25,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 234,
+      "max_end_time_ds": 318,
+      "likely_time_ds": 316,
+      "confidence": 7
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.123168",
+  "message_length": 140,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 112,
+      "length": 1
+    }
+  ],
+  "hash": "95a008d9ae1b7261dbeabe3c19383299a243199eacce98c9a2268d5d91e8d49f",
+  "sample_index": 545
+}

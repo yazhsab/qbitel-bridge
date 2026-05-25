@@ -1,0 +1,135 @@
+{
+  "intersection_id": 16329,
+  "msg_count": 100,
+  "minute_of_year": 38645,
+  "location_name": "Downtown LA",
+  "latitude": 34.0512856,
+  "longitude": -118.2430956,
+  "num_signal_groups": 8,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 170,
+      "max_end_time_ds": 230,
+      "likely_time_ds": 201,
+      "confidence": 10
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "dark",
+      "min_end_time_ds": 266,
+      "max_end_time_ds": 356,
+      "likely_time_ds": 308,
+      "confidence": 15
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 261,
+      "max_end_time_ds": 326,
+      "likely_time_ds": 304,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 49,
+      "max_end_time_ds": 54,
+      "likely_time_ds": 54,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 195,
+      "max_end_time_ds": 235,
+      "likely_time_ds": 229,
+      "confidence": 10
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 71,
+      "max_end_time_ds": 115,
+      "likely_time_ds": 80,
+      "confidence": 4
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 87,
+      "max_end_time_ds": 144,
+      "likely_time_ds": 106,
+      "confidence": 3
+    },
+    {
+      "signal_group_id": 8,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 85,
+      "max_end_time_ds": 155,
+      "likely_time_ds": 97,
+      "confidence": 13
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "fdfeec62d46c0999",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 112
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.102807",
+  "message_length": 193,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 112,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 113,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 114,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 116,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 120,
+      "length": 1
+    }
+  ],
+  "hash": "5aef19f74450672e619e6d79808f6f684085ed8764eabe43a812880c9c8ecb28",
+  "sample_index": 455
+}

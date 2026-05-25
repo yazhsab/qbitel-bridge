@@ -1,0 +1,95 @@
+{
+  "intersection_id": 6068,
+  "msg_count": 39,
+  "minute_of_year": 346489,
+  "location_name": "Times Square, NYC",
+  "latitude": 40.7571985,
+  "longitude": -73.9823141,
+  "num_signal_groups": 3,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 207,
+      "max_end_time_ds": 270,
+      "likely_time_ds": 251,
+      "confidence": 12
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 100,
+      "max_end_time_ds": 134,
+      "likely_time_ds": 126,
+      "confidence": 0
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 273,
+      "max_end_time_ds": 287,
+      "likely_time_ds": 280,
+      "confidence": 13
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.117590",
+  "message_length": 140,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 112,
+      "length": 1
+    }
+  ],
+  "hash": "d70efde93554442612491c603334e0cf8d4e1e71f6e92ff55bbd0db1fdb40975",
+  "sample_index": 522
+}

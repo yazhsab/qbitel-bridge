@@ -1,0 +1,92 @@
+{
+  "temp_id_hex": "4668543e",
+  "timestamp_ms": 3071423285,
+  "latitude": 39.9605003,
+  "longitude": -82.9964771,
+  "location_name": "Downtown Columbus",
+  "speed_mph": 66.1,
+  "heading_deg": 325.3984,
+  "vehicle_label": "tow_truck",
+  "priority": 3,
+  "response_type": "nonEmergency",
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x20",
+    "signer_type": "digest",
+    "signer_id_hex": "7028078af76da8cc",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 79
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "eva",
+  "timestamp": "2026-03-04T09:49:09.238000",
+  "message_length": 102,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 79,
+      "length": 1
+    },
+    {
+      "name": "timestamp",
+      "offset": 80,
+      "length": 4
+    },
+    {
+      "name": "temporary_id",
+      "offset": 84,
+      "length": 4
+    },
+    {
+      "name": "latitude",
+      "offset": 88,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 92,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 96,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 98,
+      "length": 2
+    },
+    {
+      "name": "priority",
+      "offset": 100,
+      "length": 1
+    },
+    {
+      "name": "response_type",
+      "offset": 101,
+      "length": 1
+    }
+  ],
+  "hash": "c401cef903969b2091dbd1febaa48a501d3239720abf12d501a0305f234e3fe2",
+  "sample_index": 986
+}

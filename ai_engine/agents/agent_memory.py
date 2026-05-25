@@ -252,6 +252,127 @@ class InMemoryBackend(MemoryBackend):
         return True
 
 
+class PersistentFileBackend(MemoryBackend):
+    """
+    Persistent file-system backend that stores agent memory as JSON.
+
+    Memory is kept in-memory for fast access, and periodically flushed to
+    disk (and loaded on startup) so it survives process restarts.
+
+    Storage layout:
+        {base_path}/
+            entries.json        — All MemoryEntry records
+            snapshot_meta.json  — Snapshot metadata (last flush time, counts)
+    """
+
+    def __init__(self, base_path: str = "./data/agent_memory"):
+        import os
+        self._base_path = base_path
+        self._entries_file = os.path.join(base_path, "entries.json")
+        self._meta_file = os.path.join(base_path, "snapshot_meta.json")
+        self._delegate = InMemoryBackend()
+        self._dirty = False
+        self._lock = asyncio.Lock()
+        self.logger = logging.getLogger(f"{__name__}.PersistentFileBackend")
+
+        # Ensure directory exists
+        os.makedirs(base_path, exist_ok=True)
+
+        # Load from disk on construction
+        self._load_from_disk()
+
+    def _load_from_disk(self) -> None:
+        """Load persisted memory entries from disk."""
+        import os
+        if not os.path.exists(self._entries_file):
+            self.logger.info("No persisted memory found at %s", self._entries_file)
+            return
+        try:
+            with open(self._entries_file, "r") as f:
+                raw_entries = json.load(f)
+            loaded = 0
+            for raw in raw_entries:
+                entry = MemoryEntry(
+                    entry_id=raw["entry_id"],
+                    agent_id=raw["agent_id"],
+                    memory_type=MemoryType(raw["memory_type"]),
+                    content=raw.get("content", {}),
+                    embedding=raw.get("embedding"),
+                    priority=MemoryPriority(raw.get("priority", "normal")),
+                    access_count=raw.get("access_count", 0),
+                    last_accessed=datetime.fromisoformat(raw["last_accessed"]) if raw.get("last_accessed") else datetime.utcnow(),
+                    created_at=datetime.fromisoformat(raw["created_at"]) if raw.get("created_at") else datetime.utcnow(),
+                    expires_at=datetime.fromisoformat(raw["expires_at"]) if raw.get("expires_at") else None,
+                    tags=set(raw.get("tags", [])),
+                    metadata=raw.get("metadata", {}),
+                )
+                self._delegate.entries[entry.entry_id] = entry
+                self._delegate.agent_index[entry.agent_id].add(entry.entry_id)
+                self._delegate.type_index[entry.memory_type].add(entry.entry_id)
+                loaded += 1
+            self.logger.info("Loaded %d memory entries from disk", loaded)
+        except Exception as e:
+            self.logger.error("Failed to load memory from disk: %s", e)
+
+    async def flush_to_disk(self) -> None:
+        """Persist all in-memory entries to disk."""
+        async with self._lock:
+            if not self._dirty:
+                return
+            try:
+                serializable = []
+                for entry in self._delegate.entries.values():
+                    serializable.append({
+                        "entry_id": entry.entry_id,
+                        "agent_id": entry.agent_id,
+                        "memory_type": entry.memory_type.value,
+                        "content": entry.content,
+                        "embedding": entry.embedding,
+                        "priority": entry.priority.value,
+                        "access_count": entry.access_count,
+                        "last_accessed": entry.last_accessed.isoformat(),
+                        "created_at": entry.created_at.isoformat(),
+                        "expires_at": entry.expires_at.isoformat() if entry.expires_at else None,
+                        "tags": list(entry.tags),
+                        "metadata": entry.metadata,
+                    })
+                with open(self._entries_file, "w") as f:
+                    json.dump(serializable, f, indent=2)
+                with open(self._meta_file, "w") as f:
+                    json.dump({
+                        "last_flush": datetime.utcnow().isoformat(),
+                        "entry_count": len(serializable),
+                    }, f)
+                self._dirty = False
+                self.logger.debug("Flushed %d entries to disk", len(serializable))
+            except Exception as e:
+                self.logger.error("Failed to flush memory to disk: %s", e)
+
+    async def store(self, entry: MemoryEntry) -> bool:
+        result = await self._delegate.store(entry)
+        if result:
+            self._dirty = True
+        return result
+
+    async def retrieve(
+        self, agent_id: str, memory_type: MemoryType,
+        query: Optional[Dict[str, Any]] = None, limit: int = 10,
+    ) -> List[MemoryEntry]:
+        return await self._delegate.retrieve(agent_id, memory_type, query, limit)
+
+    async def delete(self, entry_id: str) -> bool:
+        result = await self._delegate.delete(entry_id)
+        if result:
+            self._dirty = True
+        return result
+
+    async def search(
+        self, query: str, agent_id: Optional[str] = None,
+        memory_type: Optional[MemoryType] = None, limit: int = 10,
+    ) -> List[MemoryEntry]:
+        return await self._delegate.search(query, agent_id, memory_type, limit)
+
+
 class AgentMemoryManager:
     """
     Manages memory for all agents.
@@ -262,15 +383,30 @@ class AgentMemoryManager:
     - Working memory for current context
     - Memory consolidation
     - Cross-agent memory sharing
+    - Optional persistent storage (survives restarts)
     """
 
     def __init__(
         self,
         backend: Optional[MemoryBackend] = None,
         embedding_service: Optional[Any] = None,
+        persist_path: Optional[str] = None,
     ):
-        """Initialize the memory manager."""
-        self.backend = backend or InMemoryBackend()
+        """Initialize the memory manager.
+
+        Args:
+            backend: Custom memory backend (overrides persist_path).
+            embedding_service: Optional embedding service for semantic search.
+            persist_path: If provided and no backend given, use PersistentFileBackend
+                          at this path. Pass ``"./data/agent_memory"`` for default
+                          persistent storage.
+        """
+        if backend is not None:
+            self.backend = backend
+        elif persist_path:
+            self.backend = PersistentFileBackend(base_path=persist_path)
+        else:
+            self.backend = InMemoryBackend()
         self.embedding_service = embedding_service
 
         # Working memory (in-memory, per-agent)
@@ -303,6 +439,10 @@ class AgentMemoryManager:
         """Start the memory manager."""
         self._running = True
         self._consolidation_task = asyncio.create_task(self._consolidation_loop())
+        # Start periodic disk flushing if using persistent backend
+        self._flush_task: Optional[asyncio.Task] = None
+        if isinstance(self.backend, PersistentFileBackend):
+            self._flush_task = asyncio.create_task(self._periodic_flush())
         self.logger.info("Agent Memory Manager started")
 
     async def stop(self) -> None:
@@ -314,7 +454,27 @@ class AgentMemoryManager:
                 await self._consolidation_task
             except asyncio.CancelledError:
                 pass
+        if self._flush_task:
+            self._flush_task.cancel()
+            try:
+                await self._flush_task
+            except asyncio.CancelledError:
+                pass
+        # Final flush on shutdown
+        if isinstance(self.backend, PersistentFileBackend):
+            await self.backend.flush_to_disk()
+            self.logger.info("Memory flushed to disk on shutdown")
         self.logger.info("Agent Memory Manager stopped")
+
+    async def _periodic_flush(self) -> None:
+        """Periodically flush memory to disk (every 60 seconds)."""
+        try:
+            while self._running:
+                await asyncio.sleep(60)
+                if isinstance(self.backend, PersistentFileBackend):
+                    await self.backend.flush_to_disk()
+        except asyncio.CancelledError:
+            pass
 
     # Working Memory (Short-term)
 
@@ -668,15 +828,24 @@ class AgentMemoryManager:
                 await asyncio.sleep(10)
 
     async def _cleanup_expired(self) -> None:
-        """Clean up expired memory entries from all backends."""
-        for backend in self.backends.values():
-            try:
-                all_entries = await backend.retrieve(limit=1000)
-                for entry in all_entries:
-                    if hasattr(entry, "is_expired") and entry.is_expired():
-                        await backend.delete(entry.id)
-            except Exception as e:
-                self.logger.warning(f"Cleanup error for backend: {e}")
+        """Clean up expired memory entries from the backend."""
+        try:
+            # Search across all memory types for expired entries
+            for memory_type in MemoryType:
+                # Use search with empty query to get entries of each type
+                entries = await self.backend.search(
+                    query="",
+                    memory_type=memory_type,
+                    limit=500,
+                )
+                for entry in entries:
+                    if entry.is_expired():
+                        await self.backend.delete(entry.entry_id)
+                        self.logger.debug(
+                            f"Cleaned up expired entry: {entry.entry_id[:8]}"
+                        )
+        except Exception as e:
+            self.logger.warning(f"Cleanup error: {e}")
 
     def _calculate_importance(self, content: Dict[str, Any]) -> float:
         """Calculate importance score for memory content."""

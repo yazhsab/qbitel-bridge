@@ -1,0 +1,95 @@
+{
+  "intersection_id": 58388,
+  "msg_count": 92,
+  "minute_of_year": 371613,
+  "location_name": "Downtown Columbus",
+  "latitude": 39.9573443,
+  "longitude": -82.9951465,
+  "num_signal_groups": 3,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 162,
+      "max_end_time_ds": 228,
+      "likely_time_ds": 203,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 134,
+      "max_end_time_ds": 173,
+      "likely_time_ds": 159,
+      "confidence": 1
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "dark",
+      "min_end_time_ds": 137,
+      "max_end_time_ds": 192,
+      "likely_time_ds": 185,
+      "confidence": 7
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "9831e541dba726bb73d81c1de93dc8c022e07b13236a063410245161ef911a45",
+    "signature_algorithm": "Falcon-512",
+    "signature_size_bytes": 666,
+    "is_pqc_signature": true,
+    "header_length": 706
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.130534",
+  "message_length": 742,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 706,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 707,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 708,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 710,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 714,
+      "length": 1
+    }
+  ],
+  "hash": "9c070ed167427f4145e7375fe6a4164a9f122bedbe21228b7417ba0e869e3c3a",
+  "sample_index": 575
+}

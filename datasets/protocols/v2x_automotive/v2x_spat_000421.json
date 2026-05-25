@@ -1,0 +1,119 @@
+{
+  "intersection_id": 7280,
+  "msg_count": 66,
+  "minute_of_year": 202335,
+  "location_name": "Downtown Miami",
+  "latitude": 25.759479,
+  "longitude": -80.1939528,
+  "num_signal_groups": 6,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 171,
+      "max_end_time_ds": 261,
+      "likely_time_ds": 176,
+      "confidence": 1
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "stop-Then-Proceed",
+      "min_end_time_ds": 46,
+      "max_end_time_ds": 113,
+      "likely_time_ds": 105,
+      "confidence": 1
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 247,
+      "max_end_time_ds": 339,
+      "likely_time_ds": 311,
+      "confidence": 12
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 24,
+      "max_end_time_ds": 85,
+      "likely_time_ds": 56,
+      "confidence": 15
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 69,
+      "max_end_time_ds": 86,
+      "likely_time_ds": 85,
+      "confidence": 6
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 293,
+      "max_end_time_ds": 391,
+      "likely_time_ds": 364,
+      "confidence": 6
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "4a3d7896c6f8fdfa",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 80
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.094116",
+  "message_length": 143,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 80,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 81,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 82,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 84,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 88,
+      "length": 1
+    }
+  ],
+  "hash": "ed03298d8bc85c847a4244de18c80f6f16635cb549d761ea0f475c027dbe5352",
+  "sample_index": 421
+}

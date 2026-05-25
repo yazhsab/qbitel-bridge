@@ -1,0 +1,95 @@
+{
+  "intersection_id": 43195,
+  "msg_count": 92,
+  "minute_of_year": 197455,
+  "location_name": "Central Phoenix",
+  "latitude": 33.4472545,
+  "longitude": -112.0766611,
+  "num_signal_groups": 3,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 293,
+      "max_end_time_ds": 388,
+      "likely_time_ds": 336,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 13,
+      "max_end_time_ds": 104,
+      "likely_time_ds": 45,
+      "confidence": 15
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 225,
+      "max_end_time_ds": 300,
+      "likely_time_ds": 288,
+      "confidence": 11
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "5333a1445e1ca9a3e8eb99dfe2269d277d7fd8df5f8931f5881df1d8db01281b",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.101118",
+  "message_length": 140,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 112,
+      "length": 1
+    }
+  ],
+  "hash": "e5458da6b58937c76c3ccc825c9ebbc0f97712d300fe7884e72383132c47ce37",
+  "sample_index": 447
+}

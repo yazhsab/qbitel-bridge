@@ -1,0 +1,95 @@
+{
+  "intersection_id": 36944,
+  "msg_count": 11,
+  "minute_of_year": 19388,
+  "location_name": "Downtown Nashville",
+  "latitude": 36.1628147,
+  "longitude": -86.7817622,
+  "num_signal_groups": 3,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 127,
+      "max_end_time_ds": 182,
+      "likely_time_ds": 146,
+      "confidence": 8
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 279,
+      "max_end_time_ds": 309,
+      "likely_time_ds": 302,
+      "confidence": 3
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 251,
+      "max_end_time_ds": 333,
+      "likely_time_ds": 263,
+      "confidence": 13
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "233264d9785c359f",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 80
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.111694",
+  "message_length": 116,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 80,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 81,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 82,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 84,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 88,
+      "length": 1
+    }
+  ],
+  "hash": "f3039d4be78ac9723221c37cd64ee3ab25349508cc7288f3b8b340666d579401",
+  "sample_index": 494
+}

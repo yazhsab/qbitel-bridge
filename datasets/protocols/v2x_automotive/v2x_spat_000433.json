@@ -1,0 +1,111 @@
+{
+  "intersection_id": 62566,
+  "msg_count": 78,
+  "minute_of_year": 114057,
+  "location_name": "Boston Common",
+  "latitude": 42.3567887,
+  "longitude": -71.0558883,
+  "num_signal_groups": 5,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 118,
+      "max_end_time_ds": 180,
+      "likely_time_ds": 157,
+      "confidence": 3
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 191,
+      "max_end_time_ds": 197,
+      "likely_time_ds": 192,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 58,
+      "max_end_time_ds": 130,
+      "likely_time_ds": 102,
+      "confidence": 15
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 116,
+      "max_end_time_ds": 154,
+      "likely_time_ds": 154,
+      "confidence": 2
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 87,
+      "max_end_time_ds": 134,
+      "likely_time_ds": 88,
+      "confidence": 4
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "f6433af473322a21",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 112
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.097078",
+  "message_length": 166,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 112,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 113,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 114,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 116,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 120,
+      "length": 1
+    }
+  ],
+  "hash": "4a114971c85a15c130ff7ff3318036b027b293c4db1fec9379ec71c8ba7347ac",
+  "sample_index": 433
+}

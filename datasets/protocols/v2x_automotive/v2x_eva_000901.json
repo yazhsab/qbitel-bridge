@@ -1,0 +1,92 @@
+{
+  "temp_id_hex": "466853e9",
+  "timestamp_ms": 3071423267,
+  "latitude": 39.7385055,
+  "longitude": -104.9876764,
+  "location_name": "Downtown Denver",
+  "speed_mph": 49.2,
+  "heading_deg": 258.0388,
+  "vehicle_label": "police",
+  "priority": 6,
+  "response_type": "emergency",
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x20",
+    "signer_type": "certificate",
+    "signer_id_hex": "cf2a24e5624810342b5ed85171711635b4b0e9a433011bab69677d56ed0fcf7e",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 135
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "eva",
+  "timestamp": "2026-03-04T09:49:09.219536",
+  "message_length": 158,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 135,
+      "length": 1
+    },
+    {
+      "name": "timestamp",
+      "offset": 136,
+      "length": 4
+    },
+    {
+      "name": "temporary_id",
+      "offset": 140,
+      "length": 4
+    },
+    {
+      "name": "latitude",
+      "offset": 144,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 148,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 152,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 154,
+      "length": 2
+    },
+    {
+      "name": "priority",
+      "offset": 156,
+      "length": 1
+    },
+    {
+      "name": "response_type",
+      "offset": 157,
+      "length": 1
+    }
+  ],
+  "hash": "9df125c9300b1c570fd3b1c3310347bcaafab7971f8f15163d3bdf4174397bc4",
+  "sample_index": 901
+}

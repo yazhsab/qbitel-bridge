@@ -1,0 +1,86 @@
+{
+  "basic_type": "unavailable",
+  "sec_mark_ms": 50969,
+  "msg_count": 69,
+  "latitude": 42.3589499,
+  "longitude": -71.063789,
+  "location_name": "Boston Common",
+  "speed_mph": 6.9,
+  "heading_deg": 268.5457,
+  "position_accuracy": 5,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8002",
+    "signer_type": "digest",
+    "signer_id_hex": "a3bc18fb9ab9e913",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 80
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.200118",
+  "message_length": 98,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 80,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 81,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 82,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 84,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 85,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 89,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 93,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 95,
+      "length": 2
+    }
+  ],
+  "hash": "630477f6b3b39c23e0d1292087ebf43716c7bc70c94e10ebb6f06c2db5d83ea3",
+  "sample_index": 808
+}

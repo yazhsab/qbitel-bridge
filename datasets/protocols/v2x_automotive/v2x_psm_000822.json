@@ -1,0 +1,86 @@
+{
+  "basic_type": "anANIMAL",
+  "sec_mark_ms": 1659,
+  "msg_count": 83,
+  "latitude": 47.6103091,
+  "longitude": -122.3304633,
+  "location_name": "Downtown Seattle",
+  "speed_mph": 12.4,
+  "heading_deg": 199.841,
+  "position_accuracy": 10,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8002",
+    "signer_type": "digest",
+    "signer_id_hex": "958f35f9f8f909a5",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 80
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.202423",
+  "message_length": 98,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 80,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 81,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 82,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 84,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 85,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 89,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 93,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 95,
+      "length": 2
+    }
+  ],
+  "hash": "2cd256a5484682826ee03454f1b93f90dd9cc81d03b1c0109d77abc568f90fe7",
+  "sample_index": 822
+}

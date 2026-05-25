@@ -1,0 +1,92 @@
+{
+  "temp_id_hex": "4668541e",
+  "timestamp_ms": 3071423279,
+  "latitude": 44.9752524,
+  "longitude": -93.2629721,
+  "location_name": "Downtown Minneapolis",
+  "speed_mph": 37.2,
+  "heading_deg": 138.4179,
+  "vehicle_label": "road_maintenance",
+  "priority": 2,
+  "response_type": "pursuit",
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x20",
+    "signer_type": "certificate",
+    "signer_id_hex": "811cf6753dceb15f6e539b2240ba57d283e18462a6573676129b5314ed071a01",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 135
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "eva",
+  "timestamp": "2026-03-04T09:49:09.231689",
+  "message_length": 158,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 135,
+      "length": 1
+    },
+    {
+      "name": "timestamp",
+      "offset": 136,
+      "length": 4
+    },
+    {
+      "name": "temporary_id",
+      "offset": 140,
+      "length": 4
+    },
+    {
+      "name": "latitude",
+      "offset": 144,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 148,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 152,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 154,
+      "length": 2
+    },
+    {
+      "name": "priority",
+      "offset": 156,
+      "length": 1
+    },
+    {
+      "name": "response_type",
+      "offset": 157,
+      "length": 1
+    }
+  ],
+  "hash": "57c0ddfb4d855e07d9f64f08fcdc201f60ec8ec57f477b3f46c645035c8d7106",
+  "sample_index": 954
+}

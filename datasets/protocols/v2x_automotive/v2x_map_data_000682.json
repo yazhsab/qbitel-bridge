@@ -1,0 +1,379 @@
+{
+  "intersection_id": 16929,
+  "msg_count": 71,
+  "ref_point": {
+    "latitude": 34.0526009,
+    "longitude": -118.2452481
+  },
+  "location_name": "Downtown LA",
+  "num_lanes": 11,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "striping",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 300,
+      "num_nodes": 6,
+      "nodes": [
+        {
+          "dx_cm": -4856,
+          "dy_cm": -3009
+        },
+        {
+          "dx_cm": -2416,
+          "dy_cm": 4125
+        },
+        {
+          "dx_cm": 3478,
+          "dy_cm": 1593
+        },
+        {
+          "dx_cm": 2035,
+          "dy_cm": 1914
+        },
+        {
+          "dx_cm": 4803,
+          "dy_cm": -4828
+        },
+        {
+          "dx_cm": -3829,
+          "dy_cm": -4812
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "parking",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 400,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": -1055,
+          "dy_cm": 1200
+        },
+        {
+          "dx_cm": 928,
+          "dy_cm": 4776
+        },
+        {
+          "dx_cm": 4864,
+          "dy_cm": 2269
+        },
+        {
+          "dx_cm": -3069,
+          "dy_cm": 2337
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "striping",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 450,
+      "num_nodes": 6,
+      "nodes": [
+        {
+          "dx_cm": -2355,
+          "dy_cm": 4009
+        },
+        {
+          "dx_cm": -4175,
+          "dy_cm": 4498
+        },
+        {
+          "dx_cm": 4044,
+          "dy_cm": -144
+        },
+        {
+          "dx_cm": -4616,
+          "dy_cm": -4439
+        },
+        {
+          "dx_cm": -1373,
+          "dy_cm": -717
+        },
+        {
+          "dx_cm": -2984,
+          "dy_cm": -881
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "striping",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 400,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": 4491,
+          "dy_cm": -4619
+        },
+        {
+          "dx_cm": -1351,
+          "dy_cm": 4896
+        },
+        {
+          "dx_cm": -1148,
+          "dy_cm": 1381
+        },
+        {
+          "dx_cm": 233,
+          "dy_cm": -860
+        }
+      ]
+    },
+    {
+      "lane_id": 5,
+      "lane_type": "trackedVehicle",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 330,
+      "num_nodes": 6,
+      "nodes": [
+        {
+          "dx_cm": 4932,
+          "dy_cm": -4577
+        },
+        {
+          "dx_cm": -1649,
+          "dy_cm": -2183
+        },
+        {
+          "dx_cm": 2070,
+          "dy_cm": -1844
+        },
+        {
+          "dx_cm": -768,
+          "dy_cm": 2559
+        },
+        {
+          "dx_cm": -1366,
+          "dy_cm": -3374
+        },
+        {
+          "dx_cm": 474,
+          "dy_cm": -31
+        }
+      ]
+    },
+    {
+      "lane_id": 6,
+      "lane_type": "median",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 400,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": 1716,
+          "dy_cm": 4062
+        },
+        {
+          "dx_cm": 581,
+          "dy_cm": 3620
+        }
+      ]
+    },
+    {
+      "lane_id": 7,
+      "lane_type": "median",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 330,
+      "num_nodes": 5,
+      "nodes": [
+        {
+          "dx_cm": 448,
+          "dy_cm": -3492
+        },
+        {
+          "dx_cm": 569,
+          "dy_cm": 4583
+        },
+        {
+          "dx_cm": -3272,
+          "dy_cm": -3483
+        },
+        {
+          "dx_cm": 535,
+          "dy_cm": 4510
+        },
+        {
+          "dx_cm": -1965,
+          "dy_cm": -4536
+        }
+      ]
+    },
+    {
+      "lane_id": 8,
+      "lane_type": "striping",
+      "lane_direction": "egressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 300,
+      "num_nodes": 6,
+      "nodes": [
+        {
+          "dx_cm": -2746,
+          "dy_cm": -3715
+        },
+        {
+          "dx_cm": 2061,
+          "dy_cm": 2847
+        },
+        {
+          "dx_cm": 502,
+          "dy_cm": 4659
+        },
+        {
+          "dx_cm": -2099,
+          "dy_cm": -1364
+        },
+        {
+          "dx_cm": -2368,
+          "dy_cm": -1805
+        },
+        {
+          "dx_cm": -4593,
+          "dy_cm": -3417
+        }
+      ]
+    },
+    {
+      "lane_id": 9,
+      "lane_type": "sidewalk",
+      "lane_direction": "egressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 450,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": -3481,
+          "dy_cm": -2007
+        },
+        {
+          "dx_cm": -824,
+          "dy_cm": -4977
+        }
+      ]
+    },
+    {
+      "lane_id": 10,
+      "lane_type": "bikeLane",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 450,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": 290,
+          "dy_cm": -4984
+        },
+        {
+          "dx_cm": -85,
+          "dy_cm": -2144
+        }
+      ]
+    },
+    {
+      "lane_id": 11,
+      "lane_type": "striping",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 366,
+      "num_nodes": 5,
+      "nodes": [
+        {
+          "dx_cm": -4917,
+          "dy_cm": 2550
+        },
+        {
+          "dx_cm": -4359,
+          "dy_cm": 2200
+        },
+        {
+          "dx_cm": 4429,
+          "dy_cm": 16
+        },
+        {
+          "dx_cm": -611,
+          "dy_cm": 3666
+        },
+        {
+          "dx_cm": 3473,
+          "dy_cm": 2238
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "0b1bcdded5756ff8",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 112
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.165479",
+  "message_length": 372,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 112,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 113,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 114,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 116,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 120,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 124,
+      "length": 1
+    }
+  ],
+  "hash": "d266eb0cd4793ffad3bb01d6d252454a4836700bd0e1f7db3cdc2cebd6aa843a",
+  "sample_index": 682
+}

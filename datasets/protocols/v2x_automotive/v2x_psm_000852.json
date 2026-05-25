@@ -1,0 +1,86 @@
+{
+  "basic_type": "anANIMAL",
+  "sec_mark_ms": 16727,
+  "msg_count": 113,
+  "latitude": 36.1670519,
+  "longitude": -86.7819836,
+  "location_name": "Downtown Nashville",
+  "speed_mph": 9.2,
+  "heading_deg": 348.6718,
+  "position_accuracy": 14,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8002",
+    "signer_type": "certificate",
+    "signer_id_hex": "075d86da80834320fd08114758b7ea7e1775b7f3af2e9362b9333dd702e4dffd",
+    "signature_algorithm": "Falcon-512",
+    "signature_size_bytes": 666,
+    "is_pqc_signature": true,
+    "header_length": 706
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.210095",
+  "message_length": 724,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 706,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 707,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 708,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 710,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 711,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 715,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 719,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 721,
+      "length": 2
+    }
+  ],
+  "hash": "00b70d5e38978bf59d7089400ec490e5e18fdde188227ed82199dd3d06e2051c",
+  "sample_index": 852
+}

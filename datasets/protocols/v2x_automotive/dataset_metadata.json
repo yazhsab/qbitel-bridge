@@ -1,0 +1,21 @@
+{
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "version": "IEEE 1609.2-2022 / SAE J2735-2020",
+  "total_protocol_samples": 1000,
+  "total_instruction_pairs": 200,
+  "samples_by_type": {
+    "bsm": 400,
+    "spat": 200,
+    "map_data": 150,
+    "psm": 150,
+    "eva": 100
+  },
+  "instruction_pairs_by_category": {
+    "v2x_pqc_integration": 40,
+    "misbehavior_detection": 40,
+    "certificate_management": 40,
+    "group_signatures": 40,
+    "batch_verification": 40
+  },
+  "generated_at": "2026-03-04T09:49:08.992668"
+}

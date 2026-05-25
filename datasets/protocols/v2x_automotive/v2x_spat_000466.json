@@ -1,0 +1,127 @@
+{
+  "intersection_id": 30657,
+  "msg_count": 111,
+  "minute_of_year": 253121,
+  "location_name": "Downtown Seattle",
+  "latitude": 47.608531,
+  "longitude": -122.3300224,
+  "num_signal_groups": 7,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 40,
+      "max_end_time_ds": 46,
+      "likely_time_ds": 46,
+      "confidence": 9
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 112,
+      "max_end_time_ds": 206,
+      "likely_time_ds": 166,
+      "confidence": 13
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 265,
+      "max_end_time_ds": 331,
+      "likely_time_ds": 300,
+      "confidence": 4
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 239,
+      "max_end_time_ds": 259,
+      "likely_time_ds": 256,
+      "confidence": 1
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 237,
+      "max_end_time_ds": 282,
+      "likely_time_ds": 241,
+      "confidence": 15
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 182,
+      "max_end_time_ds": 257,
+      "likely_time_ds": 204,
+      "confidence": 12
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 118,
+      "max_end_time_ds": 211,
+      "likely_time_ds": 173,
+      "confidence": 14
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 72
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.105247",
+  "message_length": 144,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 72,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 73,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 74,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 76,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 80,
+      "length": 1
+    }
+  ],
+  "hash": "04eb173dd27ceae10eaa9b4c06059b8769baa500da21d22fb65918d2f2a2b2b4",
+  "sample_index": 466
+}

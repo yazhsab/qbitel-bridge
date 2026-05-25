@@ -169,6 +169,12 @@
     transform: translateX(-100%);
     animation: demo-scan 7s ease-in-out infinite;
   }
+
+  .usecase-stream {
+    width: 44%;
+    transform: translateX(-110%);
+    animation: usecase-stream 2.4s ease-in-out infinite;
+  }
 }
 
 @layer utilities {
@@ -190,6 +196,24 @@
     }
     100% {
       transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes usecase-stream {
+    0% {
+      transform: translateX(-115%);
+      opacity: 0;
+    }
+    18% {
+      opacity: 1;
+    }
+    72% {
+      transform: translateX(230%);
+      opacity: 0.95;
+    }
+    100% {
+      transform: translateX(230%);
       opacity: 0;
     }
   }

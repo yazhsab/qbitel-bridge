@@ -8,6 +8,10 @@ Generates all datasets required for QBITEL ML training:
 3. Threat intelligence data
 4. Security event logs
 5. Anomaly detection data
+6. BPO protocol samples (SIP, RTP, TN3270e, CTI, IVR)
+7. BPO security events (Toll Fraud CDRs, PCI Voice, LLM Instruction Pairs)
+8. Domain-specific datasets (SWIFT, V2X, FHIR, IEC 61850, ARINC)
+9. PQC instruction-tuning pairs for LLM fine-tuning
 """
 
 import json
@@ -24,6 +28,28 @@ sys.path.insert(0, str(Path(__file__).parent))
 from iso8583_generator import ISO8583Generator
 from modbus_generator import ModbusGenerator
 from hl7_generator import HL7Generator
+
+# BPO Protocol Generators
+from sip_generator import SIPGenerator
+from rtp_generator import RTPGenerator
+from tn3270e_generator import TN3270eGenerator
+from cti_generator import CTIGenerator
+from ivr_generator import IVRGenerator
+
+# BPO Security Event Generators
+from toll_fraud_cdr_generator import TollFraudCDRGenerator
+from pci_voice_generator import PCIVoiceGenerator
+from bpo_llm_instruction_generator import BPOLLMInstructionGenerator
+
+# Domain-Specific Generators (2026)
+from swift_banking_generator import SwiftBankingGenerator
+from v2x_automotive_generator import V2XAutomotiveGenerator
+from fhir_healthcare_generator import FHIRHealthcareGenerator
+from iec61850_industrial_generator import IEC61850IndustrialGenerator
+from arinc_aviation_generator import ARINCAviationGenerator
+
+# PQC Fine-Tuning Data Generator
+from pqc_dataset_generator import PQCDatasetGenerator
 
 
 def generate_field_detection_dataset(protocol_dir: Path, output_dir: Path, split_ratio: tuple = (0.8, 0.1, 0.1)):
@@ -436,16 +462,153 @@ def generate_anomaly_detection_dataset(output_dir: Path, num_samples: int = 2000
     return metadata
 
 
+def generate_bpo_datasets(base_dir: Path):
+    """
+    Generate all BPO-specific datasets.
+
+    Includes:
+    - 5 BPO protocol sample sets (SIP, RTP, TN3270e, CTI, IVR)
+    - 3 BPO security event sets (Toll Fraud CDRs, PCI Voice, LLM Pairs)
+    """
+    protocols_dir = base_dir / "protocols"
+    events_dir = base_dir / "security_events"
+
+    bpo_meta = {}
+
+    # BPO Protocol Samples
+    print("  - SIP Messages...")
+    sip_gen = SIPGenerator(seed=42)
+    sip_meta = sip_gen.generate_dataset(1000, str(protocols_dir / "sip"))
+    bpo_meta["sip"] = sip_meta
+    print(f"    Generated {sip_meta['total_samples']} SIP samples")
+
+    print("  - RTP/SRTP Packets...")
+    rtp_gen = RTPGenerator(seed=42)
+    rtp_meta = rtp_gen.generate_dataset(1000, str(protocols_dir / "rtp"))
+    bpo_meta["rtp"] = rtp_meta
+    print(f"    Generated {rtp_meta['total_samples']} RTP samples")
+
+    print("  - TN3270e Terminal Messages...")
+    tn3270e_gen = TN3270eGenerator(seed=42)
+    tn3270e_meta = tn3270e_gen.generate_dataset(1000, str(protocols_dir / "tn3270e"))
+    bpo_meta["tn3270e"] = tn3270e_meta
+    print(f"    Generated {tn3270e_meta['total_samples']} TN3270e samples")
+
+    print("  - CTI Messages (CSTA/TSAPI/Finesse)...")
+    cti_gen = CTIGenerator(seed=42)
+    cti_meta = cti_gen.generate_dataset(1000, str(protocols_dir / "cti"))
+    bpo_meta["cti"] = cti_meta
+    print(f"    Generated {cti_meta['total_samples']} CTI samples")
+
+    print("  - IVR Documents (VoiceXML/MRCP/CCXML)...")
+    ivr_gen = IVRGenerator(seed=42)
+    ivr_meta = ivr_gen.generate_dataset(1000, str(protocols_dir / "ivr"))
+    bpo_meta["ivr"] = ivr_meta
+    print(f"    Generated {ivr_meta['total_samples']} IVR samples")
+
+    # BPO Security Events
+    print("  - Toll Fraud CDR Records...")
+    cdr_gen = TollFraudCDRGenerator(seed=42)
+    cdr_meta = cdr_gen.generate_dataset(5000, str(events_dir / "bpo_toll_fraud"))
+    bpo_meta["toll_fraud_cdr"] = cdr_meta
+    print(f"    Generated {cdr_meta['total_samples']} CDR records (fraud ratio: {cdr_meta.get('fraud_ratio', 0.2):.0%})")
+
+    print("  - PCI Voice Compliance Events...")
+    pci_gen = PCIVoiceGenerator(seed=42)
+    pci_meta = pci_gen.generate_dataset(3000, str(events_dir / "bpo_pci_voice"))
+    bpo_meta["pci_voice"] = pci_meta
+    print(f"    Generated {pci_meta['total_samples']} PCI voice events")
+
+    print("  - BPO LLM Instruction Pairs...")
+    llm_gen = BPOLLMInstructionGenerator(seed=42)
+    llm_meta = llm_gen.generate_dataset(500, str(events_dir / "bpo_llm_pairs"))
+    bpo_meta["llm_instructions"] = llm_meta
+    print(f"    Generated {llm_meta['total_samples']} instruction pairs")
+
+    return bpo_meta
+
+
+def generate_domain_datasets(base_dir: Path):
+    """
+    Generate domain-specific datasets for QBITEL specialist model training.
+
+    Includes:
+    - 5 domain protocol sample sets (SWIFT, V2X, FHIR, IEC 61850, ARINC)
+    - PQC instruction-tuning pairs for security model fine-tuning
+    """
+    domain_dir = base_dir / "domain_specific"
+    domain_meta = {}
+
+    # SWIFT / Banking
+    print("  - SWIFT/ISO 20022 Banking Messages...")
+    swift_gen = SwiftBankingGenerator(seed=42)
+    swift_meta = swift_gen.generate_dataset(1000, str(domain_dir / "swift_banking"))
+    domain_meta["swift_banking"] = swift_meta
+    print(f"    Generated {swift_meta['total_samples']} SWIFT samples + instruction pairs")
+
+    # V2X / Automotive
+    print("  - IEEE 1609.2 / SAE J2735 V2X Messages...")
+    v2x_gen = V2XAutomotiveGenerator(seed=42)
+    v2x_meta = v2x_gen.generate_dataset(1000, str(domain_dir / "v2x_automotive"))
+    domain_meta["v2x_automotive"] = v2x_meta
+    print(f"    Generated {v2x_meta['total_samples']} V2X samples + instruction pairs")
+
+    # FHIR / Healthcare
+    print("  - HL7 FHIR R4 Healthcare Resources...")
+    fhir_gen = FHIRHealthcareGenerator(seed=42)
+    fhir_meta = fhir_gen.generate_dataset(1000, str(domain_dir / "fhir_healthcare"))
+    domain_meta["fhir_healthcare"] = fhir_meta
+    print(f"    Generated {fhir_meta['total_samples']} FHIR samples + instruction pairs")
+
+    # IEC 61850 / Industrial
+    print("  - IEC 61850 GOOSE/SV/MMS Industrial Messages...")
+    iec_gen = IEC61850IndustrialGenerator(seed=42)
+    iec_meta = iec_gen.generate_dataset(1000, str(domain_dir / "iec61850_industrial"))
+    domain_meta["iec61850_industrial"] = iec_meta
+    print(f"    Generated {iec_meta['total_samples']} IEC 61850 samples + instruction pairs")
+
+    # ARINC / Aviation
+    print("  - ARINC ACARS/CPDLC/ADS-C/429/653 Aviation Messages...")
+    arinc_gen = ARINCAviationGenerator(seed=42)
+    arinc_meta = arinc_gen.generate_dataset(1000, str(domain_dir / "arinc_aviation"))
+    domain_meta["arinc_aviation"] = arinc_meta
+    print(f"    Generated {arinc_meta['total_samples']} ARINC samples + instruction pairs")
+
+    return domain_meta
+
+
+def generate_pqc_finetune_dataset(base_dir: Path):
+    """
+    Generate PQC instruction-tuning dataset for security model fine-tuning.
+
+    Categories:
+    - Algorithm selection (30%)
+    - Threat assessment (20%)
+    - Migration planning (20%)
+    - Compliance analysis (15%)
+    - Protocol security (15%)
+    """
+    pqc_dir = base_dir / "pqc_finetune"
+
+    print("  - PQC Algorithm Selection Pairs...")
+    pqc_gen = PQCDatasetGenerator(seed=42)
+    pqc_meta = pqc_gen.generate_dataset(500, str(pqc_dir))
+    print(f"    Generated {pqc_meta['total_samples']} PQC instruction pairs")
+    print(f"    Categories: {', '.join(pqc_meta.get('samples_by_type', {}).keys())}")
+
+    return pqc_meta
+
+
 def main():
     """Generate all datasets."""
     base_dir = Path(__file__).parent.parent
 
-    print("=" * 60)
-    print("QBITEL Dataset Generator")
-    print("=" * 60)
+    print("=" * 70)
+    print("QBITEL Dataset Generator (v2.0 — March 2026)")
+    print("=" * 70)
 
     # 1. Generate protocol samples
-    print("\n[1/5] Generating Protocol Samples...")
+    print("\n[1/9] Generating Core Protocol Samples...")
     protocols_dir = base_dir / "protocols"
 
     print("  - ISO 8583...")
@@ -463,41 +626,92 @@ def main():
     hl7_meta = hl7_gen.generate_dataset(1000, str(protocols_dir / "hl7"))
     print(f"    Generated {hl7_meta['total_samples']} HL7 samples")
 
-    # 2. Generate field detection dataset
-    print("\n[2/5] Generating Field Detection Dataset...")
+    # 2. Generate field detection dataset (initial - will re-run after all protocols)
+    print("\n[2/9] Generating Field Detection Dataset (initial)...")
     field_dir = base_dir / "field_detection"
     field_meta = generate_field_detection_dataset(protocols_dir, field_dir)
     print(f"    Train: {field_meta['train_samples']}, Val: {field_meta['val_samples']}, Test: {field_meta['test_samples']}")
 
     # 3. Generate threat intelligence dataset
-    print("\n[3/5] Generating Threat Intelligence Dataset...")
+    print("\n[3/9] Generating Threat Intelligence Dataset...")
     threat_dir = base_dir / "threat_intelligence"
     threat_meta = generate_threat_intelligence_dataset(threat_dir, 1000)
     print(f"    MITRE techniques: {threat_meta['mitre_techniques']}, IOCs: {threat_meta['iocs']}")
 
     # 4. Generate security events dataset
-    print("\n[4/5] Generating Security Events Dataset...")
+    print("\n[4/9] Generating Security Events Dataset...")
     events_dir = base_dir / "security_events"
     events_meta = generate_security_events_dataset(events_dir, 5000)
     print(f"    Total events: {events_meta['total_events']}, Anomalies: {events_meta['anomalies']}")
 
     # 5. Generate anomaly detection dataset
-    print("\n[5/5] Generating Anomaly Detection Dataset...")
+    print("\n[5/9] Generating Anomaly Detection Dataset...")
     anomaly_dir = base_dir / "anomaly_detection"
     anomaly_meta = generate_anomaly_detection_dataset(anomaly_dir, 2000)
     print(f"    Normal: {anomaly_meta['normal_samples']}, Anomalous: {anomaly_meta['anomalous_samples']}")
 
+    # 6. Generate BPO datasets
+    print("\n[6/9] Generating BPO Datasets...")
+    bpo_meta = generate_bpo_datasets(base_dir)
+
+    # 7. Generate domain-specific datasets (NEW in v2.0)
+    print("\n[7/9] Generating Domain-Specific Datasets...")
+    domain_meta = generate_domain_datasets(base_dir)
+
+    # 8. Generate PQC fine-tuning dataset (NEW in v2.0)
+    print("\n[8/9] Generating PQC Fine-Tuning Dataset...")
+    pqc_meta = generate_pqc_finetune_dataset(base_dir)
+
+    # 9. Re-generate field detection to include ALL protocols
+    print("\n[9/9] Regenerating Field Detection Dataset (with all protocols)...")
+    field_meta = generate_field_detection_dataset(protocols_dir, field_dir)
+    print(f"    Train: {field_meta['train_samples']}, Val: {field_meta['val_samples']}, Test: {field_meta['test_samples']}")
+    print(f"    Protocols: {', '.join(field_meta.get('protocols', []))}")
+
     # Summary
-    print("\n" + "=" * 60)
+    bpo_protocol_total = sum(
+        m.get("total_samples", 0)
+        for k, m in bpo_meta.items()
+        if k in ("sip", "rtp", "tn3270e", "cti", "ivr")
+    )
+    bpo_events_total = sum(
+        m.get("total_samples", 0)
+        for k, m in bpo_meta.items()
+        if k in ("toll_fraud_cdr", "pci_voice", "llm_instructions")
+    )
+    domain_total = sum(
+        m.get("total_samples", 0)
+        for m in domain_meta.values()
+    )
+
+    print("\n" + "=" * 70)
     print("Dataset Generation Complete!")
-    print("=" * 60)
+    print("=" * 70)
     print(f"\nOutput directory: {base_dir}")
     print("\nGenerated datasets:")
-    print(f"  - Protocols: 3,000 samples (ISO-8583, Modbus, HL7)")
-    print(f"  - Field Detection: {field_meta['total_samples']} labeled samples")
-    print(f"  - Threat Intelligence: {threat_meta['mitre_techniques']} techniques, {threat_meta['iocs']} IOCs")
-    print(f"  - Security Events: {events_meta['total_events']} events")
-    print(f"  - Anomaly Detection: {anomaly_meta['total_samples']} time series")
+    print(f"  Core Protocols:          3,000 samples (ISO-8583, Modbus, HL7)")
+    print(f"  BPO Protocols:           {bpo_protocol_total:,} samples (SIP, RTP, TN3270e, CTI, IVR)")
+    print(f"  BPO Security Events:     {bpo_events_total:,} records (Toll Fraud CDRs, PCI Voice, LLM Pairs)")
+    print(f"  Domain Protocols:        {domain_total:,} samples (SWIFT, V2X, FHIR, IEC 61850, ARINC)")
+    print(f"  PQC Fine-Tune Pairs:     {pqc_meta['total_samples']:,} instruction pairs")
+    print(f"  Field Detection:         {field_meta['total_samples']} labeled samples")
+    print(f"  Threat Intelligence:     {threat_meta['mitre_techniques']} techniques, {threat_meta['iocs']} IOCs")
+    print(f"  Security Events:         {events_meta['total_events']:,} events")
+    print(f"  Anomaly Detection:       {anomaly_meta['total_samples']:,} time series")
+
+    total_records = (
+        3000
+        + bpo_protocol_total
+        + bpo_events_total
+        + domain_total
+        + pqc_meta["total_samples"]
+        + field_meta["total_samples"]
+        + events_meta["total_events"]
+        + anomaly_meta["total_samples"]
+    )
+    print(f"\n  Total training records:   ~{total_records:,}")
+    print(f"\n  Domain instruction pairs: ~{pqc_meta['total_samples'] + 200 * 5:,}")
+    print(f"  (PQC: {pqc_meta['total_samples']}, SWIFT: 200, V2X: 200, FHIR: 200, IEC61850: 200, ARINC: 200)")
 
 
 if __name__ == "__main__":

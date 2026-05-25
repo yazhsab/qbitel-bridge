@@ -1,0 +1,111 @@
+{
+  "intersection_id": 1292,
+  "msg_count": 125,
+  "minute_of_year": 97475,
+  "location_name": "Downtown Houston",
+  "latitude": 29.7615874,
+  "longitude": -95.3703447,
+  "num_signal_groups": 5,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 296,
+      "max_end_time_ds": 388,
+      "likely_time_ds": 303,
+      "confidence": 8
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "dark",
+      "min_end_time_ds": 102,
+      "max_end_time_ds": 199,
+      "likely_time_ds": 192,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 64,
+      "max_end_time_ds": 113,
+      "likely_time_ds": 72,
+      "confidence": 10
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 47,
+      "max_end_time_ds": 102,
+      "likely_time_ds": 70,
+      "confidence": 2
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 133,
+      "max_end_time_ds": 184,
+      "likely_time_ds": 183,
+      "confidence": 1
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "b4bf5423b7c7d3f9f99242986d81f2fdf27f73dd20b324f22d6f46d44445a90d",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 136
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.108500",
+  "message_length": 190,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 136,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 137,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 138,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 140,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 144,
+      "length": 1
+    }
+  ],
+  "hash": "b7b1bf238772625c496092b7066dc6830bde43a4e65932a1bf701b8d8875226f",
+  "sample_index": 480
+}

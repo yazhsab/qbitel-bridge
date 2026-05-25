@@ -1,0 +1,157 @@
+{
+  "intersection_id": 34253,
+  "msg_count": 86,
+  "ref_point": {
+    "latitude": 47.6088146,
+    "longitude": -122.3341806
+  },
+  "location_name": "Downtown Seattle",
+  "num_lanes": 4,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "median",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 450,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": -535,
+          "dy_cm": -3793
+        },
+        {
+          "dx_cm": 2586,
+          "dy_cm": -4107
+        },
+        {
+          "dx_cm": -539,
+          "dy_cm": 4396
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "trackedVehicle",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 360,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": 761,
+          "dy_cm": -2300
+        },
+        {
+          "dx_cm": -4328,
+          "dy_cm": 1441
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "trackedVehicle",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 300,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": 447,
+          "dy_cm": -882
+        },
+        {
+          "dx_cm": 2854,
+          "dy_cm": -2123
+        },
+        {
+          "dx_cm": -2083,
+          "dy_cm": -4267
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "median",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 366,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": -3620,
+          "dy_cm": -1878
+        },
+        {
+          "dx_cm": 905,
+          "dy_cm": -1317
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "c2a6c49eb06811d14b4271acf1a7afb3d27bee897aaedb777868015b5a50c5f0",
+    "signature_algorithm": "Falcon-512",
+    "signature_size_bytes": 666,
+    "is_pqc_signature": true,
+    "header_length": 706
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.170798",
+  "message_length": 779,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 706,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 707,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 708,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 710,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 714,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 718,
+      "length": 1
+    }
+  ],
+  "hash": "c93468972b8407b753e13de0e76a5216d9ab2aaa6227f672e00aff6f8be19572",
+  "sample_index": 697
+}

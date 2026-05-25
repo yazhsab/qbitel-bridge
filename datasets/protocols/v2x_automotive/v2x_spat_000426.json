@@ -1,0 +1,95 @@
+{
+  "intersection_id": 24616,
+  "msg_count": 71,
+  "minute_of_year": 480308,
+  "location_name": "Portland Pioneer Sq",
+  "latitude": 45.5254739,
+  "longitude": -122.6795014,
+  "num_signal_groups": 3,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 178,
+      "max_end_time_ds": 189,
+      "likely_time_ds": 180,
+      "confidence": 10
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "dark",
+      "min_end_time_ds": 93,
+      "max_end_time_ds": 168,
+      "likely_time_ds": 133,
+      "confidence": 5
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 13,
+      "max_end_time_ds": 95,
+      "likely_time_ds": 30,
+      "confidence": 9
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "Falcon-512",
+    "signature_size_bytes": 666,
+    "is_pqc_signature": true,
+    "header_length": 674
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.095308",
+  "message_length": 710,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 674,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 675,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 676,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 678,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 682,
+      "length": 1
+    }
+  ],
+  "hash": "d7726968bca40932100a6554d4f9ffb3e52fcc7996db6edc9c5e72b5ce84907b",
+  "sample_index": 426
+}

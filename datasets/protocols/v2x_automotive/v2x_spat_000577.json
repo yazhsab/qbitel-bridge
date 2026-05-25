@@ -1,0 +1,127 @@
+{
+  "intersection_id": 29863,
+  "msg_count": 94,
+  "minute_of_year": 408769,
+  "location_name": "Midtown Atlanta",
+  "latitude": 33.7473905,
+  "longitude": -84.3888358,
+  "num_signal_groups": 7,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 274,
+      "max_end_time_ds": 358,
+      "likely_time_ds": 346,
+      "confidence": 1
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "protected-clearance",
+      "min_end_time_ds": 194,
+      "max_end_time_ds": 256,
+      "likely_time_ds": 256,
+      "confidence": 4
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "dark",
+      "min_end_time_ds": 147,
+      "max_end_time_ds": 221,
+      "likely_time_ds": 149,
+      "confidence": 13
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 166,
+      "max_end_time_ds": 207,
+      "likely_time_ds": 207,
+      "confidence": 13
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 261,
+      "max_end_time_ds": 329,
+      "likely_time_ds": 323,
+      "confidence": 3
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 211,
+      "max_end_time_ds": 278,
+      "likely_time_ds": 221,
+      "confidence": 7
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 220,
+      "max_end_time_ds": 297,
+      "likely_time_ds": 281,
+      "confidence": 15
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 72
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.130871",
+  "message_length": 144,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 72,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 73,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 74,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 76,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 80,
+      "length": 1
+    }
+  ],
+  "hash": "0ceb2c4ec84fcc7a40c920c867bf7cf59feb05b03ddac770d67c14bd36f206db",
+  "sample_index": 577
+}

@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPUBLICSAFETYWORKER",
+  "sec_mark_ms": 53564,
+  "msg_count": 12,
+  "latitude": 38.6283253,
+  "longitude": -90.1958926,
+  "location_name": "Downtown St. Louis",
+  "speed_mph": 1.8,
+  "heading_deg": 17.1126,
+  "position_accuracy": 9,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8002",
+    "signer_type": "digest",
+    "signer_id_hex": "92ca94016d6b42b9",
+    "signature_algorithm": "Falcon-512",
+    "signature_size_bytes": 666,
+    "is_pqc_signature": true,
+    "header_length": 682
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.189086",
+  "message_length": 700,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 682,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 683,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 684,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 686,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 687,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 691,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 695,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 697,
+      "length": 2
+    }
+  ],
+  "hash": "1e85289a34f6d7fa86b026aa002b30b7a59ec88ffaa543eee376305953b1e1ed",
+  "sample_index": 751
+}

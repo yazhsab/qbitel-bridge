@@ -1,0 +1,199 @@
+{
+  "intersection_id": 17250,
+  "msg_count": 108,
+  "ref_point": {
+    "latitude": 34.0551387,
+    "longitude": -118.2474832
+  },
+  "location_name": "Downtown LA",
+  "num_lanes": 5,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "crosswalk",
+      "lane_direction": "egressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 366,
+      "num_nodes": 5,
+      "nodes": [
+        {
+          "dx_cm": 4030,
+          "dy_cm": -755
+        },
+        {
+          "dx_cm": 1251,
+          "dy_cm": -1170
+        },
+        {
+          "dx_cm": 281,
+          "dy_cm": 182
+        },
+        {
+          "dx_cm": 2936,
+          "dy_cm": -400
+        },
+        {
+          "dx_cm": 377,
+          "dy_cm": 1541
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "trackedVehicle",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 400,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": -2270,
+          "dy_cm": -1881
+        },
+        {
+          "dx_cm": -2569,
+          "dy_cm": 2358
+        },
+        {
+          "dx_cm": 2618,
+          "dy_cm": -1966
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "striping",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 400,
+      "num_nodes": 2,
+      "nodes": [
+        {
+          "dx_cm": 4337,
+          "dy_cm": 906
+        },
+        {
+          "dx_cm": -2481,
+          "dy_cm": 3731
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "striping",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 400,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": -1979,
+          "dy_cm": -1492
+        },
+        {
+          "dx_cm": 3739,
+          "dy_cm": -4194
+        },
+        {
+          "dx_cm": -901,
+          "dy_cm": -2290
+        },
+        {
+          "dx_cm": 711,
+          "dy_cm": -1342
+        }
+      ]
+    },
+    {
+      "lane_id": 5,
+      "lane_type": "vehicle",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 450,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": 3298,
+          "dy_cm": 2453
+        },
+        {
+          "dx_cm": 1620,
+          "dy_cm": 543
+        },
+        {
+          "dx_cm": 1079,
+          "dy_cm": 2256
+        },
+        {
+          "dx_cm": 746,
+          "dy_cm": 3019
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "b7ea4359f66b703c6499d213276ccfefad119b3e1fc7378046ac0dc07e05d2ae",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.177613",
+  "message_length": 214,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 112,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 116,
+      "length": 1
+    }
+  ],
+  "hash": "41cdf42b28a4f9087264ab02ac92547619f09e35561cadef3512167c4547215c",
+  "sample_index": 719
+}

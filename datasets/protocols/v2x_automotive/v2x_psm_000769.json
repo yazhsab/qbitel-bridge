@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPEDALCYCLIST",
+  "sec_mark_ms": 54822,
+  "msg_count": 30,
+  "latitude": 39.7433644,
+  "longitude": -104.994032,
+  "location_name": "Downtown Denver",
+  "speed_mph": 3.5,
+  "heading_deg": 237.387,
+  "position_accuracy": 1,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8002",
+    "signer_type": "digest",
+    "signer_id_hex": "1bd842402f9aff6a",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 112
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.192146",
+  "message_length": 130,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 112,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 113,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 114,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 116,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 117,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 121,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 125,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 127,
+      "length": 2
+    }
+  ],
+  "hash": "fdd7d90835d3e774e08c27feb321915a1dc5ea8e3172129c675678dfd8c4c15f",
+  "sample_index": 769
+}

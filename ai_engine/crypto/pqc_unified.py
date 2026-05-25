@@ -61,6 +61,16 @@ class PQCAlgorithm(Enum):
     SLHDSA_SHA2_128F = "slh-dsa-sha2-128f"
     SLHDSA_SHA2_256F = "slh-dsa-sha2-256f"
 
+    # Stateful Hash-based Signatures (NIST SP 800-208) — CNSA 2.0 required
+    LMS_SHA256_H5 = "lms-sha256-m32-h5"
+    LMS_SHA256_H10 = "lms-sha256-m32-h10"
+    LMS_SHA256_H15 = "lms-sha256-m32-h15"
+    LMS_SHA256_H20 = "lms-sha256-m32-h20"
+    LMS_SHA256_H25 = "lms-sha256-m32-h25"
+    XMSS_SHA2_10 = "xmss-sha2-10-256"
+    XMSS_SHA2_16 = "xmss-sha2-16-256"
+    XMSS_SHA2_20 = "xmss-sha2-20-256"
+
     # Hybrid (Classical + PQC)
     X25519_MLKEM_768 = "x25519-mlkem-768"
     P384_MLKEM_1024 = "p384-mlkem-1024"
@@ -85,6 +95,31 @@ class PQCAlgorithm(Enum):
         return not self.is_kem
 
     @property
+    def is_stateful(self) -> bool:
+        """Check if this is a stateful hash-based signature (LMS/XMSS)."""
+        return self in {
+            PQCAlgorithm.LMS_SHA256_H5,
+            PQCAlgorithm.LMS_SHA256_H10,
+            PQCAlgorithm.LMS_SHA256_H15,
+            PQCAlgorithm.LMS_SHA256_H20,
+            PQCAlgorithm.LMS_SHA256_H25,
+            PQCAlgorithm.XMSS_SHA2_10,
+            PQCAlgorithm.XMSS_SHA2_16,
+            PQCAlgorithm.XMSS_SHA2_20,
+        }
+
+    @property
+    def is_cnsa2_approved(self) -> bool:
+        """Check if this algorithm is approved under CNSA 2.0."""
+        return self in {
+            PQCAlgorithm.MLKEM_1024,
+            PQCAlgorithm.MLDSA_87,
+            PQCAlgorithm.LMS_SHA256_H20,
+            PQCAlgorithm.LMS_SHA256_H25,
+            PQCAlgorithm.XMSS_SHA2_20,
+        }
+
+    @property
     def nist_level(self) -> int:
         """Get the NIST security level (1, 2, 3, or 5)."""
         level_map = {
@@ -104,6 +139,14 @@ class PQCAlgorithm(Enum):
             PQCAlgorithm.FALCON_1024: 5,
             PQCAlgorithm.SLHDSA_SHA2_128F: 1,
             PQCAlgorithm.SLHDSA_SHA2_256F: 5,
+            PQCAlgorithm.LMS_SHA256_H5: 1,
+            PQCAlgorithm.LMS_SHA256_H10: 1,
+            PQCAlgorithm.LMS_SHA256_H15: 1,
+            PQCAlgorithm.LMS_SHA256_H20: 1,
+            PQCAlgorithm.LMS_SHA256_H25: 1,
+            PQCAlgorithm.XMSS_SHA2_10: 1,
+            PQCAlgorithm.XMSS_SHA2_16: 1,
+            PQCAlgorithm.XMSS_SHA2_20: 1,
             PQCAlgorithm.X25519_MLKEM_768: 3,
             PQCAlgorithm.P384_MLKEM_1024: 5,
         }
@@ -129,6 +172,7 @@ class DomainProfile(Enum):
     INDUSTRIAL = "industrial"
     TELECOM = "telecom"
     GOVERNMENT = "government"
+    CNSA2_DEFENSE = "cnsa2-defense"  # NSA CNSA 2.0 compliant
 
     @property
     def default_kem(self) -> PQCAlgorithm:
@@ -141,6 +185,7 @@ class DomainProfile(Enum):
             DomainProfile.INDUSTRIAL: PQCAlgorithm.MLKEM_768,
             DomainProfile.TELECOM: PQCAlgorithm.MLKEM_768,
             DomainProfile.GOVERNMENT: PQCAlgorithm.MLKEM_1024,
+            DomainProfile.CNSA2_DEFENSE: PQCAlgorithm.MLKEM_1024,  # CNSA 2.0 mandates 1024
         }
         return defaults[self]
 
@@ -155,8 +200,18 @@ class DomainProfile(Enum):
             DomainProfile.INDUSTRIAL: PQCAlgorithm.DILITHIUM_3,  # Deterministic
             DomainProfile.TELECOM: PQCAlgorithm.DILITHIUM_3,
             DomainProfile.GOVERNMENT: PQCAlgorithm.DILITHIUM_5,
+            DomainProfile.CNSA2_DEFENSE: PQCAlgorithm.MLDSA_87,  # CNSA 2.0 mandates ML-DSA-87
         }
         return defaults[self]
+
+    @property
+    def default_stateful_signature(self) -> Optional[PQCAlgorithm]:
+        """Get the default stateful signature algorithm (for firmware/code signing)."""
+        defaults = {
+            DomainProfile.CNSA2_DEFENSE: PQCAlgorithm.LMS_SHA256_H20,
+            DomainProfile.GOVERNMENT: PQCAlgorithm.LMS_SHA256_H20,
+        }
+        return defaults.get(self)
 
     @property
     def constraints(self) -> Dict[str, Any]:
@@ -200,6 +255,17 @@ class DomainProfile(Enum):
                 "max_latency_ms": 100,
                 "fips_required": True,
                 "min_security_level": 5,
+            },
+            DomainProfile.CNSA2_DEFENSE: {
+                "max_latency_ms": 200,
+                "fips_required": True,
+                "min_security_level": 5,
+                "cnsa2_compliant": True,
+                "require_hybrid": True,
+                "stateful_sigs_for_firmware": True,
+                "approved_kems": ["ml-kem-1024"],
+                "approved_sigs": ["ml-dsa-87", "lms-sha256-m32-h20", "xmss-sha2-20-256"],
+                "approved_hash": "sha-384",
             },
         }
         return constraints[self]
@@ -784,3 +850,23 @@ def create_industrial_engine() -> PQCEngine:
 def create_government_engine() -> PQCEngine:
     """Create PQC engine for government/classified environments."""
     return PQCEngine(DomainProfile.GOVERNMENT, fips_mode=True)
+
+
+def create_cnsa2_engine() -> PQCEngine:
+    """
+    Create PQC engine for NSA CNSA 2.0 compliance.
+
+    CNSA 2.0 mandates:
+    - ML-KEM-1024 for key establishment
+    - ML-DSA-87 for general digital signatures
+    - LMS/XMSS for firmware signing, code signing, and software updates
+    - SHA-384 minimum for hashing
+    - FIPS 140-3 validated modules
+    """
+    return PQCEngine(
+        DomainProfile.CNSA2_DEFENSE,
+        kem_algorithm=PQCAlgorithm.MLKEM_1024,
+        signature_algorithm=PQCAlgorithm.MLDSA_87,
+        hybrid_mode=True,
+        fips_mode=True,
+    )

@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPEDALCYCLIST",
+  "sec_mark_ms": 32789,
+  "msg_count": 104,
+  "latitude": 38.9074574,
+  "longitude": -77.0383603,
+  "location_name": "Washington DC",
+  "speed_mph": 11.5,
+  "heading_deg": 268.5605,
+  "position_accuracy": 5,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8002",
+    "signer_type": "digest",
+    "signer_id_hex": "c7390b2ecbf7e35c",
+    "signature_algorithm": "ML-DSA-44",
+    "signature_size_bytes": 2420,
+    "is_pqc_signature": true,
+    "header_length": 2436
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.207708",
+  "message_length": 2454,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 2436,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 2437,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 2438,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 2440,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 2441,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 2445,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 2449,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 2451,
+      "length": 2
+    }
+  ],
+  "hash": "904c9edccb33f573683f362ea3235ff81bff807bdc335ca9f6ccb7f60ef9cf96",
+  "sample_index": 843
+}

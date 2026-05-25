@@ -1,0 +1,235 @@
+{
+  "intersection_id": 25352,
+  "msg_count": 100,
+  "ref_point": {
+    "latitude": 33.7487106,
+    "longitude": -84.3839467
+  },
+  "location_name": "Midtown Atlanta",
+  "num_lanes": 5,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "crosswalk",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 360,
+      "num_nodes": 5,
+      "nodes": [
+        {
+          "dx_cm": 742,
+          "dy_cm": -1895
+        },
+        {
+          "dx_cm": -29,
+          "dy_cm": -4180
+        },
+        {
+          "dx_cm": 3196,
+          "dy_cm": 1705
+        },
+        {
+          "dx_cm": 3038,
+          "dy_cm": -1635
+        },
+        {
+          "dx_cm": -2564,
+          "dy_cm": 3879
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "bikeLane",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 450,
+      "num_nodes": 6,
+      "nodes": [
+        {
+          "dx_cm": 4651,
+          "dy_cm": 1083
+        },
+        {
+          "dx_cm": 3345,
+          "dy_cm": 632
+        },
+        {
+          "dx_cm": -774,
+          "dy_cm": 1129
+        },
+        {
+          "dx_cm": -1765,
+          "dy_cm": 1713
+        },
+        {
+          "dx_cm": 4502,
+          "dy_cm": 437
+        },
+        {
+          "dx_cm": 4452,
+          "dy_cm": 185
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "median",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 330,
+      "num_nodes": 6,
+      "nodes": [
+        {
+          "dx_cm": 1595,
+          "dy_cm": 2101
+        },
+        {
+          "dx_cm": -2370,
+          "dy_cm": -1699
+        },
+        {
+          "dx_cm": -1408,
+          "dy_cm": -2488
+        },
+        {
+          "dx_cm": 4900,
+          "dy_cm": -1024
+        },
+        {
+          "dx_cm": -1988,
+          "dy_cm": -3528
+        },
+        {
+          "dx_cm": -558,
+          "dy_cm": 1249
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "bikeLane",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 330,
+      "num_nodes": 6,
+      "nodes": [
+        {
+          "dx_cm": 1720,
+          "dy_cm": -2487
+        },
+        {
+          "dx_cm": -4244,
+          "dy_cm": 382
+        },
+        {
+          "dx_cm": 2952,
+          "dy_cm": 2646
+        },
+        {
+          "dx_cm": 4591,
+          "dy_cm": 2443
+        },
+        {
+          "dx_cm": 3806,
+          "dy_cm": 3782
+        },
+        {
+          "dx_cm": 1188,
+          "dy_cm": -1696
+        }
+      ]
+    },
+    {
+      "lane_id": 5,
+      "lane_type": "bikeLane",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 366,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": 1745,
+          "dy_cm": 4054
+        },
+        {
+          "dx_cm": -4946,
+          "dy_cm": -1579
+        },
+        {
+          "dx_cm": -2715,
+          "dy_cm": 362
+        },
+        {
+          "dx_cm": -366,
+          "dy_cm": 1043
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "06ab72fa3fa528cc",
+    "signature_algorithm": "Falcon-512",
+    "signature_size_bytes": 666,
+    "is_pqc_signature": true,
+    "header_length": 682
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.175544",
+  "message_length": 828,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 682,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 683,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 684,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 686,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 690,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 694,
+      "length": 1
+    }
+  ],
+  "hash": "575916293ed4ddd95983815d959f86614510076caa6fd9443fbfd2803beceaa0",
+  "sample_index": 711
+}

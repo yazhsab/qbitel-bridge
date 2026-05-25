@@ -52,9 +52,45 @@ except ImportError:
     vllm_available = False
     VLLMProvider = None  # type: ignore[assignment]
 
+try:  # Optional dependency - tiktoken for accurate OpenAI token counting
+    import tiktoken  # type: ignore
+except ImportError:  # pragma: no cover - environment dependent
+    tiktoken = None  # type: ignore[assignment]
+
 from ..core.config import Config
 from ..core.exceptions import QbitelAIException, LLMException
 from ..monitoring.metrics import MetricsCollector
+
+# Lazy import for guardrails to avoid circular dependency
+_guardrail_manager = None
+
+
+def _get_guardrail_manager():
+    """Lazy-load the GuardrailManager to avoid import cycles."""
+    global _guardrail_manager
+    if _guardrail_manager is None:
+        try:
+            from .guardrails import GuardrailManager
+            _guardrail_manager = GuardrailManager()
+        except ImportError:
+            pass
+    return _guardrail_manager
+
+
+# Lazy import for prompt template manager to avoid circular dependency
+_prompt_template_manager = None
+
+
+def _get_prompt_template_manager():
+    """Lazy-load the PromptTemplateManager to avoid import cycles."""
+    global _prompt_template_manager
+    if _prompt_template_manager is None:
+        try:
+            from .prompt_templates import get_template_manager
+            _prompt_template_manager = get_template_manager()
+        except ImportError:
+            pass
+    return _prompt_template_manager
 
 # =============================================================================
 # Model Configuration - 2024-2025 Latest Models
@@ -69,10 +105,10 @@ class ModelConfig:
     OPENAI_MINI = "gpt-4o-mini"  # Cost-effective option
     OPENAI_LEGACY = "gpt-4-turbo"  # Fallback
 
-    # Anthropic Models (Updated December 2024)
-    ANTHROPIC_DEFAULT = "claude-sonnet-4-5-20250929"  # Latest Claude Sonnet 4.5
-    ANTHROPIC_OPUS = "claude-opus-4-5-20251101"  # Most capable
-    ANTHROPIC_HAIKU = "claude-3-5-haiku-20241022"  # Fast/cheap
+    # Anthropic Models (Updated February 2026)
+    ANTHROPIC_DEFAULT = "claude-sonnet-4-5-20250514"  # Claude Sonnet 4.5
+    ANTHROPIC_OPUS = "claude-opus-4-5-20250514"  # Most capable
+    ANTHROPIC_HAIKU = "claude-haiku-4-5-20251001"  # Fast/cheap
     ANTHROPIC_LEGACY = "claude-3-5-sonnet-20241022"  # Fallback
 
     # Ollama Models (Local - Latest versions)
@@ -232,6 +268,14 @@ class LLMRequest:
     # New: Model selection override
     model_override: Optional[str] = None  # Override default model for this request
 
+    # Extended thinking / chain-of-thought (Anthropic Claude only)
+    extended_thinking: bool = False  # Enable extended thinking mode
+    thinking_budget_tokens: int = 10000  # Max tokens for the thinking phase
+
+    # Multi-modal / vision support (OpenAI GPT-4o, Anthropic Claude)
+    images: Optional[List[Dict[str, str]]] = None  # List of image inputs
+    # Each dict has: {"type": "url"|"base64", "data": "<url_or_b64>", "media_type"?: "image/png"}
+
 
 @dataclass
 class LLMResponse:
@@ -252,6 +296,10 @@ class LLMResponse:
 
     # New: Validated Pydantic model (when response_model provided)
     validated_model: Optional[BaseModel] = None
+
+    # Extended thinking content (Anthropic Claude only)
+    thinking_content: Optional[str] = None  # The model's internal reasoning chain
+    thinking_tokens: int = 0  # Tokens consumed by the thinking phase
 
 
 class UnifiedLLMService:
@@ -326,6 +374,14 @@ class UnifiedLLMService:
                 and maintainability.""",
             },
         }
+
+        # Guardrails integration (enabled by default in production)
+        self._enable_guardrails: bool = getattr(config, "enable_guardrails", True)
+        self._guardrail_manager = None  # Lazy-initialized on first use
+
+        # Prompt template versioning integration
+        self._prompt_template_manager = None  # Lazy-initialized on first use
+        self._use_versioned_prompts: bool = getattr(config, "use_versioned_prompts", True)
 
         # Request queue for rate limiting
         self.request_queues = {provider: asyncio.Queue(maxsize=100) for provider in LLMProvider}
@@ -415,9 +471,69 @@ class UnifiedLLMService:
             self.logger.error(f"Failed to initialize LLM service: {e}")
             raise LLMException(f"LLM service initialization failed: {e}")
 
+    # Retry configuration
+    MAX_RETRIES_PER_PROVIDER = 3
+    RETRY_BASE_DELAY = 1.0  # seconds
+    RETRY_MAX_DELAY = 30.0  # seconds
+    # Errors that are worth retrying (transient)
+    RETRYABLE_ERROR_KEYWORDS = frozenset([
+        "rate_limit", "rate limit", "429", "timeout", "timed out",
+        "connection", "temporary", "overloaded", "server_error",
+        "500", "502", "503", "529", "service unavailable",
+    ])
+
+    def _is_retryable_error(self, error: Exception) -> bool:
+        """Determine whether an error is transient and worth retrying."""
+        error_str = str(error).lower()
+        return any(keyword in error_str for keyword in self.RETRYABLE_ERROR_KEYWORDS)
+
+    async def _execute_with_retry(
+        self,
+        request: LLMRequest,
+        provider: LLMProvider,
+        system_prompt: str,
+    ) -> LLMResponse:
+        """
+        Execute a request against a single provider with retry + exponential backoff.
+
+        Only retries on transient errors (rate limits, timeouts, server errors).
+        Auth errors and content policy violations fail immediately.
+        """
+        last_error: Optional[Exception] = None
+
+        for attempt in range(1, self.MAX_RETRIES_PER_PROVIDER + 1):
+            try:
+                return await self._execute_request(request, provider, system_prompt)
+            except Exception as e:
+                last_error = e
+
+                if not self._is_retryable_error(e) or attempt == self.MAX_RETRIES_PER_PROVIDER:
+                    # Non-retryable error or final attempt — propagate
+                    raise
+
+                delay = min(
+                    self.RETRY_BASE_DELAY * (2 ** (attempt - 1)),
+                    self.RETRY_MAX_DELAY,
+                )
+                self.logger.warning(
+                    "Provider %s attempt %d/%d failed (retryable): %s — retrying in %.1fs",
+                    provider.value, attempt, self.MAX_RETRIES_PER_PROVIDER, e, delay,
+                )
+                await asyncio.sleep(delay)
+
+        # Should not reach here, but just in case
+        raise LLMException(f"{provider.value} failed after {self.MAX_RETRIES_PER_PROVIDER} retries: {last_error}")
+
     async def process_request(self, request: LLMRequest) -> LLMResponse:
         """
-        Process LLM request with intelligent routing and fallback.
+        Process LLM request with guardrails, intelligent routing, per-provider retry,
+        and fallback.
+
+        Pipeline:
+        1. [Guardrails] Check input for safety/PII/injection (if enabled)
+        2. Route to primary provider with retry + exponential backoff
+        3. Fall back to secondary providers on failure
+        4. [Guardrails] Check output for safety/PII/hallucination (if enabled)
 
         Args:
             request: LLM request with prompt and context
@@ -426,6 +542,30 @@ class UnifiedLLMService:
             LLM response with content and metadata
         """
         start_time = self._safe_time()
+
+        # ── Input Guardrails ────────────────────────────────────────────
+        if self._enable_guardrails:
+            guardrails = self._guardrail_manager or _get_guardrail_manager()
+            if guardrails is not None:
+                try:
+                    input_result = await guardrails.check_input(
+                        request.prompt,
+                        estimated_tokens=len(request.prompt.split()) * 2,
+                    )
+                    if not input_result.passed:
+                        error_msgs = [v.message for v in input_result.violations
+                                      if v.severity.value in ("error", "critical")]
+                        if error_msgs:
+                            raise LLMException(
+                                f"Input blocked by guardrails: {'; '.join(error_msgs)}"
+                            )
+                    # Use sanitized content (e.g. PII-masked)
+                    if input_result.sanitized_content:
+                        request.prompt = input_result.sanitized_content
+                except LLMException:
+                    raise
+                except Exception as e:
+                    self.logger.warning(f"Guardrail input check failed (non-blocking): {e}")
 
         # Get domain configuration
         domain_config = self._resolve_domain_config(request.feature_domain)
@@ -443,7 +583,28 @@ class UnifiedLLMService:
 
             try:
                 attempted_provider = True
-                response = await self._execute_request(request, provider, domain_config["system_prompt"])
+                response = await self._execute_with_retry(request, provider, domain_config["system_prompt"])
+
+                # ── Output Guardrails ───────────────────────────────────
+                if self._enable_guardrails:
+                    guardrails = self._guardrail_manager or _get_guardrail_manager()
+                    if guardrails is not None:
+                        try:
+                            output_result = await guardrails.check_output(
+                                response.content,
+                                tokens_used=response.tokens_used,
+                            )
+                            if output_result.sanitized_content:
+                                response.content = output_result.sanitized_content
+                            if output_result.violations:
+                                response.metadata = response.metadata or {}
+                                response.metadata["guardrail_violations"] = [
+                                    {"type": v.violation_type.value, "severity": v.severity.value,
+                                     "message": v.message}
+                                    for v in output_result.violations
+                                ]
+                        except Exception as e:
+                            self.logger.warning(f"Guardrail output check failed (non-blocking): {e}")
 
                 # Update metrics
                 LLM_REQUEST_COUNTER.labels(
@@ -460,7 +621,7 @@ class UnifiedLLMService:
 
             except Exception as e:
                 last_error = e
-                self.logger.warning(f"Provider {provider.value} failed: {e}")
+                self.logger.warning(f"Provider {provider.value} failed after retries: {e}")
 
                 # Mark provider as unhealthy temporarily
                 self.provider_health[provider] = False
@@ -481,6 +642,15 @@ class UnifiedLLMService:
         start_time = self._safe_time()
 
         messages = self._build_messages(request, system_prompt)
+
+        # Pre-flight: validate prompt fits within model context window
+        model = request.model_override or {
+            LLMProvider.OPENAI_GPT4: ModelConfig.OPENAI_DEFAULT,
+            LLMProvider.ANTHROPIC_CLAUDE: ModelConfig.ANTHROPIC_DEFAULT,
+            LLMProvider.OLLAMA_LOCAL: ModelConfig.OLLAMA_DEFAULT,
+            LLMProvider.VLLM: "llama3.2",
+        }.get(provider, "unknown")
+        self._validate_context_window(messages, model, request.max_tokens)
 
         # Execute based on provider
         if provider == LLMProvider.OPENAI_GPT4:
@@ -530,10 +700,33 @@ class UnifiedLLMService:
         # Select model - use override if provided, otherwise use latest default
         model = request.model_override or ModelConfig.OPENAI_DEFAULT
 
+        # Convert multi-part image content to OpenAI format if present.
+        # OpenAI uses image_url blocks (with data URIs for base64 images).
+        openai_messages = []
+        for msg in messages:
+            if isinstance(msg.get("content"), list):
+                openai_parts = []
+                for part in msg["content"]:
+                    if part.get("type") == "text":
+                        openai_parts.append(part)
+                    elif part.get("type") == "image_url":
+                        openai_parts.append(part)  # Already OpenAI format
+                    elif part.get("type") == "image_base64":
+                        # Convert base64 to OpenAI data URI format
+                        media_type = part.get("media_type", "image/png")
+                        data_uri = f"data:{media_type};base64,{part['data']}"
+                        openai_parts.append({
+                            "type": "image_url",
+                            "image_url": {"url": data_uri},
+                        })
+                openai_messages.append({"role": msg["role"], "content": openai_parts})
+            else:
+                openai_messages.append(msg)
+
         # Build request parameters
         request_params = {
             "model": model,
-            "messages": messages,
+            "messages": openai_messages,
             "max_tokens": request.max_tokens,
             "temperature": request.temperature,
         }
@@ -618,15 +811,24 @@ class UnifiedLLMService:
             except (json.JSONDecodeError, Exception) as e:
                 self.logger.warning(f"Failed to parse JSON response: {e}")
 
+        finish_reason = response.choices[0].finish_reason
+
         return LLMResponse(
             content=content,
             provider=LLMProvider.OPENAI_GPT4.value,
             tokens_used=tokens_used,
             processing_time=0.0,
-            confidence=0.95,  # Higher confidence for GPT-4o
+            confidence=self._compute_confidence(
+                provider=LLMProvider.OPENAI_GPT4,
+                finish_reason=finish_reason,
+                content=content,
+                tool_calls=tool_calls,
+                tokens_used=tokens_used,
+                max_tokens=request.max_tokens,
+            ),
             metadata={
                 "model": model,
-                "finish_reason": response.choices[0].finish_reason,
+                "finish_reason": finish_reason,
             },
             tool_calls=tool_calls,
             parsed_response=parsed_response,
@@ -634,7 +836,7 @@ class UnifiedLLMService:
         )
 
     async def _generate_anthropic(self, request: LLMRequest, messages: List[Dict], start_time: float) -> LLMResponse:
-        """Execute request using Anthropic Claude with tool use support."""
+        """Execute request using Anthropic Claude with tool use and extended thinking support."""
         # Select model - use override if provided, otherwise use latest default
         model = request.model_override or ModelConfig.ANTHROPIC_DEFAULT
 
@@ -646,7 +848,33 @@ class UnifiedLLMService:
             if msg["role"] == "system":
                 system_msg = msg["content"]
             else:
-                user_messages.append(msg)
+                # Convert multi-part image content to Anthropic format
+                converted = dict(msg)
+                if isinstance(converted.get("content"), list):
+                    anthropic_parts = []
+                    for part in converted["content"]:
+                        if part.get("type") == "text":
+                            anthropic_parts.append({"type": "text", "text": part["text"]})
+                        elif part.get("type") == "image_url":
+                            # Anthropic supports URL-based images via source type "url"
+                            anthropic_parts.append({
+                                "type": "image",
+                                "source": {
+                                    "type": "url",
+                                    "url": part["image_url"]["url"],
+                                },
+                            })
+                        elif part.get("type") == "image_base64":
+                            anthropic_parts.append({
+                                "type": "image",
+                                "source": {
+                                    "type": "base64",
+                                    "media_type": part.get("media_type", "image/png"),
+                                    "data": part["data"],
+                                },
+                            })
+                    converted["content"] = anthropic_parts
+                user_messages.append(converted)
 
         # Enhance system prompt for JSON mode
         if request.response_format in (ResponseFormat.JSON, ResponseFormat.JSON_SCHEMA):
@@ -662,8 +890,23 @@ class UnifiedLLMService:
             "model": model,
             "messages": user_messages,
             "max_tokens": request.max_tokens,
-            "temperature": request.temperature,
         }
+
+        # Extended thinking: when enabled, temperature must be 1 (Anthropic requirement)
+        # and we add the thinking configuration block.
+        if request.extended_thinking:
+            request_params["temperature"] = 1  # Required by Anthropic for thinking mode
+            budget = max(1024, min(request.thinking_budget_tokens, 128000))
+            request_params["thinking"] = {
+                "type": "enabled",
+                "budget_tokens": budget,
+            }
+            self.logger.info(
+                "Extended thinking enabled for Anthropic request (budget=%d tokens)",
+                budget,
+            )
+        else:
+            request_params["temperature"] = request.temperature
 
         if system_msg:
             request_params["system"] = system_msg
@@ -688,12 +931,17 @@ class UnifiedLLMService:
 
         response = await self.anthropic_client.messages.create(**request_params)
 
-        # Extract content and tool use from response
+        # Extract content, thinking blocks, and tool use from response
         content = ""
+        thinking_content = ""
+        thinking_tokens = 0
         tool_calls = None
 
         for block in response.content:
-            if hasattr(block, "text"):
+            if hasattr(block, "type") and block.type == "thinking":
+                # Extended thinking block - contains the model's reasoning chain
+                thinking_content += getattr(block, "thinking", "")
+            elif hasattr(block, "text"):
                 content += block.text
             elif hasattr(block, "type") and block.type == "tool_use":
                 if tool_calls is None:
@@ -707,6 +955,13 @@ class UnifiedLLMService:
                 )
 
         tokens_used = response.usage.input_tokens + response.usage.output_tokens
+
+        # Anthropic reports thinking tokens separately via cache_read_input_tokens
+        # or a dedicated field when extended thinking is enabled.
+        if request.extended_thinking and hasattr(response.usage, "cache_creation_input_tokens"):
+            # Thinking tokens are counted as part of output_tokens; we surface them
+            # via the dedicated field for observability.
+            thinking_tokens = getattr(response.usage, "cache_creation_input_tokens", 0)
 
         # Parse JSON response if JSON mode was used
         parsed_response = None
@@ -727,19 +982,33 @@ class UnifiedLLMService:
             except (json.JSONDecodeError, Exception) as e:
                 self.logger.warning(f"Failed to parse Anthropic JSON response: {e}")
 
+        response_metadata: Dict[str, Any] = {
+            "model": model,
+            "stop_reason": response.stop_reason,
+        }
+        if request.extended_thinking:
+            response_metadata["extended_thinking_enabled"] = True
+            response_metadata["thinking_tokens"] = thinking_tokens
+
         return LLMResponse(
             content=content,
             provider=LLMProvider.ANTHROPIC_CLAUDE.value,
             tokens_used=tokens_used,
             processing_time=0.0,
-            confidence=0.95,  # High confidence for Claude 3.5/4
-            metadata={
-                "model": model,
-                "stop_reason": response.stop_reason,
-            },
+            confidence=self._compute_confidence(
+                provider=LLMProvider.ANTHROPIC_CLAUDE,
+                finish_reason=response.stop_reason,
+                content=content,
+                tool_calls=tool_calls,
+                tokens_used=tokens_used,
+                max_tokens=request.max_tokens,
+            ),
+            metadata=response_metadata,
             tool_calls=tool_calls,
             parsed_response=parsed_response,
             validated_model=validated_model,
+            thinking_content=thinking_content if thinking_content else None,
+            thinking_tokens=thinking_tokens,
         )
 
     async def _generate_ollama(self, request: LLMRequest, messages: List[Dict], start_time: float) -> LLMResponse:
@@ -811,7 +1080,13 @@ class UnifiedLLMService:
             provider=LLMProvider.OLLAMA_LOCAL.value,
             tokens_used=tokens_used,
             processing_time=0.0,
-            confidence=0.8,  # Improved confidence for Llama 3.2
+            confidence=self._compute_confidence(
+                provider=LLMProvider.OLLAMA_LOCAL,
+                finish_reason=response.get("done_reason"),
+                content=content,
+                tokens_used=tokens_used,
+                max_tokens=request.max_tokens,
+            ),
             metadata={
                 "model": model,
                 "local": True,
@@ -874,7 +1149,13 @@ class UnifiedLLMService:
             provider=LLMProvider.VLLM.value,
             tokens_used=vllm_response.total_tokens,
             processing_time=vllm_response.latency_ms / 1000.0,
-            confidence=0.9,  # High confidence for vLLM with large models
+            confidence=self._compute_confidence(
+                provider=LLMProvider.VLLM,
+                finish_reason=vllm_response.finish_reason,
+                content=vllm_response.content,
+                tokens_used=vllm_response.total_tokens,
+                max_tokens=request.max_tokens,
+            ),
             metadata={
                 "model": vllm_response.model,
                 "request_id": vllm_response.request_id,
@@ -887,6 +1168,171 @@ class UnifiedLLMService:
             parsed_response=parsed_response,
             validated_model=validated_model,
         )
+
+    # =========================================================================
+    # Token Counting & Context Window Validation
+    # =========================================================================
+
+    # Context window sizes per model family (conservative estimates)
+    MODEL_CONTEXT_WINDOWS: Dict[str, int] = {
+        "gpt-4o": 128_000,
+        "gpt-4o-mini": 128_000,
+        "gpt-4-turbo": 128_000,
+        "claude-sonnet-4-5": 200_000,
+        "claude-opus-4-5": 200_000,
+        "claude-haiku-4-5": 200_000,
+        "claude-3-5-sonnet": 200_000,
+        "llama3.2": 128_000,
+        "qwen2.5": 32_000,
+        "mistral": 32_000,
+        "codellama": 16_000,
+    }
+
+    def _estimate_tokens(self, text: str, model: Optional[str] = None) -> int:
+        """
+        Estimate token count for a string.
+
+        Uses tiktoken for OpenAI models (accurate), otherwise falls back
+        to a word-count heuristic (~1.3 tokens per word for English text).
+        """
+        if not text:
+            return 0
+
+        # Try tiktoken for OpenAI models
+        if tiktoken is not None and model:
+            try:
+                encoding = tiktoken.encoding_for_model(model)
+                return len(encoding.encode(text))
+            except (KeyError, Exception):
+                pass  # Fall through to heuristic
+
+        # Heuristic: ~4 characters per token on average (GPT-family)
+        return max(1, len(text) // 4)
+
+    def _estimate_messages_tokens(
+        self, messages: List[Dict[str, str]], model: Optional[str] = None
+    ) -> int:
+        """Estimate total tokens for a list of chat messages."""
+        total = 0
+        for msg in messages:
+            content = msg.get("content", "")
+            if isinstance(content, str):
+                total += self._estimate_tokens(content, model)
+            elif isinstance(content, list):
+                # Anthropic-style content blocks
+                for block in content:
+                    if isinstance(block, dict):
+                        total += self._estimate_tokens(
+                            block.get("text", "") or block.get("content", ""),
+                            model,
+                        )
+            # Per-message overhead (role, separators)
+            total += 4
+        # Every reply is primed with <|start|>assistant<|message|>
+        total += 3
+        return total
+
+    def _get_context_window(self, model: str) -> int:
+        """Return the context window size for a model."""
+        # Exact match first
+        if model in self.MODEL_CONTEXT_WINDOWS:
+            return self.MODEL_CONTEXT_WINDOWS[model]
+        # Prefix match (e.g. "claude-sonnet-4-5-20250514" → "claude-sonnet-4-5")
+        for prefix, window in self.MODEL_CONTEXT_WINDOWS.items():
+            if model.startswith(prefix):
+                return window
+        # Default conservative estimate
+        return 32_000
+
+    def _validate_context_window(
+        self,
+        messages: List[Dict[str, str]],
+        model: str,
+        max_tokens: int,
+    ) -> None:
+        """
+        Validate that the prompt + requested max_tokens fits within the model's
+        context window. Raises LLMException if it exceeds the limit.
+        """
+        estimated_prompt_tokens = self._estimate_messages_tokens(messages, model)
+        context_window = self._get_context_window(model)
+        total_required = estimated_prompt_tokens + max_tokens
+
+        if total_required > context_window:
+            raise LLMException(
+                f"Estimated prompt ({estimated_prompt_tokens} tokens) + max_tokens "
+                f"({max_tokens}) = {total_required} exceeds {model} context window "
+                f"({context_window} tokens). Reduce prompt size or max_tokens."
+            )
+
+        # Warn if getting close (>85% usage)
+        usage_ratio = total_required / context_window
+        if usage_ratio > 0.85:
+            self.logger.warning(
+                "Context window usage at %.0f%% for %s (%d/%d tokens)",
+                usage_ratio * 100, model, total_required, context_window,
+            )
+
+    @staticmethod
+    def _compute_confidence(
+        provider: LLMProvider,
+        finish_reason: Optional[str] = None,
+        content: str = "",
+        tool_calls: Optional[List[ToolCall]] = None,
+        tokens_used: int = 0,
+        max_tokens: int = 2000,
+    ) -> float:
+        """
+        Compute a dynamic confidence score based on response characteristics.
+
+        Factors considered:
+        - Provider base quality (slight baseline differences)
+        - Finish reason (stop=good, length=truncated=lower confidence)
+        - Response length relative to max_tokens (very short may indicate issues)
+        - Tool call presence (structured output = higher confidence)
+
+        Returns:
+            Confidence score between 0.0 and 1.0
+        """
+        # Base confidence by provider capability tier
+        base_scores = {
+            LLMProvider.OPENAI_GPT4: 0.90,
+            LLMProvider.ANTHROPIC_CLAUDE: 0.90,
+            LLMProvider.OLLAMA_LOCAL: 0.75,
+            LLMProvider.VLLM: 0.80,
+        }
+        confidence = base_scores.get(provider, 0.75)
+
+        # Finish reason adjustments
+        if finish_reason:
+            reason = finish_reason.lower()
+            if reason in ("stop", "end_turn"):
+                confidence += 0.05  # Completed naturally
+            elif reason in ("length", "max_tokens"):
+                confidence -= 0.15  # Truncated — likely incomplete
+            elif reason in ("tool_calls", "tool_use"):
+                confidence += 0.03  # Structured tool response
+            elif reason in ("content_filter", "content_filtered"):
+                confidence -= 0.25  # Filtered — unreliable content
+
+        # Content quality heuristics
+        content_len = len(content.strip())
+        if content_len == 0 and not tool_calls:
+            confidence -= 0.30  # Empty response with no tool calls
+        elif content_len < 10 and not tool_calls:
+            confidence -= 0.10  # Suspiciously short
+
+        # Token usage ratio (if response used most of max_tokens, it may be truncated)
+        if max_tokens > 0 and tokens_used > 0:
+            usage_ratio = tokens_used / max_tokens
+            if usage_ratio > 0.95:
+                confidence -= 0.10  # Likely hit the limit
+
+        # Tool calls present = structured, higher quality
+        if tool_calls and len(tool_calls) > 0:
+            confidence += 0.02
+
+        return round(max(0.0, min(1.0, confidence)), 3)
 
     def _format_context(self, context: Dict[str, Any]) -> str:
         """Format context for LLM consumption."""
@@ -932,15 +1378,58 @@ class UnifiedLLMService:
         return self.domain_routing.get(feature_domain, self.domain_routing["protocol_copilot"])
 
     def _resolve_system_prompt(self, request: LLMRequest) -> str:
-        """Determine system prompt using request override or domain default."""
+        """Determine system prompt using request override, versioned template, or domain default.
+
+        Resolution order:
+        1. Explicit ``request.system_prompt`` override — always wins.
+        2. Versioned prompt from PromptTemplateManager (if enabled and a
+           matching template exists for the feature_domain).
+        3. Hardcoded domain routing fallback.
+        """
         if request.system_prompt:
             return request.system_prompt
+
+        # Attempt to resolve from versioned prompt templates
+        if self._use_versioned_prompts:
+            try:
+                if self._prompt_template_manager is None:
+                    self._prompt_template_manager = _get_prompt_template_manager()
+
+                if self._prompt_template_manager is not None:
+                    # Find a template whose feature_domain matches
+                    template = self._prompt_template_manager.get_template_by_domain(
+                        request.feature_domain
+                    )
+                    if template is not None:
+                        current_version = template.get_current()
+                        if current_version and current_version.system_prompt:
+                            self.logger.debug(
+                                "Using versioned system prompt for domain '%s' "
+                                "(template=%s, version=%s)",
+                                request.feature_domain,
+                                template.template_id,
+                                current_version.version,
+                            )
+                            return current_version.system_prompt
+            except Exception as exc:
+                self.logger.debug(
+                    "Versioned prompt lookup failed for domain '%s': %s",
+                    request.feature_domain,
+                    exc,
+                )
+
+        # Fallback to hardcoded domain routing
         domain_config = self._resolve_domain_config(request.feature_domain)
         return domain_config.get("system_prompt", "")
 
-    def _build_messages(self, request: LLMRequest, system_prompt: str) -> List[Dict[str, str]]:
-        """Assemble chat messages payload for provider requests."""
-        messages: List[Dict[str, str]] = []
+    def _build_messages(self, request: LLMRequest, system_prompt: str) -> List[Dict[str, Any]]:
+        """Assemble chat messages payload for provider requests.
+
+        When the request contains images, the final user message uses the
+        multi-part content format supported by OpenAI and Anthropic:
+            [{"type": "text", "text": "..."}, {"type": "image_url"|"image", ...}]
+        """
+        messages: List[Dict[str, Any]] = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
 
@@ -949,7 +1438,31 @@ class UnifiedLLMService:
             if context_str:
                 messages.append({"role": "user", "content": f"Context: {context_str}"})
 
-        messages.append({"role": "user", "content": request.prompt})
+        if request.images:
+            # Build multi-part content array (provider-agnostic at this stage;
+            # provider-specific handlers convert as needed).
+            content_parts: List[Dict[str, Any]] = [
+                {"type": "text", "text": request.prompt},
+            ]
+            for img in request.images:
+                img_type = img.get("type", "url")
+                if img_type == "url":
+                    # OpenAI-style image_url block
+                    content_parts.append({
+                        "type": "image_url",
+                        "image_url": {"url": img["data"]},
+                    })
+                elif img_type == "base64":
+                    media_type = img.get("media_type", "image/png")
+                    content_parts.append({
+                        "type": "image_base64",
+                        "media_type": media_type,
+                        "data": img["data"],
+                    })
+            messages.append({"role": "user", "content": content_parts})
+        else:
+            messages.append({"role": "user", "content": request.prompt})
+
         return messages
 
     def _safe_time(self) -> float:
@@ -1091,50 +1604,165 @@ class UnifiedLLMService:
                 else:
                     user_messages.append(msg)
 
-            async with self.anthropic_client.messages.stream(
-                model=model,
-                messages=user_messages,
-                max_tokens=request.max_tokens,
-                temperature=request.temperature,
-                system=system_msg,
-            ) as stream:
-                async for text in stream.text_stream:
-                    yield text
+            stream_params: Dict[str, Any] = {
+                "model": model,
+                "messages": user_messages,
+                "max_tokens": request.max_tokens,
+                "system": system_msg,
+            }
+
+            # Extended thinking in streaming mode
+            if request.extended_thinking:
+                stream_params["temperature"] = 1  # Required for thinking mode
+                budget = max(1024, min(request.thinking_budget_tokens, 128000))
+                stream_params["thinking"] = {
+                    "type": "enabled",
+                    "budget_tokens": budget,
+                }
+            else:
+                stream_params["temperature"] = request.temperature
+
+            async with self.anthropic_client.messages.stream(**stream_params) as stream:
+                async for event in stream:
+                    # When extended thinking is enabled, the SDK emits both
+                    # thinking and text events. We only yield text content to
+                    # the caller; the full thinking trace is available on the
+                    # final message via stream.get_final_message().
+                    if hasattr(event, "type"):
+                        if event.type == "content_block_delta":
+                            delta = getattr(event, "delta", None)
+                            if delta and getattr(delta, "type", None) == "text_delta":
+                                yield getattr(delta, "text", "")
+                    elif isinstance(event, str):
+                        # Fallback: text_stream yields plain strings
+                        yield event
+
+        elif provider == LLMProvider.OLLAMA_LOCAL:
+            if not self.ollama_client:
+                raise LLMException("Ollama client not initialized or configured")
+
+            model = model or ModelConfig.OLLAMA_DEFAULT
+            prompt = self._format_ollama_prompt(messages)
+
+            # Ollama natively supports streaming via stream=True
+            try:
+                stream_response = await self.ollama_client.generate(
+                    model=model,
+                    prompt=prompt,
+                    options={
+                        "temperature": request.temperature,
+                        "num_predict": request.max_tokens,
+                    },
+                    stream=True,
+                )
+                async for chunk in stream_response:
+                    content = chunk.get("response", "")
+                    if content:
+                        yield content
+            except Exception as e:
+                self.logger.warning(f"Ollama streaming failed: {e}")
+                raise LLMException(f"Ollama streaming failed: {e}")
+
+        elif provider == LLMProvider.VLLM:
+            if not self.vllm_provider:
+                raise LLMException("vLLM provider not initialized or configured")
+
+            # vLLM uses OpenAI-compatible API; attempt streaming if supported
+            model_alias = model or "default"
+            try:
+                vllm_req = VLLMRequest(
+                    prompt=request.prompt,
+                    model=model_alias,
+                    max_tokens=request.max_tokens,
+                    temperature=request.temperature,
+                    messages=[
+                        {"role": msg["role"], "content": msg["content"]}
+                        for msg in messages
+                    ],
+                    system_prompt=(
+                        messages[0]["content"]
+                        if messages and messages[0]["role"] == "system"
+                        else None
+                    ),
+                )
+                if hasattr(self.vllm_provider, "stream"):
+                    async for chunk in self.vllm_provider.stream(vllm_req):
+                        yield chunk
+                else:
+                    # Fallback: return full response as a single chunk
+                    self.logger.warning(
+                        "vLLM provider does not support streaming; returning full response"
+                    )
+                    resp = await self.vllm_provider.complete(vllm_req)
+                    yield resp.content
+            except Exception as e:
+                self.logger.warning(f"vLLM streaming failed: {e}")
+                raise LLMException(f"vLLM streaming failed: {e}")
 
         else:
             raise LLMException(f"Streaming is not supported for provider: {provider.value}")
 
     async def _test_provider(self, provider: LLMProvider) -> bool:
-        """Test provider health."""
-        if provider == LLMProvider.OPENAI_GPT4 and not self.openai_client:
-            self.logger.debug("Skipping OpenAI health check; client unavailable")
-            self.provider_health[provider] = False
-            return False
+        """
+        Test provider health using lightweight, zero-cost checks where possible.
 
-        if provider == LLMProvider.ANTHROPIC_CLAUDE and not self.anthropic_client:
-            self.logger.debug("Skipping Anthropic health check; client unavailable")
-            self.provider_health[provider] = False
-            return False
-
-        if provider == LLMProvider.OLLAMA_LOCAL and not self.ollama_client:
-            self.logger.debug("Skipping Ollama health check; client unavailable")
-            self.provider_health[provider] = False
-            return False
-
-        if provider == LLMProvider.VLLM and not self.vllm_provider:
-            self.logger.debug("Skipping vLLM health check; provider unavailable")
-            self.provider_health[provider] = False
-            return False
-
+        - OpenAI: Lists models (no tokens consumed)
+        - Anthropic: Uses count_tokens endpoint (no tokens consumed)
+        - Ollama: Pings the Ollama server tags endpoint
+        - vLLM: Delegates to vLLM provider's own health check
+        """
         try:
-            test_request = LLMRequest(
-                prompt="Hello, please respond with 'OK' if you're working.",
-                feature_domain="health_check",
-                max_tokens=10,
-                temperature=0.0,
-            )
+            if provider == LLMProvider.OPENAI_GPT4:
+                if not self.openai_client:
+                    self.logger.debug("Skipping OpenAI health check; client unavailable")
+                    self.provider_health[provider] = False
+                    return False
+                # Zero-cost: list models endpoint
+                await self.openai_client.models.list()
 
-            response = await self._execute_request(test_request, provider, "You are a helpful assistant.")
+            elif provider == LLMProvider.ANTHROPIC_CLAUDE:
+                if not self.anthropic_client:
+                    self.logger.debug("Skipping Anthropic health check; client unavailable")
+                    self.provider_health[provider] = False
+                    return False
+                # Zero-cost: count_tokens endpoint (or simple messages call)
+                try:
+                    await self.anthropic_client.messages.count_tokens(
+                        model=ModelConfig.ANTHROPIC_DEFAULT,
+                        messages=[{"role": "user", "content": "health check"}],
+                    )
+                except AttributeError:
+                    # Older SDK without count_tokens — minimal generation
+                    await self.anthropic_client.messages.create(
+                        model=ModelConfig.ANTHROPIC_HAIKU,  # Cheapest model
+                        max_tokens=1,
+                        messages=[{"role": "user", "content": "OK"}],
+                    )
+
+            elif provider == LLMProvider.OLLAMA_LOCAL:
+                if not self.ollama_client:
+                    self.logger.debug("Skipping Ollama health check; client unavailable")
+                    self.provider_health[provider] = False
+                    return False
+                # Zero-cost: list local models
+                await self.ollama_client.list()
+
+            elif provider == LLMProvider.VLLM:
+                if not self.vllm_provider:
+                    self.logger.debug("Skipping vLLM health check; provider unavailable")
+                    self.provider_health[provider] = False
+                    return False
+                # Use vLLM's own health check if available
+                if hasattr(self.vllm_provider, "health_check"):
+                    await self.vllm_provider.health_check()
+                else:
+                    # Fallback: list models via OpenAI-compatible endpoint
+                    await self.vllm_provider.list_models()
+
+            else:
+                self.logger.debug("Unknown provider %s; skipping health check", provider.value)
+                self.provider_health[provider] = False
+                return False
 
             self.provider_health[provider] = True
             self.logger.info(f"Provider {provider.value} is healthy")
@@ -1234,11 +1862,10 @@ class UnifiedLLMService:
         """
         Execute a request with automatic tool call handling.
 
-        This method will:
-        1. Send the initial request
-        2. If the LLM makes tool calls, execute them
-        3. Send the results back to the LLM
-        4. Repeat until no more tool calls or max_iterations reached
+        Maintains proper provider-native conversation history across iterations:
+        - OpenAI: Uses assistant messages with tool_calls + tool role messages
+        - Anthropic: Uses tool_use content blocks + tool_result content blocks
+        - Ollama/vLLM: Falls back to context-based approach
 
         Args:
             request: The LLM request with tools defined
@@ -1259,72 +1886,191 @@ class UnifiedLLMService:
         if tool_handlers:
             handlers.update(tool_handlers)
 
-        conversation_messages = []
-        current_request = request
+        # Determine the provider for this request
+        domain_config = self._resolve_domain_config(request.feature_domain)
+        provider = domain_config["primary"]
+
+        # Build initial conversation messages
+        system_prompt = self._resolve_system_prompt(request)
+        conversation_messages = self._build_messages(request, system_prompt)
         iteration = 0
+        response = None
 
         while iteration < max_iterations:
-            response = await self.process_request(current_request)
+            response = await self._execute_tool_iteration(
+                request, provider, system_prompt, conversation_messages
+            )
 
             # If no tool calls, we're done
             if not response.tool_calls:
                 return response
 
-            # Execute tool calls
-            tool_results = []
-            for tool_call in response.tool_calls:
-                handler = handlers.get(tool_call.name)
-                if handler:
-                    try:
-                        if asyncio.iscoroutinefunction(handler):
-                            result = await handler(**tool_call.arguments)
-                        else:
-                            result = handler(**tool_call.arguments)
-                        tool_results.append(
-                            ToolResult(
-                                tool_call_id=tool_call.id,
-                                content=json.dumps(result) if not isinstance(result, str) else result,
-                            )
-                        )
-                    except Exception as e:
-                        tool_results.append(
-                            ToolResult(
-                                tool_call_id=tool_call.id,
-                                content=f"Error executing tool: {str(e)}",
-                                is_error=True,
-                            )
-                        )
-                else:
-                    tool_results.append(
-                        ToolResult(
-                            tool_call_id=tool_call.id,
-                            content=f"No handler found for tool: {tool_call.name}",
-                            is_error=True,
-                        )
-                    )
+            # Execute tool calls and collect results
+            tool_results = await self._execute_tool_calls(response.tool_calls, handlers)
 
-            # Build continuation request with tool results
-            # This varies by provider - for now, include in context
-            tool_context = {
-                "previous_response": response.content,
-                "tool_results": [{"id": tr.tool_call_id, "result": tr.content, "error": tr.is_error} for tr in tool_results],
-            }
-
-            current_request = LLMRequest(
-                prompt=f"Tool execution results:\n{json.dumps(tool_context, indent=2)}\n\nPlease continue based on these results.",
-                feature_domain=request.feature_domain,
-                context={**(request.context or {}), "tool_execution": tool_context},
-                max_tokens=request.max_tokens,
-                temperature=request.temperature,
-                system_prompt=request.system_prompt,
-                tools=request.tools,
-                tool_choice="auto",
+            # Append assistant response and tool results to conversation in
+            # provider-native format for proper multi-turn context
+            self._append_tool_turn_to_history(
+                conversation_messages, response, tool_results, provider
             )
 
             iteration += 1
 
         self.logger.warning(f"Max tool iterations ({max_iterations}) reached")
         return response
+
+    async def _execute_tool_calls(
+        self,
+        tool_calls: List[ToolCall],
+        handlers: Dict[str, Callable],
+    ) -> List[ToolResult]:
+        """Execute a list of tool calls and return results."""
+        tool_results = []
+        for tool_call in tool_calls:
+            handler = handlers.get(tool_call.name)
+            if handler:
+                try:
+                    if asyncio.iscoroutinefunction(handler):
+                        result = await handler(**tool_call.arguments)
+                    else:
+                        result = handler(**tool_call.arguments)
+                    tool_results.append(
+                        ToolResult(
+                            tool_call_id=tool_call.id,
+                            content=json.dumps(result) if not isinstance(result, str) else result,
+                        )
+                    )
+                except Exception as e:
+                    tool_results.append(
+                        ToolResult(
+                            tool_call_id=tool_call.id,
+                            content=f"Error executing tool: {str(e)}",
+                            is_error=True,
+                        )
+                    )
+            else:
+                tool_results.append(
+                    ToolResult(
+                        tool_call_id=tool_call.id,
+                        content=f"No handler found for tool: {tool_call.name}",
+                        is_error=True,
+                    )
+                )
+        return tool_results
+
+    async def _execute_tool_iteration(
+        self,
+        request: LLMRequest,
+        provider: LLMProvider,
+        system_prompt: str,
+        messages: List[Dict],
+    ) -> LLMResponse:
+        """Execute a single tool iteration with the given messages."""
+        # Create a modified request that bypasses _build_messages since we
+        # already have the full conversation history
+        iter_request = LLMRequest(
+            prompt="",  # Not used — messages are pre-built
+            feature_domain=request.feature_domain,
+            max_tokens=request.max_tokens,
+            temperature=request.temperature,
+            system_prompt=request.system_prompt,
+            tools=request.tools,
+            tool_choice="auto",
+            response_format=request.response_format,
+            json_schema=request.json_schema,
+            response_model=request.response_model,
+            model_override=request.model_override,
+        )
+
+        # Call the provider directly with pre-built messages
+        if provider == LLMProvider.OPENAI_GPT4 and self.openai_client:
+            return await self._generate_openai(iter_request, messages, self._safe_time())
+        elif provider == LLMProvider.ANTHROPIC_CLAUDE and self.anthropic_client:
+            return await self._generate_anthropic(iter_request, messages, self._safe_time())
+        else:
+            # For Ollama/vLLM, fall back to context-based approach
+            return await self._execute_request(iter_request, provider, system_prompt)
+
+    def _append_tool_turn_to_history(
+        self,
+        messages: List[Dict],
+        response: LLMResponse,
+        tool_results: List[ToolResult],
+        provider: LLMProvider,
+    ) -> None:
+        """
+        Append tool call turn to conversation history in provider-native format.
+
+        OpenAI format:
+            assistant message with tool_calls → tool role messages with results
+        Anthropic format:
+            assistant message with tool_use blocks → user message with tool_result blocks
+        """
+        if provider == LLMProvider.OPENAI_GPT4:
+            # OpenAI: assistant message with tool_calls field
+            assistant_msg = {
+                "role": "assistant",
+                "content": response.content or "",
+                "tool_calls": [
+                    {
+                        "id": tc.id,
+                        "type": "function",
+                        "function": {
+                            "name": tc.name,
+                            "arguments": json.dumps(tc.arguments),
+                        },
+                    }
+                    for tc in response.tool_calls
+                ],
+            }
+            messages.append(assistant_msg)
+
+            # OpenAI: one tool-role message per result
+            for tr in tool_results:
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tr.tool_call_id,
+                    "content": tr.content,
+                })
+
+        elif provider == LLMProvider.ANTHROPIC_CLAUDE:
+            # Anthropic: assistant message with tool_use content blocks
+            assistant_content = []
+            if response.content:
+                assistant_content.append({"type": "text", "text": response.content})
+            for tc in response.tool_calls:
+                assistant_content.append({
+                    "type": "tool_use",
+                    "id": tc.id,
+                    "name": tc.name,
+                    "input": tc.arguments,
+                })
+            messages.append({"role": "assistant", "content": assistant_content})
+
+            # Anthropic: user message with tool_result content blocks
+            result_content = []
+            for tr in tool_results:
+                result_block = {
+                    "type": "tool_result",
+                    "tool_use_id": tr.tool_call_id,
+                    "content": tr.content,
+                }
+                if tr.is_error:
+                    result_block["is_error"] = True
+                result_content.append(result_block)
+            messages.append({"role": "user", "content": result_content})
+
+        else:
+            # Fallback for Ollama/vLLM: append as text summary
+            tool_summary_parts = []
+            for tr in tool_results:
+                status = "error" if tr.is_error else "success"
+                tool_summary_parts.append(f"[{status}] {tr.tool_call_id}: {tr.content}")
+            messages.append({
+                "role": "user",
+                "content": f"Tool execution results:\n" + "\n".join(tool_summary_parts)
+                           + "\n\nPlease continue based on these results.",
+            })
 
     async def generate_structured(
         self,

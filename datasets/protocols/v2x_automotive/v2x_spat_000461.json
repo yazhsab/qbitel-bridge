@@ -1,0 +1,103 @@
+{
+  "intersection_id": 28679,
+  "msg_count": 106,
+  "minute_of_year": 185358,
+  "location_name": "Austin Capitol",
+  "latitude": 30.2714977,
+  "longitude": -97.7437449,
+  "num_signal_groups": 4,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 65,
+      "max_end_time_ds": 70,
+      "likely_time_ds": 67,
+      "confidence": 8
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 58,
+      "max_end_time_ds": 77,
+      "likely_time_ds": 61,
+      "confidence": 8
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 64,
+      "max_end_time_ds": 76,
+      "likely_time_ds": 70,
+      "confidence": 14
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 209,
+      "max_end_time_ds": 296,
+      "likely_time_ds": 293,
+      "confidence": 14
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "digest",
+    "signer_id_hex": "f5acd8a80f15556d",
+    "signature_algorithm": "ML-DSA-44",
+    "signature_size_bytes": 2420,
+    "is_pqc_signature": true,
+    "header_length": 2436
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.104260",
+  "message_length": 2481,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 2436,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 2437,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 2438,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 2440,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 2444,
+      "length": 1
+    }
+  ],
+  "hash": "1779e26c99efd5a03abc6c93a3e8b84f4c2bd6d85cb31c733db27ff352d803e0",
+  "sample_index": 461
+}

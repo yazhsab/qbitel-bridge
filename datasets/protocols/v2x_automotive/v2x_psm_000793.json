@@ -1,0 +1,86 @@
+{
+  "basic_type": "unavailable",
+  "sec_mark_ms": 25350,
+  "msg_count": 54,
+  "latitude": 38.910835,
+  "longitude": -77.0359763,
+  "location_name": "Washington DC",
+  "speed_mph": 0.2,
+  "heading_deg": 258.7882,
+  "position_accuracy": 7,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8002",
+    "signer_type": "digest",
+    "signer_id_hex": "af828053b169d635",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 80
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.196992",
+  "message_length": 98,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 80,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 81,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 82,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 84,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 85,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 89,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 93,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 95,
+      "length": 2
+    }
+  ],
+  "hash": "c39c94dfe5e3e20313dbfed2a03af6be4d27f353c9e375fc59a4f35a63ab7a2b",
+  "sample_index": 793
+}

@@ -65,6 +65,26 @@ from .arinc653_partition import (
     PortType,
 )
 
+from .aggregate_signatures import (
+    SignatureAggregator,
+    AggregateSignature,
+    ATCSignedMessage,
+    ATCChannel,
+    MessagePriority,
+)
+
+from .forward_secure_channels import (
+    ForwardSecureChannel,
+    EncryptedChannelMessage,
+    FSChannelConfig,
+    ChannelType,
+    RatchetMode,
+    ACARS_FS_CONFIG,
+    CPDLC_FS_CONFIG,
+    ADS_C_FS_CONFIG,
+    LDACS_FS_CONFIG,
+)
+
 from .certification_support import (
     PQCCertificationManager,
     CertificationRequirement,
@@ -129,4 +149,20 @@ __all__ = [
     "RequirementType",
     "create_pqc_aviation_requirements",
     "create_pqc_test_cases",
+    # Aggregate Signatures for ATC
+    "SignatureAggregator",
+    "AggregateSignature",
+    "ATCSignedMessage",
+    "ATCChannel",
+    "MessagePriority",
+    # Forward-Secure Channels
+    "ForwardSecureChannel",
+    "EncryptedChannelMessage",
+    "FSChannelConfig",
+    "ChannelType",
+    "RatchetMode",
+    "ACARS_FS_CONFIG",
+    "CPDLC_FS_CONFIG",
+    "ADS_C_FS_CONFIG",
+    "LDACS_FS_CONFIG",
 ]

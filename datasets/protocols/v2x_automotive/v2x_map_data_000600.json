@@ -1,0 +1,215 @@
+{
+  "intersection_id": 40293,
+  "msg_count": 117,
+  "ref_point": {
+    "latitude": 44.9760513,
+    "longitude": -93.2644841
+  },
+  "location_name": "Downtown Minneapolis",
+  "num_lanes": 5,
+  "lane_set": [
+    {
+      "lane_id": 1,
+      "lane_type": "striping",
+      "lane_direction": "egressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 330,
+      "num_nodes": 3,
+      "nodes": [
+        {
+          "dx_cm": 4544,
+          "dy_cm": -1764
+        },
+        {
+          "dx_cm": -890,
+          "dy_cm": 933
+        },
+        {
+          "dx_cm": -4219,
+          "dy_cm": -2347
+        }
+      ]
+    },
+    {
+      "lane_id": 2,
+      "lane_type": "sidewalk",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 300,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": -3762,
+          "dy_cm": 3244
+        },
+        {
+          "dx_cm": 3133,
+          "dy_cm": 1945
+        },
+        {
+          "dx_cm": -2931,
+          "dy_cm": -235
+        },
+        {
+          "dx_cm": 4581,
+          "dy_cm": 1501
+        }
+      ]
+    },
+    {
+      "lane_id": 3,
+      "lane_type": "sidewalk",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "multipleLanesTreatedAsOneLane",
+      "lane_width_cm": 400,
+      "num_nodes": 4,
+      "nodes": [
+        {
+          "dx_cm": 3287,
+          "dy_cm": 904
+        },
+        {
+          "dx_cm": -1739,
+          "dy_cm": -4721
+        },
+        {
+          "dx_cm": -752,
+          "dy_cm": 4547
+        },
+        {
+          "dx_cm": 1448,
+          "dy_cm": -2622
+        }
+      ]
+    },
+    {
+      "lane_id": 4,
+      "lane_type": "striping",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 330,
+      "num_nodes": 5,
+      "nodes": [
+        {
+          "dx_cm": -101,
+          "dy_cm": 217
+        },
+        {
+          "dx_cm": -3333,
+          "dy_cm": -1615
+        },
+        {
+          "dx_cm": -3869,
+          "dy_cm": -3721
+        },
+        {
+          "dx_cm": 1624,
+          "dy_cm": 1152
+        },
+        {
+          "dx_cm": -4637,
+          "dy_cm": 2688
+        }
+      ]
+    },
+    {
+      "lane_id": 5,
+      "lane_type": "crosswalk",
+      "lane_direction": "ingressPath",
+      "lane_sharing": "overlappingLaneDescriptionProvided",
+      "lane_width_cm": 360,
+      "num_nodes": 6,
+      "nodes": [
+        {
+          "dx_cm": 3951,
+          "dy_cm": 877
+        },
+        {
+          "dx_cm": -4812,
+          "dy_cm": -3472
+        },
+        {
+          "dx_cm": 3058,
+          "dy_cm": 926
+        },
+        {
+          "dx_cm": -1948,
+          "dy_cm": 4126
+        },
+        {
+          "dx_cm": -2651,
+          "dy_cm": 1017
+        },
+        {
+          "dx_cm": 2179,
+          "dy_cm": -3393
+        }
+      ]
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8003",
+    "signer_type": "self",
+    "signer_id_hex": "",
+    "signature_algorithm": "ECDSA-P384",
+    "signature_size_bytes": 96,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "map_data",
+  "timestamp": "2026-03-04T09:49:09.138009",
+  "message_length": 230,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "ref_latitude",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "ref_longitude",
+      "offset": 112,
+      "length": 4
+    },
+    {
+      "name": "lane_count",
+      "offset": 116,
+      "length": 1
+    }
+  ],
+  "hash": "7576d3bb3a7b74f978d72b2d67bb6a97eda568b14f2758aa1f44afb5fbbb2b91",
+  "sample_index": 600
+}

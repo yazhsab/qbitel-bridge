@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPUBLICSAFETYWORKER",
+  "sec_mark_ms": 58721,
+  "msg_count": 48,
+  "latitude": 37.7763695,
+  "longitude": -122.4161567,
+  "location_name": "SF Civic Center",
+  "speed_mph": 7.2,
+  "heading_deg": 43.7121,
+  "position_accuracy": 6,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8002",
+    "signer_type": "certificate",
+    "signer_id_hex": "a4b0eb1373a3bd716eab41bdc2a01ec3a1f749fb5d1762f5684bb79f54bdb3b8",
+    "signature_algorithm": "ML-DSA-65",
+    "signature_size_bytes": 3293,
+    "is_pqc_signature": true,
+    "header_length": 3333
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.195692",
+  "message_length": 3351,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 3333,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 3334,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 3335,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 3337,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 3338,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 3342,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 3346,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 3348,
+      "length": 2
+    }
+  ],
+  "hash": "6006e9111b52d84a2b06d652e612c7d71ac15ef30d91da2a81aedd65368d6587",
+  "sample_index": 787
+}

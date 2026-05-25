@@ -102,7 +102,7 @@ MODEL_PRICING = {
     # Anthropic
     "claude-opus-4-5": ModelPricing("claude-opus-4-5", "anthropic", 0.015, 0.075, 200000),
     "claude-sonnet-4-5": ModelPricing("claude-sonnet-4-5", "anthropic", 0.003, 0.015, 200000),
-    "claude-3-5-haiku": ModelPricing("claude-3-5-haiku", "anthropic", 0.0008, 0.004, 200000),
+    "claude-haiku-4-5": ModelPricing("claude-haiku-4-5", "anthropic", 0.0008, 0.004, 200000),
     # Local models (zero cost)
     "llama3.2": ModelPricing("llama3.2", "ollama", 0.0, 0.0, 128000, is_local=True),
     "qwen2.5": ModelPricing("qwen2.5", "ollama", 0.0, 0.0, 32000, is_local=True),

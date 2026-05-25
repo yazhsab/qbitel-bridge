@@ -1,0 +1,86 @@
+{
+  "basic_type": "aPEDESTRIAN",
+  "sec_mark_ms": 3349,
+  "msg_count": 21,
+  "latitude": 37.7724589,
+  "longitude": -122.4225585,
+  "location_name": "SF Civic Center",
+  "speed_mph": 12.5,
+  "heading_deg": 29.6582,
+  "position_accuracy": 10,
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-256",
+    "psid": "0x8002",
+    "signer_type": "digest",
+    "signer_id_hex": "506acc49462d1fec",
+    "signature_algorithm": "ML-DSA-44",
+    "signature_size_bytes": 2420,
+    "is_pqc_signature": true,
+    "header_length": 2436
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "psm",
+  "timestamp": "2026-03-04T09:49:09.190740",
+  "message_length": 2454,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 2436,
+      "length": 1
+    },
+    {
+      "name": "basic_type",
+      "offset": 2437,
+      "length": 1
+    },
+    {
+      "name": "sec_mark",
+      "offset": 2438,
+      "length": 2
+    },
+    {
+      "name": "msg_count",
+      "offset": 2440,
+      "length": 1
+    },
+    {
+      "name": "latitude",
+      "offset": 2441,
+      "length": 4
+    },
+    {
+      "name": "longitude",
+      "offset": 2445,
+      "length": 4
+    },
+    {
+      "name": "speed",
+      "offset": 2449,
+      "length": 2
+    },
+    {
+      "name": "heading",
+      "offset": 2451,
+      "length": 2
+    }
+  ],
+  "hash": "622f1aa6bd73eddf031f2ba57534c91d1d001ba0d59161a107abb6328ed1da43",
+  "sample_index": 760
+}

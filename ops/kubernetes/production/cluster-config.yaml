@@ -1006,7 +1006,7 @@ data:
     
     llm:
       primary_provider: "anthropic"
-      primary_model: "claude-3-sonnet-20240229"
+      primary_model: "claude-sonnet-4-5-20250514"
       fallback_provider: "openai"
       fallback_model: "gpt-4"
       timeout_seconds: 30

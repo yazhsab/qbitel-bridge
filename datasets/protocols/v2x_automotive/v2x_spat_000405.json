@@ -1,0 +1,111 @@
+{
+  "intersection_id": 9177,
+  "msg_count": 50,
+  "minute_of_year": 323928,
+  "location_name": "SF Civic Center",
+  "latitude": 37.7766877,
+  "longitude": -122.4170474,
+  "num_signal_groups": 5,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 88,
+      "max_end_time_ds": 144,
+      "likely_time_ds": 136,
+      "confidence": 10
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "protected-Movement-Allowed",
+      "min_end_time_ds": 25,
+      "max_end_time_ds": 65,
+      "likely_time_ds": 49,
+      "confidence": 14
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 61,
+      "max_end_time_ds": 126,
+      "likely_time_ds": 69,
+      "confidence": 8
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "dark",
+      "min_end_time_ds": 273,
+      "max_end_time_ds": 281,
+      "likely_time_ds": 279,
+      "confidence": 1
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 133,
+      "max_end_time_ds": 184,
+      "likely_time_ds": 174,
+      "confidence": 5
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "c3e340880d3e2468a5d06a43e6ebcdc8b1e0a924bd11978a5951db6f0605083e",
+    "signature_algorithm": "ECDSA-P256",
+    "signature_size_bytes": 64,
+    "is_pqc_signature": false,
+    "header_length": 104
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.090095",
+  "message_length": 158,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 104,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 105,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 106,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 108,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 112,
+      "length": 1
+    }
+  ],
+  "hash": "fa1214adfd2c02d44f010947448f3bb23334c86fcc0d185bbc2b764f76256904",
+  "sample_index": 405
+}

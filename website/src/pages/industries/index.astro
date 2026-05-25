@@ -4,6 +4,7 @@ import PageHero from '@/components/hero/PageHero.astro';
 import IndustryCard from '@/components/content/IndustryCard.astro';
 import CTABanner from '@/components/cta/CTABanner.astro';
 import DomainDemoLab from '@/components/interactive/DomainDemoLab';
+import IndustryUseCaseAnimator from '@/components/interactive/IndustryUseCaseAnimator';
 import { industries } from '@/data/industries';
 import { url } from '@/utils/url';
 ---
@@ -43,6 +44,23 @@ import { url } from '@/utils/url';
           />
         ))}
       </div>
+    </div>
+  </section>
+
+  <!-- Animated Use Case Walkthroughs -->
+  <section class="py-16 lg:py-24 border-b border-surface-600/50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="section-heading">
+          Animated <span class="gradient-text">Use-Case Walkthroughs</span>
+        </h2>
+        <p class="section-subheading mx-auto">
+          Each vertical gets a simple, animated story that shows the buyer problem, sample input,
+          QBITEL workflow, risk signals, and evidence outputs.
+        </p>
+      </div>
+
+      <IndustryUseCaseAnimator client:load />
     </div>
   </section>
 

@@ -6,15 +6,20 @@ Combines classical ECDH with post-quantum ML-KEM for defense-in-depth:
 - P384MLKEM1024: Enterprise/Government preference
 - X25519MLKEM512: Constrained environments
 
-Reference: draft-ietf-tls-hybrid-design
+Shared secret derivation uses HKDF-SHA256 per RFC 5869 to ensure proper
+domain separation and key independence between classical and PQC components.
+
+Reference: draft-ietf-tls-hybrid-design, RFC 5869 (HKDF)
 """
 
-import hashlib
 import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, Tuple
+
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from cryptography.hazmat.primitives import hashes
 
 from .mlkem import MlKemEngine, MlKemSecurityLevel, MlKemKeyPair, MlKemCiphertext
 
@@ -215,39 +220,28 @@ class HybridKemEngine:
 
     def _generate_x25519_keypair(self) -> Tuple[bytes, bytes]:
         """Generate X25519 key pair."""
-        try:
-            from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
+        from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
 
-            private_key = X25519PrivateKey.generate()
-            public_key = private_key.public_key()
+        private_key = X25519PrivateKey.generate()
+        public_key = private_key.public_key()
 
-            return (
-                public_key.public_bytes_raw(),
-                private_key.private_bytes_raw(),
-            )
-        except ImportError:
-            # Fallback
-            import secrets
-
-            return secrets.token_bytes(32), secrets.token_bytes(32)
+        return (
+            public_key.public_bytes_raw(),
+            private_key.private_bytes_raw(),
+        )
 
     def _generate_p384_keypair(self) -> Tuple[bytes, bytes]:
         """Generate P-384 key pair."""
-        try:
-            from cryptography.hazmat.primitives.asymmetric import ec
-            from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, PrivateFormat, NoEncryption
+        from cryptography.hazmat.primitives.asymmetric import ec
+        from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, PrivateFormat, NoEncryption
 
-            private_key = ec.generate_private_key(ec.SECP384R1())
-            public_key = private_key.public_key()
+        private_key = ec.generate_private_key(ec.SECP384R1())
+        public_key = private_key.public_key()
 
-            return (
-                public_key.public_bytes(Encoding.X962, PublicFormat.UncompressedPoint),
-                private_key.private_bytes(Encoding.DER, PrivateFormat.PKCS8, NoEncryption()),
-            )
-        except ImportError:
-            import secrets
-
-            return secrets.token_bytes(97), secrets.token_bytes(48)
+        return (
+            public_key.public_bytes(Encoding.X962, PublicFormat.UncompressedPoint),
+            private_key.private_bytes(Encoding.DER, PrivateFormat.PKCS8, NoEncryption()),
+        )
 
     async def encapsulate(
         self,
@@ -332,73 +326,66 @@ class HybridKemEngine:
 
     def _x25519_ecdh(self, their_public: bytes) -> Tuple[bytes, bytes]:
         """Perform X25519 ECDH, return (our_public, shared_secret)."""
-        try:
-            from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
+        from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
 
-            our_private = X25519PrivateKey.generate()
-            our_public = our_private.public_key().public_bytes_raw()
-            their_pk = X25519PublicKey.from_public_bytes(their_public)
-            shared = our_private.exchange(their_pk)
+        our_private = X25519PrivateKey.generate()
+        our_public = our_private.public_key().public_bytes_raw()
+        their_pk = X25519PublicKey.from_public_bytes(their_public)
+        shared = our_private.exchange(their_pk)
 
-            return our_public, shared
-        except ImportError:
-            import secrets
-
-            return secrets.token_bytes(32), secrets.token_bytes(32)
+        return our_public, shared
 
     def _x25519_ecdh_decap(self, their_public: bytes, our_private: bytes) -> bytes:
         """Perform X25519 ECDH decapsulation."""
-        try:
-            from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
+        from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
 
-            our_sk = X25519PrivateKey.from_private_bytes(our_private)
-            their_pk = X25519PublicKey.from_public_bytes(their_public)
-            return our_sk.exchange(their_pk)
-        except ImportError:
-            import secrets
-
-            return secrets.token_bytes(32)
+        our_sk = X25519PrivateKey.from_private_bytes(our_private)
+        their_pk = X25519PublicKey.from_public_bytes(their_public)
+        return our_sk.exchange(their_pk)
 
     def _p384_ecdh(self, their_public: bytes) -> Tuple[bytes, bytes]:
         """Perform P-384 ECDH."""
-        try:
-            from cryptography.hazmat.primitives.asymmetric import ec
-            from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+        from cryptography.hazmat.primitives.asymmetric import ec
+        from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
-            our_private = ec.generate_private_key(ec.SECP384R1())
-            our_public = our_private.public_key().public_bytes(Encoding.X962, PublicFormat.UncompressedPoint)
-            their_pk = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP384R1(), their_public)
-            shared = our_private.exchange(ec.ECDH(), their_pk)
+        our_private = ec.generate_private_key(ec.SECP384R1())
+        our_public = our_private.public_key().public_bytes(Encoding.X962, PublicFormat.UncompressedPoint)
+        their_pk = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP384R1(), their_public)
+        shared = our_private.exchange(ec.ECDH(), their_pk)
 
-            return our_public, shared
-        except ImportError:
-            import secrets
-
-            return secrets.token_bytes(97), secrets.token_bytes(48)
+        return our_public, shared
 
     def _p384_ecdh_decap(self, their_public: bytes, our_private: bytes) -> bytes:
         """Perform P-384 ECDH decapsulation."""
-        try:
-            from cryptography.hazmat.primitives.asymmetric import ec
-            from cryptography.hazmat.primitives.serialization import load_der_private_key
+        from cryptography.hazmat.primitives.asymmetric import ec
+        from cryptography.hazmat.primitives.serialization import load_der_private_key
 
-            our_sk = load_der_private_key(our_private, password=None)
-            their_pk = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP384R1(), their_public)
-            return our_sk.exchange(ec.ECDH(), their_pk)
-        except ImportError:
-            import secrets
-
-            return secrets.token_bytes(48)
+        our_sk = load_der_private_key(our_private, password=None)
+        their_pk = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP384R1(), their_public)
+        return our_sk.exchange(ec.ECDH(), their_pk)
 
     def _combine_shared_secrets(self, classical: bytes, pqc: bytes) -> bytes:
-        """Combine classical and PQC shared secrets using HKDF-SHA256."""
-        # Simple concatenation + hash for now
-        # Production should use proper HKDF as per TLS 1.3 spec
-        hasher = hashlib.sha256()
-        hasher.update(self.variant.value.encode())
-        hasher.update(classical)
-        hasher.update(pqc)
-        return hasher.digest()
+        """
+        Combine classical and PQC shared secrets using HKDF-SHA256 (RFC 5869).
+
+        This ensures proper domain separation and key independence between the
+        classical and PQC shared secret components. The variant name is used as
+        the HKDF info parameter for context binding, and a fixed salt provides
+        additional defense-in-depth.
+
+        Per draft-ietf-tls-hybrid-design, the combined shared secret MUST be
+        derived using a KDF that provides key separation guarantees.
+        """
+        combined_ikm = classical + pqc
+
+        hkdf = HKDF(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=b"qbitel-hybrid-kex-v1",
+            info=self.variant.value.encode(),
+        )
+
+        return hkdf.derive(combined_ikm)
 
     @classmethod
     def for_tls_default(cls) -> "HybridKemEngine":

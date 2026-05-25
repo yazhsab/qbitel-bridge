@@ -1,0 +1,135 @@
+{
+  "intersection_id": 50212,
+  "msg_count": 6,
+  "minute_of_year": 317547,
+  "location_name": "Austin Capitol",
+  "latitude": 30.2706583,
+  "longitude": -97.7459551,
+  "num_signal_groups": 8,
+  "signal_groups": [
+    {
+      "signal_group_id": 1,
+      "phase_state": "permissive-clearance",
+      "min_end_time_ds": 102,
+      "max_end_time_ds": 194,
+      "likely_time_ds": 136,
+      "confidence": 11
+    },
+    {
+      "signal_group_id": 2,
+      "phase_state": "caution-Conflicting-Traffic",
+      "min_end_time_ds": 154,
+      "max_end_time_ds": 172,
+      "likely_time_ds": 160,
+      "confidence": 0
+    },
+    {
+      "signal_group_id": 3,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 204,
+      "max_end_time_ds": 297,
+      "likely_time_ds": 233,
+      "confidence": 13
+    },
+    {
+      "signal_group_id": 4,
+      "phase_state": "permissive-Movement-Allowed",
+      "min_end_time_ds": 54,
+      "max_end_time_ds": 138,
+      "likely_time_ds": 123,
+      "confidence": 3
+    },
+    {
+      "signal_group_id": 5,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 268,
+      "max_end_time_ds": 299,
+      "likely_time_ds": 291,
+      "confidence": 2
+    },
+    {
+      "signal_group_id": 6,
+      "phase_state": "unavailable",
+      "min_end_time_ds": 53,
+      "max_end_time_ds": 66,
+      "likely_time_ds": 65,
+      "confidence": 0
+    },
+    {
+      "signal_group_id": 7,
+      "phase_state": "pre-Movement",
+      "min_end_time_ds": 57,
+      "max_end_time_ds": 75,
+      "likely_time_ds": 74,
+      "confidence": 12
+    },
+    {
+      "signal_group_id": 8,
+      "phase_state": "stop-And-Remain",
+      "min_end_time_ds": 132,
+      "max_end_time_ds": 153,
+      "likely_time_ds": 141,
+      "confidence": 7
+    }
+  ],
+  "security": {
+    "ieee_1609_2_version": 3,
+    "content_type": "signedData",
+    "hash_algorithm": "SHA-384",
+    "psid": "0x8003",
+    "signer_type": "certificate",
+    "signer_id_hex": "a11358dfb6f7802bb09a984326bda6cf3a8932647c7ab441191d6b26388a0431",
+    "signature_algorithm": "Falcon-512",
+    "signature_size_bytes": 666,
+    "is_pqc_signature": true,
+    "header_length": 706
+  },
+  "protocol": "v2x_ieee1609_sae_j2735",
+  "message_type": "spat",
+  "timestamp": "2026-03-04T09:49:09.110442",
+  "message_length": 787,
+  "fields": [
+    {
+      "name": "protocol_version",
+      "offset": 0,
+      "length": 1
+    },
+    {
+      "name": "content_type",
+      "offset": 1,
+      "length": 1
+    },
+    {
+      "name": "hash_algorithm",
+      "offset": 2,
+      "length": 1
+    },
+    {
+      "name": "message_id",
+      "offset": 706,
+      "length": 1
+    },
+    {
+      "name": "msg_count",
+      "offset": 707,
+      "length": 1
+    },
+    {
+      "name": "intersection_id",
+      "offset": 708,
+      "length": 2
+    },
+    {
+      "name": "minute_of_year",
+      "offset": 710,
+      "length": 4
+    },
+    {
+      "name": "signal_group_count",
+      "offset": 714,
+      "length": 1
+    }
+  ],
+  "hash": "e15e9146bb36c49d0c121dde7eafce4ea24979d4440f3248a18bffd3f2af0baf",
+  "sample_index": 489
+}

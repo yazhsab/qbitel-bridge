@@ -67,6 +67,24 @@ class HybridMode(Enum):
         self.pqc_algorithm = pqc
 
 
+# Serialization version for forward/backward compatibility.
+# Version 1: Original format [4-byte classical len][classical key][pqc key]
+# Version 2: [1-byte version][1-byte algorithm_id][4-byte classical len][classical key][pqc key]
+SERIALIZATION_VERSION = 2
+
+# Algorithm ID map for serialization
+_MODE_TO_ALGORITHM_ID = {
+    "ECDH-ML-KEM-768": 0x01,
+    "ECDH-ML-KEM-1024": 0x02,
+    "RSA-ML-KEM-768": 0x03,
+    "ECDSA-ML-DSA-65": 0x11,
+    "ECDSA-ML-DSA-87": 0x12,
+    "RSA-ML-DSA-65": 0x13,
+}
+
+_ALGORITHM_ID_TO_MODE_NAME = {v: k for k, v in _MODE_TO_ALGORITHM_ID.items()}
+
+
 @dataclass
 class HybridPublicKey:
     """Hybrid public key containing both classical and PQC components."""
@@ -76,18 +94,54 @@ class HybridPublicKey:
     mode: HybridMode
 
     def to_bytes(self) -> bytes:
-        """Serialize hybrid public key."""
-        # Format: [4-byte classical len][classical key][pqc key]
+        """
+        Serialize hybrid public key with version header.
+
+        Format v2: [version:u8][algorithm_id:u8][classical_len:u32][classical][pqc]
+        """
+        algorithm_id = _MODE_TO_ALGORITHM_ID.get(self.mode.algorithm_name, 0xFF)
+        header = bytes([SERIALIZATION_VERSION, algorithm_id])
         classical_len = len(self.classical_key).to_bytes(4, "big")
-        return classical_len + self.classical_key + self.pqc_key
+        return header + classical_len + self.classical_key + self.pqc_key
 
     @classmethod
-    def from_bytes(cls, data: bytes, mode: HybridMode) -> "HybridPublicKey":
-        """Deserialize hybrid public key."""
-        classical_len = int.from_bytes(data[:4], "big")
-        classical_key = data[4 : 4 + classical_len]
-        pqc_key = data[4 + classical_len :]
-        return cls(classical_key=classical_key, pqc_key=pqc_key, mode=mode)
+    def from_bytes(cls, data: bytes, mode: Optional[HybridMode] = None) -> "HybridPublicKey":
+        """
+        Deserialize hybrid public key with automatic version detection.
+
+        Supports both v1 (no header) and v2 (with version + algorithm_id header).
+        For v1, the mode parameter is required. For v2, mode is auto-detected.
+        """
+        if len(data) < 6:
+            raise ValueError(f"Data too short for hybrid public key: {len(data)} bytes")
+
+        # Detect version: v2 starts with version byte 0x02
+        if data[0] == SERIALIZATION_VERSION:
+            version = data[0]
+            algorithm_id = data[1]
+            classical_len = int.from_bytes(data[2:6], "big")
+            classical_key = data[6 : 6 + classical_len]
+            pqc_key = data[6 + classical_len :]
+
+            # Auto-detect mode from algorithm_id if not provided
+            if mode is None:
+                algo_name = _ALGORITHM_ID_TO_MODE_NAME.get(algorithm_id)
+                if algo_name is None:
+                    raise ValueError(f"Unknown algorithm ID: 0x{algorithm_id:02x}")
+                mode = next(m for m in HybridMode if m.algorithm_name == algo_name)
+
+            return cls(classical_key=classical_key, pqc_key=pqc_key, mode=mode)
+        else:
+            # v1 legacy format: [4-byte classical len][classical key][pqc key]
+            if mode is None:
+                raise ValueError(
+                    "mode parameter is required for v1 serialization format. "
+                    "Re-serialize with to_bytes() to upgrade to v2."
+                )
+            classical_len = int.from_bytes(data[:4], "big")
+            classical_key = data[4 : 4 + classical_len]
+            pqc_key = data[4 + classical_len :]
+            return cls(classical_key=classical_key, pqc_key=pqc_key, mode=mode)
 
 
 @dataclass
@@ -99,17 +153,46 @@ class HybridPrivateKey:
     mode: HybridMode
 
     def to_bytes(self) -> bytes:
-        """Serialize hybrid private key."""
+        """
+        Serialize hybrid private key with version header.
+
+        Format v2: [version:u8][algorithm_id:u8][classical_len:u32][classical][pqc]
+        """
+        algorithm_id = _MODE_TO_ALGORITHM_ID.get(self.mode.algorithm_name, 0xFF)
+        header = bytes([SERIALIZATION_VERSION, algorithm_id])
         classical_len = len(self.classical_key).to_bytes(4, "big")
-        return classical_len + self.classical_key + self.pqc_key
+        return header + classical_len + self.classical_key + self.pqc_key
 
     @classmethod
-    def from_bytes(cls, data: bytes, mode: HybridMode) -> "HybridPrivateKey":
-        """Deserialize hybrid private key."""
-        classical_len = int.from_bytes(data[:4], "big")
-        classical_key = data[4 : 4 + classical_len]
-        pqc_key = data[4 + classical_len :]
-        return cls(classical_key=classical_key, pqc_key=pqc_key, mode=mode)
+    def from_bytes(cls, data: bytes, mode: Optional[HybridMode] = None) -> "HybridPrivateKey":
+        """
+        Deserialize hybrid private key with automatic version detection.
+        """
+        if len(data) < 6:
+            raise ValueError(f"Data too short for hybrid private key: {len(data)} bytes")
+
+        if data[0] == SERIALIZATION_VERSION:
+            algorithm_id = data[1]
+            classical_len = int.from_bytes(data[2:6], "big")
+            classical_key = data[6 : 6 + classical_len]
+            pqc_key = data[6 + classical_len :]
+
+            if mode is None:
+                algo_name = _ALGORITHM_ID_TO_MODE_NAME.get(algorithm_id)
+                if algo_name is None:
+                    raise ValueError(f"Unknown algorithm ID: 0x{algorithm_id:02x}")
+                mode = next(m for m in HybridMode if m.algorithm_name == algo_name)
+
+            return cls(classical_key=classical_key, pqc_key=pqc_key, mode=mode)
+        else:
+            if mode is None:
+                raise ValueError(
+                    "mode parameter is required for v1 serialization format."
+                )
+            classical_len = int.from_bytes(data[:4], "big")
+            classical_key = data[4 : 4 + classical_len]
+            pqc_key = data[4 + classical_len :]
+            return cls(classical_key=classical_key, pqc_key=pqc_key, mode=mode)
 
 
 @dataclass
@@ -150,17 +233,46 @@ class HybridSignature:
     mode: HybridMode
 
     def to_bytes(self) -> bytes:
-        """Serialize hybrid signature."""
+        """
+        Serialize hybrid signature with version header.
+
+        Format v2: [version:u8][algorithm_id:u8][sig1_len:u32][classical_sig][pqc_sig]
+        """
+        algorithm_id = _MODE_TO_ALGORITHM_ID.get(self.mode.algorithm_name, 0xFF)
+        header = bytes([SERIALIZATION_VERSION, algorithm_id])
         sig1_len = len(self.classical_signature).to_bytes(4, "big")
-        return sig1_len + self.classical_signature + self.pqc_signature
+        return header + sig1_len + self.classical_signature + self.pqc_signature
 
     @classmethod
-    def from_bytes(cls, data: bytes, mode: HybridMode) -> "HybridSignature":
-        """Deserialize hybrid signature."""
-        sig1_len = int.from_bytes(data[:4], "big")
-        classical_sig = data[4 : 4 + sig1_len]
-        pqc_sig = data[4 + sig1_len :]
-        return cls(classical_signature=classical_sig, pqc_signature=pqc_sig, mode=mode)
+    def from_bytes(cls, data: bytes, mode: Optional[HybridMode] = None) -> "HybridSignature":
+        """
+        Deserialize hybrid signature with automatic version detection.
+        """
+        if len(data) < 6:
+            raise ValueError(f"Data too short for hybrid signature: {len(data)} bytes")
+
+        if data[0] == SERIALIZATION_VERSION:
+            algorithm_id = data[1]
+            sig1_len = int.from_bytes(data[2:6], "big")
+            classical_sig = data[6 : 6 + sig1_len]
+            pqc_sig = data[6 + sig1_len :]
+
+            if mode is None:
+                algo_name = _ALGORITHM_ID_TO_MODE_NAME.get(algorithm_id)
+                if algo_name is None:
+                    raise ValueError(f"Unknown algorithm ID: 0x{algorithm_id:02x}")
+                mode = next(m for m in HybridMode if m.algorithm_name == algo_name)
+
+            return cls(classical_signature=classical_sig, pqc_signature=pqc_sig, mode=mode)
+        else:
+            if mode is None:
+                raise ValueError(
+                    "mode parameter is required for v1 serialization format."
+                )
+            sig1_len = int.from_bytes(data[:4], "big")
+            classical_sig = data[4 : 4 + sig1_len]
+            pqc_sig = data[4 + sig1_len :]
+            return cls(classical_signature=classical_sig, pqc_signature=pqc_sig, mode=mode)
 
 
 class HybridKEM:
